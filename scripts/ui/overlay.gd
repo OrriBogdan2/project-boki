@@ -59,6 +59,8 @@ func admin_allowed() -> bool:
 	return not OS.has_feature("web") or Social.is_owner
 
 # ------------------------------------------------------------------ input
+var pause_acts: Array[Callable] = []   ## the Esc menu's numbered actions (keys 1-5)
+
 func _input(event: InputEvent) -> void:
 	if listening != "":
 		if event is InputEventKey and event.pressed and not event.echo:
@@ -94,6 +96,13 @@ func _input(event: InputEvent) -> void:
 		if (k == KEY_F1 or (k == KEY_QUOTELEFT and not typing)) and admin_allowed() and Game.main and ctx_now() != "title":
 			if page == "admin": close()
 			else: open_admin()
+			get_viewport().set_input_as_handled()
+			return
+	if page == "pause" and event is InputEventKey and event.pressed and not event.echo \
+			and not root.get_children().any(func(c): return c is UI.Modal):
+		var n := (event as InputEventKey).physical_keycode - KEY_1
+		if n >= 0 and n < pause_acts.size():
+			pause_acts[n].call()
 			get_viewport().set_input_as_handled()
 			return
 	if page != "" and (event.is_action_pressed("menu") or (event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"))):
@@ -211,38 +220,62 @@ func open_pause(where: String) -> void:
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
 	var bw := 388.0
-	var item := func(txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
+	pause_acts.clear()
+	var item := func(txt: String, icon: String, cb: Callable, tier := "") -> Button:
+		var n := pause_acts.size() + 1
+		pause_acts.append(cb)
 		var b := UI.button(txt, cb, bw, icon)
 		if tier != "": b.theme_type_variation = tier
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		if key != "": UI.with_key(b, key)
+		UI.with_key(b, str(n))
 		v.add_child(b)
 		return b
-	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
-	var psc = Game.main.screen_node() if where == "match" and Game.main else null
-	var practice: Practice = Practice.of(psc) if psc is Match else null
-	if practice:
-		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
-	if where != "match":
-		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
-	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
-			close()
-			Game.main.screen_node()._start_training())
-	item.call("Settings", "gear", func():
+	var scr = Game.main.screen_node() if Game.main else null
+	var open_set := func():
 		if tab == "Controls": tab = "Gameplay"
-		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
-	if where != "match":
-		item.call("Save files", "satchel", open_saves)
+		open_settings()
+	var res: Button = item.call("Continue", "next", close, "Primary")
+	if where == "match":
+		var m = scr
+		var tut: bool = m.opts.get("tutorial", false) or m.opts.get("training", false)
+		var leave := func():
+			close()
+			Practice.leave(m, tut)
+		item.call("Settings", "gear", open_set)
+		if tut:
+			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+		else:
+			item.call("Leave match", "back", func():
+				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "Danger")
+	else:
+		item.call("Save", "satchel", func():
+			Save.save_game()
+			Sfx.play("ui_open", null, -10.0))
+		item.call("Save and quit to menu", "home", func():
+			Save.save_game()
+			close()
+			RateCard.gate(root, func(): Game.goto("title")))
+		item.call("Settings", "gear", open_set)
+		if not OS.has_feature("web"):
+			item.call("Quit game", "close", func():
+				Save.save_game()
+				RateCard.gate(root, get_tree().quit))
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
+	var practice: Practice = Practice.of(scr) if scr is Match else null
+	if practice:
+		minor.add_child(UI.ghost("Change Hunter", func(): close(); PracticeHero.open(practice)))
+	if where != "match":
+		minor.add_child(UI.ghost("Inventory", open_inventory))
+		minor.add_child(UI.ghost("Save files", open_saves))
 	if where == "home":
+		minor.add_child(UI.ghost("Training area", func():
+			close()
+			scr._start_training()))
 		minor.add_child(UI.ghost("Change your look", func():
 			close()
 			Game.goto("hatch", {"create": true})))
-	var scr = Game.main.screen_node() if Game.main else null
 	if scr and scr.has_method("unstick"):
 		minor.add_child(UI.ghost("I'm stuck", func():
 			close()
@@ -251,30 +284,8 @@ func open_pause(where: String) -> void:
 	if admin_allowed():
 		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
 	if minor.get_child_count() > 0:
+		v.add_child(UI.spacer(2))
 		v.add_child(minor)
-	v.add_child(UI.spacer(2))
-	if where == "match":
-		var m = Game.main.screen_node()
-		var tut: bool = m.opts.get("tutorial", false) or m.opts.get("training", false)
-		var leave := func():
-			close()
-			Practice.leave(m, tut)
-		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
-		else:
-			var lb: Button = item.call("Leave match", "back", func():
-				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
-			lb.tooltip_text = "You lose what you carry"
-	else:
-		item.call("Save and go to the main menu", "home", func():
-			Save.save_game()
-			close()
-			RateCard.gate(root, func(): Game.goto("title")))
-	if not OS.has_feature("web"):
-		var q: Button = item.call("Save and quit the game", "close", func():
-			Save.save_game()
-			RateCard.gate(root, get_tree().quit), "", "Ghost")
-		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
 
 # ------------------------------------------------------------------ settings
