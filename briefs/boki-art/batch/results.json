@@ -44481,5 +44481,33 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_glassolotl_f3_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glassolotl_f2",
+    "name": "Glassolotl (new face and pose)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f1",
+    "name": "Glassolotl (new face and pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f2",
+    "name": "Glassolotl (new face and pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f1",
+    "name": "Glassolotl (new face and pose)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f1_4.jpg",
+    "ok": true
   }
 ]
