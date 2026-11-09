@@ -5,6 +5,7 @@ extends RefCounted
 ##      hit: the caster's camera gets zero shake (Cam.shake_total never moves);
 ##   2. a boss slam on top of you shakes at most Shake.MAX_SECS (0.15 s), at the Screen shake slider's scale;
 ##   3. the slider at 0 means no shake at all, and the default is 30%;
+##   3b. your own Fuse (the merge's contact moment) and your Boki's landing strike don't shake your camera;
 ##   4. a scripted 60 s fight (a hunter casting its whole kit at a bot) stays under FIGHT_BUDGET seconds of shake.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
@@ -31,6 +32,7 @@ func run(main: Node) -> void:
 		_self_shake(m, hero)
 		m.queue_free()
 		await main.get_tree().process_frame
+	await _own_boki(main)
 	await _boss_slam(main)
 	await _fight(main)
 	print("SHAKE DONE, failures: %d" % bad)
@@ -86,6 +88,28 @@ func _self_shake(m: Match, hero: String) -> void:
 	ok(worst <= 0.0, "%s: %s put %.3f s of shake on the caster's camera" % [hero, ", ".join(did), worst])
 	ok(absf(m.cam.shake_amp) <= 0.0, "%s: no shake left running" % hero)
 	ok(casts >= 3, "%s: the script really cast (%d abilities went off)" % [hero, casts])
+
+## Your own Fuse and your Boki's landing strike: big moments, but yours, so your camera stays still.
+func _own_boki(main: Node) -> void:
+	var m: Match = flow._match(main, Arch.ORDER[0])
+	var h: Hunter = flow.hunter
+	var rec := Save.new_kin("cindle"); rec["trust"] = 95.0
+	var k: Kin = h.kin if h.kin else m.give_kin(h, rec)
+	_steps(m, 30)
+	k.teleport(h.pos + Vector3(2, 0, 0))
+	var before := _shake_of(m)
+	KinStrike.land(k, {})
+	_steps(m, 30)
+	ok(_shake_of(m) - before <= 0.0, "your Boki's landing strike puts %.3f s of shake on your camera" % (_shake_of(m) - before))
+	m.cam.shake_left = 0.0; m.cam.shake_amp = 0.0       # (an undrained shake would hide the next one: max, not sum)
+	before = _shake_of(m)
+	h.ult = 1.0; h.slot_lv["ult"] = 1
+	var fused := KinMerge.press(h)
+	_steps(m, 120)
+	ok(fused and not h.merge_st.is_empty(), "the Fuse went off (merge %s)" % str(not h.merge_st.is_empty()))
+	ok(_shake_of(m) - before <= 0.0, "your own Fuse puts %.3f s of shake on your camera" % (_shake_of(m) - before))
+	m.queue_free()
+	await main.get_tree().process_frame
 
 ## A boss slam (Boss.blast, the same call the slam attack makes) on top of the player, then at the slider's ends.
 func _boss_slam(main: Node) -> void:
