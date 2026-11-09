@@ -50998,5 +50998,12 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stormit_cardx_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_skateron_px",
+    "name": "Skateron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_px_3.jpg",
+    "ok": true
   }
 ]
