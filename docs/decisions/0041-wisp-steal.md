@@ -24,6 +24,8 @@ no save migration (an old entry without it is 0). Left out: guardian interplay (
 loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-boki-box-summon, ext/vfx-stolen-wisps).
 
 ## Consequences
-- Net.VERSION 0.30.0: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
-  Boki's own game. Clashes with ext/wisp-guardian's index 28 / 0.29.0: renumber on merge.
+- Net.VERSION 0.31.0 (ext/soul-link-integ, with the wisp, summon and guardian fields): kin snapshot 29-31 = loose s,
+  carrier id, stolen summon used (KinNet.STEAL_AT; 28 is 0040's guardian flag); kcmd "wgrab"/"wsum" ask the Boki's
+  own game.
+- Numbering: ext/combat-summon-band also wrote a 0041 (0041-summon-band.md); it becomes 0042 when it lands (T2).
 - match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it.

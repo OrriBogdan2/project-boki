@@ -24,7 +24,7 @@ Stealing is not built yet: `KinGuardian.protecting(h)` is the hook; a downed Hun
 it is false (window ended, guardian beaten, or the Hunter is out).
 
 ## Consequences
-- Net.VERSION 0.29.0: kin snapshot index 28 = the guardian flag (KinNet).
+- Net.VERSION 0.31.0 (ext/soul-link-integ): kin snapshot index 28 = the guardian flag (KinNet.GUARD_AT).
 - kin.gd +2 lines (damage), match.gd +1. `--wisp-guardian-check` covers it.
 - Not built: the Boki's own revive pull-up gating on a teammate standing on the Hunter (the existing 8 s Boki
   revive runs as it does for any downed owner), the `guard` bark, the +10 s squad cap.
