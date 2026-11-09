@@ -425,8 +425,18 @@ func _world() -> void:
 	home.tw.test_hold = false
 	ok(int(e["site"]["got"]) == beats, "holding the key hammers beat after beat (%d)" % int(e["site"]["got"]))
 	# the tracker card sits in the old first-day slot, and the Hob step
-	ok(is_instance_valid(home.guide.tracker) and home.guide.tracker.get_parent() == home.root_ui,
-			"the Goals card is on screen")
+	ok(not is_instance_valid(home.guide.tracker), "no Goals card while the tutorial runs")
+	FarmTutorial.state()["done"] = true      # ... then one line on screen, and G opens the list
+	home.guide.refresh()
+	var line: PanelContainer = home.guide.tracker
+	var n_rows := GoalTracker.lines().size()
+	ok(is_instance_valid(line) and line.get_parent() == home.root_ui and line.get_child(0).get_child_count() == 1,
+			"after it the Goals card is one \"Next:\" line")
+	ok(home.guide.toggle_goals() and home.guide.tracker.get_child(0).get_child_count() == n_rows + 1,
+			"G opens the whole list (%d rows and the title)" % n_rows)
+	ok(home.guide.toggle_goals() and home.guide.tracker.get_child(0).get_child_count() == 1, "and closes it again")
+	FarmTutorial.state()["done"] = false
+	home.guide.refresh()
 	home.hob.talk()
 	ok(home.panel_open == HobTalk.TALK and home.hob.chat.talking() and FarmTutorial.did("hob"),
 			"talking opens the talk box face to face")

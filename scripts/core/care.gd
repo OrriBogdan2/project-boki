@@ -105,6 +105,8 @@ static func ensure(rec: Dictionary) -> void:
 		rec["likes"] = {"food": love, "hates": hate, "play": PLAYS[r.randi() % PLAYS.size()]}
 	if not rec.has("known"):
 		rec["known"] = []          # which of food / hates / play you've found out
+	if not rec.has("journal"):
+		rec["journal"] = []        # the last CareJournal.KEEP lines of what happened to it
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
@@ -348,9 +350,11 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
 	var was := need(rec, "food")
+	var lean_before: Dictionary = rec.get("lean", {}).duplicate()
 	change(rec, "food", fill)
 	change(rec, "joy", joy)
 	fed(rec)
+	CareJournal.fed(rec, f, lean_before)
 	out["hungry"] = was < 35.0
 	return out
 

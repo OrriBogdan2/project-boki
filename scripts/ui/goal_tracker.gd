@@ -7,9 +7,12 @@ extends RefCounted
 ##   milestone a farm milestone not reached (FarmUnlocks)
 ##   level     the next farm level, always last
 ## A row: {text, have, need, frac, ready, source}. Ready-to-claim rows lead; inside a source the
-## closest to done comes first. The card is hidden when there are no rows.
+## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
+## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
 const SOURCE_ORDER := ["unlock", "mastery", "milestone", "level"]
+
+static var all := false      # the full list is open
 
 static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
@@ -85,7 +88,8 @@ static func _prog(have: int, need: int) -> Dictionary:
 
 ## A short string that changes when what the card shows changes (to know when to rebuild it).
 static func signature() -> String:
-	return "|".join(lines().map(func(r): return "%s:%d/%d:%s" % [r["text"], r["have"], r["need"], r["ready"]]))
+	var rows := lines().map(func(r): return "%s:%d/%d:%s" % [r["text"], r["have"], r["need"], r["ready"]])
+	return "%s|%s" % [all, "|".join(rows)]
 
 ## The card, or null when there is nothing to show.
 static func build() -> PanelContainer:
@@ -101,10 +105,27 @@ static func build() -> PanelContainer:
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var v := UI.vbox(7)
 	box.add_child(v)
+	if not all:
+		v.add_child(_next_ui(rows[0]))
+		return box
 	v.add_child(UI.section(String(cfg()["title"])))
 	for r in rows:
 		v.add_child(_row_ui(r))
 	return box
+
+## The one-line card: the nearest goal, its count and the key that opens the list.
+static func _next_ui(r: Dictionary) -> Control:
+	var head := UI.hbox(8)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var text := UI.label("Next: " + String(r["text"]), 14, UI.GOLD if bool(r["ready"]) else UI.INK)
+	text.autowrap_mode = TextServer.AUTOWRAP_OFF
+	text.clip_text = true
+	text.custom_minimum_size.x = 190
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(text)
+	head.add_child(UI.label("%d/%d" % [r["have"], r["need"]], 12, UI.MUTED, UI.caps))
+	head.add_child(UI.keycap("G", 11))
+	return head
 
 static func _row_ui(r: Dictionary) -> Control:
 	var col := UI.vbox(3)

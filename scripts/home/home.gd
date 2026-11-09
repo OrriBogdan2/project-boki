@@ -17,7 +17,7 @@ var topbar: Label
 var top_chips: HBoxContainer
 var prompt_box: PanelContainer
 var prompt_lbl: Label
-var hint: Label
+var key_row: FarmKeyHints = null      # the bottom key row, each hint fading once used (farm_key_hints.gd)
 var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
@@ -51,6 +51,7 @@ var lots := {}                 # building id -> {node, built}
 var visit: Dictionary = {}     # when visiting someone: their island snapshot (see Social.publish_profile)
 var visit_id := ""
 var petted := {}
+var arrivals: ArrivalQueue = null   # the arrival modals, one at a time (arrival_queue.gd)
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -70,7 +71,6 @@ var grave_c := Vector3(50.0, 0, 32.0)
 var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
-var away_work: Array = []          # lines: what assigned Boki made while you were away
 var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
@@ -140,6 +140,7 @@ func _ready() -> void:
 		set_process_unhandled_input(false)
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
+	arrivals = ArrivalQueue.new(self)
 	hecon = HomeEcon.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
@@ -662,9 +663,9 @@ func _ready_rest() -> void:
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
-		_open_welcome()
+		arrivals.add(_open_welcome)
 	else:
-		_play_evolutions()
+		arrivals.add(_play_evolutions)
 	if visit.is_empty() and Social.available():
 		Social.publish_profile(true)
 		Social.collect_gifts(func(lines: Array):
@@ -1010,6 +1011,7 @@ func _process(delta: float) -> void:
 	_move_player(d)
 	_move_kin(d)
 	if guide: guide.tick(d)
+	if key_row and visit.is_empty(): key_row.tick()
 	_care_tick(d)
 	if hecon: hecon.tick(d)
 	_update_bubbles(d)
@@ -2226,6 +2228,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
 		return
+	if panel_open == "" and visit.is_empty() and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_G and guide and guide.toggle_goals():
+		get_viewport().set_input_as_handled()      # G: the Goals line opens into the full list
+		return
 	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == HomeClasses.TITLE):
 		if panel_open == HomeClasses.TITLE: _close_panel()
 		else: HomeHero.open(self)
@@ -2287,12 +2292,8 @@ func _build_ui() -> void:
 	# bottom centre: the few keys you need to get about
 	var hint_box := UI.glass(6, 12)
 	hint_box.modulate.a = 0.85
-	var keys := UI.key_hints([["W A S D", "walk"], ["Space", "jump"], [Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]], 12, Color(1, 1, 1, 0.78))
-	hint_box.add_child(keys)
-	hint = UI.label("", 14, UI.INK)     # kept for code that still sets hint text; the key row replaces it
-	hint.visible = false
-	keys.add_child(hint)
 	root_ui.add_child(hint_box)
+	key_row = FarmKeyHints.new(hint_box)
 	hint_box.name = "Hints"
 	Record.hide_in_clean(hint_box)      # recording mode: no key hints
 	Record.hide_in_cinema(ui)           # ... and with the HUD hidden, none of this
@@ -2385,8 +2386,6 @@ func _refresh_top() -> void:
 		topbar.visible = true
 		return
 	topbar.visible = false
-	var crops := 0
-	for k in Save.d["crops"]: crops += int(Save.d["crops"][k])
 	var ak := Save.active_kin()
 	var treat: String = Save.d.get("treat", "")
 	for ch in top_chips.get_children():
@@ -2395,10 +2394,7 @@ func _refresh_top() -> void:
 		var kc: Color = Data.KIN.get(String(ak.get("species", "")), {}).get("color", UI.ACCENT)
 		top_chips.add_child(_top_chip("paw", String(ak.get("name", "")), kc, "Your partner: the Boki that comes on expeditions with you"))
 	top_chips.add_child(_top_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems: spend them on buildings, seeds and treats"))
-	top_chips.add_child(_top_chip("tonic", str(int(Save.d["items"].get("tonic", 0))), Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"))
-	top_chips.add_child(_top_chip("seed", str(crops), UI.GOOD, "Crops you've harvested"))
-	if fs or Work.mat("wood") > 0 or Work.mat("stone") > 0:
-		top_chips.add_child(_top_chip("dash", FarmSites.mats_text(), Color("d8b07a"), "Building materials: wood and stone from the wild (an axe and a pickaxe from the market) or a Lumber Camp and a Quarry, fibre from harvests and clearing the wild, Ember Coals from a Kiln. They pay for buildings and upgrades."))
+	TopChips.add_to(top_chips)
 	if treat != "":
 		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))
 
@@ -2476,7 +2472,9 @@ func _close_panel() -> void:
 	_refresh_top()
 	_refresh_burrow()
 	if was.ends_with(" evolved") or was.ends_with(" is changing") or was == "Welcome home":
-		_play_evolutions.call_deferred()
+		arrivals.add.bind(_play_evolutions).call_deferred()
+	else:
+		arrivals.pump.call_deferred()
 
 func _open_welcome() -> void:
 	# shown once: marked seen as soon as it opens, however it's closed
@@ -3029,6 +3027,7 @@ func _open_kin(rec: Dictionary) -> void:
 			c2.add_child(UI.kv("Won't eat", Care.food_name(lk["hates"]) if known.has("hates") else "???", UI.INK if known.has("hates") else UI.FAINT))
 			c2.add_child(UI.kv("Favourite game", Care.PLAY_NAMES[lk["play"]] if known.has("play") else "???", UI.INK if known.has("play") else UI.FAINT))
 			c2.add_child(UI.para("Feed it, play with it and talk to it to find out more.", 12, UI.FAINT))
+			CareJournal.card(rec, c2)
 			c2.add_child(UI.spacer(2))
 			WorkView.card_section(self, rec, c2, func(): _open_kin(rec))
 			var mem: Array = rec.get("memory", [])
@@ -3860,14 +3859,10 @@ func _open_gift_panel(owner_name: String) -> void:
 
 ## The "while you were away" note waits until nothing else is on screen.
 func _show_when_free(lines: Array, title := "While you were away") -> void:
-	if not is_inside_tree():
-		return
-	if panel_open != "" or building_now or not Save.d["tutorial"].get("home", false):
-		get_tree().create_timer(1.0).timeout.connect(_show_when_free.bind(lines, title))
-		return
-	var v := _new_panel(title, 520)
-	for l in lines: v.add_child(UI.label(HomeNotices.bullet(String(l)), 15))
-	_refresh_top()
+	arrivals.add(func():
+		var v := _new_panel(title, 520)
+		for l in lines: v.add_child(UI.label(HomeNotices.bullet(String(l)), 15))
+		_refresh_top())
 
 func _open_ferry() -> void:
 	var v := _new_panel("Ferry", 520)
@@ -4013,12 +4008,9 @@ func _setup_care() -> void:
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	# what Boki assigned to stations made while you were away (Work.catch_up)
-	away_work = Work.catch_up()
-	if not away_work.is_empty():
-		get_tree().create_timer(1.2).timeout.connect(func():
-			if is_instance_valid(self) and is_inside_tree():
-				_show_when_free(away_work)
-				_refresh_top())
+	var away_lines: Array = Work.catch_up() + CareJournal.arrival()
+	if not away_lines.is_empty():
+		_show_when_free(away_lines)      # the one "While you were away" card (the work and the journal)
 	Care.dex_sync()
 	_refresh_nest()
 

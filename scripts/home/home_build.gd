@@ -2120,4 +2120,4 @@ func finish_make_home() -> void:
 	Save.save_game()
 	h._close_panel()
 	if not Save.d["tutorial"].get("home", false) and h.is_inside_tree():
-		h._open_welcome.call_deferred()
+		h.arrivals.add(h._open_welcome)
