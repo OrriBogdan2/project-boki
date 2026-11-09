@@ -30747,5 +30747,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_rattlebub_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_mothlet_full",
+    "name": "Mothlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mothlet_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrasloth_full",
+    "name": "Terrasloth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_terrasloth_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pebblamb_full",
+    "name": "Pebblamb (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pebblamb_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrasloth_full",
+    "name": "Terrasloth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_terrasloth_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pebblamb_full",
+    "name": "Pebblamb (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pebblamb_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel_full",
+    "name": "Arcestrel (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rattlebub_full",
+    "name": "Rattlebub (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rattlebub_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pebblamb_full",
+    "name": "Pebblamb (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pebblamb_full_3.jpg",
+    "ok": true
   }
 ]
