@@ -38244,5 +38244,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_gravitank_g1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gravitank_g2",
+    "name": "Gravitank (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_e5",
+    "name": "Eclipsowl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_e5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g1",
+    "name": "Gravitank (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g1",
+    "name": "Gravitank (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g2",
+    "name": "Gravitank (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g1",
+    "name": "Gravitank (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g2",
+    "name": "Gravitank (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g3",
+    "name": "Gravitank (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g3_2.jpg",
+    "ok": true
   }
 ]
