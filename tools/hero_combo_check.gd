@@ -23,6 +23,7 @@ func run(main_node: Node, who: String) -> void:
 	var ults: RefCounted = load("res://tools/vv_ult_check.gd").new(self)
 	if who == "mage":
 		await _mage()
+		await _knocked_holds()
 		await _growth()
 		await ults.mage()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
@@ -554,6 +555,38 @@ func _mage() -> void:
 			"took %.0f -> %.0f dashes %.1f" % [took0, ac.dmg(T), P.dashes])
 	await ac.done(m)
 	fails += ac.fails
+
+## Interrupts (docs/heroes/mage.md): knocked mid Storm Rod hold she throws nothing; knocked in the Kitefall crouch
+## she never takes off. (The check sets `downed` itself: a real knock of the lone player ends the training team.)
+func _knocked_holds() -> void:
+	var r: Array = ac.setup("mage", 5.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: MageKit = P.ak
+	ac.aim_at(P, T.pos)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	ac.step(m, 0.6, func(): P.inp["sec_hold"] = true)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 1.2)
+	ok("knocked mid Storm Rod hold: no throw, no damage, the charge kept",
+			not K.rmb_down and ac.dmg(T) == 0.0 and K.ch_rmb == 1.0, "took %.0f charges %.0f" % [ac.dmg(T), K.ch_rmb])
+	P.downed = false
+	P.inp["sec_hold"] = false
+	P.lvl = int(Hunter.ULT_AT[0])
+	var y0 := P.pos.y
+	var pressed := HunterKeys.ult_pressed(P)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 0.8)
+	ok("knocked in the Kitefall crouch: no take-off", pressed and not K.ult.running() and P.pos.y < y0 + 0.5,
+			"pressed %s running %s y +%.1f" % [pressed, K.ult.running(), P.pos.y - y0])
+	P.downed = false
+	await ac.done(m)
 
 # ------------------------------------------------------------------ Vex
 func _gunslinger() -> void:

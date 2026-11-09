@@ -153,3 +153,27 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
   Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB Storm Rod hold | stun | [?] | the base hold releases: the rod is thrown | [?] |
+| RMB Storm Rod hold | knocked | ends | **was: the rod was thrown. Fixed: nothing thrown, the charge kept** (`fire_rmb`), asserted "knocked mid Storm Rod hold" in --mage-combo-check | fixed (cooldown [?]: kept, the smaller change) |
+| RMB hold | knockback, root | [?] | no check: goes on | [?] |
+| Shift Wirerun charge (hold) | stun, root, Grounded | [?] | cut, the charge spent on the press is gone | [?] |
+| Shift Wirerun charge | knocked | ends | cut | match (cooldown [?]) |
+| Shift Wirerun streak | any | ignore: [F] "Invulnerable lightning dash", INVULNERABLE label `0105` | `invuln` for the streak | match |
+| E Skycall drag (hold) | stun, knocked | [?] (placed at the press, [D] "PRESS to strike target location") | the strike commits with the drag so far | [?] |
+| X Kitefall crouch (0.3 s) | stun | [?] | no check: she takes off | [?] |
+| X Kitefall crouch | knocked | ends | **was: she took off. Fixed: dropped, no take-off** (`MageUlt.tick`), asserted "knocked in the Kitefall crouch" in --mage-combo-check | fixed (cooldown spent, [?]) |
+| X Kitefall airborne, recast to land | any hit | ignore: [D] "immune to projectiles", [F] INVULNERABLE tag (f45) | `inv_t` while up; recast lands as [D] "REACTIVATE to crash down" | match |

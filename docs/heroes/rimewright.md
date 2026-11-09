@@ -155,3 +155,28 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Ice Dart stream (hold) | stun, knocked | [?] | no darts while busy; the stream resumes if still held after a stun | [?] |
+| RMB Ice Spear hold and push | stun | [?] | the base hold releases, the charge is spent, the push is dropped: nothing thrown | [?] |
+| RMB hold and push | knocked | ends | as stun: nothing thrown | match (cooldown [?]) |
+| RMB hold | knockback, root | [?] | no check: goes on | [?] |
+| Shift Skate (hold) | stun, knocked | [?] / ends | ends (`_tick_rinkrun`) | [?] / match |
+| Shift Skate | knockback, root, Grounded | [?] | no check in the skate | [?] |
+| E Rink Wall tell (0.2 s) | stun | [?] | no check: the wall rises | [?] |
+| E Rink Wall tell | knocked | ends | **was: the wall still rose. Fixed: no wall** (`_tick_wall_cast`), asserted "tm E: knocked in the tell, no wall rises" in --rimewright-combo-check | fixed (cooldown spent, [?]) |
+| E recast (freeze the sliding wall) | stun, knocked | [?] | denied while busy; the wall slides on | [?] |
+| X Rimelock (sealed, then recast) | stun, knockback, root, Grounded | ignore: [D] "become Invulnerable", [F] invulnerable in the crystal (tamsin f25) | `inv_t` blocks every hit's crowd control, she is rooted and held still; recast ends early as [D] "Reactivate early to cancel" | match |
+| X Rimelock | pulls that are not hits (a hook's tow) | [?] (is Invulnerable immune to a pull?) | a Displace tow is not stopped by `inv_t` | [?] |

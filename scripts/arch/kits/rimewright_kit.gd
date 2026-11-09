@@ -710,6 +710,10 @@ func cast_e() -> bool:
 func _tick_wall_cast(dt: float) -> void:
 	if wall_cast.is_empty():
 		return
+	if h.downed:
+		wall_cast = {}                 # knocked in the tell: no wall (docs/heroes/rimewright.md "Interrupts")
+		AimKit.hide(h, "e")
+		return
 	wall_cast["t"] = float(wall_cast["t"]) - dt
 	if float(wall_cast["t"]) <= 0.0:
 		var wc := wall_cast

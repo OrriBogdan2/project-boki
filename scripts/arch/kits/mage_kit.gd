@@ -592,7 +592,7 @@ func fire_rmb(c: Dictionary) -> void:
 	if rod != null and is_instance_valid(rod):
 		rod.visible = false
 	var sd := rmb_def()
-	if not spend_rmb():
+	if h.downed or not spend_rmb():          # knocked mid-hold: nothing thrown (mage.md "Interrupts")
 		return
 	var held_t := float(c["t"])
 	var min_t := float(sd["min_t"])

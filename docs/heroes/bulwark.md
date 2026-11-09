@@ -200,3 +200,30 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 
 ## Payoff
 CRUSHED: stun, heal, T4 hitstop and shake, own sound, `bul_crush`.
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Crushing Blow hold | stun, hard knockback | [?] | the hold ends with no swing; the button must come up first | [?] |
+| LMB hold | knocked | ends | ends with no swing | match |
+| LMB hold | root | [?] | no check: he keeps charging (he stands still for it anyway) | [?] |
+| LMB thrown mace and recall | stun | [?] | the mace flies on; the recall is a press, denied while stunned | [?] |
+| LMB thrown mace | knocked | [?] (thrown, not in the hand) | it comes back to his hand quietly | [?] |
+| RMB aegis (hold) | stun | [?] | the base hold releases: the aegis is lowered | [?] |
+| RMB aegis | knocked | ends | lowered | match |
+| RMB aegis | knockback, root | [?] | no check: it stays up | [?] |
+| E Mending Ground pending burst | any | [?] | a cast: the burst goes off | [?] |
+| X Faultline plant (0.4 s wind-up, [F] f25-f28) | stun | [?] | INTERRUPTED, cooldown cut to `x.refund` 8 s (ours) | [?] |
+| X plant | knocked | ends | INTERRUPTED | match (cooldown [?]) |
+| X plant | knockback | [?] | his speed is held at 0 through the plant | [?] |
+| X fissure after the slam | any | [?] | runs on (already cast) | [?] |
