@@ -3342,3 +3342,16 @@ GPU (jobq 22864 rp1-1, 1280x720 record on): expedition ready 28.5 s, 15 fps; far
 BIG blocker, not fixed: the expedition misses <10 s (14 s headless, 28.5 s rp1-1) and 60 fps; it is the Demo match's own world + 20-hunter build cost. Workaround: start capture after the loading screen; cut the load. Ugly on camera: stacked bot nameplates over the airship at drop (jobq/done/20261108-233534-22864/out/demo_expedition_b.png); the farm shows a "Goals: Fly through 10 air rings" panel (demo_farm_b.png). Hatch is clean (demo_hatch_b.png).
 5 best moments: 1 Kael, Comet Drop slam (drop_comet), onto The Crown plaza. 2 Lace, Spirit Walk into the ult beam, off the Highwatch cliffs. 3 Neve, skate carve + ice bridge, across Frostgate gaps. 4 Cinder, flame lance + Flashover, then jet liftoff, on Cinder Steps. 5 Meeko, Hearth bloom healing the squad, at the Thornhive lair. (Bonus: the egg crack on the hatch dais.)
 Checks: new --demo-quick-check (registered) 21 checks, 1 fail (expedition load time, above); health --strict OK. Full suite not run (usage). Not merged to main.
+
+## 2026-11-09 deep (job 20261108-224615-a4, w2): READY `ext/islands-deeper-1108` @ 65ff8c7e (owner 11-08 "sky islands deeper")
+- Every island (match maps, Training Area, farm) now has a tall, tapered rock underside: a 5 m near-sheer outer wall, then a taper 12-40 m deep, with a shelf every 3 m. The collision follows it: open air below, so you can glide under an island. Island rock at your height, or just over your head, catches you and you climb to the top. This works down to 18 m (was 4.5 m; the farm was 3.5 m). The abyss kill depth is unchanged.
+- Code: new `IslandDepth` module, read by TerrainMesh, World.occupy, Hunter catch/unclip and the farm. Same mesh triangle count. Decision 0022.
+- Tuning file: created `content/rules/tuning.json` ("islands" section) with `Tuning.of` byte-identical to ext/lace-playtest-1108. tuning.json and tuning.gd.uid will conflict trivially with lace-playtest/expedition-fps/reticle-style: merge the sections and keep one uid.
+- Checks on w2:
+  - New `--island-depth-check`: 0 failures. Glide under, steer to the side and climb to the top on 3 match islands, the Training Area and 3 farm rims, 0 m inside rock.
+  - mantle: 0 failures (0.24.3 base: 1 failure, 16 of 20; now 20 of 20).
+  - mantle-look: 2 failures, the same as base (cloak gender/shape, not terrain).
+  - abyss, cliff-mantle, wallhug, air-limits, airdash-glide, glider-heat, wallmove, hob, drop-feel, move-feel, --check: all 0 failures.
+  - health --strict OK. suite-fast is not on w2.
+- GPU (`--island-clip`: glide-under clips on 3 islands + Training Area, island silhouettes, frame time): before 20261108-234211-05742, after 20261108-235725-12161. Both were queued behind a ~2 h GPU backlog and not run when posted. No source-game island reference is in the briefs.
+- No PR (w2 has no gh): https://github.com/OrriBogdan2/project-boki/pull/new/ext/islands-deeper-1108. Not merged.
