@@ -4723,3 +4723,16 @@ ART sporcupine 7.8 briefs/boki-art/batch/out/sporcupine_card2_w32_1.jpg kind=car
 ART terrarimit 7.9 briefs/boki-art/batch/out/terrarimit_e_w32_4.jpg kind=turnaround status=owner-review
 ART voltalon 7.8 briefs/boki-art/batch/out/voltalon_r_w32_2.jpg kind=turnaround status=owner-review
 READY ext/ability-bar-charges 82671deed (ability bar charges and slots)
+
+## 07:26Z — art session: fast lane f4
+ART buckleron 8.2 briefs/boki-art/batch/out/buckleron_r2_w32_1.jpg kind=turnaround status=owner-review
+ART chandelapi 8.3 briefs/boki-art/cards/Chandelapi.jpg kind=card
+ART eclipsowl 8.3 briefs/boki-art/cards/Eclipsowl.jpg kind=card
+ART forgebrock 8.4 briefs/boki-art/cards/Forgebrock.jpg kind=card
+ART galleotter 8.3 briefs/boki-art/batch/out/galleotter_r_w32_2.jpg kind=turnaround status=owner-review
+ART glaciatee 8.0 briefs/boki-art/batch/out/glaciatee_r_w32_1.jpg kind=turnaround status=owner-review
+ART gongrowl 8.2 briefs/boki-art/cards/Gongrowl.jpg kind=card
+ART lashyx 8.2 briefs/boki-art/cards/Lashyx.jpg kind=card
+ART lockatara 7.7 briefs/boki-art/batch/out/lockatara_r_w32_4.jpg kind=turnaround status=owner-review
+ART murmurling 8.2 briefs/boki-art/batch/out/murmurling_f_e_w32_1.jpg kind=turnaround form=female status=owner-review
+ART scythant 8.0 briefs/boki-art/batch/out/scythant_r_w32_3.jpg kind=turnaround status=owner-review
