@@ -51257,5 +51257,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/xang_vespyx_lying2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "xang_vespyx_lying2",
+    "name": "Vespyx (extra angle, lying)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/xang_vespyx_lying2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_mycroll_back2",
+    "name": "Mycroll (extra angle, on its back)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/xang_mycroll_back2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_vespyx_lying2",
+    "name": "Vespyx (extra angle, lying)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/xang_vespyx_lying2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_mycroll_back2",
+    "name": "Mycroll (extra angle, on its back)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/xang_mycroll_back2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_cardb",
+    "name": "Chandelapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_cardb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_mycroll_back2",
+    "name": "Mycroll (extra angle, on its back)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/xang_mycroll_back2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_pb",
+    "name": "Chandelapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_mycroll_back2",
+    "name": "Mycroll (extra angle, on its back)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/xang_mycroll_back2_3.jpg",
+    "ok": true
   }
 ]
