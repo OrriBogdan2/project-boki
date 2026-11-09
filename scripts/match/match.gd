@@ -2174,6 +2174,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
 	if credit is Hunter and target != credit:
 		credit.dmg_done += d
+		MatchSummary.on_hurt(credit, target, time)
 		if o.has("leech") and target.team != credit.team and not credit.remote:
 			credit.heal(d * float(o["leech"]))     # a Void weapon drains what it deals
 		if not credit.remote and target.team != credit.team and src != "burn":
@@ -2242,6 +2243,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
+		MatchSummary.on_knock(h, credit, time)
 		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
@@ -2360,6 +2362,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		return
 	cancel_abilities(h)
 	h.out = true
+	h.left_at = time
 	h.downed = false
 	if net_on and not h.remote:
 		net_event(["out", h.nid, by.nid if by else "", why])
@@ -5316,6 +5319,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	if h.extracted:
 		return
 	h.extracted = true
+	h.left_at = time
 	h.downed = false
 	if not h.stomp.is_empty(): Life.end_stomp(self, h, "extract")
 	cancel_abilities(h)
@@ -5462,11 +5466,8 @@ func _finish() -> void:
 		if not player_lost.is_empty():
 			r["lost_kin"] = _resolve_lost()
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
-	var placed := 1
-	for h in hunters:
-		if h.extracted and h != player:
-			placed += 0
-	r["placed"] = placed
+	if player and not opts.get("tutorial", false):
+		MatchSummary.fill(r, hunters, player, time)
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -5700,8 +5701,10 @@ func _net_apply(e: Ent, it: Array) -> void:
 			h.downed = f & 1 != 0
 			if f & 2 != 0 and not h.out:
 				h.out = true
+				h.left_at = time
 			if f & 4 != 0 and not h.extracted:
 				h.extracted = true
+				h.left_at = time
 			h.cloak_t = 0.3 if f & 8 != 0 else 0.0
 			h.roll_t = 0.05 if f & 16 != 0 else 0.0
 			h.grounded = f & 32 != 0
@@ -5827,6 +5830,7 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
+				who.left_at = time
 				if by == player:
 					player.kills += 1
 					DashReset.takedown(player, who)
@@ -5872,6 +5876,7 @@ func _net_ev(x, from: String) -> void:
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.extracted:
 				who.extracted = true
+				who.left_at = time
 				add_feed("%s extracted" % who.pname)
 				if who.kin: who.kin.visible = false
 				_check_last()

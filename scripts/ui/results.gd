@@ -57,26 +57,11 @@ func show_result(r: Dictionary) -> void:
 	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
 	head.add_child(UI.para((how_line + "Everything you carried is yours now.") if won else "Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
 	v.add_child(head)
-	# the four numbers that matter, big and counting up, on one strip; the rest in a quiet line
-	var secs := int(r.get("time", 0))
-	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
-	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
-		["clock", "Time", float(secs), "time"], ["gem", "Armor", float(r.get("armor_tier", 0)), "armor"]]
-	for i in big4.size():
-		var t: Array = big4[i]
-		if i > 0:
-			var sep := ColorRect.new(); sep.color = UI.LINE; sep.custom_minimum_size = Vector2(1, 0)
-			sh.add_child(sep)
-		sh.add_child(_stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08))
-	v.add_child(strip)
-	var small := UI.hbox(18)
-	for t in [["Kills", int(r.get("kills", 0))], ["Damage taken", int(r.get("taken", 0))], ["Times downed", int(r.get("downs", 0))], ["Revives", int(r.get("revives", 0))]]:
-		var one := UI.hbox(6)
-		one.add_child(UI.label(String(t[0]), UI.T_SMALL, UI.MUTED))
-		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
-		small.add_child(one)
-	v.add_child(small)
+	# one card: your place, four numbers, your Boki, what you brought home, then your squad
+	var card := UI.card(Color(0, 0, 0, 0.2), 14, 14)
+	var cv := UI.vbox(10); card.add_child(cv)
+	v.add_child(card)
+	MatchCard.head(cv, r, s.get("kin", {}))
 	v.add_child(ClassCard.results_strip(s))
 	if won:
 		var chips: Array = []
@@ -92,7 +77,7 @@ func show_result(r: Dictionary) -> void:
 			if Loot.is_rare_egg(it):
 				chips.push_front(["egg", "Brought home a Rare Egg  ·  %s" % Loot.name_of(it), Color("ffd36a")])
 		if not chips.is_empty():
-			v.add_child(UI.section("Brought home"))
+			cv.add_child(UI.section("Brought home"))
 			var flow := HFlowContainer.new()
 			flow.add_theme_constant_override("h_separation", 8); flow.add_theme_constant_override("v_separation", 8)
 			for i in chips.size():
@@ -103,29 +88,30 @@ func show_result(r: Dictionary) -> void:
 					var hb: HBoxContainer = ch.get_child(0)
 					hb.add_child(UI.label("·  " + ("Boki Burrow" if KinBox.is_boxed(krec) else "farm"), 13, Color("bfa6ff") if KinBox.is_boxed(krec) else UI.GOOD))
 				flow.add_child(ch)
-			v.add_child(flow)
+			cv.add_child(flow)
 			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
 			if not to_box.is_empty():
-				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
+				cv.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
 					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm().size(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
 	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
+		cv.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
 	if won and not haul.is_empty():
-		v.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
+		cv.add_child(UI.section("Into your armory" if Save.has_building("armory") else "Into your armory (build it on the farm to use them)"))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
 			var it: Dictionary = haul[i]
 			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + _fate_note(it), Loot.col_of(it), 0.9 + i * 0.1))
-		v.add_child(hf)
+		cv.add_child(hf)
 		if int(s.get("salvage_gems", 0)) > 0:
-			v.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
+			cv.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
 					UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
-			v.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
+			cv.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
+	MatchCard.squad(cv, r)
 	var lost_it: Array = s.get("lost_items", [])
 	if not won and not lost_it.is_empty():
 		var names: Array = lost_it.map(func(it): return Loot.name_of(it))
@@ -179,31 +165,6 @@ func show_result(r: Dictionary) -> void:
 	outer.add_child(row)
 	go.grab_focus()
 	Sfx.play("bond" if won else "fall", null, -6.0, 0.0, 1.0 if won else 0.8)
-
-## One stat on the strip: a number that counts up from zero, with what it is under it.
-func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: float) -> Control:
-	var col := UI.vbox(2)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	var num := UI.title("0" if fmt == "" else "0:00", 30)
-	num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(num)
-	var lr := UI.hbox(5); lr.alignment = BoxContainer.ALIGNMENT_CENTER
-	lr.add_child(Icons.Glyph.new(icon, Color(1, 0.86, 0.6, 0.8), 13.0))
-	var lab := UI.label(what.to_upper(), 11, UI.MUTED, UI.caps); lab.autowrap_mode = TextServer.AUTOWRAP_OFF
-	lr.add_child(lab)
-	col.add_child(lr)
-	if fmt == "armor":
-		# the armor tier you finished on, in its own colour
-		var tier: Array = Hunter.ARMOR_TIERS[clampi(int(value), 0, Hunter.ARMOR_TIERS.size() - 1)]
-		num.text = String(tier[0]); num.add_theme_color_override("font_color", tier[1])
-		return col
-	var show := func(x: float) -> void:
-		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))
-	var tw := create_tween()
-	tw.tween_interval(delay)
-	tw.tween_method(show, 0.0, value, clampf(0.4 + value * 0.01, 0.5, 1.1)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	return col
 
 ## One thing you brought home, as a little pill that pops in with a sound.
 func _chip(icon: String, txt: String, col: Color, delay: float) -> Control:

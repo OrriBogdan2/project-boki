@@ -175,6 +175,10 @@ var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
 var dmg_done := 0.0
+var assists := 0               # knocks you helped with: hurt the victim shortly before (MatchSummary)
+var healed := 0.0              # health you got back this match
+var hurt_by: Dictionary = {}   # rival Hunter -> match time they last hurt you (MatchSummary assists)
+var left_at := -1.0            # match time you were knocked out for good or extracted (-1: still in)
 var belt: Array = UtilityBelt.empty()    # the utility belt on 1-4: four slots of {id, n, cd} (UtilityBelt)
 var belt_free: Dictionary = {}                # issued charges, used first and never taken home
 var tonics: int:                              # (the belt's tonics and armor kits, for the code that counts them)
@@ -1891,6 +1895,7 @@ func heal(n: float) -> void:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
+	healed += hp - before
 	if hp - before > 1.0:
 		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
 
