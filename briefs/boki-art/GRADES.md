@@ -86,3 +86,9 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 - Approved concepts get a turnaround sheet made from the concept (`ta_<name>`), judged only on matching the concept and a clean single row.
 - Families go top-down: a later stage is only generated once the earlier stage's concept passes, using it as image 2.
 - Concept prompts are short (core + lessons + the roster entry) instead of the stacked sheet rules.
+
+## Screener + more versions (owner OK 23:16 ET, "without me being a blocker")
+- A reject-only screener (SCREEN_BRIEF.md) checks every new image first for objective hard-rule breaks (pasted creatures, ghost rows, two heads, broken layout, upright pose, held or worn items, reskinned evolutions, text, crops). It can never pass anything.
+- Survivors go to the 3-critic panel, which alone decides passes (rule unchanged: no veto, every seat >= 8.0, average >= 8.5, two seats agree).
+- New jobs make 4 versions (edits 3-4, portraits 3) so each review round sees more options.
+- The pipeline runs without waiting for the owner; owner verdicts in the Bokidex still override and recalibrate the panel.

@@ -27,3 +27,6 @@ Pass = no veto, every seat >= 8.0, average >= 8.5, and at least two seats pick t
 - Blight look: bruised purple / purple-black sludge, purple veins under skin, bone spurs along the veins, white-hot cracks where it burns, faint inner glow. Not green slime, not zombie rot.
 - Spore-type Boki: appealing first (8.5 bar), Blight palette only as an accent (purple-black gills or vein lines, faint purple glow in spores, small bone-spur quills). Gross, sad or rotting = reject. Green slime on a Spore Boki = note it.
 - Purple-black is the game's one menacing colour: flag non-Spore, non-Dark Boki that lean heavily on purple-black.
+
+## STYLE_CANON (owner 11-09, briefs/boki-art/STYLE_CANON.md) — read it
+One Boki 2D style anchored on style_refs/boki_style_ref_2d.png. For hero cards (`*_card`) and new art: gentle 3/4 view (25-35 deg, head toward viewer, both eyes), characterful grounded pose, centred with ~8% margin, plain flat pale grey #E8E8EE, no shadow/glow/halo, thin dark outline, big glossy eyes, soft blush. Judge cards against it.

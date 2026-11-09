@@ -1,7 +1,7 @@
 # Round 24 (23:30 ET): concept panel groups 1-2. Bathilus PASS (8.6/8.2/8.7) -> turnaround + next stage. Others: edits or new looks.
 CO='briefs/boki-art/batch/out/'
 def CE(name,run,instr):
-    SPECS.append({'id':'c_'+name.lower()+'_e','name':name+' (concept edit)','refs':[CO+'c_'+name.lower()+'_'+str(run)+'.jpg'],'runs':3,'aspect':'1:1',
+    SPECS.append({'id':'c_'+name.lower()+'_e','name':name+' (concept edit)','refs':[CO+'c_'+name.lower()+'_'+str(run)+'.jpg'],'runs':4,'aspect':'1:1',
       'prompt':"Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: "+instr})
 def CN(name,newlook,extra_avoid=''):
     d=dict(ROSTER200[name]); d['look']=newlook

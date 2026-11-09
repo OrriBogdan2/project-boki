@@ -1,6 +1,6 @@
 # Bokidex portraits: one per approved sheet, made from that sheet.
 def P(i, name, ref, pose):
-    SPECS.append({'id': 'portrait_' + i, 'name': name + ' (portrait)', 'refs': [ref], 'aspect': '1:1', 'runs': 2,
+    SPECS.append({'id': 'portrait_' + i, 'name': name + ' (portrait)', 'refs': [ref], 'aspect': '1:1', 'runs': 3,
       'prompt': ("Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. "
         "Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. "
         "Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): " + pose + ". "

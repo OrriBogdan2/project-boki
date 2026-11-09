@@ -53,10 +53,10 @@ def B(i,n,body,face,cols,avoid,el,arch):
     if i in _EXIST: SPECS.append({'id':i,'name':n,'refs':[SR,SR3],'prompt':base(STYLE2+desc(body,face,cols,avoid,el,arch))})  # legacy: unchanged
     else: SPECS.append({'id':i,'name':n,'refs':[SRA],'prompt':base(STYLE_A+desc(body,face,cols,avoid,el,arch),new=True)})
 def U(i,n,ref): SPECS.append({'id':i+'_4k','name':n,'refs':[ref],'runs':1,'size':'4K','prompt':"Re-render image 1 at full quality: keep it exactly the same, the same creature, design, colours, every detail, the same views in the same layout and the same plain background. Only increase the sharpness and finish. Do not change, add or remove anything."})
-def X(i,n,ref,instr,runs=2): SPECS.append({'id':i,'name':n,'refs':[ref],'runs':runs,'prompt':"Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: "+instr+" Do not add anything else."})
+def X(i,n,ref,instr,runs=3): SPECS.append({'id':i,'name':n,'refs':[ref],'runs':runs,'prompt':"Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: "+instr+" Do not add anything else."})
 def V(i,n,ref,rel,body,face,cols,avoid,el,arch):
     new=i not in _EXIST  # new ids get the anchor as image 2; existing ids stay as they were
-    SPECS.append({'id':i,'name':n,'refs':[ref,SRA] if new else [ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch),new=new),'runs':3 if rel in ('baby','mid') else 2})
+    SPECS.append({'id':i,'name':n,'refs':[ref,SRA] if new else [ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch),new=new),'runs':4})
 
 # Hero card (one image per species in the canon, see STYLE_CANON.md). Image 1 = the species' own design (identity), image 2 = style anchor.
 CARD_VIEW=("View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. ")
@@ -84,7 +84,7 @@ for j in jobs:  # jobs not started yet pick up prompt changes
 have={j['id'] for j in jobs}
 for s in SPECS:
     if s['id'] in have: continue
-    s.setdefault('runs',2); s.setdefault('aspect','16:9'); s.setdefault('size','2K'); jobs.append(s)
+    s.setdefault('runs',4); s.setdefault('aspect','16:9'); s.setdefault('size','2K'); jobs.append(s)
 _pri=globals().get('PRIORITY',[])
 jobs.sort(key=lambda j: (_pri.index(j['id']) if j['id'] in _pri else len(_pri), 1 if j['id'].startswith('relic_') else 0))  # relics run after all Boki
 (HERE/'jobs.json').write_text(json.dumps(jobs,indent=2))

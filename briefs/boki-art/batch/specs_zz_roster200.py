@@ -19,7 +19,7 @@ CONCEPT_CORE=("Creature-collector monster concept art for a fantasy action game,
  "ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, "
  "plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; "
  "its idea grows through its whole body. ")
-def CQ(name,parent_concept=None,runs=3):
+def CQ(name,parent_concept=None,runs=4):
     d=ROSTER200[name]
     refs=[SR]+([parent_concept] if parent_concept else [])
     fam=(" Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, "
