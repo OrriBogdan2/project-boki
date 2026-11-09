@@ -44,6 +44,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 | E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
 | Shift Surge | hold crouch, a streak at a constant ~32 m/s (ours: 40 m/s, owner item 70), an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
 | X Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
+| Allies | Surge damages enemies passed through; Static and the Thunderstorm strike hit enemies; no ally effect [data] | no slot hurts, stuns, roots or slows a teammate; Kitefall's strike and knock count foes only | matches; asserted (`mage ally: ...`) |
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/vex_vireo_sable.md. (a) done on this branch, (b) fixed now, (c) not applied, with the

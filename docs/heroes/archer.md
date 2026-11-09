@@ -25,6 +25,7 @@ Source vs ours per slot; [data] = the game data (supervive-data), [footage] = he
 | E Rain of Arrows | an arc at the cursor distance, about 120 degrees, 4.4 s [footage] | the same | matches |
 | X Primal Forces | 3 empowered no-draw shots, the 3rd executes [data] | Starpiercer: the same rules | matches |
 | Shift Spirit Walk | a dodge roll of about 3 m in 0.27 s (peak 17 m/s at 0.13 s), straight into the crouched walk [footage 655.55-655.65] | **was 2.55 m in 0.18 s** (the owner found Lace's Shift fast): now 3.0 m in 0.28 s (`roll` 3.5, `roll_t` 0.24, with the dash feel); `pin_roll` retimed to match; the start burst and ring are gone (owner: no rings or bursts on dashes), a dust puff instead | fixed |
+| Allies | nothing hurts an ally; Phase Walk upgrade: allies near you also get the walk [data] | no slot hurts, stuns, roots or slows a teammate; rank 3 Spirit Walk: a teammate within 6 m walks through terrain too | matches; asserted (`archer ally: ...`, `pin rank 3: ... an ally within 6 m walks too`) |
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (a) done on this branch, (b) fixed now,

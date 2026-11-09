@@ -9,6 +9,7 @@ const ULT := preload("res://tools/dj_ult_check.gd")      # both heroes' ultimate
 const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB rows, Meteor Drop and dashes
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
 var A: AKCheck
 
@@ -316,6 +317,7 @@ func thief(a) -> void:
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
+	await _ally_rows("thief")
 
 
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
@@ -793,6 +795,14 @@ func juggernaut(a) -> void:
 	await A.done(m)
 	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
+	await _ally_rows("juggernaut")
+
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero. (Kael's Warchain
+## passing a teammate to hook the foe behind is the "jug chain" row.)
+func _ally_rows(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(A.main, arch)
+	A.ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)

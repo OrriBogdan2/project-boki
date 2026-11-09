@@ -25,6 +25,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | Shift while charging [wiki] | a short dash without the spin, ending the charge, on a reduced cooldown | short dash for half a charge | short dash on a full charge (owner #51 keeps the charge, so the reduction has no reason left; the game data doesn't list one) |
 | E, X, passive | see the per-slot table | matched in the earlier passes | unchanged |
 | Camera | - | a directional camera nudge on the swing | removed (item 50: no self-caused camera motion) |
+| Allies | Brightshield blocks all damage from the front, so it covers allies behind it; Regen Field heals allies in its zone and starts Wisps resurrecting [data] | built earlier | the raised aegis stops a foe's shot at a teammate behind it; Mending Ground heals teammates and restarts downed ones; no slot hurts, stuns, roots or slows a teammate. Asserted (`bjorn ally: ...`, `bjorn small: ...`) |
 
 ## Audit (Nov 3 23:40)
 Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on main 200effce). (a) already done on this branch, (b) fixed now, (c) not applied, with the reason.

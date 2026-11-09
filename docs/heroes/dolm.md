@@ -49,6 +49,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | E Rockwave | three rocks about 2 bh ahead, a slight curve, a red flash first [footage] | Stone Row: the same | matches |
 | X Tetraform | tap or hold-drag, rocks centre-out, slow [data, footage] | Basalt Spine: the same, rocks only (owner item 15) | owner rule over data |
 | Shift Landslide | a rock ahead, a shove dash, the rock launched [footage] | Rock Hop (owner item 111), dust only (no ring or blast) | owner design |
+| Allies | allies hop over friendly rocks by jumping against them [data]; nothing else touches an ally | an ally in the air hops a Tenzo rock, a foe is stopped; bots hop at once; no slot hurts, stuns, roots or slows a teammate | matches; asserted (`hop rocks: ...`, `dolm ally: ...`) |
 
 ## Audit (Nov 3 23:40)
 Rows of briefs/specs/kit-audit/tarek_ostra_claire.md. (a) done on this branch, (b) fixed now, (c) not applied, with

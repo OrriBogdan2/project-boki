@@ -3,6 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -17,10 +19,13 @@ func run(main_node: Node) -> void:
 	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		await _ally("archer")
 		await ult.pin()
 		await own.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await _ally("bulwark")
+		await _aegis_covers()
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
@@ -653,6 +658,32 @@ func _growth() -> void:
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
+
+## Brightshield blocks everything from the front (data), so a teammate behind the raised aegis takes no shot
+## a foe fires at them; with the aegis down the same shot lands.
+func _aegis_covers() -> void:
+	var taken := []
+	for raised in [false, true]:
+		var r := setup("bulwark", 9.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var mate := ALLY.spawn(m, P, r[4] + Vector3(0.4, 0, 0.7))
+		aim_at(P, r[2].pos)
+		if raised:
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			step(m, 0.4, func(): P.inp["sec_hold"] = true)
+		m.spawn_shot(r[2], mate.pos + Vector3(6.0, 1.0, 0), Vector2(-30.0, 0), 40.0, 1.0, 0.2, Color.RED)
+		step(m, 0.8, func(): P.inp["sec_hold"] = raised)
+		taken.append(dmg(mate))
+		await done(m)
+	ok("bjorn ally: a teammate behind the raised aegis takes the shot a foe fires at them",
+			taken[0] >= 39.0 and taken[1] == 0.0, "aegis down %.0f raised %.0f" % [taken[0], taken[1]])
 
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)

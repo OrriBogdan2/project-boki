@@ -4,6 +4,8 @@ extends RefCounted
 ## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
 ## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -76,6 +78,11 @@ func down(m: Match, A: Hunter) -> void:
 	A.ctrl = "idle"
 	A.down_hp = 60.0
 
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
+
 func run(mn: Node, md := "all") -> void:
 	main = mn
 	mode = md
@@ -86,10 +93,12 @@ func run(mn: Node, md := "all") -> void:
 	ults.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
+		await _ally("tender")
 		await combos.tender()
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
+		await _ally("rimewright")
 		await combos.rimewright()
 		await ults.rimewright()
 		await ults.burst_cap()

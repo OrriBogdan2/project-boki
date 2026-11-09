@@ -8,6 +8,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	await _ostra()
 	await _bolt_through_terrain()
+	await _ally("ostra")
 	var orb_check = load("res://tools/ostra_orb_check.gd").new()
 	await orb_check.orbs(main)
 	n += orb_check.n
