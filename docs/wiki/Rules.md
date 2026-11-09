@@ -478,6 +478,27 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## toys (`content/rules/toys.json`)
+
+The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Units: seconds, tiles, 0..1 trait values, joy points.
+
+| Setting | Value |
+|---|---|
+| joy_below | 85 |
+| pick_chance | 0.5 |
+| play_secs | [8.0, 12.0] |
+| go_timeout | 20 |
+| joy_gain | 10 |
+| stat_gain | 1 |
+| max_players | 2 |
+| squabble_temper | 0.7 |
+| sulk_secs | 12 |
+| like_weight | 2 |
+| trait_weight | 1 |
+| join_weight | 2.5 |
+| join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
+| toys | {"toy_ball": {"stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

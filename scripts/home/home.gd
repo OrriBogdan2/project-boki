@@ -56,6 +56,7 @@ var water := HomeWater.new(self)      # the ponds you wade and swim in (home_wat
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
+var toys: HomeToys = null        # the base's balls, posts and tubs, played with on their own (home_toys.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
@@ -161,6 +162,7 @@ func _ready() -> void:
 	hb = HomeBuild.new(self)
 	hg = HomeGather.new(self)
 	hw = HomeWork.new(self)
+	toys = HomeToys.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
 		guide = FarmGuide.new(self)
@@ -1452,6 +1454,7 @@ func _move_kin(d: float) -> void:
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * (0.26 if joy > 0.0 else (float(pers.get("hop_a", 0.14)) if hv.length() > 0.3 else 0.03))
 		_quirk(k, n, hv.length() > 0.3, d)
 		if hw: hw.pose(k, n, d)
+		toys.pose(k, n, d)
 		n.set_meta("happy", joy > 0.0)
 		n.set_meta("kstate", "sleep" if float(k.get("nap_t", 0.0)) > 0.0 else "")
 		if k.has("say"):
@@ -4138,6 +4141,8 @@ func _care_goal(k: Dictionary) -> bool:
 		return true
 	if hecon and hecon.feed_goal(k):
 		return true      # off to a feeder
+	if toys.pick(k):
+		return true      # off to a toy (base_mode)
 	if Care.need(rec, "food") < 30.0 and randf() < 0.4 and spots["pot"].x > -100.0:
 		k["goal"] = _seat(k, spots["pot"], 1.4)
 		k["stare"] = spots["pot"]
@@ -4150,6 +4155,8 @@ func _care_goal(k: Dictionary) -> bool:
 ## Per-frame care states: napping, bathing, staring at the pot.
 func _care_step(k: Dictionary, d: float) -> void:
 	if hecon and hecon.feed_step(k, d):
+		return
+	if toys.step(k, d):
 		return
 	var rec: Dictionary = k["rec"]
 	var pos: Vector3 = k["pos"]
