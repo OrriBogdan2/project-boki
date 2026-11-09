@@ -33876,5 +33876,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_torpecone_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_torpecone_full",
+    "name": "Torpecone (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_torpecone_full_2.jpg",
+    "ok": true
   }
 ]
