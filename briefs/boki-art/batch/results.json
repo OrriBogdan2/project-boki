@@ -5988,5 +5988,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/geodemole_r_3.jpg",
     "ok": true
+  },
+  {
+    "id": "pyrraven_r",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_r",
+    "name": "Pyrraven",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pyrraven_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r2",
+    "name": "Mothlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mothlet_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r2",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove",
+    "name": "Ringrove (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanternmit_r",
+    "name": "Lanternmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ribbonwyrm",
+    "name": "Ribbonwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stormit_r",
+    "name": "Stormit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stormit_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanternmit_r",
+    "name": "Lanternmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove",
+    "name": "Ringrove (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_r",
+    "name": "Vespox (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_r",
+    "name": "Vespox (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_r_2.jpg",
+    "ok": true
   }
 ]
