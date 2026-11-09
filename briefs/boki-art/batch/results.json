@@ -9894,5 +9894,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_skateron_p_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_skateron_p",
+    "name": "Skateron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_p",
+    "name": "Prowyak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_p",
+    "name": "Rampartoad (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_p",
+    "name": "Ringrove (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_p",
+    "name": "Zephyrak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thrumbird_p",
+    "name": "Thrumbird (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark_p",
+    "name": "Spirevark (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p",
+    "name": "Soakybara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere_p",
+    "name": "Umbrathere (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark_p",
+    "name": "Spirevark (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_p",
+    "name": "Zephyrak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_p_2.jpg",
+    "ok": true
   }
 ]
