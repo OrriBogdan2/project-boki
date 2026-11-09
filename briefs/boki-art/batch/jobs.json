@@ -19912,6 +19912,198 @@
     "prompt": "Single character illustration of one Boki (a stylised, cute, endearing but slightly dangerous creature-collector monster): Slog, the creature in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, body plan, face, markings, colours and the object or idea fused into its body, with nothing added, removed or redesigned; ignore its pose, view, size, background, lighting and finish. Image 2 is the style reference only (two example creatures on a dark backdrop; ignore the backdrop, its glow and its floor shadow): match their soft hand-painted shading, clean fairly thin dark outline, big glossy eyes with a bright highlight, soft blush, rounded toy-like shapes and overall finish exactly, but never copy their designs, faces or colours. View: a gentle three-quarter view, the body turned about 30 degrees to one side (never straight-on front, never a pure side profile), the head turned slightly toward the viewer so both eyes show. Pose: oozing forward with its three eye-stalks up and curious, a characterful pose that shows its personality (a head tilt, a playful lean, a curious or cocky look, a weight shift), lively but grounded with its feet on the floor, never stiff, never posed like a passport photo, not an attack pose, not upright like a person, nothing held. Proportions: this is a young or middle form, so keep a big head and rounded body but a little more defined shapes and slightly longer limbs. Lighting: one soft key light from the top left, light shading falling to the lower right, no coloured rim light. Framing: exactly one creature, the whole body in frame from the top of the head or highest part to the feet and tail, centred, with about 8 percent empty margin on every side, its feet resting on one imaginary flat floor line. Background: one plain, flat, pale grey (#E8E8EE) background, no gradient, no floor texture, no cast shadow, no contact shadow blob, no reflection, no glow halo, no vignette, no text, no props, no other creatures. Keep every edge of the creature clean so it can be cut out easily.Most important (critics' top notes on the first 80 cards): absolutely NO shadow of any kind under or behind it, NO glow or halo around it; the face is the focal point, big, glossy, expressive and full of personality; keep every signature part of image 1 exactly (tail, wings, horns, markings), nothing changed or dropped; the creature is big in the frame.  Colour: glossy purple-black tar exactly like image 1, never light lilac or pastel purple."
   },
   {
+    "id": "geodemole_card107",
+    "name": "Geodemole (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Geodemole.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Geodemole, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): lunging forward mid-dig, body stretched long and low to the ground, both crystal claws thrown far forward, tail streaming behind, seen from a dynamic three-quarter angle. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "rattlebub_card107",
+    "name": "Rattlebub (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Rattlebub.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Rattlebub, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): a tiny baby snake bouncing upright on its tail like a spring, body in a big loose loop, rattle shaking in the air, wide happy eyes. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "maracoil_card107",
+    "name": "Maracoil (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Maracoil.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Maracoil, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): reared up tall like a striking cobra, head high above a big planted coil, mouth open showing fangs, both maraca rattles raised high and shaking, menacing. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "gravitank_card107",
+    "name": "Gravitank (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gravitank.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Gravitank, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): braced wide and charging straight at the viewer, head lowered, horn forward, its huge cratered shell raised behind like a mountain, debris floating. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "forgebrock_card107",
+    "name": "Forgebrock (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Forgebrock.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Forgebrock, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): reared up on its hind legs like a roaring bear, front paws raised, forge chest glowing blue-white, copper fur. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "frigatee_card107",
+    "name": "Frigatee (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Frigatee.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Frigatee, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): gliding forward on its belly through the air like a seal sliding on ice, flippers swept back, cooler-lid back trailing cold mist. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "scopeleon_card107",
+    "name": "Scopeleon (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Scopeleon.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Scopeleon, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): creeping forward mid-stride, body low and long, telescope eye stretched forward toward the viewer, tail curled tight behind. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "domeleon_card107",
+    "name": "Domeleon (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Domeleon.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Domeleon, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): reared up tall on its back legs and tail, its telescope cannon aimed high at the sky, frill spread wide, imposing. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "zippelith_card107",
+    "name": "Zippelith (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Zippelith.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Zippelith, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): slithering fast in a big S-curve across the image, its zipper half open in a toothy grin. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "skateron_card107",
+    "name": "Skateron (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Skateron.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Skateron, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): in a low speed-skating crouch, neck stretched far forward, wings swept back tight like a speed suit, one blade lifted mid-stroke. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "briarlynx_card107",
+    "name": "Briarlynx (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Briarlynx.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Briarlynx, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): rearing up on its hind legs with thorny forepaws raised to strike, briar whip tail lashing, snarling. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "howlop_card107",
+    "name": "Howlop (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Howlop.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Howlop, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): lunging forward mid-howl with its huge ears flared wide and sound rings bursting from its open mouth. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "dreadnoyak_card107",
+    "name": "Dreadnoyak (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Dreadnoyak.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Dreadnoyak, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): charging head-down straight toward the viewer, ice keel forward, frost hair streaming back. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "morelossus_card107",
+    "name": "Morelossus (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Morelossus.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Morelossus, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): reared up on its hind legs trumpeting, front feet high in the air, morel back towering. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "lodestaff_card107",
+    "name": "Lodestaff (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lodestaff.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Lodestaff, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): reared up tall like a praying mantis with its lodestone forelegs raised and crossed, magnetic flakes orbiting. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
+    "id": "blastopuff_card107",
+    "name": "Blastopuff (hero card, new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Blastopuff.jpg",
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised creature-collector monster): Blastopuff, the creature shown in the turnaround sheet in image 1, redrawn in the Boki house style of image 2. Image 1 is the identity reference only: keep exactly the same creature, design, face, colours, markings and signature parts; ignore its views, poses and layout. Image 2 is the style reference only (ignore its dark backdrop): soft hand-painted shading, clean fairly thin dark outline, big glossy eyes; never copy its creatures. POSE (most important, the whole point of this image): fully inflated into a round ball about to burst, spikes out, fuse sparking, glaring. This pose must be clearly different from every view in image 1. One creature only, the whole body in frame, centred, big in the frame, about 8 percent margin. Plain flat pale grey (#E8E8EE) background, no ground, no rocks, no shadow, no glow halo, no text."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
