@@ -681,7 +681,7 @@ again while it runs does its second part.
 | mage | R | press launches, recast lands at the cursor | press, reactivate (kits:69; vireo.md:30) | [D] |
 | ostra (Void) | LMB | press, repeats while held | tap or hold (kits:113; ostra.md:16) | [D] |
 | ostra | RMB | press | tap; the footage shows a width indicator while aiming (ostra.md:17, :142) | [?] |
-| ostra | Shift | hold shows both ends, release lobs to the cursor | tap, a landing circle shown "while aiming" (kits:115; ostra.md:18, :76) | [F] |
+| ostra | Shift | hold shows both ends, release lobs to the cursor | "tap", but a landing circle shows "while aiming": press-and-indicator or release can't be told apart (kits:115; ostra.md:18, :76) | [?] |
 | ostra | E | press, at the cursor; recast pops | tap, recast (kits:116; ostra.md:19) | [D] |
 | ostra | R | press, at the cursor | tap, at the cursor (kits:117; ostra.md:20) | [D] |
 | rimewright (Celeste) | LMB | hold fires the barrage | hold (kits:32; tamsin.md:17) | [D] |
@@ -703,7 +703,8 @@ again while it runs does its second part.
 The only clear mismatch was the archer's Heavy Shot tap; it is fixed in data (`content/archetypes/archer.json`
 `rmb.hold` 0.15 -> 0) and asserted in `tools/archer_bulwark_combo_check.gd` and `tools/archetype_check.gd`.
 The [?] rows are the "lane shown, then the shot" RMBs: the footage can't tell a release cast from a press with a
-short cast time. Ours splits them (ashwick and rimewright on the release; gunslinger, tender, thief and ostra on the press).
+short cast time. Ours splits them (ashwick and rimewright on the release; gunslinger, tender, thief and ostra on the press). Ostra's Shift is the same
+case (an aim circle, then the lob) and stays on the release.
 
 ---
 
