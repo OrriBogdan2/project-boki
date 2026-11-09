@@ -29,6 +29,8 @@ const T := {
 	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] SV slides ~0.38-0.49m"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
+	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
+	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
@@ -212,6 +214,7 @@ func run(main: Node) -> void:
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
 	_ground()
+	_face_turn()
 	_jump()
 	_glide()
 	_glide_dive()
@@ -279,6 +282,24 @@ func _ground() -> void:
 		rec("ground_turn90_t", t90)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
+func _face_turn() -> void:
+	var face0 := P.face
+	var aim0: Vector3 = P.inp["aim"]
+	for turn in [["face_turn180_t", PI], ["face_turn20_t", deg_to_rad(20.0)]]:
+		_reset(flat)
+		P.inp["aim"] = P.pos + Vector3(4, 0.9, 0)
+		_steps(30)
+		var a0 := atan2(-1.0, 0.0) + float(turn[1])
+		P.inp["aim"] = P.pos + Vector3(-4.0 * sin(a0), 0.9, -4.0 * cos(a0))
+		var t := -1.0
+		for i in 30:
+			m.step(DT)
+			if t < 0.0 and absf(wrapf(P.face - a0, -PI, PI)) < deg_to_rad(1.0): t = (i + 1) * DT
+		rec(turn[0], t)
+	P.face = face0          # (the rows after read the body and the cursor as they were)
+	P.inp["aim"] = aim0
 
 # ---------------------------------------------------------------- jump
 func _jump() -> void:

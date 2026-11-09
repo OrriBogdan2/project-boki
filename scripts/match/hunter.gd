@@ -2002,7 +2002,7 @@ func sim(dt: float) -> void:
 	if roll_t > 0.0 and not (ak and ak.aims_in_dash()):
 		want = atan2(-roll_dir.x, -roll_dir.y)
 	if not (ak and ak.face_locked()):
-		face = lerp_angle(face, want, minf(1.0, dt * 20.0))
+		face = rotate_toward(face, want, HunterMove.turn_rate * dt)
 
 func pad_launch(to: Vector3) -> void:
 	var d := Vector2(to.x - pos.x, to.z - pos.z).length()

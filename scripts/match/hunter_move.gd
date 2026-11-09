@@ -15,6 +15,7 @@ static var abyss_slow_from: float = _phys["abyss_slow_from"]
 static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
+static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
 static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
 static var mantle_launch_min: float = _phys["mantle_launch_min"]
 static var dive_vy: float = _phys["dive_vy"]
