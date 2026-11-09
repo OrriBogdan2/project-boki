@@ -20,7 +20,8 @@ func run(main: Node, mode := "check") -> void:
 	Save.d = Save.fresh()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true, "map": "hollowcrown"})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true,
+		"map": "hollowcrown"})
 	m.set_process(false)
 	w = m.world
 	for mb in m.mobs: mb.queue_free()
@@ -28,7 +29,9 @@ func run(main: Node, mode := "check") -> void:
 	P = m.player
 	for h in m.hunters:
 		h.ctrl = "idle"
-		if h != P: h.teleport(Vector3(-500, 50, -500)); h.out = true
+		if h != P:
+			h.teleport(Vector3(-500, 50, -500))
+			h.out = true
 	if P.kin: (P.kin as Kin).stow()
 	P.ctrl = "local"
 	ok(m.map_name == "The Hollow Crown", "the run is on the Hollow Crown (%s)" % m.map_name)
@@ -37,7 +40,7 @@ func run(main: Node, mode := "check") -> void:
 	if mode == "shots":
 		await _shots(main, tiers)
 		return
-	ok(not tiers.is_empty() and not slope.is_empty(), "found the three terrace steps %s and a flight of stairs %s" % [tiers, slope])
+	ok(not tiers.is_empty() and not slope.is_empty(), "found three terrace steps %s and stairs %s" % [tiers, slope])
 	if not tiers.is_empty() and not slope.is_empty():
 		for hero in HEROES:
 			P.set_arch(hero)
@@ -81,8 +84,10 @@ func _find_tiers() -> Array:
 ## A flight of four stairs along +x (three terraces of rise) with plain ground at both ends, as [from, to].
 func _find_slope() -> Array:
 	for i in w.stairs.keys():
-		var x: int = i % w.w; var z: int = i / w.w
-		if w.stairs[i] != Vector2i(1, 0) or not _plain(x - 1, z) or not _plain(x + 4, z) or _lvl(x + 4, z) != _lvl(x, z) + 4:
+		var x: int = i % w.w
+		var z: int = i / w.w
+		var top := _lvl(x, z) + 4
+		if w.stairs[i] != Vector2i(1, 0) or not _plain(x - 1, z) or not _plain(x + 4, z) or _lvl(x + 4, z) != top:
 			continue
 		if _lvl(x - 1, z) == _lvl(x, z) and w.stairs.has(i + 1) and w.stairs.has(i + 2) and w.stairs.has(i + 3):
 			return [Vector3(x - 0.5, 0, z + 0.5), Vector3(x + 5.5, 0, z + 0.5)]
@@ -101,7 +106,8 @@ func _frame(hero: String, label: String) -> void:
 	cam_max = maxf(cam_max, absf(m.cam.position.y - float(last[2])))
 	last = [P.pos.y, P.position.y, m.cam.position.y]
 	if OS.get_cmdline_user_args().has("--log-frames"):
-		print("STEPFRAME %s %s g=%s vy=%.2f pos.y=%.3f body.y=%.3f cam.y=%.3f x=%.2f" % [hero, label, P.grounded, P.vel.y, P.pos.y, P.position.y, m.cam.position.y, P.pos.x])
+		print("STEPFRAME %s %s collision.y=%.3f body.y=%.3f cam.y=%.3f"
+			% [hero, label, P.pos.y, P.position.y, m.cam.position.y])
 
 ## --step-smooth-shots --shots-dir=<dir>: one strip per hero (<hero>.png): the frames around the first terrace
 ## step, 1/60 s apart then wider, each cropped round the hunter, with the body and camera y in <hero>.txt.
@@ -147,7 +153,9 @@ func _crop(main: Node) -> Image:
 	return out
 
 func _start_at(a: Vector3) -> void:
-	P.out = false; P.gone = false; P.downed = false
+	P.out = false
+	P.gone = false
+	P.downed = false
 	a.y = w.ground_at(a.x, a.z)
 	P.teleport(a)
 	P.vel = Vector3.ZERO
@@ -160,7 +168,9 @@ func _start_at(a: Vector3) -> void:
 ## Walks from a to b and back, logging each frame; the worst frame-to-frame jumps must stay under the limits.
 func _walk(hero: String, label: String, a: Vector3, b: Vector3) -> void:
 	_start_at(a)
-	body_max = 0.0; cam_max = 0.0; pos_max = 0.0
+	body_max = 0.0
+	cam_max = 0.0
+	pos_max = 0.0
 	last = [P.pos.y, P.position.y, m.cam.position.y]
 	for leg in [b, a]:
 		var key := "right" if leg.x > P.pos.x else "left"
@@ -170,6 +180,7 @@ func _walk(hero: String, label: String, a: Vector3, b: Vector3) -> void:
 			if absf(P.pos.x - leg.x) < 0.15 or (key == "right") == (P.pos.x > leg.x): break
 		Input.action_release(key)
 		for i in 90: _frame(hero, label)
-	print("STEPSMOOTH %s %s: collision y jump %.3f m (not limited), drawn body %.3f, camera %.3f" % [hero, label, pos_max, body_max, cam_max])
+	print("STEPSMOOTH %s %s: collision y jump %.3f m (not limited), drawn %.3f, camera %.3f"
+		% [hero, label, pos_max, body_max, cam_max])
 	ok(body_max <= MAX_BODY_JUMP, "%s %s: drawn body y jump %.3f <= %.2f m" % [hero, label, body_max, MAX_BODY_JUMP])
 	ok(cam_max <= MAX_CAM_JUMP, "%s %s: camera y jump %.3f <= %.2f m" % [hero, label, cam_max, MAX_CAM_JUMP])
