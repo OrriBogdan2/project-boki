@@ -122,19 +122,22 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(n, Models.sphere(0.34, 10), orb_mat(Color("c8e07a", 0.3)), Vector3.ZERO))
 			_tail(n, 0.22, 1.4, Color("e8f6b8", 0.55))
 		"shard":
-			# an ice dart: a long ice-blue four-sided crystal with dark teal edges, tip first, and a short
-			# pale frost streak
-			var dart_ice := ice_mat(Color("9af0ff"), 0.95, 0.15, Color("1f8a96"))
+			# an ice dart: a long frost-cyan (her signature) four-sided crystal with dark teal edges, tip first,
+			# a white-hot core down its length and a short pale frost streak
+			var dart_ice := ice_mat(Color("8ae6ff"), 0.8, 0.15, Color("1f8a96"))
 			var c := _off(Models.part(n, Models.crystal(0.11, 0.8, 4), dart_ice, Vector3.ZERO))
 			c.rotation = Vector3(-PI * 0.5, 0, PI * 0.25)
+			_off(Models.part(n, Models.sphere(0.045, 8), orb_mat(Color("f2ffff", 1.0)), Vector3.ZERO, Vector3(1, 1, 7)))
 			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("e8ffff", 0.9)), Vector3(0, 0, -0.34)))
 			_tail(n, 0.16, 1.1, Color("6fd8f0", 0.75))
 		"beam":
-			# the skating dart: a thick (0.3 m) straight lance of ice with a cyan core and a long streak
-			var lance_ice := ice_mat(Color("7fe6ff"), 0.95, 0.3, Color("1f8a96"))
+			# the skating dart: a thick (0.3 m) straight lance of frost-cyan ice round a white-hot core, a soft
+			# cyan glow body and a long streak
+			var lance_ice := ice_mat(Color("8ae6ff"), 0.8, 0.3, Color("1f8a96"))
 			var c2 := _off(Models.part(n, Models.crystal(0.15, 1.3, 5), lance_ice, Vector3.ZERO))
 			c2.rotation = Vector3(-PI * 0.5, 0, 0)
-			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("30d8ff", 0.95)), Vector3.ZERO, Vector3(1, 1, 4)))
+			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("f8ffff", 1.0)), Vector3.ZERO, Vector3(1, 1, 8)))
+			_off(Models.part(n, Models.sphere(0.2, 10), orb_mat(Color("8ae6ff", 0.45)), Vector3.ZERO, Vector3(1, 1, 4)))
 			_tail(n, 0.3, 2.8, Color("4fd0f0", 0.85))
 		"spear":
 			# the Ice Spear: an ice-blue shaft and four-point star head with dark teal edges, so it reads blue
@@ -355,11 +358,9 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 			var hit_p := {"col": Color("5fdc6a"), "rim": Color("f2ffe8"), "r": EMBER_HIT_R, "dur": 0.3, "glow": 1.0}
 			burst("star", at, hit_p)
 		"shard":
-			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
-			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
+			HeroVfx.of(m).play(h, "dart_hit", at, d2)          # content/vfx/rimewright.json
 		"beam":
-			m.fx.flash(at, Color("7fe6ff"), 0.8, 0.08)
-			m.fx.spark(at, back, Color("dffcff"), 10, 9.0, 60.0, 0.25, 10.0, 1.1)
+			HeroVfx.of(m).play(h, "beam_hit", at, d2)
 		"spear":
 			m.fx.flash(at, Color("9af0ff"), 0.6, 0.06)
 		"burr":
