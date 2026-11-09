@@ -164,14 +164,14 @@ def ostra(rig):
         (0.00, key(0.00, 0, d.hand("L", 0.50, 0.12, 0.04), d.hand("R", 0.50, 0.12, 0.04)), "out"),
         (0.30, key(0.14, -10, d.hand("L", 0.80, 0.10, 0.22), d.hand("R", 0.80, 0.10, 0.22), roll=2, head=6), "smooth"),
         (0.60, key(0.20, 8, d.hand("L", 0.66, 0.20, 0.30), d.hand("R", 0.66, 0.20, 0.30), roll=-2, head=-6, hips=(4, 0, 0)), "smooth"),
-        (1.00, key(0.04, 2, d.hand("L", 0.46, 0.12, 0.08), d.hand("R", 0.46, 0.12, 0.08), head=-2), "out"),
+        (1.00, key(0.0, 2, d.hand("L", 0.46, 0.12, 0.08), d.hand("R", 0.46, 0.12, 0.08), head=-2), "out"),
     ]
     mantle = [(t * MANTLE_S, p, e) for t, p, e in mantle]
     ledge = [
         (0.00, key(0.04, 0, d.hand("L", 0.74, 0.10, 0.20), d.hand("R", 0.74, 0.10, 0.20), roll=3), "smooth"),
         (0.35, key(0.10, -6, d.hand("L", 0.80, 0.10, 0.24), d.hand("R", 0.80, 0.10, 0.24), roll=-3, head=4), "smooth"),
         (0.70, key(0.20, 8, d.hand("L", 0.66, 0.18, 0.30), d.hand("R", 0.66, 0.18, 0.30), roll=2, head=-6), "smooth"),
-        (1.00, key(0.06, 2, d.hand("L", 0.50, 0.12, 0.10), d.hand("R", 0.50, 0.12, 0.10), head=-2), "out"),
+        (1.00, key(0.0, 2, d.hand("L", 0.50, 0.12, 0.10), d.hand("R", 0.50, 0.12, 0.10), head=-2), "out"),
     ]
     ledge = [(t * LEDGE_S, p, e) for t, p, e in ledge]
     return {"mantle": mantle, "ledge": ledge}

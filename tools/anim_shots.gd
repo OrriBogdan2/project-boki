@@ -24,13 +24,13 @@ const ATTACKS := {
 }
 
 var posts: Array = []
+var close := false
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
-	var close := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
@@ -87,6 +87,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
+	if close:
+		_frame(model)
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
@@ -98,6 +100,17 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		if clips.lib.has_animation(climb):
 			await _keyed(model, sync, clips, dir.path_join(climb), climb, frames)
 	model.queue_free()
+
+## --close: the side camera backs off for a tall Hero (Albert is 1.5x) so his head and feet stay in the frame.
+func _frame(model: Node3D) -> void:
+	var h := 0.0
+	for v in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := v as MeshInstance3D
+		if mi.is_visible_in_tree():
+			h = maxf(h, (mi.global_transform * mi.get_aabb()).end.y)
+	var k := maxf(h / 2.2, 1.0)
+	cam.position = Vector3(0, 1.0 * k, 12.0 * k)
+	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
 func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:

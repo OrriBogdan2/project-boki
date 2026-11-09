@@ -171,6 +171,12 @@ poses in `tools/art1/climb_data.py` (two-bone IK onto the rig's own bones, no Bl
 kips over the lip with her legs kicked up behind; Albert plants the shield, heaves and drags the hammer; Motley has no
 legs, so he rises on his hover and settles. Every other Hunter keeps the procedural pose (data `procedural`).
 `--anim-shots` adds mantle and ledge strips for a Hunter that has the clips.
+Motley's root stays on his hover (data `rig_root`), so his lift and lean are keyed on the hips instead (his
+`offset_bones`): the spring stretches and he rises out of the box. `--close` backs the camera off for a tall Hunter.
+Rows below are mantle then ledge for Sparkle, Sable, Albert and Motley, 8 frames each (software GL; after changing a
+`.glb`, run `godot --headless --path . --import` first or the strip shows the old clip).
+
+![mantle and ledge strips: Sparkle, Sable, Albert, Motley](anim_audit/climb_mantle3.jpg)
 
 ## What is left
 

@@ -30,6 +30,9 @@ def lerp(a, b, u): return a + (b - a) * u
 def lerpv(a, b, u): return tuple(lerp(x, y, u) for x, y in zip(a, b))
 
 
+def qconj(q): return (-q[0], -q[1], -q[2], q[3])
+
+
 def qmul(a, b):
     ax, ay, az, aw = a
     bx, by, bz, bw = b
@@ -230,12 +233,25 @@ def sample(keys, t):
     return keys[-1][1]
 
 
+def fold_root(rig, frame):
+    """A Hero whose root stays on the rig (warden_anim "rig_root": Motley's hover drives it, its keys are dropped)
+    carries the lift and lean on the hips instead (his "offset_bones" keep the hips' translation): same pose."""
+    rot, pos = dict(frame[0]), dict(frame[1])
+    r, h = rig.n("root"), rig.n("hips")
+    rr, rp = qmul(rot[r], qconj(rig.rot[r])), sub(pos[r], rig.pos[r])
+    pos[h], rot[h] = add(rp, qrot(rr, pos[h])), qmul(rr, rot[h])
+    rot[r], pos[r] = rig.rot[r], rig.pos[r]
+    return rot, pos
+
+
 def build(rig, name, keys, legs, foot_names):
     """The animation dict (channels and samplers over new accessors) for the keys."""
     dur = keys[-1][0]
     n = int(round(dur * FPS)) + 1
     times = [min(i / FPS, dur) for i in range(n)]
     frames = [solve(rig, sample(keys, t), legs, foot_names) for t in times]
+    if "root" not in [rig.nodes[i].get("name") for i in rig.animated]:
+        frames = [fold_root(rig, f) for f in frames]
     j, b = rig.j, rig.b
     anim = {"name": name, "channels": [], "samplers": []}
 
