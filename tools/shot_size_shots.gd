@@ -102,6 +102,7 @@ func _hero(hero: String, P: Hunter, home: Vector3, out: String, res: int) -> voi
 ## Three frames with time frozen: the shot without beacons, the shot parked away, the shot with its beacon.
 func _measure(hero: String, s: Dictionary, out: String, res: int) -> void:
 	Engine.time_scale = 0.0
+	m.hitstop = 0.0      # (a freeze from an earlier hit would never run out at a zero delta and skip the render)
 	m.set_process(true)      # renders (shots, skins, beacons) but steps nothing at a zero delta
 	m.cam.snap(m.player.pos)
 	var p: Vector3 = s["pos"]
