@@ -51,12 +51,15 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
 
-## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
+## The shot of ours most recently skinned by Hem's look: how far from Hem it lands, or -1. (Where it ends, not
+## life0 * speed: ShotOrigin seats the arrow back at the bow and keeps its end, so its flight time no longer says it.)
 func _shot_reach(m: Match, P: Hunter) -> float:
 	for i in range(m.shots.size() - 1, -1, -1):
 		var sh: Dictionary = m.shots[i]
 		if sh["by"] == P and (sh["x"] as Dictionary).has("pin"):
-			return float(sh["life0"]) * (sh["vel"] as Vector2).length()
+			var at: Vector3 = sh["pos"]
+			var end := Vector2(at.x, at.z) + (sh["vel"] as Vector2) * float(sh["life"])
+			return end.distance_to(Vector2(P.pos.x, P.pos.z))
 	return -1.0
 
 ## Draws the bow for `t` seconds (aim kept on `at`), then lets go; returns how far the arrow will fly.
