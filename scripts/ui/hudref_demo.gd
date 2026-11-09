@@ -1,16 +1,19 @@
 class_name HudRefDemo
 extends RefCounted
-## --hudref-demo=<plates|fight> (screenshots only): sets up the overhead plates and bottom HUD in
+## --hudref-demo=<plates|fight|busy|numbers> (screenshots only): sets up the overhead plates and bottom HUD in
 ## known states so before/after pictures line up. Match calls tick() every step while the option is on.
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
 ##           cooling down. Everyone else stands still.
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
+##   numbers: four rivals in a row take a rifle string, a buckshot, a flame stream and a burn from you
+##           (the floating damage numbers), from NUMBERS_AT on.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
 ##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
 
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.35      # s of match time: close enough to a 2.5s shot that the chip still holds on slow frames
+const NUMBERS_AT := 2.4   # s: the damage-number volleys start
 const BUSY_AT := 2.0      # s of match time: the busy burst
 
 ## The match options for `--hudref-demo=<mode>` (Main reads the command line).
@@ -33,13 +36,14 @@ static func tick(m) -> void:
 		P.skill_pts = 0
 		for s in P.slot_lv: P.slot_lv[s] = 1
 		if mode == "plates": _plates(m, P)
+		elif mode == "numbers": _numbers_setup(m, P)
 		else: _fight(m, P)
 	# (the pointer rests at the bottom edge so you face the row, below everyone; the camera doesn't lead)
 	var vp: Viewport = m.get_viewport()
 	if vp: vp.warp_mouse(Vector2(vp.get_visible_rect().size.x * 0.5, vp.get_visible_rect().size.y - 6.0))
 	for h in m.hunters:
 		if h == P: continue
-		if mode == "plates" or m.time < 4.0:
+		if mode in ["plates", "numbers"] or m.time < 4.0:
 			h.ctrl = "idle"
 			for k in h.inp: if h.inp[k] is bool: h.inp[k] = false
 			h.inp["move"] = Vector2.ZERO
@@ -59,6 +63,8 @@ static func tick(m) -> void:
 	if mode == "busy" and m.time >= BUSY_AT and not m.has_meta("hudref_busy"):
 		m.set_meta("hudref_busy", true)
 		_busy(m, P)
+	if mode == "numbers":
+		_volleys(m, P)
 	if mode == "plates":
 		var hit: Hunter = m.get_meta("hudref_hit", null)
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
@@ -107,6 +113,36 @@ static func _plates(m, P: Hunter) -> void:
 	(foes[3] as Hunter).armor = 0.0
 	m.set_meta("hudref_stun", foes[3])
 	m.knock(foes[4], P, {})                                              # downed
+
+static func _numbers_setup(m, P: Hunter) -> void:
+	var foes: Array = m.hunters.filter(func(x): return x != P)
+	for i in mini(4, foes.size()):
+		var h: Hunter = foes[i]
+		_stand(m, h, P.pos + Vector3((float(i) - 1.5) * 2.2, 0, 4.4))
+		h.max_hp = 4000.0
+		h.hp = 4000.0
+		h.armor = h.max_armor if i == 2 else 0.0
+	m.set_meta("hudref_foes", foes.slice(0, 4))
+
+## The volleys, one per rival: a rifle string (9 every 0.08s), buckshot (6 pellets of 11 twice), a flame
+## stream (5 every 0.1s on armour) and a burn. Fired on the step the clock crosses each tick.
+static func _volleys(m, P: Hunter) -> void:
+	var foes: Array = m.get_meta("hudref_foes", [])
+	if foes.size() < 4 or m.time < NUMBERS_AT:
+		return
+	var t: float = m.time - NUMBERS_AT
+	var prev: float = m.get_meta("hudref_nt", -1.0)
+	m.set_meta("hudref_nt", t)
+	if prev < 0.0:
+		(foes[3] as Hunter).burn_t = 3.0
+		(foes[3] as Hunter).burn_dps = 24.0
+	if t < 1.4 and int(t / 0.08) != int(prev / 0.08):
+		(foes[0] as Hunter).hurt(9.0, P)
+	if t < 1.4 and int(t / 0.1) != int(prev / 0.1):
+		(foes[2] as Hunter).hurt(5.0, P)
+	if int(t / 0.7) != int(prev / 0.7) and t < 1.5:
+		for i in 6:
+			(foes[1] as Hunter).hurt(11.0, P)
 
 static func _fight(m, P: Hunter) -> void:
 	var base: Vector3 = P.pos
