@@ -69821,5 +69821,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_pickadactyl_r5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pickadactyl_r5",
+    "name": "Pickadactyl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pickadactyl_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parrywhal_r5",
+    "name": "Parrywhal (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_parrywhal_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parrywhal_r5",
+    "name": "Parrywhal (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_parrywhal_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pickadactyl_r5",
+    "name": "Pickadactyl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pickadactyl_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parrywhal_r5",
+    "name": "Parrywhal (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_parrywhal_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_checkmare_r5",
+    "name": "Checkmare (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_checkmare_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tiltster_r5",
+    "name": "Tiltster (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tiltster_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pagoguana_r5",
+    "name": "Pagoguana (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pagoguana_r5_2.jpg",
+    "ok": true
   }
 ]
