@@ -1,6 +1,6 @@
 # Pip (tender; was Moosh Moosh / Burple): import note, ART-1 rebuild (2026-11-05, items 76b + 108)
 
-`pip.glb`: head and body are Meshy scans fitted to the rig in Blender; arms, hands, eye domes and wings are scripted; the sun and raincloud companions are built by tools/art1/pip_companions.py. 14,811 triangles with the companions (S1's budget: 15k, weapon included).
+`pip.glb`: head and body are Meshy scans fitted to the rig in Blender; arms, hands, eye domes and wings are scripted; the sun and raincloud companions are built by tools/art1/pip_companions.py. 25,013 triangles with the companions (owner 11-09 revamp: ~25k).
 Materials: skin-fur, cloth-body, leather-body (the body's own 2048 colour, normal, emission), skin-face (the head's own 2048 colour, normal, emission), skin-hand, card-wing, cloth-sun, skin-cloud, ice-drop (flat colours), eyes-mood_sun / eyes-mood_cloud (the 2048x1024 face atlas, 4x2 cells).
 
     # credits: 36 (image edits) + 40 (body) + 40 (head); requests and outputs in ~/meshy/pip_f
@@ -21,3 +21,5 @@ Materials: skin-fur, cloth-body, leather-body (the body's own 2048 colour, norma
 - **Constellations:** gold marks in the emission layers (the head's masked from its paint, the body's drawn by pip_paint.py). `emit` in warden_look is the resting glow; PipStars.pulse lifts it on every heal tick from TenderKit.
 - **Imports:** pip.glb.import `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures VRAM compressed high quality, mipmapped, at most 2048. Normal maps through hero_toon `use_nrm` (from ext/art1-hem).
 - `pip_fit.json`, `pip_bake.json`, `pip_recipe.json` belong to the old pipeline and no longer build this model.
+
+Revamp (owner 11-09, ext/hunter-revamp-pz): ~25k triangles, face, hands and weapon kept denser, the 2048 normal baked from the dense Meshy raw (`warden_kit.bake_normal`, docs/art/wardens/PIPELINE.md "The ~25k revamp") and shipped as PNG beside the JPEG atlas. A fresh Meshy re-roll was compared and not used. Old vs new: docs/art/wardens/revamp/pip/. Build: `pip_head_scan.py -- HEAD_RAW WORK 10000`, `pip_source.py -- BODY_RAW WORK 12400` (the scans' own normals: face_normal.png, body_normal.png), `pip_art1.py`, the clips, then `pip_companions.py -- WORK/pip_nocomp.glb OUT /tmp/faces.png`.

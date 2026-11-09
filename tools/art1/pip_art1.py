@@ -1,7 +1,7 @@
 """Pip (ART-1 + item 76b): the sculpt to a game mesh on the contract armature with a painted atlas, saved as a .blend for
 tools/art1/pip_clips.py, which keys the clips and exports the .glb:
   blender -b --factory-startup --python tools/art1/pip_art1.py -- WORKDIR [--shape]
-Shapes pip_sculpt.py, paint pip_paint.py. Budget 15k triangles, the lantern included (S1's item 94 number). The lantern is skinned in the
+Shapes pip_sculpt.py, paint pip_paint.py. Budget ~25k triangles with the companions (owner 11-09: the scans at 12.4k body, 10k head). The lantern is skinned in the
 .glb on a hanging spring chain under hand.R; FX points are empties."""
 import math
 import os
@@ -590,14 +590,14 @@ body_i = bpy.data.images.load(os.path.join(WORK, "body_lit.jpg"))
 body_i.name = "body"
 body_e = bpy.data.images.load(os.path.join(WORK, "body_emit.jpg"))
 body_e.name = "body_emit"
-nimg = bpy.data.images.load(os.path.join(WORK, "body_normal.jpg"))
+nimg = bpy.data.images.load(os.path.join(WORK, "body_normal.png"))
 nimg.name = "body_normal"
 nimg.colorspace_settings.name = "Non-Color"
 face_i = bpy.data.images.load(os.path.join(WORK, "face.jpg"))
 face_i.name = "face"
 face_e = bpy.data.images.load(os.path.join(WORK, "face_emit.jpg"))
 face_e.name = "face_emit"
-face_n = bpy.data.images.load(os.path.join(WORK, "face_normal.jpg"))
+face_n = bpy.data.images.load(os.path.join(WORK, "face_normal.png"))
 face_n.name = "face_normal"
 face_n.colorspace_settings.name = "Non-Color"
 for nm, mt in zip(ORDER, me.materials):

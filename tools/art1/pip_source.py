@@ -1,7 +1,7 @@
 """Pip's body from the Meshy scan of the turnaround (wings out; 40 credits): fitted on the rig, arms and head cut (the arms and hands are scripted, pip_sculpt;
 the head is its own scan), the tail swung up and back for the top-down read, decimated, baked to its own 2048 colour and normal.
 Run: blender -b --factory-startup --python tools/art1/pip_source.py -- <scan.glb> <WORK> [tris]
-Out: WORK/body_scan.pkl (verts, faces, per-corner uv, weights, per-face class), body.jpg, body_normal.jpg. Space as pip_sculpt: +Y front, her right +X."""
+Out: WORK/body_scan.pkl (verts, faces, per-corner uv, weights, per-face class), body.jpg, body_normal.png. Space as pip_sculpt: +Y front, her right +X."""
 import math
 import os
 import pickle
@@ -14,18 +14,22 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
+sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import imgio
+import warden_kit as WK
+from paintkit import clean_normal
 import pip_sculpt as K
 from meshkit import catmull, smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, WORK = a[0], a[1]
-TRIS = int(a[2]) if len(a) > 2 else 6200
+TRIS = int(a[2]) if len(a) > 2 else 12400
 SIZE = 2048
 SOLE = -0.95                 # the scan's sole
 KS = 1.63 / 1.9              # scan metres -> rig metres (ear tip to sole)
 TAIL_LIFT = math.radians(48)  # the tail swung back and up about its root
 F = np.float32
+NRM_CAGE, NRM_RAY = 0.005, 0.012      # m: the normal bake's cage extrusion and ray reach (the detail pilot's)
 # scan joints, read off grid_front and grid_right (x her right, y forward, z up, raw metres)
 S_J = {"pelvis": (0, 0.17, -0.46), "neck": (0, 0.22, 0.30), "hip.R": (0.10, 0.16, -0.46), "knee.R": (0.17, 0.08, -0.66), "ankle.R": (0.205, 0.10, -0.86),
        "hip.L": (-0.10, 0.16, -0.46), "knee.L": (-0.17, 0.08, -0.66), "ankle.L": (-0.205, 0.10, -0.86)}
@@ -255,10 +259,11 @@ def bake(name, kind, **kw):
 
 
 col = bake("c", "DIFFUSE", pass_filter={"COLOR"})
-nor = bake("n", "NORMAL", normal_space="TANGENT")
+nor = WK.bake_normal(low, [hi], SIZE, NRM_CAGE, NRM_RAY)
+print("normal baked, wrong hits flattened %.4f" % clean_normal(nor))
 srgb = np.clip(np.where(col <= 0.0031308, col * 12.92, 1.055 * np.maximum(col, 1e-5) ** (1 / 2.4) - 0.055), 0, 1)
 imgio.save(srgb[::-1], os.path.join(WORK, "body.jpg"))
-imgio.save(np.clip(nor, 0, 1)[::-1], os.path.join(WORK, "body_normal.jpg"))
+imgio.save(np.clip(nor, 0, 1)[::-1], os.path.join(WORK, "body_normal.png"))
 lm = low.data
 nv = len(lm.vertices)
 v = np.zeros(nv * 3)
