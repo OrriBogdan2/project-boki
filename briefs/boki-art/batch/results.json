@@ -68197,5 +68197,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_pavonazar_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pavonazar_r4",
+    "name": "Pavonazar (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pavonazar_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bullpole_r4",
+    "name": "Bullpole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bullpole_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pinster_r4",
+    "name": "Pinster (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pinster_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pagodito_r4",
+    "name": "Pagodito (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pagodito_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pagodito_r4",
+    "name": "Pagodito (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pagodito_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pagodito_r4",
+    "name": "Pagodito (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pagodito_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pinster_r4",
+    "name": "Pinster (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pinster_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scoopsy_r4",
+    "name": "Scoopsy (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_scoopsy_r4_1.jpg",
+    "ok": true
   }
 ]
