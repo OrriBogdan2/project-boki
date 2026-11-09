@@ -86,7 +86,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge. **After (ext/vfx-dredge): 26**, see below |
 | 7 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
 | 9 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | after ext/vfx-tender (was 17: 2/2/2/3/3/1/4): all leaf, ember at its hit radius, lit soft zones, petals, heal afterglow, a Hearth Call swirl per tick. Left: fades are mostly linear; the shape is a stack of discs and swirls, not one form |
-| 6 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
+| 9 | Sable | thief | 4 | 4 | 3 | 4 | 3 | 4 | 3 | 25 | after (`vfxq-after-thief-2`): bolt hits are a violet crescent slash with an afterglow, Cartwheel arcs wide with an afterglow, blink out/in bursts, no gold flashes, X ring a lit rim. Left: X blade hits still small against the 5.4 m ring; the ring wash still tints sand; the dash streaks are DJFx |
 | 7 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
 | 8 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
 | 8 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |

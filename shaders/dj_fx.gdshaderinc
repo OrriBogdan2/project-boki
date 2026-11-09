@@ -59,14 +59,6 @@ vec4 dj_look(vec2 uv0) {
 		float flame = 0.6 + 0.4 * vnoise(vec2(uv0.x * 5.0 - progress * 6.0, uv0.y * 7.0 + seed));
 		c = (color.rgb * edge * 1.5 + color2.rgb * inner * flame * 1.1) * trail + mix(color.rgb, vec3(1.0), 0.45) * lead * edge * 0.8;
 		c *= 1.0 - smoothstep(0.7, 1.0, life);
-	} else if (mode == 4) {
-		vec2 uv = uv0 * 2.0 - 1.0;
-		float d = length(uv);
-		float r = 0.25 + 0.65 * life;
-		float ring = 1.0 - smoothstep(0.0, 0.18, abs(d - r));
-		float fill = (1.0 - smoothstep(0.0, r, d)) * 0.35;
-		float speck = step(0.82, vnoise(uv * 9.0 + seed)) * (1.0 - smoothstep(0.0, r + 0.1, d));
-		c = (color.rgb * (ring + fill) + color2.rgb * speck) * k;
 	} else if (mode == 5) {
 		float across = 1.0 - abs(uv0.y * 2.0 - 1.0);
 		float link = fract(uv0.x * stripes);

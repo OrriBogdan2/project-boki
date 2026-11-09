@@ -96,8 +96,8 @@ func thief(a) -> void:
 	var ed := Vector2(K.last_bolt_end.x - P.pos.x, K.last_bolt_end.z - P.pos.z).length()
 	A.ok("dancer small mechanics: the empowered bolt flies 12% further (13.4m); firing it ends the speed",
 			K.last_bolt_emp and absf(ed - 13.44) < 0.9 and haste_after <= 0.0, "%.1f m haste %.2f" % [ed, haste_after])
-	A.ok("dancer LMB: each bolt has its own pooled look",
-			DJFx.of(m).free_pools.has("ride_chakram") and DJFx.of(m).free_pools.has("puff"))
+	A.ok("dancer LMB: each bolt has its own pooled look; its end plays her HeroVfx recipe",
+			DJFx.of(m).free_pools.has("ride_chakram") and int(HeroVfx.of(m).plays.get("bolt_fizzle", 0)) > 0)
 	# Marks: +10% per Mark on bolts only, no cap
 	A.fresh(T)
 	K.mark_gap = {}
@@ -129,6 +129,7 @@ func thief(a) -> void:
 	A.aim_at(P, T.pos)
 	var d0 := P.dashes
 	var rings0 := _dancer_rings(m)
+	var swooshes0 := int(HeroVfx.of(m).plays.get("swoosh", 0))
 	P.inp["move"] = Vector2(0, 1)
 	P.do_dash()
 	var wheel := K.anim_id
@@ -140,6 +141,8 @@ func thief(a) -> void:
 			and K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) < 0.15,
 			"rings %d -> %d pop %.2f glint %s" % [rings0, _dancer_rings(m), pop[0],
 					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
+	A.ok("dancer dash: the cartwheel traces its violet arc twice (HeroVfx swoosh)",
+			int(HeroVfx.of(m).plays.get("swoosh", 0)) == swooshes0 + 2)
 	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
 	A.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
 			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
@@ -213,7 +216,7 @@ func thief(a) -> void:
 			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
 		"pairs %d grounded %s/%s stun %.2f/%.2f dmg %.0f" % [K.bola_pairs, KitStatus.grounded(T),
 				KitStatus.grounded(T2), T.stun_t, T2.stun_t, A.dmg(T)])
-	A.ok("dancer RMB: yellow binding rings on the Grounded (everyone sees them)",
+	A.ok("dancer RMB: violet binding rings on the Grounded (everyone sees them)",
 			AimKit.shown(P, "gnd%d" % T.get_instance_id())
 			and bool(AimKit.entry(P, "gnd%d" % T.get_instance_id()).get("all", false)))
 	T.stun_t = 0.0
@@ -264,9 +267,10 @@ func thief(a) -> void:
 		"%s vs %s" % [str(K.knife.get("pos", Vector3.ZERO)), str(kspot)])
 	P.ak.use_e()
 	m.step(A.DT)
-	A.ok("dancer E recast: a blink to it with an afterimage chain",
+	A.ok("dancer E recast: a blink to it with an afterimage chain and its out/in bursts",
 			K.blinks == 1 and Vector2(P.pos.x - kspot.x, P.pos.z - kspot.z).length() < 1.2
-			and (DJFx.of(m).free_pools.get("ghost", []) as Array).size() >= 5,
+			and (DJFx.of(m).free_pools.get("ghost", []) as Array).size() >= 5
+			and int(HeroVfx.of(m).plays.get("blink", 0)) >= 1,
 			"blinks %d" % K.blinks)
 	# ... into a foe: it sticks (slows), recast steps behind them; left alone it steps you there after 6s
 	A.fresh(T)
