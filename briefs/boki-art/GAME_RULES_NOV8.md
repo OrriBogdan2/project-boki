@@ -55,3 +55,6 @@ Only the final form of each line goes to 3D for now; the third-stage forms stay 
 - Each form keeps its own name, art, portrait and 3D model. The entry shows both forms (side by side or a toggle).
 - The entry counts as caught when either form is owned; owning both forms earns a small "both forms" star.
 - Bokidex entries drop by 4 (~120); the species and art count is unchanged.
+
+## Owner decision 2026-11-09: soul-linked Boki wisps
+In matches your Boki rides as a small critter-shaped wisp: carry passive always on, a summon button on a long cooldown, and the ult gives a longer summon or merge form. Downed Hunters drop their wisps, which can be stolen for the match only; the thief keeps a soul echo (Field Book unlock, better odds, a small mutation chance). Round wisp = Hunter, critter wisp = Boki. Full rules: DECISIONS.md, 2026-11-09.
