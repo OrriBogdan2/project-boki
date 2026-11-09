@@ -36,6 +36,28 @@ Extraction load in mind (10 trios, 30 Hunters, their Boki, monsters and VFX).
 Numbers live in `content/rules/tuning.json` ("perf"), the one shared tuning file. Visual trades are behind the
 quality preset (`Settings.QUALITY` `anim_lod`): Ultra keeps everything at full rate.
 
+## Particle budget
+VFX particles stay **under 4,000 on screen** at every preset (owner 11-08). `ParticleCount` (scripts/perf/) counts
+them: a GPU emitter is `amount x amount_ratio`, a CPU one `amount`. `--perf-bench` prints the busiest sample as
+`BENCH particles drawn at the peak`, by owner. `--particle-budget-check` (headless, ~1 min) lists what every Hero
+move (content/vfx) and every shared `Fx.burst`/`Fx.spark` call asks for, builds a 30-Hunter match at each preset
+and adds the worst a fight piles on: the full Fx burst and spark pools and the Hero VFX cap (`HeroVfx.MAX_LIVE`,
+420). Each preset must be under 4,000, each one down must draw less, and High and Ultra must draw the same.
+- **Biggest emitters (High):** island ash and pickup motes (`Main`, 886), the ash storm (`RaidFx`, 366), the full Fx
+  pools (840 + 720), the Hero VFX cap (420). The biggest Hero moves ask for 120 (`ashwick/jets`), 116
+  (`ashwick/lance`), 64 (`ashwick/ram_trail`, `juggernaut/drop_hit`).
+- **Scaling:** `Settings.QUALITY` has `fx` (amount x) and `fx_life` (lifetime x: 0.5 very low, 0.7 low, 1.0 from
+  medium up). Fx bursts and sparks, the Hero VFX layers and the ambient emitters (`ParticleCount.tune`: island ash,
+  pickup motes, the ash storm, landmark and exit motes, Hunter weapon smoke, auras) all follow them. High and Ultra
+  are untouched. The ash storm no longer has its own `Settings.lite()` cut; it follows `fx`.
+
+| Worst moment, 30 Hunters (particles) | Very Low | Low | Medium | High | Ultra |
+|---|---|---|---|---|---|
+| before (this branch without `tune`) | 1812 | 2173 | 2750 | 3454 | 3454 |
+| after | 1315 | 1808 | 2539 | 3454 | 3454 |
+
+The "before" Very Low and Low rows are 214 too high for the old build, whose ash storm was cut to 152 by `lite()`.
+
 ## Hot-path rules
 - Test the cheap things first (range, then score), the costly ones (line of sight, a walk test, `can_see`) last
   and only for a candidate that would win.
