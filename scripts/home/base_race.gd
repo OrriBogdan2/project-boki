@@ -442,6 +442,7 @@ func entrants() -> Array:
 	return out.slice(0, 4)
 
 func use() -> void:
+	release()
 	var ks := entrants()
 	if not ks.is_empty() and _offer():
 		_practice(ks[0])
@@ -465,6 +466,7 @@ func _practice(k: Dictionary) -> void:
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
+	release()
 	var k: Dictionary = h._kin_entry(rec)
 	var T: Dictionary = rules()["train"]
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
