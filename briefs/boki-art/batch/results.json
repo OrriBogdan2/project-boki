@@ -69261,5 +69261,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/parrywhal_card108_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pickadactyl_card108",
+    "name": "Pickadactyl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pickadactyl_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pickadactyl_card108",
+    "name": "Pickadactyl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pickadactyl_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pickadactyl_card108",
+    "name": "Pickadactyl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pickadactyl_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "parrywhal_card108",
+    "name": "Parrywhal (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/parrywhal_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tiltster_card108",
+    "name": "Tiltster (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tiltster_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tiltster_card108",
+    "name": "Tiltster (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tiltster_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "parrywhal_card108",
+    "name": "Parrywhal (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/parrywhal_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pagoguana_card108",
+    "name": "Pagoguana (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pagoguana_card108_1.jpg",
+    "ok": true
   }
 ]
