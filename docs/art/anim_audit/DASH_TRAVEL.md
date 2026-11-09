@@ -34,7 +34,12 @@ run's per-drawn-frame numbers read 50-550 on the spin and the folded steps. Lean
 the eye (Vex 28 deg, slip 64%: a slide; Sable 40 deg, slip 29%: a cartwheel; Sparkle 84 deg, slip 96%: a streak).
 
 Strips: `--dash-shots=<dir>` on a GPU run (every 4th drawn frame, half size), `tools/dash_travel_strip.py <before> <after> <out>`
-puts the two rows under each other per Hunter (`dash_travel_<arch>.jpg` here).
+puts the two rows under each other per Hunter (`dash_travel_<arch>.jpg` here, top row main's clip rules, bottom row
+these; GPU jobs 20261109-100839-04513 before, 20261109-100636-20778 after, RTX 4090). A shot's readback stalls its
+frame to 40-150 ms, so a shots run saves 4-5 frames a dash and prints its rows as information: the headless run
+judges. At match zoom the Hunter is small in a strip; the rows above and `--dash-out=<csv>` are the evidence. The GPU
+run on main's rules confirmed the headless numbers: Kael's Lunge rode 0.38 / 0.35 s, Cinder 0.30 s (jerk 70),
+Neve 0.53 s (jerk 101), Sparkle 0.38 s; on these rules none of those rows failed.
 
 Not done here (kit code, not clip data; see docs/DEBT.md): a variable-length dash (Kael's held Lunge, Vex's held slide)
 wants its drive pose held and a recovery played by the kit at the end; Kael's enrage roar swaps a dash's clip mid-travel.

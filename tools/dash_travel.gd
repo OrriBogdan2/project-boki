@@ -15,7 +15,7 @@ const RIDE_S := 0.28           # s: the dash pose may ride the run this long: on
 ## Per archetype, s more the pose may ride: a dash whose hit comes on arrival plays it out on the body.
 const AFTER := {"bulwark": 0.4}    # the 360 Smash spins on arrival and settles over ~0.4 s (bjorn.md 0371-0372)
 const EARLY_S := 0.05          # s: the run may show this long inside the travel (a frame or two of fade)
-const POP_RATE := 30.0         # rad/s over the frames beside it, summed on JOINTS: a jerk the eye catches
+const POP_RATE := 30.0         # rad/s over the sim frames beside it, summed on JOINTS: a jerk the eye catches
 const OWN := 0.5               # act_w from which the clip owns the body
 const MOVING := 1.0            # m/s: the body is going somewhere
 const FADE_IN := 0.12          # s from the press the loco may still show (WardenClips.FADE)
@@ -90,6 +90,10 @@ func sample(P: Hunter, m: Match, step: float) -> Dictionary:
 	e["dpose"] = turned
 	return e
 
+## rad/s the joints turned over a sim frame (a drawn frame may cover two or three steps).
+static func _rate(e: Dictionary) -> float:
+	return float(e["dpose"]) / maxf(float(e["dt"]), 1e-4)
+
 ## The window's drawn frames folded onto the sim's steps (Match.DT): headless with no --fixed-fps draws several
 ## frames per step, each showing the same pose, so a per-frame delta would read as zero then a whole step.
 static func sim_frames(fs: Array) -> Array:
@@ -143,8 +147,8 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 		var dt := float(e["dt"])
 		if float(e["act"]) >= OWN and float(e["step"]) / maxf(dt, 1e-4) >= MOVING:
 			ride += dt
-		var beside := maxf(float(fs[i - 1]["dpose"]), float(fs[i + 1]["dpose"]))
-		var jerk := (float(e["dpose"]) - beside) / maxf(dt, 1e-4)
+		var beside := maxf(_rate(fs[i - 1]), _rate(fs[i + 1]))
+		var jerk := _rate(e) - beside
 		if jerk > pop:
 			pop = jerk
 			pop_at = "%.2f s after, %s" % [t - t1, e["clip"]]

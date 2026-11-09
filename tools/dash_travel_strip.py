@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Before/after strips of each Hunter's ground dash from two --dash-shots folders (dash_frames.gd, a GPU run):
    python3 tools/dash_travel_strip.py <before_dir> <after_dir> <out_dir>
-Per Hunter one JPG: the top row the first folder's frames, the bottom row the second's, N frames from the press at
-the shots' own cadence (SHOT_EVERY drawn frames each), the time under each. docs/art/anim_audit/DASH_TRAVEL.md."""
+Per Hunter one JPG: the top row the first folder's frames, the bottom row the second's, N shots from the press at
+the shots' own cadence (SHOT_EVERY drawn frames each), the drawn frame's number on each. docs/art/anim_audit/DASH_TRAVEL.md."""
 import os
 import re
 import sys
@@ -10,8 +10,7 @@ import sys
 from PIL import Image, ImageDraw
 
 FRAMES = 9          # tiles per row
-TILE_W = 300        # px, the shot scaled to this width
-SHOT_DT = 4 / 60.0  # s between saved shots (SHOT_EVERY at 60 fps)
+TILE_W = 220        # px, the shot scaled to this width
 
 
 def shots(folder):
@@ -32,7 +31,7 @@ def row(paths):
         crop = img.crop((w // 4, h // 6, w * 3 // 4, h * 5 // 6))     # the Hunter sits mid-screen
         crop = crop.resize((TILE_W, int(crop.height * TILE_W / crop.width)))
         draw = ImageDraw.Draw(crop)
-        draw.text((6, 4), "%.2f s" % (frame / 60.0), fill=(255, 255, 255))
+        draw.text((6, 4), "f%d" % frame, fill=(255, 255, 255))
         tiles.append(crop)
     if not tiles:
         return None

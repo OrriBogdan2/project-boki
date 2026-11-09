@@ -298,6 +298,10 @@ func _judge() -> void:
 				shown += 1
 			at = here
 		var name_i := "%s %s #%d" % [arch, seq[i][0], i + 1]
+		if shots_dir != "":
+			print("DASHFRAMES shot %s: %d frames saved (a shot stalls its frame: the headless run judges)"
+					% [name_i, fs.size()])
+			continue
 		if not arch in NO_TRAVEL:
 			_ok(name_i + ": at least %d intermediate positions with the dash pose" % MIN_STEPS, shown >= MIN_STEPS + 1,
 					"%d frames posed and moving of %d in the dash" % [shown, run.size()])
