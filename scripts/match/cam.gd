@@ -10,7 +10,8 @@ const LEAD_Z := 5.4
 ## The Supervive preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
 static var RULES: Dictionary = _load_rules()
-## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far above you).
+## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
+## above you).
 static var STYLES: Dictionary = RULES["styles"]
 
 var focus := Vector3.ZERO

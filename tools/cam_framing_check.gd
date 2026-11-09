@@ -46,15 +46,18 @@ func _style(cam: CamRig) -> void:
 	ok(is_equal_approx(rad_to_deg(cam.pitch), float(st["pitch"])) and is_equal_approx(cam.dist, float(st["dist"]))
 			and is_equal_approx(cam.fov, float(st["fov"])) and is_equal_approx(cam.rise, float(st["rise"])),
 			"the Supervive style is camera.json's: %s" % str(st))
-	ok(_inside(rad_to_deg(cam.pitch), src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [rad_to_deg(cam.pitch), str(src["pitch_deg"])])
+	var pitch := rad_to_deg(cam.pitch)
+	ok(_inside(pitch, src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [pitch, str(src["pitch_deg"])])
 	ok(_inside(cam.fov, src["fov_deg"]), "lens %.1f deg inside the source's %s" % [cam.fov, str(src["fov_deg"])])
 	cam.snap(Vector3.ZERO)
 	var feet := (cam.unproject_position(Vector3.ZERO).y - VIEW.y * 0.5) / VIEW.y * 100.0
-	ok(_inside(feet, src["feet_below_pct"]), "feet %.2f%% of the height below the centre, inside the source's %s" % [feet, str(src["feet_below_pct"])])
+	ok(_inside(feet, src["feet_below_pct"]), "feet %.2f%% of the height below the centre, inside the source's %s"
+			% [feet, str(src["feet_below_pct"])])
 
 func _lean(cam: CamRig) -> void:
 	var fm: Array = CamRig.FOLLOW["supervive"]
-	ok(cam.lean_to(Vector3(float(fm[0]) * 0.9, 0, 0)) == Vector3.ZERO, "no lean inside the %.1f m deadzone" % float(fm[0]))
+	var deadzone := float(fm[0])
+	ok(cam.lean_to(Vector3(deadzone * 0.9, 0, 0)) == Vector3.ZERO, "no lean inside the %.1f m deadzone" % deadzone)
 	for z in ZOOMS:
 		cam.zoom = z
 		var worst := 1e9
@@ -68,7 +71,8 @@ func _lean(cam: CamRig) -> void:
 				var s := cam.unproject_position(at)
 				worst = minf(worst, minf(minf(s.x, VIEW.x - s.x), minf(s.y, VIEW.y - s.y)))
 		ok(over_cap <= 0.001, "zoom %.2f: the lean stays within its %.1f m cap" % [z, float(fm[2]) * maxf(1.0, z)])
-		ok(worst >= 20.0, "zoom %.2f: at full lean every way you stay on screen (%.0f px to the nearest edge)" % [z, worst])
+		ok(worst >= 20.0, "zoom %.2f: at full lean every way you stay on screen (%.0f px to the nearest edge)"
+				% [z, worst])
 	cam.zoom = 1.0
 
 func _inside(v: float, band: Array) -> bool:
@@ -99,5 +103,6 @@ func _shots(main: Node) -> void:
 			await main.get_tree().process_frame
 		vp.get_texture().get_image().save_png(dir.path_join(String(sh[0]) + ".png"))
 		var s := m.cam.unproject_position(m.player.pos)
-		print("CAMFRAME shot %s: pan %.2f m, feet at %.0f,%.0f px of %s" % [sh[0], m.cam.pan.length(), s.x, s.y, str(vp.get_visible_rect().size)])
+		print("CAMFRAME shot %s: pan %.2f m, feet at %.0f,%.0f px of %s"
+				% [sh[0], m.cam.pan.length(), s.x, s.y, str(vp.get_visible_rect().size)])
 	main.get_tree().quit(0)
