@@ -1412,5 +1412,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lanceron_2.png",
     "ok": true
+  },
+  {
+    "id": "zipling",
+    "name": "Zipling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zipling_1.png",
+    "ok": true
+  },
+  {
+    "id": "zipling",
+    "name": "Zipling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zipling_2.png",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_1.png",
+    "ok": true
+  },
+  {
+    "id": "glassolotl",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_1.png",
+    "ok": true
+  },
+  {
+    "id": "glassolotl",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_2.png",
+    "ok": true
+  },
+  {
+    "id": "chandelotl",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_1.png",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_2.png",
+    "ok": true
+  },
+  {
+    "id": "chandelotl",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_2.png",
+    "ok": true
   }
 ]
