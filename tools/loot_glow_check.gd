@@ -56,6 +56,12 @@ func run(main: Node) -> void:
 	ok(LootGlow.tier(-3) == 0 and LootGlow.tier(99) == tiers - 1, "an out-of-range rarity clamps to a look")
 	var tune := GearModels.tuning(Color.WHITE, true)
 	ok(tune.get_node_or_null("Pillar") != null, "a tuning always has a pillar")
+	var holder := Node3D.new()
+	LootGlow.stand_in(holder)
+	var stand := holder.get_node("LootGlowStandIn")
+	var warm: bool = not (stand as Node3D).visible and stand.get_node_or_null("Pillar") != null
+	ok(warm, "a hidden stand-in warms the pillar shader")
+	holder.free()
 	var mixed := {"gear": [{"rar": 1}], "pack": [{"t": "gear", "rar": 3}, {"t": "val", "id": "old_coin"}]}
 	ok(Life.box_rarity(mixed) == 3, "a box shows its best item's rarity")
 	ok(Life.box_rarity({}) == 0, "an empty box is the lowest tier")

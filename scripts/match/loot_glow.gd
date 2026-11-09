@@ -1,22 +1,23 @@
 class_name LootGlow
 extends RefCounted
 ## What rarity looks like on loot lying in the world: every drop gets a soft halo in its rarity
-## colour (Data.RARITY), and Fine/Rare and up add a short light pillar that reads from across a
-## fight. Meshes and materials are built once per tier and shared by every drop, and nothing here
-## is a particle, so a pile-up costs two draws per item and none of the VFX particle budget. No flat
-## ring: rings on the ground belong to gameplay (aim lanes, owner rings, discs).
+## colour (Data.RARITY), and Rare and up add a short light pillar (shaders/loot_pillar.gdshader) that
+## reads from across a fight. Meshes and materials are built once per tier and shared by every drop,
+## and nothing here is a particle, so a pile-up costs two draws per item and none of the VFX particle
+## budget. No flat ring: rings on the ground belong to gameplay (aim lanes, owner rings, discs).
 
 ## Per rarity tier (the Data.RARITY order): halo radius (m) and alpha, pillar height (m) and alpha.
 ## No pillar (height 0) for the two lowest tiers; from Rare up the pillar grows with the tier.
 const LOOKS := [
-	{"halo_r": 0.7, "halo_a": 0.2, "pillar_h": 0.0, "pillar_a": 0.0},
-	{"halo_r": 0.75, "halo_a": 0.26, "pillar_h": 0.0, "pillar_a": 0.0},
-	{"halo_r": 0.85, "halo_a": 0.32, "pillar_h": 2.6, "pillar_a": 0.34},
-	{"halo_r": 0.95, "halo_a": 0.38, "pillar_h": 3.2, "pillar_a": 0.42},
-	{"halo_r": 1.05, "halo_a": 0.44, "pillar_h": 3.8, "pillar_a": 0.5},
+	{"halo_r": 0.7, "halo_a": 0.3, "pillar_h": 0.0, "pillar_a": 0.0},
+	{"halo_r": 0.75, "halo_a": 0.36, "pillar_h": 0.0, "pillar_a": 0.0},
+	{"halo_r": 0.85, "halo_a": 0.42, "pillar_h": 2.6, "pillar_a": 0.34},
+	{"halo_r": 0.95, "halo_a": 0.48, "pillar_h": 3.2, "pillar_a": 0.42},
+	{"halo_r": 1.05, "halo_a": 0.55, "pillar_h": 3.8, "pillar_a": 0.5},
 ]
 const HALO_Y := 0.7            # m above the ground: the height the token spins at
-const PILLAR_R := Vector2(0.1, 0.18)    # m: top and bottom radius of a pillar
+const PILLAR_SHADER := preload("res://shaders/loot_pillar.gdshader")
+const PILLAR_R := Vector2(0.12, 0.3)    # m: top and bottom radius of a pillar
 const SEGMENTS := 10
 
 static var _shared := {}       # tier -> {halo, halo_mat, pillar, pillar_mat}
@@ -46,6 +47,15 @@ static func attach(root: Node3D, rar: int) -> void:
 	pillar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(pillar)
 
+## A hidden Legendary drop under the match, so the warm-up compiles the halo and pillar shaders
+## before the first Rare drop lands mid-fight.
+static func stand_in(parent: Node3D) -> void:
+	var hidden := Node3D.new()
+	hidden.name = "LootGlowStandIn"
+	hidden.visible = false
+	attach(hidden, LOOKS.size() - 1)
+	parent.add_child(hidden)
+
 static func _res(r: int) -> Dictionary:
 	if _shared.has(r):
 		return _shared[r]
@@ -65,6 +75,10 @@ static func _res(r: int) -> Dictionary:
 		pillar.radial_segments = SEGMENTS
 		pillar.rings = 1
 		res["pillar"] = pillar
-		res["pillar_mat"] = Models.glow_mat(Color(col, float(look["pillar_a"])))
+		var mat := ShaderMaterial.new()
+		mat.shader = PILLAR_SHADER
+		mat.set_shader_parameter("color", Color(col, float(look["pillar_a"])))
+		mat.set_shader_parameter("height", float(look["pillar_h"]))
+		res["pillar_mat"] = mat
 	_shared[r] = res
 	return res

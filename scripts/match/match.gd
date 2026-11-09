@@ -1564,6 +1564,7 @@ func _spawn_breakables() -> void:
 		var wsp: Vector3 = world.weapon_spots[i]
 		var gg := GearDrops.roll_gear(wr, 1 if tier >= 2 else 0, 0, -1, biomes.slot_lean_at(wsp) if biomes else {})
 		spawn_gear(String(gg["id"]), int(gg["rar"]), wsp, "ws%d" % i, false)
+	LootGlow.stand_in(self)
 
 func _add_break(kind_s: String, at: Vector3) -> void:
 	var n := Models.breakable(kind_s)
