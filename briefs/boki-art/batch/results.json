@@ -36396,5 +36396,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_glaivyx_g1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaivyx_g6",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g6",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g6",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g6_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g7",
+    "name": "Glaivyx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g7_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g6",
+    "name": "Glaivyx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g7",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g7_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g7",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g7_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r1",
+    "name": "Ringrove (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r1_1.jpg",
+    "ok": true
   }
 ]
