@@ -34,7 +34,7 @@ Terrasloth, etc.) comes back.
 Working names above are placeholders until the owner confirms.
 
 ## 2. Owner-approved redesigns now live (sheet + card + portrait)
-Chandelotl (candy cobra), Glassolotl (rock candy v3), Prismander (rock candy), Barokat (round body + cloud halo),
+Chandelotl (d1_1 crystal candy salamander with sugar-glass sail; NOT the cobra; new sheet/card/portrait regenerating, keep the coordinator hero until then), Glassolotl (rock candy v3), Prismander (rock candy), Barokat (round body + cloud halo),
 Bucketmander + Barrelmander (battery gimmick, no storm cloud), Glaivyx, Ringrove, Terrasloth (pangolin), Glaciatee,
 Lunowl, Thunderstrich, Reapant (ninja ant), Gravitank, Mortarfly, Orbitle, Nettlynx, Sporcupine, Teapotamus,
 Umbrink (ivory ermine ink), Vespox (recoloured to the line's plum), Vespyx (flat-background turnaround), Anchorbill

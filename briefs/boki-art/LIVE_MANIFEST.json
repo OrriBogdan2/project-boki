@@ -144,7 +144,8 @@
   "card": "briefs/boki-art/cards/Chandelotl.jpg",
   "portrait": "briefs/boki-art/portraits/light/Chandelotl.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Chandelotl.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Chandelotl.png"
+  "hero": "briefs/boki-art/batch/out/c_chandelotl_d1_1.jpg",
+  "note": "owner pick = d1_1 salamander; cobra card/sheet are wrong and are being replaced (wave86)"
  },
  "Chuggamus": {
   "sheet": "briefs/boki-art/turnarounds/Chuggamus.jpg",
@@ -312,13 +313,6 @@
   "card": null,
   "portrait": "briefs/boki-art/portraits/light/Galleotter.jpg",
   "cutout": "briefs/boki-art/portraits/cutout/Galleotter.png"
- },
- "Geodelotl": {
-  "sheet": "briefs/boki-art/evolutions/Geodelotl.jpg",
-  "card": "briefs/boki-art/cards/Geodelotl.jpg",
-  "portrait": "briefs/boki-art/portraits/light/Geodelotl.jpg",
-  "cutout": "briefs/boki-art/portraits/cutout_v2/Geodelotl.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Geodelotl.png"
  },
  "Geodemole": {
   "sheet": "briefs/boki-art/evolutions/Geodemole.jpg",
@@ -610,7 +604,7 @@
  "Lyrewing": {
   "sheet": "briefs/boki-art/evolutions/Lyrewing.jpg",
   "card": "briefs/boki-art/cards/Lyrewing.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Lyrewing.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lyrewing.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Lyrewing.png"
  },
@@ -1172,5 +1166,60 @@
   "portrait": "briefs/boki-art/portraits/light/Zippelith.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Zippelith.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Zippelith.png"
+ },
+ "Gloamspire": {
+  "sheet": "briefs/boki-art/turnarounds/Gloamspire.jpg",
+  "card": "briefs/boki-art/cards/Gloamspire.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Gloamspire.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Gloamspire.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Gloamspire.png"
+ },
+ "Glomworth": {
+  "sheet": "briefs/boki-art/turnarounds/Glomworth.jpg",
+  "card": "briefs/boki-art/cards/Glomworth.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Glomworth.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Glomworth.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Glomworth.png"
+ },
+ "Knotling": {
+  "sheet": "briefs/boki-art/turnarounds/Knotling.jpg",
+  "card": "briefs/boki-art/cards/Knotling.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Knotling.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Knotling.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Knotling.png"
+ },
+ "Lanternlong": {
+  "sheet": "briefs/boki-art/turnarounds/Lanternlong.jpg",
+  "card": "briefs/boki-art/cards/Lanternlong.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Lanternlong.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png"
+ },
+ "Mossbastion": {
+  "sheet": "briefs/boki-art/turnarounds/Mossbastion.jpg",
+  "card": "briefs/boki-art/cards/Mossbastion.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Mossbastion.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png"
+ },
+ "Rimefang": {
+  "card": "briefs/boki-art/cards/Rimefang.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Rimefang.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Rimefang.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Rimefang.png"
+ },
+ "Rimekit": {
+  "sheet": "briefs/boki-art/turnarounds/Rimekit.jpg",
+  "card": "briefs/boki-art/cards/Rimekit.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Rimekit.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Rimekit.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Rimekit.png"
+ },
+ "Selenwhale": {
+  "sheet": "briefs/boki-art/turnarounds/Selenwhale.jpg",
+  "card": "briefs/boki-art/cards/Selenwhale.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Selenwhale.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png"
  }
 }

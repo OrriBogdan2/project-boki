@@ -1,7 +1,7 @@
-# Boki art live manifest (regenerated 04:18 ET 11-09)
-Card = main image, sheet = turnaround, portrait = Bokidex portrait (cutout PNG in portraits/cutout). JSON: LIVE_MANIFEST.json.
-Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-168 Boki, 133 with all three.
+# Boki art live manifest (regenerated 04:58 ET 11-09)
+Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). JSON: LIVE_MANIFEST.json.
+Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
+175 Boki, 140 with all three.
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -50,7 +50,6 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Frigatee | ✓ | ✓ | ✓ |
 | Furnacowary | ✓ | ✓ | – |
 | Galleotter | ✓ | – | ✓ |
-| Geodelotl | ✓ | ✓ | ✓ |
 | Geodemole | ✓ | ✓ | ✓ |
 | Geysirbara | ✓ | ✓ | ✓ |
 | Gilabacus | ✓ | ✓ | ✓ |
@@ -61,7 +60,9 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Glazolm | ✓ | ✓ | ✓ |
 | Glintmole | ✓ | ✓ | ✓ |
 | Gloamshell | ✓ | ✓ | ✓ |
+| Gloamspire | ✓ | ✓ | ✓ |
 | Glomwort | ✓ | ✓ | ✓ |
+| Glomworth | ✓ | ✓ | ✓ |
 | Gongibbon | ✓ | ✓ | ✓ |
 | Gongrowl | ✓ | ✓ | – |
 | Grainspin | ✓ | ✓ | ✓ |
@@ -81,9 +82,11 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Kindlewren | ✓ | ✓ | ✓ |
 | Kintsuwyrm | ✓ | ✓ | ✓ |
 | Kitlet | ✓ | ✓ | ✓ |
+| Knotling | ✓ | ✓ | ✓ |
 | Knotwyrm | ✓ | ✓ | ✓ |
 | Lanceron | ✓ | ✓ | ✓ |
 | Lanterloris | ✓ | ✓ | ✓ |
+| Lanternlong | ✓ | ✓ | ✓ |
 | Lanternmit | ✓ | ✓ | ✓ |
 | Latchling | ✓ | ✓ | ✓ |
 | Lensling | ✓ | ✓ | ✓ |
@@ -92,7 +95,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Lunink | ✓ | ✓ | ✓ |
 | Lunowl | ✓ | ✓ | ✓ |
 | Lurklet | ✓ | ✓ | – |
-| Lyrewing | ✓ | ✓ | – |
+| Lyrewing | ✓ | ✓ | ✓ |
 | Malletary | ✓ | ✓ | – |
 | Maracoil | ✓ | ✓ | ✓ |
 | Marchleaf | ✓ | ✓ | ✓ |
@@ -102,6 +105,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Morelkin | ✓ | ✓ | ✓ |
 | Morelossus | ✓ | ✓ | – |
 | Mortarfly | ✓ | ✓ | ✓ |
+| Mossbastion | ✓ | ✓ | ✓ |
 | Mossgrade | ✓ | ✓ | ✓ |
 | Mothlet | ✓ | ✓ | ✓ |
 | Murmurling | ✓ | ✓ | ✓ |
@@ -129,6 +133,8 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Reapant | ✓ | ✓ | ✓ |
 | Reelacine | ✓ | ✓ | – |
 | Ribbonwyrm | ✓ | ✓ | ✓ |
+| Rimefang | – | ✓ | ✓ |
+| Rimekit | ✓ | ✓ | ✓ |
 | Rimeshrew | ✓ | ✓ | ✓ |
 | Rimink | ✓ | ✓ | ✓ |
 | Ringrove | ✓ | ✓ | ✓ |
@@ -138,6 +144,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbi
 | Scopeleon | ✓ | ✓ | – |
 | Seamwyrm | ✓ | ✓ | ✓ |
 | Selenfin | ✓ | ✓ | ✓ |
+| Selenwhale | ✓ | ✓ | ✓ |
 | Skateron | ✓ | ✓ | ✓ |
 | Skidlet | ✓ | ✓ | ✓ |
 | Slog | ✓ | ✓ | – |

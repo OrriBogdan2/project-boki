@@ -13,7 +13,7 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 7 | Vespyx/Mycroll match other cards + turnarounds | New cards live; Mycroll turnaround live; Vespyx turnaround on flat background | Vespyx TA GENERATING |
 | 8 | Stance variety across every line | Square stance images -> turnarounds in that stance (17 lines this round) | GENERATING (stance TAs) |
 | 9 | No 3D in the Bokidex | Asked main twice (Dex is main's page) | WAITING ON MAIN |
-| 10 | Chandelotl: no chandelier, more epic than Glassolotl | Owner loves direction 1 (candy cobra); sheet+card+portrait | GENERATING |
+| 10 | Chandelotl: no chandelier, more epic than Glassolotl | Owner's "chandelotl 1" = d1_1 crystal candy salamander with rainbow sugar-glass sail (the cobra was a mis-map, corrected 04:35 ET); sheet+card+portrait regenerating (wave86) | GENERATING |
 | 11 | Reapant = bug ninja, not a bigger Scythant | Unlocked; 5 ninja-ant directions | GENERATING |
 | 12 | Nettlynx line all the same, "AI cat" face | 6 directions (2 per stage), stylised face | GENERATING |
 | 13 | Boltstrich -> Thunderstrich no difference | Unlocked; 3 new final directions | GENERATING |
@@ -35,3 +35,10 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 30 | Picks page review 04:00 | Kept: Bucketmander battery, Terrasloth pangolin, Glaciatee, Lunowl, Thunderstrich, Mortarfly, Gravitank, Barokat cloud halo; swapped Lanceron + Pyrraven to option 2; redos: Glaivyx (longer, taller, more fox), Ringrove (younger face), Eclipsowl (dark epic Lunowl), Reapant (taller, new colours), Effigoon (faceless cocoon), Mortarfly (more epic), Chandelapi (a real final) | GENERATING |
 | 31 | Glassolotl: different face and pose from Prismander (same face and angle now) | 3 face+pose directions on the approved v3 design | GENERATING |
 | 21 | 66 Bokidex items marked "redo" | Each has a newer attempt or is in this list; re-check every tick | ONGOING |
+
+## 04:58 ET 11-09 tick
+- LIVE: Canvastross, Glintmole, Gloamspire, Glomworth, Gongibbon, Knotling, Lanternlong, Lyrewing, Mossbastion, Parasolth, Ribbonwyrm, Rimekit, Rimeshrew, Rimefang, Selenwhale, Tidalisk, Umbrathere (picks -> sheet+card+portrait); Pyrraven demonic t3 live; Lanceron k2 card+portrait live.
+- Bokidex heroes rebuilt from current cards (cutout_v2), sent to coordinator to publish (owner: "minks are the old ones").
+- Auto-picked (>=8.0) and queued sheet+card+portrait (wave86): Anchorhorn z1, Bastionpet z1, Briarlynx f3, Chandelapi f3, Cisternmander z1, Crofthollow z1, Eclipsowl d2, Effigoon f2, Glaivyx h3, Mortarfly x1, Ringrove y1, Thistlynx e2. Owner can swap.
+- Below bar, owner to look (no auto-queue): Galleotter g1/g2 7.8, Scythant n3 7.8, Glassolotl f2 7.7, Gongrowl z1 7.7, Reapant t3 7.6.
+- Retries queued: Canvastross/Rimefang/Lanceron sheets, Pipeworth card+portrait.

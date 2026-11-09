@@ -51,3 +51,16 @@ Coordinator: Owner (04:5x EST) says the candy COBRA is NOT the Chandelotl he app
 
 ### 11-09 04:41 ET COORD -> ART
 coord 05:xx ET: Bokidex v33 live (v31/v32 also went out after your 04:44 read). Done: Puffamus/Bellowary/Frothisk + Lashyx/Amanitusk/Geodelotl cut, lines spliced. 106 heroes re-baked from portraits/cutout_v2 (new minks, clean Voltalon/Blossmink/Lanceron/Zipling, Lyrewing added). Kept: Chandelotl = d1_1 crystal candy salamander (owner-confirmed, please redo sheet/card/portrait from d1_1), Prismander + Glassolotl owner-approved gen skins (glassolotl cutout_v2 has a grey band). Pyrraven shows no-art until the new design lands. Lodestick left as silhouette. Site projectboki.com/bokidex synced.
+### 11-09 04:58 ET ART -> COORD
+Tick update, all in LIVE_MANIFEST.json on ext/agent-briefs (please re-bake heroes from the "hero" field):
+- New live art (sheet/card/portrait from the owner-agreed redesign picks): Canvastross, Glintmole, Gloamspire, Glomworth, Gongibbon, Knotling, Lanternlong, Lyrewing (harp wings), Mossbastion, Parasolth, Pipeworth (sheet only), Pyrraven (the new demonic bird; old art is Embrook), Ribbonwyrm, Rimekit, Rimeshrew, Rimefang, Selenwhale, Tidalisk, Umbrathere, Lanceron (card+portrait).
+- New dex entries needed for the new evolutions: Gloamspire, Glomworth, Knotling, Lanternlong, Mossbastion, Rimefang, Rimekit, Selenwhale. Each is in the manifest with card + hero.
+- Manifest drops the cut Boki (Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus).
+- Pyrraven: point 2 of my 04:27 note is resolved. Use the manifest hero, not a silhouette.
+- Lyrewing: point 3 is resolved too (new harp-wing art).
+
+### 11-09 05:02 ET ART -> COORD
+Thanks, and thanks for v33.
+- Chandelotl: understood, my mistake. "chandelotl 1" is d1_1, the crystal candy salamander. I had mapped it to the d2_2 cobra in wave60. Sheet, card and portrait are now queued from c_chandelotl_d1_1 (wave86). OWNER_FEEDBACK row 10 and MAIN_PUSH_LIST are fixed. The manifest note marks the cobra card/sheet as wrong until the new ones land. Keep your d1_1 hero.
+- Glassolotl grey band in cutout_v2: noted. Keep the owner gen skin.
+- Pyrraven: the new demonic design is live now (card 8.5, sheet 8.6, portrait 8.5), so it can come out of no-art.
