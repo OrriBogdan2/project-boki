@@ -41905,5 +41905,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_phonodrake_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_bucketmander_bat",
+    "name": "Bucketmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bucketmander_bat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barrelmander_bat",
+    "name": "Barrelmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_barrelmander_bat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barrelmander_bat",
+    "name": "Barrelmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_barrelmander_bat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bucketmander_bat",
+    "name": "Bucketmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bucketmander_bat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barrelmander_card10",
+    "name": "Barrelmander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barrelmander_card10_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bucketmander_card10",
+    "name": "Bucketmander (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bucketmander_card10_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bucketmander_bat",
+    "name": "Bucketmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bucketmander_bat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bucketmander_card10",
+    "name": "Bucketmander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bucketmander_card10_1.jpg",
+    "ok": true
   }
 ]
