@@ -35668,5 +35668,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_sporcupine_pick_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_pick",
+    "name": "Nettlynx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_pick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_pick",
+    "name": "Teapotamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_pick",
+    "name": "Nettlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_pick",
+    "name": "Sporcupine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_pick",
+    "name": "Teapotamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_pick",
+    "name": "Teapotamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_pick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_pick",
+    "name": "Sporcupine (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_pick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrink_pick",
+    "name": "Umbrink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_umbrink_pick_1.jpg",
+    "ok": true
   }
 ]
