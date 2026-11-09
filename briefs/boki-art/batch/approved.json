@@ -747,6 +747,26 @@
    "id": "rippmink_card2",
    "pick": 1,
    "grade": 8.53
+  },
+  {
+   "id": "stance_dribbara_w31",
+   "pick": 4,
+   "grade": 8.33
+  },
+  {
+   "id": "stance_ermink_w31",
+   "pick": 1,
+   "grade": 8.57
+  },
+  {
+   "id": "stance_geysirbara_w31",
+   "pick": 4,
+   "grade": 8.3
+  },
+  {
+   "id": "stance_teapotamus_w31",
+   "pick": 2,
+   "grade": 8.43
   }
  ],
  "rerolled": [

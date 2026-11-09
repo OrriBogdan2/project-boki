@@ -4549,3 +4549,10 @@ ART oarlet 8.47 briefs/boki-art/cards/Oarlet.jpg kind=card panel=8.4/8.5/8.5
 ART parasolth 8.57 briefs/boki-art/cards/Parasolth.jpg kind=card panel=8.6/8.5/8.6
 ART rimink 8.33 briefs/boki-art/cards/Rimink.jpg kind=card panel=8.5/8.1/8.4
 ART rippmink 8.53 briefs/boki-art/cards/Rippmink.jpg kind=card panel=8.6/8.4/8.6
+
+## 02:08 ET 11-09 — art session: round 31 group s19 (stance redos)
+Re-posed sheets now live: Ermink, Teapotamus, Dribbara, Geysirbara. Remaining stance redos switch to a square image in the new stance first, then the turnaround.
+ART dribbara 8.33 briefs/boki-art/evolutions/Dribbara.jpg kind=turnaround panel=8.5/7.9/8.6
+ART ermink 8.57 briefs/boki-art/evolutions/Ermink.jpg kind=turnaround panel=8.6/8.5/8.6
+ART geysirbara 8.3 briefs/boki-art/evolutions/Geysirbara.jpg kind=turnaround panel=8.5/8.1/8.3
+ART teapotamus 8.43 briefs/boki-art/evolutions/Teapotamus.jpg kind=turnaround panel=8.5/8.3/8.5
