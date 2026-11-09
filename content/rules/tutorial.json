@@ -7,7 +7,7 @@
   ],
   [
    "dash",
-   "Dash across, then jump and press %J again in the air to glide"
+   "Dash, then hold %G to glide"
   ],
   [
    "shoot",
@@ -19,7 +19,7 @@
   ],
   [
    "throw",
-   "Tap %T to send %s at the monster"
+   "Tap %T: send %s at it"
   ],
   [
    "fight",
