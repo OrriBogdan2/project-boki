@@ -17,7 +17,7 @@ const DOWN := 0.02             # m: the flat twin's lower ankle within this of i
 const CELL := 6                # tiles per pose: flat, flat, a two-tile flight (rising +x), the upper tier
 const POSES := [["slope stand", 2.5, 0.0], ["slope walk", 2.1, WALK], ["step stand", 1.97, 0.0],
 	["step walk", 0.9, WALK]]     # [name, x in its cell where it starts (tiles), speed]
-const SHOT_DIST := 6.0         # m: the side-on camera from the figure
+const SHOT_DIST := 3.6         # m: the side-on camera from the figure
 const PROCEDURAL := "gunslinger"   # also run on the procedural body (Settings: Warden models off)
 
 var bad := 0
@@ -104,6 +104,8 @@ func _hero(id: String, out: String) -> void:
 				var reach := g - body.y > -FootPlant.REACH_DOWN and g - body.y < FootPlant.REACH_UP
 				row.append(absf(ank.y - g - clip) if reach else 0.0)
 			seen.append(row)
+			if out != "" and f == SAMPLES / 2:      # mid-walk: up the flight, or onto it from the flat
+				rows.append([await _grab(trio, 1), await _grab(trio, 2)])
 			var off: Array = _ankles(trio[1])
 			for sd in 2:
 				var mine := (off[sd] as Vector3) - (trio[1] as Node3D).position
@@ -123,8 +125,6 @@ func _hero(id: String, out: String) -> void:
 			ok(worst[1] == worst[0], "%s %s: a hover, its feet left alone" % [tag, p[0]])
 		elif p[0] == "slope stand":
 			ok(worst[0] > SHOWS, "%s: unplanted, the clip floats or sinks on the flight (%.3f m)" % [tag, worst[0]])
-		if out != "":
-			rows.append([await _grab(trio, 1), await _grab(trio, 2)])
 	for m in trio:
 		(m as Node3D).free()
 	if out != "":
@@ -188,13 +188,14 @@ func _stage() -> void:
 	holder.add_child(cam)
 	cam.make_current()
 	cam.fov = 30.0
+	cam.rotation.x = -0.08
 
 ## Figure k of the three alone, side on (the others hidden), the frame half size.
 func _grab(trio: Array, k: int) -> Image:
 	var x := (trio[k] as Node3D).position.x
 	for i in 3:
 		(trio[i] as Node3D).visible = i == k
-	cam.position = Vector3(x, (trio[k] as Node3D).position.y + 1.0, 1.5 + SHOT_DIST)
+	cam.position = Vector3(x, (trio[k] as Node3D).position.y + 0.9, 1.5 + SHOT_DIST)
 	for f in 3:
 		await tree.process_frame
 	var img := tree.root.get_viewport().get_texture().get_image()
