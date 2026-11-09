@@ -183,6 +183,11 @@ def guard_over(t, p):
 C.bake("rmb_guard", 0.72, [(0, CARRY), (0.1, merged(GUARD, e="out")), (0.72, {})], over=guard_over)
 C.bake("guard_break", 0.65, [(0, GUARD), (0.06, dict(pos=(0, -0.06, 0.0), rot=(14, -5, 6), head=(-10, 0, 0), sh=sl(0.06, 0.24, 0.0), sn=(-0.6, 0.6, 0.5), e="snap")),
                              (0.3, dict(rot=(4, 0, 2), sh=sl(0.06, 0.12, -0.38), sn=(-0.86, 0.5, 0))), (0.65, CARRY)])
+# the boop (0.36 s, BjornBoop): LMB behind the aegis. A small draw back, the door punched out at 0.13, settled home by 0.3
+C.bake("shield_boop", 0.36, [(0, GUARD), (0.07, merged(GUARD, pos=(0, -0.03, -0.07), rot=(-2, 0, -7), sh=sl(-0.26, 0.3, -0.34), e="out")),
+                             (0.13, merged(GUARD, pos=(0, 0.09, -0.05), rot=(-20, 0, 5), sh=sl(-0.32, 0.64, -0.31), sn=(-0.05, 1, 0.08),
+                                           fr=(AX, -0.1, AZ), fl=(-AX, 0.1, AZ), fra=-12.0, e="snap")),
+                             (0.3, merged(GUARD, e="out")), (0.36, GUARD)])
 C.bake("guard_armed", 0.35, [(0, CARRY), (0.1, dict(rot=(-5, 0, -8), head=(6, 0, 8), sh=sl(-0.04, 0.22, -0.3), e="out")), (0.35, CARRY)])
 
 # ---------------------------------------------------------------------- Shift
@@ -216,8 +221,14 @@ C.bake("e_mend", 0.95, [(0, CARRY),
 # ---------------------------------------------------------------------- X, Faultline
 UW = merged(WIND, pos=(0, 0, -0.04), rot=(12, 0, 0), head=(-10, 0, 0), gr=sp(-0.04, -0.06, 0.43), gd=(-0.1, -0.5, 0.85), ga=(0, 0.85, 0.5), er=(1, 0, 0.1),
             sh=sl(0.06, 0.06, -0.32), fr=(AX + 0.03, -0.05, AZ), fl=(-AX - 0.02, 0.06, AZ))
-C.bake("x_wind", 0.5, [(0, CARRY), (0.2, merged(UW, pos=(0, 0, -0.05), e="out")), (0.4, UW), (0.5, dict(pos=(0, 0, -0.035)))])
-C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.06), rot=(-30, 0, 2), gr=sp(-0.14, 0.42, -0.36), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
+# the hop (BjornUlt.leap_y; the game lifts him 1.2 m): a crouch, legs tucked with the hammer high overhead, a hang
+# arching back, then the drive down into the slam
+TUCK = dict(fr=(AX + 0.03, -0.02, AZ + 0.12), fl=(-AX - 0.02, 0.08, AZ + 0.16))
+C.bake("x_wind", 0.5, [(0, CARRY), (0.06, merged(CARRY, pos=(0, 0.02, -0.12), rot=(-10, 0, 0), e="out")),
+                       (0.2, merged(UW, TUCK, pos=(0, 0, 0.02), e="out")),
+                       (0.32, merged(UW, TUCK, rot=(20, 0, 0), head=(-16, 0, 0), gr=sp(-0.04, -0.12, 0.46))),
+                       (0.4, merged(UW, rot=(-4, 0, 0), e="snap")), (0.5, dict(pos=(0, 0, -0.035)))])
+C.bake("x_slam", 0.6, [(0, UW), (0.1, merged(IMP, pos=(0, 0.1, -0.12), rot=(-30, 0, 2), gr=sp(-0.14, 0.42, -0.36), gd=(0, 0.45, -0.9), ga=(0, 0.9, 0.45))),
                        (0.2, dict(pos=(0, 0.1, -0.07), rot=(-32, 0, 2))), (0.36, dict(pos=(0, 0.08, -0.06), rot=(-24, 0, 2))), (0.6, merged(STANCE, fra=0.0))])
 
 # ---------------------------------------------------------------------- crouch (item 143): a hammer-brace. The hull sinks and tips

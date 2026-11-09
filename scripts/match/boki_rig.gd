@@ -65,6 +65,10 @@ const FRAME := {
 		"ear_tip": Vector3(0.16, 0.72, -0.3), "tail_tip": Vector3(0, 0.21, 0.4), "tip_bone": "tail2", "hip": 0.17,
 		"marks": {"left flank": Vector3(-0.145, 0.26, 0.15), "right flank": Vector3(0.145, 0.26, 0.15),
 			"back": Vector3(0, 0.39, 0.16), "chest": Vector3(0, 0.24, -0.14)}},
+	"caecilith": {"head": Vector3(0, 0.46, -0.25), "top": 0.56, "carry": Vector3(0, 0.17, 0.09),
+		"ear_tip": Vector3(0.054, 0.53, -0.13), "tail_tip": Vector3(0, 0.027, 0.234), "tip_bone": "tail6", "hip": 0.0,
+		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
+			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
 	"glomwort": {"head": Vector3(0, 0.26, -0.22), "top": 0.42, "carry": Vector3(0, 0.5, 0.08),
 		"ear_tip": Vector3(0.085, 0.42, 0.07), "tail_tip": Vector3(0, 0.12, 0.28), "tip_bone": "hips", "hip": 0.0,
 		"marks": {"left flank": Vector3(-0.21, 0.13, 0.04), "right flank": Vector3(0.21, 0.13, 0.04),
@@ -178,6 +182,23 @@ static var _shadow_mat: StandardMaterial3D
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
+## Starts reading every common species' model on a loader thread (a match's start: bots' and wild Boki), so the
+## builds take them ready instead of each species' first build reading its .glb on the main thread (~60 ms).
+static func fetch_common() -> void:
+	for sp in Data.common_kin():
+		var p := PATH % [sp, sp]
+		if has(String(sp)) and not _scenes.has(p) \
+				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			BackgroundWork.request(p)
+
+static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
+static func _scene(kin_id: String) -> PackedScene:
+	var p := PATH % [kin_id, kin_id]
+	if not _scenes.has(p):
+		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
+		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+	return _scenes[p] as PackedScene
+
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
 static func work_clip(k: Dictionary) -> String:
 	if not k.has("job"):
@@ -192,7 +213,7 @@ static func work_clip(k: Dictionary) -> String:
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	var model_root := _scene(kin_id).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()

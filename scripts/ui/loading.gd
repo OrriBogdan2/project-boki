@@ -7,7 +7,7 @@ extends CanvasLayer
 signal shown
 
 const TIPS := [
-	"Hold Mouse 5 (or Space) in the air to glide. You can open your glider off any booster too.",
+	"Press Space again in the air (or Mouse 5) and hold to glide. You can open your glider off any booster too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
@@ -31,7 +31,7 @@ const TIPS := [
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
+	"Falling all the way into the abyss is death. Glide (press Space again in the air, or Mouse 5, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
@@ -259,7 +259,7 @@ func _squad_row(p: Vector2, a: float) -> void:
 ## The tip's glass card at a fade step (cached: drawn every frame while loading).
 func _glass(alpha: float) -> UiFrame:
 	if not _glass_at.has(alpha):
-		var g := UI.frame(Color(0.05, 0.045, 0.07, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
+		var g := UI.frame(Color(UI.NIGHT, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
 		_glass_at[alpha] = g
 	return _glass_at[alpha]
 

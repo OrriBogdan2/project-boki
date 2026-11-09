@@ -61,7 +61,7 @@ class HemSolver(Solver):
         self.hand_rest = frame_of((0, 0, -1), (-1, 0, 0))
         self.pinch = Vector(pinch)
         self.nock0 = Vector(H.bow_to_model(_v3((0, H.STRING_Y, 0)), J))
-        self.anchor = Vector((-0.012, 0.140, 1.412 + 0.5 * LIFT.z))
+        self.anchor = Vector((-0.012, 0.140, float(J["head"][2]) - 0.027))    # her jaw, just under the head bone
         self.last = {}
 
     def solve(self, P):

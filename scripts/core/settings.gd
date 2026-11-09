@@ -9,14 +9,14 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 3, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
-	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
+	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
@@ -35,25 +35,46 @@ const DEFAULTS := {
 ## the first time it's written after they went.
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 
-## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
-## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
-## settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
-##   scale: 3D render scale  ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass
-##   tufts and flowers kept  ·  draw: how far small scatter, undergrowth and motes are drawn (x)  ·
-##   shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  soft: soft-shadow filter quality  ·
-##   ssao, glow: the desktop renderer's ambient occlusion and bloom  ·  clouds: drifting cloud layers
-##   over the sea  ·  shafts: light shafts into the void  ·  fx: particle amounts (x)
+## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
+## detail for speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the
+## plain settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
+##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
+##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
+##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
+##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
+##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
+##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
+##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
+##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
+##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
 const QUALITY := {
-	"low": {"name": "Low", "msaa": 0, "shadows": false, "scale": 0.8, "lod": 4.0, "grass": 0.4, "draw": 0.6, "shadow_k": 0.7, "splits": 1, "soft": 0,
-		"ssao": false, "glow": false, "clouds": 0, "shafts": false, "fx": 0.45, "volfog": false},
-	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "scale": 1.0, "lod": 2.0, "grass": 0.7, "draw": 0.8, "shadow_k": 0.8, "splits": 2, "soft": 1,
-		"ssao": false, "glow": true, "clouds": 1, "shafts": true, "fx": 0.7, "volfog": false},
-	"high": {"name": "High", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 1.0, "grass": 1.0, "draw": 1.0, "shadow_k": 1.0, "splits": 4, "soft": 3,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
-	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "scale": 1.0, "lod": 0.5, "grass": 1.0, "draw": 1.6, "shadow_k": 1.35, "splits": 4, "soft": 4,
-		"ssao": true, "glow": true, "clouds": 2, "shafts": true, "fx": 1.0, "volfog": true},
+	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
+		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
+		"lod": 8.0, "grass": 0.15, "draw": 0.45,
+		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
+	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
+		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
+		"lod": 4.0, "grass": 0.4, "draw": 0.6,
+		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
+	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
+		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
+		"lod": 2.0, "grass": 0.7, "draw": 0.8,
+		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
+	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
+		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
+		"lod": 1.0, "grass": 1.0, "draw": 1.0,
+		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
+		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
+		"lod": 0.5, "grass": 1.0, "draw": 1.6,
+		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
 }
-const QUALITY_ORDER := ["low", "medium", "high", "ultra"]
+const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
 ## The preset in effect: the player's pick, or what auto-detect found for this machine.
 func quality() -> String:
@@ -71,35 +92,48 @@ func fps_mode() -> String:
 		1: return "fps"
 	return "full"
 
+## Very Low or Low: the presets that also thin out what isn't a knob (title-screen grass, storm streaks).
+func lite() -> bool:
+	return QUALITY_ORDER.find(quality()) <= QUALITY_ORDER.find("low")
+
 ## A knob of the preset in effect (see QUALITY).
 func q(key: String):
 	return QUALITY[quality()].get(key, QUALITY["high"][key])
 
-## A first guess from the graphics adapter: software renderers get Low, everything else Medium (the
-## default the game is tuned to hold 60 fps at; High and Ultra are a pick in Settings > Video). The first
-## expedition's loading screen then measures real frames and steps it down if they come in slow
-## (see note_benchmark).
+## A first guess from the graphics adapter: software renderers get Very Low, integrated PC graphics
+## (Intel, AMD APUs) Low, everything else Medium (the default the game is tuned to hold 60 fps at, Apple
+## silicon included: its render-height cap keeps a retina screen cheap). High and Ultra are a pick in
+## Settings > Video. The first expedition's loading screen then measures real frames and steps it down
+## if they come in slow (see note_benchmark).
 func detect_quality() -> String:
 	if OS.has_feature("web"):
 		return "medium"
 	if DisplayServer.get_name() == "headless":
 		return "high"
-	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_CPU:
-		return "low"
 	var nm := RenderingServer.get_video_adapter_name().to_lower()
-	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"): return "low"
+	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_CPU:
+		return "very_low"
+	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"): return "very_low"
+	if nm.contains("apple"):
+		return "medium"
+	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_INTEGRATED_GPU:
+		return "low"
+	if nm.contains("intel") and not nm.contains("arc"): return "low"
 	return "medium"
 
 ## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
-## from the skyship). Too slow for 60 fps steps the preset down once and remembers it.
+## from the skyship). Too slow for 60 fps steps the preset down once (twice when far too slow) and
+## remembers it.
+const BENCH_SLOW_MS := 20.0     # ms a frame: slower than this steps the preset down one
+const BENCH_FAR_MS := 45.0      # ms a frame: slower than this steps it down two
 func note_benchmark(ms: float) -> void:
 	if String(v.get("quality", "auto")) != "auto" or String(v.get("quality_found", "")) != "":
 		return
 	var cur := quality()
 	var i := QUALITY_ORDER.find(cur)
-	if ms > 20.0 and i > 0:
+	if ms > BENCH_SLOW_MS and i > 0:
 		cur = QUALITY_ORDER[i - 1]
-		if ms > 34.0 and i > 1: cur = QUALITY_ORDER[i - 2]
+		if ms > BENCH_FAR_MS and i > 1: cur = QUALITY_ORDER[i - 2]
 	v["quality_found"] = cur
 	apply("quality")
 	save()
@@ -125,6 +159,7 @@ const ACTIONS := [
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
+	["move_readout", "Movement readout (tuning)"],
 ]
 
 var v: Dictionary = {}
@@ -162,6 +197,10 @@ func _ready() -> void:
 		if String(v.get("quality", "auto")) == "auto" and String(v.get("quality_found", "")) in ["high", "ultra"]:
 			v["quality_found"] = "medium"
 		v["video_v"] = 3
+	if int(v.get("video_v", 3)) < 4:
+		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
+		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
+		v["video_v"] = 4
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
@@ -174,6 +213,7 @@ func _ready() -> void:
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
+	get_tree().root.size_changed.connect(_apply_render_scale)
 
 ## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
 func _migrate_belt_keys() -> void:
@@ -260,11 +300,13 @@ func apply(k: String) -> void:
 				DisplayServer.window_set_mode(want)
 		"vsync":
 			if not OS.has_feature("web"):
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
-		"max_fps": Engine.max_fps = int(v[k])
+				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if Record.vsync(v[k]) else DisplayServer.VSYNC_DISABLED)
+		"max_fps": Engine.max_fps = Record.frame_cap(int(v[k]))
 		"msaa":
 			var m := int(v[k])
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
+			var fxaa: bool = m == 0 and bool(q("fxaa"))
+			get_tree().root.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if fxaa else Viewport.SCREEN_SPACE_AA_DISABLED
 		"shadows":
 			for n in get_tree().root.find_children("*", "DirectionalLight3D", true, false):
 				(n as DirectionalLight3D).shadow_enabled = bool(v[k]) and _casts(n as DirectionalLight3D)
@@ -307,6 +349,8 @@ func _on_node_added(n: Node) -> void:
 			dl.shadow_enabled = false
 		elif dl.shadow_enabled:
 			_shadow_quality(dl)
+	elif n is OmniLight3D or n is SpotLight3D:
+		_light_quality(n as Light3D)
 	elif n is WorldEnvironment and (n as WorldEnvironment).environment:
 		_env_quality((n as WorldEnvironment).environment)
 
@@ -329,6 +373,31 @@ func _shadow_quality(dl: DirectionalLight3D) -> void:
 	else:
 		dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if splits == 2 else mode0
 
+const LIGHT_FADE_M := 8.0       # m over which a far lamp dims out (Settings q("light_m"))
+
+## Lamps and glows past the preset's light_m fade out (the engine then skips them); a light's own
+## shorter fade stays.
+func _light_quality(l: Light3D) -> void:
+	if not l.has_meta("fade0"):
+		l.set_meta("fade0", l.distance_fade_begin if l.distance_fade_enabled else 0.0)
+	var own := float(l.get_meta("fade0"))
+	var m := float(q("light_m"))
+	l.distance_fade_enabled = own > 0.0 or m > 0.0
+	l.distance_fade_begin = minf(own, m) if own > 0.0 and m > 0.0 else maxf(own, m)
+	l.distance_fade_length = LIGHT_FADE_M
+
+
+## The 3D renders at most q("px") pixels tall (0: the window's own height); the desktop renderer
+## scales it up with FSR, which keeps edges sharp, the browser/compatibility one bilinearly. The HUD
+## always draws at the window's full size.
+func _apply_render_scale() -> void:
+	var root := get_tree().root
+	var px := int(q("px"))
+	var h := maxi(1, root.size.y)
+	root.scaling_3d_scale = clampf(minf(float(px) / h if px > 0 else 1.0, float(q("scale"))), 0.25, 1.0)
+	var fsr := RenderingServer.get_current_rendering_method() != "gl_compatibility" and root.scaling_3d_scale < 0.999
+	root.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if fsr else Viewport.SCALING_3D_MODE_BILINEAR
+
 func _env_quality(e: Environment) -> void:
 	if not e.has_meta("ssao0"):
 		e.set_meta("ssao0", e.ssao_enabled)
@@ -341,7 +410,7 @@ func _env_quality(e: Environment) -> void:
 		e.volumetric_fog_enabled = bool(e.get_meta("vfog0")) and bool(q("volfog"))
 
 ## Applies the preset in effect: its anti-aliasing and shadows (as if picked by hand), render scale,
-## level of detail, shadow filtering, and the lights and environments already in the scene. The
+## level of detail, shadow map size and filtering, lamp fade, and the lights and environments already in the scene. The
 ## world's own detail (grass, draw distance, cloud layers, particles) follows from the next expedition.
 func _apply_quality() -> void:
 	var Q: Dictionary = QUALITY[quality()]
@@ -351,9 +420,14 @@ func _apply_quality() -> void:
 		v["shadows"] = bool(Q["shadows"])
 		apply("msaa"); apply("shadows")
 	var root := get_tree().root
-	root.scaling_3d_scale = float(Q["scale"])
+	_apply_render_scale()
 	root.mesh_lod_threshold = float(Q["lod"])
+	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
+	Engine.max_physics_steps_per_frame = int(Q["steps"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
+	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
+	for n in root.find_children("*", "Light3D", true, false):
+		if n is OmniLight3D or n is SpotLight3D: _light_quality(n as Light3D)
 	for n in root.find_children("*", "DirectionalLight3D", true, false):
 		if (n as DirectionalLight3D).shadow_enabled: _shadow_quality(n as DirectionalLight3D)
 	for n in root.find_children("*", "WorldEnvironment", true, false):

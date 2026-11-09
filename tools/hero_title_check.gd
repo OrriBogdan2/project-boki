@@ -10,8 +10,8 @@ const OLD_NAMES := ["Dancer", "Zedran", "Pin", "Bjorn", "Vireo", "Venator", "Tam
 ## Words retired from player text (Hunter / Relic / the Empty / Fusion replace them; ids and code names may keep them).
 const RETIRED_TERMS := "(?i)\\b(wardens?|mantles?|bearers?|merge[sd]?|unmasked|masks?)\\b"
 const CANONICAL_ORDER := [
-	"gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer",
-	"dredge", "rimewright", "mage", "bulwark", "thief", "ostra",
+	"gunslinger", "bulwark", "rimewright", "juggernaut", "ashwick", "dolm",
+	"mage", "dredge", "tender", "thief", "archer", "ostra",
 ]
 const RELIC_STATUS := ["locked", "proposed"]
 const GENDERS := ["male", "female", "robot"]

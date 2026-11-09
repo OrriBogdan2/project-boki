@@ -21,7 +21,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `tips` | Gameplay > Combat | `hud.gd` | renamed "Tips during expeditions" |
 | `kin_chatter` | Gameplay > Boki | `kin_companion.gd` | renamed "How much your Boki talks" |
 | `mod_mode` | Gameplay > Admin (admin only) | `game.gd` | |
-| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the 90 s pre-match lobby before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
+| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the 30 s pre-match lobby before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
 | `bot_diff` | Admin tools page | `match.gd`, `duel.gd` | the duplicate row in Gameplay is gone: the Admin tools page already sets it |
 | `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
 | `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
@@ -39,7 +39,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `show_fps` | Video > Quality | `overlay.gd` | |
 | `ui_scale` | Accessibility > Readability | `settings.gd` | |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
-| `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
+| `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | Recording mode also forces v-sync and a 60 fps cap (`Record.frame_cap`). The Demo tab's Quick start buttons (`DemoQuick`, also `--demo=expedition\|farm\|hatch`) are not settings: they play on a made-up save that is never written. |
 
 ## Looked for and not found
 

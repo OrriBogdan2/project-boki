@@ -47,12 +47,13 @@ const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (ne
 const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
+	DemoQuick.restore()                 # back from a quick start: the real save again
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind
 	rng.seed = 2026
-	low = Settings.quality() == "low"
+	low = Settings.lite()
 	fx_k = float(Settings.q("fx"))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--title-cam="):
@@ -431,6 +432,7 @@ func _build_ui() -> void:
 	root.name = "TitleUI"
 	ui.add_child(root)
 	root.add_child(TitleBackdrop.new())
+	root.add_child(VoidSpecks.new())       # void specks drifting over the key art
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
@@ -482,7 +484,7 @@ func _build_ui() -> void:
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
+	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)

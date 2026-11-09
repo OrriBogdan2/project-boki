@@ -9,6 +9,8 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
+const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
+                                 # the source's raise, then fire
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const CHAR := Color("2a1018")    # the disc's scorched inside
@@ -43,20 +45,15 @@ func cast() -> bool:
 	var xd := data()
 	var at := AimMode.point(h, float(xd["range"]))
 	casts += 1
-	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0}
+	var shell := {"at": at, "t": 0.0, "phase": FALL, "node": _take_node(), "tick": 0.0, "fired": false}
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
-	# the shot goes straight up off the raised barrel; the disc and the column show at once
-	var top := h.position + Vector3(0, 2.4, 0)
-	kit.fx().star(top, GunslingerKit.EMBER, GunslingerKit.HOT, 1.4, 0.14)
-	kit.fx().beam(top, top + Vector3(0, 14.0, 0), GunslingerKit.EMBER, GunslingerKit.HOT, 0.5, 0.3)
-	kit.m.fx.flash(top, GunslingerKit.HOT, 1.2, 0.08)
+	# the disc and the column show at once; the shot leaves the raised barrel on the clip's kick (_fire)
 	var r := float(xd["radius"])
 	var delay := float(xd["delay"])
 	kit.fx().disc(at, r, CHAR, GunslingerKit.DEEP, delay, GunslingerKit.EMBER)
 	kit.fx().pillar(at, Color(GunslingerKit.EMBER, 0.4), GunslingerKit.HOT, 12.0, r * 0.55, delay, false)
-	kit.m.sfx("vn_nuke_fire", h.pos, -1.0)
 	kit.m.sfx("vn_nuke_fall", at, -2.0)
 	kit.net_ring(at, r, GunslingerKit.EMBER)
 	return true
@@ -76,10 +73,21 @@ func _take_node() -> Node3D:
 func tick(dt: float) -> void:
 	for s in shells.duplicate():
 		s["t"] = float(s["t"]) + dt
+		if not bool(s["fired"]) and float(s["t"]) >= FIRE_T:
+			_fire(s)
 		if String(s["phase"]) == FALL:
 			_fall_tick(s)
 		else:
 			_burn_tick(s, dt)
+
+## The shot: straight up off the raised barrel, a star and a short column of ember, on the clip's kick key.
+func _fire(s: Dictionary) -> void:
+	s["fired"] = true
+	var top: Vector3 = kit.h.position + Vector3(0, 2.4, 0)
+	kit.fx().star(top, GunslingerKit.EMBER, GunslingerKit.HOT, 1.4, 0.14)
+	kit.fx().beam(top, top + Vector3(0, 14.0, 0), GunslingerKit.EMBER, GunslingerKit.HOT, 0.5, 0.3)
+	kit.m.fx.flash(top, GunslingerKit.HOT, 1.2, 0.08)
+	kit.m.sfx("vn_nuke_fire", kit.h.pos, -1.0)
 
 ## The disc fills toward the impact, its hot centre glows, a rivet ring closes in, and the shell drops through
 ## the column for the last part of the fall.
@@ -147,8 +155,7 @@ func _impact_fx(at: Vector3, r: float) -> void:
 	var xd := data()
 	var fx := kit.fx()
 	fx.pillar(at, Color(GunslingerKit.HOT, 0.95), Color.WHITE, 10.0, r * 0.6, 0.3, true)
-	fx.ring(at, r * 1.3, GunslingerKit.EMBER, GunslingerKit.HOT, 0.45)
-	fx.ring(at, r * 0.7, GunslingerKit.HOT, GunslingerKit.EMBER, 0.3)
+	fx.ring(at, r, GunslingerKit.EMBER, GunslingerKit.HOT, 0.45)
 	fx.disc(at, r, CHAR, GunslingerKit.EMBER, float(xd["zone_t"]), GunslingerKit.EMBER)
 	kit.m.fx.burst(at + Vector3(0, 0.5, 0), GunslingerKit.EMBER, 30, 9.0, 0.6, 6.0, 1.6)
 	kit.m.fx.flash(at + Vector3(0, 1.0, 0), GunslingerKit.HOT, 3.0, 0.14)

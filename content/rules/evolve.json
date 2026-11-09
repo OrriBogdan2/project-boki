@@ -1,0 +1,515 @@
+{
+ "desc": "Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (a level-up at or past it). 'into': the options; 'path' picks a branch by the Boki's leading affinity (fierce/steadfast/curious/swift), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.",
+ "cap": 100,
+ "cap_doc": "The highest level a Boki can reach.",
+ "lines": {
+  "ermink": {
+   "into": [
+    {
+     "id": "flarmink",
+     "item": "ink_ember"
+    },
+    {
+     "id": "rippmink",
+     "item": "ink_tide"
+    },
+    {
+     "id": "blossmink",
+     "item": "ink_bloom"
+    },
+    {
+     "id": "voltmink",
+     "item": "ink_storm"
+    },
+    {
+     "id": "rimink",
+     "item": "ink_frost"
+    },
+    {
+     "id": "umbrink",
+     "item": "ink_shadow"
+    },
+    {
+     "id": "lunink",
+     "item": "ink_lunar"
+    },
+    {
+     "id": "prismink",
+     "item": "ink_prism"
+    },
+    {
+     "id": "wyrmink",
+     "item": "ink_wyrm"
+    }
+   ]
+  },
+  "burrlet": {
+   "into": [
+    {
+     "id": "sporcupine"
+    }
+   ],
+   "level": 16
+  },
+  "sporcupine": {
+   "into": [
+    {
+     "id": "amanitusk",
+     "path": "fierce"
+    },
+    {
+     "id": "ringrove",
+     "path": "steadfast"
+    }
+   ],
+   "level": 36
+  },
+  "cindle": {
+   "into": [
+    {
+     "id": "vespox"
+    }
+   ],
+   "level": 14
+  },
+  "vespox": {
+   "into": [
+    {
+     "id": "glaivyx",
+     "path": "fierce"
+    },
+    {
+     "id": "lashyx",
+     "path": "swift"
+    }
+   ],
+   "level": 32
+  },
+  "puddlet": {
+   "into": [
+    {
+     "id": "glassolotl"
+    }
+   ],
+   "level": 16
+  },
+  "glassolotl": {
+   "into": [
+    {
+     "id": "chandelotl",
+     "path": "curious"
+    },
+    {
+     "id": "geodelotl",
+     "path": "steadfast"
+    }
+   ],
+   "level": 36
+  },
+  "teapotamus": {
+   "into": [
+    {
+     "id": "puffamus"
+    }
+   ],
+   "level": 20
+  },
+  "puffamus": {
+   "into": [
+    {
+     "id": "scaldamus"
+    }
+   ],
+   "level": 40
+  },
+  "kerchick": {
+   "into": [
+    {
+     "id": "jibbatross"
+    }
+   ],
+   "level": 14
+  },
+  "jibbatross": {
+   "into": [
+    {
+     "id": "squalltross"
+    }
+   ],
+   "level": 32
+  },
+  "skidlet": {
+   "into": [
+    {
+     "id": "hoarheron"
+    }
+   ],
+   "level": 14
+  },
+  "hoarheron": {
+   "into": [
+    {
+     "id": "lanceron"
+    }
+   ],
+   "level": 32
+  },
+  "zipling": {
+   "into": [
+    {
+     "id": "caecilith"
+    }
+   ],
+   "level": 14
+  },
+  "caecilith": {
+   "into": [
+    {
+     "id": "seamwyrm"
+    }
+   ],
+   "level": 32
+  },
+  "glintmole": {
+   "into": [
+    {
+     "id": "geodemole"
+    }
+   ],
+   "level": 20
+  },
+  "geodemole": {
+   "into": [
+    {
+     "id": "druzemole"
+    }
+   ],
+   "level": 40
+  },
+  "kindlewren": {
+   "into": [
+    {
+     "id": "embrook"
+    }
+   ],
+   "level": 16
+  },
+  "embrook": {
+   "into": [
+    {
+     "id": "pyrraven"
+    }
+   ],
+   "level": 36
+  },
+  "oarlet": {
+   "into": [
+    {
+     "id": "oarter"
+    }
+   ],
+   "level": 16
+  },
+  "oarter": {
+   "into": [
+    {
+     "id": "galleotter"
+    }
+   ],
+   "level": 36
+  },
+  "kitlet": {
+   "into": [
+    {
+     "id": "ribbonwyrm"
+    }
+   ],
+   "level": 14
+  },
+  "ribbonwyrm": {
+   "into": [
+    {
+     "id": "dragonkite"
+    }
+   ],
+   "level": 32
+  },
+  "bellowlet": {
+   "into": [
+    {
+     "id": "cindowary"
+    }
+   ],
+   "level": 20
+  },
+  "cindowary": {
+   "into": [
+    {
+     "id": "furnacowary"
+    }
+   ],
+   "level": 40
+  },
+  "dribbara": {
+   "into": [
+    {
+     "id": "lilybara"
+    }
+   ],
+   "level": 16
+  },
+  "lilybara": {
+   "into": [
+    {
+     "id": "geysirbara"
+    }
+   ],
+   "level": 36
+  },
+  "parasolth": {
+   "into": [
+    {
+     "id": "umbrathere"
+    }
+   ],
+   "level": 30
+  },
+  "kayak": {
+   "into": [
+    {
+     "id": "glaciyak"
+    }
+   ],
+   "level": 20
+  },
+  "glaciyak": {
+   "into": [
+    {
+     "id": "dreadnoyak"
+    }
+   ],
+   "level": 40
+  },
+  "coolatee": {
+   "into": [
+    {
+     "id": "floenatee"
+    }
+   ],
+   "level": 20
+  },
+  "floenatee": {
+   "into": [
+    {
+     "id": "glaciatee"
+    }
+   ],
+   "level": 40
+  },
+  "fizzlet": {
+   "into": [
+    {
+     "id": "nimbostrich"
+    }
+   ],
+   "level": 14
+  },
+  "nimbostrich": {
+   "into": [
+    {
+     "id": "thunderstrich"
+    }
+   ],
+   "level": 32
+  },
+  "wickapi": {
+   "into": [
+    {
+     "id": "duskapi"
+    }
+   ],
+   "level": 16
+  },
+  "duskapi": {
+   "into": [
+    {
+     "id": "chandelapi"
+    }
+   ],
+   "level": 36
+  },
+  "bucketmander": {
+   "into": [
+    {
+     "id": "spatewader"
+    }
+   ],
+   "level": 20
+  },
+  "spatewader": {
+   "into": [
+    {
+     "id": "cisternmander"
+    }
+   ],
+   "level": 40
+  },
+  "tinbrock": {
+   "into": [
+    {
+     "id": "kilnbadger"
+    }
+   ],
+   "level": 20
+  },
+  "kilnbadger": {
+   "into": [
+    {
+     "id": "forgebrock"
+    }
+   ],
+   "level": 40
+  },
+  "opalisk": {
+   "into": [
+    {
+     "id": "frothisk"
+    }
+   ],
+   "level": 16
+  },
+  "frothisk": {
+   "into": [
+    {
+     "id": "tidalisk"
+    }
+   ],
+   "level": 36
+  },
+  "kestrike": {
+   "into": [
+    {
+     "id": "arcestrel"
+    }
+   ],
+   "level": 14
+  },
+  "arcestrel": {
+   "into": [
+    {
+     "id": "voltalon"
+    }
+   ],
+   "level": 32
+  },
+  "marchleaf": {
+   "into": [
+    {
+     "id": "scythant"
+    }
+   ],
+   "level": 16
+  },
+  "scythant": {
+   "into": [
+    {
+     "id": "reapant"
+    }
+   ],
+   "level": 36
+  },
+  "nettlynx": {
+   "into": [
+    {
+     "id": "thistlynx"
+    }
+   ],
+   "level": 16
+  },
+  "thistlynx": {
+   "into": [
+    {
+     "id": "briarlynx"
+    }
+   ],
+   "level": 36
+  },
+  "thrumbird": {
+   "into": [
+    {
+     "id": "lyrewing"
+    }
+   ],
+   "level": 30
+  },
+  "mothlet": {
+   "into": [
+    {
+     "id": "wisplet"
+    }
+   ],
+   "level": 14
+  },
+  "wisplet": {
+   "into": [
+    {
+     "id": "eclipsowl"
+    }
+   ],
+   "level": 32
+  },
+  "zapple": {
+   "into": [
+    {
+     "id": "howlop",
+     "path": "fierce"
+    },
+    {
+     "id": "chimelop",
+     "path": "curious"
+    }
+   ],
+   "level": 16
+  },
+  "gibbelle": {
+   "into": [
+    {
+     "id": "gongrowl"
+    }
+   ],
+   "level": 30
+  },
+  "latchling": {
+   "into": [
+    {
+     "id": "tuatrune"
+    }
+   ],
+   "level": 20
+  },
+  "tuatrune": {
+   "into": [
+    {
+     "id": "vaultara"
+    }
+   ],
+   "level": 40
+  },
+  "jarmit": {
+   "into": [
+    {
+     "id": "lanternmit",
+     "item": "ink_ember"
+    },
+    {
+     "id": "stormit",
+     "item": "ink_storm"
+    },
+    {
+     "id": "terrarimit",
+     "item": "ink_bloom"
+    }
+   ]
+  }
+ }
+}

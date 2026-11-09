@@ -161,7 +161,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
 	elif show_name:
 		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
-		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
+		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
 	if not sts.is_empty():
 		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
 	if h.ak and h.ak.tell != "":
@@ -278,7 +278,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
-	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
+	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
 	var line := "DOWN"
 	var lcol := bcol

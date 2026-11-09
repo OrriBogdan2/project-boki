@@ -4,7 +4,7 @@ extends ArchKit
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 12m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
+##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
@@ -584,6 +584,7 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
+	RecastCue.payoff(self, t)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
@@ -781,6 +782,24 @@ func in_e() -> bool:
 
 func e_recastable() -> bool:
 	return not knife.is_empty()
+
+## RecastCue: the knife is the marker; it steps you there by itself when it runs out (no "EXPIRED").
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = knife.get("pos", h.pos)
+		w["auto"] = true
+	return w
+
+## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
+func combo_marks(out: Array) -> void:
+	super(out)
+	for f in m.foes_of(h.team):
+		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
+		var e: Array = mk.get(h.nid, [0, 0.0])
+		if int(e[0]) > 0 and float(e[1]) > 0.0:
+			var dur := float(res_def().get("dur", 4.0))
+			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")

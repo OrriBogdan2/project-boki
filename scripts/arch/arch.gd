@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Kael, Cinder, Meeko, Tenzo, Lace, Grimble, Neve, Motley, Mossy, Sparkle, Sable
+const ORDER := ["gunslinger", "bulwark", "rimewright", "juggernaut", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "archer", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Albert, Neve, Kael, Cinder, Tenzo, Sparkle, Grimble, Meeko, Sable, Lace, Motley
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -73,15 +73,19 @@ static func of_save() -> String:
 	return fix(String(Save.d.get("arch", "")), Data.class_of_save())
 
 ## A bot's archetype from a key (its id and the match seed): its own random stream, so picking one
-## never shifts the match's (seeded maps, loot and tests stay as they were).
-static func pick_for(cls: String, key: String) -> String:
+## never shifts the match's (seeded maps, loot and tests stay as they were). `only`, when it holds
+## any of the class, narrows the choice to those (DemoQuick's showcase lobby).
+static func pick_for(cls: String, key: String, only: Array = []) -> String:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
-	return pick(cls, r)
+	return pick(cls, r, only)
 
-## A random archetype of a class (bots).
-static func pick(cls: String, rng: RandomNumberGenerator) -> String:
+## A random archetype of a class (bots), from `only` when it holds any of the class.
+static func pick(cls: String, rng: RandomNumberGenerator, only: Array = []) -> String:
 	var opts := of_class(cls)
+	var picked := opts.filter(func(a): return a in only)
+	if not picked.is_empty():
+		opts = picked
 	if opts.is_empty():
 		return default_for(cls)
 	return String(opts[rng.randi_range(0, opts.size() - 1)])

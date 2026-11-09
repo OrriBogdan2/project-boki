@@ -9,7 +9,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 | Weapon | Carried by | Weight | Damage | Fire interval | Magazine | Reload | Range | Notes |
 |---|---|---|---|---|---|---|---|---|
-| Arc Shots | the Silver Thief | light | 13 | 0.45s | none | none | 12m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (12m at most) and fizzles there if it hits nothing. |
+| Arc Shots | the Silver Thief | light | 13 | 0.45s | none | none | 8.5m | A spinning shot from alternating hands every 0.45s. It flies to your cursor (8.5m at most) and fizzles there if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | 27 | 1.5s | 10.5m | Three rounds per pull. Accurate at range. |
 | Coilcaster | the Storm Chaser | light | 12 | 0.648s | none | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | the Ashen Kiss | heavy | 2.7 | 0.1s | none | none | 7m | Hold to pour fire from your hand 7m ahead: the stream trails behind a sweep, narrow at the palm and billowing at the end. It burns as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
@@ -27,7 +27,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Sniper | none | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
 | Tether Lantern | the Void Jester | medium | 9 | 0.6s | none | none | 14m | A quick violet orb every 0.6s, flying its full 14m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows. |
-| War Hammer & Aegis | the Barnacle Knight | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
+| War Hammer & Aegis | the Barnacle Knight | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way; its rope hauls it home on its own past 14m or after 6s, and it can't be thrown again till it's back. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that lunges you 1.4-2.4m forward on top of your run (about half that in the air). Right click raises the aegis; with it up, left click thrusts it forward and shoves foes 2.8m. |
 | Twin Blades | none | light | 7 | 0.3s | none | none | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 
 ## Weapon upgrades

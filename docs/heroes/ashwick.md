@@ -19,6 +19,16 @@ Sources (gameplay facts only, written in our own words):
 Where they disagreed: one guide attributes the pull, Anti-Heal and shield to the bolt; the wiki puts them on the shield ability,
 which is what we follow. Latest version chosen.
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Felix, `Upg:` lines. Cooldown, damage and shield come from `rank_cd` / `rank_dmg` / `rank_shield` (the shared
+step and `rank3_shield_k` are gone). The burn on a bolt rides the bolt's damage rank.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Cinderbolt | -1.2s cooldown, +25% damage x2, tier IV: a second charge | 6.3s / 5.6s, damage +15% / +30% | 5.8s / 4.7s, damage +25% / +50%; 2nd charge at 3 |
+| Space Ram | -0.75s recharge x2, tier IV: +4.3 damage, +16% speed, shield of 11.6% health | 7.65s / 6.3s | 8.25s / 7.5s; riders at 3 |
+| E Furnace Cloak | -1.6s cooldown, +25% damage and shield x2, tier IV: +30% shield | 9.45s / 8.4s, damage and shield +15% / +30%, shield x1.3 at 3 | 8.9s / 7.3s, damage +25% / +50%, shield +25% / +80% |
+
 ## Scaling
 Source hero 1367 HP against our heavy 193 HP: damage about x0.13 (flamethrower 205/s -> 27/s). Cooldowns about x0.8. The
 ability damages keep the source's ratios to each other: bolt : ram : cloak = 248 : 279 : 117 (footage) -> 14 : 16 : 7.
@@ -230,6 +240,24 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
 - Flue Flight (`scripts/arch/kits/ashwick_jet.gd`): the ember ring, scorch and sunburst at lift-off, a hot core and embers blown
   out of her heels and tail while flying (a roar every 0.45 s), and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
   (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.
+
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/ashwick_combo_check.gd` asserts drawn size = hit size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Flame Lance (LMB) | none | hose puffs, radius 0.25 to 1.1 m, 7 m | - | no ground shape | ok |
+| Cinder Shot (RMB) aim | lane 14 m long, 0.6 m wide | shot radius 0.3 m (0.6 m wide) | her screen | fixed-length lane | fixed: lane was 0.42 m wide; asserted |
+| Ablaze on hit | none (was a 1.2 m ring) | burn status | - | none | removed: cosmetic ring |
+| Cinder Shot fizzle | small ring 0.9 m at the end of the flight | none | everyone | small blue-white ring | kept: source shows it, a flight-end puff, not an area |
+| Furnace Cloak (E) | ring on him at r 4.5 m, scorch r 4.5 m | blast 4.5 m | everyone | ring shows the edge | fixed: scorch was 0.75x r; asserted |
+| Soot Ram (dash) | none | along the dash | - | none | ok |
+| Flue Flight (X) steer | lane, width 1.8 m, chevrons | carpet 1.8 m wide | her screen | steering line | ok |
+| Flue Flight carpet | ring segments, width 0.9 m radius (1.8 m) | 1.8 m wide | everyone | lava carpet | fixed: net ring was 0.6x width |
+| Flue Flight lift-off | ember ring r 2.2 m | burst 2.2 m | everyone | ember ring at lift-off (about 2.16 m) | kept (owner call recorded earlier); extra scorch removed |
+
+Suggestion (not built): none.
 
 ## Engine notes
 The hose is simulated on the match step (`scripts/arch/kits/ashwick_hose.gd`); a puff stops at a wall (`World.occupy`) and hurts

@@ -2,9 +2,10 @@ class_name PinSpirit
 extends RefCounted
 ## Hem's Shift, Spirit Walk (hero sheet pin.md): a quick dodge roll the plain-dash way (ArchKit.dash_dir: the
 ## move direction, the aim when standing still or with the cursor setting), then "time" s walking as a
-## spirit: rocks, trees, pillars and barriers don't stop her (Hunter.spirit_t; terrain cliffs and ledges
-## still do). Damage ends it. If it ends while she is inside something she is put back where she
-## last stood clear. While she is inside something her own screen goes dark blue.
+## spirit: rocks, trees, pillars, barriers and raised terrain don't stop her (Hunter.spirit_t; the data's
+## Phase Walk rolls "through a pillar and the raised-platform wall"). Damage ends it. If it ends while she
+## is inside something she is put back where she last stood clear. While she is inside something her own
+## screen goes dark blue.
 
 var k: ArcherKit
 var h: Hunter
@@ -60,7 +61,7 @@ func _share_with_allies() -> void:
 		var walk := walk_time()
 		x.spirit_t = walk
 		granted.append([x, walk])
-		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
 ## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
@@ -72,7 +73,7 @@ func inside_boost() -> float:
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
 func _drop_orb(at: Vector3) -> void:
-	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.GREEN))
+	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.THREAD))
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
@@ -94,7 +95,7 @@ func tick_orbs(dt: float) -> void:
 				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
-				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
@@ -106,7 +107,7 @@ func tick_orbs(dt: float) -> void:
 
 func blocked_here() -> bool:
 	var w: World = k.m.world
-	if w.is_block(h.pos.x, h.pos.z):
+	if w.is_block(h.pos.x, h.pos.z) or w.ground_at(h.pos.x, h.pos.z) > h.pos.y + World.STEP:
 		return true
 	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, h.pos.x, h.pos.z, h.r * 0.6, h.pos.y) > 0.0
 

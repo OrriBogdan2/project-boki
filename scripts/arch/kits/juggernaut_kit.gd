@@ -27,6 +27,7 @@ const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
 const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
 var enraged_t := 0.0
@@ -106,12 +107,6 @@ func on_perfect_dodge() -> void:
 	if rank("dash") >= 3:
 		add_res(float(dash_def().get("dodge_rage", 15.0)))
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "RAGE", res_col(), false)
-
-## Warchain cooldown per rank: 12.5% off at rank 2, 37.5% in all at rank 3 (the data's -2s three times).
-func cd_k(slot: String) -> float:
-	if slot != "kin":
-		return super.cd_k(slot)
-	return 1.0 - float(e_def().get("rank_cut", 0.125)) * float([0, 1, 3][clampi(rank("kin") - 1, 0, 2)])
 
 func _enrage_fx() -> void:
 	var rc := res_col()
@@ -238,7 +233,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 func _reset_riposte() -> void:
 	if float(cd["x"]) <= 0.0 or h.lvl < int(Hunter.ULT_AT[0]):
 		return
-	cd["x"] = 0.0
+	HeroUlt.reset(self)
 	slam_resets += 1
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(x_def()), true)      # no ring on a reset
 	ResetCue.play(h, "juggernaut_slam_knock")
@@ -462,21 +457,22 @@ func on_dash(use_ex: bool) -> bool:
 		warchain.dash_out()
 	if riposte.running():
 		riposte.drop()               # (only its recovery is left by now: Shift moves him out of it)
-	if use_ex and not h.grounded:
+	if use_ex and not h.grounded and h.dashes < 1.0:          # a charge in the air is the same Rampage (item 183)
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
 				{"invuln": 0.08, "trail": "dust"})
-		if not meteor.running(): play("jug_exdash")     # an air dash: a hurled shoulder charge, knees tucked
+		if not meteor.running(): play("jug_exdash")     # out of charges: a hurled shoulder charge, knees tucked
 		return true
 	if not spend_dash(false):
 		return true
 	var dd := dash_def()
-	var wind := 0.0 if from_pull or from_slam else float(dd.get("windup", 0.15))
+	var in_hang := meteor.running()           # the Smash's gather: the drive rides it, the gather pose kept
+	var wind := 0.0 if from_pull or from_slam or in_hang else float(dd.get("windup", 0.15))
 	var dir := h.aim_dir() if from_slam else dash_dir()
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
 	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
-	if from_slam:
+	if from_slam or in_hang:
 		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
 		return true
 	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive
@@ -557,7 +553,7 @@ func rmb_hold_tick(t: float) -> void:
 	var ld: Dictionary = sd["lunge"]
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
-			"width": 1.3, "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
+			"width": lunge_w(), "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
 	if warchain.hooked():
 		var to := warchain.anchor - h.pos
 		lane["dir"] = Vector2(to.x, to.z)
@@ -590,6 +586,10 @@ func perfect_window(t: float) -> int:
 ## "Now": the raised blade flashes white-hot at its tip and rings out.
 func _perfect_cue() -> void:
 	vfx("lunge_perfect")
+
+## The Lunge's true width: the lane drawn while it charges and the scorch it leaves are as wide as the contact test.
+func lunge_w() -> float:
+	return 2.0 * (h.r + LUNGE_REACH)
 
 func lunge_k(t: float) -> float:
 	var sd := rmb_def()
@@ -717,10 +717,11 @@ func _tick_slam(dt: float) -> void:
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var lane := {"len": float(sl["radius"]), "width": 1.9, "fill": wk, "col": SLASH_OUT, "all": true, "chevrons": 2}
+	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
+			"all": true}
 	if pin != Vector2.ZERO:
-		lane["dir"] = pin
-	AimKit.lane(h, "slam", lane)
+		cone["dir"] = pin
+	AimKit.cone(h, "slam", cone)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
@@ -778,7 +779,7 @@ func _lunge(k: float, perfect: bool) -> void:
 	lunge = {"end": m.time + t * float(dash_feel()["time"]) + 0.02, "dir": dv, "k": k}
 	play("jug_lunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
-	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "perfect": perfect})
+	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "w": lunge_w(), "perfect": perfect})
 	if perfect:
 		perfects += 1
 		AimKit.perfect(h, {"col": LUNGE_FULL})
@@ -787,7 +788,7 @@ func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
 	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < h.r + f.r + 0.6 and absf(f.pos.y - h.pos.y) < 1.6:
+		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
 			var was_chain: bool = lunge.get("chain", false)
 			lunge = {}
@@ -827,7 +828,7 @@ func _chain_lunge(k: float) -> void:
 	var dist := clampf(dv.length() - gap + 0.6, 2.0, float(e_def()["range"]) + 1.0)
 	var t := dist / (float(ld["speed"]) * 1.25)
 	chain_lunges += 1
-	vfx("chain_lunge", h.pos, dv.normalized(), {"len": dist})
+	vfx("chain_lunge", h.pos, dv.normalized(), {"len": dist, "w": lunge_w()})
 	warchain.spend()
 	# the whole way down the chain (travel() scales by the global dash feel; the chain sets the length)
 	var feel := dash_feel()
@@ -926,6 +927,22 @@ func e_recastable() -> bool:
 	return warchain.hooked()
 
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
+## RecastCue: E again while the hook holds pulls you in; the marker sits on what it bit.
+func recast_window() -> Dictionary:
+	if not warchain.hooked():
+		return {}
+	return RecastCue.window("e", warchain.tether_t, float(warchain.data()["time"]), warchain.anchor)
+
+## RecastCue's badge: a foe the Finishing Slam hit; a knock on them in time resets the Riposte.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var reset_t := float(rmb_def()["slam"].get("reset_t", 2.0))
+	for key in slam_hit:
+		var f := instance_from_id(key) as Ent
+		var left: float = reset_t - (m.time - float(slam_hit[key]))
+		if f != null and not f.dead and left > 0.0:
+			out.append(RecastCue.mark(f, 0, left, reset_t, "SLAMMED", true))
+
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":
 		slam_w["pinned"] = true        # the cursor moved on to the throw: the Slam goes where it was started

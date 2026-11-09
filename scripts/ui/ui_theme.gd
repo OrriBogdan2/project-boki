@@ -2,11 +2,15 @@ class_name UiTheme
 extends RefCounted
 ## Builds the menus' Theme from UI's colour and size tokens and UiFrame boxes: buttons in their
 ## tiers, tabs, tiles, text boxes, panels, scroll bars, sliders, toggles, drop-downs and tooltips.
+## The "Void & Masks" look (UI_STYLE.md on ext/agent-briefs): black-violet panels and buttons with
+## torn edges (UiTorn), a teal-to-magenta neon edge that lights on what you point at, the one
+## primary button a ticket stub with a magenta rim and pink label.
 ## UI.install() merges it into the engine's default theme once at startup, so every Control in the
 ## game (menus, popups, tooltips) gets this look without a screen setting it. docs/UI_DESIGN.md.
 
 const LIP := 2                 # px of the darker face under raised buttons
 const PRIMARY_LIP := 3
+const TICKET := Color("3a1446")    # the ticket stub's dark plum face (magenta rim, pink label)
 
 ## The whole Theme. Call through UI.theme(), which keeps the one instance.
 static func build() -> Theme:
@@ -23,11 +27,11 @@ static func build() -> Theme:
 	_toggles_and_sliders(t)
 	return t
 
-## The stock focus ring: a 2 px warm outline just outside the control (keyboard and pad only).
+## The stock focus ring: a 2 px teal outline just outside the control (keyboard and pad only).
 static func ring(rad := UI.R_CTRL + 3) -> StyleBoxFlat:
 	var f := UiFrame._flat(Color(0, 0, 0, 0), rad)
 	f.draw_center = false
-	f.border_color = Color(UI.ACCENT_HI, 0.95)
+	f.border_color = Color(UI.NEON_A, 0.95)
 	f.set_border_width_all(2)
 	f.expand_margin_left = 3
 	f.expand_margin_right = 3
@@ -47,6 +51,19 @@ static func face(fill: Color, edge := Color(0, 0, 0, 0), lip := LIP, down := fal
 	f.padded(18, 8)
 	f.content_margin_top = 8.0 + sink
 	f.content_margin_bottom = 8.0 + float(lip) - sink
+	return f
+
+## A torn button face (UiTorn): `glow` lights the neon edge, `down` nudges the label down a pixel
+## (the size never changes). `magenta` runs the whole edge magenta (primary, picked).
+static func torn(fill: Color, glow := 0.0, edge := Color(0, 0, 0, 0), down := false, magenta := false) -> UiTorn:
+	var f := UiTorn.make(fill, 3.0, glow)
+	f.edge = edge
+	if magenta:
+		f.glow_a = UI.NEON_B
+	f.padded(18, 9)
+	if down:
+		f.content_margin_top = 10.0
+		f.content_margin_bottom = 8.0
 	return f
 
 static func _states(t: Theme, type: String, n: StyleBox, h: StyleBox, p: StyleBox, d: StyleBox) -> void:
@@ -70,10 +87,10 @@ static func _font_cols(t: Theme, type: String, col: Color, hover: Color, off: Co
 ## The plain Button is the secondary tier: a quiet raised slab, so the one filled (primary) button
 ## on a screen is obviously the thing to press. OptionButton shares it.
 static func _buttons(t: Theme) -> void:
-	var n := face(UI.RAISED)
-	var h := face(UI.RAISED.lightened(0.08), Color(1, 1, 1, 0.16))
-	var p := face(UI.RAISED.darkened(0.1), Color(UI.ACCENT, 0.6), LIP, true)
-	var d := face(Color(UI.RAISED, 0.45), Color(0, 0, 0, 0), LIP, false, 0.0)
+	var n := torn(UI.RAISED, 0.0, Color(0.8, 0.65, 1.0, 0.16))
+	var h := torn(UI.RAISED.lightened(0.06), 0.9)
+	var p := torn(UI.RAISED.darkened(0.12), 1.2, Color(0, 0, 0, 0), true)
+	var d := torn(Color(UI.RAISED, 0.45))
 	for type in ["Button", "OptionButton"]:
 		_states(t, type, n, h, p, d)
 		t.set_stylebox("focus", type, ring())
@@ -85,25 +102,32 @@ static func _buttons(t: Theme) -> void:
 
 static func _primary_and_danger(t: Theme) -> void:
 	var a := UI.ACCENT
-	_states(t, "Primary", face(a, Color(0, 0, 0, 0), PRIMARY_LIP, false, 0.22),
-		face(a.lightened(0.1), Color(1, 0.95, 0.85, 0.35), PRIMARY_LIP, false, 0.26),
-		face(a.darkened(0.06), Color(0, 0, 0, 0), PRIMARY_LIP, true, 0.12),
-		face(Color(a.darkened(0.5), 0.6), Color(0, 0, 0, 0), PRIMARY_LIP, false, 0.0))
-	_font_cols(t, "Primary", UI.DARK_INK, UI.DARK_INK, Color(1, 1, 1, 0.35))
+	_states(t, "Primary", ticket(TICKET, 1.0), ticket(TICKET.lightened(0.08), 1.7),
+		ticket(TICKET.darkened(0.2), 1.3, true), ticket(Color(TICKET, 0.5), 0.0))
+	_font_cols(t, "Primary", UI.ACCENT_HI, Color.WHITE, Color(1, 1, 1, 0.35))
 	var bad := UI.BAD
-	_states(t, "Danger", face(bad.darkened(0.62), Color(bad, 0.5)),
-		face(bad.darkened(0.45), Color(bad, 0.9)),
-		face(bad.darkened(0.55), bad, LIP, true),
-		face(Color(bad.darkened(0.7), 0.5), Color(0, 0, 0, 0), LIP, false, 0.0))
+	_states(t, "Danger", torn(bad.darkened(0.66), 0.0, Color(bad, 0.6)),
+		torn(bad.darkened(0.5), 0.0, Color(bad, 0.95)),
+		torn(bad.darkened(0.6), 0.0, bad, true),
+		torn(Color(bad.darkened(0.7), 0.5)))
 	_font_cols(t, "Danger", Color("ffc2b8"), Color.WHITE, UI.FAINT)
 	# the picked option in a row of choices: an accent-tinted slab with an accent edge
-	_states(t, "Chosen", face(Color(0.3, 0.2, 0.12), Color(a, 0.85)),
-		face(Color(0.36, 0.24, 0.14), a),
-		face(Color(0.26, 0.17, 0.1), a, LIP, true),
-		face(Color(0.2, 0.15, 0.1, 0.6), Color(a, 0.3)))
-	_font_cols(t, "Chosen", UI.ACCENT_HI, Color("ffe6c2"), Color(UI.ACCENT_HI, 0.5))
+	_states(t, "Chosen", torn(TICKET, 0.8, Color(a, 0.7), false, true),
+		torn(TICKET.lightened(0.06), 1.4, a, false, true),
+		torn(TICKET.darkened(0.15), 1.0, a, true, true),
+		torn(Color(TICKET, 0.6), 0.0, Color(a, 0.3)))
+	_font_cols(t, "Chosen", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))
 	for type in ["Primary", "Danger", "Chosen"]:
 		t.set_stylebox("focus", type, ring())
+
+## The ticket stub: the one primary button (and the title's main entry), notched at both sides,
+## the whole rim magenta.
+static func ticket(fill: Color, glow: float, down := false) -> UiTorn:
+	var f := torn(fill, glow, Color(UI.NEON_B, 0.5 if glow > 0.0 else 0.15), down, true)
+	f.ticket = true
+	f.content_margin_left = 24.0
+	f.content_margin_right = 24.0
+	return f
 
 ## Text-only buttons (small or rare actions) and the round icon button (close, back).
 static func _quiet_buttons(t: Theme) -> void:
@@ -112,8 +136,9 @@ static func _quiet_buttons(t: Theme) -> void:
 	none.content_margin_right = 12
 	none.content_margin_top = 8
 	none.content_margin_bottom = 8
-	_states(t, "Ghost", none, UiFrame.sunk(Color(1, 1, 1, 0.06), UI.R_CTRL).padded(12, 8),
-		UiFrame.sunk(Color(0, 0, 0, 0.2), UI.R_CTRL).padded(12, 8), none)
+	var gh := UiTorn.make(Color(1, 1, 1, 0.05), 2.0, 0.5)
+	var gp := UiTorn.make(Color(0, 0, 0, 0.2), 2.0, 0.7)
+	_states(t, "Ghost", none, gh.padded(12, 8), gp.padded(12, 8), none)
 	_font_cols(t, "Ghost", UI.MUTED, Color.WHITE, UI.FAINT)
 	t.set_stylebox("focus", "Ghost", ring())
 	var round_none := StyleBoxEmpty.new()
@@ -137,17 +162,18 @@ static func _tabs_and_tiles(t: Theme) -> void:
 	var seg_h := UiFrame.sunk(Color(1, 1, 1, 0.06), UI.R_SMALL + 2).padded(14, 7)
 	_states(t, "Seg", seg, seg_h, seg_h, seg)
 	_font_cols(t, "Seg", UI.MUTED, Color.WHITE, UI.FAINT)
-	var on := UiFrame.raised(UI.RAISED.lightened(0.06), UI.R_SMALL + 2, 3, UI.RIM)
-	on.lit = 0.1
-	on.mark = UI.ACCENT
+	var on := UiTorn.make(UI.RAISED.lightened(0.08), 2.0, 0.8)
+	on.glow_a = UI.NEON_B
+	on.edge = Color(UI.NEON_B, 0.55)
 	on.padded(14, 7)
 	_states(t, "SegOn", on, on, on, on)
 	_font_cols(t, "SegOn", Color.WHITE, Color.WHITE, UI.FAINT)
-	var tile := UiFrame.raised(Color(1, 1, 1, 0.04), UI.R_CARD).padded(10, 10)
-	var tile_h := UiFrame.raised(Color(1, 1, 1, 0.08), UI.R_CARD)
+	var tile := UiTorn.make(Color(1, 1, 1, 0.04), 2.5).padded(10, 10)
+	var tile_h := UiTorn.make(Color(1, 1, 1, 0.08), 2.5, 0.7)
 	tile_h.edge = Color(1, 1, 1, 0.22)
 	tile_h.padded(10, 10)
-	var tile_on := UiFrame.raised(Color(UI.ACCENT, 0.14), UI.R_CARD)
+	var tile_on := UiTorn.make(Color(UI.ACCENT, 0.14), 2.5, 0.9)
+	tile_on.glow_a = UI.NEON_B
 	tile_on.edge = Color(UI.ACCENT, 0.9)
 	tile_on.edge_w = 2
 	tile_on.padded(10, 10)
@@ -160,23 +186,20 @@ static func _tabs_and_tiles(t: Theme) -> void:
 	for type in ["Tile", "TileOn"]:
 		t.set_stylebox("focus", type, ring(UI.R_CARD + 3))
 
-## The title screen: big menu entries (words until you point at one, then a lit pill with an
-## amber edge slides under it) and its one call to action.
+## The title screen: big menu entries (words until you point at one, then a torn dark strip with
+## the neon edge lights under it) and its one call to action, a ticket stub.
 static func _front_menu(t: Theme) -> void:
 	var item := StyleBoxEmpty.new()
 	item.content_margin_left = 20
 	item.content_margin_right = 20
 	item.content_margin_top = 6
 	item.content_margin_bottom = 6
-	var item_h := UiFrame._flat(Color(1, 1, 1, 0.08), UI.R_CTRL)
-	item_h.border_width_left = 3
-	item_h.border_color = UI.ACCENT
+	var item_h := UiTorn.make(Color(0.07, 0.04, 0.12, 0.86), 3.0, 1.1)
 	item_h.content_margin_left = 28
 	item_h.content_margin_right = 20
 	item_h.content_margin_top = 6
 	item_h.content_margin_bottom = 6
-	var item_p := item_h.duplicate() as StyleBoxFlat
-	item_p.bg_color = Color(UI.ACCENT, 0.18)
+	var item_p := item_h.variant(Color(0.2, 0.06, 0.2, 0.9), 1.5)
 	_states(t, "MenuItem", item, item_h, item_p, item)
 	t.set_stylebox("focus", "MenuItem", StyleBoxEmpty.new())
 	t.set_font("font", "MenuItem", UI.big)
@@ -187,12 +210,11 @@ static func _front_menu(t: Theme) -> void:
 	t.set_constant("outline_size", "MenuItem", 6)
 	t.set_color("font_outline_color", "MenuItem", Color(0.05, 0.03, 0.1, 0.55))
 	t.set_constant("h_separation", "MenuItem", 12)
-	var a := UI.ACCENT
-	var main_n := _menu_main(a, 0.22, false)
-	var main_h := _menu_main(a.lightened(0.1), 0.28, false)
-	_states(t, "MenuMain", main_n, main_h, _menu_main(a.darkened(0.06), 0.14, true), main_n)
+	var main_n := _menu_main(TICKET, 1.1, false)
+	var main_h := _menu_main(TICKET.lightened(0.08), 1.8, false)
+	_states(t, "MenuMain", main_n, main_h, _menu_main(TICKET.darkened(0.2), 1.4, true), main_n)
 	var main_f := ring(17)
-	main_f.border_color = Color(1, 0.95, 0.85, 0.9)
+	main_f.border_color = Color(UI.NEON_A, 0.9)
 	main_f.expand_margin_left = 4
 	main_f.expand_margin_right = 4
 	main_f.expand_margin_top = 4
@@ -200,17 +222,18 @@ static func _front_menu(t: Theme) -> void:
 	t.set_stylebox("focus", "MenuMain", main_f)
 	t.set_font("font", "MenuMain", UI.big)
 	t.set_font_size("font_size", "MenuMain", 28)
-	_font_cols(t, "MenuMain", Color(0.16, 0.08, 0.06), Color(0.16, 0.08, 0.06), Color(0.16, 0.08, 0.06, 0.5))
+	_font_cols(t, "MenuMain", UI.ACCENT_HI, Color.WHITE, Color(UI.ACCENT_HI, 0.5))
+	t.set_constant("outline_size", "MenuMain", 6)
+	t.set_color("font_outline_color", "MenuMain", Color(0.1, 0.02, 0.12, 0.7))
 	t.set_constant("h_separation", "MenuMain", 12)
 
-static func _menu_main(fill: Color, lit: float, down: bool) -> UiFrame:
-	var f := face(fill, Color(0, 0, 0, 0), 4, down, lit)
-	f.rad = 14
+static func _menu_main(fill: Color, glow: float, down: bool) -> UiTorn:
+	var f := ticket(fill, glow, down)
 	f.shadow = 14
-	f.content_margin_left = 30
-	f.content_margin_right = 34
-	f.content_margin_top += 3.0
-	f.content_margin_bottom += 3.0
+	f.content_margin_left = 34
+	f.content_margin_right = 38
+	f.content_margin_top += 5.0
+	f.content_margin_bottom += 5.0
 	return f
 
 ## Text boxes, labels, drop-down lists, tooltips and separators.
@@ -226,15 +249,16 @@ static func _inputs(t: Theme) -> void:
 	t.set_color("caret_color", "LineEdit", UI.ACCENT)
 	t.set_color("selection_color", "LineEdit", Color(UI.ACCENT, 0.35))
 	t.set_color("font_color", "Label", UI.INK)
-	var pm := UiFrame.raised(UI.SURFACE.lightened(0.04), UI.R_CARD, 14, UI.RIM).padded(6, 6)
-	t.set_stylebox("panel", "PopupMenu", pm)
-	t.set_stylebox("hover", "PopupMenu", UiFrame.raised(Color(UI.ACCENT, 0.24), UI.R_SMALL))
+	var pm := UiTorn.make(UI.SURFACE.lightened(0.04), 3.0, 0.6)
+	pm.shadow = 14
+	t.set_stylebox("panel", "PopupMenu", pm.padded(8, 8))
+	t.set_stylebox("hover", "PopupMenu", UiTorn.make(Color(UI.ACCENT, 0.24), 2.0))
 	t.set_color("font_color", "PopupMenu", UI.INK)
 	t.set_color("font_hover_color", "PopupMenu", Color.WHITE)
 	t.set_font_size("font_size", "PopupMenu", UI.T_BODY)
 	t.set_constant("v_separation", "PopupMenu", 8)
-	var tp := UiFrame.raised(UI.SURFACE.lightened(0.02), UI.R_CTRL, 10, UI.RIM)
-	tp.edge = Color(1, 0.95, 0.85, 0.1)
+	var tp := UiTorn.make(UI.SURFACE.lightened(0.02), 2.0, 0.5)
+	tp.shadow = 10
 	tp.padded(12, 8)
 	t.set_stylebox("panel", "TooltipPanel", tp)
 	t.set_color("font_color", "TooltipLabel", UI.INK)
@@ -242,19 +266,19 @@ static func _inputs(t: Theme) -> void:
 	t.set_stylebox("separator", "HSeparator", UiFrame._flat(UI.LINE, 1))
 	t.set_constant("separation", "HSeparator", 6)
 
-## Panels: a deep warm-night sheet with the layered frame (long soft shadow, rim, light from the
-## top). Scroll bars stay thin and quiet; progress bars are a recess with a lit fill.
+## Panels: a black-violet torn sheet with speckle and runes in its border band and the teal-to-
+## magenta neon edge. Scroll bars stay thin and quiet; progress bars are a recess with a lit fill.
 static func _panels(t: Theme) -> void:
-	var pc := UiFrame.raised(UI.SURFACE, UI.R_PANEL, 34, UI.RIM)
-	pc.lit = 0.06
+	var pc := UiTorn.make(UI.SURFACE, 5.0, 1.0, 1.0)
+	pc.shadow = 34
 	pc.padded(UI.PAD, 22)
 	t.set_stylebox("panel", "PanelContainer", pc)
 	for sb_t in ["VScrollBar", "HScrollBar"]:
-		var gr := UiFrame._flat(Color(1, 1, 1, 0.16), 4)
+		var gr := UiFrame._flat(Color(UI.NEON_A, 0.32), 4)
 		gr.content_margin_left = 3
 		gr.content_margin_right = 3
 		t.set_stylebox("grabber", sb_t, gr)
-		t.set_stylebox("grabber_highlight", sb_t, UiFrame._flat(Color(1, 1, 1, 0.3), 4))
+		t.set_stylebox("grabber_highlight", sb_t, UiFrame._flat(Color(UI.NEON_A, 0.6), 4))
 		t.set_stylebox("grabber_pressed", sb_t, UiFrame._flat(Color(UI.ACCENT, 0.6), 4))
 		var tr := UiFrame._flat(Color(0, 0, 0, 0.14), 4)
 		tr.content_margin_left = 3

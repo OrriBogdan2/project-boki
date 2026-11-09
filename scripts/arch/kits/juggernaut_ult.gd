@@ -4,11 +4,12 @@ extends RefCounted
 ## Retaliation, briefs/hero-ref/juggernaut.md "Ultimate (on X)"). Press: he plants in a guard for 0.65s,
 ## blade upright and his body flaring gold, taking no damage and no crowd control (each hit he blocks rings
 ## out and makes the answer harder, up to two). Then he lunges 1.8m and cleaves up through the strip ahead
-## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals, and knocking a
-## hunter with it makes it ready again at once. Landing it on a rival hunter fills the bond meter
-## (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain still held pulls him through it:
-## E in the guard or the cleave hauls him along the chain, the guard up, and the cleave goes into
-## the hooked foe as he reaches them. Owned by JuggernautKit.
+## (1.8m wide, 3.6m long, shown to everyone through the guard): he heals 80% of what it deals. Taking a hunter
+## down with it (the source's "killing a living enemy": our lethal hit is a knock; a hunter already down takes
+## nothing from it, and a monster or a wisp doesn't count) makes it ready again at once. Landing it on a
+## rival hunter fills the bond meter (HeroUlt.landed: a hit, a knock or a kill, the best of the cast). A chain
+## still held pulls him through it: E in the guard or the cleave hauls him along the chain, the guard up, and
+## the cleave goes into the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
 const LANE_COL := Color("ffb820")      # the strip ahead: his gold
@@ -153,9 +154,8 @@ func _land(d: Dictionary) -> void:
 			continue
 		last_dealt += dealt
 		_impact(f, dir, dealt)
-		if f is Hunter and ((f as Hunter).downed or f.hp <= 0.0):
+		if HeroUlt.landed(k, f) in ["knock", "kill"]:
 			_reset()
-		HeroUlt.landed(k, f)
 	if last_dealt > 0.0:
 		strikes += 1
 		var hp0 := h.hp
@@ -173,10 +173,10 @@ func _impact(f: Ent, dir: Vector2, dealt: float) -> void:
 	Feel.hitstop(k.m, h, f, dealt, {"melee": true, "payoff": true, "heavy": true})
 	Shake.incoming_big(k.m, f.pos, 0.6, h)
 
-## A hunter knocked by the cleave: it is ready again at once.
+## A hunter who was up and went down to the cleave: it is ready again at once.
 func _reset() -> void:
 	resets += 1
-	k.cd["x"] = 0.0
+	HeroUlt.reset(k)
 	k.m.fx.word(k.h.pos + Vector3(0, 2.6, 0), "RIPOSTE READY", GOLD, true)
 	ResetCue.play(k.h, "juggernaut_riposte_knock")
 

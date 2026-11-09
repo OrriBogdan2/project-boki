@@ -29,6 +29,7 @@ func _ready() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	root.add_child(MoveReadout.new())
 	# behind every overlay menu: the screen blurred and darkened, fading in and out
 	dim = UI.backdrop()
 	root.add_child(dim)
@@ -226,7 +227,7 @@ func open_pause(where: String) -> void:
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
+		item.call("Training Grounds", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
 	item.call("Settings", "gear", func():
@@ -260,7 +261,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = item.call("Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -323,7 +324,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
 	if admin_allowed():
 		_group(v, "Admin")
-		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 90 s lobby before each expedition. Off: plain loading")
+		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
 func _tab_controls(v: VBoxContainer) -> void:
@@ -331,6 +332,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
+	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
+	_toggle(v, "Movement readout", "move_readout", readout_tip)
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
@@ -431,6 +434,16 @@ func _tab_demo(v: VBoxContainer) -> void:
 		Record.set_level(i)
 		Settings.set_v("rec_level", i))
 	rec_row.add_child(rec_ob)
+	_group(v, "Quick start")
+	var qs := HFlowContainer.new()
+	qs.add_theme_constant_override("h_separation", 8)
+	for i in DemoQuick.IDS.size():
+		var id := String(DemoQuick.IDS[i])
+		qs.add_child(UI.button(String(DemoQuick.NAMES[i]), func():
+			close()
+			DemoQuick.start(id)))
+	v.add_child(qs)
+	_note(v, "Plays on a made-up save that is never written. Your own save is back on the title screen.")
 	_group(v, "Next match")
 	_choice(v, "Weather", "demo_weather", [["random", "Random"], ["clear", "Always clear"]])
 	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
@@ -473,7 +486,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 func _group(v: VBoxContainer, txt: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(4))
-	v.add_child(UI.section(txt, UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
@@ -618,7 +631,7 @@ func open_dex(spk: String) -> void:
 	dex_open = spk
 	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
-	DexView.detail(v, spk, get_tree())
+	DexView.detail(v, spk, get_tree(), open_dex)
 
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
@@ -636,7 +649,7 @@ func open_inventory() -> void:
 		c.custom_minimum_size = Vector2(222, 0)
 		var cv := UI.vbox(6); c.add_child(cv)
 		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
+		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
@@ -826,7 +839,7 @@ func open_admin() -> void:
 	add.call("Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
-			k["level"] = int(k["level"]) + 1
+			Evo.level_up(k)
 			Game._evolve(k, {}))
 	add.call("Partner full trust", func():
 		var k := Save.active_kin()
