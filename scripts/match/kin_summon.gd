@@ -45,6 +45,12 @@ static func times(ks: KinSpec) -> Vector2:
 static func chirp_name(ks: KinSpec) -> String:
 	return "wisp_chirp_" + (ks.size if ks else "small")
 
+## A summon cue ("burst", "end", "killed") sized by its body, with the species chirp layered under it (every
+## game plays it, positional: a rival's carries 25 m, content/sfx/boki.json "reach").
+func cue(what: String, chirp_db: float) -> void:
+	k.m.sfx("summon_%s_%s" % [what, k.ks.size if k.ks else "small"], k.pos, -4.0)
+	k.m.sfx(chirp_name(k.ks), k.pos, chirp_db, Unique.voice(k.rec))
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
@@ -126,14 +132,12 @@ func tick(dt: float) -> void:
 func popped(to_wisp: bool) -> void:
 	if not to_wisp:
 		_pop(true, false)
-		k.m.sfx("wisp_bloom", k.pos, -4.0)
-		k.m.sfx(chirp_name(k.ks), k.pos, -4.0, Unique.voice(k.rec))
+		cue("burst", -4.0)
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
-	if to_wisp:
-		k.m.sfx("wisp_shrink", k.pos, -4.0)
+		cue("killed", -14.0)      # it never shrank: knocked down, the wisp leaving
 	_folding = false
 
 ## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
@@ -183,6 +187,7 @@ func render() -> void:
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		cue("end", -8.0)
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false          # left behind mid-fold: it stays the walking Boki
 		_drop_pop()
