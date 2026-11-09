@@ -72208,5 +72208,33 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/rd2_forgebrock_v2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "rd2_gongrowl_v2",
+    "name": "Gongrowl (redesign concept, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd2_gongrowl_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_gongrowl_v2",
+    "name": "Gongrowl (redesign concept, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd2_gongrowl_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_gongrowl_v2",
+    "name": "Gongrowl (redesign concept, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd2_gongrowl_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_gongrowl_v2",
+    "name": "Gongrowl (redesign concept, round 2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd2_gongrowl_v2_4.jpg",
+    "ok": true
   }
 ]
