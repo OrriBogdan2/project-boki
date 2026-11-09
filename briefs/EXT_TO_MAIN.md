@@ -4650,3 +4650,33 @@ READY ext/recast-marker-a a9b21705b (world marker ring + key on Motley's seed, M
 
 ## 2026-11-09 (job 20261109-070112-a2, rpc1): READY ext/anim-arm-kael
 READY ext/anim-arm-kael 33006d6ab (Kael slam and air slam off arm hangs loose via free_arm, audit gates it; merge after ext/anim-quality-audit; includes ext/kael-tap-ult-1108 66423a45d and ext/anim-free-arm-relax a518863da merged in; GPU strips queued: before 20261109-071025-09130, after 20261109-072439-32521)
+
+## 07:25Z — art session: fast lane f1 + f6 (one critic; 8.0+ sheets/cards live, 7.5+ to owner queue)
+ART arcestrel 8.5 briefs/boki-art/evolutions/Arcestrel.jpg kind=turnaround
+ART bellowary 8.3 briefs/boki-art/turnarounds/Bellowary.jpg kind=turnaround
+ART blossmink 8.2 briefs/boki-art/evolutions/Blossmink.jpg kind=turnaround
+ART blotlet 8.6 briefs/boki-art/turnarounds/Blotlet.jpg kind=turnaround
+ART boltstrich 8.2 briefs/boki-art/turnarounds/Boltstrich.jpg kind=turnaround
+ART briarlynx 8.2 briefs/boki-art/turnarounds/Briarlynx.jpg kind=turnaround
+ART chandelapi 8.3 briefs/boki-art/evolutions/Chandelapi.jpg kind=turnaround
+ART chandelotl 8.4 briefs/boki-art/evolutions/Chandelotl.jpg kind=turnaround
+ART flarmink 8.1 briefs/boki-art/evolutions/Flarmink.jpg kind=turnaround
+ART galleotter 8.3 briefs/boki-art/evolutions/Galleotter.jpg kind=turnaround
+ART geodelotl 8.6 briefs/boki-art/evolutions/Geodelotl.jpg kind=turnaround
+ART latchling 8.4 briefs/boki-art/evolutions/Latchling.jpg kind=turnaround
+ART pebblamb 8.1 briefs/boki-art/turnarounds/Pebblamb.jpg kind=turnaround
+ART sloggoth 8.4 briefs/boki-art/turnarounds/Sloggoth.jpg kind=turnaround
+ART dragonkite 8.6 briefs/boki-art/cards/Dragonkite.jpg kind=card
+ART flarmink 8.5 briefs/boki-art/cards/Flarmink.jpg kind=card
+ART glomwort 8.6 briefs/boki-art/cards/Glomwort.jpg kind=card
+ART gravadillo 8.5 briefs/boki-art/cards/Gravadillo.jpg kind=card
+ART hivara 8.4 briefs/boki-art/cards/Hivara.jpg kind=card
+ART kitlet 8.5 briefs/boki-art/cards/Kitlet.jpg kind=card
+ART lockatara 8.5 briefs/boki-art/cards/Lockatara.jpg kind=card
+ART murmurling 8.6 briefs/boki-art/cards/Murmurling.jpg kind=card
+ART pawnfry 8.6 briefs/boki-art/cards/Pawnfry.jpg kind=card
+ART prowyak 8.5 briefs/boki-art/cards/Prowyak.jpg kind=card
+ART selenfin 8.2 briefs/boki-art/cards/Selenfin.jpg kind=card
+ART skateron 8.5 briefs/boki-art/cards/Skateron.jpg kind=card
+ART snuffapi 8.4 briefs/boki-art/cards/Snuffapi.jpg kind=card
+ART umbrathere 8.5 briefs/boki-art/cards/Umbrathere.jpg kind=card
