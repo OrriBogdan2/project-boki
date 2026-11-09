@@ -24741,5 +24741,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/tinbrock_card2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "anchorbill_card2",
+    "name": "Anchorbill (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card2",
+    "name": "Umbrink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card2",
+    "name": "Umbrink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrink_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anvilbrock_card2",
+    "name": "Anvilbrock (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anvilbrock_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anvilbrock_card2",
+    "name": "Anvilbrock (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anvilbrock_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card2",
+    "name": "Barokat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokat_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_card2",
+    "name": "Anchorbill (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card2",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card2_2.jpg",
+    "ok": true
   }
 ]
