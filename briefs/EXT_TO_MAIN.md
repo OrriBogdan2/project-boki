@@ -4932,3 +4932,4 @@ READY ext/boki-quirks a56585dc3 (Bokidex quirks-v1 in game: content/rules/boki_q
 ART glassolotl 10 briefs/boki-art/evolutions/Glassolotl.jpg kind=turnaround status=approved
 ART glassolotl 10 briefs/boki-art/cards/Glassolotl.jpg kind=card
 ART glassolotl 10 briefs/boki-art/portraits/light/Glassolotl.jpg kind=portrait
+READY ext/anim-hand-albert ddcfa6915 (Albert lmb_throw/lmb_slam: hand travel spread evenly, audit hand step 0.51 -> 0.42 and 0.64 -> 0.45 body heights; throw release stays 0.12 s, slam impact 0.08 -> 0.10 s; merge after ext/anim-quality-audit (tools/art1/glb_retime.py is byte-identical to ext/anim-hand-tenzo's); anim-audit bulwark 0 FAIL, bulwark-combo 145/0, clip-check 0, health --strict OK, gen_wiki --check OK; before/after --close strips queued on jobq (after 20261109-080040-31162; before tree_before), not yet rendered)
