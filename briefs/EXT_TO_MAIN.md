@@ -3355,3 +3355,17 @@ Checks: new --demo-quick-check (registered) 21 checks, 1 fail (expedition load t
   - health --strict OK. suite-fast is not on w2.
 - GPU (`--island-clip`: glide-under clips on 3 islands + Training Area, island silhouettes, frame time): before 20261108-234211-05742, after 20261108-235725-12161. Both were queued behind a ~2 h GPU backlog and not run when posted. No source-game island reference is in the briefs.
 - No PR (w2 has no gh): https://github.com/OrriBogdan2/project-boki/pull/new/ext/islands-deeper-1108. Not merged.
+
+## 2026-11-09 farm (job 20261108-193001-a1, hetzner): READY farm-tut-batch-1108-deep
+READY ext/farm-tut-batch-1108-deep dcc04a947, PR #23. Escalation of 20261108-180818-a1, owner items 27-31. Supersedes PR #20: the force push to rebase its branch was blocked, so this is a new branch, rebased on ext/farm-tut-spotlight d0f027452 (merge that first).
+- 27: modal spotlight with "Click here", now on one line (autowrap with no width set had squeezed it to one letter a line).
+- 28: cause found. A clicked build tile kept the GUI focus and its gui_input took Enter first. Home._new_panel now releases focus. The farm-place-check focused-tile case fails on the unfixed tree.
+- 29: Hob's dark plate now scales (billboard_keep_scale). The name tag's outline no longer shows under his shout.
+- 30: relic only after all 12 steps (fresh save, and a save reloaded mid-tutorial).
+- 31: live hunger gate.
+- NEW content/rules/tuning.json + Tuning.of() hold the shared feel numbers.
+Checks: --farm-place-check, --farm-tutorial-check, --hob-check, --build-ui-check, --home-build-check: 0 failures; health --strict OK.
+--farm-start-check has 1 fail ("on open meadow it tints green"); it fails the same on the base branch.
+suite-fast: not finished. Merge side 165/166 flags; the main-side comparison never ran (2 h limit, workers held by other suites). Its reds were null-node errors from load; the farm/build ones pass when run alone.
+GPU: jobq farm-tut-batch-1108-deep-{before,after} are queued. llvmpipe shots look right.
+Training Area: no farm UI there, not testable. Not merged.
