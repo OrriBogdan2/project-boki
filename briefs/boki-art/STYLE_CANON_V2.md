@@ -12,12 +12,12 @@ What round 7 showed. Style a holds up on simple, light or mid-value designs: `st
 - **Busy or strapped designs barely change** (Siegephant, Shinobant, Chuggamus). A style pass cannot fix a design: see the hold list in RERENDER_PROMPTS.md section 7.
 
 ## The recipe in one line
-Flat fills, one hard shade shape per colour, a bold three-weight line in a dark shade of the local colour, darks kept dark, shine only on truly glossy materials, detail in three zones, a face template per archetype, blush on babies only.
+Flat fills, one hard shade shape per colour, a bold even line (heavier outside than inside) in a dark shade of the local colour, darks kept dark, shine only on truly glossy materials, detail in three zones, a face template per archetype, blush on babies only.
 
 ## 1. Line
-Style a's bold clean line, with a hierarchy added (a's even weight is the one tell it left in place).
+Style a's bold clean line, with the outer line a step heavier than the inside lines.
 - **Three weights, ratio 4 : 2 : 1.** Outer silhouette : lines between body parts : small detail. On a 2048 px card that is about 6 / 3 / 1.5 px (outer line is about 0.35% of the creature's longest side, so sheets scale down with the view size). Finals and legendaries use 5 : 2 : 1 (outer about 8 px).
-- **Taper.** Strokes that end inside the body end in a point. The outer line gets up to 1.5x heavier on the shade side (lower right) and under overlaps. The silhouette line stays closed, for the cutout. If the owner prefers a's even line exactly, drop the taper and keep the three weights (`LINE_V2_EVEN` in the prompts file).
+- **No taper, no swelling** (decided 11-09 after the owner compared a mock-up and could not tell the two apart). Each of the three weights is even along its length, as in style a. Reason: a line that varies is one more thing that differs from run to run, and across 226 Boki a consistent set matters more than a livelier line. The silhouette line stays closed, for the cutout.
 - **Colour.** Each line is the neighbouring fill darkened to about 25% lightness and shifted 15 to 20 degrees cooler: deep plum round purple (Vespyx), dark umber round gold and brown (Gongrowl, Mycroll), deep slate blue round white and ice (Rimink, Glaciammoth). Never pure black (test c), never one plum for every Boki, never lighter than the fill beside it, never above 35% lightness on pale Boki.
 - One line only: no doubled lines, no sketch hairlines, no fur strands. A fur edge is 3 to 7 clump points per edge run.
 
@@ -116,7 +116,7 @@ Body turned 20 to 60 degrees, both eyes visible, never flat front or pure profil
 |---|---|---|---|
 | 1 | "Soft hand-painted shading" (STYLE_CANON style words, DESIGN_RULES 11, RENDER, CARD, P, TA, CONCEPT_CORE) | flat fill + 1 hard shade shape | the airbrushed finish is tell 2 |
 | 2 | "Never flat cel shading", "no flat vector fill" (STYLE_CANON, DESIGN_RULES 11) | flat cel is the base | the owner's pick |
-| 3 | "One thin dark outline, same weight on every Boki" | bold line, 3 weights 4:2:1 (5:2:1 on finals), hue-shifted per local colour | uniform line reads as a filter (tell 7) |
+| 3 | "One thin dark outline, same weight on every Boki" | bold even line, heavier outside than inside (4:2:1, 5:2:1 on finals), hue-shifted per local colour | style a's line, with enough hierarchy to hold the silhouette at thumbnail size |
 | 4 | "Big glossy eyes" for all; "rounded toy-like shapes" for all | 6 face templates; shapes follow the archetype table already in DESIGN_RULES | one chibi face on everything (tell 3) |
 | 5 | "Soft pink blush on the cheeks" at every stage (STYLE_CANON, PANEL_BRIEF "Blush") | flat blush on babies and cute middles only | blush on bosses and skulls (tell 3). Restores the older GRADES auto-fail "blush on non-babies", with cute middles allowed |
 | 6 | "Soft key light, a soft lighter belly and a gentle bounce from below" | one key light, hard shade, no bounce | ambiguous light (tell 2) |

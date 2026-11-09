@@ -57,7 +57,7 @@ out.save(p.rsplit('.',1)[0]+'_qa.jpg',quality=85)
 
 ## E. Construction (25 seconds)
 17. HARD. Limb count: count legs, wings, tails, heads, horns. They match the counts line in the prompt, and no limb is ambiguous or merged.
-18. HARD. Nothing strapped, belted, banded, chained, bolted, worn or held. Every part grows from the body with a fused base.
+18. HARD. Nothing strapped, belted, banded, chained, bolted, worn or held. Every part grows from the body with a fused base. Accepted exceptions, as approved by the owner: Scoopsy's cone, Shinobant's mask and scarf, Reapant's hood, Galleotter's collar, hoops, oars and mast.
 19. HARD. One locomotion system (legs or wheels or a coil, not two).
 20. Patterns wrap the form (stripes curve like rings round a tube). The part's material repeats in 2 other places.
 21. Stance matches the stage: baby sits or bounces, middle moves, final is planted. Walking species have every supporting foot on one floor line. No base under it (ice block, stump, puddle).
@@ -71,7 +71,7 @@ out.save(p.rsplit('.',1)[0]+'_qa.jpg',quality=85)
 ## G. Sheets only (add 30 seconds)
 25. HARD. Exactly four views in one row: front, three-quarter, side, back. No ghost or duplicate copies, no second row.
 26. HARD. Counts agree in all four views: limbs, horns, crystals, spikes, stripes on the same body part. Count one feature across the row (Chandelotl: hood crystals; Anchorhorn: hind limbs).
-27. HARD. Same eyes and face in every view that shows them, and the same as the card (Chandelotl's sheet has narrow eyes, its card round ones).
+27. HARD. Same eyes and face in every view that shows them, and the same as the card (Chandelotl's old sheet has narrow eyes, its card round ones; the card's face is the one to keep).
 28. Same height and scale in all four views, feet on one baseline, same stance in each.
 29. Flats only: line and flat fills, no shade shapes, no highlights except the eyes. Colours match the card's base swatches.
 30. The side and back views are real side and back views (not a second three-quarter), and the back shows how the signature part attaches.

@@ -25,7 +25,7 @@
 | Ringrove | tough | Uniform moss texture and about 40 small caps: group the caps into 3 big tiers, with the purple as a flat accent. Decide the forelegs (bark or fur) and repeat that material twice more. Realistic bear muzzle under cartoon eyes: simplify the muzzle, tough eyes, plain cheeks. Push values: dark body, light caps |
 | Prismander | cute | The glossiest starter. Translucent jelly becomes a lighter flat inner shape plus one highlight on the head. Stripes wrap as rings. Gill stalks: 4 or 5 nubs each. Flat cheek ovals |
 | Glassolotl | pretty | Rainbow only on the tail fin, as 3 flat pastel planes. Stripes in the family colours (red and green on pink). Make all 4 legs and their attachment clear. Lock the crystal count |
-| **Chandelotl** (A, pretty) | pretty | Start from `style_chandelotl_a_1`. Chevrons and tail stripes wrap the form. Hood: about 12 big facets, pale blue, 3 pastel planes. Lock crystals per zone (crown, collar, flank). The card has round cute eyes with blush, the sheet narrow smug eyes: owner picks one; I suggest the sheet's, without cheeks, for a final |
+| **Chandelotl** (A, pretty) | pretty | Start from `style_chandelotl_a_1`. Chevrons and tail stripes wrap the form. Hood: about 12 big facets, pale blue, 3 pastel planes. Lock crystals per zone (crown, collar, flank). **Face decided 11-09: the hero card's** (round eyes, small closed mouth; the owner prefers it), with plain cheeks because it is a final. The sheet's narrow-eyed grin goes: redraw the sheet to match the card |
 
 ## Legendaries
 | Boki (tier) | Face | Fix |
