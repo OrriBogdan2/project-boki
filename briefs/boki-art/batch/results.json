@@ -6709,5 +6709,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_zephyrak_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_r",
+    "name": "Zephyrak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_r3",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_r3",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_r3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_r",
+    "name": "Kayak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kayak_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_e",
+    "name": "Fizzlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fizzlet_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet_e",
+    "name": "Fizzlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fizzlet_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_r",
+    "name": "Kayak",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kayak_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r",
+    "name": "Wickapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wickapi_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak_r",
+    "name": "Kayak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kayak_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_r",
+    "name": "Howlop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_r",
+    "name": "Howlop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r",
+    "name": "Wickapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wickapi_r_1.jpg",
+    "ok": true
   }
 ]
