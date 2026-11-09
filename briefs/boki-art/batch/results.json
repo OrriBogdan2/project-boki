@@ -16740,5 +16740,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_gilabacus_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_olmlet",
+    "name": "Olmlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_olmlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gilabacus",
+    "name": "Gilabacus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_gilabacus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_olmlet",
+    "name": "Olmlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_olmlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm",
+    "name": "Glazolm (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glazolm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm",
+    "name": "Glazolm (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glazolm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm",
+    "name": "Glazolm (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glazolm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm",
+    "name": "Glazolm (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glazolm_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pawnfry",
+    "name": "Pawnfry",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pawnfry_2.jpg",
+    "ok": true
   }
 ]
