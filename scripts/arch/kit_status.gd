@@ -26,6 +26,9 @@ static func clear_rattled(e: Ent) -> void:
 static func grounded(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
 
+static func grounded_left(e: Ent) -> float:
+	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
+
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
@@ -38,6 +41,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 	if e.remote:
 		if send and m.get("net_on"):
 			m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), snappedf(k, 0.01)])
+		_note_remote(e, kind, secs)
 		_show(e, kind, secs)
 		return
 	match kind:
@@ -64,6 +68,14 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
 			_show(e, kind, secs)
+
+## A remote body's own game runs the rule, so here only the time left is kept, for the plate's timer.
+static func _note_remote(e: Ent, kind: String, secs: float) -> void:
+	if kind == "gnd" or kind == "rat":
+		var key := kind + "_until"
+		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
+	elif kind == "dsr":
+		e.slow_t = maxf(e.slow_t, secs)
 
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:

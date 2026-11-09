@@ -96,12 +96,15 @@ func _watch(h: Hunter, dt: float) -> Dictionary:
 	s["lvl_pop"] = maxf(0.0, float(s["lvl_pop"]) - dt)
 	return s
 
-## What's happening to someone, as [icon, colour, word, seconds left (or -1)], worst first.
+## What's happening to someone, as [icon, colour, word, seconds left (or -1)], worst first. The
+## crowd-control kinds (stun, root, Ground, Daze, Slow) always carry their time left.
 static func statuses(e: Ent) -> Array:
 	var out: Array = []
-	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", -1.0])
-	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", -1.0])
-	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", -1.0])
+	if e.stun_t > 0.0: out.append(["concussion", Color("fff27a"), "STUNNED", e.stun_t])
+	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", e.root_t])
+	if KitStatus.grounded(e): out.append(["bolas", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.rattled(e): out.append(["burst", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
+	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", e.slow_t])
 	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
 	var hunter := e as Hunter
 	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
@@ -109,7 +112,8 @@ static func statuses(e: Ent) -> Array:
 	if e.guard_t > 0.0: out.append(["anchor", Color("f2e6cf"), "", -1.0])
 	return out
 
-## Status icons in a row of small tiles starting at `at` (left edge, vertical centre).
+## Status icons in a row of small tiles starting at `at` (left edge, vertical centre); a status with
+## time left shows it under its tile, shrinking.
 static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> void:
 	var x := at.x
 	for ic in icons:
@@ -117,6 +121,8 @@ static func icon_row(c: CanvasItem, at: Vector2, icons: Array, tile := 14.0) -> 
 		c.draw_rect(r, HudStyle.SHADE)
 		c.draw_rect(r, Color(ic[1], 0.8), false, 1.0)
 		Icons.draw(c, String(ic[0]), r.get_center(), tile * 0.36, ic[1])
+		if float(ic[3]) > 0.0:
+			HudStyle.ctext(c, Vector2(r.get_center().x, r.end.y + 9.0), "%.1f" % float(ic[3]), 10, ic[1])
 		x += tile + 2.0
 
 ## Shield as a fraction of max health (what the bar draws past the end of health).
