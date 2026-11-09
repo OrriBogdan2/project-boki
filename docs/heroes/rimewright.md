@@ -79,6 +79,17 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 | X: the floor indicator always shows and the crash hits where it shows (height doesn't matter) | [wiki](https://supervive.wiki.gg/wiki/Celeste) (patch 05.03.25) | no | yes (the rink is fixed where she cast it, drawn for everyone) | "tm X: sealed in, the 4 bh rink shown to everyone" |
 | X: allies are unaffected | footage, card | yes | yes (foes only) | (by construction: `foes_in`) |
 
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB hold (landing ring at the cursor; card cast 0.3 s) | Not shown rooted; sheet: casts happen while moving, the arms do the work | Free at full speed (no `move_k`, no root), faces the cursor | matches |
+| RMB release (the push) and recovery | A quick flick; no stop shown | Free; the spear travels at 18 m/s from her palms | matches |
+| E tell (0.2 s sparkle at her feet) | Sparkle at her feet; no stop shown | Free at full speed through the 0.2 s tell and after | matches |
+| E recast (freeze) | No re-press shown | Free (a tap) | n/a |
+
 ## Assumptions
 - **Dart range:** the darts curve to the cursor and fly on to 10m when nothing is there to home on.
 - **Dart pattern:** the footage's uniform stream wins over the wiki's older "ends with 3 larger darts" (the sheet ranks it gap 1; the footage is newer).

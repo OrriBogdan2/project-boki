@@ -118,6 +118,16 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 | Eye of the Storm: landing damage in an area, knockback, 1 Static stack each | thebackdash (pre-1.0 wording) | light pillar and shock ring f49 | yes: "a knockback and 1 Static each" |
 | Free to attack right after landing | reference sheet | LMB at f51 | yes: "free again at once" |
 
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB hold (press to throw about 1.2 s) | She did not walk during the hold; side-on, spear at the shoulder, body flash at full charge | Free at full speed (no `move_k`), faces the cursor, throws at release (0.33 s earliest) or auto at 1.2 s | unmeasured: the footage cannot tell if moving is allowed (sheet open question 5) |
+| RMB throw and recovery (about 0.4 s) | Overarm throw, recovers in about 0.4 s | Free | unmeasured |
+| E place and strike (0.8 s) | One-arm sweep, no long wind-up; body not shown moving | Free at full speed, faces the cursor; the pull direction is chosen with the cursor | unmeasured, no data to change |
+
 ## Assumptions (the video is silent; the owner can correct these)
 - The throw comes on release; holding past full (1.2s) throws by itself. Charge scales the rod's damage and knock, not its range (the footage's fixed lane; the wiki's older text scales range).
 - The rod applies 1 Static.

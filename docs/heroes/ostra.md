@@ -154,6 +154,17 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Empowered damage is Explosive (175 a tick to destructibles) | wiki | no | not built: our destructibles are walls that take shot damage; a well tick is not a shot (owner question) |
 | It closes with no explosion | footage | yes (f66) | built |
 
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB wind-up (ours 0.32 s; footage one frame, about 0.2 s) | Patch notes: Snap slows Void 25% while casting; black orb at the hand | Walks at 75% (`snap.cast_slow` 0.25 in `move_k`), faces the cursor | matches the patch notes |
+| RMB release and recovery (0.15 s) | Both palms shove out; no stop shown | Same 25% slow through the 0.15 s recovery (`snap_rec`) | matches |
+| E drop (0.25 s orb falls on the spot) | A small orb drops at the cursor; nothing about the body | Free at full speed, faces the cursor | unmeasured, no data to change |
+| E bomb growing (6.5 s) | Not shown | Free | n/a |
+
 ## Assumptions (easy to change in content/archetypes/ostra.json)
 - Shift is hold-to-aim, release-to-cast (a tap casts at once): the source shows the landing ring before the press, and this
   is the only way a keyboard player sees it; it also removes any chance of a stray dash.
