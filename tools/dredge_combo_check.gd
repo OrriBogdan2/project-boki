@@ -166,7 +166,7 @@ func _slam_tell() -> void:
 	var vfx := HeroVfx.of(m)
 	var wind_fist := _fist_layer(vfx)
 	ok(
-		"anchor fist: a giant scrap fist forms over the cone for the wind-up, as wide as the cone is deep",
+		"anchor fist: a giant scrap fist forms over the cone for the wind-up (its square 3x the slam radius, the fist about the radius wide)",
 		int(vfx.plays.get("anchor_wind", 0)) == 1 and not wind_fist.is_empty()
 			and absf((wind_fist["s0"] as Vector3).x - 3.0 * reach) < 0.01
 			and absf(float(wind_fist["dur"]) - float(ed["windup"])) < 0.01,

@@ -299,13 +299,13 @@ func _surface_node(kind: String) -> Node3D:
 	mi.material_override = mt
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	match kind:
-		"scorch", "thread":
+		"scorch", "thread", "fist":
 			var plane := PlaneMesh.new()
 			plane.size = Vector2.ONE
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"flare", "fist":
+		"flare":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -446,7 +446,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s1 = s0 * float(layer.get("grow", 1.2))
 		"fist":
 			mt.set_shader_parameter("slam", bool(layer.get("slam", false)))
-			p.y += extent * 0.5                                    # the picture stands on the ground
+			p.y += SCORCH_LIFT * 2.0                               # flat over the area, knuckles away from him
 		"vortex":
 			s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 			s1 = s0 * float(layer.get("grow", 1.0))

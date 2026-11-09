@@ -217,7 +217,7 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
   `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
   flash; the stretched bone-hook arm (purple flesh swelling on each haul, a bone hook at its end, sludge drips, snapping back), drawn through rocks; the brass
   and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
-  brass fist, a giant scrap fist (HeroVfx `fist` layer, `anchor_wind` / `anchor_slam` in `content/vfx/dredge.json`, coin gold, 3x the slam radius wide) forming raised over the cone through the wind-up and smashing down onto it on the strike frame (footage row 7), then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
+  brass fist, a giant scrap fist (HeroVfx `fist` layer, `anchor_wind` / `anchor_slam` in `content/vfx/dredge.json`, dark brass plates with coin-gold knuckles, lying over the cone about the slam radius wide, knuckles at its rim and the arm running back into him) hanging high over its darkening shadow through the wind-up and smashing down onto it on the strike frame (footage row 7), then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
   scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
   after-images along it.
 - Weapon: `HeroGearPair.scattergun`: a fat iron barrel with a flared brass bell, a rope-wrapped pump, a slug drum, a glowing seam.
