@@ -50669,5 +50669,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_vaultara_pz_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_gloamspire_py",
+    "name": "Gloamspire",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_gloamspire_py_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_stormit_ry",
+    "name": "Stormit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_stormit_ry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gloamspire_py",
+    "name": "Gloamspire",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gloamspire_py_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_selenwhale_py",
+    "name": "Selenwhale",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_selenwhale_py_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_cardy",
+    "name": "Umbrathere (hero card, planted)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrathere_cardy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_cardy",
+    "name": "Umbrathere (hero card, planted)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/umbrathere_cardy_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_terrarimit_ry",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_terrarimit_ry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_stormit_ry",
+    "name": "Stormit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_stormit_ry_1.jpg",
+    "ok": true
   }
 ]
