@@ -29,7 +29,7 @@ func drag_dir(at: Vector3) -> Vector2:
 
 func cast() -> bool:
 	var ed := kit.e_def()
-	var at := AimMode.point(kit.h, float(ed["reach"]))
+	var at := AimMode.place(kit.h, float(ed["reach"]))
 	kit.strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": default_dir(at), "phase": "flick"})
 	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.8, 0.12)
 	kit.fx().disc(at, float(ed["radius"]), MageKit.VIOLET, MageKit.PINK, 0.2, MageKit.COPPER)

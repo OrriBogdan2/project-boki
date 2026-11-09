@@ -48,7 +48,7 @@ func aiming() -> bool: return phase == "aim"
 func start() -> bool:
 	if running():
 		return false
-	center = AimMode.point(k.h, float(xd()["range"]))
+	center = AimMode.place(k.h, float(xd()["range"]))
 	press_aim = k.aim()
 	axis = _across_aim()
 	phase = "aim"
