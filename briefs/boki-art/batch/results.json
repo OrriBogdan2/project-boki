@@ -40953,5 +40953,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lunowl_card9_1.jpg",
     "ok": true
+  },
+  {
+    "id": "glaciatee_card9",
+    "name": "Glaciatee (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciatee_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card9",
+    "name": "Lunowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_card9",
+    "name": "Terrasloth (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrasloth_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_card9",
+    "name": "Glaciatee (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaciatee_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_card9",
+    "name": "Glaciatee (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciatee_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card9",
+    "name": "Lunowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lunowl_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_card9",
+    "name": "Terrasloth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card9",
+    "name": "Eclipsowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card9_1.jpg",
+    "ok": true
   }
 ]
