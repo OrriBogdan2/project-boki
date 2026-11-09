@@ -65292,5 +65292,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_pinster_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_pagodito_r4",
+    "name": "Pagodito",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chiptero_r4",
+    "name": "Chiptero",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_narfoil_r4",
+    "name": "Narfoil",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_narfoil_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pagodito_r4",
+    "name": "Pagodito",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_narfoil_r4",
+    "name": "Narfoil",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_narfoil_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pavonazar_r4",
+    "name": "Pavonazar",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mumblet_r4",
+    "name": "Mumblet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_mumblet_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pavonazar_r4",
+    "name": "Pavonazar",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_1.jpg",
+    "ok": true
   }
 ]
