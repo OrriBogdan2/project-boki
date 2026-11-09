@@ -62,6 +62,7 @@ off landmark pairs (proxy coordinate, scan coordinate) where the two disagree: g
 | `merge` | The scan fused a part into its neighbour (folded wings, horns, ears): the part's bone gives its weights away |
 | `drop` | A proxy piece the scan has no shape for (a spark, a puff) |
 | `eye_c`, `eye_r`, `eye_yaw` | Where the Boki face goes: read the scan's own eyes off the fit sheet |
+| `cover` | The scan's own painted eye shows beside the Boki eye (an off-centre head, a wide eye): the coat inside `cover` eye radii (1.2) takes the colour on that ring |
 | `sink`, `pose` | A part hangs below the feet (a tail): lower the scan by `sink`, lift the bone in the rest pose |
 | `limbs` | A part the fit cannot follow: a capsule along it, in scan space, that takes the bone and its weights |
 | `at` | A grown part lands wrong: its attach point in scan space |

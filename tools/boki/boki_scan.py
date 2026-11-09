@@ -17,7 +17,8 @@ BROW_DARK = 0.55         # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
 # right side only; "merge": proxy bones whose part the scan has fused into another bone's; "drop": proxy pieces the
 # scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain": the
-# texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "sink": how
+# texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "cover": eye
+# radii round each Boki eye inside which the scan's own painted eye is painted out (when it shows beside); "sink": how
 # far the scan stands above its lowest point (a hanging tail), and "pose": the bones (game-axis euler) that lift such
 # a part into the rest pose;
 # "limbs": (bone, from, to, radius from, radius to) in scan space, for a part the fit cannot follow (a tail that hangs
@@ -47,7 +48,7 @@ SCANS = {
                  "z": [(-0.24, -0.17), (0.0, 0.0), (0.25, 0.178)], "drop": ("puffs",),
                  "merge": {"lobe%d" % i: "root" for i in range(7)},
                  "eye_c": (0.057, 0.38, -0.135), "eye_r": (0.041, 0.042, 0.022), "eye_yaw": 0.3, "face": {},
-                 "sat": 0.8},
+                 "sat": 0.8, "cover": 1.2},
 }
 
 
@@ -205,7 +206,25 @@ class Scan:
     def paint_piece(self, pc, q, nn, _prim):
         if pc.name != "body":
             return self._mods[1].paint_piece(pc, self.fit.back(q), nn, self._proxy)
-        return grade(self.model.colour(q), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
+        return grade(self.model.colour(self._off_eyes(q)), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
+
+    def _off_eyes(self, q):
+        """`q` with the points under a Boki eye moved out to the ring "cover" eye radii round it (met from the front,
+        as a bulging eyeball is nearer than the coat beside it): the scan's own painted eye takes the coat around it
+        there, so it cannot show beside the eye that covers it."""
+        cover = self._s.get("cover", 0.0)
+        q = np.array(q, float)
+        reach = 2 * self.EYE_R[0]
+        for sx in (1.0, -1.0) if cover else ():
+            right, up, out = self.eye_frame(sx)
+            d = q - self.EYE_C * (sx, 1, 1)
+            flat = right * (d @ right)[:, None] + up * (d @ up)[:, None]
+            r = np.maximum(np.hypot(d @ right / self.EYE_R[0], d @ up / self.EYE_R[1]), 1e-6)
+            under = np.flatnonzero((r < cover) & (np.abs(d @ out) < reach))
+            for i, ring in zip(under, q[under] + flat[under] * (cover / r[under] - 1)[:, None]):
+                hit = self.model.bvh.ray_cast((ring + out * reach).tolist(), (-out).tolist(), 2 * reach)[0]
+                q[i] = ring if hit is None else hit
+        return q
 
 
 def frame_row(species, fit, scale):
