@@ -162,6 +162,7 @@ func _pal(glb: Node3D, nm: String, mesh: ArrayMesh, glow: Color) -> Node3D:
 	mi.mesh = mesh
 	mi.top_level = true
 	glb.add_child(mi)
+	mi.owner = glb      # (the glb's own anchors are reparented onto it)
 	var gm := CareLook.orb_mat(glow)
 	var ball := Models.part(mi, Models.sphere(1.0, 12), gm, Vector3.ZERO, Vector3.ONE * float(d["glow_r_m"]))
 	ball.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
