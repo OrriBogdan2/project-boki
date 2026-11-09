@@ -9,7 +9,7 @@ extends RefCounted
 const DT := 1.0 / 30.0
 const CAM_PITCH := 66.0    # degrees: the default match camera (CamRig STYLES "supervive")
 const CAM_DIST := 23.0
-const SPEED_K := 0.55      # Hunter: the walking speed crouched
+const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetype's run speed
 ## s: down, up. Standing, 1.3 s held, 1.6 s sneaking, 0.5 s still, then up.
 const T_DOWN := 0.4
 const T_WALK := 1.7
@@ -67,7 +67,7 @@ func run(main: Node) -> void:
 		clips.force = {"proc": true}
 	var dirs := {"f": 0.0, "b": PI, "l": PI * 0.5, "r": -PI * 0.5}
 	var heading := yaw + float(dirs[sneak])
-	var walk_v := Vector3(-sin(heading), 0, -cos(heading)) * float(Data.CLASSES[Arch.weight(id)]["speed"]) * SPEED_K
+	var walk_v := Vector3(-sin(heading), 0, -cos(heading)) * float(HunterMove.of(id)["speed"]) * SPEED_K
 	for dir in ["match", "close"]:
 		DirAccess.make_dir_recursive_absolute(out.path_join(variant).path_join(dir))
 	var ck := 0.0
