@@ -295,6 +295,7 @@ var tl_yv := 0.0
 var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
+var feet := FootPlant.new()     # the feet put on the terrain after update (Hunter.render calls feet.plant)
 var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
 
 func _init(m: Node3D) -> void:
