@@ -43361,5 +43361,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_gongrowl_z2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gongrowl_z1",
+    "name": "Gongrowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_z1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_crofthollow_z2",
+    "name": "Crofthollow (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_crofthollow_z2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glintmole_p83",
+    "name": "Glintmole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glintmole_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_z1",
+    "name": "Gongrowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_z1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_z2",
+    "name": "Gongrowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_z2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_canvastross_p83",
+    "name": "Canvastross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_canvastross_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl_z1",
+    "name": "Gongrowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_z1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gloamspire_p83",
+    "name": "Gloamspire",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gloamspire_p83_1.jpg",
+    "ok": true
   }
 ]
