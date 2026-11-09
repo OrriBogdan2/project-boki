@@ -1,7 +1,7 @@
 {
 	"palette": {
 		"main": "#ff6a1a", "hot": "#ffd23a", "white": "#fff4c8", "char": "#2a100a", "red": "#d8281a",
-		"smoke": "#8a7a70", "soot": "#5a4c46", "pilot": "#6fe8ff", "halo": "#6a5aff", "pink": "#ff4a6a"
+		"smoke": "#8a7a70", "soot": "#5a4c46", "pilot": "#6fe8ff", "halo": "#6a5aff", "bolt": "#ff4a1a", "bolt_core": "#ffe070", "skull": "#ff6a2a", "pip": "#ff9a3a", "pilot_core": "#c8f8ff", "shield": "#ff5a1a"
 	},
 	"anchors": {
 		"nozzle": {"nodes": ["anchor_flame", "weapon_muzzle"], "gun": [0.0, 0.02, -0.75], "body": [0.15, 0.9, 1.3]},
@@ -48,12 +48,12 @@
 		]},
 		"shot_aim": {"fx": [
 			{"p": "ember", "at": "nozzle", "y": 0.2, "n": 16, "shape": "gather", "radius": 0.6, "speed": 2.6, "life": 0.25,
-				"size": 0.06, "c": "pink", "c2": "hot", "c3": "red"},
+				"size": 0.06, "c": "bolt", "c2": "hot", "c3": "red"},
 			{"p": "ember", "at": "nozzle", "y": 0.2, "n": 8, "speed": 1.0, "spread": 0.6, "grav": -1.5, "life": 0.4,
 				"size": 0.05, "c": "red", "c2": "hot", "c3": "char"}
 		]},
 		"shot": {"fx": [
-			{"p": "flare", "at": "nozzle", "y": 0.2, "size": 1.1, "grow": 1.3, "life": 0.14, "c": "pink", "c2": "white", "c3": "red"},
+			{"p": "flare", "at": "nozzle", "y": 0.2, "size": 1.1, "grow": 1.3, "life": 0.14, "c": "bolt", "c2": "white", "c3": "red"},
 			{"p": "ember", "at": "nozzle", "y": 0.2, "n": 14, "way": "fwd", "speed": 7.0, "spread": 0.3, "life": 0.3,
 				"size": 0.07, "c": "red", "c2": "hot", "c3": "char"},
 			{"p": "smoke", "at": "nozzle", "y": 0.2, "n": 5, "way": "fwd", "speed": 2.0, "spread": 0.4, "grav": -1.0,
@@ -61,7 +61,7 @@
 		]},
 		"shot_trail": {"fx": [
 			{"p": "ribbon", "size": 0.75, "life": 2.0, "tail": 0.32, "c": "soot", "c2": "smoke", "c3": "soot"},
-			{"p": "ribbon", "size": 0.36, "life": 2.0, "tail": 0.16, "c": "pink", "c2": "hot", "c3": "halo"}
+			{"p": "ribbon", "size": 0.36, "life": 2.0, "tail": 0.16, "c": "bolt", "c2": "hot", "c3": "halo"}
 		]},
 		"shot_hit": {"fx": [
 			{"p": "flare", "y": 1.0, "size": 1.8, "grow": 1.3, "life": 0.22, "c": "red", "c2": "hot", "c3": "char"},

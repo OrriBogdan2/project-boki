@@ -19,7 +19,7 @@
 	"dash": {"id": "spark_leap", "name": "Soot Ram", "icon": "ram", "col": "#ff6a2a", "cd": 9.0,
 		"dist": 3.4, "time": 0.33, "air_dist": 6.8, "air_time": 0.28, "air_keep": 0.5, "dmg": 16.0, "kb": 7.0, "recoil": 3.5, "char": 17.0, "rank3_dmg": 4.3, "rank3_boost": 0.16, "rank3_boost_t": 2.0, "rank3_shield": 0.116, "rank3_shield_t": 2.0,
 		"desc": "A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 16 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed."},
-	"rmb": {"delivery": "projectile", "name": "Cinder Shot", "short": "Cinder", "icon": "bolt", "col": "#ff4a6a", "cooldown": 7.0, "charges": 1, "hold": 0.15,
+	"rmb": {"delivery": "projectile", "name": "Cinder Shot", "short": "Cinder", "icon": "bolt", "col": "#ff5a22", "cooldown": 7.0, "charges": 1, "hold": 0.15,
 		"range": 14.0, "speed": 26.0, "dmg": 14.0, "size": 0.3, "spread_r": 4.0, "slow": 0.3, "slow_for": 1.5, "rank3_charges": 2,
 		"variants": {"tap": "Hold to aim down a lane, release: a cinder that always flies its full 14m: 14 damage, a 30% slow for 1.5s, and it sets the foe Ablaze. On a foe that is already burning it hits 25% harder (40% on a Flashed-over one), upgrades the burn and spreads the burn to foes within 4m. A miss fizzles at the end of its flight."}, 
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"}},

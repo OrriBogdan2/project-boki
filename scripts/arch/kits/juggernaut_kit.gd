@@ -20,13 +20,13 @@ extends ArchKit
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
-const SLASH_OUT := Color("ff3df0")     # the Slam's magenta strike lane
-const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
-const LUNGE_FULL := Color("ff3df0")    # ... at full
-const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
-const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
-const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
-const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+static var SLASH_OUT := HeroVfx.col("juggernaut", "strike")     # the Slam's strike lane
+static var LUNGE_RED := HeroVfx.col("juggernaut", "main")     # the Lunge lane while charging
+static var LUNGE_FULL := HeroVfx.col("juggernaut", "strike")    # ... at full
+static var EXEC_RED := HeroVfx.col("juggernaut", "red")      # the wounded-enough-to-finish outline
+static var WAVE_RED := HeroVfx.col("juggernaut", "main")      # the Searing Wave's crescent
+static var WAVE_EDGE := HeroVfx.col("juggernaut", "wave")     # ... its inner edge
+static var WAVE_FULL := HeroVfx.col("juggernaut", "hot")     # ... white-hot at full charge
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
 var enraged_t := 0.0
@@ -225,7 +225,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		h.heal(t.max_hp * float(rd.get("heal_knock", 0.2)))
 		knock_healed += h.hp - hp0
 		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
-		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
+		fx().star(t.pos + Vector3(0, 1.3, 0), EXEC_RED, 3.2, 0.55, HeroVfx.col("juggernaut", "hot"))
 		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
 		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
 		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
@@ -745,7 +745,7 @@ func _slam(pin := Vector2.ZERO) -> void:
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
-			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
+			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", HeroVfx.col("juggernaut", "glow"), true)
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
 		var sw: Array = sl["sweet"]
 		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
@@ -797,7 +797,7 @@ func _tick_lunge() -> void:
 			if was_chain and f.hittable():
 				f.hurt(1.0, h,
 						{"src": "abil", "ab": "utility", "tags": ["utility", "chain_lunge"], "stun": 0.35, "dr": true})
-				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", Color("ffcf6a"), true)
+				m.fx.word(f.pos + Vector3(0, 2.4, 0), "RUN THROUGH", HeroVfx.col("juggernaut", "glow"), true)
 			var dmg := lerpf(float(ld["dmg"][0]), float(ld["dmg"][1]), k) * smash_k() * (1.25 if was_chain else 1.0)
 			var stg := stage("rmb",
 					{"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
@@ -837,7 +837,7 @@ func _chain_lunge(k: float) -> void:
 	h.fortify_t = maxf(h.fortify_t, t + 0.05)
 	lunge = {"end": m.time + t + 0.02, "dir": dv.normalized(), "k": k, "chain": true}
 	play("jug_chainlunge")
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CHAIN LUNGE", Color("ffcf6a"), true)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CHAIN LUNGE", HeroVfx.col("juggernaut", "glow"), true)
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
@@ -880,7 +880,7 @@ func _haul_land(k: float) -> void:
 					{"src": "abil", "ab": "utility", "tags": ["utility", "haul_slam"],
 							"stun": lerpf(float(hd["stun"][0]), float(hd["stun"][1]), k), "dr": true})}))
 	play("jug_haulslam")
-	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
+	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", HeroVfx.col("juggernaut", "glow"), true)
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
 ## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),
@@ -899,11 +899,11 @@ func _tick_tells() -> void:
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
 	if not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
-				"col": JuggernautDrop.PURPLE, "alpha": 0.7, "ticks": true})
+				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
 		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
-		AimKit.charge(h, k, {"col": Color("ff6a4a")})
+		AimKit.charge(h, k, {"col": WAVE_EDGE})
 
 ## During the Warchain's pull: a fiery spin around you that blights everyone it hits.
 func _spin() -> void:
@@ -916,7 +916,7 @@ func _spin() -> void:
 	run_own(stg, cx("rmb", "cinder_spin", h.pos, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if is_instance_valid(f) and not f.dead: KitStatus.apply(f, "blt", float(sp["blight"]))}))
 	vfx("spin", h.pos, h.aim_dir(), {"r": float(sp["radius"])})
-	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", Color("ff7a3a"), false)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CINDER SPIN", WAVE_EDGE, false)
 
 # ------------------------------------------------------------------ E: Warchain (JuggernautChain)
 ## "During E" for the Smash is the pull and the moment after it (the Cinder Spin).

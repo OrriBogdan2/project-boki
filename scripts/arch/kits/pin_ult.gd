@@ -16,8 +16,8 @@ extends Node3D
 ## Bond: an arrow that hits a hunter goes to HeroUlt.landed once the hit has landed (a hit, or the knock or
 ## kill it caused); a miss pays nothing.
 
-const CORE := Color("dfe6f0")          # the telegraph lane's silver core
-const GOLD := Color("ffe27a")
+static var CORE := HeroVfx.col("archer", "silver")          # the telegraph lane's silver core
+static var CUE := HeroVfx.col("archer", "cue")
 
 var k: ArcherKit
 var h: Hunter
@@ -162,7 +162,7 @@ func _execute(foe: Hunter) -> void:
 	foe.hurt(foe.hp * 4.0 + foe.armor * 4.0, h, opts)
 	HeroUlt.landed(k, foe)
 	k.m.fx.own_look = true
-	k.payoff_fx(foe.pos, "EXECUTED", GOLD, "pay_deadeye", h.dir_to(foe), foe)
+	k.payoff_fx(foe.pos, "EXECUTED", CUE, "pay_deadeye", h.dir_to(foe), foe)
 	k.m.fx.own_look = false
 
 ## The tells everyone sees: three pips over her head (one per shot left) and a glow on the bow.

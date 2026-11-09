@@ -1,7 +1,7 @@
 {
 	"palette": {
 		"main": "#2ee6c0", "hot": "#b8fff0", "white": "#f2fffc", "void": "#06030c", "deep": "#0b5a50",
-		"mist": "#6fa89e"
+		"mist": "#6fa89e", "tide": "#7fe0d0", "swell": "#e8fff9", "glow": "#1fb89a", "orb": "#e0fff8"
 	},
 	"moves": {
 		"snap_wind": {"fx": [

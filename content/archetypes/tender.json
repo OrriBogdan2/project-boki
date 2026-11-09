@@ -51,7 +51,7 @@
 		"emp_idle": 1.0,
 		"emp_range": 1.4,
 		"falloff": 0.5,
-		"col": "#ffb347"
+		"col": "#b8f08a"
 	},
 	"passive": {
 		"name": "Carrier",
@@ -65,7 +65,7 @@
 		"id": "relay_step",
 		"name": "Relay Step",
 		"icon": "dash",
-		"col": "#ffe2a8",
+		"col": "#f2ffe8",
 		"cd": 7.0,
 		"dist": 4.2,
 		"time": 0.174,
@@ -119,7 +119,7 @@
 		"name": "Hearthlight",
 		"short": "Hearth",
 		"icon": "dome",
-		"col": "#ffd27a",
+		"col": "#9cf07a",
 		"cooldown": 11.0,
 		"time": 2.5,
 		"radius": 2.6,

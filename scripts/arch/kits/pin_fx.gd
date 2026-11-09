@@ -31,11 +31,11 @@ const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
 const ULT_WIDTH := 0.6          # m: Starpiercer's arrow head and trail, its hit width (2 x the 0.3 shot radius)
-const THREAD := Color("e04aff")     # her signature orchid (archetypes/archer.json "color"): thread, trails, glows
-const PALE := Color("f4c8ff")       # the pale half of her orchid: heads and hot cores
-const DEEP := Color("8a1aa8")       # the deep shade of her orchid: the overdrawn trail
-const GOLD := Color("ffc02a")       # the perfect-release cue only (a timing signal, not her body colour)
-const SILVER := Color("dfe6f0")     # her needles
+static var THREAD := HeroVfx.col("archer", "main")     # her signature orchid (archetypes/archer.json "color"): thread, trails, glows
+static var PALE := HeroVfx.col("archer", "hot")       # the pale half of her orchid: heads and hot cores
+static var DEEP := HeroVfx.col("archer", "deep")       # the deep shade of her orchid: the overdrawn trail
+static var CUE := HeroVfx.col("archer", "cue")       # the perfect-release cue only (a timing signal: near-white orchid)
+static var SILVER := HeroVfx.col("archer", "silver")     # her needles
 const FLETCH := Color("c8b48c")     # the feathers
 
 var h: Hunter
@@ -73,7 +73,7 @@ func _ready() -> void:
 		KitShaders.param(star_node, "white", 0.3)
 		stars.append({"node": star_node, "t": 0.0, "dur": 0.0})
 	for i in BURSTS:
-		var burst_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", GOLD, true))
+		var burst_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", CUE, true))
 		burst_node.sorting_offset = 2.0         # drawn over the bow hand and the body
 		bursts.append({"node": burst_node, "t": 0.0, "dur": 0.0})
 	bow_glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", THREAD, true))
@@ -104,7 +104,7 @@ func _ready() -> void:
 		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", THREAD, true))
 		wisps.append({"node": wisp, "t": 0.0})
 	for i in FLAMES:
-		var fm := KitShaders.mat("flame", Color("5aa8ff"))
+		var fm := KitShaders.mat("flame", THREAD)
 		fm.set_shader_parameter("seed", float(i) * 1.7)
 		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
 
@@ -133,7 +133,7 @@ func _arrow_node() -> Node3D:
 			Vector3.ONE, Vector3.ZERO, "Bind%d" % int(at_z * 10.0))
 		bind.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# a bright core riding the head (the Heavy Shot's alone)
-	var core := KitMeshes.inst(n, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", GOLD, true))
+	var core := KitMeshes.inst(n, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", CUE, true))
 	core.name = "Core"
 	core.visible = false
 	core.position = Vector3(0, 0, 0.1)
@@ -145,7 +145,7 @@ func _arrow_node() -> Node3D:
 
 ## Each kind's look: [shaft colour, head colour, fin colour, trail colour, trail length m, trail width m, body scale].
 ## Trails are streaks (a white-hot centre line in an orchid body): the widths hold at the match camera.
-const LOOK := {
+static var LOOK := {
 	"tap": [SILVER, Color.WHITE, FLETCH, Color(THREAD, 0.7), 1.6, 0.16, 0.8],
 	"arrow": [SILVER, Color.WHITE, FLETCH, Color(THREAD, 0.85), 2.6, 0.22, 1.0],
 	"super": [Color.WHITE, Color.WHITE, THREAD, Color(THREAD, 0.95), 5.0, 0.4, 1.35],
@@ -170,7 +170,7 @@ func _dress(n: Node3D, kind: String) -> void:
 	var core := n.get_node("Core") as MeshInstance3D
 	core.visible = false      # (the Heavy Shot is the bow's arrow, just bigger: owner Nov 4)
 	core.scale = Vector3.ONE * s * 0.5
-	KitShaders.param(core, "color", Color("fff0b0"))
+	KitShaders.param(core, "color", PALE)
 	KitShaders.param(core, "power", 2.4)
 	var thick := s * (2.2 if kind == "super" else 1.0)
 	(n.get_node("Shaft") as Node3D).scale = Vector3(thick, thick, s)
@@ -318,7 +318,7 @@ func stake(at: Vector3, dir: Vector2) -> void:
 	n.visible = true
 	best["t"] = STAKE_T
 	staked += 1
-	star(at, 1.6, GOLD, 0.2, 0.0, PI * 0.25, 2.2)
+	star(at, 1.6, CUE, 0.2, 0.0, PI * 0.25, 2.2)
 
 ## Her dash after-image: three orchid fletch streaks at hip, chest and shoulder height, lying along the way
 ## she faces and fading behind her (pooled, a set every WISP_EVERY s).

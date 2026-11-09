@@ -12,7 +12,7 @@
 		"spread": 0.0,
 		"range": 12.0,
 		"size": 0.15,
-		"color": "#ffc04a",
+		"color": "#eadcff",
 		"sfx": "dj_bolt",
 		"aim": "cursor",
 		"fire_slow": 0.9,

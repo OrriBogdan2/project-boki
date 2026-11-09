@@ -12,15 +12,15 @@ extends ArchKit
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
 const PAY := "COLLAPSE"
-const TEAL := Color("7fe0d0")
-const VOID_COL := Color("b06bff")
-const PINK := Color("ff4fd8")
-const SEA := Color("2ee6c0")               # the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
-const DEEP := Color("0b5a50")              # their deep teal: the seed's and the dome's filling accent
+static var TEAL := HeroVfx.col("ostra", "tide")
+static var VOID_COL := HeroVfx.col("ostra", "hot")
+static var PINK := HeroVfx.col("ostra", "swell")
+static var SEA := HeroVfx.col("ostra", "main")               # the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
+static var DEEP := HeroVfx.col("ostra", "deep")              # their deep teal: the seed's and the dome's filling accent
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
-const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
-const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
-const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
+static var ORB_FULL_COL := HeroVfx.col("ostra", "orb")      # the orb's shot colour at full charge (what other games draw)
+static var GLOW_COL := HeroVfx.col("ostra", "glow")          # the charge glow at his hand, starting...
+static var GLOW_FULL_COL := HeroVfx.col("ostra", "hot")     # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
 
 var swollen_t := 0.0
@@ -92,7 +92,7 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("SWOLLEN", "")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
+		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, HeroVfx.col("ostra", "deep"), 0.45)      # the vortex disc under him
 		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
@@ -165,10 +165,10 @@ func _reticle() -> void:
 	if not snap.is_empty() or (bool(h.inp.get("sec_hold", false)) and rmb_ready()):
 		AimKit.hide(h, "aim")
 		AimKit.lane(
-			h, "snap", {"len": float(sn["range"]), "width": float(sn["width"]), "rails": true, "col": Color("f2eaff")}
+			h, "snap", {"len": float(sn["range"]), "width": float(sn["width"]), "rails": true, "col": HeroVfx.col("ostra", "white")}
 		)
 	else:
-		AimKit.line(h, "aim", {"col": Color("f2eaff"), "alpha": 0.8})
+		AimKit.line(h, "aim", {"col": HeroVfx.col("ostra", "white"), "alpha": 0.8})
 
 ## The wait between shots charges the next orb: its damage, speed, size and colour follow the charge, and a
 ## full one also slows. Written into his live weapon (only when the charge moves), so bots and Net get it too.
@@ -232,7 +232,7 @@ func _orb_fired() -> void:
 	if full:
 		settled_shots += 1
 		m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
-		m.fx.burst(_hand(), Color(0.8, 0.6, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
+		m.fx.burst(_hand(), Color(HeroVfx.col("ostra", "hot"), 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:
@@ -298,7 +298,7 @@ func _swap_cast() -> void:
 	m.fx.ring(h.pos, float(dd["radius"]), TEAL, 0.35)
 	m.fx.ring(land, float(dd["radius"]), VOID_COL, 0.35)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
-	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
+	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), HeroVfx.col("ostra", "hot"))
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
 
 ## His dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
@@ -332,7 +332,7 @@ func _tick_swap(dt: float) -> void:
 	swap_peak = maxf(swap_peak, lift)
 	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
 	KitLooks.of(m).hold_on("os_star", "star", h, p, 1.0)
-	m.fx.burst(p, Color(0.5, 0.3, 1.0, 0.75), 1, 0.8, 0.35, 0.0, 1.1)
+	m.fx.burst(p, Color(HeroVfx.col("ostra", "main"), 0.75), 1, 0.8, 0.35, 0.0, 1.1)
 	var r := float(dd["radius"])
 	AimKit.swap(h, "swap_fly", {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TEAL, "col2": VOID_COL})
 	KitLooks.of(m).sigil("os_sigil_from", h, AimMode.ground(m, from), r, u, TEAL)
@@ -343,13 +343,13 @@ func _tick_swap(dt: float) -> void:
 	if float(swap["t"]) <= 0.0:
 		_swap_end(true)
 
-## His after-image on any dash (a merge's dodge): a streak of violet motes off the hem, not the shared pill.
+## His after-image on any dash (a merge's dodge): a streak of teal motes off the hem, not the shared pill.
 ## His own hand tell (the charge mote) replaces the shared white charge orb.
 func charge_orb() -> bool:
 	return false
 
 func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(0.55, 0.3, 0.95, 0.75), 3, 0.8, 0.4, -0.5, 1.2)
+	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(HeroVfx.col("ostra", "main"), 0.75), 3, 0.8, 0.4, -0.5, 1.2)
 	return true
 
 ## A Boki merge ends the Trade in flight (nobody is sent), its aim, the Snap's wind-up and the Settled
@@ -433,14 +433,14 @@ func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	if arrive_y - gy > 0.05: h.grounded = false
 	play("ostra_arrive")
 	_fold_in(land, VOID_COL)
-	m.fx.flash(land + Vector3(0, 1.0, 0), Color("b06bff"), 0.9, 0.08)
+	m.fx.flash(land + Vector3(0, 1.0, 0), HeroVfx.col("ostra", "hot"), 0.9, 0.08)
 	m.sfx("os_swap", land, -2.0, 1.0)
 	net_ring(land, 1.6, TEAL)
 
 ## Both ends of a Trade fold in on themselves (motes drawn inward, no ring or blast: the dash rule).
 func _fold_in(at: Vector3, col: Color) -> void:
 	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 20, -6.0, 0.3, 0.0, 1.3)
-	m.fx.burst(at + Vector3(0, 1.0, 0), Color(0.08, 0.02, 0.14, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
+	m.fx.burst(at + Vector3(0, 1.0, 0), Color(HeroVfx.col("ostra", "void"), 0.9), 8, -3.0, 0.25, 0.0, 1.8)
 
 # ------------------------------------------------------------------ RMB: Shard Snap
 func fire_rmb(c: Dictionary) -> void:

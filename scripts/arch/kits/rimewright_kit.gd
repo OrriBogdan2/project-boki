@@ -169,7 +169,7 @@ func _tick(dt: float) -> void:
 	_tick_rime(dt)
 	_tick_trails(dt)
 	if h.is_local() and not busy():
-		AimKit.line(h, "aim", {"alpha": 0.7, "col": Color("e8ffff")})     # the thin aim line to the cursor, always up
+		AimKit.line(h, "aim", {"alpha": 0.7, "col": HeroVfx.col("rimewright", "hot")})     # the thin aim line to the cursor, always up
 	lk().tick(dt)
 	if ult_look != null:
 		ult_look.tick(dt)
@@ -547,7 +547,7 @@ func rmb_hold_tick(t: float) -> void:
 			h, "rmb",
 			{
 				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
-				"col": Color("dffcff")})
+				"col": HeroVfx.col("rimewright", "hot")})
 	if not spear_aim:
 		spear_aim = true
 		play("tm_spear_aim")
@@ -653,11 +653,11 @@ func _tick_zones(dt: float) -> void:
 		lk().keep(
 				key, "zone", at,
 				{
-					"r": float(ld["zone_r"]), "col": Color("7fd8ff"), "rim": Color("e8ffff"), "fill": 0.8,
+					"r": float(ld["zone_r"]), "col": HeroVfx.col("rimewright", "zone"), "rim": HeroVfx.col("rimewright", "hot"), "fill": 0.8,
 					"sweep": k, "pattern": 2.0, "spin": m.time * 0.6, "a": 0.9})
 		AimKit.circle(
 				h, key,
-				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": Color("bff7ef")})
+				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": HeroVfx.col("rimewright", "frost")})
 		for f in foes_in(at, float(ld["zone_r"])):
 			f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, float(ld["zone_slow"]))
 			f.slow_t = maxf(f.slow_t, 0.2)
@@ -705,7 +705,7 @@ func cast_e() -> bool:
 			h, "e",
 			{
 				"len": float(ed["reach"]) + travel_d, "width": float(ed["length_max"]), "all": true,
-				"dur": float(ed["tell"]) + 0.3, "col": Color("9af0e6")})
+				"dur": float(ed["tell"]) + 0.3, "col": HeroVfx.col("rimewright", "teal")})
 	m.sfx("rime_wall_tell", h.pos, -3.0, 1.0)
 	return true
 
@@ -955,7 +955,7 @@ func _rime_no_glide() -> void:
 	var glide_now := bool(h.inp.get("glide", false))
 	if glide_now and not glide_held and not h.grounded:
 		h._ab_feedback("x", "deny")
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "NO GLIDE", Color("bff7ef"), false)
+		m.fx.word(h.pos + Vector3(0, 2.6, 0), "NO GLIDE", HeroVfx.col("rimewright", "frost"), false)
 	glide_held = glide_now
 
 

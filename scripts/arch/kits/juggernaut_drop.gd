@@ -8,8 +8,8 @@ extends RefCounted
 ## the stun, dust and debris, a shake and a deep boom), and a recovery rising from the crouch. Owned by
 ## JuggernautKit.
 
-const PURPLE := Color("b06aff")       # the landing marker (the damage area)
-const CORE := Color("ff5ad8")         # its centre ring: the stun area, and the shock ring on impact
+static var AREA := HeroVfx.col("juggernaut", "area")       # the landing marker (the damage area)
+static var CORE := HeroVfx.col("juggernaut", "core")         # its centre ring: the stun area, and the shock ring on impact
 const CLOSE := 0.25                   # share of the dive that closes any gap to the spot left by an air dash
 
 var k: JuggernautKit
@@ -75,7 +75,7 @@ func start() -> void:
 ## The marker at the landing point (everyone sees it): the damage area, and the stun core inside it.
 func _marker(fill: float) -> void:
 	var dd := data()
-	AimKit.circle(k.h, "drop", {"at": land, "r": float(dd["radius"]), "col": PURPLE, "all": true, "ticks": true,
+	AimKit.circle(k.h, "drop", {"at": land, "r": float(dd["radius"]), "col": AREA, "all": true, "ticks": true,
 			"fill": fill, "dur": 0.12})
 	AimKit.circle(k.h, "drop_core", {"at": land, "r": float(dd["core"]), "col": CORE, "all": true, "hot": fill,
 			"dur": 0.12})

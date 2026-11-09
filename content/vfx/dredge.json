@@ -1,5 +1,5 @@
 {
-	"palette": {"main": "ffc832", "hot": "fff0b0", "char": "3a2408", "smoke": "4a4038", "iron": "5a4a36", "brass": "e0a040"},
+	"palette": {"main": "ffc832", "hot": "fff0b0", "char": "3a2408", "smoke": "4a4038", "iron": "5a4a36", "brass": "e0a040", "bone": "e0d4c0", "word": "c0b0a0", "coin": "f5b81f"},
 	"anchors": {
 		"hand": {"nodes": ["anchor_claw"], "bone": "hand.R", "body": [0.25, 1.15, 0.45]},
 		"fist": {"bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [-0.25, 1.9, 0.2]},

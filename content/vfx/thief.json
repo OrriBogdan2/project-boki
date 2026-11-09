@@ -1,5 +1,5 @@
 {
-	"palette": {"main": "9a5cff", "hot": "eadcff", "char": "1c0a38", "smoke": "2a1a40", "deep": "5a2ad0", "white": "ffffff"},
+	"palette": {"main": "9a5cff", "hot": "eadcff", "char": "1c0a38", "smoke": "2a1a40", "deep": "5a2ad0", "white": "ffffff", "ghost": "b48cff", "knife": "b07aff", "bola": "e0c4ff", "cord": "b06aff", "aim": "d8c8ff", "pale": "c9a0ff", "glint": "2a1450"},
 	"moves": {
 		"bolt_throw": {"net": false,
 			"fx": [{"p": "flare", "size": 0.75, "life": 0.12, "c": "main", "c2": "hot"}]},

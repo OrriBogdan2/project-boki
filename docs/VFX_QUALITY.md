@@ -107,6 +107,25 @@ shader + 3 star boxes sharing one material); nothing is made per frame, and with
 Tenzo's dash is one HeroVfx hold (pooled particles, inside `MAX_LIVE`) instead of two `Fx.burst` calls per 0.028 s.
 Neve's dash no longer makes a MeshInstance3D and a material per after-image tick.
 
+## One colour table per Hunter (ext/vfx-hunter-colours, 11-09)
+Owner 11-08: every Hunter's abilities are colour-coded to them (Vex green fire, Sparkle pink, Tenzo blue). The other nine read
+their colour from `content/vfx/<arch>.json` "palette" only: kits ask `HeroVfx.col("<arch>", "<key>")` (the check
+`--hero-vfx-check` asserts every key exists), and the archetype `color` / ability `col` and the weapon `color` agree with it.
+Kael's glow is white-hot over crimson (never orange: orange is Cinder's); status colours (heal green, root violet, red
+failure words) stay.
+
+| Hunter | colour | was off-colour, now in the table |
+|---|---|---|
+| Kael | crimson body, white-hot glow | orange/gold/magenta/violet palette (guard, chain, wave, drop markers, Slam lane) |
+| Cinder | flame orange | Cinder Shot's pink-red body (pilot flame stays cyan: her sheet) |
+| Lace | orchid | gold perfect-release cue and Executed word, lime target ring, blue cremation flames |
+| Grimble | coin gold | pink aim lines |
+| Neve | frost cyan | lilac accent |
+| Albert | ivory/gold | orange sparks, blue aegis and shield colours |
+| Sable | violet | gold/blue empowered chakram and aim line, gold glint, pink stars |
+| Motley | sea teal | violet orb glow, swap landing, vortex disc, pink swell |
+| Meeko | leaf green | amber Hearthlight lamp |
+
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
 sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored by code read (the strips are silent).

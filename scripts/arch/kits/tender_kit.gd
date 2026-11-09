@@ -359,7 +359,7 @@ func fire_rmb(c: Dictionary) -> void:
 func _seed_lane() -> void:
 	var sd := rmb_def()
 	var width := float(sd["seed"]["hit_r"]) * 2.0
-	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
+	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": pale()})
 
 ## Her share of run speed during the wind-up.
 func move_k() -> float:
@@ -673,7 +673,7 @@ func _call_preview() -> void:
 	var xd := x_def()
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": leaf, "dashed": true, "alpha": 1.2})
 	AimKit.line(h, "x_line", {"from": h.pos, "to": who.pos, "col": pale(), "lw": 0.1, "alpha": 1.8})
-	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": Color("9cf07a"), "ticks": true, "alpha": 1.6})
+	AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.8, "col": HeroVfx.col("tender", "heal"), "ticks": true, "alpha": 1.6})
 	# a faint tether already strung from her raised hand onto them: this is who X will reach
 	ulk().keep("tether_aim", "tether", h.pos + Vector3(0, 1.3, 0), {"b": who.pos + Vector3(0, 1.0, 0), "a": 0.45})
 
@@ -771,7 +771,7 @@ func _call_look(who: Hunter, dt: float) -> void:
 	AimKit.circle(h, "x", {"self": true, "r": float(xd["range"]), "col": leaf, "all": true, "dashed": true})
 	AimKit.circle(h, "x_me", {"self": true, "r": 0.7, "col": pale(), "all": true})
 	if who != h:
-		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": Color("9cf07a"), "all": true})
+		AimKit.circle(h, "x_pick", {"at": who.pos, "r": 0.7, "col": HeroVfx.col("tender", "heal"), "all": true})
 		var hand := CareUtil.hand_at(h, false)
 		ulk().keep("tether", "tether", hand, {"b": who.pos + Vector3(0, 1.1, 0)})
 	hearth_call["fx"] = float(hearth_call["fx"]) - dt
@@ -806,7 +806,7 @@ func _call_end(done: bool) -> void:
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
 	if not rescue:
-		m.fx.word(at + Vector3(0, 2.7, 0), "MENDED", Color("9cf07a"), true)
+		m.fx.word(at + Vector3(0, 2.7, 0), "MENDED", HeroVfx.col("tender", "heal"), true)
 	m.sfx("tend_arrive", at, 0.0, 1.0)
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)

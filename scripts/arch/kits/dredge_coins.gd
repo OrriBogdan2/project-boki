@@ -5,7 +5,7 @@ extends RefCounted
 
 const AMOUNT := 7
 const GAP := 0.35             # s between spills, however fast the hits come
-const COIN := Color("f5b81f")
+static var COIN := HeroVfx.col("dredge", "coin")
 
 var seen := -99.0
 var last := -99.0

@@ -1,7 +1,7 @@
 {
 	"palette": {
 		"main": "#8ae6ff", "hot": "#effcff", "char": "#1e3a6a", "smoke": "#cfe8f6", "frost": "#bff7ef",
-		"deep": "#2f6ac0", "lilac": "#c8a8ff", "mist": "#8fb8d8"
+		"deep": "#2f6ac0", "ice": "#b8d8ff", "zone": "#7fd8ff", "teal": "#9af0e6", "mist": "#8fb8d8"
 	},
 	"anchors": {
 		"hand": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "gun": [0.0, 0.0, -0.2], "body": [0.25, 1.0, 0.45]},
@@ -112,8 +112,8 @@
 		]},
 		"wall_tell": {"fx": [
 			{"p": "shard", "y": 0.3, "n": 14, "shape": "gather", "radius": 1.0, "speed": 4.5, "life": 0.22,
-				"size": 0.07, "c": "lilac", "c2": "hot"},
-			{"p": "flare", "y": 0.3, "size": 1.0, "life": 0.25, "c": "lilac", "c2": "hot", "c3": "deep"}
+				"size": 0.07, "c": "ice", "c2": "hot"},
+			{"p": "flare", "y": 0.3, "size": 1.0, "life": 0.25, "c": "ice", "c2": "hot", "c3": "deep"}
 		]},
 		"wall_rise": {"fx": [
 			{"p": "shard", "y": 0.3, "n": 20, "shape": "disc", "radius": 1.0, "speed": 5.0, "spread": 0.35, "grav": 9.0,

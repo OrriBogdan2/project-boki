@@ -16,9 +16,9 @@ extends Node3D
 ##   hidden), with a pulsing double chevron in front of it showing its push
 ## The aegis's moments, the Shield Slam, Mending Ground and Faultline are HeroVfx data (content/vfx/bulwark.json).
 
-const GOLD := Color("e8c96a")        # content/vfx/bulwark.json "deep": the body of his hammer looks
-const IVORY := Color("fff0b0")       # "main", his signature: the bright edge
-const STAR_GOLD := Color("fffbe6")   # "hot": glints and flashes
+static var GOLD := HeroVfx.col("bulwark", "deep")        # content/vfx/bulwark.json "deep": the body of his hammer looks
+static var IVORY := HeroVfx.col("bulwark", "main")       # "main", his signature: the bright edge
+static var STAR_GOLD := HeroVfx.col("bulwark", "hot")   # "hot": glints and flashes
 ## s the full-charge flare shows (the sheet: one bright frame)
 const FLARE_T := 0.12
 ## s the slam's crescent stays at full strength, then s it burns away over
@@ -53,7 +53,7 @@ const ORBIT_IN := 0.3
 const ORBIT_OUT := 1.35
 const ORBIT_PAST := 1.25
 const ORBIT_ARC := 3.4
-const ORBIT_COL := GOLD
+static var ORBIT_COL := GOLD
 const ORBIT_POWER := 3.4
 const ORBIT_FAST := 1.4
 ## the planted hammer's size, and its lean off vertical (rad)

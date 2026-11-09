@@ -102,10 +102,10 @@ func _build(kind: String) -> Node3D:
 			# a mote of her lantern's light in her leaf green (#5fdc6a, Arch.color): a teardrop head the size of the
 			# shot's hit circle with a near-white core, a thin pale-leaf halo and a tail as wide as the head
 			var head := Models.sphere(EMBER_R, 12)
-			_off(Models.part(n, head, orb_mat(Color("5fdc6a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.5)))
-			_off(Models.part(n, Models.sphere(EMBER_R * 0.45, 8), orb_mat(Color("f2ffe8", 1.0)), Vector3(0, 0, -0.06)))
-			_off(Models.part(n, Models.sphere(EMBER_R * 1.35, 10), orb_mat(Color("b8f08a", 0.35)), Vector3.ZERO))
-			_tail(n, EMBER_R * 1.8, 1.6, Color("b8f08a", 0.9))
+			_off(Models.part(n, head, orb_mat(Color(HeroVfx.col("tender", "main"), 1.0)), Vector3.ZERO, Vector3(1, 1, 1.5)))
+			_off(Models.part(n, Models.sphere(EMBER_R * 0.45, 8), orb_mat(Color(HeroVfx.col("tender", "hot"), 1.0)), Vector3(0, 0, -0.06)))
+			_off(Models.part(n, Models.sphere(EMBER_R * 1.35, 10), orb_mat(Color(HeroVfx.col("tender", "pale"), 0.35)), Vector3.ZERO))
+			_tail(n, EMBER_R * 1.8, 1.6, Color(HeroVfx.col("tender", "pale"), 0.9))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -161,7 +161,7 @@ func _build(kind: String) -> Node3D:
 			_off(Models.part(spear_tail, Models.box(0.04, 0.04, 0.5), streak_mat, Vector3(0, 0, 0.6)))
 		"plus":
 			# the lantern plus: a big soft glowing cross with a halo
-			var gc := Color("9cf07a")
+			var gc := HeroVfx.col("tender", "heal")
 			_off(Models.part(n, Models.box(0.32, 1.2, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.box(1.2, 0.32, 0.12), orb_mat(Color(gc, 0.9)), Vector3.ZERO))
 			_off(Models.part(n, Models.sphere(0.75, 12), orb_mat(Color(gc.lightened(0.3), 0.3)), Vector3.ZERO))
@@ -229,8 +229,8 @@ func _build_lamp(n: Node3D) -> void:
 	lamp.name = "Lamp"
 	lamp.position = Vector3(0, 1.3, 0)
 	n.add_child(lamp)
-	_off(Models.part(lamp, Models.sphere(0.2, 12), orb_mat(Color("ffe08a", 1.0)), Vector3.ZERO, Vector3(1, 1.3, 1)))
-	_off(Models.part(lamp, Models.sphere(0.5, 12), orb_mat(Color("ffc046", 0.45)), Vector3.ZERO))
+	_off(Models.part(lamp, Models.sphere(0.2, 12), orb_mat(Color(HeroVfx.col("tender", "pale"), 1.0)), Vector3.ZERO, Vector3(1, 1.3, 1)))
+	_off(Models.part(lamp, Models.sphere(0.5, 12), orb_mat(Color(HeroVfx.col("tender", "main"), 0.45)), Vector3.ZERO))
 	var cage := Models.toon(Color("5a3d28"))
 	for k in 4:
 		var a := TAU * k / 4.0 + PI * 0.25
@@ -353,9 +353,9 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 	var back := Vector3(-d2.x, 0.4, -d2.y)
 	match kind:
 		"ember":
-			m.fx.flash(at, Color("f2ffe8"), 0.6, 0.07)
-			m.fx.spark(at, back, Color("5fdc6a"), 8, 6.0, 70.0, 0.25, 6.0)
-			var hit_p := {"col": Color("5fdc6a"), "rim": Color("f2ffe8"), "r": EMBER_HIT_R, "dur": 0.3, "glow": 1.0}
+			m.fx.flash(at, HeroVfx.col("tender", "hot"), 0.6, 0.07)
+			m.fx.spark(at, back, HeroVfx.col("tender", "main"), 8, 6.0, 70.0, 0.25, 6.0)
+			var hit_p := {"col": HeroVfx.col("tender", "main"), "rim": HeroVfx.col("tender", "hot"), "r": EMBER_HIT_R, "dur": 0.3, "glow": 1.0}
 			burst("star", at, hit_p)
 		"shard":
 			HeroVfx.of(m).play(h, "dart_hit", at, d2)          # content/vfx/rimewright.json

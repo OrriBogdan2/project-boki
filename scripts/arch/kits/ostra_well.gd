@@ -11,8 +11,8 @@ extends RefCounted
 ## (HeroUlt.landed), paid on the catch, never per tick. Its looks hang on the match, not on Ostra, so a
 ## merge or a knock on his doesn't take the placed well down.
 
-const DOME_COL := Color("b8fff0")      # the telegraph's rim: pale sea teal (the body is OstraKit.SEA)
-const PINK := Color("ff4fd8")
+static var DOME_COL := HeroVfx.col("ostra", "hot")      # the telegraph's rim: pale sea teal (the body is OstraKit.SEA)
+static var PINK := HeroVfx.col("ostra", "swell")
 const TICK := 0.1                       # s between damage ticks
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
 const GATHER_Y := 2.4                   # m over his ground point: the orb above his raised hands

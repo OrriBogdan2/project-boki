@@ -1,6 +1,6 @@
 {
 	"palette": {
-		"main": "#5fdc6a", "hot": "#f2ffe8", "char": "#1f5a34", "pale": "#b8f08a", "deep": "#34b856",
+		"main": "#5fdc6a", "hot": "#f2ffe8", "char": "#1f5a34", "pale": "#b8f08a", "deep": "#34b856", "heal": "#9cf07a",
 		"smoke": "#eef8ea"
 	},
 	"anchors": {

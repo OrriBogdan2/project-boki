@@ -10,11 +10,11 @@ extends RefCounted
 
 const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
 const RECOVER := 0.3                # s the slowed walk lasts after the last wave
-const SLUG_COL := Color("fff0b0")    # the slugs in flight: pale coin gold (their trail is HeroVfx "slug")
+static var SLUG_COL := HeroVfx.col("dredge", "hot")    # the slugs in flight: pale coin gold (their trail is HeroVfx "slug")
 const WAVE_PITCH := [1.0, 0.82]
 ## the fan on the ground: coin gold (the signature), and how strong its fill and rim are over AimKit's defaults
-const FAN_COL := DredgeKit.ANCHOR_COL
-const FAN_HOT := Color("fff0b0")
+static var FAN_COL := DredgeKit.ANCHOR_COL
+static var FAN_HOT := HeroVfx.col("dredge", "hot")
 const FAN_ALPHA := 1.8
 
 var k: DredgeKit

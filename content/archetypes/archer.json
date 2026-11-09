@@ -34,7 +34,7 @@
 		"name": "Hawk Sense",
 		"max": 1,
 		"kind": "none",
-		"col": "#d8ffb0",
+		"col": "#f0c8ff",
 		"perfect_t": 0.15,
 		"sense_hp": 0.5,
 		"sense_r": 22.0

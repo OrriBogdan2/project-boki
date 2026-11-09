@@ -10,8 +10,8 @@ extends RefCounted
 ## the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
 
-const RING_COL := Color("9a5cff")      # the ring and the blades: her signature violet (the source's is cyan)
-const RIM_COL := Color("eadcff")       # the outer band, where blades hit harder: her violet run hot
+static var RING_COL := HeroVfx.col("thief", "main")      # the ring and the blades: her signature violet (the source's is cyan)
+static var RIM_COL := HeroVfx.col("thief", "hot")       # the outer band, where blades hit harder: her violet run hot
 const BLADE_TIP := Color("ffffff")
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
@@ -175,7 +175,7 @@ func _hit(f: Ent, rim: bool) -> void:
 		rim_blades += 1
 		if not was_blighted:
 			# once, as the blight lands (above the damage numbers, so they don't overprint)
-			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
+			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", HeroVfx.col("thief", "cord"), false)
 	k.vfx("encore_hit", f.pos + Vector3(0, 1.0, 0), null, {"rim": rim})
 	k.refresh_marks()
 	HeroUlt.landed(k, f)

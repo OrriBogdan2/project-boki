@@ -4,13 +4,13 @@ extends ArchKit
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 12m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
-## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
+##   to 12m) and fizzles there; a thin aim line ends at the cursor, white-hot violet while the next bolt is empowered.
+## - Passive, Marks: every bolt that hits stacks a Mark on the target (pale diamonds over their head, up
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
-##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
+##   no Shred), shown by a white-hot glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
@@ -21,18 +21,18 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
-const BOLT_HEAD := Color("eadcff")    # the bolt's chakram: her violet run hot (content/vfx/thief.json "hot")
-const EMP_BLUE := Color("4ab8ff")  # the empowered shot's chakram
-const GLINT_EDGE := Color("2a1450")    # the dark violet edge round the hand glint
-const GLINT_CORE := Color("fff2c0")    # the glint's hot core (the empowered tell stays gold: the card names it)
-const GHOST := Color("b48cff")     # the blink's afterimages and the dash's after-image streaks: pale violet
+static var BOLT_HEAD := HeroVfx.col("thief", "hot")    # the bolt's chakram: her violet run hot (content/vfx/thief.json "hot")
+static var EMP_BLUE := HeroVfx.col("thief", "hot")  # the empowered shot's chakram: her violet run white-hot
+static var GLINT_EDGE := HeroVfx.col("thief", "glint")    # the dark violet edge round the hand glint
+static var GLINT_CORE := HeroVfx.col("thief", "hot")    # the glint's hot core
+static var GHOST := HeroVfx.col("thief", "ghost")     # the blink's afterimages and the dash's after-image streaks: pale violet
 const KNOCK_STAR := Color("ff2a48")
-const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
-const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
-const BOLT_TAIL := Color("9a5cff")     # the bolt's short tail: her signature violet
-const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
-const BOLA_HOT := Color("e0c4ff")      # the Bola's lane front and binding rings: violet run hot
-const BOLA_CORD := Color("b06aff")     # its violet lightning cord
+static var EMP_LINE := HeroVfx.col("thief", "hot")      # the aim line while the next bolt is empowered (white-hot violet)
+static var AIM_LILAC := HeroVfx.col("thief", "aim")     # ... and otherwise
+static var BOLT_TAIL := HeroVfx.col("thief", "main")     # the bolt's short tail: her signature violet
+static var KNIFE_VIOLET := HeroVfx.col("thief", "knife")  # the dagger's arrival circle
+static var BOLA_HOT := HeroVfx.col("thief", "bola")      # the Bola's lane front and binding rings: violet run hot
+static var BOLA_CORD := HeroVfx.col("thief", "cord")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 ## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
 ## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
@@ -53,7 +53,7 @@ var bola := {}                 # the Bola in flight: {pos, dir, left, first, bou
 var encore: ThiefUlt           # X, the ultimate
 var chain: ThiefChain          # the Vault loop: its routine of flips, the Shift presses it keeps
 var wrapped := {}              # foe instance id -> [foe, time left]: the binding rings on the Grounded
-var glint: Node3D = null       # the empowered tell: a gold glint at the weapon hand
+var glint: Node3D = null       # the empowered tell: a white-hot glint at the weapon hand
 var glint_pop := 0.0           # 1 as the empowered bolt forms (the landing), easing back to 0
 var glint_net_t := 0.0
 var hand := 0                  # 0: the next bolt leaves the right hand, 1: the left
@@ -161,7 +161,7 @@ func refresh_marks() -> void:
 			mk[h.nid][1] = float(res_def().get("dur", 4.0))
 			_pip_pop(f, int(mk[h.nid][0]))
 
-# ---- Marks you can read from across the fight: gold diamonds orbiting over the target's head, one per
+# ---- Marks you can read from across the fight: pale diamonds orbiting over the target's head, one per
 # Mark, spinning faster as they stack (everyone sees them, the victim included). Made once per target.
 func _pip_node(t: Ent) -> Dictionary:
 	var key := t.get_instance_id()
@@ -225,7 +225,7 @@ func res_frac() -> float:
 func res_text() -> String:
 	return "%d" % best_marks()
 
-## The payoff lives on the dash (the dash slot's gold dot): the next bolt is empowered. It isn't the shared
+## The payoff lives on the dash (the dash slot's white-hot dot): the next bolt is empowered. It isn't the shared
 ## "resource full" tell, which would ring her feet and spray sparks round her on every Cartwheel.
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
@@ -262,7 +262,7 @@ func _tick(dt: float) -> void:
 	_net_glint(dt)
 
 ## The aim line (your screen only): thin and pale lilac to the cursor, clamped to the bolt's range, with an
-## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
+## arrow tick; a thick, solid white-hot line with a soft white-hot glow while the next bolt is empowered.
 func _tick_aim_line() -> void:
 	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
 		AimKit.hide(h, "aim_glow")
@@ -278,7 +278,7 @@ func _tick_aim_line() -> void:
 func own_aim_line() -> bool:
 	return h.wid == "arc_bolts"
 
-## The empowered tell (everyone sees it): a tight gold glint in the hand the next bolt leaves from, a hot core
+## The empowered tell (everyone sees it): a tight white-hot glint in the hand the next bolt leaves from, a hot core
 ## and a turning four-point star, flaring as the bolt forms on the landing. No light (it pooled into a pale disc
 ## on the ground) and nothing on the ground.
 func _tick_glint(dt: float) -> void:
@@ -392,7 +392,7 @@ func _bolt() -> void:
 		sd["dmg"] = float(sd["dmg"]) * empowered_k()
 		sd["r"] = 0.3
 		x["kb"] = 3.0
-		fx().ride(sd, "chakram_big", Color("ffd84a"), EMP_BLUE, 2.6, 0.55)
+		fx().ride(sd, "chakram_big", EMP_LINE, EMP_BLUE, 2.6, 0.55)
 		fx().star(muzzle, EMP_BLUE, 0.9, 0.16)
 		m.sfx("thief_flintlock_crack", h.pos, -1.0 if h.is_local() else -5.0, 1.0)
 	else:
@@ -502,7 +502,7 @@ func _tick_trail(dt: float) -> void:
 	trail_t = TRAIL_EVERY
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	fx().streak(h.pos + Vector3(0, 0.7, 0), dir, 1.3, 0.5, GHOST, BOLT_HEAD, 0.3)
-	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, Color("c9a0ff"))
+	fx().star(h.pos + Vector3(0, 1.0, 0), GHOST, 0.5, 0.22, HeroVfx.col("thief", "pale"))
 
 ## After a Vault: the flip (the routine's, ThiefChain; from a jump the air one), the violet arc its hands and feet
 ## trace (twice, with an afterglow), the speed and, by its row, the next bolt empowered: the glint forms in the
@@ -759,7 +759,7 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
 	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
-	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
+	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), HeroVfx.col("thief", "hot"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 

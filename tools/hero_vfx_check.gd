@@ -53,6 +53,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+	_kit_colours()
 	_hit_scale()
 	var broken: Array = []
 	for sh: Shader in [HeroVfx.SURFACE, HeroVfx.MOTES, HeroVfx.MOTE, StunMark.SPIRAL, StunMark.SPIRAL_GLOW]:
@@ -76,6 +77,21 @@ func run(main: Node) -> void:
 	await _lisette(main, V)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Every colour a kit reads with HeroVfx.col("<arch>", "<key>") is a key of that Hero's palette (one table per Hunter).
+func _kit_colours() -> void:
+	var re := RegEx.create_from_string("HeroVfx\\.col\\(\"(\\w+)\", \"(\\w+)\"\\)")
+	var bad: Array = []
+	var n := 0
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if not f.ends_with(".gd"):
+			continue
+		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
+			n += 1
+			var pal: Dictionary = HeroVfx.data(hit.get_string(1)).get("palette", {})
+			if not pal.has(hit.get_string(2)):
+				bad.append("%s: %s.%s" % [f, hit.get_string(1), hit.get_string(2)])
+	ok(n > 0 and bad.is_empty(), "%d kit colours all come from a Hero's palette %s" % [n, bad])
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:

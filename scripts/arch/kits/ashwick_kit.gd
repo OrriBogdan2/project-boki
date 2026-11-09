@@ -18,14 +18,14 @@ extends ArchKit
 ## - X, Flue Flight (level 6): a steerable flight that lays a burning, slowing lava carpet (AshwickJet). No lance
 ##   in it.
 
-const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool spark in her palm against warm fire
-const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
-const BOLT_CORE := Color("ffe070")
-const SKULL_COL := Color("ff6a2a")
-const PIP_COL := Color("ff9a3a")
-const PILOT_CORE := Color("c8f8ff")
-const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
-const HEAT_CORE := Color("ffd23a")     # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
+static var FLAME_CYAN := HeroVfx.col("ashwick", "pilot")    # the pilot flame: a cool spark in her palm against warm fire
+static var BOLT_COL := HeroVfx.col("ashwick", "bolt")      # Cinder Shot's deep red-orange body
+static var BOLT_CORE := HeroVfx.col("ashwick", "bolt_core")
+static var SKULL_COL := HeroVfx.col("ashwick", "skull")
+static var PIP_COL := HeroVfx.col("ashwick", "pip")
+static var PILOT_CORE := HeroVfx.col("ashwick", "pilot_core")
+static var SHIELD_COL := HeroVfx.col("ashwick", "shield")    # the cloak's fire shield: a deep orange that holds on yellow grass
+static var HEAT_CORE := HeroVfx.col("ashwick", "hot")     # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
 const HEAT_RISE := 0.8                 # s of roaring before her palm glows at full heat
 const HEAT_COOL := 0.8                 # s it takes to cool from full heat once the fire stops
 const HEAT_SIZE := 1.2                 # the heat glow's scale at full heat (the pilot flame is 0.4)

@@ -21,11 +21,11 @@ extends ArchKit
 ## - X, Brass Broadside (level 6): a 1.1s charge at a slow walk behind a growing fan, then two waves of slugs with
 ##   Anti-Heal (DredgeBlast).
 
-const BONE := Color("e0d4c0")          # the bone hook
-const WORD_COL := Color("c0b0a0")      # the grey of a hook's misses (MISS, SNAGGED, TOO HEAVY, WALLED)
-const BRASS := Color("e0a040")
+static var BONE := HeroVfx.col("dredge", "bone")          # the bone hook
+static var WORD_COL := HeroVfx.col("dredge", "word")      # the grey of a hook's misses (MISS, SNAGGED, TOO HEAVY, WALLED)
+static var BRASS := HeroVfx.col("dredge", "brass")
 const IRON := Color("3a3f48")
-const ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim and its telegraphs
+static var ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim and its telegraphs
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the chain yanks taut on each
 const SNAP_T := 0.14                   # s the chain takes to snap back to his hand after a miss or the reel
@@ -228,11 +228,11 @@ func _tick_gun() -> void:
 			h, "spread",
 			{
 				"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6,
-				"col": Color("fff0f6"), "alpha": 0.8
+				"col": DredgeBlast.SLUG_COL, "alpha": 0.8
 			}
 		)
 	else:
-		AimKit.line(h, "spread_idle", {"col": Color("fff0f6"), "alpha": 0.7})
+		AimKit.line(h, "spread_idle", {"col": DredgeBlast.SLUG_COL, "alpha": 0.7})
 
 func _dress_volley() -> void:
 	play("dr_shot")

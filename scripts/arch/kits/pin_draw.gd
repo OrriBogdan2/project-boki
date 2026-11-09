@@ -24,7 +24,7 @@ const SUPER_COL := Color("fff6f0")
 const FLASH_R := Vector2(0.5, 0.32)  # m: the circle's flash, as it pops and as it settles over the window
 const MARK_R := 0.22           # m: the quiet circle
 const REST_LW := 0.045        # m: the thin line under the fill
-const TGT_COL := Color("d8ff6a")
+static var TGT_COL := HeroVfx.col("archer", "hot")
 
 var k: ArcherKit
 var h: Hunter
@@ -95,7 +95,7 @@ func _perfect() -> void:
 	perfects += 1
 	quick = true
 	perfect_now = true
-	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)
+	k.fx.fletch_burst(bow_at(), 1.1, PinFx.CUE, 0.13, 0.07, 1.0)
 	k.m.sfx("pin_perfect", h.pos, -3.0 if h.is_local() else -8.0, 1.25)
 
 func _sc() -> float:
@@ -176,7 +176,7 @@ func _reticle(t: float, s: Vector2, col: Color) -> void:
 		var rng := float((wpn_draw()[-1] as Array)[2]) if not wpn_draw().is_empty() else 16.0
 		var far := {"from": o, "len": rng - FILL_START, "col": SUPER_COL, "lw": 0.11, "hot": 0.25, "alpha": 1.3}
 		if over:
-			far.merge({"col": Color("e8d8d4"), "lw": 0.03, "hot": 0.0, "alpha": 0.55}, true)
+			far.merge({"col": PinFx.PALE, "lw": 0.03, "hot": 0.0, "alpha": 0.55}, true)
 		AimKit.line(h, "draw", far)
 		tgt = _under_line(rng)
 		if tgt != null and not over:
@@ -196,7 +196,7 @@ func _circle(t: float, s: Vector2, o: Vector3, d: Vector2, cur: float, col: Colo
 		AimKit.circle(h, "draw_mark", {"at": p, "r": MARK_R, "col": col, "hot": 0.15, "alpha": 1.3})
 		return
 	var r := lerpf(FLASH_R.x, FLASH_R.y, clampf((t - reached) / perfect_t(), 0.0, 1.0))
-	AimKit.circle(h, "draw_mark", {"at": p, "r": r, "col": PinFx.GOLD, "hot": 1.0, "fill": 1.0, "alpha": 1.3})
+	AimKit.circle(h, "draw_mark", {"at": p, "r": r, "col": PinFx.CUE, "hot": 1.0, "fill": 1.0, "alpha": 1.3})
 
 ## How far along the draw's fill is (0..1 over the whole draw to Supercharged).
 func fill_frac(t: float) -> float:

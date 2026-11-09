@@ -87,6 +87,10 @@ static func set_data(arch: String, d: Dictionary) -> void:
 	else:
 		_data[arch] = d
 
+## One colour of a Hero's palette: the single table every look and kit colour of that Hero comes from.
+static func col(arch: String, key: String) -> Color:
+	return Color(String((data(arch).get("palette", {}) as Dictionary)[key]))
+
 ## Every Hero that has a data file.
 static func heroes() -> Array:
 	var out: Array = []
