@@ -35,6 +35,13 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+A body from a Meshy model of the owner's sheet (Bellowary, `cindowary`): `tools/boki/meshy_body.py` reads the raw
+model from `~/meshy/<id>/run1` (`glb.glb`, `tex0_base_color.png`; made by `tools/meshy/meshy_task.py`, never in git),
+puts it in game axes at the species' `HEIGHT`, decimates it to `BODY_TRIS` and samples its texture for the coat (the
+eyes Meshy painted are painted out under the Boki face). The species' primitives stay as the rig's proxy for the
+weights. Bellowary's raw files: Meshy task 01a1bdab, `~/meshy/cindowary/run1`. Its `saddle` bone (behind the neck,
+child of `spine`) is the rider's seat for the BIPED-L mount; its bellows (`bellows`, in `SCALED`) pumps by scale.
+
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
 Eyes: a visible eye about 18-20% of the head's width (the owner asked for smaller eyes in game). The dome is bigger
