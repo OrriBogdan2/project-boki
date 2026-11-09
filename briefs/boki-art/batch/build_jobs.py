@@ -81,9 +81,12 @@ _made={l.split('/')[-1].rsplit('_',1)[0] for l in _sp2.run(['git','ls-tree','--n
 _spec={s['id']:s for s in SPECS}
 for j in jobs:  # jobs not started yet pick up prompt changes
     if j['id'] not in _made and j['id'] in _spec: j['prompt']=_spec[j['id']]['prompt']
+_made2=_made
+_drop=globals().get('DROP',set())
+jobs=[j for j in jobs if j['id'] not in _drop or j['id'] in _made2]
 have={j['id'] for j in jobs}
 for s in SPECS:
-    if s['id'] in have: continue
+    if s['id'] in have or s['id'] in _drop: continue
     s.setdefault('runs',4); s.setdefault('aspect','16:9'); s.setdefault('size','2K'); jobs.append(s)
 _pri=globals().get('PRIORITY',[])
 jobs.sort(key=lambda j: (_pri.index(j['id']) if j['id'] in _pri else len(_pri), 1 if j['id'].startswith('relic_') else 0))  # relics run after all Boki

@@ -109,3 +109,8 @@ turnarounds keep the concept's stance instead of a neutral stand, and existing l
 ## Owner standing permissions (01:03 ET 11-09)
 - Disk: clear anything already stored elsewhere (pushed to GitHub / re-downloadable) without asking.
 - Choices between options (e.g. design directions): Claude picks, shows the options in chat, and the owner overrides if he disagrees.
+
+## Owner review results (01:39 ET 11-09) and recalibration
+- 134 owner decisions: 52 approved, 67 redo, 16 rejected. The owner approved 16 images the critics had rejected (7.0-7.9) and sent back several the critics scored 9.0, so the critics are not a reliable proxy for his taste.
+- Owner approval is final: approved sheets are promoted to evolutions/ or turnarounds/ (old kept as *_old.jpg) and their fix/redesign/stance jobs are dropped (batch/owner_locked.json, specs_zzzz_locked.py).
+- Owner-review tier lowered to no veto + three-critic average >= 8.0, so more reaches the owner; auto-approve (8.5 rule) unchanged.

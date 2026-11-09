@@ -4583,3 +4583,9 @@ READY ext/hit-shape-check 831e2a6ab (--hit-shape-check headless, ~35 s, 70-dummy
 - Alternative not taken: merging only origin/main (a no-op). That would not fix the conflicts against the other perf branches.
 - PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/perf-actors-1108-rebased (no gh on rpc1).
 READY ext/grimble-parity-verify d94bc7769 (Grimble cooldowns 1.0x of data level 1: hand 18s, anchor 12s, broadside 36s were 0.67/0.58/0.58x; windup 0.38, charge 1.1 and wall-stops-hook verified+asserted, --dredge-combo-check 97/0, health --strict OK; ground barge 10s vs data 7s and shared -10% rank steps vs data's -2.5s/-5s left; touches the E line of dredge.json like ext/anim-time-grimble-rebased, keep both)
+
+## 02:30 ET 11-09 — art session: owner review applied
+Read the owner's 134 Bokidex decisions. Owner-approved sheets are now the official art (old kept as *_old.jpg):
+Kestrike_female, Gongibbon_female, Lunowl_female, Terrasloth, Geodemole, Oarter, Reapant, Cisternmander, Kayak, Thistlynx, Furnacowary, Thunderstrich, Frothisk, Mothlet, Pyrraven, Fizzlet, Howlop, Rippmink, Lyrewing, Bellowlet, Dreadnoyak, Wickapi, Lunink, Voltmink, Anchorbill.
+Old designs the owner approved stay (no redesign): Vespox, Lanternmit, Prismink. Redo/reject items keep going through the pipeline.
+From now on 8.0+ (no veto) reaches the owner's queue.
