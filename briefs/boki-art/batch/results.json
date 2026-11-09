@@ -38300,5 +38300,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_gravitank_g3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gravitank_g3",
+    "name": "Gravitank (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g2",
+    "name": "Gravitank (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g3",
+    "name": "Gravitank (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g3",
+    "name": "Gravitank (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g4",
+    "name": "Gravitank (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g4",
+    "name": "Gravitank (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravitank_g4",
+    "name": "Gravitank (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravitank_g4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m1",
+    "name": "Chandelapi (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m1_1.jpg",
+    "ok": true
   }
 ]
