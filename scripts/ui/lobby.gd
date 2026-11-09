@@ -108,9 +108,7 @@ func _start() -> void:
 		var p: Dictionary = Net.peers[id]
 		if p.has("lobby") and (p.get("ready", false) or id == Net.me):
 			ids.append(id)
-	if not ids.has(Net.me):
-		ids.append(Net.me)
-	ids.sort()
+	ids = roster_ids(ids, Net.me)
 	var roster := []
 	for i in ids.size():
 		var id: String = ids[i]
@@ -122,6 +120,15 @@ func _start() -> void:
 	Net.lobby_emit("start", d)
 	_go(d)
 
+## Who goes: the host first, then the ready players in id order, at most Data.MATCH_PLAYERS (10 trios).
+## Anyone past that stays in the lobby for the next match.
+static func roster_ids(ready_ids: Array, host: String) -> Array:
+	var rest := ready_ids.filter(func(id): return id != host)
+	rest.sort()
+	var ids := [host]
+	ids.append_array(rest.slice(0, Data.MATCH_PLAYERS - 1))
+	return ids
+
 func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "start" or typeof(data) != TYPE_DICTIONARY:
 		return
@@ -129,6 +136,8 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		if String(r["peer"]) == Net.me:
 			_go(data)
 			return
+	if is_instance_valid(status):
+		status.text = "That match is full (%d hunters). You stay here for the next one." % Data.MATCH_PLAYERS
 
 func _go(d: Dictionary) -> void:
 	Save.d["cls"] = opts.get("cls", Save.d.get("cls", "medium"))

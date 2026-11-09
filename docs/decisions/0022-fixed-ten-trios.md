@@ -28,6 +28,8 @@ about 8 minutes.
 - The Solo/Duos/Trios tabs, the lobby's mode buttons, `exp_mode`, `Rolling.POP`/`POP_MODE`/
   `WAVE_HUNTERS`/`squads_for`/`squads_total` and `--rolling-pop` are removed.
 - No Net.VERSION bump: the lobby's start message has the same shape, only the values are fixed.
+- A lobby with more than 30 ready players sends the host and the first 29 others (by id); the rest
+  stay in the lobby with a "that match is full" line and go in the next one (`lobby.gd roster_ids`).
   No save change.
 - Chests are laid out by the map, not the headcount: 25 on the tier-1 map is 2.5 a squad (the same
   as the old Duos) but 0.83 a hunter (it was 1.25 with 20 hunters).
