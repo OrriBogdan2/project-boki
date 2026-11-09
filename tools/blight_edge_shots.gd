@@ -2,7 +2,7 @@ extends RefCounted
 ## --blight-edge-shots --shots-dir=<dir> [--quality=low|medium|high|ultra]: does the Blight's edge read?
 ## One standing spot on the Heart's island, the camera turned to the tide ring, the ring set by the
 ## match clock to sit 60 m off, 5 m off, and 5 m behind the player (out in the Blight):
-##   wall_60m    the wall 60 m away, low camera (the play camera is 57 degrees down and sees ~12 m ahead)
+##   wall_60m    the wall 60 m away, low camera (the steep play camera sees only the nearest ground)
 ##   wall_edge   the wall 5 m off, play camera
 ##   in_blight   5 m past it: tint, line, red pulse of a tide hit
 ##   minimap     crop of the minimap with the ring and the dashed next ring

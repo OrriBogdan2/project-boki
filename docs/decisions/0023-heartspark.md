@@ -33,7 +33,7 @@ more; presets with `fx` above 0.5 get drifting bands and a patch of embers on th
 (`EMBERS` 150 x `fx`, CPU particles, one emitter). Out past the ring the HUD tints the screen, says so with the
 damage per second, and pulses the edges red on every tide hit (reduced by "Reduce flashes"). The maps draw the
 ring now (solid) and the ring it closes to next (dashed; before the tide starts, the first ring, so the drop
-map shows it). The play camera (57 degrees down) sees about 12 m ahead, so the wall is seen near, and from
+map shows it). The steep play camera sees only the nearest ground, so the wall is seen near, and from
 60 m only from a low camera; the maps are how it reads at range. `--blight-edge-shots` takes the sheets.
 There is no "very low" preset (Low, Medium, High, Ultra), so Low is the cheap path.
 
