@@ -332,6 +332,17 @@ The projectile looks that ride a shot and the Warchain itself stay in scripts/ar
 Two of our names (Execution Slam, Scorching Spin) had matched the source hero's exactly; they are now the
 Finishing Slam and the Cinder Spin everywhere the player can read them (content, UI, fx words, wiki).
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/juggernaut.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the slash, as on the ground | blocked | stays open | footage: a slash at the top of the Air Slam jump (`juggernaut.md` 6) |
+| RMB, tap or hold | the Air Slam (Meteor Drop): its own slot and cooldown, not the Execution Slam or the Lunge | the same: folds the glider, dives from the glide height and lands | folds, a slam never waits for it | data: Obsidian Slam (WHILE AIRBORNE), own cooldown slot; footage 0251-0300 |
+| E | the chain throw, as on the ground (the pull runs on) | the same | stays open | silent |
+| Shift | the class long dash `jug_exdash`, no charge spent | the same | closes, reopens after | footage has no air Shift (`juggernaut.md` 9: open) |
+
 ## Engine notes
 
 - The Gilded Riposte lives in `scripts/arch/kits/juggernaut_ult.gd` (`JuggernautUlt`, owned by the kit); X

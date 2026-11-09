@@ -194,6 +194,18 @@ Clip re-keys for the model (tools/art1/hem_clips.py, on the unmerged ravel-v2 re
 Suggestions (ours, not built): the release snap keys (0.04-0.06 s) land inside the 0.1 s blend-in, so the string hand
 snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`arc_super` would show the full snap.
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/archer.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the draw and shot, as on the ground (a draw carries through a jump, item 51) | blocked | stays open | silent |
+| RMB tap | nothing, as on the ground (Heartpiercer is hold only; no air Plunge) | nothing | - | data: hold to charge |
+| RMB hold | the Heavy Shot, charged and loosed in the air | the same | stays open | data: Heartpiercer |
+| E | Rain of Arrows, as on the ground | the same | stays open | silent |
+| Shift | rising or falling: the 4.2 m flick `pin_flick`, no charge spent. Out of a glide: the Spirit Walk roll `pin_roll`, spending a charge (`ex = use_ex and not gliding`) | the roll | closes, reopens after | the source has one Phase Walk and no air dash row; the flick is ours. Open: the glide case matches it, the jump and fall case does not |
+
 ## Engine notes
 - Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `pin_needle.gd` (the Heavy Shot's held needle), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).
 - Hunter hooks: `ArchKit.draw_rate()` scales the bow's draw; `draw_bonus(t)` sets `h.shot_aim` (AimMode: stage 1 cursor, stage 2 max) and the damage factor; `Hunter.spirit_t` makes `World.occupy(..., ghost)` and the block push-out skip rocks, trees and barriers.

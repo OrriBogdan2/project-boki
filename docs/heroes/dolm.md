@@ -293,6 +293,17 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),
   StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster only).
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/dolm.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the boulder throw, as on the ground | blocked | stays open | silent |
+| RMB, tap or hold | the Quakefall plunge: slams where she lands (a jump while charging still leaps forward) | the same: folds the glider, plunges at 32.5 m/s, slams where she lands | folds, never blocks it | DECISIONS 2026-11-07; data: jump while charging leaps |
+| E | Stone Row needs ground under the rocks: nothing in a fall or a glide; the first inch of a jump still fits | nothing | stays open | data: Rockwave, only castable over ground |
+| Shift | the class long dash `breah_exdash`, no charge spent | the same | closes, reopens after | the footage has no air dash |
+
 ## Engine notes
 - Rocks are Verbs walls with `top` 2.2m and `th` 0.42 (HeroZones.rock). Verbs.wall_blocks asks StoneStand.top_for how
   tall a rock is for the body moving (Rock ownership above); Ent.ground reads StoneStand.top_under; Hunter's move step

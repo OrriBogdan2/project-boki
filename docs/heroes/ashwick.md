@@ -231,6 +231,17 @@ to the sheet's beats: anticipation, release (with an overshoot key), follow-thro
   out of her heels and tail while flying (a roar every 0.45 s), and the carpet as pooled LDFx lava strips drawn with their own alpha-blended shader
   (`shaders/ld_lava.gdshader`), so the charred rim stays dark on bright ground.
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/ashwick.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the Torch Lance, as on the ground | blocked | stays open | silent |
+| RMB | the Cinder Shot, as on the ground | the same | stays open | silent |
+| E | the Furnace Cloak, as on the ground | the same | stays open | silent |
+| Shift | the class long dash (`lw_hop`), no charge spent | the same | closes, reopens after | silent (`linwick.md` 5: none in the source) |
+
 ## Engine notes
 The hose is simulated on the match step (`scripts/arch/kits/ashwick_hose.gd`); a puff stops at a wall (`World.occupy`) and hurts
 only with line of sight from the puff. The burn uses the engine's own burn status (credit to Cinder); remote bodies get it through

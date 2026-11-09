@@ -160,6 +160,17 @@ Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer
   mends someone, plus her own dash, light little footsteps and a small wordless voice (`tender_hurt`, `_down` with the
   lantern flickering, `_death` with its star dimming). The old names still load through `SfxKits.NAMES`.
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/tender.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the ember shot, as on the ground | blocked | stays open | silent |
+| RMB | Burrseed's press is held for the landing (a 1 s wind-up outlasts the hop; a long fall or glide waits for the ground) | the same | stays open | ours: owner items 118, 118b (`dash_flow` jump row) |
+| E | Hearthlight, as on the ground | the same | stays open | silent |
+| Shift | her long glide `mm_float`, 13.3 m, own 14 s cooldown; refused on the ground | the same | closes, reopens after | data and footage: Lunar Air Dash (see Dashes: Elluna's numbers) |
+
 ## Engine notes
 - Kit: `scripts/arch/kits/tender_kit.gd`, with helpers in `care_util.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`.
 - Merge-start hold fields: `seed_aim` and `rmb_down` (the Burrseed aim), the carry (set down, unbroken), and `hearth_call` (the X channel).
