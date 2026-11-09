@@ -822,8 +822,8 @@ func _gunslinger() -> void:
 	ok("small: Fever wears off all at once", K.res == 0.0)
 	K.add_fever(1)
 	K.add_fever(1)
-	ok("small: Fever is one flat level of 6% (a second ability hit adds nothing)",
-			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and K.res_wait > 3.0, "%.2f %.2f" % [K.res, K.fever_k()])
+	ok("small: Fever is one flat level of 6% for 3.5s (a second ability hit adds nothing)",
+			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and absf(K.res_wait - 3.5) < 0.01, "%.2f %.2f" % [K.res, K.fever_k()])
 	var hp_before := P.hp
 	P.hp = 50.0
 	K.on_deal(T, 100.0, {"src": "shot"})

@@ -481,6 +481,11 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut Enraged: ability + dash haste",
 			float(K.cd["e"]) < 8.85 and P.dashes > 1.0 / P.dash_regen() * 1.08,
 			"e cd %.2f dashes %.3f" % [float(K.cd["e"]), P.dashes])
+	var rg: Dictionary = K.res_def()
+	A.ok("juggernaut passive numbers: Enraged 6s [?], +15% damage, +12% dash, +20% ability haste, 20% heals (wiki)",
+			absf(float(rg["enraged_t"]) - 6.0) < 0.001 and absf(float(rg["enraged_dmg"]) - 0.15) < 0.001
+			and absf(float(rg["dash_haste"]) - 0.12) < 0.001 and absf(float(rg["ab_haste"]) - 0.2) < 0.001
+			and absf(float(rg["heal_knock"]) - 0.2) < 0.001 and absf(float(rg["heal_creep"]) - 0.2) < 0.001, str(rg))
 	K.enraged_t = 0.0
 	K.res = 0.0
 	K.cd["e"] = 0.0

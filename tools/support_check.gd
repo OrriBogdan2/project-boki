@@ -167,8 +167,13 @@ func _tender_support() -> void:
 	var carried_third := CareUtil.is_carried(A)
 	P.hurt(5.0, T, {}); step(m, 0.1)
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
-		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
-		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+		carried_third and not CareUtil.is_carried(A) and absf(K.lock_t - 3.9) < 0.15 and P.stun_t <= 0.0,
+		"lock %.2f stun %.2f" % [K.lock_t, P.stun_t])
+	var pd: Dictionary = K.d["passive"]
+	var kd: Dictionary = K.res_def()
+	ok("Carrier numbers: lock 4s (data), 2 carried, Kindle 5 stacks for 4s, no carry-slow key",
+		absf(float(pd["lock"]) - 4.0) < 0.001 and int(pd["max"]) == 2 and int(kd["max"]) == 5
+		and absf(float(kd["dur"]) - 4.0) < 0.001 and not pd.has("pick_speed"), "%s %s" % [pd, kd])
 	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
 	P.stun_t = 0.0
 	P.slot_lv["kin"] = 3

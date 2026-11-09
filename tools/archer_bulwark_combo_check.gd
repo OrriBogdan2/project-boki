@@ -401,6 +401,11 @@ func _archer_combos() -> void:
 		"healthy %s injured %.2f" % [healthy_seen, T.reveal_t]
 	)
 	T.hp = T.max_hp
+	var hk: Dictionary = K.res_def()
+	ok("combo archer: Hawk Sense under 50% health within 22m [?], tall ledges climbed (data)",
+		absf(float(hk["sense_hp"]) - 0.5) < 0.001 and absf(float(hk["sense_r"]) - 22.0) < 0.001
+		and HunterMove.climbs_tall(P),
+		str(hk))
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world
 	var bx := int(home.x) + 3

@@ -625,6 +625,17 @@ func _all() -> void:
 	reset.call()
 	K.add_char(T, 100.0)
 	ok("passive: Char past 31 is discarded (burn, then 0)", K.burning(T) == 1 and K.char_of(T) == 0.0)
+	var cr: Dictionary = K.res_def()
+	var ib: Dictionary = K.d["ignite_bonus"]
+	ok(
+		"passive numbers: Ablaze at 31 Char, 3s, 2% (4%), gone after 5s, +25% (40%), 1.5% (2.5%), heal 16%",
+		int(cr["ignite_at"]) == 31 and absf(float(cr["ignite_t"]) - 3.0) < 0.001
+		and absf(float(cr["dps1"]) - 0.02) < 0.0001
+		and absf(float(cr["dps2"]) - 0.04) < 0.0001 and absf(float(cr["expire"]) - 5.0) < 0.001
+		and absf(float(cr["heal_knock"]) - 0.16) < 0.0001 and absf(float(ib["dmg_k"][0]) - 1.25) < 0.0001
+		and absf(float(ib["dmg_k"][1]) - 1.4) < 0.0001 and absf(float(ib["tick_pct"][0]) - 0.015) < 0.0001
+		and absf(float(ib["tick_pct"][1]) - 0.025) < 0.0001, str(cr)
+	)
 	K.add_char(T2, 10.0)
 	ak.step(m, 5.4)
 	ok(
