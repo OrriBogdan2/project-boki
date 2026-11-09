@@ -4399,5 +4399,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/kayak_1.jpg",
     "ok": true
+  },
+  {
+    "id": "howlop",
+    "name": "Howlop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak",
+    "name": "Kayak",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kayak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak",
+    "name": "Dreadnoyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak",
+    "name": "Dreadnoyak",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop",
+    "name": "Chimelop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chimelop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop",
+    "name": "Chimelop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chimelop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak",
+    "name": "Kayak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kayak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak",
+    "name": "Dreadnoyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_2.jpg",
+    "ok": true
   }
 ]
