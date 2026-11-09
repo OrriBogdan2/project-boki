@@ -46357,5 +46357,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_prismink_p88_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_full",
+    "name": "Bastionpet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismink_p88",
+    "name": "Prismink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prismink_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismink_p88",
+    "name": "Prismink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_prismink_p88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_full",
+    "name": "Bastionpet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card91",
+    "name": "Galleotter (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_card91_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_full",
+    "name": "Bastionpet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card91",
+    "name": "Galleotter (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/galleotter_card91_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimink_p88",
+    "name": "Rimink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimink_p88_1.jpg",
+    "ok": true
   }
 ]
