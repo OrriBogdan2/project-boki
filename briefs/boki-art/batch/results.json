@@ -31587,5 +31587,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_stance3_skidlet_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_skidlet",
+    "name": "Skidlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_skidlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_skidlet",
+    "name": "Skidlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_skidlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_lashyx",
+    "name": "Lashyx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lashyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_chuggamus",
+    "name": "Chuggamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_chuggamus",
+    "name": "Chuggamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_chuggamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_chuggamus",
+    "name": "Chuggamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_chuggamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_skateron",
+    "name": "Skateron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_skateron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_skateron",
+    "name": "Skateron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_skateron_2.jpg",
+    "ok": true
   }
 ]
