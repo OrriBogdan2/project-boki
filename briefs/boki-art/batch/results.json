@@ -46637,5 +46637,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_bladypus_gap_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_domeleon_gap",
+    "name": "Domeleon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_domeleon_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blastopuff_gap",
+    "name": "Blastopuff (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_blastopuff_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_domeleon_gap",
+    "name": "Domeleon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_domeleon_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadmonite_gap",
+    "name": "Dreadmonite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dreadmonite_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blastopuff_gap",
+    "name": "Blastopuff (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_blastopuff_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blastopuff_gap",
+    "name": "Blastopuff (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_blastopuff_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_domeleon_gap",
+    "name": "Domeleon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_domeleon_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_gap",
+    "name": "Forgebrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_gap_2.jpg",
+    "ok": true
   }
 ]
