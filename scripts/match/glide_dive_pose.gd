@@ -10,7 +10,7 @@ extends RefCounted
 const IN_RATE := 16.0       # 1/s the tuck eases in: about 80% of it 0.1 s after the plunge starts
 const OUT_RATE := {"light": 7.0, "medium": 5.5, "heavy": 4.0}     # 1/s the pull-out eases off, by body weight
 const FLARE := {"light": 1.0, "medium": 0.8, "heavy": 0.55}       # how wide the pull-out throws the arms and legs
-const TIP := 0.25           # rad: the rig tips this much past the skydive's 1.15 rad, near vertical
+const TIP := 1.25           # rad: the rig tips this much past the skydive's 1.15 rad, head 47 degrees under level (2.4 rad)
 const LEG_H := -0.05        # rad: hip angle of a straight, trailing leg
 const LEG_K := -0.15        # rad: knee angle of the same
 const ARM_BACK := Vector3(0.04, -0.5, 0.1)      # m, hand from its shoulder: swept back along the body

@@ -45,7 +45,7 @@ func _stage(main: Node) -> void:
 	cam = Camera3D.new()
 	holder.add_child(cam)
 	cam.fov = 30.0
-	cam.position = Vector3(5.2, 0.9, 0)
+	cam.position = Vector3(8.0, 0.9, 0)
 	cam.look_at(Vector3(0, 0.9, 0))
 	cam.make_current()
 
@@ -53,7 +53,7 @@ func _strip(id: String, out: String) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
-	model.rotation.y = deg_to_rad(90.0)       # (faces +x... turned so the plunge's nose points left of the frame)
+	model.rotation.y = 0.0       # (faces -z: the camera on +x sees it side on, the plunge's nose to the left)
 	var anim := HunterAnim.new(model)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
