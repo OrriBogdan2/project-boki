@@ -29,7 +29,7 @@ static func mark(flex: Node3D, key: String, strength: float) -> void:
 	var fr: Dictionary = BokiRig.FRAME.get(rig.species, {}) if rig else {}
 	var top := float(fr.get("top", 0.72))
 	var head_z: float = (fr["head"] as Vector3).z if fr.has("head") else -0.2
-	var mat := Models.toon((face(key)["tint"] as Color).lightened(0.25), false, 1.6)
+	var mat := Models.toon(face(key)["tint"], false, 0.9)
 	var n := clampi(ceili(strength * int(rules()["marks"])), 1, int(rules()["marks"]))
 	for i in n:
 		var a := (float(i) - (n - 1) * 0.5) * 0.8
