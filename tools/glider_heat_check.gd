@@ -5,8 +5,7 @@ extends "res://tools/abyss_check.gd"
 ## (source parity, tags in its heat_doc) and what it does: glide time, lift cost, hit heat, burn, speed.
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
-## Fastest climb, time to the lip and the heat it cost when the glider opens `dp` m under the lip with `fuel`
-## heat left (an overheated glider is held at 0).
+## Fastest climb and time to the lip when the glider opens `dp` m under the lip with `fuel` heat left.
 func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
 	var dir: Vector2 = e["dir"]
 	var top: float = e["top"]
@@ -20,7 +19,7 @@ func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
 	var t := 0.0
 	while t < 5.0:
 		h.inp["glide"] = true
-		if fuel <= 0.0: h.glide_fuel = 0.0
+		h.glide_fuel = fuel if fuel > 0.0 else 0.0
 		m.step(Match.DT)
 		t += Match.DT
 		if h.pos.distance_to(marker) < 0.01: break
@@ -29,7 +28,7 @@ func _climb(e: Dictionary, dp: float, fuel: float) -> Array:
 			t_up = t
 			break
 	h.inp["glide"] = false
-	return [peak, t_up, fuel - h.glide_fuel]
+	return [peak, t_up]
 
 ## Presses glide (a fresh press) in the air at the given heat/cooldown; true if the glider opens within 0.4s.
 func _opens(e: Dictionary, fuel: float, cd: float, btn: bool) -> bool:
@@ -124,11 +123,12 @@ func run(main: Node) -> void:
 ## Each glider heat number and what it does. Source: briefs/supervive-data/supervive_physics.md (heat values
 ## locked), SUPERVIVE_FEEL.md footage, DECISIONS (overheated lift).
 func _heat_values(e: Dictionary) -> void:
-	var want := {"glide_heat_s": 14.0, "lift_heat": 4.0, "lift_tap_heat": 1.0, "hit_heat": 3.0,
-		"overheat_burn": 0.035, "overheat_speed": 0.5, "overheat_lift": 0.5}
-	for k in want:
-		var v: float = HunterMove.get(k)
-		ok(is_equal_approx(v, want[k]), "%s = %s (%s)" % [k, want[k], v])
+	var rows := [["glide_heat_s", HunterMove.glide_heat_s, 14.0], ["lift_heat", HunterMove.lift_heat, 4.0],
+		["lift_tap_heat", HunterMove.lift_tap_heat, 1.0], ["hit_heat", HunterMove.hit_heat, 3.0],
+		["overheat_burn", HunterMove.overheat_burn, 0.035], ["overheat_speed", HunterMove.overheat_speed, 0.5],
+		["overheat_lift", HunterMove.overheat_lift, 0.5]]
+	for r in rows:
+		ok(is_equal_approx(float(r[1]), float(r[2])), "%s = %s (%s)" % r)
 	var cap := float(h.cdat.get("glide_cap", 1.0))
 	ok(is_equal_approx(h.glide_max, 14.0 * cap), "glide_max is 14 s x glide_cap (%.2f)" % h.glide_max)
 	# [F] ~14 s of level glide over the abyss before the ring turns hot
@@ -144,40 +144,64 @@ func _heat_values(e: Dictionary) -> void:
 		t += Match.DT
 	h.inp["glide"] = false
 	ok(absf(t - 14.0 * cap) < 0.5, "a level glide over the abyss overheats in ~14 s x glide_cap (%.2f s)" % t)
-	# [F] a ~1 s lift from ~8 m deep burns a quarter to a third of the glider
-	var lift: Array = _climb(e, 8.0, 1.0)
-	var cost := float(lift[2]) / cap
-	ok(float(lift[1]) > 0.0 and cost > 0.22 and cost < 0.36,
-		"a lift from 8 m deep (%.2f s) costs a quarter to a third of the heat (%.0f%%)" % [lift[1], cost * 100.0])
+	# [F] Zik's drill: ~1 s of falling (~8 m deep), a glide press, back at the lip ~1 s later for a quarter to a third
+	var lift: Array = _lift_cost(e, 8.0)
+	var cost := float(lift[1]) / cap
+	ok(float(lift[0]) < 3.0 and cost > 0.22 and cost < 0.36,
+		"a lift from 8 m deep (%.2f s) costs a quarter to a third of the heat (%.0f%%)" % [lift[0], cost * 100.0])
 	# hits heat it: hit_heat x the damage's share of a knock
 	_glide_at(Vector3(e["at"].x, top + 12.0, e["at"].z), 1.0)
 	h.hurt(5.0, null, {})
 	var hit := 1.0 - h.glide_fuel
 	var hit_want := 3.0 * 5.0 * 0.30 / 34.5 / cap
 	ok(absf(hit - hit_want) < 0.005, "a 5-damage hit heats the glider %.3f (want %.3f)" % [hit, hit_want])
-	# overheated: half the glide speed, and it burns ~3.5% of max health a second
+	# overheated: half the glide speed (under the 8.5 m height hold, so no swoop), and it burns 3.5%/s
 	var cool := _glide_speed(e, 1.0)
-	var hp0 := h.hp
 	var hot := _glide_speed(e, 0.0)
-	var burn := (hp0 - h.hp) / (h.max_hp * 2.0)
 	ok(absf(hot / maxf(0.01, cool) - 0.5) < 0.06, "overheated glide speed %.2f is half of %.2f" % [hot, cool])
-	ok(absf(burn - 0.035) < 20.0 / (h.max_hp * 2.0) + 0.002, "an overheated glider burns %.1f%%/s" % (burn * 100.0))
+	_glide_at(Vector3(e["at"].x, top + 30.0, e["at"].z), 0.0)
+	h.heat_burn = 0.0
+	for i in int(4.0 / Match.DT):
+		h.inp["glide"] = true
+		h.glide_fuel = 0.0
+		m.step(Match.DT)
+	h.inp["glide"] = false
+	var burnt := h.max_hp - h.hp
+	var burn_want := floorf(0.035 * h.max_hp * 4.0 / 20.0) * 20.0
+	var burn_txt := "4 s overheated burns %.0f of %.0f health (want %.0f)" % [burnt, h.max_hp, burn_want]
+	ok(is_equal_approx(burnt, burn_want), burn_txt)
 
-## Opens the glider high over the ground at `fuel` heat.
+## Seconds back to the lip and the heat spent when glide is pressed `dp` m under it, falling.
+func _lift_cost(e: Dictionary, dp: float) -> Array:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	_reset(Vector3(e["ex"] + dir.x * 4.0, top - dp, e["ez"] + dir.y * 4.0), Vector3(0, -10.0, 0))
+	h.last_gy = top
+	h.air_t = 1.0
+	var t := 0.0
+	while t < 4.0 and h.pos.y < top - 0.5:
+		h.inp["glide"] = true
+		h.inp["glide_btn"] = true
+		m.step(Match.DT)
+		t += Match.DT
+	h.inp["glide"] = false
+	h.inp["glide_btn"] = false
+	return [t, 1.0 - h.glide_fuel]
+
+## Opens the glider in the air at `fuel` heat, with no swoop speed left over.
 func _glide_at(at: Vector3, fuel: float) -> void:
 	_reset(at, Vector3.ZERO)
 	h.air_t = 1.0
 	h.gliding = true
 	h.glide_fuel = fuel
 	h.inp["glide"] = true
+	h.glide_lift.swoop = 0.0
 
-## Horizontal glide speed after 2 s of steering one way at `fuel` heat, high over the island (health not reset).
+## Horizontal glide speed after 0.8 s of steering inland at `fuel` heat, 7.5 m over the island.
 func _glide_speed(e: Dictionary, fuel: float) -> float:
-	var hp := h.hp
-	_glide_at(Vector3(e["at"].x, float(e["top"]) + 20.0, e["at"].z), fuel)
-	h.hp = hp
+	_glide_at(Vector3(e["at"].x, float(e["top"]) + 7.5, e["at"].z), fuel)
 	var dir: Vector2 = e["dir"]
-	for i in int(2.0 / Match.DT):
+	for i in int(0.8 / Match.DT):
 		h.inp["move"] = -dir
 		h.inp["glide"] = true
 		if fuel <= 0.0: h.glide_fuel = 0.0
