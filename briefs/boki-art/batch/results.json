@@ -44733,5 +44733,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_flarmink_m3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_flarmink_m2",
+    "name": "Flarmink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m3",
+    "name": "Flarmink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m3",
+    "name": "Flarmink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m3",
+    "name": "Flarmink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m2",
+    "name": "Flarmink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m2",
+    "name": "Flarmink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rippmink_m1",
+    "name": "Rippmink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rippmink_m1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rippmink_m1",
+    "name": "Rippmink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rippmink_m1_1.jpg",
+    "ok": true
   }
 ]
