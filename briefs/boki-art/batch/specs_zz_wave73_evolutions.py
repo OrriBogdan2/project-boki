@@ -22,9 +22,6 @@ _EVO={
  'Pipewurm':('Pipeworth','venom','creepy',"sleepy, sly eyes and a satisfied smirk","dusky pink and plum, with a lime venom accent",[
    "A long, thick velvet worm with many stubby legs and three pastry piping nozzles on its head like a crown, piping looping lines of glowing venom icing in patterns, its body ringed with frosting-like ridges.",
    "A huge velvet-worm dragon with a broad head ending in a big fluted piping-bag nozzle, velvety plum body with sugar-pearl spots, dozens of stubby legs, and venom-icing frills along its back."]),
- 'Knotwyrm':('Knotwyrmling','spore','tough',"slow, wise eyes","hemp tan and moss green, with mushroom-cap accents",[
-   "A huge serpent of thick braided ship's rope tied into big sailor's knots along its body, frayed fibre mane, and clusters of mushrooms growing from every knot, coiled with its head raised.",
-   "A great rope dragon with a heavy knotted head, a long braided body coiled in a big figure-eight knot, small rope-fibre legs, and a forest of mushrooms sprouting along its back."]),
  'Gloamshell':('Gloamspire','shadow','majestic',"glowing violet eyes on long stalks","smoked obsidian black and dusky blue-grey, with a violet glow",[
    "A large snail whose shell has grown into a tall twisting obsidian-glass spire like a dark lighthouse tower, violet light glowing from slit windows inside, its soft body broad and dusky blue.",
    "A big shadow snail with a huge spiral obsidian shell cracked with glowing violet seams, long elegant eye stalks, and a smoky trail behind it, planted and looming."]),
@@ -54,4 +51,9 @@ for _k,_b in (('b1',"A tiny round snowball shrew baby, almost a perfect fluffy w
 for _k,_b in (('f1',"A large, powerful frost shrew-beast, long and low, with a thick armour of jagged ice plates along its back like a glacier ridge, huge icicle claws, a long ice-spike nose like a lance, and a frost-mist mane."),
               ('f2',"A big blizzard shrew with a huge mane of whirling frost fur, long legs built for speed, crystal ice horns along its nose, and a long tail ending in a cluster of ice spikes, planted and snarling.")):
     VC('rimefang_'+_k,'Rimefang',_RS,'final',_b+" One clear idea, few parts.","fierce ice-blue eyes and a fanged snarl","snow white and glacier blue, with an ice-cyan accent","a realistic shrew, standing upright, a wolf, a busy design",'frost','tough'); _P73.append('c_rimefang_'+_k)
+# Owner 03:43: "knotwyrm i would suggest a cute pre-evolution" -> baby below Knotwyrm instead of a final above.
+for _k,_b in (('k1',"A tiny, round baby worm made of soft fluffy yarn-like rope tied into one single loose bow knot, a little mushroom sprout on its head, stubby frayed-fibre tufts, sitting in a curl."),
+              ('k2',"A small chubby rope-worm baby coiled into a simple round knot like a cinnamon bun, big sleepy eyes on its knotted end, a tiny mushroom cap on top, soft frayed fuzz."),
+              ('k3',"A tiny wiggly rope-noodle baby with a single cute overhand knot in the middle of its body, a big head with huge eyes, two little button mushrooms on its back, bouncing.")):
+    VC('knotling_'+_k,'Knotling',_s73('Knotwyrm'),'baby',_b+" One clear idea, few parts.","big, sleepy, sweet eyes and a tiny smile","hemp tan and soft cream, with moss-green and mushroom-cap accents","a person, held objects, a busy design",'spore','cute'); _P73.append('c_knotling_'+_k)
 PRIORITY=_P73+PRIORITY

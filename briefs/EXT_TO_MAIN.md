@@ -5127,3 +5127,8 @@ READY ext/glide-dive-land e4081da34 (glide dive held to the ground lands at the 
 - Redesigns generating: Gongibbon (cuter/smaller), Gongrowl (bigger/scarier), Glintmole, Parasolth (tinier/cuter), Ribbonwyrm (new wings), Umbrathere (bonier, umbrella from its body), Lyrewing (wings are the harp).
 READY ext/hp-parity 32b81c981 (Health section in docs/KIT_PARITY.md: max health as a share of roster average vs the Base HP column of supervive_physics.md, all 12 Hunters 0.80 to 1.25x so no health number changed; armour is health x 2.2 so same ratio, no base shields in either game; --archetype-check now asserts every Hunter inside 1.25x; suggestion in doc, flatter weight classes, not built; archetype-check 381/0, hero-check 0 fail, hero-combo 304/0, health --strict OK, gen_wiki --check 47 unchanged)
 READY ext/damage-ratio-audit a89a84bed (damage-ratio audit doc, 3 outliers fixed: Sparkle R, Neve R, Cryo Spear burst; rest listed for owner)
+
+## 03:45 ET 11-09 — OWNER LINE CHANGES
+- Bubblisk line becomes 2 stages: Bubblisk > Tidalisk (new, very different final generating). Frothisk is CUT.
+- Knotwyrm gets a cute pre-evolution (Knotling, working name) instead of an evolution above it.
+- Selenfin evolution (Selenwhale, working name) generating.
