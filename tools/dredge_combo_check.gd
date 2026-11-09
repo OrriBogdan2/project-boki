@@ -396,6 +396,32 @@ func _all() -> void:
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
+	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
+	var wear := []
+	var armor0: float = T.armor
+	var max_armor0: float = T.max_armor
+	for bloom0 in [0.0, 9.0]:
+		reset.call()
+		T.teleport(home + Vector3(0, 0, 1.6))
+		T.max_armor = 50.0
+		T.armor = 50.0
+		var hp0: float = T.hp
+		P.wbloom = bloom0
+		P.ammo = int(P.wpn["mag"])
+		ak.aim_at(P, T.pos)
+		P.inp["fire"] = true
+		ak.step(m, 0.1)
+		P.inp["fire"] = false
+		ak.step(m, 0.5)
+		wear.append([T.max_armor - T.armor, hp0 - T.hp])
+	T.armor = armor0
+	T.max_armor = max_armor0
+	ok(
+		"gun: zero bloom wears armor %.0f%% faster than a spread volley" % (float(K.gun_def()["armor_k"]) * 100.0),
+		K.armor_shreds > 0 and wear[1][1] > 0.0 and wear[0][1] > 0.0
+		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
+		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
+	)
 	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
