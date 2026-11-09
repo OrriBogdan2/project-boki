@@ -53,7 +53,8 @@ func run(main_node: Node) -> void:
 	var c := vp.get_camera_3d().unproject_position(base + Vector3(-1.0, 0.5, 3.2)) * Vector2(img.get_size()) \
 		/ vp.get_visible_rect().size
 	var box := Rect2i(Vector2i(c) - Vector2i(520, 330), Vector2i(1040, 660))
-	img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size()))).save_png(dir.path_join("summon_side_crop.png"))
+	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
+	crop.save_png(dir.path_join("summon_side_crop.png"))
 	print("SUMMONSIDESHOTS ", dir)
 	main.get_tree().quit(0)
 

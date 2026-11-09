@@ -75,13 +75,15 @@ func _summoned(wild: Kin) -> void:
 			continue
 		var want := SideColor.of(m, h)
 		var who := "%s's summoned Boki" % h.pname
-		ok(not k.wisp and k.ring.visible and _same(SideRings.shown(k.ring), want), "%s: ring under it is the %s colour" % [who, _side(want)])
+		ok(not k.wisp and k.ring.visible and _same(SideRings.shown(k.ring), want),
+			"%s: ring under it is the %s colour" % [who, _side(want)])
 		ok(_same(_shell(k), want), "%s: glow shell is the %s colour" % [who, _side(want)])
 		seen[_side(want)] = true
 	ok(seen.size() == 3, "all three reads on screen at once: you, your squad, a rival")
 	var rival: Kin = m.hunters.filter(func(h: Hunter): return h.team != p.team)[0].kin
 	var mate: Kin = m.hunters.filter(func(h: Hunter): return h.team == p.team and h != p)[0].kin
-	ok(not _same(SideRings.shown(rival.ring), SideRings.shown(mate.ring)) and not _same(SideRings.shown(rival.ring), SideRings.shown(p.kin.ring)),
+	var foe_col := SideRings.shown(rival.ring)
+	ok(not _same(foe_col, SideRings.shown(mate.ring)) and not _same(foe_col, SideRings.shown(p.kin.ring)),
 		"a rival's summon never reads as yours or your squad's")
 	ok(wild.owner_h == null and _side(SideRings.shown(wild.ring)) == "none" and _side(_shell(wild)) == "none",
 		"a wild Boki has no side ring and no side glow")
@@ -102,7 +104,8 @@ func _stolen() -> void:
 	_run(0.3)
 	ok(KinSteal.stolen(fk) and fk.wisp and fk.ring.visible, "a stolen wisp in orbit wears a ring")
 	ok(_same(SideRings.shown(fk.ring), SideColor.YOU), "...in the thief's side colour (you), not its owner's")
-	ok(fk.ring.scale.x < 1.0 and absf(fk.ring.global_position.distance_to(fk.global_position)) < 0.01, "...small, round the wisp")
+	ok(fk.ring.scale.x < 1.0 and fk.ring.global_position.distance_to(fk.global_position) < 0.01,
+		"...small, round the wisp")
 	var own: Kin = p.kin
 	ok(not own.ring.visible, "your own wisp wears none")
 	own.summon.cd = 40.0
