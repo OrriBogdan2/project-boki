@@ -34842,5 +34842,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_reapant_n2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_n3",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n4",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_n4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n3",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_n3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n3",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n4",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_n4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n3",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_n3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_n4",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_n4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_thunderstrich",
+    "name": "Thunderstrich (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_thunderstrich_2.jpg",
+    "ok": true
   }
 ]
