@@ -3736,6 +3736,8 @@ func _gather_input() -> void:
 	if player == null or player.out or opts.get("tut_test", false):
 		return       # (the tutorial test drives the player itself)
 	var mv := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
+	if QuickNote.typing:
+		mv = Vector2.ZERO       # typing a quick note (F8)
 	if mv.length() > 1.0:
 		mv = mv.normalized()
 	# the camera only turns during the skyship ride and the drop after it: keys stay screen-relative

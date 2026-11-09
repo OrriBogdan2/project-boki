@@ -103,6 +103,7 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
+	_key("quick_note", [KEY_F8])              # a one-line note for the devs, saved with where you are (QuickNote)
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:

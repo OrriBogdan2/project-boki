@@ -53,6 +53,16 @@ class ApiTest(unittest.TestCase):
         with open(self.fb, encoding="utf-8") as f:
             self.assertEqual(len(f.read().splitlines()), len(lines))   # rejects store nothing
 
+    def test_quick_note_stored_and_validated(self):
+        note = {"kind": "note", "version": VERSION, "player": "Ana", "note": "the jump felt late",
+                "ctx": {"hunter": "vex", "t": 31.5, "pos": [1.0, 2.0]}, "shot": "abc"}
+        self.assertEqual(self.call("POST", "/feedback", note), (200, {"ok": True}))
+        with open(self.fb, encoding="utf-8") as f:
+            rec = json.loads(f.read().splitlines()[-1])
+        self.assertEqual((rec["kind"], rec["ctx"]["hunter"], rec["shot"]), ("note", "vex", "abc"))
+        for bad in (dict(note, note=" "), dict(note, ctx="x"), dict(note, shot="x" * 6001)):
+            self.assertEqual(self.call("POST", "/feedback", bad)[0], 400)
+
     def test_health(self):
         status, out = self.call("GET", "/health")
         self.assertEqual(status, 200)

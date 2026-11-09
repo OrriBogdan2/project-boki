@@ -125,6 +125,7 @@ const ACTIONS := [
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
+	["quick_note", "Quick note: type one line for the devs (Enter saves, Esc cancels)"],
 ]
 
 var v: Dictionary = {}

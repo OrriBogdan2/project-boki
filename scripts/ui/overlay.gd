@@ -86,6 +86,10 @@ func _input(event: InputEvent) -> void:
 			Record.toggle_orbit()
 			get_viewport().set_input_as_handled()
 			return
+		if not typing and page == "" and event.is_action_pressed("quick_note") and ctx_now() != "title":
+			QuickNote.open(root)
+			get_viewport().set_input_as_handled()
+			return
 		if not typing and event.is_action_pressed("inventory") and ctx_now() in ["home", "town", "interior"]:
 			if page == "inventory": close()
 			elif page == "": open_inventory()

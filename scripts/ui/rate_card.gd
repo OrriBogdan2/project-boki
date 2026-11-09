@@ -5,10 +5,19 @@ extends RefCounted
 
 const ROWS := [["combat", "Combat feel"], ["boki", "Boki"], ["onboarding", "Onboarding"], ["look", "Look"]]
 
-## Runs `then` now, or after the card is answered or skipped when one is due.
+## Runs `then` now, or after the card is answered or skipped when one is due. With quick notes queued
+## it first tries to send them, waiting at most Feedback.QUIT_WAIT seconds.
 static func gate(host: Control, then: Callable) -> void:
 	if Feedback.due():
 		open(host, then)
+	elif Feedback.queued() > 0:
+		var once := [false]
+		var go := func() -> void:
+			if not once[0]:
+				once[0] = true
+				then.call()
+		Feedback.flush(host, go)
+		host.get_tree().create_timer(Feedback.QUIT_WAIT).timeout.connect(go)
 	else:
 		then.call()
 

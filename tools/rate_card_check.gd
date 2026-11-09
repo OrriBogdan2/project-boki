@@ -52,7 +52,38 @@ func run(main: Node) -> void:
 	var same := scores.keys().all(func(k): return int(b["scores"][k]) == int(scores[k]))
 	ok(b["version"] == Net.VERSION and same and b["note"] == "fun", "payload has version, scores and note")
 	ok(b["minutes_played"] >= 10.0 and String(b["player"]) != "", "payload has minutes_played and player")
-	ok(JSON.stringify(b).length() < 2048, "payload fits the 2 KB limit")
+	ok(JSON.stringify(b).length() < 8192, "payload fits the 8 KB limit")
+	# F8 quick notes: queued with their context, sent with the queue, and a quit tries to send them
+	var ctx := QuickNote.context()
+	ok(ctx["version"] == Net.VERSION and ctx.has("preset") and ctx.has("fps"), "context: version, preset, fps")
+	ok(QuickNote.screenshot(main.get_viewport()).length() <= Feedback.SHOT_MAX, "the screenshot fits the cap")
+	var listed: bool = Settings.ACTIONS.any(func(a): return a[0] == "quick_note")
+	ok(InputMap.has_action("quick_note") and listed, "F8 is a rebindable action")
+	online[0] = false
+	Feedback.add_note("jump felt late", {"hunter": "vex", "boki": "cindle", "t": 31.5, "pos": [1.0, 2.0]}, "abc")
+	Feedback.add_note("x".repeat(400), {}, "y".repeat(Feedback.SHOT_MAX + 1))
+	ok(sent.size() == 1 and Feedback.queued() == 2, "notes only queue: nothing is sent yet")
+	QuickNote.open(host)
+	var box: Node = host.get_child(host.get_child_count() - 1)
+	var edit: LineEdit = box.find_children("*", "LineEdit", true, false)[0]
+	ok(QuickNote.typing and not main.get_tree().paused, "the box opens without pausing the tree")
+	edit.text_submitted.emit("  tree clips the camera ")
+	await main.get_tree().process_frame
+	ok(not QuickNote.typing and Feedback.queued() == 3, "Enter saves the line and closes the box")
+	QuickNote.open(host)
+	edit = host.get_child(host.get_child_count() - 1).find_children("*", "LineEdit", true, false)[0]
+	edit.text_submitted.emit("   ")
+	ok(not QuickNote.typing and Feedback.queued() == 3, "an empty line saves nothing")
+	var left := [0]
+	online[0] = true
+	RateCard.gate(host, func(): left[0] += 1)
+	ok(left[0] == 1 and sent.size() == 4 and Feedback.queued() == 0, "quit sends the queued notes, then carries on")
+	var n: Dictionary = sent[1]
+	var whole: bool = n["note"] == "jump felt late" and n["ctx"]["hunter"] == "vex" and n["shot"] == "abc"
+	ok(n["kind"] == "note" and whole, "a note carries its text, context and screenshot")
+	ok(sent[2]["note"].length() == Feedback.NOTE_MAX and sent[2]["shot"] == "", "long note cut, big shot dropped")
+	ok(sent[3]["note"] == "tree clips the camera" and not sent[3].has("scores"), "the line is trimmed; no scores")
+	ok(JSON.stringify(n).length() < 8192, "a note fits the server's 8 KB limit")
 	DirAccess.remove_absolute(Feedback.path)
 	print("RATECARD DONE, failures: ", bad)
 	main.get_tree().quit()

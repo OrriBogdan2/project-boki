@@ -3,13 +3,16 @@ extends RefCounted
 ## The "Rate this build" card's data (item 189): minutes played per game version, which versions were
 ## answered or skipped, and the answers not yet delivered. Kept in user://feedback.json, apart from the
 ## save, so it needs no save migration. Answers go to POST /feedback on the matchmaker; if that fails
-## they stay queued and flush() sends them on the next launch.
+## they stay queued and flush() sends them on the next launch. Quick notes (F8, QuickNote) wait in the same
+## queue as {"kind": "note"} entries and go out with it: when the rate card sends, on quit, or next launch.
 
 const FILE := "user://feedback.json"
 const URL := "http://boki-us-1:8080/feedback"
 const MIN_MINUTES := 10.0       # play on a version before the card may show
 const KEYS := ["combat", "boki", "onboarding", "look"]
 const NOTE_MAX := 200           # characters; the server allows 300
+const SHOT_MAX := 5000          # characters of base64 screenshot a note may carry; the server allows 6000
+const QUIT_WAIT := 2.0          # seconds a quit or leave waits for queued notes to send
 
 ## Where the file lives and how a payload is delivered; checks swap both. poster(body, done: Callable(ok: bool)).
 static var path := FILE
@@ -59,18 +62,33 @@ static func submit(host: Node, scores: Dictionary, note: String) -> void:
 	_save(st)
 	flush(host)
 
-## Sends the oldest queued answer; on success drops it and goes on to the next.
-static func flush(host: Node) -> void:
+## Queues a quick note with its context ({hunter, boki, t, pos, preset, fps}) and a small base64 screenshot
+## ("" for none). It is only saved here: the rate card, a quit or the next launch send it.
+static func add_note(text: String, ctx: Dictionary, shot: String) -> void:
+	var st := _load()
+	var who := "%s (%s)" % [Save.d.get("name", "Hunter"), Save.d.get("profile", {}).get("id", "?")]
+	st["queue"].append({"kind": "note", "version": Net.VERSION, "player": who.left(64), "note": text.left(NOTE_MAX),
+			"ctx": ctx, "shot": shot if shot.length() <= SHOT_MAX else ""})
+	_save(st)
+
+static func queued() -> int:
+	return _load()["queue"].size()
+
+## Sends the oldest queued entry; on success drops it and goes on to the next. `after` runs once the queue
+## is empty or a send failed.
+static func flush(host: Node, after := Callable()) -> void:
 	var st := _load()
 	if st["queue"].is_empty():
+		if after.is_valid(): after.call()
 		return
 	var done := func(ok: bool) -> void:
 		if not ok:
+			if after.is_valid(): after.call()
 			return
 		var now := _load()
 		now["queue"].pop_front()
 		_save(now)
-		flush(host)
+		flush(host, after)
 	if poster.is_valid():
 		poster.call(st["queue"][0], done)
 		return
@@ -85,3 +103,4 @@ static func flush(host: Node) -> void:
 	var err := req.request(URL, ["Content-Type: application/json"], HTTPClient.METHOD_POST, body)
 	if err != OK:
 		req.queue_free()
+		done.call(false)
