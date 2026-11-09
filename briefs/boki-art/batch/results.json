@@ -67952,5 +67952,26 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_shinobant_r4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_reapant_r4",
+    "name": "Reapant (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_r4",
+    "name": "Geysirbara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_harvantis_r4",
+    "name": "Harvantis (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_harvantis_r4_1.jpg",
+    "ok": true
   }
 ]
