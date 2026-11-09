@@ -44425,5 +44425,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_umbrathere_p83_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glassolotl_f3",
+    "name": "Glassolotl (new face and pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f3",
+    "name": "Glassolotl (new face and pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f2",
+    "name": "Glassolotl (new face and pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f2",
+    "name": "Glassolotl (new face and pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f3",
+    "name": "Glassolotl (new face and pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f1",
+    "name": "Glassolotl (new face and pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f1",
+    "name": "Glassolotl (new face and pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_f3",
+    "name": "Glassolotl (new face and pose)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_f3_4.jpg",
+    "ok": true
   }
 ]
