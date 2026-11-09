@@ -36676,5 +36676,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/vespox_card7_2.jpg",
     "ok": true
+  },
+  {
+    "id": "vespox_card7",
+    "name": "Vespox (recolour)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vespox_card7_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_card7",
+    "name": "Vespox (recolour)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_card7_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g10",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g10_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g9",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g9_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g10",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g10_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_recolor",
+    "name": "Vespox (portrait recolour)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_recolor_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g10",
+    "name": "Glaivyx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g10_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g10",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g10_3.jpg",
+    "ok": true
   }
 ]
