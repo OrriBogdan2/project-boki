@@ -4,6 +4,7 @@ extends RefCounted
 ## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
 ## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
+## Its goal line (StationGoals): knock the bot down once.
 
 const MODES := ["fight", "dodge", "still"]
 const MODE_NAMES := {"fight": "Fights back", "dodge": "Only dodges", "still": "Stands still"}
@@ -25,6 +26,7 @@ var _cb: Callable
 var _near: Dictionary = {}       # bot shots that came close: shot -> closest distance
 var _last_bot_hit := -9.0
 var _test_cast := -1.0
+var goals: StationGoals = null
 
 func setup(match_node: Match) -> void:
 	m = match_node
@@ -44,6 +46,7 @@ func setup(match_node: Match) -> void:
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
 	spawn_bot()
+	goals = StationGoals.new(m, null)
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -151,6 +154,7 @@ func tick(dt: float) -> void:
 		reset_t -= dt
 		if reset_t <= 0.0:
 			reset()
+	goals.tick()
 	# watch the bot's shots: one that comes close and doesn't hurt you is a dodge
 	var live := {}
 	for s in m.shots:

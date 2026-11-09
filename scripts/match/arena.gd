@@ -87,7 +87,7 @@ func setup(match_node: Match, which: String) -> void:
 	CombatBus.hit_landed.connect(_cb)
 	_build_ui()
 	_sign()
-	goals = StationGoals.new(self)
+	goals = StationGoals.new(m, self)
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:

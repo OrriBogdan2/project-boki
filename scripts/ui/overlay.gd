@@ -223,10 +223,13 @@ func open_pause(where: String) -> void:
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
-		if (psc as Match).arena:
+		var goals: StationGoals = (psc as Match).arena.goals if (psc as Match).arena else null
+		if (psc as Match).duel:
+			goals = (psc as Match).duel.goals
+		if goals:
 			item.call("Show goals" if StationGoals.hidden() else "Hide goals", "scanner", func():
 				close()
-				(psc as Match).arena.goals.set_hidden(not StationGoals.hidden()))
+				goals.set_hidden(not StationGoals.hidden()))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:

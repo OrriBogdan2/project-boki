@@ -1,8 +1,8 @@
 class_name StationGoals
 extends RefCounted
-## One plain goal line over each Training Area station (content/rules/station_goals.json), with a tick when you
-## have done it once. Nothing blocks you: a goal is only a hint and a tick. Progress is saved per save
-## (Save.d["tutorial"]["goals"]), and the Esc menu's "Hide goals" hides the lines (also saved).
+## One plain goal line over each Training Area station and in the duel room (content/rules/station_goals.json),
+## with a tick when you have done it once. Nothing blocks you: a goal is only a hint and a tick. Progress is
+## saved per save (Save.d["tutorial"]["goals"]), and the Esc menu's "Hide goals" hides the lines (also saved).
 
 const RULES_PATH := "res://content/rules/station_goals.json"
 const FLOOR_EPS := 0.15                        # m above the ground that still counts as standing on it
@@ -10,7 +10,8 @@ const COL_TODO := Color("ffe9b8")
 const COL_DONE := Color("8fe0a0")
 static var rules: Dictionary = _load()
 
-var a: Arena
+var m: Match
+var a: Arena                                   # null in the duel room
 var rows: Array = []                           # {g: the goal's data, label: Label3D, n: hits so far, done: bool}
 var _slams := 0                                # the player's wall-slam count last tick
 
@@ -38,11 +39,15 @@ static func hidden() -> bool:
 static func mark_duel() -> void:
 	state()["done"]["duel"] = true
 
-func _init(arena: Arena) -> void:
+## The Training Area's goals (arena set) or the duel room's (arena null; built after the duel's bot spot).
+func _init(match_node: Match, arena: Arena) -> void:
+	m = match_node
 	a = arena
-	_slams = int(a.m.player.stats.get("slams", 0))
+	_slams = int(m.player.stats.get("slams", 0))
 	for g in rules["goals"]:
-		var at: Vector3 = a.m.duel_pad if not g.has("at") else a._arena_point(Vector3(g["at"][0], 0, g["at"][1]))
+		if (String(g.get("room", "area")) == "duel") != (a == null):
+			continue
+		var at: Vector3 = _spot(g)
 		var lb := Label3D.new()
 		lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		lb.no_depth_test = true
@@ -53,10 +58,16 @@ func _init(arena: Arena) -> void:
 		lb.font = UI.big
 		lb.position = at + Vector3(0, float(g["lift"]), 0) if at != Vector3.INF else Vector3.ZERO
 		lb.visible = not hidden() and at != Vector3.INF      # (no duel pad: nothing to point at)
-		a.m.add_child(lb)
+		m.add_child(lb)
 		var row := {"g": g, "label": lb, "n": 0, "done": is_done(String(g["id"]))}
 		rows.append(row)
 		_show(row)
+
+## Where a goal floats: its map tiles in the Training Area, else the duel pad, or the bot's start in the duel room.
+func _spot(g: Dictionary) -> Vector3:
+	if a == null:
+		return m.duel.bot_at
+	return a._arena_point(Vector3(g["at"][0], 0, g["at"][1])) if g.has("at") else m.duel_pad
 
 func done_count() -> int:
 	return rows.filter(func(r): return r["done"]).size()
@@ -68,7 +79,7 @@ func set_hidden(on: bool) -> void:
 
 ## Only the unfinished goals are looked at, a few comparisons each.
 func tick() -> void:
-	var P: Hunter = a.m.player
+	var P: Hunter = m.player
 	var slams := int(P.stats.get("slams", 0))
 	var slammed := slams > _slams
 	_slams = slams
@@ -92,14 +103,23 @@ func _passed(r: Dictionary, P: Hunter, slammed: bool) -> bool:
 		"mode":
 			return (a.dummies[0]["mv"] as DummyMove).mode == String(g["mode"])
 		"slam":
-			return slammed and P.flat_dist(a._arena_point(Vector3(g["at"][0], 0, g["at"][1]))) < float(g["r"])
+			return slammed and _dummy(String(g["who"])).wslam_t > 0.0
 		"stand":
-			return _in_rect(P, g["rect"]) and P.pos.y - a.m.world.ground_at(P.pos.x, P.pos.z) < FLOOR_EPS
+			return _in_rect(P, g["rect"]) and P.pos.y - m.world.ground_at(P.pos.x, P.pos.z) < FLOOR_EPS
 		"dash":
 			return P.roll_t > 0.0 and _in_rect(P, g["rect"])
 		"train":
-			return a.m.train.has(String(g["step"]))
+			return m.train.has(String(g["step"]))
+		"knock":
+			return int(m.duel.stats["knocks"]) > 0
 	return false
+
+func _dummy(who: String) -> Hunter:
+	for dm in a.dummies:
+		if dm["name"] == who.to_upper():
+			return dm["h"]
+	assert(false, "station_goals.json names no dummy '%s'" % who)
+	return null
 
 func _in_rect(P: Hunter, rc: Array) -> bool:
 	return P.pos.x >= float(rc[0]) and P.pos.x <= float(rc[2]) and P.pos.z >= float(rc[1]) and P.pos.z <= float(rc[3])
@@ -109,8 +129,8 @@ func _pass(r: Dictionary) -> void:
 	state()["done"][String(r["g"]["id"])] = true
 	_show(r)
 	Sfx.play("unlock", null, -8.0)
-	if a.m.hud:
-		a.m.hud.toast("Goal done: %s" % _text(r["g"]), COL_DONE)
+	if m.hud:
+		m.hud.toast("Goal done: %s" % _text(r["g"]), COL_DONE)
 	Save.save_game()
 
 func _show(r: Dictionary) -> void:

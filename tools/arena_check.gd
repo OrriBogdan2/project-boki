@@ -134,7 +134,7 @@ func _station_goals() -> void:
 	var A: Arena = m.arena
 	var P: Hunter = m.player
 	var G: StationGoals = A.goals
-	var want: int = StationGoals.rules["goals"].size()
+	var want: int = StationGoals.rules["goals"].filter(func(g): return not g.has("room")).size()
 	var row := func(id: String) -> Dictionary: return G.rows.filter(func(r): return r["g"]["id"] == id)[0]
 	var done := func(id: String) -> bool: return bool(row.call(id)["done"])
 	var text := func(id: String) -> String: return (row.call(id)["label"] as Label3D).text
@@ -181,13 +181,19 @@ func _station_goals() -> void:
 	ok("station goals: dashing over the gap ticks it", done.call("dash"))
 	at.call(82.5, 44.0)
 	ok("station goals: landing on the far island ticks the glide", done.call("glide"))
+	var heavy: Hunter = A.dummies[2]["h"]
+	strafer.wslam_t = 1.2
 	P.add_stat("slams")
 	G.tick()
-	ok("station goals: a wall slam far from the heavy dummy ticks nothing", not done.call("slam"))
-	P.teleport(A._arena_point(Vector3(30.2, 0, 22.8)) + Vector3(2, 0, 0))
+	ok("station goals: wall-slamming the strafer ticks nothing", not done.call("slam"))
+	strafer.wslam_t = 0.0
+	heavy.wslam_t = 1.2
+	G.tick()
+	ok("station goals: the heavy dummy slammed by someone else ticks nothing", not done.call("slam"))
 	P.add_stat("slams")
 	G.tick()
-	ok("station goals: a wall slam by the heavy dummy ticks it", done.call("slam"))
+	ok("station goals: wall-slamming the heavy dummy ticks it", done.call("slam"))
+	heavy.wslam_t = 0.0
 	m.train["throw"] = true
 	G.tick()
 	ok("station goals: the Boki goal follows its checklist step", done.call("boki") and not done.call("crate"))
@@ -200,7 +206,7 @@ func _station_goals() -> void:
 	var saved: Dictionary = JSON.parse_string(JSON.stringify(Save.d["tutorial"]))
 	ok("station goals: progress is in the save and survives its JSON",
 		saved["goals"]["done"].size() == want and saved["goals"]["done"]["duel"] == true)
-	var again := StationGoals.new(A)
+	var again := StationGoals.new(m, A)
 	ok("station goals: a new visit starts with every tick in place",
 		again.done_count() == want and all_text.call(again, "[x]"))
 	for r in again.rows:
@@ -209,8 +215,28 @@ func _station_goals() -> void:
 	ok("station goals: Hide goals hides every line and is saved", StationGoals.hidden() and all_shown.call(false))
 	G.set_hidden(false)
 	ok("station goals: Show goals brings them back", not StationGoals.hidden() and all_shown.call(true))
-	StationGoals.state()["done"].clear()
 	A.teardown()
+	m.queue_free()
+	await main.get_tree().process_frame
+	await _duel_goals()
+	StationGoals.state()["done"].clear()
+
+## The duel room's own goal: a line over the bot's start, ticked by the first knock.
+func _duel_goals() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start(Match.duel_opts())
+	m.set_process(false)
+	var G: StationGoals = m.duel.goals
+	var lb: Label3D = G.rows[0]["label"] if G.rows.size() == 1 else null
+	ok("station goals: the duel room has its own one line, over the bot's start",
+		lb != null and G.rows[0]["g"]["id"] == "knock" and lb.position.distance_to(m.duel.bot_at) < 4.0)
+	m.step(DT)
+	ok("station goals: no knock yet, no tick", G.done_count() == 0 and lb.text.begins_with("[ ]"))
+	m.duel.stats["knocks"] = 1
+	m.step(DT)
+	ok("station goals: the first knock on the bot ticks it", G.done_count() == 1 and StationGoals.is_done("knock"))
+	m.duel.teardown()
 	m.queue_free()
 	await main.get_tree().process_frame
 
