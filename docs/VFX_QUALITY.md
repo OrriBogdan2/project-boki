@@ -80,16 +80,16 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Tenzo | dolm | 2 | 2 | 1 | 2 | 3 | 1 | 3 | 14 | E telegraph is opaque orange discs; X is a thin red line and ring; everything red/orange (now cobalt on this branch); `breah_*` draws flat rings with no debris |
-| 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
-| 3 | Vex | gunslinger | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | was 15 (1/2/2/2/3/1/4). After (ext/vfx-gunslinger, `vfxq-after-gunslinger-2`, before/after pairs on ext/vfx-gunslinger-strips): every round has a lime tracer, a gun-sized flash and a hit spark; E is a needle of light; X is a reticle over a see-through disc, a streaking shell and a flame wall. Left: lime is low-contrast on yellow sand; the Burr cone and slide echoes are still `vv_fx` |
-| 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
-| 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
-| 6 | Meeko | tender | 2 | 2 | 2 | 3 | 3 | 1 | 4 | 17 | purple orbs, gold seed rings, cyan ult dome: no signature colour; hard-edged flat discs; Hearth Call barely reads |
-| 7 | Sable | thief | 2 | 2 | 2 | 3 | 3 | 3 | 3 | 18 | LMB hits nearly invisible; held LMB is a flat unlit purple box; X is pale grey discs |
-| 8 | Albert | bulwark | 3 | 3 | 2 | 3 | 3 | 2 | 4 | 20 | gold swing arcs read; dash dome is mint green; E is a flat gold box with dark cubes |
-| 9 | Sparkle | mage | 3 | 3 | 3 | 3 | 3 | 2 | 3 | 20 | lightning still cyan (old teal) next to pink orbs; X tints the whole screen purple |
-| 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
+| 10 | Tenzo | dolm | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 24 | re-scored 11-08 from strips (ext/vfx-dolm): slam, RMB charge, hop landings and Basalt Spine are HeroVfx data (`content/vfx/dolm.json`): crack crater, wall, rock debris, crack lanes. Left: punch, boulder and launched-rock bursts in `dolm_kit` still draw `Fx` rings |
+| 1 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | no HeroVfx data and no `Fx` calls in the kit; the look comes from the shared cast language only. Dash/LMB are owned by void-jester-dash-feel-1108 |
+| 6 | Vex | gunslinger | 3 | 3 | 2 | 3 | 3 | 3 | 4 | 21 | `vv_fx` tracer and muzzle flashes; was ember orange through the shared layer, now lime; reload/E have no shape of their own |
+| 2 | Grimble | dredge | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 16 | `ld_fx` primitives; hook chain is a beam with no weight; coin gold shares the stock flash gold |
+| 7 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
+| 9 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
+| 4 | Sable | thief | 2 | 3 | 2 | 3 | 3 | 2 | 3 | 18 | `dj_fx` slashes are thin; blink has no in/out pair; flashes hard-coded gold, not violet |
+| 3 | Albert | bulwark | 2 | 2 | 2 | 2 | 3 | 2 | 4 | 17 | `bjorn_fx` piles of rings/flashes (9 calls); shield reads as a flat disc; hard-coded gold |
+| 5 | Sparkle | mage | 3 | 2 | 2 | 3 | 3 | 2 | 3 | 18 | `vv_fx` bolts/orbs; recoloured to pink by sparkle-dash-feel-1108; ult lacks a hot core and afterglow |
+| 8 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
 
