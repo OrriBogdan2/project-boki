@@ -6870,5 +6870,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/chimelop_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "dreadnoyak_r",
+    "name": "Dreadnoyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_r",
+    "name": "Cisternmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cisternmander_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop_r",
+    "name": "Chimelop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chimelop_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_r",
+    "name": "Dreadnoyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_r",
+    "name": "Canvastross (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_r",
+    "name": "Canvastross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron_r",
+    "name": "Buckleron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_r",
+    "name": "Bellowary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_buckleron_r",
+    "name": "Buckleron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_buckleron_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelotl_r",
+    "name": "Chandelotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_r",
+    "name": "Dragonkite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelotl_r",
+    "name": "Chandelotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_r_2.jpg",
+    "ok": true
   }
 ]
