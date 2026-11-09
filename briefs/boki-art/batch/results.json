@@ -16796,5 +16796,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_pawnfry_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_pawnfry",
+    "name": "Pawnfry",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pawnfry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin",
+    "name": "Gambitfin (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin",
+    "name": "Gambitfin (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin",
+    "name": "Gambitfin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pocketpus",
+    "name": "Pocketpus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pocketpus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin",
+    "name": "Gambitfin (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pocketpus",
+    "name": "Pocketpus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pocketpus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus",
+    "name": "Bladypus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bladypus_1.jpg",
+    "ok": true
   }
 ]
