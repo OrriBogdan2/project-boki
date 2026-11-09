@@ -4,7 +4,8 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it.
+## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
+## from their anchor, follow it, stream behind a run and are off at Low.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -59,6 +60,7 @@ func run(main: Node) -> void:
 	_net(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
+	await _scarf(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -308,3 +310,56 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	m.ents_by_id[P.nid] = P
 	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
 	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+
+## Claire's two scarf tails (HeroScarf): one ribbon each pinned beside the neck anchor, which follows the neck bone;
+## at rest they hang down behind her, running they stream back against the motion; a new frame after she moves, the
+## roots are where the anchor went; off at the Low preset, back on without new meshes.
+func _scarf(main: Node) -> void:
+	var m: Match = flow._match(main, "rimewright")
+	await main.get_tree().process_frame
+	var P: Hunter = m.player
+	var V := HeroVfx.of(m)
+	Sfx.listener = P.pos
+	var S := V.scarves
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	S.tick(1.0 / 60.0)
+	ok(S.wearers.size() == 1 and S.wearers[0].h == P and S.wearers[0].tails.size() == 2, "Claire wears two scarf tails")
+	var w: HeroScarf.Wearer = S.wearers[0]
+	var a: Dictionary = HeroVfx.data("rimewright")["anchors"]["scarf"]
+	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
+	var neck := V.anchor_pos(P, "scarf")
+	if sk != null:
+		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, String(a["bone"])))
+		var off := Vector3(a["off"][0], a["off"][1], a["off"][2])
+		ok(neck.distance_to(sk.global_transform * (pose * off)) < 0.001, "the scarf anchor rides the neck bone")
+	ok(neck.y > P.pos.y + 1.0 and neck.y < P.pos.y + 1.8, "the scarf anchor sits at her neck (%.2f m up)"
+			% (neck.y - P.pos.y))
+	for i in 90:
+		S.tick(1.0 / 60.0)
+	var ln := float(w.cfg["len"])
+	var back := P.model.global_basis.z.normalized()
+	for tail: HeroScarf.Tail in w.tails:
+		var mesh := tail.node.mesh as ImmediateMesh
+		ok(tail.node.visible and mesh.get_surface_count() == 1, "a tail is one ribbon mesh, drawn")
+		var drop := tail.pts[0].y - tail.pts[-1].y
+		ok(drop > ln * 0.7, "at rest a tail hangs (tip %.2f m under its root)" % drop)
+		ok((tail.pts[-1] - tail.pts[0]).dot(back) > 0.0, "and hangs behind her, not through her")
+	ok(S.made == 2, "one mesh per tail (%d)" % S.made)
+	var step := Vector3(6.0, 0.0, 0.0) / 60.0
+	for i in 60:
+		P.model.global_position += step
+		S.tick(1.0 / 60.0)
+	var roots := S.roots(w)
+	for j in 2:
+		var tail: HeroScarf.Tail = w.tails[j]
+		ok(tail.pts[0].distance_to(roots[j]) < 0.001, "a tail's root follows the anchor as she moves")
+		var trail := tail.pts[0].x - tail.pts[-1].x
+		ok(trail > ln * 0.4, "running at 6 m/s it streams behind her (%.2f m back)" % trail)
+	Settings.v["quality"] = HeroScarf.OFF_PRESET
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return not t.node.visible), "off at the Low preset")
+	Settings.v["quality"] = "high"
+	S.tick(1.0 / 60.0)
+	ok(w.tails.all(func(t: HeroScarf.Tail): return t.node.visible) and S.made == 2, "back on, the same meshes")
+	Settings.v["quality"] = was

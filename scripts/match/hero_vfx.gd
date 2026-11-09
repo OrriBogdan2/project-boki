@@ -50,6 +50,7 @@ var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
+var scarves := HeroScarf.new(self)   # the cloth ends some Heroes trail (data "scarf")
 
 static func of(match_node: Node) -> HeroVfx:
 	if match_node.has_meta("hero_vfx"):
@@ -721,6 +722,7 @@ func _model_has(h: Hunter, node_name: String) -> bool:
 # ------------------------------------------------------------------ the running looks
 func _process(delta: float) -> void:
 	_tick_holds()
+	scarves.tick(delta)
 	for i in range(live.size() - 1, -1, -1):
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta
