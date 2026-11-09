@@ -68589,5 +68589,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/frigatee_card107_2.jpg",
     "ok": true
+  },
+  {
+    "id": "forgebrock_card107",
+    "name": "Forgebrock (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/forgebrock_card107_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rattlebub_card107",
+    "name": "Rattlebub (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rattlebub_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card107",
+    "name": "Frigatee (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scopeleon_card107",
+    "name": "Scopeleon (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scopeleon_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "domeleon_card107",
+    "name": "Domeleon (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/domeleon_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "domeleon_card107",
+    "name": "Domeleon (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/domeleon_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rattlebub_card107",
+    "name": "Rattlebub (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rattlebub_card107_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card107",
+    "name": "Frigatee (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/frigatee_card107_3.jpg",
+    "ok": true
   }
 ]
