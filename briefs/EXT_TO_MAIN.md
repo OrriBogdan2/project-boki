@@ -4784,3 +4784,4 @@ ART sporcupine 8.3 briefs/boki-art/cards/Sporcupine.jpg kind=card
 ART stormit 8.4 briefs/boki-art/cards/Stormit.jpg kind=card
 READY ext/anim-time-kael bfe9512dc (Kael clip retime: 'lead' key in WardenClips, four Kael leads so each strike frame lands on the kit's hit, kael_anim_check asserts in --juggernaut-combo-check, timing table in docs/heroes/juggernaut.md)
 READY ext/kit-parity-refresh-1 4791eb5c9 (docs/KIT_PARITY.md: Vex, Kael, Lace, Cinder, Meeko, Tenzo re-checked on main d255acbee, canon names, closing shas, pending branches; doc only; 6 combo checks 0 fail, health --strict, gen_wiki --check OK)
+READY ext/menus-more e4c3b9694 (menus behind More)
