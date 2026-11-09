@@ -136,7 +136,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 |---|---|---|---|
 | The orb charge is binary (charged or not), since 05.02.25 | patch notes, wiki | no | changed by the owner (item 60): a continuous build-up over the same 1.4s window |
 | Charged orb: faster, slows 10% for 1.5s | wiki | yes (SLOWED) | built |
-| Charged orb passes through terrain | wiki, owner's data | no | not built (our shots stop on terrain; a pierce would read as a bug on our islands) |
+| Charged orb passes through terrain | wiki, owner's data | no | built wider by the owner (item 60): every orb passes terrain (`pierce_terrain`); placed walls and domes still stop it; asserted `item 60: every orb passes the wall ...` |
 | Snap slows Void while casting (25% less since Jan 2025) | patch notes | no | built: 25% slower during the 0.32s wind-up and the 0.15s recovery |
 | Snap stun grows with distance | wiki, card | yes | built 0.8-1.8s |
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
@@ -196,3 +196,60 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
+
+## Parity verify, Nov 9
+Main d255acbee against the sources (docs/KIT_PARITY.md Ostra block, briefs/hero-ref/ostra.md, briefs/supervive-data/supervive_kits.md Void,
+DECISIONS 2026-11-07 and the owner holds: Nightwell locks him about 1 s then he moves freely; Brimseed peaks at 3.5x; LMB and RMB are owner
+items 60 and 40; the floating passive stays `[?]`). Verdicts: match, differ (owner), regressed, open. Paths: K = scripts/arch/kits/ostra_kit.gd,
+W = ostra_well.gd, J = content/archetypes/ostra.json, F = content/dash_flow/ostra.json, T = content/weapons/tether_lantern.json, C = tools/ostra_combo_check.gd,
+U = tools/ostra_ult_check.gd (run inside `--ostra-combo-check`). Nothing is regressed. Rows tagged *in flight* are already on an unmerged
+branch (ext/motley-seed-fizzle, ext/parity-motley-float, ext/cancel-matrix-c); this pass leaves their files alone.
+
+| Row | Source | Ours (main) | Verdict | Where |
+|---|---|---|---|---|
+| Passive: Swollen state, Snap +44%, Trade 1.25 s, seed larger and quicker, well 5.1 m | Empowered variants on RMB, Shift, E, R [D] | the same four; no LMB variant (the data lists none) | match | J:30-37, K:83-98, C: `combo: Swollen ...` |
+| Passive: Swollen lasts 9 s | about 9 s [F], not in the data | 9 s | match `[?]` | J:36 |
+| Passive: floats, no footsteps, ground hazards pass him | "floats: no footstep noise, avoids ground hazards" [D] | hazards 0 dmg, a sky strike hits; gait 0.1 so no step sound | match; floating stays `[?]` (*in flight*: ext/parity-motley-float) | K:106-115, hunter.gd:3295, kmoves_stone.gd:776, C: `data: a lava hit passes him by` |
+| LMB cadence 0.6 s, orbs fly past the cursor to max range | [F], [D] | rate 0.6, range 14, `aim: max` | match | T:10-22, C: `lmb parity: held, an orb every 0.6 s` |
+| LMB turns to the aim, one-hand flick, line to the cursor, glow at the hand | [F] | `ostra_orb`, `_reticle`, hand glow | match | K:159-186, C: `lmb parity: every orb leaves at the cursor` |
+| LMB idle charge | binary: after not firing, 353 vs 263 [D] | continuous 0.6 to 1.4 s, +34%, x1.4 speed, +90% size | differ (owner item 60) | J:43-50, K:188-217, C: `item 60: ...` |
+| LMB terrain | only the charged orb passes [D] | every orb passes; placed walls stop it | differ (owner item 60) | T:21, C: `item 60: every orb passes the wall` |
+| LMB full-orb slow | 6% for 1.5 s [F card]; 10% [wiki] | 10% for 1.5 s | open (sources disagree; wiki number kept) | J:48-49 |
+| LMB orb speed | about 25 h/s [F], scale uncertain | 30 m/s plain | open (footage scale about 2x uncertain, no data number) | T:11 |
+| LMB spam penalty | "firing faster lowers speed and damage" [F card] | none: 0.6 s is a hard cadence | open (not built, no number; owner call) | audit table above |
+| RMB wind-up | 0.2 s black orb [F] | 0.32 s, slow 25% | differ (owner item 40) | J:85, K:444-453, C: `item 40: ...` |
+| RMB one tight cluster, stun 0.8-1.8 s by distance, stars | [F], [D] | one 0.7 m bundle, 0.8 to 1.8 s, crown on the foe | match | J:80-91, K:466-505, C: `rmb: it stuns 0.8s up close ...` |
+| RMB cd 10 s, one charge; Empowered 399 vs 277 | [D] | 10 s, 1 charge, +44% | match | J:76-92, C: `rmb: Shard Snap has one charge` |
+| RMB rails while aiming | two parallel lines [F] | `AimKit.lane` rails | match | K:162-166, C: `rmb aim: ...` |
+| RMB rank path | +20% dmg, -1.5 s twice; +50 / +100 speed [D] | shared rank step (+15%/+30%, -10%/-20%); speed bursts built | open (shared rank rule, not Motley's) | J:93-99, 165-180 |
+| Shift lob to the cursor, about 1.8 s, 1.25 s Swollen | [F], [D] | 1.8 s / 1.25 s, 12 m reach | match | J:57-60, K:244-300, C: `dash: the lob takes about 1.8s` |
+| Shift swaps all units in the circle | "swaps you and all units" [D] | foes, allies, Boki go to his spot, he goes to theirs | match | K:366-438, C: `owner: two units in the circle ...` |
+| Shift units standing at the origin | the dummy went to the landing, Void stayed (f0193), unsettled [F] | the landing circle is traded; the origin circle is not | open (source ambiguous, [F] open question) | K:392-423 |
+| Shift both ends marked, landing circle while aiming, sigil | [F] | rings, landing circle, rune sigils | match | K:273-283, 320-345 |
+| Shift hold-to-aim, tap casts at once | tap [F] | hold shows both ends, tap casts | differ (owner Nov 2 dash note) | K:259-284 |
+| Shift hover while the lantern flies | wiki: keeps momentum | hovers, drifts at 30%, keeps height | differ (owner item 75) | J:68, K:116-120, C: `item 17: ...` |
+| Shift no charge or in the air | none | refused, never the long dash | differ (owner sync 61) | K:265-269, C: `owner: with no charge Shift is refused` |
+| Shift rank 3 ally shield | 375 HP, 3 s [D] | 26 (375 of a level-15 hunter on 145) | match | J:62, K:376-384 |
+| Shift radius 1.5 m, reach 12 m | no number [D] | 1.5 / 12 | open `[?]` (footage scale) | J:58, 61 |
+| E grows 6.5 s, recast from 0.3 s | [F], [D] | grow 6.5, min_recast 0.3 | match | J:117, 132, K:576-584 |
+| E peak 3.5x, 12.5 base (365 vs 263) | up to 3.5x by held time [D] | 12.5 x (1 + 2.5 k): 43.75 at full | match (KIT_PARITY gap 17 and its Ostra row still say 3x: stale, fixed in 5b9a528d2) | J:120-121, K:606-607, C:343-348 |
+| E empowered larger and faster, cd 10 to 8, burn 250/s to 8.2 | [D] | 4.2 m, grow x0.75, rank 3 8 s, burn 8.2 | match | J:118-135 |
+| E drop, light column from about 4.4 s, implosion | [F] | drop 0.25, tell_k 0.68, three rings in | match | J:134, K:544-559, 606-617 |
+| E left unpopped | no expiry listed [D] | fizzles harmlessly at 10 s at full size | open (ours-only rider; *in flight*: ext/motley-seed-fizzle 9f521695a) | J:135, K:570-575, C:371 |
+| X dome 1.0 s, 3.5 s stun and pull, 0.16 per 0.1 s, radius 3.6 / 5.1 | [F], [D] | the same, cd 70 (card 58.3, data 70) | match | J:137-151, W:123-175, U: `ult open ...` |
+| X cast lock | held for the dome, free while it holds (f23-f50) | locked 1.0 s, then walks, fights, Trades; a stun or knock frees him | match (owner hold: about 1 s, then free) | W:98-143, U:249-283 |
+| X allies untouched; no explosion on close | [F] | foes only, quiet close | match | W:149-197 |
+| X upgrades | -5 s twice [D] | no ult ranks for any Hunter | open (shared system, not Motley's) | J:165-180 (rank keys: sec, dash, kin) |
+| Cancels: Snap wind-up + RMB again | one cluster per tap | ignored, no second charge | match | K:444-447 |
+| Cancels: stun in the Snap wind-up, Shift aim, or lantern flight | not shown | wind-up and flight end with no shot or teleport (the charge stays spent); an aim ends unspent | open `[?]` (unsettled; matrix on *in flight* ext/cancel-matrix-c) | K:281-284, 338-340, 459-461 |
+| Cancels: E before 0.3 s | recast from 0.3 s | press eaten, seed kept | match | K:578-581 |
+| Cancels: Merge | none | drops Trade, aim, wind-up, prime; the placed well stays | match | K:355-365, C: `merge hold: ...` |
+| Dash-flow, 16 rows, all with a source | Swap is a lobbed projectile [D] | `dash.{ground,air}.{lmb,rmb,e,x,q}` fire; `into_dash` lmb, rmb, e, q fire | match | F:6-59, 68 |
+| Dash-flow: Shift in the Nightwell dome, jump in the dome | the 1.0 s cast hold [F] | `into_dash.x` buffer (goes as the well opens), `into_jump.x` lock | match (owner hold) | F:63, 74, U:294-299 |
+| Clips: 14 kit moves | footage poses | every `play()` id is in KMovesStone and warden_anim/ostra.json `kmoves` | match on coverage | kmoves_stone.gd:476-743 |
+| Clips: `ostra_flurry` | item 136 RMB card flurry, since replaced by the Snap | never played; VoidCard and tools/motley_card_shots.gd still hang on it | open (dead, not parity; `warden_anim/ostra.json` is *in flight* on ext/anim-arm-motley) | kmoves_stone.gd:500-506 |
+
+Fixed in this pass: the small-mechanics row "Charged orb passes through terrain: not built" was stale since item 60 (now built, asserted by
+`item 60: every orb passes the wall ...`). The rest are listed, not built: LMB slow 6% vs 10%, orb speed, spam penalty, Shift ranges, ult ranks,
+the dead flurry clip, and the stale Ostra rows of KIT_PARITY (E 3x, gap 17), whose file two branches are editing.
+
