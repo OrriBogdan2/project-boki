@@ -2,14 +2,14 @@ extends Node3D
 ## Every kin species side by side, glowing as they do when they're out in a fight. Open
 ## tests/kin_gallery.tscn and press F6 to look at them (or to check a new kin you added in content/kin),
 ## or start the game with -- --kin-gallery (how GPU jobs run it).
-## --kin-wisps: the Model Room's Boki wisps (BokiWispLook), each bouncing in front of its Boki, for the
+## --kin-wisps: the Model Room's Boki wisps (BokiWispLook), each bouncing over its Boki, for the
 ## WISP_ROOM species; add --kin-shiny for their shiny colours. Use with --shot / --frames.
 
 ## The starters, the mystery egg's Ermink, and six more with a spread of ears, horns, crests and tails.
 const WISP_ROOM := ["cindle", "puddlet", "burrlet", "ermink", "zapple", "wisplet", "pebbit", "kestrike",
 	"kindlewren", "heatherhorn"]
-const WISP_SHOW_SCALE := 1.8   # the wisps shown bigger than in a match so their outlines read from the camera
-const WISP_AHEAD := Vector3(0, 0.75, 0.95)   # m from its Boki: in front of it, about at its head
+const WISP_SHOW_SCALE := 2.4   # the wisps shown bigger than in a match so their outlines read from the camera
+const WISP_ABOVE := 2.2        # m; each wisp floats over its Boki's name
 
 var _wisps: Array = []
 var _clock := 0.0
@@ -39,7 +39,7 @@ func _ready() -> void:
 		k.scale = Vector3.ONE * 1.3
 		add_child(k)
 		var shell: MeshInstance3D = k.get_node_or_null("Body/Shell")
-		if shell and not close:
+		if shell and not close and not show_wisps:      # round glows would muddle round = Hunter, critter = Boki
 			shell.visible = true
 			(shell.material_override as ShaderMaterial).set_shader_parameter("strength", 0.6)
 		var pt: CPUParticles3D = k.get_node_or_null("Aura")
@@ -96,7 +96,7 @@ func _stage() -> void:
 
 func _add_wisp(species: String, rec: Dictionary, kin: Node3D) -> void:
 	var w := BokiWispLook.build(species, rec)
-	w.position = kin.position + WISP_AHEAD
+	w.position = kin.position + Vector3(0, WISP_ABOVE, 0)
 	w.rotation.y = kin.rotation.y
 	w.scale = Vector3.ONE * WISP_SHOW_SCALE
 	add_child(w)
@@ -113,7 +113,7 @@ func _camera(close: bool, wisp_row: int) -> void:
 		cam.rotation = Vector3(-0.22, 0, 0)
 		cam.fov = 62
 	elif wisp_row > 0:
-		cam.position = Vector3(0, 3.2, 1.6 + wisp_row * 0.85)
-		cam.rotation = Vector3(-0.3, 0, 0)
+		cam.position = Vector3(0, 2.0, 1.6 + wisp_row * 0.85)
+		cam.rotation = Vector3(-0.07, 0, 0)
 	add_child(cam)
 	cam.make_current()

@@ -5,7 +5,7 @@ shader_type spatial;
 // outline of light.
 render_mode unshaded, shadows_disabled, fog_disabled;
 instance uniform vec4 rim_col : source_color = vec4(1.0);
-uniform float glow = 0.35;   // how far the middle lifts toward white
+uniform float glow = 0.15;   // how far the middle lifts toward white
 uniform float rim = 0.9;     // how strongly the edge turns to the glow colour
 void fragment() {
 	float facing = clamp(dot(NORMAL, VIEW), 0.0, 1.0);
