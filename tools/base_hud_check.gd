@@ -12,7 +12,8 @@ func ok(cond: bool, what: String) -> void:
 		fails += 1
 
 func _chip_texts(home) -> Array:
-	return home.top_chips.get_children().filter(func(c): return not c.is_queued_for_deletion()).map(func(c): return (c.find_children("*", "Label", true, false)[0] as Label).text)
+	var chips: Array = home.top_chips.get_children().filter(func(c): return not c.is_queued_for_deletion())
+	return chips.map(func(c): return (c.find_children("*", "Label", true, false)[0] as Label).text)
 
 func _home(m: Node):
 	Save.no_write = true
@@ -62,7 +63,8 @@ func run(m: Node, mode := "check") -> void:
 	var card: BaseHud = home.root_ui.get_node("BaseHud")
 	home._refresh_top()
 	var off: Array = _chip_texts(home)
-	ok(not FarmUnlocks.base_mode() and off.any(func(t): return t.contains("wood")) and off.any(func(t): return t == "3"),
+	var shows_mats: bool = off.any(func(t): return t.contains("wood")) and off.has("3")
+	ok(not FarmUnlocks.base_mode() and shows_mats,
 			"off: the mats and crop counters show: %s" % str(off))
 	await m.get_tree().process_frame
 	ok(not card.visible, "off: no base card")
@@ -80,8 +82,7 @@ func run(m: Node, mode := "check") -> void:
 	var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	ok(card.visible and texts.any(func(t): return t.begins_with("While you were away: Pip") and t.contains("+1 more")),
 			"on: the card says what changed")
-	ok(texts.has("Pip") and texts.has("Full") and texts.has("Energy") and texts.has("Happy") and texts.has("Clean"),
-			"on: the Boki's four needs show")
+	ok(["Pip", "Full", "Energy", "Happy", "Clean"].all(func(n): return texts.has(n)), "on: the Boki's four needs show")
 	ok(texts.any(func(t): return t.contains("Pip is hungry")), "on: one next action: %s" % str(texts.back()))
 	ok(not is_instance_valid(home.guide.hint_box), "on: no tutorial line")
 	ok(card.find_children("*", "Label", true, false).size() <= 9, "on: the card stays short")

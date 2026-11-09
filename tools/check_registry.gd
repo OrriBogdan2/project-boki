@@ -110,8 +110,8 @@ const CHECKS := {
 	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # results, arrival modals, top bar, key row
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
-	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base mode: gems, needs, one next step
-	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir=<dir> --size=WxH
+	"--base-hud-check": ["res://tools/base_hud_check.gd", "base_hud_check", "check"],      # base-mode farm HUD
+	"--base-hud-shots": ["res://tools/base_hud_check.gd", "base_hud_check", "shots"],      # --shots-dir= --size=WxH
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
