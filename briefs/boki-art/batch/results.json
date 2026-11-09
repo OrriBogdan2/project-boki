@@ -18819,5 +18819,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/tidalisk_r_w30_2.jpg",
     "ok": true
+  },
+  {
+    "id": "tidalisk_r_w30",
+    "name": "Tidalisk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidalisk_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w30",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w30",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w30",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w30",
+    "name": "Voltalon",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w30",
+    "name": "Voltalon",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_card",
+    "name": "Rimink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_card",
+    "name": "Rimink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_card_1.jpg",
+    "ok": true
   }
 ]
