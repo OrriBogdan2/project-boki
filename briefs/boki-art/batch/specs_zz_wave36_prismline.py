@@ -1,9 +1,10 @@
-# Prismander line redesign (owner 00:27; direction picked by Claude 01:05 per owner "you make picks"): B, stained glass.
-# Turnaround of the new starter, then Glassolotl concept-first with ONE clear idea and few parts (owner: "way too busy").
-_PB='briefs/boki-art/concepts/Prismander_B.jpg'
-TA('Prismander',_PB); SPECS[-1]['id']='ta_prismander_b'
-VC('glassolotl_b','Glassolotl',_PB,'mid',
- "A sleek, longer young axolotl caught gliding forward low through water, body stretched in a gentle S, made of a few BIG stained-glass panes split by bold dark lead lines, its gills now three long flowing glass fins on each side, and a round rose-window pattern of glass on its back as its one signature feature. Simple, clean, few parts.",
- "bright, confident glossy eyes and a sly little smile","cobalt blue and rose glass panes, with an amber accent and dark lead lines",
- "many small spikes, crystals, a sail, rainbow effects, sparkles, a busy design, a window frame",'prism','sleek')
-PRIORITY=['ta_prismander_b','c_glassolotl_b']+PRIORITY
+# Prismander line redesign. Owner 01:14 ET 11-09 picked direction A (rock candy), run 2 as Prismander ("super cute, make them all
+# based on that"); run 3 kept as the female look. Glassolotl and both finals follow the rock-candy direction: one clear idea, few parts.
+_PA='briefs/boki-art/concepts/Prismander.jpg'
+TA('Prismander',_PA); SPECS[-1]['id']='ta_prismander_a'
+TA('Prismander','briefs/boki-art/concepts/Prismander_female.jpg'); SPECS[-1]['id']='ta_prismander_female'
+VC('glassolotl_a','Glassolotl',_PA,'mid',
+ "A sleeker, longer young axolotl caught gliding forward low through water in a gentle S, its whole body glossy translucent hard candy like a boiled sweet with one bold candy-cane stripe spiralling from neck to tail tip, its gills grown into three long smooth pulled-sugar ribbons on each side, and a short ridge of sugar-crystal clusters along its spine as its one signature feature. Simple, clean, few parts.",
+ "bright, cheeky glossy eyes and a wide happy grin","strawberry pink and clear sugar white, with a mint-green stripe accent",
+ "many spikes, a sail, sharp crystals everywhere, rainbow effects, sparkles, a busy design, a lollipop stick, a wrapper",'prism','sleek')
+PRIORITY=['ta_prismander_a','c_glassolotl_a','ta_prismander_female']+PRIORITY
