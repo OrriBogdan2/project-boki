@@ -5698,3 +5698,21 @@ READY ext/vfx-sable-encore 5e9ea1d07 (Sable parity VFX: Encore area is a thin ri
 READY ext/remove-downed-crawl e41f0fd3a (supersedes 0af36e371: also drops the removed HunterAnim.down_k read in warden_stance.gd, which caused the 20 NEW-RED on mc-20261109-1352; ability + warden-stance checks 0 fails) [coord 11-09]
 READY ext/ui-boki-box-summon dcf23f6df (Boki box summon UI: ring drains while SUMMONED / fills while RESTING, key cap, READY flash once, STOLEN tag, one chip only, --boki-box-check PASS 10 rows; STACKED on ext/wisp-summon bbfbf5d9b merged in: merge that first; --wisp-check, --kinbox-check, --layout-check 0 fail, health --strict OK, gen_wiki --check OK; GPU HUD shot QUEUED not viewed: jobq 20261109-155443-32627, out shots/)
 READY ext/vfx-cinder-flight 982230c64 (Cinder Flue Flight carpet drawn full trail_w 1.8 m wide (asserted in ashwick ult check: look 1.80 = burns 1.80), thick red-orange body with a hot yellow edge that cools to char over its 5.2 s, no carpet over the void unchanged, gameplay unchanged; --ashwick-combo-check 120/0, --cinder-art-check 0, --hero-vfx-check OK, health --strict OK, gen_wiki --check OK; GPU strips QUEUED NOT RENDERED (no worker took them in 20 min), not viewed: before r 20261109-153657-04569, lmb -24426; after r 20261109-153925-00110, lmb -03630, trees /home/boki/cj/20261109-153114-a4/before and /after, hose burning-foe marker not yet checked at camera)
+
+
+## 2026-11-09 verify (job 20261109-152131-a1): first-hints-check
+Merged ext/tutorials-cut (37dc18d84) into it first. `--first-hints-check` plays a fresh save's first expedition with bots; 0 failures. Before the fixes it failed 5 asserts (hints in the first 2 s of a fight, two on screen, uplink with goexit, goexit near an outpost).
+| hint | trigger | result |
+|---|---|---|
+| exdash | in the air over the void 0.35 s | shows once, at its moment |
+| pickup | gear within 6 m | ok |
+| key | chest key picked up | ok |
+| rank | first level-up skill point | ok |
+| crouch | 40 s in, on the ground | ok |
+| orders | Boki sent 14 m out | ok |
+| utility | foe close: held 2 s, then shows | FIXED (was in the first 2 s) |
+| uplink | next to an outpost that can start | FIXED (was shown before it opened) |
+| defend | own uplink charging | FIXED (delayed past the wave's first 2 s; one at a time) |
+| goexit | 150 s in, no outpost within 40 m | FIXED (was shown beside an outpost) |
+After a save round-trip a second expedition shows none. Never more than one hint on screen. Not covered: Match._tip lines (stagger, bond full, exit tips) are a separate once-per-save system and can sit beside a hint.
+READY ext/first-hints-check 123f1800d (merges ext/tutorials-cut; --first-hints-check: hints wait out a fight's first 2 s, never stack, uplink only when it can start, go-to-exit only with no outpost close; health --strict OK)
