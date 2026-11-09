@@ -10,6 +10,8 @@ Arena's dais face, the ledge caught on the way up). Played through the real inpu
 Re-render one: `jobq submit --needs gpu --tree <tree> --out reel -- --hero-vfx-reel --reel-parity --reel-hero=<id> --reel-frames --shots-dir=reel`, then
 `ffmpeg -framerate 30 -i <out>/frames/%05d.jpg -c:v libx264 -crf 30 -maxrate 700k -bufsize 1400k -pix_fmt yuv420p <id>.mp4`.
 
+**Checked and not checked.** All 12 reels ran to the end on the GPU workers (rc 0, 9 parts each). A headless run of the same input script showed every Hunter's mantle catching the dais lip and climbing it, and every dash, air dash and glide staying on the island. No sound is in the clips. The lists are from the docs plus a sample of footage frames per Hunter (6 source frames against 12 reel frames), so a look that is not named may still differ: the final word is watching the clips.
+
 **Reading the lists.** Sources: docs/KIT_PARITY.md (main 7907d9afe audit), docs/heroes/<id>.md, the source data
 (briefs/supervive-data) and the source footage frames (briefs/hero-ref, ext/hero-ref-footage). "By eye" means a
 frame set of the footage next to frames of the reel; it is a sample, not a frame-by-frame measurement. Owner notes
@@ -102,4 +104,19 @@ Still differs (KIT_PARITY gap 16, docs/heroes/rimewright.md):
 - Passive: the Chill 15% slow is ours (gap 19). E: slide and grow, cd 17 vs 20. Dash: 11.5 m/s for 1.6 s (source 10 to 11), early-release refund .6 (owner), cd 13 in the data. R: hold 3.5, carry .8 (owner), cd 80: match.
 - Body 1.15 matches (1.1 to 1.15).
 By eye (footage 50 to 392 next to the reel): the source's Ice Crash is a violent burst of long blue shards with a bright light column and a wide ring; in the reel it is a large flat pale-blue disc with a swirl, so it has the size but not the shard burst or column. The source's Ice Wall is a bright crystal cluster with a red aim line; ours is a thin pale strip. The dart is a long blue bolt in the source and a short pale bolt here.
+
+## Meeko the Dawnfox (`tender`, source Pip / Elluna): [tender.mp4](tender.mp4)
+Still differs (KIT_PARITY, docs/heroes/tender.md):
+- RMB: a hop form with a 1.0 s wind-up, cd 10.5; the source fires a shot with a delayed Root, 11.5 s. The motion is `[?]` (not settled from code).
+- Passive: carries up to 2 Wisps plus a Carrier shield (ours); the drop lockout (4 s) is built but which hits drop a Wisp was not traced.
+- LMB: Empowered +40% range is ours (ramp per hit matches). E: 2.5 s zone, throw, cd 11 vs 12, self heal .33 (ours). R: tether 5 s, range 12.6, cd 46 vs 60 (0.77x), match in shape.
+- Dash: ground 7 s and air 14 s match; the owner's air steer stays.
+By eye (footage 74 to 279 next to the reel): the source's Moon Shot is a blue comet with a trail, Bound by Fate a white bolt with a rune ring, Rejuvenating Aura a big green-white disc, and Divine Intervention a long white arc to the ally. In the reel the shots are small gold sparks, the aura a thin gold ring, and the R tether read faintly; they have much less weight on screen than the source's.
+
+## Sable the Silver Thief (`thief`, source Sable / Shiv / Dancer): [thief.mp4](thief.mp4)
+Still differs (KIT_PARITY, docs/heroes/thief.md):
+- RMB: Bola with a 30% slow (owner item 53); the source's bolas Ground and stun two targets. Cd 7 vs 13 (0.54x).
+- R: Encore, 10 shots with a rim band, cd 24 vs 50 (0.48x, the lowest pace of any kit); E: dagger 14 m, 6 s, cd 15 (0.75x of the data at rank IV). The ult has no ranks (not built).
+- Passive: Marks plus an empowered Shred that is ours (`[?]`). LMB range 12 m is unconfirmed. Dash: 4.5 m / .48 s, 2.34x prime, cd 4.5 (excluded from the dash feel scale): match.
+By eye (footage 25 to 350 next to the reel): the source's Arcslinger shots and Death Blossom are bright red-white streaks with a pink knife flurry, Cartwheel a spinning flip with a purple trail, and Trickshot a wide pale cone lane. The reel shows a violet figure with thin small shots and a pale translucent disc for R; the sampled dash frames show little of the cartwheel flip, so check the dash parts. Her speed lines and the Death Blossom flurry are much lighter than the source's.
 
