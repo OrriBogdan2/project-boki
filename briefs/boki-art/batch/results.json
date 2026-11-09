@@ -21318,5 +21318,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_forgebrock_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_bubblisk",
+    "name": "Bubblisk (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_bubblisk_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_frothisk",
+    "name": "Frothisk (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_frothisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_frothisk",
+    "name": "Frothisk (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_frothisk_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_frothisk",
+    "name": "Frothisk (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_frothisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_arcestrel",
+    "name": "Arcestrel (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_arcestrel_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_arcestrel",
+    "name": "Arcestrel (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_arcestrel_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_arcestrel",
+    "name": "Arcestrel (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_arcestrel_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_nettlynx",
+    "name": "Nettlynx (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_nettlynx_1.jpg",
+    "ok": true
   }
 ]
