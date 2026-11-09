@@ -803,6 +803,10 @@ func _tick_wall(dt: float) -> void:
 		wall["hit"] = 1.0
 	wall["hit"] = maxf(0.0, float(wall["hit"]) - dt * 4.0)
 	var rise := clampf(float(wall["t"]) / 0.15, 0.0, 1.0) if not bool(wall.get("frozen", false)) else 1.0
+	if bool(wall["sliding"]):
+		var spot := Vector3(mid.x, float(w["y"]), mid.y)
+		var slide := float(wall["slide_t"])
+		RecastMarker.show_at(h, "signature", spot, slide - float(wall["t"]), slide, col_of(ed))
 	lk().keep(
 			"wall", "wall", Vector3(mid.x, float(w["y"]), mid.y),
 			{"a": w["a"], "b": w["b"], "y": float(w["y"]), "hit": float(wall["hit"]), "rise": maxf(rise, 0.1)})

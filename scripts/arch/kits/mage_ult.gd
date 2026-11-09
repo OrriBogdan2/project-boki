@@ -246,6 +246,9 @@ func _aim_tick() -> void:
 	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
 	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
+	if phase() == AIR:
+		var hover := float(data()["hover"])
+		RecastMarker.show_at(h, "hunter_ult", leap["land"], hover - float(leap["t"]), hover, kit.col_of(data()))
 
 ## Gold crackle along the rim and round her body while she hangs.
 func _air_fx(dt: float) -> void:

@@ -143,6 +143,8 @@ func _fly(dt: float) -> void:
 		"col": k.col_of(x), "alpha": 0.75})
 	if float(flight["t"]) <= 0.0:
 		_land()
+	else:
+		RecastMarker.show_at(h, "hunter_ult", p, float(flight["t"]), float(x["time"]), k.col_of(x))
 
 ## A knockback mid-flight (a fresh Hunter.impulse pushed the body off the flight's velocity) adds to the
 ## flight's speed and bends it the way it was pushed.

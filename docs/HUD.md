@@ -39,3 +39,11 @@ drawn, the downed plate and status words show, cooldown text appears).
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) left of the box: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
+
+## The recast marker (world)
+While a recast is open, a ring and a key cap sit in the world on what the key will trigger, in the ability's
+colour, shrinking and fading as the window closes. `RecastMarker.show_at` (scripts/ui/recast_marker.gd) is
+called every step by the kit; only the caster's game draws it and nothing goes over Net. In: Tenzo's Rock Hop
+(the next landing spot toward the cursor), Neve's Rink Wall (the sliding wall, E freezes it), Sparkle's Kitefall
+(the crash point) and Cinder's Flue Flight (the ground under her, for an early landing). Check:
+`--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
