@@ -7,7 +7,7 @@ Internal design doc (was "Linnet"; the id and file names stay `tender`). Source 
 ## Our kit
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive Bearer | run into a downed teammate | Carry up to 2 downed teammates; they don't bleed and can't be stomped; no slow while you carry; crouch sets them down; damage, stun, root or hex drops them (no stun on you, 4s lockout). Never one a rival is standing on. Embers Kindle foes (up to 5, 4s): +0.72 damage per stack (about +45% at 5), and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s Empowered) | Soulpack + Moon Burn | Mana return becomes cooldown wind-back (no mana here) |
+| Passive Carrier | run into a downed teammate | Carry up to 2 downed teammates; they don't bleed and can't be stomped; no slow while you carry; crouch sets them down; damage, stun, root or hex drops them (no stun on you, 4s lockout). Never one a rival is standing on. Embers Kindle foes (up to 5, 4s): +0.72 damage per stack (about +45% at 5), and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s Empowered) | Soulpack + Moon Burn | Mana return becomes cooldown wind-back (no mana here) |
 | LMB Ember Cast | hold | No weapon: an ember pushed out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor (`"aim": "max"`). After 1s without firing, the next ember is Empowered: 40% further, double wind-back, its own two-handed push and chime | Crescent Bolt | Same; the range is the footage's 7-8 bh (about 13 m) less a little |
 | RMB Burrseed | press; a fixed 1s wind-up, then it throws itself (owner item 118) | Wind-up: half speed, a short 6m dotted lane along the aim (AimKit `dotted`), a ring round her and a coiled pose; not a hold, letting go does nothing; a stun, Hex or going down loses the throw, not the charge. At the end, along the aim of that moment: a fast seed (30 m/s) sticks to the first foe (9 damage). A violet disc the size of the burst shows under them at once for everyone, filling. 0.7s later it flares: 32 damage and a 1.1s root in 2.2m, with root beams, and Kindles all. 10.5s cooldown (the data's 11.5 : 12 against Hearthlight). Rank 3: the root lasts 0.3s longer and the burst is twice as wide (4.4m) | Darkside Binding / Bound by Fate | Footage timing (a fast orb, 0.6-0.8s) over the wiki's 2s |
 | Shift Relay Step | tap (in the air: her long glide) | A skip where you move, 3.6m in 0.2s after the global dash feel (Elluna's ground dash). In the air: Elluna's long floaty glide, 13.3m over 0.95s (a 0.1s ramp, a 0.4s burst at about 17 m/s, then a float out easing to 45% of that, held up while it floats; the move keys steer it at 3 rad/s; `dash.air`). The glide is airborne only: on the ground with the hop spent, Shift is refused. No bonus for passing through a teammate (data pass). Rank 3: picking up a teammate refreshes the air dash | Lunar Dash | Goes in the movement direction (footage); the "Dash toward the cursor" setting covers the other preference. Both dashes copy Elluna's distances and timings (owner 18:20, replacing item 24's 3x rule); see "Dashes: Elluna's numbers and ours" |
@@ -52,7 +52,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | Pickup ring (cosmetic) | LOW | (b) | 99f79210: removed (the CARRY word and the sound stay) |
 | Self screen shake | MED | (c) | ext/no-shake owns it |
 | Dash -> ability rows | LOW | (c) | left as they are (a separate agent researches presses during a dash) |
-| RMB shape, E, X shape, Bearer, rank 3, dash VFX | ok | (a) | matched in the audit |
+| RMB shape, E, X shape, Carrier, rank 3, dash VFX | ok | (a) | matched in the audit |
 
 ## Small mechanics
 | Mechanic | Source | Footage confirms | Built | Check |
@@ -138,7 +138,7 @@ The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `H
 | E flare (payoff) | `mm_flare` | 0.07 / 0.15 / 0.3 / 0.6 | both arms flung up |
 | Shift Relay Step | `mm_skip` | 0 squash, 0.04 take-off, 0.11 apex, 0.17 touchdown squash, 0.21 bounce, 0.24 | a skip off one foot, the lead knee up and the arms flung up behind like little wings, tucked at the top, a squash on landing and a happy bounce with a shoulder wiggle; a tiny dust puff at take-off and landing |
 | Air glide | `mm_float` | 0.06-0.26 somersault, 0.36-0.62 float, 0.85 legs down, 0.95 touchdown, 1.05 | tucked into a ball for one forward somersault, then a seated float with the knees tucked and the arms out wide like a drifting seed, a little sway, a soft squash on touchdown |
-| Bearer pickup | `mm_pickup` | 0.12 squat, 0.3 heave, 0.55 | a scoop and a heave onto her back |
+| Carrier pickup | `mm_pickup` | 0.12 squat, 0.3 heave, 0.55 | a scoop and a heave onto her back |
 | Kindled to 5 | `mm_kindled` | 0.06 / 0.12 / 0.34 | a snap of the fingers by the shoulder, a little bounce |
 | X cast (f25) | `mm_call` | 0.05 coil, 0.1 thrust high, 0.2 overshoot, 0.35 into the channel | the hand pulled back low, then thrust up as the plus bursts on the teammate |
 | X channel (f26-f73) | `mm_call_hold` (hold) | 0 / 0.3 | one hand held high over the tether; the legs keep walking |
