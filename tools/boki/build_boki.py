@@ -33,6 +33,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "gloamshell": ("gloamshell", "gloamshell", "gloamshell_anim"),
          "selenfin": ("selenfin", "selenfin", "selenfin_anim"),
          "zapple": ("echolop", "echolop", "echolop_anim"),
+         "goliathite": ("effigeetle", "effigeetle", "effigeetle_anim"),
          "hivara": ("hivara", "hivara", "hivara_anim"),
          "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
