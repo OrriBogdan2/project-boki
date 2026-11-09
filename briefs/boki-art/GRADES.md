@@ -116,5 +116,5 @@ turnarounds keep the concept's stance instead of a neutral stand, and existing l
 - Owner-review tier lowered to no veto + three-critic average >= 8.0, so more reaches the owner; auto-approve (8.5 rule) unchanged.
 
 ## Fast lane (owner 02:22 ET 11-09: "speed up the critics so I can see all the art fixes")
-- Cards, portraits, stance redos, turnarounds of passed concepts and fix rounds: ONE critic (fast lane, groups of ~15 run in parallel). 8.5+ no veto = live; 8.0+ no veto = owner queue.
+- Cards, portraits, stance redos, turnarounds of passed concepts and fix rounds: ONE critic (fast lane, groups of ~15 run in parallel). 8.5+ no veto = live; 7.5+ no veto = owner queue (owner 02:23).
 - New-species concepts and redesigns keep the three-critic panel.
