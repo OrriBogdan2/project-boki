@@ -86,9 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; a second charge. |
-| Dash (Shift) | recharge 9s -> 7.65s per charge. | recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s. |
-| E | cooldown 10.5s -> 9.45s, damage and shield +15%. | cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more. |
+| RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.7s, damage +50%; a second charge. |
+| Dash (Shift) | recharge 9s -> 8.25s per charge. | recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s. |
+| E | cooldown 10.5s -> 8.9s, damage and shield +25%. | cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

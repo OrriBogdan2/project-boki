@@ -87,9 +87,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 6.5s -> 5.9s, damage +15%. | cooldown 6.5s -> 5.2s; resets when you knock a hunter. |
-| Dash (Shift) | recharge 8.5s -> 7.7s. | recharge 8.5s -> 6.8s; +25% speed for 2s when a slide ends. |
-| E | cooldown 11.5s -> 10.4s, damage +20%. | cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown. |
+| RMB | cooldown 6.5s -> 5.4s. | cooldown 6.5s -> 4.3s; it resets when you knock a hunter. |
+| Dash (Shift) | recharge 8.5s -> 7.4s. | recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends. |
+| E | damage +20%. | damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 
