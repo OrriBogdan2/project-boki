@@ -83,6 +83,12 @@
   "portrait": "briefs/boki-art/portraits/light/Bubblisk.jpg",
   "cutout": "briefs/boki-art/portraits/cutout/Bubblisk.png"
  },
+ "Bucketmander": {
+  "sheet": "briefs/boki-art/turnarounds/Bucketmander.jpg",
+  "card": "briefs/boki-art/cards/Bucketmander.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Bucketmander.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Bucketmander.png"
+ },
  "Buckleron": {
   "sheet": "briefs/boki-art/turnarounds/Buckleron.jpg",
   "card": "briefs/boki-art/cards/Buckleron.jpg",
@@ -151,13 +157,13 @@
  },
  "Dobsabre": {
   "sheet": "briefs/boki-art/turnarounds/Dobsabre.jpg",
-  "card": null,
-  "portrait": null,
-  "cutout": null
+  "card": "briefs/boki-art/cards/Dobsabre.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Dobsabre.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Dobsabre.png"
  },
  "Domeleon": {
   "sheet": "briefs/boki-art/turnarounds/Domeleon.jpg",
-  "card": null,
+  "card": "briefs/boki-art/cards/Domeleon.jpg",
   "portrait": null,
   "cutout": null
  },
@@ -293,6 +299,12 @@
   "portrait": null,
   "cutout": null
  },
+ "Glaciatee": {
+  "sheet": "briefs/boki-art/turnarounds/Glaciatee.jpg",
+  "card": "briefs/boki-art/cards/Glaciatee.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Glaciatee.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Glaciatee.png"
+ },
  "Glaivyx": {
   "sheet": "briefs/boki-art/evolutions/Glaivyx.jpg",
   "card": "briefs/boki-art/cards/Glaivyx.jpg",
@@ -367,9 +379,15 @@
  },
  "Gravigrub": {
   "sheet": "briefs/boki-art/turnarounds/Gravigrub.jpg",
-  "card": null,
-  "portrait": null,
-  "cutout": null
+  "card": "briefs/boki-art/cards/Gravigrub.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Gravigrub.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Gravigrub.png"
+ },
+ "Gravitank": {
+  "sheet": "briefs/boki-art/turnarounds/Gravitank.jpg",
+  "card": "briefs/boki-art/cards/Gravitank.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Gravitank.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Gravitank.png"
  },
  "Hatstag": {
   "sheet": "briefs/boki-art/turnarounds/Hatstag.jpg",
@@ -529,7 +547,7 @@
  },
  "Maulangler": {
   "sheet": "briefs/boki-art/turnarounds/Maulangler.jpg",
-  "card": null,
+  "card": "briefs/boki-art/cards/Maulangler.jpg",
   "portrait": null,
   "cutout": null
  },
@@ -553,9 +571,15 @@
  },
  "Morelossus": {
   "sheet": "briefs/boki-art/turnarounds/Morelossus.jpg",
-  "card": null,
+  "card": "briefs/boki-art/cards/Morelossus.jpg",
   "portrait": null,
   "cutout": null
+ },
+ "Mortarfly": {
+  "sheet": "briefs/boki-art/turnarounds/Mortarfly.jpg",
+  "card": "briefs/boki-art/cards/Mortarfly.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Mortarfly.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Mortarfly.png"
  },
  "Mossgrade": {
   "sheet": "briefs/boki-art/turnarounds/Mossgrade.jpg",
@@ -611,6 +635,12 @@
   "portrait": "briefs/boki-art/portraits/light/Olmlet.jpg",
   "cutout": "briefs/boki-art/portraits/cutout/Olmlet.png"
  },
+ "Orbitle": {
+  "sheet": "briefs/boki-art/turnarounds/Orbitle.jpg",
+  "card": "briefs/boki-art/cards/Orbitle.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Orbitle.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Orbitle.png"
+ },
  "Parasolth": {
   "sheet": "briefs/boki-art/evolutions/Parasolth.jpg",
   "card": "briefs/boki-art/cards/Parasolth.jpg",
@@ -631,9 +661,9 @@
  },
  "Phonodrake": {
   "sheet": "briefs/boki-art/turnarounds/Phonodrake.jpg",
-  "card": null,
-  "portrait": null,
-  "cutout": null
+  "card": "briefs/boki-art/cards/Phonodrake.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Phonodrake.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Phonodrake.png"
  },
  "Pipewurm": {
   "sheet": "briefs/boki-art/turnarounds/Pipewurm.jpg",
@@ -697,7 +727,7 @@
  },
  "Reapant": {
   "sheet": "briefs/boki-art/evolutions/Reapant.jpg",
-  "card": null,
+  "card": "briefs/boki-art/cards/Reapant.jpg",
   "portrait": "briefs/boki-art/portraits/light/Reapant.jpg",
   "cutout": "briefs/boki-art/portraits/cutout/Reapant.png"
  },
@@ -871,9 +901,9 @@
  },
  "Thunderstrich": {
   "sheet": "briefs/boki-art/evolutions/Thunderstrich.jpg",
-  "card": null,
-  "portrait": null,
-  "cutout": null
+  "card": "briefs/boki-art/cards/Thunderstrich.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Thunderstrich.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout/Thunderstrich.png"
  },
  "Tidalisk": {
   "sheet": "briefs/boki-art/evolutions/Tidalisk.jpg",

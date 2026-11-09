@@ -1,8 +1,7 @@
-# Boki art live manifest (generated 04:10 ET 11-09)
-Every Boki's current main art, ready to upload. Card = main image (hero card); sheet = turnaround; portrait = Bokidex portrait
-(light background; transparent cutout in portraits/cutout/<Name>.png). Machine-readable: LIVE_MANIFEST.json.
-Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-163 Boki, 123 with all three.
+# Boki art live manifest (regenerated 04:18 ET 11-09)
+Card = main image, sheet = turnaround, portrait = Bokidex portrait (cutout PNG in portraits/cutout). JSON: LIVE_MANIFEST.json.
+Cut: Amanitusk, Bellowary, Frothisk, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
+168 Boki, 133 with all three.
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -20,6 +19,7 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Boltstrich | ✓ | ✓ | ✓ |
 | Briarlynx | ✓ | ✓ | – |
 | Bubblisk | ✓ | ✓ | ✓ |
+| Bucketmander | ✓ | ✓ | ✓ |
 | Buckleron | ✓ | ✓ | ✓ |
 | Bullsfrog | ✓ | ✓ | ✓ |
 | Cairnback | ✓ | ✓ | ✓ |
@@ -31,8 +31,8 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Clinkpede | ✓ | ✓ | ✓ |
 | Crofthorn | ✓ | ✓ | ✓ |
 | Cubbat | ✓ | ✓ | ✓ |
-| Dobsabre | ✓ | – | – |
-| Domeleon | ✓ | – | – |
+| Dobsabre | ✓ | ✓ | ✓ |
+| Domeleon | ✓ | ✓ | – |
 | Dragonkite | ✓ | ✓ | ✓ |
 | Dreadmonite | ✓ | ✓ | – |
 | Dreadnoyak | ✓ | ✓ | ✓ |
@@ -55,6 +55,7 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Geysirbara | ✓ | ✓ | ✓ |
 | Gilabacus | ✓ | ✓ | ✓ |
 | Glaciammoth | ✓ | ✓ | – |
+| Glaciatee | ✓ | ✓ | ✓ |
 | Glaivyx | ✓ | ✓ | ✓ |
 | Glassolotl | ✓ | ✓ | ✓ |
 | Glazolm | ✓ | ✓ | ✓ |
@@ -67,7 +68,8 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Grammite | ✓ | ✓ | – |
 | Gramofrill | ✓ | ✓ | – |
 | Gravadillo | ✓ | ✓ | ✓ |
-| Gravigrub | ✓ | – | – |
+| Gravigrub | ✓ | ✓ | ✓ |
+| Gravitank | ✓ | ✓ | ✓ |
 | Hatstag | ✓ | ✓ | – |
 | Hivara | ✓ | ✓ | ✓ |
 | Howlop | ✓ | ✓ | – |
@@ -94,11 +96,12 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Malletary | ✓ | ✓ | – |
 | Maracoil | ✓ | ✓ | ✓ |
 | Marchleaf | ✓ | ✓ | ✓ |
-| Maulangler | ✓ | – | – |
+| Maulangler | ✓ | ✓ | – |
 | Medushroom | ✓ | ✓ | – |
 | Mirrolin | ✓ | ✓ | ✓ |
 | Morelkin | ✓ | ✓ | ✓ |
-| Morelossus | ✓ | – | – |
+| Morelossus | ✓ | ✓ | – |
+| Mortarfly | ✓ | ✓ | ✓ |
 | Mossgrade | ✓ | ✓ | ✓ |
 | Mothlet | ✓ | ✓ | ✓ |
 | Murmurling | ✓ | ✓ | ✓ |
@@ -108,10 +111,11 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Oarlet | ✓ | ✓ | ✓ |
 | Oarter | ✓ | ✓ | ✓ |
 | Olmlet | ✓ | ✓ | ✓ |
+| Orbitle | ✓ | ✓ | ✓ |
 | Parasolth | ✓ | ✓ | ✓ |
 | Pawnfry | ✓ | ✓ | ✓ |
 | Pebblamb | ✓ | ✓ | ✓ |
-| Phonodrake | ✓ | – | – |
+| Phonodrake | ✓ | ✓ | ✓ |
 | Pipewurm | ✓ | ✓ | ✓ |
 | Polyshroom | ✓ | ✓ | ✓ |
 | Prismander | ✓ | ✓ | ✓ |
@@ -122,7 +126,7 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Pyrraven | ✓ | ✓ | ✓ |
 | Rampartoad | ✓ | ✓ | ✓ |
 | Rattlebub | ✓ | ✓ | ✓ |
-| Reapant | ✓ | – | ✓ |
+| Reapant | ✓ | ✓ | ✓ |
 | Reelacine | ✓ | ✓ | – |
 | Ribbonwyrm | ✓ | ✓ | ✓ |
 | Rimeshrew | ✓ | ✓ | ✓ |
@@ -151,7 +155,7 @@ Cut from the roster (do not upload): Amanitusk, Bellowary, Frothisk, Lashyx, Puf
 | Terrasloth | ✓ | ✓ | ✓ |
 | Thistlynx | ✓ | – | ✓ |
 | Thrumbird | ✓ | ✓ | ✓ |
-| Thunderstrich | ✓ | – | – |
+| Thunderstrich | ✓ | ✓ | ✓ |
 | Tidalisk | ✓ | ✓ | ✓ |
 | Tinbrock | ✓ | ✓ | – |
 | Tootle | ✓ | ✓ | ✓ |
