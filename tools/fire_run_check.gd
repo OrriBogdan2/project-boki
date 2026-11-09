@@ -56,7 +56,8 @@ func _hunter(id: String) -> void:
 	var band := _band(fr)
 	var base := _slide(fr, band)
 	var run_share: float = base["slide"] / maxf(base["speed"], 0.1)
-	print("FIRERUN %-10s run %.2f m/s slide %.2f m/s (%d%%)" % [id, base["speed"], base["slide"], round(100.0 * run_share)])
+	print("FIRERUN %-10s run %.2f m/s slide %.2f m/s (%d%%)" % [id, base["speed"], base["slide"],
+			round(100.0 * run_share)])
 	for slot in SLOTS:
 		P.teleport(home)
 		P.vel = Vector3.ZERO
@@ -73,7 +74,7 @@ func _hunter(id: String) -> void:
 			var fs := _slide(fast, band)
 			var share: float = fs["slide"] / maxf(fs["speed"], 0.1)
 			var full: float = fast.map(func(p): return float(p["full"])).max() if not fast.is_empty() else 0.0
-			print("FIRERUN %-10s %-3s %-16s speed %3d%% full-stick %2d/%2d frames, body %.2f, slide %3d%% (all frames %3d%%)"
+			print("FIRERUN %-10s %-3s %-16s speed %3d%% full-stick %2d/%2d frames, body %.2f, slide %3d%% (all %3d%%)"
 					% [id, slot, mv, round(100.0 * kept), fast.size(), own.size(),
 					full, round(100.0 * share), round(100.0 * ms["slide"] / maxf(ms["speed"], 0.1))])
 			if fast.size() < MIN_FRAMES or id in NO_LEGS or kept < ROOTED or kept > DRIVEN:
