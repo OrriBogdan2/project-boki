@@ -32,6 +32,8 @@ func _ready() -> void:
 	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
+	var demo := Demo.name_in(args)      # recording presets: a made-up save in memory, overlays hidden (docs/DEMO_PRESETS.md)
+	if demo != "": Demo.setup(demo)
 	for a in args:
 		if a.begins_with("--overlay="):
 			# test: open one of the overlay menus a moment after the screen appears
@@ -668,6 +670,8 @@ func _ready() -> void:
 			get_tree().create_timer(0.5).timeout.connect(func():
 				current.dec.toggle()
 				current.dec.take("plant"))
+	elif demo != "":
+		Demo.open(self, demo, args)
 	elif town_arg != "":
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:
