@@ -14,7 +14,8 @@ const RECOVER := 0.3                # s the slowed walk lasts after the last wav
 static var SLUG_COL := HeroVfx.col("dredge", "hot")
 const WAVE_PITCH := [1.0, 0.82]
 ## the fan on the ground: coin gold (the signature), and how strong its fill and rim are over AimKit's defaults
-static var FAN_COL := DredgeKit.ANCHOR_COL
+# coin gold, read from the table (not DredgeKit.ANCHOR_COL: static vars across scripts init in load order)
+static var FAN_COL := HeroVfx.col("dredge", "main")
 static var FAN_HOT := HeroVfx.col("dredge", "hot")
 const FAN_ALPHA := 1.8
 
