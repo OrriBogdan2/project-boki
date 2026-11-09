@@ -39,6 +39,7 @@ static func attach(match_node: Match) -> Practice:
 	match_node.add_child(p)
 	p.bench = ParityBench.attach(match_node)
 	p._build_bar()
+	KitDrill.attach(p)
 	return p
 
 ## The bar's entries: [id, label, icon, open, key cap]. The Arena and the Training Grounds share a loadout
