@@ -383,13 +383,13 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** gravity wells: pulls enemies in and orbits pebbles as shields or shrapnel.
 
 ### Gravigrub (1 of 3) · Psychic
-- **Concept:** a grub curled around its own little moon.
-- **Rejected ideas:** grub + glass marble; grub + gumball machine.
-- **Mix:** curled grub + moon
-- **Look:** A C-shaped grub curled around its own belly, which is a smooth dark-iron moon ball with craters. Two small pebbles orbit it.
+- **Concept:** a grub that has curled itself into a crescent moon. (Redesigned 11-09: four rounds kept drawing a grub hugging a separate moon ball, which reads as a held object.)
+- **Rejected ideas:** grub + glass marble; grub + gumball machine; grub curled around a separate moon ball.
+- **Mix:** curled grub + crescent moon
+- **Look:** A plump C-shaped grub whose whole body is the crescent: its back is a smooth pale-iron moon shell with a few soft craters, its belly side is soft cream segments. Head at the upper tip of the crescent, tail tip at the lower; nothing inside the curve.
 - **Face:** round surprised eyes, a tiny open mouth.
 - **Colours:** cream and deep indigo iron; accent pale crater dots.
-- **Avoid:** a ball being pushed, legs, wings.
+- **Avoid:** any separate ball or sphere, anything held or hugged, orbiting effects, legs, wings.
 - **Archetype:** cute
 
 ### Orbeetle (2 of 3) · Psychic
