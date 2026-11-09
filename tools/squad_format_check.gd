@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	var lobby := preload("res://scripts/ui/lobby.gd")
 	var picked: Array = lobby.roster_ids(many, "p20")
 	var last_team := (picked.size() - 1) / Data.SQUAD_SIZE
-	var full := picked.size() == Data.MATCH_PLAYERS and picked[0] == "p20" and last_team == Data.SQUADS - 1
+	var full: bool = picked.size() == Data.MATCH_PLAYERS and picked[0] == "p20" and last_team == Data.SQUADS - 1
 	ok(full, "a 35-player lobby sends %d (host in, last team %d), the other %d wait"
 		% [picked.size(), last_team, many.size() - picked.size()])
 	ok(lobby.roster_ids(["b", "a"], "c") == ["c", "a", "b"], "a small lobby sends everyone, host first")
