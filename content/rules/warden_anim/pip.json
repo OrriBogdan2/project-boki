@@ -11,11 +11,12 @@
 			"cloud": {"calm": 4, "happy": 5, "angry": 7, "determined": 4, "cry": 7, "sleepy": 6, "shy": 4, "sad": 7}
 		}
 	},
+	"free_arm": {"seed": "R", "shot_r": "L"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.55
+		"walk_speed": 2.2, "run_speed": 4.55, "stride": [1.5, 1.5], "foot_mps": [0.93, 3.04], "arm_swing": {"L": 0.5}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "float"},
