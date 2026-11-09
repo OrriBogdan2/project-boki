@@ -64753,5 +64753,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_gongrowl_px_1.jpg",
     "ok": true
+  },
+  {
+    "id": "voltalon_cardz",
+    "name": "Voltalon (hero card edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_cardz",
+    "name": "Voltalon (hero card edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_cardz",
+    "name": "Voltalon (hero card edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_px",
+    "name": "Gongrowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_px_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_cardz",
+    "name": "Cisternmander (hero card edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/cisternmander_cardz_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_cardz",
+    "name": "Cisternmander (hero card edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cisternmander_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_cardz",
+    "name": "Cisternmander (hero card edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/cisternmander_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jibbatross_pc",
+    "name": "Jibbatross (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_jibbatross_pc_3.jpg",
+    "ok": true
   }
 ]
