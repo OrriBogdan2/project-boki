@@ -2839,3 +2839,4 @@ READY ext/idle-juggernaut 2c700e15c (Kael the Unbroken idle+stance rework; based
 READY ext/idle-ostra 2a99a0912 (Motley the Void Jester idle+stance rework; based on ext/parity-idle-audit, merge that first; trivial doc/STAND_OPEN conflicts with ext/idle-bulwark)
 READY ext/idle-gunslinger fa16ce7ef (Vex the Hired Gun idle+stance rework)
 READY ext/idle-bulwark 53c963ec5 (Mossy the Barnacle Knight idle+stance rework)
+READY ext/ui-extract-widget 67842fb47 (one extraction widget: nearest/own exit, way+distance, time open, next step, boarding/uplink progress+cancel; replaces centre status line, exit waypoint, minimap exit text; --extract-check/--layout-check/health green; shots in briefs/shots/ui-extract-widget)
