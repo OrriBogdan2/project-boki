@@ -34618,5 +34618,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_thistlynx_la_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_thistlynx_lb",
+    "name": "Thistlynx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thistlynx_lb",
+    "name": "Thistlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thistlynx_lb",
+    "name": "Thistlynx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_lb",
+    "name": "Briarlynx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_lb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thistlynx_lb",
+    "name": "Thistlynx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lb_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_la",
+    "name": "Briarlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_la_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_lb",
+    "name": "Briarlynx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_lb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_lb",
+    "name": "Briarlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_lb_3.jpg",
+    "ok": true
   }
 ]
