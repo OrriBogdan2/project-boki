@@ -1043,12 +1043,4 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a stoat, a human shape, a ghost sheet, a skull, gore.
 - **Archetype:** majestic
 
-## 39. Driftpup (rare) · Water, Crystal (owner 01:24: the sea-glass look from Prismander direction C as its own Boki; Claude picked the otter shape 02:15)
-### Driftpup (rare) · Water, Crystal
-- **Concept:** a sea otter pup made of tide-worn sea glass.
-- **Mix:** sea otter pup + frosted beach glass.
-- **Look:** A chubby sea otter pup floating on its back with its paws folded on its tummy, its fur turned into smooth frosted sea-glass pebbles, rounded cobalt-blue pebble patches, a flat rounded tail like a polished piece of beach glass.
-- **Face:** big, sleepy-happy eyes and a soft little smile.
-- **Colours:** frosted seafoam green and pale aqua, with a cobalt blue pebble accent.
-- **Avoid:** an axolotl, sharp crystals, shells, sand, a bottle.
-- **Archetype:** cute
+## 39. Sea-glass Boki (rare) · Water, Crystal — owner 01:36: NOT an otter or ray; a non-aquatic animal made of sea glass. Lamb / koala / red panda concepts in progress; name follows the pick.

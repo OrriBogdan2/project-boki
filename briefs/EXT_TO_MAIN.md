@@ -4570,3 +4570,5 @@ ART glacione 8.3 briefs/boki-art/batch/out/ta_glacione_w31_2.jpg kind=turnaround
 ART prismander 8.53 briefs/boki-art/turnarounds/Prismander_female.jpg kind=turnaround form=female panel=8.6/8.5/8.5
 ART zippelith 8.47 briefs/boki-art/turnarounds/Zippelith.jpg kind=turnaround panel=8.5/8.4/8.5
 ART driftpup 8.47 briefs/boki-art/concepts/Driftpup.jpg kind=concept
+
+## 02:20 ET 11-09 — art session: Driftpup withdrawn (owner 01:36: no otter, ray is boring). Ignore the 'ART driftpup' line above; a land-animal sea-glass Boki (lamb/koala/red panda) is being made instead.

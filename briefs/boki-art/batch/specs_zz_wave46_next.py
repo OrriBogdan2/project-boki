@@ -1,7 +1,6 @@
 # Next steps after round 31 s18 (02:15 ET): Driftpup (sea-glass otter, Claude's pick) and owner-tier concepts get turnarounds;
 # Glassolotl (rock candy) gets its turnaround and rock-candy concepts for its finals; Prismander male turnaround retried.
 _O='briefs/boki-art/batch/out/'
-TA('Driftpup','briefs/boki-art/concepts/Driftpup.jpg')
 TA('Glassolotl',_O+'c_glassolotl_a_2.jpg'); SPECS[-1]['id']='ta_glassolotl_a'
 TA('Bucketmander',_O+'c_bucketmander_w31_3.jpg'); SPECS[-1]['id']='ta_bucketmander_v'
 TA('Fanpire',_O+'c_fanpire_w31_4.jpg')
@@ -17,4 +16,4 @@ VC('geodelotl_a','Geodelotl',_GA,'final',
  "A huge, heavy rock-candy axolotl braced wide and low on thick legs, its back a thick crust of chunky rock-candy sugar crystals like a geode cracked open, the rest of its body glossy boiled sweet, and its tail ending in a big round crystallised sugar lump like a club. One clear idea, few parts.",
  "stubborn, steady glossy eyes and a confident grin","strawberry pink and sugar white, with a deep raspberry and mint accent",
  "grey stone, real rocks, armour plates, rainbow effects, a busy design",'prism','tough')
-PRIORITY=['ta_prismander_a2','ta_glassolotl_a','c_chandelotl_a','c_geodelotl_a','ta_driftpup','ta_bucketmander_v','ta_fanpire','ta_fawngus_n']+PRIORITY
+PRIORITY=['ta_prismander_a2','ta_glassolotl_a','c_chandelotl_a','c_geodelotl_a','ta_bucketmander_v','ta_fanpire','ta_fawngus_n']+PRIORITY
