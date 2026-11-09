@@ -75,7 +75,7 @@ func start_match(opts: Dictionary, live := false) -> Match:
 	return m
 
 func _training_duel_leave() -> void:
-	var m := await start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	var m := await start_match(Match.arena_opts())
 	step(m, 3.0)
 	await settle(4.0)
 	var a := audible()

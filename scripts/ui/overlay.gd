@@ -226,7 +226,7 @@ func open_pause(where: String) -> void:
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
+		item.call("Training Area", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
 	item.call("Settings", "gear", func():

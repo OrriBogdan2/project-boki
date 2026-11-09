@@ -1,6 +1,6 @@
 class_name Duel
 extends RefCounted
-## The duel room, next to the Training Grounds: you against one sparring bot hunter on an empty
+## The duel room, off the Training Area's Practice Wing: you against one sparring bot hunter on an empty
 ## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
 ## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.

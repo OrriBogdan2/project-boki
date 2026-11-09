@@ -7,25 +7,10 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
-| The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
+| Training Area | `content/maps/training.json` | 100 x 100 | 5 | The Training Area, the one practice space (title screen, the Expedition menu, the farm's Esc menu). |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
-
-## The Arena
-
-The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
-
-### Islands
-
-| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
-|---|---|---|---|---|---|
-| The Arena | grove | Meadow | quiet | 2 |  |
-| Bench | grove | Meadow | quiet | 0 |  |
-
-**Getting around:** 1 bridges.
-
-
 
 ## The Hollow Crown
 
@@ -132,6 +117,24 @@ Hand-made expedition map. Big walkable regions: the Heart in the middle, four la
 | Vaults | 2 | Frostkeep, Bloomwild, Ember Quarry, Stormreach, Gullcrest |
 | Item caches | 4 | Skyport, Dawnrest, Ironfall, Fernway, Lantern Hollow, Gullcrest, Mossmere, Stillwater, Static Field, Ember Quarry |
 | Live boss lairs | 2 to 3 | The Sunken Forge, Stormcrown Eyrie, The Thornhive |
+
+
+## Training Area
+
+The Training Area, the one practice space (title screen, the Expedition menu, the farm's Esc menu). Ability Ring: the old Arena floor (round, low ruin walls with four gates, four 2x2 blocks to slam into, a dais, two grass patches); your start, the three practice dummies and the sparring bot. Range (east gate): still dummies at 10, 20 and 35 m from the line at x 43. Movement Lane (over the bridge from the range): a low wall to vault, a 2 m gap, ledges at 0.8, 1.6 and 2.4 m (step, jump, mantle), a 3 m gap to dash, a ramp up to 4.8 m and a drop off its end, with the Landing islet 6 m out for air control. Practice Wing (south bridge): the checklist's gear rack, crates, the target monsters and the Duel Room pad. No monsters, chests or breakables are spawned on the map itself.
+
+### Islands
+
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| Ability Ring | grove | Meadow | quiet | 2 |  |
+| Range | grove | Meadow | quiet | 0 |  |
+| Movement Lane | grove | Meadow | quiet | 0 |  |
+| Landing | grove | Meadow | quiet | 0 |  |
+| Practice Wing | grove | Meadow | quiet | 0 |  |
+
+**Getting around:** 3 bridges.
+
 
 
 ## First Flight

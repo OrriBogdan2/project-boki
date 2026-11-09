@@ -692,7 +692,7 @@ func _ready() -> void:
 	elif "--arena" in args:
 		_open_arena("")
 	elif "--training" in args:
-		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+		show_screen("match", Match.arena_opts(Arch.of_save()).merged({"perk_demo": "--perk-demo" in args}, true))      # (the Training Area)
 	elif "--tutorial" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:

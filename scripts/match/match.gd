@@ -712,7 +712,7 @@ func _start(o: Dictionary) -> void:
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	elif o.get("arena", false):
-		layout = World.load_layout("arena")     # the practice arena (scripts/match/arena.gd)
+		layout = World.load_layout("training")     # the Training Area (scripts/match/arena.gd)
 	map_name = String(layout.get("name", ""))
 	if _stage_cb.is_valid(): world.stage_cb = _world_step
 	if not layout.is_empty():
@@ -771,8 +771,8 @@ func _start(o: Dictionary) -> void:
 	await _slice()
 	Beacons.place(self)
 	await _slice()
-	if not opts.get("arena", false):
-		await _spawn_breakables()
+	if opts.get("arena", false) and player: player.teleport(Arena.wing_spot(world))  # (the Wing first)
+	await _spawn_breakables()
 	await _slice()
 	for rg in world.rings:
 		var rn := Models.air_ring()
@@ -852,9 +852,8 @@ func _start(o: Dictionary) -> void:
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
 	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
-		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
-		arena = Arena.new()
-		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
+		arena = Arena.new()      # the Training Area's practice tools (dummies, swaps, kit card)
+		arena.setup(self, "arena")
 	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
@@ -4894,14 +4893,12 @@ func _update_training(dt: float) -> void:
 	train_t += dt
 	if player.downed and train_t > 2.0:
 		revive_hunter(player, null)
-	if opts.get("arena", false):
-		return        # the Arena runs its own (scripts/match/arena.gd)
 	var was_ult: bool = train.get("_ult_full", false)
-	# everything recharges quickly here
-	player.ult = minf(1.0, player.ult + dt / 6.0)
-	player.sig_cd = maxf(0.0, player.sig_cd - dt * 2.0)
-	for kk in [player.kin, player.kin2]:
-		if kk: (kk as Kin).runner.tick(dt * 2.0)
+	if not opts.get("arena", false):      # everything recharges quickly here (the Training Area: its O and U toggles)
+		player.ult = minf(1.0, player.ult + dt / 6.0)
+		player.sig_cd = maxf(0.0, player.sig_cd - dt * 2.0)
+		for kk in [player.kin, player.kin2]:
+			if kk: (kk as Kin).runner.tick(dt * 2.0)
 	if player.tonics < 1: player.tonics = 3
 	if not train.has("tonic") and player.hp >= player.max_hp and train_t > 1.0:
 		player.hp = player.max_hp * 0.7     # a scratch, so the tonic has something to heal
@@ -4935,7 +4932,8 @@ func _update_training(dt: float) -> void:
 			if hud: hud.toast(("Done: %s" % _train_label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
 			if left == 0:
 				Save.d["tutorial"]["training"] = true
-	# keep a few target dummies around you
+	if opts.get("arena", false) and player.flat_dist(Arena.WING) > Arena.WING_R:
+		return      # keep a few target dummies around you (the Training Area's live on its Practice Wing)
 	var alive := mobs.filter(func(x): return not x.dead)
 	if alive.size() < 4 and int(train_t * 10.0) % 20 == 0:
 		var at := world.random_ground(world.island_of(player.pos.x, player.pos.z))

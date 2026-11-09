@@ -221,7 +221,7 @@ func run(m: Node) -> void:
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame
 	var btns: Array = Overlay.host.find_children("*", "Button", true, false)
-	ok(btns.any(func(b): return (b as Button).text.contains("Training area")), "the farm's Esc menu has Training area")
+	ok(btns.any(func(b): return (b as Button).text.contains("Training Area")), "the farm's Esc menu has Training Area")
 	Overlay.close()
 	main.set("current", was)
 	var cl := -1

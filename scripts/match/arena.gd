@@ -1,7 +1,9 @@
 class_name Arena
 extends RefCounted
-## The Arena (opts "arena", map content/maps/arena.json) and the training area's practice tools
-## (opts "training": the same controller in its "practice" layout, on the training island).
+## The Training Area (opts "arena", map content/maps/training.json; the name "Arena" is kept for the code, the
+## player-facing name "Arena" is reserved for the 4v4 team mode): the one practice space, from the title screen
+## and the farm. Its Practice Wing holds the old training island's extras (Match._spawn_breakables: crates,
+## gear rack, the duel-room pad, the checklist, the wandering mobs).
 ##
 ## What it gives you:
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
@@ -18,9 +20,27 @@ const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
 const TEAM := 7
+## The dummies: kind, where (map tiles), class, name. In the Ability Ring a still one, a strafer and a heavy one by
+## the pillar; on the Range three still ones at 10, 20 and 35 m from its gate (x = 43), for falloff and aim.
+const WING := Vector3(26.0, 0, 52.0)        # the Practice Wing (training.json): crates, gear rack, duel pad, mobs
+const WING_R := 7.5
+
+## Where the match puts the player while it builds the wing's crates, gear rack and duel pad (setup moves them on).
+static func wing_spot(w: World) -> Vector3:
+	return WING + Vector3(0, w.ground_at(WING.x, WING.z), 0)
+## The Movement Lane's signs (text, foot in map tiles; the lane runs east along z 40-48, training.json).
+const SIGNS := [["MOVEMENT LANE\nvault  ·  gap  ·  ledges  ·  ramp", Vector3(44.5, 0, 47.0)],
+	["STEP 0.8 m", Vector3(55.0, 0, 47.0)], ["JUMP 1.6 m", Vector3(59.0, 0, 47.0)],
+	["MANTLE 2.4 m", Vector3(63.0, 0, 47.0)], ["DASH THE GAP", Vector3(66.5, 0, 47.0)],
+	["RAMP UP, DROP OFF\nglide to the Landing", Vector3(73.5, 0, 47.0)], ["RANGE\n10 · 20 · 35 m", Vector3(44.0, 0, 29.0)],
+	["PRACTICE WING\ngear  ·  monsters  ·  duel room", Vector3(27.5, 0, 41.0)]]
+const SPOTS := [["still", Vector3(23.5, 0, 26.5), "light", "Dummy"],
+	["strafe", Vector3(29.5, 0, 26.0), "medium", "Strafer"],
+	["heavy", Vector3(30.2, 0, 22.8), "heavy", "Training dummy"], ["still", Vector3(53.5, 0, 26.5), "light", "10 m"],
+	["still", Vector3(63.5, 0, 26.5), "light", "20 m"], ["still", Vector3(78.5, 0, 26.5), "medium", "35 m"]]
 
 var m: Match
-var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
+var layout := "arena"          # (one layout since 11-08: the separate "practice" training island is retired)
 var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
 var bot: Hunter = null
@@ -47,20 +67,17 @@ func setup(match_node: Match, which: String) -> void:
 	var P: Hunter = m.player
 	if P == null:
 		return
-	if layout == "arena":
-		home = _arena_point(Vector3(26.5, 0, 33.5))
-		P.teleport(home)
-		P.vel = Vector3.ZERO
-		P.face = 0.0
-		m.cam.snap(P.pos)
-	else:
-		home = P.pos
+	home = _arena_point(Vector3(26.5, 0, 33.5))
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.face = 0.0
+	m.cam.snap(P.pos)
 	P.unlock_all()
 	_apply_ult()
 	for i in Gloves.SLOTS:
 		gloves[i] = String(P.gear[i].get("id", "")) if not (P.gear[i] as Dictionary).is_empty() else ""
 	_spawn_dummies()
-	bot_at = _arena_point(Vector3(26.5, 0, 19.5)) if layout == "arena" else _free_near(home + Vector3(0, 0, -7.0))
+	bot_at = _arena_point(Vector3(26.5, 0, 19.5))
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
 	_build_ui()
@@ -69,7 +86,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
+		m.hud.toast("Training Area  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -79,22 +96,12 @@ func teardown() -> void:
 func _arena_point(p: Vector3) -> Vector3:
 	return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 
-func _free_near(p: Vector3) -> Vector3:
-	var q: Vector3 = m.world.free_spot_near(p, [m.player.pos], 1.2, 0.5, 6.0)
-	q.y = m.world.ground_at(q.x, q.z)
-	return q
-
 # ------------------------------------------------------------------ dummies
 func _spawn_dummies() -> void:
-	var spots: Array
-	if layout == "arena":
-		spots = [["still", Vector3(23.5, 0, 26.5), "light"], ["strafe", Vector3(29.5, 0, 26.0), "medium"], ["heavy", Vector3(30.2, 0, 22.8), "heavy"]]
-	else:
-		spots = [["still", home + Vector3(-2.5, 0, -4.0), "light"], ["strafe", home + Vector3(2.5, 0, -4.5), "medium"], ["heavy", home + Vector3(0, 0, -6.5), "heavy"]]
-	for sp in spots:
-		var at: Vector3 = sp[1]
-		at = _arena_point(at) if layout == "arena" else _free_near(at)
-		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Training dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
+	for sp in SPOTS:
+		var at: Vector3 = _arena_point(sp[1])
+		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), String(sp[3]), "idle", {}, at,
+			{"arch": "none"})
 		D.max_hp = DUMMY_HP; D.hp = DUMMY_HP
 		D.armor = 0.0; D.max_armor = 0.0
 		D.lives = 99
@@ -110,7 +117,8 @@ func _spawn_dummies() -> void:
 		lb.font = UI.big
 		lb.position = Vector3(0, 3.4, 0)
 		D.add_child(lb)
-		dummies.append({"h": D, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0})
+		dummies.append({"h": D, "kind": sp[0], "name": String(sp[3]).to_upper(), "at": at, "label": lb, "hits": [],
+			"total": 0.0, "last": 0.0, "quiet": 0.0})
 
 func _on_hit(by, t, d, _tags) -> void:
 	var credit = by
@@ -189,7 +197,10 @@ func tick(dt: float) -> void:
 			hs.pop_front()
 		var lb: Label3D = dm["label"]
 		var dps := dps_of(hs, m.time)
-		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "TRAINING DUMMY  ·  slam me into the pillar"}[dm["kind"]]
+		if float(dm["total"]) > 0.0:
+			lb.text = "DPS %d   ·   last %d\ntotal %d" % [roundi(dps), roundi(float(dm["last"])), roundi(float(dm["total"]))]
+		else:
+			lb.text = String(dm["name"]) + ("  ·  slam me into the pillar" if dm["kind"] == "heavy" else "")
 	while not hits_all.is_empty() and m.time - float(hits_all[0][0]) > 6.0:
 		hits_all.pop_front()
 	# the sparring bot and you always see each other (the view cone never hides a sparring partner)
@@ -215,7 +226,7 @@ func tick(dt: float) -> void:
 		if P.ammo < int(P.wpn["mag"]) and P.reload_t <= 0.0 and not P.wpn.get("melee", false): P.ammo = int(P.wpn["mag"])
 	if ult_on and int(P.slot_lv.get("ult", 0)) <= 0:
 		_apply_ult()
-	if P.downed and layout == "arena":
+	if P.downed:
 		P.set_meta("arena_down", float(P.get_meta("arena_down", 0.0)) + dt)
 		if float(P.get_meta("arena_down", 0.0)) > 1.6:
 			P.remove_meta("arena_down")
@@ -375,7 +386,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70     # (the training area's banner sits at the top)
+	hint.position.y = 10
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)
@@ -384,7 +395,7 @@ func _build_ui() -> void:
 	meter.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	meter.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	meter.position = Vector2(-330, 120)
+	meter.position = Vector2(-330, 236)      # (under the checklist, Hud._draw_top)
 	meter.custom_minimum_size = Vector2(310, 0)
 	root.add_child(meter)
 
@@ -397,23 +408,28 @@ func _update_ui() -> void:
 	if meter.text != lines:
 		meter.text = lines
 
-## A sign by your start: where the kit card and the loadout are.
+## The signs: by your start, where the kit card and the loadout are; along the Movement Lane, what each piece is for.
 func _sign() -> void:
+	var keys := "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, 2 gloves)\nBACKSPACE  ·  RESET"
+	_sign_at(keys, home + Vector3(-3.2, 0, 1.2))
+	for sg in SIGNS:
+		_sign_at(String(sg[0]), _arena_point(sg[1]))
+
+func _sign_at(text: String, foot: Vector3) -> void:
 	var lb := Label3D.new()
-	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, 2 gloves)\nBACKSPACE  ·  RESET"
+	lb.text = text
 	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lb.font = UI.big
 	lb.font_size = 44
 	lb.outline_size = 12
 	lb.pixel_size = 0.008
 	lb.modulate = Color("ffe9b8")
-	var at := home + Vector3(-3.2, 2.2, 1.2)
-	lb.position = at
+	lb.position = foot + Vector3(0, 2.2, 0)
 	m.add_child(lb)
 	var post := MeshInstance3D.new()
 	post.mesh = Models.box(0.14, 1.6, 0.14)
 	post.material_override = Models.toon(Color("7a5a3a"))
-	post.position = Vector3(at.x, home.y + 0.8, at.z)
+	post.position = foot + Vector3(0, 0.8, 0)
 	m.add_child(post)
 
 func _open_card() -> void:

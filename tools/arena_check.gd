@@ -107,7 +107,8 @@ func _arena() -> void:
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(
-		"arena boots on its own map", m.world.layout_id == "arena" and m.arena != null and m.arena.layout == "arena",
+		"the Training Area boots on its own map",
+		m.world.layout_id == "training" and m.arena != null and m.arena.layout == "arena",
 		"layout %s" % m.world.layout_id
 	)
 	ok(
@@ -119,7 +120,7 @@ func _arena() -> void:
 		"%s on %s" % [P.arch, m.world.island_id(P.pos.x, P.pos.z)]
 	)
 	var A: Arena = m.arena
-	ok("arena: three dummies", A.dummies.size() == 3)
+	ok("arena: six dummies (three in the ring, three on the range)", A.dummies.size() == 6)
 	ok("arena: ult unlocked by default", int(P.slot_lv["ult"]) >= 1 and P.lvl >= 6)
 	# dummies take damage and show it
 	var D: Hunter = A.dummies[0]["h"]
@@ -350,18 +351,14 @@ func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
 	printerr("ARENACHECK starting the training match")
-	await m.start(
-		{
-			"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
-			"no_drop": true
-		}
-	)
+	await m.start(Match.arena_opts())      # (the old training island is the Training Area's Practice Wing since 11-08)
 	m.set_process(false)
 	printerr("ARENACHECK training match up")
 	var P: Hunter = m.player
 	ok(
-		"training gets the practice tools",
-		m.arena != null and m.arena.layout == "practice" and m.arena.dummies.size() == 3
+		"the Training Area: six dummies (ring and range), the duel pad on the Practice Wing",
+		m.arena != null and m.arena.dummies.size() == 6 and m.duel_pad != Vector3.INF
+			and m.duel_pad.distance_to(Arena.WING) < Arena.WING_R + 2.0
 	)
 	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)
 	m.arena.set_arch("thief")

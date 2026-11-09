@@ -1,6 +1,6 @@
 class_name Practice
 extends Node
-## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
+## What every practice area shares (the Training Area, the tutorial and the Duel room;
 ## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
 ## the hero picker (PracticeHero), and the mouse wheel zooming the camera. One node under the Match,
 ## attached by Match.start with a single call.
