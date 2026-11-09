@@ -31251,5 +31251,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_pyrraven_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_full",
+    "name": "Pyrraven (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_full",
+    "name": "Reapant (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_full",
+    "name": "Reapant (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_puffamus_full",
+    "name": "Puffamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_puffamus_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_full",
+    "name": "Pyrraven (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimink_full",
+    "name": "Rimink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimink_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_full",
+    "name": "Reapant (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rippmink_full",
+    "name": "Rippmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rippmink_full_1.jpg",
+    "ok": true
   }
 ]
