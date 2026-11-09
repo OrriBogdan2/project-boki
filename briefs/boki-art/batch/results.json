@@ -23754,5 +23754,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lanternmit_e_w31_2.jpg",
     "ok": true
+  },
+  {
+    "id": "jibbatross_r_w31",
+    "name": "Jibbatross",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w31",
+    "name": "Lyrewing",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w31",
+    "name": "Lyrewing",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w31",
+    "name": "Lyrewing",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_r_w31",
+    "name": "Lyrewing",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/lyrewing_r_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w31",
+    "name": "Murmurling (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w31",
+    "name": "Murmurling (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w31",
+    "name": "Murmurling (female)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w31_4.jpg",
+    "ok": true
   }
 ]
