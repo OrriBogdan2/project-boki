@@ -132,8 +132,8 @@ static func floors_apply(m: Node, team: int) -> bool:
 	return p != null and int(p.team) != team
 
 # ---- §5.4 hitstop ----
-## Tier -> [attacker (melee), target] seconds. Projectiles never freeze the attacker.
-const HITSTOP := [[0.0, 0.0], [0.0, 0.025], [0.035, 0.045], [0.05, 0.065], [0.07, 0.09], [0.10, 0.0]]
+## Tier -> [attacker (melee), target] seconds (content/rules/hitstop.json). Projectiles never freeze the attacker.
+static var HITSTOP: Array = rules()["tiers"]
 const HS_CAP := 0.11           # at most this much freeze in any 0.5s per player
 const HS_WINDOW := 0.5
 const HS_MULTI := 0.25         # further hits on the same pair inside this get a third of their tier
@@ -199,6 +199,10 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 		if target: target.freeze_t = maxf(target.freeze_t, tt)
 		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)
 	return t
+
+## content/rules/hitstop.json (the tier table and the source's bounds), parsed on each call: HITSTOP keeps the tiers.
+static func rules() -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hitstop.json"))
 
 ## How much of a `want` s freeze the player may still take: at most HS_CAP in any HS_WINDOW, whatever asked for it.
 static func spend(p: Ent, want: float, now: float) -> float:

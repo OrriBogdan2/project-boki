@@ -270,6 +270,20 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## hitstop (`content/rules/hitstop.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Hit-stop tiers (scripts/arch/feel.gd Feel.hitstop, docs/DASHES_AND_ABILITY_FEEL.md §5.4). Seconds. Parity notes: docs/DASHES_AND_ABILITY_FEEL.md §5.4 'Source parity'. |
+| tiers | [[0.0, 0.0], [0.0, 0.0], [0.035, 0.045], [0.05, 0.065], [0.07, 0.09], [0.1, 0.0]] |
+| _tiers | tier T0..T5 -> [attacker (melee only), target] s. T1 (a chip hit: a rifle round) holds nothing: the source's light hits show only the flash and a small number. T2-T4 stay a few frames (owner OWNER_REVIEW_1103 item 50), under one 10 fps footage frame |
+| footage_frame_s | 0.1 |
+| _footage_frame_s | one frame of the slowest-sampled hit footage we have (10 fps ult strips): no sheet shows a held frame on any hit, so no hit's freeze may reach this |
+| flash_s | [0.08, 0.13] |
+| _flash_s | the source's body hit flash, s (min, max): Sable's 0.45 s LMB string at 5 fps caught it on 3 of 8 hits (about 0.075 s), Vex's rifle string flashed in every frame (0.1 s or more at its rate); Ent.hurt's flash must sit in this band |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
