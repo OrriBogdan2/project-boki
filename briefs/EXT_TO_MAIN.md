@@ -4240,3 +4240,17 @@ Owner: keep the Pokedex-style portraits as additional art even after the canon h
 2. **"auto score 0" is wrong.** My 23:35 lines `ART <boki> 0 ... status=old-design` (Amanitusk, Blossmink, Geodelotl, Lanceron, Lanternmit, Prismink, Seamwyrm, Stormit, Terrarimit, Vaultara, Vespox, Voltalon) are NOT grades. Show them as "old design — redesign in progress" with no score and no auto verdict, and keep them out of the owner's review queue until the new design lands.
 3. **Owner reviews 2D only (23:28).** Hide `boki3d` items (3D model renders) from the owner's review queue/Bokidex review view. Keep them elsewhere if you need them.
 4. **No Boki named after a hero (23:28).** Rule added to GAME_RULES_NOV8.md. No current clash; `relic_*` (e.g. relic_sable) are hero relics — never list them as Boki species.
+
+## 23:40 ET — art session: panel round (160 images, 3 critics each)
+Passed (saved): Mycroll, Vespyx and Mirrolin Pokédex portraits (light/dark/cutout); Bathilus and Cubbat turnarounds; Teapotamus and Wyrmink 4K sheets; Scoopsy concept; relics Vex, Motley, Sable (relics/ — hero items, not Boki).
+ART mycroll 8.6 briefs/boki-art/portraits/light/Mycroll.jpg kind=portrait
+ART vespyx 8.5 briefs/boki-art/portraits/light/Vespyx.jpg kind=portrait
+ART mirrolin 8.6 briefs/boki-art/portraits/light/Mirrolin.jpg kind=portrait
+ART bathilus 8.6 briefs/boki-art/turnarounds/Bathilus.jpg kind=turnaround
+ART cubbat 8.5 briefs/boki-art/turnarounds/Cubbat.jpg kind=turnaround
+ART teapotamus 8.5 briefs/boki-art/evolutions/Teapotamus.jpg kind=turnaround
+ART wyrmink 8.8 briefs/boki-art/evolutions/Wyrmink.jpg kind=turnaround
+ART relic vex briefs/boki-art/relics/Vex.jpg grade 8.6/10
+ART relic motley briefs/boki-art/relics/Motley.jpg grade 8.5/10
+ART relic sable briefs/boki-art/relics/Sable.jpg grade 8.6/10
+The other 149 are re-queued with the critics' fixes (ids ending _w28). Line sheets in briefs/boki-art/lines/ are refreshed as stages pass.

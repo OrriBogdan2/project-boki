@@ -379,6 +379,34 @@
     "C": 8.4
    },
    "note": "fundamental redesign: coiling ink-brushstroke dragon -> evolutions/Wyrmink.jpg"
+  },
+  {
+   "id": "ta_bathilus",
+   "grade": 8.57
+  },
+  {
+   "id": "ta_cubbat",
+   "grade": 8.53
+  },
+  {
+   "id": "teapotamus_4k",
+   "grade": 8.5
+  },
+  {
+   "id": "wyrmink_4k",
+   "grade": 8.83
+  },
+  {
+   "id": "relic_vex",
+   "grade": 8.6
+  },
+  {
+   "id": "relic_motley",
+   "grade": 8.5
+  },
+  {
+   "id": "relic_sable",
+   "grade": 8.6
   }
  ],
  "rerolled": [
@@ -779,6 +807,18 @@
    "pick": 1,
    "grade": 8.5,
    "note": "Pokedex style, cut out; light + dark versions in portraits/light, portraits/dark, portraits/cutout"
+  },
+  {
+   "id": "portrait_mycroll_light",
+   "grade": 8.63
+  },
+  {
+   "id": "portrait_vespyx_light",
+   "grade": 8.53
+  },
+  {
+   "id": "portrait_mirrolin_pe",
+   "grade": 8.6
   }
  ],
  "retired": [
@@ -963,6 +1003,12 @@
    "pick": 2,
    "grade": 8.5,
    "panel": "8.5/8.3/8.7"
+  },
+  {
+   "id": "c_scoopsy_e",
+   "pick": 2,
+   "grade": 8.5,
+   "panel": "8.6/8.4/8.5"
   }
  ]
 }
