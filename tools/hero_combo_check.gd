@@ -150,6 +150,11 @@ func _mage() -> void:
 			K.live(T) and int(mk.get("n", 0)) == 4 and grows,
 			"%d -> %d" % [sparks_1, sparks_4])
 	ok("Static: the marker sits above the HP bar", high >= K._top(T) + 0.45, "%.2f m" % high)
+	P.hp = P.max_hp * 0.5
+	K.on_knock(T, true)
+	ok("Static (data: 4 stacks, no knock heal): cap 4, a knock heals nothing, the card says none",
+			int(K.res_def()["max"]) == 4 and P.hp <= P.max_hp * 0.5 + 1.0
+			and not String(K.d["passive"]["desc"]).contains("heals you"), "hp %.1f" % P.hp)
 	# 3. Wirerun: the charge is spent on the press, the lane + end ring grow with the hold (not the cursor)
 	K.sparks.clear()
 	ac.fresh(T)

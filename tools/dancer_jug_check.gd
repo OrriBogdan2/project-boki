@@ -473,7 +473,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut passive: no bonus below full", absf(K.outgoing(T, 100.0, {}) - 100.0) < 0.1)
 	K.gain_rage(100.0)
 	A.ok("juggernaut passive: full = Enraged (+15%)",
-			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED",
+			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED"
+			and absf(K.enraged_t - 6.0) < 0.1,   # 6 s is ours [?]: the data's "Empowered" has no duration
 			"%.1f" % K.outgoing(T, 100.0, {}))
 	K.cd["e"] = 10.0
 	P.dashes = 0.0

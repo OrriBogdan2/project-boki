@@ -795,20 +795,21 @@ func _all() -> void:
 		absf(P.ex_cd - 12.5) < 0.01 and absf(cd_r[1] - 10.5) < 0.01 and absf(cd_r[2] - 8.5) < 0.01 and air_spent < 0.01,
 		"ex_cd %.2f ranks %s charge spent %.2f" % [P.ex_cd, str(cd_r), air_spent]
 	)
-	# --- Salvage: knocks stack, +2.5% health each, a knock heals, losing one when downed
+	# --- Salvage: knocks stack, +2.5% health each, no knock heal (the data has none), losing one when downed
 	reset.call()
 	P.slot_lv["kin"] = 1
 	var mh0 := P.max_hp
 	P.hp = P.max_hp * 0.5
 	K.on_knock(T, true)
 	ok(
-		"passive: a knock = 1 stack, +2.5% health, a heal",
-		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp > mh0 * 0.5 + mh0 * 0.15,
+		"passive: a knock = 1 stack, +2.5% health, no knock heal",
+		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp <= mh0 * 0.5 + mh0 * 0.03 + 0.5
+		and not K.res_def().has("heal_knock"),
 		"res %.0f maxhp %.1f hp %.1f" % [K.res, P.max_hp, P.hp]
 	)
 	var hp1 := P.hp
 	K.on_knock(T, false)
-	ok("passive: an assist stacks but does not heal", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
+	ok("passive: a second knock stacks again", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
 	for i in 12: K.on_knock(T, false)
 	ok(
 		"passive: capped at 10 stacks (+25%)", K.res == 10.0 and absf(P.max_hp - mh0 * 1.25) < 0.5,
