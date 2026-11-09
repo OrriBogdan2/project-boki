@@ -161,3 +161,21 @@ for _k,_ref,_r in (('card','briefs/boki-art/cards/Glaivyx.jpg',4),('portrait','b
     SPECS.append({'id':'glaivyx_clean_'+_k,'name':'Glaivyx (no slime, '+_k+')','refs':[_ref],'runs':_r,'aspect':'1:1','size':'2K',
       'prompt':"Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: "+_GLV+" Do not add anything else."})
 X('glaivyx_clean_sheet','Glaivyx (no slime, sheet)','briefs/boki-art/evolutions/Glaivyx.jpg',_GLV.replace("stay exactly the same.","stay exactly the same, in all four views."))
+
+# 18:00 ET 11-09 owner: "008 doesn't match 007's style (probably same for 009)". Dex 007-009 = Mycroll > Sporcupine > Ringrove.
+# Sporcupine and Ringrove are semi-realistic and scruffy with grey caps and purple gills; Mycroll is clean and cute with mint, cream-spotted caps.
+# Redraw both as Mycroll's grown-up family: Mycroll (image 2) is the family and style reference. Route A = own card, route B = own sheet.
+def _FAM(n,stage,ref,pose,body,tag,runs):
+    SPECS.append({'id':'fam_'+n.lower()+'_'+tag,'name':n+' (match Mycroll, '+tag+')','refs':[ref,'briefs/boki-art/cards/Mycroll.jpg'],'runs':runs,'aspect':'1:1','size':'2K',
+      'prompt':("Single character illustration of one Boki: "+n+", the creature in image 1, redrawn so it clearly belongs to the same family as image 2 (Mycroll, its baby form) and looks drawn by the same artist. "
+        "Image 1 is its design: keep its animal, body plan, pose, size and signature parts. "+(("Draw it once, in this pose: "+pose+". ") if tag=='b' else "")+
+        "Image 2 is the family and the style: use its exact colours and finish. Family colours: warm brown spines and back, cream face, muzzle and belly, mint-green mushroom caps with round cream spots and soft lavender gills underneath, teal eyes, a dark brown nose. "
+        "Draw it in image 2's clean style: a bold clean dark brown outline, flat colours with one simple shade, a smooth cute face with big teal eyes and a friendly look, no scruffy fur strands, no realistic texture. "
+        "It is the grown-up form of image 2, bigger and tougher, so its face is a little more serious than image 2's, with plain cheeks and no blush. "+body+
+        " One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text. Draw no part of image 2's creature.")})
+_SPB="It is a porcupine: its quills are about ten mushroom stalks in three sizes growing from its back, each topped with a mint cap; the big cap over its head grows from its brow like part of its skull. Fur is a few big clumps, not strands."
+_RGB="It is a big bear-like final form: its back carries three big tiers of mint mushroom caps growing from mossy brown hide, its muzzle is simple and rounded like image 2's, its forelegs are plain brown fur."
+for _t,_ref,_r in (('a','briefs/boki-art/cards/Sporcupine.jpg',4),('b',_LM['Sporcupine']['sheet'],3)):
+    _FAM('Sporcupine','mid',_ref,'prowling forward, head low, quills raised',_SPB,_t,_r)
+for _t,_ref,_r in (('a','briefs/boki-art/cards/Ringrove.jpg',4),('b',_LM['Ringrove']['sheet'],3)):
+    _FAM('Ringrove','final',_ref,'planted and sitting tall, its mushroom tiers towering over its back',_RGB,_t,_r)

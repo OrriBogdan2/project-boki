@@ -21841,6 +21841,54 @@
     "size": "2K"
   },
   {
+    "id": "fam_sporcupine_a",
+    "name": "Sporcupine (match Mycroll, a)",
+    "refs": [
+      "briefs/boki-art/cards/Sporcupine.jpg",
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki: Sporcupine, the creature in image 1, redrawn so it clearly belongs to the same family as image 2 (Mycroll, its baby form) and looks drawn by the same artist. Image 1 is its design: keep its animal, body plan, pose, size and signature parts. Image 2 is the family and the style: use its exact colours and finish. Family colours: warm brown spines and back, cream face, muzzle and belly, mint-green mushroom caps with round cream spots and soft lavender gills underneath, teal eyes, a dark brown nose. Draw it in image 2's clean style: a bold clean dark brown outline, flat colours with one simple shade, a smooth cute face with big teal eyes and a friendly look, no scruffy fur strands, no realistic texture. It is the grown-up form of image 2, bigger and tougher, so its face is a little more serious than image 2's, with plain cheeks and no blush. It is a porcupine: its quills are about ten mushroom stalks in three sizes growing from its back, each topped with a mint cap; the big cap over its head grows from its brow like part of its skull. Fur is a few big clumps, not strands. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text. Draw no part of image 2's creature."
+  },
+  {
+    "id": "fam_sporcupine_b",
+    "name": "Sporcupine (match Mycroll, b)",
+    "refs": [
+      "briefs/boki-art/evolutions/Sporcupine.jpg",
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki: Sporcupine, the creature in image 1, redrawn so it clearly belongs to the same family as image 2 (Mycroll, its baby form) and looks drawn by the same artist. Image 1 is its design: keep its animal, body plan, pose, size and signature parts. Draw it once, in this pose: prowling forward, head low, quills raised. Image 2 is the family and the style: use its exact colours and finish. Family colours: warm brown spines and back, cream face, muzzle and belly, mint-green mushroom caps with round cream spots and soft lavender gills underneath, teal eyes, a dark brown nose. Draw it in image 2's clean style: a bold clean dark brown outline, flat colours with one simple shade, a smooth cute face with big teal eyes and a friendly look, no scruffy fur strands, no realistic texture. It is the grown-up form of image 2, bigger and tougher, so its face is a little more serious than image 2's, with plain cheeks and no blush. It is a porcupine: its quills are about ten mushroom stalks in three sizes growing from its back, each topped with a mint cap; the big cap over its head grows from its brow like part of its skull. Fur is a few big clumps, not strands. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text. Draw no part of image 2's creature."
+  },
+  {
+    "id": "fam_ringrove_a",
+    "name": "Ringrove (match Mycroll, a)",
+    "refs": [
+      "briefs/boki-art/cards/Ringrove.jpg",
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki: Ringrove, the creature in image 1, redrawn so it clearly belongs to the same family as image 2 (Mycroll, its baby form) and looks drawn by the same artist. Image 1 is its design: keep its animal, body plan, pose, size and signature parts. Image 2 is the family and the style: use its exact colours and finish. Family colours: warm brown spines and back, cream face, muzzle and belly, mint-green mushroom caps with round cream spots and soft lavender gills underneath, teal eyes, a dark brown nose. Draw it in image 2's clean style: a bold clean dark brown outline, flat colours with one simple shade, a smooth cute face with big teal eyes and a friendly look, no scruffy fur strands, no realistic texture. It is the grown-up form of image 2, bigger and tougher, so its face is a little more serious than image 2's, with plain cheeks and no blush. It is a big bear-like final form: its back carries three big tiers of mint mushroom caps growing from mossy brown hide, its muzzle is simple and rounded like image 2's, its forelegs are plain brown fur. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text. Draw no part of image 2's creature."
+  },
+  {
+    "id": "fam_ringrove_b",
+    "name": "Ringrove (match Mycroll, b)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Ringrove.jpg",
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki: Ringrove, the creature in image 1, redrawn so it clearly belongs to the same family as image 2 (Mycroll, its baby form) and looks drawn by the same artist. Image 1 is its design: keep its animal, body plan, pose, size and signature parts. Draw it once, in this pose: planted and sitting tall, its mushroom tiers towering over its back. Image 2 is the family and the style: use its exact colours and finish. Family colours: warm brown spines and back, cream face, muzzle and belly, mint-green mushroom caps with round cream spots and soft lavender gills underneath, teal eyes, a dark brown nose. Draw it in image 2's clean style: a bold clean dark brown outline, flat colours with one simple shade, a smooth cute face with big teal eyes and a friendly look, no scruffy fur strands, no realistic texture. It is the grown-up form of image 2, bigger and tougher, so its face is a little more serious than image 2's, with plain cheeks and no blush. It is a big bear-like final form: its back carries three big tiers of mint mushroom caps growing from mossy brown hide, its muzzle is simple and rounded like image 2's, its forelegs are plain brown fur. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text. Draw no part of image 2's creature."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
