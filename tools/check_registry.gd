@@ -53,6 +53,7 @@ const CHECKS := {
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],      # two-step abilities report their window
 	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],      # --shots-dir=<dir>
+	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],      # each Hunter dashes four ways (GPU)
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
 	"--boki-moves-check": ["res://tools/boki_moves_check.gd", "boki_moves_check", null],      # move tiles
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],      # --shots-dir=<dir>
