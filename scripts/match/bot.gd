@@ -661,8 +661,6 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		if m.truce and m.truce.holds(h, o):
 			continue
-		if o is Hunter and not m.can_see(h.team, o):
-			continue
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
@@ -673,6 +671,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		var bounty: bool = m.rolling != null and o.has_meta("bounty")
 		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
+			continue
+		# the sight checks last: each is a line trace per teammate (in a brawl, most rivals are out of reach)
+		if o is Hunter and not m.can_see(h.team, o):
 			continue
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
