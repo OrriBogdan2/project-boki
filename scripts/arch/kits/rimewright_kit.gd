@@ -12,8 +12,7 @@ extends ArchKit
 ## (HeroVfx) for the moments, CareLook and UltLook for the bodies (darts, spear, wall, zone, rink, shells);
 ## moves: KMovesCare "tm_".
 
-var chill := {}                # target instance id -> {t: Ent, left: float}
-var fan_hits := {}             # target instance id -> {n: int, left: float, t: Ent}
+var fan_hits := {}             # target instance id -> foe to glow (the count is Stacks "shatter", shared)
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
@@ -36,6 +35,7 @@ var rime := {}                 # Rimelock running: {t, at, slow: {instance id: s
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var ult_look: UltLook
+const FAN_HIT_T := 3.0         # s the dart count on a foe lasts after its latest dart
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
 const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
@@ -66,26 +66,24 @@ func play_soft(move: String) -> void:
 func chilled(t: Ent) -> bool:
 	if t == null or not is_instance_valid(t):
 		return false
-	var e: Dictionary = chill.get(t.get_instance_id(), {})
-	return float(e.get("left", 0.0)) > 0.0
+	return Stacks.count(t, "chill") > 0.0
 
 func add_chill(t: Ent) -> void:
 	if t == null or not is_instance_valid(t) or t.dead or t.team == h.team:
 		return
-	var key := t.get_instance_id()
 	var fresh := not chilled(t)
-	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
+	Stacks.add(t, "chill", 1.0, float(d["passive"].get("chill_t", 4.0)))
 	if fresh:
 		vfx("chill", t.pos)
 
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
-	return int((fan_hits.get(t.get_instance_id(), {}) as Dictionary).get("n", 0))
+	return int(Stacks.count(t, "shatter"))
 
 func best_fan() -> int:
 	var b := 0
 	for k in fan_hits:
-		b = maxi(b, int((fan_hits[k] as Dictionary)["n"]))
+		b = maxi(b, fan_on(fan_hits[k]))
 	return b
 
 func res_frac() -> float: return float(best_fan()) / float(d["passive"].get("fan_hits", 8))
@@ -102,18 +100,15 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		m.later(
 				float(pd.get("splinter_delay", 0.4)),
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
-		chill.erase(t.get_instance_id())
+		Stacks.clear(t, "chill")
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
 		m.sfx("rimewright_dart_hit", t.pos, -5.0, 1.0)
 		var key := t.get_instance_id()
-		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": 3.0, "t": t})
-		e["n"] = int(e["n"]) + 1
-		e["left"] = 3.0
-		e["t"] = t
-		fan_hits[key] = e
-		if int(e["n"]) >= int(pd.get("fan_hits", 8)):
+		fan_hits[key] = t
+		if Stacks.add(t, "shatter", 1.0, FAN_HIT_T) >= float(pd.get("fan_hits", 8)):
+			Stacks.clear(t, "shatter")
 			fan_hits.erase(key)
 			# an icy shell closes over them for a beat, then it bursts
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
@@ -140,25 +135,15 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 		add_chill(f)
 
 func _tick(dt: float) -> void:
-	for key in chill.keys():
-		var e: Dictionary = chill[key]
-		e["left"] = float(e["left"]) - dt
-		var tv = e["t"]     # untyped first: a freed foe can't be assigned to a typed var
-		var t: Ent = tv if is_instance_valid(tv) else null
-		if float(e["left"]) <= 0.0 or t == null or t.dead:
-			chill.erase(key)
-			continue
 	for key in fan_hits.keys():
-		var e2: Dictionary = fan_hits[key]
-		e2["left"] = float(e2["left"]) - dt
-		var tv2 = e2["t"]
-		if float(e2["left"]) <= 0.0 or not is_instance_valid(tv2):
+		var tv = fan_hits[key]     # untyped first: a freed foe can't be assigned to a typed var
+		var n := fan_on(tv) if is_instance_valid(tv) and not tv.dead else 0
+		if n <= 0:
 			fan_hits.erase(key)
 			continue
 		# the frost glow on the foe grows with each dart toward the Shatter
-		var n := int(e2["n"])
 		lk().keep(
-				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
+				"frost%d" % key, "frost", (tv as Node3D).global_position,
 				{"r": 0.7 + 0.08 * n, "a": 0.15 + 0.75 * float(n) / 8.0})
 	_tick_darts(dt)
 	_tick_throw(dt)

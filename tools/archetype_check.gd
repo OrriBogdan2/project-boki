@@ -76,6 +76,7 @@ func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
 	T.set_meta("marks", {})
+	T.stacks.clear()
 
 func dmg(T: Hunter) -> float:
 	return T.max_hp - T.hp

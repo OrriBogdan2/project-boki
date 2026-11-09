@@ -38,6 +38,7 @@ var vuln_k := 0.0
 var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false        # the running stun counts toward the immunity that follows it
 var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
+var stacks := {}            # stack counts on this body, shared by every caster: key -> [count, time left] (Stacks)
 var marks := {}             # combo setups on this body: status -> {by, owner, until}
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
@@ -166,17 +167,15 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			if float(opts.get(st1, 0.0)) > 0.0:
 				opts[st1] = cc_dr(st1, float(opts[st1]))
 	if opts.get("burn", 0.0) > 0.0:
-		burn_t = maxf(burn_t, float(opts.get("burn_for", 3.0))); burn_dps = maxf(burn_dps, float(opts["burn"])); burn_by = by
+		add_burn(float(opts["burn"]), float(opts.get("burn_for", 3.0)), by)
 	if opts.get("slow", 0.0) > 0.0:
-		var sk := float(opts.get("slow_k", 0.0))
-		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
-		slow_t = maxf(slow_t, float(opts["slow"]))
+		add_slow(float(opts["slow"]), float(opts.get("slow_k", 0.0)))
 	if opts.get("root", 0.0) > 0.0:
-		root_t = maxf(root_t, float(opts["root"]))
+		root_t = Stacks.merge_time("root", root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
 	if opts.get("stun", 0.0) > 0.0:
-		stun_t = maxf(stun_t, float(opts["stun"]))
+		stun_t = Stacks.merge_time("stun", stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true
 	for st in ["stun", "root", "slow", "burn"]:
 		if float(opts.get(st, 0.0)) > 0.0:
@@ -191,6 +190,25 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if hp <= 0.0:
 		_on_zero(by, opts)
 	return d
+
+## A slow of strength `k` (0 = this body's usual) lands: the strongest running slow wins, the time is the
+## longer of the two (status_stacking.json). Two slows never add or multiply.
+func add_slow(secs: float, k := 0.0) -> void:
+	if slow_t > 0.0 and (slow_k > 0.0 or k > 0.0):
+		k = Stacks.merge_k("slow", _slow_or_usual(slow_k), _slow_or_usual(k))
+	slow_k = k
+	slow_t = Stacks.merge_time("slow", slow_t, secs)
+
+func _slow_or_usual(k: float) -> float:
+	return k if k > 0.0 else KinRules.DEFAULT_SLOW
+
+## A burn of `dps` lands: the strongest burn wins, the time is the longer, and the one who set the
+## strongest takes the credit (status_stacking.json).
+func add_burn(dps: float, secs: float, by: Ent) -> void:
+	if burn_t <= 0.0 or dps >= burn_dps:
+		burn_by = by
+	burn_dps = Stacks.merge_k("burn", burn_dps if burn_t > 0.0 else 0.0, dps)
+	burn_t = Stacks.merge_time("burn", burn_t, secs)
 
 func _mitigate(dmg: float, _by: Ent, _opts: Dictionary) -> float:
 	return dmg
@@ -313,6 +331,7 @@ func tick_status(dt: float) -> void:
 			cc_immune_t = KinRules.STUN_IMMUNE
 	if guard_t > 0.0: guard_t -= dt
 	if blight_t > 0.0: blight_t -= dt
+	Stacks.tick(self, dt)
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
 		if not remote:

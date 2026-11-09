@@ -252,10 +252,10 @@ func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 		return
 	var t := target as Ent
 	if muts.has("frozen"):
-		t.slow_t = maxf(t.slow_t, 1.4)
+		t.add_slow(1.4)
 		m.fx.burst(t.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 8, 2.5, 0.4, 2.0)
 	if muts.has("molten") or muts.has("toxic"):
-		t.burn_t = maxf(t.burn_t, 2.5); t.burn_dps = maxf(t.burn_dps, 3.0)
+		t.add_burn(3.0, 2.5, null)
 	if muts.has("charged"):
 		# the hit jumps to the nearest other foe within reach
 		var best: Ent = null; var bd := 4.5

@@ -208,8 +208,7 @@ func _carpet() -> void:
 	ak.step(m, 1.6, func(): ak.aim_at(P, home + Vector3(16, 0, 0)))
 	# Ablaze in about 2.4s of standing in it (4 Char every 0.3s)
 	ak.fresh(T)
-	K.chars = {}
-	K.ignites = {}
+	T.stacks.clear()
 	var spot: Vector3 = J.trail[-1]["b"]
 	ak.step(m, 1.4, func(): T.teleport(spot))
 	var at_14 := K.burning(T)
@@ -296,8 +295,7 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 	ak.step(m, 0.3)
 	ok("ult 66: the idle pilot flame shows on the ground", K.fx.shown(pilot))
 	ak.fresh(T)
-	K.chars = {}
-	K.ignites = {}
+	T.stacks.clear()
 	var side := Vector3(0, 0, 3.0)      # beside her, off the carpet, inside the lance's reach
 	T.teleport(P.pos + side)
 	var at := home + Vector3(40.0, 0, 0)
@@ -318,9 +316,9 @@ func _lance_off(m: Match, P: Hunter, K: AshwickKit, T: Hunter, home: Vector3) ->
 			pilot_in += int(K.fx.shown(pilot))
 	ok("ult 66: LMB held through the whole flight: no flame, no pilot, no lance damage, Char or burn",
 			frames > 90 and held_in == 0 and pilot_in == 0 and K.hose.emitted == em and ak.dmg(T) < 0.5
-			and K.chars.is_empty() and K.burning(T) == 0,
+			and K.char_of(T) == 0.0 and K.burning(T) == 0,
 			"%d frames, held %d, pilot %d, puffs +%d, dmg %.1f, chars %d, burn %d" % [
-				frames, held_in, pilot_in, K.hose.emitted - em, ak.dmg(T), K.chars.size(), K.burning(T)])
+				frames, held_in, pilot_in, K.hose.emitted - em, ak.dmg(T), int(K.char_of(T)), K.burning(T)])
 	ok("ult 66: that hold ticks once, on its press", K.lmb_denied == denied + 1, "denied +%d" % (K.lmb_denied - denied))
 	ok("ult 66: LMB works on the first frame after the flight (the lance lights)",
 			K.was_held and K.spool > 0.0 and P.ak.anim_id == "as_lance",

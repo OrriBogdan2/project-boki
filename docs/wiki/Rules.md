@@ -476,6 +476,24 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## status_stacking (`content/rules/status_stacking.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How a status behaves when two casters put it on one body (docs/COMBAT.md, Status stacking). combine: strongest = the bigger strength wins, never added or multiplied; add = stack counts add. time: longest = the longer of what is left and the new time (never extended past it); refresh = every new hit resets it to the full time. owner: target = one count on the body for every caster; caster = one count per caster. |
+| slow | {"combine": "strongest", "time": "longest"} |
+| burn | {"combine": "strongest", "time": "longest"} |
+| stun | {"time": "longest"} |
+| root | {"time": "longest"} |
+| static | {"combine": "add", "time": "refresh", "owner": "target"} |
+| shatter | {"combine": "add", "time": "refresh", "owner": "target"} |
+| chill | {"combine": "strongest", "time": "refresh", "owner": "target"} |
+| char | {"combine": "add", "time": "refresh", "owner": "target"} |
+| ignite | {"combine": "strongest", "time": "longest", "owner": "target"} |
+| mark | {"combine": "add", "time": "refresh", "owner": "caster"} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

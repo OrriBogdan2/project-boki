@@ -20,7 +20,7 @@ const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
-var sparks := {}               # foe id -> {e, n, t}
+var sparks := {}               # foe id -> foe to draw a marker on (the count is Stacks "static", shared)
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
@@ -93,13 +93,13 @@ func fire_ok() -> bool:
 
 func full_ready() -> bool:
 	for k in sparks:
-		if int(sparks[k]["n"]) >= int(res_def()["max"]):
+		if live(sparks[k]):
 			return true
 	return false
 
 func _best() -> int:
 	var best := 0
-	for k in sparks: best = maxi(best, int(sparks[k]["n"]))
+	for k in sparks: best = maxi(best, spark_n(sparks[k]))
 	return best
 
 func res_text() -> String:
@@ -112,12 +112,10 @@ func ready_label() -> String:
 	return "LIVE FOE: WIRERUN THROUGH" if full_ready() else ""
 
 func live(f: Ent) -> bool:
-	var s = sparks.get(f.get_instance_id())
-	return s != null and int(s["n"]) >= int(res_def()["max"])
+	return spark_n(f) >= int(res_def()["max"])
 
 func spark_n(f: Ent) -> int:
-	var s = sparks.get(f.get_instance_id())
-	return int(s["n"]) if s != null else 0
+	return int(Stacks.count(f, "static"))
 
 func _top(f: Ent) -> float:
 	return 2.25 * (float((f as Hunter).cdat.get("scale", 1.0)) if f is Hunter else 0.85)
@@ -130,12 +128,10 @@ func add_spark(f: Ent, n := 1) -> void:
 		return
 	var key := f.get_instance_id()
 	var rd := res_def()
-	var s: Dictionary = sparks.get(key, {"e": f, "n": 0, "t": 0.0})
-	var was := int(s["n"])
-	s["n"] = mini(int(rd["max"]), was + n)
-	s["t"] = float(rd["dur"])
-	sparks[key] = s
-	if int(s["n"]) >= int(rd["max"]) and was < int(rd["max"]):
+	var was := spark_n(f)
+	var now := int(Stacks.add(f, "static", mini(n, int(rd["max"]) - was), float(rd["dur"])))
+	sparks[key] = f
+	if now >= int(rd["max"]) and was < int(rd["max"]):
 		# the 4th stack: a bolt drops out of the sky onto them
 		var top := f.position + Vector3(0, 9.0, 0)
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
@@ -146,11 +142,12 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
 		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
 		net_bolt(top, f.position, TEAL)
-	elif int(s["n"]) > was:
-		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+	elif now > was:
+		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(now))     # the zap climbs with each stack
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
+	Stacks.clear(f, "static")
 	if sparks.has(key):
 		sparks.erase(key)
 		fx().unmark("vs%d" % key)
@@ -158,16 +155,16 @@ func clear_sparks(f: Ent) -> void:
 func _tick_sparks(dt: float) -> void:
 	var mx := int(res_def()["max"])
 	for key in sparks.keys():
-		var s: Dictionary = sparks[key]
-		var fv = s["e"]     # untyped first: a freed foe can't be assigned to a typed var
+		var fv = sparks[key]     # untyped first: a freed foe can't be assigned to a typed var
 		var f: Ent = fv if is_instance_valid(fv) else null
-		if not ult.busy():                 # (Kitefall can't refresh it: it waits for the strike that spreads it)
-			s["t"] = float(s["t"]) - dt
-		if not is_instance_valid(f) or f.dead or float(s["t"]) <= 0.0 or (f is Hunter and (f as Hunter).downed):
+		if f != null and ult.busy():       # (Kitefall can't run it down: it waits for the strike that spreads it)
+			Stacks.hold(f, "static", dt)
+		if f == null or f.dead or spark_n(f) <= 0 or (f is Hunter and (f as Hunter).downed):
+			if f != null: Stacks.clear(f, "static")
 			sparks.erase(key)
 			fx().unmark("vs%d" % key)
 			continue
-		var n := int(s["n"])
+		var n := spark_n(f)
 		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT)
 		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
 			# Live: arcs crawl down the body from the marker to the ground

@@ -1,0 +1,13 @@
+{
+  "_doc": "How a status behaves when two casters put it on one body (docs/COMBAT.md, Status stacking). combine: strongest = the bigger strength wins, never added or multiplied; add = stack counts add. time: longest = the longer of what is left and the new time (never extended past it); refresh = every new hit resets it to the full time. owner: target = one count on the body for every caster; caster = one count per caster.",
+  "slow":   {"combine": "strongest", "time": "longest"},
+  "burn":   {"combine": "strongest", "time": "longest"},
+  "stun":   {"time": "longest"},
+  "root":   {"time": "longest"},
+  "static": {"combine": "add", "time": "refresh", "owner": "target"},
+  "shatter": {"combine": "add", "time": "refresh", "owner": "target"},
+  "chill":  {"combine": "strongest", "time": "refresh", "owner": "target"},
+  "char":   {"combine": "add", "time": "refresh", "owner": "target"},
+  "ignite": {"combine": "strongest", "time": "longest", "owner": "target"},
+  "mark":   {"combine": "add", "time": "refresh", "owner": "caster"}
+}

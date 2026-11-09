@@ -41,8 +41,8 @@ const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't
 # m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
 const PALM_AHEAD := 0.12
 
-var chars := {}                 # foe id -> {e, n, t}
-var ignites := {}               # foe id -> {e, lvl, until}
+var chars := {}                 # foe id -> foe to draw Char on (the amount is Stacks "char", shared)
+var ignites := {}               # foe id -> foe to draw burn pips on (the stage is Stacks "ignite")
 var hose := AshwickHose.new()   # the Torch Lance stream
 var flame_acc := 0.0
 var spool := 0.0                # how long the hose has been held
@@ -84,7 +84,7 @@ func _setup() -> void:
 func _best_char() -> float:
 	var b := 0.0
 	for k in chars:
-		b = maxf(b, float(chars[k]["n"]))
+		b = maxf(b, char_of(chars[k]))
 	return b
 
 func _fwd() -> Vector3:
@@ -112,24 +112,18 @@ func tip() -> Vector3:
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
-	var e: Dictionary = chars.get(f.get_instance_id(), {})
-	return float(e.get("n", 0.0))
+	return Stacks.count(f, "char")
 
 func burning(f: Ent) -> int:
-	var e: Dictionary = ignites.get(f.get_instance_id(), {})
-	return int(e.get("lvl", 0)) if not e.is_empty() and float(e["until"]) > m.time else 0
+	return int(Stacks.count(f, "ignite"))
 
 ## Adds Char; at the top the foe goes Ablaze (or the burn upgrades). True if that stoked the burn.
 func add_char(f: Ent, amt: float) -> bool:
 	if f == null or not is_instance_valid(f) or f.dead or f.team == h.team:
 		return false
-	var key := f.get_instance_id()
-	var e: Dictionary = chars.get(key, {"e": f, "n": 0.0, "t": 0.0})
-	e["n"] = float(e["n"]) + amt
-	e["t"] = m.time
-	chars[key] = e
-	if float(e["n"]) >= float(rd()["ignite_at"]):
-		e["n"] = 0.0          # extra Char past the top is discarded
+	chars[f.get_instance_id()] = f
+	if Stacks.add(f, "char", amt, float(rd()["expire"])) >= float(rd()["ignite_at"]):
+		Stacks.clear(f, "char")          # extra Char past the top is discarded
 		stoke(f)
 		return true
 	return false
@@ -145,14 +139,13 @@ func stoke(f: Ent) -> int:
 
 func _ignite(f: Ent, lvl: int, was: int) -> void:
 	var key := f.get_instance_id()
-	ignites[key] = {"e": f, "lvl": lvl, "until": m.time + float(rd()["ignite_t"])}
+	ignites[key] = f
+	Stacks.add(f, "ignite", float(lvl), float(rd()["ignite_t"]))
 	var dps := float(rd()["dps%d" % lvl]) * f.max_hp * power("sec")
 	if f.remote:
 		f.hurt(0.01, h, {"src": "flame", "burn": dps, "burn_for": float(rd()["ignite_t"])})
 	else:
-		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"]))
-		f.burn_dps = dps
-		f.burn_by = h
+		f.add_burn(dps, float(rd()["ignite_t"]), h)
 	if lvl == 2 and was < 2:
 		_flashover_fx(f)
 		_stoke_pose()
@@ -194,17 +187,19 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
+## Whether the foe (maybe freed) still carries `kind`.
+func _holds(fv, kind: String) -> bool:
+	return is_instance_valid(fv) and not (fv as Ent).dead and Stacks.count(fv, kind) > 0.0
+
 func _tick(dt: float) -> void:
 	fx.track()
 	if after_t > 0.0: after_t -= dt
 	if relight_t > 0.0: relight_t -= dt
 	for key in chars.keys():
-		var e: Dictionary = chars[key]
-		if not is_instance_valid(e["e"]) or (e["e"] as Ent).dead or m.time - float(e["t"]) > float(rd()["expire"]):
+		if not _holds(chars[key], "char"):
 			chars.erase(key)
 	for key in ignites.keys():
-		var e: Dictionary = ignites[key]
-		if not is_instance_valid(e["e"]) or (e["e"] as Ent).dead or float(e["until"]) <= m.time:
+		if not _holds(ignites[key], "ignite"):
 			ignites.erase(key)
 	_tick_tells(dt)
 	if not hose.puffs.is_empty():
@@ -248,17 +243,15 @@ func _tick_tells(dt: float) -> void:
 	if ember_t <= 0.0:
 		ember_t = 0.35
 		for key in chars:
-			var e: Dictionary = chars[key]
-			if float(e["n"]) >= 15.0 and vis:
-				vfx("char_drift", (e["e"] as Ent).pos)
+			if vis and char_of(chars[key]) >= 15.0:
+				vfx("char_drift", (chars[key] as Ent).pos)
 	if not vis:
 		return
 	for key in ignites:
-		var e: Dictionary = ignites[key]
-		var f := e["e"] as Ent
+		var f := ignites[key] as Ent
 		if not is_instance_valid(f):
 			continue
-		var lvl := int(e["lvl"])
+		var lvl := burning(f)
 		var top := f.pos + Vector3(0, 3.7, 0)
 		var n := 1 if lvl < 2 else 3
 		for i in n:

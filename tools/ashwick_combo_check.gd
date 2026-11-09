@@ -145,9 +145,9 @@ func _hold_at(hunter: Hunter, target: Hunter) -> void:
 	ak.aim_at(hunter, target.pos)
 
 ## Holds the lance with the burn's own ticks and the Char held off, so only the hose counts.
-func _hold_bare(hunter: Hunter, target: Hunter, kit: AshwickKit) -> void:
+func _hold_bare(hunter: Hunter, target: Hunter) -> void:
 	_hold_at(hunter, target)
-	kit.chars = {}
+	target.stacks.erase("char")
 	target.burn_t = 0.0
 
 func _all() -> void:
@@ -178,8 +178,8 @@ func _all() -> void:
 			x.blight_t = 0.0
 		T.teleport(home + Vector3(4.0, 0, 0))
 		T2.teleport(home + Vector3(5.5, 0, 1.5))
-		K.chars = {}
-		K.ignites = {}
+		T.stacks.clear()
+		T2.stacks.clear()
 		m.displace.tows.clear()
 		K.hose.clear()
 		K.relight_t = 0.0
@@ -304,15 +304,15 @@ func _all() -> void:
 	)
 	# +25% on a burning foe (the burn's own ticks held off so only the hose counts)
 	reset.call()
-	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {})
+	ak.step(m, 0.8, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); T.stacks.erase("char"))
 	var d0: float = ak.dmg(T)
 	var t0: int = K.flame_ticks
-	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
+	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); T.stacks.erase("char"); T.burn_t = 0.0)
 	var cold: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 1.0, 99.0)
 	d0 = ak.dmg(T)
 	t0 = K.flame_ticks
-	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); K.chars = {}; T.burn_t = 0.0)
+	ak.step(m, 1.0, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos); T.stacks.erase("char"); T.burn_t = 0.0)
 	var hot: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
 	var chip := T.max_hp * 0.015 * float(K.lmbd()["tick"])
 	ok(
@@ -320,10 +320,10 @@ func _all() -> void:
 		cold > 1.5 and absf(hot - (cold * 1.25 + chip)) < cold * 0.12,
 		"cold %.2f burning %.2f expect %.2f" % [cold, hot, cold * 1.25 + chip]
 	)
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 2, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 2.0, 99.0)
 	d0 = ak.dmg(T)
 	t0 = K.flame_ticks
-	ak.step(m, 1.0, func(): _hold_bare(P, T, K))
+	ak.step(m, 1.0, func(): _hold_bare(P, T))
 	var flash: float = (ak.dmg(T) - d0) / maxf(1.0, K.flame_ticks - t0)
 	var chip2 := T.max_hp * 0.025 * float(K.lmbd()["tick"])
 	ok(
@@ -338,7 +338,7 @@ func _all() -> void:
 	P.inp["fire"] = false
 	reset.call()
 	K.relight_t = 0.0
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 1.0, 99.0)
 	ak.step(m, 0.7, func(): _hold_at(P, T))
 	ok(
 		"lance: a burning foe builds Char at the full rate", char_cold > 6.0 and K.char_of(T) >= char_cold * 0.9,
@@ -412,7 +412,7 @@ func _all() -> void:
 	var cinder_cold: float = ak.dmg(T)
 	ak.step(m, 7.0)
 	reset.call()
-	K.ignites[T.get_instance_id()] = {"e": T, "lvl": 1, "until": m.time + 99.0}
+	Stacks.add(T, "ignite", 1.0, 99.0)
 	K.cd["rmb"] = 0.0
 	K.ch_rmb = 1.0
 	ak.aim_at(P, T.pos)
