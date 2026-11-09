@@ -7,7 +7,10 @@ import math
 TAU = 2 * math.pi
 
 ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.45, 0.85), "eR": (1.0, -0.7, -0.6), "cR": 0.3, "sR": 1.0}
-FAN_UP = {"hL": (-0.30, 0.18, 1.10), "fL": (-0.25, 0.25, 0.95), "pL": (0.15, -0.95, 0.2), "eL": (-1.0, -0.6, -0.5), "cL": 0.55, "sL": 0.6}
+# the fan held up before his chest, the elbow hanging under it (not out sideways: tools/anim_audit.gd's T-pose)
+FAN_UP = {"hL": (-0.24, 0.22, 1.08), "fL": (-0.25, 0.25, 0.95), "pL": (0.15, -0.95, 0.2), "eL": (-0.5, -0.4, -1.0), "cL": 0.55, "sL": 0.6}
+# the same held in at the ruff, while the right hand does a move
+HELD_L = {"hL": (-0.12, 0.26, 1.12), "fL": (0.2, 0.45, 0.85), "pL": (0.45, -0.85, 0.25), "eL": (-0.4, -0.5, -1.0), "cL": 0.6, "sL": 0.5}
 STILL = dict(ORB_UP, **FAN_UP, spine=(8.0, -5.0, 2.0), head=(-14.0, 6.0, 12.0), brow=-0.5, cheek=0.3, lid=0.3)
 
 # leaning out, both hands in it
@@ -67,6 +70,33 @@ def wobble(period, pitch, roll, bob):
     return fn
 
 
+def bound(period, hop, squash, pitch, roll, arm):
+    """walk and run: two bounds a loop. The box leaps off his hover and lands (`hop`, m), the spring squashes into the landing
+    (`squash`, m) and throws him up out of it; the box tips forward off the take-off and back into the landing (`pitch`, degrees),
+    rocks to one side a bound (`roll`), and the body and hands follow through a beat late (`arm`, m of hand lift)."""
+    def fn(P, t):
+        ph = 2.0 * t / period                       # bounds: 0 .. 2 a loop
+        u = ph % 1.0
+        air = math.sin(math.pi * u)                 # 0 on the landing, 1 at the top: a bouncing ball's arc
+        land = (1.0 - air) ** 3                     # the squash, sharp at the landing
+        rock = math.sin(math.pi * ph)               # one side, then the other
+        P["hop"] = hop * air
+        l = P["lift"]
+        P["lift"] = (l[0], l[1], l[2] + 0.5 * hop * air - squash * land)
+        b = P["box"]
+        P["box"] = (b[0] + pitch * math.sin(TAU * u), b[1] + roll * rock)
+        s = P["spine"]
+        P["spine"] = (s[0] + 0.8 * pitch * math.sin(TAU * u - 1.0), s[1], s[2] - 0.8 * roll * math.sin(math.pi * ph - 0.6))
+        hd = P["head"]
+        P["head"] = (hd[0] - 0.5 * pitch * math.sin(TAU * u - 1.6), hd[1], hd[2] + 0.5 * roll * math.sin(math.pi * ph - 1.2))
+        lag = -math.cos(TAU * u - 1.3)               # the hands drop into the landing, lift after it
+        for h, side in (("hR", 1.0), ("hL", -1.0)):
+            x, y, z = P[h]
+            P[h] = (x, y + side * 0.4 * arm * rock, z + arm * lag)
+        P["wR"], P["wL"] = 0.12, 0.08
+    return fn
+
+
 def twitch(amp, rate):
     def fn(P, t):
         s = P["spine"]
@@ -88,13 +118,12 @@ AIM_LOW = {"hR": (0.30, -0.24, 0.92), "fR": (0.2, -0.75, -0.55), "pR": (-0.1, -0
            "hL": (-0.27, 0.27, 1.12), "fL": (-0.1, 0.9, 0.35), "pL": (0.4, -0.2, -0.85), "cL": 0.45, "sL": 1.0, "eL": (-1.0, -0.6, -0.4),
            "spine": (14.0, 20.0, 4.0), "head": (-14.0, -14.0, 6.0), "brow": -0.9, "cheek": 0.8, "lid": 0.5, "lift": (0.0, 0.0, -0.24), "smoke": 1.0, "box": (-3.0, 0.0)}
 
-WIND = {"hR": (0.13, 0.24, 1.26), "fR": (-0.45, 0.55, 0.65), "pR": (-0.8, -0.3, -0.5), "cR": 0.65, "sR": 0.8, "hL": (-0.13, 0.24, 1.2), "fL": (0.45, 0.55, 0.7),
-        "pL": (0.8, -0.3, -0.45), "cL": 0.65, "sL": 0.8, "eR": (1.0, -0.8, -0.2), "eL": (-1.0, -0.8, -0.2), "fan": 0.3,
-        "spine": (-16.0, 28.0, 0.0), "head": (0.0, -20.0, 6.0), "brow": -1.0, "cheek": 0.9, "lid": 0.9, "pld": (10.0, 10.0),
+WIND = {"hR": (0.13, 0.24, 1.26), "fR": (-0.45, 0.55, 0.65), "pR": (-0.8, -0.3, -0.5), "cR": 0.65, "sR": 0.8, "eR": (0.5, -0.6, -1.0), **HELD_L, "fan": 0.3,
+        "spine": (-10.0, 24.0, 0.0), "head": (0.0, -18.0, 6.0), "brow": -1.0, "cheek": 0.9, "lid": 0.9, "pld": (10.0, 10.0),
         "lift": (0.0, -0.08, -0.2), "box": (-5.0, 0.0), "smoke": 0.8}
 
-SHOVE = {"hR": (0.09, 0.44, 1.28), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 1.0, -0.4), "eR": (1.0, -0.4, -0.7), "cR": 0.05, "sR": 1.0, "hL": (-0.09, 0.44, 1.24),
-         "fL": (0.0, 0.5, 0.85), "pL": (0.0, 1.0, -0.4), "eL": (-1.0, -0.4, -0.7), "cL": 0.05, "sL": 1.0, "spine": (36.0, -18.0, 0.0), "head": (-26.0, 14.0, 0.0),
+# the release: the right palm thrown out, the fan kept in at the ruff
+SHOVE = {"hR": (0.09, 0.44, 1.28), "fR": (0.0, 0.5, 0.85), "pR": (0.0, 1.0, -0.4), "eR": (0.4, -0.3, -1.0), "cR": 0.05, "sR": 1.0, **HELD_L, "spine": (36.0, -18.0, 0.0), "head": (-26.0, 14.0, 0.0),
          "brow": -1.0, "cheek": 1.0, "lid": 0.6, "jaw": 8.0, "pld": (-10.0, -10.0), "lift": (0.0, 0.2, 0.1), "box": (7.0, 0.0), "smoke": 0.0, "fan": 1.0}
 
 DOWN = dict(LIMP, spine=(34.0, 0.0, 9.0), head=(34.0, 8.0, 16.0), hL=(-0.16, 0.22, 0.86), hR=(0.14, 0.16, 0.84), brow=0.4, cheek=0.0, jaw=8.0, lid=0.8, fan=0.5,
@@ -149,14 +178,14 @@ CLIPS = {
         (3.2, {}),
     ]},
     "stance": {"len": 2.0, "base": READY, "add": stance_add, "loop": True, "keys": [(0.0, {}), (2.0, {})]},
-    "walk_f": {"len": 1.4, "loop": True, "base": loco((9.0, 0.0), (4.0, -4.0, 2.0), (0.0, -0.03, -0.03), head=(-18.0, 4.0, 8.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_b": {"len": 1.4, "loop": True, "base": loco((-9.0, 0.0), (10.0, -4.0, 0.0), (0.0, 0.03, -0.03), head=(-12.0, 2.0, 10.0)), "add": wobble(1.4, 2.5, 2.0, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_l": {"len": 1.4, "loop": True, "base": loco((3.0, -9.0), (6.0, 8.0, 6.0), (0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "walk_r": {"len": 1.4, "loop": True, "base": loco((3.0, 9.0), (6.0, -12.0, -6.0), (-0.03, 0.0, -0.03)), "add": wobble(1.4, 2.0, 2.5, 0.012), "keys": [(0.0, {}), (1.4, {})]},
-    "run_f": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((17.0, 0.0), (2.0, 0.0, 0.0), (0.0, -0.09, -0.07), head=(-22.0, 0.0, 6.0), brow=-1.0, cheek=0.7), **TRAIL), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-16.0, 0.0), (14.0, 0.0, 0.0), (0.0, 0.08, -0.07), head=(-16.0, 0.0, 6.0), cheek=0.7)), "add": wobble(0.9, 3.5, 3.0, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, -17.0), (6.0, 8.0, 12.0), (0.08, 0.0, -0.07), head=(-16.0, -8.0, 4.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
-    "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, 17.0), (6.0, -8.0, -12.0), (-0.08, 0.0, -0.07), head=(-16.0, 8.0, 20.0), cheek=0.7), **TRAIL), "add": wobble(0.9, 3.0, 3.5, 0.02), "keys": [(0.0, {}), (0.9, {})]},
+    "walk_f": {"len": 1.4, "loop": True, "base": loco((9.0, 0.0), (4.0, -4.0, 2.0), (0.0, -0.03, -0.03), head=(-18.0, 4.0, 8.0)), "add": bound(1.4, 0.03, 0.025, 3.0, 2.5, 0.02), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_b": {"len": 1.4, "loop": True, "base": loco((-9.0, 0.0), (10.0, -4.0, 0.0), (0.0, 0.03, -0.03), head=(-12.0, 2.0, 10.0)), "add": bound(1.4, 0.03, 0.025, 3.0, 2.5, 0.02), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_l": {"len": 1.4, "loop": True, "base": loco((3.0, -9.0), (6.0, 8.0, 6.0), (0.03, 0.0, -0.03)), "add": bound(1.4, 0.03, 0.025, 3.0, 2.5, 0.02), "keys": [(0.0, {}), (1.4, {})]},
+    "walk_r": {"len": 1.4, "loop": True, "base": loco((3.0, 9.0), (6.0, -12.0, -6.0), (-0.03, 0.0, -0.03)), "add": bound(1.4, 0.03, 0.025, 3.0, 2.5, 0.02), "keys": [(0.0, {}), (1.4, {})]},
+    "run_f": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((17.0, 0.0), (2.0, 0.0, 0.0), (0.0, -0.09, -0.07), head=(-22.0, 0.0, 6.0), brow=-1.0, cheek=0.7), **TRAIL), "add": bound(0.9, 0.05, 0.04, 5.0, 3.5, 0.03), "keys": [(0.0, {}), (0.9, {})]},
+    "run_b": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((-16.0, 0.0), (14.0, 0.0, 0.0), (0.0, 0.08, -0.07), head=(-16.0, 0.0, 6.0), cheek=0.7)), "add": bound(0.9, 0.05, 0.04, 5.0, 3.5, 0.03), "keys": [(0.0, {}), (0.9, {})]},
+    "run_l": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, -17.0), (6.0, 8.0, 12.0), (0.08, 0.0, -0.07), head=(-16.0, -8.0, 4.0), cheek=0.7), **TRAIL), "add": bound(0.9, 0.05, 0.04, 5.0, 3.5, 0.03), "keys": [(0.0, {}), (0.9, {})]},
+    "run_r": {"len": 0.9, "loop": True, "turns": 2, "base": dict(loco((4.0, 17.0), (6.0, -8.0, -12.0), (-0.08, 0.0, -0.07), head=(-16.0, 8.0, 20.0), cheek=0.7), **TRAIL), "add": bound(0.9, 0.05, 0.04, 5.0, 3.5, 0.03), "keys": [(0.0, {}), (0.9, {})]},
 
     # ---------------------------------------------------------------- the crouch: down with a squeeze past the hold, up with a small overshoot
     "crouch_idle": {"len": 3.6, "base": HUNCH, "add": hunch_add, "loop": True, "keys": [(0.0, {}), (3.6, {})]},
@@ -204,14 +233,14 @@ CLIPS = {
     # ---------------------------------------------------------------- RMB: Shard Snap (the spring wound right down, then the release)
     "snap_wind": {"len": 0.70, "base": STILL, "add": lambda P, t: t > 0.3 and twitch(0.5, 44.0)(P, t), "keys": [
         (0.00, {}),
-        (0.133, dict(WIND, spine=(0.0, 12.0, 0.0), head=(-8.0, -8.0, 8.0), hR=(0.13, 0.25, 1.14), hL=(-0.13, 0.25, 1.1), lift=(0.0, -0.03, -0.1), smoke=0.3)),
+        (0.133, dict(WIND, spine=(0.0, 12.0, 0.0), head=(-8.0, -8.0, 8.0), hR=(0.13, 0.25, 1.14), lift=(0.0, -0.03, -0.1), smoke=0.3)),
         (0.30, WIND),
         (0.70, WIND),
     ]},
     "snap": {"len": 0.50, "base": WIND, "keys": [
         (0.00, {}),
         (0.067, SHOVE, "snap"),
-        (0.167, {"spine": (-12.0, -14.0, 0.0), "lift": (0.0, -0.1, 0.03), "hR": (0.2, 0.32, 1.32), "hL": (-0.28, 0.2, 1.12), "fL": (-0.3, 0.7, 0.3), "cR": 0.35, "cL": 0.4, "head": (-6.0, 10.0, 6.0), "box": (-6.0, 0.0)}),
+        (0.167, {"spine": (-6.0, -12.0, 0.0), "lift": (0.0, -0.06, 0.03), "hR": (0.18, 0.34, 1.22), "eR": (0.3, -0.3, -1.0), "cR": 0.35, "head": (-6.0, 10.0, 6.0), "box": (-6.0, 0.0)}),
         (0.30, {"spine": (12.0, -8.0, 0.0), "lift": (0.0, 0.04, -0.03), "box": (3.0, 0.0)}),
         (0.50, dict(STILL, jaw=0.0, pld=(0.0, 0.0), lift=(0.0, 0.0, 0.0), box=(0.0, 0.0))),
     ]},

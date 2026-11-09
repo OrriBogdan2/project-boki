@@ -21,7 +21,9 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
-const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+## No feet to plant: Motley has no legs and glides on bounds of his box
+## (KMovesStone.hover); Neve skates (a backlog item).
+const NO_LEGS := ["ostra", "rimewright"]
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0

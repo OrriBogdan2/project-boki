@@ -21,8 +21,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+  counter under 0.3 on a Hunter with legs, fails. `ostra` (no legs: he glides on bounds of his box) and `rimewright`
+  (skates, open below) have no stepping feet and are exempt.
 
 ## What is wrong with all of them
 
@@ -66,7 +66,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `gunslinger` | 50 → 21 | 25 → 23 | 3.6 → 4.5 | +0.90 → +0.89 | 7 | 4.2 |
 | `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
-| `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
+| `ostra` | glides (no feet) | glides (no feet) | 0.0 | +0.00 | 5.6 | 2.1 bounds |
 | `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
 | `tender` | 76 → 39 | 62 → 17 | 1.8 → 3.9 | -0.82 → +0.39 | 5 | 6.7 |
 | `thief` | 73 → 39 | 60 → 17 | 1.8 → 4.3 | -0.96 → +0.82 | 5 | 4.2 |
@@ -132,10 +132,16 @@ posts scroll at the move speed).
 
 ![mage walk and run, before and after](anim_audit/mage.jpg)
 
-**Motley (`ostra`)**
-1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
-2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights.
-3. No arm swing (reach 0.03).
+**Motley (`ostra`)** (re-keyed Nov 9, tools/art1/ostra_clips.py `bound`, `FAN_UP`, `HELD_L`)
+1. He has no legs (KMovesStone.hover), so the gait is a deliberate glide, not a step: walk and run were a smooth drift
+   (bob 3.6 cm, no beat). Now two bounds a loop: the box leaps off his hover and lands (`hop`, 3 cm walk, 5 cm run),
+   the spring squashes into the landing, the box tips forward off the take-off and back into the landing, rocks a side
+   a bound, and body and hands follow a beat late. Hip bob 5.6 cm at 2.1 bounds/s at a run, 3.4 cm at a walk.
+2. The T-pose was the idle's fan arm: its elbow pointed out sideways (63 degrees up), so every clip built on the idle
+   (orb 100 %, snap 75 %) had it. The fan elbow now hangs under the hand; orb and snap hold the fan in at the ruff
+   (`HELD_L`) while the right hand works, the shove's elbows tucked. orb 0 %, snap 0 % sideways; snap's free arm
+   travels 1.13 body heights (was 1.64).
+3. Arm swing against legs does not apply (no legs); the hands lift and rock with the bounds.
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
 
@@ -164,10 +170,10 @@ posts scroll at the move speed).
 
 Split into backlog items per Hunter (role build):
 
-- `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
+- `ostra`: swap (the lantern lob, not one of the two audited attacks) keeps the right elbow out sideways most of the clip.
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
+- Arm use in attacks: `ashwick`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.

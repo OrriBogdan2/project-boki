@@ -28,6 +28,7 @@ NEUTRAL = {
     "skirt": (0.0, 0.0),        # (unused on this model: the tails are spring chains)
     "pld": (0.0, 0.0),          # the collar's points: lift R, lift L, degrees
     "box": (0.0, 0.0),          # the box tilts: toward his front (+), his right (+), degrees
+    "hop": 0.0,                 # the box's rise off his hover, m (a bound)
     "lidb": 0.0,                # the box's lid: 0 as modelled (open), 1 shut, -0.4 flung wide
     "crank": 0.0,               # the crank's turn, degrees
     "smoke": 0.0,               # void smoke round the spring: 0 gone (every still), 1 wound on
@@ -156,7 +157,8 @@ class Rig:
         out["pauldron.R"] = (self.about("pauldron.R", Quaternion((0, 1, 0), math.radians(-P["pld"][0]))), None, None)
         out["pauldron.L"] = (self.about("pauldron.L", Quaternion((0, 1, 0), math.radians(P["pld"][1]))), None, None)
         bx = P["box"]
-        out["x_box"] = (self.about("x_box", Quaternion((-1, 0, 0), math.radians(bx[0])) @ Quaternion((0, 1, 0), math.radians(bx[1]))), None, None)
+        out["x_box"] = (self.about("x_box", Quaternion((-1, 0, 0), math.radians(bx[0])) @ Quaternion((0, 1, 0), math.radians(bx[1]))),
+                        self.rest["x_box"].inverted() @ Vector((0.0, 0.0, P["hop"])), None)
         out["x_boxlid"] = (self.about("x_boxlid", Quaternion((1, 0, 0), math.radians(-104.0 * P["lidb"]))), None, None)
         out["x_crank"] = (self.about("x_crank", Quaternion((1, 0, 0), math.radians(P["crank"]))), None, None)
         sm = max(P["smoke"], 0.001)
