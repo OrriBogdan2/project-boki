@@ -1,7 +1,7 @@
 extends RefCounted
-## --level-vfx-check: a level-up, a rank-up's ready cue and an ability coming ready give one short
-## upward body glow in the Hunter's colour and spawn no ground ring or burst (a ground ring means
-## gameplay). The Boki's level-up at home (Home._play_evolutions) gets the same, checked in source.
+## --level-vfx-check: a level-up, a rank-up's ready cue, an ability or the resource coming ready give
+## one short upward body glow in the Hunter's colour and spawn no ground ring or burst (a ground ring
+## means gameplay). The Boki's level-up at home (Home._play_evolutions) gets the same, checked in source.
 ## Never touches the save.
 
 var bad := 0
@@ -17,7 +17,7 @@ func run(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
-			"arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+			"arch": "dredge", "cls": Arch.weight("dredge"), "weapon": Arch.signature("dredge")})
 	m.set_process(false)
 	var P: Hunter = m.player
 	P.ctrl = "local"
@@ -35,6 +35,14 @@ func run(main: Node) -> void:
 	P.ak._charge_full_tick(Color("ff8844"))
 	ok(fx.radial == radial0 and fx.rings.is_empty(), "a full charge spawns no ring or burst")
 	ok(fx.ghosts.size() == glows1 + 2, "a full charge gives one body glow")
+	var glows2 := fx.ghosts.size()
+	P.ak.tell = ""
+	P.ak.fx_t = 10.0                  # (skip the aura puffs: only the coming-full moment is checked)
+	P.ak.res = P.ak.res_max()
+	P.ak._tells(0.0)
+	var quiet := fx.radial == radial0 and fx.rings.is_empty()
+	ok(P.ak.tell == "full" and quiet, "the resource coming full spawns no ring or burst")
+	ok(fx.ghosts.size() == glows2 + 1, "the resource coming full gives one body glow")
 	var rank0 := fx.radial
 	P.skill_pts = 1
 	P.level_slot("sec")

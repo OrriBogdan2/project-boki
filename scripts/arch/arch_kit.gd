@@ -660,14 +660,14 @@ func touch_res(wait := -1.0) -> void:
 func add_res(v: float) -> void:
 	res = clampf(res + v, 0.0, res_max())
 
-## The resource tell (§3.2): a subtle glow at 50%, an aura and a short sting at full that
+## The resource tell (§3.2): a subtle glow at 50%, the body glow, an aura and a short sting at full that
 ## enemies within 12-25m can hear. Also the Bonded R tell (kin glow and motes while bond is full).
 func _tells(dt: float) -> void:
 	var f := res_frac()
 	var t := "full" if f >= 0.999 or full_ready() else ("half" if f >= 0.5 else "")
 	if t == "full" and tell != "full":
 		m.sfx("unlock", h.pos, -6.0 if h.is_local() else -3.0, 1.6)
-		m.fx.ring(h.pos, 1.6, res_col(), 0.35)
+		if not h.unseen and h.visible: m.fx.body_glow(h.pos, res_col())     # coming full: the body glow, no ground ring
 	tell = t
 	bonded_glow = int(h.slot_lv.get("ult", 0)) > 0 and h.ult >= 1.0 and h.kin != null and not (h.kin as Kin).dead
 	fx_t -= dt
