@@ -30425,5 +30425,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_anchorbill_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_dobsabre",
+    "name": "Dobsabre (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_dobsabre_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hatstag",
+    "name": "Hatstag (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_hatstag_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dobsabre",
+    "name": "Dobsabre (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_dobsabre_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dobsabre",
+    "name": "Dobsabre (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_dobsabre_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_full",
+    "name": "Anchorbill (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dobsabre",
+    "name": "Dobsabre (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_dobsabre_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_full",
+    "name": "Anchorbill (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blotlet_full",
+    "name": "Blotlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_blotlet_full_2.jpg",
+    "ok": true
   }
 ]
