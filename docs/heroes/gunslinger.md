@@ -141,6 +141,31 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
   the sheet's 0.8 for a centre hit or two hunters is not one of the bond kinds (hit, knock, kill), so every hit
   pays the hit share (see the report's owner questions).
 
+## Footage gaps, Nov 9 re-check
+The ranked gaps in briefs/hero-ref/venator.md section 4 (written before 22ceca1e1), checked on main d255acbee.
+Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tools/venator_parity_check.gd).
+
+| # | Gap | On main | Where |
+|---|---|---|---|
+| 1 | Daze payoff on the rifle | closed | 22ceca1e1: `rattle_k` 0.9, gold numbers, no string decay. Asserts `Dazed: the rifle does +90%`, `Dazed: big gold numbers`, `Dazed: the string's decay pauses` |
+| 2 | Wall cone has no pre-telegraph | closed; in flight to be cut | 22ceca1e1: `_tick_burrs` fills an `AimKit.cone` for everyone over the fuse, then `_detonate`. Assert `RMB: the cone shows back toward you, for everyone`. ext/vex-greenfire-1108 (owner 11-08 item 12) makes Coin Blast hit-only and deletes the stick, fuse and cone |
+| 2b | Cone length, knock | closed; in flight to be cut | 22ceca1e1: `cone_len` 6.0, `push` 11.0. Assert `RMB ground cone: damage + Dazed + shoved toward you`. Same greenfire note |
+| 3 | Fuse 0.9 | closed; in flight to be cut | 22ceca1e1: `burr.fuse` 0.9. Assert `RMB: 0.9s fuse`. Same greenfire note |
+| 4 | RMB held aim lane | owner override | OWNER_REVIEW_1103 item 112 (Nov 5, after the "side toss" line in DECISIONS): tap only, no hold; 04648e2a0. Assert `RMB tap: thrown on the press, nothing held, no lane shown`. The coin flick (ext/vex-coin-palm-1108) keeps the tap |
+| 5 | Fires on a tapped slide; cooldown | firing closed; cooldown open (row 9) | `ArchKit.fires_in_dash` reads the dash's LMB row (`fire`). Assert `Slipstep tap: the rifle keeps firing`. ext/vex-dash-parity-rebased: one Shift charge |
+| 6 | Passive: footage has only the knock reset | closed to the kit data | 65ffef1e7: the knock reset plus Fever, one flat 6% for 3.5 s (Combat Rush data, not ours). Asserts `Knock: Slipstep back ...`, `small: Fever is one flat level of 6%` |
+| 7 | Longneedle timing, recoil | closed | 22ceca1e1: `charge` 0.6, `self_slow` 1.0, `recoil` 6.0, `linger` 0.75; `gunslinger_e` brace in kmoves_vv.gd. Asserts `Longneedle: fires at 0.6s`, `Longneedle: the recoil shoves you back`. In flight: ext/vex-e-turn (turn cap), ext/vex-coin-palm-1108 (from the palm) |
+| 8 | Longneedle line narrows; muzzle orb | closed | 04648e2a0: `_tick_needle` `width_to` 12%; orb and flare in `_fire_needle`. Assert `Longneedle: the line narrows over the cast (18m)` |
+| 9 | Cooldowns | open | Rank 1 RMB 6.5, Shift 8.5, E 11.5; footage (level 9) 5.4 / 7.5 / 10; data (level 1) 9 / 11.5 / 12. Which level "source values" means is the owner's call (DECISIONS 11-07 default 1.0x) |
+| 10 | Slide identity | afterimage closed; ring owner override | 596288ff1 `_tick_echo` afterimages. Rings cut by DECISIONS "no bursts, rings or discs on dashes" and 1d5cdfd46. Assert `Vex audit: no ground ring, disc or column on a slide ...` |
+| 11 | Dazed reads for the whole window | in flight | KitStatus `rat` on main; ext/combo-marks-a b7353ee3a adds the overhead Daze tag with a time ring |
+| 12 | Grenade throw animation | owner override; in flight | Item 112: no throw, a cannon kick. Assert `Vex item 112: no throw pose ...`. ext/vex-coin-palm-1108 (owner 11-08): a coin flick from the cyborg hand |
+| 13 | Mini Nuke | closed | 96831d533: Cinderfall, her ultimate (`gunslinger_ult.gd`) |
+| 14 | Mana | no change | The sheet's own call: our kits have no mana |
+
+The per-slot table's "while held: a white lane" and the Shift "white ring" lines are stale (rows 4 and 10); they
+are left alone here because every in-flight Vex branch rewrites those rows.
+
 ## Ultimate choice
 X is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
