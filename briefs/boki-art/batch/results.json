@@ -43529,5 +43529,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_pipeworth_p83_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_lyrewing_p83",
+    "name": "Lyrewing",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lyrewing_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lyrewing_p83",
+    "name": "Lyrewing",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lyrewing_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_parasolth_p83",
+    "name": "Parasolth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_parasolth_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_parasolth_p83",
+    "name": "Parasolth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_parasolth_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ribbonwyrm_p83",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_ribbonwyrm_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimeshrew_p83",
+    "name": "Rimeshrew",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimeshrew_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimeshrew_p83",
+    "name": "Rimeshrew",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimeshrew_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimekit_p83",
+    "name": "Rimekit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimekit_p83_1.jpg",
+    "ok": true
   }
 ]
