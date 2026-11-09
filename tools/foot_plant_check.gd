@@ -87,7 +87,7 @@ func _hero(id: String, out: String) -> void:
 			anims.append(HunterAnim.new(m))
 		for f in SETTLE:
 			_step(trio, anims, float(p[2]))
-		var seen: Array = []          # per frame: [the flat twin's lower ankle over its ground, then off's and on's miss]
+		var seen: Array = []          # per frame: [the flat twin's lower ankle's height, off's miss, on's miss]
 		var same := true
 		for f in SAMPLES:
 			_step(trio, anims, float(p[2]))
@@ -113,7 +113,8 @@ func _hero(id: String, out: String) -> void:
 		for r in seen:
 			if float(r[0]) < lowest + DOWN:
 				worst = [maxf(worst[0], float(r[1])), maxf(worst[1], float(r[2]))]
-		ok(worst[1] < TOL, "%s %s: planted ankle %.3f m off the clip's height over the ground (off: %.3f)" % [tag, p[0], worst[1], worst[0]])
+		ok(worst[1] < TOL, "%s %s: planted ankle %.3f m off the clip's height over the ground (off: %.3f)"
+				% [tag, p[0], worst[1], worst[0]])
 		ok(same, "%s %s: planting off leaves the clip's pose" % [tag, p[0]])
 		var sync := (trio[0] as Node3D).get_node_or_null("Warden/Sync")
 		if sync and (sync.get("leg_bones") as PackedInt32Array).is_empty():
@@ -206,5 +207,6 @@ func _sheet(rows: Array) -> Image:
 	out.fill(Color("1c1a24"))
 	for i in rows.size():
 		for k in 2:
-			out.blit_rect(rows[i][k], Rect2i(Vector2i.ZERO, a.get_size()), Vector2i(a.get_width() * i, (a.get_height() + 6) * k))
+			var at := Vector2i(a.get_width() * i, (a.get_height() + 6) * k)
+			out.blit_rect(rows[i][k], Rect2i(Vector2i.ZERO, a.get_size()), at)
 	return out

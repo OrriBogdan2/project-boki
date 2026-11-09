@@ -49,8 +49,8 @@ func run(main_node: Node) -> void:
 
 func _match() -> void:
 	var o := Match.demo_opts()
-	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)

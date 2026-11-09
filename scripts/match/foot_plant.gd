@@ -26,10 +26,10 @@ static func reach(hip: float, knee: float, out: float) -> float:
 ## its bones once its clips have posed (WardenGlb's Sync calls bones); the procedural body on the rig nodes.
 const META := "foot_plant"     # root meta: this FootPlant, for the .glb body's bones pass
 const NEAR := 14.0             # m from the local player: Hunters this near get planted feet
-const REACH_DOWN := 0.3        # m: the most a foot reaches down; ground lower than that is a ledge (the foot stays on the lip)
-const REACH_UP := 0.3          # m: the most a foot lifts; ground higher than that is a wall or rock (the foot stays put)
+const REACH_DOWN := 0.3        # m: the most a foot reaches down; lower ground is a ledge (it stays on the lip)
+const REACH_UP := 0.3          # m: the most a foot lifts; higher ground is a wall or rock (it stays put)
 const RATE := 30.0             # 1/s: how fast a foot follows the ground, so a tile edge doesn't pop
-const BODY_SLACK := 0.08       # m: a body this far off the terrain (a mount, a train car, a step easing up) is left alone
+const BODY_SLACK := 0.08       # m: a body this far off the terrain (mounted, on a train car) is left alone
 
 var lift := Vector2.ZERO       # m, world: each foot's move onto the ground (left, right), eased
 var drop := 0.0                # m, world: the hips' drop, eased
@@ -147,7 +147,9 @@ static func foot(leg: Node3D, knee: Node3D) -> Vector3:
 ## The ankle in the skeleton's space: the shin's first child bone (the foot), or a thigh's length down the shin.
 static func ankle(sk: Skeleton3D, thigh: int, shin: int) -> Vector3:
 	var kids := sk.get_bone_children(shin)
-	var tip := sk.get_bone_rest(kids[0]).origin if not kids.is_empty() else Vector3(0.0, sk.get_bone_rest(shin).origin.length(), 0.0)
+	var tip := Vector3(0.0, sk.get_bone_rest(shin).origin.length(), 0.0)
+	if not kids.is_empty():
+		tip = sk.get_bone_rest(kids[0]).origin
 	return sk.get_bone_global_pose(shin) * tip
 
 ## Two-bone IK in the Legs node's space: bends the knee and turns the hip so the ankle moves by move,
