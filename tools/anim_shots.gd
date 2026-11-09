@@ -1,15 +1,19 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
-## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
+## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
+## --dirs: only the run, run_back, run_strafe_l and run_strafe_r strips: the body keeps its facing while he moves
+## back or sideways (the strips turn the model so the way he moves is screen right), for the strafe audit.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
+const DIRS := {"back": PI, "strafe_l": -PI / 2.0, "strafe_r": PI / 2.0}     # off the facing, rad (0 forward, + right)
 const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
 const POST_COUNT := 14
@@ -30,12 +34,14 @@ func run(main: Node) -> void:
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
 	var close := false
+	var dirs_only := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--dirs": dirs_only = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -49,7 +55,7 @@ func run(main: Node) -> void:
 	cam.look_at(Vector3(0, 0.8 if not close else 1.0, 0))
 	_posts()
 	for id in ids:
-		await _hunter(String(id), out.path_join(String(id)), frames)
+		await _hunter(String(id), out.path_join(String(id)), frames, dirs_only)
 	print("ANIM_SHOTS_DONE ", ids.size())
 	tree.quit()
 
@@ -70,7 +76,7 @@ func _scroll(mps: float, dt: float) -> void:
 	for p in posts:
 		p.position.x = fposmod((p as Node3D).position.x - mps * dt + span / 2.0, span) - span / 2.0
 
-func _hunter(id: String, dir: String, frames: int) -> void:
+func _hunter(id: String, dir: String, frames: int, dirs_only: bool) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
@@ -85,9 +91,15 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	if clips == null:
 		model.queue_free()
 		return
+	if not dirs_only:
+		await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames, 0.0)
+	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames, 0.0)
+	for dn in DIRS:
+		await _loco(model, sync, dir.path_join("run_" + dn), RUN_MPS, frames, DIRS[dn])
+	if dirs_only:
+		model.queue_free()
+		return
 	model.rotation.y = SIDE_YAW
-	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
-	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
 	await _keyed(model, sync, clips, dir.path_join("idle"), String(lc["idle"]), frames)
 	var atk: Array = ATTACKS[id]
@@ -96,10 +108,12 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.queue_free()
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+## He moves screen right, facing `ang` off it.
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, ang: float) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
-	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
+	model.rotation.y = SIDE_YAW + ang
+	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW + ang, "grounded": true})
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
 		_scroll(mps, DT)

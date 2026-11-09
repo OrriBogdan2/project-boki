@@ -13,14 +13,17 @@ const DT := 1.0 / 30.0
 const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
 const SAMPLE_S := 2.4        # s of locomotion sampled
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
+const DIRS := AnimShots.DIRS
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
-const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
+const AnimShots := preload("res://tools/anim_shots.gd")
+const ATTACKS := AnimShots.ATTACKS
 ## The gate (every Hunter whose clips move the legs): at full stick a planted foot slides at most this share of the
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
+const MAX_STEP_CM := 30.0     # cm: a planted foot's slide over one step, any way he runs (the clips hold 24 at most)
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
@@ -68,8 +71,11 @@ func _hero(main: Node, id: String) -> void:
 			"walk_len": clips.lib.get_animation(walk).length, "run_len": clips.lib.get_animation(run).length}
 	var live := {}
 	for s in SPEEDS:
-		live[str(s)] = _gait(m, sync, clips, sk, s)
+		live[str(s)] = _gait(m, sync, clips, sk, s, 0.0)
 	row["live"] = live
+	row["dirs"] = {}
+	for dn in DIRS:
+		row["dirs"][dn] = _gait(m, sync, clips, sk, SPEEDS[2], DIRS[dn])
 	row["seam"] = {}
 	for nm in [walk, run, String(lc["idle"])]:
 		row["seam"][nm] = _seam(sync, clips, sk, nm, hgt)
@@ -90,6 +96,11 @@ func _hero(main: Node, id: String) -> void:
 			top["peaks"]])
 	if not id in NO_LEGS:
 		_gate(id, top)
+		_gate_dirs(id, row["dirs"])
+	var ds := ""
+	for dn in DIRS:
+		ds += " %s %d%% %.0fcm" % [dn, round(100.0 * row["dirs"][dn]["slide"] / SPEEDS[2]), row["dirs"][dn]["step_cm"]]
+	print("AUDIT %-10s slide by direction (run %.0fcm):%s" % [id, top["step_cm"], ds])
 	m.free()
 
 func _gate(id: String, top: Dictionary) -> void:
@@ -101,6 +112,15 @@ func _gate(id: String, top: Dictionary) -> void:
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
 		bad += 1
+
+## Back-run and strafe: the planted foot slides no more than MAX_SLIDE and MAX_STEP_CM, in any direction.
+func _gate_dirs(id: String, dirs: Dictionary) -> void:
+	for dn in dirs:
+		var share: float = dirs[dn]["slide"] / SPEEDS[2]
+		if share > MAX_SLIDE or dirs[dn]["step_cm"] > MAX_STEP_CM:
+			print("FAIL %s: feet slide %d%% of the speed, %d cm a step, running %s (limits %d%%, %d cm)" % [id,
+					round(100.0 * share), round(dirs[dn]["step_cm"]), dn, round(100.0 * MAX_SLIDE), round(MAX_STEP_CM)])
+			bad += 1
 
 ## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction.
 func _read(sk: Skeleton3D) -> Dictionary:
@@ -143,9 +163,10 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 	clips.force = {}
 	return out
 
-## A gait at speed s, as the game plays it: the state carries the velocity, facing -Z.
-func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) -> Dictionary:
-	m.set_meta(WardenClips.STATE, {"vel": Vector3(0, 0, -s), "face": 0.0, "grounded": true})
+## A gait at speed s along ang off the facing (0 forward, +PI/2 right, PI back), as the game plays it: the state carries
+## the velocity, facing -Z.
+func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float, ang: float) -> Dictionary:
+	m.set_meta(WardenClips.STATE, {"vel": Vector3(sin(ang), 0, -cos(ang)) * s, "face": 0.0, "grounded": true})
 	clips.loco_pos = Vector2.ZERO
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
@@ -154,17 +175,20 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 		sync.call("_process", DT)
 		fr.append(_read(sk))
 	m.set_meta(WardenClips.STATE, {})
-	var out := _slide(fr, s)
+	var out := _slide(fr, s, Vector2(sin(ang), -cos(ang)))
 	out.merge(_swing(fr))
 	return out
 
-## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
-func _slide(fr: Array, s: float) -> Dictionary:
+## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back
+## (m: the way he moves, model frame).
+func _slide(fr: Array, s: float, m: Vector2) -> Dictionary:
 	var slide := 0.0
 	var peak := 0.0
 	var back := 0.0
 	var n := 0
+	var step_cm := 0.0
 	for f in ["foot.L", "foot.R"]:
+		var run_drift := Vector2.ZERO     # the planted foot's slide so far this step (m, against the ground)
 		var lo := INF
 		var hi := -INF
 		for p in fr:
@@ -172,13 +196,19 @@ func _slide(fr: Array, s: float) -> Dictionary:
 			hi = maxf(hi, (p[f] as Vector3).y)
 		for i in range(1, fr.size() - 1):
 			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
+				run_drift = Vector2.ZERO
 				continue
-			var v: float = ((fr[i + 1][f] as Vector3).z - (fr[i - 1][f] as Vector3).z) / (2.0 * DT)     # +Z: backward
-			slide += absf(s - v)
-			peak = maxf(peak, absf(s - v))
+			var dv: Vector3 = ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * DT)
+			var v := -Vector2(dv.x, dv.z).dot(m)       # how fast the foot goes back along his way
+			var err := (Vector2(dv.x, dv.z) + m * s).length()
+			slide += err
+			run_drift += (Vector2(dv.x, dv.z) + m * s) * DT
+			step_cm = maxf(step_cm, 100.0 * run_drift.length())
+			peak = maxf(peak, err)
 			back += v
 			n += 1
-	return {"slide": slide / maxi(n, 1), "slide_max": peak, "clip_speed": back / maxi(n, 1), "planted": n}
+	return {"slide": slide / maxi(n, 1), "slide_max": peak, "clip_speed": back / maxi(n, 1), "planted": n,
+			"step_cm": step_cm}
 
 ## Hip bob, arm swing against the legs (1: each arm swings against its own-side leg, 0: none) and how far they swing.
 func _swing(fr: Array) -> Dictionary:

@@ -22,7 +22,14 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+  are listed below as open. It also runs the back and both strafes (the Hunter turned 180, -90, +90 degrees off his
+  run, `step_cm`: a planted foot's slide over one step) with the same share gate and a 30 cm step cap.
+- **`--anim-shots --dirs`**: adds run_back, run_strafe_l and run_strafe_r strips; the result per Hunter is
+  docs/art/anim_audit/strafe_<id>.jpg (rows: forward, back, strafe left, strafe right).
+- Strafe and back-run (ext/anim-strafe-back): `dir_foot` per Hunter, `side_legs` for `dolm`, `rate_max` 1.6 for `thief` and
+  `tender`. Planted-foot slide is 11 to 24 % of the speed in every direction; per step 13 to 24 cm for `thief` and `dolm`,
+  under 15 cm elsewhere. Owner's 5 cm per step needs foot IK or stride-matched clips (a Blender pass: `thief` and `dolm`
+  strafe, `ostra` and `rimewright` legs).
 
 ## What is wrong with all of them
 

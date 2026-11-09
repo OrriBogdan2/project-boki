@@ -13,7 +13,7 @@ extends RefCounted
 const LEG_BONES := ["thigh.L", "thigh.R"]
 const MEAN_TAU := 0.8        # s: the running mean a stride or an arm swing is scaled around
 const RATE_MIN := 0.6        # x: slowest the walk and run clips play
-const RATE_MAX := 1.4        # x: fastest
+const RATE_MAX := 1.4        # x: fastest (a Hunter's "rate_max" lifts it)
 const FADE_RATE := 8.0       # 1/s: the gait layer in and out
 
 var skel: Skeleton3D
@@ -38,15 +38,22 @@ func _init(sk: Skeleton3D, swing: Dictionary) -> void:
 
 ## The clip rate for speed `spd` (m/s) from the "loco" data, and sets `gain`: "stride": [walk, run] stretch of the
 ## thighs, "foot_mps": [walk, run] foot speed of the clips with it at rate 1 (m/s, tools/anim_audit.gd), between the
-## rings at "walk_speed" and "run_speed".
-func plan(spd: float, lc: Dictionary) -> float:
+## rings at "walk_speed" and "run_speed". "dir_foot" {"b", "s"}: the same speed of the back and the strafe clips over
+## the forward ones, weighted by where `dir` (right, forward) points, so a planted foot keeps pace going any way.
+func plan(spd: float, lc: Dictionary, dir: Vector2) -> float:
 	var walk := float(lc.get("walk_speed", 2.2))
 	var run := float(lc.get("run_speed", 4.6))
 	var t := clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0)
 	var stride: Array = lc.get("stride", [1.0, 1.0])
 	var foot: Array = lc.get("foot_mps", [walk, run])
 	gain = lerpf(float(stride[0]), float(stride[1]), t)
-	return clampf(spd / maxf(lerpf(float(foot[0]), float(foot[1]), t), 0.1), RATE_MIN, RATE_MAX)
+	var df: Dictionary = lc.get("dir_foot", {})
+	var w_back := maxf(-dir.y, 0.0)
+	var w_side := absf(dir.x)
+	var ratio := 1.0 + (w_back * (float(df.get("b", 1.0)) - 1.0) + w_side * (float(df.get("s", 1.0)) - 1.0)) \
+			/ maxf(maxf(dir.y, 0.0) + w_back + w_side, 0.01)
+	var foot_now := lerpf(float(foot[0]), float(foot[1]), t) * ratio
+	return clampf(spd / maxf(foot_now, 0.1), RATE_MIN, float(lc.get("rate_max", RATE_MAX)))
 
 ## After tree.advance. `legs_k`, `arm_k` 0..1: how much locomotion owns the legs and the arms this frame.
 func apply(dt: float, legs_k: float, arm_k: float) -> void:

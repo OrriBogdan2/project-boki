@@ -27,6 +27,8 @@ const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon o
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
 const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
+const SIDE_FLIP := 1.57       # rad: past this off the facing the back run plays, under it the forward run ("side_legs")
+const SIDE_BAND := 0.2        # rad: the flip needs this much more, so a stick on the line does not flicker
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
 const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl)
@@ -62,6 +64,9 @@ var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
+var side_on := false         # "side_legs": the legs are turned onto the heading this frame
+var side_back := false       # ...and it is the back run that plays
+var side_yaw := 0.0          # rad the legs turn off the facing (+ left)
 var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
@@ -403,6 +408,9 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 	if on and Vector2(vel.x, vel.z).length() > HEADING_MIN:
 		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)), -PI, PI)
 		goal = clampf(goal, -LEGS_MAX, LEGS_MAX) if legs_only else clampf(goal, -HEADING_MAX, HEADING_MAX)
+	elif side_on and not on:
+		goal = side_yaw
+		legs_only = true
 	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
 	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
 	if absf(head_turn) < 0.002:
@@ -414,6 +422,18 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 	if legs_only or legs_was:
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+
+## "side_legs" (Tarek, whose strafe clips barely move the feet): going sideways plays the forward run, or the back run
+## when he goes more than SIDE_FLIP off the facing, on legs turned onto where he goes (the torso keeps the aim).
+## `goal` is the (right, forward) stick as the blend space takes it; returns where the run sits instead.
+func _side_legs(goal: Vector2) -> Vector2:
+	var off := atan2(goal.x, goal.y)     # off the facing, + right
+	if side_back and absf(off) < SIDE_FLIP - SIDE_BAND:
+		side_back = false
+	elif not side_back and absf(off) > SIDE_FLIP + SIDE_BAND:
+		side_back = true
+	side_yaw = -(wrapf(off - PI, -PI, PI) if side_back else off) * (1.0 - air_w)
+	return Vector2(0.0, -goal.length() if side_back else goal.length())
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -432,9 +452,12 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	side_on = bool(lc.get("side_legs", false)) and spd >= STILL and act_w <= 0.0
+	if side_on:
+		goal = _side_legs(goal)
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
+	var rate := gait.plan(spd, lc, loco_pos)
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)

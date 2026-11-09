@@ -9,7 +9,7 @@ const CHECKS := {
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
-	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],      # movement, glide, camera and facing timings vs docs/MOVEMENT_FEEL.md
+	"--move-feel-check": ["res://tools/move_feel_check.gd", "move_feel_check", null],  # movement, glide, camera, facing
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],      # item 63
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
@@ -69,7 +69,7 @@ const CHECKS := {
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
-	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],      # firing while running keeps the legs
+	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run: legs keep stepping
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
