@@ -45,6 +45,8 @@ func tick(home: Node, dt: float) -> void:
 		picked = -1
 		var across: Vector3 = Vector3(step.x, 0, step.y).rotated(Vector3.UP, home.cam.yaw)
 		focus += across * PAN_SPEED * home.cam.zoom * dt
+	elif picked >= 0 and not _shown(home, picked):
+		picked = -1
 	elif picked >= 0:
 		var at: Vector3 = home.kins[picked]["pos"]
 		focus = focus.lerp(at, 1.0 - exp(-FOLLOW_EASE * dt))
@@ -76,11 +78,20 @@ func input(home: Node, event: InputEvent) -> bool:
 			return false
 	return true
 
-## Picks the next (dir 1) or previous (dir -1) Boki on the farm; the camera glides to it.
+## Picks the next (dir 1) or previous (dir -1) Boki out on the farm (one napping indoors is skipped); the
+## camera glides to it. With none outside it stays on the free camera.
 func pick_next(home: Node, dir: int) -> void:
 	var count: int = home.kins.size()
-	if count > 0:
-		picked = posmod(picked + dir, count)
+	var at := picked
+	for i in count:
+		at = posmod(at + dir, count)
+		if _shown(home, at):
+			picked = at
+			return
+
+## True when Boki `i` is out where the camera can see it (not napping indoors).
+static func _shown(home: Node, i: int) -> bool:
+	return not home.kins[i].has("indoors") and (home.kins[i]["node"] as Node3D).visible
 
 ## The point nearest `p` that is on the land, kept EDGE_MARGIN inside the bounds.
 func clamp_to_garden(p: Vector3) -> Vector3:

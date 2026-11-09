@@ -38,6 +38,12 @@ func _new_save() -> void:
 	Save.d = d
 	HomeLayout.ensure(d)
 
+## Both Boki out on the lawn (a fresh farm may send one in for a nap), so the shots show who the caption names.
+func _bring_out(home: Node) -> void:
+	for k in home.kins:
+		k.erase("indoors")
+		(k["node"] as Node3D).visible = true
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
@@ -67,10 +73,15 @@ func run(m: Node) -> void:
 	photo.tick(home, 0.016)
 	var inside := photo.bounds.grow(-photo.EDGE_MARGIN + 0.001).has_point(Vector2(photo.focus.x, photo.focus.z))
 	ok(inside and photo.bounds.size.x > 10.0, "the free camera is held inside the garden (%s)" % photo.bounds)
+	_bring_out(home)
 	var spot: Vector3 = home.kins[1]["pos"]
 	photo.pick_next(home, 1)
 	photo.pick_next(home, 1)
 	ok(photo.picked == 1, "Tab picks the next Boki and wraps round (%d)" % photo.picked)
+	home.kins[0]["indoors"] = 999.0
+	photo.pick_next(home, 1)
+	ok(photo.picked == 1, "Tab skips a Boki napping indoors (%d)" % photo.picked)
+	home.kins[0].erase("indoors")
 	for i in 120:
 		photo.tick(home, 0.05)
 	ok(photo.focus.distance_to(Vector3(spot.x, photo.focus.y, spot.z)) < 0.5, "the camera glides to the picked Boki")
@@ -80,7 +91,7 @@ func run(m: Node) -> void:
 	var middle: Vector2 = main.get_viewport().get_visible_rect().size * 0.5
 	var shown: bool = home.kins[1]["node"].is_visible_in_tree()
 	var framed := on_screen.distance_to(middle) < middle.y * 0.5
-	ok(framed, "and it sits near the middle of the frame (%s, shown %s)" % [on_screen, shown])
+	ok(framed and shown, "and it is out and near the middle of the frame (%s, shown %s)" % [on_screen, shown])
 	var caption := photo.caption_text(home)
 	ok(caption == "Mochi the %s" % Data.KIN["zapple"]["name"], "the caption: %s" % caption)
 	await _shot("1_picked_no_caption")
@@ -89,6 +100,7 @@ func run(m: Node) -> void:
 	ok(photo._caption.visible and photo._caption.text != "", "C: the caption shows")
 	home.cam.yaw_to = 0.9
 	await _shot("2_picked_caption_orbit")
+	ok(photo.picked == 1 and photo._caption.visible, "the captioned Boki is still out after the orbit")
 	var path: String = await photo.take(home)
 	var img := Image.load_from_file(path) if path != "" else null
 	var window := Vector2i(main.get_viewport().get_visible_rect().size)
