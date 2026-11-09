@@ -4613,3 +4613,4 @@ READY ext/recast-sounds 82a248d91 (recast open chime + 0.5s close tick for every
 READY ext/move-sfx-positional 0e4199c4f (positional movement sounds)
 READY ext/sparkle-e-verify 63b2b6142 (Skycall verified vs footage and data: 0.8 s and 1 Static match, 1 s drag cap is ours; asserts added, --mage-combo-check 131/0; open: 10.5 s cooldown at our pace vs data 12, footage panel says 2 Static)
 READY ext/sfx-strike-sync 61619d99d (SFX on strike frames)
+READY ext/ability-bar-charges de9f5e1be (ability bar charges and slots)
