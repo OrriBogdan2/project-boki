@@ -1,16 +1,16 @@
 # Owner decisions 02:25 ET 11-09: Glassolotl (rock candy, 8.33) and Bucketmander concept sent back for redo (no notes). Fresh tries.
-# Owner 02:28: the rock-candy Glassolotl is good and stays live; "redo" meant: look for other options for Prismander's evolution.
-_PA='briefs/boki-art/concepts/Prismander.jpg'
-VC('glassolotl_o1','Glassolotl',_PA,'mid',
- "A long, stretchy young axolotl made of pulled taffy, its body twisting in a gentle corkscrew as it swims forward, glossy stripes of strawberry and white candy wound round its body like a candy cane, its gills three long drooping pulled-sugar strands per side. One clear idea, few parts.",
- "big, cheeky glossy eyes and a wide happy grin","strawberry pink and sugar white, with a mint accent","crystal spikes, a sail, sparkles, rainbow effects, a busy design",'prism','sleek')
-VC('glassolotl_o2','Glassolotl',_PA,'mid',
- "A chunky, squishy young axolotl made of translucent gummy candy, jelly-soft and wobbly, with little sugar crystals coating its back like a sugared gummy, its gills short round gummy nubs, crouched low and ready to pounce. One clear idea, few parts.",
- "big, mischievous glossy eyes and a sly grin","strawberry pink gummy with a sugar-white coating, and a lime accent","crystal spikes, a sail, sparkles, rainbow effects, a busy design",'prism','tough')
-VC('glassolotl_o3','Glassolotl',_PA,'mid',
- "A fluffy young axolotl whose gills have puffed into big clouds of spun cotton candy and whose tail is a long swirl of hard candy, the rest of its body glossy boiled sweet, gliding forward low. One clear idea, few parts.",
- "dreamy, happy glossy eyes and a soft smile","pastel pink and sky blue cotton candy, with a strawberry body","crystal spikes, a sail, sparkles, rainbow effects, a busy design, a stick",'prism','pretty')
+# Owner 02:28-02:29: keep the rock-candy Glassolotl STYLE, but try different versions of it, because it is a bit plain.
+_GA='briefs/boki-art/batch/out/c_glassolotl_a_2.jpg'
+def _GV(tag,change):
+    SPECS.append({'id':'c_glassolotl_'+tag,'name':'Glassolotl (variant '+tag+')','refs':[_GA,SR],'runs':3,'aspect':'1:1',
+      'prompt':("Creature-collector monster concept art. Image 1 is the current design of this creature: keep its species, rock-candy material, "
+       "palette, face shape and overall look so it is clearly the same creature, but make it less plain and more striking: "+change+
+       " Image 2 is the style reference only; never copy its creatures. ONE creature only, full body, gentle three-quarter view with the head "
+       "toward the viewer, centred, plain flat pale grey background, no shadow, no text, no effects. "+LESSONS)})
+_GV('v1',"give it a bolder spiral candy-cane stripe pattern wrapping its whole body, a short frilled crest of clear sugar-glass along its back, and a confident lunging pose.")
+_GV('v2',"make its gills into longer, flowing, glossy hard-candy ribbons with two-tone swirls, add a translucent jelly-candy tail fin with tiny sugar crystals inside, and give it a playful twisting swim pose.")
+_GV('v3',"make it chunkier with a bigger head and more expressive face, add a few large faceted rock-candy crystals growing from its shoulders and tail tip, and a cheeky open-mouth grin.")
 VC('bucketmander_o','Bucketmander',SR,'baby',
  "A tiny round tadpole larva with a big head and a soft round body, no legs, a long tail fin made of a few small wooden barrel staves joined like a fan, short stubby gill nubs, and a thumb-sized raincloud tuft growing from the top of its head.",
  "tiny beady eyes and a big lazy grin","wood brown and slate grey, with a yellow accent","legs, a barrel body, hoops, bands, a bucket, axolotl gill fans, a second creature",'storm','cute')
-PRIORITY=['c_glassolotl_o1','c_glassolotl_o2','c_glassolotl_o3','c_bucketmander_o']+PRIORITY
+PRIORITY=['c_glassolotl_v1','c_glassolotl_v2','c_glassolotl_v3','c_bucketmander_o']+PRIORITY
