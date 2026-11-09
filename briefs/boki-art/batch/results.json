@@ -13275,5 +13275,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/voltalon_r_w28_2.jpg",
     "ok": true
+  },
+  {
+    "id": "voltalon_r_w28",
+    "name": "Voltalon",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w28",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w28",
+    "name": "Anchorbill",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w28",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w28",
+    "name": "Anchorbill",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_r2_w28",
+    "name": "Anchorbill",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/anchorbill_r2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w28",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blossmink_e_w28",
+    "name": "Blossmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/blossmink_e_w28_3.jpg",
+    "ok": true
   }
 ]
