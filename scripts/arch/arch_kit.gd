@@ -21,6 +21,10 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
+const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
+const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
+var recast_buf := {}           # slot -> s an early recast press still waits
+var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
 var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
@@ -128,6 +132,27 @@ func r_recast() -> bool: return false                # R pressed while it runs (
 func ult_recast() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
+## The open recast for RecastCue, {} when none: {slot: e|x|dash|lmb, left, total (s), at (the world marker),
+## armed (false while a press is still eaten), auto (it fires itself at the end: no "EXPIRED")}. The base reports E while it's up and e_recastable().
+func recast_window() -> Dictionary:
+	if e_t > 0.0 and e_recastable():
+		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
+	return {}
+func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (the knife, the seed, the ring)
+## The foes carrying this kit's mark/stack/Daze, for RecastCue's badge: appends {e, n, left, total, label, ready}.
+## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
+func combo_marks(out: Array) -> void:
+	for f in m.foes_of(h.team):
+		for id in f.marks:
+			var mk: Dictionary = f.marks[id]
+			var left := float(mk["until"]) - float(m.time)
+			if mk["owner"] == h and left > 0.0:
+				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), "COMBO", true))
+## A recast press from the buffer (RecastCue's ~0.15s): the slot's own press again.
+func recast_now(slot_id: String) -> void:
+	match slot_id:
+		"e": use_e()
+		"x": cast_ult()
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
@@ -206,6 +231,25 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
+	_tick_recast(dt)
+
+## An early recast press waits RECAST_BUFFER for its window to open (armed), then goes; the local hunter's cues.
+func _tick_recast(dt: float) -> void:
+	if not recast_buf.is_empty():
+		var w := recast_window()
+		for slot_id in recast_buf.keys():
+			recast_buf[slot_id] = float(recast_buf[slot_id]) - dt
+			if String(w.get("slot", "")) == slot_id and bool(w.get("armed", true)):
+				recast_buf.erase(slot_id)
+				recast_now(slot_id)
+			elif float(recast_buf[slot_id]) <= 0.0:
+				recast_buf.erase(slot_id)
+				if slot_id in ["e", "x"]: h._ab_feedback("k1" if slot_id == "e" else "x", "deny")     # it never opened
+	if h.is_local():
+		RecastCue.track(self, dt)
+
+func buffer_recast(slot_id: String) -> void:
+	recast_buf[slot_id] = RECAST_BUFFER
 
 func held(which: String) -> bool:
 	match which:
@@ -280,7 +324,10 @@ func use_e() -> void:
 	if e_t > 0.0 and e_recast():
 		return
 	if float(cd["e"]) > 0.0:
-		h._ab_feedback("k1", "deny")
+		if float(e_def().get("cooldown", 14.0)) * cd_k("kin") - float(cd["e"]) < RECAST_LEAD:
+			buffer_recast("e")         # just cast: an E before the recast opens (the knife still flying) waits
+		else:
+			h._ab_feedback("k1", "deny")
 		return
 	if cast_e():
 		cd["e"] = float(e_def().get("cooldown", 14.0)) * cd_k("kin")
@@ -937,6 +984,7 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	m.sfx("crit", at, -7.0, 0.85)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
+	RecastCue.payoff(self, victim)
 	net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
