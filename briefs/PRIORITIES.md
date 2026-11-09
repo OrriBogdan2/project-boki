@@ -1,3 +1,16 @@
+# OWNER PRIORITIES 2026-11-09 (newest; wins over the older order below)
+Goal for the next stretch: the game feels **playable**. Planner: at least 70% of new tasks must serve these areas, at least 3 per area, in this order.
+1. **Game feel -> Supervive parity** (movement, dash, hit feedback, camera, input buffering, cancels)
+2. **Farming / Chao-style Boki raising changes** (raising, bonding, farm loop)
+3. **Combat changes** (kits, damage flow, TTK, readability)
+4. **Animations** (every Warden and Boki state: idle, walk, run, attack, hit, death; blends and gaps)
+5. **VFX** (abilities, hits, Boki types, readability)
+6. **SFX** (every ability, hit, UI action, ambience)
+7. **UI across the board** (HUD, menus, in-extraction UI, inventory)
+8. **Tutorial** (new-player flow, farm tutorial, first match)
+Also tracked, after those: better character customizer, better in-extraction UI, minigames for players who don't want extractions, clans (so people can do what they like and still play together), and many small polish items.
+Rebase-only chores do not count toward these areas.
+
 # Project Boki: priority order (owner-approved, 2026-11-03 23:40 UTC; replaces the 20:05 order)
 **Vertical slice first:** one great match on the Hollow Crown with the starter Wardens and Boki. Work top-down.
 **Finish what's in flight** (servers, the farm tutorial/Hob, the Vex model, the 2D portraits), but start NOTHING new from steps 6–8 until the slice feels great to the owner and outside testers.
