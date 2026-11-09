@@ -32588,5 +32588,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_glintmole_stance_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_kitlet_stance",
+    "name": "Kitlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_kitlet_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glintmole_stance",
+    "name": "Glintmole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glintmole_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_kitlet_stance",
+    "name": "Kitlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_kitlet_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gongibbon_stance",
+    "name": "Gongibbon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gongibbon_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barrelmander_stance",
+    "name": "Barrelmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_barrelmander_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glassolotl_v3",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glassolotl_v3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gongibbon_stance",
+    "name": "Gongibbon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_gongibbon_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_echolop_stance",
+    "name": "Echolop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_echolop_stance_1.jpg",
+    "ok": true
   }
 ]
