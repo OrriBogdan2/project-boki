@@ -40729,5 +40729,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_glaivyx_p79_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_lanceron_p79",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lanceron_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_terrasloth_p79",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_terrasloth_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glaivyx_p79",
+    "name": "Glaivyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glaivyx_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_p79",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_effigoon_p79",
+    "name": "Effigoon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_effigoon_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_p79",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gravitank_p79",
+    "name": "Gravitank",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_gravitank_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_effigoon_p79",
+    "name": "Effigoon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_effigoon_p79_2.jpg",
+    "ok": true
   }
 ]
