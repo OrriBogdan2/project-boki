@@ -24909,5 +24909,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/echolop_card2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "effigeetle_card2",
+    "name": "Effigeetle (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/effigeetle_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card2",
+    "name": "Frigatee (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "effigeetle_card2",
+    "name": "Effigeetle (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/effigeetle_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card2",
+    "name": "Frigatee (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glintmole_card2",
+    "name": "Glintmole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glintmole_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card2",
+    "name": "Gloamshell (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamshell_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glintmole_card2",
+    "name": "Glintmole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glintmole_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card2",
+    "name": "Gloamshell (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gloamshell_card2_2.jpg",
+    "ok": true
   }
 ]
