@@ -10503,5 +10503,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/tidalisk_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "vespox_r2",
+    "name": "Vespox",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_r2",
+    "name": "Vespox",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_r",
+    "name": "Tidalisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_r2",
+    "name": "Vespox",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vespox_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r2",
+    "name": "Wickapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wickapi_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r2",
+    "name": "Wickapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wickapi_r2_2.jpg",
+    "ok": true
   }
 ]
