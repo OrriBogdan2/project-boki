@@ -1,0 +1,1 @@
+- Boki sheet redo: nacrolin: no 3/4 view (views are front, side, mirrored side, back), and it has a row of spikes along the dome back and head crest that the entry rules out ('No spikes', every scale a square mirror tile); the tail ends in a disco ball not in the entry (keep it only if wanted). Job 20261109-003042-a4.
