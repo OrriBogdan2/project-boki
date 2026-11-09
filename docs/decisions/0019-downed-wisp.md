@@ -39,3 +39,13 @@ species: its own palette (the shiny one when it shimmers), its ears and tail tip
 for the hand-built bodies), one baked mesh on one shared unlit material (`shaders/boki_wisp.gdshader`), a quick
 hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the wisp prototype wires it into
 matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
+
+### Readability at the match camera
+`BokiWispClear` (scripts/kin/boki_wisp_clear.gd) is the wisp's keep-clear rules, judged on screen. It orbits an arc
+(not a lap) behind and beside the aim, on the side whose arc is furthest from the aim line on screen. It dims
+(down to 0.2) over the aim line, the cursor, your hit circle or a plate (the default shoulder height puts it
+under the plate often, so the plate case is the dimming one). Its trail is 40% as long while its Hunter fires. Only
+the nearest 10 wisps within 14 m keep sparkles (30 Hunters stay under the 300 budget). The body blends with no
+depth write at render priority -1, so telegraphs (priority 2) and the HUD plates draw over it. `--boki-wisp-check`
+sweeps the aim over 360 degrees for three camera styles; shots: `--wisp-clear-shots --shots-dir=<dir>` (GPU).
+The wisp prototype calls `place`, `alpha`, `apply` and `sparkly` from `KinWisp.render`.

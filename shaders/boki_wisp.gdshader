@@ -1,9 +1,11 @@
 shader_type spatial;
-// A Boki wisp's body (BokiWispLook): the one material every Boki wisp shares. Unlit and opaque; each part's
+// A Boki wisp's body (BokiWispLook): the one material every Boki wisp shares. Unlit; each part's
 // colour (body, belly, tips) comes in the vertex colours, the middle lifts toward white like a soul-light
 // and the edge turns to the Boki's glow colour (per wisp, an instance uniform), so the critter reads as an
-// outline of light.
-render_mode unshaded, shadows_disabled, fog_disabled;
+// outline of light. It blends and writes no depth, so it draws before the telegraphs (priority 2) and they
+// stay readable over it; `fade` is how far BokiWispClear has dimmed it over an aim line or a plate.
+render_mode unshaded, shadows_disabled, fog_disabled, blend_mix, depth_draw_never, cull_back;
+instance uniform float fade = 1.0;
 instance uniform vec4 rim_col : source_color = vec4(1.0);
 uniform float glow = 0.15;   // how far the middle lifts toward white
 uniform float rim = 0.9;     // how strongly the edge turns to the glow colour
@@ -13,4 +15,5 @@ void fragment() {
 	vec3 base = mix(pow((COLOR.rgb + 0.055) / 1.055, vec3(2.4)), COLOR.rgb / 12.92, step(COLOR.rgb, vec3(0.04045)));
 	vec3 col = mix(base, vec3(1.0), glow * facing * facing);
 	ALBEDO = mix(col, rim_col.rgb * 1.3, pow(1.0 - facing, 2.0) * rim);
+	ALPHA = fade;
 }
