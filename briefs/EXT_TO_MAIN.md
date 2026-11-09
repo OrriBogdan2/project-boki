@@ -3384,3 +3384,6 @@ READY ext/sparkle-dash-feel 8876174f9 (PR #21, job 20261108-183005-a2; on main d
 - CLAIM: BOKI_50_DESIGNS 'Effigeetle (`goliathite`)' REDESIGNED, new model from briefs/art-refs/boki/goliathite_turnaround.png (7e91f47b5): sheet check, then build via tools/art1 + Meshy, shared rig for its body type, standard clip set, Boki checks, turntable. Branch ext/boki-goliathite-v2 from origin/main.
 ## 2026-11-09 deep (job 20261109-001543-a4): CLAIM Boki 3D: Gongibbon (gibbelle) from the owner's new concept sheet
 - CLAIM: BOKI_50_DESIGNS 'Gongibbon (`gibbelle`)' REDESIGNED, new model from briefs/art-refs/boki/gibbelle_turnaround.png (7e91f47b5): sheet check, then build via tools/art1 + Meshy, shared rig for its body type, standard clip set, Boki checks, turntable. Branch ext/boki-gibbelle-v2 from origin/main.
+
+## 2026-11-09 deep (job 20261109-001603-a4): CLAIM Boki 3D: Soakybara (lilybara) from the owner's new concept sheet
+- CLAIM: sheet check of briefs/art-refs/boki/lilybara_turnaround.png, then Meshy build through tools/art1 + tools/meshy/meshy_task.py on the shared quadruped/mount rig, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-lilybara from origin/main.
