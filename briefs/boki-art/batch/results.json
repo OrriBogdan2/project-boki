@@ -28269,5 +28269,68 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/umbrathere_card2_w32_1.jpg",
     "ok": true
+  },
+  {
+    "id": "umbrathere_card2_w32",
+    "name": "Umbrathere (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrathere_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_blotlet",
+    "name": "Blotlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_blotlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_arcestrel_v2",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_arcestrel_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geodelotl_a",
+    "name": "Geodelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_geodelotl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sloggoth",
+    "name": "Sloggoth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sloggoth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_blotlet",
+    "name": "Blotlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_blotlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_arcestrel_v2",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_arcestrel_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelotl_a",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelotl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pebblamb",
+    "name": "Pebblamb",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pebblamb_1.jpg",
+    "ok": true
   }
 ]
