@@ -63577,5 +63577,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_pipwom_gp_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pocketpus_gp",
+    "name": "Pocketpus (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scoopsy_gp",
+    "name": "Scoopsy (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_scoopsy_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scoopsy_gp",
+    "name": "Scoopsy (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_scoopsy_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scoopsy_gp",
+    "name": "Scoopsy (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_scoopsy_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus_gp",
+    "name": "Pocketpus (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scoopsy_gp",
+    "name": "Scoopsy (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_scoopsy_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus_gp",
+    "name": "Pocketpus (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gambitfin_gp",
+    "name": "Gambitfin (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gambitfin_gp_2.jpg",
+    "ok": true
   }
 ]
