@@ -187,13 +187,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** cute
 
 ### Torpecone (2 of 3) · Psychic
-- **Concept:** an extinct straight-shelled nautiloid that is a living torpedo.
+- **Concept:** a living torpedo whose seeker nose is Bathilus's porthole eye and whose arms have fused into its tail fins.
 - **Rejected ideas:** orthocone + traffic cone; orthocone + space rocket.
-- **Mix:** orthocone (extinct straight-shelled nautiloid) + torpedo
-- **Look:** The coil has straightened into a long, pointed, riveted iron cone like a torpedo hull, with stubby fins grown at the tip and a short chunky periscope horn on top. It swims head-first, its thick arms swept back into a tight bundle like a propeller hub; foam-white wave curls run along the stripes.
-- **Face:** narrow focused eyes, a determined set mouth.
-- **Colours:** gunmetal and sea teal; accent rust stripes.
-- **Avoid:** coiled shell like Bathilus, a propeller, thin parts, upright.
+- **Mix:** orthocone (extinct straight-shelled nautiloid) + torpedo (the eye is the nose, the arms are the fins)
+- **Look:** A chubby, short, bullet-shaped straight shell racing forward level through a burst of foam. The rounded front is its face, with Bathilus's big round porthole eye set dead centre in the nose under a riveted brow ridge. The riveted gunmetal shell tapers back from there, and at the rear its arms have fused into four short, thick fin blades in an X like a torpedo's tail. Bathilus's rust tiger stripes run straight along the hull.
+- **Face:** one big porthole eye narrowed under a stern brow, a small determined beak mouth just below it.
+- **Colours:** gunmetal grey and rust orange; accent foam white.
+- **Avoid:** loose, trailing or knotted tentacles, a coiled shell like Bathilus, rings around the hull, a long thin tube, upright.
+- **Redesign (01:25 11-09):** the arms kept trailing, knotting or looping into a band, and the face sat behind the hull like a squid in a tube (6.9-8.5, never three seats together). With the eye as the nose and the arms as the fins, the creature is the torpedo with nothing loose, and the short chubby hull adds toy-like appeal.
 - **Archetype:** fast
 
 ### Dreadmonite (3 of 3) · Psychic, Water
@@ -278,13 +279,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** a sound cone that knocks enemies back; the final blasts in four directions.
 
 ### Tootle (1 of 3) · Sound
-- **Concept:** a baby frilled lizard tooting through a trumpet frill.
+- **Concept:** a baby frilled lizard whose round open frill is a black vinyl record, its face the label.
 - **Rejected ideas:** frilled lizard + umbrella (Umbrathere clash); gecko + party blower.
-- **Mix:** baby frilled lizard + small trumpet
-- **Look:** A round little lizard sitting low on all fours, its neck frill folded into a small brass trumpet bell that it lifts to toot. Its tail is a short cone with a groove spiral.
-- **Face:** puffed cheeks, eyes squeezed shut mid-toot.
-- **Colours:** sandy tan and brass; accent cream sound ridges.
-- **Avoid:** held trumpet, music notes, upright pose.
+- **Mix:** baby frilled lizard + vinyl record (the open frill disc)
+- **Look:** A round little big-headed lizard sitting low on all fours, its neck frill opened flat into one round disc around its head like a record: glossy black with fine spiral grooves, and a brass-gold ring around its face like the centre label. Its tail is a short plain tan cone, and faint cream sound ridges ripple off the frill edge as it hums.
+- **Face:** big round amber eyes in the middle of the record, cheeks puffed mid-hum.
+- **Colours:** sandy tan and glossy black; accent brass label ring.
+- **Avoid:** anything in or over its mouth, music notes, an upright pose, a record player.
+- **Redesign (01:25 11-09):** the trumpet frill was drawn as a trumpet held in the mouth or a horn mask over the face (7.3-7.9). A frilled lizard's open frill is already a disc, so as a grooved record it stays one piece of skin with the face in full view, and it opens into Gramofrill's gramophone horn and Phonodrake's groove plates.
 - **Archetype:** cute
 
 ### Gramofrill (2 of 3) · Sound
@@ -346,13 +348,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** snuffles out hidden loot; spore clouds from its snout.
 
 ### Morelkin (1 of 3) · Spore
-- **Concept:** a tapir calf whose baby stripes are rows of tiny mushrooms.
+- **Concept:** a tapir calf sitting on its haunches, shaped and pitted exactly like a plump morel.
 - **Rejected ideas:** tapir + vacuum-cleaner hose; tapir + garden hose.
-- **Mix:** tapir calf + button mushrooms
-- **Look:** A tapir calf on stubby legs whose baby stripes are rows of tiny mushroom caps, its short wiggly snout a little morel cap. Soft teal spore puffs drift from its nose.
-- **Face:** sleepy drooping eyes, snout mid-wiggle.
-- **Colours:** chestnut brown and cream; accent teal spore glow.
-- **Avoid:** mushrooms on its back like a garden, realistic tapir.
+- **Mix:** tapir calf + morel mushroom (its whole body is the cap)
+- **Look:** A tapir calf sitting back on its haunches like a puppy, its round body tapering up into a big head so the whole calf is the plump cone of a morel. Its hide is the morel's honeycomb of soft brown pits and cream ridges all over, the ridges running in rows like baby-tapir stripes, and its short wiggly trunk ends in a little pitted tip. Four very short stumpy cream legs, the front pair planted between its hind feet; a teal spore puff sneezes from the trunk.
+- **Face:** big sleepy drooping dark brown eyes, small round ears, trunk mid-wiggle, a content little smile.
+- **Colours:** chestnut brown and cream; accent teal spores.
+- **Avoid:** long legs, a standing tapir pose, separate mushrooms on the back, realistic tapir proportions, a garden.
+- **Redesign (01:25 11-09):** three edit rounds never made the realistic long-legged calf rounder (7.5-8.4). A sitting, morel-shaped body leaves the round short-legged baby as the only way to draw it, and the pitted hide grows into Truffapir's morel trunk and Morelossus's morel towers.
 - **Archetype:** cute
 
 ### Truffapir (2 of 3) · Spore
@@ -521,13 +524,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** the nymph's shooting mask jaw grabs; the adult throws coloured light beams through its wings.
 
 ### Nymphane (1 of 2) · Bug
-- **Concept:** a dragonfly nymph armoured in bead-glass windows.
+- **Concept:** a dragonfly nymph that is a rosebud of leaded glass, its wing pads curled shut like petals.
 - **Rejected ideas:** nymph + diving suit (worn); caddisfly larva + mosaic (reads as worn).
-- **Mix:** dragonfly nymph + bead glass
-- **Look:** A squat six-legged nymph crawling low, its body plated in thick bead-glass panes with dark lead seams in a honeycomb pattern. Its hinged mask jaw folds under its chin and shoots out to grab.
-- **Face:** big bulging eyes, a greedy grin.
-- **Colours:** amber glass and lead grey; accent green panes.
-- **Avoid:** wings, a church window frame, thin legs.
+- **Mix:** dragonfly nymph + stained-glass rosebud
+- **Look:** A round, squat nymph sitting low like a cushion, its back a dome of curved stained-glass petal panes in dark lead seams, closed tight like a rosebud: the folded wing pads that will open into Rosedart's rose window. Six very short, thick stubby legs barely show under the glass rim, and three short rounded glass paddles stick out at the rear. Its big head has a folded hinged chin plate that shoots out to grab.
+- **Face:** two huge rose-red faceted eyes grown into the head, a greedy sideways grin under the chin plate, unsettling calm.
+- **Colours:** deep rose glass and lead grey; accent amber and green panes.
+- **Avoid:** long or thin legs, wings, a window frame, a ladybird or beetle shape, glow.
+- **Redesign (01:25 11-09):** for four rounds the bead-glass nymph always came out on long spidery legs (7.4-8.3). A rosebud-shaped glass body that sits like a cushion hides the legs, the tail paddles keep it a nymph rather than a beetle, and the closed petals open into Rosedart's rose-window wings.
 - **Archetype:** creepy
 
 ### Rosedart (2 of 2) · Bug, Crystal
@@ -712,13 +716,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** a looping charge that saws through anything in its path.
 
 ### Clinkpede (1 of 2) · Poison
-- **Concept:** a short centipede made of chunky chain links.
+- **Concept:** a baby centipede of stacked steel bottle caps, their crimped edges its many little legs.
 - **Rejected ideas:** centipede + toy train (Chuggamus clash); millipede + zipper (Zippelith clash).
-- **Mix:** short centipede + chain links
-- **Look:** A short, stubby centipede of eight segments, each a chunky steel chain link with one small tooth. Little glossy green venom fangs.
-- **Face:** small beady eyes, a curious tilt.
-- **Colours:** steel grey and venom green; accent rust.
-- **Avoid:** loose chain, thin legs, a motor.
+- **Mix:** short centipede + crimped bottle caps (scrapyard)
+- **Look:** A short, chubby centipede of six fat domed segments, each a round steel bottle cap enamelled green on top, curled into a round C and bouncing on its crimped edges. The crimp teeth round each cap's rim are its rows of tiny legs, the rounded head is the biggest cap, and two small glossy green venom fangs poke out beneath it.
+- **Face:** small beady venom-green eyes, a curious head tilt.
+- **Colours:** steel grey and venom green; accent rust on the crimps.
+- **Avoid:** open chain links, a separate body under the caps, thin legs, text or logos on the caps.
+- **Redesign (01:25 11-09):** chain links came out as a loose heap, as links draped over a worm, or as a plain caterpillar once filled in (7.0-8.1). Bottle caps are solid toy-like segments that read at a glance, their crimp teeth are the legs and foreshadow Chainipede's saw teeth, and the clink fits the scrapyard.
 - **Archetype:** cute
 
 ### Chainipede (2 of 2) · Poison, Bug
@@ -759,13 +764,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** hangs a mushroom "cap" on each ally as a spore shield; the final throws them like discs.
 
 ### Fawngus (1 of 2) · Spore
-- **Concept:** a fawn whose spots are tiny hat pegs, each wearing a mushroom cap.
+- **Concept:** a resting fawn whose two big floppy ears are dappled mushroom caps.
 - **Rejected ideas:** fawn + coral fungus (too obvious); fawn + pincushion.
-- **Mix:** fawn + hat pegs with mushroom caps
-- **Look:** A spindly fawn on long wobbly legs whose back spots are little wooden pegs, each wearing a tiny mushroom cap grown from it. Two peg nubs sprout where antlers will be, and teal spore puffs drift up.
-- **Face:** big wet eyes, an anxious ear-flick.
-- **Colours:** fawn brown and cream; accent teal spore glow.
-- **Avoid:** antlers, a garden on its back, hats worn.
+- **Mix:** fawn + broad dappled mushroom caps (grown as its ears)
+- **Look:** A toy-like fawn lying folded into a round loaf on the ground, legs tucked under so only small black hoof tips show, its head as big as its body. Its two big ears are broad, round, floppy mushroom caps drooping to either side: fawn brown on top with the fawn's cream dapple spots, soft teal gills underneath. Two smooth walnut-brown knobs swell from its brow where antlers will grow, and a faint teal spore puff drifts from the gills. The rest of its coat is plain fawn brown with no spots.
+- **Face:** big soft heavy-lidded dark walnut eyes, shy and anxious, one ear-cap lifted mid-flick.
+- **Colours:** fawn brown and cream; accent teal gills and spores.
+- **Avoid:** long legs, a standing pose, antlers, mushrooms anywhere else on the body, a hat look, realistic deer proportions.
+- **Redesign (01:25 11-09):** pegs in the spots drew a realistic long-legged fawn with sticks poked in for four rounds (7.3-8.1). The idea is now the ears themselves, the folded lying pose leaves no long legs to draw, and caps on the head lead straight into Hatstag's cap-hung antlers.
 - **Archetype:** pretty
 
 ### Hatstag (2 of 2) · Spore, Grass
@@ -807,13 +813,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** a scissor-strike with crossed mandibles.
 
 ### Grammite (1 of 2) · Bug
-- **Concept:** a river larva with dagger jaws.
+- **Concept:** a curled river larva carrying its two blade jaws crossed in an X, like crossed swords.
 - **Rejected ideas:** larva + garden shears; hellgrammite + pliers.
-- **Mix:** hellgrammite larva + curved daggers
-- **Look:** A long, flat, many-legged larva crawling low, its pincer jaws two short curved daggers. Chunky gill tufts line its sides in repeated amber segments.
-- **Face:** small mean eyes, mandibles open.
-- **Colours:** dark umber and amber; accent bronze edges.
-- **Avoid:** wings, thin legs, hair.
+- **Mix:** hellgrammite larva + crossed swords (the mandibles are the blades)
+- **Look:** A plump hellgrammite bouncing on its rear segments, its body curled into a round C so the big head sits high. Its two mandibles are long, curved, flat blades of shiny bronze chitin that cross in front of its face in a bold X, each widening smoothly at the root into the cheek plates with no seam. Its body is smooth overlapping plates with a short row of fat amber gill tufts down each side and six short stubby legs.
+- **Face:** narrow scheming bronze eyes and a cheeky smirk peeking out behind the crossed blades.
+- **Colours:** dark crimson-umber and bronze; accent amber gill tufts.
+- **Avoid:** rings, cuffs or sockets at the blade roots, tusks, a long flat crawling pose, wings, thin legs.
+- **Redesign (01:25 11-09):** the dagger jaws sat in collar rings and read as walrus tusks on a generic grub for four rounds (7.6-8.2). The jaws now cross in an X (crossed swords, no hilt or guard to grow a collar), the curled bounce gives the baby stance, and the X grows straight into Dobsabre's crossed sabres and crimson palette.
 - **Archetype:** creepy
 
 ### Dobsabre (2 of 2) · Dragon, Bug
@@ -854,13 +861,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 # Rares (single stage)
 
 ## 28. Reelacine (rare) · Dark, Normal (found: at dusk on old moors, rarely)
-- **Concept:** the last thylacine, living on as old black-and-white film.
+- **Concept:** the last thylacine as an old film's clapperboard: its famous wide gape is the striped clapper.
 - **Rejected ideas:** thylacine + barcode; thylacine + jail cage.
-- **Mix:** thylacine (extinct) + film reel; the last thylacine was filmed in black and white.
-- **Look:** A lean, stiff-tailed thylacine trotting low, its back stripes dark film-strip bands with chunky sprocket holes. Its tail is a stiff tapering film spool, and its outline flickers into inky smoke at the edges.
-- **Face:** wide gaping jaw yawn, haunted pale eyes.
-- **Colours:** sepia and black; accent violet flicker.
-- **Avoid:** a camera, colour film, a dog face, thin film ribbons.
+- **Mix:** thylacine (extinct) + film clapperboard; the last thylacine was filmed in black and white, yawning its huge gape
+- **Look:** A chunky, low cartoon thylacine trotting mid-stride, with a big boxy head and short sturdy legs. Its long jaws are a clapperboard: a flat, squared upper and lower jaw that open very wide on one hinge, striped across in black and bone-white diagonal bands, and the same diagonal stripes run over its back and rump where a thylacine's stripes are. Its stiff tapering tail is plain, and the whole body is sepia and black like old film.
+- **Face:** half-lidded pale violet eyes, a sly sideways grin when the clapper jaw is shut.
+- **Colours:** sepia grey and charcoal black; accent bone-white stripe bands.
+- **Avoid:** writing or marks on the jaws, a camera, smoke or flicker effects, realistic lanky thylacine proportions, long thin legs.
+- **Redesign (01:25 11-09):** the film-stripe thylacine with a reel tail came back as a lanky realistic thylacine plus a reel prop for five rounds (6.8-7.6). The clapperboard is the jaw itself, built on the real thylacine's gape and stripes, the boxy head forces the chunky cartoon build, and "take two" fits the rewind dash.
 - **Archetype:** sleek
 - **Ability link:** a "rewind" dash that leaves a flickering after-image.
 
@@ -878,14 +886,15 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Ability link:** "watched": marks every enemy in sight at once.
 
 ## 30. Malletary (rare) · Normal, Steel (egg-only)
-- **Concept:** a secretary bird that stomps with war-hammer feet.
+- **Concept:** a secretary bird whose black "trousers" have turned to cast iron: two short, heavy iron stomper legs.
 - **Rejected ideas:** secretary bird + quill pen (ink clash with Ermink); shoebill + executioner axe (Anchorbill clash).
 - **Egg:** long pale shell with dark hammer-head-shaped bands.
-- **Mix:** secretary bird + war hammers
-- **Look:** A tall, long-legged secretary bird striding forward, its feet two heavy iron war-hammer heads it stomps with. Its crest quills are short spike-tipped quills, and gold rune bands ring its long legs like greaves grown from the scales.
-- **Face:** severe hooded eyes, a hooked frown.
-- **Colours:** dove grey and black; accent old gold.
-- **Avoid:** a quill pen, held weapons, a hornbill bill (Anchorbill), ink.
+- **Mix:** secretary bird + cast iron (its dark leg feathering grown into heavy riveted iron)
+- **Look:** A chunky, toy-like secretary bird with an egg-shaped body and a head nearly as big as its body, leaning forward mid-stomp with one leg raised high. From the belly down it is dark cast iron: the black thigh feathers are heavy riveted iron plates, and each short, very thick leg swells downward into one huge round flat-soled foot with three blunt iron toe knuckles, the scale pattern running unbroken from thigh to sole. The same iron caps its quill-crest tips and the hook of its beak.
+- **Face:** severe hooded amber eyes with long lashes under heavy brows, a hooked disapproving frown, bare orange face skin.
+- **Colours:** dove grey and dark iron; accent orange face skin.
+- **Avoid:** long thin stick legs, anything gripped in the toes, separate blocks on the feet, a realistic bird, an upright person-like posture.
+- **Redesign (01:25 11-09):** hammer-head feet drew dumbbells and mallets on thin realistic legs in every round (7.0-7.8). The iron now grows out of the bird's own black leg feathers into one thick stomp leg, the word hammer is gone from the prompt, and the bird is chunky and big-headed.
 - **Archetype:** fast
 - **Ability link:** a stomp combo that hits harder each kick.
 
@@ -930,23 +939,25 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 # Legendaries (single stage, boss and event only, no egg)
 
 ## 34. Sarcobra · Dragon, Dark
-- **Concept:** a cobra whose hood is a royal sarcophagus lid.
+- **Concept:** a cobra whose hood spreads into the great gold-and-lapis wings carved on royal coffin lids.
 - **Rejected ideas:** cobra + snake-charmer basket; cobra + pharaoh headdress (worn).
-- **Mix:** Egyptian cobra + golden sarcophagus
-- **Look:** A giant cobra rearing in a low S, its hood a golden sarcophagus lid carved with scarab and wing motifs. Its body bands are carved coffin panels in lapis and gold, and long glossy fangs drop below its jaw; inky smoke trails from the hood edges.
-- **Face:** kohl-rimmed slit eyes, a cold royal stare.
-- **Colours:** lapis blue and old gold; accent violet smoke.
-- **Avoid:** a human mask face, bandage wraps, a pharaoh headdress worn.
+- **Mix:** Egyptian cobra + the spread wings of a royal sarcophagus lid (the hood ribs are the wing bones)
+- **Look:** A giant cobra reared high from a heavy coiled base, its hood spread wide into two great curved wings: the hood ribs are the wing bones and the hood skin is rows of long gold feather scales tipped in lapis, the inside of the hood smooth black. Its body scales are black with thin gold edges, lapis returns at the tail tip, and long glossy fangs show under its jaw.
+- **Face:** cold gold slit eyes with black kohl-line markings sweeping back from them, a still royal stare.
+- **Colours:** obsidian black and old gold; accent lapis blue.
+- **Avoid:** a plate, mask or face on the hood, rings or bands on the neck, bandages, bird wings separate from the hood, smoke.
+- **Redesign (01:25 11-09):** the coffin-lid hood kept drawing a raised plaque over the brow and lapis neck rings, and edits never fixed it (7.3-8.7 over four rounds); cobra plus coffin was also the obvious pair. The hood itself now spreads into the lid's carved wings, so the signature is the hood's shape and nothing can sit on top of it.
 - **Archetype:** majestic
 
 ## 35. Glaciammoth · Ice, Steel
-- **Concept:** a woolly mammoth that is a living permafrost time capsule.
+- **Concept:** a mammoth carved from one colossal block of glacier ice, like a banquet ice sculpture come alive.
 - **Rejected ideas:** mammoth + glacier (too obvious); mammoth + bobsled (blade clash with Skateron).
-- **Mix:** woolly mammoth + permafrost time capsule
-- **Look:** A colossal mammoth whose hide is thick plates of clear permafrost with ancient things frozen inside: amber drops, fern fossils, spiral shells, old carved runestones. Its woolly fur is frozen into long frosted locks, its tusks are huge curved fossil-ivory sabres, and gold runes are carved into the plate edges.
-- **Face:** small ancient eyes deep in frost, a slow tired calm.
-- **Colours:** frost blue and dark umber fur; accent old gold runes and amber.
-- **Avoid:** human bones or bodies frozen inside, a howdah, riders, an icebreaker prow (Prowyak).
+- **Mix:** woolly mammoth + ice sculpture (chisel-cut glacier ice, blued-steel tusks)
+- **Look:** A colossal mammoth in a big planted stance, head reared high, trunk curled up and one forefoot stamped forward. Its whole body is chiselled from clear blue glacier ice in big flat chisel-cut facets: the shaggy coat is carved as a few huge chunky locks, the domed head and sloping back are bold faceted planes, and frost whitens every edge. Its two enormous tusks sweep up and forward as curved blades of polished blued steel, and a few amber relic drops are frozen deep inside the ice.
+- **Face:** small deep-set ancient eyes carved into the ice, a slow, tired calm.
+- **Colours:** glacier blue and frost white; accent amber relic drops.
+- **Avoid:** hair texture, a realistic mammoth, a block or plinth under it, ice plates laid over fur, a hull or prow (Prowyak).
+- **Redesign (01:25 11-09):** the permafrost-plate mammoth stayed a realistic plodding mammoth with plates stuck on, close in feel to Prowyak (7.3-7.9). As a living ice sculpture the chisel facets force a blocky stylised look and the ice is the body, not plates on it; steel tusks keep the Steel type and the frozen relics keep the thaw ability.
 - **Archetype:** majestic
 - **Ability link:** each time it is "thawed" (damaged) it frees a relic buff for its team.
 
@@ -961,13 +972,14 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** majestic
 
 ## 37. Hydrangor · Grass, Dragon
-- **Concept:** a hydra whose heads are hydrangea blooms.
+- **Concept:** a three-headed hydra that is living garden topiary in full hydrangea bloom.
 - **Rejected ideas:** hydra + candelabra (Snuffapi clash); hydra + garden hose.
-- **Mix:** three-headed hydra + hydrangea flowers
-- **Look:** A three-headed hydra on four thick legs, each head a round cluster of hydrangea petals with a fanged dragon jaw beneath. Petal-shaped scales cover its body, and leaf-plate spines run down its back to a heavy tail.
-- **Face:** three different moods: one sleepy, one snarling, one curious.
-- **Colours:** hydrangea blue-violet and leaf green; accent old gold horns.
-- **Avoid:** thin necks, a bouquet, more than three heads.
+- **Mix:** three-headed hydra + clipped topiary hedge (flowering hydrangea)
+- **Look:** A huge, heavy hydra planted on four thick pillar legs, its whole body clipped from dense leafy hedge into bold, smooth topiary shapes: a broad barrel body, three thick arched necks and three blocky clipped dragon heads with deep jaws of dark wood fangs. Round patches of blue-violet hydrangea blooms flower across the clipped surface, and the spine is clipped into a row of sharp hedge spikes running down to a heavy tapering tail. Small old-gold horns curl back from each head.
+- **Face:** three heads, three moods: one sleepy, one snarling, one curious; small gold eyes.
+- **Colours:** deep hedge green and hydrangea blue-violet; accent old gold horns.
+- **Avoid:** thin necks, bare skulls or masks, flower balls in place of heads, pots or a garden, a realistic lizard body.
+- **Redesign (01:25 11-09):** flower-wig heads, bone skull masks and a mid-sized body held it at 7.8-8.5, and hydra plus hydrangea read as the pun. As living topiary the whole body is one clipped hedge shape, naturally chunky, stylised and easy to build at 5k triangles, with the hydrangea kept as its bloom accent.
 - **Archetype:** majestic
 
 ---
