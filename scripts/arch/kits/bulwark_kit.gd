@@ -269,6 +269,11 @@ func recast_left() -> float:
 	return INF if lie <= 0.0 else maxf(0.0, lie - float(mace["t"]))
 
 func recast_slot() -> String: return "primary"
+func recast_fire() -> bool:
+	if h.fire_cd > 0.0 or m.time - throw_at < float(lmb_def().get("recall_lock", 0.25)):
+		return false
+	_recall()
+	return true
 
 func ult_running() -> bool:
 	return ult.phase != ""
@@ -363,6 +368,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
 	if not rides_dash and (not h.can_fire() or h.fire_cd > 0.0):
+		if pressed and recast_left() > 0.0:
+			rb.early("primary")          # the hammer is out and he is still recovering the throw: kept
 		return true
 	var md := lmb_def()
 	if not mace.is_empty():
@@ -523,6 +530,7 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 const THROW_WIND := 0.08
 
 func _throw() -> void:
+	rb.took("primary")
 	play("bul_throw")
 	var md := lmb_def()
 	lmb_t = -1.0
@@ -542,6 +550,7 @@ func _throw() -> void:
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
 
 func _recall() -> void:
+	rb.took("primary")
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}

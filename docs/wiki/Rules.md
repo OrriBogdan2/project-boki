@@ -448,6 +448,16 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | face | {"bulwark": [0.52, 0.29], "archer": [0.39, 0.38], "juggernaut": [0.49, 0.33], "thief": [0.42, 0.38], "mage": [0.52, 0.46], "dolm": [0.47, 0.37], "ostra": [0.44, 0.47], "ashwick": [0.55, 0.33], "gunslinger": [0.41, 0.32], "tender": [0.49, 0.41], "rimewright": [0.42, 0.47], "dredge": [0.41, 0.44]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.35, 0.36], "juggernaut": [0.58, 0.3], "thief": [0.7, 0.19], "mage": [0.55, 0.22], "dolm": [0.57, 0.32], "ostra": [0.71, 0.25], "ashwick": [0.52, 0.27], "rimewright": [0.64, 0.23], "dredge": [0.73, 0.25], "gunslinger": [0.64, 0.19], "tender": [0.23, 0.32]} |
 
+## recast (`content/rules/recast.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The recast rule (owner 2026-11-08, two-step abilities). buffer_s: a recast press that comes this long (s) before its window opens, or while a prior move recovers, is kept and fires when the window opens. expired_s: how long (s) the slot shows EXPIRED after a window closes unused. |
+| buffer_s | 0.15 |
+| expired_s | 0.6 |
+
 ## revive (`content/rules/revive.json`)
 
 

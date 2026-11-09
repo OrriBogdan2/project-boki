@@ -34,6 +34,7 @@ var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
+var rb: RecastBuffer           # recast presses kept 0.15s, EXPIRED on a window that closes unused
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
@@ -58,6 +59,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k.d = Arch.def(arch_id)
 	k.ch_rmb = float(k.rmb_def().get("charges", 1))
 	k.flow = DashFlow.new(k)
+	k.rb = RecastBuffer.new(k)
 	k._setup()
 	return k
 
@@ -196,6 +198,7 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
+	rb.tick(dt)
 
 func held(which: String) -> bool:
 	match which:
@@ -265,14 +268,18 @@ func in_e() -> bool:
 # ------------------------------------------------------------------ E and R
 func use_e() -> void:
 	if busy():
+		rb.early("k1")
 		h._ab_feedback("k1", "deny")
 		return
 	if e_t > 0.0 and e_recast():
+		rb.took("k1")
 		return
 	if float(cd["e"]) > 0.0:
+		rb.early("k1")
 		h._ab_feedback("k1", "deny")
 		return
 	if cast_e():
+		rb.took("k1")
 		cd["e"] = float(e_def().get("cooldown", 14.0)) * cd_k("kin")
 		h.used["k1"] = int(h.used.get("k1", 0)) + 1
 		h._ab_feedback("k1", "cast")
@@ -722,6 +729,12 @@ func e_recastable() -> bool: return false
 ## Kits whose recast is not E's override both; recast_slot() is the HUD slot id: k1 (E), x, dash, sec or primary.
 func recast_left() -> float: return e_t if e_t > 0.0 and e_recastable() else 0.0
 func recast_slot() -> String: return "k1"
+## Takes the open recast on recast_slot() for RecastBuffer (a kept press); true when it went. Kits with their own slot override.
+func recast_fire() -> bool:
+	if recast_slot() == "k1":
+		return not busy() and e_recast()
+	return ult_running() and ult_recast()
+
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start

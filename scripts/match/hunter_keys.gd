@@ -14,9 +14,14 @@ static func ult_pressed(h: Hunter) -> bool:
 		if h.is_local() and h.m.hud:
 			h.m.hud.toast_small("Ultimate at level %d" % int(Hunter.ULT_AT[0]), Color("a2a8bb"))
 		return false
-	if h.ak == null or not h.ak.cast_ult():
+	if h.ak == null:
 		_deny(h)
 		return false
+	if not h.ak.cast_ult():
+		h.ak.rb.early("x")           # kept: a recast window opening within the buffer takes it
+		_deny(h)
+		return false
+	h.ak.rb.took("x")
 	return true
 
 ## A press that did nothing: the X tile shakes red with the soft warning sound (HunterUltTile).

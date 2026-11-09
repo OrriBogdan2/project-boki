@@ -538,6 +538,7 @@ func extra_dashes() -> float:
 func on_dash(use_ex: bool) -> bool:
 	if hop.chaining():
 		hop.press()
+		rb.took("dash")
 		return true
 	if use_ex:
 		if not spend_dash(true): return true
@@ -548,6 +549,7 @@ func on_dash(use_ex: bool) -> bool:
 		m.sfx("dolm_dash", h.pos, -4.0, 1.0)
 		return true
 	if in_dash() or not spend_dash(false):
+		rb.early("dash")
 		return true
 	hop.start()
 	return true
@@ -578,6 +580,9 @@ func aims_in_dash() -> bool:
 ## The next hop is open while the chain has a hop to give (Shift again).
 func recast_left() -> float: return hop.left() if hop.chaining() and hop.hops_left() > 0 else 0.0
 func recast_slot() -> String: return "dash"
+func recast_fire() -> bool:
+	hop.press()
+	return true
 
 ## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:

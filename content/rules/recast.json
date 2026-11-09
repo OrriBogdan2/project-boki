@@ -1,0 +1,5 @@
+{
+	"doc": "The recast rule (owner 2026-11-08, two-step abilities). buffer_s: a recast press that comes this long (s) before its window opens, or while a prior move recovers, is kept and fires when the window opens. expired_s: how long (s) the slot shows EXPIRED after a window closes unused.",
+	"buffer_s": 0.15,
+	"expired_s": 0.6
+}

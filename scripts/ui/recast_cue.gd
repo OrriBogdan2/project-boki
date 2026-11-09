@@ -3,7 +3,8 @@ extends RefCounted
 ## The cue for an ability you press twice (DECISIONS 2026-11-08 "two-step abilities must be obvious"): while the
 ## local Hunter's kit has a recast open (ArchKit.recast_left / recast_slot), that slot's icon pulses, a ring
 ## round it shrinks with the time left, and big "<KEY> AGAIN" text sits over it, all in the ability's colour.
-## The same for every Hunter. Hud._draw_arch_abilities calls draw() once, after the slots are placed.
+## The same for every Hunter. A window that closes unused leaves the slot showing a grey EXPIRED flash for
+## RecastBuffer.expired seconds. Hud._draw_arch_abilities calls draw() once, after the slots are placed.
 
 const RING_GAP := 8.0          # px from the slot edge to the timer ring
 const RING_W := 4.0            # px: the timer ring's width
@@ -11,6 +12,8 @@ const TEXT_RISE := 36.0        # px from the slot's top edge up to the AGAIN tex
 const TEXT_SIZE := 20
 const PULSE_HZ := 9.0          # rad/s of the pulse
 const TILE_RISE := 14.0        # px: the gap between the RMB slot and the floating LMB tile
+const GREY := Color("9aa0ad")  # the EXPIRED flash: the ability gone cold
+const EXPIRED_TEXT := "EXPIRED"
 const KEYS := {"k1": "signature", "x": "hunter_ult", "dash": "dash", "sec": "secondary", "primary": "fire"}
 
 static var span := 0.0          # the longest the open recast has been (s): the ring is left / span
@@ -20,6 +23,7 @@ static func draw(H, p: Hunter) -> void:
 	var k: ArchKit = p.ak
 	var left := k.recast_left()
 	shown = ""
+	_expired(H, k)
 	if left <= 0.0:
 		span = 0.0
 		return
@@ -32,9 +36,7 @@ static func draw(H, p: Hunter) -> void:
 	var col: Color = info["col"]
 	var key := String(Settings.key_cap(KEYS[slot]))
 	if slot == "primary":
-		HudStyle.slot_frame(c, r, col, "ready")
-		Icons.draw(c, String(info["icon"]), r.get_center() + Vector2(0, -2), r.size.x * 0.27, col)
-		HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, col)
+		_tile(c, r, info, key)
 	span = maxf(span, left) if left != INF else 1.0
 	var pulse := 0.5 + 0.5 * sin(float(H.m.time) * PULSE_HZ)
 	var glow := Color(col, 0.55 + 0.45 * pulse)
@@ -50,6 +52,29 @@ static func draw(H, p: Hunter) -> void:
 	var pill := Rect2(tp + Vector2(-tw * 0.5, -TEXT_SIZE - 2.0), Vector2(tw, TEXT_SIZE + 8.0))
 	H._rounded(pill, HudStyle.KEY_BG, 7, glow, 2)
 	HudStyle.ctext(c, tp, shown, TEXT_SIZE, col.lerp(Color.WHITE, 0.35 + 0.3 * pulse), 3)
+
+## The attack key's tile floating over RMB's slot (the LMB has none on the bar).
+static func _tile(c: CanvasItem, r: Rect2, info: Dictionary, key: String) -> void:
+	var col: Color = info["col"]
+	HudStyle.slot_frame(c, r, col, "ready")
+	Icons.draw(c, String(info["icon"]), r.get_center() + Vector2(0, -2), r.size.x * 0.27, col)
+	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, col)
+
+## Each slot whose window just closed unused: a grey wash that fades out and EXPIRED over the icon.
+static func _expired(H, k: ArchKit) -> void:
+	for slot in k.rb.expired:
+		var r := _rect(H, slot)
+		if r.size.x <= 0.0:
+			continue
+		if slot == "primary":
+			_tile(H.c, r, _info(k, slot), String(Settings.key_cap(KEYS[slot])))
+		var a := clampf(float(k.rb.expired[slot]) / float(Content.rules("recast")["expired_s"]), 0.0, 1.0)
+		H._rounded(r, Color(GREY, 0.55 * a), HudStyle.SLOT_RAD, Color(GREY, a), 3)
+		var tw := HudStyle.BIG.get_string_size(EXPIRED_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_SIZE).x + 16.0
+		var tp := Vector2(r.get_center().x, r.position.y - TEXT_RISE)
+		var pill := Rect2(tp + Vector2(-tw * 0.5, -TEXT_SIZE - 2.0), Vector2(tw, TEXT_SIZE + 8.0))
+		H._rounded(pill, HudStyle.KEY_BG, 7, Color(GREY, a), 2)
+		HudStyle.ctext(H.c, tp, EXPIRED_TEXT, TEXT_SIZE, Color(GREY, 0.4 + 0.6 * a), 3)
 
 ## The slot's screen rect, as the bar placed it (hover_spots); "primary" has no slot, so a tile floats over RMB's.
 static func _rect(H, slot: String) -> Rect2:
