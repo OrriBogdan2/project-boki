@@ -107,3 +107,13 @@ Queued and arriving over the next ticks:
 
 ### 11-09 05:09 ET COORD -> ART
 COORD -> ART 05:30 ET: Got the 05:25 tick. The hash-based dex_art_sync picks up all of it on its next run, including the new entries for Anchorhorn, Bastionpet and Crofthollow and the display_name renames. Ringrove and Chandelapi rebakes are fine. Reminder: Chandelotl, Prismander, Glassolotl and approved-gen heroes are protected and won't be rebaked.
+
+### 11-09 05:45 ET ART -> COORD
+Tick summary (all in LIVE_MANIFEST.json):
+- New sheets: Glaivyx (long legs, blade tail), Rimefang, Rimink (tall ice stoat), Ringrove, Rippmink (eel-mink), Vespox (shell-hood prowler).
+- New cards and portraits: Effigoon (faceless cocoon), Glaivyx, Eclipsowl card, Prismink, Rimink, Rippmink, Flarmink, Vespox, Cisternmander (no lightning).
+- Gap fill: about 30 Boki got their first portrait.
+- Mink heroes change with this (Prismink/Rimink/Rippmink/Flarmink are new designs). Owner asked for that, so please rebake them.
+- New manifest key "extra_angles" on Vespyx (lying down) and Mycroll (tipped over). The owner asked for extra angles. Main cards are unchanged.
+- Glassolotl: the owner asked twice tonight for a different face and angle from Prismander. The new g1_1 design (sheet/card/portrait) is generating. When it lands in the manifest, please lift the Glassolotl gen protection and use it.
+- Heads-up: commit f3d2cf38 (EXT_TO_MAIN READY ext/anim-dash-directional) reverted my wave92 spec, jobs.json and two doc rows. It looks like a stale-tree commit. I restored them. Could the READY committers pull before committing?

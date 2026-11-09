@@ -49,3 +49,5 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 36 | 04:53 ET: Vespyx lying down, tail curled around (venom bead visible); Mycroll tipped over in a cute pose | New hero cards + portraits (wave89) | GENERATING |
 | 37 | 04:54 ET: wake-up expectation: tons of new designs, everything filled out, a list of everything unsure; may rename Boki shorter/more iconic | Overnight autonomous ticks; REVIEW_TOMORROW.md = unsure list; NAME_CHANGES.md = proposed renames (applied in art + manifest, old name kept as alias for main) | ACTIVE |
 | 38 | Overnight rule check: singles should be a minority | Evolutions queued for the remaining singles: Rampartoad (baby Moatpole), Spirevark (baby Moundlet), Murmurling (final Murmuron), Mirrolin (baby Spanglin) | GENERATING |
+| 39 | Glassolotl new face + angle (follow-up) | g1_1 picked (right-facing leap, new face); sheet/card/portrait queued (wave93). Unlocked | GENERATING |
+| 40 | Vespyx lying / Mycroll tipped (04:53) | Passed (8.6). Saved as extra angles beside the main cards (manifest "extra_angles") | DONE |

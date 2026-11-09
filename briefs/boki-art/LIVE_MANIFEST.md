@@ -1,7 +1,7 @@
-# Boki art live manifest (regenerated 05:04 UTC 11-09)
+# Boki art live manifest (regenerated 05:23 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-178 Boki, 143 with all three. Missing something: Bastionpet, Bladypus, Blastopuff, Crofthollow, Domeleon, Dreadmonite, Forgebrock, Furnacowary, Galleotter, Glaciammoth, Gongrowl, Grammite, Gramofrill, Hatstag, Howlop, Hydrangor, Loafhopper, Lockatara, Lurklet, Malletary, Maulangler, Medushroom, Morelossus, Reelacine, Rimefang, Sandwidow, Scopeleon, Slog, Snapler, Starcap, Tinbrock, Torpecone, Truffapir, Voltmink, Zipling
+180 Boki, 178 with all three. Missing something: Crofthollow, Tinbrock
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -11,11 +11,11 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Arcestrel | ✓ | ✓ | ✓ |
 | Barokat | ✓ | ✓ | ✓ |
 | Barrelmander (Kegmander) | ✓ | ✓ | ✓ |
-| Bastionpet | ✓ | ✓ | – |
+| Bastionpet | ✓ | ✓ | ✓ |
 | Bathilus | ✓ | ✓ | ✓ |
 | Bellowlet | ✓ | ✓ | ✓ |
-| Bladypus | ✓ | ✓ | – |
-| Blastopuff | ✓ | ✓ | – |
+| Bladypus | ✓ | ✓ | ✓ |
+| Blastopuff | ✓ | ✓ | ✓ |
 | Blossmink | ✓ | ✓ | ✓ |
 | Blotlet | ✓ | ✓ | ✓ |
 | Boltstrich | ✓ | ✓ | ✓ |
@@ -35,28 +35,29 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Crofthorn | ✓ | ✓ | ✓ |
 | Cubbat | ✓ | ✓ | ✓ |
 | Dobsabre | ✓ | ✓ | ✓ |
-| Domeleon | ✓ | ✓ | – |
+| Domeleon | ✓ | ✓ | ✓ |
 | Dragonkite | ✓ | ✓ | ✓ |
-| Dreadmonite | ✓ | ✓ | – |
+| Dreadmonite | ✓ | ✓ | ✓ |
 | Dreadnoyak | ✓ | ✓ | ✓ |
 | Dribbara | ✓ | ✓ | ✓ |
 | Echolop | ✓ | ✓ | ✓ |
 | Eclipsowl | ✓ | ✓ | ✓ |
 | Effigeetle | ✓ | ✓ | ✓ |
+| Effigoon | ✓ | ✓ | ✓ |
 | Embrook | ✓ | ✓ | ✓ |
 | Ermink | ✓ | ✓ | ✓ |
 | Fawngus | ✓ | ✓ | ✓ |
 | Fizzlet | ✓ | ✓ | ✓ |
 | Flarmink | ✓ | ✓ | ✓ |
 | Foldbat | ✓ | ✓ | ✓ |
-| Forgebrock | ✓ | ✓ | – |
+| Forgebrock | ✓ | ✓ | ✓ |
 | Frigatee | ✓ | ✓ | ✓ |
-| Furnacowary (Furnowary) | ✓ | ✓ | – |
-| Galleotter | ✓ | – | ✓ |
+| Furnacowary (Furnowary) | ✓ | ✓ | ✓ |
+| Galleotter | ✓ | ✓ | ✓ |
 | Geodemole | ✓ | ✓ | ✓ |
 | Geysirbara | ✓ | ✓ | ✓ |
 | Gilabacus | ✓ | ✓ | ✓ |
-| Glaciammoth | ✓ | ✓ | – |
+| Glaciammoth | ✓ | ✓ | ✓ |
 | Glaciatee | ✓ | ✓ | ✓ |
 | Glaivyx | ✓ | ✓ | ✓ |
 | Glassolotl | ✓ | ✓ | ✓ |
@@ -67,17 +68,17 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Glomwort | ✓ | ✓ | ✓ |
 | Glomworth (Glombulus) | ✓ | ✓ | ✓ |
 | Gongibbon | ✓ | ✓ | ✓ |
-| Gongrowl | ✓ | ✓ | – |
+| Gongrowl | ✓ | ✓ | ✓ |
 | Grainspin | ✓ | ✓ | ✓ |
-| Grammite | ✓ | ✓ | – |
-| Gramofrill | ✓ | ✓ | – |
+| Grammite | ✓ | ✓ | ✓ |
+| Gramofrill | ✓ | ✓ | ✓ |
 | Gravadillo | ✓ | ✓ | ✓ |
 | Gravigrub | ✓ | ✓ | ✓ |
 | Gravitank (Gravidon) | ✓ | ✓ | ✓ |
-| Hatstag | ✓ | ✓ | – |
+| Hatstag | ✓ | ✓ | ✓ |
 | Hivara | ✓ | ✓ | ✓ |
-| Howlop | ✓ | ✓ | – |
-| Hydrangor | ✓ | ✓ | – |
+| Howlop | ✓ | ✓ | ✓ |
+| Hydrangor | ✓ | ✓ | ✓ |
 | Jarmit | ✓ | ✓ | ✓ |
 | Kayak | ✓ | ✓ | ✓ |
 | Kerchick | ✓ | ✓ | ✓ |
@@ -93,20 +94,20 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Lanternmit | ✓ | ✓ | ✓ |
 | Latchling | ✓ | ✓ | ✓ |
 | Lensling | ✓ | ✓ | ✓ |
-| Loafhopper | ✓ | ✓ | – |
-| Lockatara | ✓ | ✓ | – |
+| Loafhopper | ✓ | ✓ | ✓ |
+| Lockatara | ✓ | ✓ | ✓ |
 | Lunink | ✓ | ✓ | ✓ |
 | Lunowl | ✓ | ✓ | ✓ |
-| Lurklet | ✓ | ✓ | – |
+| Lurklet | ✓ | ✓ | ✓ |
 | Lyrewing | ✓ | ✓ | ✓ |
-| Malletary | ✓ | ✓ | – |
+| Malletary | ✓ | ✓ | ✓ |
 | Maracoil | ✓ | ✓ | ✓ |
 | Marchleaf | ✓ | ✓ | ✓ |
-| Maulangler | ✓ | ✓ | – |
-| Medushroom | ✓ | ✓ | – |
+| Maulangler | ✓ | ✓ | ✓ |
+| Medushroom | ✓ | ✓ | ✓ |
 | Mirrolin | ✓ | ✓ | ✓ |
 | Morelkin | ✓ | ✓ | ✓ |
-| Morelossus | ✓ | ✓ | – |
+| Morelossus | ✓ | ✓ | ✓ |
 | Mortarfly | ✓ | ✓ | ✓ |
 | Mossbastion (Mosstodon) | ✓ | ✓ | ✓ |
 | Mossgrade | ✓ | ✓ | ✓ |
@@ -123,6 +124,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Pawnfry | ✓ | ✓ | ✓ |
 | Pebblamb | ✓ | ✓ | ✓ |
 | Phonodrake | ✓ | ✓ | ✓ |
+| Pipeworth | ✓ | ✓ | ✓ |
 | Pipewurm | ✓ | ✓ | ✓ |
 | Polyshroom | ✓ | ✓ | ✓ |
 | Prismander | ✓ | ✓ | ✓ |
@@ -134,30 +136,30 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Rampartoad | ✓ | ✓ | ✓ |
 | Rattlebub | ✓ | ✓ | ✓ |
 | Reapant | ✓ | ✓ | ✓ |
-| Reelacine | ✓ | ✓ | – |
+| Reelacine | ✓ | ✓ | ✓ |
 | Ribbonwyrm | ✓ | ✓ | ✓ |
-| Rimefang | – | ✓ | ✓ |
+| Rimefang | ✓ | ✓ | ✓ |
 | Rimekit | ✓ | ✓ | ✓ |
 | Rimeshrew | ✓ | ✓ | ✓ |
 | Rimink | ✓ | ✓ | ✓ |
 | Ringrove | ✓ | ✓ | ✓ |
 | Rippmink | ✓ | ✓ | ✓ |
-| Sandwidow | ✓ | ✓ | – |
+| Sandwidow | ✓ | ✓ | ✓ |
 | Sarcobra | ✓ | ✓ | ✓ |
-| Scopeleon | ✓ | ✓ | – |
+| Scopeleon | ✓ | ✓ | ✓ |
 | Seamwyrm | ✓ | ✓ | ✓ |
 | Selenfin | ✓ | ✓ | ✓ |
 | Selenwhale (Lunarca) | ✓ | ✓ | ✓ |
 | Skateron | ✓ | ✓ | ✓ |
 | Skidlet | ✓ | ✓ | ✓ |
-| Slog | ✓ | ✓ | – |
+| Slog | ✓ | ✓ | ✓ |
 | Sloggoth | ✓ | ✓ | ✓ |
-| Snapler | ✓ | ✓ | – |
+| Snapler | ✓ | ✓ | ✓ |
 | Snuffapi | ✓ | ✓ | ✓ |
 | Soakybara | ✓ | ✓ | ✓ |
 | Spirevark | ✓ | ✓ | ✓ |
 | Sporcupine | ✓ | ✓ | ✓ |
-| Starcap | ✓ | ✓ | – |
+| Starcap | ✓ | ✓ | ✓ |
 | Stormit | ✓ | ✓ | ✓ |
 | Sundormouse | ✓ | ✓ | ✓ |
 | Teapotamus | ✓ | ✓ | ✓ |
@@ -169,17 +171,17 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Tidalisk | ✓ | ✓ | ✓ |
 | Tinbrock | ✓ | ✓ | – |
 | Tootle | ✓ | ✓ | ✓ |
-| Torpecone | ✓ | ✓ | – |
-| Truffapir | ✓ | ✓ | – |
+| Torpecone | ✓ | ✓ | ✓ |
+| Truffapir | ✓ | ✓ | ✓ |
 | Umbrathere (Ribbrella) | ✓ | ✓ | ✓ |
 | Umbrink | ✓ | ✓ | ✓ |
 | Vaultara | ✓ | ✓ | ✓ |
 | Vespox | ✓ | ✓ | ✓ |
 | Vespyx | ✓ | ✓ | ✓ |
 | Voltalon | ✓ | ✓ | ✓ |
-| Voltmink | ✓ | ✓ | – |
+| Voltmink | ✓ | ✓ | ✓ |
 | Wickapi | ✓ | ✓ | ✓ |
 | Wyrmink | ✓ | ✓ | ✓ |
 | Zephyrak | ✓ | ✓ | ✓ |
-| Zipling | ✓ | ✓ | – |
+| Zipling | ✓ | ✓ | ✓ |
 | Zippelith | ✓ | ✓ | ✓ |

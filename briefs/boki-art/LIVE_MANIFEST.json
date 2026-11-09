@@ -52,14 +52,14 @@
  "Bladypus": {
   "sheet": "briefs/boki-art/turnarounds/Bladypus.jpg",
   "card": "briefs/boki-art/cards/Bladypus.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Bladypus.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Bladypus.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Bladypus.png"
  },
  "Blastopuff": {
   "sheet": "briefs/boki-art/turnarounds/Blastopuff.jpg",
   "card": "briefs/boki-art/cards/Blastopuff.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Blastopuff.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png"
  },
@@ -194,7 +194,7 @@
  "Domeleon": {
   "sheet": "briefs/boki-art/turnarounds/Domeleon.jpg",
   "card": "briefs/boki-art/cards/Domeleon.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Domeleon.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Domeleon.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Domeleon.png"
  },
@@ -208,7 +208,7 @@
  "Dreadmonite": {
   "sheet": "briefs/boki-art/turnarounds/Dreadmonite.jpg",
   "card": "briefs/boki-art/cards/Dreadmonite.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Dreadmonite.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Dreadmonite.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Dreadmonite.png"
  },
@@ -292,7 +292,7 @@
  "Forgebrock": {
   "sheet": "briefs/boki-art/evolutions/Forgebrock.jpg",
   "card": "briefs/boki-art/cards/Forgebrock.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Forgebrock.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Forgebrock.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Forgebrock.png"
  },
@@ -306,16 +306,17 @@
  "Furnacowary": {
   "sheet": "briefs/boki-art/evolutions/Furnacowary.jpg",
   "card": "briefs/boki-art/cards/Furnacowary.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Furnacowary.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Furnacowary.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Furnacowary.png",
   "display_name": "Furnowary"
  },
  "Galleotter": {
   "sheet": "briefs/boki-art/evolutions/Galleotter.jpg",
-  "card": null,
+  "card": "briefs/boki-art/cards/Galleotter.jpg",
   "portrait": "briefs/boki-art/portraits/light/Galleotter.jpg",
-  "cutout": "briefs/boki-art/portraits/cutout/Galleotter.png"
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Galleotter.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Galleotter.png"
  },
  "Geodemole": {
   "sheet": "briefs/boki-art/evolutions/Geodemole.jpg",
@@ -341,7 +342,7 @@
  "Glaciammoth": {
   "sheet": "briefs/boki-art/turnarounds/Glaciammoth.jpg",
   "card": "briefs/boki-art/cards/Glaciammoth.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Glaciammoth.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png"
  },
@@ -404,7 +405,7 @@
  "Gongrowl": {
   "sheet": "briefs/boki-art/evolutions/Gongrowl.jpg",
   "card": "briefs/boki-art/cards/Gongrowl.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Gongrowl.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Gongrowl.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Gongrowl.png"
  },
@@ -418,14 +419,14 @@
  "Grammite": {
   "sheet": "briefs/boki-art/turnarounds/Grammite.jpg",
   "card": "briefs/boki-art/cards/Grammite.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Grammite.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Grammite.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Grammite.png"
  },
  "Gramofrill": {
   "sheet": "briefs/boki-art/turnarounds/Gramofrill.jpg",
   "card": "briefs/boki-art/cards/Gramofrill.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Gramofrill.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Gramofrill.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Gramofrill.png"
  },
@@ -454,7 +455,7 @@
  "Hatstag": {
   "sheet": "briefs/boki-art/turnarounds/Hatstag.jpg",
   "card": "briefs/boki-art/cards/Hatstag.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Hatstag.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Hatstag.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Hatstag.png"
  },
@@ -468,14 +469,14 @@
  "Howlop": {
   "sheet": "briefs/boki-art/evolutions/Howlop.jpg",
   "card": "briefs/boki-art/cards/Howlop.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Howlop.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Howlop.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Howlop.png"
  },
  "Hydrangor": {
   "sheet": "briefs/boki-art/turnarounds/Hydrangor.jpg",
   "card": "briefs/boki-art/cards/Hydrangor.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Hydrangor.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Hydrangor.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Hydrangor.png"
  },
@@ -573,14 +574,14 @@
  "Loafhopper": {
   "sheet": "briefs/boki-art/turnarounds/Loafhopper.jpg",
   "card": "briefs/boki-art/cards/Loafhopper.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Loafhopper.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Loafhopper.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Loafhopper.png"
  },
  "Lockatara": {
   "sheet": "briefs/boki-art/turnarounds/Lockatara.jpg",
   "card": "briefs/boki-art/cards/Lockatara.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Lockatara.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lockatara.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Lockatara.png"
  },
@@ -601,7 +602,7 @@
  "Lurklet": {
   "sheet": "briefs/boki-art/turnarounds/Lurklet.jpg",
   "card": "briefs/boki-art/cards/Lurklet.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Lurklet.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lurklet.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Lurklet.png"
  },
@@ -615,7 +616,7 @@
  "Malletary": {
   "sheet": "briefs/boki-art/turnarounds/Malletary.jpg",
   "card": "briefs/boki-art/cards/Malletary.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Malletary.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Malletary.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Malletary.png"
  },
@@ -636,14 +637,14 @@
  "Maulangler": {
   "sheet": "briefs/boki-art/turnarounds/Maulangler.jpg",
   "card": "briefs/boki-art/cards/Maulangler.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Maulangler.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Maulangler.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Maulangler.png"
  },
  "Medushroom": {
   "sheet": "briefs/boki-art/turnarounds/Medushroom.jpg",
   "card": "briefs/boki-art/cards/Medushroom.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Medushroom.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Medushroom.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Medushroom.png"
  },
@@ -664,7 +665,7 @@
  "Morelossus": {
   "sheet": "briefs/boki-art/turnarounds/Morelossus.jpg",
   "card": "briefs/boki-art/cards/Morelossus.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Morelossus.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Morelossus.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Morelossus.png"
  },
@@ -859,7 +860,7 @@
  "Reelacine": {
   "sheet": "briefs/boki-art/turnarounds/Reelacine.jpg",
   "card": "briefs/boki-art/cards/Reelacine.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Reelacine.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Reelacine.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Reelacine.png"
  },
@@ -901,7 +902,7 @@
  "Sandwidow": {
   "sheet": "briefs/boki-art/turnarounds/Sandwidow.jpg",
   "card": "briefs/boki-art/cards/Sandwidow.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Sandwidow.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Sandwidow.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Sandwidow.png"
  },
@@ -915,7 +916,7 @@
  "Scopeleon": {
   "sheet": "briefs/boki-art/turnarounds/Scopeleon.jpg",
   "card": "briefs/boki-art/cards/Scopeleon.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Scopeleon.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Scopeleon.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Scopeleon.png"
  },
@@ -950,7 +951,7 @@
  "Slog": {
   "sheet": "briefs/boki-art/evolutions/Slog.jpg",
   "card": "briefs/boki-art/cards/Slog.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Slog.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Slog.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Slog.png"
  },
@@ -964,7 +965,7 @@
  "Snapler": {
   "sheet": "briefs/boki-art/turnarounds/Snapler.jpg",
   "card": "briefs/boki-art/cards/Snapler.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Snapler.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Snapler.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Snapler.png"
  },
@@ -999,7 +1000,7 @@
  "Starcap": {
   "sheet": "briefs/boki-art/turnarounds/Starcap.jpg",
   "card": "briefs/boki-art/cards/Starcap.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Starcap.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Starcap.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Starcap.png"
  },
@@ -1085,14 +1086,14 @@
  "Torpecone": {
   "sheet": "briefs/boki-art/turnarounds/Torpecone.jpg",
   "card": "briefs/boki-art/cards/Torpecone.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Torpecone.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Torpecone.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Torpecone.png"
  },
  "Truffapir": {
   "sheet": "briefs/boki-art/turnarounds/Truffapir.jpg",
   "card": "briefs/boki-art/cards/Truffapir.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Truffapir.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Truffapir.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Truffapir.png"
  },
@@ -1148,7 +1149,7 @@
  "Voltmink": {
   "sheet": "briefs/boki-art/evolutions/Voltmink.jpg",
   "card": "briefs/boki-art/cards/Voltmink.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Voltmink.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Voltmink.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Voltmink.png"
  },
@@ -1176,7 +1177,7 @@
  "Zipling": {
   "sheet": "briefs/boki-art/evolutions/Zipling.jpg",
   "card": "briefs/boki-art/cards/Zipling.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Zipling.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Zipling.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Zipling.png"
  },
@@ -1229,7 +1230,8 @@
   "card": "briefs/boki-art/cards/Rimefang.jpg",
   "portrait": "briefs/boki-art/portraits/light/Rimefang.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Rimefang.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Rimefang.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Rimefang.png",
+  "sheet": "briefs/boki-art/turnarounds/Rimefang.jpg"
  },
  "Rimekit": {
   "sheet": "briefs/boki-art/turnarounds/Rimekit.jpg",
@@ -1257,12 +1259,27 @@
   "sheet": "briefs/boki-art/turnarounds/Bastionpet.jpg",
   "card": "briefs/boki-art/cards/Bastionpet.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Bastionpet.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Bastionpet.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Bastionpet.png",
+  "portrait": "briefs/boki-art/portraits/light/Bastionpet.jpg"
  },
  "Crofthollow": {
   "card": "briefs/boki-art/cards/Crofthollow.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Crofthollow.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Crofthollow.png",
   "portrait": "briefs/boki-art/portraits/light/Crofthollow.jpg"
+ },
+ "Effigoon": {
+  "sheet": "briefs/boki-art/turnarounds/Effigoon.jpg",
+  "card": "briefs/boki-art/cards/Effigoon.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Effigoon.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Effigoon.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Effigoon.png"
+ },
+ "Pipeworth": {
+  "sheet": "briefs/boki-art/turnarounds/Pipeworth.jpg",
+  "card": "briefs/boki-art/cards/Pipeworth.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Pipeworth.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Pipeworth.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Pipeworth.png"
  }
 }
