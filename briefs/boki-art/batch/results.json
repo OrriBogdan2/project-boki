@@ -5624,5 +5624,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_puffamus_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_prismander",
+    "name": "Prismander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rippmink",
+    "name": "Rippmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rippmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mirrolin",
+    "name": "Mirrolin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mirrolin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimink",
+    "name": "Rimink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snuffapi",
+    "name": "Snuffapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_snuffapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine",
+    "name": "Sporcupine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine",
+    "name": "Sporcupine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark",
+    "name": "Spirevark (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara",
+    "name": "Soakybara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_spirevark",
+    "name": "Spirevark (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_spirevark_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snuffapi",
+    "name": "Snuffapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_snuffapi_2.jpg",
+    "ok": true
   }
 ]
