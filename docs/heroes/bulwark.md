@@ -1,6 +1,6 @@
 # Albert the Barnacle Knight (id `bulwark`, Heavy) - fidelity pass (hero sheet bjorn.md)
 
-Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/hunter_abilities/bulwark.json) is now Bracewall.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 Source: Oath, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the

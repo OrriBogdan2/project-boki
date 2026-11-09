@@ -197,7 +197,7 @@ ARCH = content("archetypes")
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
 WEAPONS = content("weapons")
-ABIL1 = content("abilities")
+ABIL1 = content("hunter_abilities")
 KIN2 = content("kin_v2")
 KIN1 = content("kin")
 AB2 = content("abilities_v2")
@@ -517,7 +517,7 @@ def gen_gear():
         elif users: ut.append([", ".join(users)] + row)
     body += "\n\n## Without a class kit\n\nEvery player and bot now plays a class, whose kit owns Shift and right click. A hunter without one falls back to these: the weight's dodge and the weapon's own right-click utility.\n\n"
     body += table(["Weight", "Dodge", "Cooldown", "What it does"], dg) + "\n\n" + table(["Weapon", "Right click", "Cooldown", "What it does"], ut)
-    page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
+    page("Weapons.md", "Weapons, upgrades and run perks", body, ["content/weapons", "content/hunter_abilities", "content/classes", "scripts/core/data.gd", "scripts/core/loot.gd", "scripts/match/weapon_ups.gd"])
 
 # ------------------------------------------------------------------ maps
 def gen_maps():
