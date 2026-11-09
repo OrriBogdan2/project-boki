@@ -4940,3 +4940,4 @@ READY ext/gaps-gunslinger 9960559bb (Vex footage gaps re-check: table in docs/he
 READY ext/perf-texture-import 93e254d1d (compressed textures)
 
 READY ext/gaps-archer 82dd65e13 (Lace footage gaps Nov 9 re-check: table of the 12 pin.md rows on main in docs/heroes/archer.md, all closed, owner override or in flight, E cooldown cell fixed 9 -> 15 s; doc only; archer-combo 159/0, hero-combo 304/0, reticle 0, health --strict OK, gen_wiki --check unchanged)
+READY ext/gaps-ashwick 148f071b7 (Cinder footage gaps Nov 9 re-check table in docs/heroes/ashwick.md: all 12 hero-ref/linwick.md rows closed or owner override on main, rows 5/6 owner items 19/11, 9 and 12 already closed; doc only, nothing built; ashwick-combo 119/0, hero-combo 304/0, reticle 0, health --strict OK, gen_wiki --check OK)
