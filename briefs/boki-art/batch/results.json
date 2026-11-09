@@ -24685,5 +24685,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rimink_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rippmink_card2",
+    "name": "Rippmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rippmink_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_card2",
+    "name": "Rippmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rippmink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card2",
+    "name": "Sporcupine (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card2",
+    "name": "Sporcupine (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card2",
+    "name": "Tidalisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card2",
+    "name": "Tidalisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidalisk_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_card2",
+    "name": "Tinbrock (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tinbrock_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_card2",
+    "name": "Tinbrock (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tinbrock_card2_1.jpg",
+    "ok": true
   }
 ]
