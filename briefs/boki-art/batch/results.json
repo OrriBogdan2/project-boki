@@ -11672,5 +11672,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_proofhop_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_proofhop_r",
+    "name": "Proofhop (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_proofhop_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_r",
+    "name": "Clinkpede (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_r",
+    "name": "Grammite (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_grammite_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_r",
+    "name": "Clinkpede (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_r",
+    "name": "Grammite (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_grammite_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_r",
+    "name": "Grammite (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grammite_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_r",
+    "name": "Clinkpede (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin_r",
+    "name": "Morelkin (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_morelkin_r_1.jpg",
+    "ok": true
   }
 ]
