@@ -35108,5 +35108,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_dobsabre_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_thistlynx_lc",
+    "name": "Thistlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_nettlynx_pick",
+    "name": "Nettlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_nettlynx_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gravigrub",
+    "name": "Gravigrub",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_gravigrub_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thistlynx_lc",
+    "name": "Thistlynx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lc_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sporcupine_pick",
+    "name": "Sporcupine",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sporcupine_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_umbrink_pick",
+    "name": "Umbrink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_umbrink_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_umbrink_pick",
+    "name": "Umbrink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_umbrink_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thistlynx_lc",
+    "name": "Thistlynx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_thistlynx_lc_1.jpg",
+    "ok": true
   }
 ]
