@@ -38524,5 +38524,19 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_anchorbill_fix_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_fix",
+    "name": "Anchorbill (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_fix_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anchorbill_fix",
+    "name": "Anchorbill (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_anchorbill_fix_3.jpg",
+    "ok": true
   }
 ]
