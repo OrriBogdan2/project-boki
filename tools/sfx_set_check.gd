@@ -33,6 +33,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_boki_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -133,6 +134,15 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
+func _boki_cues() -> void:
+	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
+		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
+	for cue in wired:
+		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
+		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
 
 func _takes(sname: String) -> Array:
 	var out := []
