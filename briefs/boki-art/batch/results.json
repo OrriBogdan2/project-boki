@@ -14843,5 +14843,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2_w28",
+    "name": "Soakybara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe_w28",
+    "name": "Ringrove (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2_w28",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2_w28",
+    "name": "Soakybara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_r2_w28",
+    "name": "Pyrraven",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_r2_w28",
+    "name": "Pyrraven",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_r2_w28",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_r2_w28",
+    "name": "Pyrraven",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/pyrraven_r2_w28_4.jpg",
+    "ok": true
   }
 ]
