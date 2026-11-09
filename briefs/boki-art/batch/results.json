@@ -2704,5 +2704,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/tinbrock_2.png",
     "ok": true
+  },
+  {
+    "id": "forgebrock",
+    "name": "Forgebrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_1.png",
+    "ok": true
+  },
+  {
+    "id": "tinbrock",
+    "name": "Tinbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tinbrock_1.png",
+    "ok": true
+  },
+  {
+    "id": "galleotter",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_2.png",
+    "ok": true
+  },
+  {
+    "id": "forgebrock",
+    "name": "Forgebrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_2.png",
+    "ok": true
   }
 ]
