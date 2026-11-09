@@ -129,6 +129,66 @@ func _match_items() -> void:
 		t += Match.DT
 	ok(t <= 0.2, "item 6: falling backward, holding W carries you forward in %.2fs" % t)
 
+## A ground tile with LANE m of flat, open ground east of it (no wall to stop a run, a dash or a glide).
+const LANE := 26
+func _open_lane() -> Vector3:
+	for z in range(4, w.h - 4):
+		for x in range(4, w.w - LANE - 4):
+			var lv := w.level[w.idx(x, z)]
+			var clear := true
+			for i in LANE:
+				var j := w.idx(x + i, z)
+				clear = clear and w.kind[j] == World.T_GROUND and w.level[j] == lv
+				clear = clear and not w.is_block(x + i + 0.5, z + 0.5)
+				if not clear: break
+			if clear:
+				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
+	return Vector3.INF
+
+## Items 6/7: one chain holding D: run, Shift, jump out of it, a glide press, let go, land. The h-speed never
+## drops more than 30% in one step (no sudden stop), never jumps up except as a dash starts (no spike),
+## and the step after touchdown you are still moving.
+func _chain() -> void:
+	var at := _open_lane()
+	if at == Vector3.INF:
+		ok(false, "items 6/7: no open lane on this map to run the chain on")
+		return
+	_reset(at, Vector3.ZERO)
+	h.inp["glide_press_only"] = true
+	h.inp["move"] = Vector2(1, 0)
+	var trace := []
+	var worst_drop := 0.0
+	var worst_gain := 0.0
+	var land := [-1.0, -1.0]
+	var prev := 0.0
+	var was_air := false
+	for i in 150:
+		h.inp["dash"] = i == 30
+		h.inp["jump"] = i == 44 or i == 56
+		h.inp["glide"] = i >= 56 and i < 90
+		m.step(Match.DT)
+		var hs := Vector2(h.vel.x, h.vel.z).length()
+		var dashing := h.roll_t > 0.0 or (h.ak != null and h.ak.in_dash())
+		if i > 0 and not (dashing and hs > prev):
+			worst_gain = maxf(worst_gain, hs - prev)
+		if i > 0 and prev > 0.5:
+			worst_drop = maxf(worst_drop, (prev - hs) / prev)
+		if was_air and h.grounded and land[0] < 0.0 and i > 60:
+			land = [prev, hs]
+		was_air = not h.grounded
+		prev = hs
+		if i % 10 == 9: trace.append("%s %.1f" % [h.loco.state_name().left(4), hs])
+	h.inp["move"] = Vector2.ZERO
+	h.inp["glide"] = false
+	print("ACHECK note chain h-speed every 1/6 s: %s" % ", ".join(trace))
+	# (the worst is the jump out of the dash: it keeps Loco.dash_jump_keep, 0.75, plus that step's air drag)
+	ok(worst_drop <= 0.3, "item 7: run > dash > jump > glide > land never loses over 30%% in a step (worst %d%%)"
+		% int(100.0 * worst_drop))
+	ok(worst_gain <= 2.0,
+		"item 7: and never gains over 2 m/s in a step outside a dash's start (worst %.2f)" % worst_gain)
+	ok(land[0] > 0.0 and land[1] >= land[0] * 0.9, "item 6: the step after touchdown you keep moving (%.2f -> %.2f m/s)"
+		% [land[0], land[1]])
+
 ## Item 4 for every Hunter's own Shift: a fresh glide press 2 steps into an air Shift opens the glider that step,
 ## and 0.1 s later the glide still carries the speed it started with (no stop when the kit's dash winds down).
 ## A Shift whose kit keeps it (its own move, not a plain dash) is FLAGGED, not silently excepted.
@@ -263,6 +323,7 @@ func run(main: Node) -> void:
 	h.ctrl = "local"
 	m.opts["god"] = true
 	_match_items()
+	_chain()
 	await _parity(main)
 	m.queue_free()
 	print("ACHECK DONE, failures: ", bad)
