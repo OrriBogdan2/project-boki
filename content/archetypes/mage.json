@@ -11,6 +11,7 @@
 	"color": "#5fe3c8",
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"silhouette": "the copper rod mast and kite pennant on the back",
+	"hint": {"lmb": "Hold {fire} for bolts; each hit adds a Static", "rmb": "Hold {secondary} to summon a rod, release to throw it", "e": "Press {signature}, drag, release: lightning pulls foes in", "dash": "Tap {dash} to zap, hold to charge a longer Wirerun", "x": "Level 6: press {hunter_ult} to leap up, then strike down"},
 	"card": {
 		"loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.",
 		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",

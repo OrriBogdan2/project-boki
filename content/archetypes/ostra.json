@@ -8,6 +8,7 @@
 	"color": "#7fe0d0",
 	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
+	"hint": {"lmb": "Hold {fire} for orbs; waiting between shots makes them bigger", "rmb": "Press {secondary} to snap shards that stun the first foe", "e": "Press {signature} to drop a growing bomb, again to pop it", "dash": "Press {dash} to lob a lantern and swap places with foes", "x": "Level 6: press {hunter_ult} to open a well that stuns foes"},
 	"card": {
 		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",

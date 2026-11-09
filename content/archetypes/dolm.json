@@ -9,6 +9,7 @@
 	"fantasy": "The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you.",
 	"silhouette": "the huge stone left arm, the stone gauntlet and the three floating eye stones",
 	"model_glow": {"core": "#5ce6b8", "edge": "#2fc2b4"},
+	"hint": {"lmb": "Tap {fire} to throw a boulder, hold to punch the lane", "rmb": "Tap {secondary} to slam ahead, hold to hop and slam harder", "e": "Press {signature} to raise three rocks to climb or punch", "dash": "Press {dash} to hop off a rock, again as you land", "x": "Level 6: press {hunter_ult} for a rock ridge; drag to turn it"},
 	"card": {
 		"role": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.",
 		"loop": "Brawler and builder: raises rocks to climb and hide behind, then punches them into the enemy.",

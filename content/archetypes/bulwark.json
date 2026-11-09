@@ -20,6 +20,7 @@
 	"plate_offset": 2.6,
 	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
 	"silhouette": "the frozen prow shield and the long ice-cased oar",
+	"hint": {"lmb": "Tap {fire} to throw the hammer, tap again to call it back", "rmb": "Hold {secondary} to block shots from the front", "e": "Press {signature} for a healing light on your hammer", "dash": "Press {dash} for a spin smash; aegis up, a shield charge", "x": "Level 6: press {hunter_ult} to slam a lane that throws foes up"},
 	"card": {
 		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
 		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",

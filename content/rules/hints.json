@@ -1,5 +1,5 @@
 {
- "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. A save that had finished the old tutorials sees none of its part (the v11 -> v12 migration).",
+ "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). The first-time Hunter hints (HunterHints) wait hunter_gap_s between lines. {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. A save that had finished the old tutorials sees none of its part (the v11 -> v12 migration).",
  "match": {
   "exdash": "Too far? Jump, then press {dash} in mid-air",
   "crouch": "Hold {crouch} to crouch and see farther",
@@ -38,6 +38,7 @@
   "sell": "you hold a crop",
   "hob": "the tutorial is over and you have not talked to Hob"
  },
+ "hunter_gap_s": 8.0,
  "near_m": 6.0,
  "outpost_m": 14.0,
  "goexit_s": 150.0,

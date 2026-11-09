@@ -11,6 +11,7 @@ const REAL_ONLY := ["crouch", "uplink", "defend", "goexit"]
 var m: Match
 var _poll_t := 0.0
 var _void_t := 0.0
+var _hunter_t := 0.0      # match time of the last first-time Hunter hint
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -32,6 +33,10 @@ func tick(dt: float) -> void:
 		if _due(String(id), p, r):
 			FirstTimeHint.show(id, func(line): m.hud.toast(line, COL))
 			return      # one at a time
+	if m.tut == null and m.time - _hunter_t >= float(r["hunter_gap_s"]):
+		var hid := HunterHints.due(p.arch, p.lvl, _foe_near(p, float(r["near_m"]) * 1.5))
+		if hid != "" and FirstTimeHint.show(hid, func(line): m.hud.toast(line, COL)):
+			_hunter_t = m.time
 
 func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 	match id:

@@ -15,6 +15,7 @@
 	},
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
+	"hint": {"lmb": "Hold {fire} to draw, release on the flash", "rmb": "Hold {secondary} for a Heavy Shot that pins foes to walls", "e": "Press {signature} to rain arrows in a wall at the cursor", "dash": "Press {dash} to roll, then walk through rocks as a spirit", "x": "Level 6: press {hunter_ult}, then loose 3 shots with no draw"},
 	"card": {
 		"loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
 		"role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",

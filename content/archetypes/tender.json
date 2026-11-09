@@ -25,6 +25,7 @@
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
+	"hint": {"lmb": "Hold {fire} to push embers; hits on foes add Kindle", "rmb": "Press {secondary}: the seed sticks to a foe and roots them", "e": "Press {signature} for a healing ring, again to throw it", "dash": "Press {dash} to hop; in the air, glide a long way", "x": "Level 6: press {hunter_ult} to tether and heal a teammate"},
 	"card": {
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",

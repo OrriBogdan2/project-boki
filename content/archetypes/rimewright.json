@@ -20,6 +20,7 @@
 	"color": "#5fd6c4",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
+	"hint": {"lmb": "Hold {fire} for darts that curve onto the foe at the cursor", "rmb": "Press {secondary} to push an ice spear that bursts later", "e": "Press {signature} to slide an ice wall, again to freeze it", "dash": "Hold {dash} to skate; your darts fly straight and thick", "x": "Level 6: press {hunter_ult} to freeze yourself, then it cracks"},
 	"card": {
 		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
