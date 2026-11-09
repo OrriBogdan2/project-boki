@@ -24,7 +24,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Cele
 
 | Slot | Source | Ours before | Ours now | Asserted (`--rimewright-combo-check`) |
 |---|---|---|---|---|
-| LMB rhythm | hold: a barrage of semi-homing darts, then 3 larger darts at its end (double damage, faster, longer range) [data]; about one dart per 0.2s, no visible pattern at 5 fps [footage] | a steady stream of identical darts | 4 plain, then 3 large (x2 damage, x1.5 speed, x1.3 reach), round again; 0.18s cadence | `tm LMB: the source's barrage ...`, `... one dart every 0.18 s` |
+| LMB rhythm | hold: a barrage of semi-homing darts, then 3 larger darts at its end (double damage, faster, longer range) [data]; about one dart per 0.2s, no visible pattern at 5 fps [footage] | a steady stream of identical darts (superseded) | 4 plain, then 3 large (x2 damage, x1.5 speed, x1.3 reach), round again; 0.18s cadence | `tm LMB: the source's barrage ...`, `... one dart every 0.18 s` |
 | LMB tracking | darts curve onto the cursor area [footage 0027-0066]; skating, she turns to face the cursor and fires straight thick beams at it [footage 0239-0245] | the same | the same; asserted while skating with the cursor swung round: the next beam leaves within 1 degree of it | `tm Shift: skating, the beams track the cursor ...`, `... curve back onto the foe` |
 | LMB animation | thrown from the hands while walking or skating [footage] | alternating one-hand flicks, a two-hand drive while skating | the same, plus a bigger two-handed fling for the 3 large darts (`tm_dart_heavy`, 0.04 wind, 0.08 fling, 0.18) | `tm LMB: darts alternate hands ...` |
 | RMB | lands at the cursor, slow zone, detonation 1.8-2s later [footage]; owner 19:50: a push, the spear emerges from her and travels out | an overhand throw from the raised hand | the two-palm push, travel time = distance / 18 m/s | `tm RMB: ...` (7 rows) |
@@ -81,7 +81,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 
 ## Assumptions
 - **Dart range:** the darts curve to the cursor and fly on to 10m when nothing is there to home on.
-- **Dart pattern:** the footage's uniform stream wins over the wiki's older "ends with 3 larger darts" (the sheet ranks it gap 1; the footage is newer).
+- **Dart pattern:** the game data wins: 4 plain darts then 3 large ones, round again (an earlier pass kept the footage's uniform stream, replaced in f6250bd1).
 - **Ice Spear:** 2 charges with a 10.2s recharge (the source's 12s, scaled by our wall's 17s against its 20s; the card's 0.3s is read as the cast time). Its direct hit is small; the detonation is the big hit. The ice-encased look after it is a 0.5s freeze plus a 1.5s ice shell. The wiki's near/far slow-versus-damage split is dropped in favour of the footage's slow zone.
 - **Rink Wall:** it slides until its middle reaches the cursor (4.5 to 16.2m of travel, +50% by the owner) and stands 4.5s in all; the freeze recast is the wiki's (6s).
 - **Body and movement (not in the footage):** she has **no separate air dash**: Shift is the skate everywhere, and in the air (owner item 62, replacing item 12's buffer to the landing) it starts at once and skates through the air (see the Skate row). Her **plain jump** is the shared one; her **idle** is the shared idle with her skater's stance (one leg back, arms out, a slight lean). The sheet asks for a ~0.15s stop on release: the stop keeps the shared 30% carry (about 0.1-0.2s to rest).
@@ -95,7 +95,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 3 (audited on 
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
 |---|---|
-| A steady stream of equal darts, slow and bowed, curving onto the foe at the cursor | "a steady stream ...", "every dart the same", "darts come out slowly ...", "the bowed darts curve back ..." |
+| Barrage of 4 plain then 3 large darts, slow and bowed, curving onto the foe at the cursor (the old "steady stream" and "every dart the same" rows were replaced by `tm LMB: the source's barrage ...`) | "darts come out slowly ...", "the bowed darts curve back ...", "the source's barrage ..." |
 | Darts Chill; the frost glow grows; 8 Shatter | "the frost glow on the foe shows the stacks", "8 darts on one foe Shatter them" |
 | A knock on a Chilled foe Shatters them | "knocking a Chilled foe Shatters them after a beat" |
 | Skate: the push-off, straight beams at normal damage, the stride loop, over a ledge, the hockey stop and refund; rank 3 lays ice over the Abyss | the "tm Shift" rows |
