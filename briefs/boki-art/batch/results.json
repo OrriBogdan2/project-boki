@@ -44089,5 +44089,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_gloamspire_p83_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_p83",
+    "name": "Gongibbon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamspire_p83",
+    "name": "Gloamspire (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gloamspire_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamspire_p83",
+    "name": "Gloamspire (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamspire_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_p83",
+    "name": "Glintmole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomworth_p83",
+    "name": "Glomworth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glomworth_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomworth_p83",
+    "name": "Glomworth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomworth_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomworth_p83",
+    "name": "Glomworth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glomworth_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_p83",
+    "name": "Gongibbon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_p83_3.jpg",
+    "ok": true
   }
 ]
