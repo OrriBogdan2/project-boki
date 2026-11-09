@@ -28,11 +28,45 @@ func run(main_node: Node) -> void:
 	await _lance_combos()
 	await _growth()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
+	await _flight_keys()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## In Flue Flight only E works: the kit's dash entry spends and moves nothing there, and the card
+## and tooltip say only the Furnace Cloak works.
+func _flight_keys() -> void:
+	var r: Array = ak.setup("ashwick", 16.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: AshwickKit = P.ak
+	var xd: Dictionary = K.d["x"]
+	var words := String(xd["desc"]) + " " + String(K.d["card"]["x"])
+	ok(
+		"flight text: only the Furnace Cloak works, no Cinder Shot or Shift claimed",
+		words.contains("only the Furnace Cloak works")
+				and not words.contains("Cinder Shot") and not words.contains("Shift")
+	)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	ak.aim_at(P, P.pos + Vector3(10, 0, 0))
+	HunterKeys.ult_pressed(P)
+	ak.step(m, 0.2)
+	var speed0 := float(K.jet.flight.get("speed", 0.0))
+	var dashes0 := P.dashes
+	var roll0 := P.roll_t
+	var shield0 := P.shield
+	var handled: bool = K.on_dash(false) and K.on_dash(true)
+	ok(
+		"flight keys: the dash entry spends no charge and changes no speed or roll in the flight",
+		K.jet.running() and handled and P.dashes == dashes0 and P.roll_t == roll0 and P.shield == shield0
+				and float(K.jet.flight["speed"]) == speed0,
+		"dashes %.1f -> %.1f, speed %.1f -> %.1f" % [dashes0, P.dashes, speed0, float(K.jet.flight.get("speed", 0.0))]
+	)
+	m.queue_free()
+	await main.get_tree().process_frame
 
 ## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
 ## keeps burning through a jump.

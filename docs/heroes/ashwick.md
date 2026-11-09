@@ -62,6 +62,52 @@ Source (Felix) vs ours per slot, LMB first. [D] game data (supervive_kits.md, th
 | Dash | all | [F] head-first ~3.4 m in 0.33 s, stops on the first foe | 3.4 m in 0.33 s, stops on the first foe, flame skull | matches |
 | X | all | [F] f25-f139: low steerable flight ~7 bh/s, lava behind, recast lands; [O] item 20: a bit longer | 12.6 m/s for 1.8 s, steering 120 deg/s, carpet 5.2 s, recast lands | matches |
 
+## Parity verify, Nov 9
+
+Main d255acbee against the source: the Cinder block of docs/KIT_PARITY.md, hero-ref/linwick.md [F], supervive_kits.md [D], and the
+owner notes in DECISIONS (they win). Verdicts: match, differ (owner), regressed, open. K = `scripts/arch/kits/ashwick_kit.gd`,
+J = `ashwick_jet.gd`, H = `ashwick_hose.gd`, A = `content/archetypes/ashwick.json`, F = `content/dash_flow/ashwick.json`.
+Nothing here is a flamethrower: the fire starts at her palm (`tip()`), `HeroGearPair.flamer` builds no prop (the id
+`flamethrower` is only the weapon's data key).
+
+| Row | Source | Ours (where) | Verdict |
+|---|---|---|---|
+| LMB hold, hose, ticks | hold; stream lags and curves [F 0016] | puffs keep their velocity, 10 ticks/s: K:317-367, H:19 | match |
+| LMB pilot, reach | cyan pilot ~0.2 s; ~7 m past a close cursor [F] | K:357 (spool 0.2), K:360, A:18 | match |
+| LMB fire from the hand | owner Nov 7: palms, no tank, no weapon | `tip()` K:102, `flamer()` hero_gear_pair.gd:247 is empty; cinder-art-check "the fire is off her hand in flight" | match (owner) |
+| LMB release | stops at once; 0.35 s slow and gap [D] | K:336-337, `move_k` K:298 | match |
+| LMB bonus on Ignited | % max HP vs Ignited [D] | `ignite_k`/`ignite_pct` K:307-315, A:17 (sizes ours: the data names none) | match |
+| RMB bolt | 106 dmg, Slow, Ignite or upgrade, spreads [D] | `fire_rmb` K:443, `_cinder_hit` K:480, slow 30% 1.5 s, spread 4 m | match |
+| RMB range, lane | lane ~0.4 s; footage miss ended near the cursor | always 14 m: K:438, K:455 | differ (owner item 19) |
+| RMB cooldown | 9 s [D] | 7 s, A:22 | open (cooldowns 1.0x per DECISIONS 11-07; in flight on ext/cooldown-parity-verify) |
+| RMB rank 3 | +1 charge [D] | `rmb_charges` K:303-305 | match |
+| Q | none | a glove (ours, not Cinder's) | differ (ours) |
+| E pull, shield, Anti-Heal | pull all nearby, shield per foe, Anti-Heal, builds Ignite [D] | `_cloak_blast` K:653-684, r 4.5; the pull needs sight and mass under 6 (wiki, Displace) | match |
+| E timing | arms flung ~0.2 s, then the blast [F] | blast on the press, flare 0.25 s: K:640-651, K:34 | differ (owner item 11) |
+| E knock reset | a knock resets its cooldown [D] | `on_knock` K:180-195 | match |
+| E cooldown | 13 s [D] | 10.5 s, A:26 | open (in flight, as RMB) |
+| Dash, ground | ~3.4 m in 0.33 s, stops on the first foe, 2 charges [D,F] | A:19 (3.4 / 0.33), `travel` K:529, `_bash_impact` K:607; `dash_feel.json` ashwick 1.0/1.0; asserted "ram: the source's ~3.4 m in 0.33 s" | match |
+| Dash, air poof | owner 23:40: long fast poof, one roll | 6.8 m in 0.28 s, the feel scale applied once (`_poof` K:541-556); asserted "air poof: 6.8 m in 0.28 s, scaled once" | match (owner numbers). KIT_PARITY said "scaled twice, 5.8 m / 0.32 s": stale, corrected |
+| Dash cooldown, chain | 2 charges, 0.4 s apart | A:19 cd 9, "ram: ... two charges chain within 0.4 s" | match |
+| Dash rank 3 | +40 dmg, +75 speed, 150 shield [D] | `_ram_reward` K:630, scaled to our health | match |
+| Passive Ignite | levels, bonus damage [D] | Char 31 / Flashover: K:123-165, A:15-17 | match |
+| Passive knock heal, ram charge | not in [D] or [F]; wiki only | K:180-190 (heal 16%, one charge) | match (wiki), kept per the Nov 3 audit |
+| X flight | forward flight that steers, recast ends it [D] | 12.6 m/s, 1.8 s, 120 deg/s: J:112-139, A:29 | differ (owner item 20: +30%) |
+| X carpet | 4 s, ~1.8 m wide, none over the abyss [D,F] | 1.8 m wide, 5.2 s (owner item 20), none over the void: J:200-204 | match; length differs (owner) |
+| X carpet damage | 239 dmg/s [D] against the hose's 258; footage ticks of 16 | 4.5 dmg/s, 1/6 of the hose (A:29) | open (sources disagree; owner call, idea in the report) |
+| X cooldown | 45 s [D] | 36 s, A:29 | open (in flight, as RMB) |
+| X only E works | owner Nov 5: no LMB, RMB, Shift, gloves or items; E and X work | `lock_inputs` J:52-68; dash row `lock` F:23; asserted "ult 66: ..." | match |
+| X card and tooltip | must say the same | said the Cinder Shot and Shift work in flight, and "36s" | regressed; fixed (A:13, A:32), asserted "flight text: ..." |
+| X dash path in flight | Shift does nothing | `on_dash` still poofed him in the flight (a dead path behind `lock_inputs`) | regressed (latent); fixed K:518-521, J: `poof` and the `dash_buf` branch removed, asserted "flight keys: ..." |
+| Cancels | X again lands; a stun ends it; a jump leaps off | J:85 `recast`, J:113 stun, J:117 and J:174 jump; a merge drops it J:93, K:286; a knock speeds it J:146 | match |
+| Dash to X, X to dash | dash then X ends the dash | F:8, F:15 `cancel`; F:23 `lock` | match |
+| Dash-flow rows | source rows, item 51 where silent | F:3-30; `--dash-flow-check` 0 failures, 54 ashwick lines; source rows in dash_flow_check.gd:24-28 | match (silent source: item 51) |
+| Clips | 12 keyed moves | kmoves_pair.gd:198-394 each mapped to a `cinder.glb` clip in `content/rules/warden_anim/cinder.json`; `--warden-clips-check` 0 failures; the E arm fling is item 11 | match |
+
+Run on this branch: `--ashwick-combo-check` 121/0 (two rows added), `--hero-combo-check`, `--dash-flow-check` 0, `--warden-clips-check` 0,
+`--cinder-art-check` 0. Left alone: the three cooldowns (ext/cooldown-parity-verify), the carpet look (ext/vfx-cinder-flight),
+the animation timing (ext/anim-time-cinder).
+
 ## Audit (Nov 3 23:40)
 
 Every Cinder row of briefs/specs/kit-audit/cinder_dredge_moosh.md (it audited main 200effce): (a) already done on

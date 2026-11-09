@@ -519,11 +519,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var dir := dash_dir()
 	if jet.running():
-		# in the flight (AshwickJet passes Shift on) a poof from the bellows feeds it and the flight goes on
-		if spend_dash(true):
-			jet.poof(dir)
-			_poof_cloud(dir)
-		return true
+		return true         # only E works in the flight (AshwickJet.lock_inputs): no poof, no ram, no charge spent
 	if use_ex and not h.grounded:
 		if not spend_dash(true): return true
 		_poof(dd, dir)

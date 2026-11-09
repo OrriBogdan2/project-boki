@@ -63,7 +63,7 @@ What the in-game kit card (K) says.
 | Dash: Soot Ram | Ram head first the way you move (or at the cursor with Dash-to-cursor on); you stop on the first foe with a fiery hit. 2 charges. |
 | RMB: Cinder Shot | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
 | E: Furnace Cloak | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
-| Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your stream of fire is off while you fly. |
+| Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. While you fly only the Furnace Cloak works. |
 | Weapon: Torch Lance | Hold to pour fire from your hand 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
 ### Abilities in full
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
+**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. While you fly only the Furnace Cloak works (every other key is ignored, not saved for the landing), and a knockback speeds you up. The carpet never forms over the abyss.
 
 ### Ranks
 

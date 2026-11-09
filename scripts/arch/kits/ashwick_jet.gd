@@ -3,7 +3,7 @@ extends RefCounted
 ## Cinder's ultimate on X, Flue Flight (docs/heroes/ashwick.md): a ring of embers at lift-off, then 1.8s of
 ## low flight toward the cursor that steers with the aim at a capped turn rate. A molten carpet forms under
 ## him as he goes and lasts 5.2s: it burns, slows and builds Char. X again lands early; a stun ends the flight;
-## a knockback, or Shift (a poof from the bellows), speeds it up; a jump leaps off it, keeping its speed. The
+## a knockback speeds it up; a jump leaps off it, keeping its speed. Only E works in it (lock_inputs). The
 ## carpet never forms over the abyss. An enemy hunter it burns (or knocks, or kills) fills the Boki bond
 ## (HeroUlt.landed).
 
@@ -117,9 +117,6 @@ func _fly(dt: float) -> void:
 		_leap()
 		return
 	h.coyote = maxf(h.coyote, FOOTING)
-	if h.dash_buf > 0.0:
-		h.dash_buf = 0.0            # Shift in the flight (Hunter.do_dash holds it for the flight's end): a poof now
-		k.on_dash(true)
 	var x := xd()
 	flight["t"] = float(flight["t"]) - dt
 	_take_boost(x)
@@ -153,13 +150,6 @@ func _take_boost(x: Dictionary) -> void:
 	if not fresh or push.length() < 1.5:
 		return
 	_feed(push, x)
-
-## Shift in the flight: a poof from the bellows along `dir` feeds it like a knockback: the poof's kept speed
-## (Soot Ram's air_keep share of it) adds to the flight's, and the heading bends its way.
-func poof(dir: Vector2) -> void:
-	var dd := k.dash_def()
-	var kept := float(dd["air_dist"]) / float(dd["air_time"]) * float(dd["air_keep"])
-	_feed(dir.normalized() * kept, xd())
 
 ## A push adds to the flight's speed (up to boost_max over its own) and bends it the way it was pushed.
 func _feed(push: Vector2, x: Dictionary) -> void:

@@ -69,7 +69,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Q | none | glove | ours |
 | E | Spin pull, shield per foe, knock resets, 13 s; ~.2 s arm fling [D,F] | Instant, r 4.5, pull 14 m/s, cd 10.5 | differ (owner item 11) |
 | R | Fly forward, burning ground + Slow, 45 s [D] | 12.6 m/s, 1.8 s, trail 5.2 s, slow 30%, cd 36 | match; 0.8x cd |
-| Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | Felt ground 2.9 m/.32 s (3.4/.28 ×feel), stops on foe, 2 charges. Air poof 8/.24 is scaled twice: 5.8 m/.32 s, not 6.8 m/.28 s | differ (gap 11) |
+| Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | 3.4 m/.33 s (off the global feel), stops on foe, 2 charges. Air poof 6.8 m/.28 s, scaled once (owner) | match (verified Nov 9, ashwick combo check) |
 | Passive | Ignite levels, bonus dmg [D] | Flashover 1/2, `ignite_bonus`, heal_knock .16 (wiki only) | match |
 | Anim | Footage poses | 12 moves, all on `cinder.glb` (41) | match on coverage |
 
