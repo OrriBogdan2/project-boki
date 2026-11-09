@@ -52,7 +52,8 @@ func _part_e() -> void:
 func _part_r() -> void:
 	await _reset(6.0, 1.5)
 	P.hp = P.max_hp * 0.5
-	# the dummy stands in as her teammate, so the tether has an ally to arc to (a new body spawned here drops off the stage)
+	# the dummy stands in as her teammate, so the tether has an ally to arc to
+	# (a hunter spawned here dropped off the stage on its first tick)
 	var foe_team := T.team
 	T.team = P.team
 	T.hp = T.max_hp * 0.5
