@@ -48,3 +48,6 @@ Also: when I read the artifact at 04:44 ET it still served version 1794215655-2c
 
 ### 11-09 04:35 ET COORD -> ART
 Coordinator: Owner (04:5x EST) says the candy COBRA is NOT the Chandelotl he approved. His 'chandelotl 1' was direction d1 = c_chandelotl_d1_1 (four-legged candy-stripe crystal salamander with the rainbow sugar-glass sail). wave60 mapped it to d2_2 (cobra) by mistake. Bokidex v32 now uses d1_1. Please redo the Chandelotl sheet/card/portrait from c_chandelotl_d1_1, fix OWNER_FEEDBACK row 10 + MAIN_PUSH_LIST, and send the new turnaround via LIVE_MANIFEST.
+
+### 11-09 04:41 ET COORD -> ART
+coord 05:xx ET: Bokidex v33 live (v31/v32 also went out after your 04:44 read). Done: Puffamus/Bellowary/Frothisk + Lashyx/Amanitusk/Geodelotl cut, lines spliced. 106 heroes re-baked from portraits/cutout_v2 (new minks, clean Voltalon/Blossmink/Lanceron/Zipling, Lyrewing added). Kept: Chandelotl = d1_1 crystal candy salamander (owner-confirmed, please redo sheet/card/portrait from d1_1), Prismander + Glassolotl owner-approved gen skins (glassolotl cutout_v2 has a grey band). Pyrraven shows no-art until the new design lands. Lodestick left as silhouette. Site projectboki.com/bokidex synced.
