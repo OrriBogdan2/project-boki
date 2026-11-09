@@ -1702,8 +1702,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
+##   lift     one beat, LIFT_T long, from the interact press: reach down, lift to the chest, settle (a pickup, a chest's
+##            lid, a box emptied). Not a loop: the hold ends with the settle
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
+const LIFT_T := 0.8            # s: the lift beat, press to settled (reach 0.28, lift 0.55, settle 0.8)
+const LIFT_REACH := 0.28       # s into the beat: the hands are down
+const LIFT_UP := 0.55          # s into the beat: the hands are at the chest
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
 	if not grounded or spd > 2.2 or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
@@ -1712,7 +1717,8 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 		act_kind = want
 		act_t = 0.0
 	act_t += dt
-	act_k = _ease(act_k, 1.0 if want != "" else 0.0, 9.0 if want != "" else 12.0, dt)
+	var out_rate := 24.0 if spd > 2.2 else 12.0      # moving off cancels at once
+	act_k = _ease(act_k, 1.0 if want != "" else 0.0, 9.0 if want != "" else out_rate, dt)
 	if act_k < 0.01 and want == "":
 		act_kind = ""
 
@@ -1735,6 +1741,9 @@ func _act_legs() -> Vector4:
 			return Vector4(0.15, -0.35, 1.25 * up, -1.5 * up - 0.1)
 		"shrine":
 			return Vector4(0.25, -0.35, 0.25, -0.35)
+		"lift":
+			var d := _lift_phase().x
+			return Vector4(1.0 * d + 0.1, -1.3 * d - 0.15, 0.5 * d + 0.1, -1.0 * d - 0.15)
 	return Vector4(0.12 + w * 0.02, -0.22, 0.12 - w * 0.02, -0.22)
 
 ## How far forward the body leans into the hold (negative leans back).
@@ -1753,7 +1762,18 @@ func _act_pitch() -> float:
 		"lever": return -0.15 - 0.15 * (0.5 - 0.5 * cos(act_t * 2.6))
 		"windup": return -0.15 * smoothstep(0.0, 0.6, act_t)
 		"beacon": return -0.12
+		"lift":
+			var ph := _lift_phase()
+			return 0.45 * ph.x + 0.1 * ph.y
 	return 0.0
+
+## The lift beat by act_t: Vector3(down, carry, settle), each 0..1. Down is the hands at the thing (the knees bend, the
+## body folds over), carry is it lifted to the chest, settle is the weapon coming back.
+func _lift_phase() -> Vector3:
+	var reach := smoothstep(0.0, LIFT_REACH, act_t)
+	var up := smoothstep(LIFT_REACH, LIFT_UP, act_t)
+	var settle := smoothstep(LIFT_UP, LIFT_T, act_t)
+	return Vector3(reach * (1.0 - up), up * (1.0 - settle), settle)
 
 ## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
 func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
@@ -1796,6 +1816,11 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
 		"offer":
 			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
+		"lift":
+			var ph := _lift_phase()
+			var y := -0.48 * ph.x - 0.14 * ph.y
+			var z := -0.3 - 0.06 * ph.y
+			return [sh_l + Vector3(0.08, y, z), sh_r + Vector3(-0.08, y, z), 1.0 - ph.z]
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.

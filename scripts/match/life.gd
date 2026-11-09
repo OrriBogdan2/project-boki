@@ -390,6 +390,7 @@ static func _settle_box(b: Dictionary) -> void:
 
 ## Takes everything in a box.
 static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
+	h.set_hold("lift", HunterAnim.LIFT_T)
 	Backpacks.take_from_box(m, h, b)       # first: a bigger backpack makes room for the rest
 	# worn gear: the owner gets theirs back; anyone else only takes upgrades
 	if (b["owner"] as Hunter) == h:

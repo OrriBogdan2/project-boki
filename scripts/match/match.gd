@@ -4718,6 +4718,7 @@ func _update_interact(dt: float) -> void:
 			"weapon":
 				if not h.swap_hold:
 					h.swap_hold = true
+					h.set_hold("lift", HunterAnim.LIFT_T)
 					if h == player and not opts.get("training", false):
 						Pack.take_ground(self, h, best["wp"])
 					else:
@@ -4812,6 +4813,7 @@ func _open_chest(h: Hunter, c: Dictionary, from_net := false) -> void:
 	if c["open"] or (not from_net and not KeyChest.spend(h, c)):
 		return      # (opening costs exactly one key; another game's open already paid in that game)
 	c["open"] = true
+	if h: h.set_hold("lift", HunterAnim.LIFT_T)
 	if blight: blight.noise(c["pos"], "chest", h)      # a chest lid is loud
 	if h: h.add_stat("chests")
 	if net_on and not from_net:
