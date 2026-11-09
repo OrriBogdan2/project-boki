@@ -33,6 +33,7 @@ func _part_r_void() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(over + Vector3(d.x, 0, d.y) * 6.0)
+		m.verbs.render(1.0)      # (the rig keeps Match._process off; the floor's warning draws here)
 	await _go(8.2, cast, _sheet("r_void", "R pressed falling over the abyss: the floor, its warning, the crumble",
 		[0.1, 0.14, 0.2, 0.35, 1.0, 5.0, 6.5, 7.4, 8.0], func(): return P.position + Vector3(0, 0.9, 0)), 2.5)
 	await _go(GAP)
