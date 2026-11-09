@@ -1,13 +1,15 @@
 extends Node3D
-## The prologue: a short animated telling of how the Skylands came to be, before your first egg.
-## Five shots, each a little set far apart from the others, with a line of story under letterbox bars:
-##   1. the land whole  2. the Wyrm wakes  3. the Hollowing  4. the Boki  5. hunters race for the Wyrmheart
+## The prologue: a short storybook telling of how the Skylands came to be (origin v3, briefs/LORE_MASKS.md),
+## before your first egg. Six panels, each on a little set far apart from the others, with a line of story
+## under letterbox bars (about 45 s in all):
+##   1. Solmere whole  2. Malgrave's mask over the Wyrmheart  3. Kael's uprising, the Wyrm wakes
+##   4. Sable drops the Heart  5. the Hollowing  6. you drop in, toward the Heart
 ## then the PROJECT BOKI title card. Each shot is one or two eased camera moves (a new move is a cut), its own
 ## light (MOODS) and its own action. Space or a click moves on; holding Esc skips it all.
 
 signal finished
 
-const SETS := {"whole": Vector3(0, 0, 0), "kin": Vector3(1200, 0, 0), "drop": Vector3(2400, 0, 0)}
+const SETS := {"whole": Vector3(0, 0, 0), "vault": Vector3(1200, 0, 0), "drop": Vector3(2400, 0, 0)}
 ## Light per beat: sky (top, mid, horizon), cloud sea (deep, light, glow), haze, ambient, sun colour and
 ## energy, stars.
 const MOODS := {
@@ -17,6 +19,8 @@ const MOODS := {
 		"fog": Color("7a2e2a"), "amb": Color("c48078"), "sun": Color("ff8a56"), "sun_e": 0.9, "stars": 0.0},
 	"dawn": {"sky": [Color("3e72c4"), Color("8eb8ea"), Color("ffcf96")], "sea": [Color("5a74b0"), Color("c4d6f2"), Color("ffc890")],
 		"fog": Color("a8c0e6"), "amb": Color("d8e2f4"), "sun": Color("ffe8c4"), "sun_e": 1.25, "stars": 0.0},
+	"vault": {"sky": [Color("12060c"), Color("3a0c18"), Color("7a1a2a")], "sea": [Color("140810"), Color("3a1420"), Color("8a2030")],
+		"fog": Color("2a0c14"), "amb": Color("a06070"), "sun": Color("ffb0a0"), "sun_e": 0.5, "stars": 0.0},
 	"deep": {"sky": [Color("0e0a2a"), Color("362a70"), Color("9466cc")], "sea": [Color("181238"), Color("5e44a0"), Color("c486ff")],
 		"fog": Color("3c2c6c"), "amb": Color("8674c4"), "sun": Color("c4a4ff"), "sun_e": 0.7, "stars": 0.9},
 }
@@ -24,7 +28,14 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const MANTLES_AT := 2.6        # s into THE HOLLOWING: the Hunters' selves burst out of the Crown as Relics
+const SOULS_AT := 2.6           # s into THE HOLLOWING: the eaten souls burst out of the Crown
+const SOULS := 24               # lights in that burst: enough to read as a crowd, not a dozen Hunters
+const SOUL_COLOR := Color("ffd6dc")  # a freed soul: pale, a little pink from the Heart
+const KAEL_SCALE := 1.15        # Kael stands a head over his knights
+const KNIGHTS := 4              # Auburn Knights behind him (a squad reads as an army in one shot)
+const AUBURN := Color("b02030") # the Auburn Knights' red (Solmere's colour)
+const QUAKE_LEAD := 0.8         # s before the Heart slips that THE THIEF's floor starts to shake
+const DROP_HEART_R := 2.6       # m: the Wyrmheart's lobe radius on its isle far below in THE DESCENT
 
 var cam: Camera3D
 var env: Environment
@@ -37,7 +48,8 @@ var shots: Array = []
 var rng := RandomNumberGenerator.new()
 var pieces: Array = []          # the broken continent: {node, dir, fall, spin}
 var gliders: Array = []
-var boki: PrologueBoki          # THE RELICS' set (scripts/ui/prologue_boki.gd)
+var vault: PrologueVault        # THE MASK's and THE THIEF's set (scripts/ui/prologue_vault.gd)
+var knights: Node3D             # Kael and the Auburn Knights, on the Crown's isle in THE UPRISING
 var broke := false
 var rumble := 0.0                # the roar and the fall: a faint camera rumble (RUMBLE_AMP), never a shake
 const RUMBLE_AMP := 0.08
@@ -96,15 +108,11 @@ func _ready() -> void:
 	add_child(cam)
 	cam.make_current()
 	_set_whole()
-	boki = PrologueBoki.new()
-	boki.position = SETS["kin"]
-	add_child(boki)
-	var rise := _drift(SETS["kin"] + PrologueBoki.HUNTER_AT, Vector3(0.45, 0.1, 0.45), Arch.color(PrologueBoki.MANTLE),
-		30, 0.04, 1.6, false)
-	rise.lifetime = 1.6
-	rise.preprocess = 0.0
-	rise.emitting = false
-	boki.build(rng, rise)
+	vault = PrologueVault.new()
+	vault.position = SETS["vault"]
+	add_child(vault)
+	vault.build(rng)
+	_set_uprising()
 	_set_drop()
 	_set_wyrm()
 	_build_ui()
@@ -115,32 +123,43 @@ func _ready() -> void:
 ## grade, and its line of story.
 func _shots() -> Array:
 	var W: Vector3 = SETS["whole"]
-	var K: Vector3 = SETS["kin"]
+	var V: Vector3 = SETS["vault"]
 	var D: Vector3 = SETS["drop"]
+	var heart := V + Vector3(0, PrologueVault.PEDESTAL_TOP + 0.4, 0)
 	var out := [
-		{"chapter": "BEFORE THE FALL", "mood": "gold", "tint": Color("ffd27a"), "grade": 0.16,
-			"text": "Once, the sky held one great land, Solmere,\nruled by Malgrave, a queen who never aged.",
-			"cam": [[W + Vector3(-70, 22, 80), W + Vector3(0, 2, 0), W + Vector3(-54, 17, 62), W + Vector3(0, 3, 0), 3.4],
-				[W + Vector3(-16, 8, 18), W + Vector3(0, 5.0, 0), W + Vector3(-13, 7, 14.5), W + Vector3(0, 5.6, 0), 3.4]]},
-		{"chapter": "THE WAKING", "mood": "gold", "tint": Color("ff5a3a"), "grade": 0.3, "event": "wyrm",
-			"text": "She was the Wyrm in human shape.\nThe night a thief reached its heart, it woke.",
-			"cam": [[W + Vector3(-22, 12, 26), W + Vector3(18, 6, -30), W + Vector3(-20, 11, 23), W + Vector3(20, 10, -30), 3.0],
+		{"chapter": "SOLMERE", "mood": "gold", "tint": Color("ffd27a"), "grade": 0.16,
+			"text": "Once, the land was whole: one kingdom on solid ground, Solmere,\n"
+				+ "ruled by Malgrave, the Beloved, a queen who never aged.",
+			"cam": [[W + Vector3(-70, 22, 80), W + Vector3(0, 2, 0), W + Vector3(-54, 17, 62), W + Vector3(0, 3, 0), 3.2],
+				[W + Vector3(-16, 8, 18), W + Vector3(0, 5.0, 0), W + Vector3(-13, 7, 14.5), W + Vector3(0, 5.6, 0), 3.2]]},
+		{"chapter": "THE MASK", "mood": "vault", "tint": Color("ff6a7a"), "grade": 0.26, "event": "mask",
+			"text": "She was the Wyrm behind a mask. She hid her soul in the Wyrmheart, deep in her vault,\n"
+				+ "and fed it her people's souls for three hundred years.",
+			"cam": [[V + Vector3(0, 3.6, 5.4), V + PrologueVault.MASK_AT,
+				V + Vector3(0, 3.5, 3.4), V + PrologueVault.MASK_AT, 3.4],
+				[V + Vector3(-2.8, 2.3, 3.4), heart, V + Vector3(-2.1, 1.9, 2.5), heart, 3.2]]},
+		{"chapter": "THE UPRISING", "mood": "gold", "tint": Color("ff5a3a"), "grade": 0.3, "event": "wyrm",
+			"text": "Kael led the Auburn Knights against her and ran his blade through her heart. Nothing happened.\n"
+				+ "She rose as the Wyrm, and when Kael at last wounded her, she roared.",
+			"cam": [[W + Vector3(-7, 8, 22), W + Vector3(1, 3.5, -3), W + Vector3(-6.5, 8, 21), W + Vector3(1.2, 3.6, -3), 3.0],
 				[W + Vector3(12, 7, 40), W + Vector3(8, 9, -10), W + Vector3(10, 8, 42), W + Vector3(-16, 9, 10), 4.0]]},
+		{"chapter": "THE THIEF", "mood": "vault", "tint": Color("d0406a"), "grade": 0.3, "event": "theft",
+			"text": "Under cover of the fight, Sable was robbing the vault.\n"
+				+ "The roar shook the Heart from her hands, and it cracked.",
+			"cam": [[V + Vector3(3.6, 2.5, 4.6), V + Vector3(0.4, 1.3, 0.4),
+				V + Vector3(2.9, 2.0, 3.7), V + Vector3(0.6, 1.0, 0.8), 3.6],
+				[V + Vector3(-1.8, 0.7, 3.4), V + Vector3(0.9, 0.5, 1.2), V + Vector3(-1.4, 0.6, 2.9), V + Vector3(0.9, 0.6, 1.2),
+					3.0]]},
 		{"chapter": "THE HOLLOWING", "mood": "fire", "tint": Color("d0406a"), "grade": 0.34, "event": "break",
-			"text": "The Wyrm broke the land and stole our essence.\n"
-				+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty.",
+			"text": "The souls she had eaten burst free and flung Solmere into the sky: the Skylands.\n"
+				+ "and the cracked Heart sank into the Hollow below. Malgrave lives on inside it.",
 			"cam": [[W + Vector3(-30, 22, 46), W + Vector3(0, 0, 0), W + Vector3(-36, 28, 56), W + Vector3(0, -6, 0), 3.6],
-				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.9]]},
-		{"chapter": "THE RELICS", "mood": "dawn", "tint": Color("ffe4b0"), "grade": 0.12, "event": "kin",
-			"text": "Our only salvation became the cursed fossils we had tried to destroy:\n"
-				+ "Relics, the masks of fallen Hunters.\nOnly those who wear a Hunter's Relic can save our souls.",
-			"cam": [[K + Vector3(0.2, 2.0, 7.6), K + Vector3(0.2, 0.9, -1.2), K + Vector3(0.25, 1.7, 6.4), K + Vector3(0.3, 0.85, -1.0), 3.1],
-				[K + Vector3(0.4, 0.55, 3.9), K + Vector3(0.4, 0.85, -0.3), K + Vector3(0.4, 0.55, 3.45), K + Vector3(0.4, 0.88, -0.3), 4.4]]},
-		{"chapter": "THE RACE", "mood": "deep", "tint": Color("b08aff"), "grade": 0.24, "event": "drop",
-			"text": "Put on a Relic, bond with a Boki, and hunt for the Wyrmheart:\n"
-				+ "one wish to remake the world, or rule it.\nEvery Hunter wants it. So does the Wyrm.",
-			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 4.0],
-				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 4.2]]},
+				[W + Vector3(46, 4, 34), W + Vector3(0, -4, 0), W + Vector3(58, 10, 46), W + Vector3(0, -20, 0), 3.6]]},
+		{"chapter": "THE DESCENT", "mood": "deep", "tint": Color("ff7a8a"), "grade": 0.24, "event": "drop",
+			"text": "The Hunters who went down after it left only their Relics behind.\n"
+				+ "Take up a Hunter's Relic, bond with a Boki, and drop in. Every Hunter wants the Heart. So does Malgrave.",
+			"cam": [[D + Vector3(-6, 20, 14), D + Vector3(2, 4, -30), D + Vector3(-3, 16, 2), D + Vector3(8, -10, -52), 3.6],
+				[D + Vector3(-4, 14, -4), D + Vector3(14, -28, -70), D + Vector3(0, 11, -12), D + Vector3(18, -36, -82), 3.8]]},
 	]
 	for s in out:
 		var dur := 0.0
@@ -199,15 +218,39 @@ func _crown(isl: Node3D) -> Vector3:
 		Models.part(isl, Models.cyl(0.0, 0.7, 1.4, 8), gold, at + Vector3(0, 6.7, 0))
 	return Vector3(0, 8.0, 0)
 
+## Kael (his Hunter's model, a head taller) at the front of the Auburn Knights, in Solmere's red, at the
+## Crown's door. Seen from behind in THE UPRISING only.
+func _set_uprising() -> void:
+	knights = Node3D.new()
+	knights.position = SETS["whole"]
+	knights.visible = false
+	add_child(knights)
+	var jug := "juggernaut"
+	var kael := Models.hunter(Arch.weight(jug), Arch.color(jug), Arch.signature(jug), "", {}, jug)
+	kael.position = Vector3(0.5, 0, 4.0)
+	kael.scale *= KAEL_SCALE
+	knights.add_child(kael)
+	for i in KNIGHTS:
+		var k := Models.hunter("heavy", AUBURN, Data.CLASSES["heavy"]["weapon"], "", PlayerLook.random(rng))
+		k.position = Vector3(-3.0 + i * 2.0, 0, 6.4 + rng.randf_range(-0.4, 0.4))
+		knights.add_child(k)
+	for h: Node3D in knights.get_children():
+		(h.get_node("TeamRing") as Node3D).visible = false
+		h.rotation.y = 0.0       # facing -Z, up at the Crown
+
 ## The drop: hunters gliding down over the wild isles toward the Heart, glowing far below.
 func _set_drop() -> void:
 	var o: Vector3 = SETS["drop"]
 	var heart := Scenery.island(rng, 13.0, true, true)
 	heart.position = o + Vector3(14, -30, -70)
 	add_child(heart)
-	Scenery.heart(heart, 13.0)
+	var core := PrologueVault.wyrmheart(heart, DROP_HEART_R)
+	core.position = Vector3(0, DROP_HEART_R * 2.2, 0)
+	var beam := Models.part(heart, Models.cyl(1.2, 2.2, 120.0, 16), Models.glow_mat(Color(1.0, 0.35, 0.45, 0.2)),
+		Vector3(0, 62.0, 0))
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # its light climbs the sky, so you can find it
 	heart_light = OmniLight3D.new()
-	heart_light.light_color = Color("c48aff")
+	heart_light.light_color = Color("ff5a72")
 	heart_light.omni_range = 40.0
 	heart_light.light_energy = 2.0
 	heart_light.position = heart.position + Vector3(0, 6, 0)
@@ -297,8 +340,8 @@ func _fire(parent: Node3D, at: Vector3, size := 1.0) -> void:
 	sm.mesh = _blob(0.6, false)
 	parent.add_child(sm)
 
-## Specks drifting in a set's air (the Hollowing's dust, the Relic rising): `box` half-extents in m, `radius` the
-## speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
+## Specks drifting in a set's air (the Hollowing's dust, the Relic rising): `box` half-extents in m,
+## `radius` the speck radius in m, `rise` m/s² up (negative sinks), `glow` adds light instead of covering.
 func _drift(at: Vector3, box: Vector3, col: Color, n: int, radius: float, rise: float, glow: bool) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
 	p.amount = n
@@ -491,6 +534,7 @@ func _fit_caption() -> void:
 func _enter(ev: String, mood: String) -> void:
 	_mood(mood)
 	wyrm.visible = ev in ["wyrm", "break"]
+	knights.visible = ev == "wyrm"
 	match ev:
 		"wyrm":
 			var c: Curve3D = wyrm_paths["wyrm"]
@@ -616,8 +660,10 @@ func _events(ev: String, st: float, delta: float) -> void:
 			_waking(st, delta)
 		"break":
 			_hollowing(st, delta)
-		"kin":
-			boki.play(st, delta)
+		"mask":
+			vault.mask(st)
+		"theft":
+			_theft(st)
 		"drop":
 			_race(st, delta)
 
@@ -660,9 +706,9 @@ func _hollowing(st: float, delta: float) -> void:
 		Sfx.play("boom", null, -4.0, 0.0, 0.45)
 		Sfx.play("v_warden", null, 0.0, 0.0, 0.5)
 		create_tween().tween_method(_burn, 0.6, 1.0, 1.5)
-	if st > MANTLES_AT and not dust.has_meta("scattered"):
+	if st > SOULS_AT and not dust.has_meta("scattered"):
 		dust.set_meta("scattered", true)
-		_scatter_mantles()
+		_free_souls()
 	if broke:
 		# the pieces drift apart, tilt and sink into the clouds
 		var k := clampf((st - 1.4) / 6.0, 0.0, 1.0)
@@ -677,20 +723,18 @@ func _hollowing(st: float, delta: float) -> void:
 			flash.color.a = maxf(flash.color.a, 0.3)
 			rumble = maxf(rumble, 0.35)
 
-## The fallen Hunters' selves scattering as Relics: a light of each Relic's colour bursts out of the Crown and
-## flies off over the breaking isles.
-func _scatter_mantles() -> void:
+## The souls Malgrave ate bursting free: pale lights shoot out of the Crown and up past the breaking isles,
+## lifting them into the sky.
+func _free_souls() -> void:
 	var from: Vector3 = (pieces[0]["node"] as Node3D).position + Vector3(0, 10, 0)
-	var ids := Arch.ids()
-	for i in ids.size():
-		var a := float(i) / ids.size() * TAU + rng.randf_range(-0.2, 0.2)
-		var reach := rng.randf_range(28, 42)
-		var to := from + Vector3(cos(a) * reach, rng.randf_range(-8, 2), sin(a) * reach)
-		var col := Arch.color(String(ids[i]))
-		var orb := Models.part(self, Models.sphere(1.3, 12), Models.toon(col, false, 0.5), from)
+	for i in SOULS:
+		var a := float(i) / SOULS * TAU + rng.randf_range(-0.2, 0.2)
+		var reach := rng.randf_range(24, 44)
+		var to := from + Vector3(cos(a) * reach, rng.randf_range(10, 30), sin(a) * reach)
+		var orb := Models.part(self, Models.sphere(0.9, 10), Models.toon(SOUL_COLOR, false, 0.8), from)
 		var tw := create_tween()
 		tw.tween_property(orb, "position", to, 3.2).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-		tw.parallel().tween_property(orb, "scale", Vector3.ONE * 0.4, 3.2)
+		tw.parallel().tween_property(orb, "scale", Vector3.ONE * 0.3, 3.2)
 	Sfx.play("ult", null, -6.0, 0.0, 0.7)
 
 ## A rock breaking off an isle's edge and tumbling away; one in three falls close past the camera.
@@ -707,6 +751,18 @@ func _rock() -> void:
 	var vel := Vector3(rng.randf_range(-3, 3), rng.randf_range(-1, 3), rng.randf_range(-3, 3))
 	var spin := Vector3(rng.randf_range(-3, 3), rng.randf_range(-3, 3), rng.randf_range(-3, 3))
 	debris.append({"node": rock, "vel": vel, "spin": spin})
+
+## Sable lifts the Heart; the quake from the roar builds, and the Heart hits the floor with a flash and a boom.
+func _theft(st: float) -> void:
+	var was := vault.cracked
+	vault.theft(st)
+	if st > PrologueVault.SLIP_AT - QUAKE_LEAD and not vault.cracked:
+		rumble = maxf(rumble, 0.5)
+	if vault.cracked and not was:
+		flash.color.a = 0.7
+		rumble = 1.2
+		Sfx.play("boom", null, -2.0, 0.0, 0.8)
+		Sfx.play("v_warden", null, -6.0, 0.0, 0.4)
 
 ## Gliders dive toward the Heart's glow; at the end two embers open far down in the clouds.
 func _race(st: float, delta: float) -> void:

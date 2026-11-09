@@ -53,20 +53,3 @@ static func grass_on(root: Node3D, isl: MeshInstance3D, rr: RandomNumberGenerato
 	fi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(fi)
 
-## The Heart: a great crystal at the middle of the islands, with a light that climbs into the sky.
-static func heart(isl: Node3D, r: float) -> void:
-	var cm := Models.toon(Color("8ae8ff"), true, 1.3)
-	var pm := PrismMesh.new(); pm.size = Vector3(2.6, 6.5, 2.6)
-	var spire := Node3D.new(); spire.position = Vector3(0, 3.6, 0); isl.add_child(spire)
-	Models.part(spire, pm, cm, Vector3(0, 1.0, 0))
-	Models.part(spire, pm, cm, Vector3(0, -1.4, 0), Vector3(1.0, 0.5, 1.0), Vector3(PI, 0, 0))
-	for i in 5:
-		var a := TAU * i / 5.0
-		Models.part(spire, pm, cm, Vector3(cos(a) * 1.4, -0.8, sin(a) * 1.4), Vector3(0.45, 0.5, 0.45), Vector3(sin(a) * 0.4, 0, -cos(a) * 0.4))
-	PropAnim.on(spire, 0.25, 0.3, 0.8)
-	var beam := Models.part(isl, Models.cyl(1.4, 2.4, 120.0, 16), Models.glow_mat(Color(0.55, 0.9, 1.0, 0.24)), Vector3(0, 62.0, 0))
-	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(r * 1.3)
-	ring.material_override = Models.ring_mat(Color(0.55, 0.9, 1.0, 0.6), 0.04); ring.position.y = 0.1
-	isl.add_child(ring)
-

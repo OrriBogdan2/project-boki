@@ -1,39 +1,43 @@
 extends RefCounted
 ## --prologue-check [--shots-dir=<dir>]: plays the prologue frame by frame (add --fixed-fps 60 for even strips) and
-## checks the five slides and the owner's lines for 3 and 4, that in THE RELICS every Boki and the hunter stay
-## inside the picture (between the letterbox bars) and never stand in each other, that the relic wakes,
-## and that it ends on the hatch. With --shots-dir (under xvfb with a renderer) it also saves a 5-frame strip
-## per slide (start, two key beats, middle, end) as <dir>/s<slide>_<n>.png with <dir>/captions.txt.
+## checks the six storybook panels of origin v3 (briefs/LORE_MASKS.md: Solmere, Malgrave's mask, Kael's uprising,
+## Sable drops the Heart, the Hollowing, you drop in), that it runs about 45 s, that each panel names who it
+## must, that Kael and the Auburn Knights stand in the uprising's picture, that the Heart hits the vault
+## floor, that the Heart below is crimson, and that it ends on the hatch. With --shots-dir (under xvfb with a
+## renderer) it also saves a 5-frame strip per panel (start, two key beats, middle, end) as
+## <dir>/s<panel>_<n>.png with <dir>/captions.txt.
 
-const HOLLOWING := "The Wyrm broke the land and stole our essence.\n" \
-	+ "In time, humans, beasts and skyfolk alike were born without faces.\nWe became a new race: the Empty."
-const RELICS := "Our only salvation became the cursed fossils we had tried to destroy:\n" \
-	+ "Relics, the masks of fallen Hunters.\nOnly those who wear a Hunter's Relic can save our souls."
-## each slide's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
+const CHAPTERS := ["SOLMERE", "THE MASK", "THE UPRISING", "THE THIEF", "THE HOLLOWING", "THE DESCENT"]
+## words each panel's line must carry (the round 5 locks: the kingdom, the queen, the guard, the thief)
+const NAMES := [["Solmere", "Malgrave"], ["mask", "Wyrmheart"], ["Kael", "Auburn Knights", "Wyrm"], ["Sable", "Heart"],
+	["Hollow", "Skylands", "Heart"], ["Relics", "Hunter's Relic", "Boki", "Heart"]]
+const RUN_S := Vector2(38.0, 46.0)      # s: the panels' own time, the brief's ~45 s less the fades and title card
+const FADE_S := 0.7                     # s: Prologue's fade between panels (_advance)
+## each panel's strip: [seconds in (from the end when negative, taken just before the wipe), caption]
 const STRIP := [
-	[[1.0, "start: the land whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
-		[3.4, "middle: cut to a low angle on the Crown"], [5.0, "beat: the push in on the Crown"],
+	[[1.0, "start: Solmere whole at golden hour, a slow push in"], [2.6, "beat: the Crown on its isle"],
+		[3.4, "middle: cut low on the Crown"], [5.0, "beat: the push in on the Crown"],
 		[-0.2, "end: the Crown in the evening sun"]],
-	[[1.0, "start: the calm before, over the towns to the Crown"],
+	[[1.0, "start: the vault, the red-and-gold mask over the pedestal"], [2.8, "beat: the mask's eyes kindle"],
+		[3.8, "middle: cut low on the Wyrmheart"], [5.2, "beat: the Heart beating, crimson glass"],
+		[-0.2, "end: the Heart on its pedestal under the mask"]],
+	[[1.0, "start: behind Kael and the Auburn Knights at the Crown's door"],
 		[2.6, "beat: the Wyrm rises behind the Crown and roars"],
 		[3.5, "middle: cut wide, the sky reddening as it dives"], [4.6, "beat: fire on the towns, the frame shaking"],
 		[-0.2, "end: the Wyrm climbs away over the burning land"]],
+	[[1.0, "start: Sable at the pedestal"], [1.9, "beat: the Heart in her hands"],
+		[2.9, "middle: the quake, the Heart falling"], [3.9, "beat: cut low, the Heart on the floor, the flash"],
+		[-0.2, "end: the Heart glowing on the vault floor"]],
 	[[1.0, "start: the burning land, the Wyrm circling"], [1.8, "beat: the land splits (flash, jolt, rocks)"],
-		[3.2, "middle: the Relics burst out of the Crown"], [4.4, "beat: cut low, the isles drifting apart in dust"],
+		[3.2, "middle: the souls burst out of the Crown"], [4.4, "beat: cut low, the isles drifting apart in dust"],
 		[-0.2, "end: the isles sinking, rocks falling past"]],
-	[[1.0, "start: a hunter at sunrise, the first Boki out of the grass"],
-		[2.4, "beat: the lead Boki greets him, he kneels"],
-		[3.9, "middle: cut side-on, it rears up to nose the relic in his hands and it wakes"],
-		[5.4, "beat: the woken relic hangs glowing in Vex's colour between them"],
-		[-0.2, "end: the Boki jump for joy, the Relic rising off him"]],
-	[[1.0, "start: behind the hunters gliding for the Heart"], [2.8, "beat: the Heart's beam ahead"],
+	[[1.0, "start: behind the hunters gliding for the Heart"], [2.8, "beat: the Heart's crimson beam ahead"],
 		[4.2, "middle: cut to the reveal over the isles"], [5.6, "beat: two eyes open far down in the clouds"],
 		[-0.2, "end: the Wyrm watching the race"]],
 ]
 const FRAME := Vector2i(1280, 720)      # px: the game's window (project.godot), the smallest it frames for
 ## px: the game's window, a big one, a small one
 const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(800, 450)]
-const BOKI_GAP := 0.75          # m: the least room between two Boki, or a Boki and the hunter's feet
 
 var bad := 0
 var main: Node
@@ -64,9 +68,18 @@ func run(m: Node) -> void:
 		ok(false, "the prologue opens")
 		tree.quit(1)
 		return
-	ok(pr.shots.size() == 5, "five slides (%d)" % pr.shots.size())
-	ok(String(pr.shots[2]["text"]) == HOLLOWING, "THE HOLLOWING reads the owner's line")
-	ok(String(pr.shots[3]["text"]) == RELICS, "THE RELICS reads the owner's line")
+	var chapters: Array = pr.shots.map(func(sh): return String(sh["chapter"]))
+	ok(chapters == CHAPTERS, "six panels in order (%s)" % ", ".join(chapters))
+	var run := 0.0
+	for sh in pr.shots:
+		run += float(sh["dur"])
+	ok(run >= RUN_S.x and run <= RUN_S.y, "the panels run %.1f s (%.0f s with the fades and title card)"
+		% [run, run + FADE_S * pr.shots.size() + 3.6])
+	for i in mini(pr.shots.size(), NAMES.size()):
+		var text := String(pr.shots[i]["text"])
+		var missing: Array = NAMES[i].filter(func(w): return not text.contains(w))
+		var clean := not text.contains("twelve") and not text.contains("Tyrant")
+		ok(missing.is_empty() and clean, "%s names %s" % [CHAPTERS[i], ", ".join(NAMES[i])])
 	await _captions_fit(pr, tree)
 	main.get_window().size = FRAME
 	await _play(pr, tree)
@@ -85,13 +98,11 @@ func run(m: Node) -> void:
 	RenderingServer.render_loop_enabled = true
 	tree.quit(1 if bad else 0)
 
-## Steps through the slides, taking the strip frames and watching THE RELICS's framing every frame.
+## Steps through the panels, taking the strip frames and watching THE UPRISING's framing and THE THIEF's beat.
 func _play(pr, tree: SceneTree) -> void:
-	var worst_gap := 99.0
-	var out_frames := 0
-	var first_out := ""
-	var boki_frames := 0
-	for i in 5:
+	var kael_in := 0
+	var up_frames := 0
+	for i in pr.shots.size():
 		var dur := float(pr.shots[i]["dur"])
 		for n in 5:
 			var at := float(STRIP[i][n][0])
@@ -99,55 +110,35 @@ func _play(pr, tree: SceneTree) -> void:
 				at += dur
 			while pr.shot < i or (pr.shot == i and pr.shot_t < at):
 				await tree.process_frame
-				if pr.shot != 3:
-					continue
-				boki_frames += 1
-				worst_gap = minf(worst_gap, _boki_gap(pr))
-				var out := _out_of_frame(pr)
-				if pr.shot_t > 1.2 and out != "":
-					out_frames += 1
-					if first_out == "":
-						first_out = ", first %s at %.1f s" % [out, pr.shot_t]
+				if pr.shot == 2 and pr.shot_t > 0.05 and pr.shot_t < 2.3:      # once the cut lands, before the roar
+					up_frames += 1
+					kael_in += int(pr.knights.visible and _in_frame(pr, pr.knights.get_child(0)))
 			await _shot(i, n, pr)
-	ok(boki_frames > 100 and out_frames == 0, "THE RELICS: every Boki and the hunter stay inside the frame"
-		+ " (%d of %d frames out%s)" % [out_frames, boki_frames, first_out])
-	ok(worst_gap >= BOKI_GAP, "THE RELICS: no Boki stands in the hunter or another Boki (closest %.2f m)" % worst_gap)
-	ok(pr.boki.relic_k > 0.9, "THE RELICS: the relic wakes (%.2f)" % pr.boki.relic_k)
+		if i == 1:
+			var lit: float = (pr.vault.mask_eyes[0] as ShaderMaterial).get_shader_parameter("glow")
+			ok(lit > 1.0, "THE MASK: the mask's eyes kindle (%.2f)" % lit)
+		if i == 3:
+			ok(pr.vault.cracked and pr.vault.heart.position.y < PrologueVault.PEDESTAL_TOP,
+				"THE THIEF: the Heart falls from Sable's hands and hits the floor (%.2f m)" % pr.vault.heart.position.y)
+	ok(up_frames > 30 and kael_in > up_frames * 0.9, "THE UPRISING: Kael stands in the picture before the roar"
+		+ " (%d of %d frames)" % [kael_in, up_frames])
+	ok(not pr.knights.visible, "Kael and the Auburn Knights leave with THE UPRISING")
+	var red: Color = pr.heart_light.light_color
+	ok(red.r > 0.9 and red.b < 0.5, "THE DESCENT: the Heart below glows crimson (%s)" % red.to_html(false))
 
-## The least ground distance between any two Boki, or a Boki and the hunter, while they are out.
-func _boki_gap(pr) -> float:
-	var g := 99.0
-	var bodies: Array = [pr.boki.kin_hunter]
-	for k in pr.boki.kin_nodes:
-		if (k as Node3D).visible:
-			bodies.append(k)
-	for a in bodies.size():
-		for b in range(a + 1, bodies.size()):
-			var d: Vector3 = (bodies[a] as Node3D).global_position - (bodies[b] as Node3D).global_position
-			g = minf(g, Vector2(d.x, d.z).length())
-	return g
-
-## Which of the hunter and the Boki out pokes past the picture (the frame edges or the letterbox bars): its
-## name, or "" when all of them sit wholly inside.
-func _out_of_frame(pr) -> String:
+## Whether `body` (a standing model) sits wholly inside the picture: the frame edges and the letterbox bars.
+func _in_frame(pr, body: Node3D) -> bool:
 	var vp: Vector2 = main.get_viewport().get_visible_rect().size
 	var top: float = pr.bar_top.offset_bottom
 	var bot: float = vp.y + pr.bar_bot.offset_top
 	var cam: Camera3D = pr.cam
-	var bodies: Array = [[pr.boki.kin_hunter, 1.8, 0.45, "the hunter"]]
-	for i in pr.boki.kin_nodes.size():
-		var k: Node3D = pr.boki.kin_nodes[i]
-		if k.visible:
-			bodies.append([k, 0.9, 0.45, String(PrologueBoki.BOKI_SPOTS[i][0])])
-	for b in bodies:
-		var at: Vector3 = (b[0] as Node3D).global_position
-		var side: Vector3 = cam.global_basis.x * float(b[2])
-		for p in [at + Vector3(0, float(b[1]), 0), at + side, at - side]:
-			var px := cam.unproject_position(p)
-			var off_x := px.x < 0.0 or px.x > vp.x
-			if cam.is_position_behind(p) or off_x or px.y < top or px.y > bot:
-				return String(b[3])
-	return ""
+	var at := body.global_position
+	var side: Vector3 = cam.global_basis.x * 0.5 * body.scale.x
+	for p in [at + Vector3(0, 2.0 * body.scale.y, 0), at + side, at - side]:
+		var px := cam.unproject_position(p)
+		if cam.is_position_behind(p) or px.x < 0.0 or px.x > vp.x or px.y < top or px.y > bot:
+			return false
+	return true
 
 func _shot(i: int, n: int, pr) -> void:
 	if dir == "":
@@ -164,7 +155,7 @@ func _shot(i: int, n: int, pr) -> void:
 	img.save_png(dir.path_join(file))
 	caps.append("%s: %s, %.1f s in. %s" % [file, String(pr.shots[i]["chapter"]), pr.shot_t, String(STRIP[i][n][1])])
 
-## Item 77: every slide's caption stays fully on screen (wrapped, growing upward) at the game's window, a big
+## Item 77: every panel's caption stays fully on screen (wrapped, growing upward) at the game's window, a big
 ## one and a small one. With --shots-dir each is saved as <dir>/caption_<width>_s<slide>.png.
 func _captions_fit(pr, tree: SceneTree) -> void:
 	var worst := 0.0
