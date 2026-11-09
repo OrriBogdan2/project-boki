@@ -412,6 +412,8 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	var cx := KinExec.make_cx(m, caster, self, owner_h, p, pw * Effects.level_k({"level": rank}), slot, def.id, chain)
 	KinExec.cast(effective(slot), cx)
 	CombatBus.ability_used.emit(caster, def.id, slot)
+	if not unseen:
+		KinTypeFx.play(m.fx, String(sp.get("type", "")), pos, dd.normalized())
 	if model:
 		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
