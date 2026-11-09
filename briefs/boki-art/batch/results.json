@@ -21038,5 +21038,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/stance_bellowary_3.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_dribbara",
+    "name": "Dribbara (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_dribbara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_soakybara",
+    "name": "Soakybara (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_soakybara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_soakybara",
+    "name": "Soakybara (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_soakybara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_soakybara",
+    "name": "Soakybara (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_soakybara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_geysirbara",
+    "name": "Geysirbara (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_geysirbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_geysirbara",
+    "name": "Geysirbara (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_geysirbara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_umbrathere",
+    "name": "Umbrathere (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_umbrathere_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_geysirbara",
+    "name": "Geysirbara (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_geysirbara_3.jpg",
+    "ok": true
   }
 ]
