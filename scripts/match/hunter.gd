@@ -10,9 +10,9 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # footage depth, the glider opens and steers at once and keeps the momentum you bring into it.
 const GLIDE_CATCH := 60.0        # the canopy brakes a terminal fall to its sink rate in ~0.13s (was 16: ~0.45s, sluggish)
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
-# out under four terraces (the wall kick's job) on our 0.8m terraces
+# out under four terraces (the wall kick's job) on our 0.8m terraces. Fixed height and no re-jump delay
+# (JumpMaxHoldTime / JumpCooldown undecoded); coyote and buffer times are in HunterMove
 const JUMP_V := 6.8
-const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
@@ -837,13 +837,13 @@ func do_jump() -> void:
 		return
 	# already in the air: a second press opens the glider straight away, rising or falling,
 	# unless you're about to land, where it buffers a jump instead
-	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
+	var lead := HunterMove.jump_buffer + 0.02     # "about to land": the ground is this many seconds of falling away
 	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and can_glide() and not near_ground:
 		_open_glider()
 		return
-	jump_buf = JUMP_BUFFER
+	jump_buf = HunterMove.jump_buffer
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
 const GLIDE_SINK := 1.4       # (movefeel) floatier: [spec] says 2-4 m/s eyeball, [est] 2.2 felt like falling; was 2.2
@@ -2375,7 +2375,7 @@ func _physics(dt: float) -> void:
 	if grounded and g < pos.y - 0.05:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
-		coyote = 0.12
+		coyote = HunterMove.coyote
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt

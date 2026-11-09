@@ -34,8 +34,8 @@ Nothing here comes from SUPERVIVE's files.
   - Jump height or arc.
   - Glide turn rate.
   - Drop dive speed.
-  - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump is already the glide input, so **no variable jump height** was added.
-  - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
+  - Whether jump height is variable, and whether there is a re-jump delay. The game data names JumpMaxHoldTime, JumpCooldown, JumpApexTime and a JumpDecel spring, but their values are not decoded (supervive_physics.md), and the 5 fps footage shows no tap next to a held jump, no two jumps in a row and no jump just past a ledge (Nov 9 re-check of briefs/hero-ref). Holding jump is already the glide input, so ours keeps **a fixed jump height and no re-jump delay**.
+  - Coyote time or buffer values. The source can't walk off an edge at all (bCanWalkOffLedges false), so it needs no coyote time; ours can (owner), so it uses FeelConfig's 0.12s for both (`coyote`, `jump_buffer` in content/rules/hunter_move.json).
 
 ## Targets and results
 
@@ -58,7 +58,9 @@ Nothing here comes from SUPERVIVE's files.
 | air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
 | dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
-| coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
+| jump_hold_dv (tap vs Space held, 0.1s in) | n/a | 0 m/s | <= 0.01 | JumpMaxHoldTime undecoded: fixed height |
+| rejump_frames (press the step after landing) | n/a | 1 | <= 1 | JumpCooldown undecoded: no delay |
+| coyote_frames | 7 | 7 | 6-8 | FeelConfig 0.12s; a later press doesn't jump |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |

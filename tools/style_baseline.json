@@ -1117,7 +1117,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 32,
+"long_line": 30,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
