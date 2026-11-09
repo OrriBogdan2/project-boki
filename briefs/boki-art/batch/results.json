@@ -16075,5 +16075,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/chimelop_r2_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "galleotter_r_w29",
+    "name": "Galleotter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r_w29",
+    "name": "Galleotter",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r_w29",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w29",
+    "name": "Rimink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rimink_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w29",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2_w29",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2_w29",
+    "name": "Chandelapi",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2_w29",
+    "name": "Chandelapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_w29_3.jpg",
+    "ok": true
   }
 ]
