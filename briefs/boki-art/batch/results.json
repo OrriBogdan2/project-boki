@@ -18413,5 +18413,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/flarmink_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "galleotter_card",
+    "name": "Galleotter (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_card",
+    "name": "Frothisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frothisk_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_card",
+    "name": "Frothisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frothisk_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card",
+    "name": "Geysirbara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "latchling_card",
+    "name": "Latchling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/latchling_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card",
+    "name": "Lashyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lashyx_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card",
+    "name": "Gongrowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kerchick_card",
+    "name": "Kerchick (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kerchick_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card",
+    "name": "Lashyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lashyx_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jarmit_card",
+    "name": "Jarmit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jarmit_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kitlet_card",
+    "name": "Kitlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kitlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "latchling_card",
+    "name": "Latchling (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/latchling_card_1.jpg",
+    "ok": true
   }
 ]
