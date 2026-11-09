@@ -5,8 +5,10 @@ extends RefCounted
 ## dash to end ("buffer", the default for a missing row) or cancels the dash. A press is never dropped.
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
+## A press while stunned (any slot) or rooted (Shift) is held the same way for every kit: one made within BUFFER_S
+## of the lock's end goes on the first free step, a stale one is refused (the source, briefs/hero-ref footage).
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past the dash's end while the hunter can't act
+const BUFFER_S := 0.15      # s: a held press waits at most this long while the hunter can't act (dash over, or stunned)
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
@@ -21,7 +23,7 @@ const COMBINE := {"jump": "fire", "into": "fire", "hold": "keep"}
 static var _files := {}     # hero id -> its content/dash_flow file (empty when it has none)
 
 var kit: ArchKit
-var held := {}              # slot -> seconds it has waited since the dash ended
+var held := {}              # slot -> seconds it has waited since the dash ended, or since a press while locked
 var landing := {}           # slot -> true: pressed mid-jump, its jump row holds it for the landing
 var air := false            # the dash running now set off in the air
 var _was_dashing := false
@@ -77,7 +79,7 @@ func row(slot: String) -> Dictionary:
 	return row_of(kit.id, slot, air)
 
 ## Each step, before Hunter.tick reads its presses: routes the presses made during a dash by the rows and lets the
-## held ones go once the dash is over.
+## held ones go once the dash (or the stun) is over.
 func route(dt: float) -> void:
 	var h := kit.h
 	var dashing := _sync()
@@ -85,8 +87,10 @@ func route(dt: float) -> void:
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
 	if not dashing:
+		var locked := _hold_locked(fire_pressed)
 		_release(dt)
-		_route_jump(fire_pressed)
+		if not locked:
+			_route_jump(fire_pressed)
 		return
 	if fire_pressed:
 		_press("lmb")          # a held LMB is left alone: holding it through the dash fires at the end anyway
@@ -101,6 +105,9 @@ func take_x() -> bool:
 	if _replaying:
 		return false
 	if not _sync():
+		if kit.h.stun_t > 0.0:
+			held["x"] = 0.0
+			return true
 		return _press_mid_jump("x")
 	return _press("x") == "buffer"
 
@@ -183,13 +190,38 @@ func _cancel(carry: bool) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(h.base_speed)
 	h.vel = Vector3(flat.x, h.vel.y, flat.y)
 
+## Presses made while stunned (every slot but Q, which a stun doesn't lock) or rooted (Shift) are held, aged from
+## the press, so _release lets them go on the first free step within BUFFER_S or refuses them stale. True while
+## the hunter is locked (a held LMB is left alone: it fires on its own once free).
+func _hold_locked(fire_pressed: bool) -> bool:
+	var h := kit.h
+	if h.stun_t <= 0.0 and h.root_t <= 0.0:
+		return false
+	if h.inp.get("dash", false):
+		h.inp["dash"] = false
+		held["dash"] = 0.0
+	if h.stun_t <= 0.0:
+		return true
+	if fire_pressed:
+		held["lmb"] = 0.0
+	for slot in ["rmb", "e"]:
+		var key: String = KEY_OF[slot]
+		if h.inp.get(key, false):
+			h.inp[key] = false
+			held[slot] = 0.0
+	return true
+
 func _release(dt: float) -> void:
 	for slot in held.keys():
-		if kit.busy() and float(held[slot]) < BUFFER_S:
+		if _locked(slot) and float(held[slot]) < BUFFER_S:
 			held[slot] = float(held[slot]) + dt
 			continue
 		held.erase(slot)
 		_replay(slot)
+
+## What keeps a held press of `slot` waiting: anything that makes the kit busy, and for Shift a root too.
+func _locked(slot: String) -> bool:
+	return kit.busy() or (slot == "dash" and kit.h.root_t > 0.0)
 
 ## The held press goes now, through the slot's own path (which casts or answers with its deny cue).
 func _replay(slot: String) -> void:
@@ -197,6 +229,8 @@ func _replay(slot: String) -> void:
 	match slot:
 		"lmb":
 			h.inp["fire"] = true       # a tap; still held, the weapon already fires on its own
+		"dash":
+			h.inp["dash"] = true
 		"x":
 			_replaying = true
 			HunterKeys.ult_pressed(h)

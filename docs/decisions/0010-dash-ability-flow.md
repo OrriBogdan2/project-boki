@@ -1,6 +1,6 @@
 # 0010: Dash -> ability flow
 
-- **Status:** accepted; amended by 0015 (combo flow: jump and hold rows, owner item 51)
+- **Status:** accepted; amended by 0015 (combo flow: jump and hold rows, owner item 51) and below (presses while stunned or rooted, 2026-11-09)
 - **Date:** 2026-11-03
 - **Area:** movement / combat
 
@@ -18,3 +18,6 @@ Option 2. Per ground or air dash and slot (LMB, RMB, E, X, Q) a row says `fire` 
 - "In a dash" is `ArchKit.in_dash()` (the shared Effects dash). A kit that runs its dash in its own state overrides `in_dash()` and `dash_left()` (the seconds left, which `--dash-flow-check` uses to press on the dash's last step): Motley's Trade flight and Tenzo's Rock Hop do. Until it does, it lists that dash in `kit_owns` and DashFlow doesn't route it (Neve's Rink Run, on the ground). Zedran's crouch before the drive and Vireo's charge before the Wirerun (`wire`) are outside it too.
 - Kit-side cases for the per-hero rows to absorb: Vex's and Neve's `fires_in_dash`, Cinder's jet ending the dash.
 - Check `--dash-flow-check`; table `docs/heroes/dash_interactions.md` (gen_wiki). No Net or save change.
+
+## Amendment 2026-11-09: presses while stunned or rooted (PARITY FIRST)
+The source fires a press made right as a stun ends on the first free frame, and never a stale press from early in the stun (briefs/hero-ref footage). Ours lost every press in a stun (RMB, E and X denied, an LMB tap and Shift dropped) and Shift in a root, on all 12 kits (`--cc-press-check` baseline). Now the same hold does both jobs: `DashFlow.route` holds a press made while stunned (LMB, RMB, E, X, Shift) or rooted (Shift) in `held`, aged from the press, and `_release` lets it go on the first free step if the lock ends within `BUFFER_S` (0.15 s) or replays it stale through the slot's own path, which refuses it (the deny cue). No per-kit code: every kit gets the one window. Q (gear) isn't locked by a stun, so it isn't held; a knock locks nothing, so a press during one goes at once. Check `--cc-press-check` (each kit, each slot: 0.1 s and 0.05 s before a 1 s stun ends, 0.5 s before, in a knock, Shift 0.1 s before a root ends).
