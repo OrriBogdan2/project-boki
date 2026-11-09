@@ -21786,6 +21786,61 @@
     "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Domeleon, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a chameleon gripping with its four feet, body low. Its back and sides are plain bare navy skin with pale crescent-moon spots, low and smooth, with nothing on them. On its HEAD grows a tall rounded bronze casque, like a real chameleon's helmet-shaped head crest, shaped like an observatory dome with one slit line across it. One eye is set in a short bronze tube like a little telescope, the other is a normal round eye. Its tail curls into a bronze spiral. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
   },
   {
+    "id": "vespox_nopincer_portrait",
+    "name": "Vespox (no pincers, portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Vespox.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: Replace its two front scorpion pincers with two ordinary fox front legs: slim furry plum-purple legs like its hind legs, with dark plum paws and small claws, planted on the ground in the same stance. No pincers or claws anywhere. Its head, face, frill, body, hind legs, segmented tail, stinger, green drips and every colour stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "vespox_nopincer_sheet",
+    "name": "Vespox (no pincers, sheet)",
+    "refs": [
+      "briefs/boki-art/evolutions/Vespox.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: Replace its two front scorpion pincers with two ordinary fox front legs: slim furry plum-purple legs like its hind legs, with dark plum paws and small claws, planted on the ground in the same stance, in all four views. No pincers or claws anywhere. Its head, face, frill, body, hind legs, segmented tail, stinger, green drips and every colour stay exactly the same. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "glaivyx_clean_portrait",
+    "name": "Glaivyx (no slime, portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Glaivyx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: Remove all the dripping slime and goo: no drips hanging from the tail blade, the back spikes or the body, no slime pooling or trailing. The curved tail blade and the back spikes stay exactly the same shape and the same lime-green, but as clean, solid, smooth shapes with crisp edges. Its fur, face, pose, every other part and every other colour stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "glaivyx_clean_v2pilot",
+    "name": "Glaivyx (no slime, v2pilot)",
+    "refs": [
+      "briefs/boki-art/batch/out/v2a_glaivyx_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: Remove all the dripping slime and goo: no drips hanging from the tail blade, the back spikes or the body, no slime pooling or trailing. The curved tail blade and the back spikes stay exactly the same shape and the same lime-green, but as clean, solid, smooth shapes with crisp edges. Its fur, face, pose, every other part and every other colour stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "glaivyx_clean_sheet",
+    "name": "Glaivyx (no slime, sheet)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glaivyx.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: Remove all the dripping slime and goo: no drips hanging from the tail blade, the back spikes or the body, no slime pooling or trailing. The curved tail blade and the back spikes stay exactly the same shape and the same lime-green, but as clean, solid, smooth shapes with crisp edges. Its fur, face, pose, every other part and every other colour stay exactly the same, in all four views. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
@@ -30141,6 +30196,28 @@
     "runs": 3,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): floating upright with its little wing-lobes spread, crescent glowing softly in its belly. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views. Plain background only: no ground, no sand, no rocks, no base under it.",
     "size": "2K"
+  },
+  {
+    "id": "vespox_nopincer_card",
+    "name": "Vespox (no pincers, card)",
+    "refs": [
+      "briefs/boki-art/cards/Vespox.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: Replace its two front scorpion pincers with two ordinary fox front legs: slim furry plum-purple legs like its hind legs, with dark plum paws and small claws, planted on the ground in the same stance. No pincers or claws anywhere. Its head, face, frill, body, hind legs, segmented tail, stinger, green drips and every colour stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "glaivyx_clean_card",
+    "name": "Glaivyx (no slime, card)",
+    "refs": [
+      "briefs/boki-art/cards/Glaivyx.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: Remove all the dripping slime and goo: no drips hanging from the tail blade, the back spikes or the body, no slime pooling or trailing. The curved tail blade and the back spikes stay exactly the same shape and the same lime-green, but as clean, solid, smooth shapes with crisp edges. Its fur, face, pose, every other part and every other colour stay exactly the same. Do not add anything else."
   },
   {
     "id": "ta_cetorgan",

@@ -50,3 +50,4 @@ DROP|={'glacione_card','glacione_card3','klaxada_card','klaxada_card3'}
 
 # 17:29 ET 11-09: the V2 pilot jobs for Glaivyx and Ringrove are wanted (owner approved the V2 pilot 17:23); keep them out of the old glaivyx/ringrove drop.
 DROP-={'v2a_glaivyx','v2b_glaivyx','v2a_ringrove','v2b_ringrove'}
+DROP-={'glaivyx_clean_card','glaivyx_clean_portrait','glaivyx_clean_v2pilot','glaivyx_clean_sheet'}  # owner 17:55: tone down the slime

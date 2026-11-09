@@ -142,3 +142,22 @@ for _n,_st,_ar,_dk,_fu,_sh,_po,_co,_ct,_fx in _PILOT:
                       'prompt':RS_CARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx).replace("Change ONLY how it is drawn. ","Change ONLY how it is drawn. "+_ONE)})
 # Domeleon round 2 still carries a shell and telescope on its back: round 3, the dome moves to the head.
 _RD2('Domeleon',"a chameleon gripping with its four feet, body low. Its back and sides are plain bare navy skin with pale crescent-moon spots, low and smooth, with nothing on them. On its HEAD grows a tall rounded bronze casque, like a real chameleon's helmet-shaped head crest, shaped like an observatory dome with one slit line across it. One eye is set in a short bronze tube like a little telescope, the other is a normal round eye. Its tail curls into a bronze spiral.",tag="r3")
+
+# 17:56 ET 11-09 owner: "take off 002's pincers since we took them off 001". Vespox: front scorpion pincers become fox front legs.
+_VPX=("Replace its two front scorpion pincers with two ordinary fox front legs: slim furry plum-purple legs like its hind legs, with dark plum paws and small claws, planted on the ground in the same stance. "
+      "No pincers or claws anywhere. Its head, face, frill, body, hind legs, segmented tail, stinger, green drips and every colour stay exactly the same.")
+for _k,_ref in (('card','briefs/boki-art/cards/Vespox.jpg'),('portrait','briefs/boki-art/portraits/light/Vespox.jpg')):
+    SPECS.append({'id':'vespox_nopincer_'+_k,'name':'Vespox (no pincers, '+_k+')','refs':[_ref],'runs':4 if _k=='card' else 3,'aspect':'1:1','size':'2K',
+      'prompt':"Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: "+_VPX+" Do not add anything else."})
+X('vespox_nopincer_sheet','Vespox (no pincers, sheet)','briefs/boki-art/evolutions/Vespox.jpg',_VPX.replace("in the same stance","in the same stance, in all four views"))
+SPECS[-1].update({'aspect':'16:9','size':'2K'})
+
+# 17:56 ET 11-09 owner: "tone down 003's gross stuff so it's a bit more neutral" (Glaivyx). Drop the dripping slime; the blade and spikes stay as clean
+# lime-green shapes. Card, sheet, portrait, and the V2 pilot pick.
+_GLV=("Remove all the dripping slime and goo: no drips hanging from the tail blade, the back spikes or the body, no slime pooling or trailing. "
+      "The curved tail blade and the back spikes stay exactly the same shape and the same lime-green, but as clean, solid, smooth shapes with crisp edges. "
+      "Its fur, face, pose, every other part and every other colour stay exactly the same.")
+for _k,_ref,_r in (('card','briefs/boki-art/cards/Glaivyx.jpg',4),('portrait','briefs/boki-art/portraits/light/Glaivyx.jpg',3),('v2pilot','briefs/boki-art/batch/out/v2a_glaivyx_2.jpg',3)):
+    SPECS.append({'id':'glaivyx_clean_'+_k,'name':'Glaivyx (no slime, '+_k+')','refs':[_ref],'runs':_r,'aspect':'1:1','size':'2K',
+      'prompt':"Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style and plain background. Only change this: "+_GLV+" Do not add anything else."})
+X('glaivyx_clean_sheet','Glaivyx (no slime, sheet)','briefs/boki-art/evolutions/Glaivyx.jpg',_GLV.replace("stay exactly the same.","stay exactly the same, in all four views."))
