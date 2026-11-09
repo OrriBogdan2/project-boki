@@ -137,16 +137,17 @@ func _arena() -> void:
 		"dummy label shows DPS", String((A.dummies[0]["label"] as Label3D).text).begins_with("DPS"),
 		String((A.dummies[0]["label"] as Label3D).text)
 	)
-	# a real Bola lands on a dummy: Grounded, a Mark; SMG hits on it stack Marks (the pips)
+	# a real Bola lands on a dummy: Grounded (no Mark of its own); SMG hits on it stack Marks (the pips)
 	P.teleport(D.pos + Vector3(0, 0, 4.0)); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
+	var marks0 := (P.ak as ThiefKit).marks_on(D)
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
 	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
 	var tk := P.ak as ThiefKit
-	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
-		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])
-	(P.ak as ThiefKit).add_mark(D, 4, true)
+	ok("thief Bola hits a dummy, no Mark", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) == marks0,
+		"total %.0f marks %d (was %d)" % [float(A.dummies[0]["total"]), tk.marks_on(D), marks0])
+	tk.add_mark(D, 5, true)
 	step(m, 0.05)
 	ok("five Marks: diamonds over the dummy", tk.pips.size() >= 1 and tk.marks_on(D) >= 5,
 		"marks %d pips %d" % [tk.marks_on(D), tk.pips.size()])
