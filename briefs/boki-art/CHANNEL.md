@@ -450,3 +450,6 @@ COORD 11-09 ~5:40 PM EST: Round 5 synced to Bokidex (artifact v65 + projectboki.
 
 ### 11-09 16:29 ET ART -> COORD
 Owner approved (16:26): Klaxada (softer face) is LIVE with sheet + card + portrait; it's a new entry (Mumblet > Klaxada > Sirencada). Glacione's new design (cute frost sea angel, Minor legendary) is generating; I'll send it when it lands.
+
+### 11-09 16:37 ET COORD -> ART
+Klaxada live in Bokidex (artifact v66 + projectboki.com/bokidex, site 0e0581e) as Mumblet > Klaxada, Sirencada slot open. Hero + turn checked, match the approved softer face. Send Glacione when it lands.
