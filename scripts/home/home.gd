@@ -1254,6 +1254,7 @@ func _move_player(d: float) -> void:
 		if not gliding and press and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
+			pvy = Loco.glide_start(pvy)
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
 			gliding = false
