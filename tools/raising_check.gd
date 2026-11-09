@@ -40,6 +40,25 @@ func _old_save_stamps() -> void:
 	ok(not rec.has("pet_m") and not rec.has("played") and not rec.has("talked"),
 		"an old save's once-per-expedition stamps are dropped on load")
 
+## Play is practice: a game of fetch trains Speed while it has the energy, not when it's worn out.
+func _fetch_trains(home, k: Dictionary) -> void:
+	var rec: Dictionary = k["rec"]
+	rec["needs"]["energy"] = 80.0
+	var sp0 := int(rec["stats"]["speed"])
+	home._play_with_kin(k)
+	for i in 600:
+		if not k.has("fetch"): break
+		home._move_kin(0.05)
+	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
+		"a finished game of fetch trains Speed (%d -> %d)" % [sp0, int(rec["stats"]["speed"])])
+	rec["needs"]["energy"] = Care.PLAY_TRAIN_ENERGY - 5.0
+	home._play_with_kin(k)
+	for i in 600:
+		if not k.has("fetch"): break
+		home._move_kin(0.05)
+	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
+		"a worn-out Boki plays but doesn't learn (%d)" % int(rec["stats"]["speed"]))
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -63,6 +82,7 @@ func run(m: Node) -> void:
 	ok(float(rec["trust"]) > t1,
 		"the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"]))
 	ok(pets == 1 and pets2 == 1, "the same care before the next expedition is one memory (%d, %d)" % [pets, pets2])
+	_fetch_trains(home, k)
 	# a week of farm days with the usual care and no expeditions: it grows Close
 	for day in 7:
 		_next_day(rec)

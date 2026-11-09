@@ -79,7 +79,8 @@ sentences, and a grown, Devoted Boki talks freely.
   out by trying, and the card remembers. Each kind of care builds a little trust once a farm day
   (5 minutes), so a Boki raised only at home still grows close.
 - **Training.** Power, Guard, Speed and Focus, trained at the Training post with a three-round timing
-  drill. A happy Boki learns faster; a tired one won't train.
+  drill. A happy Boki learns faster; a tired one won't train. Play is practice too: a finished game
+  of fetch trains a point of Speed while it still has the energy.
 - **Life stages.** Hatchling, Youngling (level 4), Grown (8), Elder (16).
 - **Evolution.** How you raise it decides what it grows into. It builds four affinities (Fierce,
   Steadfast, Curious, Swift) from what it eats, what it does in matches and its personality, and every

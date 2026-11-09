@@ -84,6 +84,10 @@ const FOODS := {
 	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
 }
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
+## Play is practice: a finished game of fetch trains this stat by one point, as long as the Boki has
+## the energy (PLAY_TRAIN_ENERGY, the same line under which the Training post drill teaches less).
+const PLAY_TRAINS := {"fetch": "speed"}
+const PLAY_TRAIN_ENERGY := 35.0
 const PLAY_NAMES := {"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"}
 
 ## Fills in anything an older record is missing. Likes come from the kin's id, so they're fixed.
@@ -273,6 +277,12 @@ static func match_mods(rec: Dictionary) -> Dictionary:
 		"skill": 1.05 if trust >= 50.0 else 1.0,
 		"mood": clampf((c - 50.0) / 50.0, -1.0, 1.0),
 	}
+
+## A game it just finished: the point it trains (0 when too tired or at its cap for now).
+static func play_train(rec: Dictionary, play: String) -> int:
+	if not PLAY_TRAINS.has(play) or need(rec, "energy") < PLAY_TRAIN_ENERGY:
+		return 0
+	return add_stat(rec, String(PLAY_TRAINS[play]), 1)
 
 ## Trained points can't run too far ahead of its level.
 static func stat_cap(rec: Dictionary) -> int:

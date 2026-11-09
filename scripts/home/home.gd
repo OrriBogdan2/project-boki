@@ -2858,6 +2858,8 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				var rec: Dictionary = k["rec"]
 				var loves_fetch: bool = rec["likes"]["play"] == "fetch"
 				Care.change(rec, "joy", 24.0 if loves_fetch else 14.0)
+				if Care.play_train(rec, "fetch") > 0:
+					_toast("+1 Speed  (%d of %d)" % [int(rec["stats"]["speed"]), Care.stat_cap(rec)])
 				Care.change(rec, "energy", -6.0)
 				Care.change(rec, "clean", -4.0)
 				if loves_fetch and Care.discover(rec, "play"): _toast("%s loves playing fetch" % rec["name"])
