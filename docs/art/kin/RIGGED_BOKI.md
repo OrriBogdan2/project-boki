@@ -48,3 +48,22 @@ A Boki without legs (Zephyrak) writes all its own clips: the body is a chain ben
 
 To add a species: copy `prismander*.py` to its own shapes, coat and clips, add it to `SPECS` (`build_boki.py`),
 `MODULES` (`build_fusion.py`), `BokiRig.FRAME` and `BokiFusion.SPECIES`.
+
+## Standing still: breath and fidget (`BokiIdle`, `content/rules/boki_idle.json`)
+
+Audit of the 21 idles (2026-11-09): none stood on a static pose (`--boki-idle-check` asserts the loop seam of all 21); but 12 shared the generic breath (same loop length, the torso moving a hair, an ear/claw tick every loop):
+cindle, puddlet, burrlet, glintmole, rimeshrew, pebbit, cairnback, gloamshell, hivara, mossgrade, nettlynx, zapple.
+The other 9 have a clip of their own and keep it. Nobody had anything that happens now and then.
+
+At runtime `BokiRig` asks `BokiIdle.build` (no re-export, no Blender) for two clips per model:
+- `idle`: for the 12 above it is re-timed to the species' own breath length and the torso swings deeper (`breath`
+  in the JSON: len s, amp x); `calm` keeps 20% of the ear/claw tick. The loop still ends on its first key.
+- `idle_fidget`: the same clip with a few bones moved over a window (`fidget`: at, dur, rows of [bone, axis, peak rad,
+  cycles, phase]) inside a sin envelope, so it starts and ends on the idle's pose. It is a whole number of idle loops
+  long, so going back to `idle` is seamless at any blend weight.
+
+The fidget comes every 4-9 s (`gap_s`), counted while it stands idle, only when `_state_clip` says idle: any
+action, sleep, hop, ability or attack takes over at once and restarts the count. Each fidget is picked from who the
+Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
+body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
+frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.
