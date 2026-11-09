@@ -3619,3 +3619,11 @@ READY ext/boki3d-lilybara 6df99d443 (job 20261109-001603-a4; on main d255acbee).
 - Coat: the toon look turned the scan's brown orange-red, so warm hues get half their chroma (soakybara.tame). Alternative: tune COAT_LOOK for this species instead.
 - Not done: no fusion module (same as thrumbird). Steam left to VFX.
 - GPU in-engine turntable (jobq 20261109-010614-29584): briefs/shots/soakybara/lilybara_{front,tq,side,back,turntable}.png. Not merged.
+
+## 2026-11-09 deep (job 20261109-001554-a4): READY Boki 3D: Effigeetle (goliathite) from the owner's concept sheet
+- READY: branch ext/boki-goliathite-v2 (7212f12f3, b081bd239) from origin/main. Built with the procedural tools/boki pipeline like every other Boki (tools/boki/effigeetle.py + effigeetle_anim.py), not Meshy as the CLAIM said. Meshy/tools/art1 is the path for Wardens and heroes, so it was not used here.
+- Model: white head with amber eyes and a gold Y horn, a black/white striped thorax in a leather harness with a grab bar, two hooked gold forelegs, four marble legs, and two marble wing cases (bones case.L/R) that carry the statue face (closed amber-glow eyes, nose seam, lips). The cases lift open in ability/hop and show amber wings. The hexapod walk helpers are shared with Lodestick. Full standard clip set. 4.8k tris, 2k atlas.
+- Registered: build_boki SPECS, BokiRig.FRAME, boki_rig_check SPECIES_LIST, RIGGED_BOKI.md. No fusion module (same as Lodestick).
+- Checks: --boki-rig-check failures 0; health.py --strict HEALTH OK. GPU rig shots: jobq 20261109-010926-12361 (rp1-1).
+- Renders: /home/boki/renders/goliathite-20261109/{front,q34,side,back,turntable,anim_ability,faces}.png; gen-feed drop effigeetle-1109011036.
+- Differences from the sheet: the horn is tall, as on the sheet (BOKI_50_DESIGNS says stubby). The statue face sits on the rear of the dome, as on the sheet. The glow uses kin_v2 glow #ffd06a.
