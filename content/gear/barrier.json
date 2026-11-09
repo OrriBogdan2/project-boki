@@ -22,7 +22,10 @@
    "time": 5,
    "block": "all",
    "move": true,
-   "color": "d6c4a8"
+   "color": "d6c4a8",
+   "sfx": "gl_barrier",
+   "hit_sfx": "gl_barrier_hit"
   }
- ]
+ ],
+ "sfx": {}
 }

@@ -37,12 +37,13 @@ func add_wall(by: Node, at: Vector3, d: Vector2, e: Dictionary, pw: float) -> Di
 		"block": String(e.get("block", "enemy")), "move": bool(e.get("move", false)), "reflect": bool(e.get("reflect", false)),
 		"col": col, "touch": e.get("touch", {}), "follow": bool(e.get("follow", false)), "dist": float(e.get("dist", 1.4)),
 		"len": length, "th": WALL_TH, "touched": {}, "hit_t": 0.0, "nid": by.get("nid") if by else "",
-		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null)}
+		"rk": clampf(float(e.get("rk", 1.0)), 0.0, KinRules.REFLECT_MAX), "kx_end": e.get("kx_end", null),
+		"hit_sfx": String(e.get("hit_sfx", "ab_shield_hit"))}
 	# don't seal anyone inside it: a movement-blocking wall skips the bits that would trap someone
 	w["node"] = _wall_node(w)
 	walls.append(w)
 	m.fx.burst(Vector3(c2.x, at.y + 0.4, c2.y), col, 20, 4.0, 0.45, 2.0, 1.2)
-	m.sfx("shield", at, -2.0, 0.7)
+	Effects.snd(m, e, "shield", at, -2.0, 0.7)
 	return w
 
 func _wall_node(w: Dictionary) -> Node3D:
@@ -131,8 +132,8 @@ func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 		n.set_meta("pool_key", key)
 		m.add_child(n)
 	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
-	m.sfx("shield", ent.pos, -3.0, 1.4)
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "hit_sfx": String(e.get("hit_sfx", "")), "node": n, "col": col, "caught": 0})
+	Effects.snd(m, e, "shield", ent.pos, -3.0, 1.4)
 	return mirrors[-1]
 
 func _release_mirror(mr: Dictionary) -> void:
@@ -257,7 +258,7 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 		return 0
 	m.add_child(n)
 	terrain.append({"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0), "team": int(by.team)})
-	m.sfx("shield", from, -2.0, 1.6)
+	Effects.snd(m, e, "shield", from, -2.0, 1.6)
 	return tiles.size()
 
 # ------------------------------------------------------------------ forced movement
@@ -331,7 +332,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		_hit_wall(w, float(s["dmg"]), s["col"])
 		m.fx.burst(p, w["col"], 6, 3.0, 0.25, 4.0, 0.8)
 		m.fx.flash(p, Color(w["col"]).lerp(Color.WHITE, 0.4), 0.35, 0.07)
-		m.sfx("ab_shield_hit", p, -8.0)
+		m.sfx(String(w["hit_sfx"]), p, -8.0)
 		return "end"
 	for mr in mirrors:
 		if int(mr["team"]) == int(s["team"]) or s["by"] == mr["ent"]:
@@ -368,8 +369,11 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		_take_shot(s, back * 1.1, ent, int(mr["team"]), float(mr["k"]))
 		m.fx.flash(p, mr["col"], 0.4, 0.06)
 		m.fx.burst(p, mr["col"], 8, 4.0, 0.3, 2.0)
-		m.sfx("shield", p, -4.0, 1.9)
-		m.sfx("ab_parry", p, -5.0, 1.25)
+		if mr["hit_sfx"] != "":
+			m.sfx(String(mr["hit_sfx"]), p)
+		else:
+			m.sfx("shield", p, -4.0, 1.9)
+			m.sfx("ab_parry", p, -5.0, 1.25)
 		m.fx.spark(p, Vector3(back.x, 0.3, back.y), Color(mr["col"]).lerp(Color.WHITE, 0.4), 10, 9.0, 30.0, 0.2, 4.0, 1.0)
 		if ent == m.player and m.hud: m.hud.toast_small("REFLECTED", mr["col"])
 		return "bounce"

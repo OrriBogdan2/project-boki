@@ -190,6 +190,14 @@ func _arena() -> void:
 	ok("the V glove fires alone: V on cooldown, Q ready", float(P.gear_cd[1]) > 0.0 and float(P.gear_cd[0]) <= 0.0)
 	m.use_gear(P, 0)
 	ok("then the Q glove fires too", float(P.gear_cd[0]) > 0.0)
+	var cast_all := true
+	for gid in Gear.ALL:
+		if Gear.active(gid) and Gear.slot_of(gid) == 0:
+			P.gear[0] = {"id": gid, "rar": 1}
+			P.gear_cd[0] = 0.0
+			m.use_gear(P, 0)
+			cast_all = cast_all and float(P.gear_cd[0]) > 0.0
+	ok("every active glove casts (their own sounds play)", cast_all)
 	A.give_glove("blink", 1)
 	ok("one glove can't be worn twice: blink to V empties Q", A.gloves[0] == "" and gid0.call(1) == "blink")
 	A.give_glove("grapple", 0)

@@ -1691,7 +1691,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 	if gd.has("effects"):
 		# newer gloves are built from the same effect blocks as abilities, scaled by rarity
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
-		sfx("skill", h.pos, -4.0, 1.0)
+		Gear.cast_sfx(self, gid, h.pos, "skill", -4.0, 1.0)
 		return
 	match gid:
 		"gust_fan":
@@ -1702,7 +1702,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.shot_down = false
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
 			fx.burst(h.pos + Vector3(0, 0.4, 0), col, 20, 5.0, 0.5, -2.0, 1.0)
-			sfx("glide", h.pos, 0.0, 1.5)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 1.5)
 		"platform":
 			var tiles: Array = []
 			var y := h.pos.y - 0.1
@@ -1726,7 +1726,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 				h.vel.y = 0.0
 			h.glide_fuel = 1.0
 			h.shot_down = false
-			sfx("shield", h.pos, 0.0, 0.8)
+			Gear.cast_sfx(self, gid, h.pos, "shield", 0.0, 0.8)
 		"shock":
 			Abil._blast(h, h.pos, 3.4, 12.0, 13.0, col, 5.0, "gear")
 		"rocket":
@@ -1739,7 +1739,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.5)
 			fx.burst(h.pos + Vector3(0, 0.2, 0), col, 26, 6.0, 0.5, -1.0, 1.2, Vector3.DOWN, 30.0)
-			sfx("glide", h.pos, 0.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 0.7)
 		"skyhook":
 			# hook a point toward the cursor and swing up to it: onto a ledge above you if there is
 			# one there, otherwise straight up into the air
@@ -1754,7 +1754,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.launch_to(to, 0.55)
 			h.glide_cd = 0.0
 			fx.bolt(h.pos + Vector3(0, 1.2, 0), to, Color(col, 0.9))
-			sfx("throw", h.pos, -2.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "throw", -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
 			h.vel.y = maxf(h.vel.y, 11.0)
@@ -1763,7 +1763,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			fx.ring(h.pos, 1.2, col, 0.3)
 			fx.burst(h.pos, col, 14, 3.0, 0.4, 2.0, 1.0, Vector3.DOWN, 50.0)
-			sfx("jump", h.pos, -2.0, 1.3)
+			Gear.cast_sfx(self, gid, h.pos, "jump", -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
 	for gp in gpads.duplicate():
