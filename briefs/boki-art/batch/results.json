@@ -21822,5 +21822,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/prowyak_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rampartoad_card",
+    "name": "Rampartoad (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rampartoad_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rampartoad_card",
+    "name": "Rampartoad (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rampartoad_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimeshrew_card",
+    "name": "Rimeshrew (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimeshrew_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimeshrew_card",
+    "name": "Rimeshrew (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimeshrew_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_card",
+    "name": "Ringrove (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_card",
+    "name": "Ringrove (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ringrove_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenfin_card",
+    "name": "Selenfin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenfin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenfin_card",
+    "name": "Selenfin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/selenfin_card_1.jpg",
+    "ok": true
   }
 ]
