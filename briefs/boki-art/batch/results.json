@@ -43473,5 +43473,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_glomworth_p83_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_gongibbon_p83",
+    "name": "Gongibbon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gongibbon_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_knotling_p83",
+    "name": "Knotling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_knotling_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gongibbon_p83",
+    "name": "Gongibbon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_gongibbon_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_knotling_p83",
+    "name": "Knotling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_knotling_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanternlong_p83",
+    "name": "Lanternlong",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lanternlong_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanternlong_p83",
+    "name": "Lanternlong",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lanternlong_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mossbastion_p83",
+    "name": "Mossbastion",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_mossbastion_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pipeworth_p83",
+    "name": "Pipeworth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pipeworth_p83_1.jpg",
+    "ok": true
   }
 ]
