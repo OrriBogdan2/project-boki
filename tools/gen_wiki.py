@@ -581,7 +581,7 @@ def gen_rules():
         body += table(["Rule", "Value", "Meaning"], [[k, num(v), lc.get(k, "")] for k, v in lr.items()])
     rules = content("rules")
     for rid, r in rules.items():
-        if rid == "lore": continue   # the Lore page
+        if rid in ("lore", "cast_queue"): continue   # their own pages (Lore, docs/heroes/cast_queue.md)
         body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight"}.get(rid, rid), rid, r.get("desc", ""))
         body += table(["Setting", "Value"], [[k, num(v) if not isinstance(v, (dict, list)) else json.dumps(v)] for k, v in r.items() if k != "desc"])
     co = content("combos")
@@ -739,9 +739,46 @@ def gen_dash_flow():
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
+QUEUE_MODE = {"queue": "held, goes the step the move ends", "fire": "goes at once, the move runs on",
+              "drop": "refused (the deny cue)"}
+
+def gen_cast_queue():
+    """docs/heroes/cast_queue.md: RMB or E pressed in another ability's wind-up or recovery (CastQueue)."""
+    rules = load_json(os.path.join(ROOT, "content", "rules", "cast_queue.json"))
+    labels = dict(DASH_SLOTS)
+    rows = []
+    for aid in ARCH_ORDER:
+        hero = ARCH.get(aid, {}).get("name", aid)
+        moves = rules["heroes"].get(aid)
+        if moves is None:
+            rows.append([hero, "any", "Not audited yet.", "the kit's own handling (no move_slot)"])
+            continue
+        if "note" in moves:
+            rows.append([hero, "any", moves["note"], "goes at once (no move holds the body)"])
+        for move, given in moves.items():
+            if move == "note":
+                continue
+            for slot in ("rmb", "e"):
+                if slot == move:
+                    continue
+                row = given.get(slot, {})
+                ours = QUEUE_MODE[row.get("mode", rules["default"])]
+                rows.append([hero, "%s during %s" % (labels[slot], labels[move]), row.get("source", ""), ours])
+    body = ("One row per hero and pair, read from `content/rules/cast_queue.json` by `CastQueue` "
+            "(`scripts/arch/cast_queue.gd`): RMB or E pressed while another ability's wind-up or recovery owns the "
+            "body (the kit's `move_slot`). The shared rule (a missing row) holds the press and lets it go the step "
+            "that move ends; a row is an exception only where the source or an owner call differs. A recast of the "
+            "pressed slot is the kit's own, and presses during a dash are DashFlow's (dash_interactions.md). "
+            "\"Source\" is what the source hero does; \"Ours\" is what the game does now. `--cast-queue-check` "
+            "presses every pair mid-cast.\n\n")
+    body += table(["Hero", "Pair", "Source", "Ours"], rows)
+    write("cast_queue.md", "%s\n# Ability presses during another ability\n\n_Generated from "
+          "`content/rules/cast_queue.json`._\n\n%s" % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
+
 # ------------------------------------------------------------------ main
 def main():
-    for f in (gen_classes, gen_lore, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow):
+    for f in (gen_classes, gen_lore, gen_boki, gen_gear, gen_maps, gen_rules, gen_farm, gen_controls, gen_dash_flow,
+              gen_cast_queue):
         try:
             f()
         except Exception as e:  # report and keep going: one broken table shouldn't hide the rest
