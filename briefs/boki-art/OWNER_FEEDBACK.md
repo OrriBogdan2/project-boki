@@ -32,4 +32,5 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 27 | Lanceron too close to Skateron | 5 new final body plans (ice knight crane, heron-dragon, frost guardian, ice stork-rhino, winter knight) | GENERATING |
 | 28 | Effigeetle needs an evolution: defensive cocoon -> artillery butterfly, more mechanical each time | 4 cocoon + 5 artillery-butterfly directions (Effigoon / Mortarfly placeholders) | GENERATING |
 | 29 | Chandelapi too busy; majestic but not rigid or crowded | 4 simplified, flowing directions (few candles, no body filigree) | GENERATING |
+| 30 | Picks page review 04:00 | Kept: Bucketmander battery, Terrasloth pangolin, Glaciatee, Lunowl, Thunderstrich, Mortarfly, Gravitank, Barokat cloud halo; swapped Lanceron + Pyrraven to option 2; redos: Glaivyx (longer, taller, more fox), Ringrove (younger face), Eclipsowl (dark epic Lunowl), Reapant (taller, new colours), Effigoon (faceless cocoon), Mortarfly (more epic), Chandelapi (a real final) | GENERATING |
 | 21 | 66 Bokidex items marked "redo" | Each has a newer attempt or is in this list; re-check every tick | ONGOING |
