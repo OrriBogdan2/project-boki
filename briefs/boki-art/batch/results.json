@@ -9278,5 +9278,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_ghoulamari_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_sarcobra",
+    "name": "Sarcobra (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gilabacus",
+    "name": "Gilabacus (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gilabacus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth",
+    "name": "Glaciammoth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gilabacus",
+    "name": "Gilabacus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gilabacus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan",
+    "name": "Cetorgan (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock_p",
+    "name": "Anvilbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock_p",
+    "name": "Anvilbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth",
+    "name": "Glaciammoth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan",
+    "name": "Cetorgan (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_p",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor",
+    "name": "Hydrangor (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor",
+    "name": "Hydrangor (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_3.jpg",
+    "ok": true
   }
 ]
