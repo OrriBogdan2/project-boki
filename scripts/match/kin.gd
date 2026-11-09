@@ -417,10 +417,9 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	if model:
 		model.set_meta("pulse", Time.get_ticks_msec())
 	st_skills += 1
-	# each kin has its own cue: a warm whoomp (venom), a puff (spore), a stone rumble (gravity),
-	# a glassy chime (prism), a swirl of wind (lunar), a low crackle of storm (echo)
+	# each Boki type has its own cue, k_<type> (tools/gen_sfx_boki.py); a kin of no type plays the generic one
 	var cue := "k_%s" % String(sp.get("type", ""))
-	m.sfx(cue if Sfx.has(cue) else "skill", pos, -2.0 if not auto else -7.0)
+	m.sfx(cue if Sfx.ensure(cue) else "skill", pos, -2.0 if not auto else -7.0)
 	m.on_kin_ability(self, def, auto)
 
 ## An event trigger (KinParts.TRIGGERS): on_throw, on_hit, on_recall, on_bond_full, on_low_hp.
