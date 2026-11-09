@@ -4,7 +4,8 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it.
+## a held stream turns with the aim, a projectile trail follows its node and ends with it. And the status looks
+## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -57,6 +58,7 @@ func run(main: Node) -> void:
 	_view(m, V, P)
 	_kit(m, V, P)
 	_net(m, V, P)
+	_statuses(m, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
@@ -308,3 +310,62 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	m.ents_by_id[P.nid] = P
 	V.net_in(["fx", "hvfx", P.nid, "spin", P.pos.x, P.pos.y, P.pos.z, 1.0, 0.0, 0.0, 0.0, 2.6])
 	ok(int(V.plays.get("spin", 0)) == 1, "a move arrives from another game")
+
+# ------------------------------------------------------------------ status looks
+## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16          # meshes one status look may use (30 Hunters each with a few stay cheap)
+
+## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
+func _set_status(m: Match, F: Hunter, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": F.stun_t = t
+		"root": F.root_t = t
+		"slow": F.slow_t = t
+		"burn": F.burn_t = t
+		"antiheal": F.blight_t = t
+		"sick": F.sick_t = t
+		"gnd": F.set_meta("gnd_until", m.time + t)
+		"daze": F.set_meta("rat_until", m.time + t)
+		"chill", "static":
+			if on: StatusLooks.of(m).keep(F, st)
+			else: m.time += StatusLooks.KEEP + 0.01
+
+func _statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var rules := StatusLooks.rules()
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	Sfx.listener = P.pos
+	ok(STATUSES.all(func(st): return rules.has(st)), "status looks: every plain status has data")
+	var looks := {}
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+		var up := L.showing(F, st)
+		var rig: Node3D = (L.rigs.get("%d/%s" % [F.get_instance_id(), st], {}) as Dictionary).get("n")
+		var parts := rig.find_children("*", "MeshInstance3D", true, false).size() if rig else 0
+		ok(up and not L.showing(P, st), "status %s: its look comes up on that body only" % st)
+		ok(parts > 0 and parts <= RIG_PARTS, "status %s: %d meshes (at most %d)" % [st, parts, RIG_PARTS])
+		looks[String(rules[st]["look"])] = true
+		_set_status(m, F, st, false)
+		ok(not L.showing(F, st), "status %s: the look goes when it ends" % st)
+	ok(looks.size() == STATUSES.size(), "status looks: each status has a look of its own (%d)" % looks.size())
+	var made := L.made
+	for st: String in STATUSES:
+		_set_status(m, F, st, true)
+	ok(STATUSES.all(func(st): return L.showing(F, st)) and L.made == made,
+		"status looks: all at once on one body, from the pool (built %d)" % L.made)
+	for st: String in STATUSES:
+		_set_status(m, F, st, false)
+	L.from_hit(F, {"stun": 0.5, "burn": 4.0, "burn_for": 2.0, "blight": 1.0})
+	ok(L.showing(F, "stun") and L.showing(F, "burn") and L.showing(F, "antiheal"),
+		"status looks: a hit sent to another game's body shows what it carries here")
+	m.time += 2.1
+	ok(not L.showing(F, "stun") and not L.showing(F, "burn"), "status looks: ... until that status would end")
+	F.stun_t = 1.0
+	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
+	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
+	F.stun_t = 0.0

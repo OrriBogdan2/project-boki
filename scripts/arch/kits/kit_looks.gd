@@ -14,7 +14,7 @@ extends Node3D
 ##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
 ##              brightens it with its charge
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
-## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
+## Lingering: aura (Ostra's Swollen sphere), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
 ## black wind-up orb), star (the Trade's lobbed star-orb).
@@ -99,8 +99,6 @@ func _build(kind: String) -> Node3D:
 				n, Models.sphere(1.25, 20), glass_mat(Color("7a1a68"), Color("ff4fd8"), 0.6, 0.12), Vector3(0, 1.0, 0)
 			)
 			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(0.75, 0.12, 0.6, 0.45)), Vector3(0, 0.05, 0))
-		"crown":
-			_build_crown(n)
 		"burst", "crater":
 			_build_impact(n, kind)
 		"shard":
@@ -188,18 +186,6 @@ func _tail(n: Node3D, w: float, len_: float, col: Color) -> void:
 	var mat := shade_mat(col)
 	mat.render_priority = -1      # always under the shot's glass
 	Models.part(n, Models.cyl(0.0, w, len_, 10), mat, Vector3(0, 0, len_ * 0.5), Vector3.ONE, Vector3(PI * 0.5, 0, 0))
-
-func _build_crown(n: Node3D) -> void:
-	var c := Node3D.new()
-	c.name = "Spin"
-	n.add_child(c)
-	for i in 3:
-		var a2 := TAU * i / 3.0
-		Models.part(
-			c, Models.box(0.16, 0.16, 0.05), Models.glow_mat(Color("fff27a")),
-			Vector3(cos(a2) * 0.38, 0.0, sin(a2) * 0.38), Vector3.ONE, Vector3(0, a2, PI * 0.25)
-		)
-	Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(1.0, 0.85, 0.2, 0.4)), Vector3.ZERO)
 
 ## Tarek's slam, radius 1: a molten starburst of rays (burst), or the dark red crater it leaves with radial
 ## cracks and ember flecks (crater). Both alpha-blended, in her molten colours.
@@ -410,8 +396,7 @@ func _process(delta: float) -> void:
 	for e2 in timed.duplicate():
 		e2["t"] = float(e2["t"]) + delta
 		var u := float(e2["t"]) / maxf(0.01, float(e2["dur"]))
-		var ent2 = e2.get("ent")
-		if u >= 1.0 or (bool(e2.get("follows", false)) and not is_instance_valid(ent2)):
+		if u >= 1.0:
 			timed.erase(e2)
 			_give(String(e2["kind"]), e2["n"])
 			continue
@@ -453,12 +438,6 @@ func _tick_skins(delta: float) -> void:
 func _tick_timed(e2: Dictionary, u: float, delta: float) -> void:
 	var n2: Node3D = e2["n"]
 	match String(e2["kind"]):
-		"crown":
-			var ent2: Ent = e2["ent"]
-			n2.global_position = ent2.pos + Vector3(0, 2.15 if ent2 is Hunter else 1.5, 0)
-			(n2.get_node("Spin") as Node3D).rotate_y(delta * 6.5)
-			if ent2.stun_t <= 0.0 and float(e2["t"]) > 0.2:
-				e2["t"] = e2["dur"]
 		"burst":
 			var r := float(e2["r"]) * (0.55 + 0.45 * minf(1.0, u * 3.0))
 			n2.scale = Vector3(r, 1.0, r)
@@ -524,17 +503,6 @@ func release(key: String) -> void:
 
 func holding(key: String) -> bool:
 	return held.has(key) and float(m.time) - float(held[key]["t"]) <= KEEP
-
-## Stun stars circling over a head until the stun ends (or `secs`).
-func crown(e: Ent, secs: float) -> void:
-	for t in timed:
-		if t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e:
-			t["dur"] = maxf(float(t["dur"]), float(t["t"]) + secs)
-			return
-	timed.append({"n": _take("crown"), "kind": "crown", "t": 0.0, "dur": secs, "ent": e, "follows": true})
-
-func crowned(e: Ent) -> bool:
-	return timed.any(func(t): return t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e)
 
 ## Tarek's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a molten
 ## starburst, rock chips flying out, a dust ring at the edge, and a dark red cracked crater left `secs`.

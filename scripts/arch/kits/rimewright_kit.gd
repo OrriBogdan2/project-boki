@@ -148,6 +148,7 @@ func _tick(dt: float) -> void:
 		if float(e["left"]) <= 0.0 or t == null or t.dead:
 			chill.erase(key)
 			continue
+		StatusLooks.of(m).keep(t, "chill")
 	for key in fan_hits.keys():
 		var e2: Dictionary = fan_hits[key]
 		e2["left"] = float(e2["left"]) - dt

@@ -182,7 +182,7 @@ func _breah() -> void:
 	step(m, 0.5)
 	ok(
 		"combo: punch into a wall = stun, with stars over the head",
-		K.wall_stuns >= 1 and T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		K.wall_stuns >= 1 and T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
@@ -403,7 +403,7 @@ func _breah() -> void:
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
-		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"stun %.2f" % T.stun_t
 	)
 	ok(
