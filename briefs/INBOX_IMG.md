@@ -133,3 +133,24 @@ transparent versions of every hero card; match that set.
   Then redo the rest, starting with any whose current cutout has holes or halos (crystal/glass species: Glassolotl, Prismander,
   Prismink, Geodelotl, Mirrolin are most at risk).
 - Report each batch in EXT_TO_MAIN.md as "HEROES batch N: ids".
+
+## 2026-11-09 05:35 UTC coordinator -> art batch: 18 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Amanitusk attempt 2 (owner 8.0)**: owner note first: good, i can see it being a little much, maybe the mushrooms are closer to him and wider and less of them, just because they make him so tall. Previous attempt: /home/boki/gens/amanitusk-1-art.
+- **Redo Barokat attempt 3 (owner 8.3)**: owner note first: all close, 2 is prob the best but i dont love any - 1 could also be good but looks bad in this instance. i liek the stripes though.. Previous attempt: /home/boki/gens/barokat-1109045518.
+- **Redo Bellowlet attempt 2 (owner 8.0)**: owner note first: the bottom part and top part feel disconnected. Previous attempt: /home/boki/gens/bellowlet-3-art.
+- **Redo Briarlynx attempt 2 (owner 8.4)**: owner note first: very close to being there - the fae is a bit generic and the spikes are gneric / too many of them, but veyr col and keep a similar direction. Previous attempt: /home/boki/gens/briarlynx-2-art.
+- **Redo Bucketmander attempt 2 (owner 8.1)**: owner note first: think i saw a better versi jonof this, but if this is the earlier verison, then it needs to have a slightly different thundercloud on it - its close though. Previous attempt: /home/boki/gens/bucketmander-2-art.
+- **Redo Canvastross attempt 2 (owner 7.5)**: owner note first: a little generic like this. Previous attempt: /home/boki/gens/canvastross-1-art.
+- **Redo Druzemole attempt 2 (owner 8.3)**: owner note first: dont like his nose, but close. Previous attempt: /home/boki/gens/druzemole-3-art.
+- **Redo Druzemole attempt 2 (owner 6.9)**: owner note first: worse than the other option. Previous attempt: /home/boki/gens/druzemole-r-2-art.
+- **Redo Echolop attempt 2 (owner 8.3)**: owner note first: cool but the circle around him is kind of weird (i like it but maybe mor sound wave than pure circle). Previous attempt: /home/boki/gens/echolop-1-art.
+- **Redo Effigeetle attempt 2 (owner 8.4)**: owner note first: looks a bit low poly but is good!. Previous attempt: /home/boki/gens/effigeetle-1-art.
+- **Redo Embrook attempt 2 (owner 8.1)**: owner note first: could be good but saw something similar, ill do redo cuz im not sure. Previous attempt: /home/boki/gens/embrook-r-3-art.
+- **Redo Ermink attempt 2 (owner 8.1)**: owner note first: think he can be done better than this ,i dont like his hair on top. Previous attempt: /home/boki/gens/ermink-1-art.
+- **Redo Frigatee attempt 2 (owner 7.3)**: owner note first: too generic. Previous attempt: /home/boki/gens/frigatee-1-art.
+- **Redo Glaciatee attempt 2 (owner 7.8)**: owner note first: good but generic, if you're doing an ice seal it needs to have something more to it.. Previous attempt: /home/boki/gens/glaciatee-1-art.
+- **Redo Glintmole attempt 2 (owner 8.4)**: owner note first: good based deisgn but could use a few more looks / designs - might be good enough. Previous attempt: /home/boki/gens/glintmole-1-art.
+- **Redo Voltmink attempt 2 (owner 7.7)**: owner note first: a little too calm, i emant more cool than calm when i gave rthat advice - like epic cool thunder boki that is not over the top. Previous attempt: /home/boki/gens/voltmink-r-3-art.
+- **Redo Wickapi attempt 2 (owner 7.8)**: owner note first: looks too realin the face, doesnt fit the game design. Previous attempt: /home/boki/gens/wickapi-r-2-art.
+- **Redo Zipling attempt 2 (owner 8.0)**: owner note first: cool idea but i htink the one they used is better, so ill say redo cuz im ot sure. Previous attempt: /home/boki/gens/zipling-1-art.
