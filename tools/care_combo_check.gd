@@ -11,6 +11,21 @@ var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 func ok(what: String, cond: bool, info := "") -> void:
 	sc.ok(what, cond, info)
 
+## The root bone's rise in a glb clip, from its first frame, up the skeleton's Y (rig units):
+## [its rise by t_up, its rise by t_down (negative: a squash below the start)]. [0, 0] when there is no clip.
+static func _root_lift(a: Animation, sk: Skeleton3D, t_up: float, t_down: float) -> Array:
+	if a == null or sk == null or sk.find_bone("root") < 0:
+		return [0.0, 0.0]
+	var up: Basis = sk.get_bone_rest(sk.find_bone("root")).basis
+	for i in a.get_track_count():
+		if a.track_get_type(i) != Animation.TYPE_POSITION_3D or not String(a.track_get_path(i)).ends_with(":root"):
+			continue
+		var p0: Vector3 = a.position_track_interpolate(i, 0.0)
+		var at_up: Vector3 = a.position_track_interpolate(i, t_up) - p0
+		var at_down: Vector3 = a.position_track_interpolate(i, t_down) - p0
+		return [(up * at_up).y, (up * at_down).y]
+	return [0.0, 0.0]
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	sc.step(m, secs, each)
 
@@ -811,11 +826,20 @@ func tender() -> void:
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
 			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
+			and absf(float(lane.get("width", 0.0)) - float(K.rmb_def()["seed"]["hit_r"])) < 0.01
 			and K.anim_id == "mm_seed_aim"
 			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
 			"%s len %.1f %s k %.2f" % [
 				String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id, K.move_k()])
 	ok("mm RMB: nothing leaves during the wind-up", _mine(m, P).size() == n0 and K.ch_rmb >= 1.0)
+	var sync: Node = P.model.get_node_or_null("Warden/Sync")
+	var clips: WardenClips = sync.get("clips") if sync else null
+	var lib: AnimationLibrary = clips.lib if clips else null
+	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
+	ok(
+			"mm RMB: Pip's hand-keyed stretch-and-gather is exactly as long as the wind-up",
+			aim_clip != null and absf(aim_clip.length - wind) <= 0.04,
+			"clip %.2f wind %.2f" % [aim_clip.length if aim_clip else -1.0, wind])
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
@@ -832,6 +856,16 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	ok(
+			"mm RMB: the seed leaves on the release clip's first frame (the snap, not after it)",
+			m.time - K.anim_at <= 1.5 / 60.0,
+			"clip at %.3f s" % (m.time - K.anim_at))
+	var seed_clip: Animation = lib.get_animation("seed") if lib and lib.has_animation("seed") else null
+	var hop := _root_lift(seed_clip, WardenGlb.skeleton(P.model.get_node("Warden")), 0.1, 0.32)
+	ok(
+			"mm RMB: the release clip hops (footage: a small hop, about 0.3 s in the air) and lands in a squash",
+			hop[0] >= 0.12 and hop[1] < -0.03,
+			"rise %.3f at 0.1 s, %.3f at 0.32 s" % [hop[0], hop[1]])
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:

@@ -451,7 +451,10 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1})
+	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
+	if layer.get("ride", false):      # it rides on the Hero (an anchor goes with the clip: a hop, a lunge)
+		e.merge({"ride": h, "layer": layer, "dir": dir, "off": p - _where(layer, h, h.pos, dir)})
+	live.append(e)
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
@@ -730,6 +733,9 @@ func _process(delta: float) -> void:
 			live.remove_at(i)
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
+		if e.has("ride") and is_instance_valid(e["ride"]):
+			var r: Hunter = e["ride"]
+			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)

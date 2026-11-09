@@ -351,7 +351,8 @@ func fire_rmb(c: Dictionary) -> void:
 
 func _seed_lane() -> void:
 	var sd := rmb_def()
-	var width := float(sd["seed"]["hit_r"]) * 2.0
+	# the seed's own width (its shot radius is half hit_r): the footage's lane is about 0.4 bh wide
+	var width := float(sd["seed"]["hit_r"])
 	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
 
 ## Her share of run speed during the wind-up.
@@ -397,7 +398,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern
+	vfx("seed_cast", null, dir)          # the cast flare from her lantern, riding her hop (footage: about 0.3 s up)
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
