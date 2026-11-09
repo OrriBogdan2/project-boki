@@ -362,7 +362,9 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 ## perform it. A from:owner ability always works on its hunter, wherever the kin is.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
-	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot) or wind_do.is_valid():
+	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
+		return false
+	if wind_do.is_valid():
 		return false
 	var def := runner.def_of(slot)
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
@@ -1118,7 +1120,8 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if lunge_t > 0.0 or wind_do.is_valid() else ""))
+	var striking := lunge_t > 0.0 or wind_do.is_valid()
+	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if striking else ""))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":

@@ -60,8 +60,11 @@ func _contents(rig: BokiRig) -> void:
 			if a.track_get_type(t) == Animation.TYPE_ROTATION_3D:
 				off = maxf(off, a.rotation_track_interpolate(t, BokiSwing.WIND[c]).angle_to(
 					src.rotation_track_interpolate(t, BokiSwing.release_of(src))))
-		ok(a.length <= 0.6 and a.loop_mode == Animation.LOOP_NONE, "%s is short (%.2f s) and plays once" % [c, a.length])
-		ok(off < 0.15, "%s: the keyed release (%.2f s of %.2f) is the pose at %.2f s (off %.3f rad)" % [c, BokiSwing.release_of(src), src.length, BokiSwing.WIND[c], off])
+		var once := a.loop_mode == Animation.LOOP_NONE
+		ok(a.length <= 0.6 and once, "%s is short (%.2f s) and plays once" % [c, a.length])
+		var rel := BokiSwing.release_of(src)
+		var msg := "%s: the keyed release (%.2f s of %.2f) is the pose at %.2f s (off %.3f rad)"
+		ok(off < 0.15, msg % [c, rel, src.length, BokiSwing.WIND[c], off])
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
 	var tris := 0

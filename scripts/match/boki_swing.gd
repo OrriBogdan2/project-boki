@@ -39,10 +39,12 @@ static func release_of(a: Animation) -> float:
 		if type != Animation.TYPE_ROTATION_3D and type != Animation.TYPE_POSITION_3D:
 			continue
 		for i in range(1, n + 1):
+			var t0 := (i - 1) * SAMPLE_S
 			if type == Animation.TYPE_ROTATION_3D:
-				speed[i] += a.rotation_track_interpolate(t, (i - 1) * SAMPLE_S).angle_to(a.rotation_track_interpolate(t, i * SAMPLE_S))
+				speed[i] += a.rotation_track_interpolate(t, t0).angle_to(a.rotation_track_interpolate(t, t0 + SAMPLE_S))
 			else:
-				speed[i] += a.position_track_interpolate(t, (i - 1) * SAMPLE_S).distance_to(a.position_track_interpolate(t, i * SAMPLE_S)) * MOVE_PER_M
+				var from := a.position_track_interpolate(t, t0)
+				speed[i] += from.distance_to(a.position_track_interpolate(t, t0 + SAMPLE_S)) * MOVE_PER_M
 	var best := a.length * 0.5
 	var best_v := -1.0
 	for i in range(maxi(2, ceili(n * EARLY)), mini(n, int(n * LATE))):

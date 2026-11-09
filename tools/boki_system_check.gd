@@ -114,7 +114,8 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "wind_up", "downed", "no_steal", "merge", "leap", "surge", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "cast_c", "wind_up", "downed", "no_steal", "merge", "leap",
+			"surge", "net"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -266,7 +267,8 @@ func _wind_up() -> void:
 		if k.melee_n > bites:
 			landed = t
 	ok(held, "a bite is held in its wind-up")
-	ok(landed >= BokiSwing.LUNGE_WIND - 0.03 and landed <= BokiSwing.LUNGE_WIND + 0.1, "...and lands on the lunge's release frame (%.2f s)" % landed)
+	var on_time := landed >= BokiSwing.LUNGE_WIND - 0.03 and landed <= BokiSwing.LUNGE_WIND + 0.1
+	ok(on_time, "...and lands on the lunge's release frame (%.2f s)" % landed)
 
 # ------------------------------------------------------------------ 5. downed
 func _downed() -> void:
