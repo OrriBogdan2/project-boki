@@ -20,7 +20,7 @@ func add(open: Callable) -> void:
 
 func pump() -> void:
 	while not jobs.is_empty() and is_instance_valid(h) and h.is_inside_tree() and h.panel_open == "":
-		if h.building_now:
+		if h.building_now or h.panel_host == null:      # mid-build, or the panel host is not up yet (headless checks)
 			_retry_soon()
 			return
 		jobs.pop_front().call()

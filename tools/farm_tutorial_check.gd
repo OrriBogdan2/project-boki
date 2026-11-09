@@ -146,7 +146,7 @@ func _base_world() -> void:
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
 	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
-	home._after_feed(k, "emberberry", {"hate": false, "full": false, "ok": true, "love": false, "new": false})
+	home._after_feed(k, "emberberry", Care.feed(k["rec"], "emberberry"))      # Care.feed leans, the home shows it
 	guide._poll()
 	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
 	var gems0 := int(Save.d["gems"])

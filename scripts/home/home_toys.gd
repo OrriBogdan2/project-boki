@@ -59,8 +59,12 @@ func _toy(u: int) -> Dictionary:
 func players(u: int) -> Array:
 	return h.kins.filter(func(o): return o.has("play") and int(o["play"]["u"]) == u)
 
+## The element this Boki leans to: its strongest lean (Evo.lean), else its species' element.
 func _lean(rec: Dictionary) -> String:
-	return String(rec.get("lean", BokiLines.element_of(String(rec.get("species", ""))))).to_lower()
+	var top := String(Evo.lean(rec)[0])
+	if top == "":
+		top = BokiLines.element_of(String(rec.get("species", "")))
+	return top.to_lower()
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
 func weight(rec: Dictionary, toy_id: String) -> float:
@@ -80,6 +84,8 @@ func pick(k: Dictionary, want := false) -> bool:
 		return k.has("play")
 	if not want and (Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"])):
 		return false
+	if not want and h.life and not h.life.machine(k).is_in(BaseLife.S.ROAM):
+		return false      # a Boki mentoring, eating or napping (BaseLife) is not pulled off to a toy
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var weights := {}
 	var total := 0.0
