@@ -63,6 +63,9 @@ var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var turn: WardenTurn         # the feet re-planting while he turns on the spot (the Sync runs it, over the rig root)
+var plant_face := 0.0        # the facing and whether he stands on the spot this frame, for turn
+var plant_on := false
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
@@ -101,6 +104,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	var c := WardenClips.new()
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
+	c.turn = WardenTurn.new(sk, Arch.weight(String(WardenGlb.ART.find_key(art_name))))
 	return c
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -384,6 +388,10 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	plant_face = float(s.get("face", 0.0))
+	plant_on = not proc and bool(s.get("grounded", true)) and Vector2(vel.x, vel.z).length() < STILL \
+			and (not want.has("clip") or bool(want.get("upper", false)))
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
