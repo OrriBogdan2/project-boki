@@ -4384,3 +4384,4 @@ ART relic sparkle briefs/boki-art/relics/Sparkle.jpg grade 8.53/10
 ART wickapi 8.33 briefs/boki-art/batch/out/wickapi_r2_w29_2.jpg kind=turnaround status=owner-review panel=8.2/8.2/8.6
 ART geysirbara 8.27 briefs/boki-art/review/geysirbara_r2_w29_1_row.jpg kind=turnaround status=owner-review panel=8.0/8.4/8.4 note=relaid-out-to-one-row
 ART lanceron 8.23 briefs/boki-art/review/lanceron_r_w29_1_row.jpg kind=turnaround status=owner-review panel=8.1/8.2/8.4 note=relaid-out-to-one-row
+READY ext/tender-gait-rebased cdeada2b2 (job 20261109-052620-a1 on rpc1; SUPERSEDES READY ext/tender-gait 4f9fd219f). Merge of origin/main into ext/tender-gait: no textual conflicts now (ANIM_QUALITY_AUDIT.md conflict gone, anim-quality-audit already in main); only release.yml and net.gd came from main. Same Meeko gait change (stride 2.0/1.9, arm_swing 0.7). Checks: --check 0 failures (after godot --import), health --strict OK, --anim-audit 12 Hunters FAIL 0.
