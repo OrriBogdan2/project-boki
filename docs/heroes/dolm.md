@@ -16,6 +16,17 @@ Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, own
   he raises, the skateboard/parkour idea. See Rock Hop below; the crash and the rolling rock stay on the last landing.
 - Copied: structure, timing ratios and interactions. Not copied: names, text, raw numbers, art, sound.
 
+## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Tenzo: each slot reads
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Tetra, `Upg:` lines.
+The ult keeps its own ranks (X has 1-2); its source upgrades (-5s cooldown, +2.5s terrain lifetime x2) are not built here.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Quakefall | +50 damage, -1s cooldown x2, slamming foes or rocks grants a Molten Guard stack | cooldown 9.9s / 8.8s, damage +15% / +30% | cooldown 10s / 9s, damage +24% / +48% (+50 a tier on about 208), 18 shield per slam at 3 |
+| Shift Rock Hop | -2s recharge, +1 charge, the dash 33% longer | 10.2s / 8.4s, second charge and reach at 3 | 10s / 10s, second charge and reach at 3 |
+| E Stone Row | -1s / -1.5s cooldown, an extra rock wall | cooldown 11.25s / 10s, damage +15% / +30% | cooldown 11.5s / 10s, no rank damage, extra row of rocks at 3 |
+
 ## Design
 Weight Medium (145 hp). Fixed weapon Rubble Fists (`content/weapons/rubble_fists.json`): a huge basalt gauntlet on each fist,
 with magma cracks (shaders/molten_rock.gdshader), knuckle studs and a hot core (scripts/match/hero_arms.gd); the gauntlets
@@ -237,14 +248,13 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Tetraform terrain lasts longer per rank (+2.5s at levels 2 and 3) | wiki | no | not built: our X has no ranks |
 | Landslide rock shoves enemies toward the abyss (dunk setup) | footage tip "Dash -> RMB Dunk Combo" | yes (0965-1010) | built as the leap's landing crash (a shove with a lift) and the rock rolling on |
 | Rock Molten Guard shield per rock fired (2.00 passive) / hitting your rocks with the punch gives a shield | patch 2.00 notes, owner's tooltip data | no | built (data pass) as the base passive: one stack per punch |
-| Landslide: 12s, -2s / +1 charge / dash 33% longer | owner's tooltip data | no | built: 12s (10.2s at rank 2 by the shared recharge step), a second charge and the third further at rank 3 |
+| Landslide: 12s, -2s / +1 charge / dash 33% longer | owner's tooltip data | no | built: 12s (10s at ranks 2 and 3), a second charge and the third further at rank 3 |
 
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
 - Molten Guard is the base passive (above); the slam's rank-3 stacks are the data's "slamming enemies or rocks grants a stack".
 - The slam reset on a knock or kill is removed (Volcano Crusher has none).
-- The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10.2s (the shared -15% step; the data's -2s), rank 3
-  adds the second charge (the data's +1 charge) and the third-further reach (its +33%) on top of the shared step (8.4s per
-  charge, faster than the data's 10s: the shared rank step cannot be switched off for one hunter).
+- The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10s (the data's -2s), rank 3 adds the second
+  charge (+1 charge) and the third-further reach (+33%) at the same 10s per charge (see Ranks: upgrade parity).
 - Allies climbing the rocks: the data pass let any hunter jump onto a rock; owner review item 25 replaced that: only the
   rock's caster climbs it (see Rock ownership).
 - Not touched: the X wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (9s and 13s against the
