@@ -145,7 +145,7 @@ const CHECKS := {
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
-	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],      # lobby screenshots at the window size
+	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],      # lobby screenshots + safe-area scan at the window size
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],      # bots wear gamer tags
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
