@@ -25,3 +25,5 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 ## Consequences
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
+
+**Bots (BotKin.summon, `--bot-summon-check`):** a bot presses Summon on entering a fight it will take (a rival or brute within 12 m, health at least 45%) or when a teammate is downed within 15 m; never while fleeing, hexed, on cooldown or with its Boki already out. It waits 0.3 s (easy: up to 1.5 s) and easy bots skip the moment more often (50% at no ability skill, always at 1). Tutorial bots never summon unless a beat sets `ai["summon_ok"]`.

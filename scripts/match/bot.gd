@@ -134,6 +134,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["seen"] = tgt
 		a["react_t"] = float(df.get("react", 0.3)) * randf_range(0.8, 1.3) * (1.6 if tgt is Hunter else 1.0)
 	a["react_t"] = float(a.get("react_t", 0.0)) - dt
+	BotKin.summon(m, h, tgt, float(df.get("abil", 0.7)), dt)
 	# ---- a decoy: the rival vanished and left a copy behind; bots keep shooting the copy
 	if tgt is Hunter and (tgt as Hunter).cloak_t > 0.0 and m.verbs:
 		var dc: Dictionary = m.verbs.decoy_of(tgt)
