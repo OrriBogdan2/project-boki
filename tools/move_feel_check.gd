@@ -50,6 +50,7 @@ const T := {
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t":           ["<=", 0.20, "s", "glider opens 'instantly' on input; brakes a terminal fall to sink rate"],
 	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
+	"glide_vs_run":            ["~", [0.95, 1.2], "x", "[footage] ~5 m/s, about a run (decision 0024)"],
 	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
 	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] the glide force: a turn has inertia (item 163)"],
 	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same force brakes a reversal (item 163)"],
@@ -401,6 +402,7 @@ func _glide() -> void:
 		P.inp["glide"] = true; P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
 	rec("glide_speed", _hv(P).length())
+	rec("glide_vs_run", _hv(P).length() / P.base_speed)
 	rec("glide_sink", -P.vel.y)
 	var cruise := _hv(P).length()
 	# turn 90

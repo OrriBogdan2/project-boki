@@ -24,7 +24,25 @@ The owner read these straight from the installed game (config files, curve table
 | Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | **Yes**: above 8.5 m the glider sinks at 3.5 m/s and the drop past its usual sink becomes speed (2.5x, fading over 1.5 s; `GlideLift.sink`) |
 | Dive | Z target -3250 uu/s, ZForceMax 350,000 / Mass 100, XY force x0.25, cancel 350 uu up, 10 s timeout | -32.5 m/s at 35 m/s², steer 0.25, 3.5 m, 10 s | **Yes**: hold crouch under the glider (`GlideDive`, `HunterMove.dive_*`); the key is ours, the source names none |
 
-Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Keep current tuning for those (TODO).
+Still unknown in the data (encrypted C++ defaults), measured from footage instead (decision 0024). Sources: the
+`ext/agent-briefs` frame notes (`briefs/hero-ref/*.md`, 4-5 fps, ±0.2 s a frame; scale 1 bh ≈ 1.8 m ≈ 48 px at
+the guide zoom, the 0.5 m hunter body for width) and the play notes in `briefs/supervive-data/`. No glide clip
+is in the briefs and the raw frames are not on the worker, so only what the notes measured is used. Set only where
+the error is under 15 %; `[?]` keeps our tuning.
+
+| Unknown | Footage range | Frames / source | Error | Ours |
+|---|---|---|---|---|
+| Base glide speed | 4.5-5.5 m/s, about run speed (4.45-4.85) | SUPERVIVE_FEEL guides (Tom Kick, Zik); MaxGlide 500 agrees | ~10 % | **Set**: `GLIDE_SPEED` 5.0; `glide_speed`, `glide_vs_run` rows |
+| Glide gravity factor / sink under 8.5 m | not measured: every clip glides while the lift holds you level | Tom Kick ~14 s level; Zik ~8 m back up in ~1 s (±0.2 s) | n/a | `[?]` `GLIDE_GRAV` 14, `GLIDE_SINK` 1.4 |
+| Abyss lift (for reference) | 0.8-1.2 s for ~8 m | Zik drill | ~20 % | kept: `abyss_lift_t` <= 1.0 s |
+| Glide braking | no clip steers against the heading | none | n/a | `[?]` `GLIDE_BRAKE` 36 over 115° |
+| Hoop boost | "bridge to the west island in ~1 s"; gap length not measured | supervive_kits.md movement tests | > 50 % | `[?]` none: the match has no hoops |
+| Jump hold time | not observable: SV's glide is its own bind, Space alone never opened it; a jump is ~5 frames ±1 | supervive_kits.md; PHYSICS_PARITY step 2 | ~20 % | `[?]` `GLIDE_ENGAGE` 0.1 s (our Space tap/hold) |
+| Air-dash multiplier | 1.9-3.1x ground distance (notes say ~1.7x) | dancer.md Cartwheel: air 223-225 px ≈ 8.4 m (0129-0134, 0153-0156), ground 1.5-2.5 bh, camera follows | ~25 % | `[?]` per-kit `air_k` (Dredge 1.35) |
+| Air dash into glide | Mooshmoosh: 6-8 bh (11-15 m) over 0.8-1.1 s, flat 19-22 m/s burst | mooshmoosh.md 706.8/731.1/735.9/745.1 s | ~15-20 %, one hero's signature | `[?]` `GLIDE_HANDOFF_KEEP` 0.75, `GLIDE_BOOST_MAX` 14 |
+
+DECISIONS still apply: an overheated glider lifts you out of the abyss at half strength, and walking off ledges is
+never blocked.
 
 ## What's in it
 

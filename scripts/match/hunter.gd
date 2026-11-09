@@ -24,10 +24,10 @@ const GLIDE_DECEL := 1.4         # let go of the keys and the glider drifts on, 
 const GLIDE_OVERSPEED := 1.1     # extra glide momentum bleeds off slowly: a dash into a glide carries for seconds
 const GLIDE_TURN := 420.0        # deg/s the glider turns at cruise speed (90 degrees in ~0.2s); wider arcs when fast
 const GLIDE_TURN_FAST := 0.45    # ...down to this share of GLIDE_TURN at the boost cap
-const GLIDE_BRAKE := 36.0        # steering more than GLIDE_BRAKE_DEG against your heading brakes this hard
+const GLIDE_BRAKE := 36.0        # [?] steering more than GLIDE_BRAKE_DEG against your heading brakes this hard
 const GLIDE_BRAKE_DEG := 115.0
-const GLIDE_GRAV := 14.0
-const GLIDE_ENGAGE := 0.1        # hold Space this long in the air before the glider opens (a tap is a jump); was 0.15
+const GLIDE_GRAV := 14.0         # [?] source glide gravity factor unknown (decision 0024)
+const GLIDE_ENGAGE := 0.1        # [?] hold Space this long in the air before the glider opens (a tap is a jump)
                                  # (the dedicated glide button, Mouse 5, opens it at once)
 ## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
 ## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
@@ -846,7 +846,7 @@ func do_jump() -> void:
 	jump_buf = JUMP_BUFFER
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
-const GLIDE_SINK := 1.4       # (movefeel) floatier: [spec] says 2-4 m/s eyeball, [est] 2.2 felt like falling; was 2.2
+const GLIDE_SINK := 1.4       # [?] floatier: [spec] 2-4 m/s eyeball, [est] 2.2 felt like falling
 static func glide_fall(_speed: float) -> float:
 	return GLIDE_SINK
 
@@ -955,9 +955,9 @@ func _open_glider() -> void:
 ## glide's slow over-speed bleed (GLIDE_OVERSPEED) does the rest. Owner-side only (inputs and
 ## physics run on the owning machine; the result reaches others through the usual Net state).
 const GLIDE_HANDOFF_WINDOW := 0.3   # [est] "right after": open the glider within this long
-const GLIDE_HANDOFF_KEEP := 0.75    # [est] an air dash opens the glider at this share of its speed, up to the cap below
+const GLIDE_HANDOFF_KEEP := 0.75    # [?] an air dash opens the glider at this share of its speed, up to the cap below
 const GLIDE_HANDOFF_MIN := 3.0      # a burst slower than a walk hands nothing over
-const GLIDE_BOOST_MAX := 14.0       # [est] the most a handoff can start you at (GLIDE_MAX is 15)
+const GLIDE_BOOST_MAX := 14.0       # [?] the most a handoff can start you at (GLIDE_MAX is 15)
 var boost_fx_t := 0.0               # the boost trail lasts while you're well above cruise speed (render)
 const GLIDE_HANDOFF_DOT := 0.3      # "in the same direction": the glide's heading within ~70 degrees
 var _handoff := {}                  # {dir: Vector2, speed: float, at: float} the last lateral burst
