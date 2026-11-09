@@ -1,5 +1,5 @@
 {
- "_doc": "The Heart loop (docs/decisions/0019-heartspark.md; scripts/match/heart.gd). Every number of the prototype lives here. Seconds and metres.",
+ "_doc": "The Heart loop (docs/decisions/0023-heartspark.md; scripts/match/heart.gd). Every number of the prototype lives here. Seconds and metres.",
  "charge_s": 75.0,
  "_charge_s": "a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time",
  "cool_s": 90.0,

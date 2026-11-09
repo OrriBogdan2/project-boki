@@ -1,5 +1,5 @@
 extends RefCounted
-## --heart-check: the Heart loop (scripts/match/heart.gd, content/rules/heart.json, docs/decisions/0019).
+## --heart-check: the Heart loop (scripts/match/heart.gd, content/rules/heart.json, docs/decisions/0023).
 ## The site and Gate, the Blight's tide (ring shrinks, stronger and sooner outside it), the Heartspark
 ## charging and becoming ready, taking it by holding interact, the carrier's slow and reveal, dropping on
 ## down, the Gate taking only the carrier, the reward bundle, the cooldown and the next charge, the normal

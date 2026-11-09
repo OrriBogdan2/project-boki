@@ -1,6 +1,6 @@
 class_name Heart
 extends RefCounted
-## The Heart loop (docs/decisions/0019-heartspark.md): every match is a fight over the Heart.
+## The Heart loop (docs/decisions/0023-heartspark.md): every match is a fight over the Heart.
 ##   1. The Blight's tide closes toward the Heart site (tide_r): outside the ring it is stronger and
 ##      comes for squads sooner (BlightDir.level / _spawn_tick read tide_boost / tide_heat).
 ##   2. A Heartspark charges at the Heart for charge_s, with a map marker and a world beam for everyone.

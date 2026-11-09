@@ -1,6 +1,6 @@
 class_name HeartHud
 extends RefCounted
-## The Heart on screen (docs/decisions/0019), for the Hud and the FullMap, the same for every player:
+## The Heart on screen (docs/decisions/0023), for the Hud and the FullMap, the same for every player:
 ##   - the Heart's marker with a charge ring on the minimap and the full map, and a waypoint in the world;
 ##   - the carrier's glyph on every map (revealed) with their name, and a waypoint over them;
 ##   - the Heart Gate (dim until the Heartspark is carried, then lit);

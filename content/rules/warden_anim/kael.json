@@ -1,0 +1,223 @@
+{
+	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"hide_while_chain": [
+		"spring_hangwarchain_0"
+	],
+	"hang_own_rest": [
+		"spring_hangwarchain"
+	],
+	"loco": {
+		"idle": "idle",
+		"stance": "stance",
+		"stance_after": 6.0,
+		"walk": {
+			"f": "walk_f",
+			"b": "walk_b",
+			"l": "walk_l",
+			"r": "walk_r"
+		},
+		"run": {
+			"f": "run_f",
+			"b": "run_b",
+			"l": "run_l",
+			"r": "run_r"
+		},
+		"walk_speed": 2.2,
+		"run_speed": 4.6
+	},
+	"crouch": {
+		"idle": "crouch_idle",
+		"walk": {
+			"f": "crouch_f",
+			"b": "crouch_b",
+			"l": "crouch_l",
+			"r": "crouch_r"
+		},
+		"in": "crouch_in",
+		"out": "crouch_out",
+		"speed": 2.42
+	},
+	"air": {
+		"rise": "jump",
+		"fall": "fall",
+		"glide": "glide",
+		"dive": "exdash"
+	},
+	"land": {
+		"clip": "land",
+		"dur": 0.4,
+		"min_fall": 0.25
+	},
+	"kmoves": {
+		"jug_slash_r": {
+			"clip": "slash_r"
+		},
+		"jug_slash_l": {
+			"clip": "slash_l"
+		},
+		"jug_wave_wind": {
+			"clip": "wave_wind",
+			"hold_from": 0.5,
+			"fade": 0.2
+		},
+		"jug_wave": {
+			"clip": "wave"
+		},
+		"jug_slam": {
+			"clip": "slam"
+		},
+		"jug_lunge_wind": {
+			"clip": "lunge_wind",
+			"hold_from": 0.45,
+			"fade": 0.18
+		},
+		"jug_lunge": {
+			"clip": "lunge"
+		},
+		"jug_meteor": {
+			"clip": "meteor",
+			"hold_from": 0.3
+		},
+		"jug_meteor_land": {
+			"clip": "meteor_land"
+		},
+		"jug_dash": {
+			"clip": "dash"
+		},
+		"jug_exdash": {
+			"clip": "exdash"
+		},
+		"jug_chain": {
+			"clip": "chain"
+		},
+		"jug_reel": {
+			"clip": "reel",
+			"hold_from": 0.25,
+			"heading": true
+		},
+		"jug_spin": {
+			"clip": "spin"
+		},
+		"jug_chainlunge": {
+			"clip": "chainlunge"
+		},
+		"jug_haul_wind": {
+			"clip": "haul_wind",
+			"hold_from": 0.15
+		},
+		"jug_haulslam": {
+			"clip": "haulslam"
+		},
+		"jug_guard": {
+			"clip": "guard",
+			"hold_from": 0.2
+		},
+		"jug_riposte": {
+			"clip": "riposte"
+		},
+		"jug_roar": {
+			"clip": "roar",
+			"upper": true
+		},
+		"mf_xform": {
+			"clip": "fusion"
+		}
+	},
+	"states": {
+		"downed": "downed",
+		"reviving": "revive",
+		"dead": "death",
+		"dead_t": 1.5,
+		"stun": "stun",
+		"emote": "emote",
+		"hit": {
+			"front": "hit_f",
+			"back": "hit_b",
+			"dur": 0.42
+		}
+	},
+	"flow": [
+		[
+			"jug_slash_r",
+			0.25
+		],
+		[
+			"jug_slash_l",
+			0.25
+		],
+		[
+			"jug_dash",
+			0.42
+		],
+		[
+			"jug_slash_r",
+			0.25
+		],
+		[
+			"jug_lunge_wind",
+			0.6
+		],
+		[
+			"jug_lunge",
+			0.3
+		],
+		[
+			"jug_chain",
+			0.3
+		],
+		[
+			"jug_reel",
+			0.4
+		],
+		[
+			"jug_haul_wind",
+			0.2
+		],
+		[
+			"jug_haulslam",
+			0.3
+		],
+		[
+			"jug_wave_wind",
+			0.6
+		],
+		[
+			"jug_wave",
+			0.3
+		],
+		[
+			"jug_guard",
+			0.66
+		],
+		[
+			"jug_riposte",
+			0.3
+		],
+		[
+			"jug_slam",
+			0.8
+		]
+	],
+	"procedural": [
+		"ledge",
+		"mantle",
+		"stomp",
+		"base",
+		"drink"
+	],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R"
+	],
+	"skinned_weapon": true,
+	"blade": {
+		"root": "anchor_blade_root",
+		"tip": "weapon_muzzle"
+	}
+}
