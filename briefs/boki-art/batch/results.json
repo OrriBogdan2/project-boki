@@ -14563,5 +14563,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/jibbatross_r_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "lanternmit_e_w28",
+    "name": "Lanternmit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_e_w28",
+    "name": "Lanternmit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w28",
+    "name": "Jibbatross",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card_w28",
+    "name": "Lunowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_card_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_e_w28",
+    "name": "Lanternmit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card_w28",
+    "name": "Lunowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_card_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_card_w28",
+    "name": "Lunowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lunowl_card_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w28",
+    "name": "Murmurling (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w28_1.jpg",
+    "ok": true
   }
 ]
