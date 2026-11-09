@@ -7906,5 +7906,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/bucketmander_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "chimelop_r2",
+    "name": "Chimelop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chimelop_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_r",
+    "name": "Coolatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/coolatee_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_r",
+    "name": "Coolatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/coolatee_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop_r2",
+    "name": "Chimelop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chimelop_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_r2",
+    "name": "Cisternmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cisternmander_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_r2",
+    "name": "Cisternmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cisternmander_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_r",
+    "name": "Coolatee",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/coolatee_r_3.jpg",
+    "ok": true
   }
 ]
