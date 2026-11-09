@@ -518,7 +518,12 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 	if k.is_empty():
 		return
 	var mem: Array = k["memory"]
-	mem.append({"m": int(d.get("matches", 0)), "kind": kind, "text": text})
+	var m := int(d.get("matches", 0))
+	# the same care again since the last expedition stays one memory (the trust still counts)
+	var again := mem.slice(-6).any(func(e):
+		return int(e.get("m", -1)) == m and String(e.get("kind", "")) == kind and String(e.get("text", "")) == text)
+	if not again:
+		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
 	k["trust"] = clampf(float(k["trust"]) + trust_delta, 0.0, 100.0)
