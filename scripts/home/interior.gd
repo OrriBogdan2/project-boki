@@ -17,6 +17,7 @@ var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
 var pface := PI
+var verbs := HomeVerbs.new()      # your garden moves (home_verbs.gd)
 var walk_ph := 0.0
 var decor: Array = []           # [{id, x, z, r}], the live list in the save (or a copy when visiting)
 var nodes: Array = []           # one Node3D per decor entry
@@ -285,7 +286,7 @@ func _move_player(d: float) -> void:
 		pface = lerp_angle(pface, atan2(-hv.x, -hv.y), minf(1.0, d * 14.0))
 	player.rotation.y = pface
 	if not player.has_meta("anim"): player.set_meta("anim", HunterAnim.new(player))
-	(player.get_meta("anim") as HunterAnim).update(d, {"vel": pvel, "face": pface, "fired": 99.0, "holster": true})
+	(player.get_meta("anim") as HunterAnim).update(d, {"vel": pvel, "face": pface, "fired": 99.0, "holster": true}.merged(verbs.step(d)))
 
 func _find_interact() -> void:
 	var best := {}; var bd := 1.3
@@ -317,6 +318,7 @@ func _pet_kin(k: Dictionary) -> void:
 	Sfx.play("kin_happy", null, -4.0)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 10, 1.6)
 	k["t"] = 1.2; k["goal"] = k["pos"]
+	verbs.play("pat")
 	if not visit.is_empty():
 		return
 	var loves_pet: bool = rec.get("likes", {}).get("play", "") == "pet"
