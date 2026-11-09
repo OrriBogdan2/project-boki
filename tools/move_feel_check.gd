@@ -29,6 +29,8 @@ const T := {
 	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] SV slides ~0.38-0.49m"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
+	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
+	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
@@ -280,6 +282,17 @@ func _ground() -> void:
 			var hv := _hv(P)
 			if t90 < 0.0 and hv.length() >= 0.9 * top and absf(hv.angle_to(Vector2(0, 1))) < deg_to_rad(10.0): t90 = (i + 1) * DT
 		rec("ground_turn90_t", t90)
+		# a shove over the run (a knock, a kit step) slides out under the same brake, keys held or not
+		for keys in [Vector2.ZERO, Vector2(1, 0)]:
+			_reset(flat + Vector3(-3.0, 0, 0))
+			P.base_speed = top
+			P.vel = Vector3(10.0, 0, 0)
+			P.inp["move"] = keys
+			var xs := P.pos.x
+			for i in 90:
+				m.step(DT)
+				if _hv(P).length() <= (top + 0.02 if keys.x > 0.0 else 0.02): break
+			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
 

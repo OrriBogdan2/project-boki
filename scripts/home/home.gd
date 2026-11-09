@@ -1198,9 +1198,9 @@ func _move_player(d: float) -> void:
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	elif mv.length() > 0.001:
-		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, Hunter.GROUND_OVERSPEED, d)
+		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
 	else:
-		hv = HunterMove.brake(hv, run, 1.0, d)
+		hv = HunterMove.brake(hv, 1.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos

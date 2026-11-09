@@ -46,13 +46,14 @@ static func apply(h: Hunter) -> void:
 static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
 
-## Ground speed after a step with no keys: UE's walking brake, ground_friction (share of the speed per
-## second) plus a constant brake_decel, so a let-go from a run slides ~0.3 m. Speed over `run` (a kit
-## step, a knock) first sheds at Hunter.GROUND_SHED. grip < 1 on ice.
-static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
-	var s := hv.length()
-	if s > run + 0.05:
-		return hv * (maxf(run, s - Hunter.GROUND_SHED * grip * dt) / s)
+## The source's walking brake at `speed` (m/s^2): ground_friction's share of the speed plus brake_decel. UE
+## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
+static func brake_rate(speed: float) -> float:
+	return ground_friction * speed + brake_decel
+
+## Ground speed after a step with no keys: the walking brake, so a let-go from a run slides ~0.3 m and a
+## knock or kit step slides out under the same rule. grip < 1 on ice.
+static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)
 
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
@@ -70,13 +71,23 @@ static func dash_k(curve: Array, u: float) -> float:
 			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
 	return float(curve[-1][1])
 
-## Metres a let-go at v0 m/s slides on flat ground under brake() (dv/dt = -friction*v - brake_decel):
-## a kit step with a measured total takes this off its dash so the slide doesn't add to it.
-static func slide(v0: float) -> float:
+## Metres speed v0 slides on flat ground under brake_rate before it falls to `to_speed` m/s (0: a let-go; the run
+## speed: keys held). A kit step with a measured total takes this off its dash so the slide doesn't add to it.
+static func slide(v0: float, to_speed := 0.0) -> float:
 	var k := ground_friction
-	if k <= 0.0:
-		return v0 * v0 / (2.0 * brake_decel)
-	return v0 / k - brake_decel / (k * k) * log(1.0 + k * v0 / brake_decel)
+	return (v0 - to_speed) / k - brake_decel / (k * k) * log((k * v0 + brake_decel) / (k * to_speed + brake_decel))
+
+## The speed that slides `dist` metres before it falls to `to_speed` (the inverse of slide; a lunge's push).
+static func slide_speed(dist: float, to_speed := 0.0) -> float:
+	var lo := to_speed
+	var hi := to_speed + 60.0
+	for i in 24:
+		var mid := (lo + hi) * 0.5
+		if slide(mid, to_speed) < dist:
+			lo = mid
+		else:
+			hi = mid
+	return hi
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's

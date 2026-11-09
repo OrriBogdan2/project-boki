@@ -13,8 +13,6 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
-const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
-const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
@@ -39,7 +37,6 @@ const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its sid
                                  # (a bit past the normal ledge reach); deeper you slide down the face
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
-const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
 const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
 const SPIKE_DMG := 8.0
@@ -1438,11 +1435,10 @@ func _lunge(dist: float) -> void:
 	var k := pow(0.75, lunge_n)
 	lunge_n += 1
 	lunge_at = m.time
-	# the speed that covers about dist before ground friction takes it back (it bleeds off slower
-	# while you're holding a direction)
+	# the speed that covers about dist before the ground brake takes it back (to a walk while you hold a direction)
 	var d2 := aim_dir()
 	var moving := (inp["move"] as Vector2).length() > 0.1
-	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_SHED) * dist * k + (base_speed * base_speed if moving else 0.0))
+	var want := HunterMove.slide_speed(dist * k, base_speed if moving else 0.0)
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(d2)
 	hv += d2 * (maxf(along, want) - along)
@@ -2131,9 +2127,9 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
+				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
-				hv = HunterMove.brake(hv, spd, grip, dt)
+				hv = HunterMove.brake(hv, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
