@@ -141,6 +141,8 @@ posts scroll at the move speed).
 
 ![mage walk and run, before and after](anim_audit/mage.jpg)
 
+![mage rmb, before (top) and after (bottom): 8 frames, side view](anim_audit/mage_rmb.jpg)
+
 **Motley (`ostra`)**
 1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
 2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights.
