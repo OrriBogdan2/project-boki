@@ -16964,5 +16964,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/amanitusk_e_w29_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_loafhopper",
+    "name": "Loafhopper (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w29",
+    "name": "Amanitusk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w29",
+    "name": "Amanitusk",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_r_w29",
+    "name": "Bellowlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowlet_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_r_w29",
+    "name": "Bellowlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowlet_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet_r_w29",
+    "name": "Bellowlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowlet_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w29",
+    "name": "Buckleron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_r2_w29",
+    "name": "Geysirbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_r2_w29_1.jpg",
+    "ok": true
   }
 ]
