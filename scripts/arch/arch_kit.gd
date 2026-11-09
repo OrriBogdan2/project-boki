@@ -34,6 +34,7 @@ var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
+var queue: CastQueue           # what RMB and E presses do during another ability's wind-up or recovery
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
@@ -58,6 +59,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k.d = Arch.def(arch_id)
 	k.ch_rmb = float(k.rmb_def().get("charges", 1))
 	k.flow = DashFlow.new(k)
+	k.queue = CastQueue.new(k)
 	k._setup()
 	return k
 
@@ -104,6 +106,7 @@ func _drop_holds() -> void: pass
 ## state this hunter shows. Call this, not _drop_holds, so the shared telegraphs always go with the holds.
 func drop_holds() -> void:
 	_drop_holds()
+	queue.clear()
 	AimKit.clear(h)
 func fire_rmb(_c: Dictionary) -> void: pass        # c: {hold, air, e, r, full, t, variant}
 func rmb_press_extra() -> bool: return false        # a recast that takes the press (Shadow Step); true = handled
@@ -196,6 +199,7 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
+	queue.route(dt)
 
 func held(which: String) -> bool:
 	match which:
@@ -209,6 +213,9 @@ func _r_end() -> void: pass
 ## A cast holds the caster still (no walking or jumping); aim_lock() is the facing it keeps (ZERO: free to turn).
 func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
+## The slot whose wind-up or recovery owns the body now ("rmb", "e" or "x"; "" for none): CastQueue holds or
+## routes the other slots' presses by content/rules/cast_queue.json.
+func move_slot() -> String: return ""
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
 

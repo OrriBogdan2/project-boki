@@ -456,7 +456,7 @@ func on_dash(use_ex: bool) -> bool:
 	if _dash_waits():
 		dash_held = true
 		return true
-	var slot := _move_slot()
+	var slot := move_slot()
 	var from_pull := slot == "e" and _into_mode(slot) == "cancel"
 	var from_slam := not slam_w.is_empty() and h.grounded
 	if from_pull:
@@ -651,7 +651,7 @@ func _flush_buffer() -> void:
 
 ## Which of his moves owns the body now, by slot ("" for none): the Gilded Riposte's guard and cleave, a Smash
 ## (the Slam's wind-up, a Lunge, a Meteor Drop in the air), the Warchain's pull.
-func _move_slot() -> String:
+func move_slot() -> String:
 	if riposte.move_k() <= 0.0:
 		return "x"
 	if not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne():
@@ -666,7 +666,7 @@ func _into_mode(slot: String) -> String:
 ## Shift is held now (it goes the step this turns false): a move whose into_dash row buffers it (the guard and
 ## the cleave), or a Lunge or a Meteor Drop's dive, each a dash of its own.
 func _dash_waits() -> bool:
-	var slot := _move_slot()
+	var slot := move_slot()
 	if slot != "" and _into_mode(slot) == "buffer":
 		return true
 	return not lunge.is_empty() or meteor.phase == "dive"

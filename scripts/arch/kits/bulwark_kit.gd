@@ -264,6 +264,10 @@ func _start_ult() -> bool:
 func ult_running() -> bool:
 	return ult.phase != ""
 
+## Faultline's plant (CastQueue: RMB and E wait for him to unplant).
+func move_slot() -> String:
+	return "x" if ult.planted() else ""
+
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):

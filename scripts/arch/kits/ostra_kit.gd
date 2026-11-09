@@ -69,6 +69,7 @@ func ult_running() -> bool: return well.running()
 func cast_locked() -> bool: return well.locked
 func aim_lock() -> Vector2: return well.aim_lock
 func busy() -> bool: return super.busy() or well.locked
+func move_slot() -> String: return "x" if well.locked else ""      # CastQueue: presses wait for the lock
 func can_shoot() -> bool: return not well.locked and super.can_shoot()
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)

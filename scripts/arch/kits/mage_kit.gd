@@ -88,6 +88,10 @@ func ult_recast() -> bool:
 func busy() -> bool:
 	return super.busy() or ult.busy()
 
+## Kitefall's crouch to its strike (CastQueue: RMB and E wait for the landing).
+func move_slot() -> String:
+	return "x" if ult.busy() else ""
+
 func fire_ok() -> bool:
 	return not ult.busy()
 

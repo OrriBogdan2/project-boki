@@ -777,6 +777,15 @@ func has_ult() -> bool: return true
 
 func ult_running() -> bool: return broadside.running()
 
+## The move that owns his body (CastQueue): the hook's flight and reel, the Anchor's wind-up and air smash, the
+## Broadside.
+func move_slot() -> String:
+	if broadside.running():
+		return "x"
+	if wind > 0.0 or not dive.is_empty():
+		return "e"
+	return "rmb" if flying or not pull.is_empty() else ""
+
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null or not pull.is_empty() or wind > 0.0 or not dive.is_empty() or broadside.running():

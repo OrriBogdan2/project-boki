@@ -70,6 +70,10 @@ func cast_ult() -> bool:
 func has_ult() -> bool:
 	return true
 
+## The Longneedle's charge holds her (CastQueue: an RMB press waits for the shot).
+func move_slot() -> String:
+	return "" if needle.is_empty() else "e"
+
 func full_ready() -> bool:
 	return false
 

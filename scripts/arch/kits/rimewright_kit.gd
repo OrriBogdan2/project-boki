@@ -332,6 +332,10 @@ func face_locked() -> bool:
 func cast_locked() -> bool:
 	return not rime.is_empty()
 
+## Sealed in Rimelock (CastQueue: RMB and E wait for the seal to break).
+func move_slot() -> String:
+	return "" if rime.is_empty() else "x"
+
 ## Seconds left in the skate (the timer in_dash reads): to its full length while Shift is held, else to its
 ## shortest run.
 func dash_left() -> float:
