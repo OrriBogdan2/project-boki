@@ -36060,5 +36060,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_snapler_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_truffapir_full",
+    "name": "Truffapir (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_truffapir_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_truffapir_full",
+    "name": "Truffapir (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_truffapir_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snapler_full",
+    "name": "Snapler (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_snapler_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_truffapir_full",
+    "name": "Truffapir (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_truffapir_full_3.jpg",
+    "ok": true
   }
 ]
