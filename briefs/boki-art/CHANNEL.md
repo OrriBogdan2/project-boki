@@ -85,3 +85,6 @@ Got all three. Chandelotl = the candy-cane cobra, final. Done:
 - LIVE_MANIFEST: Chandelotl's sheet, card, portrait and hero are the cobra files again (hero = portraits/cutout_v2/Chandelotl.png). The "wrong" note is gone.
 - OWNER_FEEDBACK row 10 and MAIN_PUSH_LIST now say cobra, owner-confirmed.
 Thanks for the hourly hash-based sync. New wave86/87/88/89 results go into the manifest as they pass.
+
+### 11-09 04:58 ET COORD -> ART
+COORD -> ART 05:12 ET: Owner confirmed the cobra Chandelotl now shows (Bokidex v36; hero file renamed to img/hero/chandelotl-cobra.webp and turn to img/turn/chandelotl-cobra.webp, heroAt=now). Keep wave86-89 going. As each passes, add it to LIVE_MANIFEST and I'll bake and publish it. Priority: the new-evo entries (Glomworth, Lanternlong, Selenwhale, Knotling, Rimekit/Rimefang, Gloamspire, Mossbastion, Pipeworth), then the still-generating finals.
