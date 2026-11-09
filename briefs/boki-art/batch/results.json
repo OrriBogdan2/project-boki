@@ -5330,5 +5330,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/gongibbon_f_1.jpg",
     "ok": true
+  },
+  {
+    "id": "eclipsowl_f",
+    "name": "Eclipsowl (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_f",
+    "name": "Gongrowl (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f",
+    "name": "Murmurling (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f",
+    "name": "Murmurling (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigeetle",
+    "name": "Effigeetle (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_effigeetle_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigeetle",
+    "name": "Effigeetle (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_effigeetle_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaivyx",
+    "name": "Glaivyx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glaivyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink",
+    "name": "Ermink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaivyx",
+    "name": "Glaivyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glaivyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_flarmink",
+    "name": "Flarmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_flarmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_echolop",
+    "name": "Echolop (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_echolop_2.jpg",
+    "ok": true
   }
 ]
