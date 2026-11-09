@@ -57,6 +57,8 @@ const CHECKS := {
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
+	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
+	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],      # --shots-dir=<dir> (GPU)
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
