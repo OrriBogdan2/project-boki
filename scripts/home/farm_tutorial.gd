@@ -235,6 +235,10 @@ static func give_seed_gems() -> int:
 	Save.d["gems"] = int(Save.d["gems"]) + add
 	return add
 
+## The "Welcome home" card's second line (the base's names what to do first; the farm's points to Hob).
+static func welcome() -> String:
+	return String(rules()["base"]["welcome"] if base() else rules()["welcome"])
+
 ## The starter food: the base's is a typed one, so its meal shows the lean.
 static func food() -> Dictionary:
 	return rules()["base"]["start_food"] if base() else rules()["start_food"]
@@ -247,4 +251,5 @@ static func give_food() -> void:
 	st["gift"] = true
 	var meal := food()
 	for k in meal:
-		Save.d["items"][k] = int(Save.d["items"].get(k, 0)) + int(meal[k])
+		var shelf: Dictionary = Save.d["crops"] if Data.CROPS.has(k) else Save.d["items"]      # a crop is fed from the crop shelf
+		shelf[k] = int(shelf.get(k, 0)) + int(meal[k])

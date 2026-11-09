@@ -2490,7 +2490,7 @@ func _open_welcome() -> void:
 	var kn: String = Save.active_kin().get("name", "your Boki")
 	var v := _new_panel("Welcome home", 580)
 	UI.subtitle(v, "This island is yours, and %s lives here with you." % kn)
-	v.add_child(UI.para("Hob will show you around. Out in the wild, what you find is only yours once you make it back.", UI.T_BODY, UI.MUTED))
+	v.add_child(UI.para(FarmTutorial.welcome(), UI.T_BODY, UI.MUTED))
 	var b := UI.footer_primary(v, "Let's go", func():
 		Save.d["tutorial"]["home"] = true
 		Save.save_game()

@@ -40,7 +40,8 @@ func players(u: int) -> Array:
 	return h.kins.filter(func(o): return o.has("play") and int(o["play"]["u"]) == u)
 
 func _lean(rec: Dictionary) -> String:
-	return String(rec.get("lean", BokiLines.element_of(String(rec.get("species", ""))))).to_lower()
+	var fed := String(Evo.lean(rec)[0])      # rec["lean"] is the food-lean dictionary once it has eaten a typed snack
+	return fed if fed != "" else String(BokiLines.element_of(String(rec.get("species", "")))).to_lower()
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
 func weight(rec: Dictionary, toy_id: String) -> float:

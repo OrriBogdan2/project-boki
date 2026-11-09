@@ -134,7 +134,7 @@ func _base_tutorial() -> void:
 	rules["base_mode"] = false
 
 func _berries() -> int:
-	return int(Save.d["items"].get("emberberry", 0))
+	return int(Save.d["crops"].get("emberberry", 0))
 
 ## In a real Home: meeting, feeding through the home's own path, and Skip.
 func _base_world() -> void:

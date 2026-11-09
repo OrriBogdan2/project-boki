@@ -203,7 +203,9 @@
 			}
 		}
 	],
+	"welcome": "Hob will show you around. Out in the wild, what you find is only yours once you make it back.",
 	"base": {
+		"welcome": "Say hello to it, give it a snack and put a toy down. Out in the wild, what you find is only yours once you make it back.",
 		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it.",
 		"start_food": {"emberberry": 3},
 		"skip_toy": "toy_ball",
@@ -236,7 +238,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing."},
+				"hints": {"go": "Press {interact} at the portal when you want to head out. Until then, your Boki keeps playing."},
 				"world": {"go": "Portal"}
 			}
 		]

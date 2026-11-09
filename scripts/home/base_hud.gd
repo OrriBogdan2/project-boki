@@ -64,14 +64,16 @@ func _refresh() -> void:
 	body.add_child(_para(next_action(rec, h.POND_EDGE.x > -100.0), UI.GOLD))
 	reset_size()
 
-## The one thing to do next: what the Boki wants, else something to enjoy.
+## The one thing to do next: the base tutorial's step while it runs, else what the Boki wants, else something to enjoy.
 static func next_action(rec: Dictionary, pond: bool) -> String:
+	if FarmTutorial.active():
+		return FarmTutorial.hint_text(FarmTutorial.current())
 	if Care.want(rec) != "":
 		return KinWants.line(rec, pond)
 	return "%s is happy: take a trip, or place a toy" % String(rec["name"])
 
 func _need_sig(rec: Dictionary) -> String:
-	return "%s%s" % [rec["uid"], Care.NEEDS.map(func(n): return int(Care.need(rec, n) / 4.0))]
+	return "%s%s%s" % [rec["uid"], Care.NEEDS.map(func(n): return int(Care.need(rec, n) / 4.0)), FarmTutorial.current()]
 
 func _need_row(n: String, v: float) -> Control:
 	var row := UI.hbox(6)

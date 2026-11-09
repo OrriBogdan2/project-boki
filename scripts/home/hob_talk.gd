@@ -58,7 +58,7 @@ func start() -> void:
 	if offer_due():
 		box.say(_offer_lines(), _show_offer)
 	elif first and FarmTutorial.active():
-		box.say(rules()["intro"], box.close)
+		box.say(rules()["intro_base" if FarmUnlocks.base_mode() else "intro"], box.close)
 	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
 	else:

@@ -35,6 +35,11 @@
 			{"text": "First you need a house. That spot over there will do nicely.", "show": "house"},
 			{"text": "A house needs wood. Here, take an axe and chop a tree.", "show": "tree"}
 		],
+		"intro_base": [
+			{"text": "There you are! I'm Hob Brackenridge. I build things.", "pose": "wave"},
+			{"text": "This is your base. Your Boki lives here, and it plays on its own."},
+			{"text": "Say hello to it, give it a snack and set a toy down. Then see what it does."}
+		],
 		"offer": [
 			{"text": "By the way... I see you found a {mask} Relic."},
 			{"text": "Could I interest you in another?"}

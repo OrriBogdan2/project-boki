@@ -55,7 +55,7 @@ func run(m: Node) -> void:
 	var storm := {"species": "kestrike", "traits": {}}
 	var stone := {"species": "basaltoad", "traits": {}}
 	var frost := {"species": "rimeshrew", "traits": {}}
-	var wet := {"species": "kestrike", "lean": "Water", "traits": {}}
+	var wet := {"species": "kestrike", "lean": {"water": 1.0}, "traits": {}}
 	var likes_post: bool = toys.weight(storm, "toy_post") > toys.weight(storm, "toy_tub") \
 			and toys.weight(stone, "toy_post") > toys.weight(stone, "toy_ball")
 	ok(likes_post,
