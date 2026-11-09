@@ -3,8 +3,8 @@ extends RefCounted
 ## Keeps a Boki wisp (BokiWispLook) out of the way at the match camera (DECISIONS 2026-11-09): it orbits on
 ## the side away from the aim, fades while it is over the aim line, the cursor, your hit circle or a plate,
 ## sheds a shorter trail when its Hunter fires, and with a crowd only the nearest few keep sparkles.
-## Pure look rules: who carries the wisp is the wisp prototype's job. Everything is judged on screen (px),
-## because the aim line lies on the ground and the wisp floats at shoulder height.
+## Pure look rules: KinWisp.render calls them for each wisp. Everything is judged on screen (px), because the
+## aim line floats at hip height and the wisp at shoulder height.
 
 const ORBIT_R := 0.95           # m from the Hunter's middle
 const REAR := 1.75              # rad off the aim where its arc is centred (100 deg: beside it, a little behind)
@@ -21,6 +21,9 @@ const FIRE_TRAIL := 0.4         # fraction of the trail's life while its Hunter 
 const TRAIL_RANGE := 14.0       # m from you: further wisps shed no sparkles
 const TRAIL_WISPS := 10         # wisps that may shed sparkles at once: BokiWispLook's budget of 300
 const PLATE_ABOVE := 15.0       # px of the plate's name line over its bars
+const LINE_Y := 0.95            # m over the feet where Match draws the aim line
+const HIT_R := 0.48             # m: a Hunter's hit circle on the ground (r 0.4 + Match.HIT_SLACK)
+const LINE_FROM := 0.6          # m from the Hunter's middle where the drawn aim line starts
 
 ## The screen the camera shows: world point to pixels, and how many pixels a metre is at that depth.
 class View extends RefCounted:
@@ -41,14 +44,15 @@ class View extends RefCounted:
 		return focal / -(inv * p).z
 
 ## Where the wisp rides: an arc behind its Hunter relative to the aim (aim is flat, x/z), on the side whose
-## whole arc is furthest from the aim line on screen, sinking a little to stay under its Hunter's plate. Keeps
-## its side in the wisp's meta.
+## whole arc is furthest on screen from the aim, the cursor at its end and the Hunter's hit circle, sinking a
+## little to stay under its Hunter's plate. Keeps its side in the wisp's meta.
 static func place(view: View, feet: Vector3, y: float, aim: Vector2, line_len: float, wisp: Node3D,
 		t: float) -> Vector3:
 	var side := float(wisp.get_meta("side", 1.0))
 	var line := aim_line(view, feet, aim, line_len)
-	var here := _arc_gap(view, feet, y, aim, side, line)
-	if _arc_gap(view, feet, y, aim, -side, line) > here + SIDE_STICKY:
+	var keep_off: Array[Rect2] = [ground_rect(view, feet, HIT_R), cursor_rect(line[1])]
+	var here := _arc_gap(view, feet, y, aim, side, line, keep_off)
+	if _arc_gap(view, feet, y, aim, -side, line, keep_off) > here + SIDE_STICKY:
 		side = -side
 		wisp.set_meta("side", side)
 	var swing := SWING * sin(TAU * (t * SWING_HZ + float(wisp.get_meta("phase", 0.0))))
@@ -64,9 +68,13 @@ static func alpha(view: View, wisp_at: Vector3, line: PackedVector2Array, rects:
 	var over_rect := lerpf(PLATE_ALPHA, 1.0, clampf(rect_gap_min / FADE_BAND, 0.0, 1.0))
 	return minf(over_line, over_rect)
 
-## px between the wisp's edge (its reach) and the aim line's edge: below 0 they overlap.
+## px between the wisp's edge (its reach) and the nearest aim segment's edge: below 0 they overlap. No line: INF.
 static func line_gap(view: View, wisp_at: Vector3, line: PackedVector2Array) -> float:
-	return _seg_gap(view.px(wisp_at), line[0], line[1]) - (REACH + LINE_HALF) * view.per_m(wisp_at)
+	var p := view.px(wisp_at)
+	var gap := INF
+	for i in range(0, line.size() - 1, 2):
+		gap = minf(gap, _seg_gap(p, line[i], line[i + 1]))
+	return gap - (REACH + LINE_HALF) * view.per_m(wisp_at)
 
 ## Puts the rules on the node: fade, a shorter trail while firing, and sparkles on or off.
 static func apply(wisp: Node3D, fade: float, firing: bool, sparkles: bool) -> void:
@@ -89,10 +97,13 @@ static func sparkly(dists: PackedFloat32Array) -> PackedByteArray:
 		out[i] = 1 if dists[i] <= TRAIL_RANGE and nearer < TRAIL_WISPS else 0
 	return out
 
-## The aim line on screen: from the Hunter's feet, line_len m along the aim.
+## The aim on screen as two segments: AimDraw's ribbon on the ground from the feet, and Match's line at LINE_Y
+## from LINE_FROM, both line_len m along the aim. The cursor sits at the ground segment's end ([1]).
 static func aim_line(view: View, feet: Vector3, aim: Vector2, line_len: float) -> PackedVector2Array:
-	var end := feet + Vector3(aim.x, 0, aim.y) * line_len
-	return PackedVector2Array([view.px(feet), view.px(end)])
+	var dir := Vector3(aim.x, 0, aim.y)
+	var hip := feet + Vector3.UP * LINE_Y
+	return PackedVector2Array([view.px(feet), view.px(feet + dir * line_len),
+		view.px(hip + dir * LINE_FROM), view.px(hip + dir * maxf(line_len, LINE_FROM))])
 
 ## A ground circle (your hit circle) as the screen rect that holds it.
 static func ground_rect(view: View, feet: Vector3, radius: float) -> Rect2:
@@ -101,9 +112,9 @@ static func ground_rect(view: View, feet: Vector3, radius: float) -> Rect2:
 		rect = rect.expand(view.px(feet + corner))
 	return rect
 
-## The plate over a Hunter, as the screen rect it covers (its name line, bars and frame).
-static func plate_rect(view: View, feet: Vector3) -> Rect2:
-	var top := view.px(feet + Vector3(0, HudPlate.PLATE_OFFSET, 0))
+## The plate over a Hunter (offset m over the feet), as the screen rect it covers (name line, bars, frame).
+static func plate_rect(view: View, feet: Vector3, offset := HudPlate.PLATE_OFFSET) -> Rect2:
+	var top := view.px(feet + Vector3(0, offset, 0))
 	var w := HudStyle.PLATE_W + HudStyle.PLATE_PAD * 2.0
 	var h := HudStyle.PLATE_HP_H + HudStyle.PLATE_AR_H + HudStyle.PLATE_PAD * 2.0 + 1.0
 	return Rect2(top.x - w * 0.5, top.y - PLATE_ABOVE, w, h + PLATE_ABOVE)
@@ -123,12 +134,16 @@ static func _at(feet: Vector3, y: float, aim: Vector2, side: float, swing: float
 	var off := aim.rotated(side * (REAR + swing)) * ORBIT_R
 	return Vector3(feet.x + off.x, y, feet.z + off.y)
 
-## The smallest gap (px, past the wisp's reach) between the aim line and the wisp anywhere on one side's arc.
-static func _arc_gap(view: View, feet: Vector3, y: float, aim: Vector2, side: float, line: PackedVector2Array) -> float:
+## The smallest gap (px, past the wisp's reach) between the wisp anywhere on one side's arc and the aim line
+## or the rects (hit circle, cursor).
+static func _arc_gap(view: View, feet: Vector3, y: float, aim: Vector2, side: float, line: PackedVector2Array,
+		rects: Array[Rect2]) -> float:
 	var gap := INF
 	for s in [-SWING, 0.0, SWING]:
-		var at := _at(feet, y, aim, side, s)
+		var at := _below_plate(view, feet, _at(feet, y, aim, side, s))
 		gap = minf(gap, line_gap(view, at, line))
+		for r in rects:
+			gap = minf(gap, rect_gap(view, at, r))
 	return gap
 
 static func _seg_gap(p: Vector2, a: Vector2, b: Vector2) -> float:

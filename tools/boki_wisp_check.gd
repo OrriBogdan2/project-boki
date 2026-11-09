@@ -76,7 +76,6 @@ func _room() -> void:
 ## The match camera of each style (scripts/match/cam.gd): pitch deg, distance m, fov deg; the world looks north.
 const CAMERAS := [[66.0, 23.0, 32.0], [57.0, 32.2, 28.0], [50.0, 23.0, 42.0]]
 const SCREEN := Vector2(1920, 1080)
-const HUNTER_R := 0.48          # m: a Hunter's hit circle (r 0.4 + Match.HIT_SLACK)
 const AIM_LENS := [1.5, 4.0, 12.0]
 const SWEEP_STEP := 3           # deg between aims in the 360 sweep
 const SWING_STEPS := 8          # wisp positions along one swing
@@ -109,7 +108,7 @@ func _clear_sweep() -> void:
 					var line := BokiWispClear.aim_line(view, feet, aim, len)
 					var rects := {
 						"cursor": BokiWispClear.cursor_rect(line[1]),
-						"hit": BokiWispClear.ground_rect(view, feet, HUNTER_R),
+						"hit": BokiWispClear.ground_rect(view, feet, BokiWispClear.HIT_R),
 						"plate": BokiWispClear.plate_rect(view, feet),
 					}
 					for i in SWING_STEPS:
@@ -135,7 +134,7 @@ func _clear_rules() -> void:
 	var feet := Vector3.ZERO
 	var line := BokiWispClear.aim_line(view, feet, Vector2.RIGHT, 8.0)
 	var no_rects: Array[Rect2] = []
-	var covering := Vector3(4, 0.4, 0)               # on the line (which lies on the ground)
+	var covering := Vector3(4, BokiWispClear.LINE_Y, 0)    # on the line
 	ok(BokiWispClear.alpha(view, covering, line, no_rects) <= OVER_LINE, "over the aim line it is dimmed")
 	var clear := Vector3(4, 0.4, -6)
 	ok(is_equal_approx(BokiWispClear.alpha(view, clear, line, no_rects), 1.0), "in the clear it is full")

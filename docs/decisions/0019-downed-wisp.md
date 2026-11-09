@@ -42,9 +42,13 @@ matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; chec
 
 ### Readability at the match camera
 `BokiWispClear` (scripts/kin/boki_wisp_clear.gd) is the wisp's keep-clear rules, judged on screen. It orbits an arc
-(not a lap) behind and beside the aim, on the side whose arc is furthest from the aim line on screen. It sinks up to half a metre to stay under its own plate, and dims over the aim line (to 0.2) or the cursor, your hit
-circle or a plate (to 0.5: the HUD draws those over it anyway; the default shoulder height puts it by the plate a lot). Its trail is 40% as long while its Hunter fires. Only
+(not a lap) behind and beside the aim, on the side whose arc is furthest on screen from the aim (AimDraw's ground
+ribbon and Match's hip-height line), the cursor and its Hunter's hit circle. It sinks up to half a metre to stay
+under its own plate, and dims over your aim (to 0.2) or the cursor, your hit circle or a plate within 4 m (to 0.5:
+the HUD draws those over it anyway; at shoulder height it is by a plate on about half the aims, so a lower ride
+height would dim it less: owner's call). Its trail is 40% as long while its Hunter fires. Only
 the nearest 10 wisps within 14 m keep sparkles (30 Hunters stay under the 300 budget). The body blends with no
 depth write at render priority -1, so telegraphs (priority 2) and the HUD plates draw over it. `--boki-wisp-check`
 sweeps the aim over 360 degrees for three camera styles; shots: `--wisp-clear-shots --shots-dir=<dir>` (GPU).
-The wisp prototype calls `place`, `alpha`, `apply` and `sparkly` from `KinWisp.render`.
+`KinWisp.render` calls `place`, `alpha` and `apply` for each wisp, with the screen, your aim and the sparkle
+set built once a frame; `--wisp-check` asserts a match wisp rides on the side away from the aim.
