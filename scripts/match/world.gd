@@ -457,6 +457,9 @@ func generate(seed_val: int, size := 64, n_islands := 7) -> void:
 		_place_compounds()
 	_place_stairs()
 	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # no lone posts a shot could clip
+	_clear_strays()
+	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # (a wall piece that leaned on a stray rock)
+	BlockPrune.fill_pockets(self)                     # no ground sealed in by rocks to be trapped in (item 151)
 
 ## On the big islands the point of interest sits inside a walled compound: a square of stone walls
 ## with a gate in each side and a squat tower at each corner, so each island reads as one place
@@ -590,8 +593,18 @@ func _wall_at(q: Vector2i, ii: int) -> void:
 		kind[idx(q.x, q.y)] = T_BLOCK
 		walls[idx(q.x, q.y)] = true
 
+var strays: Array = []       # tile indices of the scattered random rocks, cleared before the map is built
+
+## Item 151: no stray rocks to snag on (they looked a step high and blocked like a wall). They're placed and then
+## cleared, so every spot, spawn and chest the generator picks around them lands where it always has.
+func _clear_strays() -> void:
+	for i: int in strays:
+		if kind[i] == T_BLOCK and not walls.has(i) and not props.has(i):
+			kind[i] = T_GROUND
+	strays.clear()
+
 func _place_blockers() -> void:
-	walls.clear(); bush.clear(); live_bush.clear()
+	walls.clear(); bush.clear(); live_bush.clear(); strays.clear()
 	for ii in islands.size():
 		var isl: Dictionary = islands[ii]
 		var cells: Array = isl["cells"]
@@ -601,6 +614,7 @@ func _place_blockers() -> void:
 				continue
 			if rng.randf() < 0.03:
 				kind[i] = T_BLOCK
+				strays.append(i)        # cleared once every spot is placed (item 151), so the spots stay put
 		# stone walls to fight around and peek past: straight runs with a doorway, corners,
 		# rows of pillars, and on big islands a broken square keep
 		var n_walls := 1 + int(cells.size() / 110) + rng.randi_range(0, 1)
@@ -1159,6 +1173,7 @@ func build_meshes() -> void:
 	mat.set_shader_parameter("height_tex", tm.height_texture())
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
+	mat.set_shader_parameter("depth_k", DepthCues.k())
 	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)
 	if Flora.on():
 		var bt := _biome_textures()

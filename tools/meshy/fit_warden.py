@@ -2415,7 +2415,7 @@ def hair_spring(ob, arm, hs):
 
 
 def emit_art(ob, img, el):
-    """An emission mask projected from the art (Ryzz's pink scar, choker charm, corset piping and forearm veins: the
+    """An emission mask projected from the art (Sparkle's pink scar, choker charm, corset piping and forearm veins: the
     scan paints them as plain pink, the art draws them as neon). In Meshy's frame, before the fit (the mesh still
     stands as the front view does), every texel of a face in one of `boxes` that faces the camera (normal -Y) gets
     its surface point, which the front view's registration puts on the art: `image`, `px_per_m`, `col_at` / `row_at`
@@ -2497,7 +2497,7 @@ def emit_art(ob, img, el):
 
 def paint_art(ob, img, pa):
     """The art painted over the finished atlas by an orthographic front projection with its own registration
-    (Ryzz's face from the head sheet, which draws it at 3.5x the front view's pixels): in Meshy's frame, before the
+    (Sparkle's face from the head sheet, which draws it at 3.5x the front view's pixels): in Meshy's frame, before the
     fit, every texel of a face on one of `slots` inside `box` [x0, x1, z0, z1] that faces the camera (normal -Y)
     takes the art's pixel at col = col_at + x * kx, row = row_at - z * ky, blended by `k` and feathered over
     `feather` m from the box's edges; art pixels in a `keep` hsv range (the art's hair) leave the scan's own."""
@@ -2566,7 +2566,7 @@ spec_emit_atlas = []
 
 
 def net_paint(ob, img, nt):
-    """A fishnet over skin (Ryzz's thighs; the scan paints it as a tan blur): skin texels of faces in `box` (Meshy
+    """A fishnet over skin (Sparkle's thighs; the scan paints it as a tan blur): skin texels of faces in `box` (Meshy
     frame) darkened along a diamond lattice in surface space, lines `line` m wide every `pitch` m on the two
     diagonals of (x or y, z), to `colour`."""
     w, h = img.size
@@ -2629,7 +2629,7 @@ def emit_attach(ob, img, mask, parts=()):
         mask = mask.reshape(h, f, w, f, 3).mean(axis=(1, 3))
     ea = spec_emit_atlas[0] if spec_emit_atlas else None
     if ea:
-        # (pieces that glow in their own painted colour, not the Warden's glow colour: Ryzz's hazard bands, a faint
+        # (pieces that glow in their own painted colour, not the Warden's glow colour: Sparkle's hazard bands, a faint
         # yellow that the match camera's far_emit lifts so they read at distance; the shader keeps yellow untinted)
         px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., :3]
         hh, ss, vv = _hsv_px(px)
@@ -3131,124 +3131,6 @@ def _tail_s(co, path):
 
 
 
-def hot_faces(ob, hb):
-    """Faces inside a box (the Meshy frame) whose atlas has hot texels (Kael's magma cracks, his right arm only) move
-    to a copy of their material named "<slot>-<tag>-hot": the game lights only that material's hot texels, keyed per
-    texel (hero_toon glow_key), in the Warden's glow colour; the skin round the cracks stays skin."""
-    me = ob.data
-    b = hb["box"]
-    hot = {}
-    n = 0
-    for p in me.polygons:
-        c = p.center
-        if not (b[0] <= c.x <= b[1] and b[2] <= c.y <= b[3] and b[4] <= c.z <= b[5]):
-            continue
-        m = me.materials[p.material_index]
-        if m is None or m.name.split("-")[0] not in hb.get("slots", ["skin"]):
-            continue
-        if m.name not in hot:
-            h = m.copy()
-            h.name = m.name + "-hot"
-            me.materials.append(h)
-            hot[m.name] = len(me.materials) - 1
-        p.material_index = hot[m.name]
-        n += 1
-    log("hot faces: %d in %s" % (n, b))
-
-
-def hot_paint(ob, img, hp):
-    """Kael's arm cracks as the art draws them (kael_arm_sheet): a few big branching cracks, white-hot cores with a
-    pale-gold rim, over the whole right arm from the shoulder to the bandage, not the scan's busy net. In the
-    "-hot" materials' texels: the scan's own hot texels go back to skin (`skin`), then cracks generated on the arm's
-    surface (unwrapped round the shoulder -> wrist axis, Meshy frame) are painted: within `core` m of a crack the
-    warm colour the shader keys fully hot, out to `rim` m a duller one it keys as the glow's edge."""
-    w, h = img.size
-    px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
-    rgb = px[..., :3]
-    me = ob.data
-    me.calc_loop_triangles()
-    uv = me.uv_layers.active.data
-    names = [m.name for m in me.materials]
-    a0, a1 = np.array(hp["axis"][0], float), np.array(hp["axis"][1], float)
-    ax = a1 - a0
-    L = float(np.linalg.norm(ax))
-    ax /= L
-    e1 = np.cross(ax, [0.0, 1.0, 0.0])
-    e1 /= np.linalg.norm(e1)
-    e2 = np.cross(ax, e1)
-    rng = np.random.default_rng(int(hp.get("seed", 4)))
-    paths, circ = _crack_paths(hp, L * float(hp.get("to", 0.92)), rng)
-    core, rim = float(hp.get("core_w", 0.006)), float(hp.get("rim_w", 0.014))
-    c_core = np.array(K.hexcol(hp.get("core", "ffd070")), np.float32)
-    c_rim = np.array(K.hexcol(hp.get("edge", "8c5030")), np.float32)
-    c_skin = np.array(K.hexcol(hp.get("skin", "5a3530")), np.float32)
-
-    def ss(e0, e1_, x):
-        t = np.clip((x - e0) / (e1_ - e0), 0, 1)
-        return t * t * (3 - 2 * t)
-    n_core = n_rim = n_off = 0
-    for t in me.loop_triangles:
-        if not names[t.material_index].endswith("-hot"):
-            continue
-        pv = np.array([me.vertices[i].co[:] for i in t.vertices])
-        q = np.array([[uv[li].uv.x * w, uv[li].uv.y * h] for li in t.loops])
-        lo = np.maximum(np.floor(q.min(axis=0)).astype(int), 0)
-        hi = np.minimum(np.ceil(q.max(axis=0)).astype(int), [w - 1, h - 1])
-        xs, ys = np.meshgrid(np.arange(lo[0], hi[0] + 1), np.arange(lo[1], hi[1] + 1))
-        pts = np.stack([xs.ravel() + 0.5, ys.ravel() + 0.5], axis=1)
-        a, b, c = q
-        d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
-        if abs(d) < 1e-12:
-            continue
-        l1 = ((b[1] - c[1]) * (pts[:, 0] - c[0]) + (c[0] - b[0]) * (pts[:, 1] - c[1])) / d
-        l2 = ((c[1] - a[1]) * (pts[:, 0] - c[0]) + (a[0] - c[0]) * (pts[:, 1] - c[1])) / d
-        l3 = 1 - l1 - l2
-        ins = (l1 >= -0.02) & (l2 >= -0.02) & (l3 >= -0.02)
-        if not ins.any():
-            continue
-        wp = np.outer(l1[ins], pv[0]) + np.outer(l2[ins], pv[1]) + np.outer(l3[ins], pv[2])
-        tx = np.clip(pts[ins, 0].astype(int), 0, w - 1)
-        ty = np.clip(pts[ins, 1].astype(int), 0, h - 1)
-        # the scan's own hot texels back to skin (its busy net)
-        cur = rgb[ty, tx]
-        heat = ss(0.42, 0.66, cur[:, 0]) * ss(0.14, 0.32, cur[:, 0] - cur[:, 2]) * ss(-0.04, 0.01, cur[:, 1] - cur[:, 2])
-        hot = heat > float(hp.get("net_k", 0.15))
-        if hp.get("white_k"):
-            # (the scan's own pale crack paint, near-white blotches on the arm, goes too)
-            hot |= cur.min(axis=1) > float(hp["white_k"])
-        rgb[ty[hot], tx[hot]] = c_skin * (0.85 + 0.3 * rng.random((int(hot.sum()), 1))).astype(np.float32)
-        n_off += int(hot.sum())
-        # the texel's place on the unwrapped arm
-        rel = wp - a0
-        u = rel @ ax
-        ang = np.arctan2(rel @ e2, rel @ e1)
-        v = (ang % (2 * np.pi)) / (2 * np.pi) * circ
-        inarm = (u > -0.02) & (u < L * float(hp.get("to", 0.92)))
-        uvp = np.stack([u, v], axis=1)
-        dist = np.full(len(u), np.inf)
-        for path in paths:
-            for k in range(len(path) - 1):
-                for wrap in (-circ, 0.0, circ):
-                    off = np.array([0.0, wrap])
-                    dist = np.minimum(dist, _seg_dist2d(uvp, path[k] + off, path[k + 1] + off))
-        isc = inarm & (dist < core)
-        isr = inarm & ~isc & (dist < rim)
-        rgb[ty[isc], tx[isc]] = c_core
-        kk = (1.0 - (dist[isr] - core) / (rim - core))[:, None] * 0.8
-        rgb[ty[isr], tx[isr]] = rgb[ty[isr], tx[isr]] * (1 - kk) + c_rim * kk
-        n_core += int(isc.sum())
-        n_rim += int(isr.sum())
-    px[..., :3] = rgb
-    img.pixels = px.ravel()
-    log("hot paint: %d crack paths, %d core texels, %d rim, %d net texels back to skin" % (len(paths), n_core, n_rim, n_off))
-
-
-def _seg_dist2d(p, a, b):
-    ab = b - a
-    t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-12), 0.0, 1.0)
-    return np.linalg.norm(p - (a + np.outer(t, ab)), axis=1)
-
-
 def deform(ob, items):
     """Reshape the scan's body before the rig fit (Meshy frame: +Z up, facing -Y, his right -X): each item moves
     and scales the vertices within `r` of its centre `c`, by a smooth fall-off (1 at the centre, 0 at r), so a
@@ -3272,33 +3154,6 @@ def deform(ob, items):
     for v, p in zip(ob.data.vertices, co):
         v.co = p
     ob.data.update()
-
-
-def _crack_paths(hp, L, rng):
-    """A few big branching cracks on an unwrapped arm (u along the arm 0..L m, v round it in m): `mains` long
-    jagged cracks from the shoulder to the wrist, each with `branches` side cracks (kael_arm_sheet)."""
-    circ = float(hp.get("circ", 0.42))
-    paths = []
-    for i in range(int(hp.get("mains", 3))):
-        v = circ * (i + rng.uniform(-0.1, 0.1)) / int(hp.get("mains", 3))
-        u, pts = 0.0, []
-        while u < L:
-            pts.append((u, v))
-            u += rng.uniform(0.025, 0.05)
-            v += rng.uniform(-0.03, 0.03)
-        pts.append((L, v))
-        paths.append(np.array(pts))
-        for _b in range(int(hp.get("branches", 3))):
-            j = int(rng.integers(1, len(pts) - 2))
-            bu, bv = pts[j]
-            sgn = 1 if rng.random() < 0.5 else -1
-            br = [(bu, bv)]
-            for _k in range(int(rng.integers(3, 6))):
-                bu += rng.uniform(0.015, 0.035)
-                bv += sgn * rng.uniform(0.012, 0.03)
-                br.append((bu, bv))
-            paths.append(np.array(br))
-    return paths, circ
 
 
 def cut_strands(ob, img, cs):
@@ -3550,8 +3405,6 @@ def main():
             grow_slot(ob, g)
     else:
         slot_split(ob, img, spec["palette"], spec["glow_min"], "body")
-    for hb in spec.get("hot_boxes", []):
-        hot_faces(ob, hb)
     if spec.get("touch_up"):
         touch_up(ob, img, spec["touch_up"])
         pad(img, ids, int(spec.get("pad", 6)))       # (the touched islands' new colour into their margins too)
@@ -3570,8 +3423,6 @@ def main():
         for pj in spec["project_late"]:
             project(ob, img, pj)
         pad(img, ids, int(spec.get("pad", 6)))
-    if spec.get("hot_paint"):
-        hot_paint(ob, img, spec["hot_paint"])
         pad(img, ids, int(spec.get("pad", 6)))
     if spec.get("touch_up_late"):
         touch_up(ob, img, spec["touch_up_late"])
@@ -3756,7 +3607,7 @@ def main():
             if got:
                 parts.append(got)
     if spec.get("scripted"):
-        # a Warden's own scripted pieces (tools/meshy/<module>.py build(): Ryzz's pigtails and back rods)
+        # a Warden's own scripted pieces (tools/meshy/<module>.py build(): Sparkle's pigtails and back rods)
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import importlib
         parts += importlib.import_module(spec["scripted"]["module"]).build(ob, arm, rig, K, spec["scripted"])
@@ -3803,30 +3654,6 @@ def main():
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import hard_parts as HP
         built = HP.build(spec, ob, arm, rig)
-    if spec.get("kael"):
-        # Kael's scripted pieces (tools/meshy/kael_parts.py): the Warchain, the left cuff's chain, the mane
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        import kael_parts
-        parts.append(kael_parts.chains(ob, arm, rig, K, spec["kael"]["chain"]))
-        if spec["kael"].get("meshy_mane"):
-            parts.append(kael_parts.meshy_mane(ob, arm, rig, K, spec["kael"]["meshy_mane"], import_glb, decimate, log))
-            if parts[-1].get("volume"):
-                parts.append(bpy.data.objects[parts[-1]["volume"]])
-            if spec["kael"].get("spikes"):
-                parts.append(kael_parts.spikes(ob, arm, rig, K, spec["kael"]["spikes"], bpy.data.objects.get("Mane")))
-            if spec["kael"].get("under_mane"):
-                # (chunky opaque locks under the head run's stringy hair, back and sides only: its gaps show hair)
-                under = kael_parts.mane(ob, arm, rig, K, spec["kael"]["under_mane"])
-                under.name = under.data.name = "ManeUnder"
-                parts.append(under)
-        else:
-            parts.append(kael_parts.mane(ob, arm, rig, K, spec["kael"]["mane"]))
-        if spec["kael"].get("cap"):
-            parts.append(kael_parts.cap(ob, arm, rig, K, spec["kael"]["cap"]))
-        if spec["kael"].get("collar"):
-            parts.append(kael_parts.collar(ob, arm, rig, K, spec["kael"]["collar"]))
-        if spec["kael"].get("shards"):
-            parts.append(kael_parts.shards(ob, arm, rig, K, spec["kael"]["shards"]))
     if spec.get("fins") or spec.get("vials") or spec.get("dorsal"):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import warden_parts as WP
@@ -3867,9 +3694,6 @@ def main():
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         import lance as LANCE
         gun, _limg = LANCE.build(spec["lance"], slot_materials(None, [s for s in K.SLOTS if s != "team"], "weapon"))
-    elif spec.get("kael"):
-        gun = kael_parts.sword(spec["kael"].get("sword", {}))     # (the greatsword, scripted)
-        gun["built"] = 1
     elif spec.get("weapon_glb") and built["weapon"] is None:
         gun = weapon(spec, rig)
     held = [x for x in [built["weapon"]] + built["extra"] if x is not None and x.parent is None]

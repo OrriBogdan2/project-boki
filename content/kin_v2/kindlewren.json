@@ -1,0 +1,124 @@
+{
+	"grammar": 1,
+	"id": "kindlewren",
+	"name": "Kindlewren",
+	"animals": [
+		"Wren",
+		"Ember coal"
+	],
+	"theme": "ember",
+	"flavor": "A cocky little wren that carries a live coal in its cocked-up tail. It darts in, scorches, and is gone.",
+	"colors": {
+		"body": "#7a4a32",
+		"belly": "#f2d3a8",
+		"glow": "#ff8a2a",
+		"wing": "#5a3a2a"
+	},
+	"look": {
+		"ears": "flame",
+		"body": "drop",
+		"tail": "flame",
+		"feet": "none",
+		"aura": "embers"
+	},
+	"body": {
+		"size": "small",
+		"reach": 1.3,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 5.0,
+			"hop_height": 0.2,
+			"pace": 1.0
+		}
+	},
+	"stats": {
+		"kin_hp": 3,
+		"kin_damage": 3,
+		"kin_speed": 12,
+		"owner_move_speed": 2
+	},
+	"personality": {
+		"bravery": 0.85,
+		"loyalty": 0.5,
+		"temper": 0.7,
+		"curiosity": 0.6
+	},
+	"ai": {
+		"aggression": 0.7,
+		"loyalty": 0.45,
+		"caution": 0.3,
+		"role": "skirmisher"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Kindling",
+		"passives": [
+			{
+				"stat": "fire_rate",
+				"amount": 0.15
+			},
+			{
+				"stat": "reload",
+				"amount": 0.15
+			},
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"amount": 8,
+				"over": 3
+			}
+		]
+	},
+	"active": "gale_lance",
+	"auto": "flare_dash",
+	"merge": "stormwing",
+	"evolution": {
+		"root": "Kindle",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "cheeky and quick, chirps over everyone",
+		"syllables": [
+			"Kindle",
+			"wren"
+		]
+	},
+	"egg": {
+		"name": "Kindlewren Egg",
+		"temper": "Cheeky",
+		"desc": "Something cheeky is in here.",
+		"play": "Fast, darting and always on the move."
+	}
+}

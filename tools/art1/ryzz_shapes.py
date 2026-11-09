@@ -1,4 +1,4 @@
-"""ART-1 Ryzz: a quick look at a stage .blend: four material-preview ortho renders of any objects. blender -b --factory-startup --python ryzz_shapes.py -- <blend> <out prefix> [hide,objs] [ortho] [cz]"""
+"""ART-1 Sparkle: a quick look at a stage .blend: four material-preview ortho renders of any objects. blender -b --factory-startup --python ryzz_shapes.py -- <blend> <out prefix> [hide,objs] [ortho] [cz]"""
 import sys, bpy
 from mathutils import Vector
 a = sys.argv[sys.argv.index("--") + 1:]

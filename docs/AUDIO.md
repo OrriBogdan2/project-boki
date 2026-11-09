@@ -15,7 +15,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 
 | category | RMS dBFS | for |
 |---|---|---|
-| heavy_impact | -14.5 | a damage carry's hits (Vex, Kael, Grimble's blunderbuss, Breaker's hammer) |
+| heavy_impact | -14.5 | a damage carry's hits (Vex, Kael, Grimble's blunderbuss, Mossy's hammer) |
 | heavy_fire | -15.5 | a damage carry's weapon: a little louder than the lighter Hunters |
 | impact | -16 | an ability or weapon landing |
 | fire, signature | -17 | a shot or swing; a Hunter's recognisable sound |
@@ -27,7 +27,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 | step | -23 | footsteps |
 
 ## Names
-- A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lisette), `juggernaut_*` (Kael), `bulwark_*` (Breaker), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Claire), `tender_*` (Pip), `thief_*` (Sable), `mage_*` (Ryzz), `dolm_*` (Tarek). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
+- A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
 

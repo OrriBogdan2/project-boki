@@ -6,8 +6,10 @@ extends RefCounted
 ## is its face, and its splash (<archetype>_splash.jpg) fills the bigger spots (a Warden with no
 ## splash shows its portrait there). A Warden with no painted art falls back to a render of its model
 ## (make()). Each place draws a copy cut to its own size around the framing in
-## content/rules/portraits.json, corners rounded (greyed for the fallen), made once and kept.
-## Headless there are no pixels to cut: frames draw the art's region straight from its texture.
+## content/rules/portraits.json, corners rounded (greyed for the fallen), made once and kept. A menu's
+## portrait (Pic) reads its art on a loader thread and cuts it on a worker thread (cut_soon), so a screen
+## full of faces never stalls a frame. Headless there are no pixels to cut: frames draw the art's region
+## straight from its texture.
 
 const SIZE := 96              # px: the rendered fallback's square
 const RULES_PATH := "res://content/rules/portraits.json"
@@ -20,6 +22,8 @@ const HEAD_MID := Vector3(0, 0.18, 0)      # the head's middle above its neck pi
 static var art_dir := "res://art/portraits/"
 static var _rules := {}
 static var _cuts := {}        # "path|w|h|grey" -> ImageTexture
+static var _art := {}         # path -> its Texture2D, kept once read (a face drawn again never reads the disk)
+static var _jobs := {}        # cut key -> [worker task id, the cut Image once done] for cut_soon
 
 ## The painted art for an archetype: its splash if asked and it has one, else its portrait; "" if none.
 static func art_path(ak: String, splash := false) -> String:
@@ -73,22 +77,76 @@ static func set_icon(b: Button, ak: String, px: int) -> void:
 ## The art at `path` cut to `px` around the archetype's framing, corners rounded, greyed if asked; null
 ## where its pixels can't be read (headless).
 static func cut(ak: String, path: String, px: Vector2i, greyed := false) -> Texture2D:
-	var key := "%s|%d|%d|%d" % [path, px.x, px.y, int(greyed)]
+	var key := _cut_key(path, px, greyed)
 	if _cuts.has(key):
 		return _cuts[key]
-	var tex := load(path) as Texture2D
-	var src: Image = tex.get_image() if tex and DisplayServer.get_name() != "headless" else null
-	if src == null or src.is_empty():
+	var src := _pixels(_texture(path))
+	if src == null:
 		return null
+	var at := Rect2i(region(ak, path, Vector2(src.get_size()), Vector2(px)))
+	_cuts[key] = ImageTexture.create_from_image(_cut_pixels(src, at, px, greyed))
+	return _cuts[key]
+
+## The same cut, made off the main thread: null until it is ready (ask again next frame). The art is read
+## on a loader thread and cut on a worker; headless (no pixels) it stays null.
+static func cut_soon(ak: String, path: String, px: Vector2i, greyed := false) -> Texture2D:
+	var key := _cut_key(path, px, greyed)
+	if _cuts.has(key):
+		return _cuts[key]
+	if _jobs.has(key):
+		var job: Array = _jobs[key]
+		if not WorkerThreadPool.is_task_completed(int(job[0])):
+			return null
+		BackgroundWork.join(int(job[0]))
+		_jobs.erase(key)
+		_cuts[key] = ImageTexture.create_from_image(job[1])
+		return _cuts[key]
+	var src := _pixels(read_soon(path))
+	if src == null:
+		return null
+	var at := Rect2i(region(ak, path, Vector2(src.get_size()), Vector2(px)))
+	var job := [0, null]
+	job[0] = BackgroundWork.add_task(func(): job[1] = _cut_pixels(src, at, px, greyed))
+	_jobs[key] = job
+	return null
+
+static func _cut_key(path: String, px: Vector2i, greyed: bool) -> String:
+	return "%s|%d|%d|%d" % [path, px.x, px.y, int(greyed)]
+
+## The art's texture, read now if it isn't yet (kept for the session).
+static func _texture(path: String) -> Texture2D:
+	if not _art.has(path):
+		_art[path] = load(path)
+	return _art[path]
+
+## The art's texture once a loader thread has read it (null while it reads; the read starts on the first ask).
+static func read_soon(path: String) -> Texture2D:
+	if _art.has(path):
+		return _art[path]
+	match ResourceLoader.load_threaded_get_status(path):
+		ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			BackgroundWork.request(path)
+			return null
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return null
+	_art[path] = BackgroundWork.take(path)
+	return _art[path]
+
+## The texture's pixels, or null where they can't be read (headless, or no texture).
+static func _pixels(tex: Texture2D) -> Image:
+	var src: Image = tex.get_image() if tex and DisplayServer.get_name() != "headless" else null
+	return null if src == null or src.is_empty() else src
+
+## Cuts `at` out of the art, sized to `px`, greyed if asked, corners rounded. Touches only the images given,
+## so it runs on a worker thread too.
+static func _cut_pixels(src: Image, at: Rect2i, px: Vector2i, greyed: bool) -> Image:
 	src.convert(Image.FORMAT_RGBA8)
-	var img := src.get_region(Rect2i(region(ak, path, Vector2(src.get_size()), Vector2(px))))
+	var img := src.get_region(at)
 	img.resize(maxi(1, px.x), maxi(1, px.y), Image.INTERPOLATE_LANCZOS)
 	if greyed:
 		_grey_pixels(img)
 	_round_corners(img, corner(Vector2(px)))
-	var out := ImageTexture.create_from_image(img)
-	_cuts[key] = out
-	return out
+	return img
 
 ## The part of the art (in its pixels, `src` its size) a frame of size `px` shows: the frame's shape,
 ## as big as fits, with the framing point at FACE_AT; a small frame crops in on the face.
@@ -119,7 +177,7 @@ static func _draw_art(c: CanvasItem, r: Rect2, ak: String, path: String, greyed:
 	if tex:
 		c.draw_texture_rect(tex, r, false)
 		return
-	var full := load(path) as Texture2D
+	var full := _texture(path)
 	var tint := Color(0.55, 0.55, 0.6) if greyed else Color.WHITE
 	c.draw_texture_rect_region(full, r, region(ak, path, full.get_size(), r.size), tint)
 
@@ -256,5 +314,20 @@ class Pic extends Control:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		set_meta("portrait_art", Portraits.art_path(ak, use_splash))
 
+	## Until its cut is ready (Portraits.cut_soon) only the frame shows.
+	func _process(_dt: float) -> void:
+		if size.x < 1.0:
+			return
+		var path := Portraits.art_path(arch, splash)
+		var cut_ready := Portraits.cut_soon(arch, path, Vector2i(size.round())) != null
+		if cut_ready or (DisplayServer.get_name() == "headless" and Portraits.read_soon(path) != null):
+			set_process(false)
+			queue_redraw()
+
 	func _draw() -> void:
-		Portraits.draw(self, Rect2(Vector2.ZERO, size), arch, null, edge, "", 0.0, 0.0, 0.0, splash)
+		var r := Rect2(Vector2.ZERO, size)
+		if is_processing():
+			var box := HudStyle.box(HudStyle.SHADE_EDGE, Portraits.corner(r.size) + 2, Color(edge, 0.9), 2)
+			draw_style_box(box, r.grow(2.0))
+			return
+		Portraits.draw(self, r, arch, null, edge, "", 0.0, 0.0, 0.0, splash)

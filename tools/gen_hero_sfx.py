@@ -2,7 +2,7 @@
 
     python3 tools/gen_hero_sfx.py      (then: godot --headless --import)
 
-hero_blowout : Ryzz's payoff. A dry thunder crack, a falling thump and a rising zap with a spark ring on top.
+hero_blowout : Sparkle's payoff. A dry thunder crack, a falling thump and a rising zap with a spark ring on top.
 hero_skewer  : Vex's payoff. A thin needle sweep, a metal tick on arrival and a short low thud.
 """
 import math, os, random, struct, wave
@@ -51,7 +51,7 @@ def save(name, x, db=-19.0, tail=0.03):
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
         w.writeframes(b''.join(struct.pack('<h', int(max(-1, min(1, v)) * 32767)) for v in x))
 
-# ---- Ryzz: Blowout
+# ---- Sparkle: Blowout
 save('hero_blowout', mix(
     scale(mul(hp(noise(0.5), 2200), env(N(0.5), 0.001, 0.07)), 1.0),
     scale(mul(tone(210, 48, 0.55), env(N(0.55), 0.002, 0.16)), 1.0),

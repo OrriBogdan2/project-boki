@@ -1,6 +1,6 @@
 class_name VVSfx
 extends RefCounted
-## Ryzz's and Vex's own ability sounds (tools/gen_sfx_ryzz.py, tools/gen_sfx_vex.py), loaded by Sfx.
+## Sparkle's and Vex's own ability sounds (tools/gen_sfx_ryzz.py, tools/gen_sfx_vex.py), loaded by Sfx.
 
 const NAMES := ["vv_bolt", "vv_static_full", "vv_surge_charge", "vv_surge_go", "vv_rod_summon", "vv_rod_full",
 	"vv_rod_throw", "vv_orb",

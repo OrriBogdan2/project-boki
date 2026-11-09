@@ -16,7 +16,7 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 
 ## Your first hour
 
-1. **The story.** A short animated prologue about how the Skylands broke. Hold Esc to skip it.
+1. **The story.** A short animated prologue about how Malgrave, the Wyrm in a queen's shape, broke Solmere. Hold Esc to skip it.
 2. **Your first egg.** Three starter eggs sit on a little island, plus a mystery egg:
    the Venom Egg (Vespyx), the Prism Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
    that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.

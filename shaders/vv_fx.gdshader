@@ -1,5 +1,5 @@
 shader_type spatial;
-// Ryzz's and Vex's own effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
+// Sparkle's and Vex's own effects (scripts/arch/kits/vv_fx.gd), one shader with a mode per look.
 // `life` runs 0 -> 1 over the effect; `color` is the body, `color2` the hot core / accent, `color3` an
 // optional edge colour (its alpha says how much). Each mode writes a BODY, alpha-blended so it keeps its
 // colour and darkness on bright grass, and a GLOW added on top for the hot cores and sparks only.

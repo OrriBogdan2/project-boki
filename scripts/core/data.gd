@@ -203,8 +203,12 @@ func load_kin_content() -> void:
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
 ## kin (content/kin/*.json "rare": true), which only ever hatch from a boss's Rare Egg.
+## The six that shipped first lead the list (code reads common_kin()[0] and [i % size]), then the rest by id.
+const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple"]
+
 func common_kin() -> Array:
-	return KIN.keys().filter(func(k): return not KIN[k].get("rare", false))
+	var all: Array = KIN.keys().filter(func(k): return not KIN[k].get("rare", false))
+	return LAUNCH_KIN.filter(func(k): return all.has(k)) + all.filter(func(k): return not LAUNCH_KIN.has(k))
 
 func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))

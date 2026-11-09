@@ -1,5 +1,5 @@
 shader_type spatial;
-// A bubble's gloss over its toon pass (WardenGlb: Ryzz's gum, a material tagged "gum"): drawn additively on top,
+// A bubble's gloss over its toon pass (WardenGlb: Sparkle's gum, a material tagged "gum"): drawn additively on top,
 // a pale fresnel rim and one soft highlight toward the upper left, so the opaque pink ball reads as a thin,
 // glossy, see-through skin of gum. No depth write, so it never hides what's behind it.
 render_mode blend_add, unshaded, depth_draw_never, cull_back;

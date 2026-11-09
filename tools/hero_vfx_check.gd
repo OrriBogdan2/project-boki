@@ -2,15 +2,33 @@ extends RefCounted
 ## --hero-vfx-check: the shared Hero looks (scripts/match/hero_vfx.gd) against every content/vfx file: each move a kit
 ## asks for has a recipe, each sound exists and is a one-shot, the colours resolve and the sizes stay in budget; the FX
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
-## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game.
+## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
+## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
+## a held stream turns with the aim, a projectile trail follows its node and ends with it.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
-const KIT_CALLS := {"juggernaut": [
-	"res://scripts/arch/kits/juggernaut_kit.gd", "res://scripts/arch/kits/juggernaut_chain.gd",
-	"res://scripts/arch/kits/juggernaut_drop.gd", "res://scripts/arch/kits/juggernaut_ult.gd"],
-	"archer": ["res://scripts/arch/kits/archer_kit.gd", "res://scripts/arch/kits/pin_spirit.gd",
-	"res://scripts/arch/kits/pin_ult.gd", "res://scripts/arch/kits/pin_fx.gd"]}
+const MAX_VORTEX := 4.5        # m radius, the largest ground swirl
+## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
+## data must answer.
+const KIT_FILES := {
+	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
+	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
+	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
+	"tender": ["tender_"], "thief": ["thief_"]}
+## The synthetic recipes the runtime parts play: one layer of every kind.
+const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008", "smoke": "#404040"},
+	"anchors": {"palm": {"bone": "hand.R", "off": [0.0, 0.05, 0.0], "body": [0.3, 1.0, 0.2]},
+		"tip": {"body": [0.2, 1.1, 0.5]}},
+	"moves": {
+		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
+			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
+			{"p": "bolt", "len": 4.0, "jag": 0.4},
+			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
+			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
+			{"p": "drop", "n": 24}]},
+		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
+		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
@@ -25,7 +43,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	for arch: String in KIT_CALLS:
+	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
@@ -39,22 +57,29 @@ func run(main: Node) -> void:
 	_view(m, V, P)
 	_kit(m, V, P)
 	_net(m, V, P)
+	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The moves a Hero's kit asks for (from its scripts' source).
+func _called(arch: String) -> Dictionary:
+	var called := {}
+	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
+			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
+				called[hit.get_string(1)] = true
+	return called
 
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:
 	var d := HeroVfx.data(arch)
 	var moves: Dictionary = d.get("moves", {})
 	ok(not moves.is_empty(), "%s has a recipe file" % arch)
-	var called := {}
-	var re := RegEx.create_from_string("(?:vfx\\(|hold\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
-	for path: String in KIT_CALLS[arch]:
-		for hit in re.search_all(FileAccess.get_file_as_string(path)):
-			called[hit.get_string(1)] = true
+	var called := _called(arch)
 	var missing := called.keys().filter(func(k): return not (moves.has(k) or String(k).ends_with("_")))
-	ok(called.size() >= 16 and missing.is_empty(),
+	ok(not called.is_empty() and missing.is_empty(),
 			"%s: all %d moves its kit calls have recipes %s" % [arch, called.size(), missing])
 	var unused := moves.keys().filter(func(k): return not called.has(k) and not k in CALLED_ELSEWHERE)
 	ok(unused.is_empty(), "%s: no recipe is left unused %s" % [arch, unused])
@@ -71,15 +96,21 @@ func _recipes(arch: String) -> void:
 			for key in ["c", "c2", "c3"]:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
-			var flare_big: bool = layer["p"] == "flare" and float(layer.get("size", 0.0)) > MAX_FLARE
+			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
+			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
+			var vortex_big: bool = layer["p"] == "vortex" and big > MAX_VORTEX
+			var life := float(layer.get("life", 0.0))
+			if layer["p"] == "ribbon" and layer.has("tail"):
+				life = minf(life, HeroVfx.TRAIL_MAX)     # a projectile trail runs as long as its shot, capped
 			var lasts: bool = layer["p"] == "thread"      # (a needle's thread stays as long as the needle)
-			if (float(layer.get("life", 0.0)) > MAX_LIFE and not lasts) or flare_big:
+			if (life > MAX_LIFE and not lasts) or flare_big or vortex_big:
 				over.append(mv)
 			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or layer["p"] == "string"):
 				flat_only.append(layer["p"])
 	ok(bad_sound.is_empty(), "%s: every sound in the data has a file %s" % [arch, bad_sound])
 	ok(bad_col.is_empty(), "%s: every colour is in the palette %s" % [arch, bad_col])
-	ok(over.is_empty(), "%s: no look over %.1f s or %.1f m %s" % [arch, MAX_LIFE, MAX_FLARE, over])
+	ok(over.is_empty(), "%s: no look over %.1f s, %.1f m flare, %.1f m swirl %s" % [arch, MAX_LIFE, MAX_FLARE,
+			MAX_VORTEX, over])
 	ok(flat_only.is_empty(), "%s: every layer is a known look %s" % [arch, flat_only])
 	var loops: Array = []
 	for mv: String in moves:
@@ -219,6 +250,58 @@ func _lisette(main: Node, V0: HeroVfx) -> void:
 	var hip := V.anchor_pos(P, "nock")
 	ok(hip.distance_to(K.hand_pos(true)) < 0.001 or WardenGlb.anchor(P.model, "anchor_nock") != null,
 			"nock: the model's anchor, else the drawing hand")
+
+## The shared kinds on a synthetic recipe set (the real files are done with): every layer kind plays and a pile-up
+## stays capped; a bone anchor follows the hand; prewarm builds one of every kind and hides them; a stream held along
+## the aim turns with it; a projectile's trail follows its node and runs out when it is gone.
+func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
+	HeroVfx.set_data(P.arch, TEST)
+	V._anchors.clear()
+	_clear(V)
+	V.play(P, "all", P.pos, Vector2.RIGHT)
+	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
+	for i in 40:
+		V.play(P, "all", P.pos, Vector2.RIGHT)
+	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)
+	_clear(V)
+	var sk := WardenGlb.skeleton(P.model.get_node_or_null("Warden"))
+	var palm := V.anchor_pos(P, "palm")
+	if sk != null:
+		var pose := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand.R"))
+		var want := sk.global_transform * (pose * Vector3(0.0, 0.05, 0.0))
+		ok(palm.distance_to(want) < 0.001, "a bone anchor follows the model's hand.R")
+	else:
+		ok(palm.distance_to(P.pos) < 1.6, "a bone anchor on a model without a skeleton falls back to the body")
+	V.prewarm(P.pos)
+	ok(V._warming.size() == HeroVfx.POOL.size(), "prewarm holds up one node of every kind (%d)" % V._warming.size())
+	V.prewarm_end()
+	ok(_visible_nodes(V) == 0 and V._warming.is_empty(), "and they are hidden again")
+	P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+	V.hold(P, "stream")
+	P.inp["aim"] = P.pos + Vector3(0, 0, 4)
+	V._tick_holds()
+	var lay: Dictionary = V.holds.values()[0]["layers"][0]
+	var way: Vector3 = (lay["node"].process_material as ShaderMaterial).get_shader_parameter("dir")
+	ok(way.distance_to(Vector3(0, 0, 1)) < 0.01, "a stream held along the aim turns with it (%s)" % way)
+	m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	_clear(V)
+	var shot := Node3D.new()
+	m.add_child(shot)
+	shot.global_position = P.pos + Vector3(0, 1, 0)
+	V.trail(P, "shot", shot)
+	ok(V.ribbons.size() == 1, "a projectile gets its trail")
+	for i in 4:      # (ticked by hand: on a loaded box a frame's delta can outlast the tail)
+		shot.global_position += Vector3(0.5, 0, 0)
+		V._tick_ribbon(V.ribbons[0], 0.02)
+	ok((V.ribbons[0]["pts"] as Array).size() >= 3, "the trail follows the projectile")
+	shot.visible = false
+	for i in 30:
+		await main.get_tree().process_frame
+	ok(V.ribbons.is_empty(), "the projectile ends: its tail runs out")
+	shot.queue_free()
+	_clear(V)
+	HeroVfx.set_data(P.arch, {})
 
 func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 	V.plays.clear()

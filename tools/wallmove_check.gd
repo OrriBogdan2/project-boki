@@ -1,8 +1,11 @@
 extends RefCounted
 ## --wallmove-check: wall kick, wall bounce, ledges that always answer, and the springy abyss lift.
-##   1. Wall kick: a jump pressed against a wall you push into adds about one terrace of height, once per
-##      airtime, and gives it back on landing. Jump + kick + mantle tops a four-terrace wall (Cinder
-##      Steps' plateau); a five-terrace wall stays sheer.
+##   1. Wall kick (item 149): a jump pressed against a wall you push into adds about one terrace of height,
+##      again on every press (a wall dance), up to WallMoves.HOP_CLIMB_CAP over the take-off. Jump + kick +
+##      mantle tops a four-terrace wall (Cinder Steps' plateau); a five-terrace wall stays sheer however much
+##      you hop, and the glider never opens from it.
+##      Facing a wall with no keys, ten hops in a row, each with its scuff, and never a glider; a standing
+##      jump at a one-terrace ledge mantles onto it.
 ##   2. Wall bounce: an angled hit with speed reflects and keeps most of the speed; head-on it doesn't.
 ##   3. Ledges: a glide release against a two-terrace ledge, and falling past one, put you on top;
 ##      keys along or away from the wall never do.
@@ -11,6 +14,7 @@ extends RefCounted
 ## "WCHECK DONE, failures: N".
 
 const DT := Match.DT
+const DANCE_S := 8.0            # s of wall dancing (a hop is ~0.66 s from the cap to its apex and back)
 const LIFT_PEAK_MIN := 0.6      # m above the lip the lift must float to (a lift used to stop at the lip)
 const LIFT_HANG_MIN := 0.25     # s spent near the top of the lift (|vertical speed| < 1 m/s, above the lip)
 var bad := 0
@@ -49,6 +53,8 @@ func run(main: Node) -> void:
 	var w4: Dictionary = _carve(4, 1)[0]
 	var w5 := _carve(5, 2)
 	_kick(w4, w5[0], w5[1])
+	_dance(w5[1])
+	_stand_mantle(_carve(1, 1)[0])
 	_bounce(w4)
 	_ledges(_carve(2, 2)[0])
 	_lift()
@@ -157,15 +163,52 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	ok(not a4["top"], "jump + mantle alone doesn't reach 4 terraces (3.2m): peak %.2fm" % a4["peak"])
 	ok(k4["top"] and k4["kicks"] == 1, "kick + mantle tops 4 terraces (Cinder Steps): %d kick" % k4["kicks"])
 	var plain := _attempt(w5, false)
-	var kicked := _attempt(w5, true)
+	var kicked := _attempt(w5, true, false)
 	var gain: float = kicked["peak"] - plain["peak"]
 	ok(kicked["kicks"] == 1 and gain > 0.7 and gain < 1.1,
-		"one kick per airtime: +%.2fm over a plain jump (%.2fm to %.2fm), kicks %d" % [
-			gain, plain["peak"], kicked["peak"], kicked["kicks"]])
-	ok(not kicked["top"], "a 5-terrace wall (4.0m) stays sheer")
-	var again := _attempt(w5b, true)
+		"a kick: +%.2fm over a plain jump (%.2fm to %.2fm)" % [gain, plain["peak"], kicked["peak"]])
+	var danced := _attempt(w5, true)
+	ok(danced["kicks"] >= 3 and not danced["top"] and not h.gliding,
+		"spammed: %d kicks, a 5-terrace wall (4.0m) still sheer (peak %.2fm), no glider" % [
+			danced["kicks"], danced["peak"]])
+	var again := _attempt(w5b, true, false)
 	var same := absf(again["peak"] - kicked["peak"]) < 0.15
-	ok(again["kicks"] == 1 and same, "landing gives the kick back: same height next jump (%.2fm)" % again["peak"])
+	ok(again["kicks"] == 1 and same, "the next jump kicks the same: %.2fm" % again["peak"])
+
+## Facing the wall, no keys: Space on every fall for DANCE_S. Ten hops, ten scuffs, the glider never opens.
+func _dance(wl: Dictionary) -> void:
+	var n: Vector2 = wl["n"]
+	var at: Vector2 = (wl["at"] as Vector2) - n * 0.1
+	_reset(Vector3(at.x, wl["low"], at.y), true)
+	h.inp["aim"] = Vector3(at.x + n.x * 6.0, float(wl["low"]) + 0.9, at.y + n.y * 6.0)
+	var kicks0 := int(h.stats.get("wall_kicks", 0))
+	var scuffs0 := WallMoves.scuffs
+	var opened := false
+	var t := 0.0
+	while t < DANCE_S:
+		var falling := not h.grounded and h.vel.y <= 0.0
+		h.inp["jump"] = h.grounded or falling
+		m.step(DT)
+		t += DT
+		opened = opened or h.gliding
+	var kicks := int(h.stats.get("wall_kicks", 0)) - kicks0
+	ok(kicks >= 10 and not opened, "a wall dance: %d hops in %.0fs facing the wall, no glider" % [kicks, DANCE_S])
+	ok(WallMoves.scuffs - scuffs0 == kicks, "every hop scuffs (%d of %d)" % [WallMoves.scuffs - scuffs0, kicks])
+
+## A standing jump at a one-terrace ledge, keys into it: on top.
+func _stand_mantle(wl: Dictionary) -> void:
+	var n: Vector2 = wl["n"]
+	var at: Vector2 = (wl["at"] as Vector2) - n * 0.1
+	_reset(Vector3(at.x, wl["low"], at.y), true)
+	var on_top := false
+	for i in 90:
+		h.inp["move"] = n
+		h.inp["jump"] = i == 2
+		m.step(DT)
+		if h.grounded and absf(h.pos.y - float(wl["top"])) < 0.1:
+			on_top = true
+			break
+	ok(on_top, "a standing jump mantles a %.1fm ledge" % (float(wl["top"]) - float(wl["low"])))
 
 # ---------------------------------------------------------------- 2. wall bounce
 ## Airborne at `speed` against the 4-terrace wall, `deg` off its normal. Returns the velocity after contact.
@@ -339,7 +382,7 @@ func _stunned(wl: Dictionary) -> void:
 		var r := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), fall)
 		ok(not r["mantled"], "a %s player falling against a 2-terrace ledge doesn't grab it" % mode)
 
-## Push-off and climb kicks share one use per airtime; a held glide doesn't add height to a kick.
+## A push-off and then a climb kick both go (item 149: no once-per-airtime); a kick folds a held glide.
 func _one_kick(wl: Dictionary) -> void:
 	var n: Vector2 = wl["n"]
 	var at: Vector2 = (wl["at"] as Vector2) - n * 0.05
@@ -355,7 +398,8 @@ func _one_kick(wl: Dictionary) -> void:
 	var vy0 := h.vel.y
 	h.inp["jump"] = true
 	m.step(DT)
-	ok(pushed > 5.0 and h.vel.y <= vy0 + 0.01, "push-off and climb kicks share one use (push %.1f m/s)" % pushed)
+	ok(pushed > 5.0 and h.vel.y > vy0 + 0.5,
+		"a push-off (%.1f m/s) then a climb kick (vy %.1f to %.1f)" % [pushed, vy0, h.vel.y])
 	_reset(Vector3(at.x, wl["low"] + 1.0, at.y), false, Vector3.ZERO)
 	h.wall_touch_t = 0.2
 	h.wall_n = -n

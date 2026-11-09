@@ -1,0 +1,120 @@
+{
+	"grammar": 1,
+	"id": "cindowary",
+	"name": "Bellowary",
+	"animals": [
+		"Cassowary",
+		"Forge bellows"
+	],
+	"theme": "ember",
+	"flavor": "A cassowary whose head crest is a leather bellows; every stride pumps it and it blasts a gust of embers. Proud and territorial, loyal to its rider; wheezes the bellows as a warning before it charges.",
+	"colors": {
+		"body": "#2a2a2a",
+		"belly": "#4a3a3a",
+		"glow": "#ff7a2a"
+	},
+	"look": {
+		"ears": "flame",
+		"body": "boulder",
+		"tail": "stub",
+		"feet": "stumps",
+		"aura": "embers"
+	},
+	"body": {
+		"size": "large",
+		"reach": 1.5,
+		"mass": 1.5,
+		"gait": {
+			"hop_rate": 7.0,
+			"hop_height": 0.08,
+			"pace": 1.1
+		}
+	},
+	"stats": {
+		"kin_hp": 9,
+		"kin_damage": 5,
+		"kin_speed": 5,
+		"owner_max_hp": 1
+	},
+	"personality": {
+		"bravery": 0.9,
+		"loyalty": 0.75,
+		"temper": 0.75,
+		"curiosity": 0.3
+	},
+	"ai": {
+		"aggression": 0.8,
+		"loyalty": 0.5,
+		"caution": 0.25,
+		"role": "bruiser"
+	},
+	"carry": {
+		"style": "mount",
+		"name": "Ash Stride",
+		"passives": [
+			{
+				"stat": "damage",
+				"amount": 0.08
+			}
+		],
+		"mount": {
+			"speed": 1.25,
+			"jump": 1.1,
+			"turn": 0.75
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "damage",
+				"amount": 8,
+				"over": 3
+			}
+		]
+	},
+	"active": "gale_lance",
+	"auto": "flare_dash",
+	"merge": "stormwing",
+	"evolution": {
+		"root": "Cind",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "booming, territorial",
+		"syllables": [
+			"Cind",
+			"owary"
+		]
+	},
+	"egg": {
+		"name": "Cindowary Egg",
+		"temper": "Fierce",
+		"desc": "Something fierce is in here.",
+		"play": "Gets in close and hits hard."
+	}
+}

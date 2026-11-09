@@ -381,7 +381,7 @@ func _bots() -> void:
 	R.hp = R.max_hp * 0.2
 	BotKin.fight(m, R, P, 7.0, 1.0)
 	ok(k.cmd == "return" or k.state == "flying_home", "a hurt bot sends its Boki back onto it (Return)")
-	run_for(1.0)
+	run_for(1.0, func(): R.hp = maxf(R.hp, R.max_hp * 0.2))      # (hurt, not killed: the player's Boki is next to it)
 	ok(k.state == "shoulder" and k.cmd == "return", "...and it is on the bot (state %s)" % k.state)
 	R.hp = R.max_hp
 	R.ai["throw_cd"] = 0.0

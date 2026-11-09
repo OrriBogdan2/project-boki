@@ -722,5 +722,5 @@ func _fake_members() -> Array:
 		var rec := Save.new_kin(sp[i % sp.size()])
 		rec["level"] = rng.randi_range(2, 18)
 		Evo.simulate(rec, rng)
-		out.append({"id": "fake%d" % i, "d": Social.clean_island({"name": ["Wren", "Ollie", "Mara", "Tobin", "Ivy", "Juno", "Pip"][i], "roster": [rec], "active": rec["uid"], "buildings": ["cottage"]})})
+		out.append({"id": "fake%d" % i, "d": Social.clean_island({"name": ["Wren", "Ollie", "Mara", "Tobin", "Ivy", "Juno", "Pudding"][i], "roster": [rec], "active": rec["uid"], "buildings": ["cottage"]})})
 	return out

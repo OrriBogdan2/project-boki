@@ -25,6 +25,25 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - Checks: `--farm-tutorial-check` (new), `--farmbuild` updated (locked entries are now hidden, the house is a site). Screenshots: `--farm-hob-shots=<dir>`.
 - Main wiring left: none beyond the few lines already in home.gd.
 
+## Round 3: Hob in person and the second Mask (items 87, 89; owner, Nov 4)
+- **Hob is a person** (`HobModel`: a stocky builder in the toon style, built from shapes: rolled sleeves, apron,
+  tool belt with a hammer, flat cap, pencil behind his ear, simple face marks like the rest of the Empty; poses
+  idle, wave, talk, point, hammer). He waits by the market stall (`farm_builder.json` "stall_stand") and walks to
+  the house while it is a site. His name shows over him until you have met him; a "!" while he has something.
+- **Face to face** (`HobTalk`, `TalkBox`, lines in `farm_builder.json` "talk"): interact opens a talk box with his
+  portrait (rendered from the model) and name, one line at a time (click or the interact key), you stand still
+  and the camera eases toward him; a line with "show" makes him point at it while the camera looks there. The
+  first talk introduces the farm (stall, house spot, axe); during the tutorial he explains the step you're on;
+  after it, blueprints and the build menu. The tutorial's bottom line is only the goal reminder now.
+- **First arrival:** the camera swings to him for 1.5 s while he waves and calls "Hey! Over here!"
+  (`tutorial.hob_intro`). Meeting him is the tutorial's first step (axe needs it).
+- **The second Mask** (`HobOffer`): once the house is down (or with no tutorial), he calls you over: "By the
+  way... I see you found a Vex Mask. Could I interest you in another?" Exactly the three of
+  `ClassUnlock.second_picks` as cards (portrait, name and title, a one-line role from "roles"), one ability clip
+  for the card in focus. Taking one opens it and plays the short Mask moment (`MaskBeat`); "Not now" waits. The
+  portal offer (`MaskOffer`) is gone; saves that already own a second Mask keep it and are never offered one.
+- Checks: `--hob-check` (new, with `--shots-dir=`), `--farm-tutorial-check` updated.
+
 ## Round 2 (owner feedback, Nov 4)
 - **Challenge House** is not given any more (`home.gd` no longer grants it). It is Hob's blueprint after the first expedition (milestone `first_run`: `matches >= 1`), a lot you mark and build for wood and stone (`farm_build.json` "lots": 6 wood, 4 stone; `FarmBuilder.lot_cost`). Saves that already have it keep it. Old Pell's Black Market is untouched.
 - **Crops by the water** (`FarmWater`): a crop patch whose footprint is within 2 tiles of water (pond, painted river, or the island's wild water: all `layout.water`) waters its own plots as tended (`_farm_tick`). The patch tooltip, the plot prompt and the plot panel say so; build mode shows "Near water: waters itself" in green over the patch you are placing (and "No water within 2 tiles" otherwise).

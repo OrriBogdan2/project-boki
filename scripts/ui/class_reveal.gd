@@ -23,19 +23,17 @@ const CLIP := Vector2(200, 112)      # px: each ability clip beside the Hunter
 static func maybe_show(home: Node) -> ClassReveal:
 	if home == null or not home.is_inside_tree():
 		return null
-	if MaskOffer.offer(home):
-		return null
 	var waiting := ClassUnlock.pending_reveal()
 	if waiting.is_empty():
 		announce_fresh(home)
 		var news := ClassUnlock.take_news()
 		if news > 0 and home.has_method("_toast"):
-			home._toast("A Mask unlock is ready. Open Masks (%s) and hold to unlock it." % Settings.key_cap("hero"))
+			home._toast("A Relic unlock is ready. Open Relics (%s) and hold to unlock it." % Settings.key_cap("hero"))
 			Save.save_game()
 		return null
 	return show_for(home, String(waiting[0]))
 
-## "Hem and Kael are open now" once the starters have opened (after the first expedition): a toast as soon
+## "Vex and Kael are open now" once the starters have opened (after the first expedition): a toast as soon
 ## as no panel (the welcome, make-home) covers the farm.
 static func announce_fresh(home: Node) -> void:
 	if not (ClassUnlock.state().get("fresh", []) as Array).is_empty():
@@ -72,7 +70,7 @@ func _ready() -> void:
 	var v := UI.vbox(10)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_child(v)
-	var kick := UI.label("NEW MASK", UI.T_HEAD, UI.GOLD, UI.caps)
+	var kick := UI.label("NEW RELIC", UI.T_HEAD, UI.GOLD, UI.caps)
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
 	# the ring of light, with the Hunter standing in it, beside its name and its abilities working
@@ -111,12 +109,15 @@ func _ready() -> void:
 	clips.add_theme_constant_override("v_separation", 8)
 	for slot in HunterViewer.CLIP_SLOTS:
 		if slot in HunterViewer.slots_for(id):
-			clips.add_child(AbilityClip.make(id, slot, CLIP))
+			var clip := AbilityClip.make(id, slot, CLIP)
+			clip.playing = clips.get_child_count() == 0      # (the first plays; the mouse moves the focus)
+			clip.mouse_entered.connect(func(): for c in clips.get_children(): (c as AbilityClip).play(c == clip))
+			clips.add_child(clip)
 	right.add_child(clips)
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER
 	btns.add_child(UI.ghost("Later", func(): _finish(false), 140))
-	var play := UI.primary("Play %s" % Arch.name_of(id), func(): _finish(true), 220)
+	var play := UI.primary("Play %s" % Arch.name_of(id, true), func(): _finish(true), 220)
 	btns.add_child(play)
 	v.add_child(btns)
 	root.set_meta("class_id", id)

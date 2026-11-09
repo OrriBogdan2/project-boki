@@ -113,7 +113,8 @@ func goto(screen: String, opts := {}) -> void:
 
 func start_match(opts := {}) -> void:
 	last_tier = int(opts.get("tier", 0))
-	goto("match", opts)
+	Prematch.deal_mates(opts)
+	goto("prematch" if Prematch.wanted(opts) else "match", opts)
 
 var last_tier := 0
 

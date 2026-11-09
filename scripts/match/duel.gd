@@ -76,7 +76,7 @@ func spawn_bot() -> void:
 	if bot and is_instance_valid(bot):
 		_remove_bot()
 	var kit := {"arch": arch, "weapon": Arch.signature(arch), "perk": ""}
-	bot = m.make_hunter(m.next_id("duel"), 1, Arch.weight(arch), "Sparring %s" % Arch.name_of(arch), "bot", m.bot_kin_record(), bot_at, kit, {})
+	bot = m.make_hunter(m.next_id("duel"), 1, Arch.weight(arch), "Sparring %s" % Arch.name_of(arch, true), "bot", m.bot_kin_record(), bot_at, kit, {})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	weapon = bot.wid          # (its archetype's signature weapon: nobody swaps)
 	bot.lives = 99

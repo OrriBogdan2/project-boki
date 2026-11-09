@@ -1,14 +1,15 @@
 extends "res://tools/breah_shots.gd"
 ## --combo51-shots --shots-dir=<dir> --combo51-hero=<id>: owner item 51's new combos as strips (the Breah
 ## rig's 3-wide grid of crops round the hero, tools/breah_shots.gd) in a live Arena match, under xvfb with a
-## renderer: archer|mage|dolm (Lisette, Ryzz, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
+## renderer: archer|mage|dolm (Lisette, Sparkle, Tarek) and juggernaut|dredge|ashwick (Kael, Grimble, Cinder).
 ## <dir>/captions.txt gets "file: caption" per file.
-## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Ryzz, Tarek: the audit's strips) or Kael's
-## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), or Cinder's
-## "item66" (LMB held through Flue Flight).
+## --combo51-part=<part> takes `_<hero>_<part>` instead: "audit" (Sparkle, Tarek: the audit's strips) or Kael's
+## "chain" (the Warchain's tether and pull, on a map island long enough for its 24 m: LONG_PARTS), Cinder's
+## "item66" (LMB held through Flue Flight) or "queen" (LMB from her hands, Flue Flight's fire), or "acc" (Kael's
+## accuracy points as frame runs, acc_<name>_<n>).
 
 const LONG := 30                # m of flat ground the chain strips need, east of the spot
-const LONG_PARTS := ["chain"]   # parts shot on an expedition map instead of the Arena
+const LONG_PARTS := ["chain", "acc"]   # parts shot on an expedition map instead of the Arena
 
 var part := ""                 # --combo51-part=<name>: another set of strips for the hero (`_<hero>_<part>`)
 
@@ -22,7 +23,7 @@ func run(main_node: Node) -> void:
 			who = arg.substr(15)
 		if arg.begins_with("--combo51-part="):
 			part = arg.substr(15)
-	hero_name = Arch.name_of(who).to_lower()
+	hero_name = Arch.bare_title(who).to_lower()
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	await Callable(self, "_%s" % (who if part == "" else who + "_" + part)).call()
@@ -35,7 +36,7 @@ func _archer() -> void:
 	var K: ArcherKit = P.ak
 	await _reset(9.0)
 	var hold := func(t: float):
-		K.res = 0.0              # (no Focus: a full Focus is drawn at once)
+		K.res = 0.0              # (keep the resource empty)
 		P.inp["fire"] = t < 1.0
 		if t >= 0.4 and t < 0.4 + DT:
 			P.do_dash()
@@ -62,7 +63,7 @@ func _archer() -> void:
 	)
 	await _go(1.4, air, air_marks)
 
-## Ryzz: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
+## Sparkle: Kitefall's crouch into a Wirerun, then the launch from where it ended; the crouch into a jump.
 func _mage() -> void:
 	P.lvl = 6
 	await _reset(9.0)
@@ -73,7 +74,7 @@ func _mage() -> void:
 		P.inp["dash_down"] = t >= 0.05 and t < 0.35
 	var marks := _strip(
 		"combo_kitefall_shift_strip",
-		"Ryzz (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
+		"Sparkle (item 51): Kitefall's crouch; Shift in it charges the Wirerun at once; the streak; out of it the"
 			+ " crouch starts over; she launches from where the run ended; up, the ring round the new spot",
 		[0.03, 0.2, 0.42, 0.62, 0.8, 1.0]
 	)
@@ -85,14 +86,14 @@ func _mage() -> void:
 	var jump := func(t: float): P.inp["jump"] = t >= 0.05 and t < 0.05 + DT
 	var jmarks := _strip(
 		"combo_kitefall_jump_strip",
-		"Ryzz (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
+		"Sparkle (item 51): Kitefall's crouch; a jump in it goes at once; the crouch finishing mid-jump; the launch"
 			+ " from that height (no drop first); climbing; hanging",
 		[0.03, 0.12, 0.25, 0.36, 0.5, 0.75]
 	)
 	await _go(0.8, jump, jmarks)
 	await _go(2.2)
 
-## Ryzz items 71-73: the committed Skycall arrow, an orb pulled to her (the flash), Kitefall's Static arcs.
+## Sparkle items 71-73: the committed Skycall arrow, an orb pulled to her (the flash), Kitefall's Static arcs.
 func _mage_items() -> void:
 	var K: MageKit = P.ak
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
@@ -360,6 +361,36 @@ func _ashwick_item66() -> void:
 	)
 	await _go(3.1, held, marks)
 
+## Cinder, the Ashen Kiss (--combo51-part=queen): the LMB stream from her hands, and Flue Flight
+## with fire from her heels
+## and tail (briefs DECISIONS "Cinder the Flame Queen", retitled the Ashen Kiss).
+func _ashwick_queen() -> void:
+	var K: AshwickKit = P.ak
+	P.lvl = 6
+	await _reset(6.0)
+	var held := func(t: float):
+		P.inp["fire"] = t < 1.2
+		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	var hmarks := _strip(
+		"queen_lmb_hands_strip",
+		"Cinder the Ashen Kiss: standing; LMB, the fire starts at her hand; the stream building; full stream;"
+			+ " the stream roaring; let go; the last embers",
+		[0.1, 0.35, 0.6, 0.9, 1.25, 1.5]
+	)
+	await _go(1.6, held, hmarks)
+	await _reset(14.0)
+	var lift := func(t: float):
+		if _at(t, 0.1):
+			K.cd["x"] = 0.0
+			HunterKeys.ult_pressed(P)
+	var umarks := _strip(
+		"queen_flue_flight_strip",
+		"Cinder the Ashen Kiss, Flue Flight: standing; X, the lift-off, fire from her heels and tail; rising;"
+			+ " flying; flying on; the landing",
+		[0.05, 0.3, 0.6, 1.0, 1.6, 2.4]
+	)
+	await _go(2.6, lift, umarks)
+
 ## Kael's Warchain, as whole views (the chain is longer than a strip crop): it pays out as he backs away and
 ## holds taut at 24 m; backing away then pulling slingshots him in; a strafe held in the pull curves him in beside.
 func _juggernaut_chain() -> void:
@@ -415,6 +446,58 @@ func _haul_strip(name_of_run: String, look: Vector3) -> void:
 	await _go(1.65, haul, marks)
 	K.warchain.snap("")
 
+## Item 113: one frame run per point, for GIFs.
+func _juggernaut_acc() -> void:
+	var K: JuggernautKit = P.ak
+	var east := func(): _aim(P.pos + Vector3(8, 0, 0))
+	await _acc("hold", 7.0, 1.0, func(t: float):
+		P.inp["sec_hold"] = true
+		if _at(t, 0.1): K.press_rmb()
+		east.call())
+	P.inp["sec_hold"] = false
+	await _acc("wave", 7.0, 1.3, func(t: float):
+		P.inp["fire"] = t >= 0.1 and t < 1.0
+		east.call())
+	await _acc("slam_then_e", 7.0, 1.0, func(t: float):
+		if _at(t, 0.1):
+			_aim(P.pos + Vector3(0, 0, -6))
+			K.press_rmb()
+		if _at(t, 0.3):
+			_aim(T.pos)
+			K.use_e())
+	K.warchain.snap("")
+	await _acc("meteor", 3.0, 1.2, func(t: float):
+		if _at(t, 0.1): P.do_jump()
+		if _at(t, 0.45):
+			_aim(T.pos)
+			K.press_rmb())
+	await _acc("e_r_pull", 11.0, 1.9, func(t: float):
+		if _at(t, 0.1):
+			_aim(T.pos)
+			K.use_e()
+		if _at(t, 0.65): K.cast_ult()
+		if _at(t, 0.8): K.use_e())
+	K.warchain.snap("")
+	await _acc("dash", 4.0, 0.7, func(t: float):
+		if _at(t, 0.1): P.do_dash()
+		P.inp["move"] = Vector2(1, 0) if t > 0.05 and t < 0.5 else Vector2.ZERO
+		east.call())
+
+## A frame every 0.06 s of `secs`, the dummy `td` m east, under one still camera.
+func _acc(run_name: String, td: float, secs: float, each: Callable) -> void:
+	var K: JuggernautKit = P.ak
+	await _reset(td)
+	for s in ["e", "rmb", "x", "air"]:
+		K.cd[s] = 0.0
+	P.lvl = 6
+	P.slot_lv["ult"] = 1
+	cam_at = home + Vector3(td * 0.5, 0, 0)
+	var marks := []
+	for i in int(secs / 0.06):
+		marks.append([0.06 * i, "full", "acc_%s_%02d" % [run_name, i], "Kael 113 %s" % run_name])
+	await _go(secs, each, marks)
+	cam_at = Vector3.ZERO
+
 ## The audit (Nov 3): Skycall held and dragged, then released; the strike ring at its true radius.
 func _mage_audit() -> void:
 	await _reset(7.0)
@@ -427,7 +510,7 @@ func _mage_audit() -> void:
 		P.inp["e_down"] = t < 0.6
 	var at_t := func(): return T.position + Vector3(0, 0.9, 0)
 	var marks := [
-		[0.45, "full", "audit_skycall_held", "Ryzz Skycall held (audit: the data's hold, drag, release): the drag"
+		[0.45, "full", "audit_skycall_held", "Sparkle Skycall held (audit: the data's hold, drag, release): the drag"
 			+ " arrow follows the cursor back toward her, the rim chevron points it; nothing commits while E is held",
 			at_t],
 		[0.9, "full", "audit_skycall_count", "Released at 0.6s: committed, the pillar narrows over the 0.8s countdown",

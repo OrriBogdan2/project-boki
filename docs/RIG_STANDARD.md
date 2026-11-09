@@ -1,7 +1,7 @@
 # Hunter rig standard (locked, RIGFIX 2026-11-04)
 
-One skeleton, one set of attachment points and one set of scale rules for all 12 Hunters (Vex, Kael, Lisette, Breaker,
-Ryzz, Claire, Pip, Tarek, Grimble, Motley, Sable, Cinder). Any rebuild of a Hunter's model (the face and texture
+One skeleton, one set of attachment points and one set of scale rules for all 12 Hunters (Vex, Kael, Lace, Mossy,
+Sparkle, Neve, Meeko, Tenzo, Grimble, Motley, Sable, Cinder). Any rebuild of a Hunter's model (the face and texture
 accuracy pass included) MUST keep everything below, so the animation work (HunterAnim and the kit moves) carries
 over to the new model unchanged. `--rig-standard-check` asserts it; `docs/art/wardens/RIG_CONTRACT.md` has the
 full bone table and loader details.
@@ -22,7 +22,7 @@ at the rig's `Hand` nodes. Apply all transforms before export.
 ## Scale
 - The mesh is built as a medium hunter (head top about 1.55 m); the game applies class, archetype `body.size` and
   the MantleLook sliders on the root. Never bake a Hunter's own height in.
-- Resulting heights against a medium hunter are owner decisions, asserted by `--warden-model-check`: Breaker 1.5x
+- Resulting heights against a medium hunter are owner decisions, asserted by `--warden-model-check`: Mossy 1.5x
   (his hitbox stays the heavy class's 0.50 m), Kael body 1.06, Motley body 0.9.
 - The hit ring and radius are the class's, never the model's.
 
@@ -33,9 +33,9 @@ at the rig's `Hand` nodes. Apply all transforms before export.
 | muzzle | empty `weapon_muzzle` under `weapon` | on the weapon's mouth: the Gun's `Muzzle` moves there |
 | magazine | `weapon_mag` / `weapon_spin` | child of `weapon`; the reload and the spinning barrels |
 | offhand | child `weapon_offhand` | a twin weapon's second piece, left of x = -0.04, handed to the left hand |
-| shield | mesh `shield` | modelled in the Shield node's space on `Hand.L` (Breaker) |
+| shield | mesh `shield` | modelled in the Shield node's space on `Hand.L` (Mossy) |
 | anchors | empties `anchor_head_top`, `anchor_chest`, plus a Hunter's own (`anchor_*`) | children of their bone; kits find them with `WardenGlb.anchor` |
-| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain_hand`, `anchor_feet`, on their bones; Lisette: `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
+| FX anchors | optional empties a Hero's looks read (`content/vfx/<arch>.json` "anchors"; Kael: `anchor_blade_tip`, `anchor_blade_mid`, under `weapon`; `anchor_chain_hand`, `anchor_feet`, on their bones; Lace: `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`) | looks fall back to the Gun's space, then the body, without them (docs/HERO_VFX.md) |
 
 The weapon is part of the Hunter's design: it stays seated in the hand (its bounds hold the grip within 6 cm) and
 follows the hand in every state. `HunterAnim._weapon_to_hand` pulls a weapon whose grip the arm cannot reach (a flip,

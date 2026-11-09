@@ -806,39 +806,6 @@ const MOVES := {
 		[0.18, {"p": -0.15, "fz": 6.28, "sq": 0.15, "lw": 1.0, "legs": [0.6, -0.9, 0.3, -0.5]}],
 		[0.32, {"fz": 6.28, "sq": -0.05}],
 		[0.42, {"fz": 6.28}]]},
-	# Deadeye (the payoff): the bow thrust out at the target, the body locked low and still, then a slow rise
-	"pin_deadeye": {"keys": [
-		[0.0, {}],
-		[
-			0.05,
-			{
-				"p": -0.12,
-				"y": 0.7,
-				"lift": -0.1,
-				"sq": 0.2,
-				"lw": 1.0,
-				"legs": [0.8, -1.2, -0.5, -0.6],
-				"hw": 1.0,
-				"fl": Vector3(0.3, 0.25, 0.4),
-				"gp": 0.1
-			}
-		],
-		[
-			0.4,
-			{
-				"p": -0.1,
-				"y": 0.68,
-				"lift": -0.1,
-				"sq": 0.18,
-				"lw": 1.0,
-				"legs": [0.8, -1.2, -0.5, -0.6],
-				"hw": 0.8,
-				"fl": Vector3(0.28, 0.22, 0.38)
-			}
-		],
-		[0.75, {}]]},
-	# ---------------------------------------------------------------- Breaker: procs, payoffs and the base dash
-	# Crushed (the payoff): the hammer swung up overhead in triumph, a stamp, the chest out
 	"bul_crush": {"keys": [
 		[0.0, {}],
 		[0.1, {"p": 0.35, "lift": 0.1, "sq": -0.2, "gp": 1.4, "lw": 1.0, "legs": [0.2, -0.3, 0.1, -0.2]}],

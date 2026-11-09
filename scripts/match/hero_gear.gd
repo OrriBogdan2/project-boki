@@ -242,7 +242,7 @@ static func _wraps(c: Dictionary, m_wrap: Material, m_cuff: Material) -> void:
 			_p(el, HeroKit.band("wrap", 0.062, 0.062, 0.014, 0.006), m_wrap, Vector3(0, -0.125 - k * 0.045, 0), Vector3.ONE, Vector3(0.25 * (1 - 2 * k), 0, 0))
 
 # ------------------------------------------------------------------------------------------ mage
-## Ryzz, the storm-kite runner: no hat and no robe. Flight goggles pushed up on a swept-back head,
+## Sparkle, the storm-kite runner: no hat and no robe. Flight goggles pushed up on a swept-back head,
 ## a cropped jacket over a short split kite-tail, copper coils round both forearms, a copper rod mast
 ## on the back flying a pennant in the team colour, and a belt of glass insulators.
 static func _mage(c: Dictionary) -> void:

@@ -1,8 +1,8 @@
 class_name AshwickHose
 extends RefCounted
-## Cinder's Torch Lance stream as a hose, not a rigid cone (sheet gap 1): puffs of fire leave the nozzle
-## every EMIT_DT along the aim and keep their own velocity, so sweeping the nozzle bends the stream behind
-## it. Each puff widens from the narrow nozzle (w0) to a billowing end (w1) over its life (range / speed).
+## Cinder's Torch Lance stream as a stream of fire, not a rigid cone (sheet gap 1): puffs of fire leave her hand
+## every EMIT_DT along the aim and keep their own velocity, so sweeping the aim bends the stream behind
+## it. Each puff widens from the narrow palm (w0) to a billowing end (w1) over its life (range / speed).
 ## Walls stop a puff where it meets them. The fire only hurts while the key is held; letting go snuffs
 ## the stream within SNUFF seconds (the source's fire stops at once). Simulated on the match step.
 

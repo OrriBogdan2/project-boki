@@ -328,7 +328,6 @@ func _crash() -> void:
 	k.play("breah_leap_land")
 	m.fx.dust(at, 14)      # the hit area showed all through the flight: no ring or blast here
 	m.sfx("br_slam", at, -5.0, 1.15)
-	k.rider_points(start_at, at)
 	for f in k.foes_in(at, r, 2.0):
 		k.leap_hits += 1
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)

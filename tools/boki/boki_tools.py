@@ -17,9 +17,10 @@ def axe_blade(base, axis, up):
             Cone("b3", "prop_axe", c1, c2, 0.012, 0.012, k=0.01, **flat)]
 
 
-def tools(grip, axis):
-    """name -> (Shape, step, tris). `grip` is where it is held, `axis` the way the handle runs."""
-    up = np.cross(SIDE, axis)
+def tools(grip, axis, side=SIDE):
+    """name -> (Shape, step, tris). `grip` is where it is held, `axis` the way the handle runs; the blade is on the
+    `up` side of the handle, cross(side, axis): pass -SIDE to put it on the other edge."""
+    up = np.cross(side, axis)
     end = grip + axis * 0.30
     return {
         "axe_handle": (Shape([Cone("h", "prop_axe", grip, end, 0.017, 0.015, k=0)]), 0.004, 12),
