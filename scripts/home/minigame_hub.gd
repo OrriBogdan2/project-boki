@@ -17,7 +17,7 @@ static func rules() -> Dictionary:
 
 ## Records a finished game: the winning Boki's name.
 static func record(game: String, who: String) -> void:
-	var all: Dictionary = Save.d["game_board"]
+	var all: Dictionary = Save.d.get_or_add("game_board", {})     # a hand-built save may lack it
 	if not all.has(game):
 		all[game] = {"last": "", "wins": {}}
 	var rec: Dictionary = all[game]
@@ -26,7 +26,7 @@ static func record(game: String, who: String) -> void:
 
 ## "No games yet", or "Best Pip, 3 wins · last Rue".
 static func summary(game: String) -> String:
-	var rec: Dictionary = Save.d["game_board"].get(game, {})
+	var rec: Dictionary = Save.d.get("game_board", {}).get(game, {})
 	var wins: Dictionary = rec.get("wins", {})
 	if wins.is_empty():
 		return "No games yet"
