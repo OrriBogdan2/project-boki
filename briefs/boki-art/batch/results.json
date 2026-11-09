@@ -45181,5 +45181,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_glaivyx_h5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaivyx_h5",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bastionpet_card86",
+    "name": "Bastionpet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bastionpet_card86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h5",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorhorn_card86",
+    "name": "Anchorhorn (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/anchorhorn_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bastionpet_card86",
+    "name": "Bastionpet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bastionpet_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorhorn_card86",
+    "name": "Anchorhorn (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorhorn_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorhorn_card86",
+    "name": "Anchorhorn (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorhorn_card86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bastionpet_card86",
+    "name": "Bastionpet (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bastionpet_card86_3.jpg",
+    "ok": true
   }
 ]
