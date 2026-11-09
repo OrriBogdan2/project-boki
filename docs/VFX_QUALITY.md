@@ -1,4 +1,4 @@
-# Ability VFX quality: the bar, the rules, the scorecard (2026-11-08)
+# Ability VFX quality: the bar, the rules, the coverage, the scorecard (2026-11-08, coverage 11-09)
 
 Owner playtest 11-08: abilities look janky; Cinder and Kael look decent. This doc sets the bar from those two kits
 (plus the source footage in `docs/KIT_PARITY.md`), lists the shared causes of jank and what the shared layer now does,
@@ -63,16 +63,49 @@ Still open (shared, not done here):
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
 - `pin_draw.gd` defaults to `#e8483e`.
-- Six kits are data-driven (`content/vfx/`: archer, ashwick, gunslinger, juggernaut, rimewright, tender). The rest draw
-  with `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`); Vex still uses `vv_fx` for her
-  slide echoes, the Burr Charge's cone and smear, and the Dazed swirl. Moving each to `HeroVfx` data is
-  how a kit reaches the bar.
+- All 12 Hunters have a data file (`content/vfx/`). Still drawn in code: Vex's slide echoes and Burr look (`vv_fx`),
+  Lace's dash fletch (`pin_fx`), Grimble's barge (`ld_fx`), Sable's dash streaks (`dj_fx`), Albert's hammer and dash
+  (`bjorn_fx`, now in his palette), Motley's LMB and dash (violet, kept by the dash-feel lane). See the coverage table.
 - **Opaque zone fills** (seen in the strips): Vex's X scorch (`VvFx.disc`, fixed on ext/vfx-gunslinger), Motley's well dome, Meeko's seed and
   ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
   rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
   is per kit (backlog).
 - Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
   moves them to teal. The alternative (keep void violet) would clash with Sable.
+
+## Coverage per Hunter and slot (2026-11-09, ext/vfx-pass)
+What draws each moment, after the 11-08 VFX branches (merged into ext/vfx-pass) and this pass. **ok**: its own look in
+the Hunter's palette (HeroVfx data or the kit's pooled module). **ph** (placeholder): shared primitives, off-palette, or a
+known weak spot. **miss**: nothing in the world (the overhead plate's word or icon only). Slice Wardens first.
+Status = what the kit puts on a foe. "before → after" where this pass changed it.
+
+| Hunter | LMB | RMB | Dash | E | R | Impact | Status on the foe |
+|---|---|---|---|---|---|---|---|
+| Vex (slice) | ok | ok (`vv_fx`) | ok (`vv_fx` echoes) | ok | ok | ok | Dazed ok; stun miss → ok |
+| Kael (slice) | ok | ok | ok | ok | ok | ok | stun miss → ok; Blight miss |
+| Lace (slice) | ok | ok | ok (`pin_fx`) | ok | ok | ok | stun miss → ok; Blight miss |
+| Cinder (slice) | ok | ok (body red-pink, as the hero doc specs) | ok (jets) | ok | ok | ok | Ablaze ok; slow miss |
+| Meeko | ok | ok | ok | ok | ok | ok | root miss |
+| Tenzo | ph → ok (punch) | ok | ph → ok (`dash_dust`) | ok; rock/boulder bursts ph → ok (`rock_burst`) | ok | ok | stun ok (kit crown → shared); Shred ph (ring + word) |
+| Grimble | ok | ok | ok (`ld_fx` barge) | ok | ok | ok (slugs read small) | stun ok (kit spiral → shared); Grounded ok |
+| Neve | ok | ok | ph → ok (shared team pill over the skate removed) | ok | ok | ok | stun miss → ok; slow/root miss |
+| Motley | ph (violet, kept by the dash-feel lane) | ok | ph (violet puffs) | ok | ok | ok | stun ok (kit crown → shared); Disoriented ph |
+| Albert | ph → ok (gold/orange → his palette) | ok | ph → ok (palette) | ok | ok | ok | stun miss → ok |
+| Sparkle | ok | ok | ok | ok | ok | ok | stun miss → ok; Grounded ph (flat amber disc) |
+| Sable | ok | ok | ok (`dj_fx` violet) | ok | ph → ok (blade hits were no bigger than the LMB's: now a crossed slash) | ok | stun miss → ok; Grounded ok |
+
+**Ours vs source** (`briefs/hero-ref`, KIT_PARITY):
+| Moment | Source [F] | Ours before | Ours now |
+|---|---|---|---|
+| A stun | a marker over the head on every stun: "a dark spiral" (dredge.md 0236), "a stun swirl" (dancer.md), "stun stars" (breah.md 0122), "a pink stun marker" (ostra.md f33); shown ~1.2-1.4 s, as long as the stun | two kit-only looks (Tenzo/Motley's star crown, Grimble's spiral); 8 of 12 kits' stuns showed nothing on the body | `StunMark`: spiral + 3 stars over every stunned Hunter or monster for its whole stun, fading over the last 0.2 s; size and colour [?] (not recorded), so the plate's STUNNED yellow |
+| A dash | dust and the hero's own trail; no ring or burst (DECISIONS) | Neve: the shared team-colour pill (a new mesh and material every 0.028 s) over her skate; Tenzo: two puffs a tick; Albert: orange | every kit its own look; no Hunter reaches the shared pill (asserted) |
+| An ult hit vs an LMB hit | bigger (the bar's scale rule) | Sable's Encore hit 1.3 m vs her bolt hit 1.25 m | Encore hit: two crossed violet slashes (1.6 m) and a 1.8 m flare (2.4 m on the rim); every data ult hit is asserted wider than its LMB hit |
+| Slow, root, burn, Blight on the body | not recorded [?] | plate word/icon (Blight: none) | unchanged: parity first, no invented looks. Suggestion for the owner: a frost rim for slow, roots at the feet, embers for burn, a dark heal-cut tick for Blight |
+
+Frame cost: `StunMark` is a fixed pool of 8 marks built once (one billboard quad with the existing `ld_fx` spiral
+shader + 3 star boxes sharing one material); nothing is made per frame, and with nobody stunned its `_process` is off.
+Tenzo's dash is one HeroVfx hold (pooled particles, inside `MAX_LIVE`) instead of two `Fx.burst` calls per 0.028 s.
+Neve's dash no longer makes a MeshInstance3D and a material per after-image tick.
 
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
@@ -107,6 +140,6 @@ The hook is a gold chain of links (HeroVfx's new hold-only `chain` layer): it pa
 taut and glowing on the bite (a burst of coins, sparks and a flash on the target) and again on each haul, and throws
 sparks as it snaps back. The E and X telegraphs are gold; sparks rise along the cone's edge through the wind-up and
 charge, and each slam or wave ends in a gold sweep that burns away, a flash, debris and coins. Kept from LDFx: the bone
-hook (now a gold rim), the ghost anchor, the reel's chain ring, the stun spirals and the barge (dash not in scope).
+hook (now a gold rim), the ghost anchor, the reel's chain ring, the stun spirals (now the shared StunMark) and the barge (dash not in scope).
 Sound is unchanged (3). Scale stays 3: the slugs read as small pale-gold dots with thin trails at match
 zoom; a gold body on sand or autumn ground has less contrast than on grass (the dark rims and char carry it).
