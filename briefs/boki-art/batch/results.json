@@ -33883,5 +33883,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_torpecone_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_portrait_glassolotl_v3",
+    "name": "Glassolotl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_portrait_glassolotl_v3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_portrait_glassolotl_v3",
+    "name": "Glassolotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_portrait_glassolotl_v3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_portrait_glassolotl_v3",
+    "name": "Glassolotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_portrait_glassolotl_v3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_v3",
+    "name": "Glassolotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_v3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_v3",
+    "name": "Glassolotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_v3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_v3",
+    "name": "Glassolotl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_v3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card4",
+    "name": "Glassolotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_card4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card4",
+    "name": "Glassolotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_card4_1.jpg",
+    "ok": true
   }
 ]
