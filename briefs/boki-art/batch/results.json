@@ -20870,5 +20870,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/stance_teapotamus_3.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_skidlet",
+    "name": "Skidlet (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_skidlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_kerchick",
+    "name": "Kerchick (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_kerchick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_skateron",
+    "name": "Skateron (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_skateron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_skateron",
+    "name": "Skateron (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_skateron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_zippelith",
+    "name": "Zippelith (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_zippelith_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_zippelith",
+    "name": "Zippelith (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_zippelith_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_zippelith",
+    "name": "Zippelith (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_zippelith_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_glintmole",
+    "name": "Glintmole (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_glintmole_1.jpg",
+    "ok": true
   }
 ]
