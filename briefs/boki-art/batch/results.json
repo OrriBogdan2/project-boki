@@ -11784,5 +11784,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_pipwom_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_cubbat",
+    "name": "Cubbat",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_cubbat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom",
+    "name": "Pipwom (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pipwom_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom",
+    "name": "Pipwom (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pipwom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e",
+    "name": "Cetorgan (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet_e",
+    "name": "Lurklet (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lurklet_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e",
+    "name": "Cetorgan (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet_e",
+    "name": "Lurklet (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lurklet_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lurklet_e",
+    "name": "Lurklet (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lurklet_e_3.jpg",
+    "ok": true
   }
 ]
