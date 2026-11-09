@@ -47029,5 +47029,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_reelacine_gap_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_sandwidow_gap",
+    "name": "Sandwidow (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sandwidow_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reelacine_gap",
+    "name": "Reelacine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_reelacine_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelossus_gap",
+    "name": "Morelossus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_morelossus_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reelacine_gap",
+    "name": "Reelacine (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_reelacine_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_morelossus_gap",
+    "name": "Morelossus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_morelossus_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sandwidow_gap",
+    "name": "Sandwidow (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sandwidow_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sandwidow_gap",
+    "name": "Sandwidow (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_sandwidow_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_slog_gap",
+    "name": "Slog (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_slog_gap_1.jpg",
+    "ok": true
   }
 ]
