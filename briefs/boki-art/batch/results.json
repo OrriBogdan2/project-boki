@@ -8340,5 +8340,68 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/eclipsowl_e_3.jpg",
     "ok": true
+  },
+  {
+    "id": "embrook_r2",
+    "name": "Embrook",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/embrook_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_e",
+    "name": "Howlop",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/howlop_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r",
+    "name": "Glaciatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_f2",
+    "name": "Gongibbon (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongibbon_f2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_e",
+    "name": "Howlop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_r2",
+    "name": "Glaivyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_f2",
+    "name": "Gongibbon (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongibbon_f2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_r2",
+    "name": "Geysirbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_r2",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_r2_2.jpg",
+    "ok": true
   }
 ]
