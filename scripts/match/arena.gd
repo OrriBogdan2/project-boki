@@ -10,6 +10,7 @@ extends RefCounted
 ##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a goal line and a pass tick over each station (StationGoals, content/rules/station_goals.json; Esc: Hide goals)
+## - the wisp station (WispStation): a downed dummy's round Wisp, two critter wisps to grab; Z skips
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
@@ -48,6 +49,7 @@ var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, mv: DummyMove}
 var station_label: Label3D = null
 var goals: StationGoals = null
+var wisp: WispStation = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -87,6 +89,8 @@ func setup(match_node: Match, which: String) -> void:
 	CombatBus.hit_landed.connect(_cb)
 	_build_ui()
 	_sign()
+	var wat: Array = WispStation.rules["at"]
+	wisp = WispStation.new(m, TEAM + 1, _arena_point(Vector3(wat[0], 0, wat[1])))
 	goals = StationGoals.new(m, self)
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
@@ -240,6 +244,7 @@ func tick(dt: float) -> void:
 			P.hp = P.max_hp
 	if Input.is_action_just_pressed("interact") and not m.paused and not P.downed and P.flat_dist(_arena_point(STATION)) < STATION_R:
 		cycle_dummy()
+	wisp.tick(dt, not StationGoals.hidden())
 	goals.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
@@ -281,6 +286,7 @@ func reset() -> void:
 		D.set_meta("marks", {})
 		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
 	hits_all.clear(); dealt = 0.0
+	wisp.reset()
 	m.fx.ring(home, 1.6, Color("8fe3c8"), 0.35)
 	m.sfx("revive", null, -8.0, 1.2)
 
@@ -658,6 +664,7 @@ class ArenaKeys extends Node:
 			KEY_BACKSPACE:
 				if not a.m.paused: a.reset()
 			KEY_N: a.cycle_bot()
+			KEY_Z: a.wisp.skip()
 			KEY_O: a.toggle_cd()
 			KEY_U: a.toggle_ult()
 			KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:

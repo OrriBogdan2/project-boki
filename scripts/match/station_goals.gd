@@ -112,6 +112,8 @@ func _passed(r: Dictionary, P: Hunter, slammed: bool) -> bool:
 			return m.train.has(String(g["step"]))
 		"knock":
 			return int(m.duel.stats["knocks"]) > 0
+		"wisp":
+			return a.wisp.done()
 	return false
 
 func _dummy(who: String) -> Hunter:

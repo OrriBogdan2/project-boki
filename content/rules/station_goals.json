@@ -1,5 +1,5 @@
 {
- "doc": "One plain goal line per Training Area station, and one in the duel room (scripts/match/station_goals.gd). id: the save key. text: the goal ({throw} {interact} {jump} become the player's key caps). at: [x, z] map tiles, where the goal floats (omit for the duel pad); lift: metres above the ground. kind: hits (who: the dummy's name, need: how many hits), mode (the station dummy is set to the mode in 'mode'), slam (the player wall-slams the dummy named 'who'), stand (on the ground inside rect [x0, z0, x1, z1]), dash (mid-dash inside rect), train (the checklist's step 'step' is done), duel (entering the duel room), knock (a knock on the duel room's bot). room 'duel' puts a goal in the duel room, over the bot's start (default: the Training Area). Nothing blocks you: a goal only shows a tick.",
+ "doc": "One plain goal line per Training Area station, and one in the duel room (scripts/match/station_goals.gd). id: the save key. text: the goal ({throw} {interact} {jump} become the player's key caps). at: [x, z] map tiles, where the goal floats (omit for the duel pad); lift: metres above the ground. kind: hits (who: the dummy's name, need: how many hits), mode (the station dummy is set to the mode in 'mode'), slam (the player wall-slams the dummy named 'who'), stand (on the ground inside rect [x0, z0, x1, z1]), dash (mid-dash inside rect), train (the checklist's step 'step' is done), wisp (a critter wisp at the wisp station is grabbed, or Skip), duel (entering the duel room), knock (a knock on the duel room's bot). room 'duel' puts a goal in the duel room, over the bot's start (default: the Training Area). Nothing blocks you: a goal only shows a tick.",
  "goals": [
   {"id": "strafe", "text": "Hit the strafing dummy 5 times", "at": [29.5, 26.0], "lift": 4.4, "kind": "hits", "who": "Strafer", "need": 5},
   {"id": "dodge", "text": "Press {interact} at the sign until the dummy dodges", "at": [20.2, 28.0], "lift": 3.2, "kind": "mode", "mode": "dodge"},
@@ -11,6 +11,7 @@
   {"id": "glide", "text": "Glide to the far island: jump, then press {jump} again", "at": [73.5, 47.0], "lift": 3.2, "kind": "stand", "rect": [81, 40, 84, 48]},
   {"id": "boki", "text": "Summon your Boki: press {throw}", "at": [23.3, 34.7], "lift": 3.2, "kind": "train", "step": "throw"},
   {"id": "crate", "text": "Break a crate", "at": [27.5, 41.0], "lift": 3.2, "kind": "train", "step": "smash"},
+  {"id": "wisp", "text": "Hold {interact} on a critter wisp to grab it (the round one is a Hunter's)", "at": [32.5, 30.5], "lift": 3.2, "kind": "wisp"},
   {"id": "duel", "text": "Step on the glowing pad, press {interact}: the duel room", "lift": 2.2, "kind": "duel"},
   {"id": "knock", "room": "duel", "text": "Knock the sparring bot down once", "lift": 3.2, "kind": "knock"}
  ]

@@ -28,6 +28,9 @@ Signs on posts name each area and each piece of the lane.
 - **The dummy station** (a sign by the first dummy, **F** within two metres) switches that dummy between Still, Strafe
   (side to side at run speed, random 0.6-1.4 s legs) and Dodge (strafe plus a dash every 4-6 s), for testing skillshots
   against targets that move like players. It stays in its pen. Tuning: `content/rules/dummy_move.json`.
+- **The wisp station** (east of the start): a downed dummy Hunter shows its round Wisp, slow and low and never
+  stealable, while two small critter wisps pop off it at shoulder height. Hold **F** on a critter wisp to grab it
+  (the goal line ticks); **Z** skips the station. Round = Hunter, critter = Boki. Tuning: `content/rules/wisp_station.json`.
 - **A sparring bot** you switch between Off, Idle, Moving and Fighting (**N**), with any Hunter.
 - **Backspace** resets. **O** turns cooldowns off (dash, RMB, E, R and the glove). **U** unlocks the ultimate.
 - **2-9** swap to the first eight Hunters on the spot. **L** opens the loadout (Hunter, weapon, Boki, gloves,

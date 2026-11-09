@@ -200,6 +200,7 @@ func _station_goals() -> void:
 	m.train["smash"] = true
 	G.tick()
 	ok("station goals: the crate goal follows its checklist step", done.call("crate"))
+	_wisp_station_asserts(m, A, G)
 	ok("station goals: all but the duel ticked, nothing blocked",
 		G.done_count() == want - 1 and not done.call("duel") and not m.paused)
 	StationGoals.mark_duel()
@@ -220,6 +221,59 @@ func _station_goals() -> void:
 	await main.get_tree().process_frame
 	await _duel_goals()
 	StationGoals.state()["done"].clear()
+
+## The wisp station: a downed dummy Hunter (round Wisp, low) with two critter wisps at shoulder height; a hold of
+## interact on a critter wisp grabs it and ticks the goal, the round Wisp is no target, Skip ticks it too.
+func _wisp_station_asserts(m: Match, A: Arena, G: StationGoals) -> void:
+	var W: WispStation = A.wisp
+	var P: Hunter = m.player
+	var row: Dictionary = G.rows.filter(func(r): return r["g"]["id"] == "wisp")[0]
+	var rest := func() -> void: W.tick(1.0, true)          # (a second: the pop is over, the wisps at rest)
+	var ground: float = m.world.ground_at(W.dummy.pos.x, W.dummy.pos.z)
+	var rules := WispStation.rules
+	ok("wisp station: the goal line floats over the dummy's own spot", row["g"]["at"] == rules["at"])
+	ok("wisp station: a downed Hunter dummy and two critter wisps", W.dummy.downed and W.wisps.size() == 2
+		and W.wisps.all(func(w): return w.get_node_or_null("Body") != null))
+	P.teleport(W.dummy.pos + Vector3(0, 0, 6.0))
+	rest.call()
+	var up: float = W.wisps[0].position.y - ground
+	var hover: float = Content.rules("wisp_looks")["looks"]["default"]["hover"]
+	ok("wisp station: critter wisps hover at shoulder height, well above the Hunter Wisp (rule 11-09)",
+		absf(up - float(rules["shoulder_m"])) < 0.01 and up > hover + 0.5)
+	ok("wisp station: the Skip line shows until it is done", W.skip_label.visible and not W.done())
+	P.teleport(W.dummy.pos)
+	P.inp["interact"] = true
+	for i in 12:
+		W.tick(0.1, true)
+	G.tick()
+	ok("wisp station: holding interact on the round Wisp grabs nothing", not W.done() and not row["done"])
+	P.teleport(W.wisps[0].position - Vector3(0, float(WispStation.rules["shoulder_m"]) - 1.0, 0))
+	for i in 3:
+		W.tick(0.1, true)
+	G.tick()
+	ok("wisp station: a short hold is no grab yet", not W.done() and not row["done"] and W.hold > 0.0)
+	P.inp["interact"] = false
+	for i in 8:
+		W.tick(0.1, true)
+	ok("wisp station: letting go drains the hold", W.hold == 0.0)
+	P.inp["interact"] = true
+	for i in 8:
+		W.tick(0.1, true)
+	G.tick()
+	P.inp["interact"] = false
+	ok("wisp station: a full hold grabs the critter wisp and ticks the goal",
+		W.carried[0] and row["done"] and not W.skip_label.visible)
+	var ring: float = W.wisps[0].position.distance_to(P.pos + Vector3(0, float(rules["shoulder_m"]), 0))
+	ok("wisp station: the grabbed wisp circles you, the other stays",
+		ring < float(rules["orbit_m"]) + 0.01 and not W.carried[1])
+	W.reset()
+	var home_d: float = W.wisps[0].position.distance_to(W.dummy.pos)
+	ok("wisp station: reset sends it back to the dummy", not W.done() and home_d < 3.0)
+	W.skip()
+	ok("wisp station: Skip counts as done", W.done())
+	W.dummy.down_hp = 5.0
+	W.tick(0.1, true)
+	ok("wisp station: the dummy stays downed and unfinishable", W.dummy.downed and W.dummy.down_hp > 1000.0)
 
 ## The duel room's own goal: a line over the bot's start, ticked by the first knock.
 func _duel_goals() -> void:

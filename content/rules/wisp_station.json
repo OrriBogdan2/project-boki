@@ -1,0 +1,13 @@
+{
+	"doc": "The Training Area's wisp station (scripts/match/wisp_station.gd): a downed dummy Hunter shows its round Hunter Wisp, two critter Boki wisps pop off it, and you grab one (DECISIONS 2026-11-09, outline rule: round = Hunter, slow, low, never taken; critter = Boki, quick, shoulder height). at: [x, z] map tiles of the dummy. species: the two Boki wisps (kin ids). shoulder_m: height of a Boki wisp over the ground. apart_m: how far from the dummy each rests. pop_s: seconds a wisp takes to pop off the Hunter Wisp. repeat_s: seconds between pops. reach_m: how close you stand to a Boki wisp to grab it. hold_s: seconds you hold interact on it. orbit_m: the radius a grabbed wisp circles you at. down_hp: the dummy's down health, kept full so the Hunter Wisp is never finished.",
+	"at": [32.5, 30.5],
+	"species": ["cindle", "duskapi"],
+	"shoulder_m": 1.3,
+	"apart_m": 1.9,
+	"pop_s": 0.5,
+	"repeat_s": 6.0,
+	"reach_m": 1.6,
+	"hold_s": 0.6,
+	"orbit_m": 1.1,
+	"down_hp": 1000000.0
+}
