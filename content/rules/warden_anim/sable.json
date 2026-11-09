@@ -16,7 +16,7 @@
 		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving"}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving"}, "thf_primed": {"clip": "primed", "upper": "moving"},
 		"thf_vault_r": {"clip": "vault_r"}, "thf_vault_l": {"clip": "vault_l"}, "thf_vault_f": {"clip": "vault_f"}, "thf_vault_b": {"clip": "vault_b"}, "thf_vault_twist": {"clip": "vault_twist"},
 		"thf_exdash": {"clip": "exdash", "hold_from": 0.46}, "thf_land": {"clip": "land_v"},
-		"thf_bola": {"clip": "bola", "upper": "moving"}, "thf_knife": {"clip": "knife"}, "thf_arrive": {"clip": "arrive"},
+		"thf_bola": {"clip": "bola", "upper": "moving"}, "thf_knife": {"clip": "knife", "upper": "moving"}, "thf_arrive": {"clip": "arrive"},
 		"thf_encore": {"clip": "encore"}, "thf_encore_dance": {"clip": "encore_dance", "hold_from": 0.0, "upper": "moving"},
 		"thf_reset": {"clip": "reset", "upper": "moving"}, "thf_flourish": {"clip": "flourish", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}

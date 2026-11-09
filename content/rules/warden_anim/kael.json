@@ -50,10 +50,12 @@
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r"
+			"clip": "slash_r",
+			"upper": "moving"
 		},
 		"jug_slash_l": {
-			"clip": "slash_l"
+			"clip": "slash_l",
+			"upper": "moving"
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
@@ -88,10 +90,12 @@
 			"clip": "exdash"
 		},
 		"jug_chain": {
-			"clip": "chain"
+			"clip": "chain",
+			"upper": "moving"
 		},
 		"jug_reel": {
 			"clip": "reel",
+			"fade": 0.2,
 			"hold_from": 0.25,
 			"heading": true
 		},

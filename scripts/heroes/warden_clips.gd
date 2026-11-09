@@ -361,6 +361,8 @@ func step(dt: float) -> void:
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
+			if act_w <= 0.0:
+				xf = float(chan)      # (none of the last whole-body move shows: no fade from its stale pose)
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
@@ -368,7 +370,7 @@ func step(dt: float) -> void:
 		else:
 			_p("rate_%s/scale" % live, 1.0)
 		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
-		up_w = move_toward(up_w, 0.0, dt / FADE)
+		up_w = move_toward(up_w, 0.0, dt / float(want.get("fade", FADE)))     # (the upper move hands over as it comes in)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
