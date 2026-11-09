@@ -214,8 +214,8 @@ vec4 chain(vec2 uv) {
 	float rim = 1.0 - smoothstep(0.19, 0.3, d);
 	// pulled taut it heats, and glints run down it toward the hand (the yank)
 	float glint = smoothstep(0.82, 1.0, sin(uv.x * 0.7 + TIME * 22.0)) * life;
-	float shine = smoothstep(0.1, -0.6, p.y) * 0.5 + 0.35 * life + glint;
-	vec3 c = mix(col3.rgb, mix(col.rgb, mix(col2.rgb, vec3(1.0), glint * 0.6), clamp(shine, 0.0, 1.0)), metal);
+	float sheen = smoothstep(0.1, -0.6, p.y) * 0.5 + 0.35 * life + glint;
+	vec3 c = mix(col3.rgb, mix(col.rgb, mix(col2.rgb, vec3(1.0), glint * 0.6), clamp(sheen, 0.0, 1.0)), metal);
 	return vec4(c * rim, rim);
 }
 
