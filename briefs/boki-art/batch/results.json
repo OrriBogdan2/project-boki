@@ -37264,5 +37264,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_mortarfly_a5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lanceron_k1",
+    "name": "Lanceron (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k1",
+    "name": "Lanceron (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a5",
+    "name": "Mortarfly (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k1",
+    "name": "Lanceron (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a5",
+    "name": "Mortarfly (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a4",
+    "name": "Mortarfly (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a5",
+    "name": "Mortarfly (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanceron_k1",
+    "name": "Lanceron (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lanceron_k1_4.jpg",
+    "ok": true
   }
 ]
