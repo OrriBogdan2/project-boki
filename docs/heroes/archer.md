@@ -181,7 +181,7 @@ key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one 
 | `arc_hail` | lob f456, rain f458 | raise 0.12, lob 0.33-0.36, rain at tell 0.35 / 0.6 | same | matches |
 | `pin_roll` | 0.27 s roll, peak at 0.13, straight into the crouched walk [655.55-655.65] | peak 0.2, clip stands up 0.24-0.36, walk pose only from 0.4 | hands to `pin_walk` at roll_t 0.24 (the standing tail never shows) | fixed; asserted |
 | `pin_walk` | crouched run | hold from 0.2 | same | matches |
-| `pin_flick` `pin_deadeye` | not in the footage | 0.17 / 0.43; 0.45 / 0.73 | same | no source |
+| `pin_flick` | not in the footage | 0.17 / 0.43 | same | no source (our long-dash variant, still played) |
 | `pin_ult_cast` | flash f33 (0.1 s) | flash 0.1, swept 0.25 / 0.45 | same | matches |
 | `pin_ult_nock` | a 0.4-0.8 s draw a shot | nock 0.3 (held from 0.3) | nock 0.5 | fixed; asserted |
 | `pin_ult_loose` `pin_ult_final` | 1.5 s a shot [f48/f63/f78] | release 0.1 / 0.5-0.65, next nock at 0.9 | recover 1.0: beam to beam 1.5 s | fixed; asserted |
