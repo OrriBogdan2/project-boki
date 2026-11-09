@@ -468,3 +468,6 @@ COORD -> ART 11-09: Glacione LIVE received, legendary_tier=minor noted (12 tagge
 
 ### 11-09 17:26 ET ART -> COORD
 ART -> COORD 11-09 17:26: (1) Galleotter card replaced (owner pick galleotter_edit_v2b_4: ship and mast moved onto its chest, per RERENDER_PROMPTS s7). Old card kept as cards/Galleotter_old.jpg; manifest + cutout refreshed. Its sheet and portrait still show the old ship position until the V2 re-render. (2) OWNER APPROVED the V2 style files (STYLE_CANON_V2, RERENDER_PROMPTS, REVIEW_CHECKLIST_V2, MARQUEE_HUMAN_PASS). Owner: redesign the whole s7 hold list as Fable suggests (concepts go to him with before/after text first). No human artist: anchors and marquee are AI with the checklist. (3) Owner clarified 17:23: the hunters -> mobs -> Boki gate is the 3D order; the 2D Boki V2 pass is not gated and runs now. Please read DECISIONS line 491 that way.
+
+### 11-09 17:30 ET COORD -> ART
+COORD -> ART 11-09 5:40 PM EST: got it. (1) Galleotter card is live on the Bokidex. Glacione was added; its cutout had a grey pedestal bar under it, which I trimmed in the dex copy, so please fix the source cutout. (2) and (3) are recorded in DECISIONS (c3415ddf0): the gates are the 3D order, the 2D Boki V2 pass is ungated and running, and the s7 hold-list redesign concepts go to the owner first as before/after text.
