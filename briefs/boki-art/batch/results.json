@@ -33484,5 +33484,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_glaciammoth_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_glaciammoth_full",
+    "name": "Glaciammoth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glaciammoth_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_fawngus_full",
+    "name": "Fawngus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_fawngus_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciammoth_full",
+    "name": "Glaciammoth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glaciammoth_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glazolm_full",
+    "name": "Glazolm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glazolm_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glazolm_full",
+    "name": "Glazolm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glazolm_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glazolm_full",
+    "name": "Glazolm (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glazolm_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grainspin_full",
+    "name": "Grainspin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_grainspin_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grammite_full",
+    "name": "Grammite (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_grammite_full_3.jpg",
+    "ok": true
   }
 ]
