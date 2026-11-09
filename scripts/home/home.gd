@@ -51,6 +51,7 @@ var lots := {}                 # building id -> {node, built}
 var visit: Dictionary = {}     # when visiting someone: their island snapshot (see Social.publish_profile)
 var visit_id := ""
 var petted := {}
+var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -141,6 +142,7 @@ func _ready() -> void:
 		get_viewport().disable_3d = true
 		PerfLog.frame_drawn()
 	hecon = HomeEcon.new(self)
+	if FarmUnlocks.base_mode() and visit.is_empty(): hrace = BaseRace.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -279,6 +281,7 @@ func _sync_fixtures() -> void:
 		hinc.refresh()
 	if hecon and visit.is_empty():
 		hecon.move_graveyard()
+	if hrace: hrace.place()
 	if is_instance_valid(nest): nest.position = NEST_AT
 	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
 	if str(_plot_spots(cap)) != _fx_sig:
@@ -319,6 +322,7 @@ func _fs_arrivals() -> bool:
 func _ready_rest() -> void:
 	var dbg := OS.get_cmdline_user_args()
 	_fixture_spots()
+	if hrace: hrace.place()
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
@@ -1012,6 +1016,7 @@ func _process(delta: float) -> void:
 	if guide: guide.tick(d)
 	_care_tick(d)
 	if hecon: hecon.tick(d)
+	if hrace: hrace.tick(d)
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
@@ -1994,6 +1999,7 @@ func _find_interact() -> void:
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
+	if hrace and best.is_empty(): best = hrace.find(p2)
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2140,6 +2146,7 @@ func _label_for(it: Dictionary) -> String:
 			return "Spend time with %s" % rec["name"]
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
+		"race": return hrace.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2175,6 +2182,7 @@ func _use(it: Dictionary) -> void:
 			var ak := Save.active_kin()
 			if not ak.is_empty(): _open_train(ak)
 		"nook": _open_nook()
+		"race": hrace.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -2201,8 +2209,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		hb.toggle()
 		get_viewport().set_input_as_handled()
 		return
+	if hrace and hrace.input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if not train.is_empty():
-		if event.is_action_pressed("interact") or event.is_action_pressed("jump") or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		if TimingBar.is_press(event):
 			_train_hit()
 			get_viewport().set_input_as_handled()
 			return
@@ -2210,8 +2221,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			# walk away from the drill
 			var tk: Dictionary = train["k"]
 			tk["busy"] = false
+			train["bar"].close()
 			train = {}
-			if is_instance_valid(train_bar): train_bar.queue_free()
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.pressed and panel_open == "":
@@ -3980,9 +3991,6 @@ var care_save := 0.0
 var yard: Node3D = null
 var nest: Node3D = null
 var train := {}                 # the training session in progress
-var train_bar: Control = null
-var train_lbl: Label = null
-var train_draw: Control = null
 
 ## Builds the yard and the nest, and catches every kin up on the time you were away.
 func _setup_care() -> void:
@@ -4380,51 +4388,22 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	ppos = YARD_KIN + Vector3(-0.6, 0, 1.4)
 	player.position = ppos
 	_face(YARD_KIN)
-	train = {"k": k, "stat": stat, "round": 0, "results": [], "m": 0.0, "dir": 1.0, "speed": 0.85, "zone": randf_range(0.3, 0.7), "wait": 0.0}
-	_build_train_bar()
+	var bar := TimingBar.new()
+	bar.open(root_ui, "Press %s (or click) when the marker is in the gold" % Settings.key_cap("interact"))
+	train = {"k": k, "stat": stat, "round": 0, "results": [], "bar": bar, "wait": 0.0}
+	_train_label()
 	Sfx.play("whoosh", null, -8.0)
 
-func _build_train_bar() -> void:
-	if is_instance_valid(train_bar): train_bar.queue_free()
-	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
-	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	bar.offset_top = -64; bar.offset_bottom = -64
-	bar.custom_minimum_size.x = minf(560.0, get_viewport().get_visible_rect().size.x - 32.0)
-	var col := UI.vbox(8); bar.add_child(col)
-	train_lbl = UI.label("", 15)
-	col.add_child(train_lbl)
-	train_draw = Control.new()
-	train_draw.custom_minimum_size = Vector2(0, 26)
-	train_draw.draw.connect(_draw_train)
-	col.add_child(train_draw)
-	col.add_child(UI.label("Press %s (or click) when the marker is in the gold" % Settings.key_cap("interact"), 12, UI.MUTED))
-	root_ui.add_child(bar)
-	train_bar = bar
-	_train_label()
-
 func _train_label() -> void:
-	if not is_instance_valid(train_lbl) or train.is_empty():
+	if train.is_empty() or not is_instance_valid(train["bar"].lbl):
 		return
 	var st: Dictionary = Care.STATS[train["stat"]]
 	var res: Array = train["results"]
 	var marks := ""
 	for r in res: marks += {"great": "  ★", "good": "  ●", "miss": "  ✕"}[r]
-	train_lbl.text = "%s  ·  round %d of 3%s" % [st["drill"], mini(int(train["round"]) + 1, 3), marks]
-	train_lbl.add_theme_color_override("font_color", st["col"])
-
-func _draw_train() -> void:
-	if train.is_empty() or not is_instance_valid(train_draw):
-		return
-	var w := train_draw.size.x
-	var h := train_draw.size.y
-	train_draw.draw_rect(Rect2(0, h * 0.3, w, h * 0.4), Color(1, 1, 1, 0.1))
-	var z: float = train["zone"]
-	train_draw.draw_rect(Rect2(w * (z - 0.16), h * 0.3, w * 0.32, h * 0.4), Color(UI.ACCENT, 0.45))
-	train_draw.draw_rect(Rect2(w * (z - 0.06), h * 0.2, w * 0.12, h * 0.6), UI.GOLD)
-	var mx := w * float(train["m"])
-	train_draw.draw_rect(Rect2(mx - 3, 0, 6, h), UI.INK)
+	var lbl: Label = train["bar"].lbl
+	lbl.text = "%s  ·  round %d of 3%s" % [st["drill"], mini(int(train["round"]) + 1, 3), marks]
+	lbl.add_theme_color_override("font_color", st["col"])
 
 func _train_process(d: float) -> void:
 	if train.is_empty():
@@ -4434,22 +4413,15 @@ func _train_process(d: float) -> void:
 		if float(train["wait"]) <= 0.0 and int(train["round"]) >= 3:
 			_finish_training()
 		return
-	var m := float(train["m"]) + float(train["dir"]) * float(train["speed"]) * d
-	if m > 1.0: m = 2.0 - m; train["dir"] = -1.0
-	if m < 0.0: m = -m; train["dir"] = 1.0
-	train["m"] = m
-	if is_instance_valid(train_draw): train_draw.queue_redraw()
+	train["bar"].step(d)
 
 func _train_hit() -> void:
 	if train.is_empty() or float(train["wait"]) > 0.0:
 		return
-	var off := absf(float(train["m"]) - float(train["zone"]))
-	var r := "great" if off < 0.06 else ("good" if off < 0.16 else "miss")
+	var r: String = train["bar"].press()
 	train["results"].append(r)
 	train["round"] = int(train["round"]) + 1
 	train["wait"] = 1.1
-	train["speed"] = float(train["speed"]) * 1.35
-	train["zone"] = randf_range(0.2, 0.8)
 	_train_anim(train["k"], String(train["stat"]), r)
 	_train_label()
 
@@ -4514,9 +4486,8 @@ func _finish_training() -> void:
 	_say(k, BokiLines.say(rec, "trained" if gained > 0 else "train_miss"))
 	k["busy"] = false
 	k["t"] = 1.5
+	train["bar"].close()
 	train = {}
-	if is_instance_valid(train_bar): train_bar.queue_free()
-	train_bar = null
 
 # ---- eggs: two kin who are close leave an egg in the nest; you hatch and name it
 func _can_pair(rec: Dictionary) -> String:
