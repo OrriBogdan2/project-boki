@@ -490,6 +490,20 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | mob | {"hp": 5.0, "scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6} |
 | labels | {"land": "Land here", "move": "Walk here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "crouch": "Lookout", "pickup": "Item", "key": "Key", "chest": "Chest", "goexit": "Outpost", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
 
+## unstable_mix (`content/rules/unstable_mix.json`)
+
+When two Boki are paired in the Nesting Nook the pair is an unstable mix if their elements clash (a pair in clashes) or their tempers oppose (bravery or temper at least trait_gap apart, 0 to 1). The baby then hatches with joy at hatch_joy (0 to 100) and the 'Needs extra care' tag, which clears after care_s seconds spent doing at least fine_condition (0 to 100 Care.condition). A story, never a loss. types maps each game type id to its standard name (GAME_RULES_NOV8, 18 types).
+
+| Setting | Value |
+|---|---|
+| hatch_joy | 35 |
+| care_s | 86400 |
+| fine_condition | 50 |
+| trait_gap | 0.5 |
+| traits | {"temper": ["hot-headed", "mellow"], "bravery": ["bold", "timid"]} |
+| types | {"ember": "Fire", "tide": "Water", "bloom": "Grass", "storm": "Electric", "frost": "Ice", "venom": "Poison", "swarm": "Bug", "stone": "Rock", "tempest": "Flying", "wild": "Normal", "titan": "Steel", "wyrm": "Dragon", "shadow": "Dark", "lunar": "Fairy", "prism": "Crystal", "spore": "Spore", "echo": "Sound", "gravity": "Psychic"} |
+| clashes | [["ember", "frost"], ["ember", "tide"], ["ember", "bloom"], ["tide", "storm"], ["storm", "stone"], ["bloom", "venom"], ["shadow", "lunar"], ["shadow", "gravity"], ["frost", "wyrm"], ["wyrm", "lunar"]] |
+
 ## warden_look (`content/rules/warden_look.json`)
 
 

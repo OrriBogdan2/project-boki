@@ -398,7 +398,10 @@ func _ready() -> void:
 		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
 		return
 	if "--nook-check" in args:
-		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding: friend gate, lean head start, habits
+		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding
+		return
+	if "--unstable-mix-check" in args:
+		load("res://tools/unstable_mix_check.gd").new().run(self)      # Nook unstable mixes: 20 clashing, 20 calm couples
 		return
 	if "--incubator-check" in args:
 		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook

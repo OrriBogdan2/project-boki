@@ -83,9 +83,6 @@ const FOODS := {
 	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
 }
 const LEAN_HEAD_START := 0.5     # share of the stronger parent's lean a hatchling starts with
-const UNSTABLE_JOY := 35.0       # joy (0-100) an unstable mix hatches with: it needs a day of care
-const CLASHES := [["ember", "frost"], ["storm", "stone"], ["bloom", "venom"], ["shadow", "lunar"]]
-const TEMPER_CLASH := 0.5        # temper gap (0-1) at which two parents' tempers clash
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
 const PLAY_NAMES := {"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"}
 
@@ -149,6 +146,7 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
 		nd["joy"] = minf(float(nd["joy"]), 25.0)
+	UnstableMix.tick(rec, secs)
 	rec["needs_t"] = Time.get_unix_time_from_system()
 
 ## The time you were away: it sleeps a lot of it off, and nothing drops below a floor (unless it
@@ -224,6 +222,7 @@ static func condition(rec: Dictionary) -> float:
 static func condition_name(rec: Dictionary) -> String:
 	var ss := starve_stage(rec)
 	if ss != "" and ss != "dead": return String(STARVE_INFO[ss][0])
+	if rec.has("extra_care"): return "Needs extra care"
 	var c := condition(rec)
 	if c >= 75.0: return "In great shape"
 	if c >= 50.0: return "Doing fine"
@@ -490,7 +489,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
 	_inherit_habits(baby, a, b, rng)
-	if unstable_mix(a, b): baby["needs"]["joy"] = UNSTABLE_JOY
+	if UnstableMix.unstable(a, b): UnstableMix.mark(baby)
 	var lean := stronger(a, b).get("lean", {}) as Dictionary
 	if not lean.is_empty():
 		baby["lean"] = {}
@@ -506,14 +505,6 @@ static func lean_total(rec: Dictionary) -> float:
 ## The parent with the stronger lean (a on a tie), whose lean the baby gets a head start from.
 static func stronger(a: Dictionary, b: Dictionary) -> Dictionary:
 	return b if lean_total(b) > lean_total(a) else a
-
-## Clashing elements or tempers: the baby hatches low on joy and needs a day of care.
-static func unstable_mix(a: Dictionary, b: Dictionary) -> bool:
-	var ta := String(Data.KIN.get(a["species"], {}).get("theme", ""))
-	var tb := String(Data.KIN.get(b["species"], {}).get("theme", ""))
-	for c in CLASHES:
-		if (c[0] == ta and c[1] == tb) or (c[0] == tb and c[1] == ta): return true
-	return absf(float(a["traits"].get("temper", 0.5)) - float(b["traits"].get("temper", 0.5))) >= TEMPER_CLASH
 
 ## One habit from each parent: the favourite food from one, the favourite play from the other.
 static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
