@@ -27317,5 +27317,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/glaciatee_r_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "scythant_r_w32",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scythant_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w32",
+    "name": "Scythant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scythant_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w32",
+    "name": "Scythant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scythant_r_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card2_w32",
+    "name": "Chandelapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card2_w32",
+    "name": "Chandelapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card2_w32",
+    "name": "Eclipsowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card2_w32",
+    "name": "Eclipsowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card2_w32",
+    "name": "Chandelapi (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelapi_card2_w32_3.jpg",
+    "ok": true
   }
 ]
