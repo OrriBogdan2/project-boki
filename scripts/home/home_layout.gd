@@ -51,6 +51,8 @@ const CATALOG := {
 		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
+	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
+		"desc": "Grows four element snacks every few minutes. Walk over it to pick them. For feeding only."},
 	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
 	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true},
 	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true},
@@ -241,6 +243,7 @@ static func ensure(d: Dictionary) -> Dictionary:
 			(L["b"] as Dictionary).erase(b)
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
+	SnackPatch.grant(d)
 	return L
 
 static func of(d: Dictionary) -> Dictionary:
