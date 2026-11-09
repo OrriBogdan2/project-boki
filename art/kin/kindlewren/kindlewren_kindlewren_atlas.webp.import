@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3e6mtfvee5gu"
-path="res://.godot/imported/kindlewren_kindlewren_atlas.webp-796b3749bf7cc53496dd013b9164663c.ctex"
+path.bptc="res://.godot/imported/kindlewren_kindlewren_atlas.webp-796b3749bf7cc53496dd013b9164663c.bptc.ctex"
+path.astc="res://.godot/imported/kindlewren_kindlewren_atlas.webp-796b3749bf7cc53496dd013b9164663c.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "553b195005902d51a1d7d9d01a7a3429"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/kindlewren/kindlewren_kindlewren_atlas.webp"
-dest_files=["res://.godot/imported/kindlewren_kindlewren_atlas.webp-796b3749bf7cc53496dd013b9164663c.ctex"]
+dest_files=["res://.godot/imported/kindlewren_kindlewren_atlas.webp-796b3749bf7cc53496dd013b9164663c.bptc.ctex", "res://.godot/imported/kindlewren_kindlewren_atlas.webp-796b3749bf7cc53496dd013b9164663c.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

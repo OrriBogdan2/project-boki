@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bae4j8s1ktw1f"
-path="res://.godot/imported/thrumbird_thrumbird_atlas.webp-d40229b6540bc92793a8c327fc36d3f0.ctex"
+path.bptc="res://.godot/imported/thrumbird_thrumbird_atlas.webp-d40229b6540bc92793a8c327fc36d3f0.bptc.ctex"
+path.astc="res://.godot/imported/thrumbird_thrumbird_atlas.webp-d40229b6540bc92793a8c327fc36d3f0.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d9b831f13ffe197f985503f8b70c2ee4"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/thrumbird/thrumbird_thrumbird_atlas.webp"
-dest_files=["res://.godot/imported/thrumbird_thrumbird_atlas.webp-d40229b6540bc92793a8c327fc36d3f0.ctex"]
+dest_files=["res://.godot/imported/thrumbird_thrumbird_atlas.webp-d40229b6540bc92793a8c327fc36d3f0.bptc.ctex", "res://.godot/imported/thrumbird_thrumbird_atlas.webp-d40229b6540bc92793a8c327fc36d3f0.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

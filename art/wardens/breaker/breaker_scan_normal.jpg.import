@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c0rohkctfh3fi"
-path="res://.godot/imported/breaker_scan_normal.jpg-21c6b37329e02f23aa3d97ade5d00717.ctex"
+path.bptc="res://.godot/imported/breaker_scan_normal.jpg-21c6b37329e02f23aa3d97ade5d00717.bptc.ctex"
+path.astc="res://.godot/imported/breaker_scan_normal.jpg-21c6b37329e02f23aa3d97ade5d00717.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "227ee043b98d7113429b290a01dcadae"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/breaker/breaker_scan_normal.jpg"
-dest_files=["res://.godot/imported/breaker_scan_normal.jpg-21c6b37329e02f23aa3d97ade5d00717.ctex"]
+dest_files=["res://.godot/imported/breaker_scan_normal.jpg-21c6b37329e02f23aa3d97ade5d00717.bptc.ctex", "res://.godot/imported/breaker_scan_normal.jpg-21c6b37329e02f23aa3d97ade5d00717.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
