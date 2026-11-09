@@ -35276,5 +35276,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/chandelotl_card5_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_orbeetle",
+    "name": "Orbeetle (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_orbeetle_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "nettlynx_card5",
+    "name": "Nettlynx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nettlynx_card5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card5",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card5",
+    "name": "Chandelotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_card5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card5",
+    "name": "Barokat (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/barokat_card5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "nettlynx_card5",
+    "name": "Nettlynx (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/nettlynx_card5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card5",
+    "name": "Chandelotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_card5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card5",
+    "name": "Barokat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokat_card5_1.jpg",
+    "ok": true
   }
 ]
