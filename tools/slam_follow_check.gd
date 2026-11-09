@@ -29,6 +29,7 @@ const SLAMS := [
 ]
 
 const SHOT_KEYS := ["time", "fade", "blend_out"]
+const SHOT_DIST := {"bulwark": 15.0}      # m the camera stands off (default 10: the blade's whole arc in frame)
 var bad := 0
 var holder: Node3D
 var shots := ""
@@ -65,8 +66,6 @@ func _stage(main: Node) -> void:
 	stage.call("_stage", main)
 	var cam: Camera3D = stage.get("cam")
 	cam.fov = 30.0
-	cam.position = Vector3(0, 1.4, 7.0)
-	cam.look_at(Vector3(0, 1.0, 0))
 	for k in 30:
 		await main.get_tree().process_frame       # (past the title's fade)
 
@@ -85,6 +84,11 @@ func _slam(sl: Array, before: bool) -> void:
 		for k in SHOT_KEYS:
 			(clips.d["kmoves"][km] as Dictionary).erase(k)
 	m.rotation.y = deg_to_rad(110.0)
+	if shots != "":
+		var dist := float(SHOT_DIST.get(id, 10.0))
+		var cam: Camera3D = stage.get("cam")
+		cam.position = Vector3(0, dist * 0.2, dist)
+		cam.look_at(Vector3(0, dist * 0.12, 0))
 	var dir := shots.path_join(km).path_join("before" if before else "after")
 	if shots != "":
 		DirAccess.make_dir_recursive_absolute(dir)
