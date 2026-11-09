@@ -5410,3 +5410,4 @@ READY ext/parity-status-stacking bafa3ff4c (status stacking rules)
 READY ext/parity-dot-ticks d211db733 (DoT tick parity)
 
 READY ext/parity-ally-effects a106b5f15 (ally interaction parity)
+READY ext/parity-motley-float f48366abc (Motley float passive)
