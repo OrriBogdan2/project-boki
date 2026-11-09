@@ -33540,5 +33540,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_grammite_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_hydrangor_full",
+    "name": "Hydrangor (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hydrangor_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grammite_full",
+    "name": "Grammite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_grammite_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grainspin_full",
+    "name": "Grainspin (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_grainspin_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grammite_full",
+    "name": "Grammite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_grammite_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hydrangor_full",
+    "name": "Hydrangor (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_hydrangor_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grainspin_full",
+    "name": "Grainspin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_grainspin_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hydrangor_full",
+    "name": "Hydrangor (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hydrangor_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lensling_full",
+    "name": "Lensling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lensling_full_1.jpg",
+    "ok": true
   }
 ]
