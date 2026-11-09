@@ -137,6 +137,17 @@ pass above.
   fires mid-flip (a bolt held through it goes at once, empowered); a move it starts waits out the flip, so the
   cartwheel is never cut short; the dagger's recast blink ends the cartwheel.
 
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB wind-up (0.4 s lane, whirl overhead) | 0.4-0.6 s cast; the legs stay a stance; her ult shows her walking and firing freely | Free at full speed (the haste only from the Vault), faces the cursor | matches (no stop shown) |
+| RMB sling and recovery | A forward lunge on the sling; no stop shown | Free | matches |
+| E throw (spin into a side-arm throw) | No stop shown | Free, faces the cursor | matches |
+| E recast (blink, about 0.2 s) | Near-instant, one frame | Free | matches |
+
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/thief.json)
 
 1. **Trickshot input:** a fixed 0.4s cast with the lane, not a hold-and-release. The lane follows the aim during the cast.
