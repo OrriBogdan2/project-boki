@@ -206,7 +206,7 @@ func slam(c: float, at_feet: bool) -> void:
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
-		var air := f is Hunter and (not (f as Hunter).grounded or (f as Hunter).gliding)
+		var air: bool = not f.grounded or (f is Hunter and (f as Hunter).gliding)
 		var o := {"src": "abil", "ab": "rmb", "kb": away * float(s["kb"]), "lift": 2.0, "heavy": true}
 		if in_core:
 			o["stun"] = lerpf(float(s["stun"][0]), float(s["stun"][1]), c)

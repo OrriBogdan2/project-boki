@@ -219,3 +219,39 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## Hunter abilities on monsters (`--mob-cc-check`)
+
+Parity rule: in the source's PvE a Hunter's CC and displacement work on camps as they do on Hunters (knocks scale with Mass, stuns and roots apply). One ability per kit (two where a kit has a second CC route) is cast at a Hunter dummy, a skitter, a brute and a lair boss that stand still (speed 0), headless on the Training strip. Mass: Hunter 1 (source 100 for all), skitter 1, brute 3, boss 80 (ours; the source gives no monster Mass). The check asserts a monster feels every kit status the Hunter did (stun, root, slow of 0.5 s or more, Grounded, Daze), that a knock moves it, and that heavier moves less. Cells show the longest status seen and the farthest it was moved.
+
+| Kit | Ability | Hunter | Skitter (Mass 1) | Brute (3) | Boss (80) |
+|---|---|---|---|---|---|
+| archer | Heavy Shot hold: knock, wall stun | stun 1.20 s, 1.06 m | stun 1.20 s, 0.88 m | stun 1.20 s, 1.10 m | stun 1.20 s |
+| ashwick | Furnace Cloak pull | 2.70 m | 2.75 m | 3.20 m | no effect |
+| ashwick | Soot Ram knock | 1.95 m | 2.22 m | 0.74 m | ~0 m |
+| bulwark | Shield Charge: knock, stun | 4.02 m | 4.36 m | 1.75 m | ~0 m |
+| bulwark | Faultline stun, slow | stun 0.48 s, slow 1.48 s | stun 0.48 s, slow 1.48 s | stun 0.48 s, slow 1.48 s | stun 0.48 s, slow 1.48 s |
+| dolm | Quakefall knock | stun 0.76 s, 1.81 m | stun 0.76 s, 2.24 m | stun 0.76 s, 0.79 m | stun 0.76 s, ~0 m |
+| dolm | Basalt Spine slow | slow 0.98 s, 0.97 m | slow 0.98 s, 0.97 m | slow 0.98 s, 0.97 m | slow 0.98 s, 1.01 m |
+| dredge | Abyssal Hand pull | stun 0.20 s, 5.50 m | stun 0.20 s, 5.55 m | stun 0.20 s, 5.98 m | no effect |
+| dredge | Anchor Drop stun | stun 1.08 s, Grounded 1.00 s | stun 1.08 s, Grounded 1.00 s | stun 1.08 s, Grounded 1.00 s | stun 1.08 s, Grounded 1.00 s |
+| gunslinger | Burr direct hit, Daze | Daze 1.40 s | Daze 1.40 s | Daze 1.40 s | Daze 1.40 s |
+| gunslinger | Burr cone: push, Daze, wall stun | stun 0.88 s, Daze 1.97 s, 0.24 m | stun 0.98 s, Daze 1.97 s, 1.11 m | stun 0.67 s, Daze 1.97 s | stun 0.67 s, Daze 1.97 s |
+| juggernaut | Smash push | 1.63 m | 2.13 m | 0.71 m | ~0 m |
+| mage | Storm Rod hold: knock, wall stun | stun 0.80 s, 2.10 m | stun 0.80 s, 1.99 m | stun 0.80 s, 1.14 m | stun 0.80 s, ~0 m |
+| mage | Skycall Grounded, drag | Grounded 1.50 s, 3.24 m | Grounded 1.50 s, 3.22 m | Grounded 1.50 s, 3.22 m | Grounded 1.50 s, 2.94 m |
+| ostra | Shard Snap slow | stun 1.08 s, ~0 m | stun 1.08 s, 0.37 m | stun 1.08 s, 0.12 m | stun 1.08 s |
+| ostra | Nightwell stun, pull | stun 3.47 s | stun 3.47 s | stun 3.47 s, 0.25 m | stun 3.47 s, 0.95 m |
+| rimewright | Rink Wall push | slow 1.00 s, 4.30 m | slow 1.00 s, 4.96 m | slow 1.00 s, 3.75 m | slow 1.00 s, 3.16 m |
+| rimewright | Rimelock stun | stun 0.73 s | stun 0.73 s | stun 0.73 s | stun 0.73 s |
+| tender | Burrseed root | root 1.08 s | root 1.08 s | root 1.08 s | root 1.08 s |
+| thief | Bola Grounded, slow | slow 1.48 s, Grounded 1.50 s | slow 1.48 s, Grounded 1.50 s | slow 1.48 s, Grounded 1.50 s | slow 1.48 s, Grounded 1.50 s |
+
+Fixed (each skipped monsters because it looped only `m.hunters` or tested `is Hunter`):
+- Ryzz's Skycall Grounded now lands on monsters (`mage_sky.gd`).
+- Vex's Burr cone wall stun now lands on monsters pressed to terrain (`gunslinger_kit.gd`).
+- Tarek's Basalt Spine moves a monster off a rock's line like a Hunter, so a rock never rises inside it (`breah_spine.gd`).
+- Tarek's Quakefall dunk counts any airborne foe, not only Hunters (`breah_slam.gd`; not asserted, no airborne case).
+- A monster knocked into a wall is stunned for the hit's `wallstun` (min 1 s), as Hunters are (`mob.gd`).
+
+Boss resistance: no row in briefs/supervive-data (supervive_kits, supervive_physics, PHYSICS_PARITY, kit_comparison) or docs/SUPERVIVE_DATA.md says a boss resists displacement or CC, so none was added. What exists already, kept as is: monsters of Mass 6 or more (Warden, bosses) are not pulled by Cinder's cloak, Grimble's hook, Boki yanks, and monsters of Mass 10 or more take no wall-slam stun. Rimewright's Rink Wall and Ryzz's Skycall drag still move a boss (rows above), so the existing gate is not uniform; the owner may want one rule (suggestion, not built). The only monster-specific data row is "Monsters can't spike" (SUPERVIVE_DATA section 5), which concerns gliding Hunters, not CC.

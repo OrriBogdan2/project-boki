@@ -26,6 +26,7 @@ const STAGGER_DMG := 2.5
 var stag_open := 0.0
 var stag_next := 0.0
 var stagger_t := 0.0
+var wallstun := 0.0                     # s the next wall slam stuns, when a hit asks for more than 1 s
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null           # a treasure kin slips away if nobody hurts it for a while
 
@@ -82,6 +83,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		elif stag_open > 0.0 and opts.has("ab"):
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
+	if opts.has("wallstun"):
+		wallstun = float(opts["wallstun"])
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0: calm_t = 0.0
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
@@ -263,7 +266,8 @@ func sim(dt: float) -> void:
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
+		stun_t = maxf(stun_t, maxf(1.0, wallstun))
+		wallstun = 0.0
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})

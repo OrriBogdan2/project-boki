@@ -121,8 +121,7 @@ func _strike(s: Dictionary) -> void:
 		var slide := {"mode": "slide", "dir": [dir.x, dir.y], "dur": float(ed["slide_t"])}
 		slide["dist"] = float(ed["slide_dist"])
 		kit.m.displace.tow(f, null, slide)
-		if f is Hunter:
-			KitStatus.apply(f, "gnd", float(ed["grounded"]))
+		KitStatus.apply(f, "gnd", float(ed["grounded"]))
 		kit.fx().shackle(f, MageKit.TEAL, MageKit.PINK, float(ed["grounded"]))
 	for mt in kit.motes.duplicate():
 		if (mt["pos"] as Vector3).distance_to(at) < float(ed["radius"]) + 0.6:
