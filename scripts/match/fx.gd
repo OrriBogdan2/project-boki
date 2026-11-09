@@ -60,10 +60,10 @@ func _ready() -> void:
 	for i in NUM_POOL:
 		var l := Label3D.new()
 		l.font = font
-		l.font_size = NUM_FONT
-		l.pixel_size = NUM_PX
-		_num_look(l, i == 0)
-		l.text = "+-0123456789" if i < 2 else ""     # both outlines' digits drawn into the font once, here
+		l.font_size = 52
+		l.pixel_size = 0.011
+		l.outline_size = 14
+		l.outline_modulate = Color(0.05, 0.04, 0.08, 0.9)
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		l.no_depth_test = true
 		l.render_priority = 10
@@ -279,7 +279,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			elif not n.get("crit", false):
 				ln.modulate = col
 			_num_look(ln, bool(n.get("crit", false)))
-			_num_size(ln, float(n["val"]), bool(n.get("crit", false)))
+			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
@@ -291,7 +291,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
 	_num_look(l, crit)
-	_num_size(l, v, crit)
+	l.font_size = _num_size(v, crit)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
 	l.visible = true
@@ -308,26 +308,16 @@ const NUM_POOL := 24           # floating numbers and words on screen at once (t
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
 
-## Every number and word is laid out at one font size and sized on screen by pixel_size: a font
-## rasterizes its glyphs once per size and outline, and a new size mid-fight was a hitch.
-const NUM_FONT := 52           # font px every pooled label is shaped at
-const NUM_PX := 0.011          # m per font px at NUM_FONT (a 52 px label is 0.57 m tall)
-
 ## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
-## a yellower number (pooled labels are reused, so every number sets this). Two outline sizes only,
-## both warmed when the pool is built.
+## a yellower number (pooled labels are reused, so every number sets this).
 func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 21 if crit else 18
+	l.outline_size = 20 if crit else 14
 
 ## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
-func _num_size(l: Label3D, v: float, crit: bool) -> void:
+func _num_size(v: float, crit: bool) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	_label_px(l, lerpf(36.0, 46.0, k) + (8.0 if crit else 0.0))
-
-## A pooled label drawn as tall as a `px` font size would be.
-func _label_px(l: Label3D, px: float) -> void:
-	l.pixel_size = NUM_PX * px / NUM_FONT
+	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
@@ -339,7 +329,7 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.text = txt
 	l.modulate = col
 	_num_look(l, false)
-	_label_px(l, 46.0 if big else 34.0)
+	l.font_size = 46 if big else 34
 	l.global_position = _clear_spot(at)
 	l.visible = true
 	l.scale = Vector3.ONE * (1.25 if big else 1.0)
