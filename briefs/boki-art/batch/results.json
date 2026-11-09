@@ -43753,5 +43753,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/gongibbon_card83_1.jpg",
     "ok": true
+  },
+  {
+    "id": "knotling_card83",
+    "name": "Knotling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/knotling_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "knotling_card83",
+    "name": "Knotling (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/knotling_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "knotling_card83",
+    "name": "Knotling (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/knotling_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_card83",
+    "name": "Gongibbon (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongibbon_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternlong_card83",
+    "name": "Lanternlong (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanternlong_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_card83",
+    "name": "Gongibbon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongibbon_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomworth_card83",
+    "name": "Glomworth (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glomworth_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternlong_card83",
+    "name": "Lanternlong (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternlong_card83_2.jpg",
+    "ok": true
   }
 ]
