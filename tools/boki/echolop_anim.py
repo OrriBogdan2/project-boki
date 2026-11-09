@@ -354,5 +354,22 @@ CLIPS = {
 }
 # unused props tucked inside the right foreleg they ride (m from their rest place), so no pose shows their ink
 import boki_react
-CLIPS.update(boki_react.react())
+
+
+def _win(p, t, k):
+    """Wings flung open at the top of the hop and held out, fingers fluttering."""
+    wings(p, open_=0.85 * k, lift_=0.35 * k, flutter=0.15 * k * s(t, 4))
+
+
+def _sulk(p, t, k):
+    """Wings wrapped tight and low, a sigh of the tips."""
+    wings(p, open_=-0.08 * k, lift_=-0.15 * k, flutter=0.03 * s(t, 1))
+
+
+def _push(p, t, k):
+    """Half open for balance, beating once with each shove."""
+    wings(p, open_=0.35 + 0.15 * k, lift_=0.1 * k, flutter=0.08 * k)
+
+
+CLIPS.update(boki_react.react(hop=1.1, extra_win=_win, extra_sulk=_sulk, extra_push=_push))
 HIDE_AT = {"prop_axe": (0.079, 0.04, 0.05), "prop_pick": (0.079, 0.04, 0.05), "prop_berry": (0.079, 0.01, 0.08)}

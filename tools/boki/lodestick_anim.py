@@ -283,6 +283,68 @@ CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (0.5, True
          "pet": (2.4, True, pet), "carry": (1.1, True, carry), "tend": (1.3, True, tend),
          "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
-import boki_react
-CLIPS.update(boki_react.react())
+
+
+# ---------------------------------------------------------------- minigame results (its own: the shared ones are four-legged)
+def win(t):
+    """Stick-stiff boing, legs starred, then it rears on its hind four and waves both forelegs, feelers high."""
+    p = {}
+    air = seq(t, [(0, 0), (0.14, -0.7), (0.24, 0.3), (0.38, 1), (0.52, 0.2), (0.6, -0.5), (0.7, 0), (1, 0)])
+    up, down = max(air, 0), max(-air, 0)
+    proud = seq(t, [(0, 0), (0.62, 0), (0.76, 1), (0.92, 1), (1, 0.6)])
+    wave = s(t, 3) * proud
+    p["root_at"] = (0, 0.16 * up - 0.045 * down + 0.025 * proud, 0.03 * proud)
+    p["root_sc"] = (1 + 0.1 * down, 1 - 0.15 * down + 0.06 * up, 1 + 0.04 * down)
+    add(p, "root", rx=0.26 * proud, rz=0.12 * seq(t, [(0, 0), (0.24, 0), (0.38, 1), (0.52, -1), (0.62, 0), (1, 0)]))
+    all_legs(p, 0.0, 0.45 * up - 0.2 * down, -0.3 * up, only=("mleg", "hleg"))
+    for sd, sx in SIDES:
+        k = 1.0 if sd == "L" else -1.0
+        leg(p, "fleg", sd, 0.45 * proud + 0.15 * k * wave, 0.45 * up - 0.2 * down + 0.8 * proud + 0.2 * k * wave,
+            -0.3 * up - 0.25 * proud)
+    look(p, 1 + 0.4 * up - 0.3 * proud)
+    feelers(p, t, 0.1 + 0.08 * proud, back=-0.4 * (up + proud) + 0.3 * down, rate=3)
+    tail(p, t, 0.05, up=0.5 * (up + proud) - 0.3 * down)
+    return p
+
+
+def sulk(t):
+    """A twig in a cold wind: turned away, sagging on bent legs, head and feelers down; it drags one foreleg in the
+    dirt, and once looks back over its shoulder."""
+    p = {}
+    sigh = 0.5 + 0.5 * s(t, 1, -0.25)
+    peek = seq(t, [(0, 0), (0.5, 0), (0.58, 1), (0.72, 1), (0.8, 0), (1, 0)])
+    scuff = seq(t, [(0, 0), (0.18, 0), (0.24, 1), (0.31, 0), (0.37, 1), (0.44, 0), (1, 0)])
+    sway(p, t, 0.02)
+    at(p, y=-0.03 - 0.006 * sigh)
+    p["root_sc"] = (1.02, 0.95 - 0.015 * sigh, 1.0)
+    add(p, "root", rx=-0.1, ry=0.5 * (1 - 0.7 * peek))
+    all_legs(p, 0.0, -0.12, 0.25)
+    leg(p, "fleg", "R", 0.25 * scuff - 0.1, 0.18 * scuff - 0.12, 0.25)
+    add(p, "neck", rx=-0.3 - 0.04 * sigh, ry=0.3 * (1 - 1.4 * peek))
+    add(p, "head", rx=-0.3 - 0.05 * sigh + 0.15 * peek, ry=0.35 * (1 - 1.5 * peek), rz=0.1)
+    feelers(p, t, 0.02, back=0.7 - 0.25 * peek, rate=1)
+    tail(p, t, 0.015, up=-0.4)
+    return p
+
+
+def push(t):
+    """Braced on six legs: forelegs planted ahead, the middle and hind pairs digging back in turn, its long body
+    a leaning stick that shoves on every beat."""
+    p = {}
+    thrust = 0.5 + 0.5 * s(t, 1, -0.25)
+    at(p, y=-0.025, z=-0.05 - 0.05 * thrust)
+    add(p, "root", rx=-0.16 - 0.05 * thrust, ry=0.025 * s(t, 3))
+    for sd, _ in SIDES:
+        ph = 0.0 if sd == "L" else 0.12
+        dig = 0.5 + 0.5 * s(t, 1, -0.25 + ph)
+        leg(p, "fleg", sd, 0.4 - 0.08 * dig, 0.1, 0.25)
+        leg(p, "mleg", sd, -0.15 - 0.12 * dig, -0.05, 0.12)
+        leg(p, "hleg", sd, -0.3 - 0.15 * dig, -0.1, 0.1 * dig)
+    look(p, 0.6 + 0.2 * thrust)
+    feelers(p, t, 0.03, back=0.55, rate=2)
+    tail(p, t, 0.02, up=0.15)
+    return p
+
+
+CLIPS.update({"win": (1.0, False, win), "sulk": (2.8, True, sulk), "push": (0.9, True, push)})
 HIDE_AT = {"prop_berry": (0, 0.16, 0.62), "prop_lode": (0, -0.34, 0.5)}
