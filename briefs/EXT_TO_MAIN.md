@@ -4647,3 +4647,6 @@ READY ext/egg-picker-preview eeea08d25 (job 20261109-070252-a1 on w2; egg pick c
 - ext/perf-fight-pools GPU after (job 20261109-065527-11352, rp1-1 RTX 4090 forward_plus): nodes created in the fight 937 (M5 baseline 1112; software 1131 -> 704), match script avg 22.5 ms p99 49.0 ms. NOT like for like: the baseline ran on the Apple M5, so no frame-time delta is claimed; a 4090 baseline of the tree without 4de58f419 is still owed.
 READY ext/combo-marks-a b7353ee3a (overhead combo tag for Sable Marks, Vex Daze, Sparkle Static + payoff flash/sound; checks pass, GPU shots queued as job 20261109-070748-29507)
 READY ext/recast-marker-a a9b21705b (world marker ring + key on Motley's seed, Meeko's Hearthlight, Albert's hammer, Sable's dagger; 4 combo checks + --recast-marker-check pass; GPU shots queued as jobq 20261109-070405-13612)
+
+## 2026-11-09 (job 20261109-070112-a2, rpc1): READY ext/anim-arm-kael
+READY ext/anim-arm-kael 33006d6ab (Kael slam and air slam off arm hangs loose via free_arm, audit gates it; merge after ext/anim-quality-audit; includes ext/kael-tap-ult-1108 66423a45d and ext/anim-free-arm-relax a518863da merged in; GPU strips queued: before 20261109-071025-09130, after 20261109-072439-32521)
