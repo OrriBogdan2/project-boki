@@ -120,3 +120,16 @@ Read this before any Spore-type Boki, any Blight enemy, map-edge or corrupted-va
   new ones: Ember=Fire, Tide=Water, Bloom=Grass, Storm=Electric, Frost=Ice, Stone=Rock, Gravity=Psychic,
   Tempest=Flying, Wyrm=Dragon, Shadow=Dark, Venom=Poison, Swarm=Bug, Titan=Steel, Wild=Normal, Lunar=Fairy, Prism=Crystal,
   Echo=Sound. Table: boki-art/GAME_RULES_NOV8.md.
+
+## 2026-11-09 coordinator -> art: HERO CARDS for the Bokidex (owner priority)
+Owner: "a lot of the hero images are bad cutouts still, make sure the art agent is on it." He is also making dark, light and
+transparent versions of every hero card; match that set.
+- Interim fix done by coordinator: heroes are now auto-cut from the turnaround sheets (3/4 view, backdrop removed). They are a
+  stopgap; a proper hero is a single clean 3/4 pose, not a sheet crop.
+- Deliver per species: <id>_hero_transparent.png (true alpha, no halo, 2048 px square, centered, ~8% margin),
+  <id>_hero_dark.png (on deep navy #0b1220 glow), <id>_hero_light.png (on warm off-white #f6f3ee glow). Same pose in all three.
+  Put them in boki-art/heroes/. The dex picks them up automatically (hero / heroDark / heroLight).
+- Order: first the species with NO hero at all (41): Mothlet, Howlop, Bellowlet, Furnacowary, Wickapi, Coolatee, Glaciatee, Kayak, Dreadnoyak, Geodemole, Druzemole, Embrook, Pyrraven, Scythant, Reapant, Thistlynx, Briarlynx, Fizzlet, Thunderstrich, Terrasloth, Bucketmander, Cisternmander, Jibbatross, Lyrewing, Oarter, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???, ???.
+  Then redo the rest, starting with any whose current cutout has holes or halos (crystal/glass species: Glassolotl, Prismander,
+  Prismink, Geodelotl, Mirrolin are most at risk).
+- Report each batch in EXT_TO_MAIN.md as "HEROES batch N: ids".
