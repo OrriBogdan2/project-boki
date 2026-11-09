@@ -214,7 +214,11 @@ func play() -> void:
 	await frames(20)
 	await log_step("feed-panel")
 	ok(press("Feed"), "the feed panel offers a Feed button")
-	await frames(60)
+	var waited := 0.0
+	while Evo.lean(rec)[0] == "" and waited < 10.0:      # the meal takes a few seconds of game time
+		await main.get_tree().create_timer(SAMPLE_S).timeout
+		waited += SAMPLE_S
+	ok(Evo.lean(rec)[0] != "", "the meal lands and leans the Boki (%.1f s)" % waited)
 	home._close_panel()
 	home.guide._poll()
 	await frames(20)
