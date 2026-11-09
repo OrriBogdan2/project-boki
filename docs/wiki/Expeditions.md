@@ -168,6 +168,10 @@ The Wyrm's corruption, a faction that hunts every squad by **noise and light**.
   grace period after landing) and on the outer islands; stronger with time, toward the core, at night
   and in storms. Early Blight die fast and hit soft.
 - **Noise draws it.** Gunfire, blasts, opened chests, dashing and running all add up; quiet squads see less of it.
+- **The tide closes on the Heart.** From 15 s the Blight's ring shrinks toward the Heart's site over 4 minutes.
+  Outside it the Blight is stronger and comes sooner, and the tide itself hurts you every second, past your
+  armor: barely at first (a full-health medium Hunter lasts minutes), 26 s to die by the third of its 11 stages,
+  and about 3 s once it has closed.
 
 ## Raid conditions
 
