@@ -3485,3 +3485,11 @@ READY ext/map-perf-1108 f4209d74c (2 commits on main d255acbee; touches world.gd
 - Fix: --art-view screenshots on main were the boot-splash logo (the fade covered them); main.gd now skips the fade for --art-view like --shot.
 - Checks: new --clutter-check 0 failures (headless, local), health.py --strict OK.
 - Not done, with reasons: chests are already merged per material (PropSculpt._finish); the leftover chest draws are Lid/Lock/Beacon, which animate. Occlusion culling was not added: the top-down camera over floating islands has almost no occluders. Lightmaps were not added: the map is built at runtime and ambient comes from the environment. SDFGI/SSR/SSIL/VoxelGI are not used anywhere, and volumetric fog is already off below high. Tree LODs and visibility ranges already existed on main.
+
+## 2026-11-09 deep (job 20261109-003148-a4): READY Boki 3D: Lockatara (tuatrune)
+Branch `ext/boki3d-tuatrune` (4e956fc66, 5f73524d9), based on `ext/boki-caecilith-v2` (unmerged Zippelith) so it reuses its Meshy-body build; merge that first. Alternative was a copy of MeshShape on main.
+- Body: Meshy multi-image model of the sheet (task 01a1bdba, raw in ~/meshy/tuatrune, not in git), graded to olive/dark iron/old gold; shared quadruped rig + `shackle` bone (rocks behind the back, clicks on Boulder Heave); keyhole third eye as a lit piece; key-bit tail on tail4; heave scoops a stone and flings it.
+- Meshy loading moved to `tools/boki/meshy_body.py`; caecilith rebuilds byte-identical.
+- Checks: --boki-rig-check DONE failures 0 (4838 tris/5000, 39 bones/64); health --strict OK; GPU shots job 20261109-005346-19447 fails 0.
+- Renders: /home/boki/jobq/done/20261109-005346-19447/out/turntable.png, /home/boki/jobq/done/20261109-005346-19447/out/anim_ability.png, /home/boki/jobq/done/20261109-005346-19447/out/faces.png
+- Not done: no fusion parts (build_fusion), as with Zippelith; no data/Net changes.
