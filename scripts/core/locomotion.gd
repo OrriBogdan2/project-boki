@@ -83,21 +83,15 @@ static func glide_carry(arch: String) -> float:
 	var c: Dictionary = T["glide_carry"]
 	return float(c.get(arch, c["default"]))
 
-## A dash's speed share at `u` (0..1 through it) for this hunter, and how much longer it runs (speed scale
-## and ease from tuning.json dash_ease; flat 1.0 for a hunter not listed). The ease averages 1 over the dash.
-static func dash_k(arch: String, u: float) -> float:
-	var e: Dictionary = T["dash_ease"].get(arch, {})
-	if e.is_empty():
-		return 1.0
-	return float(e["speed"]) * (1.0 - float(e["ease"]) * cos(TAU * u))
+## A dash's speed scale for this hunter (tuning.json dash_speed; 1.0 for a hunter not listed): its time
+## stretches by the inverse so the distance stays. The dash's shape is its source curve (HunterMove.dash_k).
+static func dash_speed(arch: String) -> float:
+	return float(T["dash_speed"].get(arch, 1.0))
 
-static func dash_time_k(arch: String) -> float:
-	return 1.0 / float(T["dash_ease"].get(arch, {}).get("speed", 1.0))
-
-## A dash's velocity with `left` of its `total` s to go: `v` (its direction x its flat speed) through the hunter's
-## ease. The farm avatar and a match hunter both dash through this, so a Shift feels the same everywhere.
-static func dash_hv(v: Vector2, arch: String, left: float, total: float) -> Vector2:
-	return v * dash_k(arch, 1.0 - left / maxf(total, left))
+## A dash's velocity: `v` (its direction x its speed) at the hunter's dash_speed. The farm avatar and a match
+## hunter both dash through this, so a Shift feels the same everywhere.
+static func dash_hv(v: Vector2, arch: String) -> Vector2:
+	return v * dash_speed(arch)
 
 ## Momentum-preserving ground acceleration: under the wanted speed, move toward it; over it (a dash, a pad, a
 ## knock) bleed the extra at `over` while still steering, and steering back against it brakes properly.

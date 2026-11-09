@@ -56,17 +56,22 @@ func _numbers() -> void:
 	var lace := _glide(Vector2(17, 0), Vector2(1, 0), Loco.glide_carry("archer"), 0.5).length()
 	var dflt := _glide(Vector2(17, 0), Vector2(1, 0), carry, 0.5).length()
 	ok(lace < dflt, "item 9: Lace carries less from Shift into the glide (%.2f vs %.2f after 0.5s)" % [lace, dflt])
+	# Lace's dash: the source's Myth curve (dash_feel.json, footage) at tuning.json's dash_speed. It eases in from
+	# a standing start, peaks well under the source's 1.86x, and still covers the kit's distance.
+	var feel: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/dash_feel.json"))
+	var curve: Array = feel["archer"]["curve"]
+	var ks := Loco.dash_speed("archer")
+	var n := int(round(0.3 / ks / DT))
 	var peak := 0.0
-	var start := 99.0
 	var dist := 0.0
-	var tk := Loco.dash_time_k("archer")
-	for i in int(round(0.3 * tk / DT)):
-		var k := Loco.dash_k("archer", (i + 0.5) / (0.3 * tk / DT))
+	for i in n:
+		var k := ks * HunterMove.dash_k(curve, (i + 0.5) / n)
 		peak = maxf(peak, k)
-		start = minf(start, k)
 		dist += k * DT
-	ok(peak < 1.0 and start < 0.6 and absf(dist - 0.3) < 0.01,
-		"item 9: Lace's dash peaks lower (%.2f of before), eases in/out (%.2f), keeps its distance" % [peak, start])
+	var start := ks * HunterMove.dash_k(curve, 0.0)
+	ok(peak < 1.86 * 0.75 and start < 0.6 and absf(dist - 0.3) < 0.01,
+		"item 9: Lace's dash peaks under the source (%.2f of its mean), eases in (%.2f), keeps its distance (%.3f)" \
+		% [peak, start, dist / 0.3])
 
 ## A hunter `up` metres over a ground spot, moving `v`, keys off.
 func _air_at(up: float, v: Vector3) -> void:

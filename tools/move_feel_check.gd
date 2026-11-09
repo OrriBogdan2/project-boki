@@ -29,6 +29,10 @@ const T := {
 	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] SV slides ~0.38-0.49m"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
+	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
+	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
+	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
+	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
@@ -49,7 +53,7 @@ const T := {
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
-	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed and the walk takes it"],
+	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
@@ -89,7 +93,8 @@ const T := {
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
 	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
-	"ledge_rise_t":            ["<=", 0.35, "s", "[footage] touching ground above you floats you up fast (~0.8s from a full second deep); here a 1.6m wall from a jump"],
+	"ledge_rise_t":            ["<=", 0.45, "s", "[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
+	"ledge_rise_vy_max":       ["<=", 7.0, "m/s", "[game data] suction cap 2.5 m/s: a rise never outruns the jump"],
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
 	"ledge_fling_early_m":     [">=", 0.0, "m", "a jump as the rise starts: a weak fling (distance onto the top, reference)"],
 	"ledge_fling_timed_m":     [">=", 1.5, "m", "[est] a jump in the window near the top: a real fling onto the top"],
@@ -212,6 +217,7 @@ func run(main: Node) -> void:
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
 	_ground()
+	_face_turn()
 	_jump()
 	_glide()
 	_glide_dive()
@@ -277,8 +283,37 @@ func _ground() -> void:
 			var hv := _hv(P)
 			if t90 < 0.0 and hv.length() >= 0.9 * top and absf(hv.angle_to(Vector2(0, 1))) < deg_to_rad(10.0): t90 = (i + 1) * DT
 		rec("ground_turn90_t", t90)
+		# a shove over the run (a knock, a kit step) slides out under the same brake, keys held or not
+		for keys in [Vector2.ZERO, Vector2(1, 0)]:
+			_reset(flat + Vector3(-3.0, 0, 0))
+			P.base_speed = top
+			P.vel = Vector3(10.0, 0, 0)
+			P.inp["move"] = keys
+			var xs := P.pos.x
+			for i in 90:
+				m.step(DT)
+				if _hv(P).length() <= (top + 0.02 if keys.x > 0.0 else 0.02): break
+			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
+func _face_turn() -> void:
+	var face0 := P.face
+	var aim0: Vector3 = P.inp["aim"]
+	for turn in [["face_turn180_t", PI], ["face_turn20_t", deg_to_rad(20.0)]]:
+		_reset(flat)
+		P.inp["aim"] = P.pos + Vector3(4, 0.9, 0)
+		_steps(30)
+		var a0 := atan2(-1.0, 0.0) + float(turn[1])
+		P.inp["aim"] = P.pos + Vector3(-4.0 * sin(a0), 0.9, -4.0 * cos(a0))
+		var t := -1.0
+		for i in 30:
+			m.step(DT)
+			if t < 0.0 and absf(wrapf(P.face - a0, -PI, PI)) < deg_to_rad(1.0): t = (i + 1) * DT
+		rec(turn[0], t)
+	P.face = face0          # (the rows after read the body and the cursor as they were)
+	P.inp["aim"] = aim0
 
 # ---------------------------------------------------------------- jump
 func _jump() -> void:
@@ -887,6 +922,7 @@ func _ledge() -> void:
 		_reset(Vector3(wl["at"].x, wl["low"], wl["at"].y))
 		var rising := 0; var t_rise := -1.0; var peak := -1e9; var lip_at := Vector2.INF; var jumped := false
 		var win_steps := 0
+		var vy_max := 0.0
 		for i in 150:
 			P.inp["move"] = n
 			var jump := i == 2
@@ -899,14 +935,16 @@ func _ledge() -> void:
 			m.step(DT)
 			P.inp["jump"] = false
 			if rising > 0 and t_rise < 0.0 and P.pos.y >= top: t_rise = rising * DT
+			if P.call("mantling"): vy_max = maxf(vy_max, P.vel.y)
 			if rising > 0 and not P.call("mantling"):
 				peak = maxf(peak, P.pos.y)
 				if lip_at == Vector2.INF: lip_at = Vector2(P.pos.x, P.pos.z)
 			if rising > 0 and P.grounded and not P.call("mantling"):
 				break
-		out[mode] = {"t": t_rise, "peak": peak - top, "dist": (Vector2(P.pos.x, P.pos.z) - lip_at).dot(n) if lip_at != Vector2.INF else 0.0, "win": win_steps * DT}
+		out[mode] = {"t": t_rise, "peak": peak - top, "dist": (Vector2(P.pos.x, P.pos.z) - lip_at).dot(n) if lip_at != Vector2.INF else 0.0, "vy": vy_max, "win": win_steps * DT}
 	rec("ledge_rise_t", out["none"]["t"] if out["none"]["t"] > 0.0 else 9.0)
 	rec("ledge_rise_peak_m", out["none"]["peak"])
+	rec("ledge_rise_vy_max", out["none"]["vy"])
 	rec("ledge_fling_early_m", out["early"]["dist"])
 	rec("ledge_fling_timed_m", out["timed"]["dist"])
 	rec("ledge_fling_timed_up_m", out["timed"]["peak"])
