@@ -20,8 +20,8 @@ static func weight(dmg: float) -> float:
 static func hit(m: Match, at: Vector3, dmg: float, dir := Vector2.ZERO) -> void:
 	var w := weight(dmg)
 	var up := at + Vector3(0, 0.5, 0)
-	m.fx.flash(up, CORE, 0.9 + 1.5 * w, 0.14)
-	m.fx.flash(up, BLUE, 1.4 + 2.4 * w, 0.2)
+	m.fx.flash(up, CORE, 0.7 + 1.1 * w, 0.14)
+	m.fx.flash(up, BLUE, 1.1 + 1.8 * w, 0.2)
 	m.fx.ring(at, 1.0 + 3.0 * w, BLUE, 0.32)
 	m.fx.ring(at, 0.5 + 1.4 * w, CORE, 0.18)
 	var fwd := Vector3(dir.x, 0.35, dir.y) if dir != Vector2.ZERO else Vector3.UP
