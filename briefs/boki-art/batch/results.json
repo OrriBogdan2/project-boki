@@ -2336,5 +2336,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/vespox_f_1.png",
     "ok": true
+  },
+  {
+    "id": "ringrove_r2",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ringrove_r2_2.png",
+    "ok": true
+  },
+  {
+    "id": "portrait_bubblisk",
+    "name": "Bubblisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bubblisk_1.png",
+    "ok": true
+  },
+  {
+    "id": "puffamus_r",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "ringrove_r2",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ringrove_r2_1.png",
+    "ok": true
+  },
+  {
+    "id": "portrait_bubblisk",
+    "name": "Bubblisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bubblisk_2.png",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl",
+    "name": "Lunowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_1.png",
+    "ok": true
+  },
+  {
+    "id": "puffamus_r",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_r_1.png",
+    "ok": true
+  },
+  {
+    "id": "canvastross_r2",
+    "name": "Canvastross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_r2_1.png",
+    "ok": true
   }
 ]
