@@ -12,6 +12,10 @@ extends RefCounted
 static func rules() -> Dictionary:
 	return Content.rules("farm_build")
 
+## The Boki-base cut (farm_build.json "base_mode"): the economy is hidden, nothing is deleted.
+static func base_mode() -> bool:
+	return bool(rules().get("base_mode", false))
+
 ## Is the gating on for this save?
 static func gated(d: Dictionary = Save.d) -> bool:
 	return int(HomeLayout.of(d).get("fb", 0)) >= 1 and not Game.modding()
