@@ -50151,5 +50151,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_vaultara_pz_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_stormit_pz",
+    "name": "Stormit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_stormit_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vaultara_pz",
+    "name": "Vaultara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_vaultara_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_voltalon_rz",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_voltalon_rz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dreadnoyak_pz",
+    "name": "Dreadnoyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_dreadnoyak_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dragonkite_pz",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sporcupine_pz",
+    "name": "Sporcupine",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_sporcupine_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_cardz",
+    "name": "Dragonkite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dragonkite_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dragonkite_pz",
+    "name": "Dragonkite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_pz_1.jpg",
+    "ok": true
   }
 ]
