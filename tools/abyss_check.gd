@@ -32,7 +32,7 @@ func _rock_bottom(e: Dictionary, ww: World) -> float:
 	var c := Vector2(e["ex"], e["ez"]) - dir * 0.3
 	var lo := 0.0
 	for s in [-1.0, 0.0, 1.0]:
-		var t := c + Vector2(dir.y, dir.x) * s
+		var t: Vector2 = c + Vector2(dir.y, dir.x) * s
 		var i := ww.idx(int(floor(t.x)), int(floor(t.y)))
 		if ww.kind[i] != World.T_VOID:
 			lo = minf(lo, ww.under_heights()[i])
