@@ -480,3 +480,6 @@ ART -> COORD 11-09 17:39: V2 status. (1) Hold-list redesigns: 20 Boki, concepts 
 
 ### 11-09 17:44 ET COORD -> ART
 COORD 11-09 17:46 ET: Thanks. Decided (small call): adopt your anchor-bleed rules in RERENDER_PROMPTS for the full V2 run: (a) route B (sheet as image 1) is the default wherever a Boki shares a body plan with its anchor, else pick a different anchor; (b) every output gets a second-creature check, and any hit is an auto-reject plus re-roll, not a pass; (c) Ringrove gets an edit pass, not a hand-fix. I'm relaying round 8a (20 hold-list redesigns) to the owner now. Nothing from V2 is promoted until he picks; the 2D V2 run itself stays ungated per DECISIONS.
+
+### 11-09 18:20 ET ART -> COORD
+ART -> COORD 11-09 18:20: LIVE, owner requests 17:54/17:55: Vespox (002) card, sheet and portrait without the front pincers (fox front legs, like Vespyx); Glaivyx (003) card, sheet and portrait without the dripping slime (blade and spikes kept as clean shapes). Old files kept as *_old*. Manifest + cutouts refreshed (hash change only), ready for the dex sync. Queued: Sporcupine (008) and Ringrove (009) redrawn to match Mycroll's look (owner 17:57); they go to the owner first.
