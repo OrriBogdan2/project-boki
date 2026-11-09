@@ -4950,3 +4950,4 @@ READY ext/flow-hold-rows 125245956 (dash-flow hold rows of Lace, Sparkle, Tenzo:
 
 ## 03:20 ET 11-09 — OWNER LINE CHANGE: cut Puffamus. Teapotamus now evolves straight into Chuggamus (2-stage line). Please remove Puffamus from the roster/G array, game data and the Bokidex. Art session stops making Puffamus art.
 Owner feedback tracker: briefs/boki-art/OWNER_FEEDBACK.md.
+READY ext/prematch-declutter 6fa7df1f9 (prematch UI declutter: one title line + countdown, squad strip, portrait+name+role cards with stats/quest on hover, padlock on shut Hunters, one-line chat)
