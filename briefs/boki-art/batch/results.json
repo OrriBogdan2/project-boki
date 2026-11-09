@@ -50879,5 +50879,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_selenwhale_py_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_dragonkite_rx",
+    "name": "Dragonkite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_rx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_px",
+    "name": "Selenwhale (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_px_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_px",
+    "name": "Selenwhale (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_px_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_px",
+    "name": "Selenwhale (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_px_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardx",
+    "name": "Selenwhale (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardx",
+    "name": "Selenwhale (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardx",
+    "name": "Selenwhale (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dragonkite_rx",
+    "name": "Dragonkite",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_rx_3.jpg",
+    "ok": true
   }
 ]
