@@ -168,7 +168,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if not was_open and Game.main:
 		var s = Game.main.screen_node()
-		if s and s.has_method("on_menu_opened"):
+		if s is Match:
 			s.on_menu_opened()
 	var pb := UI.scroll_panel(title_txt, width, back, "Back" if stack.size() > 0 else "Close", scroll)
 	host.add_child(pb[0])
@@ -210,31 +210,23 @@ func open_pause(where: String) -> void:
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
-	var bw := 388.0
-	var item := func(txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
-		var b := UI.button(txt, cb, bw, icon)
-		if tier != "": b.theme_type_variation = tier
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		if key != "": UI.with_key(b, key)
-		v.add_child(b)
-		return b
-	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
+	var res: Button = _pause_item(v, "Resume", "next", close, "Esc", "Primary")
 	var psc = Game.main.screen_node() if where == "match" and Game.main else null
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
-		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		_pause_item(v, "Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
 	if where != "match":
-		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
+		_pause_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
-		item.call("Training area", "jump", func():
+		_pause_item(v, "Training area", "jump", func():
 			close()
 			Game.main.screen_node()._start_training())
-	item.call("Settings", "gear", func():
+	_pause_item(v, "Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
+	_pause_item(v, "Controls", "dash", func(): tab = "Controls"; open_settings())
 	if where != "match":
-		item.call("Save files", "satchel", open_saves)
+		_pause_item(v, "Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
@@ -243,7 +235,7 @@ func open_pause(where: String) -> void:
 			close()
 			Game.goto("hatch", {"create": true})))
 	var scr = Game.main.screen_node() if Game.main else null
-	if scr and scr.has_method("unstick"):
+	if scr is Match or (scr and scr.has_method("unstick")):  # Home/Interior: no class_name
 		minor.add_child(UI.ghost("I'm stuck", func():
 			close()
 			scr.unstick()
@@ -260,18 +252,18 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			_pause_item(v, "Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
-			var lb: Button = item.call("Leave match", "back", func():
+			var lb: Button = _pause_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
-		item.call("Save and go to the main menu", "home", func():
+		_pause_item(v, "Save and go to the main menu", "home", func():
 			Save.save_game()
 			close()
 			RateCard.gate(root, func(): Game.goto("title")))
 	if not OS.has_feature("web"):
-		var q: Button = item.call("Save and quit the game", "close", func():
+		var q: Button = _pause_item(v, "Save and quit the game", "close", func():
 			Save.save_game()
 			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
@@ -625,56 +617,36 @@ func open_inventory() -> void:
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters
 		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
-	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
 	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Field Book"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
 	var grid := GridContainer.new(); grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
-	var cell := func(title_txt: String, count_txt: String, desc: String, col: Color, action_txt := "", action := Callable(), icon := "") -> void:
-		var c := UI.card(UI.CARD, 12, 12)
-		c.custom_minimum_size = Vector2(222, 0)
-		var cv := UI.vbox(6); c.add_child(cv)
-		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
-		top.add_child(dot)
-		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
-		tc.add_child(tl)
-		if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
-		top.add_child(tc)
-		cv.add_child(top)
-		if desc != "":
-			var dl := UI.para(desc, 12, UI.MUTED)
-			cv.add_child(dl)
-		if action.is_valid():
-			cv.add_child(UI.button(action_txt, action))
-		grid.add_child(c)
 	var empty := true
 	match inv_tab:
 		"Items":
 			empty = false
-			cell.call("Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
-			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
+			_inv_cell(grid, "Gems", str(int(Save.d["gems"])), "Spend them at the stall, on buildings and furniture.", UI.GOLD, "", Callable(), "gem")
+			_inv_cell(grid, "Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
-				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+				if fn > 0: _inv_cell(grid, Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
-				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
+				_inv_cell(grid, "Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))
 		"Seeds":
 			for k in Data.CROPS:
 				var n := int(Save.d["seeds"].get(k, 0))
 				if n <= 0: continue
 				empty = false
-				cell.call(Data.CROPS[k]["name"] + " seed", "×%d" % n, "Plant it in a farm plot.", Data.CROPS[k]["color"])
+				_inv_cell(grid, Data.CROPS[k]["name"] + " seed", "×%d" % n, "Plant it in a farm plot.", Data.CROPS[k]["color"])
 		"Crops":
 			for k in Data.CROPS:
 				var n := int(Save.d["crops"].get(k, 0))
 				if n <= 0: continue
 				empty = false
 				var ck: String = k
-				cell.call(Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
+				_inv_cell(grid, Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
@@ -689,7 +661,7 @@ func open_inventory() -> void:
 				var n := int(Save.d.get("furniture", {}).get(k, 0))
 				if n <= 0: continue
 				empty = false
-				cell.call(Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press B.", Color("c99a6a"))
+				_inv_cell(grid, Data.FURN[k]["name"], "×%d" % n, "Place it inside your house: go in and press B.", Color("c99a6a"))
 		"Kin":
 			for rec in Save.d["roster"]:
 				empty = false
@@ -702,7 +674,7 @@ func open_inventory() -> void:
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
-		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
+		v.add_child(UI.empty_state(String(INV_ICON.get(inv_tab, "gem")), es[0], es[1]))
 
 ## A Boki in the inventory's Boki tab: its portrait, name with its sex, level, form and bond.
 func _boki_card(rec: Dictionary) -> Control:
@@ -810,64 +782,57 @@ func open_admin() -> void:
 	var grid := GridContainer.new(); grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
 	v.add_child(grid)
-	var add := func(txt: String, f: Callable):
-		var b := UI.button(txt, func():
-			f.call()
-			Sfx.play("pickup")
-			Save.save_game()
-			_admin_refresh(), 290)
-		grid.add_child(b)
-	add.call("+1000 gems", func(): Save.d["gems"] = int(Save.d["gems"]) + 1000)
-	add.call("+10 of every seed", func():
+	_admin_add(grid, "+1000 gems", func(): Save.d["gems"] = int(Save.d["gems"]) + 1000)
+	_admin_add(grid, "+10 of every seed", func():
 		for s in Data.CROPS: Save.add_seed(s, 10))
-	add.call("+5 of every crop", func():
+	_admin_add(grid, "+5 of every crop", func():
 		for s in Data.CROPS: Save.d["crops"][s] = int(Save.d["crops"].get(s, 0)) + 5)
-	add.call("+5 tonics", func(): Save.add_item("tonic", 5))
-	add.call("Partner +1 level", func():
+	_admin_add(grid, "+5 tonics", func(): Save.add_item("tonic", 5))
+	_admin_add(grid, "Partner +1 level", func():
 		var k := Save.active_kin()
 		if not k.is_empty():
 			k["level"] = int(k["level"]) + 1
 			Game._evolve(k, {}))
-	add.call("Partner full trust", func():
+	_admin_add(grid, "Partner full trust", func():
 		var k := Save.active_kin()
 		if not k.is_empty(): k["trust"] = 100.0)
-	add.call("Grow every crop now", func():
+	_admin_add(grid, "Grow every crop now", func():
 		for arr in ["plots", "gh_plots"]:
 			for p in Save.d.get(arr, []):
 				if p["crop"] != "":
 					p["stage"] = int(Data.CROPS[p["crop"]]["grow"])
 					p["care"] = p["stage"]
 		if c == "home": _reload_home())
-	add.call("Unlock every building and bridge", func():
+	_admin_add(grid, "Unlock every building and bridge", func():
 		for b in Data.BUILDINGS:
 			if not Save.d["buildings"].has(b): Save.d["buildings"].append(b)
 		for i in Data.ISLES:
 			if not Save.d["bridges"].has(i): Save.d["bridges"].append(i)
 		Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10)
 		if c == "home": _reload_home())
-	add.call("Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
-	add.call("Replay the tutorials", func(): Save.d["tutorial"] = {})
+	_admin_add(grid, "Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
+	_admin_add(grid, "Replay the tutorials", func(): Save.d["tutorial"] = {})
 	var spawn := UI.button("Spawn a Boki…", open_spawn_kin, 290)
 	grid.add_child(spawn)
 	if c == "home":
 		var h = Game.main.screen_node()
-		add.call("Morning", func(): h.day_t = 0.27)
-		add.call("Night", func(): h.day_t = 0.95)
-		add.call("Rain on / off", func():
+		_admin_add(grid, "Morning", func(): h.day_t = 0.27)
+		_admin_add(grid, "Night", func(): h.day_t = 0.95)
+		_admin_add(grid, "Rain on / off", func():
 			h.raining = not h.raining
 			h.weather_t = 999.0 if h.raining else 60.0
 			h.rain.emitting = h.raining)
 	if c == "match":
 		var m = Game.main.screen_node()
-		add.call("Ultimate and ability ready", func():
+		_admin_add(grid, "Ultimate and ability ready", func():
 			if m.player:
 				m.player.ult = 1.0; m.player.sig_cd = 0.0)
-		add.call("Defeat every monster", func():
+		_admin_add(grid, "Defeat every monster", func():
 			for mb in m.mobs:
 				if not mb.dead: mb.hurt(99999.0, m.player, {}))
-		add.call("Exits ready now", func():
+		_admin_add(grid, "Exits ready now", func():
 			if m.exits: m.exits.admin_ready())
-		add.call("Extract now", func():
+		_admin_add(grid, "Extract now", func():
 			if m.player and not m.player.out:
 				close()
 				m._extract(m.player))
@@ -910,7 +875,7 @@ func open_spawn_kin() -> void:
 			Save.save_game()
 			Sfx.play("unlock")
 			var s = Game.main.screen_node() if Game.main else null
-			if s and s.has_method("_spawn_kin"):
+			if s and s.has_method("_spawn_kin"):  # Home/Interior, see unstick
 				s._spawn_kin()
 			_admin_refresh(), 196)
 		b.add_theme_color_override("font_color", Data.KIN[sid]["color"])
@@ -926,9 +891,48 @@ func _admin_refresh() -> void:
 		var k := Save.active_kin()
 		(st as Label).text = "%d gems · partner %s level %d, trust %d" % [int(Save.d["gems"]), k.get("name", "none"), int(k.get("level", 0)), int(k.get("trust", 0))]
 	var s = Game.main.screen_node() if Game.main else null
-	if s and s.has_method("_refresh_top"):
+	if s and s.has_method("_refresh_top"):  # Home only
 		s._refresh_top()
 
 func _reload_home() -> void:
 	close()
 	Game.goto("home")
+
+const INV_ICON := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
+
+func _pause_item(v: Control, txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
+	var b := UI.button(txt, cb, 388.0, icon)
+	if tier != "": b.theme_type_variation = tier
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if key != "": UI.with_key(b, key)
+	v.add_child(b)
+	return b
+
+func _inv_cell(grid: GridContainer, title_txt: String, count_txt: String, desc: String, col: Color,
+		action_txt := "", action := Callable(), icon := "") -> void:
+	var c := UI.card(UI.CARD, 12, 12)
+	c.custom_minimum_size = Vector2(222, 0)
+	var cv := UI.vbox(6); c.add_child(cv)
+	var top := UI.hbox(10)
+	var dot := UI.badge(icon if icon != "" else String(INV_ICON.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
+	top.add_child(dot)
+	var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
+	tc.add_child(tl)
+	if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
+	top.add_child(tc)
+	cv.add_child(top)
+	if desc != "":
+		var dl := UI.para(desc, 12, UI.MUTED)
+		cv.add_child(dl)
+	if action.is_valid():
+		cv.add_child(UI.button(action_txt, action))
+	grid.add_child(c)
+
+func _admin_add(grid: GridContainer, txt: String, f: Callable) -> void:
+	var b := UI.button(txt, func():
+		f.call()
+		Sfx.play("pickup")
+		Save.save_game()
+		_admin_refresh(), 290)
+	grid.add_child(b)
