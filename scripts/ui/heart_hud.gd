@@ -4,9 +4,14 @@ extends RefCounted
 ##   - the Heart's marker with a charge ring on the minimap and the full map, and a waypoint in the world;
 ##   - the carrier's glyph on every map (revealed) with their name, and a waypoint over them;
 ##   - the Heart Gate (dim until the Heartspark is carried, then lit);
-##   - the Blight's tide ring closing on the Heart.
+##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
+##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 
 const TIDE_COL := Color(0.75, 0.2, 0.35, 0.8)
+const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)
+const TINT_COL := Color(0.55, 0.05, 0.22)
+const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
+const DASHES := 48
 
 # ------------------------------------------------------------------ the world
 static func world_labels(hud) -> void:
@@ -15,6 +20,7 @@ static func world_labels(hud) -> void:
 	if ht == null or m.player == null or ht.site == Vector3.INF:
 		return
 	var cam: Camera3D = m.cam
+	_outside(hud, m, ht)
 	match ht.state:
 		"charging":
 			hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.COL)
@@ -39,6 +45,26 @@ static func world_labels(hud) -> void:
 		hud._ctext(cp2, "You carry the Heartspark  ·  everyone sees you", 13, Heart.COL, hud.big)
 
 # ------------------------------------------------------------------ the maps
+## Past the ring the screen is tinted and says so; each tide tick pulses the edges red.
+static func _outside(hud, m: Match, ht: Heart) -> void:
+	var p: Hunter = m.player
+	var tr := Heart.tide_r(m)
+	if tr <= 0.0 or p.out or p.extracted or Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).length() <= tr:
+		return
+	var sz: Vector2 = hud.c.size
+	var calm := 0.3 if Settings.get_v("reduce_flashes") else 1.0
+	var k := 0.07 + 0.13 * Heart.tide_out(m, p.pos)
+	var hit := clampf(1.0 - (m.time - ht.hit_t) / HIT_S, 0.0, 1.0) * calm
+	hud.c.draw_rect(Rect2(Vector2.ZERO, sz), Color(TINT_COL, k))
+	for i in 6:
+		var inset := i * minf(sz.x, sz.y) * 0.025
+		var a := (0.1 + 0.3 * hit) * (1.0 - i / 6.0)
+		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
+		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
+	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
+	var line := "IN THE BLIGHT  ·  -%d HP a second  ·  get inside the ring" % int(per_s)
+	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.3), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
+
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
 	var ht: Heart = m.heart
@@ -92,20 +118,26 @@ static func _word(ht: Heart) -> String:
 			return "Cooling  %ds" % int(ceil(ht.cool))
 	return "Heart"
 
-## The tide ring: short segments of the circle that fall on the map.
+## The tide ring now (solid) and the ring it closes to next (dashed, lighter): short segments of the
+## circles that fall on the map. Before the tide starts only the first ring shows.
 static func _tide(c: Control, m: Match, to_map: Callable, on_map: Callable, width: float) -> void:
 	var tr := Heart.tide_r(m)
-	if tr <= 0.0:
-		return
-	var ctr: Vector3 = m.heart.site
-	var n := 96
+	var nr := Heart.next_r(m)
+	if tr > 0.0:
+		_circle(c, m.heart.site, tr, to_map, on_map, TIDE_COL, width, false)
+	if nr < tr - 0.5 or tr <= 0.0:
+		_circle(c, m.heart.site, nr, to_map, on_map, NEXT_COL, width, true)
+
+static func _circle(c: Control, ctr: Vector3, radius: float, to_map: Callable, on_map: Callable,
+		col: Color, width: float, dashed: bool) -> void:
+	var n := DASHES * 2 if dashed else 96
 	var prev := Vector2.INF
 	for i in n + 1:
 		var a := TAU * i / n
-		var pv: Vector2 = to_map.call(ctr + Vector3(cos(a), 0, sin(a)) * tr)
+		var pv: Vector2 = to_map.call(ctr + Vector3(cos(a), 0, sin(a)) * radius)
 		var inside: bool = on_map.call(pv, 2.0)
-		if inside and prev != Vector2.INF:
-			c.draw_line(prev, pv, TIDE_COL, width, true)
+		if inside and prev != Vector2.INF and not (dashed and i % 2 == 0):
+			c.draw_line(prev, pv, col, width, true)
 		prev = pv if inside else Vector2.INF
 
 ## The Heart on a map: a crimson heart-gem with a charge ring; lit and pulsing when the spark is ready.

@@ -26,6 +26,17 @@ State machine in `scripts/match/heart.gd`: `charging -> ready -> carried -> cool
 Host-authoritative `["ht", ...]`: `s` (state snapshot, every 3 s and on change), `pick`, `drop`, `done`.
 Clients only predict timers. `Net.VERSION` 0.25.0.
 
+## The edge in the world and on the maps (ext/blight-edge-read)
+The tide ring is also a wall in the world (`scripts/match/blight_wall.gd`, `shaders/blight_wall.gdshader`): one
+open cylinder on `Heart.tide_r`, unshaded and alpha-only, so the Low preset pays for a flat ring and nothing
+more; presets with `fx` above 0.5 get drifting bands and a patch of embers on the wall nearest the player
+(`EMBERS` 150 x `fx`, CPU particles, one emitter). Out past the ring the HUD tints the screen, says so with the
+damage per second, and pulses the edges red on every tide hit (reduced by "Reduce flashes"). The maps draw the
+ring now (solid) and the ring it closes to next (dashed; before the tide starts, the first ring, so the drop
+map shows it). The play camera (57 degrees down) sees about 12 m ahead, so the wall is seen near, and from
+60 m only from a low camera; the maps are how it reads at range. `--blight-edge-shots` takes the sheets.
+There is no "very low" preset (Low, Medium, High, Ultra), so Low is the cheap path.
+
 ## Alternatives not taken
 - Block the carrier from normal exits (kept exits unchanged instead; the spark drops).
 - The tide without damage (the prototype's first cut; parity with the source's death circle added it).
