@@ -4,6 +4,7 @@ extends RefCounted
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
+## And the heal and shield family (HealSfx): one cue per event, heals merged per 0.3 s, a shield's expiry pops.
 
 var main: Node
 var fails := 0
@@ -49,6 +50,7 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	_heal_cues(m, P)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -64,6 +66,45 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+func _cue(sname: String) -> int:
+	return int(HealSfx.cues.get(sname, 0))
+
+func _heal_cues(m: Match, P: Hunter) -> void:
+	HealSfx.cues.clear()
+	P.hp = P.max_hp * 0.3
+	P.heal(20.0)
+	ok(_cue("heal_chime") == 1, "a heal is one chime (%d)" % _cue("heal_chime"))
+	P.heal(5.0)
+	P.heal(5.0)
+	CareUtil.heal(m, P, 5.0)            # a Boki or Meeko heal goes the same way
+	ok(_cue("heal_chime") == 1, "heals inside 0.3 s are merged, not one chime each (%d)" % _cue("heal_chime"))
+	_step(m, HealSfx.MERGE + 0.1)
+	ok(_cue("heal_chime") == 2, "the merged heals chime once as the window closes (%d)" % _cue("heal_chime"))
+	_step(m, HealSfx.MERGE + 0.1)
+	P.heal(0.5)
+	ok(_cue("heal_chime") == 2, "a heal of under a point is silent")
+	var foe: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	foe.hp = foe.max_hp * 0.5
+	foe.heal(30.0)
+	ok(_cue("heal_chime") == 3, "another hunter's heal is a cue too, at its position (%d)" % _cue("heal_chime"))
+	HealSfx.set_shield(P, 30.0)
+	HealSfx.set_shield(P, 20.0)         # a smaller shield changes nothing: no second hum
+	ok(_cue("shield_gain") == 1 and P.shield == 30.0, "one hum per shield gain (%d)" % _cue("shield_gain"))
+	P.shield_t = 0.1
+	_step(m, 0.3)
+	ok(_cue("shield_pop") == 1 and P.shield == 0.0, "a shield running out pops once (%d)" % _cue("shield_pop"))
+	HealSfx.set_shield(P, 30.0)
+	P.shield_t = 0.0
+	P.shield = 0.0
+	P.armor = 0.0
+	HealSfx.give_armor(P, 25.0)
+	HealSfx.give_armor(P, 1000.0)
+	ok(_cue("armor_refill") == 2 and P.armor == P.max_armor, "one ring per refill (%d)" % _cue("armor_refill"))
+	HealSfx.give_armor(P, 10.0)
+	ok(_cue("armor_refill") == 2, "armor already full is silent")
+	for sname in ["heal_chime", "shield_gain", "armor_refill", "shield_pop"]:
+		ok(Sfx.ensure(sname), "the sound file %s loads" % sname)
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

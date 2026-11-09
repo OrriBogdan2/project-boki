@@ -23,7 +23,7 @@ static func afterglow(h: Hunter) -> void:
 	var r := rules()
 	var secs := float(r.get("secs", 3.0))
 	h.add_buff("move_speed", float(r.get("move_speed", 0.15)), secs)
-	h.shield = maxf(h.shield, h.max_hp * float(r.get("shield_frac", 0.08)))
+	HealSfx.set_shield(h, h.max_hp * float(r.get("shield_frac", 0.08)))
 	h.shield_t = maxf(h.shield_t, secs)
 	h.set_meta("afterglow_t", secs)
 	var col := Color("ffd84a")

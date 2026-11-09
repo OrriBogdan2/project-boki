@@ -2279,7 +2279,6 @@ func _armor_up(h: Hunter) -> void:
 	fx.ring(h.pos, 2.4, Color(col, 0.9), 0.45)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 14, 3.5, 0.5)
 	if h == player:
-		sfx("revive", null, -6.0)
 		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
 
 func _reward_moment(at: Vector3) -> void:
@@ -2489,7 +2488,7 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 	h.down_hp = 0.0
 	h.revive = 0.0
 	h.hp = h.max_hp
-	h.armor = h.max_armor
+	HealSfx.give_armor(h, h.max_armor)
 	h.inv_t = 3.0
 	h.vel = Vector3.ZERO
 	h.grap = {}; h.pad = {}; h.charge = {}; h.roll_t = 0.0

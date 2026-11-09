@@ -120,6 +120,7 @@ var haste_t := 0.0
 var fortify_t := 0.0
 var shield := 0.0
 var shield_t := 0.0
+var heal_cue := {"t": 0.0, "sum": 0.0}   # HealSfx: the merge window and the heals waiting in it
 var recoil := 0.0
 var walk_ph := 0.0
 var anim: HunterAnim = null     # the procedural animation for the model
@@ -1893,6 +1894,7 @@ func heal(n: float) -> void:
 	hp = minf(max_hp, hp + n)
 	if hp - before > 1.0:
 		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+		HealSfx.heal(self, hp - before)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
@@ -1956,7 +1958,10 @@ func sim(dt: float) -> void:
 		set(k, maxf(0.0, get(k) - dt))
 	if shield_t > 0.0:
 		shield_t -= dt
-		if shield_t <= 0.0: shield = 0.0
+		if shield_t <= 0.0:
+			HealSfx.shield_end(self)
+			shield = 0.0
+	HealSfx.tick(self, dt)
 	if reload_t > 0.0:
 		reload_t -= dt
 		if reload_t <= 0.0:
@@ -2979,7 +2984,7 @@ func armor_gain(xp: float) -> int:
 	if up >= 0:
 		var old := max_armor
 		refresh_gear()
-		armor = minf(max_armor, armor + maxf(0.0, max_armor - old))
+		HealSfx.give_armor(self, max_armor - old)
 	return up
 
 ## How far into the current tier (0..1), for the HUD.

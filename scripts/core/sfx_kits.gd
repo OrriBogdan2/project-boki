@@ -15,6 +15,8 @@ const NAMES := [
 	"br_leap", "br_slam", "br_crack", "br_raise", "br_sense",
 	"os_orb", "os_orb_hot", "os_prime", "os_snap_wind", "os_snap", "os_snap_hit", "os_swap_lob", "os_swap", "os_seed",
 	"os_pop", "os_empower", "br_spine", "br_rumble", "br_crumble", "os_well", "os_well_hum",
+	# Heals and shields: tools/gen_sfx_heal.py, HealSfx
+	"heal_chime", "shield_gain", "armor_refill", "shield_pop",
 ]
 ## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs).
 const MIN_GAP := {}

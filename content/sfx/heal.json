@@ -1,0 +1,8 @@
+{
+ "group": "heal",
+ "name": "Heals and shields",
+ "script": "tools/gen_sfx_heal.py",
+ "sounds": {"heal_chime": "cast", "shield_gain": "cast", "armor_refill": "cast", "shield_pop": "cast"},
+ "signature": [],
+ "replaces": []
+}

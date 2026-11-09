@@ -589,7 +589,9 @@ func sim(dt: float) -> void:
 		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt
-		if shield_t <= 0.0: shield = 0.0
+		if shield_t <= 0.0:
+			HealSfx.shield_end(self)
+			shield = 0.0
 	if runner:
 		runner.tick(dt)
 	if remote:
