@@ -986,7 +986,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		elif dist < 3.2:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true # the Finishing Slam (best on the wounded)
-		elif dist < 7.0 and randf() < 0.45:
+		elif dist < 7.0 and randf() < 0.6:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 			bot_hold["rmb"] = rmb_charge_full() + PERFECT_LEAD       # a full charge let go in the perfect window

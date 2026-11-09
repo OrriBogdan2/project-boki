@@ -900,7 +900,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if int(h.slot_lv["sec"]) > 0:
 		var shot_at: bool = m.time - h.hurt_at < 0.6 and dist > 3.0
-		if shot_at and lock_t <= 0.0 and shield_hp > 30.0:
+		# (a shield against only half the shots: the hammer needs the aegis down)
+		if shot_at and lock_t <= 0.0 and shield_hp > 30.0 and randf() < 0.5:
 			# raise the shield toward whoever is shooting
 			h.inp["aim"] = tgt.pos
 			if not rmb_down: h.inp["sec"] = true

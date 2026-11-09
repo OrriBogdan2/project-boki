@@ -709,6 +709,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and in_reach and (burning(te) > 0 or randf() < 0.5):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.3      # a held lane, then the release
 		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > 2.5 and dist < 5.0 and randf() < 0.2:
 		h.inp["aim"] = tgt.pos

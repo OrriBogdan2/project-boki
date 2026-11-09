@@ -684,11 +684,14 @@ func _raise_feel() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist > 3.0 and dist < float(x_def()["range"]) and los:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
+	# Stone Row: the rocks rise 3.4 m ahead and never into a body or over an abyss, so the bot asks row_spots first
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.0 and dist < 10.0 and los and randf() < 0.5 \
+			and not row_spots(h.dir_to(tgt)).is_empty():
+		h.inp["aim"] = tgt.pos
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:

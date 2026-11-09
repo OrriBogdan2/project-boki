@@ -823,4 +823,5 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.5 and randf() < 0.4:
 		h.inp["aim"] = aimp
 		h.inp["sec"] = true
-		bot_hold["rmb"] = (0.6 + randf() * 0.5) if dist > 5.0 else 0.0
+		var full := dist > 5.0 or randf() < 0.5          # a full-hold Rod, or a quick tap
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + randf() * 0.1 if full else 0.0

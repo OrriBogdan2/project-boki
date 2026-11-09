@@ -1067,6 +1067,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.15      # held past the tap, then released
 	if (int(h.slot_lv["kin"]) > 0
 			and float(cd["e"]) <= 0.0
 			and dist < 9.0
