@@ -48,6 +48,9 @@ body (not in the air, a crouch, or a move that owns the body):
   too. It is off while an upper-body move owns the arm.
 - The numbers are per Hunter in content/rules/warden_anim/*.json, measured by `--anim-audit`, with the sweep that chose
   the `stride` gains. `ostra` and `rimewright` keep their clips (no leg motion to stretch).
+- **Hip bob.** `loco.bob` [walk, run] scales the hips' height about their running mean (Grimble and Kael: 1.0, 0.55).
+  The clips' bob is the root bone's, which the thighs hang from, so only the hips and what hangs from them (torso, arms,
+  head) are held back; the feet stay planted and slide is unchanged.
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
@@ -62,9 +65,9 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `ashwick` | 6 → 5 | 18 → 12 | 5.1 → 4.6 | -0.93 → +0.80 | 9 | 2.5 |
 | `bulwark` | 22 → 18 | 25 → 19 | 4.0 → 4.6 | +0.17 → +0.64 | 4 | 5.0 |
 | `dolm` | 54 → 25 | 38 → 18 | 3.1 → 5.5 | -0.86 → +0.72 | 4 | 3.3 |
-| `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 | 2.5 |
+| `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 → 10 | 2.5 |
 | `gunslinger` | 50 → 21 | 25 → 23 | 3.6 → 4.5 | +0.90 → +0.89 | 7 | 4.2 |
-| `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
+| `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 → 9 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
 | `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
@@ -105,7 +108,7 @@ posts scroll at the move speed).
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
 
 **Grimble (`dredge`)**
-1. Hip bob 17 cm at a run (12 % of his height); not changed.
+1. Hip bob 17 cm at a run (12 % of his height); damped by `loco.bob` to 10 cm (7 %).
 2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster.
 3. The throw sends the free arm 1.4 body heights and holds an arm sideways for 67 %; slide 28 % to 12 % (fixed).
 
@@ -120,7 +123,7 @@ posts scroll at the move speed).
 
 **Kael (`juggernaut`)**
 1. Feet slid 27 % at a run, 53 % at a walk (fixed: 12 %, 25 %); the left arm paced with its leg (counter -0.65, fixed to +0.84).
-2. Hip bob 16 cm at a run (10 % of his height); not changed.
+2. Hip bob 16 cm at a run (10 % of his height); damped by `loco.bob` to 9 cm (6 %).
 3. The slam flings the free arm 1.7 body heights and holds an arm out for 29 to 46 %.
 
 ![juggernaut walk and run, before and after](anim_audit/juggernaut.jpg)
@@ -166,7 +169,6 @@ Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
-- `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
