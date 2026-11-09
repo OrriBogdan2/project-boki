@@ -69933,5 +69933,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_ghoulamari_r5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_ghoulamari_r5",
+    "name": "Ghoulamari (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ghoulamari_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wayshell_r5",
+    "name": "Wayshell (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_wayshell_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wayshell_r5",
+    "name": "Wayshell (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_wayshell_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_siegephant_r5",
+    "name": "Siegephant (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_siegephant_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_siegephant_r5",
+    "name": "Siegephant (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_siegephant_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_wayshell_r5",
+    "name": "Wayshell (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_wayshell_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cindermaw_r5",
+    "name": "Cindermaw (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_cindermaw_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ghoulamari_r5",
+    "name": "Ghoulamari (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ghoulamari_r5_3.jpg",
+    "ok": true
   }
 ]
