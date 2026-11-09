@@ -229,6 +229,23 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Edge knocks against the source (`--abyss-check` section 8; PARITY FIRST, decisions 2026-11-07)
+
+Asked: what the source does when a Hunter is knocked off an island. Evidence read: `supervive_physics.md` (Abyss rows), `supervive_kits.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, the hero-ref sheets (Kael, Grimble, Breah, Motley). **The source data answers almost none of it.** The footage sheets show only that an Air Slam or a dunk over the abyss ends in a KNOCK callout (juggernaut.md 0291-0292, breah.md 0989). So most rows below are [est] ours, kept as they are and measured; only the last fix changes behaviour.
+
+| Question | Source | Ours (measured) | Verdict |
+|---|---|---|---|
+| Glider open at once off a knock, mid-knock or after? At what heat? | Nothing published (`bAllowsMantlingFromAbyss` true; hits on a glider drain heat, wiki). | A shove over 4 m/s shuts the glider for 0.4 s (`kb_t`); the longest knock is 0.35 s, so a held glide opens 0.42 s in, after the knock. A shove of 2.5 to 4 m/s opens it mid-knock (0.12 s). Heat never gates it: an overheated glider opens the same. | [est] kept; asserted for hard knocks at 0% and 100% heat. |
+| Overheated glider out of the abyss | Owner decision: lifts at half strength while it burns. | Peak lift 6.1 vs 11.5 m/s from 7 m, 8.7 vs 16.7 from 12 m (0.53x, 0.52x); back at the lip in 1.2 to 1.6 s. | Matches; now asserted (it had no check). |
+| Ledge grab or mantle while knocked | `bAllowsMantlingFromAbyss` true; no knock rule. | A knocked Hunter catches a rim from below; only a launch over 8 m/s within 0.3 s of the knock waits, and a stun, root or a fresh knock ends a rise. | [est] kept (section 2). |
+| Kill credit after a knock-off | Not published. | The last attacker keeps the abyss kill for 4.0 s after a hard knock (`Match.on_fell`, `kb_t`), then the fall is nobody's. | [est] kept. Gap, not changed: Grimble's reel, Motley's Trade and a soft shove (under 4 m/s) never start the 4 s, so a fall after them credits nobody. Fixing it needs the tow and the swap to carry the caster over Net (`Net.VERSION`). |
+| Walking or being shoved off | Source `bCanWalkOffLedges` false; owner: always allowed. | A person is never blocked. **Fixed:** a bot's edge guard held a bot at the rim after a 2.5 to 5.8 m/s shove, so the knock-off failed on bots only. The guard now ignores a knock (`knock_t`) and 0.6 s after a hard one. | Asserted: 4.5 m/s at the rim carries player and bot over. |
+| Grimble's arm | Pierces terrain, pulls the first target, which is STUNNED all the pull; Grimble is GROUNDED. | Stun kept on the foe through the reel (so no glider), dragged over rocks and cliffs, the abyss takes it. Hover over the abyss while the arm flies is an owner ask (items 31, 75). | Matches. |
+| Kael's chain | Attaches to a foe or wall; recast pulls him about 5 bh in 0.4 s. | A dash toward the anchor: it ends over the abyss like any dash and the glider and lift take over. | Matches. |
+| Motley's Trade | Swaps a foe and Motley. | Owner override: hover-swap over the abyss. Foes land at Motley's spot, so a swap from over the abyss drops them. | Matches. |
+
+Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

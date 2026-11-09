@@ -2271,8 +2271,8 @@ func _physics(dt: float) -> void:
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
-	# take over); only bots keep an edge guard, so walking can't carry one into the abyss by accident
-	var guard := ctrl == "bot" and grounded and roll_t <= 0.0 and hv.length() <= spd * 1.25
+	# take over); only bots keep an edge guard (a walk only: a shove still takes them over)
+	var guard: bool = ctrl == "bot" and grounded and roll_t <= 0.0 and knock_t <= 0.0 and m.time - kb_t > 0.6 and hv.length() <= spd * 1.25
 	# horizontal with walls; mantle onto ledges you run or fall into
 	var x0 := pos.x; var z0 := pos.z
 	var pre_v := Vector2(vel.x, vel.z)

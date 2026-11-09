@@ -302,10 +302,83 @@ func run(main: Node) -> void:
 		if mb.dead: mb_fell += 1
 	ok(mb_in < 0.05, "monsters knocked at an island from below stay out of it (deepest %.2fm)" % mb_in)
 	ok(mb_fell == mb_n and mb_low < 7.0, "monsters off the edge fall out promptly: %d of %d, deepest %.1fm below the lowest lip around" % [mb_fell, mb_n, mb_low])
+	_edge_knocks(edges[0])
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## 8. A hunter knocked off an island (docs/MOVEMENT_FEEL.md "Edge knocks against the source").
+func _edge_knocks(e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	# a hard shove shuts the glider for the knock and a beat; the heat does not decide it
+	for fuel in [1.0, 0.0]:
+		_reset(Vector3(e["ex"] - dir.x * 0.5, top + 0.1, e["ez"] - dir.y * 0.5), Vector3.ZERO)
+		h.grounded = true
+		h.last_gy = top
+		h.glide_fuel = fuel
+		h.impulse(dir * 22.0 * h.mass(), 3.0 * h.mass())
+		var kt := h.knock_t
+		var t := 0.0
+		var t_open := -1.0
+		while t < 1.5 and t_open < 0.0:
+			h.inp["glide"] = true
+			m.step(Match.DT)
+			t += Match.DT
+			if h.gliding:
+				t_open = t
+		var good: bool = kt > 0.0 and t_open >= kt and t_open <= kt + 0.15
+		var what := "hard knock off an island, glide held, heat %.0f%%: opens %.2fs in, knock %.2fs"
+		ok(good, what % [(1.0 - fuel) * 100.0, t_open, kt])
+	h.inp["glide"] = false
+	# an overheated glider still lifts you out, at about half strength
+	var peaks := {}
+	for fuel in [1.0, 0.0]:
+		for dp in [7.0, 12.0]:
+			_reset(Vector3(e["ex"] + dir.x * 4.0, top - dp, e["ez"] + dir.y * 4.0), Vector3(0, -4.0, 0))
+			h.last_gy = top
+			h.air_t = 1.0
+			h.gliding = true
+			h.glide_fuel = fuel
+			var peak := -99.0
+			var t_up := -1.0
+			var t := 0.0
+			while t < 5.0:
+				h.inp["glide"] = true
+				m.step(Match.DT)
+				t += Match.DT
+				if t <= 0.5:
+					peak = maxf(peak, h.vel.y)
+				if t_up < 0.0 and h.pos.y >= top - 0.5:
+					t_up = t
+					break
+			peaks[[fuel, dp]] = [peak, t_up]
+	h.inp["glide"] = false
+	var halves := true
+	for dp in [7.0, 12.0]:
+		var r: float = float(peaks[[0.0, dp]][0]) / float(peaks[[1.0, dp]][0])
+		halves = halves and r > 0.4 and r < 0.65 and float(peaks[[0.0, dp]][1]) > 0.0
+	var shown := [peaks[[0.0, 7.0]][0], peaks[[1.0, 7.0]][0], peaks[[0.0, 12.0]][0], peaks[[1.0, 12.0]][0]]
+	var lift_what := "overheated glider lifts at half strength from 7m and 12m (peak %.1f vs %.1f, %.1f vs %.1f m/s)"
+	ok(halves, lift_what % shown)
+	# a shove off the edge is never blocked: a bot's edge guard only holds a walk
+	var went := 0
+	var n := 0
+	for who in ["local", "bot"]:
+		_reset(Vector3(e["ex"] - dir.x * 0.4, top, e["ez"] - dir.y * 0.4), Vector3.ZERO)
+		h.grounded = true
+		h.last_gy = top
+		h.ctrl = who
+		h.impulse(dir * 4.5 * h.mass())
+		for i in int(1.0 / Match.DT):
+			m.step(Match.DT)
+			if w.is_void(h.pos.x, h.pos.z) and not h.grounded:
+				went += 1
+				break
+		n += 1
+	h.ctrl = "local"
+	ok(went == n, "a 4.5 m/s shove at the rim carries player and bot over: %d of %d" % [went, n])
 
 ## Depths below the lip the lift is measured at (the point of no return is ~13m: Hunter.abyss_kill_y).
 const LIFT_DEPTHS := [1.0, 2.0, 4.0, 7.0, 10.0, 12.0]
