@@ -4016,3 +4016,14 @@ READY ext/meeko-rmb-orbit-1108 (3 commits off main d255acbee; job 20261109-02454
 - Checks: --tender-combo-check 88/0, --warden-clips-check 0 (7 new orbit asserts), --dash-flow-check 0, --warden-glb, --warden-model, --hero-vfx, --archetype-check 379/0, gen_wiki --check unchanged, health --strict OK. suite-fast not on w2. Fresh save + Training Area (--arena=tender) run, no errors.
 - GPU: reel before 20261109-031904-26061, after 20261109-031917-12866 (ring gone, faster throw); turntable before 20261109-032419-30402, after rendered on w2 llvmpipe: hetzner jobq "No space left on device" lost the GPU after-job.
 - Open: her personality text still says "raincloud" (lore, owner's call); a Blender pass can bake a real moon into pip_companions.py.
+
+READY ext/suite-reds-0243 dc6e22d00 (job 20261109-024601-a4, rpc1; 5 commits off main d255acbee, tools/ + one json line, health --strict OK; PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/suite-reds-0243). Each flag run alone on the branch tip, `godot --headless --path . -- --<flag>` (the flags only reach the game after `--`; without it the game idles on the title screen, a plausible cause of the rc 124s).
+| item | verdict | fix |
+|---|---|---|
+| --displace-net-check (guest at inf) | NOT a game bug: `_reply()` returned Vector3.INF after 10 s of host sim time when a starved guest answered late; 34 checks / 0 fails on unchanged main | wait 30 s real time |
+| --mantle-check 16/20 | stale check: decision 0020 air_control 0.015 can't cross the 0.6 m gap the trial hung at (air_control 0.3 = 20/20 as an experiment, reverted) | hang at the face (0.1 m) |
+| --boki-dash-check 13 | stale check: the 13 Boki with owner_move_speed shift the dash exit slide 2 cm (dash hands over at run speed, KIT_PARITY 4); rolling steps, i-frames, kit moves unchanged; stats allowed by the agency rule (DECISIONS 2026-11-06) | path 1 cm while rolling, end point 6 cm |
+| --mantle-look-check gender | data bug: Grimble's Warden "robot" vs base character male (model reads robot as male, no visible change) | mantle_look.json |
+| --mantle-look-check 0.72 | stale floor: Tenzo v2 model, 0.71 at slider ends, still closest to its own by 0.17 | floor 0.70, names the Hunter |
+| --farm-start-check (1 fail, not in your list) | check race: queue_free'd red ghost cells counted in the green-tint read | skip queued-for-deletion |
+| farm-start / home-build / work / incubator / kin-indoors rc 124 | NOT reproduced: 7-17 s each, 0 fails (farm-start only the race above). Suggest checking that the suite passes `--` before the flag | none |
