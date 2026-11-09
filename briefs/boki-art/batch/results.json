@@ -38412,5 +38412,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_chandelapi_m1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chandelapi_m2",
+    "name": "Chandelapi (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m3",
+    "name": "Chandelapi (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m2",
+    "name": "Chandelapi (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m3",
+    "name": "Chandelapi (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m3",
+    "name": "Chandelapi (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m2",
+    "name": "Chandelapi (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m2",
+    "name": "Chandelapi (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_m4",
+    "name": "Chandelapi (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_m4_3.jpg",
+    "ok": true
   }
 ]
