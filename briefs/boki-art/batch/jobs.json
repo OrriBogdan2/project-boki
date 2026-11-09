@@ -1,5 +1,41 @@
 [
   {
+    "id": "c_seaglass_ray",
+    "name": "Sea-glass Boki (ray)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/concepts/SeaGlass_ref.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Image 2 shows the material, palette and face to keep: frosted, tide-worn translucent sea glass in seafoam green and pale aqua with rounded cobalt-blue pebble patches, big sleepy-happy eyes and a soft little smile. Make a brand-new creature in exactly that material and palette, but a completely different animal and body shape from image 2 (it must not be an axolotl): a round baby manta ray gliding low, its wide wing-fins frosted sea glass edged like smooth broken beach glass, two little cephalic fins curled by its face, a short paddle tail. A baby: small, round, chunky, big head, short limbs, simple enough to read as a tiny icon. Water and Crystal types. Avoid: an axolotl, sharp crystals, shells, sand, a bottle, sparkles, rainbow effects.",
+    "size": "2K"
+  },
+  {
+    "id": "c_seaglass_otter",
+    "name": "Sea-glass Boki (otter)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/concepts/SeaGlass_ref.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Image 2 shows the material, palette and face to keep: frosted, tide-worn translucent sea glass in seafoam green and pale aqua with rounded cobalt-blue pebble patches, big sleepy-happy eyes and a soft little smile. Make a brand-new creature in exactly that material and palette, but a completely different animal and body shape from image 2 (it must not be an axolotl): a chubby sea otter pup floating on its back with its paws folded on its tummy, its fur turned into smooth frosted sea-glass pebbles, a flat rounded tail like a polished piece of beach glass. A baby: small, round, chunky, big head, short limbs, simple enough to read as a tiny icon. Water and Crystal types. Avoid: an axolotl, sharp crystals, shells, sand, a bottle, sparkles, rainbow effects.",
+    "size": "2K"
+  },
+  {
+    "id": "c_seaglass_slug",
+    "name": "Sea-glass Boki (slug)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/concepts/SeaGlass_ref.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Image 2 shows the material, palette and face to keep: frosted, tide-worn translucent sea glass in seafoam green and pale aqua with rounded cobalt-blue pebble patches, big sleepy-happy eyes and a soft little smile. Make a brand-new creature in exactly that material and palette, but a completely different animal and body shape from image 2 (it must not be an axolotl): a plump sea slug (nudibranch) creeping along, its back crowned with soft rounded sea-glass frills like worn glass petals, two little rhinophore horns. A baby: small, round, chunky, big head, short limbs, simple enough to read as a tiny icon. Water and Crystal types. Avoid: an axolotl, sharp crystals, shells, sand, a bottle, sparkles, rainbow effects.",
+    "size": "2K"
+  },
+  {
     "id": "c_fawngus_n",
     "name": "Fawngus (concept)",
     "refs": [
