@@ -316,11 +316,6 @@
       "grade": 8.5
     },
     {
-      "id": "vespox_f_r",
-      "pick": 1,
-      "grade": 8.5
-    },
-    {
       "id": "zipling_r",
       "pick": 1,
       "grade": 8.5
@@ -604,6 +599,12 @@
       "id": "portrait_zephyrak",
       "pick": 1,
       "grade": 8.5
+    }
+  ],
+  "retired": [
+    {
+      "id": "vespox_f_r",
+      "why": "owner 20:18: branching lines get no female looks"
     }
   ]
 }

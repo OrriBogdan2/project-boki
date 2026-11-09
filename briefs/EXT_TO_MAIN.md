@@ -3703,3 +3703,5 @@ ART ringrove_r2 reject briefs/boki-art/batch/out/ringrove_r2_1.png
 ART ringrove_r2 reject briefs/boki-art/batch/out/ringrove_r2_2.png
 ART terrasloth reject briefs/boki-art/batch/out/terrasloth_1.png
 ART terrasloth reject briefs/boki-art/batch/out/terrasloth_2.png
+
+## Nov 8 20:20 (art, owner): one special rule per line. Branching lines (starters, Echolop, Ermink, Jarmit) get NO male/female looks; only Bellowary, Gongibbon/Gongrowl, Kestrike/Arcestrel/Voltalon, Lunowl/Eclipsowl and Murmurling lines do. GAME_RULES_NOV8.md section 6 updated. vespox_f_r removed from approved.json (moved to "retired").

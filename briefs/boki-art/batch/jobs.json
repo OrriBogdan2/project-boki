@@ -1968,5 +1968,104 @@
     "runs": 2,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: peeking out with a sneaky grin. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "4K"
+  },
+  {
+    "id": "bellowary_f",
+    "name": "Bellowary (female)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowary.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "kestrike_f",
+    "name": "Kestrike (female)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Kestrike.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "arcestrel_f",
+    "name": "Arcestrel (female)",
+    "refs": [
+      "briefs/boki-art/evolutions/Arcestrel.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "voltalon_f",
+    "name": "Voltalon (female)",
+    "refs": [
+      "briefs/boki-art/evolutions/Voltalon.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "lunowl_f",
+    "name": "Lunowl (female)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "eclipsowl_f",
+    "name": "Eclipsowl (female)",
+    "refs": [
+      "briefs/boki-art/evolutions/Eclipsowl.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "murmurling_f",
+    "name": "Murmurling (female)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Murmurling.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "gongibbon_f",
+    "name": "Gongibbon (female)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gongibbon.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "gongrowl_f",
+    "name": "Gongrowl (female)",
+    "refs": [
+      "briefs/boki-art/evolutions/Gongrowl.jpg"
+    ],
+    "runs": 2,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make this the female form of the same species: slightly slimmer and more graceful, a softer, warmer or paler colour tint, a different crest, ear or tail shape, and a smaller or more elegant version of its signature part. Keep the same face shape, idea, pose type and number of views, and keep it an animal, never standing like a person, no human body shapes. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "4K"
   }
 ]

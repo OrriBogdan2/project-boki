@@ -52,8 +52,8 @@ V('bellowlet','Bellowlet',T+'Bellowary.jpg','baby',"A tiny, round cassowary chic
 V('furnacowary','Furnacowary',T+'Bellowary.jpg','final',"A towering forge bird whose chest is a roaring blast-furnace door, a tall chimney crest blasting smoke and sparks, molten cracks down its neck, and huge glowing bronze spur blades."+DIFF,"blazing orange eyes and a fierce, hot-tempered glare","soot black and bright blue, with a molten-orange accent","straps, a saddle, a rider",'ember','majestic')
 
 # ---- female looks (edit jobs from the approved male sheet) ----
-HOLD_FEMALE=True  # owner rethinking male/female looks (20:15); jobs held
-for _sp,_dir in ([] if HOLD_FEMALE else [('sporcupine',E),('amanitusk',E),('geodelotl',E),('chandelotl',E),('bellowary',T),('kestrike',T),('arcestrel',E),('voltalon',E),('lunowl',T),('eclipsowl',E),('murmurling',T),('gongibbon',T),('gongrowl',E),('glaivyx',E),('lashyx',E)]):
+# Owner 20:18: one special rule per line. Branching lines (starters, Echolop, Ink lines) get NO female looks.
+for _sp,_dir in ([('bellowary',T),('kestrike',T),('arcestrel',E),('voltalon',E),('lunowl',T),('eclipsowl',E),('murmurling',T),('gongibbon',T),('gongrowl',E)]):
     X(_sp+'_f',_sp.capitalize()+' (female)',_dir+_sp.capitalize()+'.jpg',FEM)
 
 # ---- portraits for round-4 passes ----

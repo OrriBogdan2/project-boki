@@ -34,19 +34,12 @@ The final form is set by which trained stat (Training post: Power, Guard, Speed)
 - Mycroll, Vespyx and Prismander.
 - The **mystery egg hatches Ermink** (not a random common Boki, not Hatchet).
 
-## 6. Sex
-- Every Boki has a sex, 50/50: rolled at hatch and wild spawn, saved with uid and lineage, passed through breeding, shown on the Boki screen.
-- Separate male and female looks only on these lines, through every evolved stage (babies differ little or not at all):
-  - Mycroll line (Sporcupine, Amanitusk, Ringrove)
-  - Vespyx line (Vespox, Glaivyx, Lashyx)
-  - Prismander line (Glassolotl, Chandelotl, Geodelotl)
-  - Bellowary
-  - Gongibbon and Gongrowl
-  - Kestrike, Arcestrel and Voltalon
-  - Lunowl and Eclipsowl
-  - Murmurling
-- Not the Ermink line or anything else. Use a per-species flag such as `sex_forms: true`.
-- The existing sheet is the male look.
+## 6. Sex (revised 20:18: one special rule per line)
+- Every Boki has a sex, 50/50 (hatch, wild spawn, saved with uid and lineage, used in breeding, shown on the Boki screen).
+- **Each line gets at most ONE special rule**: either a branching final (training stat or Ink) OR male/female looks, never both.
+- Male/female looks only on these non-branching lines, through every evolved stage (babies differ little or not at all): Bellowary line (Bellowlet, Bellowary, Furnacowary); Gongibbon and Gongrowl; Kestrike, Arcestrel and Voltalon; Lunowl and Eclipsowl (Mothlet little or none); Murmurling.
+- The starter lines, Echolop, Ermink and Jarmit branch, so they have ONE look each. (The female Vespox sheet is retired.)
+- Per-species flag such as `sex_forms: true`. The existing sheet is the male look.
 
 ## 7. Renames and line changes
 - Gongibbon evolves into **Gongrowl** (replaces Carillangutan).
