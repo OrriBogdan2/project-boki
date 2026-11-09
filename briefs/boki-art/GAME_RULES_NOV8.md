@@ -97,3 +97,18 @@ Wild=Normal, Ember=Fire, Tide=Water, Bloom and Spore=Grass (merged), Storm=Elect
 Tempest=Flying, Wyrm=Dragon, Shadow=Dark, Venom=Poison, Swarm=Bug, Titan=Steel, Lunar=Ghost, Prism=Fairy, Echo=Psychic.
 17 types (no Fighting yet). Any old type name in older briefs means the new one above. Applied to ROSTER_100.html,
 ROSTER_200_NEW.md, roster.json and the Bokidex dex.json; game type table goes through a gated branch.
+
+## Owner decision 2026-11-08 22:29 ET: standard type names
+Rename every type to the plain, standard name (18 types):
+| old | new |  | old | new |
+|---|---|---|---|---|
+| Ember | Fire | | Swarm | Bug |
+| Tide | Water | | Stone | Rock |
+| Bloom | Grass | | Tempest | Flying |
+| Storm | Electric | | Wild | Normal |
+| Frost | Ice | | Titan | Steel |
+| Wyrm | Dragon | | Lunar | Fairy |
+| Shadow | Dark | | Prism | Crystal |
+| Venom | Poison | | Spore | Spore (kept) |
+| Echo | Sound | | Gravity | Psychic |
+Applied in ROSTER_200_NEW.md (headers and tables). Main: rename in game data, the in-game Bokidex, the website Bokidex and ROSTER_100. Type matchups are not part of this change.
