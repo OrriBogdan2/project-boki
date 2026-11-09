@@ -27,5 +27,6 @@ shoulder. Soft light only: the bloom's spark burst and ground ring and the knock
 Left out on purpose: guardian summon, stealing, the reveal on a killed summon, bots summoning, mounts.
 
 ## Consequences
-- Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
+- Net.VERSION 0.31.0 (ext/soul-link-integ): kin snapshot indices 25-27 = window, shrink, cooldown seconds
+  (KinNet.SUMMON_AT).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
