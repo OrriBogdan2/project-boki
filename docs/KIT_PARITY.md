@@ -108,8 +108,8 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, Grounded (ours) | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
-| Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, cd 10, air shares slot, air range scaled twice (3.1 m, single 3.7 m) | differ (owner); air slot missing (gap 13) |
-| Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down | match |
+| Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, cd 10; air pounce own 12.5 s slot, 3.7 m scaled once (done, verified) | differ (owner: 3 charges, short) |
+| Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down; knock heals 16% | match on stacks; differ: 16% knock heal ours (Kingpin has none) |
 | Anim | Footage poses | 13 moves, all on `dredge.glb` (40) | match on coverage |
 
 ## Claire (`rimewright`, source Celeste)
@@ -143,12 +143,12 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .48 vs .45, walks 55% vs stands | differ (owner); cadence S fix (gap 12) |
+| LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .45 (done), walks 55% vs stands | differ (owner) |
 | RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
-| Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m, cd 8 | match |
+| Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m, cd 8; rank 3 refunds the Bash; Bash 12 | match |
 | Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open |
 | Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
 
@@ -179,6 +179,71 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
+## Verify: Grimble and Albert on main d255acbee (job 20261109-210110-a2, ext/verify-grimble-albert)
+
+Sources: supervive_kits.md (Kingpin, Oath), hero-ref dredge.md and bjorn.md, DECISIONS (owner wins). Checks run: `--dredge-combo-check` 95/0, `--bulwark-combo-check` 146/0 (with the new rank 3 range assert), `--archetype-check` 379/0. Verdicts: match, differ (how), owner, `[?]`. "READY" names the branch in EXT_TO_MAIN that already fixes the row and is not on main.
+
+**Grimble (`dredge`)**
+| Slot | Row | Main | Verdict |
+|---|---|---|---|
+| LMB | 7 slugs, 0.5 s, stop 6.3 m | as source | match |
+| LMB | fan [F] 20 rested, 30 firing | 30 rested + bloom to 45 | differ (READY lmb-range-parity d1aa84b8d, scrapking-lmb d5891bd37) |
+| LMB | bloom resets on dash (tier 3) | rank 3 barge resets it | match |
+| RMB | Abyssal Hand through terrain (DECISIONS: walls and cliffs, placed walls stop it) | `pierce_terrain` on the hook (match.gd:3186): rocks, props, cliffs pass; `--dredge-combo-check` cliff and rock rows PASS (grab 6.3 m behind a cliff, drag over rocks); reel also climbs cliffs, stops at a placed wall | match |
+| RMB | what stops it | placed walls (Verbs.shot_check), domes, and breakable props (`_shot_break`) end the flight without a grab; no main assert for the placed wall (READY decisions-hero-asserts a6d970278) | match; breakables `[?]` (source says terrain only) |
+| RMB | first target, ally, wisps, caster Grounded, rank 3 half cd | all built and asserted | match |
+| RMB | cooldown 18 s (data L1), card 11.7 s at footage level 9 | 12 | differ 0.67x (READY grimble-parity-verify d94bc7769 sets 18; see ranked 2) |
+| RMB | rank steps -2.5 s x2 | -10% per rank | differ (READY rank-parity-b d911bdfb4) |
+| RMB | 20% braced shuffle, fly_slow 0.2, height hold | not in source | owner/ours, kept |
+| E | 0.38 s wind-up, slam, stun 1.1 (footage 1.2-1.4), 25 vs 14 volley (349 vs 193 footage) | as footage | match |
+| E | cooldown 12 s (card 6.7 s) | 7 | differ 0.58x (READY d94bc7769) |
+| E | foe Grounded after the slam | ours (1 s) | differ (READY parity-no-riders-grimble-tenzo 7b130d5c7) |
+| E | air: smash straight down, +50% by height | owner note | owner |
+| E | rank 3: +100% over the abyss, +0.2 s stun | built | match |
+| R | 1.1 s charge, 105 deg, two waves 0.6 s apart, 6 slugs, Anti-Heal | as footage | match |
+| R | cooldown 36 s (card 20.8 s); ranks +20% dmg -5 s x2 | 21; ranks unchanged | differ 0.58x (READY d94bc7769, ult-ranks a48ec55a0) |
+| Dash | ground 7 s, blink 4.6 m in 0.12 s [F] | 3 charges, 3.2 m in 0.16 s | owner (DECISIONS: short, several in a row) |
+| Dash | air own slot 12.5 s, -2 s a rank, further | own slot, 3.7 m once, asserted | match |
+| Dash | into rmb/e/x fire, lmb buffer, jump locked in the reel | content/dash_flow/dredge.json | match; lmb `[?]` (source silent) |
+| Passive | stacks of max HP, lose one on death, backstab bonus | Salvage 10 x 2.5%, lose one when downed, back +50% | match; the numbers `[?]` (source silent) |
+| Passive | knock heals 16% | ours (Kingpin has none) | differ (READY heal-knock-source-rebased 44f88a2c9 only lists it) |
+| Passive | zero-bloom volley wears armour 66% faster | missing | differ (READY grimble-unspread-bonus 1592226f9) |
+| Anim | poses | 13 moves on dredge.glb | match |
+
+**Albert (`bulwark`)**
+| Slot | Row | Main | Verdict |
+|---|---|---|---|
+| LMB | throw, equal hits out and back, recall, cadence 0.45 | as source | match |
+| LMB | hold: charged swing; ours whirl, 3x-5.5x (data 2.7x), walks 55%, step 1.5-1.8 m, perfect launch | owner #30 #49 #51 #59 | owner |
+| RMB | hold, up in 0.1 s, blocks all damage from the front | 140 deg arc takes melee, shots and abilities; DoT and rear hits land; asserted | match |
+| RMB | aegis pushes foes back 2 m, 3 s break lock, glide Surf, HP 160 | not in source | differ (ours) `[?]` |
+| RMB | block rules for hooks, stun, slow, root | no main assert (READY parity-aegis-block e17eaf4bc) | `[?]` |
+| Shift | Spin Dash 3.5 m, one spin 2x the throw, cd 8 | 24 = 2x, cd 8 | match |
+| Shift | rank 3 dash refund: hitting foes refunds the Shield Bash | `_spin_hit` resets cd and charge when a foe is in 2.2 m (asserted) | match |
+| Shift | rank 3 spin goes 1 m further | ours-only rider (source Upg has no range) | fixed here: removed, assert added |
+| Shift | rank steps -1.5 s on both x2 | Bash 6, 4.5, 3 ok; Spin 8, 6.8, 5.6 (should be 6.5, 5) | differ (READY rank-parity-c 29ce1049f) |
+| Shift | Shield Bash 6 s, invulnerable, 198 vs throw 192 | 6 s, invulnerable, was 10 vs 12 | fixed here: 12 |
+| Shift | Bash from the 0.1 s rise and in the air | ground only, Spin Dash if pressed in the rise | differ (READY mossy-shield-bash edfaf87cf) |
+| Shift | Bash ends in a Shield Slam at 50 Guard | invented | differ (owner CUT 11-07; READY parity-bulwark-guardcut b2e942eb4) |
+| E | zone at the hammer or on himself, burst, Wisps resurrect, 8 s at IV | 12 s, 8 at rank 3, burst 18, revive third | match |
+| R | fissure stun, AoE, heavy Slow, cd 50 | 4 cells, stun 0.5, cd 40; strike 4 / eruption 18 (data 31 / 396) | differ 0.8x (READY albert-parity-verify b69c6ca3b fixes damage; cd with cooldown parity) |
+| Passive | wall knock Stuns | stun 0.5 (footage about 1 s) plus 8 damage; the wall test is "terrain within 1.5 m behind", not the real knock | differ (READY cc-parity 61ecea138 sets 1.0 s); proxy `[?]` |
+| Passive | Guard meter | still on main | differ (owner CUT; READY b2e942eb4) |
+| Anim | poses | 17 moves on breaker.glb | match |
+
+**READY branches on the heroes, not on main** (latest tip per branch, patch not in main): Grimble: lmb-range-parity, scrapking-lmb, grimble-parity-verify, parity-no-riders-grimble-tenzo, grimble-unspread-bonus, rank-parity-b, heal-knock-source-rebased, decisions-hero-asserts, anim-time-grimble-rebased, telegraph-audit-b-rebased, grimble-fist-vfx. Albert: parity-bulwark-guardcut, albert-parity-verify, mossy-shield-bash, mossy-dash-refund, parity-aegis-block, cc-parity, rank-parity-c, anim-time-mossy, telegraph-audit-c-rebased, vfx-albert-faultline, albert-size-boop-rebased, mossy-narrow (alternative, not both). Much older READY lines on these files are superseded or already merged through integration branches.
+
+**Ranked fixes left (file, effort)**
+1. Merge the two cut and rider branches: Guard meter and Shield Slam, Grimble E Grounded (bulwark_kit.gd, bulwark.json, dredge_kit.gd; S each, merge only).
+2. Cooldowns: data level 1 (18/12/36, Albert R 50) versus footage card at level 9 (11.7/6.7/20.8). Ours sits at the card. DECISIONS wants 1.0x of data, the card suggests the footage was taken with rank steps; owner to confirm which (dredge.json, bulwark.json; S).
+3. Spin Dash and Spin ranks to -1.5 s steps (6.5, 5) and Grimble ground dash -1.25 s steps (bulwark.json, dredge.json; S, with READY rank-parity).
+4. Albert shield: drop the 2 m push, 3 s lock and Surf unless the owner keeps them; assert hook, stun, slow and root from the front (bulwark_kit.gd:176, 267; M, owner).
+5. Crush: test the real knock into a wall, not terrain within 1.5 m (bulwark_kit.gd:307; M).
+6. Grimble LMB fan 20 + 10 (READY), knock heal 16% remove or keep (dredge.json; S, owner).
+7. Breakable props ending the Abyssal Hand: source says terrain only (match.gd:3298; S, `[?]`).
+
+Suggestion, not built: show Albert's Bash cooldown on the dash slot icon so the Shift choice reads at a glance.
+
 ## The 20 biggest feel gaps, ranked
 
 Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a few days, L a week or more. `owner` = needs an owner call before building.
@@ -195,9 +260,9 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
 | 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
 | 10 | Cooldown pace is uneven: 0.48x to 1.0x of data | One rule per kit | content/archetypes/*.json | S, owner |
-| 11 | Cinder's dash is short: ground felt 2.9 m vs 3.4 m; his and Grimble's air dashes apply feel twice (likely bug) | Exempt or raise ground; scale air once (Zedran already undoes it, `juggernaut_kit.gd:826`) | ashwick_kit.gd:521, dredge_kit.gd:684, ashwick.json | S |
-| 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
-| 13 | Grimble's air dash lacks its own 12.5 s slot | Add slot | dredge_kit.gd, dredge.json | M |
+| 11 | Cinder's dash is short: ground felt 2.9 m vs 3.4 m; his and Grimble's air dashes apply feel twice (fixed, 2f24ae36b) | Exempt or raise ground; scale air once (Zedran already undoes it, `juggernaut_kit.gd:826`) | ashwick_kit.gd:521, dredge_kit.gd:684, ashwick.json | S |
+| 12 | Bjorn's cadence .48 vs .45 (done, 1eecee8c3); hold walks | Check hold | bulwark.json | S |
+| 13 | Grimble's air dash lacks its own 12.5 s slot (done, 0a5b33f48) | none | dredge_kit.gd, dredge.json | M |
 | 14 | Tarek's allies can't hop his rocks | Add jump hop | dolm_kit.gd | M, owner |
 | 15 | Bjorn's Guard meter and Shield Slam are invented | Remove, or owner keeps | bulwark_kit.gd, bulwark.json | M, owner |
 | 16 | Claire's darts fly straight while skating | Owner answer, then home | rimewright_kit.gd | S, owner |
