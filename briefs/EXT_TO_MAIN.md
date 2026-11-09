@@ -4254,3 +4254,38 @@ ART relic vex briefs/boki-art/relics/Vex.jpg grade 8.6/10
 ART relic motley briefs/boki-art/relics/Motley.jpg grade 8.5/10
 ART relic sable briefs/boki-art/relics/Sable.jpg grade 8.6/10
 The other 149 are re-queued with the critics' fixes (ids ending _w28). Line sheets in briefs/boki-art/lines/ are refreshed as stages pass.
+
+## 23:42 ET — art session: OWNER REVIEW tier (owner OK 23:37)
+New rule: no hard-rule veto + three-critic average >= 8.3 goes straight to the owner's Bokidex queue (status=owner-review); the owner makes the final call. 8.5+ still auto-approves. These 32 are from tonight's panel; each is also being improved in the background (_w28), so the owner can approve now or wait. Images are batch outputs (path = the pick).
+ART bellowlet 8.37 briefs/boki-art/batch/out/bellowlet_r_2.jpg kind=turnaround status=owner-review panel=8.4/8.2/8.5
+ART lurklet 8.4 briefs/boki-art/batch/out/c_lurklet_e_1.jpg kind=concept status=owner-review panel=8.3/8.4/8.5
+ART pavonazar 8.37 briefs/boki-art/batch/out/c_pavonazar_r_2.jpg kind=concept status=owner-review panel=8.5/8.3/8.3
+ART rattlebub 8.3 briefs/boki-art/batch/out/c_rattlebub_e_2.jpg kind=concept status=owner-review panel=8.4/7.9/8.6
+ART kitlet 8.47 briefs/boki-art/batch/out/portrait_kitlet_pe_2.jpg kind=portrait status=owner-review panel=8.4/8.4/8.6
+ART relic albert briefs/boki-art/batch/out/relic_albert_2.jpg grade 8.47/10 status=owner-review
+ART relic cinder briefs/boki-art/batch/out/relic_cinder_1.jpg grade 8.33/10 status=owner-review
+ART rimeshrew 8.3 briefs/boki-art/batch/out/portrait_rimeshrew_pe_2.jpg kind=portrait status=owner-review panel=8.3/8.3/8.3
+ART puffamus 8.3 briefs/boki-art/batch/out/puffamus_e_2.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.3
+ART relic lace briefs/boki-art/batch/out/relic_lace_2.jpg grade 8.3/10 status=owner-review
+ART relic neve briefs/boki-art/batch/out/relic_neve_2.jpg grade 8.4/10 status=owner-review
+ART seamwyrm 8.3 briefs/boki-art/batch/out/seamwyrm_e2_1.jpg kind=turnaround status=owner-review panel=8.2/8.5/8.2
+ART glacione 8.47 briefs/boki-art/batch/out/c_glacione_r_3.jpg kind=concept status=owner-review panel=8.3/8.6/8.5
+ART hydrangor 8.3 briefs/boki-art/batch/out/c_hydrangor_r_3.jpg kind=concept status=owner-review panel=8.0/8.5/8.4
+ART proofhop 8.47 briefs/boki-art/batch/out/c_proofhop_r_3.jpg kind=concept status=owner-review panel=8.6/8.6/8.2
+ART geodelotl 8.37 briefs/boki-art/batch/out/geodelotl_e_2.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.5
+ART lunowl 8.37 briefs/boki-art/batch/out/lunowl_card_2.jpg kind=card status=owner-review panel=8.5/8.2/8.4
+ART echolop 8.4 briefs/boki-art/batch/out/portrait_echolop_pe_1.jpg kind=portrait status=owner-review panel=8.5/8.4/8.3
+ART kestrike 8.47 briefs/boki-art/batch/out/portrait_kestrike_pe_1.jpg kind=portrait status=owner-review panel=8.5/8.4/8.5
+ART lanterloris 8.43 briefs/boki-art/batch/out/portrait_lanterloris_pe_1.jpg kind=portrait status=owner-review panel=8.5/8.4/8.4
+ART soakybara 8.37 briefs/boki-art/batch/out/portrait_soakybara_p2_1.jpg kind=portrait status=owner-review panel=8.4/8.2/8.5
+ART skidlet 8.33 briefs/boki-art/batch/out/skidlet_card_2.jpg kind=card status=owner-review panel=8.1/8.5/8.4
+ART umbrink 8.4 briefs/boki-art/batch/out/umbrink_e_1.jpg kind=turnaround status=owner-review panel=8.6/8.4/8.2
+ART bellowary 8.3 briefs/boki-art/batch/out/bellowary_f2_3.jpg kind=turnaround status=owner-review panel=8.2/8.2/8.5
+ART grainspin 8.3 briefs/boki-art/batch/out/c_grainspin_e_3.jpg kind=concept status=owner-review panel=8.2/8.2/8.5
+ART lensling 8.37 briefs/boki-art/batch/out/c_lensling_e_2.jpg kind=concept status=owner-review panel=8.5/8.0/8.6
+ART puffuse 8.37 briefs/boki-art/batch/out/c_puffuse_e_2.jpg kind=concept status=owner-review panel=8.0/8.4/8.7
+ART frothisk 8.3 briefs/boki-art/batch/out/frothisk_r_3.jpg kind=turnaround status=owner-review panel=8.3/8.2/8.4
+ART geodemole 8.43 briefs/boki-art/batch/out/geodemole_e_3.jpg kind=turnaround status=owner-review panel=8.5/8.3/8.5
+ART lunowl 8.4 briefs/boki-art/batch/out/lunowl_f_e_3.jpg kind=turnaround status=owner-review panel=8.3/8.5/8.4
+ART kindlewren 8.43 briefs/boki-art/batch/out/portrait_kindlewren_pe_1.jpg kind=portrait status=owner-review panel=8.5/8.4/8.4
+ART rippmink 8.37 briefs/boki-art/batch/out/rippmink_e_2.jpg kind=turnaround status=owner-review panel=8.3/8.4/8.4

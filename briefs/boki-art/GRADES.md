@@ -95,3 +95,8 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 
 ## Two art sets per Boki (owner 23:24 ET)
 - Canon hero card (STYLE_CANON) is the main image; the Pokedex-style portraits (light, dark, cut-out) are kept as additional art and keep improving. Neither replaces the other's files.
+
+## Owner-review tier and queue order (owner 23:37 ET 11-08)
+- Pass (auto-approve): unchanged (no veto, every seat >= 8.0, average >= 8.5, two seats agree).
+- Owner review: no veto and three-seat average >= 8.3 -> posted to the Bokidex with status=owner-review; the owner decides. A fix round still runs in the background.
+- Queue order: new-species concepts and turnarounds first, then evolution and other sheets, then portrait touch-ups (specs_zzz_order.py).
