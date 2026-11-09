@@ -15,7 +15,6 @@ var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
 var rings: Array = []         # {node, t, dur, r}
 var teles: Array = []
-var lines: Array = []         # {node, t}
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
 var rng := RandomNumberGenerator.new()
@@ -365,6 +364,8 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
 	mi.material_override = Models.ring_mat(col, 0.12)
+	mi.material_override.set_shader_parameter("wash", 1.0)
+	mi.material_override.set_shader_parameter("halo", 1.0)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = at + Vector3(0, 0.08, 0)
@@ -405,6 +406,7 @@ func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy :
 	tw.chain().tween_callback(mi.queue_free)
 
 static var _impact_quad: QuadMesh
+const FLASH_MIN := 0.1         # s an impact flash holds at least: ~6 frames, so the hit frame reads
 func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	# a star of rays round a white-hot core (shaders/impact.gdshader), from a pool so a firefight
 	# doesn't make and free a mesh for every shot
@@ -421,11 +423,12 @@ func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	m.set_shader_parameter("rays", float([4, 5, 6][rng.randi_range(0, 2)]))
 	m.set_shader_parameter("life", 0.0)
 	mi.scale = Vector3.ONE * size * 1.6
-	dur = maxf(dur, 0.07)
+	dur = maxf(dur, FLASH_MIN)
 	mi.visible = true
 	mi.global_position = at
 	flashes.append({"node": mi, "t": 0.0, "dur": dur, "s0": size * 1.6})
 
+## A jagged bolt of lightning from a to b: soft glowing segments that flare and fade.
 func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	var pts := [a]
 	for i in range(1, 5):
@@ -433,15 +436,7 @@ func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 		pts.append(a.lerp(b, k) + Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.2, 0.2), rng.randf_range(-0.3, 0.3)))
 	pts.append(b)
 	for i in pts.size() - 1:
-		var p0: Vector3 = pts[i]; var p1: Vector3 = pts[i + 1]
-		var mi := MeshInstance3D.new()
-		mi.mesh = Models.box(0.07, 0.07, 1.0)
-		mi.material_override = Models.glow_mat(col)
-		add_child(mi)
-		mi.global_position = (p0 + p1) * 0.5
-		mi.look_at(p1, Vector3.UP if absf((p1 - p0).normalized().y) < 0.95 else Vector3.RIGHT)
-		mi.scale = Vector3(1, 1, p0.distance_to(p1))
-		lines.append({"node": mi, "t": 0.0, "dur": 0.18})
+		beam(pts[i], pts[i + 1], col, 0.22, 0.22)
 	burst(b, col, 10, 3.0, 0.3, 4.0)
 
 func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
@@ -524,7 +519,7 @@ func _process(delta: float) -> void:
 		var k: float = rg["t"] / rg["dur"]
 		var mi: MeshInstance3D = rg["node"]
 		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
-		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k, 0.0, 1.0)))
+		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
 		if k >= 1.0:
 			mi.queue_free(); rings.erase(rg)
 	for f in flashes.duplicate():
@@ -543,7 +538,3 @@ func _process(delta: float) -> void:
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
 			gm.queue_free(); ghosts.erase(g)
-	for ln in lines.duplicate():
-		ln["t"] += delta
-		if ln["t"] >= ln["dur"]:
-			ln["node"].queue_free(); lines.erase(ln)

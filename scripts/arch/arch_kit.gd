@@ -578,6 +578,7 @@ static func _clamp_parts(sd: Dictionary) -> void:
 ## A cast context with this hunter as caster and owner, the kin as the kin.
 func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
 	var c := KinExec.make_cx(m, h, h.kin, h, aim, power({"rmb": "sec", "e": "kin", "r": "ult"}.get(slot, slot)), {"rmb": "utility", "e": "k1", "r": "ult"}.get(slot, slot), ability)
+	c["hero_col"] = Arch.color(id)
 	for k in extra:
 		c[k] = extra[k]
 	return c
