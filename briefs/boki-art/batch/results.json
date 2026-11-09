@@ -48254,5 +48254,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lodestick_card95_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lodestick_p95",
+    "name": "Lodestick (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lodestick_p95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "spanglin_card95",
+    "name": "Spanglin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/spanglin_card95_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lodestick_p95",
+    "name": "Lodestick (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lodestick_p95_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "spanglin_card95",
+    "name": "Spanglin (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/spanglin_card95_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "spanglin_card95",
+    "name": "Spanglin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/spanglin_card95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_moatpole_p95",
+    "name": "Moatpole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_moatpole_p95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_moundlet_p95",
+    "name": "Moundlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_moundlet_p95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lodestick_p95",
+    "name": "Lodestick (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lodestick_p95_3.jpg",
+    "ok": true
   }
 ]
