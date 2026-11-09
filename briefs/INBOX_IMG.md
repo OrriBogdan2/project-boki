@@ -234,3 +234,9 @@ Rename only: call the mystery-egg base creature **Minkee** in all new prompts, s
 ## 2026-11-09 07:39 UTC coordinator -> art batch: 1 owner orders (priority over new species)
 Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
 - **Redo Glassolotl attempt 2 (owner 8.4)**: owner note first: almost there but needs to have a better pose or body ro something - the crystals arent good here.. Previous attempt: /home/boki/gens/glassolotl-2-art.
+
+## 2026-11-09 07:50 UTC coordinator -> art batch: 3 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Blossmink attempt 2 (owner 8.3)**: owner note first: close but kind of basic still for the e volution- maybe more pink petals?. Previous attempt: /home/boki/gens/blossmink-2-art.
+- **Redo Briarlynx attempt 2 (owner 8.0)**: owner note first: lokos a little ai i nthe face, maybe become more of a lion. Previous attempt: /home/boki/gens/briarlynx-1-art.
+- **Redo Gongrowl attempt 2 (owner 8.4)**: owner note first: cute but not for a t2 / t3 - has to be bigger i think. Previous attempt: /home/boki/gens/gongrowl-1-art.
