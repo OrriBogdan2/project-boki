@@ -63801,5 +63801,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_meteorab_gp_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chainipede_gp",
+    "name": "Chainipede (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chainipede_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chainipede_gp",
+    "name": "Chainipede (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chainipede_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scarabit_gp",
+    "name": "Scarabit (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_scarabit_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scarabit_gp",
+    "name": "Scarabit (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_scarabit_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_meteorab_gp",
+    "name": "Meteorab (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_meteorab_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_meteorab_gp",
+    "name": "Meteorab (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_meteorab_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_f_n",
+    "name": "Furnacowary (female form concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_f_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_f_n",
+    "name": "Furnacowary (female form concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_f_n_1.jpg",
+    "ok": true
   }
 ]
