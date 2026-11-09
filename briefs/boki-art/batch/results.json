@@ -12085,5 +12085,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lunowl_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "vespyx_card",
+    "name": "Vespyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespyx_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_card",
+    "name": "Glaivyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card",
+    "name": "Chandelotl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_card",
+    "name": "Teapotamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/teapotamus_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl",
+    "name": "Gongrowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary",
+    "name": "Furnacowary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl",
+    "name": "Gongrowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary",
+    "name": "Furnacowary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak",
+    "name": "Dreadnoyak (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary",
+    "name": "Furnacowary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongrowl",
+    "name": "Gongrowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak",
+    "name": "Dreadnoyak (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_1.jpg",
+    "ok": true
   }
 ]
