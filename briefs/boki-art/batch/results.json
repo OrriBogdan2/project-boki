@@ -4455,5 +4455,82 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/dreadnoyak_2.jpg",
     "ok": true
+  },
+  {
+    "id": "howlop",
+    "name": "Howlop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chimelop",
+    "name": "Chimelop",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chimelop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop",
+    "name": "Howlop",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/howlop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet",
+    "name": "Fizzlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fizzlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi",
+    "name": "Chandelapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich",
+    "name": "Thunderstrich",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thunderstrich_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet",
+    "name": "Fizzlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fizzlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fizzlet",
+    "name": "Fizzlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fizzlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi",
+    "name": "Wickapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wickapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi",
+    "name": "Wickapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wickapi_1.jpg",
+    "ok": true
   }
 ]
