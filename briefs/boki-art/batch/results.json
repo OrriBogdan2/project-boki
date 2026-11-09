@@ -50725,5 +50725,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_stormit_ry_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_selenwhale_py",
+    "name": "Selenwhale",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_selenwhale_py_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardy",
+    "name": "Selenwhale (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geodemole_ry",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_geodemole_ry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_cardy",
+    "name": "Glaciatee (hero card, planted)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciatee_cardy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geodemole_ry",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_geodemole_ry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_cardy",
+    "name": "Glaciatee (hero card, planted)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciatee_cardy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamspire_cardy",
+    "name": "Gloamspire (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gloamspire_cardy_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_cardy",
+    "name": "Selenwhale (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/selenwhale_cardy_3.jpg",
+    "ok": true
   }
 ]
