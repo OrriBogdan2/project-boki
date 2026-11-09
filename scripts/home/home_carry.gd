@@ -35,7 +35,7 @@ var base_scale := Vector3.ONE
 func _init(home) -> void:
 	h = home
 
-## "arms", "back" or "lead": how a Boki of this weight travels with you.
+## "carry" (arms), "pack" (back) or "lead": how a Boki of this weight travels with you.
 static func mode_for(rec: Dictionary) -> String:
 	var kg := float(Unique.size_info(rec)["kg"])
 	if kg <= ARMS_KG:
@@ -183,11 +183,8 @@ func _pay(rec: Dictionary) -> void:
 	if paid or t < TRUST_S:
 		return
 	paid = true
-	var today := Time.get_datetime_dict_from_system()
-	var day := "%d-%02d-%02d" % [today["year"], today["month"], today["day"]]
-	if Care.bond_index(rec) < BOND_MIN or String(rec.get("carried_day", "")) == day:
+	if Care.bond_index(rec) < BOND_MIN or not MarketSave.new_day(rec, "carried_day"):
 		return
-	rec["carried_day"] = day
 	Save.remember(rec, "carried", "was carried around the farm in your arms", TRUST_GAIN)
 	Save.save_game()
 
