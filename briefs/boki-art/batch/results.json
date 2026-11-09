@@ -13723,5 +13723,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/lanceron_r_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "lanceron_r_w28",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_r_w28",
+    "name": "Lunink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunink_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_r_w28",
+    "name": "Lunink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunink_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_r_w28",
+    "name": "Lunink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/lunink_r_w28_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3_w28",
+    "name": "Mothlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_r_w28",
+    "name": "Lunink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lunink_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mothlet_r3_w28",
+    "name": "Mothlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_pe_w28",
+    "name": "Bellowary (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_pe_w28_1.jpg",
+    "ok": true
   }
 ]
