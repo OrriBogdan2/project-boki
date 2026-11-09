@@ -3825,3 +3825,10 @@ ART wickapi reject briefs/boki-art/batch/out/wickapi_1.jpg
 ART wickapi reject briefs/boki-art/batch/out/wickapi_2.jpg
 ART wickapi reject briefs/boki-art/batch/out/wickapi_3.jpg
 ART puffamus_r2 reject briefs/boki-art/batch/out/puffamus_r2_1.jpg
+
+READY ext/ui-void-masks 6afeee56e (PR #15 head; job 20261109-013010-a1, role feel, escalated from 20261108-174509-a4). **This one branch now carries the whole Void & Masks pass**: it fast-forwarded through ext/ui-void-masks-2 153acf74e and merges -2's 08c29a320, so merging ext/ui-void-masks alone is enough (merging -2 after it is a no-op; ext/expedition-pick-simplify-1108 still stacks on it). New here: a new Boki's reveal card (kin_reveal.gd, the A2 screen) is the theme's torn neon panel with its name on a parchment tab and its type as a stamp (its hand-rolled chip removed); VoidSpecks (new, 37 lines) drift over the title art; --void-ui-shots adds the egg pick and the reveal. Diff vs main: 39 files, +625/-169.
+- Screenshot grid (before/after, ref vs after, 720p sheet, match HUD pairs): briefs/shots/ui-void-masks/README.md. 4K run queued as jobq 20261109-020239-25126 (pc-MRROBOTO, out shots4k/); not in the grid yet.
+- Perf (GPU --perf-bench, farm 30 s): before 6.9 ms avg / 9.3 p99, after 5.9 / 9.6, draws 958 -> 968 (different Pi workers rp1-0/rp2-0, so read as no regression, not a win).
+- Checks: --check 0; health --strict OK; uipolish 30/0, hatch 0, market 0, rank-ui 0, tutorial-hud 0. title-check (stale: wants the old 3D title), build-ui (1), pack-ui (18), kinbox (2) fail identically on origin/main d255acbee, untouched here.
+- There is no --suite-fast flag in the game: a jobq `-- --suite-fast` just opens the title and times out (that is what stopped job 174509-a4 at 2 h). Suggest the coordinator define the suite list.
+- Not done: PR #15's description still shows the first commit (no gh/API access from w2); please paste the README grid into it. Match HUD kept minimal (only palette/edges), as specced.
