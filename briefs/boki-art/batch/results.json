@@ -51705,5 +51705,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_vespox_pc_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_coolatee_b1",
+    "name": "Coolatee (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_coolatee_b1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_coolatee_b1",
+    "name": "Coolatee (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_coolatee_b1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_b2",
+    "name": "Druzemole (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_druzemole_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_coolatee_b3",
+    "name": "Coolatee (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_coolatee_b3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_b2",
+    "name": "Druzemole (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_druzemole_b2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_coolatee_b1",
+    "name": "Coolatee (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_coolatee_b1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_coolatee_b3",
+    "name": "Coolatee (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_coolatee_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_coolatee_b2",
+    "name": "Coolatee (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_coolatee_b2_3.jpg",
+    "ok": true
   }
 ]
