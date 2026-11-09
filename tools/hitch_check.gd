@@ -1,8 +1,8 @@
 extends Node
 ## --hitch-check: one seeded expedition the way a player gets it (loading screen and warm-up, the
 ## planning map, the skyship ride, the jump, the glide down, landing and the first seconds on the
-## ground, with a mob pack of every roaming kind a second after landing), timing every drawn frame and
-## failing if one in the start/drop/landing stretch stalls.
+## ground, with a mob pack of every roaming kind arriving one a frame from a second after landing),
+## timing every drawn frame and failing if one in the start/drop/landing stretch stalls.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --hitch-check
 ##   [--hitch-out=/path/report.txt] [--hitch-squad=3] [--hitch-seed=4101] [--hitch-budget=ms] [--quality=...]
 ## Also runs headless (--headless): then nothing is drawn and only the script side is timed.
@@ -211,7 +211,6 @@ func _next_phase() -> void:
 				landed_at = m.time
 		"land":
 			if phase_t >= 1.0 and not _pack_done:
-				_pack_done = true
 				_bring_pack()
 			if phase_t >= 3.0:
 				_finish()
@@ -219,20 +218,26 @@ func _next_phase() -> void:
 		print("HITCH stuck in phase ", phase)
 		_finish()
 
-## A second on the ground, one of each roaming mob kind spawns round you (a fight's pack): a kind's first
-## model mid-play compiled its materials then, unless the warm-up built one (WarmUp._mob_stand_ins).
+## From a second on the ground, one of each roaming mob kind spawns round you, one a frame (a fight's
+## pack arriving): a kind's first model mid-play compiled its materials then, unless the warm-up built
+## one (WarmUp._mob_stand_ins). One a frame so the frame judged holds one model build, not ten at once
+## (ten cost ~40 ms of script on the 2-CPU box, over the headless budget on their own).
 var _pack_done := false
+var _pack_kinds: Array = []    # roaming kinds still to spawn (filled on the first call)
+var _pack_i := 0
 func _bring_pack() -> void:
+	if _pack_kinds.is_empty():
+		for k in Data.MOBS:
+			if not Data.MOBS[k].get("boss", false) and not Data.MOBS[k].get("ward", false):
+				_pack_kinds.append(k)
 	var P: Hunter = m.player
-	var kinds: Array = []
-	for k in Data.MOBS:
-		if not Data.MOBS[k].get("boss", false) and not Data.MOBS[k].get("ward", false):
-			kinds.append(k)
-	for i in kinds.size():
-		var a := TAU * i / kinds.size()
-		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
-		m.spawn_mob(kinds[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-	print("HITCH pack: %d mobs (%s) at t=%.2f" % [kinds.size(), ",".join(kinds), m.time])
+	var a := TAU * _pack_i / _pack_kinds.size()
+	var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
+	m.spawn_mob(_pack_kinds[_pack_i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	_pack_i += 1
+	if _pack_i == _pack_kinds.size():
+		_pack_done = true
+		print("HITCH pack: %d mobs (%s) by t=%.2f" % [_pack_kinds.size(), ",".join(_pack_kinds), m.time])
 
 ## Materials in the camera's view this frame that weren't in view on any frame before (from the
 ## first judged frame on). A first draw is where shaders compile, so these name what a stall drew.
