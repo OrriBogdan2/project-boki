@@ -41961,5 +41961,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/bucketmander_card10_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_bucketmander_bat",
+    "name": "Bucketmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bucketmander_bat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bucketmander_card10",
+    "name": "Bucketmander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bucketmander_card10_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b1",
+    "name": "Cisternmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "barrelmander_card10",
+    "name": "Barrelmander (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/barrelmander_card10_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b1",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "barrelmander_card10",
+    "name": "Barrelmander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barrelmander_card10_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b1",
+    "name": "Cisternmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_b1",
+    "name": "Cisternmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_b1_3.jpg",
+    "ok": true
   }
 ]
