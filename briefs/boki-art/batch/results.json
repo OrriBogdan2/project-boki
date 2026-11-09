@@ -1468,5 +1468,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/chandelotl_2.png",
     "ok": true
+  },
+  {
+    "id": "terrarimit",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrarimit_1.png",
+    "ok": true
+  },
+  {
+    "id": "geodelotl",
+    "name": "Geodelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodelotl_1.png",
+    "ok": true
+  },
+  {
+    "id": "geodelotl",
+    "name": "Geodelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodelotl_2.png",
+    "ok": true
+  },
+  {
+    "id": "voltalon",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_1.png",
+    "ok": true
+  },
+  {
+    "id": "terrarimit",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrarimit_2.png",
+    "ok": true
+  },
+  {
+    "id": "arcestrel",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_1.png",
+    "ok": true
+  },
+  {
+    "id": "arcestrel",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_2.png",
+    "ok": true
+  },
+  {
+    "id": "voltalon",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_2.png",
+    "ok": true
   }
 ]
