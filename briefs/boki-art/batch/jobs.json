@@ -714,5 +714,49 @@
     "runs": 2,
     "aspect": "16:9",
     "size": "4K"
+  },
+  {
+    "id": "portrait_chuggamus",
+    "name": "Chuggamus (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Chuggamus.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: charging forward with steam blasting from its nostrils and its firebox blazing. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_vespox",
+    "name": "Vespox (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Vespox.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: crouched low and ready to pounce, tail sting raised and one pincer snapping. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_lanternmit",
+    "name": "Lanternmit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lanternmit.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: peeking proudly from its glowing lantern shell with its big claw raised. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_stormit",
+    "name": "Stormit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Stormit.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: scuttling sideways in a jittery panic with sparks jumping off its claws. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
   }
 ]
