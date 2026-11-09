@@ -93,3 +93,5 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 72 | Round-3 paste 12:37: Mycroll fallen 3, Gongrowl cardc 3, Vespox frill card 1, Reapant w8-1 (ninja-route T2) | Mycroll alt live; Gongrowl card live (redo still coming); Vespox card + sheet + portrait live; w8-1 waits for the greener version + name | DONE / GENERATING |
 | 73 | Batch-1 paste: Coolatee b2-3, Druzemole b3-4, Scythant b1-2, Jibbatross b2-2 | First three live with sheet + card + portrait; Jibbatross redo from b2-2 queued | DONE / GENERATING |
 | 74 | 12:37: "dont override what we said": the awake Vespyx stays the main card, the sleeping one is only an alt | Main card untouched | DONE |
+| 75 | 13:35: ninja-route T2 name = Shinobant | Line: Marchleaf > Shinobant > Reapant; branch Marchleaf > Scythant > leaf final | DONE |
+| 76 | 12:43: check alt forms + every Boki, make sure all is queued | 17 missing roster species + 6 female forms queued; 8 chained after parent picks; batch 3 poses + batch 4 evolutions queued | GENERATING |

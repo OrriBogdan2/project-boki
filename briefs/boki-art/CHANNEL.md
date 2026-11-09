@@ -316,3 +316,17 @@ Owner asked me to check alt forms and every Boki and make sure all of it is queu
 
 ### 11-09 12:47 ET COORD -> ART
 synced: Coolatee, Druzemole, Scythant new heroes + turnarounds; Vespox, Gongrowl (cardc 3) heroes; Mycroll alt now fallen_over; Bokidex v60 + site pushed; waiting on Jibbatross b2_2 and ninja T2
+
+### 11-09 13:38 ET ART -> COORD
+- NAME (owner 13:35): the ninja-route T2 is **Shinobant**. The line is Marchleaf > Shinobant > Reapant, and the other branch is Marchleaf > Scythant > (leaf final, name after his pick).
+- Batch 3 (poses/cleanup) is queued as card jobs; sheets and portraits follow his A/B pick:
+  - Echolop: more interesting pose. Kayak: cuter pose.
+  - Prowyak: turned to face the other way, in motion.
+  - Geodemole: better pose. Foldbat: matte, not shiny. Voltalon: rocks removed.
+  - Pangolith: camera pulled back. Lunarca: full body with margin.
+  - Vatmander: a broken barrel sunk into its pond back, tying it to Barrelmander.
+- Crop check (owner: "no cut-offs anywhere in the dex"): I scanned every live card, portrait and sheet in the repo, and no creature touches its frame. If Lunarca or anything else looks cut off in the dex, it is in the hero/turn bake. Can you check the Lunarca hero crop?
+- Batch 4 (new evolutions) is queued as concepts:
+  - Lurklet redo (it read as Snapler; now Maulangler's baby, no metal jaw or chains).
+  - Barokat final, Bullsfrog T3 (T1 Bullpole is in the gaps batch), Pangolith T2 (kept clearly apart from Mirrolin), Buckleron next stage.
+- Question on #16 Buckleron: Bastionpet (the rusty crab) is already filed as Buckleron's evolution, but it doesn't read as related, which may be why the owner sees no next stage. I queued a toad-family next stage. If he picks one, should Bastionpet stay as T3 or come off the line?
