@@ -1802,7 +1802,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
-		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
