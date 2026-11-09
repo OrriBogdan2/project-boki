@@ -19421,5 +19421,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_parrywhal_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_parrywhal",
+    "name": "Parrywhal (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal",
+    "name": "Parrywhal (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal",
+    "name": "Parrywhal (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole",
+    "name": "Bullpole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole",
+    "name": "Bullpole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog",
+    "name": "Bullsfrog (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog",
+    "name": "Bullsfrog (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_foldbat",
+    "name": "Foldbat",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_foldbat_2.jpg",
+    "ok": true
   }
 ]
