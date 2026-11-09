@@ -82,14 +82,12 @@ func _shots(home) -> void:
 	await main.get_tree().create_timer(1.0).timeout
 	if main.fade:
 		main.fade.reveal(0.05)
-	var pile := _by_name(home, "Ash")
-	var pip := _by_name(home, "Pip")
 	for phase in [["dusk", DUSK, 12.0], ["night", NIGHT, 25.0]]:
 		home.day_t = phase[1]
 		_run(home, phase[2])
 		await main.get_tree().create_timer(2.0).timeout
-		for view in [["wide", pile, 2.2], ["close", pip, 1.0]]:
-			var at: Vector3 = view[1]["pos"]
+		for view in [["wide", "Ash", 2.2], ["close", "Pip", 1.0]]:
+			var at := _shot_at(home, view[1])
 			home.ppos = at + Vector3(0, 0, 5)
 			home.player.position = home.ppos
 			home.cam.zoom_to = view[2]
@@ -99,12 +97,23 @@ func _shots(home) -> void:
 			home.prompt_box.visible = false
 			await main.get_tree().process_frame
 			await main.get_tree().process_frame
-			main.get_viewport().get_texture().get_image().save_png("%s/garden_%s_%s.png" % [dir, phase[0], view[0]])
+			var img := main.get_viewport().get_texture().get_image()
+			if img:      # null under --headless (no renderer): the run still walks every phase and quits
+				img.save_png("%s/garden_%s_%s.png" % [dir, phase[0], view[0]])
 			home.set_process(true)
 			print("GARDENNIGHT shot garden_%s_%s" % [phase[0], view[0]])
 	home.queue_free()
 	await main.get_tree().process_frame
 	main.get_tree().quit(0)
+
+## Where a shot looks: the named Boki, else any farm Boki, else the farm centre (the GPU run can respawn kins
+## while the real renderer catches up, so look them up at shot time, never once before).
+func _shot_at(home, who: String) -> Vector3:
+	var k := _by_name(home, who)
+	if k.is_empty() and not home.kins.is_empty():
+		k = home.kins[0]
+	print("GARDENNIGHT aim %s -> %s (%d kins)" % [who, k.get("rec", {}).get("name", "centre"), home.kins.size()])
+	return k["pos"] if k.has("pos") else home.world.random_ground(0)
 
 func run(m: Node, mode := "check") -> void:
 	main = m
