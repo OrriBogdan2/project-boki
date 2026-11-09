@@ -43,6 +43,43 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## base_life (`content/rules/base_life.json`)
+
+Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json base_mode on, every farm Boki runs one state machine (Roam, Eat, Nap, Play, PlayWith, Watch, React) and keeps rec['bonds'] = {uid: -1..1}. Times are seconds, distances metres (tiles), bond changes are per event unless they say per second.
+
+| Setting | Value |
+|---|---|
+| toys | ["training_post"] |
+| toys_doc | Catalog ids a Boki plays at on its own (Play state). GARDEN.md 9.3 adds the ball, climbing post and splash tub here. |
+| think | [2.0, 5.0] |
+| think_doc | s between a roaming Boki's choices (random in the range). |
+| max | {"roam": 45.0, "eat": 40.0, "play": 30.0, "play_with": 40.0, "watch": 12.0, "react": 12.0} |
+| max_doc | s a Boki stays in each state before it moves on; a Boki that roamed this long picks something to do. Nap has no cap: night naps last till morning. |
+| play | [10.0, 22.0] |
+| play_with | [14.0, 26.0] |
+| watch | [4.0, 9.0] |
+| nap | [20.0, 40.0] |
+| nap_doc | s of a day nap (energy low or bored); at night a non-nocturnal Boki naps till dawn. |
+| tired_at | 25 |
+| tired_at_doc | energy need below which a Boki naps by day. |
+| near | 6 |
+| near_doc | m within which another Boki counts as close: a play mate, a rival to stare at, a pile to join. |
+| pile | 0.35 |
+| pile_doc | how close two napping friends may lie, as a share of their normal personal space. |
+| friend_at | 0.5 |
+| rival_at | -0.5 |
+| bond_doc | a bond at or above friend_at is a friendship, at or below rival_at a rivalry. |
+| bond_tag | 0.07 |
+| bond_tag_doc | added to both Boki's bond each time one tags the other in a game of tag. |
+| bond_share | 0.05 |
+| bond_share_doc | added when two Boki that get on share a toy. |
+| bond_nap | 0.004 |
+| bond_nap_doc | per second two Boki nap side by side. |
+| bond_squabble | -0.16 |
+| bond_squabble_doc | added when two Boki squabble over a toy or their tempers clash. |
+| clash | 0.55 |
+| clash_doc | the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more. |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).

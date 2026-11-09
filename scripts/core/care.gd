@@ -103,6 +103,8 @@ static func ensure(rec: Dictionary) -> void:
 		while hate == love:
 			hate = foods[r.randi() % foods.size()]
 		rec["likes"] = {"food": love, "hates": hate, "play": PLAYS[r.randi() % PLAYS.size()]}
+	if not rec.has("bonds"):
+		rec["bonds"] = {}         # uid -> -1..1, friends and rivals on the base (BaseLife)
 	if not rec.has("known"):
 		rec["known"] = []          # which of food / hates / play you've found out
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
