@@ -62,3 +62,13 @@ Still differs (KIT_PARITY gaps 11, 13, docs/heroes/dredge.md):
 - Not built: enemies Grounded on arrival is ours-only (Grounded on E), no bonus armour damage without spread, no destructible bonus (docs/heroes/dredge.md).
 By eye (footage 46 to 302 next to the reel): the source's Buckshot is a wide fan of small blue pellets and its Kaiju Grasp a thick magenta arm with a diamond marker on the hooked foe; Kaiju Blast is a green beam with a wide ground telegraph. Ours at the match camera shows the slugs as a thin pink dotted line, and the blast reads smaller; the spread of seven slugs is hard to see in the reel.
 
+## Kael the Unbroken (`juggernaut`, source Brall): [juggernaut.mp4](juggernaut.mp4)
+Plays the generic parity set; his own detailed reel (slam, lunge, drop, chain spin) is the old `--hero-vfx-reel --reel-hero=juggernaut`.
+Still differs (KIT_PARITY gap 1, docs/heroes/juggernaut.md):
+- **Animation: missing.** `kael.glb` has 0 clips and no `warden_anim/kael.json`: all 20 moves run on the procedural HunterAnim, the biggest visible gap of any Hunter (gap 1, size L).
+- RMB: context moves (Slam, Lunge, air Slam, chain Spin) match in shape; the over-head pose and perfect release differ by owner decision; cd 2.0 vs 2.5 (air drop 0.8x).
+- E: tether 24 m (ours), cd 12.8 vs 16, source length unknown. R: Riposte shape matches (guard .65, strike .1, recover .35), the kill reset is `[?]`, cd 36 vs 45.
+- Dash: 4.5 m / .3 s raw with the feel scale, 2 charges, cd 10.4 vs 13: distance scaled. Dash to LMB buffers, plus `cancel` rows on three kits (gap 9). Turning is not locked after an RMB dash (not built, would read as lag).
+- LMB combo and hold fireblast, the passive (Rage, heal on knock): match.
+By eye (footage 60 to 455 next to the reel): the source's chain is a thick yellow-and-black striped rope with a marker ring on the target; ours is a thin dotted line in the sampled frames. Retaliation in the source ends in a large green burst with a red slash flare; at the sampled reel frames I caught only the guard, so check the R part for the cleave. His glow is white-hot by owner note (not orange as in the source's hot red).
+
