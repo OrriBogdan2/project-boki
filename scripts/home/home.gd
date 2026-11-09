@@ -661,7 +661,7 @@ func _ready_rest() -> void:
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
-		rows.append(f)
+		pass
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
