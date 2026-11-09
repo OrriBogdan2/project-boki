@@ -49822,5 +49822,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_chuggamus_p99_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_chuggamus_p99",
+    "name": "Chuggamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_p99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_furnacowary_p99",
+    "name": "Furnacowary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_furnacowary_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_furnacowary_p99",
+    "name": "Furnacowary (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_furnacowary_p99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_furnacowary_p99",
+    "name": "Furnacowary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_furnacowary_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_p99",
+    "name": "Geysirbara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_p99",
+    "name": "Geysirbara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_p99",
+    "name": "Geysirbara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_p99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm_p99",
+    "name": "Seamwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_p99_2.jpg",
+    "ok": true
   }
 ]
