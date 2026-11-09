@@ -41625,5 +41625,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_chandelapi_p79_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p79",
+    "name": "Chandelapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_p79",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_p79",
+    "name": "Reapant (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_p79",
+    "name": "Reapant (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p79",
+    "name": "Chandelapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_p79",
+    "name": "Barokat (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_p79",
+    "name": "Barokat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_orbitle_p79",
+    "name": "Orbitle (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_orbitle_p79_2.jpg",
+    "ok": true
   }
 ]
