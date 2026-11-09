@@ -44,3 +44,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 - Retries queued: Canvastross/Rimefang/Lanceron sheets, Pipeworth card+portrait.
 | 32 | Minks 04:44 ET: Lunink, Voltmink, Umbrink, Blossmink good; Rimink, Rippmink, Prismink, Flarmink need more differentiation | Unlocked those four; 3 new body-plan directions each (wave87 m1-m3), best goes to sheet+card+portrait automatically | GENERATING |
 | 33 | Owner asleep 04:44 ET: "follow the principles I set and get it done" | Auto-pick top passing direction per family, eye-check against owner notes before queuing; picks swappable later | ACTIVE |
+| 34 | 04:52 ET: new Vespox looks too much like Vespyx | Unlocked; 3 new mid-stage directions (wave88 v1-v3: chitin jackal, shell-hood prowler, wiry runner), same plum/green palette; best goes live, others to REVIEW_TOMORROW | GENERATING |
