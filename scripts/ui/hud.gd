@@ -914,10 +914,8 @@ func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 			if st == "closed":
 				c.draw_line(pv + Vector2(-6, -6) * k, pv + Vector2(6, 6) * k, Color(BAD, 0.8), 2.0)
 		"hatch":
-			var dm := PackedVector2Array([pv + Vector2(0, -5) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 5) * k, pv + Vector2(-5, 0) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6.5) * k, pv + Vector2(6.5, 0) * k, pv + Vector2(0, 6.5) * k, pv + Vector2(-6.5, 0) * k]), dark)
-			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
-			c.draw_circle(pv, 1.6 * k, dark)
+			c.draw_circle(pv, 6.0 * k, dark)
+			c.draw_arc(pv, 4.3 * k, 0, TAU, 20, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55), 2.4 * k, true)
 		"outpost":
 			var held := OutpostLook.held(x)
 			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
@@ -2480,8 +2478,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 		var nm := String(lb["name"])
 		if String(lb["kind"]) == "perch":
 			# a high perch: an up-arrow with its height, so you know it takes vertical tech
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
+			MapLegend.place_glyph(c, "perch", pv)
 			if overview:
 				_ctext(pv + Vector2(0, 15), "%dm" % int(round(float(lb.get("height", 0.0)))), 10, Color("c8f6ff"))
 			continue
@@ -2490,14 +2487,10 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
-			# a train stop: a small amber square, named in the overview
-			c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-			c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-			continue      # (unnamed here: stop, road and perch names piled on top of each other at this size; the full map names them)
+			MapLegend.place_glyph(c, "rail", pv)      # a train stop, named on the full map
+			continue
 		if String(lb["kind"]) == "choke":
-			# a chokepoint: a small orange diamond, named in the overview
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
+			MapLegend.place_glyph(c, "choke", pv)      # a chokepoint
 		else:
 			if overview and not _region_names(w).has(nm):
 				continue      # (the whole map at this size: region names only, as the full map does)

@@ -258,12 +258,19 @@ static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
 	H.c.draw_colored_polygon(PackedVector2Array([edge + dir * 14.0, edge - dir * 8.0 + side * 10.0, edge - dir * 8.0 - side * 10.0]), col)
 	H._ctext(edge - dir * 22.0 + Vector2(0, 4), "%ds" % int(ceil(k.down_t)), 11, Color(H.INK, 0.9), H.big)
 
+## A Boki's colour on the maps and the squad cards: its glow, else its own colour.
+static func wisp_col(k: Kin) -> Color:
+	return Color(k.sp.get("glow", k.sp["color"]))
+
 ## Your squad's downed Boki on a map: a ringed cross in its colour (the minimap draws it at `pv`).
 static func map_dot(c: Control, pv: Vector2, k: Kin, r: float, time: float) -> void:
-	var col := Color(k.sp.get("glow", k.sp["color"]))
+	wisp_glyph(c, pv, wisp_col(k) if not k.down_void else Color(DOWN_COL, 0.7), r, time)
+
+## The wisp itself (also the map legend's): a ringed cross in `col` with a pulse.
+static func wisp_glyph(c: Control, pv: Vector2, col: Color, r: float, time: float) -> void:
 	var ph := fmod(time * 1.2, 1.0)
 	c.draw_circle(pv, r + 1.5, Color(0, 0, 0, 0.7))
-	c.draw_circle(pv, r, col if not k.down_void else Color(DOWN_COL, 0.7))
+	c.draw_circle(pv, r, col)
 	c.draw_line(pv + Vector2(-r, -r) * 0.55, pv + Vector2(r, r) * 0.55, Color(0.05, 0.03, 0.08), 1.8)
 	c.draw_line(pv + Vector2(-r, r) * 0.55, pv + Vector2(r, -r) * 0.55, Color(0.05, 0.03, 0.08), 1.8)
 	c.draw_arc(pv, r + 2.0 + ph * 8.0, 0, TAU, 20, Color(col, 1.0 - ph), 2.0, true)

@@ -25,6 +25,7 @@ var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var _key: Array = []           # the icon kinds this match has, for the corner key (MapLegend)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -37,6 +38,7 @@ func open(by_plan := false) -> void:
 	auto = by_plan
 	zoom = 1.0
 	zoom_to = 1.0
+	_key = []
 	center = Vector2(m.world.w, m.world.h) * 0.5
 
 func close() -> void:
@@ -194,6 +196,9 @@ func draw(sz: Vector2) -> void:
 	_bounties(c, team)
 	_squad(c, team)
 	_legend(c, sz, team)
+	if _key.is_empty():
+		_key = MapLegend.present(m)
+	MapLegend.draw(self, _key)
 	_side(c, sz)
 	_cursor(c)
 
@@ -275,19 +280,16 @@ func _labels(c: Control, kk: float) -> void:
 		var nm := String(lb["name"])
 		match String(lb["kind"]):
 			"perch":
-				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]), Color(0, 0, 0, 0.6))
-				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]), Color("9af0ff"))
+				MapLegend.place_glyph(c, "perch", pv)
 				var hm := "%dm" % int(round(float(lb.get("height", 0.0))))
 				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
 					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
 			"rail":
-				c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-				c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
+				MapLegend.place_glyph(c, "rail", pv)
 				if zoomed:
 					_name(nm, pv + Vector2(0, 15), 10, Color("ffe2b0"), taken)
 			"choke":
-				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
-				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
+				MapLegend.place_glyph(c, "choke", pv)
 				if zoomed:
 					_name(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9), taken)
 			_:
@@ -633,7 +635,8 @@ func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-6, 1), pv + Vector2(6, 1), pv + Vector2(4, 5), pv + Vector2(-4, 5)]), col)
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 0), pv + Vector2(0, 0)]), col)
 		"hatch":
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), col)
+			c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.7))
+			c.draw_arc(pv, 4.3, 0, TAU, 20, col, 2.4, true)
 		"outpost":
 			OutpostGlyph.draw(c, pv, 1.0, col, Color(0.55, 0.58, 0.64, 0.9), 0.0)
 
