@@ -37,16 +37,10 @@ func _act(k: Dictionary, n: Node3D) -> bool:
 	var act := ""
 	var eat: Variant = k.get("eat")
 	var play: Variant = k.get("play")
-	var id := String(k.get("life_toy", ""))
 	if eat is Dictionary and eat["phase"] == "eat":
 		act = "munch"
 	elif play is Dictionary and play["phase"] == "play":
-		id = String(_toy(int(play["u"])).get("id", ""))
-	if act == "" and id != "":
-		act = String(rules()["toys"].get(id, {}).get("clip", ""))
-	if id != "" and not k.has("play") and k.get("life_at") is Vector3:
-		var at: Vector3 = k["life_at"]
-		n.rotation.y = atan2(-(at.x - k["pos"].x), -(at.z - k["pos"].z))
+		act = String(rules()["toys"].get(String(_toy(int(play["u"])).get("id", "")), {}).get("clip", ""))
 	if act != "" or n.has_meta("kact_home"):
 		n.set_meta("kact", act)
 		if act != "":
@@ -77,13 +71,14 @@ func weight(rec: Dictionary, toy_id: String) -> float:
 		w += float(R["like_weight"])
 	return w
 
-## An idle Boki looks for a toy: true when it has set off for one.
-func pick(k: Dictionary) -> bool:
+## An idle Boki looks for a toy: true when it has set off for one. want: it is bored or curious (BaseLife.choose),
+## so it goes whatever its joy and the pick chance say.
+func pick(k: Dictionary, want := false) -> bool:
 	var R := rules()
 	var rec: Dictionary = k["rec"]
 	if not FarmUnlocks.base_mode() or not h.visit.is_empty() or k.has("play"):
 		return k.has("play")
-	if Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"]):
+	if not want and (Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"])):
 		return false
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var weights := {}
@@ -166,6 +161,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 		h._emote(others[0], "!", true)
 		k["huff_t"] = HUFF_SECS
 		Care.change(k["rec"], "joy", -3.0)
+		_bond(k, others[0], "bond_squabble")      # a squabble over a toy builds rivalry (BaseLife)
 		_stop(k)
 		k["t"] = float(R["sulk_secs"])
 		return
@@ -175,6 +171,12 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 	p["t"] = randf_range(float(secs[0]), float(secs[1]))
 	if others.size() >= 1:
 		h._emote(k, "★", true)
+		_bond(k, others[0], "bond_share")      # sharing one builds friendship
+
+## Two Boki at one toy change their bond by base_life.json's `key` (base life on only).
+func _bond(k: Dictionary, o: Dictionary, key: String) -> void:
+	if h.life:
+		h.life.add_bond(k["rec"], o["rec"], float(h.life.R[key]))
 
 func _temper(k: Dictionary) -> float:
 	return float(k["rec"]["traits"].get("temper", 0.5))

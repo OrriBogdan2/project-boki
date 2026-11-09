@@ -63,9 +63,8 @@ func run(m: Node) -> void:
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
 	var center: Vector3 = home.world.random_ground(0)
-	Save.d["layout"]["deco"].append({"id": "training_post", "u": 990001, "px": center.x + 3.0, "pz": center.z})
-	home.life.find_toys()
-	ok(home.life.toys.size() == 1, "the placed Training post counts as a toy")
+	Save.d["layout"]["deco"].append({"id": "toy_ball", "u": 990001, "px": center.x + 3.0, "pz": center.z})
+	ok(home.life.toy_spots().size() == 1, "the placed ball is the one toy the machine knows (HomeToys owns the toys)")
 	_gather(home, center)
 	var longest := {}         # state name -> longest s seen
 	var reacted := false

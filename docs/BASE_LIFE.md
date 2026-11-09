@@ -20,9 +20,18 @@ check: `--base-life-check`.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
-- Toys at home_toys.gd (k["play"]): the machine mirrors them as Play (`TOY_PLAY`), so the history never says Roam while a Boki plays.
-- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, daily feeding) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, or an engine error, and writes every state change to user://garden_soak.json.
-- Toys: placed layout items whose id is in `toys` (today only the Training post; GARDEN.md 9.3 adds more).
+- Toys: one system, `HomeToys` (home_toys.gd, k["play"], toys.json). It picks, walks, plays, squabbles and shares;
+  `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
+  HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
+  `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
+- Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
+  goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
+  the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
+  the Eat state (k["life_eat"]); the meal is `Care.feed`, so the journal and lean see it.
+- Sulky, never sick (care.json `sulky`, `Care.sulky()`): on base_mode every need bottoms out at its floor in both
+  `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
+  so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
+- Soak: `--garden-soak` (tools/garden_soak.gd) lives six Boki 30 in-game days (friends, rivals, baby, retired elder, three toys, snack patch, Dash and Shove each third day, the player feeds three of the six daily and picks the patch every other day) at 0.25 s steps without frames (about 10 s), fails on a stuck state, a need outside 0..100 or under its sulky floor, any starve stage, a NaN or out-of-range trait, a bond outside -1..1, a toy held 60 s, the save over 2x, an engine error, or an unfed Boki that never ate on its own, and writes every state change to user://garden_soak.json.
 - Legacy (GARDEN.md section 3, `scripts/core/mentor.gd`): an Elder (stage 16) retires from its card ("Retire as
   mentor", one-line confirm, `scripts/home/mentor_card.gd`; needs the Soul Shrine, not your partner). `rec["mentor"]
   = {gifted}`. In `BaseLife` it is the MENTOR state: slow steps (`Mentor.PACE`, `mentor`/`mentor_radius` in the
@@ -44,6 +53,5 @@ check: `--base-life-check`.
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy, whether it came to it from Play here or from HomeToys' own
-  pick. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.

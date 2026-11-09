@@ -34,7 +34,7 @@ static func can_do(life: BaseLife, k: Dictionary, kind: String) -> bool:
 		"cheer":
 			return not glum(life, k).is_empty()
 		"fetch":
-			return not life.toys.is_empty()
+			return not life.toy_spots().is_empty()
 	return false
 
 ## Starts the chosen chore: where it is going and what it carries.
@@ -46,7 +46,7 @@ static func begin(life: BaseLife, k: Dictionary, kind: String) -> void:
 		"cheer":
 			c["to"] = glum(life, k)
 		"fetch":
-			c["spot"] = life.toys[0]
+			c["spot"] = life.toy_spots()[0]
 			c["ball"] = _drop_ball(life, c["spot"])
 			c["carry"] = false
 	k["life_chore"] = c

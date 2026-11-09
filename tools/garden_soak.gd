@@ -2,11 +2,13 @@ extends RefCounted
 ## --garden-soak: the garden pieces run together. A base_mode save with six Boki (two friends, two rivals, a baby
 ## and a retired elder) plus the three toys and the snack patch lives 30 in-game days on the real farm, stepped at
 ## DT of farm time per call with no frames in between (the high time scale; a day is home.DAY_LEN s). Each day the
-## player feeds everyone and picks the patch, every third day the Dash and the Stump Shove are run on the logic
-## classes. Every Boki's state changes are kept (user://garden_soak.json). It fails on: a Boki stuck in one state
-## over STUCK_HOURS in-game hours (Nap through the night excepted), a need outside 0..100, a NaN or out-of-range
-## trait, a bond outside -1..1, a toy held past TOY_HOLD s, the save over SAVE_GROWTH times its first size, or an
-## error in the engine log. Never touches the real save.
+## player feeds the first FED Boki (the rest must feed themselves: BaseFeed) and picks the patch every other day,
+## every third day the Dash and the Stump Shove are run on the logic classes. Every Boki's state changes are kept
+## (user://garden_soak.json). It fails on: a Boki stuck in one state over STUCK_HOURS in-game hours (Nap through
+## the night excepted), a need outside 0..100 or under its sulky floor (care.json sulky, GARDEN.md 2), a starve
+## stage at all (never weak or sick), a NaN or out-of-range trait, a bond outside -1..1, a toy held past TOY_HOLD
+## s, the save over SAVE_GROWTH times its first size, or an error in the engine log; and at the end, unless every
+## unfed Boki ate on its own. Never touches the real save.
 
 const DAYS := 30
 const DT := 0.25                # s of farm time per step
@@ -16,6 +18,7 @@ const TOY_HOLD := 60.0          # s a Boki may keep one toy (go_timeout 20 + pla
 const SAVE_GROWTH := 2.0        # the save may grow to this many times its first size
 const DAY_START := 0.3          # the farm clock at the start (morning)
 const MATCH_EVERY := 3          # days between a Dash and a Stump Shove
+const FED := 3                  # Boki the player feeds each day; the others feed themselves (GARDEN.md 2)
 const RACE_MAX_S := 120.0       # s a headless race may run
 const OUT := "user://garden_soak.json"
 
@@ -37,7 +40,10 @@ var hist := {}              # name -> Array of [t s, state name]
 var longest := {}           # name -> {state name: longest stay in s}
 var play_since := {}        # name -> t its current toy began
 var t := 0.0
-var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0}      # what the run actually exercised
+var seen := {"plays": 0, "picks": 0, "races": 0, "bouts": 0, "self_fed": 0}      # what the run actually exercised
+var low := {}               # need -> lowest value seen on any Boki
+var snack := {}             # name -> it was off for a snack (life_eat) at the last look
+var food_was := {}          # name -> its food need at the last look
 
 func ok(cond: bool, what: String) -> void:
 	print("SOAK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -77,6 +83,14 @@ func run(m: Node) -> void:
 	ok(seen.values().all(func(n): return n > 0) and drifted > 0, "toys, patch, Dash, Shove and trait drift all ran")
 	var played: bool = hist.values().any(func(h): return h.any(func(e): return e[1] == "Play"))
 	ok(played, "the machine shows Play while a Boki is at a toy (home_toys.gd)")
+	var unfed: Array = home.kins.slice(FED).map(func(k): return String(k["rec"]["name"]))
+	var fed_self: Array = unfed.filter(func(nm): return hist[nm].any(func(e): return e[1] == "Eat"))
+	ok(fed_self.size() == unfed.size(), "every unfed Boki (%s) ate on its own (%d snacks eaten)"
+			% [", ".join(unfed), seen["self_fed"]])
+	var floors := Care.sulky()
+	print("SOAK lowest needs: ", low, " sulky floors: ", floors)
+	ok(not floors.is_empty() and Care.NEEDS.all(func(n): return float(low.get(n, 0.0)) >= float(floors[n]) - 0.01),
+			"needs bottomed out at sulky, never lower")
 	ok(errors.lines.is_empty(), "no errors in the log (%d)" % errors.lines.size())
 	for l in errors.lines.slice(0, 5):
 		print("SOAK   ", l)
@@ -127,10 +141,10 @@ func _step() -> void:
 
 ## What the player does once a day: feed everyone, walk over the patch, and now and then run a Dash and a Shove.
 func _player_day(day: int) -> void:
-	for k in home.kins:
+	for k in home.kins.slice(0, FED):
 		Care.feed(k["rec"], String(k["rec"]["likes"]["food"]))
 	var e := SnackPatch.entry(Save.d)
-	if not e.is_empty():
+	if not e.is_empty() and day % 2 == 0:
 		var was: Vector3 = home.ppos
 		home.ppos = HomeLayout.deco_center(e)
 		var crops := int(Save.d["crops"].values().reduce(func(a, b): return a + b, 0))
@@ -179,6 +193,11 @@ func _watch(limit_s: float) -> void:
 		var endless: bool = m.is_in(BaseLife.S.MENTOR) or (m.is_in(BaseLife.S.NAP) and home.life.night)
 		if m.since > limit_s and m.since <= limit_s + DT and not endless and not BaseLife._taken(k):
 			_fail("%s stuck in %s for over %.1f s" % [nm, state, limit_s])      # said once, as it crosses
+		var food := Care.need(rec, "food")
+		if snack.get(nm, false) and not k.has("life_eat") and food > float(food_was.get(nm, food)):
+			seen["self_fed"] += 1      # it was off for a snack and came back fuller: it fed itself
+		snack[nm] = k.has("life_eat")
+		food_was[nm] = food
 		_check_values(rec, nm)
 		_check_toy(k, nm)
 
@@ -187,6 +206,9 @@ func _check_values(rec: Dictionary, nm: String) -> void:
 		var v := float(rec["needs"][n])
 		if is_nan(v) or v < 0.0 or v > 100.0:
 			_fail("%s need %s = %s" % [nm, n, str(v)])
+		low[n] = minf(float(low.get(n, 100.0)), v)
+	if Care.starve_stage(rec) != "" or float(rec.get("starve", 0.0)) > 0.0:
+		_fail("%s starves (%s): the base must stop at sulky" % [nm, Care.starve_stage(rec)])
 	for tr in rec["traits"]:
 		var v := float(rec["traits"][tr])
 		if is_nan(v) or v < 0.0 or v > 1.0:

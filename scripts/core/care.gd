@@ -122,6 +122,10 @@ static func ensure(rec: Dictionary) -> void:
 		rec.erase(old)              # the old once-per-expedition care stamps (now care_day)
 	give_habit(rec)
 
+## base_mode's floors (care.json sulky): needs bottom out at sulky, never sick (GARDEN.md 2); {} off base_mode.
+static func sulky() -> Dictionary:
+	return Content.rules("care").get("sulky", {}) if FarmUnlocks.base_mode() else {}
+
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
 	return float(rec["needs"].get(n, 50.0))
@@ -129,7 +133,7 @@ static func need(rec: Dictionary, n: String) -> float:
 static func change(rec: Dictionary, n: String, amt: float) -> float:
 	ensure(rec)
 	var before := float(rec["needs"].get(n, 50.0))
-	rec["needs"][n] = clampf(before + amt, 0.0, 100.0)
+	rec["needs"][n] = clampf(before + amt, float(sulky().get(n, 0.0)), 100.0)      # the base: sulky at worst
 	return float(rec["needs"][n]) - before
 
 ## Time passing at home. sleeping: curled up in bed or napping.
@@ -144,8 +148,10 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	var f0 := float(nd["food"])
 	var rate := DECAY["food"] / 60.0 * (0.5 if sleeping else 1.0)
 	nd["food"] = clampf(float(nd["food"]) - DECAY["food"] * mins * (0.5 if sleeping else 1.0), 0.0, 100.0)
-	# the part of this stretch spent with nothing in it counts toward starving
-	starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0)
+	var floors := sulky()
+	if floors.is_empty():
+		# the part of this stretch spent with nothing in it counts toward starving
+		starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
 	if sleeping:
 		nd["energy"] = clampf(float(nd["energy"]) + 9.0 * mins, 0.0, 100.0)
@@ -154,10 +160,12 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	nd["joy"] = clampf(float(nd["joy"]) - DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0), 0.0, 100.0)
-	if starve_h(rec) >= STARVE["sick"]:
+	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
 		nd["joy"] = minf(float(nd["joy"]), 25.0)
+	for n in floors:
+		nd[n] = maxf(float(nd[n]), float(floors[n]))      # the base: sulky at worst
 	UnstableMix.tick(rec, secs)
 	rec["needs_t"] = Time.get_unix_time_from_system()
 
@@ -195,6 +203,8 @@ static func starve_h(rec: Dictionary) -> float:
 
 ## "" (fine), "starving", "weak", "refuse", "sick" or "dead".
 static func starve_stage(rec: Dictionary) -> String:
+	if FarmUnlocks.base_mode():
+		return ""      # the base never starves a Boki (sulky at worst)
 	var h := starve_h(rec)
 	if h >= STARVE["dead"] and bool(Content.rules("care")["natural_death"]): return "dead"
 	if h >= STARVE["sick"]: return "sick"
@@ -205,7 +215,7 @@ static func starve_stage(rec: Dictionary) -> String:
 
 ## secs of time passing; zero_secs of it with an empty belly (defaults to all of it if food is 0).
 static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void:
-	if rec.get("boxed", false):
+	if rec.get("boxed", false) or FarmUnlocks.base_mode():
 		return
 	var z := zero_secs if zero_secs >= 0.0 else (secs if need(rec, "food") <= 0.5 else 0.0)
 	var st := float(rec.get("starve", 0.0))
@@ -222,6 +232,8 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 ## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
 ## a Boki left alone for weeks still recovers with a few meals and a day of care.
 static func starve_cap() -> float:
+	if FarmUnlocks.base_mode():
+		return 0.0
 	return INF if bool(Content.rules("care")["natural_death"]) else STARVE["dead"] * 3600.0
 
 ## It just ate: a meal takes four hours off the starve clock.

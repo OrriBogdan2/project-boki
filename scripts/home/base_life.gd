@@ -1,10 +1,13 @@
 class_name BaseLife
 extends RefCounted
 ## Base life (briefs/design/GARDEN.md section 4), on only with farm_build.json base_mode: each farm Boki lives on
-## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats at a feeder, naps
+## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, or a
+## snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
 ## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
-## near the Soul Shrine (MENTOR), eats and naps, joining the piles. Tag and napping together build friendship,
+## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
+## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
+## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
 ## nap in a pile; rivals stare and huff.
 ##
@@ -26,29 +29,22 @@ const TABLE := {
 	S.CHORE: [S.ROAM, S.NAP, S.REACT],
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
-const TOY_SCAN := 2.0      # s between looks at the layout for placed toys
 const CATCH := 0.8         # m: a tag lands this close
-const AT_TOY := 1.4        # m: a Boki this close to a toy is at it (two here share it or squabble)
 const GREET := 2.5         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
-const TOY_PLAY := -1.0      # life_for while home_toys.gd (k["play"]) runs the play, not this machine
 const GRUMPY := 30.0       # joy need below which a Boki naps alone
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
-var toys: Array = []       # Vector3: where the placed toys stand
-var toy_ids: Array = []    # and the id of each (toys.json)
 var night := false
 var _acc := 0.0
-var _toy_t := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
-	find_toys()
 
 static func nocturnal(rec: Dictionary) -> bool:
 	return Work.NOCTURNAL.has(String(rec["species"]))
@@ -76,19 +72,15 @@ static func add_bond(a: Dictionary, b: Dictionary, by: float) -> void:
 		var uid := String(pair[1]["uid"])
 		rec["bonds"][uid] = clampf(float(rec["bonds"].get(uid, 0.0)) + by, -1.0, 1.0)
 
-func find_toys() -> void:
-	toys.clear()
-	toy_ids.clear()
-	for e in HomeLayout.of(Save.d).get("deco", []):
-		if (R["toys"] as Array).has(String(e.get("id", ""))) and not FarmSites.is_site(e):
-			toys.append(HomeLayout.deco_center(e))
-			toy_ids.append(String(e["id"]))
+## Where the base's toys stand (HomeToys, toys.json), for the chores that borrow one (BaseChore fetch).
+func toy_spots() -> Array:
+	return h.toys.toys().map(func(t): return t["pos"])
 
 ## The Boki's machine (made the first time the base sees it).
 func machine(k: Dictionary) -> Fsm:
 	if not k.has("life"):
 		var m := Fsm.new(PackedStringArray(NAMES), TABLE, S.ROAM, "boki:" + String(k["rec"]["name"]))
-		m.guard(S.PLAY, func(_from: int) -> bool: return not toys.is_empty() or k.has("play"))
+		m.guard(S.PLAY, func(_from: int) -> bool: return k.has("play"))
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
@@ -96,21 +88,17 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
-		m.on_exit(S.PLAY, func(_to: int) -> void: k.erase("life_toy"))
+		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
 		k["life"] = m
 	return k["life"]
 
 ## Moves every machine on; called each frame from home.gd _move_kin, ticks at 10 Hz.
 func step(d: float) -> void:
 	_acc += d
-	_toy_t += d
 	if _acc < STEP:
 		return
 	var dt := _acc
 	_acc = 0.0
-	if _toy_t >= TOY_SCAN:
-		_toy_t = 0.0
-		find_toys()
 	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
 	if h.day_t < _day_t:
 		BaseDrift.day(h.kins.map(func(k): return k["rec"]))
@@ -159,8 +147,8 @@ func choose(k: Dictionary) -> void:
 	var traits: Dictionary = rec.get("traits", {})
 	var bored := m.since >= float(R["max"]["roam"])
 	k["t"] = randf_range(R["think"][0], R["think"][1])
-	if k.has("eat"):
-		m.go(S.EAT, "feeder")
+	if BaseFeed.pick(h, k):
+		m.go(S.EAT, "feeder" if k.has("eat") else "snack")      # hungry: a bowl, or a snack it fetches itself
 		return
 	if not _awake(k) or Care.need(rec, "energy") < float(R["tired_at"]):
 		_nap(k, "tired")
@@ -184,8 +172,8 @@ func choose(k: Dictionary) -> void:
 	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
 		_tag(k, mate)
 		return
-	if not toys.is_empty() and (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3):
-		_play(k, toys[randi() % toys.size()])
+	if (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3) and h.toys.pick(k, true):
+		m.go(S.PLAY, "toy")      # HomeToys has it now: the walk, the play and the squabbles are its
 		return
 	if bored:
 		_nap(k, "bored")
@@ -206,14 +194,17 @@ func _tick(k: Dictionary, dt: float) -> void:
 		_nap(k, "night")
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
 		m.go(S.NAP, "dozed")
-	if k.has("play") and m.is_in(S.ROAM) and m.go(S.PLAY, "toy"):
-		k["life_for"] = TOY_PLAY      # home_toys.gd has it at a toy: the machine says so and lets go when it does
+	if k.has("play") and m.is_in(S.ROAM):
+		m.go(S.PLAY, "toy")      # home_toys.gd took it to a toy (home.gd _care_goal): the machine says so
 	match m.state:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
 		S.EAT:
-			if not k.has("eat") or m.since >= float(R["max"]["eat"]):
+			if k.has("life_eat"):
+				if not BaseFeed.tick(h, k, m.since) or m.since >= float(R["max"]["eat"]):
+					m.go(S.ROAM, "fed")
+			elif not k.has("eat") or m.since >= float(R["max"]["eat"]):
 				k.erase("eat")
 				m.go(S.ROAM, "fed")
 		S.NAP:
@@ -246,18 +237,9 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 				and _dist(k, o) < PILE_JOIN * 1.5:
 			add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
 
-func _play_tick(k: Dictionary, m: Fsm, dt: float) -> void:
-	if float(k["life_for"]) == TOY_PLAY:
-		if not k.has("play"):
-			m.go(S.ROAM, "played")
-		return
-	var toy: Vector3 = k["life_at"]
-	if Vector2(toy.x - k["pos"].x, toy.z - k["pos"].z).length() < AT_TOY:
-		k["hop"] = float(k.get("hop", 0.0)) + dt * 6.0      # bounces about at it
-		k["life_toy"] = toy_ids[maxi(0, toys.find(toy))]      # and HomeToys.pose plays its clip
-		if randf() < 0.1:
-			k["goal"] = toy + Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
-	if m.since >= float(k["life_for"]) or m.since >= float(R["max"]["play"]):
+## HomeToys runs the play (walk, play, squabble, finish); the machine only shows it and lets go when it is done.
+func _play_tick(k: Dictionary, m: Fsm, _dt: float) -> void:
+	if not k.has("play"):
 		m.go(S.ROAM, "played")
 
 func _tag_tick(k: Dictionary, m: Fsm) -> void:
@@ -338,27 +320,6 @@ func _mentor(k: Dictionary) -> void:
 	var r := float(R["mentor_radius"])
 	k["goal"] = h.world.free_spot_near(shrine + Vector3(randf_range(-r, r), 0, randf_range(-r, r)), [], 0.8)
 
-func _play(k: Dictionary, toy: Vector3) -> void:
-	if not machine(k).go(S.PLAY, "toy"):
-		return
-	k["life_at"] = toy
-	k["life_for"] = randf_range(R["play"][0], R["play"][1])
-	k["t"] = float(k["life_for"])
-	k["goal"] = toy
-	h._emote(k, "★")
-	for o in h.kins:
-		if o == k or not o.has("life") or not (o["life"] as Fsm).is_in(S.PLAY) or o["life_at"] != toy:
-			continue
-		if _clash(k["rec"], o["rec"]) or bond(k["rec"], o["rec"]) <= float(R["rival_at"]):
-			_squabble(k, o)
-			if _bravery(k) >= _bravery(o):
-				_watch(o, k, "lost the toy")      # the less brave one gives the toy up and glares
-			else:
-				_watch(k, o, "lost the toy")
-		else:
-			add_bond(k["rec"], o["rec"], float(R["bond_share"]))
-		return
-
 ## Starts the chore its knacks give it (BaseChore), if one can run now.
 func _chore(k: Dictionary) -> bool:
 	var kind := BaseChore.pick(self, k)
@@ -412,9 +373,6 @@ func _awake(k: Dictionary) -> bool:
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
 		or k.has("fetch") or k.has("bath") or k.get("nap_go", false) or float(k.get("hold_t", 0.0)) > 0.0
-
-static func _bravery(k: Dictionary) -> float:
-	return float(k["rec"]["traits"].get("bravery", 0.5))
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()
