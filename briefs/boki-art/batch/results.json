@@ -32980,5 +32980,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_maulangler_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_phonodrake",
+    "name": "Phonodrake (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_phonodrake_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_phonodrake",
+    "name": "Phonodrake (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_phonodrake_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_phonodrake",
+    "name": "Phonodrake (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_phonodrake_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hourachnid",
+    "name": "Hourachnid (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hourachnid",
+    "name": "Hourachnid (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hourachnid",
+    "name": "Hourachnid (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_hourachnid_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hourachnid",
+    "name": "Hourachnid (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_hourachnid_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_glaivyx_w33",
+    "name": "Glaivyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_glaivyx_w33_2.jpg",
+    "ok": true
   }
 ]
