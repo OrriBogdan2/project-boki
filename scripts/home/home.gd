@@ -4173,6 +4173,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 		k["slept"] = 0.0
 		k["nap_t"] = 30.0
 		k["z_t"] = 0.5
+		Sfx.play("boki_sleep", k["pos"], -10.0)
 	if k.has("stare") and Vector2(pos.x - k["goal"].x, pos.z - k["goal"].z).length() < 0.5:
 		var at: Vector3 = k["stare"]
 		k.erase("stare")
@@ -4239,10 +4240,11 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	var body: Node3D = (k["node"] as Node3D).get_node("Body")
 	var tw := create_tween()
 	if res["ok"]:
+		Sfx.play("boki_eat", fp, -8.0)
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
+			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
@@ -4352,6 +4354,7 @@ func _care_nap(rec: Dictionary) -> void:
 	else:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
+		Sfx.play("boki_sleep", k["pos"], -10.0)
 	_say(k, BokiLines.say(rec, "nap"))
 
 # ---- training: a timing game at the yard; three rounds, each a little faster

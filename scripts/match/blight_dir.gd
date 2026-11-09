@@ -342,6 +342,7 @@ func _spawn_tick(dt: float) -> void:
 			s.hear(anchor.pos, 20.0)
 			n_alive += 1
 		m.fx.dust(at, 12)
+		m.sfx("blight_rumble", at, -6.0)
 
 ## Where Skitters claw out of the ground: out of the squad's sight, 13-20 tiles off, on solid
 ## ground (preferably their island), never in a lair.

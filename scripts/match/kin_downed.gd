@@ -50,6 +50,7 @@ static func begin(k: Kin, fell: bool) -> void:
 	if fell:
 		k.teleport(k.last_safe if k.last_safe != Vector3.INF else (k.owner_h.pos if k.owner_h else k.pos))
 	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
+	k.m.sfx("boki_downed", k.pos, -4.0)
 
 ## Can the owner scoop it up right now?
 static func rescuable(k: Kin) -> bool:
@@ -245,7 +246,7 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
-	k.m.sfx("recall", k.owner_h.pos, -4.0)
+	k.m.sfx("boki_revive", k.owner_h.pos, -4.0)
 	if rescued:
 		k.note("rescued", "you ran in and carried it out", 1.5)
 		k.bark("revive")

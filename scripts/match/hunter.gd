@@ -1967,6 +1967,8 @@ func sim(dt: float) -> void:
 	var regen := owner_stat("regen") + kin_pt("owner_regen")
 	if regen > 0.0 and not downed and hp < max_hp:
 		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
+	if is_local():
+		WarnSfx.low_hp(self, dt)
 	if kin_pt("owner_shield") > 0.0 and regen_wait <= 0.0 and kin_shield < kin_pt("owner_shield"):
 		kin_shield = minf(kin_pt("owner_shield"), kin_shield + kin_pt("owner_shield") * 0.5 * dt)
 	if owner_stat("dodge_regen") >= 0.99:

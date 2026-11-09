@@ -117,16 +117,20 @@ static func on_event(m: Match, x: Array) -> void:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
+			m.sfx("boki_downed", at, -4.0)
 		"scoop", "round":
 			m.fx.ring(at, 1.2, Color.WHITE, 0.3)
-			m.sfx("recall", at, -4.0)
+			m.sfx("boki_revive", at, -4.0)
 		"merge":
 			MergeXform.on_event(m, at, decode_form(String(x[6])), e as Hunter if e is Hunter else null)
 		"merge_end":
 			if String(x[6]) == "shell" and e is Hunter:
 				(e as Hunter).set_meta("shell_break_at", m.time)
 				(e as Hunter).set_meta("shell_break_col", (e as Hunter).get_meta("mf_glow", Color.WHITE))
-			m.sfx("armor_break" if String(x[6]) == "shell" else "recall", at, -2.0, 0.9 if String(x[6]) == "shell" else 1.3)
+			if String(x[6]) == "shell":
+				m.sfx("armor_break", at, -2.0, 0.9)
+			else:
+				m.sfx("boki_unfuse", at, -2.0)
 		"mcast":
 			if e is Hunter:
 				MergeXform.on_cast(m, e as Hunter, at, String(x[6]))
