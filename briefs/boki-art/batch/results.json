@@ -17342,5 +17342,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/flarmink_e_w29_1.jpg",
     "ok": true
+  },
+  {
+    "id": "coolatee_r_w29",
+    "name": "Coolatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/coolatee_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_r_w29",
+    "name": "Coolatee",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/coolatee_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w29",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r_w29",
+    "name": "Glaciatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r_w29",
+    "name": "Glaciatee",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r_w29",
+    "name": "Glaciatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_r2_w29",
+    "name": "Glaivyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaivyx_r2_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w29",
+    "name": "Flarmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w29_3.jpg",
+    "ok": true
   }
 ]
