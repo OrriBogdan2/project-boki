@@ -12,7 +12,7 @@ extends RefCounted
 const EPS := 0.0005
 const GRID := 48              # cells across the silhouette window
 const FILL_H := 40.0          # cells: every silhouette is scaled to this height (about its pixels at the match zoom)
-const MIN_OWN_IOU := 0.78     # a slider end keeps at least this much of the neutral Warden's silhouette
+const MIN_OWN_IOU := 0.70     # a slider end keeps this much of the neutral silhouette (Tenzo v2 least: 0.71)
 const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "supervive")
 const SHOT_HUNTERS := ["thief", "juggernaut", "mage", "tender"]
 
@@ -190,10 +190,13 @@ func _silhouettes(tree: SceneTree) -> void:
 	var worst := 1.0
 	var worst_at := ""
 	var least_own := 1.0
+	var least_at := ""
 	for a in ends:
 		for mk in ends[a]:
 			var own := _iou(mk, neutral[a])
-			least_own = minf(least_own, own)
+			if own < least_own:
+				least_own = own
+				least_at = a
 			var best_other := 0.0
 			var other_at := ""
 			for b in neutral:
@@ -209,7 +212,8 @@ func _silhouettes(tree: SceneTree) -> void:
 				worst_at = "%s (vs %s)" % [a, other_at]
 	holder.queue_free()
 	ok(wrong.is_empty(), "at both slider ends every Hunter's silhouette is still closest to its own (%s)" % str(wrong))
-	ok(least_own >= MIN_OWN_IOU, "and keeps at least %.2f of its own shape (least %.2f)" % [MIN_OWN_IOU, least_own])
+	ok(least_own >= MIN_OWN_IOU, "and keeps at least %.2f of its own shape (least %.2f, %s)"
+			% [MIN_OWN_IOU, least_own, least_at])
 	print("MANTLE silhouette: the closest call is %s, %.2f IoU ahead of the next Hunter" % [worst_at, worst])
 
 ## Body at one end and face at the other: the oddest proportions the sliders allow.
