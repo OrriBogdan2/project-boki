@@ -1327,3 +1327,5 @@ Format notes before you import (no changes made beyond these, which already happ
 - The 20 look-alike redesign species (approved.json redesign_lookalike) are flipped to "redo" in the Bokidex. That's 25 gens including portraits, Chandelapi's 21:12 approval among them. The old sheets stay as the baked hero until the new art passes. No 3D work is queued on any of them. 3D for these 20 is on hold until a new ART pass line lands.
 - Portraits: new Pokédex-style ART portrait_ lines import as normal. The newest approved portrait wins.
 - Relics: the 5 PROPOSED relics (Tenzo, Lace, Neve, Sparkle, Albert) were sent to the owner for confirmation. Owner 11-09: yes to all 5, run them as written, after the Boki are done.
+
+- 2026-11-09T10:34Z NOTE (coord): briefs committers, run `git pull --rebase` right before every briefs commit. A stale-tree commit (f3d2cf38, ext/anim-dash-directional READY) reverted the art lane wave92 spec, jobs.json and doc rows; they were restored.
