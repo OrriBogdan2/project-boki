@@ -2076,13 +2076,13 @@ func _draw_overhead(p: Hunter) -> void:
 		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
 		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / Hunter.DRINK_TIME
+		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
 		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
-		var kf := 1.0 - p.kit_t / Hunter.KIT_TIME
+		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
