@@ -450,6 +450,9 @@ func _archer_combos() -> void:
 		)
 		T.teleport(tp0)
 	ok("pin anim: after the roll she walks as a spirit (pin_walk)", K.anim_id == "pin_walk", K.anim_id)
+	var shell: MeshInstance3D = K.fx.aura
+	ok("pin look: a ghost shell shows on her while she phases (enemies see it too)", shell != null and shell.visible)
+	_impact_looks()
 	ok(
 		"combo pin: Spirit Walk passes through a rock column",
 		P.pos.x > bx + 1.3 and K.spirit.passed > in0,
@@ -627,6 +630,28 @@ func _archer_combos() -> void:
 	await done(m)
 
 ## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
+## The Heavy Shot's impact is sized to its charge and bigger on a wall pin; the dash start and end have no burst.
+func _impact_looks() -> void:
+	var mv: Dictionary = HeroVfx.data("archer")["moves"]
+	var hit := _flare_reach(mv["heavy_hit"], 1.0)
+	var tap := _flare_reach(mv["heavy_hit"], 0.0)
+	var pin := _flare_reach(mv["heavy_pin"], 1.0)
+	ok("pin look: full-charge hit burst %.1f m is wider than an uncharged one %.1f m" % [hit, tap], hit > 1.5 * tap)
+	ok("pin look: the wall pin burst %.1f m beats the plain hit %.1f m" % [pin, hit], pin > hit)
+	var burst_on_dash := false
+	for move: String in ["spirit_go", "spirit_end"]:
+		for layer: Dictionary in mv[move].get("fx", []):
+			burst_on_dash = burst_on_dash or layer["p"] in ["ember", "flare", "sweep"]
+	ok("pin look: no burst at the Spirit Walk start or end", not burst_on_dash)
+
+## The widest flare layer of a recipe at charge k (m across).
+func _flare_reach(rec: Dictionary, k: float) -> float:
+	var widest := 0.0
+	for layer: Dictionary in rec["fx"]:
+		if layer["p"] == "flare":
+			widest = maxf(widest, float(layer["size"]) * (1.0 + float(layer.get("size_k", 0.0)) * k))
+	return widest
+
 func _spin(lvl: int) -> float:
 	var r := setup("bulwark", 2.2)
 	var m: Match = r[0]

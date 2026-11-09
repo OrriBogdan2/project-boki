@@ -302,7 +302,7 @@ func _pin(a: Vector3, k: float) -> void:
 		if _wall_behind(f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
-			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
+			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir, {"k": k})
 			if rank("sec") >= 3:
 				h.dashes = minf(h.max_dashes(), h.dashes + 1.0)       # rank 3: a wall stun gives a dash charge
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})

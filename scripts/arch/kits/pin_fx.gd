@@ -26,6 +26,7 @@ const FLAMES := 4
 const WISP_T := 0.26
 const WISPS := 12
 const WISP_EVERY := 0.05
+const AURA_POWER := 1.7        # the Spirit Walk shell's strength (rim and chevron bands add up over the body)
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
 const STAKE_T := 7.0           # s the stake a wall pin leaves in the wall stays
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
@@ -530,12 +531,15 @@ func _tick_bursts(delta: float) -> void:
 # ------------------------------------------------------------------ Spirit Walk aura
 var aura: MeshInstance3D = null
 
-## A soft green shell over her while she walks as a spirit (k 0 = off).
+## A pale ghost shell round her while she walks as a spirit, bright on its rim so it reads as an outline to
+## everyone, enemies too (k 0 = off).
 func aura_on(k: float) -> void:
+	var body := float(h.cdat.get("scale", 1.0))
 	if aura == null:
-		aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(GREEN, 0.9)))
+		aura = KitMeshes.inst(self, Models.capsule(0.62, 2.0), KitShaders.mat("beam", Color(TEAL, 0.9)))
 		aura.material_override.set_shader_parameter("bands", 3.0)
 	aura.visible = k > 0.01
 	if aura.visible:
-		aura.global_position = h.position + Vector3(0, 0.9 * float(h.cdat.get("scale", 1.0)), 0)
-		aura.material_override.set_shader_parameter("power", k * 0.8)
+		aura.scale = Vector3.ONE * body
+		aura.global_position = h.position + Vector3(0, 0.95 * body, 0)
+		aura.material_override.set_shader_parameter("power", k * AURA_POWER)
