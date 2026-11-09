@@ -26869,5 +26869,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_loafhopper_w32_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_loafhopper_w32",
+    "name": "Loafhopper (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper_w32",
+    "name": "Loafhopper (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_n_w32",
+    "name": "Malletary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_malletary_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_n_w32",
+    "name": "Malletary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_malletary_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil_w32",
+    "name": "Maracoil (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_n_w32",
+    "name": "Malletary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_malletary_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_n_w32",
+    "name": "Malletary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_malletary_n_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil_w32",
+    "name": "Maracoil (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w32_2.jpg",
+    "ok": true
   }
 ]
