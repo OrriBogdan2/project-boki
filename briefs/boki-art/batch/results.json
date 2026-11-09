@@ -41177,5 +41177,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/chandelapi_card9_1.jpg",
     "ok": true
+  },
+  {
+    "id": "chandelapi_card9",
+    "name": "Chandelapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card9",
+    "name": "Barokat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokat_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card9",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "orbitle_card9",
+    "name": "Orbitle (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/orbitle_card9_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card9",
+    "name": "Chandelapi (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelapi_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card9",
+    "name": "Barokat (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/barokat_card9_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "orbitle_card9",
+    "name": "Orbitle (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/orbitle_card9_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "domeleon_card3",
+    "name": "Domeleon (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/domeleon_card3_3.jpg",
+    "ok": true
   }
 ]
