@@ -4399,3 +4399,5 @@ PR: https://github.com/OrriBogdan2/project-boki/pull/new/ext/boki-caecilith-v3
   - GPU shots: jobq 20261109-053050-11287.
 - Gen: caecilith-1109053649 (redo-of caecilith-1109001057). Renders: the 4 matte views, a hero shot and the turntable.
 - Merge note: ext/boki3d-tuatrune moves the Meshy loader to `tools/boki/meshy_body.py`. When the two meet, carry `self.raw`, `reshape()` and `source()` over into it (or call reshape after the load).
+
+READY ext/grimble-stretch-v2-rebased 88c75bf31 (supersedes ext/grimble-stretch-v2 ba158402c: same Grimble skin-stretch fix (skin_relax.reweigh, rebaked dredge.glb, --stretch-check) with origin/main d255acbee merged in; the merge was clean, no conflicts against current main (the reported conflicts in dredge.glb, grimble_clips.py, skin_relax.py did not occur; main only added release.yml + net.gd since the branch base); worst stretch still 2.48 run_l (non-gating; --stretch-check dredge has 40 clips over 1.3, as in the original READY); --check 0 failures, --clip-check --wardens=dredge 0, health --strict OK; job 20261109-052119-a1)
