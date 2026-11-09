@@ -136,12 +136,6 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `dex_view.gd`, `about_view.gd`, `iv_view.gd`, `kinbox_view.gd`, `incubator_view.gd`, `work_view.gd` | Boki menus |
 | `egg_hatch.gd`, `kin_reveal.gd`, `kin_portrait.gd`, `portraits.gd`, `icons.gd` | Hatching, portraits, icons |
 
-## scripts/feel/
-
-A stand-alone movement and camera lab (`--feel-lab`): `hunter_controller.gd`, `top_down_camera.gd`,
-`feel_config.gd` (tagged tunables), `feel_test_world.gd`, `jump_pad.gd`, `kinfall_input.gd`. The
-match's real movement is in `scripts/match/hunter.gd`.
-
 ## scripts/server/ and scripts/social/
 
 | File | What it is |

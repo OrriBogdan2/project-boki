@@ -1,5 +1,7 @@
 # Supervive-style feel for Project Boki (phase 1: camera + movement)
 
+The lab this describes (`scripts/feel/`, `--feel-lab`, `tests/feel_sim.gd`) was deleted on 11-09 (briefs/STATE_MACHINES.md M1): the live movement is `Hunter` + `Loco` (docs/decisions/0022). The numbers and footage notes below are still the sources.
+
 Clean-room rebuild of the feel. Numbers now come first from the game data section below, then the wiki, guides and footage. The values come from the community wiki, published settings guides, frame-by-frame measurements of 60fps gameplay videos, or my estimates. Each one is tagged in `scripts/feel/feel_config.gd`: `[wiki]`, `[guide]`, `[footage]` or `[est]`.
 
 
@@ -30,18 +32,10 @@ Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, gl
 
 | File | What it does |
 |---|---|
-| `scripts/feel/feel_config.gd` | Every tunable in one Resource. Save it as a `.tres` to give different weapons or kin their own feel. |
-| `scripts/feel/hunter_controller.gd` | CharacterBody3D. Covers WASD, jump, hold-to-glide with heat, abyss lift, feathering, the glider balloon, spiking, dash/ex-dash (or tap/hold), deep mantling, jump pads, cursor aim and the aim laser. |
-| `scripts/feel/top_down_camera.gd` | Fixed-angle camera with Supervive's 3 presets, zoom-out while gliding, and a purple screen tint that deepens the further you sink into the abyss. |
-| `scripts/feel/jump_pad.gd` | Launch pad that keeps your momentum. |
-| `scripts/feel/glide_zone.gd` | Wind rings (cool the glider + boost), jetstreams (no heat, faster), abyss storm clouds (more heat, slower). |
 | `scripts/combat/class_profile.gd`, `weapon_profile.gd`, `data/` | Light/medium/heavy classes and 9 guns/swords as data files. See KINFALL_CLASSES.md. |
 | `scripts/combat/weapon_user.gd`, `projectile.gd`, `training_dummy.gd` | Weapon firing (guns and swords), projectiles, and practice dummies. See WEAPON_FIRING_DATA.md. |
 | `tests/weapons_sim.gd` | Headless weapon check: `godot --headless --path . -s tests/weapons_sim.gd` |
 | `scripts/match/` + `data/rules/` | Downed (wisp), deathboxes, revives, revive beacons, team wipes, solo rules, kin hooks. See DEATH_AND_REVIVE.md. Test: `tests/life_sim.gd` |
-| `scripts/feel/kinfall_input.gd` | Registers default binds at runtime (`kf_*` actions). |
-| `scenes/feel_test.tscn` | Playground: islands over an abyss, a raised island to mantle onto, pillars, a jump pad and a debug HUD. |
-| `tests/feel_sim.gd` | Headless check: `godot --headless --path . -s tests/feel_sim.gd` |
 
 ## Controls (Supervive defaults)
 WASD move · Space jump (tap) / glide (hold in air) · Shift dash · Ctrl sneak · LMB/RMB attack (the hunter turns to face the cursor) · F1/F2/F3 switch camera preset, 1/2/3 switch class and 4/5/6 switch weapon in the test scene.
@@ -96,5 +90,3 @@ Videos studied: TheSixGame's full walkthrough (60fps), Ryan Lemur's Celeste guid
 - Jump height: I didn't find a clean plain jump in any of the videos.
 - Dash distance per weapon.
 - Glider damage while overheated, spike plummet speed, and the jump pad's launch strength.
-
-Tune them in `feel_config.gd`, then rerun the sim.
