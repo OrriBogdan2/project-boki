@@ -107,6 +107,22 @@ How the bond meter fills (it gates the Merge). All values are fractions of a ful
 | debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}} |
 | kinds | {"crate": {"weight": 0.45, "material": "wood", "chunks": 14, "loot": {"gems": [2, 4], "gem_base": 2, "tonic": 0.3, "armor": 0.4, "armor_amount": 25, "table": "crate"}}, "pot": {"weight": 0.3, "material": "clay", "chunks": 12, "loot": {"gems": [1, 2], "gem_base": 2, "seed": 0.2}}, "barrel": {"weight": 0.13, "material": "wood", "chunks": 16, "loot": {"gems": [1, 3], "gem_base": 2, "tonic": 0.15}}, "keg": {"weight": 0.12, "material": "metal", "chunks": 18, "loot": {}, "explosive": {"radius": 2.6, "damage": 22.0, "knockback": 10.0, "lift": 7.5, "fuse": 0.45, "chain_fuse": 0.22, "edge_falloff": 0.5, "height": 2.0, "color": "ff7a3a"}}} |
 
+## burrow (`content/rules/burrow.json`)
+
+How many Boki are out on the island at once; the rest sleep in the Boki Burrow (scripts/core/kinbox.gd). The owner's garden default is 6 out.
+
+| Setting | Value |
+|---|---|
+| farm_caps | [6, 8, 10, 12] |
+| farm_caps_unit | Boki out at once, by Kin Cottage expansion level (index 0 is the start) |
+| farm_caps_reason | Six keeps the island inside the 60-character animation budget (GARDEN.md question 3); each cottage expansion adds two. A bigger start needs a real-GPU check with animation LOD first. |
+| expand_cost | [0, 200, 400, 700] |
+| expand_cost_unit | gems to buy each expansion level (index 0 is free) |
+| expand_cost_reason | Room is a late purchase: the 4th level costs about a day of expedition gems. |
+| walk_secs | 2.5 |
+| walk_secs_unit | seconds a swapped Boki takes to walk between the Burrow door and the island |
+| walk_secs_reason | Long enough to be seen leaving, short enough that a second swap never waits on it. |
+
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
