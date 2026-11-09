@@ -34198,5 +34198,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_chandelotl_d6_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chandelotl_d10",
+    "name": "Chandelotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d10_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d10",
+    "name": "Chandelotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d10_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d10",
+    "name": "Chandelotl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d10_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d10",
+    "name": "Chandelotl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d10_4.jpg",
+    "ok": true
   }
 ]
