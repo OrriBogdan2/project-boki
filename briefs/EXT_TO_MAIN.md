@@ -5626,3 +5626,4 @@ READY ext/ttk-table 9333571d9 (--ttk-check + docs/TTK.md: time to knock of all 1
 READY ext/art1-clip-port 9b9d93216 (SUPERSEDES READY ext/art1-clip-port 0494c83a6; hit-reaction keys in tools/art1 breaker_anims, hem, claire, sable, ryzz clip scripts, re-bake VERIFIED with Blender 4.5.15: hit_f/hit_b baked from each script and spliced in, --react-audit 12 FAIL 0 within 0.01 of the REACT_AUDIT table, the old scripts bake to FAIL 10; glbs not re-baked in the commit (keeps the other glb-only patches DEBT lists); STACKED on READY ext/anim-react-audit 807d9386e, merge it first; --clip-check 0, health --strict OK, gen_wiki --check 47 unchanged, py_compile ok)
 READY ext/boki-state-clips 6791e0ddc (Boki state coverage)
 READY ext/ui-minimap-declutter e59334cb2 (minimap declutter)
+READY ext/fps-feel cbdde0a86 (fps-independent movement)
