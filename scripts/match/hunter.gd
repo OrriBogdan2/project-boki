@@ -534,7 +534,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		shield -= a; d -= a
 		if d <= 0.0:
 			flash_t = 0.06
-			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
+			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false, nid + "s")
 			return 0.0
 	regen_wait = 5.0
 	armor_wait = ARMOR_WAIT
@@ -1892,7 +1892,7 @@ func heal(n: float) -> void:
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	if hp - before > 1.0:
-		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, nid, "+")
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).

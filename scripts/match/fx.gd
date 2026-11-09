@@ -260,13 +260,18 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
 	ghosts.append({"node": mi, "t": 0.0, "col": col})
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
+## A damage or heal number. `key` names the stream it belongs to (the target's id, with an "a" on
+## armour damage so health and armour read apart): hits on the same stream within MERGE_T add up on
+## one number that sits on the target and grows, then floats off once the hits stop.
+func number(at: Vector3, v: float, col: Color, crit: bool, key: String, prefix := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
 		return
-	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
-	# number that sits on it and grows with each hit, then floats off once the hits stop
+	var live := 0
+	var oldest: Dictionary = {}
 	for n in nums:
-		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.6:
+		if not n.has("val") or n["key"] != key or n["pre"] != prefix:
+			continue
+		if float(n["last"]) < MERGE_T:
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -283,6 +288,14 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
 			return
+		live += 1
+		if oldest.is_empty() or float(n["t"]) > float(oldest["t"]):
+			oldest = n
+	if live >= NUM_PER_STREAM:
+		(oldest["node"] as Label3D).visible = false      # a stream shows at most NUM_PER_STREAM numbers
+		nums.erase(oldest)
+		num_pool.erase(oldest["node"])
+		num_pool.push_front(oldest["node"])
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
 	for n in nums:
@@ -296,7 +309,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 	l.global_position = at + off
 	l.visible = true
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "key": key, "base": at, "off": off, "hits": 1, "crit": crit})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
@@ -305,6 +318,8 @@ const STICK_T := 0.3
 const CRIT_POP := 1.7          # a crit lands this many times its size and settles
 const HIT_POP := 1.25          # ... and a normal hit this many
 const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
+const NUM_PLAIN_MAX := 46.0     # font size of a plain number at 100 and up (a crit doubles it)
+const NUM_PER_STREAM := 2      # numbers one target's health (or armour) shows at once: the fresh one and the fading one
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
 
@@ -314,10 +329,11 @@ func _num_look(l: Label3D, crit: bool) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
 	l.outline_size = 20 if crit else 14
 
-## Bigger totals and crits read bigger, within a small range so numbers never cover the fight.
+## Plain numbers grow with their running total (34 at 10, 46 from 100 up); a crit is twice that, the
+## reference's big yellow hit (about 2.3x a plain one), so it reads over the fight.
 func _num_size(v: float, crit: bool) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
-	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
+	return int(lerpf(34.0, NUM_PLAIN_MAX, k)) * (2 if crit else 1)
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:

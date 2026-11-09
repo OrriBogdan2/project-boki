@@ -39,7 +39,7 @@ static func absorb(h: Hunter, d: float, opts := {}) -> float:
 	h.flash_t = 0.06
 	opts["soaked"] = a
 	var col: Color = (st["form"] as Dictionary)["glow"]
-	h.m.fx.number(h.pos + Vector3(0, 1.8, 0), a, col, false)
+	h.m.fx.number(h.pos + Vector3(0, 1.8, 0), a, col, false, h.nid + "s")
 	h.m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 3, 2.5, 0.25)
 	if float(st["shell"]) <= 0.0:
 		KinMerge.end(h, "shell")

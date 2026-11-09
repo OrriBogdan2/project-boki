@@ -6,6 +6,8 @@ extends RefCounted
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
+##   7. floating damage numbers: rapid ticks on one target merge into one growing number, other targets
+##      and armour damage stay apart, a stream never shows more than a few, crits read bigger
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -171,6 +173,7 @@ func run(main_node: Node) -> void:
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
+	await _check_numbers(m)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -208,6 +211,48 @@ func _check_keys(P: Hunter) -> void:
 	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
 		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
 	P.ak.cd["x"] = 0.0
+
+## 7. Floating damage numbers (Fx.number): fed the way a rifle string, buckshot and a burn feed it.
+func _check_numbers(m: Match) -> void:
+	var fx: Fx = m.fx
+	Settings.set_v("damage_numbers", true, false)
+	var at := Vector3(0, 1.5, 0)
+	var cream := HudStyle.HIT
+	for i in 8:
+		fx.number(at, 9.0, cream, false, "rifle")             # a string: one tick a frame
+		fx.number(at + Vector3(1.0, 0, 0), 5.0, cream, false, "mate")     # a second target a step away
+		await main.get_tree().process_frame
+	fx.number(at, 6.0, HudStyle.HIT_ARMOR, false, "riflea")   # the same target's armour
+	var rifle := _nums(fx, "rifle")
+	ok(rifle.size() == 1 and absf(float(rifle[0]["val"]) - 72.0) < 0.01 and int(rifle[0]["hits"]) == 8,
+		"eight rifle ticks on one target are one number totalling 72 (%d numbers)" % rifle.size())
+	ok(_nums(fx, "mate").size() == 1 and absf(float(_nums(fx, "mate")[0]["val"]) - 40.0) < 0.01,
+		"a second target one step away keeps its own total (40)")
+	ok(_nums(fx, "riflea").size() == 1, "armour damage on the same target is its own number")
+	var small := _nums(fx, "mate")[0]["node"] as Label3D
+	var low: int = small.font_size
+	for i in 12:
+		fx.number(at, 30.0, cream, false, "rifle")
+	var big := (_nums(fx, "rifle")[0]["node"] as Label3D).font_size
+	ok(big > low and big <= int(Fx.NUM_PLAIN_MAX), "a growing total grows its number (%d -> %d, never past %d)" % [low, big, int(Fx.NUM_PLAIN_MAX)])
+	fx.number(at, 40.0, HudStyle.CRIT, true, "crit")
+	fx.number(at, 40.0, cream, false, "plain")
+	var cn := _nums(fx, "crit")[0]["node"] as Label3D
+	var pn := _nums(fx, "plain")[0]["node"] as Label3D
+	ok(cn.font_size >= int(1.6 * float(pn.font_size)) and cn.modulate.is_equal_approx(HudStyle.CRIT),
+		"a crit is a yellow number at least 1.6x a plain one (%d vs %d)" % [cn.font_size, pn.font_size])
+	for i in 8:
+		fx.number(at, 7.0, cream, false, "slow")              # hits a pause apart: each starts a new number
+		for n in _nums(fx, "slow"): n["last"] = Fx.MERGE_T + 0.01
+	ok(_nums(fx, "slow").size() <= Fx.NUM_PER_STREAM,
+		"hits a pause apart never stack past %d numbers on one target (%d)" % [Fx.NUM_PER_STREAM, _nums(fx, "slow").size()])
+	for n in fx.nums.duplicate():
+		(n["node"] as Label3D).visible = false
+		fx.nums.erase(n)
+
+## The live damage numbers of one stream (Fx.number's `key`).
+func _nums(fx: Fx, key: String) -> Array:
+	return fx.nums.filter(func(n): return n.get("key", "") == key)
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

@@ -15,7 +15,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
-| `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
+| `hudref_demo.gd` | `--hudref-demo=plates|fight|busy|numbers` screenshot scenes |
 
 Rules of the look:
 - Colours are roles: `SELF` / `ALLY` / `FOE` for health, `LOW` as yours and allies' runs low, armour in
