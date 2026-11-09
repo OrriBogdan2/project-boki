@@ -343,6 +343,10 @@ func _ostra() -> void:
 		"e: a full pop hits up to 3.5x an early one", late > early * 2.5 and K.pops >= 2,
 		"early %.1f late %.1f" % [early, late]
 	)
+	ok(
+		"e: a full pop is 3.5x the base 12.5 (source peak)", absf(late - 12.5 * 3.5) < 1.0,
+		"late %.2f vs %.2f" % [late, 12.5 * 3.5]
+	)
 	ok("data: the pop does not ground what it catches", not KitStatus.grounded(T))
 	ok("anim: the pop plays ostra_pop", K.anim_id == "ostra_pop")
 	# the data: "reactivate to detonate": left alone at full size it waits for the recast, then the Collapse

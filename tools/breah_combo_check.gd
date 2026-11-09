@@ -1,5 +1,5 @@
 extends "res://tools/hero_pair_check.gd"
-## --dolm-combo-check: Tarek (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
+## --dolm-combo-check: Tenzo (id dolm), docs/heroes/dolm.md. Every slot, its telegraph and cursor state
 ## while aiming or holding, the charge timings, where it lands, the payoffs, the small mechanics
 ## (docs/heroes/dolm.md "Small mechanics"), standing on and climbing rocks, the merge-start drops, and
 ## that every move, sound and look the kit plays exists.
@@ -57,7 +57,7 @@ func _breah() -> void:
 		step(m, 0.25)
 	ok(
 		"name: the display name is the class title",
-		Arch.name_of("dolm") == "Cliff Runner", Arch.name_of("dolm")
+		Arch.name_of("dolm") == "The Stone Seer", Arch.name_of("dolm")
 	)
 	var card: Dictionary = K.d["card"]
 	ok(
@@ -712,13 +712,13 @@ func _breah() -> void:
 		"breah_raise", "breah_sense"
 	]
 	ok(
-		"anim: every Tarek move is keyed (KMovesStone)",
+		"anim: every Tenzo move is keyed (KMovesStone)",
 		moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty()),
 		str(moves.filter(func(mv): return HunterAnim.km_sample(mv, 0.1).is_empty()))
 	)
 	var snd := SfxKits.NAMES.filter(func(s): return String(s).begins_with("br_"))
 	ok(
-		"sfx: every Tarek sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
+		"sfx: every Tenzo sound is loaded by Sfx", snd.size() >= 14 and snd.all(func(s): return Sfx.has(s)),
 		str(snd.filter(func(s): return not Sfx.has(s)))
 	)
 	await done(m)
@@ -809,9 +809,8 @@ func _hop_item61(m: Match, P: Hunter, K: DolmKit, home: Vector3, reset: Callable
 		float(ran["x"]) > float(plain["x"]) + 0.3, "run %.2f standing %.2f" % [float(ran["x"]), float(plain["x"])]
 	)
 
-## Item 26: Quakefall then the glider. Glide held from the hop, or pressed after a charge leap or an air
-## press: the glider opens, she never drops below where she took off (for the first 0.3s), and it sinks
-## like a normal glide.
+## Item 162b (replaces item 26's glide mid-Quakefall): glide held from the hop, a charge leap or an air press
+## never opens the glider while the Quakefall runs (AirLimits; DolmKit.locks_glide). Over the abyss it may.
 func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	for mode in ["hop", "leap", "air"]:
 		reset.call()
@@ -833,21 +832,17 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 			tap(m, P)
 			z0 = P.pos.y
 		var dove := K.dive
-		var floor_z := -Hunter.GLIDE_SINK * 0.3 - 0.02 if mode == "air" else -0.01     # (in the air: a glide's sink)
-		var low := 99.0
-		var sink := 0.0
+		var opened := false
 		var t := 0.0
 		P.inp["jump"] = true
-		while t < 0.3:
+		while t < 0.3 and K.dive:
 			P.inp["glide"] = true
 			m.step(DT)
 			t += DT
-			low = minf(low, P.pos.y - z0)
-			if P.gliding: sink = minf(sink, P.vel.y)
+			opened = opened or (P.gliding and K.dive)
 		ok(
-			"glide (item 26, %s): Quakefall, then glide opens the glider; height kept, a normal glide" % mode,
-			dove and P.gliding and not K.dive and low >= floor_z and sink >= -Hunter.GLIDE_SINK - 0.05,
-			"gliding %s dive %s low %.2f sink %.2f" % [P.gliding, K.dive, low, sink]
+			"glide (item 162b, %s): glide held through the Quakefall never opens the glider mid-move" % mode,
+			dove and not opened, "dove %s opened %s (%.2fs, %.1fm over the take-off)" % [dove, opened, t, P.pos.y - z0]
 		)
 		P.inp["glide"] = false
 		step(m, 0.8)

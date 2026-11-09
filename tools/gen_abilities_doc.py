@@ -5,7 +5,7 @@ def ab(i): return j(f"content/abilities/{i}.json")
 out = []
 w = out.append
 w("# Project Boki abilities\n")
-w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
+w("Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.\n")
 w("This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.\n")
 w("## Archetypes (the kit you play)\n")
 w("Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), X (the hunter ultimate, run level 6, rank 2 at 9; none yet) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. T is the Merge with your Boki (a full bond meter), R reloads. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).\n")
@@ -45,9 +45,6 @@ for c in ["light", "medium", "heavy"]:
     a = ab(j(f"content/classes/{c}.json")["dodge"])
     e = a["effects"][0]
     w(f"| {c.capitalize()} | **{a['name']}** ({e['speed']*e['time']:.1f}m) | {a.get('charges',1)} / {a['cooldown']}s | {a['desc']} |")
-w("\n### Kin dodge riders\n")
-w("The kin you brought adds a rider to every class dodge (`dodge_rider` in `content/kin_v2/<id>.json`).\n")
-w("| Kin | Rider | What it adds |\n|---|---|---|")
 KV = {}
 for f in sorted(os.listdir(os.path.join(R, "content/kin_v2"))):
     k = j("content/kin_v2/" + f); KV[k["id"]] = k
@@ -64,16 +61,6 @@ def stage(st):
     d = st["delivery"]
     t = d["type"] + (" %sm" % d["radius"] if "radius" in d else "")
     return t + ((": " + parts(st.get("effects", []))) if st.get("effects") else "")
-for kid, k in KV.items():
-    rd = k.get("dodge_rider")
-    if not rd: continue
-    bits = []
-    if rd.get("as") == "blink": bits.append("the dodge is an instant blink")
-    if rd.get("on_pass"): bits.append("what you pass through: " + parts(rd["on_pass"]))
-    for st in rd.get("on_start", []): bits.append("where you start: " + stage(st))
-    for st in rd.get("on_end", []): bits.append("where you stop: " + stage(st))
-    for md in rd.get("modifiers", []): bits.append("a second, shorter dodge a beat later")
-    w(f"| {k['name']} | **{rd['name']}** | {'; '.join(bits)} |")
 w("\n## RMB: weapon signature abilities (no archetype)\n")
 w("Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, landing circle, wall footprint or arc); release to cast. Rail Charge charges while held instead.\n")
 w("| Weapon | Class | Ability | Verb | Cooldown | What it does |\n|---|---|---|---|---|---|")
@@ -95,7 +82,7 @@ for f in sorted(os.listdir(os.path.join(R, "content/gear"))):
         pas.append(g)
 w("\nPassive gloves (no Q, stats only): " + "; ".join(f"**{g['name']}** ({g['desc']})" for g in pas) + "\n")
 w("## E, the kin's own ability, and the merge\n")
-w("Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (the Merge key, T by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.\n")
+w("Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C) and a merge (the Merge key, T by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.\n")
 def a2(i): return j(f"content/abilities_v2/{i}.json")
 for kid, k in KV.items():
     w(f"### {k['name']} ({' + '.join(k['animals'])}, {k['carry']['style']})\n")
@@ -104,7 +91,6 @@ for kid, k in KV.items():
     w(f"- **E: {e1['name']}** ({e1['stages'][0]['delivery']['type']}, {e1.get('cooldown', 8)}s): {e1.get('flavor', '')}")
     if e2: w(f"- **Auto: {e2['name']}** ({e2['stages'][0]['delivery']['type']}, {e2.get('cooldown', 8)}s): {e2.get('flavor', '')}")
     if k.get("throw"): w(f"- **Throw (C)**: stuns what it hits; also {parts(k['throw']['effects'])}.")
-    if k.get("dodge_rider"): w(f"- **Shift rider: {k['dodge_rider']['name']}**")
     w(f"- **Merge: {u['name']}** ({u['duration']}s): {u.get('flavor', '')}\n")
 w("## Element variants of shared verbs\n")
 w("Several verbs appear in more than one element, tuned to fit it:\n")
@@ -112,8 +98,8 @@ w("- **Hook / yank**: Hook Glove (neutral, drags to your feet or zips you to ter
 w("- **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bracewall (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).")
 w("- **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries melee), Refraction (prism, auto when hurt), Prism Wall (reflecting wall).")
 w("- **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).")
-w("- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places), Lunar dash rider.")
-w("- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud), Spore dash rider.\n")
+w("- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).")
+w("- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).\n")
 w("## Readability\n")
 w("- Holding RMB, Q, E or R shows the cast's shape before you let go: a lane for shots and rushes (with a tick at the far end), a range ring plus landing circle for lobs and leaps, the wall's footprint across your aim, a cone, or a ring round you (`Match._update_indicators`, shape from `AbilityDef.aim_spec` and, for kin, `KinText.aim`).")
 w("- Enemy area casts get a 0.32s filling ground marker before they land; leaps show their landing circle to everyone; fissures show their lane filling.")

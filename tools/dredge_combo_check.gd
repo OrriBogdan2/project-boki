@@ -403,7 +403,7 @@ func _all() -> void:
 		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
-	ok("reel: the braided rope is drawn (through rocks)", K.fx.rope_shown("rope%d" % P.get_instance_id()))
+	ok("reel: the stretched arm is drawn (through rocks)", K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -767,6 +767,11 @@ func _all() -> void:
 	P.ex_cd = 0.0
 	ak.aim_at(P, home + Vector3(9.0, 0, 0))
 	P.ak.on_dash(true)
+	ok(
+		"barge: the air pounce is 3.2 m x 1.35 x the dash feel once (3.7 m), same time as the ground",
+		absf(P.roll_t - dash_t) < 0.005 and absf(P.roll_speed * P.roll_t - one * 1.35) < 0.05,
+		"%.2f m in %.2fs, ground %.2f m in %.2fs" % [P.roll_speed * P.roll_t, P.roll_t, one, dash_t]
+	)
 	ak.step(m, dash_t + 0.02)
 	var air_quick := P.pos.x - home.x
 	ak.step(m, 0.3)
@@ -778,6 +783,24 @@ func _all() -> void:
 	ok(
 		"barge: further in the air than on the ground", air_d > ground_d * 1.15 and ground_d > 2.0,
 		"ground %.1f air %.1f" % [ground_d, air_d]
+	)
+	# the air pounce is its own slot: source Brute Dash (Air) 12.5 s, 2 s less per rank, ground charges untouched
+	var cd_r := []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		cd_r.append(K.long_dash_cd())
+	P.slot_lv["dash"] = 1
+	reset.call()
+	P.teleport(home + Vector3(0, 3.0, 0))
+	P.grounded = false
+	P.ex_cd = 0.0
+	P.dashes = P.max_dashes()
+	P.ak.on_dash(true)
+	var air_spent := P.max_dashes() - P.dashes
+	ok(
+		"barge air slot: its own 12.5 s recharge (10.5 / 8.5 at ranks 2 / 3), no ground charge spent",
+		absf(P.ex_cd - 12.5) < 0.01 and absf(cd_r[1] - 10.5) < 0.01 and absf(cd_r[2] - 8.5) < 0.01 and air_spent < 0.01,
+		"ex_cd %.2f ranks %s charge spent %.2f" % [P.ex_cd, str(cd_r), air_spent]
 	)
 	# --- Salvage: knocks stack, +2.5% health each, a knock heals, losing one when downed
 	reset.call()

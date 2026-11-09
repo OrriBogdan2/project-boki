@@ -11,6 +11,7 @@ var m: Match
 var w: World
 var P: Hunter
 var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
+const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
@@ -24,8 +25,8 @@ const SPAN_SKIP := ["Glider", "Gun", "Shield"]
 const T := {
 	"ground_input_frames":     ["<=", 1.0, "frames", "press to velocity change, same sim step"],
 	"ground_t95":              ["<=", 0.10, "s", "[game data] MaxAcceleration 4700-5400 uu/s2: top speed in ~0.09s"],
-	"ground_stop_t":           ["<=", 0.06, "s", "[spec] near-instant stop"],
-	"ground_stop_dist":        ["<=", 0.20, "m", "[spec] no floaty slide"],
+	"ground_stop_t":           ["~", [0.12, 0.25], "s", "[game data] braking 2220 uu/s2, friction 1 x2: SV ~0.18s"],
+	"ground_stop_dist":        ["~", [0.2, 0.5], "m", "[game data] SV slides ~0.38-0.49m"],
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
@@ -33,9 +34,12 @@ const T := {
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
+	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
 	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
-	"air_reverse_t":           ["~", [0.4, 0.75], "s", "[game data] AirControl 0.015, translated: steerable in one jump"],
+	"air_reverse_dv":          ["~", [0.5, 1.1], "m/s", "[game data] AirControl 0.015: a jump keeps its run-up"],
+	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
+	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
@@ -45,14 +49,20 @@ const T := {
 	"glide_open_hold_s":       ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t":           ["<=", 0.20, "s", "glider opens 'instantly' on input; brakes a terminal fall to sink rate"],
-	"glide_speed":             ["~", [6.2, 6.8], "m/s", "between [footage] ~5-5.5 and [spec] 7-10, leaning stronger (owner)"],
+	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
 	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
-	"glide_turn90_t":          ["<=", 0.30, "s", "responsive steering [est]"],
-	"glide_reverse_t":         ["<=", 0.45, "s", "brake by steering against heading [est]"],
+	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] the glide force: a turn has inertia (item 163)"],
+	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same force brakes a reversal (item 163)"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
 	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
-	"glide_swoop_speed":       [">=", 10.5, "m/s", "[game data] SwoopSpeedTransferRatio 2.5"],
+	"glide_swoop_speed":       [">=", 9.0, "m/s", "[game data] SwoopSpeedTransferRatio 2.5: far over cruise"],
 	"glide_swoop_faded":       ["<=", 10.0, "m/s", "[game data] SwoopSpeedFadeTime 1.5s, then the usual bleed"],
+	"dive_vy":                 ["~", [32.0, 32.5], "m/s", "[game data] GlideDiveZTargetSpeed -3250 uu/s, crouch held"],
+	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
+	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
+	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
+	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
+	"dive_swoop_speed":        ["~", [12.0, 15.0], "m/s", "[game data] swoop 2.5x the fall, capped at GLIDE_MAX"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[wiki] momentum preserved while gliding"],
 	"dashglide_2s_speed":      [">=", 9.0, "m/s", "[wiki] momentum preserved while gliding"],
@@ -195,7 +205,9 @@ func run(main: Node) -> void:
 	_ground()
 	_jump()
 	_glide()
+	_glide_dive()
 	_dash_glide()
+	_dash_exit()
 	_plain_dash()
 	_abyss_updraft()
 	_feather()
@@ -263,15 +275,18 @@ func _jump() -> void:
 	_reset(flat)
 	var g0 := P.pos.y
 	P.inp["jump"] = true
-	var first := -1; var apex := 0.0; var air := 0.0
+	var first := -1; var apex := 0.0; var air := 0.0; var v0 := 0.0
 	for i in 120:
 		m.step(DT)
-		if first < 0 and P.vel.y > 0.0: first = i + 1
+		if first < 0 and P.vel.y > 0.0:
+			first = i + 1
+			v0 = P.vel.y
 		apex = maxf(apex, P.pos.y - g0)
 		if not P.grounded: air += DT
 		elif i > 2: break
 	rec("jump_input_frames", first)
 	rec("jump_apex", apex)
+	rec("jump_speed_vs_source", v0 / SOURCE_JUMP_V)
 	rec("jump_airtime", air)
 	_air_control()
 	# coyote time: step off over open air (the walk-off path sets coyote), press jump k frames later
@@ -317,6 +332,7 @@ func _jump() -> void:
 ## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
 ## turn takes in the air).
 func _air_control() -> void:
+	var land_vx := 0.0
 	for mode in ["let_go", "reverse"]:
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
@@ -324,14 +340,14 @@ func _air_control() -> void:
 		var x0 := P.pos.x
 		P.inp["jump"] = true
 		P.inp["move"] = Vector2.ZERO if mode == "let_go" else Vector2(-1, 0)
-		var top := _hv(P).length()
-		var t_rev := 9.0
 		for i in 90:
 			m.step(DT)
-			if t_rev > 8.0 and P.vel.x <= -0.9 * top: t_rev = (i + 1) * DT
 			if P.grounded and i > 2: break
-		if mode == "let_go": rec("air_carry_m", P.pos.x - x0)
-		else: rec("air_reverse_t", t_rev)
+		if mode == "let_go":
+			rec("air_carry_m", P.pos.x - x0)
+			land_vx = P.vel.x
+		else:
+			rec("air_reverse_dv", land_vx - P.vel.x)
 
 # ---------------------------------------------------------------- glide
 func _glide_at(h: float) -> void:
@@ -453,6 +469,80 @@ func _glide_high() -> void:
 	rec("glide_swoop_speed", swoop)
 	rec("glide_swoop_faded", faded)
 
+# ---------------------------------------------------------------- glide dive
+## Crouch held under the glider plunges: its fall speed and ramp, the keys at a quarter of their force,
+## the cancel height, the timeout, and the speed a pull-out high up gives.
+func _glide_dive() -> void:
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	var t90 := -1.0
+	var peak := 0.0
+	var cancel_h := -1.0
+	var was_on := false
+	for i in 300:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i >= 30
+		var h_before := P.pos.y - flat.y
+		m.step(DT)
+		if i >= 30 and t90 < 0.0 and -P.vel.y >= HunterMove.dive_vy * 0.9:
+			t90 = (i - 29) * DT
+		if P.glide_dive.on:
+			peak = maxf(peak, -P.vel.y)
+		elif was_on and cancel_h < 0.0:
+			cancel_h = h_before
+		was_on = P.glide_dive.on
+		if P.grounded:
+			break
+	rec("dive_vy", peak)
+	rec("dive_vy_t", t90)
+	rec("dive_cancel_h", cancel_h)
+	# the keys in the plunge against the keys under the glider, from a standstill
+	var side := []
+	for diving in [true, false]:
+		_reset(flat + Vector3(0, 60.0, 0), false)
+		P.inp["jump"] = true
+		for i in 72:
+			P.inp["glide"] = true
+			P.inp["crouch"] = diving
+			m.step(DT)
+			if i == 0:
+				P.vel.x = 0.0     # drop the opening push: both runs steer from a standstill
+				P.vel.z = 0.0
+		for i in 12:
+			P.inp["glide"] = true
+			P.inp["crouch"] = diving
+			P.inp["move"] = Vector2(1, 0)
+			m.step(DT)
+		side.append(_hv(P).length())
+	rec("dive_steer_ratio", float(side[0]) / maxf(0.01, float(side[1])))
+	# let go of crouch high up: the glide catches you and the drop becomes speed
+	_reset(flat + Vector3(0, 60.0, 0), false)
+	P.inp["jump"] = true
+	var swoop := 0.0
+	for i in 132:
+		P.inp["glide"] = true
+		P.inp["crouch"] = i < 72
+		P.inp["move"] = Vector2(1, 0)
+		m.step(DT)
+		if i >= 72:
+			swoop = maxf(swoop, _hv(P).length())
+	rec("dive_swoop_speed", swoop)
+	# holding on: the plunge times out, and stays off until a fresh press
+	_reset(flat + Vector3(0, 360.0, 0), false)
+	P.inp["jump"] = true
+	var t_off := -1.0
+	for i in 690:
+		P.inp["glide"] = true
+		P.inp["crouch"] = true
+		P.glide_fuel = 1.0
+		var was := P.glide_dive.on
+		m.step(DT)
+		if was and not P.glide_dive.on and t_off < 0.0:
+			t_off = i * DT
+	rec("dive_timeout_s", t_off)
+	ok(not P.glide_dive.on, "dive_timeout_holds: a timed-out plunge stays off while crouch stays held")
+	_clear_inp()
+
 # ---------------------------------------------------------------- dash into glide
 func _dash_glide() -> void:
 	var kit_was := P.arch
@@ -486,6 +576,31 @@ func _dash_glide() -> void:
 # ---------------------------------------------------------------- abyss lift, updrafts
 var _rim := {}
 ## A rim tile with open sky beyond it: {at: ground point, dir: outward}.
+## The source numbers in content/rules/hunter_move.json, then a class dash on flat ground, let go once it
+## starts: it hands over at run speed and the walking stop takes it from there.
+func _dash_exit() -> void:
+	var brake := HunterMove.brake_decel
+	var fric := HunterMove.ground_friction
+	ok(is_equal_approx(brake, 22.2), "brake = BrakingDecelerationWalking 2220 uu/s2 (%s)" % brake)
+	ok(is_equal_approx(fric, 2.0), "ground_friction = GroundFriction 1.0 x2 (%s)" % fric)
+	ok(is_equal_approx(HunterMove.air_control, 0.015), "air_control = AirControl 0.015 (%s)" % HunterMove.air_control)
+	var kit_was := P.arch
+	P.set_arch("")
+	_reset(flat + Vector3(-3.0, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	var x_end := 0.0
+	for i in 120:
+		var was_rolling := P.roll_t > 0.0
+		m.step(DT)
+		P.inp["dash"] = false
+		if P.roll_t > 0.0: P.inp["move"] = Vector2.ZERO
+		if was_rolling and P.roll_t <= 0.0:
+			rec("dash_exit_run", _hv(P).length() / P.base_speed)
+			x_end = P.pos.x
+	rec("dash_exit_slide_m", P.pos.x - x_end)
+	P.set_arch(kit_was)
+
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
 func _plain_dash() -> void:
@@ -493,6 +608,8 @@ func _plain_dash() -> void:
 	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
 	for airborne in [false, true]:
 		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
+		m.fields.clear()      # (a Boki's patch sparkles on its own clock)
+		P.xp = 0.0            # (the long glide-dive rows feed the xp trickle: no level-up ring mid-dash)
 		var radial0: int = m.fx.radial
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
