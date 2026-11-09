@@ -88,13 +88,26 @@ func run(mn: Node, md := "all") -> void:
 		await _tender_support()
 		await combos.tender()
 		await ults.tender()
+		await _abyss("tender")
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await combos.rimewright()
 		await ults.rimewright()
 		await ults.burst_cap()
+		await _abyss("rimewright")
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The "over the abyss" rows (tools/abyss_cast.gd).
+func _abyss(who: String) -> void:
+	var ab = load("res://tools/abyss_cast.gd").new()
+	ab.main = main
+	if who == "tender":
+		await ab.tender()
+	else:
+		await ab.rimewright()
+	n += ab.n
+	fails += ab.fails
 
 func _free(m: Match) -> void:
 	m.queue_free()

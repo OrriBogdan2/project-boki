@@ -156,3 +156,11 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--hero-combo-check`) |
+|---|---|---|---|
+| Cinderfall (X) | [wiki Ghost's Summon Napalm] "at target location"; nothing about the abyss; footage has only the Ion Cannon beam crossing a chasm | the shell is aimed at the cursor (14 m) even over the abyss, the disc and column form there on his height, it lands and burns what hangs in it; the cooldown runs | `abyss: ...` rows of tools/abyss_cast.gd (`gunslinger()`) |

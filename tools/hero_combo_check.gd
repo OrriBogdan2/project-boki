@@ -34,6 +34,11 @@ func run(main_node: Node, who: String) -> void:
 	else:
 		await _gunslinger()
 		await ults.gunslinger()
+		var abyss = load("res://tools/abyss_cast.gd").new()
+		abyss.main = main
+		await abyss.gunslinger()
+		n += abyss.n
+		fails += abyss.fails
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

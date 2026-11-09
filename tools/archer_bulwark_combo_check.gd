@@ -25,6 +25,11 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+		var abyss = load("res://tools/abyss_cast.gd").new()
+		abyss.main = main_node
+		await abyss.bulwark()
+		n += abyss.n
+		fails += abyss.fails
 	n += ult.n + own.n + launch.n
 	fails += ult.fails + own.fails + launch.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])

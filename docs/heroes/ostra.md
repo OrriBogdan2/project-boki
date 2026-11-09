@@ -196,3 +196,11 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--ostra-combo-check`) |
+|---|---|---|---|
+| Brimseed (E), Nightwell (X) | nothing stated for the seed or the well (Swap over the abyss: hover, stated) | the seed and the well are walked from him to the cursor and planted at the last ground before the abyss (HeroZones.walk): they are placed on ground, never in the air; asserted `seed: planted at the aimed edge, not over the abyss` / `seed: stops short of the abyss` (tools/hero_pair_check.gd) | tools/hero_pair_check.gd |

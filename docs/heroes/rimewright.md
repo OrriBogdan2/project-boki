@@ -155,3 +155,11 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--rimewright-combo-check`) |
+|---|---|---|---|
+| Rink Wall (E), Rimelock (X) | [wiki Celeste] and footage: nothing stated for the wall or the ult over an edge (only Skate: ice islands) | the wall erupts at its reach point, or a metre ahead if that point is over the abyss; it slides on the island and stops at the lip; from the lip itself it still forms over the abyss. Rimelock is round her: the rink opens and chills a foe hanging over the abyss. Neither refunds | `abyss: ...` rows of tools/abyss_cast.gd (`rimewright()`) |
