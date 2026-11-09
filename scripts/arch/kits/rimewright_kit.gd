@@ -744,6 +744,14 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 func e_recastable() -> bool:
 	return not wall.is_empty() and bool(wall.get("sliding", false))
 
+## E while the wall slides; X in Rimelock's late crack window (earlier it only breaks the shell).
+func recast_open() -> Array:
+	if e_recastable():
+		return ["signature", "stop the wall"]
+	if not rime.is_empty() and float(rime["t"]) >= float(x_def()["hold"]) - float(x_def()["late"]):
+		return ["hunter_ult", "crack the shell open"]
+	return []
+
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
 		return true          # still in its tell

@@ -926,6 +926,8 @@ func in_e() -> bool:
 func e_recastable() -> bool:
 	return warchain.hooked()
 
+func recast_open() -> Array: return ["signature", "pull yourself in"] if e_recastable() else []
+
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
 func use_e() -> void:
 	if not slam_w.is_empty() and warchain.state == "ready":

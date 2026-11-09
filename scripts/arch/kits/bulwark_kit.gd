@@ -703,6 +703,12 @@ func _shield_slam() -> void:
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
 
+## The hammer is out and past its recall lockout: LMB calls it back.
+func recast_open() -> Array:
+	if mace.is_empty() or String(mace["st"]) == "back" or m.time - throw_at < float(lmb_def().get("recall_lock", 0.25)):
+		return []
+	return ["fire", "call the hammer back"]
+
 # ------------------------------------------------------------------ dash: Whirl / Shield Charge
 func on_dash(use_ex: bool) -> bool:
 	if ult.planted():

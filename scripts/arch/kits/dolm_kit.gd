@@ -533,6 +533,9 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 func extra_dashes() -> float:
 	return 1.0 if rank("dash") >= 3 else 0.0
 
+func recast_open() -> Array:
+	return ["dash", "hop again"] if hop.chaining() and int(hop.st["n"]) < int(hop.dd()["hops"]) else []
+
 ## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
 func on_dash(use_ex: bool) -> bool:

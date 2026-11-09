@@ -21,6 +21,7 @@ var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
+var rival_since := -1.0        # Match.time a rival hunter came in range (-1: none), for RecastHint
 var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
@@ -196,6 +197,8 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
+	if h.is_local():
+		RecastHint.track(self)
 
 func held(which: String) -> bool:
 	match which:
@@ -718,6 +721,8 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 func e_recastable() -> bool: return false
+## The recast window open now, for the first-time hint (RecastHint): [input action, "to ..." verb], [] when none.
+func recast_open() -> Array: return []
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
