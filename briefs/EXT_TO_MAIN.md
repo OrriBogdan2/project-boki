@@ -5759,6 +5759,12 @@ READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
 READY ext/home-verbs-anim c8bf505c3 (home player moves)
 READY ext/<branch> <sha> (<what>)
+
+## 2026-11-09 (job 20261109-133231-a4, deep, rpc1): ext/feel-first-cast-warm
+READY ext/feel-first-cast-warm 27d6f01f4 (first-cast warm: kit effect pools filled at match load, --first-cast-check)
+- New registered `--first-cast-check` (tools/first_cast_check.gd; `=gunslinger,mage` filter): each of the 12 Hunters in a fresh Training Area match loaded like Main (start + warm_up), LMB/RMB/E/R/dash/Q once, then twice more; FAIL = the first window's worst frame >8 ms over the cheaper repeat AND over the median; FAIL lines name the pipelines compiled and who made each node. DashPace._pipelines -> pipelines (public).
+- Cause of every big spike: kit effect libraries built and first drew their pools on the first cast, after warm_up's material scan (node building + pipeline compiles in one frame). Fix: ArchKit.warm_fx(at), called for every Hunter at the top of Match.warm_up (2 lines, before the headless return): VVFx.prewarm (one of every look + the local Hunter's 10 dash echoes), LDFx.prewarm (every pooled kind + the kit's crescent widths), CareLook.prewarm (every kind); PinFx builds the Spirit Walk aura with its pools. Overlap: ext/perf-load-shaders-1108 draws these libraries' shader constants and moves warm_up to warm_up.gd; the one wiring call moves with it (trivial conflict).
+- GPU (RTX 4090, Forward+), worst frame (ms) in the window after the FIRST press, before (job 20261109-151409-08411, rp2-0, 414bfce6a = main + the check) -> after (job 20261109-163536-28980, rp1-1, e159ff82c). Different pods, median frame 18-25 ms on both, so ±15 ms is pod noise; the 150-290 ms first-cast spikes (all with 3-9 pipeline compiles) are gone:
 | Hunter | LMB | RMB | E | R | DASH | Q |
 |---|---|---|---|---|---|---|
 | gunslinger | 291→28 | 25→62 | 28→30 | 33→33 | 69→32 | 33→35 |
