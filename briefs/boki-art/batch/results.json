@@ -25357,5 +25357,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pipewurm_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "umbrathere_card2",
+    "name": "Umbrathere (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrathere_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_card2",
+    "name": "Gongibbon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongibbon_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipewurm_card2",
+    "name": "Pipewurm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipewurm_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith_fix",
+    "name": "Zippelith (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_fix_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card2",
+    "name": "Umbrathere (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrathere_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith_fix",
+    "name": "Zippelith (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_fix_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith_fix",
+    "name": "Zippelith (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_fix_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zippelith_fix",
+    "name": "Zippelith (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_zippelith_fix_4.jpg",
+    "ok": true
   }
 ]
