@@ -65,7 +65,8 @@ func start() -> void:
 		_roll_on()         # the last chain's rock was still to come
 	spots = []
 	st = {
-		"n": 0, "phase": "crouch", "t": 0.0, "T": _flight(), "from": h.pos, "start": h.pos, "press": false, "left": 0.0
+		"n": 0, "phase": "crouch", "t": 0.0, "T": _flight(), "from": h.pos, "start": h.pos, "press": false, "left": 0.0,
+		"air": not h.grounded
 	}
 	dash_was = true
 	_aim_hop()
@@ -110,6 +111,8 @@ func spot_for(dir: Vector2, after: int) -> Dictionary:
 		var g: float = m.world.ground_at(p.x, p.z)
 		if not _clear(dir, want):
 			pass
+		elif bool(st.get("air", false)) and not h.grounded:
+			return {"at": Vector3(p.x, h.pos.y, p.z), "rock": false, "feet": h.pos.y}  # in the air
 		elif g <= World.VOID + 1.0:
 			if _ground_ahead(p, dir, far * after + 0.5):
 				return {"at": Vector3(p.x, h.pos.y - top, p.z), "rock": true, "feet": h.pos.y}
@@ -184,7 +187,7 @@ func tick(dt: float) -> void:
 	dash_was = down
 	if phase == "skid" and h.ctrl == "bot":
 		press()            # bots ride the whole chain
-	if h.grounded or phase != "crouch":
+	if (h.grounded or phase != "crouch") and not bool(st.get("air", false)):
 		_foot()
 	match phase:
 		"crouch":
@@ -263,6 +266,8 @@ func _tick_air(dt: float) -> void:
 			_raise(at, st["dir"])
 	if t > 0.08 and h.grounded:
 		_touchdown()
+	elif bool(st.get("air", false)) and t >= T:
+		drop()                  # an air hop ends at its own height: no landing, no rock
 	elif t > T + 0.5:
 		_crash()
 

@@ -158,11 +158,11 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | dolm | ground dash -> E | Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the end of the chain, then raised from there. | buffered to the dash's end |
 | dolm | ground dash -> ult (X) | Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-hop; the ridge rises on release. | fires mid-dash |
 | dolm | ground dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-hop like any glove. | fires mid-dash |
-| dolm | air dash -> LMB | Not in the data or footage (the source shows no air dash). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| dolm | air dash -> RMB | Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam. | fires mid-dash |
+| dolm | air dash -> LMB | Item 183: with a charge, the air dash is the same Rock Hop as the ground one (the source has one Landslide, no air variant), so the punch goes off mid-hop and the hop carries on, as on the ground. | fires mid-dash; dash momentum carries |
+| dolm | air dash -> RMB | Item 183: the same Rock Hop as on the ground, so the charge starts mid-hop and the slam lands where the hop does. With no charge left the shared long dash runs and the dive waits for its end. | fires mid-dash; dash momentum carries |
 | dolm | air dash -> E | Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash). | buffered to the dash's end |
-| dolm | air dash -> ult (X) | Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash. | fires mid-dash |
-| dolm | air dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-dash like any glove. | fires mid-dash |
+| dolm | air dash -> ult (X) | Item 183: the same Rock Hop as on the ground. The aim is placed at the cursor, so it starts mid-hop. | fires mid-dash |
+| dolm | air dash -> Q glove | Not in the data or footage (the glove is ours). It goes off mid-hop like any glove. | fires mid-dash |
 | dolm | LMB -> dash | Not in the data or footage. Shift during the punch's wind-up hops at once; the hold carries on and the punch goes on release. | the dash goes, the ability keeps running |
 | dolm | RMB -> dash | Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rock Hop (the circle comes along, the charge carries on). | the dash goes, the ability keeps running |
 | dolm | E -> dash | Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift hops at once and they rise anyway. | the dash goes, the ability keeps running |
@@ -346,3 +346,21 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ostra | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | ostra | ult (X) -> jump | Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once. | **exception:** the move is refused while it runs (owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once) |
 | ostra | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+## Air dash against ground dash (owner item 183)
+
+Every Hunter's air dash is its ground dash or a special one the source has, never the generic long dash on a charged press. "same" = the same move, clip and charge; "special" = a sourced difference.
+
+| Hero | Ground dash | Air dash | Verdict | Source |
+|---|---|---|---|---|
+| Ghost (gunslinger) | Slipstep (cd 8.5 s) | a tap in the air slides 2/3 of the ground Slipstep (`air_k`), the same charge and clip | special | venator.md: the air slide is shorter |
+| Kael (juggernaut) | Rampage, 4.5 m in 0.17 s (cd 10.4 s) | with a charge: the same Rampage (`jug_dash`, one charge); in the Meteor Smash's gather it rides the drive with no wind-up, the gather pose kept; out of charges the class shoulder charge (`jug_exdash`) | same | juggernaut.md: one Rampage. Item 183 moved the generic long dash off the charged press |
+| Cinder (ashwick) | Soot Ram, 3.4 m in 0.33 s (cd 9.0 s) | air 8.0 m in 0.24 s (ground 3.4 m in 0.28 s) | skipped | parity 11 (queued) |
+| Elluna (tender) | Relay Step, 4.2 m in 0.174 s (cd 7.0 s) | its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown | special | mooshmoosh.md and owner item 24 |
+| Tarek (dolm) | Rock Hop, 2.8 m in 0.26 s (cd 12.0 s) | with a charge: the same Rock Hop (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; out of charges the class long dash (`breah_exdash`) | same | breah.md: one Landslide, no air variant. Item 183 moved the generic long dash off the charged press |
+| Hem (archer) | Spirit Walk (cd 9.5 s) | with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot) | same | pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press |
+| Grimble (dredge) | Barge, 3.2 m in 0.16 s (cd 10.0 s) | `air_k` carry on the Barge | skipped | parity 13 (queued) |
+| Claire (rimewright) | Skate (cd 13.0 s) | the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`) | same | tamsin.md: one Skate |
+| Vex (mage) | Wirerun (cd 8.0 s) | the same Wirerun (7.5 to 13 m by rank, one charge, same clip) | same | vireo.md: one Wirerun, no air variant |
+| Oath (bulwark) | 360 Smash (cd 8.0 s) | with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash | same | bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press |
+| Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
+| Void (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
