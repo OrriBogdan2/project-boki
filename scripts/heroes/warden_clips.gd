@@ -286,7 +286,7 @@ func _p(nm: String, v: Variant) -> void:
 	tree.set("parameters/" + nm, v)
 
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
-func _pick(s: Dictionary, dt: float) -> Dictionary:
+func pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
 	for k in d.get("procedural", []):
 		var v = s.get(k, null)
@@ -294,6 +294,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	var climb := _climb(st, s)
+	if not climb.is_empty():
+		return climb
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
@@ -342,11 +345,21 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
 
+## The mantle clip at how far up the face the body is (so it never lags the rise), or the ledge clip on its own
+## clock while floating back up; {} when this Hero has no such clip (the data lists them under "states").
+func _climb(st: Dictionary, s: Dictionary) -> Dictionary:
+	var mk := float(s.get("mantle", -1.0))
+	if mk >= 0.0 and st.has("mantle"):
+		return {"clip": st["mantle"], "t": mk * lib.get_animation(String(st["mantle"])).length}
+	if bool(s.get("ledge", false)) and st.has("ledge"):
+		return {"clip": st["ledge"], "t": -1.0}
+	return {}
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
 	var want := force
 	if want.is_empty():
-		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
+		want = pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	if not proc and bool(want.get("upper", false)):

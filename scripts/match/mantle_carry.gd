@@ -68,3 +68,12 @@ static func exit(h: Hunter, hv: Vector2, n: Vector2, mv: Vector2, v_in: float) -
 		hv += d * (want - along)
 	h.carry_mini = {"t": MINI_S, "v": want, "dir": d}
 	return hv
+
+## How far up the face a ledge rise has got, 0 (at the foot) to 1 (at the lip); -1 when you are not rising. The
+## Warden's mantle clip plays at this phase, so its pose is the body's own progress and never lags it.
+static func rise_k(h: Hunter) -> float:
+	var lf := h.lfloat
+	if lf.is_empty():
+		return -1.0
+	var y0 := float(lf["y0"])
+	return clampf((h.pos.y - y0) / maxf(float(lf["lip"]) + 0.12 - y0, 0.05), 0.0, 1.0)

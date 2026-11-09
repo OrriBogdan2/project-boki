@@ -1,6 +1,7 @@
 extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
-## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
+## attacks (and a mantle and ledge, when it has the clips) at the match camera (--close: a side view at hip height, to
+## read the arms and feet), for the animation audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced).
@@ -93,6 +94,9 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	var atk: Array = ATTACKS[id]
 	for i in 2:
 		await _keyed(model, sync, clips, dir.path_join("atk%d" % (i + 1)), String(atk[i]), frames)
+	for climb in ["mantle", "ledge"]:
+		if clips.lib.has_animation(climb):
+			await _keyed(model, sync, clips, dir.path_join(climb), climb, frames)
 	model.queue_free()
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.

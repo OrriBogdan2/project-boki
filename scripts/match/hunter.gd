@@ -2697,7 +2697,7 @@ func _try_ledge_grab(dt: float) -> void:
 	lfloat = {"lip": float(best["gz"]), "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
-		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
+		"at": Vector2(pos.x, pos.z), "y0": pos.y, "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),
 		"v_in": carry_v,                                      # the speed you came in with comes over the top (item 185b)
 		"max_t": clampf((float(best["gz"]) - pos.y) / LRISE_SPEED, 0.1, 0.9) * (1.35 if downed else 1.0) + 0.3}
 	vel.y = maxf(vel.y, LRISE_MIN)
@@ -3128,7 +3128,7 @@ func _anim_state(stretch: float) -> void:
 	var mk := -1.0
 	if pad.has("face"):
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
-	s["mantle"] = mk
+	s["mantle"] = mk if mk >= 0.0 else MantleCarry.rise_k(self)
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
 	s["drink"] = (1.0 - drink_t / DRINK_TIME) if drink_t > 0.0 else -1.0

@@ -160,6 +160,18 @@ posts scroll at the move speed).
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
 
+## Mantle and ledge clips
+
+A ledge rise (`Hunter.lfloat`) now feeds the anim state `mantle` = how far up the face the body is (`MantleCarry.rise_k`,
+0 at the foot, 1 at the lip), so a keyed mantle clip is read at that phase and cannot lag the body; `ledge` (the float
+back up from the abyss) plays on its own clock and holds its last pose. `mage` (Sparkle), `bulwark` (Albert), `thief`
+(Sable) and `ostra` (Motley) have both clips (0.8 s mantle, 1.0 s ledge), keyed with `tools/art1/climb_clips.py` and the
+poses in `tools/art1/climb_data.py` (two-bone IK onto the rig's own bones, no Blender; rerun it after any rebuild of the
+`.glb`: `python3 tools/art1/climb_clips.py <ryzz|sable|breaker|ostra>`). Sparkle scrambles with one knee up; Sable
+kips over the lip with her legs kicked up behind; Albert plants the shield, heaves and drags the hammer; Motley has no
+legs, so he rises on his hover and settles. Every other Hunter keeps the procedural pose (data `procedural`).
+`--anim-shots` adds mantle and ledge strips for a Hunter that has the clips.
+
 ## What is left
 
 Split into backlog items per Hunter (role build):
