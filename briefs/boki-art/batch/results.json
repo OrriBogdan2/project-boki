@@ -16908,5 +16908,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_starcap_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_starcap",
+    "name": "Starcap (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_starcap_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_proofhop",
+    "name": "Proofhop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_proofhop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_proofhop",
+    "name": "Proofhop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_proofhop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper",
+    "name": "Loafhopper (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper",
+    "name": "Loafhopper (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w29",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper",
+    "name": "Loafhopper (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w29",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w29_2.jpg",
+    "ok": true
   }
 ]
