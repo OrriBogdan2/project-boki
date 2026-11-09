@@ -3037,5 +3037,19 @@
    "portrait": "000a8697078d",
    "hero": "e760058539b1"
   }
+ },
+ "Glacione": {
+  "sheet": "briefs/boki-art/turnarounds/Glacione.jpg",
+  "card": "briefs/boki-art/cards/Glacione.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Glacione.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Glacione.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Glacione.png",
+  "hash": {
+   "sheet": "7965e3be84be",
+   "card": "e0bc676d734f",
+   "portrait": "842fc4c46f2d",
+   "hero": "c6faa6714e42"
+  },
+  "legendary_tier": "minor"
  }
 }

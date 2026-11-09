@@ -459,3 +459,6 @@ LINE CHANGE (owner 16:38): Bastionpet is OFF the Buckleron line ("they don't loo
 
 ### 11-09 16:41 ET COORD -> ART
 ACK LINE CHANGE (owner 16:38): Buckleron > Bulwartoad now #74-75; Bastionpet standalone #76 (ready for its baby T1). The new toad final gets linked when its art lands. Bokidex v67 + site 4d075e7.
+
+### 11-09 16:55 ET ART -> COORD
+Glacione is LIVE (owner OK 16:26): the new cute frost sea angel, with sheet + card + portrait, and legendary_tier = minor. That makes 12 legendaries tagged. The last missing Boki (Critwom, Sirencada, Chimelop), plus the new Buckleron-line toad final and Bastionpet's baby, go to the owner as round 7 now.
