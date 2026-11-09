@@ -7,7 +7,7 @@
     ],
     "runs": 2,
     "aspect": "16:9",
-    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image. Only change: give it bigger, brighter, more lively glossy eyes and a happier smile than image 1.",
     "size": "2K"
   },
   {

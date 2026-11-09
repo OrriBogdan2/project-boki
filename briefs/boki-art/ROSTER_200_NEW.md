@@ -1052,3 +1052,6 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Colours:** frosted seafoam green and pale aqua, with a cobalt blue pebble accent.
 - **Avoid:** an axolotl, sharp crystals, shells, sand, a bottle.
 - **Archetype:** cute
+
+## Idea bank (owner)
+- **Red panda** (owner 02:08): use a red panda in a different, non-sea-glass design later (the sea-glass red panda was liked as an animal).
