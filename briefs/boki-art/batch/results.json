@@ -50543,5 +50543,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_skateron_pz_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_reapant_pz",
+    "name": "Reapant (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pz",
+    "name": "Skateron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanternmit_pz",
+    "name": "Lanternmit (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_pz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_pz",
+    "name": "Reapant (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_pz",
+    "name": "Sporcupine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reapant_pz",
+    "name": "Reapant (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_reapant_pz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pz",
+    "name": "Skateron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_pz",
+    "name": "Sporcupine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_pz_2.jpg",
+    "ok": true
   }
 ]
