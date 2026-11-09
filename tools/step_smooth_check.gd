@@ -129,7 +129,7 @@ func _shots(main: Node, tiers: Array) -> void:
 		for i in 160:
 			var before := P.pos.y
 			m._process(DT)
-			await main.get_tree().process_frame
+			await RenderingServer.frame_post_draw
 			if snap_at < 0 and P.pos.y > before + 0.3: snap_at = i
 			log.append("frame %d  body.y %.3f  drawn.y %.3f  cam.y %.3f" % [i, P.pos.y, P.position.y, m.cam.position.y])
 			if snap_at >= 0 and (i - snap_at) in STRIP_AT or (snap_at < 0 and i == 0):
@@ -146,9 +146,10 @@ func _shots(main: Node, tiers: Array) -> void:
 
 func _crop(main: Node) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
+	img.convert(Image.FORMAT_RGBA8)   # the viewport gives RGB8; blit_rect needs matching formats
 	var at := Vector2i(m.cam.unproject_position(P.position + Vector3(0, 0.9, 0)))
 	var r := Rect2i(at - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
-	var out := Image.create(CROP.x, CROP.y, false, img.get_format())
+	var out := Image.create(CROP.x, CROP.y, false, Image.FORMAT_RGBA8)
 	out.blit_rect(img, r, r.position - (at - CROP / 2))
 	return out
 
