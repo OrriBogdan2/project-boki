@@ -1,7 +1,7 @@
 # Owner 01:32 ET 11-09: the ink-pool design that was "Umbrink" is its own line (Blotlet > Slog > Sloggoth). Umbrink is redone as a
 # real Ink-family mink in the original direction ("soaked jet-black, smoking brush"), with its own stance.
 _SL='briefs/boki-art/evolutions/Slog.jpg'
-CQ('Blotlet',_SL); SPECS[-1]['id']='c_blotlet'
+SPECS[:]=[s for s in SPECS if s['id']!='c_blotlet']; CQ('Blotlet',_SL)
 CQ('Sloggoth',_SL); SPECS[-1]['id']='c_sloggoth'
 _INK3=(" It is a grown-up Ink form: clearly bigger than image 1 (about twice its size), longer and stronger, and the same stoat species as image 1 (Ermink's"
        " face mask shape, brush tail and ink markings), never a blob, a pool or a ghost.")
