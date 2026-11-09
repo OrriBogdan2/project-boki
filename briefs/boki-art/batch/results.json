@@ -22970,5 +22970,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_ringrove_w31_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_rimink_w31",
+    "name": "Rimink (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_rimink_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_rimink_w31",
+    "name": "Rimink (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_rimink_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ringrove_w31",
+    "name": "Ringrove (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_ringrove_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ringrove_w31",
+    "name": "Ringrove (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_ringrove_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ringrove_w31",
+    "name": "Ringrove (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_ringrove_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_sporcupine_w31",
+    "name": "Sporcupine (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_sporcupine_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_sporcupine_w31",
+    "name": "Sporcupine (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_sporcupine_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_teapotamus_w31",
+    "name": "Teapotamus (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_teapotamus_w31_1.jpg",
+    "ok": true
   }
 ]
