@@ -145,14 +145,6 @@ func teardown() -> void:
 	ult.clear()
 	_end_needle()
 
-## Her dashes (a slide, tap or held, and the air roll): the rifle keeps going when the dash's LMB row says so.
-func fires_in_dash() -> bool:
-	return String(flow.row("lmb")["mode"]) == "fire"
-
-## Her slide and air dash go where she moves; the rifle stays on the cursor, only her legs follow the dash.
-func aims_in_dash() -> bool:
-	return fires_in_dash()
-
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
@@ -268,7 +260,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex:
 		if not spend_dash(true):
 			return true
-		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08}, true)
+		travel(float(h.cdat.get("ex_dist", 4.6)) * 0.9, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.08})
 		play("gunslinger_dash_ex")
 		fx().echo(h, echo_col(), 0.45, ECHO_ALPHA, ECHO_BACK)
 		last_dash_kind = "air"
