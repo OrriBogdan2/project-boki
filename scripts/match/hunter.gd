@@ -796,7 +796,7 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
-	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
+	if downed or CcLockout.blocks(self, "jump") or grap.size() > 0 or out or (ak and ak.cast_locked()):
 		return
 	KinFollow.on_jump(self)         # riding a mount: you come off it into the jump
 	if not lfloat.is_empty():
@@ -927,8 +927,8 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, ABYSS_LIP_VY), ABYSS_BRAKE * dt)
 
 func can_glide() -> bool:
-	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
+	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and not CcLockout.blocks(self, "glide") \
+		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not shot_down \
 		and not (ak != null and ak.no_glide()) and not AirLimits.glide_locked(self)
 
 func _open_glider() -> void:
@@ -1121,10 +1121,10 @@ const DASH_BUFFER := 0.18
 const DASH_JUMP_CARRY := 0.55
 
 func do_dash() -> void:
-	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
+	if downed or out or Hex.active(self):
 		return
-	if KitStatus.grounded(self) and not DredgeKit.reeling(self):
-		# Grounded (a Thief's Bola): no dash, jump or glide (a reeling Dredge still barges)
+	if CcLockout.blocks(self, "dash", "gnd" if DredgeKit.reeling(self) else ""):
+		# stunned, Dazed, rooted or Grounded (a reeling Dredge, Grounded by his own hook, still barges)
 		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
@@ -1279,9 +1279,10 @@ func can_fire() -> bool:
 		return false
 	if ak and not ak.can_shoot():
 		return false
-	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
+	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or CcLockout.blocks(self, "lmb")):
 		return true          # shooting from a held slide
-	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
+	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or CcLockout.blocks(self, "lmb") or grap.size() > 0 or gliding \
+		or charge.size() > 0)
 
 const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]
 var shot_n := 0
@@ -1980,7 +1981,8 @@ func sim(dt: float) -> void:
 	armor_wait = maxf(0.0, armor_wait - dt)
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
-		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
+		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty() \
+			and not CcLockout.blocks(self, "crouch")
 	var want_bloom := -0.3 if crouch else 0.0
 	if not grounded: want_bloom = 1.0
 	elif Vector2(vel.x, vel.z).length() > 1.5 and not crouch: want_bloom = 0.45
@@ -2161,7 +2163,7 @@ func _physics(dt: float) -> void:
 	if grap.size() > 0:
 		_grapple(dt)
 		return
-	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
+	var mv: Vector2 = Vector2.ZERO if CcLockout.blocks(self, "move") else inp["move"]
 	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
@@ -2556,8 +2558,8 @@ func _update_glide(dt: float) -> void:
 			heat_burn -= 20.0
 			hurt(20.0, null, {"src": "heat"})
 	# an overheated glider stays open (slow and sinking) until you land or get hit again
-	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
+	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed \
+		and not CcLockout.blocks(self, "glide") and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	if gliding and not _handoff.is_empty() and want and can:
 		_take_glide_handoff()       # (movefeel) a burst that ended with the glider still open

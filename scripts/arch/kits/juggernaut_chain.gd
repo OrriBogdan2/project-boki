@@ -76,7 +76,7 @@ func press() -> void:
 		"pulling", "arriving":
 			pass                    # the pull is committed: no second pull, no stop
 		_:
-			if float(k.cd["e"]) > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
+			if float(k.cd["e"]) > 0.0 or CcLockout.blocks(h, "travel"):
 				h._ab_feedback("k1", "deny")
 				return
 			_throw()

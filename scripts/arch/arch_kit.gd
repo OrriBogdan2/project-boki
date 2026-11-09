@@ -213,7 +213,7 @@ func aim_lock() -> Vector2: return Vector2.ZERO
 func no_glide() -> bool: return false
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+	return h.downed or h.out or h.dropping or h.riding or CcLockout.blocks(h, "abil") or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >

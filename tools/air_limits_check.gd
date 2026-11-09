@@ -7,6 +7,9 @@ extends RefCounted
 ##     kit's move runs to the landing, as Tarek's Quakefall does).
 ##  3. A free fall with Shift mashed: no chain of dashes, never more than the hero's ground charges in FALL_S
 ##     (a kit's own air version, like Vex's air taps, spends those charges; item 183 audits each air dash).
+##  4. CC lockouts (CcLockout, content/rules/cc_lockouts.json, docs/COMBAT.md), one assert per row fixed on
+##     11-09: Grounded or rooted, a held glide never opens in a fall; rooted, Space doesn't jump; stunned, no
+##     crouch and no tonic; Dazed, no dash, jump or RMB (a Daze locks like a stun).
 
 const HEIGHT := 60.0
 const HOLD_S := 0.35            # s a hold is charged on the ground before it's carried off the ledge
@@ -67,7 +70,8 @@ func _match(main: Node, arch: String) -> Match:
 	return m
 
 func _clear(h: Hunter) -> void:
-	for k in ["dash", "sec", "sec_hold", "sig", "ult", "jump", "throw", "fire", "glide", "glide_btn", "x_down"]:
+	for k in ["dash", "sec", "sec_hold", "sig", "ult", "jump", "throw", "fire", "glide", "glide_btn", "x_down",
+			"crouch"]:
 		h.inp[k] = false
 	h.inp["move"] = Vector2.ZERO
 
@@ -192,6 +196,67 @@ func _fall(m: Match, home: Vector3, arch: String) -> void:
 	h.vel = Vector3.ZERO
 	_steps(m, 30)
 
+## 4. What a status forbids, on the first hero (the table is the same for every Hunter).
+func _cc(m: Match, home: Vector3, arch: String) -> void:
+	var h: Hunter = m.player
+	for kind in ["gnd", "root"]:
+		_clear(h)
+		h.teleport(home + Vector3(0, HEIGHT, 0))
+		h.vel = Vector3.ZERO
+		h.grounded = false
+		_lock(h, kind, 2.0)
+		h.inp["glide"] = true
+		var opened := false
+		for i in int(1.0 / Match.DT):
+			m.step(Match.DT)
+			opened = opened or h.gliding
+		ok(not opened, "%s %s: holding glide in a fall never opens the glider" % [arch, kind])
+		_land(m, h, home)
+	_lock(h, "root", 1.0)
+	h.do_jump()
+	_steps(m, 3)
+	ok(h.grounded and h.vel.y <= 0.0, "%s rooted: Space doesn't jump (vy %.2f)" % [arch, h.vel.y])
+	_land(m, h, home)
+	h.belt[0] = {"id": "tonic", "n": 2, "cd": 0.0}
+	h.hp = h.max_hp * 0.5
+	_lock(h, "stun", 1.0)
+	h.inp["crouch"] = true
+	UtilityBelt.press(h, 0)
+	_steps(m, 3)
+	ok(not h.crouch and h.drink_t <= 0.0, "%s stunned: no crouch (%s) and no tonic (drink %.2f)" % [
+		arch, h.crouch, h.drink_t])
+	_land(m, h, home)
+	_ready_all(h)
+	_lock(h, "daze", 1.0)
+	var dashes0 := h.dashes
+	var cd0: Dictionary = h.ak.cd.duplicate()
+	h.inp["dash"] = true
+	h.inp["sec"] = true
+	h.inp["sec_hold"] = true
+	h.do_jump()
+	_steps(m, 6)
+	ok(h.roll_t <= 0.0 and h.dashes == dashes0 and h.grounded and not h.ak.rmb_down and h.ak.cd == cd0,
+		"%s Dazed: no dash, jump or RMB (roll %.2f, cds %s)" % [arch, h.roll_t, h.ak.cd])
+	_land(m, h, home)
+
+func _lock(h: Hunter, kind: String, secs: float) -> void:
+	match kind:
+		"stun": h.stun_t = secs
+		"root": h.root_t = secs
+		"gnd": KitStatus.apply(h, "gnd", secs)
+		"daze": KitStatus.apply(h, "rat", secs)
+
+func _land(m: Match, h: Hunter, home: Vector3) -> void:
+	_clear(h)
+	h.stun_t = 0.0
+	h.root_t = 0.0
+	h.set_meta("gnd_until", 0.0)
+	KitStatus.clear_rattled(h)
+	h.gliding = false
+	h.teleport(home)
+	h.vel = Vector3.ZERO
+	_steps(m, 30)
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	for arch in Arch.ORDER:
@@ -201,6 +266,8 @@ func run(main: Node) -> void:
 		_hold(m, home, arch, "rmb")
 		_hold(m, home, arch, "lmb")
 		_fall(m, home, arch)
+		if arch == Arch.ORDER[0]:
+			_cc(m, home, arch)
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("AIRLIM DONE, failures: %d" % bad)

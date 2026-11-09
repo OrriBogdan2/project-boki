@@ -125,6 +125,17 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | sight_range | 24 |
 | sight_places_kept | 3 |
 
+## cc_lockouts (`content/rules/cc_lockouts.json`)
+
+What each crowd-control status forbids a Hunter (CcLockout, scripts/combat/cc_lockout.gd; table and sources in docs/COMBAT.md). Acts: move (walk and air control), dash (Shift), lmb (weapon), abil (RMB, E, R), travel (an ability that moves the caster), jump, glide, crouch, item (a belt item: drink, repair kit). Slow, knock-up, Static and Chill forbid nothing, so they have no row.
+
+| Setting | Value |
+|---|---|
+| stun | ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"] |
+| daze | ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"] |
+| root | ["move", "dash", "travel", "jump", "glide"] |
+| gnd | ["dash", "travel", "jump", "glide"] |
+
 ## chest_keys (`content/rules/chest_keys.json`)
 
 

@@ -434,7 +434,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 			"%s, knock %s, %s" % [slid, knocked, str(seen)])
 	C.ac.fresh(T)
 	KitStatus.apply(T, "rat", 1.4)
-	C.ok("Vex audit: Dazed is a damage window only, no slow (the data)",
+	C.ok("Vex audit: Dazed adds no slow (it locks like a stun instead: CcLockout)",
 			KitStatus.rattled(T) and T.slow_t <= 0.0, "slow %.2f for %.2f s" % [T.slow_k, T.slow_t])
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
