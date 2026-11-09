@@ -1,5 +1,5 @@
 {
-	"_doc": "What an RMB or E press does during another ability's wind-up or recovery (CastQueue, scripts/arch/cast_queue.gd; docs/heroes/cast_queue.md). Per hero: the move that owns the body (ArchKit.move_slot: 'rmb', 'e' or 'x') -> the slot pressed in it -> {mode, source}. 'queue' (the shared rule, and a missing row): the press is held and goes the step the move ends. The exceptions: 'fire' (it goes at once, the move runs on) and 'drop' (refused with the deny cue). A recast of the pressed slot (e_recastable) is the kit's own and always passes. 'note' says why a hero has no rows.",
+	"_doc": "What an RMB or E press does during another ability's wind-up or recovery (CastQueue, scripts/arch/cast_queue.gd; docs/heroes/cast_queue.md). Per hero: the move that owns the body (ArchKit.move_slot: 'rmb', 'e' or 'x') -> the slot pressed in it -> {mode, source}. 'queue' (the shared rule, and a missing row): the press is held and goes the step the move ends (a stun that ends it keeps the press DashFlow's BUFFER_S past it). The exceptions: 'fire' (it goes at once, the move runs on) and 'drop' (refused with the deny cue). A recast of the pressed slot (e_recastable) is the kit's own and always passes. 'note' says why a hero has no rows.",
 	"default": "queue",
 	"heroes": {
 		"gunslinger": {

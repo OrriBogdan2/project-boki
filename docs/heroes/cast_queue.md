@@ -3,7 +3,7 @@
 
 _Generated from `content/rules/cast_queue.json`._
 
-One row per hero and pair, read from `content/rules/cast_queue.json` by `CastQueue` (`scripts/arch/cast_queue.gd`): RMB or E pressed while another ability's wind-up or recovery owns the body (the kit's `move_slot`). The shared rule (a missing row) holds the press and lets it go the step that move ends; a row is an exception only where the source or an owner call differs. A recast of the pressed slot is the kit's own, and presses during a dash are DashFlow's (dash_interactions.md). "Source" is what the source hero does; "Ours" is what the game does now. `--cast-queue-check` presses every pair mid-cast.
+One row per hero and pair, read from `content/rules/cast_queue.json` by `CastQueue` (`scripts/arch/cast_queue.gd`): RMB or E pressed while another ability's wind-up or recovery owns the body (the kit's `move_slot`). The shared rule (a missing row) holds the press and lets it go the step that move ends (a stun that ends the move keeps the press DashFlow's 0.15 s past it); a row is an exception only where the source or an owner call differs. A recast of the pressed slot is the kit's own, and presses during a dash are DashFlow's (dash_interactions.md). "Source" is what the source hero does; "Ours" is what the game does now. `--cast-queue-check` presses every pair mid-cast.
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|

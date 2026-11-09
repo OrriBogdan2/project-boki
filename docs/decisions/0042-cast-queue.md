@@ -18,9 +18,10 @@ one such press (Brall's Scorching Spin "DURING Feysteel Chain pull") and are sil
 
 ## Decision
 Option 2, with the explicit `Fsm` pattern (STATE_MACHINES section 1). `CastQueue` (scripts/arch/cast_queue.gd,
-OPEN/HELD) runs at the end of `ArchKit.tick`; each kit names the slot that owns the body in `move_slot()`. The
+OPEN/HELD/LATE) runs at the end of `ArchKit.tick`; each kit names the slot that owns the body in `move_slot()`. The
 shared rule queues the press and lets it go the step the move ends, like DashFlow's missing row ("nothing is
-dropped"). Rows in content/rules/cast_queue.json carry "fire" or "drop" with their source;
+dropped"), and keeps it DashFlow's BUFFER_S past a stun that ends the move (LATE), one grace for both
+buffers. Rows in content/rules/cast_queue.json carry "fire" or "drop" with their source;
 docs/heroes/cast_queue.md is generated from them. Option 3 stays the M3a job; `move_slot()` is what it replaces.
 
 ## Consequences

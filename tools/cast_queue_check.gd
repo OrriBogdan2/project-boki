@@ -4,7 +4,9 @@ extends RefCounted
 ## a step of its end), "fire" (goes while the move runs) or "drop" (never goes). Each trial starts the move, presses
 ## the other slot mid-move and watches; a queued trial also asserts the queue machine's log ("fired") and that it
 ## refused nothing. A hero with a "note" has no move that holds the body (no trials). --cast-queue-check=<id>,<id>
-## runs only those heroes. Never touches the save. Reuses --dash-flow-check's arena, ready-up and "went off" probes.
+## runs only those heroes. Two stun trials drive the machine straight: a move a stun ends keeps the press LATE, which
+## goes as the stun lifts, or at DashFlow.BUFFER_S if it holds. Never touches the save. Reuses --dash-flow-check's
+## arena, ready-up and "went off" probes.
 
 const START_WAIT := 90          # steps: the move shows up within this (a chain hooks, then pulls)
 const MID := 4                  # steps into the move before the press (mid-cast, not on its first frame)
@@ -38,6 +40,7 @@ func run(main: Node) -> void:
 					m.queue_free()
 					await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(flow_check._on_used)
+	_stun_trials(main)
 	print("CASTQ DONE, trials: %d, failures: %d" % [trials, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -107,6 +110,41 @@ func _start(m: Match, move: String) -> bool:
 			recast = true
 			flow_check._press("e")
 	return false
+
+## A held press whose move a stun ended: it goes the step the stun lifts, else at BUFFER_S (the slot's own path
+## then answers with its deny cue), and the queue is open again with no refusal.
+func _stun_trials(main: Node) -> void:
+	var m: Match = flow_check._match(main, "ostra")
+	var h: Hunter = flow_check.hunter
+	flow_check._ready_up(m)
+	var q: CastQueue = h.ak.queue
+	for lifts in [true, false]:
+		trials += 1
+		var refused_was := q.fsm.refused
+		q.slot = "rmb"
+		q.during = "x"
+		q.fsm.go(CastQueue.S.HELD, "trial")
+		h.stun_t = 1.0
+		h.inp["sec"] = false
+		var went := -1
+		for i in 20:
+			q.route(Match.DT)
+			if lifts and i == 2:
+				h.stun_t = 0.0
+			if h.inp["sec"]:
+				went = i
+				break
+		var what := "stun %s: went at step %d (%s)" % ["lifts" if lifts else "holds", went,
+				q.fsm.history[-1].strip_edges()]
+		ok(q.fsm.history[-2].contains("can't act") and q.fsm.is_in(CastQueue.S.OPEN)
+				and q.fsm.refused == refused_was, what)
+		if lifts:
+			ok(went == 3, "%s: the press goes the step the stun lifts" % what)
+		else:
+			ok(went >= 0 and absf(went * Match.DT - DashFlow.BUFFER_S) <= Match.DT,
+					"%s: the press goes at BUFFER_S" % what)
+	h.stun_t = 0.0
+	m.queue_free()
 
 func _foe(m: Match) -> Hunter:
 	for other in m.hunters:

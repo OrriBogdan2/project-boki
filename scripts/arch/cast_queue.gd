@@ -5,14 +5,16 @@ extends RefCounted
 ## ends. A hero's exceptions, where the source or an owner call differs, are rows in content/rules/cast_queue.json:
 ## "fire" (it goes at once and the move runs on) or "drop" (refused with the deny cue). docs/heroes/cast_queue.md
 ## is the table. A press of a slot during its own move, or an E that is a recast, is the kit's (recasts and the
-## Smash during a Smash buffer there), and so are presses during a dash (DashFlow routes those first).
+## Smash during a Smash buffer there), and so are presses during a dash (DashFlow routes those first). A move a stun
+## ends keeps the press DashFlow's BUFFER_S past it, so a short stun still casts; a long one answers with the deny cue.
 
 enum S {
 	OPEN,   ## no press waits; a press in a move goes by its row (queue -> HELD)
 	HELD,   ## one press waits for `during` to end; it goes then (OPEN "fired"), and a newer press replaces it
+	LATE,   ## the move ended while the hunter can't act (ArchKit.busy); the press goes when he can, or at BUFFER_S
 }
-const NAMES: PackedStringArray = ["OPEN", "HELD"]
-const TABLE := {S.OPEN: [S.HELD], S.HELD: [S.OPEN]}
+const NAMES: PackedStringArray = ["OPEN", "HELD", "LATE"]
+const TABLE := {S.OPEN: [S.HELD], S.HELD: [S.OPEN, S.LATE], S.LATE: [S.OPEN]}
 const SLOTS := ["rmb", "e"]
 const MODES := ["queue", "fire", "drop"]
 const FEEDBACK := {"rmb": "sec", "e": "k1"}       # the deny cue's slot name (Hunter._ab_feedback)
@@ -39,14 +41,18 @@ static func mode_of(hero: String, pressed: String, move: String) -> String:
 	return String(row.get("mode", rules()["default"]))
 
 ## Each step, after the kit's tick and before Hunter reads the RMB and E presses: lets a held press go once its
-## move is over, then routes this step's presses made in a move.
+## move is over (or waits out a stun that ended it, at most BUFFER_S), then routes this step's presses made in a move.
 func route(dt: float) -> void:
 	fsm.tick(dt)
 	var h := kit.h
 	var move := kit.move_slot()
 	if fsm.is_in(S.HELD) and move != during:
-		h.inp[DashFlow.KEY_OF[slot]] = true
-		fsm.go(S.OPEN, "fired %s after %s" % [slot, during])
+		if kit.busy():
+			fsm.go(S.LATE, "%s ended, can't act" % during)
+		else:
+			_fire()
+	elif fsm.is_in(S.LATE) and (not kit.busy() or fsm.since >= DashFlow.BUFFER_S):
+		_fire()
 	if move == "":
 		return
 	for pressed in SLOTS:
@@ -62,6 +68,11 @@ func route(dt: float) -> void:
 			"drop":
 				h.inp[key] = false
 				h._ab_feedback(FEEDBACK[pressed], "deny")
+
+## The held press goes now, through the slot's own path (which casts or answers with its deny cue).
+func _fire() -> void:
+	kit.h.inp[DashFlow.KEY_OF[slot]] = true
+	fsm.go(S.OPEN, "fired %s after %s" % [slot, during])
 
 ## A merge or a new kit: nothing held goes off.
 func clear() -> void:
