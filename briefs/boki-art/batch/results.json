@@ -44677,5 +44677,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_eclipsowl_p86_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_chandelotl_p86",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelotl_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelotl_p86",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chandelotl_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m1",
+    "name": "Flarmink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m2",
+    "name": "Flarmink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m1",
+    "name": "Flarmink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m1",
+    "name": "Flarmink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m1",
+    "name": "Flarmink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_m3",
+    "name": "Flarmink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_flarmink_m3_3.jpg",
+    "ok": true
   }
 ]
