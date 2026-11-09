@@ -102,7 +102,7 @@ func _throw() -> void:
 			if state == "throwing" and is_instance_valid(f) and not f.dead: _hook(f, f.pos),
 		"on_shot_end": func(at: Vector3, why: String, e: Ent):
 			if state != "throwing" or e != null: return
-			if why == "wall": _hook(null, at)
+			if why == "wall" and not _on_shield(at): _hook(null, at)
 			else: _miss(at)}))
 	if k.m.shots.size() > shots0 and k.m.shots[-1]["by"] == h:
 		var sd: Dictionary = k.m.shots[-1]
@@ -111,6 +111,14 @@ func _throw() -> void:
 		if sd.has("deco") and is_instance_valid(sd["deco"]):
 			(sd["deco"] as Node3D).visible = false
 	k.vfx("chain_throw")
+
+## Whether the hook ended on a foe's raised shield (an aegis): that is a block, not a wall to anchor to.
+func _on_shield(at: Vector3) -> bool:
+	for w in k.m.verbs.walls:
+		if w["follow"] and int(w["team"]) != k.h.team and Vector2(at.x, at.z).distance_to(
+				Geometry2D.get_closest_point_to_segment(Vector2(at.x, at.z), w["a"], w["b"])) < float(w["th"]) + 0.6:
+			return true
+	return false
 
 func _hook(f: Ent, at: Vector3) -> void:
 	var ed := data()
