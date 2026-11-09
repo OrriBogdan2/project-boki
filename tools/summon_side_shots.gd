@@ -58,10 +58,13 @@ func run(main_node: Node) -> void:
 	var cam := vp.get_camera_3d()
 	for k in m.kins:
 		var o: Hunter = k.owner_h
+		var at := Vector2i(cam.unproject_position(k.global_position))
+		var ring := SideRings.shown(k.ring).to_html(false)
 		print("SUMMONSIDE kin %s owner %s team %s ring %s at %s" % [k.rec.get("name", "?"), o.name if o else "wild",
-			o.team if o else -1, SideRings.shown(k.ring).to_html(false), Vector2i(cam.unproject_position(k.global_position))])
+			o.team if o else -1, ring, at])
 	for h in m.hunters:
-		print("SUMMONSIDE hunter %s team %d at %s" % [h.name, h.team, Vector2i(cam.unproject_position(h.global_position))])
+		var spot := Vector2i(cam.unproject_position(h.global_position))
+		print("SUMMONSIDE hunter %s team %d at %s" % [h.name, h.team, spot])
 	print("SUMMONSIDESHOTS ", dir)
 	main.get_tree().quit(0)
 
