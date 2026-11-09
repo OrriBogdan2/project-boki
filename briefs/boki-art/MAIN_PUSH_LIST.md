@@ -49,3 +49,5 @@ Lyrewing (harp wings), Canvastross, Tidalisk, Thistlynx/Briarlynx (cartoon face)
 ## 4. Not in the Bokidex yet (need entries)
 57 live new-species Boki from ROSTER_200 have art but no Bokidex entry (list at the end of LIVE_MANIFEST.md). Add entries
 from ROSTER_200_NEW.md + LIVE_MANIFEST.json.
+
+Renames: see briefs/boki-art/NAME_CHANGES.md (13 old -> new names; owner authorized 04:54 ET, may veto). Art files keep old names; use LIVE_MANIFEST.json "display_name" and keep the old name as an alias in game data.
