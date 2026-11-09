@@ -29977,5 +29977,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_nymphane_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_reelacine",
+    "name": "Reelacine",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_reelacine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_morelkin",
+    "name": "Morelkin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_morelkin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_morelkin",
+    "name": "Morelkin",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_morelkin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_malletary",
+    "name": "Malletary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_malletary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_maracoil",
+    "name": "Maracoil",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_maracoil_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_maracoil",
+    "name": "Maracoil",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_maracoil_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_nymphane",
+    "name": "Nymphane",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_nymphane_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_reelacine",
+    "name": "Reelacine",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_reelacine_2.jpg",
+    "ok": true
   }
 ]
