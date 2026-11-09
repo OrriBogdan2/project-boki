@@ -4782,3 +4782,4 @@ ART puffamus 8.5 briefs/boki-art/cards/Puffamus.jpg kind=card
 ART seamwyrm 8.6 briefs/boki-art/cards/Seamwyrm.jpg kind=card
 ART sporcupine 8.3 briefs/boki-art/cards/Sporcupine.jpg kind=card
 ART stormit 8.4 briefs/boki-art/cards/Stormit.jpg kind=card
+READY ext/anim-time-kael bfe9512dc (Kael clip retime: 'lead' key in WardenClips, four Kael leads so each strike frame lands on the kit's hit, kael_anim_check asserts in --juggernaut-combo-check, timing table in docs/heroes/juggernaut.md)
