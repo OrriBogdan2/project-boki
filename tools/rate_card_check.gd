@@ -74,6 +74,9 @@ func run(main: Node) -> void:
 	edit = host.get_child(host.get_child_count() - 1).find_children("*", "LineEdit", true, false)[0]
 	edit.text_submitted.emit("   ")
 	ok(not QuickNote.typing and Feedback.queued() == 3, "an empty line saves nothing")
+	QuickNote.open(host)
+	host.get_child(host.get_child_count() - 1).free()      # the screen went away with the box open
+	ok(not QuickNote.typing, "the box leaving with its screen never leaves the keys stuck")
 	var left := [0]
 	online[0] = true
 	RateCard.gate(host, func(): left[0] += 1)

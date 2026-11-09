@@ -53,14 +53,14 @@ static func finish() -> void:
 		st["done"].append(Net.VERSION)
 	_save(st)
 
-## Queues an answer, then tries to deliver the queue.
-static func submit(host: Node, scores: Dictionary, note: String) -> void:
+## Queues an answer, then tries to deliver the queue (quick notes included); `after` as in flush().
+static func submit(host: Node, scores: Dictionary, note: String, after := Callable()) -> void:
 	var st := _load()
 	var who := "%s (%s)" % [Save.d.get("name", "Hunter"), Save.d.get("profile", {}).get("id", "?")]
 	st["queue"].append({"version": Net.VERSION, "player": who.left(64), "scores": scores,
 			"note": note.left(NOTE_MAX), "minutes_played": snappedf(minutes(), 0.1)})
 	_save(st)
-	flush(host)
+	flush(host, after)
 
 ## Queues a quick note with its context ({hunter, boki, t, pos, preset, fps}) and a small base64 screenshot
 ## ("" for none). It is only saved here: the rate card, a quit or the next launch send it.

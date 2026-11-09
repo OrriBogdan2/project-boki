@@ -31,9 +31,13 @@ static func open(host: Control) -> void:
 	line.max_length = Feedback.NOTE_MAX
 	v.add_child(line)
 	var close := func() -> void:
+		if not typing:
+			return
 		typing = false
 		if m and is_instance_valid(m): m.paused = was_paused
 		panel.queue_free()
+	# the box goes away with the screen (match over, back to the title): never leave the keys stuck
+	panel.tree_exiting.connect(func() -> void: typing = false)
 	line.text_submitted.connect(func(text: String) -> void:
 		if text.strip_edges() != "":
 			Feedback.add_note(text.strip_edges(), ctx, shot)
@@ -42,6 +46,9 @@ static func open(host: Control) -> void:
 		if ev.is_action_pressed("ui_cancel"):
 			line.accept_event()
 			close.call())
+	# a click into the world must not strand the box without the keyboard: it keeps the focus until closed
+	line.focus_exited.connect(func() -> void:
+		if typing and line.is_inside_tree(): line.grab_focus.call_deferred())
 	host.add_child(panel)
 	line.grab_focus()
 

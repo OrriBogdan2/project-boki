@@ -11,15 +11,19 @@ static func gate(host: Control, then: Callable) -> void:
 	if Feedback.due():
 		open(host, then)
 	elif Feedback.queued() > 0:
-		var once := [false]
-		var go := func() -> void:
-			if not once[0]:
-				once[0] = true
-				then.call()
-		Feedback.flush(host, go)
-		host.get_tree().create_timer(Feedback.QUIT_WAIT).timeout.connect(go)
+		Feedback.flush(host, _waiting(host, then))
 	else:
 		then.call()
+
+## `then` wrapped to run once: when the queue is sent, or after Feedback.QUIT_WAIT seconds at most.
+static func _waiting(host: Node, then: Callable) -> Callable:
+	var once := [false]
+	var go := func() -> void:
+		if not once[0]:
+			once[0] = true
+			then.call()
+	host.get_tree().create_timer(Feedback.QUIT_WAIT).timeout.connect(go)
+	return go
 
 static func open(host: Control, then: Callable) -> Control:
 	var scores := {}
@@ -47,10 +51,11 @@ static func open(host: Control, then: Callable) -> Control:
 			return
 		finished[0] = true
 		Feedback.finish()
-		if sent:
-			Feedback.submit(host, scores, note.text)
 		layer.queue_free()
-		then.call()
+		if sent:
+			Feedback.submit(host, scores, note.text, _waiting(host, then))      # the answer and any quick notes
+		else:
+			then.call()
 	var send := UI.primary("Send", close.bind(true))
 	send.disabled = true
 	for row in ROWS:
