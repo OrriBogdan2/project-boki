@@ -611,7 +611,7 @@ func _all() -> void:
 	P.slot_lv["kin"] = 3
 	K._cloak_blast()
 	ok(
-		"cloak rank 3: shield +30%", shield1 > 5.0 and absf(P.shield / shield1 - 1.3) < 0.02,
+		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
 		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
@@ -620,6 +620,30 @@ func _all() -> void:
 	K.cd["rmb"] = 0.0
 	ak.step(m, 0.1)
 	ok("cinder: a second charge at rank 3", K.rmb_charges() == 2 and K.ch_rmb >= 2.0, "charges %.1f" % K.ch_rmb)
+	# upgrade parity (docs/heroes/ashwick.md): the source's tier II / III+IV numbers per slot
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	var pb1 := K.power("sec")
+	var pc1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([
+			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
+			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("sec") / pb1, K.power("kin") / pc1,
+			K.rank_k("rank_shield", "kin", 1.0),
+		])
+	ok("upgrade parity: Cinderbolt cooldown 7 -> 5.8 -> 4.7 and damage +25% / +50%",
+			near.call(up[1][0], 5.8) and near.call(up[2][0], 4.7)
+			and near.call(up[1][3], 1.25) and near.call(up[2][3], 1.5), str(up))
+	ok("upgrade parity: Ram recharge 9 -> 8.25 -> 7.5", near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5), str(up))
+	ok("upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
+			near.call(up[1][2], 8.9) and near.call(up[2][2], 7.3) and near.call(up[1][4], 1.25)
+			and near.call(up[2][4], 1.5) and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.8), str(up))
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 1
 	reset.call()

@@ -23,11 +23,15 @@ about 14, held lower for the same cap) and slows 30%. Its cooldown follows the s
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
 slide tap 4.6 m and hold 7 m.
 
-## Ranks (kit data pass)
-Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own and matches the source's rank IV:
-Burr Charge resets on a knock, Slipstep gives a speed burst when a slide ends, Longneedle takes 30% off its cooldown
-for every hunter it hits (the base is 20% once). The source's earlier upgrades (-1.5s twice on the grenade and the
-slide, +20% twice on the beam) collapse into the shared step.
+## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Vex: each slot reads
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Ghost, `Upg:` lines.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Burr Charge | -1.5s cooldown x2, tier IV: resets on a knock | 5.85s / 5.2s, reset on a knock | 5.4s / 4.3s, reset on a knock at 3 |
+| Space Slipstep | -1.5s recharge x2, tier IV: +25% speed 2s after a slide | 7.65s / 6.0s, speed burst at 3 | 7.4s / 6.3s, +25% speed 2s at 3 |
+| E Longneedle | +20% damage x2, tier IV: 30% shave per hunter | cooldown 10.35s / 9.2s, damage +15% / +30%, shave at 3 | cooldown 11.5s flat, damage +20% / +40%, 30% shave per hunter at 3 |
 
 ## Audit (Nov 3 23:40)
 
