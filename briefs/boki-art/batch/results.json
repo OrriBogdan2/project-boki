@@ -65124,5 +65124,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_soakybara_r4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_crofthorn_r4",
+    "name": "Crofthorn",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_crofthorn_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_tinbrock_r4",
+    "name": "Tinbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_tinbrock_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lockatara_r4",
+    "name": "Lockatara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lockatara_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_anchorhorn_r4",
+    "name": "Anchorhorn",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_anchorhorn_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geysirbara_r4",
+    "name": "Geysirbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_geysirbara_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_reapant_r4",
+    "name": "Reapant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_reapant_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geysirbara_r4",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_geysirbara_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_tinbrock_r4",
+    "name": "Tinbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_tinbrock_r4_2.jpg",
+    "ok": true
   }
 ]
