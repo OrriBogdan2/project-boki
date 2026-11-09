@@ -4,7 +4,7 @@ Owner: "make sure all the stuff we improved and agreed on is clear for main to p
 Art files live on ext/agent-briefs. Full per-Boki paths: LIVE_MANIFEST.md / LIVE_MANIFEST.json (card = main image,
 sheet = turnaround, portrait = Dex portrait, cutout PNG for UI).
 
-## 0. Bokidex already updated (04:13 ET) — do not overwrite with an older build
+## 0. Bokidex: coordinator owns publishing (from 04:20 ET). Art session only keeps LIVE_MANIFEST.json current; see CHANNEL.md.
 The art session ported the live art into the Bokidex artifact (version 30): dex/img/hero/<id>.webp (cutout of the Dex
 portrait) and dex/img/turn/<id>.webp (turnaround) for 110 Boki, and dex/dex.json now points at them with heroKind "art",
 heroAt/built = 04:13 ET so the new art wins over older approved gens. If main rebuilds dex.json, rebuild from the current
@@ -17,7 +17,7 @@ Terrasloth, etc.) comes back.
 | Cut: Puffamus | Teapotamus > Chuggamus (2 stages) |
 | Cut: Bellowary | Bellowlet > Furnacowary (2 stages) |
 | Cut: Frothisk | Bubblisk > Tidalisk (2 stages); Tidalisk is a new design (generating) |
-| Cut: Lashyx, Amanitusk | Starters have ONE final: Vespyx > Vespox > Glaivyx; Mycroll > Sporcupine > Ringrove. Remove the starter branch-by-affinity rule (GAME_RULES_NOV8.md) |
+| Cut: Lashyx, Amanitusk, Geodelotl | Starters have ONE final: Vespyx > Vespox > Glaivyx; Mycroll > Sporcupine > Ringrove. Remove the starter branch-by-affinity rule (GAME_RULES_NOV8.md) |
 | Renamed | Orbeetle -> Orbitle (Pokemon name clash); old Pyrraven art is now Embrook (t2); Pyrraven t3 is new |
 | Terrasloth | no longer a sloth: greenhouse pangolin (art live); name can stay or change (owner to confirm) |
 | New: Effigeetle line | Effigeetle > Effigoon (faceless defensive cocoon, generating) > Mortarfly (artillery butterfly, live) |
