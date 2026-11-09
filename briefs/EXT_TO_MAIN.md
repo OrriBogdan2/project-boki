@@ -5138,3 +5138,145 @@ READY ext/hair-typed-calls c60bae226 (HeroHair: 14 untyped cap.call -> one typed
 READY ext/anim-gait-albert 4cbdf0d255e61dee65706336fe99093b2a51f597 (job 20261109-070415-a2, rpc1; merge after ext/anim-quality-audit, and it contains ext/anim-slide-tune merged in. Albert (bulwark) gait at his size: run cadence 4.4 to 3.5 steps/s and walk 3.4 to 2.6 (breaker.json loco foot_mps [3.1, 7.4], rate 0.65), stride [1.35, 1.55] so the slower clip still covers the ground: run slide 15% to 11%, walk 16%, counter +0.68 (shield arm 0.5; a 0.2 hammer-arm sway was tried, counter +0.80, but it dragged the chained head behind his heels at floor level, so the hammer keeps its authored low carry in front); move speed untouched (4.85 game data; audit at 4.65). anim-audit times the cadence between crossings (was quantised to 0.8 steps/s); anim-shots --close pulls back with the Hunter height so a 2 m Albert fits the side view. Open: at a 3.4 m/s jog the walk/run blend slides 80%, gate reads the run only. Checks: --anim-audit 12 FAIL 0 (bulwark slide 11% counter 0.68), --bulwark-combo-check 145/0, --clip-check 0, health --strict OK, gen_wiki --check 47 unchanged. GPU strips jobs 20261109-075129-29629 (before) / 20261109-084035-17731 (after), docs/art/anim_audit/bulwark.jpg)
 READY ext/parity-no-riders-meeko 0d6177875 (Meeko Empowered +40% range/double wind-back and Hearthlight self_k 0.33 removed: source silent, fields and code deleted; Empowered = cue only, she is healed like an ally; tender.md, KIT_PARITY, card text; tender-combo 89/0, kit-combo 39/0, archetype 379/0, health --strict OK, gen_wiki --check OK)
 READY ext/neve-scarf-ribbon fd5c099d1 (Claire frost-scarf tails: two pooled cloth ribbons off the neck wrap, hang at rest, stream on run/skate, frost-white to teal, off at Low; hero-vfx-check asserts)
+
+## 04:05 ET 11-09 — Boki art tick (f28-f39): redesign directions graded; top pick of each now generating sheet+card+portrait (wave79). Live this tick: Chandelotl candy-cobra sheet+card+portrait; Nettlynx, Sporcupine, Teapotamus, Umbrink(alt), Barokat(round), Vespox(recoloured) sheets/cards/portraits; Zippelith tail fixed; Anchorbill restored to the exact approved run; 8 new-species turnarounds; 25 cards; 12 portraits.
+- NAME CLASH: "Orbeetle" (Gravigrub line t2) is an existing Pokemon name; renamed to Orbitle (working name). Please rename in the roster/data.
+ART barokat_b1 8.4 briefs/boki-art/batch/out/c_barokat_b1_3.jpg kind=concept status=owner-review
+ART barokat_cloud 8.3 briefs/boki-art/batch/out/c_barokat_cloud_1.jpg kind=concept status=owner-review
+ART barrelmander_ga 7.7 briefs/boki-art/batch/out/c_barrelmander_ga_4.jpg kind=concept status=owner-review
+ART barrelmander_gb 8.3 briefs/boki-art/batch/out/c_barrelmander_gb_4.jpg kind=concept status=owner-review
+ART barrelmander_gc 7.7 briefs/boki-art/batch/out/c_barrelmander_gc_3.jpg kind=concept status=owner-review
+ART briarlynx_la 7.7 briefs/boki-art/batch/out/c_briarlynx_la_1.jpg kind=concept status=owner-review
+ART bucketmander_ga 7.9 briefs/boki-art/batch/out/c_bucketmander_ga_2.jpg kind=concept status=owner-review
+ART bucketmander_gb 8.0 briefs/boki-art/batch/out/c_bucketmander_gb_1.jpg kind=concept status=owner-review
+ART bucketmander_gc 8.2 briefs/boki-art/batch/out/c_bucketmander_gc_3.jpg kind=concept status=owner-review
+ART chandelapi_m1 7.7 briefs/boki-art/batch/out/c_chandelapi_m1_1.jpg kind=concept status=owner-review
+ART chandelapi_m2 8.1 briefs/boki-art/batch/out/c_chandelapi_m2_2.jpg kind=concept status=owner-review
+ART chandelapi_m3 7.7 briefs/boki-art/batch/out/c_chandelapi_m3_3.jpg kind=concept status=owner-review
+ART chandelapi_m4 7.8 briefs/boki-art/batch/out/c_chandelapi_m4_4.jpg kind=concept status=owner-review
+ART cisternmander_ga 8.1 briefs/boki-art/batch/out/c_cisternmander_ga_4.jpg kind=concept status=owner-review
+ART cisternmander_gb 7.6 briefs/boki-art/batch/out/c_cisternmander_gb_4.jpg kind=concept status=owner-review
+ART cisternmander_gc 7.8 briefs/boki-art/batch/out/c_cisternmander_gc_4.jpg kind=concept status=owner-review
+ART eclipsowl_e1 7.9 briefs/boki-art/batch/out/c_eclipsowl_e1_1.jpg kind=concept status=owner-review
+ART eclipsowl 8.3 briefs/boki-art/batch/out/c_eclipsowl_e2_2.jpg kind=concept status=owner-review
+ART eclipsowl_e4 8.0 briefs/boki-art/batch/out/c_eclipsowl_e4_1.jpg kind=concept status=owner-review
+ART eclipsowl_e5 8.4 briefs/boki-art/batch/out/c_eclipsowl_e5_4.jpg kind=concept status=owner-review
+ART effigoon_c1 8.0 briefs/boki-art/batch/out/c_effigoon_c1_3.jpg kind=concept status=owner-review
+ART effigoon_c3 7.7 briefs/boki-art/batch/out/c_effigoon_c3_4.jpg kind=concept status=owner-review
+ART effigoon_c4 7.8 briefs/boki-art/batch/out/c_effigoon_c4_1.jpg kind=concept status=owner-review
+ART glaciatee_s1 8.3 briefs/boki-art/batch/out/c_glaciatee_s1_1.jpg kind=concept status=owner-review
+ART glaciatee_s2 7.9 briefs/boki-art/batch/out/c_glaciatee_s2_2.jpg kind=concept status=owner-review
+ART glaciatee_s3 8.5 briefs/boki-art/batch/out/c_glaciatee_s3_4.jpg kind=concept status=owner-review
+ART glaciatee_s4 7.7 briefs/boki-art/batch/out/c_glaciatee_s4_3.jpg kind=concept status=owner-review
+ART glaciatee_s5 8.2 briefs/boki-art/batch/out/c_glaciatee_s5_2.jpg kind=concept status=owner-review
+ART glaivyx_g1 7.8 briefs/boki-art/batch/out/c_glaivyx_g1_3.jpg kind=concept status=owner-review
+ART glaivyx_g10 7.5 briefs/boki-art/batch/out/c_glaivyx_g10_1.jpg kind=concept status=owner-review
+ART glaivyx_g2 8.2 briefs/boki-art/batch/out/c_glaivyx_g2_4.jpg kind=concept status=owner-review
+ART glaivyx_g3 7.7 briefs/boki-art/batch/out/c_glaivyx_g3_2.jpg kind=concept status=owner-review
+ART glaivyx_g4 8.3 briefs/boki-art/batch/out/c_glaivyx_g4_4.jpg kind=concept status=owner-review
+ART glaivyx_g6 7.8 briefs/boki-art/batch/out/c_glaivyx_g6_1.jpg kind=concept status=owner-review
+ART glaivyx_g7 8.0 briefs/boki-art/batch/out/c_glaivyx_g7_3.jpg kind=concept status=owner-review
+ART glaivyx_g8 8.6 briefs/boki-art/batch/out/c_glaivyx_g8_2.jpg kind=concept status=owner-review
+ART glaivyx_g9 7.8 briefs/boki-art/batch/out/c_glaivyx_g9_3.jpg kind=concept status=owner-review
+ART gravitank_g1 7.7 briefs/boki-art/batch/out/c_gravitank_g1_4.jpg kind=concept status=owner-review
+ART gravitank_g2 8.3 briefs/boki-art/batch/out/c_gravitank_g2_1.jpg kind=concept status=owner-review
+ART gravitank_g3 7.6 briefs/boki-art/batch/out/c_gravitank_g3_3.jpg kind=concept status=owner-review
+ART gravitank_g4 7.7 briefs/boki-art/batch/out/c_gravitank_g4_4.jpg kind=concept status=owner-review
+ART lanceron_k1 7.8 briefs/boki-art/batch/out/c_lanceron_k1_4.jpg kind=concept status=owner-review
+ART lanceron_k2 8.3 briefs/boki-art/batch/out/c_lanceron_k2_1.jpg kind=concept status=owner-review
+ART lanceron_k4 8.4 briefs/boki-art/batch/out/c_lanceron_k4_4.jpg kind=concept status=owner-review
+ART lanceron_k5 7.5 briefs/boki-art/batch/out/c_lanceron_k5_2.jpg kind=concept status=owner-review
+ART lunowl_m1 7.8 briefs/boki-art/batch/out/c_lunowl_m1_2.jpg kind=concept status=owner-review
+ART lunowl_m2 8.5 briefs/boki-art/batch/out/c_lunowl_m2_1.jpg kind=concept status=owner-review
+ART lunowl_m3 8.0 briefs/boki-art/batch/out/c_lunowl_m3_1.jpg kind=concept status=owner-review
+ART lunowl_m4 8.3 briefs/boki-art/batch/out/c_lunowl_m4_3.jpg kind=concept status=owner-review
+ART lunowl_m5 8.1 briefs/boki-art/batch/out/c_lunowl_m5_3.jpg kind=concept status=owner-review
+ART mortarfly_a1 8.2 briefs/boki-art/batch/out/c_mortarfly_a1_1.jpg kind=concept status=owner-review
+ART mortarfly 8.3 briefs/boki-art/batch/out/c_mortarfly_a2_2.jpg kind=concept status=owner-review
+ART mortarfly_a3 7.9 briefs/boki-art/batch/out/c_mortarfly_a3_3.jpg kind=concept status=owner-review
+ART mortarfly_a5 7.7 briefs/boki-art/batch/out/c_mortarfly_a5_3.jpg kind=concept status=owner-review
+ART pyrraven_d2 7.8 briefs/boki-art/batch/out/c_pyrraven_d2_1.jpg kind=concept status=owner-review
+ART pyrraven_d3 8.3 briefs/boki-art/batch/out/c_pyrraven_d3_1.jpg kind=concept status=owner-review
+ART pyrraven_d5 8.4 briefs/boki-art/batch/out/c_pyrraven_d5_4.jpg kind=concept status=owner-review
+ART pyrraven_d6 7.7 briefs/boki-art/batch/out/c_pyrraven_d6_1.jpg kind=concept status=owner-review
+ART reapant_n1 7.6 briefs/boki-art/batch/out/c_reapant_n1_4.jpg kind=concept status=owner-review
+ART reapant_n2 8.0 briefs/boki-art/batch/out/c_reapant_n2_3.jpg kind=concept status=owner-review
+ART reapant_n3 7.6 briefs/boki-art/batch/out/c_reapant_n3_3.jpg kind=concept status=owner-review
+ART reapant_n4 8.1 briefs/boki-art/batch/out/c_reapant_n4_2.jpg kind=concept status=owner-review
+ART reapant_n5 7.7 briefs/boki-art/batch/out/c_reapant_n5_4.jpg kind=concept status=owner-review
+ART ringrove_r1 7.8 briefs/boki-art/batch/out/c_ringrove_r1_3.jpg kind=concept status=owner-review
+ART ringrove 7.8 briefs/boki-art/batch/out/c_ringrove_r2_4.jpg kind=concept status=owner-review
+ART ringrove 8.3 briefs/boki-art/batch/out/c_ringrove_r3_1.jpg kind=concept status=owner-review
+ART ringrove_r4 7.7 briefs/boki-art/batch/out/c_ringrove_r4_2.jpg kind=concept status=owner-review
+ART ringrove_r5 8.4 briefs/boki-art/batch/out/c_ringrove_r5_1.jpg kind=concept status=owner-review
+ART ringrove_r6 8.5 briefs/boki-art/batch/out/c_ringrove_r6_4.jpg kind=concept status=owner-review
+ART terrasloth_t1 8.2 briefs/boki-art/batch/out/c_terrasloth_t1_3.jpg kind=concept status=owner-review
+ART terrasloth_t2 8.6 briefs/boki-art/batch/out/c_terrasloth_t2_1.jpg kind=concept status=owner-review
+ART terrasloth_t4 8.6 briefs/boki-art/batch/out/c_terrasloth_t4_2.jpg kind=concept status=owner-review
+ART thistlynx_lb 8.0 briefs/boki-art/batch/out/c_thistlynx_lb_4.jpg kind=concept status=owner-review
+ART orbeetle 8.6 briefs/boki-art/batch/out/c_orbeetle_1.jpg kind=concept status=owner-review
+ART thistlynx_lc 7.6 briefs/boki-art/batch/out/c_thistlynx_lc_1.jpg kind=concept status=owner-review
+ART thunderstrich_la 8.3 briefs/boki-art/batch/out/c_thunderstrich_la_4.jpg kind=concept status=owner-review
+ART thunderstrich_lb 7.7 briefs/boki-art/batch/out/c_thunderstrich_lb_3.jpg kind=concept status=owner-review
+ART thunderstrich_lc 8.0 briefs/boki-art/batch/out/c_thunderstrich_lc_3.jpg kind=concept status=owner-review
+ART barokat 8.5 briefs/boki-art/turnarounds/Barokat.jpg kind=turnaround
+ART chandelotl 8.6 briefs/boki-art/evolutions/Chandelotl.jpg kind=turnaround
+ART dobsabre 8.4 briefs/boki-art/turnarounds/Dobsabre.jpg kind=turnaround
+ART domeleon 8.5 briefs/boki-art/turnarounds/Domeleon.jpg kind=turnaround
+ART gravigrub 8.4 briefs/boki-art/turnarounds/Gravigrub.jpg kind=turnaround
+ART maulangler 8.5 briefs/boki-art/turnarounds/Maulangler.jpg kind=turnaround
+ART morelossus 8.5 briefs/boki-art/turnarounds/Morelossus.jpg kind=turnaround
+ART nettlynx 8.6 briefs/boki-art/turnarounds/Nettlynx.jpg kind=turnaround
+ART phonodrake 8.5 briefs/boki-art/turnarounds/Phonodrake.jpg kind=turnaround
+ART sporcupine 8.5 briefs/boki-art/evolutions/Sporcupine.jpg kind=turnaround
+ART teapotamus 8.1 briefs/boki-art/evolutions/Teapotamus.jpg kind=turnaround
+ART umbrink 8.3 briefs/boki-art/turnarounds/Umbrink.jpg kind=turnaround
+ART vespox 8.5 briefs/boki-art/evolutions/Vespox.jpg kind=turnaround
+ART zippelith 8.6 briefs/boki-art/turnarounds/Zippelith.jpg kind=turnaround
+ART anchorbill 8.5 briefs/boki-art/cards/Anchorbill.jpg kind=card
+ART barokat 8.3 briefs/boki-art/cards/Barokat.jpg kind=card
+ART blastopuff 8.5 briefs/boki-art/cards/Blastopuff.jpg kind=card
+ART blastopuff 8.6 briefs/boki-art/cards/Blastopuff.jpg kind=card
+ART chandelotl 8.4 briefs/boki-art/cards/Chandelotl.jpg kind=card
+ART dreadmonite 8.5 briefs/boki-art/cards/Dreadmonite.jpg kind=card
+ART dreadmonite 8.5 briefs/boki-art/cards/Dreadmonite.jpg kind=card
+ART embrook 8.0 briefs/boki-art/cards/Embrook.jpg kind=card
+ART gramofrill 8.0 briefs/boki-art/cards/Gramofrill.jpg kind=card
+ART gramofrill 8.2 briefs/boki-art/cards/Gramofrill.jpg kind=card
+ART hatstag 8.0 briefs/boki-art/cards/Hatstag.jpg kind=card
+ART hatstag 8.3 briefs/boki-art/cards/Hatstag.jpg kind=card
+ART kintsuwyrm 8.6 briefs/boki-art/cards/Kintsuwyrm.jpg kind=card
+ART kintsuwyrm 8.6 briefs/boki-art/cards/Kintsuwyrm.jpg kind=card
+ART medushroom 8.5 briefs/boki-art/cards/Medushroom.jpg kind=card
+ART medushroom 8.6 briefs/boki-art/cards/Medushroom.jpg kind=card
+ART nettlynx 8.6 briefs/boki-art/cards/Nettlynx.jpg kind=card
+ART sandwidow 8.4 briefs/boki-art/cards/Sandwidow.jpg kind=card
+ART sandwidow 8.5 briefs/boki-art/cards/Sandwidow.jpg kind=card
+ART scopeleon 8.5 briefs/boki-art/cards/Scopeleon.jpg kind=card
+ART scopeleon 8.5 briefs/boki-art/cards/Scopeleon.jpg kind=card
+ART snapler 8.5 briefs/boki-art/cards/Snapler.jpg kind=card
+ART snapler 8.5 briefs/boki-art/cards/Snapler.jpg kind=card
+ART sporcupine 8.5 briefs/boki-art/cards/Sporcupine.jpg kind=card
+ART teapotamus 8.2 briefs/boki-art/cards/Teapotamus.jpg kind=card
+ART truffapir 8.3 briefs/boki-art/cards/Truffapir.jpg kind=card
+ART truffapir 8.4 briefs/boki-art/cards/Truffapir.jpg kind=card
+ART umbrink 8.6 briefs/boki-art/cards/Umbrink.jpg kind=card
+ART vespox 8.7 briefs/boki-art/cards/Vespox.jpg kind=card
+ART anchorbill 8.3 briefs/boki-art/portraits/light/Anchorbill.jpg kind=portrait (owner-picked design)
+ART barokat 8.3 briefs/boki-art/portraits/light/Barokat.jpg kind=portrait (owner-picked design)
+ART blastopuff 8.4 briefs/boki-art/batch/out/portrait_blastopuff_full_1.jpg kind=portrait status=owner-review
+ART chandelotl 8.7 briefs/boki-art/portraits/light/Chandelotl.jpg kind=portrait
+ART dreadmonite 8.3 briefs/boki-art/batch/out/portrait_dreadmonite_full_1.jpg kind=portrait status=owner-review
+ART gramofrill 8.2 briefs/boki-art/batch/out/portrait_gramofrill_full_1.jpg kind=portrait status=owner-review
+ART hatstag 8.0 briefs/boki-art/batch/out/portrait_hatstag_full_1.jpg kind=portrait status=owner-review
+ART kintsuwyrm 8.5 briefs/boki-art/portraits/light/Kintsuwyrm.jpg kind=portrait
+ART medushroom 8.3 briefs/boki-art/batch/out/portrait_medushroom_full_3.jpg kind=portrait status=owner-review
+ART nettlynx 8.6 briefs/boki-art/portraits/light/Nettlynx.jpg kind=portrait
+ART sandwidow 7.9 briefs/boki-art/batch/out/portrait_sandwidow_full_2.jpg kind=portrait status=owner-review
+ART scopeleon 8.0 briefs/boki-art/batch/out/portrait_scopeleon_full_2.jpg kind=portrait status=owner-review
+ART snapler 8.2 briefs/boki-art/batch/out/portrait_snapler_full_1.jpg kind=portrait status=owner-review
+ART sporcupine 8.3 briefs/boki-art/portraits/light/Sporcupine.jpg kind=portrait (owner-picked design)
+ART teapotamus 8.6 briefs/boki-art/portraits/light/Teapotamus.jpg kind=portrait
+ART truffapir 8.2 briefs/boki-art/batch/out/portrait_truffapir_full_1.jpg kind=portrait status=owner-review
+ART umbrink 8.4 briefs/boki-art/portraits/light/Umbrink.jpg kind=portrait (owner-picked design)
+ART vespox 8.6 briefs/boki-art/portraits/light/Vespox.jpg kind=portrait
