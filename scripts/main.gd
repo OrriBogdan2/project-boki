@@ -166,16 +166,6 @@ func _ready() -> void:
 		if a.begins_with("--raid-demo="): opts["raid"] = a.substr(12); opts["raid_demo"] = true; opts["no_drop"] = true    # a raid condition's look (RaidLook)
 		if a == "--blight-demo": opts["blight_demo"] = "all"; opts["no_drop"] = true      # a Warden's light and a Skitter pack (BlightDir.demo)
 		if a.begins_with("--blight-demo="): opts["blight_demo"] = a.substr(14); opts["no_drop"] = true
-	if "--check" in args:
-		var CheckT = load("res://tools/check.gd")
-		var bad := 0
-		for f in CheckT.new()._scan("res://scripts"):
-			var sc = load(f)
-			if sc == null or not sc.can_instantiate():
-				print("FAIL ", f); bad += 1
-		print("CHECK DONE, failures: ", bad)
-		get_tree().quit()
-		return
 	if Array(args).any(func(a): return String(a).begins_with("--grammar-check")):
 		# tooling: parse every kin grammar file (docs/KIN_GRAMMAR.md) and print structural errors;
 		# --grammar-check=<root> checks another folder (e.g. res://tests/grammar_fixtures/broken)
@@ -235,30 +225,6 @@ func _ready() -> void:
 				if o != sm.player:
 					o.teleport(sm.world.spawns[-1]); o.ctrl = "idle"
 			return
-	if "--biome-check" in args:
-		# tooling: an expedition on the authored map; what each biome spawned, then a minute of play
-		var bm := Match.new()
-		add_child(bm)
-		bm.start({"teams": 4, "squad": 1, "tier": int(opts.get("tier", 1)), "seed": int(opts.get("seed", 9)), "no_drop": true, "autoplay": true})
-		bm.set_process(false)
-		var by := {}
-		var rar := [0, 0, 0, 0]; var nm := 0
-		for mb in bm.mobs:
-			var b := bm.world.biome_at(mb.pos.x, mb.pos.z)
-			if not by.has(b): by[b] = []
-			by[b].append(String(mb.md["name"]))
-			rar[int(mb.get_meta("rarity", 0))] += 1
-			if not (mb.get_meta("muts", []) as Array).is_empty(): nm += 1
-		for b in by:
-			print("BIOME %s: %d mobs, e.g. %s" % [b, by[b].size(), ", ".join((by[b] as Array).slice(0, 6))])
-		var hk := {}
-		for hz in bm.biomes.hazards: hk[hz["kind"]] = int(hk.get(hz["kind"], 0)) + 1
-		print("BIOME rarity common/uncommon/rare/elite %s, mutated %d of %d; hazards %s" % [str(rar), nm, bm.mobs.size(), str(hk)])
-		for i in int(60.0 / Match.DT):
-			bm.step(Match.DT)
-		print("BIOME sim ok, time %.0f, mobs left %d, fields %d" % [bm.time, bm.mobs.filter(func(x): return not x.dead).size(), bm.fields.list.size()])
-		get_tree().quit()
-		return
 	if "--arch-lineup" in args or "--showcase" in args or "--arch-matrix" in args or "--arch-heads" in args:
 		add_child(load("res://tests/arch_gallery.gd").new())
 		return
@@ -267,11 +233,6 @@ func _ready() -> void:
 		return
 	if "--art-stats" in args:
 		load("res://tests/art_stats.gd").stats()
-		get_tree().quit()
-		return
-	if "--hair-check" in args:
-		var hb: int = load("res://tests/hair_gallery.gd").check()
-		print("HAIR CHECK DONE, failures: ", hb)
 		get_tree().quit()
 		return
 	if "--pack-gallery" in args:
@@ -305,11 +266,6 @@ func _ready() -> void:
 	if "--speak-test" in args:
 		load("res://tools/speaktest.gd").new().run()
 		get_tree().quit()
-		return
-	if "--kinbox-check" in args:
-		var kbc = load("res://tools/kinbox_check.gd").new()      # the farm cap, the Kin Burrow and rare mutations
-		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
-		kbc.run(self)
 		return
 	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
 		return
