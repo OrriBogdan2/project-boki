@@ -13,6 +13,8 @@ const DT := 1.0 / 30.0
 const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
 const SAMPLE_S := 2.4        # s of locomotion sampled
 const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
+const FPS := 60.0            # frames/s the game draws at: the hand-off is judged per frame
+const MAX_STEP := 0.045      # body heights: the most of the idle to walk gap one frame of the loco blend may show
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
@@ -76,6 +78,7 @@ func _hero(main: Node, id: String) -> void:
 	row["pop"] = {"idle_walk": _first_pose_gap(sync, clips, sk, String(lc["idle"]), walk, hgt),
 			"walk_run": _first_pose_gap(sync, clips, sk, walk, run, hgt),
 			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run)}
+	row["pop"]["idle_walk_step"] = row["pop"]["idle_walk"] * (1.0 - exp(-float(lc.get("blend_rate", WardenClips.LOCO_RATE)) / FPS))
 	var weapon := ""
 	row["attacks"] = {}
 	for nm in ATTACKS[id]:
@@ -88,6 +91,10 @@ func _hero(main: Node, id: String) -> void:
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
 			top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"], top["bob_cm"],
 			top["peaks"]])
+	if row["pop"]["idle_walk_step"] > MAX_STEP:
+		print("FAIL %s: the loco blend shows %.3f body heights of the idle to walk gap in one frame (limit %.3f)" % [id,
+				row["pop"]["idle_walk_step"], MAX_STEP])
+		bad += 1
 	if not id in NO_LEGS:
 		_gate(id, top)
 	m.free()

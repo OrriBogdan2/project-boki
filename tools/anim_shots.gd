@@ -9,6 +9,7 @@ extends "res://tools/clip_shots.gd"
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
+const START_FPS := 30.0    # frames/s of the start strip: the first 0.27 s from standing still to a run
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
 const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
@@ -86,8 +87,9 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
-	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
-	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
+	await _loco(model, sync, dir.path_join("start"), RUN_MPS, frames, 0.0, START_FPS)
+	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames, WARM_S, LOCO_FPS)
+	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames, WARM_S, LOCO_FPS)
 	var lc: Dictionary = clips.d["loco"]
 	await _keyed(model, sync, clips, dir.path_join("idle"), String(lc["idle"]), frames)
 	var atk: Array = ATTACKS[id]
@@ -96,14 +98,18 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.queue_free()
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, warm_s: float, fps: float) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
-	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
+	model.set_meta(WardenClips.STATE, {})
+	(sync.get("clips") as WardenClips).loco_pos = Vector2.ZERO
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
+	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
+	for k in int(warm_s / DT):
+		sync.call("_process", DT)
 		_scroll(mps, DT)
-	var steps := int(round(1.0 / (LOCO_FPS * DT)))
+	var steps := int(round(1.0 / (fps * DT)))
 	for i in frames:
 		for k in steps:
 			sync.call("_process", DT)
