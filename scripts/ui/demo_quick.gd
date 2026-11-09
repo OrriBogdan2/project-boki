@@ -52,7 +52,8 @@ static func _swap(d: Dictionary) -> void:
 	Save.no_write = true
 	Save.d = d
 
-## The Demo match (Match.demo_opts) with every seat filled by showcase Hunters, straight in (no lobby).
+## The Demo match (Match.demo_opts) with every seat filled by showcase Hunters, straight in (no lobby),
+## every kit open from the start.
 static func expedition_opts() -> Dictionary:
 	var o := Match.demo_opts()
 	o["arch"] = YOU
@@ -60,6 +61,7 @@ static func expedition_opts() -> Dictionary:
 	o["weapon"] = Arch.signature(YOU)
 	o["bot_archs"] = SHOWCASE
 	o["mates"] = [{"name": String(Names.BOT[0]), "arch": MATE}]
+	o["unlocked"] = true          # every Hunter's whole kit open from the drop: abilities to film, not padlocks
 	return o
 
 ## HomeWork's farm at work, its Boki grown to FARM_LEVEL with the forms and parts that brings.

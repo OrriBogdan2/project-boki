@@ -2,7 +2,8 @@ extends RefCounted
 ## --demo-quick-check: Settings > Demo's quick starts and recording mode's frame pacing.
 ## Recording mode caps frames at Record.REC_FPS with v-sync and gives the player's cap back when off.
 ## Each quick start (DemoQuick) is up within READY_S with no tutorial: the expedition has every seat
-## filled and its bots in showcase Hunters, the farm's Boki are evolved, the hatch opens on the creator.
+## filled, its bots in showcase Hunters and every kit open; the farm's Boki are evolved and its Goals card
+## steps aside while recording; the hatch opens on the creator.
 ## Neither the real save file nor Save.d is touched: the title screen gives the real one back.
 ## With --shots-dir=<dir> (a real GPU run) each path also saves screenshots and logs its frame times:
 ##   jobq submit --needs gpu -- godot -- --demo-quick-check --record --shots-dir=/tmp/dq
@@ -95,6 +96,8 @@ func _expedition(m: Match) -> void:
 		if h != m.player and not String(h.arch) in DemoQuick.SHOWCASE: off.append(h.arch)
 	ok("expedition: bots in showcase Hunters", off.is_empty(), str(off))
 	ok("expedition: you as %s" % DemoQuick.YOU, String(m.player.arch) == DemoQuick.YOU, String(m.player.arch))
+	var shut: Array = m.hunters.filter(func(h): return int(h.slot_lv["ult"]) < 1 or int(h.slot_lv["sec"]) < 1)
+	ok("expedition: every kit open (no padlocks)", shut.is_empty(), "%d locked" % shut.size())
 
 func _farm(h: Node) -> void:
 	var tut: Dictionary = Save.d["tutorial"]
@@ -104,6 +107,13 @@ func _farm(h: Node) -> void:
 		if (r.get("forms", []) as Array).size() < FORMS_MIN: low.append(r["name"])
 	ok("farm: every Boki evolved", low.is_empty(), "%d Boki, short: %s" % [Save.d["roster"].size(), low])
 	ok("farm: the base built", (Save.d["layout"]["deco"] as Array).size() >= 10 and h.get("hb") != null)
+	var card = (h.get("guide") as FarmGuide).tracker
+	var was := Record.level
+	Record.set_level(1)
+	Record.tick(main.get_tree(), 0.0)
+	ok("farm: no Goals card while recording", not is_instance_valid(card) or not card.visible)
+	Record.set_level(was)
+	Record.tick(main.get_tree(), 0.0)
 
 func _hatch(hs: Node) -> void:
 	ok("hatch: no intro card", hs.get("card_box") == null or not is_instance_valid(hs.get("card_box")))
