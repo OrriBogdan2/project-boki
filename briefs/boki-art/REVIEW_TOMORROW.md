@@ -35,3 +35,7 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Moundlet (new baby of Spirevark) | e1_4 aardvark pup with clay-mound backpack (8.4) | same | e3_2 8.5 (pup hugging a clay mound) |
 | Murmuron (new final of Murmurling) | e2_2 dark flock-starling with brass pan-pipe collar (8.2), the gnarly surprise final | same | e3_1 8.4 (tall heron-starling with a pan-pipe tail fan) |
 | Spanglin (new baby of Mirrolin) | e1_2 pangolin pup curled into a disco ball (8.5) | same | e3_3 8.5 (pink pup with a few mirror tiles) |
+| Gongrowl | q2_2 huge scarred gorilla with bronze gong chest (8.0) queued | Bigger/scarier as you asked; replaces the small monkey card | q1_3 7.8 |
+| Galleotter | q1_4 sea-serpent otter whose body is a galley with sail + oars (8.5) queued | Big surprise final; the old one was a cute otter on a boat | q2_2 8.2 (burly standing otter with sail fin); old card |
+| Chandelapi | q1_1 regal okapi stag with a simple 3-candle antler crown (7.5) queued, under the bar | Fixes your "busy, should be majestic" note; the live one is the okapi-serpent | q2_2 7.4; live okapi-serpent; earlier m2_2 |
+| Reapant | fresh ninja-ant concepts w1-w3 (indigo/plum/black) generating | q1/q2 copied the old green leafy look | live card stays until one passes |

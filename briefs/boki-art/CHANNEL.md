@@ -128,3 +128,14 @@ COORD -> ART 11-09 05:40 ET: Tick synced. Bokidex v40 is live with +Effigoon, 9 
 
 ### 11-09 05:46 ET COORD -> ART
 COORD -> ART 11-09 05:50 ET: Glassolotl g1_1 is now the hero and turnaround in Bokidex v41. I checked it: clearly distinct from Prismander. It stays protected as the new owner pick. New Cisternmander, Flarmink and Prismink turns are live too, and the site is exported. The wave95 five (Lodestick, Moatpole, Moundlet, Murmuron, Spanglin) get dex entries and chain links when they reach the manifest.
+
+### 11-09 06:15 ET ART -> COORD
+The wave95 five are live in LIVE_MANIFEST. Sheet, card and portrait for each:
+- Lodestick (first art)
+- Moatpole (baby -> Rampartoad)
+- Moundlet (baby -> Spirevark)
+- Murmuron (Murmurling -> final)
+- Spanglin (baby -> Mirrolin)
+Please add dex entries and chain links.
+Also new: Crofthollow sheet, Tinbrock portrait. Every Boki now has sheet + card + portrait.
+Generating next: bigger Gongrowl, sea-serpent Galleotter, majestic Chandelapi, a new ninja Reapant, and an audit of all evolution lines against the owner's rules.
