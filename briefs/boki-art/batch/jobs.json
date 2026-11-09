@@ -1057,6 +1057,72 @@
     "size": "2K"
   },
   {
+    "id": "lunowl_f_e",
+    "name": "Lunowl (female)",
+    "refs": [
+      "briefs/boki-art/batch/out/lunowl_f_2.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: remove the extra cat-like ear tufts so only the curled teal crest feathers remain, restore the moon-crater marks on the face disc, give the eyes a slightly sharper, sly shape, and slim the body and wings a little. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "murmurling_f_e",
+    "name": "Murmurling (female)",
+    "refs": [
+      "briefs/boki-art/batch/out/murmurling_f_1.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make the pipe tail slimmer and shorter like thin bamboo pipes, remove the floating music notes and sound arcs, and add a little starry iridescence back into the plumage. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "oarter_e",
+    "name": "Oarter",
+    "refs": [
+      "briefs/boki-art/batch/out/oarter_r2_1.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: lay it out as four views in one row at the same scale with the tail curled up to fit, restore Oarlet's warm brown coat and dark eyes, make the head a little bigger and more stylised, and add honey-wood grain streaks in the fur with oar-blade webbing on the paws. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "lyrewing_r",
+    "name": "Lyrewing",
+    "refs": [
+      "briefs/boki-art/turnarounds/Thrumbird.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A long-necked ground lyrebird in a low, crouching display pose, whose two outer tail feathers ARE the lyre: they curve up from the tail base as one feathered-metal piece into two tall lyre arms with glowing silver string-feathers between them, a tuning-fork crest, blade-edged wing tips and a proud face. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Its body plan, silhouette and pose must be fundamentally different from image 1, not image 1 with parts added. Face: proud, bright eyes and a confident open-beaked call. Main colours: emerald green and silver, with a gold accent. Avoid: a separate lyre or harp standing behind it, a breastplate, perching on an object. Element: echo, shown clearly by gold sound rings rippling out from its body. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "mothlet_r3",
+    "name": "Mothlet",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A tiny, perfectly round fluff ball of lavender owlet down with no visible legs, huge eyes, a small cratered moon-face disc, two tiny mint-green luna-moth wing buds with gold eyespots, two short trailing tail-streamer nubs and feathery moth-frond antennae. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: huge, sleepy, sparkling eyes and a tiny happy beak. Main colours: lavender and cream, with a mint-green and moon-gold accent. Avoid: a plain owlet, the long wings of image 1, legs. Element: lunar, shown clearly by a soft pale moonlight glow and crescent markings. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "refs": [
+      "briefs/boki-art/evolutions/Ermink.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A bright, playful stoat on all four legs in every view, mid-bounce, whose ink is now crystal: its bamboo tail shaft has turned to clear glass and its brush head is a fan of clear crystal bristles that split light into rainbows, one long unbroken rainbow brushstroke swirls from its nose down its whole body to its tail, faceted crystal studs grow at its elbows and along its brow, and its ear tips are clear crystal. Its claws are clear crystal hooks. Face: big, shining eyes with rainbow highlights and a delighted, open-mouthed grin. Main colours: pearl white and soft rainbow, with a clear crystal accent. Avoid: standing upright, sitting up like a person, a unicorn horn, wings, a plain recolour. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: pretty: graceful curves and an elegant shape.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
     "id": "chuggamus_r2",
     "name": "Chuggamus",
     "refs": [
@@ -1196,17 +1262,6 @@
       "briefs/boki-art/evolutions/Ermink.jpg"
     ],
     "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A graceful, long-bodied stoat on all four legs in every view, mid-prance, whose ink is now living bloom: its bamboo brush tail has sprouted green leaves at every joint and its brush head is a fat bundle of sharp leaf-blade bristles, long painted brushstrokes of pink blossom branches wind across its whole body with real petals growing from them, and its ears are broad leaf-shaped ears. A short ruff of petals frames its face, and its claws are green thorns. Face: gentle, round dark eyes and a sweet, knowing smile. Main colours: cream and leaf green, with a blossom-pink accent. Avoid: standing upright, sitting up like a person, a flower crown, a held flower, a plain recolour. Element: bloom, shown clearly by living leaves, petals or moss growing from its body, fresh green. Archetype: pretty: graceful curves and an elegant shape.",
-    "runs": 2,
-    "aspect": "16:9",
-    "size": "4K"
-  },
-  {
-    "id": "prismink_r",
-    "name": "Prismink",
-    "refs": [
-      "briefs/boki-art/evolutions/Ermink.jpg"
-    ],
-    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A bright, playful stoat on all four legs in every view, mid-bounce, whose ink is now crystal: its bamboo tail shaft has turned to clear glass and its brush head is a fan of clear crystal bristles that split light into rainbows, one long unbroken rainbow brushstroke swirls from its nose down its whole body to its tail, faceted crystal studs grow at its elbows and along its brow, and its ear tips are clear crystal. Its claws are clear crystal hooks. Face: big, shining eyes with rainbow highlights and a delighted, open-mouthed grin. Main colours: pearl white and soft rainbow, with a clear crystal accent. Avoid: standing upright, sitting up like a person, a unicorn horn, wings, a plain recolour. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: pretty: graceful curves and an elegant shape.",
     "runs": 2,
     "aspect": "16:9",
     "size": "4K"
