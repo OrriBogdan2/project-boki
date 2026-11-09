@@ -1,8 +1,8 @@
 class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit, air,
-## fall, glide and mantle tunables every hunter shares, from content/rules/hunter_move.json ([game data]: SUPERVIVE's
-## movement settings, uu converted to metres).
+## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
+## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
@@ -21,6 +21,11 @@ static var swoop_ratio: float = _phys["swoop_ratio"]
 static var swoop_fade: float = _phys["swoop_fade"]
 static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
 static var mantle_launch_min: float = _phys["mantle_launch_min"]
+static var dive_vy: float = _phys["dive_vy"]
+static var dive_accel: float = _phys["dive_accel"]
+static var dive_steer: float = _phys["dive_steer"]
+static var dive_cancel_h: float = _phys["dive_cancel_h"]
+static var dive_timeout: float = _phys["dive_timeout"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))

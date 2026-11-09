@@ -11,7 +11,7 @@ R is your Boki's Merge.
 |---|---|
 | Class title | the Snowglide |
 | Base character | Neve, female |
-| Personality | A graceful ice skater who glides where others walk and leaves frost behind her. Elegant and playful, with a cold edge when crossed. |
+| Personality | The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her. She glides on the skates that saved them and fights with a candy-cane spear from the festival. |
 
 <!-- /gen:profile -->
 
@@ -32,7 +32,7 @@ R is your Boki's Merge.
 
 | Do this | And you get |
 |---|---|
-| Darts | Chill, so the foe is slower, and a frost glow that grows |
+| Darts | Chill, and a frost glow that grows |
 | Skate while firing | Straight darts at 1.6x |
 | Eight darts on one foe | They Shatter: 60 damage in 2.4m |
 | Knock a Chilled foe | They Shatter 0.4s later: 30 damage within 3m, more Chill |
@@ -55,7 +55,7 @@ R is your Boki's Merge.
 | Body | 124 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Hoar Fan (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them. |
-| Silhouette | a bunny-eared fur hood with curled ice horns, a long candy-striped ice spear, on glowing blade skates |
+| Silhouette | tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates |
 | Resource | Chill (max 8) |
 
 ### Kit card
@@ -75,7 +75,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe is a little slower and shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
+**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
 
 **Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
 

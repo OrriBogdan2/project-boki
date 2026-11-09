@@ -197,6 +197,7 @@ var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
+var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
 var land_t := 0.0
@@ -248,7 +249,7 @@ var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
 var ak: ArchKit = null        # the archetype's kit at run time
-var shot_range_k := 1.0       # the next shot's range (a full Focus: +20%)
+var shot_range_k := 1.0       # the next shot's range (an idle gun's first ember: +40%)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
 var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees and barriers don't stop you while > 0
@@ -1427,10 +1428,6 @@ func fire() -> void:
 		m.sfx("cloak", pos, -8.0)
 	idle_fire = 0.0
 	reveal_t = maxf(reveal_t, 1.2)
-	if float(wpn.get("warmup", 0.0)) > 0.0 and ak and ak.has_method("take_focus_shot") and ak.take_focus_shot():
-		shot_range_k = 1.2          # a full Focus: aimed at once, further
-		_release()
-		return
 	if float(wpn.get("warmup", 0.0)) > 0.0:
 		# the sniper winds up with its laser showing, then fires
 		warm_t = float(wpn["warmup"])
@@ -2196,7 +2193,7 @@ func _physics(dt: float) -> void:
 		# drifts on when you let go of the keys
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		gs += glide_lift.swoop
-		hv = glide_steer(hv, mv * gs, gs, dt)
+		hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else glide_steer(hv, mv * gs, gs, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
 			gs = DIVE_SPEED if diving else DROP_SPEED
@@ -2255,6 +2252,8 @@ func _physics(dt: float) -> void:
 			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
+		elif glide_dive.on:
+			vel.y = glide_dive.fall_vy(vel.y, dt)
 		else:
 			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
 			if vel.y < -sink:
@@ -2483,6 +2482,10 @@ func _unclip() -> void:
 		teleport(safe_pos)
 		vel = Vector3.ZERO
 
+## Falling with the canopy folded: the opening skydive, or the glider's dive.
+func plunging() -> bool:
+	return diving or glide_dive.on
+
 ## The skydive ends: the glider snaps open and the fall slows right down.
 func _deploy() -> void:
 	if not diving:
@@ -2519,6 +2522,7 @@ func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
 	DropLaunch.tick(self)            # the squad launch over: break off, the glider opens (item 163)
+	glide_dive.tick(self, dt)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
@@ -3111,8 +3115,8 @@ func _anim_state(stretch: float) -> void:
 	var s := anim_s
 	s["vel"] = vel; s["face"] = face
 	s["grounded"] = grounded and pad.is_empty()
-	s["gliding"] = gliding and not diving
-	s["diving"] = diving
+	s["gliding"] = gliding and not plunging()
+	s["diving"] = plunging()
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
@@ -3293,7 +3297,7 @@ func render(delta: float, alpha: float) -> void:
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
-	glide_k = move_toward(glide_k, 1.0 if gliding and not diving else 0.0, delta * (7.0 if gliding else 9.0))
+	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
 	gl.visible = glide_k > 0.02
 	if gl.visible:

@@ -898,15 +898,16 @@ func tender() -> void:
 	P.inp["move"] = Vector2(1, 0)
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true
+	Sfx.listener = P.pos          # (the star trail draws only near the camera's focus)
 	step(m, 0.05)
 	P.inp["dash"] = false
-	var aft := K.lk().live.filter(func(e): return String(e["kind"]) == "mote").size()
+	var aft := (HeroVfx.of(m).holds.keys() as Array).filter(func(k): return String(k).ends_with("/dash_trail")).size()
 	step(m, 0.25)
 	P.inp["move"] = Vector2.ZERO
 	ok(
-			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and after-images",
+			"mm Shift: Relay Step goes where you move (cursor elsewhere), its own hop and a trail of stars",
 			P.pos.x - p0.x > 2.5 and absf(P.pos.z - p0.z) < 1.0 and aft >= 1,
-			"dx %.1f dz %.1f aft %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
+			"dx %.1f dz %.1f trail %d" % [P.pos.x - p0.x, P.pos.z - p0.z, aft])
 	ok(
 			"mm Shift: the hop is its own move (no shared roll under it)",
 			K.anim_id == "mm_skip" and K.dodge_anim() == "kit")
@@ -1337,7 +1338,13 @@ func rimewright() -> void:
 	step(m, 0.5)
 	# --- Shatter on a knock (Chilled foe)
 	T.hp = 8.0
+	T.slow_t = 0.0
 	K.add_chill(T)
+	step(m, 0.1)
+	ok(
+			"tm passive: Chill is 4 s and shatter only, no slow of ours (the source has none)",
+			K.chilled(T) and float(Arch.def("rimewright")["passive"]["chill_t"]) == 4.0 and T.slow_t <= 0.0,
+			"slow_t %.2f" % T.slow_t)
 	T2.teleport(T.pos + Vector3(1.5, 0, 0))
 	T2.hp = T2.max_hp
 	step(m, 0.05)

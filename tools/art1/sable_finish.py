@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import meshkit as M, sable_pieces as K, sable_paint as P
 from meshkit import smooth, Piece
-from kael_paint import hexc, mix
+from paintkit import hexc, mix
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]

@@ -1,7 +1,8 @@
 class_name TenderKit
 extends ArchKit
-## Pip, the Tender (a small support on medium stats). docs/heroes/tender.md. Looks are pooled in
-## CareLook; the moves are KMovesCare "mm_" entries.
+## Pip, the Tender (a small support on medium stats). docs/heroes/tender.md. Her moments are starlight from her
+## lantern (content/vfx/tender.json, HeroVfx); the bodies (the comet, the burr, the Hearthlight disc, the tether)
+## are pooled in CareLook and UltLook; the moves are KMovesCare "mm_" entries.
 ## Passive Carrier: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
 ## alternating hands Kindle foes.
 ## RMB Burrseed sticks, then roots. Shift Relay Step. E Hearthlight heals; press again to toss it.
@@ -9,7 +10,6 @@ extends ArchKit
 ## R is the Boki Merge.
 
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
-const MOTE_EVERY := 0.05       # s between the soft ember motes her dashes leave
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 
@@ -29,7 +29,6 @@ var look: CareLook             # pooled visuals (made on first use)
 var shot_seen := 0             # the hunter's shot counter at the last ember we dressed
 var seed_aim := false          # the Burrseed wind-up is running (item 118; a merge start drops it)
 var seed_wind := 0.0           # s of it left
-var aft_t := 0.0               # next dash ember mote
 var glide := {}                # the air dash's long glide: {t, top (m/s)} (a dash: dropped on merge)
 var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}   # tests
 var hearth_call := {}          # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
@@ -67,7 +66,7 @@ func add_kindle(t: Ent, n := 1) -> void:
 	kind[key] = e
 	if int(e["n"]) >= int(res_def().get("max", 5)) and had < int(res_def().get("max", 5)):
 		m.fx.word(t.pos + Vector3(0, 2.5, 0), "KINDLED", res_col(), true)
-		lk().burst("flare", t.pos, {"col": Color("b98aff"), "rim": res_col(), "r": 1.3, "dur": 0.35})
+		vfx("kindled", t.pos)
 		m.sfx("tend_kindled", t.pos, -4.0, 1.0)
 		play_soft("mm_kindled")
 
@@ -125,8 +124,8 @@ func _tick(dt: float) -> void:
 	if h.ctrl == "bot":
 		_bot_idle(dt)
 
-## Every ember she casts: the comet look leaving the casting hand (right, then left), the punch-push
-## move, and at the thrust a swirl, a flash and sparks at that hand.
+## Every ember she casts: the comet look leaving the casting hand (right, then left) with its starlit trail,
+## the punch-push move, and at the thrust a little flare of starlight at that hand.
 func _tick_look(dt: float) -> void:
 	if h.shot_n != shot_seen:
 		shot_seen = h.shot_n
@@ -159,6 +158,7 @@ func _dress_ember(s: Dictionary) -> void:
 	s["pos"] = from
 	s["start"] = from
 	lk().skin(s, "ember")
+	HeroVfx.of(m).trail(h, "cast_trail", s["node"])
 	stats["embers"] += 1
 	stats["swirls"] += 1
 	if emp:
@@ -171,23 +171,13 @@ func _dress_ember(s: Dictionary) -> void:
 	m.later(THRUST_T, func():
 		if not is_instance_valid(h) or look == null:
 			return
-		var at := CareUtil.hand_at(h, right)
-		lk().burst("swirl", at, {"r": 0.5 * big, "dur": 0.14, "dir": d2})
-		m.fx.flash(at, Color("ffb347"), 0.35 * big, 0.06)
-		m.fx.spark(at, Vector3(d2.x, 0.2, d2.y), Color("ffd27a"), 6, 6.0, 40.0, 0.18, 2.0, 0.8))
+		vfx("cast", CareUtil.hand_at(h, right), d2, {"k": big - 1.0}))
 
-## Her dashes leave a few soft ember motes (not the shared after-image), and the air dash glides.
+## Her dashes leave a faint trail of stars (not the shared after-image), and the air dash glides.
 func _tick_dash_look(dt: float) -> void:
 	_tick_glide(dt)
-	if h.roll_t <= 0.0 or h.move_kind != "dash":
-		return
-	aft_t -= dt
-	if aft_t > 0.0:
-		return
-	aft_t = MOTE_EVERY
-	var dv := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
-	var off := Vector3(randf_range(-0.2, 0.2), randf_range(0.3, 0.8), randf_range(-0.2, 0.2))
-	lk().burst("mote", h.position + off, {"r": randf_range(0.6, 0.9), "dur": 0.35, "dir": dv})
+	if h.roll_t > 0.0 and h.move_kind == "dash":
+		HeroVfx.of(m).hold(h, "dash_trail")
 
 ## Her own dash look (motes, puffs and the moves): no shared after-image pill, burst or ring.
 func own_dash_trail() -> bool: return true
@@ -222,10 +212,9 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h) or h.shield <= 0.01:
+		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
 			drop_all(true)
 			return
-		h.shield_t = maxf(h.shield_t, 2.0)      # the Carrier shield stays up while you carry
 		var down := bool(h.inp.get(SETDOWN, false))
 		if down and not setdown_was:
 			drop_all(false)
@@ -246,6 +235,11 @@ func _tick_carry(dt: float) -> void:
 			break
 		pick_up(o)
 
+## Taking damage drops whoever you carry, with the lock.
+func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
+	if dmg > 0.0 and not carrying().is_empty():
+		drop_all(true)
+
 func _foes_near(r: float) -> bool:
 	for f in m.foes_of(h.team):
 		if f is Hunter and h.flat_dist(f) < r:
@@ -253,10 +247,7 @@ func _foes_near(r: float) -> bool:
 	return false
 
 func pick_up(o: Hunter) -> void:
-	var pd: Dictionary = d["passive"]
 	CareUtil.set_carry(m, o, h.nid)
-	h.shield = float(pd.get("shield", 40.0)) + float(pd.get("shield_lv", 6.0)) * float(maxi(0, h.lvl - 1))
-	h.shield_t = 999.0
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "CARRY", res_col(), false)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
@@ -270,8 +261,6 @@ func drop_all(broken: bool) -> void:
 		CareUtil.set_carry(m, o, "")
 		m.displace.teleport(o, Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
 		o.vel = Vector3.ZERO
-	h.shield = 0.0
-	h.shield_t = 0.0
 	lock_t = maxf(lock_t, 1.5)          # set down: not picked straight back up
 	if broken:
 		lock_t = float(d["passive"].get("lock", 4.0))
@@ -295,10 +284,9 @@ func on_dash(use_ex: bool) -> bool:
 		_start_glide(dist, tt)
 	play("mm_float" if use_ex else "mm_skip")
 	m.sfx("tend_hop", h.pos, -3.0, 1.05 if use_ex else 1.2)
-	aft_t = 0.0
+	vfx("hop", null, dash_dir())        # a few stars off her heels
 	if h.grounded and not use_ex:
-		# a tiny puff of dust off her heels, and another where she lands
-		m.fx.dust(h.pos, PUFF_N)
+		# a tiny puff of dust where she lands
 		m.later(h.roll_t, func():
 			if is_instance_valid(h) and h.grounded: m.fx.dust(h.pos, PUFF_N))
 	return true
@@ -379,6 +367,7 @@ func _tick_seed(dt: float) -> void:
 	seed_wind -= dt
 	if seed_wind > 0.0:
 		_seed_lane()
+		HeroVfx.of(m).hold(h, "seed_aim")      # lilac stars gather at the lantern while she winds up
 		return
 	_seed_cancel()
 	_throw_seed()
@@ -404,10 +393,11 @@ func _throw_seed() -> void:
 	m.spawn_shot(
 			h, start, dir * float(sd["speed"]), float(sd["dmg"]) * power("sec"), life, float(sd["hit_r"]) * 0.5,
 			col_of(rmb_def()), extra)
-	lk().skin(lk().last_shot(), "burr")
-	# the cast flare round her (about 1.5 bh across)
-	lk().burst("flare", h.pos, {"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.25, "pattern": 3.0})
-	m.fx.flash(start, Color("c8e07a"), 0.9, 0.08)
+	var s := lk().last_shot()
+	lk().skin(s, "burr")
+	if not s.is_empty():
+		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
+	vfx("seed_cast", null, dir)          # the cast flare from her lantern
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).
@@ -423,7 +413,7 @@ func _stick(e: Ent) -> void:
 	# the area shows at once: a disc the size of the burst under them, and a light column falling
 	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
-	net_ring(e.pos, burst_radius(), col_of(rmb_def()))
+	vfx("seed_stick", e.pos)
 
 func _tick_burrs(dt: float) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
@@ -454,12 +444,8 @@ func _burst(t: Ent) -> void:
 	var at := t.pos
 	var rr := burst_radius()
 	var col := col_of(rmb_def())
-	# the flare: the disc snaps out bigger and brighter, then a root beam holds on each foe
-	lk().burst(
-			"flare", at,
-			{"col": Color("7a4aff"), "rim": Color("c9a0ff"), "r": rr * 1.5, "dur": 0.45, "pattern": 3.0})
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color("c9a0ff"), 26, 5.0, 0.6, 3.0, 1.2)
-	m.fx.burst(at + Vector3(0, 0.2, 0), col, 14, 3.5, 0.5, 6.0, 1.0)
+	# the flare: a swirl of starlight snaps out over the area, then a root beam holds on each foe
+	vfx("seed_burst", at, null, {"r": rr})
 	m.sfx("tend_root", at, 0.0, 1.0)
 	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
@@ -469,9 +455,6 @@ func _burst(t: Ent) -> void:
 					"src": "abil", "ab": "utility", "root": root, "dr": true, "kindle": true,
 					"tags": ["utility", "burrseed"]})
 		lk().burst("beam_root", f.pos, {"col": Color("9a6aff"), "r": 1.0, "dur": root, "ent": f})
-		lk().burst(
-				"flare", f.pos,
-				{"col": Color("7a4aff"), "rim": Color("c9a0ff"), "r": 1.0, "dur": root, "pattern": 3.0})
 	m.fx.word(at + Vector3(0, 2.2, 0), "ROOTED", col, false)
 	stats["flares"] += 1
 	play_soft("mm_tug")
@@ -484,9 +467,9 @@ func cast_e() -> bool:
 			"revived": false, "tossed": false}
 	e_t = float(ed["time"])
 	play("mm_hearth")
-	# the lantern plus over her hand and green light rising round her
+	# the lantern plus over her hand and starlight flaring from the lantern, rising round her
 	lk().burst("plus", h.pos + Vector3(0, 1.9, 0), {"r": 0.9, "dur": 0.4})
-	lk().burst("rays", h.pos, {"col": Color("9cf07a"), "r": 1.0, "dur": 0.45})
+	vfx("hearth")
 	m.sfx("tend_hearth", h.pos, -2.0, 1.0)
 	m.sfx("tender_lantern_chime", h.pos, -4.0, 1.0)      # her lantern's star rings as she lifts it
 	return true
@@ -550,8 +533,7 @@ func _tick_hearth(dt: float) -> void:
 			break
 		if String(hearth["mode"]) == "flying" and dv.length() <= step:
 			hearth["mode"] = "ground"
-			var land := {"col": Color("ffd27a"), "rim": Color("5fe0d8"), "r": hearth_r(), "dur": 0.3, "pattern": 5.0}
-			lk().burst("flare", to, land)
+			vfx("hearth_land", to, null, {"r": hearth_r()})
 			m.sfx("tend_land", to, -3.0, 1.0)
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
@@ -572,8 +554,7 @@ func _tick_hearth(dt: float) -> void:
 		hearth["tick"] = float(hearth["tick"]) - every
 		var per := float(ed["over"]) / (float(ed["time"]) / every)
 		_pulse(c, per)
-		var motes := 10 if tossed else 6
-		m.fx.burst(c + Vector3(0, 0.3, 0), Color("ffc46a"), motes, hearth_r() * 0.5, 0.9, -2.0, 0.8, Vector3.UP, 30.0)
+		vfx("hearth_motes", c, null, {"r": hearth_r()})
 	hearth["boost"] = maxf(0.0, float(hearth["boost"]) - dt)
 	if float(hearth["left"]) <= 0.0:
 		_hearth_end(true, "FLARE")
@@ -595,7 +576,13 @@ func _pulse(c: Vector3, per: float) -> void:
 		if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > hearth_r() + o.r:
 			continue
 		var amt := per * heal_k() * boost * (float(ed.get("self_k", 0.33)) if o == h else 1.0)
-		CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
+		_mend(o, amt, float(ed.get("wisp_k", 5.0)))
+
+## A heal from her light: CareUtil.heal, and twinkling stars rising off whoever it mends (content/vfx
+## "heal_stars").
+func _mend(o: Hunter, amt: float, wisp_k := 5.0) -> void:
+	CareUtil.heal(m, o, amt, wisp_k)
+	vfx("heal_stars", o.pos)
 
 func _hearth_end(flare: bool, word: String) -> void:
 	var ed := e_def()
@@ -612,9 +599,9 @@ func _hearth_end(flare: bool, word: String) -> void:
 			if Vector2(o.pos.x - c.x, o.pos.z - c.z).length() > rr + o.r:
 				continue
 			if o.downed:
-				CareUtil.heal(m, o, amt, float(ed.get("wisp_k", 5.0)))
+				_mend(o, amt, float(ed.get("wisp_k", 5.0)))
 			else:
-				CareUtil.heal(m, o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
+				_mend(o, amt * (float(ed.get("self_k", 0.33)) if o == h else 1.0))
 	else:
 		m.fx.word(c + Vector3(0, 2.0, 0), word, Color("ff8a6a"), false)
 		m.sfx("knock", c, -6.0, 1.4)
@@ -622,17 +609,14 @@ func _hearth_end(flare: bool, word: String) -> void:
 	hearth = {}
 	e_t = 0.0
 
-## The light's last heal reads as a heal, not a blast: the warm disc swells to its own edge (no wider), light
-## rises off it with the lantern plus over the middle and a few slow motes, a soft chime; no ring, burst or shake.
+## The light's last heal reads as a heal, not a blast: a slow swirl of starlight to its own edge (no wider), stars
+## rising off it with the lantern plus over the middle, a soft chime; no ring, burst or shake.
 func _bloom(c: Vector3, rr: float) -> void:
 	var ed := e_def()
 	m.fx.word(c + Vector3(0, 2.4, 0), "HEARTH", col_of(ed), false)
-	lk().burst("flare", c, {"col": Color("ffd27a"), "rim": Color("3fd8d0"), "r": rr, "dur": 0.5, "pattern": 5.0})
-	lk().burst("rays", c, {"col": Color("ffe6a0"), "r": rr * 0.6, "dur": 0.6})
 	lk().burst("plus", c + Vector3(0, 1.6, 0), {"r": 0.8, "dur": 0.5})
-	m.fx.burst(c + Vector3(0, 0.3, 0), Color("ffc46a"), 10, rr * 0.4, 1.0, -2.0, 0.8, Vector3.UP, 30.0)
+	vfx("bloom", c, null, {"r": rr})
 	m.sfx("tend_flare", c, BLOOM_DB, 1.0)
-	net_ring(c, rr, col_of(ed))
 
 func _e_end() -> void:
 	if not hearth.is_empty():
@@ -729,10 +713,9 @@ func _start_call() -> bool:
 	play("mm_call")
 	m.sfx("tend_call", h.pos, -1.0, 1.0)
 	lk().burst("plus", who.pos + Vector3(0, 1.3, 0), {"r": 1.1, "dur": 0.45})
-	var cast_flare := {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.4, "dur": 0.35, "pattern": 1.0}
-	lk().burst("flare", who.pos, cast_flare)
+	vfx("call")
+	vfx("call_land", who.pos)
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "HEARTH CALL", col_of(x_def()), true)
-	net_ring(h.pos, float(x_def()["range"]), Color("ffd27a"))
 	net_bolt(h.pos + Vector3(0, 1.3, 0), who.pos + Vector3(0, 1.1, 0), Color("ffd27a"))
 	return true
 
@@ -767,9 +750,9 @@ func _call_heal(who: Hunter, amount: float) -> void:
 	var amt := amount * LevelGrowth.ap(h)
 	PipStars.pulse(h)
 	if who == h:
-		CareUtil.heal(m, h, amt * float(e_def().get("self_k", 0.33)))
+		_mend(h, amt * float(e_def().get("self_k", 0.33)))
 	else:
-		CareUtil.heal(m, who, amt, float(e_def().get("wisp_k", 5.0)))
+		_mend(who, amt, float(e_def().get("wisp_k", 5.0)))
 
 
 func _call_look(who: Hunter, dt: float) -> void:
@@ -786,7 +769,6 @@ func _call_look(who: Hunter, dt: float) -> void:
 		hearth_call["fx"] = 0.22
 		var up := who.pos + Vector3(randf_range(-0.4, 0.4), 0.6 + randf() * 0.8, randf_range(-0.4, 0.4))
 		lk().burst("plus", up, {"r": 0.28, "dur": 0.5})
-		m.fx.burst(who.pos + Vector3(0, 0.5, 0), Color("9cf07a"), 4, 1.4, 0.7, -3.0, 0.7, Vector3.UP, 25.0)
 		m.sfx("tend_call_hum", h.pos, -12.0, 1.0)
 
 
@@ -813,10 +795,11 @@ func _call_end(done: bool) -> void:
 	KinBond.from_ult(h, "kill" if rescue else "hit", HeroUlt.cast_id(self))
 	var at := who.pos if not rescue else h.pos
 	# a rescue has its own revive banner, and the bond word lands on her now: no third word there
-	CareUtil.payoff(m, h, at, "" if rescue else "MENDED", Color("9cf07a"), "tend_arrive")
+	if not rescue:
+		m.fx.word(at + Vector3(0, 2.7, 0), "MENDED", Color("9cf07a"), true)
+	m.sfx("tend_arrive", at, 0.0, 1.0)
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
-	lk().burst("flare", at, {"col": Color("9cf07a"), "rim": Color("ffd27a"), "r": 1.8, "dur": 0.4, "pattern": 1.0})
-	lk().burst("rays", at, {"col": Color("b8ff9a"), "r": 0.9, "dur": 0.45})
+	vfx("mended", at)
 	play("mm_call_end")
 
 

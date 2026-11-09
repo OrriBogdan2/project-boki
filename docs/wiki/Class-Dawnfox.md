@@ -11,7 +11,7 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 |---|---|
 | Class title | the Dawnfox |
 | Base character | Meeko, female |
-| Personality | Meeko was once a small, timid wild Boki, a fox kit who was afraid of the dark. Magic changed her: glowing constellations in her fur, glowing fairy wings, an upright stance and, at last, speech. She was the first Boki anyone saw become something more. She still fears the dark, but she became a field medic who walks into the places that scare her for anyone who needs her. |
+| Personality | A fox-kit who kept the hearth of a Boki shelter alive through the night everything broke. The fire grew into a tiny sun that follows her, and a shy raincloud, the storm that tried to drown the hearth, came along too. She heals through the two of them, and keeps them safe in a little glass globe. |
 
 <!-- /gen:profile -->
 
@@ -55,8 +55,8 @@ Meeko keeps the squad on its feet: she heals with Hearthlight, carries downed fr
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Ember Cast (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with healing light, pins chasers with burr-seeds. |
-| Silhouette | small: a tiny fairy fox medic with gold-veined wings, a leaf cape and glowing constellations in her fur |
+| Fantasy | The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds. |
+| Silhouette | small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her |
 | Resource | Kindle (max 5) |
 
 ### Kit card
@@ -66,7 +66,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Support medic: heals and carries the downed, roots whoever chases them. |
-| Passive: Carrier | Carrier: run into a downed teammate to carry up to 2 behind a shield. |
+| Passive: Carrier | Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them. |
 | Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
 | RMB: Burrseed | Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and roots them 0.7s later. |
@@ -76,7 +76,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). You carry a Carrier shield (40, +6 a level) that refills each time you pick someone up. While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If the shield breaks or you're stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, rooted or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
 **Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
 
@@ -84,7 +84,7 @@ What the in-game kit card (K) says.
 
 - *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
-**Hearthlight (E, 11s cooldown).** A 2.6m ring of healing light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
+**Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
 **Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
 
