@@ -1,14 +1,14 @@
 extends RefCounted
-## --first15-shots --shots-dir=<dir> [--size=1280x720]: every screen of the first 15 minutes on a fresh save
-## (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
+## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels]: every screen of the first 15 minutes on a
+## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
 ## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
-## the screen's UI controls clipped by the window or inside the 5% margin, and (matches) the HUD drawn
-## alone, grouped into separate clusters of pixels. Needs a real renderer (jobq submit --needs gpu).
+## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
+## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics)
+## plays one part alone from a made-up save.
+## Needs a real renderer (jobq submit --needs gpu).
 ## Never writes the save. The write-up is docs/UI_FIRST15.md.
 
 const MARGIN := 0.05          # fraction of the window kept free on every side (the safe area)
-const CELL := 8               # px: grid cell for finding HUD clusters
-const JOIN := 3               # cells: clusters closer than this count as one group
 const TUT_END := 24           # tutorial step index after which the walk-through stops
 
 var main: Node
@@ -17,30 +17,41 @@ var dir := "/tmp/first15"
 var n := 0
 var lines: PackedStringArray = []
 var m: Match
+var part := ""
 
 func run(main_node: Node) -> void:
 	main = main_node
 	tree = main.get_tree()
-	var size := Vector2i(1280, 720)
+	var win := Vector2i(1280, 720)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--part="):
+			part = String(a).substr(7)
 		elif String(a).begins_with("--size="):
 			var p := String(a).substr(7).split("x")
-			size = Vector2i(int(p[0]), int(p[1]))
+			win = Vector2i(int(p[0]), int(p[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Save.d = Save.fresh()
-	tree.root.size = size
+	tree.root.size = win
 	await _wait(1.0)
-	await _front()
-	await _tutorial()
-	await _farm()
-	await _first_match()
+	match part:
+		"match":
+			_made_up_save()
+			await _first_match()
+		"panels":
+			_made_up_save()
+			await _farm()
+		_:
+			await _front()
+			await _tutorial()
+			await _farm()
+			await _first_match()
 	var f := FileAccess.open(dir.path_join("layout.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(lines) + "\n")
 	f.close()
-	print("FIRST15 %d shots in %s (%dx%d)" % [n, dir, size.x, size.y])
+	print("FIRST15 %d shots in %s (%dx%d)" % [n, dir, win.x, win.y])
 	tree.quit(0)
 
 func _wait(s: float) -> void:
@@ -52,6 +63,19 @@ func _frames(k: int) -> void:
 
 func _screen() -> Node:
 	return main.screen_node()
+
+## A finished tutorial: one hatched Boki, Vex worn.
+func _made_up_save() -> void:
+	Save.d["look"] = Unmasked.default_look()
+	Save.d["arch"] = "gunslinger"
+	Save.d["cls"] = Arch.weight("gunslinger")
+	Save.d["weapon"] = Arch.signature("gunslinger")
+	var rec := Save.new_kin("cindle", "Ember")
+	rec["trust"] = 55.0
+	Save.d["roster"] = [rec]
+	Save.d["active"] = rec["uid"]
+	for k in ["intro", "prologue", "hatched", "match", "home"]:
+		Save.d["tutorial"][k] = true
 
 # ------------------------------------------------------------------ screens
 func _front() -> void:
@@ -96,7 +120,7 @@ func _tutorial() -> void:
 	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
 	m.set_process(false)
 	await _wait(0.5)
-	await _shot("tutorial_intro", true)
+	await _shot("tutorial_intro")
 	m.tut.ack()
 	var seen := {}
 	var guard := 0
@@ -109,7 +133,7 @@ func _tutorial() -> void:
 		var sid := m.tut.id()
 		if m.tut.t >= 1.5 and not seen.has(sid):
 			seen[sid] = true
-			await _shot("tutorial_%02d_%s" % [m.tut.step, sid], true)
+			await _shot("tutorial_%02d_%s" % [m.tut.step, sid])
 		if guard % 4 == 0:
 			await _frames(1)
 	# the end: keep playing until the match hands over to the results
@@ -120,7 +144,10 @@ func _tutorial() -> void:
 		m.step(Match.DT)
 		if guard % 4 == 0:
 			await _frames(1)
-	await _wait(4.0)
+	await _wait(1.0)
+	if is_instance_valid(m):
+		m.queue_free()      # (the match was added here, not by Main, so Main's screen change leaves it behind)
+	await _wait(3.0)
 	await _shot("results")
 
 func _farm() -> void:
@@ -143,34 +170,46 @@ func _farm() -> void:
 	h._close_panel()
 
 func _first_match() -> void:
-	main.current.queue_free()
+	if main.current:
+		main.current.queue_free()
 	await _frames(2)
 	m = Match.new()
 	main.add_child(m)
+	main.current = m      # (the pause menu reads the screen's options from Main's current screen)
 	await m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": 7})
 	m.set_process(false)
+	if main.fade:
+		await main.fade.reveal(0.01)      # (this part never went through show_screen, which lifts the cover)
 	await _wait(0.5)
-	await _shot("expedition_ship", true)
-	m.ship_jump(m.player, true)
+	await _shot("expedition_plan")
 	var guard := 0
+	while guard < 3000 and m.skydrop.planning:
+		guard += 1
+		m.step(Match.DT)
+		if guard % 4 == 0:
+			await _frames(1)
+	await _shot("expedition_ship")
+	m.ship_jump(m.player, true)
+	m.player.teleport(m.world.spawns[0])      # (the drop itself is not under test: land on the first spawn)
+	guard = 0
 	while guard < 2400 and not (m.player.grounded and not m.player.dropping):
 		guard += 1
 		m.step(Match.DT)
 		if guard % 4 == 0:
 			await _frames(1)
-	await _shot("expedition_landed", true)
+	await _shot("expedition_landed")
 	for i in 900:
 		m.step(Match.DT)
 		if i % 4 == 0:
 			await _frames(1)
-	await _shot("expedition_15s", true)
+	await _shot("expedition_15s")
 	Overlay.open_pause("match")
 	await _wait(1.0)
 	await _shot("pause")
 
 # ------------------------------------------------------------------ shots and layout
 ## Saves the window as <dir>/NN_<what>.jpg and appends what the layout scan found to the report.
-func _shot(what: String, hud := false) -> void:
+func _shot(what: String) -> void:
 	await _frames(2)
 	await RenderingServer.frame_post_draw
 	n += 1
@@ -179,8 +218,6 @@ func _shot(what: String, hud := false) -> void:
 	var view := vp.get_visible_rect().size
 	lines.append("## %02d_%s (window %dx%d, laid out in %dx%d)" % [n, what, vp.size.x, vp.size.y, view.x, view.y])
 	_scan_controls(main, view, false)
-	if hud:
-		await _scan_hud(vp, view)
 
 ## Visible controls that cross the window edge or sit inside the margin (ones inside a scroll area
 ## or clipping parent are skipped: they are cut on purpose).
@@ -212,52 +249,3 @@ func _breach(r: Rect2, view: Vector2) -> String:
 
 func _fmt(r: Rect2) -> String:
 	return "%d,%d %dx%d" % [r.position.x, r.position.y, r.size.x, r.size.y]
-
-## Draws the HUD without the 3D world, then groups what was drawn into clusters (pixels within JOIN cells).
-func _scan_hud(vp: Viewport, view: Vector2) -> void:
-	vp.disable_3d = true
-	await _frames(3)
-	await RenderingServer.frame_post_draw
-	var img := vp.get_texture().get_image()
-	vp.disable_3d = false
-	var bg := img.get_pixel(img.get_width() / 2, img.get_height() / 2)
-	var k := float(img.get_width()) / view.x
-	var gw := img.get_width() / CELL
-	var gh := img.get_height() / CELL
-	var on := PackedByteArray()
-	on.resize(gw * gh)
-	for gy in gh:
-		for gx in gw:
-			for s in 16:
-				var px := img.get_pixel(gx * CELL + (s % 4) * 2, gy * CELL + (s / 4) * 2)
-				if absf(px.r - bg.r) + absf(px.g - bg.g) + absf(px.b - bg.b) > 0.08:
-					on[gy * gw + gx] = 1
-					break
-	var seen := PackedByteArray()
-	seen.resize(gw * gh)
-	var groups: Array = []
-	for gy in gh:
-		for gx in gw:
-			if on[gy * gw + gx] == 0 or seen[gy * gw + gx] == 1:
-				continue
-			var box := Rect2i(gx, gy, 1, 1)
-			var cells := 0
-			var stack: Array = [Vector2i(gx, gy)]
-			seen[gy * gw + gx] = 1
-			while not stack.is_empty():
-				var c: Vector2i = stack.pop_back()
-				cells += 1
-				box = box.expand(c)
-				for dy in range(-JOIN, JOIN + 1):
-					for dx in range(-JOIN, JOIN + 1):
-						var q := Vector2i(c.x + dx, c.y + dy)
-						if q.x < 0 or q.y < 0 or q.x >= gw or q.y >= gh:
-							continue
-						if on[q.y * gw + q.x] == 1 and seen[q.y * gw + q.x] == 0:
-							seen[q.y * gw + q.x] = 1
-							stack.append(q)
-			if cells >= 6:
-				groups.append(Rect2(Vector2(box.position * CELL) / k, Vector2((box.size + Vector2i.ONE) * CELL) / k))
-	lines.append("  HUD groups: %d" % groups.size())
-	for r in groups:
-		lines.append("    %s %s" % [_fmt(r), _breach(r, view)])
