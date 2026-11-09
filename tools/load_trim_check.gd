@@ -25,7 +25,8 @@ func _gliders() -> void:
 		var b := Gliders.mesh(id, Color("40c060"), Color("e0b030"))
 		var va: PackedVector3Array = a.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var vb: PackedVector3Array = b.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-		_ok("%s: a second Hunter's canopy reuses the sheet, same geometry" % id, Gliders._sheets.size() == sheets and va == vb)
+		var same := Gliders._sheets.size() == sheets and va == vb
+		_ok("%s: a second Hunter's canopy reuses the sheet, same geometry" % id, same)
 		var cols: PackedColorArray = b.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
 		var cloth := Gliders.col(String(g["cloth"]), Color("40c060"), Color("e0b030"))
 		_ok("%s: the canopy wears its own cloth colour" % id, Array(cols).any(func(c): return _near(c, cloth)))
