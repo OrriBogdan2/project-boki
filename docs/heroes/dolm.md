@@ -27,7 +27,7 @@ sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
 
 ## Scaling used (ratios from the source)
 - Boulder 9 (source 169); a launched rock 14, about 1.5x the boulder (source 244 vs 169, 1.45x). Punch 12-24 (source 199).
-- Quakefall 14-30, the sweet spot x1.2 (source 188 outer vs 225 centre), stun 0.5-1.2s by charge. RMB cooldown 9s (source 11s, ratio 0.82; the
+- Quakefall 14-30, the sweet spot x1.2 (source 188 outer vs 225 centre), stun 0.5-1.2s by charge. RMB cooldown 11s (the owner's tooltip data; the footage card reads 9s; the
   dash is 12s as in the source, no longer equal to it). Full charge 0.45s (0.2s tap window + 0.25s; owner item 61 overrides the source's 1.0-1.5s).
 - Punch hold: full at 0.9s (source about 0.75s release), step 0.6m (source 0.5 bh). Rocks 45 hp, 9s.
 - Scale: one body height (bh) is about 1.8m, for gameplay ranges and visuals alike: the punch lane 4.2 by 1.8m (2.5 by 1 bh),
@@ -92,6 +92,31 @@ something; Rock Hop takes a second charge and each hop goes a third further; Sto
 **Unfolded:** the kit pass had folded the source's Tetraform into Stone Row rank 3 (a centre-out second row that slowed, and a
 bridge over the abyss). Now that Tetraform is Basalt Spine on X, the row moved there and rank 3 is the source's plain extra
 row again. The bridge is gone altogether (owner review item 15: no terrain over the abyss from her ult).
+
+## Footage gaps, Nov 9 re-check
+The 14 ranked gaps of briefs/hero-ref/breah.md section 5 (written at main 4f82978), checked on main d255acbee. Asserts are in
+`--dolm-combo-check` (tools/breah_combo_check.gd). Scale as above: 1 bh is 1.8m.
+
+| # | Gap | On main | Where |
+|---|---|---|---|
+| 1 | Rocks punched along the lane, a stream | closed | 773e1aba4: `sweep_max` 12, `sweep_gap` 2.8, `sweep_stagger` 0.08. `combo: a punch along a row launches every rock in a stream` |
+| 2 | Slam lands where she hops, large circle; jump while charging leaps | closed | 773e1aba4, 8c91b34b7 (item 61): hop 2.5m, circle 3.82-4.5m (2.1-2.5 bh), `leap` 3.2m. `item 61: the hold carries him at least 2m forward...`, `rmb: jump while charging is a real leap...`. In flight: ext/tenzo-playtest-1108 (item 22) re-times the hop (0.16s wind-up, 0.75s lob) |
+| 3 | RMB charge telegraph | closed | 773e1aba4: the circle shows to everyone from the hold, at the landing spot, the sweet spot grows. `rmb hold: the slam circle shows for everyone, a hop ahead`, `rmb hold: circle and sweet spot grow through the short hold` |
+| 4 | LMB hold: punch lane | closed | 773e1aba4: pale lane 4.2 by 1.8m (2.5 by 1 bh) with chevrons from the hold, a lane hit test. `lmb hold: the punch lane shows from the hold...`, `lmb: the punch is a lane, not a cone...` |
+| 5 | Punch hold timing, step | closed | `tap` 0.28, `full` 0.9, `step` 0.6m. `lmb: the punch steps her forward about half a body` |
+| 6 | Landslide: rock rides ahead, slow | owner override | Rock Hop (owner item 111, OWNER_REVIEW_1103, replaces the single dash): a rock bursts up under him, no rock ahead. The rolling rock keeps the source's parts: `rock_range` 6, `slow_t` 1.5, `kb` 8. `crash: the rock rolls on and hits: shred and a slow` |
+| 7 | Boulder look, burst ring | closed | red ground ring and a 0.9m splash for half damage. `small: the boulder's burst splashes the foe beside it` |
+| 8 | Rockwave placement | closed | 3.4m (1.9 bh) ahead, curve 0.45m, a 0.2s red flash first. `e: a red ground flash before the rocks`, `e: the row is a slight curve 3.4m ahead...` |
+| 9 | Passive cone | open (one number) | cone drawn while sneaking, 25 -> 40 degrees over 2s: `passive: sneaking shows a pale cone ahead`, `passive: the cone widens 25 -> 40 degrees over 2s of sneaking`. Length 16m is 8.9 bh; the footage shows it running off screen at 10 bh and more. Suggestion: `passive.len` 18 (the lower bound); `dolm.json` is in flight (ext/anim-time-tenzo, ext/tenzo-playtest-1108, ext/rank-parity-b) |
+| 10 | RMB charge length, cooldown | owner override | charge capped at 0.45s (owner item 61, Quakefall review above); cooldown 11s is the owner's tooltip data (Audit row "RMB cooldown 9 vs 11") |
+| 11 | Slam animation, scorch | closed | item 14: `breah_crouch` while held, `breah_slam` re-keyed, `scorch_t` 1.0. `anim: the charge is a crouch (breah_crouch)`, `rmb: ... the dark red crater lingering about 1s`. In flight: ext/anim-time-tenzo (timing only) |
+| 12 | Shield ring | closed | a gold ring on every Molten Guard stack (`dolm_kit.gd` guard ring) |
+| 13 | Tetraform | owner override | X is Basalt Spine (owner item 15): rocks erupt centre-out over 0.4s, slow 35% for 1s, hold-drag sets the angle. E rank 3 stays the plain extra row |
+| 14 | Sfx | n/a | the footage was not transcribed |
+
+Nothing built in this pass: the one open row is a number in `dolm.json`, and every file a Tenzo fix would touch
+(`dolm.json`, `dolm_kit.gd`, `breah_slam.gd`, `kmoves_stone.gd`, `breah_combo_check.gd`) is changed by an unmerged
+Tenzo branch.
 
 ## Quakefall review (owner review item 14, Nov 3)
 - **Before:** the hop was the shared dash motion (2m in 0.15s, 13 m/s, height held flat), so the release read as a quick
