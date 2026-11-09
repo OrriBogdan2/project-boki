@@ -31958,5 +31958,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_gravigrub_n_2.jpg",
     "ok": true
+  },
+  {
+    "id": "geodelotl_card3",
+    "name": "Geodelotl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodelotl_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_card3",
+    "name": "Howlop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary_card3",
+    "name": "Furnacowary (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/furnacowary_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodelotl_card3",
+    "name": "Geodelotl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodelotl_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card3",
+    "name": "Cisternmander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cisternmander_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_card3",
+    "name": "Howlop (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_card3",
+    "name": "Dreadnoyak (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card3",
+    "name": "Cisternmander (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/cisternmander_card3_3.jpg",
+    "ok": true
   }
 ]
