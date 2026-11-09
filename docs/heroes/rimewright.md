@@ -155,3 +155,49 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Parity verify, Nov 9
+Verified on origin/main d255acbee against the Neve block of docs/KIT_PARITY.md, `briefs/hero-ref/tamsin.md`, `briefs/supervive-data/supervive_kits.md` (Celeste) and DECISIONS (owner notes win). Verdicts: match, differ (owner), regressed, open. K = `scripts/arch/kits/rimewright_kit.gd`, J = `content/archetypes/rimewright.json`, W = `content/weapons/hoar_fan.json`, D = `content/dash_flow/rimewright.json`. Checks on main: `--rimewright-combo-check` 90/0, `--hero-combo-check` 304/0, `--dash-flow-check` 0 fails, `--clip-check` 0, `--warden-clips-check` 0. No gameplay file changed here: K, J and `care_combo_check.gd` have unmerged Neve branches (neve-chill-shatter, parity-neve-skate-home, neve-lmb-celeste, vfx-neve-crash), so the one open row that needs K is listed, not fixed.
+
+| Row | Source | Ours on main (file:line) | Verdict |
+|---|---|---|---|
+| Passive: Chill 4 s | Damaging abilities Chill for 4 s | `chill_t` J:53, `add_chill` K:72 | match |
+| Passive: no Chill slow | Owner 11-07: no ours-only riders | Chill sets no slow; asserted `tm passive: Chill is 4 s ... no slow` | match |
+| Passive: Shatter slow | Shatter is damage only (data) | the Shatter burst hurts with `slow 1.2 s, 30%` (K:138) | **open**: ours-only rider, needs K |
+| Passive: 8 darts Shatter | 8 dart hits on one foe burst | `fan_hits` J:52, K:111-121 | match (damage scaled, 60 vs 529) |
+| Passive: knock Shatter | Chilled foe knocked or minion killed shatters after a beat | K:98-108, delay J `splinter_delay` | match (37 vs 324, scaled) |
+| LMB hold, rhythm | Hold; barrage then 3 larger darts at the end | `burst` 4, `heavy.n` 3, W:28-29; K:190 | match |
+| LMB homing | Semi-homing, curves to the cursor | `_tick_darts` K:257, `_homing_k` K:305 | match |
+| LMB homing, late in flight | Owner 11-07: home toward the end of the flight | `home_from` 0.35 to `home_full` 0.7, W:22-23; asserted `a dart flies out straight ... curves in late` | match |
+| LMB while skating | Owner 11-07: darts semi-home while skating too | `skating` only swaps beam skin, speed, size (K:198-218); `_tick_darts` runs for beams too; asserted `skating, beams aimed 1.5 m off ... home in late` | match |
+| LMB skating damage | Footage 56 vs 35 (1.6x) | normal damage (data pass); asserted `straight beams at normal damage` | differ (data pass); owner call if 1.6x returns |
+| LMB cadence | One dart per ~0.2 s | `rate` 0.18, W:9 | match |
+| RMB input | Tap, lands at the cursor | hold to aim, release pushes (K:540-604) | differ (owner) |
+| RMB push emerge | Owner 19:50: push, not throw | K:604 (palms, 0.9 m out); asserted `the push: the spear emerges` | match (owner) |
+| RMB travel time | Owner: grows with distance | `dist / speed`, speed 18, J:88; asserted `travel time grows with distance` | match (owner) |
+| RMB slow zone, delayed blast | Zone, detonates 1.8-2 s later | K:628-690, `delay` 1.8 J:95 | match |
+| RMB charges, cd | 2 charges, 12 s | 2, 10.2 s (J:84-85) | differ (owner scaling, 0.85x) |
+| RMB numbers | Data 156 then 190; footage 584 | 18 then 60 | differ (footage ratio) |
+| E Rink Wall | Pushes, blocks shots, recast freezes, 20 s | `cast_e` K:691, `_freeze_wall` K:756, cd 17 J:117 | match (0.85x cd) |
+| Shift Skate hold | Hold to skate, release stops, 13 s | `_tick_rinkrun` K:380, cd 13 J:60 | match |
+| Shift speed | 10-11 m/s, full speed 0.2 s | 11.5, J:61, `ramp` 0.2 | match (footage 10-11, owner kept 11.5) |
+| Shift over ledges | Carries on over the edge | K:386-391; asserted `skates on over a ledge` | match |
+| Shift ice path | Owner: skate with an ice path | `_lay_ice` K:441, plates K:522; rank 3 bridge over the Abyss | match |
+| Shift release refund | None in source | 0.6 refund J:63 | differ (owner) |
+| Air Shift | Not shown | skates at once in the air, no separate slot (item 62) | differ (owner) |
+| X: carried forward, then encased | Owner: carry, then rooted until it ends or she cancels | `_start_rime` K:867, `carry_t` J:177; asserted `skating into it keeps >= 80% ... then encased and rooted` | match (owner) |
+| X: radius, hold, cd | 4 bh zone, 3.5 s, 80 s | 7.2 m (4 x 1.8), 3.5, 80 (J:174-178) | match |
+| X: crash, stun | Damage + stun at the end | `_rime_crash` K:1010, 40 and 0.75 s (J:181-182) | match (scaled) |
+| X: cancel | Recast early ends it, no stun | `ult_recast` K:913, `_rime_cancel` K:1035 | match |
+| X: late recast | Fine print: late recast stuns (67%, wiki) | `late` J:179 | match |
+| X: zone stacks | Zone applies Shatter stacks | stacking slow + Chill in the rink (K:973) | differ (small; stacks are a slow ramp) |
+| Cancels: Shift out of X | Owner item 27 | K:962; D `into_dash.x` cancel | match (owner) |
+| Cancels: glide out of skate | Glide opens only on a double press | `_glide_pressed` K:434 | match |
+| Dash-flow, ground/air to LMB RMB E X Q | Nothing stops a cast during the held skate | D:6-19 all `fire`, carry | match (`--dash-flow-check`) |
+| Dash-flow, into_dash | Shift in a wind-up | D into_dash: LMB/RMB/E/Q fire, X cancel | match |
+| Dash-flow, `hold.lmb` | none | no `hold.lmb` row in D (a missing row combines) | match (no source row) |
+| Dash-flow, `hold.rmb` | none | `keep` x3, D | match (`[?]`, no source) |
+| Dash-flow source text | Owner: darts home while skating | D:6 said "straight thick beams" | fixed here (text only, no behaviour) |
+| Clips | Footage poses | every `tm_*` kit move has a clip in `claire.json`, 0 fails | match |
+
+Open, not fixed (needs a file an unmerged Neve branch changes): the Shatter slow, K:138. Remove `"slow": 1.2, "slow_k": 0.3` from the `splinter` hit, and assert `foe.slow_t == 0` after a Shatter in `--rimewright-combo-check`. Stale text in files held by other branches: J card `dash` ("your darts fly straight and thick") and the Neve block of docs/KIT_PARITY.md (still "Claire", "15% slow", "straight while skating") are fixed by ext/neve-lmb-celeste and ext/parity-neve-skate-home once merged.
