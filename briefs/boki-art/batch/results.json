@@ -28388,5 +28388,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_briarlynx_v2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_flarmink_v2",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_flarmink_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_galleotter_v2",
+    "name": "Galleotter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_galleotter_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_briarlynx_v2",
+    "name": "Briarlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_briarlynx_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bellowary_stance",
+    "name": "Bellowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bellowary_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bellowary_stance",
+    "name": "Bellowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bellowary_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_boltstrich_stance",
+    "name": "Boltstrich",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_boltstrich_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_boltstrich_stance",
+    "name": "Boltstrich",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_boltstrich_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_galleotter_v2",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_galleotter_v2_2.jpg",
+    "ok": true
   }
 ]
