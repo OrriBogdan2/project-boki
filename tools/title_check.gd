@@ -1,6 +1,6 @@
 extends RefCounted
 ## --title-check: the title screen. It builds; its menu has the items it should (Continue or New
-## game, Play with friends when online play is there, Save files, Settings, Quit off the web) and
+## game, Play with friends when online play is there, Settings, More... (Practice, Demo match, Save files), Quit off the web) and
 ## nothing called "The story so far"; the tagline is there; the key art has its squad of six with
 ## their Boki, the Wyrm and the logo; and the scene stays inside a frame budget, on the High preset
 ## and again on Low (which must build a cheaper scene). Headless, so the budget is the CPU side of a
@@ -50,12 +50,17 @@ func _pass(preset: String) -> Dictionary:
 		return {"parts": 0, "meshes": 0}
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
-	var want: Array = ["Continue" if has else "New game", "Arena"]
-	if has: want.append("Demo match")
+	var want: Array = ["Continue" if has else "New game"]
 	if Net.available(): want.append("Play with friends")
-	want.append_array(["Save files", "Settings"])
+	want.append_array(["Settings", "More..."])
 	if not OS.has_feature("web"): want.append("Quit")
 	ok(labels == want, "[%s] menu items %s" % [preset, labels])
+	var more_at := want.find("More...")
+	for c in ts.menu_col.get_children():
+		if c is Button and (c as Button).text == "More...": (c as Button).pressed.emit()
+	var opened: Array = ts.menu_labels()
+	var rest: Array = ["Practice"] + (["Demo match"] if has else []) + ["Save files"]
+	ok(opened.slice(more_at + 1, more_at + 1 + rest.size()) == rest and not opened.has("Arena"), "[%s] More... opens %s, Arena stays unused (%s)" % [preset, rest, opened])
 	var texts := _texts(ts)
 	ok(not texts.any(func(s): return String(s).to_lower().contains("story so far")), "[%s] no \"The story so far\" anywhere on the title" % preset)
 	ok(texts.any(func(s): return String(s).to_lower().contains("raise them") and String(s).to_lower().contains("bring them home")), "[%s] the tagline is there" % preset)

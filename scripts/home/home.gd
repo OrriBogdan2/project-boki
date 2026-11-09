@@ -3366,13 +3366,14 @@ func _open_expedition() -> void:
 	right.add_child(UI.para(String(RaidLook.BLURBS.get(rc, "")), 12, UI.MUTED))
 	if not ak.is_empty():
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
-	# the way out: practice on the left, go on the right
+	# the way out: "More" holds practice and the other rooms on the left, go on the right
 	var fl := UI.footer_left(v)
-	fl.add_child(UI.ghost("Arena", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
-	fl.add_child(UI.ghost("Training area", _start_training, 0, "jump"))
-	fl.add_child(UI.ghost("Duel room", _start_duel, 0, "knock"))
+	var more := UI.ghost("More v", func(): pass)
+	var extra: Array = [UI.ghost("Training area", _start_training, 0, "jump"), UI.ghost("Duel room", _start_duel, 0, "knock")]
 	if Net.available():
-		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+		extra.append(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
+	UI.fold_more(more, extra, "More v", "Less ^")
+	for b in [more] + extra: fl.add_child(b)
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
 

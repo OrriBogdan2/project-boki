@@ -200,6 +200,14 @@ static func ghost(text: String, cb: Callable, minw := 0.0, icon := "") -> Button
 	b.theme_type_variation = "Ghost"
 	return b
 
+## Makes `more` open and close the hidden `extra` buttons (menus keep advanced options behind a "More" button).
+static func fold_more(more: Button, extra: Array, closed: String, opened: String) -> void:
+	for b in extra: b.visible = false
+	more.pressed.connect(func():
+		var open: bool = not extra[0].visible
+		for b in extra: b.visible = open
+		more.text = opened if open else closed)
+
 ## A red-outlined button for things that can't be undone (pair it with confirm()).
 static func danger(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)

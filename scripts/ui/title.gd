@@ -43,6 +43,8 @@ const CAM_AT := Vector3(-0.9, 1.9, -0.9)
 const CAM_LOOK := Vector3(1.25, 1.95, -9.4)
 const WIND := Vector3(2.2, 0.15, 0.35)            # the storm blows left to right
 ## Each archetype's weapon on the title (the arch_gallery set).
+const MORE := "More..."                                 # opens Practice, Demo match and Save files
+const LESS := "Less"
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
@@ -474,33 +476,41 @@ func _build_ui() -> void:
 	col.add_child(logo)
 	# no tagline under the logo
 	var has: bool = not Save.d["roster"].is_empty()
-	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
+	col.add_child(UI.spacer(12 if has else 30))
 	# the one big button: carry on where you left off, or start a new story
 	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
 	col.add_child(b1)
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
+	# the everyday items, then "More..." which opens the rest (docs/UI_DESIGN.md: advanced options behind More)
 	var items: Array = []
-	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
+	if Net.available():
+		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
+	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
+	var rest: Array = [["Practice", func(): Game.start_match(Match.arena_opts()), "knock"]]
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
-		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
-	if Net.available():
-		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
-	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
-	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
-	if not OS.has_feature("web"):
-		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
+		rest.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+	rest.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
 	for it in items:
 		col.add_child(_menu_item(String(it[0]), it[1], String(it[2])))
+	var more := _menu_item(MORE, func(): pass, "gear")
+	col.add_child(more)
+	var extra: Array = []
+	for it in rest:
+		var b := _menu_item(String(it[0]), it[1], String(it[2]))
+		col.add_child(b)
+		extra.append(b)
+	UI.fold_more(more, extra, MORE, LESS)
+	if not OS.has_feature("web"):
+		col.add_child(_menu_item("Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"))
 	var i := 0
 	for ch in col.get_children():
 		if ch == logo: continue
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
-	# bottom corners: what this is, and how to drive the menu without a mouse
+	# bottom corner: which build this is
 	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
@@ -523,20 +533,15 @@ func _build_ui() -> void:
 	nv.add_child(nb)
 	root.add_child(news)
 	UI.pop_in(news, 1.4)
-	var keys := UI.key_hints([["W S", "choose"], ["Enter", "select"], ["Esc", "back"]], 13)
-	keys.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
-	root.add_child(keys)
 	b1.grab_focus()
 
-## The menu's item labels in order (the main button first): read by --title-check.
+## The menu's visible item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:
 	var out: Array = []
 	if menu_col == null:
 		return out
 	for ch in menu_col.get_children():
-		if ch is Button: out.append(String((ch as Button).text))
+		if ch is Button and (ch as Button).visible: out.append(String((ch as Button).text))
 	return out
 
 ## W and S move through the menu as well as the arrow keys and a gamepad's d-pad.
