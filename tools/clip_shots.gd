@@ -1,6 +1,6 @@
 extends RefCounted
-## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match] [--carry]:
-## a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
+## --clip-shots --warden=<id> --shots-dir=<dir> [--clips=a,b] [--fps=15] [--size=480] [--yaw=deg] [--turn] [--match]
+## [--carry]: a Hero's hand-keyed clips frame by frame in the game's renderer (ART-1 approval sheets): <dir>/<clip>/f000.png...,
 ## and with --turn a turntable in <dir>/turntable/. Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 var ground_col := Color("4f7a3e")
@@ -143,7 +143,7 @@ func _moods(model: Node3D, sync: Node, clips: WardenClips, out: String) -> void:
 	await _grab(dir.path_join("flare.png"))
 	model.set_meta(WardenMood.FLARE, false)
 
-## --carry: the rescue carry on the walk (<dir>/carry/fNN.png, 8 frames over one second), a ball at the socket for the Boki.
+## --carry: the rescue carry on the walk (<dir>/carry/fNN.png, 8 frames), a ball at the socket for the Boki.
 func _carry(model: Node3D, sync: Node, out: String) -> void:
 	var dir := out.path_join("carry")
 	DirAccess.make_dir_recursive_absolute(dir)
