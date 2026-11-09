@@ -3528,57 +3528,46 @@ func _play_evolutions() -> void:
 	rec["pending_evo"] = []
 	Save.save_game()
 	var n: Node3D = k["node"]
-	# bring it next to you
-	var at := ppos + Vector3(1.6, 0, 0.6)
-	if world.is_void(at.x, at.z) or world.is_block(at.x, at.z):
-		at = ppos + Vector3(0, 0, 1.4)
-	k["pos"] = at
+	var at: Vector3 = n.position
 	k["goal"] = Vector3.INF
 	k["busy"] = true
-	n.position = at
-	cam.zoom_to = 0.55
 	var big := false
 	for e in evs:
 		if e["kind"] == "form": big = true
-	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("skill")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
-	var tw := create_tween()
-	tw.tween_interval(0.4)
-	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	for i in 6:
-		get_tree().create_timer(0.4 + i * 0.22).timeout.connect(func(): fx.burst(at + Vector3(0, 0.5, 0), tint, 6, 2.0, 0.4, -2.0))
-	tw.tween_callback(func():
-		# swap in the grown model
-		if not is_instance_valid(n):
-			building_now = false
-			return
-		var nn := Models.kin(rec["species"], rec)
-		nn.position = at
-		nn.rotation = n.rotation
-		var lbl: Label3D = k["emote"]
-		n.remove_child(lbl)
-		nn.add_child(lbl)
-		if k.has("say") and is_instance_valid(k["say"]):
-			n.remove_child(k["say"]); nn.add_child(k["say"])
-		k.erase("bubble")
-		add_child(nn)
-		n.queue_free()
-		k["node"] = nn
+	# the grown model, with the label and bubble the old one carried
+	var nn := Models.kin(rec["species"], rec)
+	var lbl: Label3D = k["emote"]
+	n.remove_child(lbl)
+	nn.add_child(lbl)
+	if k.has("say") and is_instance_valid(k["say"]):
+		n.remove_child(k["say"]); nn.add_child(k["say"])
+	k.erase("bubble")
+	k["node"] = nn
+	var seen := EvolveMoment.on_screen(cam, at)
+	var watchers: Array = EvolveMoment.watchers_of(kins, k, at) if seen else []
+	for w in watchers: w["busy"] = true
+	var end := func() -> void:
+		for w in watchers: w["busy"] = false
 		k["busy"] = false
 		k["t"] = 3.0
-		fx.burst(at + Vector3(0, 0.5, 0), tint, 36, 5.0, 0.8, 4.0, 1.3)
-		fx.ring(at, 3.0, Color(tint, 0.9), 0.5)
-		Sfx.play("unlock")
+		building_now = false
 		Sfx.play("kin_happy")
 		_emote(k, "★")
-		building_now = false
-		cam.zoom_to = HOME_ZOOM
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
-		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED)))
+		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED))
+	if seen:
+		EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
+	else:
+		nn.position = at
+		nn.rotation = n.rotation
+		add_child(nn)
+		n.queue_free()
+		end.call()
 
 # ---- buildings and bridges
 func _building_verb(b: String) -> String:
