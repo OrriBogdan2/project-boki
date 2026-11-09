@@ -534,7 +534,7 @@ func _draw_top(sz: Vector2) -> void:
 			return      # (recording: no training banner or checklist)
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
-		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING AREA", 12, Color("8fe3c8"))
+		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
 		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
 		# the checklist: only what's left (up to six), with a count; H folds it away
 		var all_rows: Array = m.train_rows()

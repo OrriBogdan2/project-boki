@@ -274,7 +274,7 @@ func _home() -> void:
 		await shot("loadout_bottom")
 	h._close_panel()
 	await wait(0.4)
-	# the training area (a match)
+	# the Training Grounds (a match)
 	h._start_training()
 	await _wait_match(600.0)
 	god = true
