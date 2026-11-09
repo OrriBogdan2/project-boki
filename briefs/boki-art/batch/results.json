@@ -29606,5 +29606,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/sloggoth_card3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_briarlynx",
+    "name": "Briarlynx (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_briarlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_briarlynx",
+    "name": "Briarlynx (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_briarlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sloggoth_card3",
+    "name": "Sloggoth (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sloggoth_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_briarlynx",
+    "name": "Briarlynx (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_briarlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_card",
+    "name": "Briarlynx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/briarlynx_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx_card",
+    "name": "Briarlynx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/briarlynx_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blotlet_card",
+    "name": "Blotlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blotlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "blotlet_card",
+    "name": "Blotlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blotlet_card_2.jpg",
+    "ok": true
   }
 ]
