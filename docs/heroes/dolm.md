@@ -169,6 +169,9 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - Asserted (`--dolm-combo-check`): `item 67: a rock's top is at least 1.6x...`, `item 67: the look reaches the top...`,
   `item 67: every rock has a ground shadow`, `rock (item 25): ...`. Old vs new: /home/boki/shots-s2/kits/tarek/.
 
+## Impact weight (parity-reel "by eye")
+The source's rocks burst in fire and its punch lands with a flash; ours read thin. `DolmImpact` (scripts/arch/kits/dolm_impact.gd) lays Tenzo's ability colour (blue, DECISIONS 2026-11-08) on top of each hit's own fire: two flashes, two ground rings and a spray of chips, sized by the hit's damage (weight = dmg / 30, at least 0.25). Used by the boulder landing, a launched rock's burst, the punch's hit (or lane end), and every slam (tap, hop, dive, glide). Dashes and their landings (Rock Hop, air dash) get none. Each Stone Row and Tetraform rock also breaks the ground in a blue ring and flash (`DolmImpact.rise`); the R layout is unchanged. Asserted by `--dolm-combo-check` ("impact:" rows); strips `--breah-shots --breah-only=impacts`.
+
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
 |---|---|---|
