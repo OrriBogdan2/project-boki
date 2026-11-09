@@ -10,7 +10,8 @@ const WINDOW_S := 10.0            # s of damage the card adds up
 const SHOWN_SOURCES := 3          # sources named on the damage line; the rest fold into "others"
 const CYCLE_ACTION := "fire"      # the key that cycles the watched teammate (a dead Hunter has no use for it)
 ## A hit's tag -> the key of the Hunter's own ability in its archetype file (its name is the label).
-const ABILITY_KEY := {"rmb": "rmb", "secondary": "rmb", "utility": "e", "e": "e", "ult": "x", "ultimate": "x", "x": "x", "dodge": "dash"}
+const ABILITY_KEY := {
+	"rmb": "rmb", "secondary": "rmb", "utility": "e", "e": "e", "ult": "x", "ultimate": "x", "x": "x", "dodge": "dash"}
 ## A hit's tag -> plain words, for hits that are not a named ability.
 const TAG_WORDS := {"primary": "a weapon shot", "shot": "a weapon shot", "flame": "flames", "burn": "burning",
 	"mob": "a monster", "fall": "a fall", "boom": "an explosion", "wall": "a wall slam", "hazard": "a hazard",
@@ -72,7 +73,8 @@ func _how(by: Hunter, tags: Array) -> String:
 
 ## The hits `h` took in the WINDOW_S seconds up to `until` (the match time, or the moment they went out).
 func recent(h: Hunter, until: float) -> Array:
-	return (_hits.get(h.get_instance_id(), []) as Array).filter(func(r): return until - float(r["t"]) <= WINDOW_S and float(r["t"]) <= until)
+	var kept: Array = _hits.get(h.get_instance_id(), [])
+	return kept.filter(func(r): return float(r["t"]) <= until and until - float(r["t"]) <= WINDOW_S)
 
 ## "Rin 84, a monster 12": damage by source, biggest first.
 static func by_source(hits: Array) -> String:
@@ -121,7 +123,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func draw(c: CanvasItem, at: Vector2, p: Hunter) -> void:
 	var hits := recent(p, float(p.get_meta("died_at", m.time)) if p.out else m.time)
 	var mate := watched()
-	var lines := 1 + (0 if hits.is_empty() else 1) + (1 if mate else 0)
+	var lines := 1 + int(not hits.is_empty()) + int(mate != null)
 	var box := Rect2(at - Vector2(PANEL_W * 0.5, 0), Vector2(PANEL_W, 14.0 + lines * LINE_H))
 	c.draw_style_box(HudStyle.box(Color(0.04, 0.05, 0.08, 0.82), 10, Color(0.5, 0.55, 0.65, 0.5), 1), box)
 	var y := box.position.y + 24.0
@@ -132,7 +134,9 @@ func draw(c: CanvasItem, at: Vector2, p: Hunter) -> void:
 		_who_line(c, at.x, y, verb, hits.back() as Dictionary)
 		HudStyle.ctext(c, Vector2(at.x, y + LINE_H), "Last %d s: %s" % [int(WINDOW_S), by_source(hits)], 14, MUTED)
 	if mate:
-		var next := "  (%s: next teammate)" % Settings.key_cap(CYCLE_ACTION) if mates().size() > 1 else ""
+		var next := ""
+		if mates().size() > 1:
+			next = "  (%s: next teammate)" % Settings.key_cap(CYCLE_ACTION)
 		HudStyle.ctext(c, Vector2(at.x, box.end.y - 10.0), "Watching %s%s" % [mate.pname, next], 14, INK)
 
 ## "Downed by Rin with Shadow Knife", the Hunter's name in their squad colour.
