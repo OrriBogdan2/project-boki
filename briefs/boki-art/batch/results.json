@@ -68253,5 +68253,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_pocketpus_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pavonazar_r4",
+    "name": "Pavonazar (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pavonazar_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bullpole_r4",
+    "name": "Bullpole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bullpole_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bullpole_r4",
+    "name": "Bullpole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bullpole_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scoopsy_r4",
+    "name": "Scoopsy (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_scoopsy_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pocketpus_r4",
+    "name": "Pocketpus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pocketpus_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scoopsy_r4",
+    "name": "Scoopsy (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_scoopsy_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scoopsy_r4",
+    "name": "Scoopsy (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_scoopsy_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gambitfin_r4",
+    "name": "Gambitfin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gambitfin_r4_2.jpg",
+    "ok": true
   }
 ]
