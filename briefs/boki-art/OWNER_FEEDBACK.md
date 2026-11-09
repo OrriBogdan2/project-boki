@@ -58,3 +58,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 45 | Line-audit picks | wave99: Chuggamus, Furnacowary, Geysirbara, Seamwyrm, Voltalon, + new Lodestaff -> sheet/card/portrait | GENERATING |
 | 46 | Line audit batch 3 | wave100: planted-pose cards for Glaciatee, Lyrewing, Umbrathere, Lanternlong, Knotwyrm; new concepts for Gloamspire and Selenwhale | GENERATING |
 | 47 | Audit batch 2 picks | wave9zz: 10 Boki -> sheet/card/portrait (incl. Reapant six-legged plum ninja ant) | GENERATING |
+| 48 | Audit batch 3 picks | Gloamspire + Selenwhale new finals -> sheet/card/portrait; retries: 4 sheets, Glaciatee/Umbrathere planted cards | GENERATING |

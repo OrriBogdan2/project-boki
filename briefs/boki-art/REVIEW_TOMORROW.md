@@ -54,3 +54,5 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Galleotter | Bokidex keeps your earlier approved gen hero (coordinator rule); the new sea-serpent card/portrait are filed in the repo | Which do you want as Galleotter? | say 'use the serpent' to switch |
 | Audit batch 2 picks (all queued, 8.2-8.6) | Dragonkite (lacquered paper-sail dragon), Dreadnoyak (icicle-coat mammoth), Geodemole (geode beast mid-dig), Lanternmit (long-legged lantern crab), Reapant (six-legged plum ninja ant), Skateron (racing glide), Sporcupine (toadstool-quill porcupine), Stormit (storm-tower spider crab), Terrarimit (rooted garden crab), Vaultara (vault-door lizard) | Line audit: these stages were the previous body scaled up | old cards kept in git history; concepts in batch/out (c_<name>_x*) |
 | Forgebrock | live stays | audit redos peaked at 7.8 | c_forgebrock_x2_3, x3_3 |
+| Gloamspire | x1_4 gnarly crystal slug-spire in a shadow pool (7.9) queued | Line audit: weak final; just under the bar but clearly better | live card |
+| Selenwhale (Lunarca) | x1_4 vast cratered moon-whale (8.0) queued | Line audit: weak final | live card |
