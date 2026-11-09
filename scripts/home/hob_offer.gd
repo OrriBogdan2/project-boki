@@ -18,6 +18,7 @@ var cards: Array = []          # PanelContainer per id
 var preview: Control           # holds the focused Mask's clips
 var reel: Array = []           # the focused Mask's clips (attack, signature, dash); one shows at a time
 var reel_i := 0
+var turn: Timer                # one loop long: moves the reel on
 var take_button: Button
 var root: Control
 
@@ -100,11 +101,11 @@ func focus(i: int) -> void:
 		var clip := AbilityClip.make(id, slot, CLIP)
 		preview.add_child(clip)
 		reel.append(clip)
-	var turn := Timer.new()
+	turn = Timer.new()
 	turn.wait_time = AbilityClip.LOOP_S
+	turn.autostart = true
 	turn.timeout.connect(func(): show_clip(reel_i + 1))
 	preview.add_child(turn)
-	turn.start()
 	show_clip(0)
 	take_button.text = String(chat.rules()["offer_take"]).replace("{name}", HeroTitle.base_name(id))
 
@@ -117,6 +118,8 @@ func show_clip(k: int) -> void:
 		if clip.model != null:
 			clip.play(j == reel_i)
 	(reel[reel_i] as AbilityClip).restart()
+	if turn.is_inside_tree():
+		turn.start()
 
 ## Takes this Mask (once; anything not on offer is refused).
 func pick(id: String) -> void:
