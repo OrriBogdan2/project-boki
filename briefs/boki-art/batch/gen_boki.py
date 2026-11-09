@@ -25,7 +25,7 @@ def main():
     ap.add_argument("--parallel", type=int, default=12, help="images generated at the same time")
     ap.add_argument("--watch", action="store_true", help="keep running: pull new jobs every minute, generate, push")
     a = ap.parse_args()
-    if not os.environ.get("GEMINI_API_KEY") and not os.environ.get("OPENROUTER_API_KEY"):
+    if not any(os.environ.get(k) for k in ("GEMINI_API_KEY", "OPENROUTER_API_KEY", "GOOGLE_CLOUD_PROJECT")):
         sys.exit("No API key. Run: export GEMINI_API_KEY=\"your key\"  (or OPENROUTER_API_KEY)")
     try:
         from google import genai
@@ -40,7 +40,16 @@ def main():
     if not has_size:
         print("WARNING: this google-genai is too old for 4K. Images will come out at the default size.")
         print("To fix: python3 -m pip install --upgrade 'google-genai>=1.50'  (needs Python 3.10+)\n")
-    client = genai.Client() if os.environ.get("GEMINI_API_KEY") else None
+    if os.environ.get("GOOGLE_CLOUD_PROJECT"):
+        # Vertex AI (Google Cloud credits): sign in once with `gcloud auth application-default login`
+        kw = dict(project=os.environ["GOOGLE_CLOUD_PROJECT"], location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"))
+        try:
+            client = genai.Client(enterprise=True, **kw)
+        except TypeError:
+            client = genai.Client(vertexai=True, **kw)
+        print(f"Using Vertex AI, project {kw['project']} ({kw['location']})")
+    else:
+        client = genai.Client() if os.environ.get("GEMINI_API_KEY") else None
     use_or = {"on": os.environ.get("BOKI_PROVIDER") == "openrouter" or client is None}
     if os.environ.get("OPENROUTER_API_KEY"):
         print("OpenRouter key found: used " + ("for everything" if use_or["on"] else "when Google's daily limit is hit"))
