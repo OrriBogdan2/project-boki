@@ -123,13 +123,13 @@ static func food_text(rec: Dictionary) -> String:
 ## A row: a small icon, a short muted label, the value (one line where it can), an optional extra.
 static func _row(parent: Control, k: String, val: String, col := UI.INK, extra: Control = null, icon := "") -> void:
 	var r := UI.hbox(8)
-	var ic: Control = UI.IconDot.new(icon, UI.MUTED, 14.0) if icon != "" else Control.new()
+	var ic: Control = UiWidgets.IconDot.new(icon, UI.MUTED, 14.0) if icon != "" else Control.new()
 	ic.custom_minimum_size = Vector2(14, 14)
 	r.add_child(ic)
-	var kl := UI.label(k, UI.T_SMALL, UI.MUTED)
+	var kl := UiText.label(k, UI.T_SMALL, UI.MUTED)
 	kl.custom_minimum_size.x = 74
 	r.add_child(kl)
-	var vl := UI.label(val, UI.T_SMALL, col, UI.semi)
+	var vl := UiText.label(val, UI.T_SMALL, col, UI.semi)
 	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if extra == null else TextServer.AUTOWRAP_OFF
 	vl.size_flags_horizontal = Control.SIZE_EXPAND_FILL if extra == null else Control.SIZE_SHRINK_BEGIN
 	vl.custom_minimum_size.x = 120 if extra == null else 0
@@ -210,10 +210,10 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	var sx := Unique.sex(rec)
 	if sx != "":
 		var r := UI.hbox(8)
-		r.add_child(UI.sex_icon(rec, 14.0))
-		var kl := UI.label("Sex", UI.T_SMALL, UI.MUTED); kl.custom_minimum_size.x = 74
+		r.add_child(UiWidgets.sex_icon(rec, 14.0))
+		var kl := UiText.label("Sex", UI.T_SMALL, UI.MUTED); kl.custom_minimum_size.x = 74
 		r.add_child(kl)
-		r.add_child(UI.label(Unique.sex_name(rec), UI.T_SMALL, UI.SEX_COL[sx], UI.semi))
+		r.add_child(UiText.label(Unique.sex_name(rec), UI.T_SMALL, UiWidgets.SEX_COL[sx], UI.semi))
 		parent.add_child(r)
 	_row(parent, "Size", size_short(rec), UI.INK, null, "ruler")
 	var ms := Mutations.of(rec).filter(func(m): return String(Mutations.info(m).get("group", "")) == "size")
@@ -246,24 +246,24 @@ static func block(rec: Dictionary, parent: Control, compact := false) -> void:
 	if rec.is_empty(): return
 	if compact:
 		var top := UI.hbox(6)
-		top.add_child(UI.sex_icon(rec, 13.0))
-		var sl := UI.label(size_short(rec), UI.T_SMALL, UI.INK, UI.semi)
+		top.add_child(UiWidgets.sex_icon(rec, 13.0))
+		var sl := UiText.label(size_short(rec), UI.T_SMALL, UI.INK, UI.semi)
 		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		sl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		sl.custom_minimum_size.x = 240
 		top.add_child(sl)
 		parent.add_child(top)
-		var l := UI.label("%s  ·  %s eyes  ·  %s" % [coat_short(rec), Unique.eye_name(rec), String(HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec)))], 12, UI.MUTED)
+		var l := UiText.label("%s  ·  %s eyes  ·  %s" % [coat_short(rec), Unique.eye_name(rec), String(HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec)))], 12, UI.MUTED)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size.x = 260
 		parent.add_child(l)
-		var ol := UI.label(origin_short(rec) + (("  ·  #%04d" % int(rec["serial"])) if rec.has("serial") else ""), 12, UI.MUTED)
+		var ol := UiText.label(origin_short(rec) + (("  ·  #%04d" % int(rec["serial"])) if rec.has("serial") else ""), 12, UI.MUTED)
 		ol.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ol.custom_minimum_size.x = 260
 		parent.add_child(ol)
 		return
-	parent.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
+	parent.add_child(UiText.section("Who it is", UI.FAINT.lightened(0.2)))
 	looks(rec, parent)
 	parent.add_child(UI.spacer(4))
-	parent.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
+	parent.add_child(UiText.section("Where it's from", UI.FAINT.lightened(0.2)))
 	history(rec, parent)

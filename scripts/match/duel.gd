@@ -275,7 +275,7 @@ func open_menu() -> void:
 	root.add_child(shade)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
-	var pb := UI.scroll_panel("Sparring bot", 520, close_menu, "Done")
+	var pb := UiShell.scroll_panel("Sparring bot", 520, close_menu, "Done")
 	center.add_child(pb[0])
 	_fill_menu(pb[1])
 	UI.pop_in(pb[0])
@@ -283,28 +283,28 @@ func open_menu() -> void:
 func _fill_menu(v: VBoxContainer) -> void:
 	for ch in v.get_children():
 		ch.queue_free()
-	v.add_child(UI.label("Changing the Hunter, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
+	v.add_child(UiText.label("Changing the Hunter, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
 	var rows := [["cls", "Hunter"], ["glove", "Glove 1 (%s)" % Gloves.key_cap(0)]]
 	rows += [["glove2", "Glove 2 (%s)" % Gloves.key_cap(1)], ["diff", "Difficulty"], ["mode", "Behaviour"]]
 	for row in rows:
 		var what: String = row[0]
 		var h := UI.hbox(8)
-		var l := UI.label(row[1], 15, UI.MUTED); l.custom_minimum_size.x = 120
+		var l := UiText.label(row[1], 15, UI.MUTED); l.custom_minimum_size.x = 120
 		h.add_child(l)
-		h.add_child(UI.button("‹", func(): cycle(what, -1); _fill_menu(v), 44))
-		var val := UI.label(pick_text(what), 16, UI.INK); val.custom_minimum_size.x = 200
+		h.add_child(UiWidgets.button("‹", func(): cycle(what, -1); _fill_menu(v), 44))
+		var val := UiText.label(pick_text(what), 16, UI.INK); val.custom_minimum_size.x = 200
 		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		h.add_child(val)
-		h.add_child(UI.button("›", func(): cycle(what, 1); _fill_menu(v), 44))
+		h.add_child(UiWidgets.button("›", func(): cycle(what, 1); _fill_menu(v), 44))
 		v.add_child(h)
 	if m.arena:
 		v.add_child(_kin_row(v))      # your Boki: any species, a loaner if you don't own it (never saved)
 	var acts := UI.hbox(8)
-	acts.add_child(UI.button("Reset round", func(): reset(); close_menu(), 150))
-	acts.add_child(UI.button("Heal both", func(): heal_both(), 130))
-	acts.add_child(UI.button("Clear stats", func(): _clear_stats(); round_n = 1, 130))
+	acts.add_child(UiWidgets.button("Reset round", func(): reset(); close_menu(), 150))
+	acts.add_child(UiWidgets.button("Heal both", func(): heal_both(), 130))
+	acts.add_child(UiWidgets.button("Clear stats", func(): _clear_stats(); round_n = 1, 130))
 	v.add_child(acts)
-	v.add_child(UI.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
+	v.add_child(UiText.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
 
 ## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
 ## that never reaches your roster; the training area has no way out).
@@ -314,17 +314,17 @@ func _kin_row(v: VBoxContainer) -> HBoxContainer:
 	var cur := String((P.kin as Kin).species) if P.kin and not (P.kin as Kin).dead else ""
 	var i := maxi(0, opts.find(cur))
 	var h := UI.hbox(8)
-	var l := UI.label("Your Boki", 15, UI.MUTED); l.custom_minimum_size.x = 120
+	var l := UiText.label("Your Boki", 15, UI.MUTED); l.custom_minimum_size.x = 120
 	h.add_child(l)
 	var step := func(d: int):
 		m.arena.set_kin(String(opts[posmod(i + d, opts.size())]))
 		_fill_menu(v)
-	h.add_child(UI.button("‹", func(): step.call(-1), 44))
+	h.add_child(UiWidgets.button("‹", func(): step.call(-1), 44))
 	var nm := "None" if cur == "" else String(Data.KIN.get(cur, {}).get("name", cur))
-	var val := UI.label(nm, 16, UI.INK); val.custom_minimum_size.x = 200
+	var val := UiText.label(nm, 16, UI.INK); val.custom_minimum_size.x = 200
 	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	h.add_child(val)
-	h.add_child(UI.button("›", func(): step.call(1), 44))
+	h.add_child(UiWidgets.button("›", func(): step.call(1), 44))
 	return h
 
 func close_menu() -> void:

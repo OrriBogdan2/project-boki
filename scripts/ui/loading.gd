@@ -229,7 +229,7 @@ func _draw() -> void:
 	var bw := minf(480.0, sz.x - 80.0)
 	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
 	var af := snappedf(a, 0.1)
-	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
+	UiWidgets.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
 	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
 	_text(Vector2(br.position.x + 22.0, br.position.y - 10), stage_label + "…", UI.semi, 13, Color(UI.INK, a * 0.8), 0, HORIZONTAL_ALIGNMENT_LEFT)
 	_text(Vector2(br.end.x, br.position.y - 10), "%d%%" % int(prog * 100.0), UI.semi, 13, Color(UI.INK, a * 0.55), 0, HORIZONTAL_ALIGNMENT_RIGHT)

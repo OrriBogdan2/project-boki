@@ -70,7 +70,7 @@ func _ready() -> void:
 	var v := UI.vbox(10)
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	center.add_child(v)
-	var kick := UI.label("NEW RELIC", UI.T_HEAD, UI.GOLD, UI.caps)
+	var kick := UiText.label("NEW RELIC", UI.T_HEAD, UI.GOLD, UI.caps)
 	kick.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(kick)
 	# the ring of light, with the Hunter standing in it, beside its name and its abilities working
@@ -99,9 +99,9 @@ func _ready() -> void:
 	var right := UI.vbox(8)
 	right.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(right)
-	var nm := UI.title(HunterViewer.display_name(id), 44, col)
+	var nm := UiText.title(HunterViewer.display_name(id), 44, col)
 	right.add_child(nm)
-	var wl := UI.label(HunterViewer.stat_line(id), UI.T_SMALL, UI.MUTED)
+	var wl := UiText.label(HunterViewer.stat_line(id), UI.T_SMALL, UI.MUTED)
 	right.add_child(wl)
 	var clips := GridContainer.new()
 	clips.columns = 3
@@ -116,8 +116,8 @@ func _ready() -> void:
 	right.add_child(clips)
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER
-	btns.add_child(UI.ghost("Later", func(): _finish(false), 140))
-	var play := UI.primary("Play %s" % Arch.name_of(id, true), func(): _finish(true), 220)
+	btns.add_child(UiWidgets.ghost("Later", func(): _finish(false), 140))
+	var play := UiWidgets.primary("Play %s" % Arch.name_of(id, true), func(): _finish(true), 220)
 	btns.add_child(play)
 	v.add_child(btns)
 	root.set_meta("class_id", id)

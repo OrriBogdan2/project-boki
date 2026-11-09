@@ -434,7 +434,7 @@ func _build_ui() -> void:
 	pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(pips)
 	# bottom corner: how to move on
-	var hint := UI.key_hints([["Space", "next"]], 12, Color(1, 1, 1, 0.5))
+	var hint := UiWidgets.key_hints([["Space", "next"]], 12, Color(1, 1, 1, 0.5))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	hint.offset_right = -24; hint.offset_top = -40; hint.offset_bottom = -16

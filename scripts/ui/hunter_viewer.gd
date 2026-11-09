@@ -185,10 +185,10 @@ func _header(col: Color) -> Control:
 	head.add_child(ClassCard.portrait(id, PORTRAIT_PX))
 	var names := UI.vbox(2)
 	names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var nm := UI.title(display_name(id), 28, col)
+	var nm := UiText.title(display_name(id), 28, col)
 	nm.set_meta("mask_name", id)
 	names.add_child(nm)
-	names.add_child(UI.label(stat_line(id), 13, UI.MUTED))
+	names.add_child(UiText.label(stat_line(id), 13, UI.MUTED))
 	head.add_child(names)
 	return head
 
@@ -197,13 +197,13 @@ func _line(slot: String, col: Color) -> Control:
 	var info := slot_info(id, slot)
 	var v := UI.vbox(2)
 	var r := UI.hbox(8)
-	r.add_child(UI.keycap(key_for(slot), 11))
-	r.add_child(UI.IconDot.new(String(info["icon"]), info["col"], 20.0))
-	var nl := UI.label(String(info["name"]), 14, col.lightened(0.25), UI.semi)
+	r.add_child(UiWidgets.keycap(key_for(slot), 11))
+	r.add_child(UiWidgets.IconDot.new(String(info["icon"]), info["col"], 20.0))
+	var nl := UiText.label(String(info["name"]), 14, col.lightened(0.25), UI.semi)
 	nl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	r.add_child(nl)
 	v.add_child(r)
-	var ln := UI.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
+	var ln := UiText.para(AbilityClip.line_for(id, slot), 12, UI.MUTED)
 	ln.custom_minimum_size.x = clip_size.x
 	v.add_child(ln)
 	return v

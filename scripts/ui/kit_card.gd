@@ -83,14 +83,14 @@ func _build() -> void:
 	var tv := VBoxContainer.new()
 	tv.add_theme_constant_override("separation", 2)
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tv.add_child(UI.label(Arch.name_of(arch), 34, col, UI.big))
+	tv.add_child(UiText.label(Arch.name_of(arch), 34, col, UI.big))
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))
 	var wt := Arch.weight(arch).capitalize() if Arch.weight(arch) != "" else "Support"
-	tv.add_child(UI.label("  ·  ".join([wt] + wn), 16, UI.MUTED, UI.big))
+	tv.add_child(UiText.label("  ·  ".join([wt] + wn), 16, UI.MUTED, UI.big))
 	hd.add_child(tv)
 	hd.add_child(UI.fill())
 	if on_close.is_valid():
-		var cb := UI.ghost("Close  (K)", on_close, 120)
+		var cb := UiWidgets.ghost("Close  (K)", on_close, 120)
 		cb.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		hd.add_child(cb)
 	# the body: one row per ability, or one ability's detail page
@@ -125,9 +125,9 @@ func _row(slot: String) -> Control:
 	var kc_box := CenterContainer.new()
 	kc_box.custom_minimum_size = Vector2(64, 0)
 	var cap := _cap(slot)
-	kc_box.add_child(UI.keycap(cap, 14) if cap != "" else UI.label("PASSIVE", 12, UI.MUTED, UI.big))
+	kc_box.add_child(UiWidgets.keycap(cap, 14) if cap != "" else UiText.label("PASSIVE", 12, UI.MUTED, UI.big))
 	row.add_child(kc_box)
-	var dot := UI.IconDot.new(String(info["icon"]), col, 40.0)
+	var dot := UiWidgets.IconDot.new(String(info["icon"]), col, 40.0)
 	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(dot)
 	var tv := VBoxContainer.new()
@@ -135,9 +135,9 @@ func _row(slot: String) -> Control:
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var top := HBoxContainer.new()
-	top.add_child(UI.label(String(info["name"]), 18, UI.INK, UI.big))
+	top.add_child(UiText.label(String(info["name"]), 18, UI.INK, UI.big))
 	if String(info.get("how", "")) != "":
-		var hw := UI.label("   " + String(info["how"]), 13, Color(col.lightened(0.2), 0.95), UI.big)
+		var hw := UiText.label("   " + String(info["how"]), 13, Color(col.lightened(0.2), 0.95), UI.big)
 		hw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(hw)
 	tv.add_child(top)
@@ -145,10 +145,10 @@ func _row(slot: String) -> Control:
 	if slot == "r" and kin_sp != "" and not KinCommand.class_ults():
 		var bn := String(Data.KIN.get(kin_sp, {}).get("name", kin_sp))
 		line = "Fuse with your %s: its colour and type change your abilities." % bn
-	var ln := UI.label(short_line(line, String(info["name"])), 13, UI.MUTED)
+	var ln := UiText.label(short_line(line, String(info["name"])), 13, UI.MUTED)
 	tv.add_child(ln)
 	row.add_child(tv)
-	var db := UI.ghost("Details", func(): _show_detail(slot), 84)
+	var db := UiWidgets.ghost("Details", func(): _show_detail(slot), 84)
 	db.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(db)
 	return p
@@ -171,7 +171,7 @@ func _show_detail(slot: String) -> void:
 	var pv := KitPreview.new(preview_kind(arch, slot), col)
 	pv.custom_minimum_size = Vector2(250, 190)
 	left.add_child(pv)
-	left.add_child(UI.button("‹  Back to the kit", _show_grid, 250))
+	left.add_child(UiWidgets.button("‹  Back to the kit", _show_grid, 250))
 	h.add_child(left)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 8)
@@ -179,17 +179,17 @@ func _show_detail(slot: String) -> void:
 	h.add_child(v)
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 10)
-	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
-	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
+	top.add_child(UiWidgets.IconDot.new(String(info["icon"]), col, 30.0))
+	top.add_child(UiText.label(String(info["name"]), 24, UI.INK, UI.big))
 	if _cap(slot) != "":
-		var kc := UI.keycap(_cap(slot), 13)
+		var kc := UiWidgets.keycap(_cap(slot), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
-	v.add_child(UI.label(String(info["tag"]), 13, col, UI.big))
+	v.add_child(UiText.label(String(info["tag"]), 13, col, UI.big))
 	var fs := 15 if (info["detail"] as Array).size() <= 5 else 13      # (a long kit still fits, ranks included)
 	for para in info["detail"]:
-		var p := UI.label(String(para[1]) if para[0] == "" else "%s:  %s" % [para[0], para[1]], fs, UI.INK if para[0] == "" else (Color("ffd98a") if para[0] == "Ranks" else UI.MUTED))
+		var p := UiText.label(String(para[1]) if para[0] == "" else "%s:  %s" % [para[0], para[1]], fs, UI.INK if para[0] == "" else (Color("ffd98a") if para[0] == "Ranks" else UI.MUTED))
 		p.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(p)
 
@@ -379,22 +379,22 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		bv.add_theme_constant_override("separation", 2)
 		bv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		bv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
+		var dot := UiWidgets.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
 		var k := _cap(s) if _cap(s) != "" else "passive"
-		var kl := UI.label(k, 10, UI.MUTED, UI.big)
+		var kl := UiText.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bv.add_child(kl)
-		var nl := UI.label(String(info["name"]).split(" ")[0], 11, UI.INK, UI.big)
+		var nl := UiText.label(String(info["name"]).split(" ")[0], 11, UI.INK, UI.big)
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nl.clip_text = true
 		nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bv.add_child(nl)
 		b.add_child(bv)
 		row.add_child(b)
-	var ll := UI.label(String(Arch.def(a).get("card", {}).get("loop", "")), UI.T_SMALL, Arch.color(a))
+	var ll := UiText.label(String(Arch.def(a).get("card", {}).get("loop", "")), UI.T_SMALL, Arch.color(a))
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(ll)
 	return v

@@ -12,7 +12,7 @@ static func toggle(p: Practice) -> void:
 
 static func open(p: Practice) -> void:
 	var body := _show(p, "Relics", 860, func(): close(p), "Done", "heroes")
-	UI.subtitle(body, "Who you play here and on expeditions. Your Boki stays. "
+	UiShell.subtitle(body, "Who you play here and on expeditions. Your Boki stays. "
 			+ "Hover a Hunter for its kit, K for the full kit card.")
 	var grid := HeroGrid.build(body, func(ak: String): pick(p, ak), func(ak: String): kit(p, ak),
 			func(ak: String): p.hover_arch = ak, false)
@@ -79,7 +79,7 @@ static func _show(p: Practice, title: String, width: float, on_close: Callable, 
 	root.add_child(shade)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
-	var pb := UI.scroll_panel(title, width, on_close, close_txt, true)
+	var pb := UiShell.scroll_panel(title, width, on_close, close_txt, true)
 	center.add_child(pb[0])
 	if first: UI.pop_in(pb[0])
 	return pb[1]

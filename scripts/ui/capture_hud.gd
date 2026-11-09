@@ -56,19 +56,19 @@ static func armed_for(m, p: Hunter, idx: int) -> bool:
 
 ## The "In your box" section of the backpack: one row per capsule, with Release.
 static func pack_section(H, v: VBoxContainer, p: Hunter, rebuild: Callable) -> void:
-	v.add_child(UI.label("%s  ·  captured Bokis ride home in capsules" % box_text(p), 12, H.MUTED, UI.caps))
+	v.add_child(UiText.label("%s  ·  captured Bokis ride home in capsules" % box_text(p), 12, H.MUTED, UI.caps))
 	if p.caught.is_empty():
-		v.add_child(UI.label("Empty. Knock a wild Boki out, then hold %s beside it to scan it." % Settings.key_cap("interact"), 13, H.MUTED))
+		v.add_child(UiText.label("Empty. Knock a wild Boki out, then hold %s beside it to scan it." % Settings.key_cap("interact"), 13, H.MUTED))
 		return
 	for i in p.caught.size():
 		var idx := i
 		var rec: Dictionary = p.caught[i]
 		var row := UI.hbox(8)
-		var nm := UI.label("%s  ·  %s" % [rec.get("name", "Boki"), Data.KIN[String(rec["species"])]["name"]], 14, H.INK)
+		var nm := UiText.label("%s  ·  %s" % [rec.get("name", "Boki"), Data.KIN[String(rec["species"])]["name"]], 14, H.INK)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm)
 		var armed := armed_for(H.m, p, idx)
-		var bt := UI.button("Release %s?" % rec.get("name", "it") if armed else "Release", func():
+		var bt := UiWidgets.button("Release %s?" % rec.get("name", "it") if armed else "Release", func():
 			if armed_for(H.m, p, idx):
 				p.remove_meta("release_arm")
 				Capture.release(H.m, H.m.player, idx)

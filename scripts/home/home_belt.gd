@@ -37,7 +37,7 @@ static func slot_text(id: String, tier: int) -> String:
 static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 	var first := Settings.key_cap(UtilityBelt.KEYS[0])
 	var last := Settings.key_cap(UtilityBelt.KEYS[UtilityBelt.SLOTS - 1])
-	parent.add_child(UI.section("Utility belt  (keys %s-%s)" % [first, last]))
+	parent.add_child(UiText.section("Utility belt  (keys %s-%s)" % [first, last]))
 	var ch := choices()
 	for i in UtilityBelt.SLOTS:
 		var id := _pick_at(i)
@@ -46,7 +46,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 		card.add_child(row)
 		if id != "":
 			row.add_child(Icons.Glyph.new(UtilityBelt.icon_of(id), UtilityBelt.col_of(id), 22.0))
-		var nm := UI.label("%d:  %s" % [i + 1, slot_text(id, tier)], 14,
+		var nm := UiText.label("%d:  %s" % [i + 1, slot_text(id, tier)], 14,
 				UtilityBelt.col_of(id) if id != "" else UI.MUTED, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.clip_text = true
@@ -57,7 +57,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 		var at := maxi(0, ch.find(id))
 		for dir in [-1, 1]:
 			var dd: int = dir
-			var b := UI.button("‹" if dir < 0 else "›", func():
+			var b := UiWidgets.button("‹" if dir < 0 else "›", func():
 				_set_pick(i, String(ch[(at + dd + ch.size()) % ch.size()]))
 				Save.save_game()
 				reopen.call(), 36)
@@ -66,7 +66,7 @@ static func rows(parent: VBoxContainer, reopen: Callable, tier: int) -> void:
 		parent.add_child(card)
 	var cap_line := "You can bring up to %s on this difficulty; " % _cap_text(tier)
 	cap_line += "what you bring is lost if you go down."
-	var note := UI.label(cap_line, 12, UI.MUTED)
+	var note := UiText.label(cap_line, 12, UI.MUTED)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(note)
 
@@ -81,18 +81,18 @@ static func stash(v: VBoxContainer) -> void:
 		r.add_child(Icons.Glyph.new(UtilityBelt.icon_of(id), UtilityBelt.col_of(id), 26.0))
 		var info := UI.vbox(1)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(UI.label("%s  ×%d" % [UtilityBelt.name_of(id), Equal.stash_of(id)], 16, UtilityBelt.col_of(id),
+		info.add_child(UiText.label("%s  ×%d" % [UtilityBelt.name_of(id), Equal.stash_of(id)], 16, UtilityBelt.col_of(id),
 				UI.semi))
-		var d := UI.label(String(UtilityBelt.def(id).get("desc", "")), 12, UI.MUTED)
+		var d := UiText.label(String(UtilityBelt.def(id).get("desc", "")), 12, UI.MUTED)
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(d)
 		r.add_child(info)
 		var caps: Array = []
 		for t in Data.TIERS.size():
 			caps.append(str(UtilityBelt.bring_cap(id, t)))
-		r.add_child(UI.label("brings up to " + " / ".join(caps), 12, UI.FAINT))
+		r.add_child(UiText.label("brings up to " + " / ".join(caps), 12, UI.FAINT))
 		v.add_child(r)
 	var tip_text := "Pick what goes on the belt on the expedition board. Buy more at the market; what you find "
 	tip_text += "and bring home is kept."
-	var tip := UI.para(tip_text, 12, UI.FAINT)
+	var tip := UiText.para(tip_text, 12, UI.FAINT)
 	v.add_child(tip)

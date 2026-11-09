@@ -116,5 +116,5 @@ static func lot_cost(b: String) -> Dictionary:
 static func add_footer(foot: Control) -> void:
 	if not more_to_come():
 		return
-	var l := UI.label(String(rules()["hint_more"]), 13, UI.GOLD)
+	var l := UiText.label(String(rules()["hint_more"]), 13, UI.GOLD)
 	foot.add_child(l)

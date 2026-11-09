@@ -161,15 +161,15 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 
 ### The panel shell
 ```gdscript
-var pb := UI.scroll_panel("Market stall", 800, close_cb)   # or (title, width, close_cb, "Back", true) to scroll
+var pb := UiShell.scroll_panel("Market stall", 800, close_cb)   # or (title, width, close_cb, "Back", true) to scroll
 var panel: PanelContainer = pb[0]
 var v: VBoxContainer = pb[1]                     # the body: add your content here
-UI.subtitle(v, "Seeds, food and things for the farm")
-UI.head_extra(v).add_child(UI.chip("gem", "120", UI.GOLD, "Your gems"))
-UI.shell_tabs(v, ["Seeds", "Food", "Sell"], cur_tab, func(t): cur_tab = t; reopen())
-UI.footer_left(v).add_child(UI.ghost("Hear it", play_sound))
-UI.footer(v).add_child(UI.button("Brush", brush))
-UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.press_primary(host) presses it
+UiShell.subtitle(v, "Seeds, food and things for the farm")
+UiShell.head_extra(v).add_child(UiWidgets.chip("gem", "120", UI.GOLD, "Your gems"))
+UiShell.shell_tabs(v, ["Seeds", "Food", "Sell"], cur_tab, func(t): cur_tab = t; reopen())
+UiShell.footer_left(v).add_child(UiWidgets.ghost("Hear it", play_sound))
+UiShell.footer(v).add_child(UiWidgets.button("Brush", brush))
+UiShell.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UiShell.press_primary(host) presses it
 ```
 - The body pages (or scrolls, with `scroll = true`) whenever it's taller than the window.
 - At home use `_new_panel(title, width, scroll)` in `home.gd`: it builds this shell, blurs the farm,

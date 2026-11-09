@@ -90,7 +90,7 @@ static func chip(el: String, lv: int, bonus := "", size := 22.0, with_name := tr
 	hb.add_child(Icon.new(el, size))
 	var tv := UI.vbox(0)
 	if with_name:
-		var l := UI.label(Work.name_of(el), UI.T_SMALL, Work.col_of(el).lerp(UI.INK, 0.4), UI.semi)
+		var l := UiText.label(Work.name_of(el), UI.T_SMALL, Work.col_of(el).lerp(UI.INK, 0.4), UI.semi)
 		l.autowrap_mode = TextServer.AUTOWRAP_OFF
 		tv.add_child(l)
 	var pr := UI.hbox(4)
@@ -98,7 +98,7 @@ static func chip(el: String, lv: int, bonus := "", size := 22.0, with_name := tr
 	pp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	pr.add_child(pp)
 	if bonus != "":
-		var bl := UI.label("+1 " + bonus, 11, UI.GOLD)
+		var bl := UiText.label("+1 " + bonus, 11, UI.GOLD)
 		bl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		pr.add_child(bl)
 	tv.add_child(pr)
@@ -131,7 +131,7 @@ static func icons(rec: Dictionary, px := 12.0, most := 3) -> Control:
 # ------------------------------------------------------------------ the kin's card
 ## The Work section on a kin's card: its elements, what it's doing, and its job settings.
 static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen: Callable) -> void:
-	parent.add_child(UI.section("Work elements", UI.FAINT.lightened(0.2)))
+	parent.add_child(UiText.section("Work elements", UI.FAINT.lightened(0.2)))
 	parent.add_child(chips(rec, 22.0))
 	var k: Dictionary = h._kin_entry(rec) if h.has_method("_kin_entry") else {}
 	var doing := ""
@@ -140,7 +140,7 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	var line := doing if doing != "" else (why if why != "" else ("Pinned to %s jobs" % Work.name_of(Work.pin(rec)) if Work.pin(rec) != "" else "Takes whatever it's best at"))
 	if rec.get("overworked", false): line = "Overworked: let it rest"
 	var row := UI.hbox(8)
-	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
+	var dl := UiText.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	dl.clip_text = true
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -186,13 +186,13 @@ static func _drop(h: Node, rec: Dictionary) -> void:
 # ------------------------------------------------------------------ the Job Board
 static func open(h: Node) -> void:
 	var v: VBoxContainer = h._new_panel("Job Board", 1010)
-	UI.subtitle(v, "Farm Boki take the jobs they're best at on their own. Set what matters most.")
-	var hx := UI.head_extra(v)
-	hx.add_child(UI.chip("seed", "%d wood" % Work.mat("wood"), Work.col_of("timber"), "Wood: from Timber Boki at a Lumber Camp"))
-	hx.add_child(UI.chip("seed", "%d stone" % Work.mat("stone"), Work.col_of("stone"), "Stone: from Stone Boki at a Quarry"))
-	hx.add_child(UI.chip("gem", "%d scrap" % int(Save.d.get("scrap", 0)), Work.col_of("craft"), "Scrap: from Craft Boki at a Workbench"))
-	hx.add_child(UI.chip("heart", "%d kibble" % int(Save.d["items"].get("kibble", 0)), Work.col_of("ember"), "Kibble: from Ember Boki at the Hearth Oven"))
-	UI.shell_tabs(v, ["Jobs", "Kin"], tab, func(t): tab = t; open(h))
+	UiShell.subtitle(v, "Farm Boki take the jobs they're best at on their own. Set what matters most.")
+	var hx := UiShell.head_extra(v)
+	hx.add_child(UiWidgets.chip("seed", "%d wood" % Work.mat("wood"), Work.col_of("timber"), "Wood: from Timber Boki at a Lumber Camp"))
+	hx.add_child(UiWidgets.chip("seed", "%d stone" % Work.mat("stone"), Work.col_of("stone"), "Stone: from Stone Boki at a Quarry"))
+	hx.add_child(UiWidgets.chip("gem", "%d scrap" % int(Save.d.get("scrap", 0)), Work.col_of("craft"), "Scrap: from Craft Boki at a Workbench"))
+	hx.add_child(UiWidgets.chip("heart", "%d kibble" % int(Save.d["items"].get("kibble", 0)), Work.col_of("ember"), "Kibble: from Ember Boki at the Hearth Oven"))
+	UiShell.shell_tabs(v, ["Jobs", "Kin"], tab, func(t): tab = t; open(h))
 	var hw = h.hw
 	if tab == "Jobs":
 		var counts := {}
@@ -211,21 +211,21 @@ static func open(h: Node) -> void:
 		v.add_child(list)
 		var rows: Array = hw.workers()
 		if rows.is_empty():
-			list.add_child(UI.empty_state("paw", "Nobody on the farm", "Boki out on the farm take jobs. Boki asleep in the Boki Burrow never work."))
+			list.add_child(UiWidgets.empty_state("paw", "Nobody on the farm", "Boki out on the farm take jobs. Boki asleep in the Boki Burrow never work."))
 		for w in rows:
 			list.add_child(_kin_row(h, w))
 		var nb := KinBox.boxed().size()
 		if nb > 0:
-			list.add_child(UI.para("%d more asleep in the Boki Burrow: Boki in the burrow never work." % nb, 12, UI.FAINT))
-	var ft := UI.footer(v)
+			list.add_child(UiText.para("%d more asleep in the Boki Burrow: Boki in the burrow never work." % nb, 12, UI.FAINT))
+	var ft := UiShell.footer(v)
 	var made: Dictionary = Work.ensure()["made"]
 	var bits: Array = []
 	for key in ["wood", "stone", "kibble", "scrap", "watered", "sown", "tonics"]:
 		if int(made.get(key, 0)) > 0: bits.append("%d %s" % [int(made[key]), key])
-	var ml := UI.label(("Made so far: " + ", ".join(bits)) if not bits.is_empty() else "Build work stations (Build, Work tab) and your Boki get going.", 12, UI.MUTED)
+	var ml := UiText.label(("Made so far: " + ", ".join(bits)) if not bits.is_empty() else "Build work stations (Build, Work tab) and your Boki get going.", 12, UI.MUTED)
 	ml.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ft.add_child(ml)
-	UI.footer_primary(v, "Done", func(): h._close_panel(), 100)
+	UiShell.footer_primary(v, "Done", func(): h._close_panel(), 100)
 
 static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 	var r := UI.hbox(10)
@@ -235,7 +235,7 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var e: Dictionary = Work.ELEMENTS[el]
 	var top := UI.hbox(8)
-	var nl := UI.label("%s  ·  %s" % [e["name"], e["job"]], UI.T_BODY, Work.col_of(el).lerp(UI.INK, 0.35), UI.semi)
+	var nl := UiText.label("%s  ·  %s" % [e["name"], e["job"]], UI.T_BODY, Work.col_of(el).lerp(UI.INK, 0.35), UI.semi)
 	nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	top.add_child(nl)
 	var best := ""; var bl := 0
@@ -245,11 +245,11 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 	var st := ""
 	if not who.is_empty(): st = ", ".join(who) + (" working" if who.size() > 1 else " on it")
 	elif waiting > 0: st = "%d waiting" % waiting
-	var sl := UI.label(st, 12, UI.GOOD if not who.is_empty() else (UI.GOLD if waiting > 0 else UI.FAINT))
+	var sl := UiText.label(st, 12, UI.GOOD if not who.is_empty() else (UI.GOLD if waiting > 0 else UI.FAINT))
 	sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	top.add_child(sl)
 	tv.add_child(top)
-	var sub := UI.label(("Best: %s (%d)" % [best, bl]) if best != "" else "No farm Boki has it", 12, UI.MUTED if best != "" else Color("ff9a8a"))
+	var sub := UiText.label(("Best: %s (%d)" % [best, bl]) if best != "" else "No farm Boki has it", 12, UI.MUTED if best != "" else Color("ff9a8a"))
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sub.tooltip_text = String(e["desc"])
 	sub.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -259,7 +259,7 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 	var cur := Work.prio(el)
 	for i in Work.PRIO.size():
 		var pi: int = i
-		var b := UI.choice(Work.PRIO[i], cur == i, func():
+		var b := UiWidgets.choice(Work.PRIO[i], cur == i, func():
 			Work.set_prio(el, pi)
 			Save.save_game()
 			if h.get("hw"):
@@ -293,11 +293,11 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	r.add_child(KinPortrait.view(rec, h.get_tree(), 40.0))
 	var nv := UI.vbox(0)
 	nv.custom_minimum_size.x = 150
-	var nl := UI.label(String(rec["name"]), UI.T_BODY, Shiny.body(rec).lerp(UI.INK, 0.5), UI.semi)
+	var nl := UiText.label(String(rec["name"]), UI.T_BODY, Shiny.body(rec).lerp(UI.INK, 0.5), UI.semi)
 	nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	nl.clip_text = true
 	nv.add_child(nl)
-	nv.add_child(UI.label("%s · Lv %d" % [Data.KIN[rec["species"]]["name"], int(rec["level"])], 12, UI.MUTED))
+	nv.add_child(UiText.label("%s · Lv %d" % [Data.KIN[rec["species"]]["name"], int(rec["level"])], 12, UI.MUTED))
 	r.add_child(nv)
 	var ch := UI.hbox(10)
 	ch.custom_minimum_size.x = 250
@@ -307,14 +307,14 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	var dv := UI.vbox(0)
 	dv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var el := String(w["el"])
-	var dl := UI.label(String(w["text"]), 13, Work.col_of(el).lerp(UI.INK, 0.4) if el != "" else UI.MUTED, UI.semi if el != "" else null)
+	var dl := UiText.label(String(w["text"]), 13, Work.col_of(el).lerp(UI.INK, 0.4) if el != "" else UI.MUTED, UI.semi if el != "" else null)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	dl.clip_text = true
 	dv.add_child(dl)
 	var mood := ""
 	if rec.get("overworked", false): mood = "Overworked: needs a rest"
 	elif Care.want(rec) != "": mood = "Wants: %s" % String(Care.NEED_INFO[Care.want(rec)]["name"]).to_lower()
-	if mood != "": dv.add_child(UI.label(mood, 11, Color("ffb0a0") if rec.get("overworked", false) else UI.FAINT))
+	if mood != "": dv.add_child(UiText.label(mood, 11, Color("ffb0a0") if rec.get("overworked", false) else UI.FAINT))
 	r.add_child(dv)
 	var opt := pin_menu(h, rec, func(): open(h))
 	r.add_child(opt)

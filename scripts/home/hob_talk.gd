@@ -85,11 +85,11 @@ func _offer_lines() -> Array:
 ## After the blueprint lines: open the build menu, or say goodbye.
 func _menu_choice() -> void:
 	var row := UI.hbox(12)
-	row.add_child(UI.primary(String(rules()["build_menu"]), func():
+	row.add_child(UiWidgets.primary(String(rules()["build_menu"]), func():
 		box.close()
 		if hob.h.hb and not hob.h.hb.active:
 			hob.h.hb.toggle(), 260))
-	row.add_child(UI.ghost(String(rules()["bye"]), box.close, 140))
+	row.add_child(UiWidgets.ghost(String(rules()["bye"]), box.close, 140))
 	box.show_extra(row)
 
 func _show_offer() -> void:

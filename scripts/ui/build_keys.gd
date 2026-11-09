@@ -89,9 +89,9 @@ func _set_tag(state: Dictionary) -> void:
 		old.queue_free()
 	var col := UI.vbox(4)
 	tag.add_child(col)
-	col.add_child(UI.label(item, 16, UI.INK, UI.semi))
+	col.add_child(UiText.label(item, 16, UI.INK, UI.semi))
 	if reason != "":
-		col.add_child(UI.label(reason, 14, Color("ff9a8a")))
+		col.add_child(UiText.label(reason, 14, Color("ff9a8a")))
 	var store_cap := Settings.key_cap("store")
 	var pairs: Array = []
 	if not held:
@@ -112,5 +112,5 @@ func _set_tag(state: Dictionary) -> void:
 	grid.add_theme_constant_override("v_separation", 3)
 	col.add_child(grid)
 	for pair in pairs:
-		grid.add_child(UI.key_hints([pair], 12, Color(1, 1, 1, 0.85)))
+		grid.add_child(UiWidgets.key_hints([pair], 12, Color(1, 1, 1, 0.85)))
 	tag.reset_size()

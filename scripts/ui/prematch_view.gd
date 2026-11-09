@@ -35,11 +35,11 @@ func _ready() -> void:
 	var titles := UI.vbox(2)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(titles)
-	titles.add_child(UI.section("Before the drop", UI.GOLD))
-	titles.add_child(UI.title("Pick your Hunter", 34))
-	hint = UI.para("Your squad can see your pick. Picks lock when the timer ends.")
+	titles.add_child(UiText.section("Before the drop", UI.GOLD))
+	titles.add_child(UiText.title("Pick your Hunter", 34))
+	hint = UiText.para("Your squad can see your pick. Picks lock when the timer ends.")
 	titles.add_child(hint)
-	timer_label = UI.label("", 56, UI.INK, UI.big)
+	timer_label = UiText.label("", 56, UI.INK, UI.big)
 	head.add_child(timer_label)
 	var cols := UI.hbox(24)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -56,10 +56,10 @@ func _ready() -> void:
 	var side_col := UI.vbox(12)
 	side_col.custom_minimum_size = Vector2(380, 0)
 	cols.add_child(side_col)
-	side_col.add_child(UI.section("Your squad"))
+	side_col.add_child(UiText.section("Your squad"))
 	squad_box = UI.vbox(6)
 	side_col.add_child(squad_box)
-	side_col.add_child(UI.section("Squad chat"))
+	side_col.add_child(UiText.section("Squad chat"))
 	chat_scroll = ScrollContainer.new()
 	chat_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	chat_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -75,8 +75,8 @@ func _ready() -> void:
 	chat_in.max_length = Prematch.CHAT_MAX
 	chat_in.text_submitted.connect(func(_t): _send_chat())
 	row.add_child(chat_in)
-	row.add_child(UI.button("Say", _send_chat))
-	talk_btn = UI.button("", Callable())
+	row.add_child(UiWidgets.button("Say", _send_chat))
+	talk_btn = UiWidgets.button("", Callable())
 	talk_btn.button_down.connect(func(): _talk(true))
 	talk_btn.button_up.connect(func(): _talk(false))
 	side_col.add_child(talk_btn)
@@ -129,7 +129,7 @@ func _fill_hunters() -> void:
 
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
-	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
+	var card := UiWidgets.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
 	card.custom_minimum_size = Vector2(HeroGrid.CARD_W, 0)
 	var row := UI.hbox(10)
 	card.add_child(row)
@@ -137,12 +137,12 @@ func _tile(ak: String) -> PanelContainer:
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
-	col.add_child(UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big))
-	col.add_child(UI.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
+	col.add_child(UiText.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big))
+	col.add_child(UiText.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
 	if ak == pm.pick:
-		col.add_child(UI.label("Locked in" if pm.locked else "Your pick", 12, UI.GOOD, UI.semi))
+		col.add_child(UiText.label("Locked in" if pm.locked else "Your pick", 12, UI.GOOD, UI.semi))
 	elif not open:
-		col.add_child(UI.label("Locked: " + ClassUnlock.requirement(ak), 12, UI.FAINT, UI.semi))
+		col.add_child(UiText.label("Locked: " + ClassUnlock.requirement(ak), 12, UI.FAINT, UI.semi))
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	card.tooltip_text = ClassCard.kit_tip(ak)
 	card.set_meta("arch", ak)
@@ -162,20 +162,20 @@ func _fill_squad() -> void:
 		var row := UI.card(UI.CARD, 8, 10)
 		var h := UI.hbox(10)
 		row.add_child(h)
-		h.add_child(ClassCard.portrait(ak, 48.0) if Arch.exists(ak) else UI.label("?", 24))
+		h.add_child(ClassCard.portrait(ak, 48.0) if Arch.exists(ak) else UiText.label("?", 24))
 		var you: bool = m["you"]
 		var shown := "%s%s" % [m["name"], "  (you)" if you else ""]
-		var nm := UI.label(shown, UI.T_BODY, UI.ACCENT_HI if you else UI.INK, UI.semi)
+		var nm := UiText.label(shown, UI.T_BODY, UI.ACCENT_HI if you else UI.INK, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(nm)
-		h.add_child(UI.label(Arch.label(ak) if Arch.exists(ak) else "Choosing...", 14, UI.MUTED))
+		h.add_child(UiText.label(Arch.label(ak) if Arch.exists(ak) else "Choosing...", 14, UI.MUTED))
 		squad_box.add_child(row)
 	if squad_box.get_child_count() == 1 and int(pm.opts.get("squad", 1)) <= 1:
-		squad_box.add_child(UI.para("A solo drop: nobody to plan with, but everyone else is out there."))
+		squad_box.add_child(UiText.para("A solo drop: nobody to plan with, but everyone else is out there."))
 
 # ------------------------------------------------------------------ chat and picks
 func _add_chat(who: String, text: String, col: Color) -> void:
-	var l := UI.para("%s: %s" % [who, text], UI.T_BODY, col)
+	var l := UiText.para("%s: %s" % [who, text], UI.T_BODY, col)
 	chat_log.add_child(l)
 	await get_tree().process_frame
 	chat_scroll.scroll_vertical = int(chat_scroll.get_v_scroll_bar().max_value)

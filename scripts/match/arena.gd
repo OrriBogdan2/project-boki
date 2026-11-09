@@ -369,7 +369,7 @@ func _build_ui() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(root)
-	hint = UI.label(KEYS_HINT, 13, Color(1, 1, 1, 0.8), UI.big)
+	hint = UiText.label(KEYS_HINT, 13, Color(1, 1, 1, 0.8), UI.big)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint.add_theme_constant_override("outline_size", 6)
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
@@ -378,7 +378,7 @@ func _build_ui() -> void:
 	hint.position.y = 10 if layout == "arena" else 70     # (the training area's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
-	meter = UI.label("", 15, UI.INK, UI.big)
+	meter = UiText.label("", 15, UI.INK, UI.big)
 	meter.autowrap_mode = TextServer.AUTOWRAP_OFF
 	meter.add_theme_constant_override("outline_size", 6)
 	meter.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
@@ -481,11 +481,11 @@ func _fill_menu(v: VBoxContainer) -> void:
 		ch.queue_free()
 	var P: Hunter = m.player
 	var hd := HBoxContainer.new()
-	hd.add_child(UI.label("Loadout", 26, UI.INK, UI.big))
-	hd.add_child(UI.label("   Everything applies at once. Esc or L closes.", 14, UI.MUTED))
+	hd.add_child(UiText.label("Loadout", 26, UI.INK, UI.big))
+	hd.add_child(UiText.label("   Everything applies at once. Esc or L closes.", 14, UI.MUTED))
 	hd.add_child(UI.fill())
-	hd.add_child(UI.ghost("Kit card", func(): close_menu(); _open_card(), 120))
-	hd.add_child(UI.primary("Done", close_menu, 110))
+	hd.add_child(UiWidgets.ghost("Kit card", func(): close_menu(); _open_card(), 120))
+	hd.add_child(UiWidgets.primary("Done", close_menu, 110))
 	v.add_child(hd)
 	var cols := HBoxContainer.new()
 	cols.add_theme_constant_override("separation", 22)
@@ -495,27 +495,27 @@ func _fill_menu(v: VBoxContainer) -> void:
 	left.add_theme_constant_override("separation", 8)
 	left.custom_minimum_size = Vector2(470, 0)
 	cols.add_child(left)
-	left.add_child(UI.section("Hunter  (keys 2-9 pick the first eight)"))
+	left.add_child(UiText.section("Hunter  (keys 2-9 pick the first eight)"))
 	var ag := GridContainer.new(); ag.columns = 3
 	ag.add_theme_constant_override("h_separation", 6); ag.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
 		var aa: String = a
-		var b := UI.choice(Arch.name_of(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), 150)
+		var b := UiWidgets.choice(Arch.name_of(a), P.arch == a, func(): set_arch(aa); _fill_menu(v), 150)
 		b.tooltip_text = String(Arch.def(a).get("card", {}).get("loop", ""))
 		ag.add_child(b)
 	left.add_child(ag)
-	var ll := UI.label(String(Arch.def(P.arch).get("card", {}).get("loop", "")), 13, Arch.color(P.arch))
+	var ll := UiText.label(String(Arch.def(P.arch).get("card", {}).get("loop", "")), 13, Arch.color(P.arch))
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ll.custom_minimum_size = Vector2(460, 36)
 	left.add_child(ll)
-	left.add_child(UI.section("Boki"))
+	left.add_child(UiText.section("Boki"))
 	var kg := GridContainer.new(); kg.columns = 3
 	kg.add_theme_constant_override("h_separation", 6); kg.add_theme_constant_override("v_separation", 6)
 	var cur := String((P.kin as Kin).species) if P.kin and not (P.kin as Kin).dead else ""
 	for sp in _kin_choices():
 		var ss: String = sp
 		var nm := "None" if sp == "" else String(Data.KIN.get(sp, {}).get("name", sp))
-		var b := UI.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), 150)
+		var b := UiWidgets.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), 150)
 		if sp != "" and KinLib.kin(sp):
 			var ks := KinLib.kin(sp)
 			b.tooltip_text = "%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(P.arch, ks))]
@@ -530,47 +530,47 @@ func _fill_menu(v: VBoxContainer) -> void:
 	gl.sort_custom(func(x, y): return (1 if Gear.active(x) else 0) > (1 if Gear.active(y) else 0) or (Gear.active(x) == Gear.active(y) and String(x) < String(y)))
 	for si in Gloves.SLOTS:
 		var slot: int = si
-		right.add_child(UI.section("Glove %d  (%s)" % [slot + 1, Gloves.key_cap(slot)]))
+		right.add_child(UiText.section("Glove %d  (%s)" % [slot + 1, Gloves.key_cap(slot)]))
 		var gg := GridContainer.new()
 		gg.columns = 5
 		gg.add_theme_constant_override("h_separation", 4)
 		gg.add_theme_constant_override("v_separation", 4)
-		var nb := UI.choice("None", String(gloves[slot]) == "", func(): clear_glove(slot); _fill_menu(v), 60)
+		var nb := UiWidgets.choice("None", String(gloves[slot]) == "", func(): clear_glove(slot); _fill_menu(v), 60)
 		nb.add_theme_font_size_override("font_size", 12)
 		gg.add_child(nb)
 		for g in gl:
 			var gid: String = g
 			var nm2 := String(Gear.ALL[g].get("name", g))
-			var b := UI.choice(nm2.substr(0, 11), String(gloves[slot]) == gid, func(): give_glove(gid, slot); _fill_menu(v), 90, Gear.icon_of(gid))
+			var b := UiWidgets.choice(nm2.substr(0, 11), String(gloves[slot]) == gid, func(): give_glove(gid, slot); _fill_menu(v), 90, Gear.icon_of(gid))
 			b.tooltip_text = "%s%s  ·  %s\n%s" % [nm2, ("  ·  %ss" % KinText.n(Gear.cd_of(gid, 2))) if Gear.active(gid) else "  ·  passive", Gloves.key_cap(slot), Gear.desc_of(gid, 2)]
 			b.add_theme_font_size_override("font_size", 12)
 			gg.add_child(b)
 		right.add_child(gg)
-		var gd := UI.label(_glove_line(slot), 13, UI.MUTED)
+		var gd := UiText.label(_glove_line(slot), 13, UI.MUTED)
 		gd.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		gd.custom_minimum_size = Vector2(480, 20)
 		right.add_child(gd)
-	right.add_child(UI.section("Practice"))
+	right.add_child(UiText.section("Practice"))
 	var tr := HBoxContainer.new(); tr.add_theme_constant_override("separation", 6)
-	tr.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 170))
-	tr.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 200))
-	tr.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
+	tr.add_child(UiWidgets.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 170))
+	tr.add_child(UiWidgets.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 200))
+	tr.add_child(UiWidgets.button("Reset  (Backspace)", func(): reset(), 110))
 	right.add_child(tr)
 	var br := HBoxContainer.new(); br.add_theme_constant_override("separation", 6)
-	br.add_child(UI.label("Bot (N)", 14, UI.MUTED))
+	br.add_child(UiText.label("Bot (N)", 14, UI.MUTED))
 	for md in BOT_MODES:
 		var mm: String = md
-		br.add_child(UI.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 96))
+		br.add_child(UiWidgets.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 96))
 	right.add_child(br)
 	var ba := HBoxContainer.new(); ba.add_theme_constant_override("separation", 6)
-	ba.add_child(UI.label("Bot Hunter", 14, UI.MUTED))
+	ba.add_child(UiText.label("Bot Hunter", 14, UI.MUTED))
 	var ids := Arch.ids()
-	ba.add_child(UI.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
-	var bl := UI.label(Arch.name_of(bot_arch), 16, Arch.color(bot_arch), UI.big)
+	ba.add_child(UiWidgets.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
+	var bl := UiText.label(Arch.name_of(bot_arch), 16, Arch.color(bot_arch), UI.big)
 	bl.custom_minimum_size = Vector2(150, 0)
 	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ba.add_child(bl)
-	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
+	ba.add_child(UiWidgets.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
 	right.add_child(ba)
 
 func _glove_line(slot: int) -> String:

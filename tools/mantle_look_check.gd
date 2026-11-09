@@ -411,7 +411,7 @@ func _lineup(tree: SceneTree, models: Array, names: Array, file: String) -> void
 		mdl.position = Vector3((i - (models.size() - 1) * 0.5) * 1.35, 0, 0)
 		mdl.rotation.y = PI + 0.35
 		stage.add_child(mdl)
-		var l := UI.label(String(names[i]), 18, UI.INK, UI.semi)
+		var l := UiText.label(String(names[i]), 18, UI.INK, UI.semi)
 		l.add_theme_constant_override("outline_size", 6)
 		l.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09))
 		layer.add_child(l)

@@ -2634,15 +2634,15 @@ func _build_loot() -> void:
 	var o: Hunter = b["owner"]
 	var head := UI.hbox(8); v.add_child(head)
 	head.add_child(Icons.Glyph.new("gem", bc, 18.0))
-	var t := UI.title(("Your deathbox" if o == p else "%s's deathbox" % o.pname), 22, INK)
+	var t := UiText.title(("Your deathbox" if o == p else "%s's deathbox" % o.pname), 22, INK)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	head.add_child(_pack_chip(p))
-	var cl := UI.button("✕", func(): close_loot(), 36)
+	var cl := UiWidgets.button("✕", func(): close_loot(), 36)
 	cl.flat = true
 	head.add_child(cl)
 	if items.is_empty():
-		v.add_child(UI.label("Empty.", 14, MUTED))
+		v.add_child(UiText.label("Empty.", 14, MUTED))
 	var list := UI.vbox(6)
 	if items.size() > 5:
 		var sc := ScrollContainer.new()
@@ -2666,21 +2666,21 @@ func _build_loot() -> void:
 		rp.add_child(row)
 		row.add_child(Icons.Glyph.new(String(it["icon"]), it["col"], 24.0))
 		var col := UI.vbox(0); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var nm := UI.label(String(it["name"]), 15, INK, UI.semi)
+		var nm := UiText.label(String(it["name"]), 15, INK, UI.semi)
 		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 		col.add_child(nm)
-		var sub := UI.label(String(it["sub"]), 12, MUTED)
+		var sub := UiText.label(String(it["sub"]), 12, MUTED)
 		sub.autowrap_mode = TextServer.AUTOWRAP_OFF
 		sub.clip_text = true
 		sub.custom_minimum_size.x = 210
 		col.add_child(sub)
 		row.add_child(col)
 		if it["key"] == "gear":
-			var tag := UI.label("UPGRADE" if it["upgrade"] else "WORSE", 11, GOOD if it["upgrade"] else MUTED, UI.caps)
+			var tag := UiText.label("UPGRADE" if it["upgrade"] else "WORSE", 11, GOOD if it["upgrade"] else MUTED, UI.caps)
 			tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			row.add_child(tag)
 		elif it["key"] == "pack":
-			var vt := UI.label("%d" % int(it.get("value", 0)), 13, GOLD, UI.big)
+			var vt := UiText.label("%d" % int(it.get("value", 0)), 13, GOLD, UI.big)
 			vt.tooltip_text = "Worth"
 			vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
@@ -2697,7 +2697,7 @@ func _build_loot() -> void:
 				open_hold(itc)
 			elif (loot_open as Dictionary).get("empty", false): close_loot()
 			else: _build_loot()
-		var take := UI.button(verb, take_it, 76)
+		var take := UiWidgets.button(verb, take_it, 76)
 		_row_click(rp, take_it)
 		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		if not fit:
@@ -2708,13 +2708,13 @@ func _build_loot() -> void:
 		row.add_child(take)
 		list.add_child(rp)
 	var foot := UI.hbox(8); v.add_child(foot)
-	var sm := UI.primary("Smart loot  (%s)" % Settings.key_cap("interact"), func():
+	var sm := UiWidgets.primary("Smart loot  (%s)" % Settings.key_cap("interact"), func():
 		if loot_open != null and m.player:
 			var got := LootFull.smart(m, m.player, loot_open)
 			if got > 0 or (loot_open as Dictionary).get("empty", false):
 				close_loot(), 200)
 	foot.add_child(sm)
-	var hint := UI.label("Best first: hands, then your backpack", 12, MUTED)
+	var hint := UiText.label("Best first: hands, then your backpack", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	foot.add_child(hint)
 	pc.custom_minimum_size.x = 430
@@ -2746,7 +2746,7 @@ func _pack_chip(p: Hunter) -> Control:
 	var chip := UI.card(Color(Color("ffb0a0") if full else INK, 0.1), 4, 999)
 	var hb := UI.hbox(5); chip.add_child(hb)
 	hb.add_child(Icons.Glyph.new("satchel", Color("ffb0a0") if full else INK, 14.0))
-	var l := UI.label("%d/%d" % [p.pack.size(), p.pack_cap], 13, Color("ffb0a0") if full else INK, UI.semi)
+	var l := UiText.label("%d/%d" % [p.pack.size(), p.pack_cap], 13, Color("ffb0a0") if full else INK, UI.semi)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hb.add_child(l)
 	chip.tooltip_text = "Backpack: weapons, gloves and treasure to carry home (%s)" % Settings.key_cap("inventory")
@@ -2768,7 +2768,7 @@ func _item_panel(title: String, col: Color, width: float) -> Array:
 	var v := UI.vbox(6); pc.add_child(v)
 	var head := UI.hbox(8); v.add_child(head)
 	head.add_child(Icons.Glyph.new("satchel", col, 18.0))
-	var t := UI.title(title, 22, INK)
+	var t := UiText.title(title, 22, INK)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	return [pc, v, head]
@@ -2828,13 +2828,13 @@ func _build_swap() -> void:
 	var pb := _item_panel("Backpack full", Color("ffb0a0"), 470)
 	var pc: PanelContainer = pb[0]; var v: VBoxContainer = pb[1]; var head: HBoxContainer = pb[2]
 	head.add_child(_pack_chip(p))
-	var cl := UI.button("✕", func(): close_swap(), 36); cl.flat = true
+	var cl := UiWidgets.button("✕", func(): close_swap(), 36); cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("Picking up", 12, MUTED, UI.caps))
+	v.add_child(UiText.label("Picking up", 12, MUTED, UI.caps))
 	var incoming_row := _item_row(incoming, [])
 	LootHold.mark_full(incoming_row)
 	v.add_child(incoming_row)
-	v.add_child(UI.label("Drop one to make room", 12, MUTED, UI.caps))
+	v.add_child(UiText.label("Drop one to make room", 12, MUTED, UI.caps))
 	var low := Pack.lowest(p)
 	var sl := _scroll_rows(v)
 	for i in p.pack.size():
@@ -2849,8 +2849,8 @@ func _build_swap() -> void:
 		_row_click(srow, drop_it)
 		sl[1].add_child(srow)
 	var foot := UI.hbox(8); v.add_child(foot)
-	foot.add_child(UI.button("Leave it  (Esc)", func(): close_swap(), 150))
-	var hint := UI.label("What you drop stays on the ground", 12, MUTED)
+	foot.add_child(UiWidgets.button("Leave it  (Esc)", func(): close_swap(), 150))
+	var hint := UiText.label("What you drop stays on the ground", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	foot.add_child(hint)
 	add_child(pc)
@@ -2883,17 +2883,17 @@ func _build_pack() -> void:
 	var pb := _item_panel("Backpack", INK, 470)
 	var pc: PanelContainer = pb[0]; var v: VBoxContainer = pb[1]; var head: HBoxContainer = pb[2]
 	head.add_child(_pack_chip(p))
-	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
+	var cl := UiWidgets.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("Wearing", 12, MUTED, UI.caps))
+	v.add_child(UiText.label("Wearing", 12, MUTED, UI.caps))
 	for g in p.gear:
 		if not (g as Dictionary).is_empty():
 			v.add_child(_item_row(Loot.gear(String(g["id"]), int(g["rar"])), []))
-	v.add_child(UI.label("Carrying home  ·  extract to keep it all", 12, MUTED, UI.caps))
+	v.add_child(UiText.label("Carrying home  ·  extract to keep it all", 12, MUTED, UI.caps))
 	var sl := _scroll_rows(v)
 	var rows: VBoxContainer = sl[1]
 	if p.pack.is_empty():
-		rows.add_child(UI.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
+		rows.add_child(UiText.label("Nothing yet. Gear and treasure you pick up go here.", 13, MUTED))
 	for i in p.pack.size():
 		var idx := i
 		var it: Dictionary = p.pack[i]
@@ -2906,10 +2906,10 @@ func _build_pack() -> void:
 		if k >= 3: break
 		var empty := UI.card(Color(1, 1, 1, 0.03), 6, 9)
 		empty.custom_minimum_size.y = 30
-		empty.add_child(UI.label("empty slot", 12, Color(MUTED, 0.6)))
+		empty.add_child(UiText.label("empty slot", 12, Color(MUTED, 0.6)))
 		rows.add_child(empty)
 	CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.label("%s or Esc to close  ·  bigger backpacks at your armory" % Settings.key_cap("inventory"), 12, MUTED)
+	var hint := UiText.label("%s or Esc to close  ·  bigger backpacks at your armory" % Settings.key_cap("inventory"), 12, MUTED)
 	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc

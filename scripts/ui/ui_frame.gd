@@ -7,7 +7,7 @@ extends StyleBox
 ## sinks onto it. `edge` draws a coloured outline (selected, focus-free hover, danger) and `mark`
 ## an accent line along the bottom inside (the picked tab).
 ## UiTheme builds every panel, card, tooltip, button and track from these, so they read as one set.
-## Properties are exported so duplicate() (UI.with_key, UI.set_card_border) copies them; the layers
+## Properties are exported so duplicate() (UiWidgets.with_key, UI.set_card_border) copies them; the layers
 ## are built on first draw and reused.
 
 @export var fill := Color(0.1, 0.1, 0.12)

@@ -67,22 +67,22 @@ func _init() -> void:
 	top.add_child(_search)
 	_sweep_slot = UI.hbox(0)
 	top.add_child(_sweep_slot)
-	_undo = UI.button("Undo", func(): undo_fn.call(), 76)
+	_undo = UiWidgets.button("Undo", func(): undo_fn.call(), 76)
 	top.add_child(_undo)
-	top.add_child(UI.primary("Done", func(): done_fn.call(), 80))
+	top.add_child(UiWidgets.primary("Done", func(): done_fn.call(), 80))
 	var mid := UI.hbox(8)
 	mid.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	col.add_child(mid)
-	_prev = UI.button("‹", func(): _turn_page(-1), NAV_W)
+	_prev = UiWidgets.button("‹", func(): _turn_page(-1), NAV_W)
 	mid.add_child(_prev)
 	_tiles = UI.hbox(8)
 	_tiles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mid.add_child(_tiles)
-	_next = UI.button("›", func(): _turn_page(1), NAV_W)
+	_next = UiWidgets.button("›", func(): _turn_page(1), NAV_W)
 	mid.add_child(_next)
 	_foot = UI.hbox(16)
 	col.add_child(_foot)
-	hint = UI.label("", 14, UI.INK)
+	hint = UiText.label("", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint.clip_text = true
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -95,7 +95,7 @@ func refresh() -> void:
 	var cur: String = current_fn.call()
 	for old in _tabs_row.get_children():
 		old.queue_free()
-	_tabs_row.add_child(UI.tabs(tabs_fn.call(), cur, _pick))
+	_tabs_row.add_child(UiWidgets.tabs(tabs_fn.call(), cur, _pick))
 	for old in _extras_row.get_children():
 		old.queue_free()
 	if extras_fn.is_valid():
@@ -106,7 +106,7 @@ func refresh() -> void:
 		old.queue_free()
 	if sweep_fn.is_valid():
 		var on := bool(sweep_on_fn.call())
-		var toggle := UI.choice("Store", on, func(): sweep_fn.call(not on))
+		var toggle := UiWidgets.choice("Store", on, func(): sweep_fn.call(not on))
 		toggle.tooltip_text = "Click pieces to put them away"
 		_sweep_slot.add_child(toggle)
 	for old in _foot.get_children():
@@ -167,7 +167,7 @@ func _fill_tiles() -> void:
 	_prev.disabled = page == 0
 	_next.disabled = page >= pages - 1
 	if entries.is_empty():
-		_tiles.add_child(UI.label(_empty_text(), 15, UI.MUTED))
+		_tiles.add_child(UiText.label(_empty_text(), 15, UI.MUTED))
 		return
 	for e in entries.slice(page * per_page, page * per_page + per_page):
 		_tiles.add_child(_tile(e))
@@ -181,7 +181,7 @@ func _empty_text() -> String:
 
 func _tile(e: Dictionary) -> Control:
 	var cb: Callable = e["cb"]
-	var tile := UI.tile_card(bool(e.get("on", false)), cb, 5)
+	var tile := UiWidgets.tile_card(bool(e.get("on", false)), cb, 5)
 	tile.custom_minimum_size = TILE
 	tile.tooltip_text = String(e.get("tip", ""))
 	var col := UI.vbox(2)
@@ -190,7 +190,7 @@ func _tile(e: Dictionary) -> Control:
 		col.modulate = Color(1, 1, 1, 0.5)
 	tile.add_child(col)
 	col.add_child(_picture(e))
-	var title := UI.label(String(e["name"]), 13, UI.INK)
+	var title := UiText.label(String(e["name"]), 13, UI.INK)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.clip_text = true
 	title.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -200,7 +200,7 @@ func _tile(e: Dictionary) -> Control:
 		col.add_child(FarmIcon.cost_row(cost, 13, 12))
 	var note := String(e.get("note", ""))
 	if note != "":
-		var line := UI.label(note, 12, UI.MUTED)
+		var line := UiText.label(note, 12, UI.MUTED)
 		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		line.clip_text = true
 		line.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -228,10 +228,10 @@ func _picture(e: Dictionary) -> Control:
 		pic.add_child(chip)
 	elif e.has("glyph"):
 		var glyph: String = e["glyph"]
-		pic.draw.connect(func(): UI.draw_icon(pic, glyph, pic.size * 0.5, 18.0, UI.GOLD))
+		pic.draw.connect(func(): UiWidgets.draw_icon(pic, glyph, pic.size * 0.5, 18.0, UI.GOLD))
 	var owned := int(e.get("owned", 0))
 	if owned > 0:
-		var badge := UI.tag("×%d" % owned, UI.GOLD)
+		var badge := UiWidgets.tag("×%d" % owned, UI.GOLD)
 		badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 		badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		pic.add_child(badge)

@@ -11,16 +11,16 @@ const CHIP_FACE := 24         # px: the Warden's face on each Hunter's chip
 static func add(home: Node, parent: Control) -> String:
 	var cur := Arch.of_save()
 	var hd := UI.hbox(8)
-	hd.add_child(UI.section("Relic"))
+	hd.add_child(UiText.section("Relic"))
 	hd.add_child(UI.fill())
-	hd.add_child(UI.ghost("All Relics", func(): HomeClasses.open(home, cur), 0))
+	hd.add_child(UiWidgets.ghost("All Relics", func(): HomeClasses.open(home, cur), 0))
 	parent.add_child(hd)
 	var flow := HFlowContainer.new()
 	flow.add_theme_constant_override("h_separation", 6)
 	flow.add_theme_constant_override("v_separation", 6)
 	for a in Arch.ids():
 		var id: String = a
-		var b := UI.choice(Arch.name_of(id), id == cur, func(): _pick(home, id), 104)
+		var b := UiWidgets.choice(Arch.name_of(id), id == cur, func(): _pick(home, id), 104)
 		b.disabled = not ClassUnlock.is_open(id)
 		var locked := "Locked: %s\n" % ClassUnlock.requirement(id) if b.disabled else ""
 		b.tooltip_text = locked + ClassCard.kit_tip(id)
@@ -28,7 +28,7 @@ static func add(home: Node, parent: Control) -> String:
 		Portraits.set_icon(b, id, CHIP_FACE)
 		flow.add_child(b)
 	parent.add_child(flow)
-	var sl := UI.label(HunterViewer.stat_line(cur), UI.T_SMALL, Arch.color(cur))
+	var sl := UiText.label(HunterViewer.stat_line(cur), UI.T_SMALL, Arch.color(cur))
 	sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	parent.add_child(sl)
 	return cur

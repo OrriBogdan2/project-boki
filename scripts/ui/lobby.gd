@@ -18,19 +18,19 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
-	var pb := UI.scroll_panel("Play online", 640, func(): Game.goto("home"), "Back")
+	var pb := UiShell.scroll_panel("Play online", 640, func(): Game.goto("home"), "Back")
 	var panel: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
 	center.add_child(panel)
 	UI.pop_in(panel)
 	status = panel.get_meta("sub")
-	UI.subtitle(v, "Connecting...")
-	v.add_child(UI.section("Hunters here"))
+	UiShell.subtitle(v, "Connecting...")
+	v.add_child(UiText.section("Hunters here"))
 	list_box = UI.vbox(6)
-	list_box.add_child(UI.para("Looking for hunters with the game open...", UI.T_SMALL, UI.FAINT))
+	list_box.add_child(UiText.para("Looking for hunters with the game open...", UI.T_SMALL, UI.FAINT))
 	v.add_child(list_box)
 	v.add_child(UI.spacer(2))
-	v.add_child(UI.section("Teams"))
+	v.add_child(UiText.section("Teams"))
 	var modes := UI.hbox(2)
 	var track := PanelContainer.new()
 	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
@@ -38,14 +38,14 @@ func _ready() -> void:
 	track.add_child(modes)
 	for m in [["ffa", "Everyone for themselves"], ["duo", "Teams of 2"], ["trio", "Teams of 3"]]:
 		var key: String = m[0]
-		var b := UI.button(m[1], func(): mode = key; _refresh_modes())
+		var b := UiWidgets.button(m[1], func(): mode = key; _refresh_modes())
 		mode_btns[key] = b
 		modes.add_child(b)
 	v.add_child(track)
-	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
-	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
-	UI.footer(v).add_child(ready_btn)
-	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
+	v.add_child(UiText.para("Empty spots are filled with bots, up to 4 squads. Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+	ready_btn = UiWidgets.button("I'm ready", _toggle_ready, 160, "check")
+	UiShell.footer(v).add_child(ready_btn)
+	start_btn = UiShell.footer_primary(v, "Start the match", _start, 220, "portal")
 	_refresh_modes()
 	Net.peers_changed.connect(_refresh)
 	Net.message.connect(_on_msg)
@@ -105,16 +105,16 @@ func _refresh() -> void:
 			continue
 		var row := UI.card(UI.CARD, 10, 12)
 		var h := UI.hbox(12); row.add_child(h)
-		h.add_child(UI.IconDot.new("paw", Data.KIN.get(p.get("kin", {}).get("species", "cindle"), Data.KIN["cindle"])["color"], 20.0))
-		var nm := UI.label("%s%s" % [p.get("name", "Hunter"), "  (you)" if id == Net.me else ""], UI.T_BODY, UI.ACCENT_HI if id == Net.me else UI.INK, UI.semi)
+		h.add_child(UiWidgets.IconDot.new("paw", Data.KIN.get(p.get("kin", {}).get("species", "cindle"), Data.KIN["cindle"])["color"], 20.0))
+		var nm := UiText.label("%s%s" % [p.get("name", "Hunter"), "  (you)" if id == Net.me else ""], UI.T_BODY, UI.ACCENT_HI if id == Net.me else UI.INK, UI.semi)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(nm)
 		var kin: Dictionary = p.get("kin", {})
-		var info := UI.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
+		var info := UiText.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
 		info.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(info)
-		h.add_child(UI.tag("Ready" if p.get("ready", false) else "Not ready", UI.GOOD if p.get("ready", false) else UI.MUTED))
+		h.add_child(UiWidgets.tag("Ready" if p.get("ready", false) else "Not ready", UI.GOOD if p.get("ready", false) else UI.MUTED))
 		list_box.add_child(row)
 
 func _start() -> void:

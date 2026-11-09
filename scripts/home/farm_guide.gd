@@ -146,7 +146,7 @@ func _make_hint() -> void:
 	hint_box.offset_top = 66      # under the top chips
 	var row := UI.hbox(14)
 	hint_box.add_child(row)
-	hint_lbl = UI.label("", 16, UI.INK, UI.semi)
+	hint_lbl = UiText.label("", 16, UI.INK, UI.semi)
 	row.add_child(hint_lbl)
 	skip_row = UI.hbox(6)
 	row.add_child(skip_row)
@@ -159,13 +159,13 @@ func _skip_buttons() -> void:
 	if not bool(FarmTutorial.option("skippable")):
 		return
 	if not asking:
-		skip_row.add_child(UI.button(String(FarmTutorial.rules()["skip_label"]), func():
+		skip_row.add_child(UiWidgets.button(String(FarmTutorial.rules()["skip_label"]), func():
 			asking = true
 			_skip_buttons(), 0))
 		return
-	skip_row.add_child(UI.label(String(FarmTutorial.rules()["skip_ask"]), 14, UI.MUTED))
-	skip_row.add_child(UI.button("Yes", func(): skip(), 0))
-	skip_row.add_child(UI.button("No", func():
+	skip_row.add_child(UiText.label(String(FarmTutorial.rules()["skip_ask"]), 14, UI.MUTED))
+	skip_row.add_child(UiWidgets.button("Yes", func(): skip(), 0))
+	skip_row.add_child(UiWidgets.button("No", func():
 		asking = false
 		_skip_buttons(), 0))
 

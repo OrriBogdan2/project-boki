@@ -501,7 +501,7 @@ func _build_ui() -> void:
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
 	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
+	var ver := UiText.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
 	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
 	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
@@ -515,15 +515,15 @@ func _build_ui() -> void:
 	news.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	news.offset_right = -28; news.offset_bottom = -64
 	var nv := UI.hbox(10); news.add_child(nv)
-	var tag := UI.label("PLAYTEST  ·  %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps)
+	var tag := UiText.label("PLAYTEST  ·  %s" % Net.VERSION, 11, Color("e9b48a"), UI.caps)
 	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	nv.add_child(tag)
-	var nb := UI.ghost("Join the Discord", func(): OS.shell_open(DISCORD), 0, "bond")
+	var nb := UiWidgets.ghost("Join the Discord", func(): OS.shell_open(DISCORD), 0, "bond")
 	nb.focus_mode = Control.FOCUS_NONE
 	nv.add_child(nb)
 	root.add_child(news)
 	UI.pop_in(news, 1.4)
-	var keys := UI.key_hints([["W S", "choose"], ["Enter", "select"], ["Esc", "back"]], 13)
+	var keys := UiWidgets.key_hints([["W S", "choose"], ["Enter", "select"], ["Esc", "back"]], 13)
 	keys.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
@@ -573,7 +573,7 @@ func _resume_line() -> String:
 	return "  ·  ".join(bits)
 
 func _menu_main(text: String, cb: Callable) -> Button:
-	var b := UI.button(text, cb)
+	var b := UiWidgets.button(text, cb)
 	b.theme_type_variation = "MenuMain"
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
@@ -584,7 +584,7 @@ func _menu_item(text: String, cb: Callable, icon := "") -> Button:
 	var b := Button.new()
 	b.text = text
 	b.theme_type_variation = "MenuItem"
-	if icon != "": UI.set_icon(b, icon, 18)
+	if icon != "": UiWidgets.set_icon(b, icon, 18)
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300

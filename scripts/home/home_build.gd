@@ -1879,16 +1879,16 @@ func open_expand() -> void:
 	var lv := int(lay["grow"])
 	var v: VBoxContainer = h._new_panel("Grow your island", 520)
 	if lv >= HomeLayout.EXPAND.size():
-		v.add_child(UI.label("Your island is as big as it gets. There's room out on the other isles.", 16))
+		v.add_child(UiText.label("Your island is as big as it gets. There's room out on the other isles.", 16))
 		return
 	var gain := HomeLayout.expand_gain(lv, _seed())
 	var c: Array = HomeLayout.EXPAND[lv]
 	var cm: Array = HomeLayout.EXPAND_MATS[mini(lv, HomeLayout.EXPAND_MATS.size() - 1)]
-	v.add_child(UI.label("The island's edge grows out to the east and south: %d more tiles of open meadow to build on. (Step %d of %d.)" % [gain, lv + 1, HomeLayout.EXPAND.size()], 16))
+	v.add_child(UiText.label("The island's edge grows out to the east and south: %d more tiles of open meadow to build on. (Step %d of %d.)" % [gain, lv + 1, HomeLayout.EXPAND.size()], 16))
 	var have := "You have %d gems, %d scrap, %d wood and %d stone." % [int(Save.d["gems"]), int(Save.d.get("scrap", 0)), Work.mat("wood"), Work.mat("stone")]
 	var mt := (" · %d wood · %d stone" % [int(cm[0]), int(cm[1])]) if int(cm[0]) + int(cm[1]) > 0 else ""
-	v.add_child(UI.label("Costs %d gems · %d scrap%s. %s" % [int(c[0]), int(c[1]), mt, have], 15, UI.GOLD if _can_pay(int(c[0]), int(c[1]), int(cm[0]), int(cm[1])) else UI.BAD))
-	var btn := UI.primary("Expand  +%d tiles" % gain, func(): expand(), 240)
+	v.add_child(UiText.label("Costs %d gems · %d scrap%s. %s" % [int(c[0]), int(c[1]), mt, have], 15, UI.GOLD if _can_pay(int(c[0]), int(c[1]), int(cm[0]), int(cm[1])) else UI.BAD))
+	var btn := UiWidgets.primary("Expand  +%d tiles" % gain, func(): expand(), 240)
 	btn.disabled = not _can_pay(int(c[0]), int(c[1]), int(cm[0]), int(cm[1]))
 	v.add_child(btn)
 
@@ -1971,7 +1971,7 @@ func _extras() -> Array:
 	if FarmUnlocks.gated():
 		var progress := FarmUnlocks.progress()
 		var more: String = (" · %d/%d" % [int(progress[0]), int(progress[1])]) if progress[1] > 0 else " (max)"
-		out.append(UI.chip("hammer", "Farm level %d%s" % [FarmUnlocks.level(), more], UI.GOLD,
+		out.append(UiWidgets.chip("hammer", "Farm level %d%s" % [FarmUnlocks.level(), more], UI.GOLD,
 			"Your farm levels up as you play: extract, scan Boki, hatch, harvest and build. Higher levels open more things to build."))
 	return out
 
@@ -2036,22 +2036,22 @@ func open_make_home() -> void:
 		for it in MAKE_ITEMS: make_pick[it[0]] = 0
 	_mark_make()
 	var v: VBoxContainer = h._new_panel("Make it home", 560)
-	v.add_child(UI.label("This bit of wild sky-meadow is yours. Pick where your first things go: the marks on the ground show the choices. The wild gets cut back round them; the rest you can clear and build on later.", 15))
+	v.add_child(UiText.label("This bit of wild sky-meadow is yours. Pick where your first things go: the marks on the ground show the choices. The wild gets cut back round them; the rest you can clear and build on later.", 15))
 	for it in MAKE_ITEMS:
 		var key: String = it[0]
 		var opts: Array = make.get(key, [])
 		if opts.is_empty(): continue
 		var row := UI.hbox(8)
-		var l := UI.label(String(it[1]), 16, Color(String(it[2])), UI.semi)
+		var l := UiText.label(String(it[1]), 16, Color(String(it[2])), UI.semi)
 		l.custom_minimum_size.x = 170
 		row.add_child(l)
 		for i in opts.size():
 			var ii := i
-			row.add_child(UI.choice("Spot %s" % "ABC"[i], int(make_pick.get(key, 0)) == i, func(): make_pick[key] = ii; open_make_home(), 96))
+			row.add_child(UiWidgets.choice("Spot %s" % "ABC"[i], int(make_pick.get(key, 0)) == i, func(): make_pick[key] = ii; open_make_home(), 96))
 		v.add_child(row)
 	var go := UI.hbox(10)
-	go.add_child(UI.primary("Use suggested layout", func(): use_suggested(), 230))
-	go.add_child(UI.button("Done", func(): finish_make_home(), 120))
+	go.add_child(UiWidgets.primary("Use suggested layout", func(): use_suggested(), 230))
+	go.add_child(UiWidgets.button("Done", func(): finish_make_home(), 120))
 	v.add_child(go)
 
 func _mark_make() -> void:

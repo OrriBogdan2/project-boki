@@ -364,18 +364,18 @@ func _build_ui() -> void:
 	var top := UI.glass(8, 14)
 	top.position = Vector2(16, 14)
 	var th := UI.hbox(14); top.add_child(th)
-	th.add_child(UI.title(String(R["name"]) if visit.is_empty() else "%s's house" % String(visit.get("name", "Their")), 24, UI.ACCENT))
-	var sub := UI.label("%d gems" % int(Save.d["gems"]), 15)
+	th.add_child(UiText.title(String(R["name"]) if visit.is_empty() else "%s's house" % String(visit.get("name", "Their")), 24, UI.ACCENT))
+	var sub := UiText.label("%d gems" % int(Save.d["gems"]), 15)
 	sub.name = "Gems"
 	th.add_child(sub)
 	root_ui.add_child(top)
 	prompt_box = UI.glass(10, 16)
-	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
+	prompt_lbl = UiText.label("", 18, UI.GOLD, UI.big)
 	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	prompt_box.add_child(prompt_lbl)
 	root_ui.add_child(prompt_box)
 	if visit.is_empty():
-		deco_btn = UI.primary("Decorate  (%s)" % Settings.key_cap("build"), func(): dec.toggle(), 200)
+		deco_btn = UiWidgets.primary("Decorate  (%s)" % Settings.key_cap("build"), func(): dec.toggle(), 200)
 		deco_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 		deco_btn.position = Vector2(16, -64)
 		root_ui.add_child(deco_btn)
@@ -401,11 +401,11 @@ func _refresh_gems() -> void:
 	if gems: (gems as Label).text = "%d gems" % int(Save.d["gems"])
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt)
+	UiShell.toast(root_ui, txt)
 
 func _new_panel(title_txt: String, width := 560.0) -> VBoxContainer:
 	_close_panel()
-	var pb := UI.scroll_panel(title_txt, width, _close_panel)
+	var pb := UiShell.scroll_panel(title_txt, width, _close_panel)
 	panel_host.add_child(pb[0])
 	panel_open = title_txt
 	UI.show_backdrop(panel_dim, true)
@@ -423,9 +423,9 @@ func _close_panel() -> void:
 ## Every kin you have, and who comes along on expeditions.
 func _open_journal() -> void:
 	var v := _new_panel("Boki journal", 640)
-	v.add_child(UI.label("Your Boki out on the farm. The one you bring on expeditions is your partner.", 14, UI.MUTED))
+	v.add_child(UiText.label("Your Boki out on the farm. The one you bring on expeditions is your partner.", 14, UI.MUTED))
 	if not KinBox.boxed().is_empty():
-		v.add_child(UI.label("%d more asleep in the Boki Burrow (open it on the farm to swap them out)." % KinBox.boxed().size(), 13, Color("cdb8ff")))
+		v.add_child(UiText.label("%d more asleep in the Boki Burrow (open it on the farm to swap them out)." % KinBox.boxed().size(), 13, Color("cdb8ff")))
 	for rec in KinBox.farm():
 		var row := UI.card(UI.CARD, 10, 10)
 		var h := UI.hbox(12); row.add_child(h)
@@ -433,14 +433,14 @@ func _open_journal() -> void:
 		var dot := ColorRect.new(); dot.color = sp["color"]; dot.custom_minimum_size = Vector2(14, 14)
 		dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(dot)
-		var info := UI.label("%s the %s  ·  level %d  ·  trust %d" % [rec["name"], Evo.form_name(rec), int(rec["level"]), int(rec["trust"])], 15)
+		var info := UiText.label("%s the %s  ·  level %d  ·  trust %d" % [rec["name"], Evo.form_name(rec), int(rec["level"]), int(rec["trust"])], 15)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(info)
 		var r: Dictionary = rec
 		if rec["uid"] == Save.d.get("active", ""):
-			h.add_child(UI.label("Partner", 14, UI.GOLD))
+			h.add_child(UiText.label("Partner", 14, UI.GOLD))
 		else:
-			h.add_child(UI.button("Make partner", func():
+			h.add_child(UiWidgets.button("Make partner", func():
 				Save.d["active"] = r["uid"]
 				Save.save_game()
 				_open_journal()))
@@ -449,23 +449,23 @@ func _open_journal() -> void:
 func _open_music() -> void:
 	var v := _new_panel("Gramophone", 560)
 	var heard: Array = Save.d.get("music", [])
-	v.add_child(UI.label("Every tune you've heard on your travels. Pick one to play at home.", 14, UI.MUTED))
+	v.add_child(UiText.label("Every tune you've heard on your travels. Pick one to play at home.", 14, UI.MUTED))
 	for tid in Data.MUSIC:
 		var md: Dictionary = Data.MUSIC[tid]
 		var row := UI.hbox(10)
 		var known := heard.has(tid)
-		var l := UI.label(String(md["name"]) if known else "???  ·  " + String(md.get("hint", "")), 15, UI.INK if known else UI.MUTED)
+		var l := UiText.label(String(md["name"]) if known else "???  ·  " + String(md.get("hint", "")), 15, UI.INK if known else UI.MUTED)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
 		if known:
 			var t: String = tid
-			row.add_child(UI.choice("Playing" if Sfx.music_lock == tid else "Play", Sfx.music_lock == tid, func():
+			row.add_child(UiWidgets.choice("Playing" if Sfx.music_lock == tid else "Play", Sfx.music_lock == tid, func():
 				Sfx.music_lock = t
 				Sfx.play_music(t, 1.0)
 				_open_music(), 110))
 		v.add_child(row)
 	if Sfx.music_lock != "":
-		v.add_child(UI.button("Back to the island's own music", func():
+		v.add_child(UiWidgets.button("Back to the island's own music", func():
 			Sfx.music_lock = ""
 			_open_music(), 300))
 

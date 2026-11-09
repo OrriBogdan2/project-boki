@@ -431,18 +431,18 @@ func _build_ui() -> void:
 	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
 	top.position = Vector2(16, 14)
 	var th := UI.hbox(14); top.add_child(th)
-	th.add_child(UI.title("Project Boki", 26, UI.ACCENT))
-	topbar = UI.label("", 15, UI.INK)
+	th.add_child(UiText.title("Project Boki", 26, UI.ACCENT))
+	topbar = UiText.label("", 15, UI.INK)
 	topbar.autowrap_mode = TextServer.AUTOWRAP_OFF
 	th.add_child(topbar)
 	root_ui.add_child(top)
 	prompt_box = UI.card(Color(0.06, 0.07, 0.1, 0.85), 12, 12)
-	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
+	prompt_lbl = UiText.label("", 18, UI.GOLD, UI.big)
 	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	prompt_box.add_child(prompt_lbl)
 	root_ui.add_child(prompt_box)
 	var hint_box := UI.card(Color(0.06, 0.07, 0.1, 0.7), 8, 10)
-	var hint := UI.label("WASD walk   ·   Space jump   ·   " + Settings.key_cap("interact") + " use   ·   Scroll to zoom   ·   Esc menu", 14, UI.INK)
+	var hint := UiText.label("WASD walk   ·   Space jump   ·   " + Settings.key_cap("interact") + " use   ·   Scroll to zoom   ·   Esc menu", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint_box.add_child(hint)
 	hint_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -458,7 +458,7 @@ func _build_ui() -> void:
 func _new_panel(title_txt: String, width := 540.0) -> VBoxContainer:
 	var prev := panel_open
 	_close_panel()
-	var pb := UI.scroll_panel(title_txt, width, _close_panel)
+	var pb := UiShell.scroll_panel(title_txt, width, _close_panel)
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
 	panel_host.add_child(p)
@@ -474,11 +474,11 @@ func _close_panel() -> void:
 	panel_open = ""
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt)
+	UiShell.toast(root_ui, txt)
 
 func _row(v: VBoxContainer, text: String, col := UI.INK, size := 15) -> HBoxContainer:
 	var row := UI.hbox(10)
-	var l := UI.label(text, size, col)
+	var l := UiText.label(text, size, col)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(l)
 	v.add_child(row)
@@ -487,7 +487,7 @@ func _row(v: VBoxContainer, text: String, col := UI.INK, size := 15) -> HBoxCont
 func _loading(v: VBoxContainer) -> VBoxContainer:
 	var list := UI.vbox(6)
 	v.add_child(list)
-	list.add_child(UI.label("Loading...", 14, UI.MUTED))
+	list.add_child(UiText.label("Loading...", 14, UI.MUTED))
 	return list
 
 func _clear(list: VBoxContainer) -> bool:
@@ -509,8 +509,8 @@ func _use(it: Dictionary) -> void:
 		"ferry":
 			if mode == "guild":
 				var v := _new_panel("Ferry", 420)
-				v.add_child(UI.button("Home", func(): Game.goto("home"), 360))
-				v.add_child(UI.button("The town", func(): Game.goto("town", {"mode": "hub"}), 360))
+				v.add_child(UiWidgets.button("Home", func(): Game.goto("home"), 360))
+				v.add_child(UiWidgets.button("The town", func(): Game.goto("town", {"mode": "hub"}), 360))
 			else:
 				Game.goto("home")
 		"to_guild": Game.goto("town", {"mode": "guild", "gid": Social.my_guild_id()})
@@ -537,22 +537,22 @@ func _open_visits() -> void:
 	Social.list_islands(func(rows: Array):
 		if not _clear(list): return
 		if rows.is_empty():
-			list.add_child(UI.label("No other islands yet.", 14, UI.MUTED))
+			list.add_child(UiText.label("No other islands yet.", 14, UI.MUTED))
 		for r in rows.slice(0, 14):
 			var d: Dictionary = r["d"]
 			var row := _row(list, "%s  ·  %d Boki  ·  %d buildings" % [d["name"], d["roster"].size(), d["buildings"].size()])
 			var rid: String = r["id"]
-			row.add_child(UI.button("Visit", func(): Game.goto("home", {"visit": d, "visit_id": rid}), 100)))
+			row.add_child(UiWidgets.button("Visit", func(): Game.goto("home", {"visit": d, "visit_id": rid}), 100)))
 
 # ---- market
 func _open_market() -> void:
 	var v := _new_panel("Market", 600)
-	v.add_child(UI.label("Players sell seeds and crops here. (Boki are never sold: hand one to a friend from the Shelter.) You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
+	v.add_child(UiText.label("Players sell seeds and crops here. (Boki are never sold: hand one to a friend from the Shelter.) You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
 	var list := _loading(v)
 	Social.list_market(func(rows: Array):
 		if not _clear(list): return
 		if rows.is_empty():
-			list.add_child(UI.label("Nothing for sale right now. Be the first.", 14, UI.MUTED))
+			list.add_child(UiText.label("Nothing for sale right now. Be the first.", 14, UI.MUTED))
 		for r in rows.slice(0, 12):
 			var l: Dictionary = r["l"]
 			var key: String = l["key"]
@@ -561,7 +561,7 @@ func _open_market() -> void:
 				int(l["price"]), l["seller_name"]], Data.CROPS[key]["color"])
 			var lid: String = r["id"]
 			if mine:
-				var tb := UI.button("Take back", func():
+				var tb := UiWidgets.button("Take back", func():
 					_lock()
 					Social.unlist(lid, func(okk: bool):
 						if okk: _toast("Taken back")
@@ -569,7 +569,7 @@ func _open_market() -> void:
 				tb.disabled = not Save.d.get("listings", {}).has(lid)
 				row.add_child(tb)
 			else:
-				var b := UI.button("Buy", func():
+				var b := UiWidgets.button("Buy", func():
 					_lock()
 					Social.buy(lid, func(what: String):
 						if what != "":
@@ -580,7 +580,7 @@ func _open_market() -> void:
 						if panel_open == "Market": _open_market()), 100)
 				b.disabled = int(Save.d["gems"]) < int(l["price"])
 				row.add_child(b))
-	v.add_child(UI.section("Sell"))
+	v.add_child(UiText.section("Sell"))
 	var any := false
 	for kind in ["seed", "crop"]:
 		var store: Dictionary = Save.d["seeds"] if kind == "seed" else Save.d["crops"]
@@ -590,13 +590,13 @@ func _open_market() -> void:
 			var price := int(Data.CROPS[key]["price"]) * (2 if kind == "crop" else 1)
 			var row := _row(v, "%s%s  ×%d" % [Data.CROPS[key]["name"], " seed" if kind == "seed" else "", int(store[key])], Data.CROPS[key]["color"])
 			var kk: String = key; var kd: String = kind
-			row.add_child(UI.button("List 1 for %d gems" % price, func():
+			row.add_child(UiWidgets.button("List 1 for %d gems" % price, func():
 				_lock()
 				Social.sell(kd, kk, price, func(okk: bool):
 					if okk: _toast("Listed. You'll be paid when it sells.")
 					if panel_open == "Market": _open_market()), 200))
 	if not any:
-		v.add_child(UI.label("You have no seeds or crops to sell yet.", 14, UI.MUTED))
+		v.add_child(UiText.label("You have no seeds or crops to sell yet.", 14, UI.MUTED))
 
 # ---- notice board
 func _open_notices() -> void:
@@ -605,19 +605,19 @@ func _open_notices() -> void:
 	Social.list_notices(func(rows: Array):
 		if not _clear(list): return
 		if rows.is_empty():
-			list.add_child(UI.label("The board is empty.", 14, UI.MUTED))
+			list.add_child(UiText.label("The board is empty.", 14, UI.MUTED))
 		for r in rows.slice(0, 10):
 			var n: Dictionary = r["n"]
 			var c := UI.card(UI.CARD, 8, 10)
 			var cv := UI.vbox(2); c.add_child(cv)
-			cv.add_child(UI.label(n["name"], 13, UI.GOLD))
-			cv.add_child(UI.label(n["text"], 15))
+			cv.add_child(UiText.label(n["name"], 13, UI.GOLD))
+			cv.add_child(UiText.label(n["text"], 15))
 			list.add_child(c))
 	var row := UI.hbox(8)
 	var inp := LineEdit.new(); inp.placeholder_text = "Pin a note: looking for a squad, selling Mindmint..."; inp.max_length = 140
 	inp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(inp)
-	row.add_child(UI.button("Pin it", func():
+	row.add_child(UiWidgets.button("Pin it", func():
 		if inp.text.strip_edges() == "": return
 		_lock()
 		Social.post_notice(inp.text, func(okk: bool):
@@ -629,23 +629,23 @@ func _open_notices() -> void:
 func _open_guilds() -> void:
 	var v := _new_panel("Guild registry", 600)
 	if not Social.guild.is_empty():
-		v.add_child(UI.label("You're in %s." % String(Social.guild.get("name", "a guild")), 16, UI.GOLD))
+		v.add_child(UiText.label("You're in %s." % String(Social.guild.get("name", "a guild")), 16, UI.GOLD))
 		var hb := UI.hbox(8)
 		var gid0 := Social.my_guild_id()
-		hb.add_child(UI.button("Go to the guild isle", func(): Game.goto("town", {"mode": "guild", "gid": gid0}), 240))
-		hb.add_child(UI.button("Leave the guild", func():
+		hb.add_child(UiWidgets.button("Go to the guild isle", func(): Game.goto("town", {"mode": "guild", "gid": gid0}), 240))
+		hb.add_child(UiWidgets.button("Leave the guild", func():
 			_lock()
 			Social.leave_guild(func():
 				_toast("You left the guild")
 				if panel_open == "Guild registry": _open_guilds()), 200))
 		v.add_child(hb)
 	else:
-		v.add_child(UI.label("Guilds share an isle: every member gets a cottage, and you build projects together that help everyone on expeditions.", 14, UI.MUTED))
+		v.add_child(UiText.label("Guilds share an isle: every member gets a cottage, and you build projects together that help everyone on expeditions.", 14, UI.MUTED))
 		var row := UI.hbox(8)
 		var nm := LineEdit.new(); nm.placeholder_text = "Guild name"; nm.max_length = 24; nm.custom_minimum_size.x = 200
 		var mo := LineEdit.new(); mo.placeholder_text = "Motto (optional)"; mo.max_length = 60; mo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm); row.add_child(mo)
-		row.add_child(UI.button("Found it", func():
+		row.add_child(UiWidgets.button("Found it", func():
 			if nm.text.strip_edges().length() < 3:
 				_toast("Pick a name of at least 3 letters")
 				return
@@ -657,19 +657,19 @@ func _open_guilds() -> void:
 					_toast("%s is founded" % gname)
 				if panel_open == "Guild registry": _open_guilds()), 120))
 		v.add_child(row)
-	v.add_child(UI.section("Guilds"))
+	v.add_child(UiText.section("Guilds"))
 	var list := _loading(v)
 	Social.list_guilds(func(rows: Array):
 		if not _clear(list): return
 		if rows.is_empty():
-			list.add_child(UI.label("No guilds yet. Found the first one.", 14, UI.MUTED))
+			list.add_child(UiText.label("No guilds yet. Found the first one.", 14, UI.MUTED))
 		for r in rows.slice(0, 10):
 			var g: Dictionary = r["g"]
 			var row := _row(list, g["name"] + (("  ·  " + g["motto"]) if g["motto"] != "" else ""))
 			var rid: String = r["id"]
-			row.add_child(UI.button("Visit", func(): Game.goto("town", {"mode": "guild", "gid": rid}), 90))
+			row.add_child(UiWidgets.button("Visit", func(): Game.goto("town", {"mode": "guild", "gid": rid}), 90))
 			if Social.guild.is_empty():
-				row.add_child(UI.button("Join", func():
+				row.add_child(UiWidgets.button("Join", func():
 					_lock()
 					Social.join_guild(rid, func(_okk):
 						Sfx.play("unlock")
@@ -682,24 +682,24 @@ func _open_project(k: String) -> void:
 	var title := String(pd["name"])
 	var v := _new_panel(title, 520)
 	var mine: bool = gid != "" and gid == Social.my_guild_id()
-	v.add_child(UI.label("When it's built, everyone in the guild gets: " + String(pd["perk"]), 15))
+	v.add_child(UiText.label("When it's built, everyone in the guild gets: " + String(pd["perk"]), 15))
 	var body := _loading(v)
 	Social.load_progress(gid, guild_doc, func(prog: Dictionary):
 		if not is_inside_tree() or panel_open != title or not _clear(body): return
 		var total := int(prog.get(k, 0))
 		var goal := int(pd["goal"])
-		body.add_child(UI.label("%d of %d gems put in" % [mini(total, goal), goal], 15, UI.GOLD))
-		body.add_child(UI.bar(float(total) / goal, UI.GOLD, 460, 10))
+		body.add_child(UiText.label("%d of %d gems put in" % [mini(total, goal), goal], 15, UI.GOLD))
+		body.add_child(UiWidgets.bar(float(total) / goal, UI.GOLD, 460, 10))
 		if total >= goal:
-			body.add_child(UI.label("Built. Its perk is active for every member.", 15, UI.GOOD))
+			body.add_child(UiText.label("Built. Its perk is active for every member.", 15, UI.GOOD))
 			return
 		if not mine:
-			body.add_child(UI.label("Only members can help build this.", 14, UI.MUTED))
+			body.add_child(UiText.label("Only members can help build this.", 14, UI.MUTED))
 			return
 		var hb := UI.hbox(8)
 		for amt in [10, 50, 150]:
 			var a: int = mini(amt, goal - total)
-			var b := UI.button("Put in %d gems" % a, func():
+			var b := UiWidgets.button("Put in %d gems" % a, func():
 				_lock()
 				Social.contribute(k, a, func(okk: bool):
 					if okk:
@@ -711,7 +711,7 @@ func _open_project(k: String) -> void:
 			b.disabled = int(Save.d["gems"]) < a or a <= 0
 			hb.add_child(b)
 		body.add_child(hb)
-		body.add_child(UI.label("You have %d gems." % int(Save.d["gems"]), 13, UI.MUTED)))
+		body.add_child(UiText.label("You have %d gems." % int(Save.d["gems"]), 13, UI.MUTED)))
 
 ## Test-only: a guild's worth of made-up members so the isle can be looked at offline.
 func _fake_members() -> Array:

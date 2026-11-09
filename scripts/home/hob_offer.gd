@@ -26,7 +26,7 @@ func _init(talk: HobTalk) -> void:
 func build() -> Control:
 	var v := UI.vbox(12)
 	v.set_meta("mask_offer", true)
-	var head := UI.title(String(chat.rules()["offer_title"]), 26, UI.INK)
+	var head := UiText.title(String(chat.rules()["offer_title"]), 26, UI.INK)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
 	var row := UI.hbox(14)
@@ -41,8 +41,8 @@ func build() -> Control:
 	v.add_child(preview)
 	var btns := UI.hbox(12)
 	btns.alignment = BoxContainer.ALIGNMENT_CENTER
-	btns.add_child(UI.ghost(String(chat.rules()["offer_later"]), chat.later, 160))
-	take_button = UI.primary("", func(): pick(String(ids[focus_i])), 260)
+	btns.add_child(UiWidgets.ghost(String(chat.rules()["offer_later"]), chat.later, 160))
+	take_button = UiWidgets.primary("", func(): pick(String(ids[focus_i])), 260)
 	btns.add_child(take_button)
 	v.add_child(btns)
 	root = v
@@ -68,12 +68,12 @@ func _card(id: String, i: int) -> PanelContainer:
 	var face := ClassCard.portrait(id, FACE_PX)
 	face.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(face)
-	var nm := UI.label(HunterViewer.display_name(id), 19, col, UI.semi)
+	var nm := UiText.label(HunterViewer.display_name(id), 19, col, UI.semi)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nm.custom_minimum_size.x = CARD_W - 24.0
 	v.add_child(nm)
-	var role := UI.para(String((chat.rules()["roles"] as Dictionary).get(id, "")), UI.T_SMALL, UI.MUTED)
+	var role := UiText.para(String((chat.rules()["roles"] as Dictionary).get(id, "")), UI.T_SMALL, UI.MUTED)
 	role.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	role.custom_minimum_size.x = CARD_W - 24.0
 	role.set_meta("mask_role", id)

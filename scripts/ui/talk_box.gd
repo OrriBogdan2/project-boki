@@ -62,12 +62,12 @@ func _build(who: String, face: Control) -> void:
 	var right := UI.vbox(6)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(right)
-	right.add_child(UI.title(who, 24, UI.GOLD))
-	text = UI.label("", 21, UI.INK)
+	right.add_child(UiText.title(who, 24, UI.GOLD))
+	text = UiText.label("", 21, UI.INK)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(WIDTH - FACE_PX - 90.0, 64.0)
 	right.add_child(text)
-	hint = UI.label("", UI.T_SMALL, UI.MUTED)
+	hint = UiText.label("", UI.T_SMALL, UI.MUTED)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(hint)
 	UI.pop_in(panel)

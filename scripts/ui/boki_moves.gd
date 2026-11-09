@@ -69,13 +69,13 @@ func _add(nm: String, icon: String, col: Color, lines: Array, bond: bool) -> voi
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	t.add_child(v)
 	if bond:
-		var cap := UI.label("Bond move", 10, col, UI.semi)
+		var cap := UiText.label("Bond move", 10, col, UI.semi)
 		cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(cap)
-	var ic := UI.IconDot.new(icon, col, ICON_PX)
+	var ic := UiWidgets.IconDot.new(icon, col, ICON_PX)
 	ic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(ic)
-	var nl := UI.label(nm, 12, UI.INK, UI.semi)
+	var nl := UiText.label(nm, 12, UI.INK, UI.semi)
 	nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nl.custom_minimum_size.x = TILE.x - 12.0
@@ -105,7 +105,7 @@ func show_tip(i: int) -> void:
 	for j in lines.size():
 		var head := j == 0           # the move's name
 		var col := UI.INK if j < 2 else UI.MUTED     # name and what it does bright, how it's used muted
-		var l := UI.label(lines[j], 15 if head else 13, col)
+		var l := UiText.label(lines[j], 15 if head else 13, col)
 		if head:
 			l.add_theme_font_override("font", UI.semi)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

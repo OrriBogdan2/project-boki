@@ -66,9 +66,9 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	demo()
 	var c := counts()
 	var head := UI.hbox(14)
-	head.add_child(UI.chip("eye", "Seen %d" % c.x, UI.INK))
-	head.add_child(UI.chip("paw", "Caught %d" % c.y, UI.INK))
-	var hint := UI.label("Field notes on every Boki you've met. Click one to read its page.", UI.T_SMALL, UI.MUTED)
+	head.add_child(UiWidgets.chip("eye", "Seen %d" % c.x, UI.INK))
+	head.add_child(UiWidgets.chip("paw", "Caught %d" % c.y, UI.INK))
+	var hint := UiText.label("Field notes on every Boki you've met. Click one to read its page.", UI.T_SMALL, UI.MUTED)
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -88,7 +88,7 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	var t: PanelContainer
 	if is_seen:
 		var sk := spk
-		t = UI.tile_card(false, func(): on_open.call(sk), 8)
+		t = UiWidgets.tile_card(false, func(): on_open.call(sk), 8)
 		t.tooltip_text = String(Data.KIN[spk]["name"])
 	else:
 		t = UI.card(Color(1, 1, 1, 0.025), 8)
@@ -97,7 +97,7 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	var col := UI.vbox(2)
 	t.add_child(col)
 	var top := UI.hbox(4)
-	var nl := UI.label(num_text(spk), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
+	var nl := UiText.label(num_text(spk), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
 	if is_seen:
@@ -122,9 +122,9 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 			holder.add_child(sp)
 		pic.add_child(holder)
 	else:
-		var q := UI.title("?", 40, Color(1, 1, 1, 0.16))
+		var q := UiText.title("?", 40, Color(1, 1, 1, 0.16))
 		pic.add_child(q)
-	var name_l := UI.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi)
+	var name_l := UiText.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi)
 	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_l.clip_text = true
 	col.add_child(name_l)
@@ -171,8 +171,8 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(info)
 	var nrow := UI.hbox(10)
-	nrow.add_child(UI.label(num_text(spk), UI.T_HEAD, UI.MUTED, UI.big))
-	nrow.add_child(UI.title(String(sp["name"]), 26, UI.INK))
+	nrow.add_child(UiText.label(num_text(spk), UI.T_HEAD, UI.MUTED, UI.big))
+	nrow.add_child(UiText.title(String(sp["name"]), 26, UI.INK))
 	info.add_child(nrow)
 	var trow := UI.hbox(8)
 	var t := type_of(spk)
@@ -181,11 +181,11 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	tchip.add_theme_stylebox_override("panel", chip_box)
 	var th := UI.hbox(6); tchip.add_child(th)
 	th.add_child(TypeIcon.new(t, 18.0))
-	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
+	th.add_child(UiText.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	trow.add_child(tchip)
-	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
+	trow.add_child(UiWidgets.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
 	info.add_child(trow)
-	var note := UI.para(_field_note(spk), UI.T_SMALL + 1, UI.INK)
+	var note := UiText.para(_field_note(spk), UI.T_SMALL + 1, UI.INK)
 	note.custom_minimum_size.x = 360
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
@@ -193,7 +193,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
-	fl.add_child(UI.section("Forms found", UI.FAINT.lightened(0.2)))
+	fl.add_child(UiText.section("Forms found", UI.FAINT.lightened(0.2)))
 	var fr := UI.hbox(8)
 	var shown: Array = [String(sp["name"])] + forms.slice(0, 5)
 	for fname in shown:
@@ -203,7 +203,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 		if not is_caught: fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
 		var fcc := CenterContainer.new(); fcc.add_child(fp)
 		fc.add_child(fcc)
-		var fn := UI.label(String(fname), 11, UI.MUTED)
+		var fn := UiText.label(String(fname), 11, UI.MUTED)
 		fn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		fn.clip_text = true
 		fc.add_child(fn)
@@ -217,7 +217,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 		var spk2 := Sparkle.new(); spk2.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); sh.add_child(spk2)
 		var scc := CenterContainer.new(); scc.add_child(sh)
 		sc.add_child(scc)
-		var sn := UI.label("Shimmer", 11, UI.MUTED); sn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var sn := UiText.label("Shimmer", 11, UI.MUTED); sn.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		sc.add_child(sn)
 		fr.add_child(sc)
 	fl.add_child(fr)
@@ -226,29 +226,29 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	var mine: Array = (Save.d.get("roster", []) as Array).filter(func(r): return String(r.get("species", "")) == spk)
 	if not mine.is_empty():
 		var ml := UI.vbox(4)
-		ml.add_child(UI.section("Yours", UI.FAINT.lightened(0.2)))
+		ml.add_child(UiText.section("Yours", UI.FAINT.lightened(0.2)))
 		var mr := HFlowContainer.new()
 		mr.add_theme_constant_override("h_separation", 8); mr.add_theme_constant_override("v_separation", 6)
 		for r in mine.slice(0, 8):
 			var pc := PanelContainer.new()
 			var pill := UI.frame(Color(1, 1, 1, 0.05), UI.R_PILL, Color(0, 0, 0, 0), 0, 10, 3, 0.0)
 			pc.add_theme_stylebox_override("panel", pill)
-			var ph := UI.name_with_sex(r, "%s  Lv %d" % [String(r["name"]), int(r.get("level", 1))], UI.T_SMALL, UI.INK, UI.semi, 12.0)
+			var ph := UiWidgets.name_with_sex(r, "%s  Lv %d" % [String(r["name"]), int(r.get("level", 1))], UI.T_SMALL, UI.INK, UI.semi, 12.0)
 			pc.add_child(ph)
 			mr.add_child(pc)
 		if mine.size() > 8:
-			mr.add_child(UI.label("+%d more" % (mine.size() - 8), UI.T_SMALL, UI.MUTED))
+			mr.add_child(UiText.label("+%d more" % (mine.size() - 8), UI.T_SMALL, UI.MUTED))
 		ml.add_child(mr)
 		info.add_child(ml)
 
 ## A labelled fact line: an icon, a short label, the value.
 static func _fact(parent: Control, icon: String, k: String, val: String) -> void:
 	var r := UI.hbox(8)
-	r.add_child(UI.IconDot.new(icon, UI.MUTED, 15.0))
-	var kl := UI.label(k, UI.T_SMALL, UI.MUTED, UI.semi)
+	r.add_child(UiWidgets.IconDot.new(icon, UI.MUTED, 15.0))
+	var kl := UiText.label(k, UI.T_SMALL, UI.MUTED, UI.semi)
 	kl.custom_minimum_size.x = 48
 	r.add_child(kl)
-	var vl := UI.label(val, UI.T_SMALL, UI.INK)
+	var vl := UiText.label(val, UI.T_SMALL, UI.INK)
 	vl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vl.custom_minimum_size.x = 200

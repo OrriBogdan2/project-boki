@@ -903,7 +903,7 @@ func feed(text: String, col: Color, el := "") -> void:
 	row.add_child(hb)
 	if el != "" and Work.ELEMENTS.has(el):
 		hb.add_child(WorkView.Icon.new(el, 18.0))
-	var l := UI.label(text, 13, col.lerp(UI.INK, 0.45), UI.semi)
+	var l := UiText.label(text, 13, col.lerp(UI.INK, 0.45), UI.semi)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hb.add_child(l)
 	feed_box.add_child(row)
@@ -960,26 +960,26 @@ func open_station(e: Dictionary) -> void:
 	var c: Dictionary = HomeLayout.CATALOG[id]
 	var el := String(c["work"])
 	var v: VBoxContainer = h._new_panel(String(c["name"]), 560)
-	UI.subtitle(v, "%s station  ·  %s" % [Work.name_of(el), Work.ELEMENTS[el]["job"]])
-	v.add_child(UI.para(String(c.get("desc", "")), UI.T_BODY, UI.INK))
+	UiShell.subtitle(v, "%s station  ·  %s" % [Work.name_of(el), Work.ELEMENTS[el]["job"]])
+	v.add_child(UiText.para(String(c.get("desc", "")), UI.T_BODY, UI.INK))
 	if not Work.ASSIGN.has(id):
-		v.add_child(UI.para("Boki with the %s knack work it on their own; set how much it matters on the Job Board." % Work.name_of(el), UI.T_SMALL, UI.MUTED))
-		UI.footer_primary(v, "Job Board", func(): h._close_panel(); h.open_job_board(), 160)
+		v.add_child(UiText.para("Boki with the %s knack work it on their own; set how much it matters on the Job Board." % Work.name_of(el), UI.T_SMALL, UI.MUTED))
+		UiShell.footer_primary(v, "Job Board", func(): h._close_panel(); h.open_job_board(), 160)
 		return
 	var cfg: Dictionary = Work.ASSIGN[id]
 	var crew := Work.crew(u)
 	var made := {"wood": "wood", "stone": "stone", "seed": "common seeds", "coals": "Ember Coals"}
-	v.add_child(UI.para("Assigned Boki work only here, and keep making %s while you're out on an expedition (up to %d per trip home)." % [made.get(String(cfg["out"]), "things"), int(cfg["cap"])], UI.T_SMALL, UI.MUTED))
-	v.add_child(UI.section("Assigned  %d / %d" % [crew.size(), int(cfg["slots"])]))
+	v.add_child(UiText.para("Assigned Boki work only here, and keep making %s while you're out on an expedition (up to %d per trip home)." % [made.get(String(cfg["out"]), "things"), int(cfg["cap"])], UI.T_SMALL, UI.MUTED))
+	v.add_child(UiText.section("Assigned  %d / %d" % [crew.size(), int(cfg["slots"])]))
 	if crew.is_empty():
-		v.add_child(UI.label("Nobody yet." if not cfg.get("need", false) else "Nobody yet: it only runs with a Boki assigned.", UI.T_BODY, UI.MUTED))
+		v.add_child(UiText.label("Nobody yet." if not cfg.get("need", false) else "Nobody yet: it only runs with a Boki assigned.", UI.T_BODY, UI.MUTED))
 	for r in crew:
 		var rr: Dictionary = r
 		var row := UI.hbox(10)
-		var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), "" if Work.can_work(r) else "  (%s)" % Work.why_not(r)], UI.T_BODY, Data.KIN.get(String(r["species"]), {}).get("color", UI.INK))
+		var l := UiText.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), "" if Work.can_work(r) else "  (%s)" % Work.why_not(r)], UI.T_BODY, Data.KIN.get(String(r["species"]), {}).get("color", UI.INK))
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
-		row.add_child(UI.button("Unassign", func(): Work.assign(rr, -1); _reassign(rr); open_station(e), 120))
+		row.add_child(UiWidgets.button("Unassign", func(): Work.assign(rr, -1); _reassign(rr); open_station(e), 120))
 		v.add_child(row)
 	var cands: Array = []
 	for r in Save.d["roster"]:
@@ -987,9 +987,9 @@ func open_station(e: Dictionary) -> void:
 		if Work.assign_why(r, id) == "": cands.append(r)
 	cands.sort_custom(func(a, b): return Work.level(a, el) > Work.level(b, el))
 	if crew.size() < int(cfg["slots"]):
-		v.add_child(UI.section("Assign a Boki"))
+		v.add_child(UiText.section("Assign a Boki"))
 		if cands.is_empty():
-			v.add_child(UI.label(("No other Boki of yours has the %s knack." if not crew.is_empty() else "None of your Boki has the %s knack.") % Work.name_of(el), UI.T_BODY, UI.MUTED))
+			v.add_child(UiText.label(("No other Boki of yours has the %s knack." if not crew.is_empty() else "None of your Boki has the %s knack.") % Work.name_of(el), UI.T_BODY, UI.MUTED))
 		for r in cands.slice(0, 5):
 			var rr: Dictionary = r
 			var row := UI.hbox(10)
@@ -999,10 +999,10 @@ func open_station(e: Dictionary) -> void:
 				for st in HomeLayout.stations(h._d()):
 					if int(st["e"]["u"]) == other: note = "  (at the %s)" % HomeLayout.CATALOG[st["id"]]["name"]
 			elif KinBox.is_boxed(r): note = "  (asleep in the Burrow)"
-			var l := UI.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
+			var l := UiText.label("%s  ·  %s %d%s" % [r["name"], Work.name_of(el), Work.level(r, el), note], UI.T_BODY, UI.INK)
 			l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(l)
-			row.add_child(UI.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); _reassign(rr); Save.save_game(); open_station(e), 120))
+			row.add_child(UiWidgets.primary("Assign", func(): Work.assign(rr, u); FarmTutorial.event("task"); _reassign(rr); Save.save_game(); open_station(e), 120))
 			v.add_child(row)
 
 ## A kin's assignment changed: it drops whatever it was doing and picks again.

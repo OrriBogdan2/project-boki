@@ -5,7 +5,7 @@ extends RefCounted
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
 ##   5. rows the host's own cards take (the ally alerts) leave fewer for messages, at least one
-##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
+##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UiShell.toast all use a lane
 ##   7. a world label under a card fades back
 ## Never touches the save.
 
@@ -143,10 +143,10 @@ func _wiring() -> void:
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
-	UI.toast(farm, "Not enough wood")
-	UI.toast(farm, "Not enough wood")
-	ok(str(MsgLane.of(farm).texts()) == str(["Not enough wood  x2"]) and UI.toast_busy(farm),
-		"UI.toast (the farm, town, houses) uses a lane too, repeats merged")
+	UiShell.toast(farm, "Not enough wood")
+	UiShell.toast(farm, "Not enough wood")
+	ok(str(MsgLane.of(farm).texts()) == str(["Not enough wood  x2"]) and UiShell.toast_busy(farm),
+		"UiShell.toast (the farm, town, houses) uses a lane too, repeats merged")
 	farm.queue_free()
 
 # ------------------------------------------------------------------ 7. world labels yield

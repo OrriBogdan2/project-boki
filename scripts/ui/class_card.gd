@@ -33,19 +33,19 @@ static func challenge_block(id: String, width := 190.0) -> VBoxContainer:
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.set_meta("challenge_block", id)
 	v.set_meta("frac", float(gp["frac"]))
-	var g := UI.para(ClassUnlock.challenge_text(id), 13, GOAL_COL if float(gp["frac"]) > 0.0 else UI.INK)
+	var g := UiText.para(ClassUnlock.challenge_text(id), 13, GOAL_COL if float(gp["frac"]) > 0.0 else UI.INK)
 	g.custom_minimum_size.x = width
 	v.add_child(g)
 	var row := UI.hbox(8)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(UI.bar(float(gp["frac"]), UI.GOOD if bool(gp["done"]) else GOAL_COL, width - 56.0, 8.0))
-	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 12, UI.MUTED))
+	row.add_child(UiWidgets.bar(float(gp["frac"]), UI.GOOD if bool(gp["done"]) else GOAL_COL, width - 56.0, 8.0))
+	row.add_child(UiText.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 12, UI.MUTED))
 	v.add_child(row)
 	var needed := ClassUnlock.open_needed(id)
 	var tier_line := "%s challenge" % ClassUnlock.tier(id).capitalize()
 	if needed > ClassUnlock.open_ids().size():
 		tier_line += "  ·  opens once %d Relics are open" % needed
-	v.add_child(UI.label(tier_line, 12, UI.MUTED))
+	v.add_child(UiText.label(tier_line, 12, UI.MUTED))
 	return v
 
 ## A Hunter's mastery: its level, then each goal with its counter and the cosmetic it gives. Tagged
@@ -57,8 +57,8 @@ static func mastery_list(id: String, width := 330.0) -> VBoxContainer:
 	v.set_meta("mastery_list", id)
 	v.set_meta("level", ClassUnlock.mastery_level(id))
 	var head := UI.hbox(8)
-	head.add_child(UI.label("Mastery", 12, UI.MUTED, UI.caps))
-	head.add_child(UI.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
+	head.add_child(UiText.label("Mastery", 12, UI.MUTED, UI.caps))
+	head.add_child(UiText.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
 	v.add_child(head)
 	for i in goals.size():
 		v.add_child(_mastery_row(id, i, width))
@@ -71,14 +71,14 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	var row := UI.hbox(6)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.set_meta("mastery_goal", i)
-	var gl := UI.label(String(g["text"]), 12, UI.GOOD if done else UI.INK)
+	var gl := UiText.label(String(g["text"]), 12, UI.GOOD if done else UI.INK)
 	gl.custom_minimum_size.x = width * 0.5
 	gl.clip_text = true
 	row.add_child(gl)
-	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 11, UI.MUTED))
+	row.add_child(UiText.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 11, UI.MUTED))
 	var rw: Dictionary = g["reward"]
 	var reward := "%s: %s" % [ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])]
-	var reward_label := UI.label(reward, 11, GOAL_COL if done else UI.FAINT)
+	var reward_label := UiText.label(reward, 11, GOAL_COL if done else UI.FAINT)
 	if done:
 		reward_label.add_theme_font_override("font", UI.semi)
 	row.add_child(reward_label)
@@ -101,12 +101,12 @@ static func results_strip(s: Dictionary) -> Control:
 	var v := UI.vbox(4)
 	for m in cu.get("mastered", []):
 		var rw: Dictionary = m["reward"]
-		var ml := UI.label("%s mastery: %s  ·  %s %s" % [Arch.name_of(String(m["id"])), String(m["text"]),
+		var ml := UiText.label("%s mastery: %s  ·  %s %s" % [Arch.name_of(String(m["id"])), String(m["text"]),
 				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])], UI.T_SMALL, GOAL_COL, UI.semi)
 		ml.set_meta("mastery_done", String(m["id"]))
 		v.add_child(ml)
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Relic challenge done! Hold to unlock it on the Relics screen at home.", UI.T_SMALL,
+		var nl := UiText.label("Relic challenge done! Hold to unlock it on the Relics screen at home.", UI.T_SMALL,
 				GOAL_COL, UI.semi)
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
 		v.add_child(nl)

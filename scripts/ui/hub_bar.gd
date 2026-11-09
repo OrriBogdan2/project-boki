@@ -16,22 +16,22 @@ static func build(items: Array, go: Callable, btns := {}) -> PanelContainer:
 		var it: Array = items[i]
 		var cb: Callable = it[3]
 		var cap := String(it[4]) if it.size() > 4 else str(i + 1)
-		var b := UI.button("", func(): go.call(cb, String(it[0])))
+		var b := UiWidgets.button("", func(): go.call(cb, String(it[0])))
 		b.theme_type_variation = "Ghost"
 		b.focus_mode = Control.FOCUS_NONE
 		b.custom_minimum_size = BUTTON
 		b.tooltip_text = "%s  (%s)" % [it[1], cap] if cap != "" else String(it[1])
-		var ic := UI.IconDot.new(String(it[2]), UI.INK, 22.0)
+		var ic := UiWidgets.IconDot.new(String(it[2]), UI.INK, 22.0)
 		ic.position = Vector2(23, 9)
 		b.add_child(ic)
-		var lb := UI.label(String(it[1]), 11, UI.MUTED, UI.semi)
+		var lb := UiText.label(String(it[1]), 11, UI.MUTED, UI.semi)
 		lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lb.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 		lb.offset_top = -19; lb.offset_bottom = -4
 		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(lb)
 		if cap != "":
-			var kc := UI.keycap(cap, 10)
+			var kc := UiWidgets.keycap(cap, 10)
 			kc.position = Vector2(2, 2)
 			kc.modulate.a = 0.75
 			b.add_child(kc)

@@ -144,12 +144,12 @@ func _build() -> void:
 	top.alignment = BoxContainer.ALIGNMENT_CENTER
 	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(top)
-	title_lbl = UI.title("", 34, UI.INK)
+	title_lbl = UiText.title("", 34, UI.INK)
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_lbl.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.05, 0.8))
 	title_lbl.add_theme_constant_override("outline_size", 6)
 	top.add_child(title_lbl)
-	sub_lbl = UI.label("", 16, UI.MUTED)
+	sub_lbl = UiText.label("", 16, UI.MUTED)
 	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	top.add_child(sub_lbl)
 	title_lbl.modulate.a = 0.0
@@ -160,7 +160,7 @@ func _build() -> void:
 	root.add_child(info)
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
-	hint = UI.label("Drag to turn it round  ·  A / D", 15, UI.MUTED)
+	hint = UiText.label("Drag to turn it round  ·  A / D", 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40
 	hint.offset_top = -64
@@ -211,7 +211,7 @@ func _info_card() -> PanelContainer:
 	card.custom_minimum_size = Vector2(400, 0)
 	var v := UI.vbox(8); card.add_child(v)
 	var head := UI.hbox(10)
-	var nm := UI.title(String(sp["name"]), 30, _bright(col))
+	var nm := UiText.title(String(sp["name"]), 30, _bright(col))
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(nm)
 	head.add_child(_chip(String(sp.get("type", "")).capitalize(), UI.MUTED))
@@ -228,33 +228,33 @@ func _info_card() -> PanelContainer:
 	for mid in Mutations.of(rec):
 		v.add_child(_note("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)]))
 	if rec.has("parents"):
-		v.add_child(UI.label("Child of %s and %s" % [rec["parents"][0], rec["parents"][1]], 14, UI.MUTED))
+		v.add_child(UiText.label("Child of %s and %s" % [rec["parents"][0], rec["parents"][1]], 14, UI.MUTED))
 	var who := UI.hbox(8)
 	if Unique.sex(rec) != "":
-		who.add_child(UI.sex_icon(rec, 15.0))
-		who.add_child(UI.label(Unique.sex_name(rec), 15, UI.SEX_COL[Unique.sex(rec)], UI.semi))
+		who.add_child(UiWidgets.sex_icon(rec, 15.0))
+		who.add_child(UiText.label(Unique.sex_name(rec), 15, UiWidgets.SEX_COL[Unique.sex(rec)], UI.semi))
 	var bits := PackedStringArray()
 	if rec.has("traits"):
 		bits.append("%s nature" % Care.nature(rec))
 	if not Unique.of(rec).is_empty():
 		bits.append(String(AboutView.HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec))).to_lower())
 	if not bits.is_empty():
-		who.add_child(UI.label(("·  " if who.get_child_count() > 0 else "") + "  ·  ".join(bits), 15, UI.INK))
+		who.add_child(UiText.label(("·  " if who.get_child_count() > 0 else "") + "  ·  ".join(bits), 15, UI.INK))
 	if who.get_child_count() > 0:
 		v.add_child(who)
 	moves = BokiMoves.new(species, rec)
 	if not moves.tiles.is_empty():
 		v.add_child(UI.spacer(2))
-		v.add_child(UI.section("Moves  ·  hover one"))
+		v.add_child(UiText.section("Moves  ·  hover one"))
 		v.add_child(moves)
 	v.add_child(UI.spacer(6))
-	name_btn = UI.primary("Name it", _go, 360)
+	name_btn = UiWidgets.primary("Name it", _go, 360)
 	name_btn.disabled = true
 	v.add_child(name_btn)
 	return card
 
 func _note(text: String) -> Label:
-	var l := UI.label(text, 14, UI.INK)
+	var l := UiText.label(text, 14, UI.INK)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size.x = 360
 	return l
@@ -273,18 +273,18 @@ func _chip(text: String, c: Color) -> PanelContainer:
 	sb.set_border_width_all(1); sb.set_corner_radius_all(12)
 	sb.content_margin_left = 12; sb.content_margin_right = 12; sb.content_margin_top = 3; sb.content_margin_bottom = 3
 	p.add_theme_stylebox_override("panel", sb)
-	p.add_child(UI.label(text, 14, UI.INK))
+	p.add_child(UiText.label(text, 14, UI.INK))
 	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return p
 
 func _stat(name: String, val: float, top: float) -> HBoxContainer:
 	var h := UI.hbox(10)
-	var l := UI.label(name, 14, UI.MUTED); l.custom_minimum_size.x = 70
+	var l := UiText.label(name, 14, UI.MUTED); l.custom_minimum_size.x = 70
 	h.add_child(l)
-	var b := UI.bar(clampf(val / top, 0.05, 1.0), Color("cfc6b8"), 230.0, 10.0)
+	var b := UiWidgets.bar(clampf(val / top, 0.05, 1.0), Color("cfc6b8"), 230.0, 10.0)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	h.add_child(b)
-	h.add_child(UI.label(str(snappedf(val, 0.1)).trim_suffix(".0"), 14, UI.INK))
+	h.add_child(UiText.label(str(snappedf(val, 0.1)).trim_suffix(".0"), 14, UI.INK))
 	return h
 
 # ------------------------------------------------------------------ the moment

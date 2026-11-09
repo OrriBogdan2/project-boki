@@ -101,7 +101,7 @@ static func build() -> PanelContainer:
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var v := UI.vbox(7)
 	box.add_child(v)
-	v.add_child(UI.section(String(cfg()["title"])))
+	v.add_child(UiText.section(String(cfg()["title"])))
 	for r in rows:
 		v.add_child(_row_ui(r))
 	return box
@@ -113,13 +113,13 @@ static func _row_ui(r: Dictionary) -> Control:
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if bool(r["ready"]):
 		head.add_child(Icons.Glyph.new("gem", UI.GOLD, 12.0))
-	var text := UI.label(String(r["text"]), 14, UI.GOLD if bool(r["ready"]) else UI.INK)
+	var text := UiText.label(String(r["text"]), 14, UI.GOLD if bool(r["ready"]) else UI.INK)
 	text.autowrap_mode = TextServer.AUTOWRAP_OFF
 	text.clip_text = true
 	text.custom_minimum_size.x = 190
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(text)
-	head.add_child(UI.label("%d/%d" % [r["have"], r["need"]], 12, UI.MUTED, UI.caps))
+	head.add_child(UiText.label("%d/%d" % [r["have"], r["need"]], 12, UI.MUTED, UI.caps))
 	col.add_child(head)
-	col.add_child(UI.bar(float(r["frac"]), UI.GOLD if bool(r["ready"]) else UI.GOOD, 270.0, 4.0))
+	col.add_child(UiWidgets.bar(float(r["frac"]), UI.GOLD if bool(r["ready"]) else UI.GOOD, 270.0, 4.0))
 	return col

@@ -29,17 +29,17 @@ static func build(
 	pc.add_child(v)
 	var head := UI.hbox(8)
 	v.add_child(head)
-	var t := UI.title("Backpack full  %d/%d" % [p.pack.size(), p.pack_cap], 20, LootFull.FULL_COL)
+	var t := UiText.title("Backpack full  %d/%d" % [p.pack.size(), p.pack_cap], 20, LootFull.FULL_COL)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
-	var cl := UI.button("✕", on_close, 36)
+	var cl := UiWidgets.button("✕", on_close, 36)
 	cl.flat = true
 	head.add_child(cl)
-	v.add_child(UI.label("Holding", 12, MUTED, UI.caps))
+	v.add_child(UiText.label("Holding", 12, MUTED, UI.caps))
 	var held_row := item_row(held, [])
 	mark_full(held_row)
 	v.add_child(held_row)
-	v.add_child(UI.label("Swap it with one of yours, or drop one", 12, MUTED, UI.caps))
+	v.add_child(UiText.label("Swap it with one of yours, or drop one", 12, MUTED, UI.caps))
 	for i in p.pack.size():
 		var idx := i
 		var buttons: Array = [["Swap", func(): on_swap.call(idx), true], ["Drop", func(): on_drop.call(idx)]]
@@ -74,12 +74,12 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 	row.add_child(Icons.Glyph.new(Loot.icon_of(it), col, 24.0))
 	var cv := UI.vbox(0)
 	cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UI.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
+	var nm := UiText.label(Loot.name_of(it) + (("  ·  " + note) if note != "" else ""), 15, col, UI.semi)
 	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 	nm.clip_text = true
 	nm.custom_minimum_size.x = 200
 	cv.add_child(nm)
-	var sub := UI.label(Loot.sub_of(it), 12, MUTED)
+	var sub := UiText.label(Loot.sub_of(it), 12, MUTED)
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
 	sub.clip_text = true
 	sub.custom_minimum_size.x = 200
@@ -88,12 +88,12 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 	cv.add_child(sub)
 	row.add_child(cv)
 	row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
-	var vt := UI.label("%d" % Loot.value(it), 13, GOLD, UI.big)
+	var vt := UiText.label("%d" % Loot.value(it), 13, GOLD, UI.big)
 	vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(vt)
 	for bt in buttons:
 		var is_primary: bool = bt.size() > 2 and bt[2]
-		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if is_primary else UI.button(String(bt[0]), bt[1], 70)
+		var b: Button = UiWidgets.primary(String(bt[0]), bt[1], 76) if is_primary else UiWidgets.button(String(bt[0]), bt[1], 70)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)
 	return rp

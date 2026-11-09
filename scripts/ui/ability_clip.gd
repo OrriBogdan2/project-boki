@@ -101,13 +101,13 @@ func _ready() -> void:
 	add_child(v)
 	v.add_child(_stage())
 	var head := UI.hbox(6)
-	var key := UI.keycap(HunterViewer.key_for(slot), 11)
+	var key := UiWidgets.keycap(HunterViewer.key_for(slot), 11)
 	head.add_child(key)
-	var nm := UI.label(String(info["name"]), UI.T_BODY, col.lightened(0.25), UI.semi)
+	var nm := UiText.label(String(info["name"]), UI.T_BODY, col.lightened(0.25), UI.semi)
 	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(nm)
 	v.add_child(head)
-	var ln := UI.para(line_for(id, slot), 12, UI.MUTED)
+	var ln := UiText.para(line_for(id, slot), 12, UI.MUTED)
 	ln.custom_minimum_size = Vector2(stage_size.x, 0)
 	v.add_child(ln)
 	t = fmod(float(hash(id + slot) % 1000) / 1000.0 * LOOP_S, LOOP_S)     # clips side by side don't beat together
@@ -135,7 +135,7 @@ func _stage() -> Control:
 	_still = CenterContainer.new()
 	_still.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_still.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_still.add_child(UI.IconDot.new(String(info["icon"]), col, stage_size.y * 0.32))
+	_still.add_child(UiWidgets.IconDot.new(String(info["icon"]), col, stage_size.y * 0.32))
 	holder.add_child(_still)
 	holder.resized.connect(func(): _fit(holder))
 	return holder

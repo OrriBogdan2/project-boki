@@ -180,12 +180,12 @@ func _screens() -> void:
 	await main.get_tree().process_frame
 	var off_menu := _off_look(Overlay.root, ours)
 	ok("Esc menu: every box is the menu look", off_menu.is_empty(), str(off_menu))
-	var layer := UI.confirm(Overlay.root, "Leave?", "A test question.", "Leave", func(): pass)
+	var layer := UiShell.confirm(Overlay.root, "Leave?", "A test question.", "Leave", func(): pass)
 	await main.get_tree().process_frame
 	var with_badge := layer.find_children("*", "PanelContainer", true, false).size() >= 2
 	ok("confirm box: every box is the menu look, with its badge", _off_look(layer, ours).is_empty() and with_badge)
 	layer.queue_free()
-	UI.toast(Overlay.root, "Bramble Isle is open")
+	UiShell.toast(Overlay.root, "Bramble Isle is open")
 	await main.get_tree().process_frame
 	var toast_box: Control = MsgLane.of(Overlay.root).get_child(0)
 	var glass_ok := toast_box is PanelContainer and toast_box.get_theme_stylebox("panel") is UiFrame
@@ -194,14 +194,14 @@ func _screens() -> void:
 	var host := Control.new()
 	Overlay.root.add_child(host)
 	for t in ["Harvest ready", "Harvest ready", "Egg hatched", "A", "B", "C", "D", "E", "F", "G"]:
-		UI.toast(host, t)
+		UiShell.toast(host, t)
 	var lane := MsgLane.of(host)
 	ok("toast: a few at a time, repeats merged, the queue capped", lane.texts().size() == MsgLane.MAX_SHOWN
 		and lane.texts()[0] == "Harvest ready  x2" and lane.waiting() == MsgLane.WAIT_CAP)
 	host.queue_free()
 	var wide := Control.new()
 	Overlay.root.add_child(wide)
-	UI.toast(wide, "Pip, Moss and Fern heard you from the house and are on their way")
+	UiShell.toast(wide, "Pip, Moss and Fern heard you from the house and are on their way")
 	await main.get_tree().process_frame
 	var long_box := MsgLane.of(wide).get_child(0) as Control
 	ok("toast: a long line wraps at a sane width", long_box.size.y < 130.0 and long_box.size.x > 200.0)

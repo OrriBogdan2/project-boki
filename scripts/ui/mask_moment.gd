@@ -108,15 +108,15 @@ func _wait() -> void:
 	box.offset_top = -170
 	box.offset_bottom = -40
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var line := UI.title(TEXT, 24, UI.INK)
+	var line := UiText.title(TEXT, 24, UI.INK)
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	line.add_theme_constant_override("outline_size", 10)
 	line.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
 	box.add_child(line)
 	var row := UI.hbox(10)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_child(UI.keycap(Settings.key_cap("interact"), 16))
-	var b := UI.primary(BUTTON, put_on, 260)
+	row.add_child(UiWidgets.keycap(Settings.key_cap("interact"), 16))
+	var b := UiWidgets.primary(BUTTON, put_on, 260)
 	b.set_meta("put_on", true)
 	row.add_child(b)
 	box.add_child(row)
@@ -155,7 +155,7 @@ func _show_intro() -> void:
 	panel.set_meta("mask_intro", hunter_id)
 	var col := UI.vbox(12)
 	col.add_child(panel)
-	go_button = UI.primary(GO, _go, 260)
+	go_button = UiWidgets.primary(GO, _go, 260)
 	go_button.size_flags_horizontal = Control.SIZE_SHRINK_END
 	col.add_child(go_button)
 	var holder := MarginContainer.new()

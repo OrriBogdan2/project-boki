@@ -54,8 +54,8 @@ func open(which := "") -> void:
 	if not tabs().has(tab): tab = "Vendor"
 	var v: VBoxContainer = h._new_panel(PANEL, WIDTH, true)
 	UI.hold(v, HOLD_H)
-	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
-	UI.shell_tabs(v, tabs(), tab, func(t): open(t))
+	UiShell.head_extra(v).add_child(UiWidgets.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
+	UiShell.shell_tabs(v, tabs(), tab, func(t): open(t))
 	match tab:
 		"Vendor": _vendor(v)
 		"Exchange": _exchange(v)
@@ -73,7 +73,7 @@ func say(t: String, good := true) -> void:
 func show_note(v: VBoxContainer) -> void:
 	if note == "":
 		return
-	var nl := UI.label(note, 14, note_col)
+	var nl := UiText.label(note, 14, note_col)
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(nl)
 	note = ""
@@ -84,7 +84,7 @@ func _next_level(v: VBoxContainer) -> void:
 	if lv >= 3:
 		return
 	var nxt := String(Goods.rules()["stall"]["levels"][str(lv + 1)])
-	var l := UI.para("Upgrade the stall (build mode, Upgrades) and it opens: %s." % nxt, 12, UI.FAINT)
+	var l := UiText.para("Upgrade the stall (build mode, Upgrades) and it opens: %s." % nxt, 12, UI.FAINT)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(UI.spacer(4))
 	v.add_child(l)
@@ -94,23 +94,23 @@ func _next_level(v: VBoxContainer) -> void:
 ## section headers. Some only go on sale once you've made it out of enough expeditions or finished a
 ## challenge; wear and utility restock by rarity (Stalls.vendor_has).
 func _vendor(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
+	UiShell.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
 	var row := UI.hbox(6)
 	for t in VENDOR_TABS:
 		var tt: String = t
-		row.add_child(UI.choice(tt, vendor_tab == tt, func(): vendor_tab = tt; open(), 0))
+		row.add_child(UiWidgets.choice(tt, vendor_tab == tt, func(): vendor_tab = tt; open(), 0))
 	v.add_child(row)
 	if vendor_tab == "Sell":
 		_vendor_sell(v)
 		return
 	var sections := _vendor_sections().filter(func(s): return not (s[1] as Array).is_empty())
 	if sections.is_empty():
-		v.add_child(UI.empty_state("shop", "Nothing for sale", "Come back after your next expedition."))
+		v.add_child(UiWidgets.empty_state("shop", "Nothing for sale", "Come back after your next expedition."))
 	for sec in sections:
 		var goods: Array = sec[1]
 		goods.sort_custom(func(a, b): return int(Progress.unlocked(a[0])) > int(Progress.unlocked(b[0])))
 		if sections.size() > 1:
-			v.add_child(UI.section(String(sec[0])))
+			v.add_child(UiText.section(String(sec[0])))
 		var grid := GridContainer.new()
 		grid.columns = 2
 		grid.add_theme_constant_override("h_separation", 10)
@@ -221,22 +221,22 @@ func _vendor_card(g: Array) -> Control:
 	card.add_child(hr)
 	var icons := {"seed": "seed", "food": "heart", "tonic": "tonic", "acc": "paw", "furn": "home", "plots": "seed",
 		"coals": "dash", "incub_slot": "egg", "tool": "hammer"}
-	var sw := UI.badge("lock", UI.FAINT, 32.0, UI.R_CTRL)
-	if is_open: sw = UI.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0, UI.R_CTRL)
+	var sw := UiWidgets.badge("lock", UI.FAINT, 32.0, UI.R_CTRL)
+	if is_open: sw = UiWidgets.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0, UI.R_CTRL)
 	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(sw)
 	var nv := UI.vbox(0)
 	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var top := UI.hbox(6)
-	var nm := UI.label(String(g[1]), UI.T_BODY, UI.INK if is_open else UI.MUTED, UI.semi)
+	var nm := UiText.label(String(g[1]), UI.T_BODY, UI.INK if is_open else UI.MUTED, UI.semi)
 	nm.clip_text = true
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nm)
 	if is_open and String(g[6]) != "":
-		top.add_child(UI.label(String(g[6]), 12, UI.GOOD if String(g[6]) == "yours" else UI.MUTED))
+		top.add_child(UiText.label(String(g[6]), 12, UI.GOOD if String(g[6]) == "yours" else UI.MUTED))
 	nv.add_child(top)
-	var d := UI.label(Progress.req_text(key), 12, Color("ffb3a8"))
-	if is_open: d = UI.label(String(g[2]), 12, UI.MUTED)
+	var d := UiText.label(Progress.req_text(key), 12, Color("ffb3a8"))
+	if is_open: d = UiText.label(String(g[2]), 12, UI.MUTED)
 	d.autowrap_mode = TextServer.AUTOWRAP_OFF
 	d.clip_text = true
 	d.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -249,7 +249,7 @@ func _vendor_card(g: Array) -> Control:
 ## A price you press: gold on an outline, so a page of goods isn't a wall of orange. on_buy runs
 ## after the gems are taken.
 func price_tag(cost: int, on_buy: Callable) -> Button:
-	var b := UI.button(str(cost), func():
+	var b := UiWidgets.button(str(cost), func():
 		if int(Save.d["gems"]) < cost: return
 		Save.d["gems"] = int(Save.d["gems"]) - cost
 		on_buy.call()
@@ -277,11 +277,11 @@ func _vendor_sell(v: VBoxContainer) -> void:
 		var rc := UI.card(UI.CARD, 10, 12)
 		var row := UI.hbox(12)
 		rc.add_child(row)
-		row.add_child(UI.IconDot.new("seed", Data.CROPS[s]["color"], 22.0))
-		var l := UI.label("%s  ×%d" % [Data.CROPS[s]["name"], n], UI.T_BODY, UI.INK, UI.semi)
+		row.add_child(UiWidgets.IconDot.new("seed", Data.CROPS[s]["color"], 22.0))
+		var l := UiText.label("%s  ×%d" % [Data.CROPS[s]["name"], n], UI.T_BODY, UI.INK, UI.semi)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
-		row.add_child(UI.button("Sell 1  ·  %d" % gain, func():
+		row.add_child(UiWidgets.button("Sell 1  ·  %d" % gain, func():
 			if int(Save.d["crops"].get(sk, 0)) <= 0: return
 			Save.d["crops"][sk] = int(Save.d["crops"][sk]) - 1
 			Save.d["gems"] = int(Save.d["gems"]) + gain
@@ -292,18 +292,18 @@ func _vendor_sell(v: VBoxContainer) -> void:
 			open(), 140, "gem"))
 		v.add_child(rc)
 	if not sell_any:
-		v.add_child(UI.empty_state("seed", "Nothing to sell", "Harvest your plots first, then sell spare crops here."))
+		v.add_child(UiWidgets.empty_state("seed", "Nothing to sell", "Harvest your plots first, then sell spare crops here."))
 
 # ------------------------------------------------------------------ the Exchange
 func _exchange(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Tradewind Exchange: post a price for wood, stone, scrap, crops, food and tonics. "
+	UiShell.subtitle(v, "Tradewind Exchange: post a price for wood, stone, scrap, crops, food and tonics. "
 		+ "Offers match the best price first; each sale pays a %d%% tax." % int(Exchange.TAX * 100))
 	var tabs_row := HFlowContainer.new()
 	tabs_row.add_theme_constant_override("h_separation", 6)
 	tabs_row.add_theme_constant_override("v_separation", 6)
 	for it in Exchange.ORDER:
 		var ik: String = it
-		tabs_row.add_child(UI.choice("%s  %d" % [Exchange.name_of(it), Exchange.have(it)], item == it, func():
+		tabs_row.add_child(UiWidgets.choice("%s  %d" % [Exchange.name_of(it), Exchange.have(it)], item == it, func():
 			item = ik
 			price = 0
 			open(), 0))
@@ -313,31 +313,31 @@ func _exchange(v: VBoxContainer) -> void:
 	cols.add_child(_exchange_book())
 	cols.add_child(_exchange_offer())
 	if Exchange.BACKEND == "local":
-		v.add_child(UI.para("Offline: Tradewind's traders fill the other side. "
+		v.add_child(UiText.para("Offline: Tradewind's traders fill the other side. "
 			+ "With the online backend, every offer here is another player's.", 11, UI.FAINT))
 
 ## Left: the book and the price history.
 func _exchange_book() -> Control:
 	var left := UI.vbox(8)
 	left.custom_minimum_size = Vector2(400, 0)
-	left.add_child(UI.section("%s  ·  order book" % Exchange.name_of(item)))
+	left.add_child(UiText.section("%s  ·  order book" % Exchange.name_of(item)))
 	var bk := Exchange.book(item)
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 22)
 	grid.add_theme_constant_override("v_separation", 3)
 	for hd in ["Buying", "Price", "Price", "Selling"]:
-		grid.add_child(UI.label(hd, 12, UI.FAINT))
+		grid.add_child(UiText.label(hd, 12, UI.FAINT))
 	var n := maxi((bk["buys"] as Array).size(), (bk["sells"] as Array).size())
 	for i in mini(n, 6):
 		var b: Array = bk["buys"][i] if i < (bk["buys"] as Array).size() else []
 		var s: Array = bk["sells"][i] if i < (bk["sells"] as Array).size() else []
-		grid.add_child(UI.label(str(b[1]) if not b.is_empty() else "", 14, UI.INK))
-		grid.add_child(UI.label(str(b[0]) if not b.is_empty() else "", 14, UI.GOOD, UI.semi))
-		grid.add_child(UI.label(str(s[0]) if not s.is_empty() else "", 14, Color("ff9a8a"), UI.semi))
-		grid.add_child(UI.label(str(s[1]) if not s.is_empty() else "", 14, UI.INK))
+		grid.add_child(UiText.label(str(b[1]) if not b.is_empty() else "", 14, UI.INK))
+		grid.add_child(UiText.label(str(b[0]) if not b.is_empty() else "", 14, UI.GOOD, UI.semi))
+		grid.add_child(UiText.label(str(s[0]) if not s.is_empty() else "", 14, Color("ff9a8a"), UI.semi))
+		grid.add_child(UiText.label(str(s[1]) if not s.is_empty() else "", 14, UI.INK))
 	left.add_child(grid)
-	left.add_child(UI.section("Price history"))
+	left.add_child(UiText.section("Price history"))
 	left.add_child(PriceGraph.new(Exchange.history(item), Exchange.ref_price(item)))
 	return left
 
@@ -345,42 +345,42 @@ func _exchange_book() -> Control:
 func _exchange_offer() -> Control:
 	var right := UI.vbox(8)
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.add_child(UI.section("Your offer"))
+	right.add_child(UiText.section("Your offer"))
 	if price <= 0: price = Exchange.ref_price(item)
 	var bd := Exchange.band(item)
 	var qrow := UI.hbox(6)
-	qrow.add_child(UI.label("Amount", 13, UI.MUTED))
+	qrow.add_child(UiText.label("Amount", 13, UI.MUTED))
 	for dq in [-10, -1, 1, 10]:
 		var ddq: int = dq
-		qrow.add_child(UI.button(("%+d" % dq), func(): qty = clampi(qty + ddq, 1, 999); open(), 44))
-	qrow.add_child(UI.label(str(qty), 16, UI.INK, UI.semi))
+		qrow.add_child(UiWidgets.button(("%+d" % dq), func(): qty = clampi(qty + ddq, 1, 999); open(), 44))
+	qrow.add_child(UiText.label(str(qty), 16, UI.INK, UI.semi))
 	right.add_child(qrow)
 	var prow := UI.hbox(6)
-	prow.add_child(UI.label("Each", 13, UI.MUTED))
+	prow.add_child(UiText.label("Each", 13, UI.MUTED))
 	for dp in [-1, 1]:
 		var ddp: int = dp
-		prow.add_child(UI.button(("%+d" % dp), func(): price = clampi(price + ddp, bd.x, bd.y); open(), 44))
-	prow.add_child(UI.label("%d gems" % price, 16, UI.GOLD, UI.semi))
-	prow.add_child(UI.label("(%d-%d)" % [bd.x, bd.y], 12, UI.FAINT))
+		prow.add_child(UiWidgets.button(("%+d" % dp), func(): price = clampi(price + ddp, bd.x, bd.y); open(), 44))
+	prow.add_child(UiText.label("%d gems" % price, 16, UI.GOLD, UI.semi))
+	prow.add_child(UiText.label("(%d-%d)" % [bd.x, bd.y], 12, UI.FAINT))
 	right.add_child(prow)
 	var act := UI.hbox(8)
-	act.add_child(UI.primary("Buy %d for %d" % [qty, qty * price], func(): _post("buy"), 0, "gem"))
-	act.add_child(UI.button("Sell %d (have %d)" % [qty, Exchange.have(item)], func(): _post("sell"), 0, "gem"))
+	act.add_child(UiWidgets.primary("Buy %d for %d" % [qty, qty * price], func(): _post("buy"), 0, "gem"))
+	act.add_child(UiWidgets.button("Sell %d (have %d)" % [qty, Exchange.have(item)], func(): _post("sell"), 0, "gem"))
 	right.add_child(act)
 	show_note(right)
 	right.add_child(UI.spacer(2))
-	right.add_child(UI.section("Your open offers"))
+	right.add_child(UiText.section("Your open offers"))
 	var mine := Exchange.mine()
 	if mine.is_empty():
-		right.add_child(UI.para("None. An offer that doesn't match right away waits on the book (your gems or goods held) and fills while you're out on expeditions.", 12, UI.FAINT))
+		right.add_child(UiText.para("None. An offer that doesn't match right away waits on the book (your gems or goods held) and fills while you're out on expeditions.", 12, UI.FAINT))
 	for o in mine:
 		var oid := String(o["id"])
 		var r := UI.hbox(8)
-		var ol := UI.label("%s %d/%d %s at %d" % ["Buying" if o["side"] == "buy" else "Selling", int(o["qty"]) - int(o["left"]), int(o["qty"]),
+		var ol := UiText.label("%s %d/%d %s at %d" % ["Buying" if o["side"] == "buy" else "Selling", int(o["qty"]) - int(o["left"]), int(o["qty"]),
 			Exchange.name_of(String(o["item"])), int(o["price"])], 13, UI.INK)
 		ol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(ol)
-		r.add_child(UI.button("Cancel", func(): Exchange.cancel(oid); h._refresh_top(); open(), 80))
+		r.add_child(UiWidgets.button("Cancel", func(): Exchange.cancel(oid); h._refresh_top(); open(), 80))
 		right.add_child(r)
 	return right
 

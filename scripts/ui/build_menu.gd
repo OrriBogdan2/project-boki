@@ -19,14 +19,14 @@ static func open(host: Control, at: Vector2, title: String, entries: Array, colo
 	UI.set_card_border(card, Color(1, 1, 1, 0.14), 1)
 	var col := UI.vbox(6)
 	card.add_child(col)
-	col.add_child(UI.label(title, 16, UI.GOLD, UI.semi))
+	col.add_child(UiText.label(title, 16, UI.GOLD, UI.semi))
 	for entry in entries:
 		var cb: Callable = entry["cb"]
-		var b := UI.button(String(entry["label"]), func():
+		var b := UiWidgets.button(String(entry["label"]), func():
 			menu.close()
 			cb.call(), 190)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		col.add_child(UI.with_key(b, String(entry["key"])) if String(entry.get("key", "")) != "" else b)
+		col.add_child(UiWidgets.with_key(b, String(entry["key"])) if String(entry.get("key", "")) != "" else b)
 	if not colours.is_empty():
 		var swatches := UI.hbox(5)
 		for hex in colours:

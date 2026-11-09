@@ -132,7 +132,7 @@ func _build_ui() -> void:
 	memory.visible = false
 	white = _cover(Color(1, 1, 1, 0))
 	ui.add_child(white)
-	whisper_line = UI.label("", 26, Color(0.92, 0.9, 0.98), UI.semi)
+	whisper_line = UiText.label("", 26, Color(0.92, 0.9, 0.98), UI.semi)
 	whisper_line.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	whisper_line.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	whisper_line.offset_top = -120
@@ -143,7 +143,7 @@ func _build_ui() -> void:
 	ui.add_child(whisper_line)
 	if seen():
 		var key := Settings.key_cap("interact")
-		skip_hint = UI.label("%s  Skip" % key, 13, Color(1, 1, 1, 0.55))
+		skip_hint = UiText.label("%s  Skip" % key, 13, Color(1, 1, 1, 0.55))
 		skip_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 		skip_hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		skip_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -365,7 +365,7 @@ func _show_name() -> void:
 	name_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	name_box.offset_top = -170
 	name_box.set_meta("mask_name", id)
-	var nm := UI.title(HunterViewer.display_name(id), 46, Arch.color(id).lightened(0.15))
+	var nm := UiText.title(HunterViewer.display_name(id), 46, Arch.color(id).lightened(0.15))
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.add_theme_constant_override("outline_size", 12)
 	nm.add_theme_color_override("font_outline_color", Color(0.03, 0.02, 0.06))

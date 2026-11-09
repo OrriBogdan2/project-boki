@@ -35,7 +35,7 @@ How a GDScript literal is classified:
   4. Literals in a key position are keys: a dict key or match pattern ("Kin":), compared with
      == / != / in, a subscript ["..."], the first argument of get()/has()/erase()/..., a
      StringName (&"") or NodePath (^""), a node name (x.name = "..."), or a tab-id list given
-     to UI.tabs()/UI.shell_tabs().
+     to UiWidgets.tabs()/UiShell.shell_tabs().
   5. A display literal whose exact text also appears in a key position anywhere in the game's
      scripts is FROZEN: it's an id that doubles as a label (tab names, panel titles that code
      compares). Frozen texts are left as they are in code, so every comparison still matches,
@@ -624,7 +624,7 @@ class Run:
                 'msgid ""', 'msgstr ""', '"Content-Type: text/plain; charset=UTF-8\\n"', '"Language: en\\n"', '']
         for text in sorted(self.keys):
             body += ['msgid "%s"' % text, 'msgstr "%s"' % rewrite_words(text), '']
-            if text.upper() != text:   # UI.section() and friends upper-case their text
+            if text.upper() != text:   # UiText.section() and friends upper-case their text
                 body += ['msgid "%s"' % text.upper(), 'msgstr "%s"' % rewrite_words(text).upper(), '']
         new = "\n".join(body)
         p = os.path.join(self.root, rel)

@@ -274,12 +274,12 @@ func _build_ui() -> void:
 	top.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	top.position.y = 36
 	top_box = top
-	title = UI.title("Choose your first Boki", 40, UI.ACCENT)
+	title = UiText.title("Choose your first Boki", 40, UI.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_constant_override("outline_size", 12)
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.85))
 	top.add_child(title)
-	var sub := UI.label("Every Boki is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
+	var sub := UiText.label("Every Boki is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub_lbl = sub
@@ -311,14 +311,14 @@ func _show_card() -> void:
 	card_box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	card_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var line := UI.title(CARD_TEXT, 30, UI.INK)
+	var line := UiText.title(CARD_TEXT, 30, UI.INK)
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	line.custom_minimum_size.x = 640
 	line.add_theme_constant_override("outline_size", 10)
 	line.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
 	card_box.add_child(line)
-	var go := UI.primary(CARD_BUTTON, _end_intro, 260)
+	var go := UiWidgets.primary(CARD_BUTTON, _end_intro, 260)
 	go.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	card_box.add_child(go)
 	root_ui.add_child(card_box)
@@ -400,17 +400,17 @@ func _show_create() -> void:
 	for r in Unmasked.ROWS.size():
 		var row: Array = Unmasked.ROWS[r]
 		if r == 0 or r == Unmasked.HOLLOW_ROW:
-			v.add_child(UI.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
+			v.add_child(UiText.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
 		var key: String = row[0]
 		var opts: Array = row[2]
 		var hr := UI.hbox(8)
-		var l := UI.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
+		var l := UiText.label(row[1], UI.T_BODY, UI.MUTED); l.custom_minimum_size.x = 120
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		if row.size() > 3:
 			l.tooltip_text = row[3]
 			l.mouse_filter = Control.MOUSE_FILTER_STOP
 		hr.add_child(l)
-		hr.add_child(UI.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
+		hr.add_child(UiWidgets.icon_button("back", func(): _step_look(key, -1, opts.size()), "Previous", 12.0))
 		var i := int(look[key])
 		if opts[0] is Color:
 			var sw := Panel.new(); sw.custom_minimum_size = Vector2(170, 26)
@@ -418,14 +418,14 @@ func _show_create() -> void:
 			sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			hr.add_child(sw)
 		else:
-			var val := UI.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
+			var val := UiText.label(String(opts[i]), UI.T_BODY, UI.INK, UI.semi); val.custom_minimum_size.x = 170
 			val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			hr.add_child(val)
-		hr.add_child(UI.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
+		hr.add_child(UiWidgets.icon_button("next", func(): _step_look(key, 1, opts.size()), "Next", 12.0))
 		v.add_child(hr)
 	var nr := UI.hbox(8)
-	var nl := UI.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UiText.label("Your name", UI.T_BODY, UI.MUTED); nl.custom_minimum_size.x = 120
 	nr.add_child(nl)
 	var ne := LineEdit.new(); ne.text = Save.d.get("name", "Hunter"); ne.max_length = 16; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ne.text_changed.connect(func(t): Save.d["name"] = t.strip_edges() if t.strip_edges() != "" else "Hunter")
@@ -433,10 +433,10 @@ func _show_create() -> void:
 	v.add_child(nr)
 	var br := UI.hbox(10)
 	br.alignment = BoxContainer.ALIGNMENT_END
-	br.add_child(UI.ghost("Random", func():
+	br.add_child(UiWidgets.ghost("Random", func():
 		look = Unmasked.random_look()
 		_show_create(), 120, "swap"))
-	br.add_child(UI.primary("Looks good", _looks_good, 200))
+	br.add_child(UiWidgets.primary("Looks good", _looks_good, 200))
 	v.add_child(br)
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
@@ -501,16 +501,16 @@ func _show_pick() -> void:
 		var ecol: Color = Color("c4bcd6") if mystery else Data.KIN[d["species"]]["color"]
 		while ecol.get_luminance() < 0.55:
 			ecol = ecol.lerp(Color.WHITE, 0.2)     # dark shells still need a readable name
-		var tt := UI.title(d["name"], 22, ecol); tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var tt := UiText.title(d["name"], 22, ecol); tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hr.add_child(tt)
-		hr.add_child(UI.section(d["temper"], ecol))
+		hr.add_child(UiText.section(d["temper"], ecol))
 		v.add_child(hr)
-		var dl := UI.label(d["desc"], 14, UI.MUTED)
+		var dl := UiText.label(d["desc"], 14, UI.MUTED)
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(dl)
 		if i == chosen:
-			var pl := UI.label(d["play"], 13, UI.INK)
+			var pl := UiText.label(d["play"], 13, UI.INK)
 			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			v.add_child(pl)
 		var ii := i
@@ -518,7 +518,7 @@ func _show_pick() -> void:
 		var push := Control.new()
 		push.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		v.add_child(push)
-		var pb: Button = (UI.primary if i == chosen else UI.button).call("This one" if i != chosen else "Hatch it", func(): _pick(ii))
+		var pb: Button = (UiWidgets.primary if i == chosen else UiWidgets.button).call("This one" if i != chosen else "Hatch it", func(): _pick(ii))
 		pb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(pb)
 		row.add_child(card)
@@ -575,14 +575,14 @@ func _start_hatch() -> void:
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
+	var l := UiText.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
 	warm_bar.draw.connect(func():
 		var warm := Color("ff9a5a").lerp(Color("ffd36a"), snappedf(warmth, 0.05))
-		UI.draw_bar(warm_bar, Rect2(Vector2.ZERO, warm_bar.size), warmth, warm, Color(0, 0, 0, 0.45), 8))
+		UiWidgets.draw_bar(warm_bar, Rect2(Vector2.ZERO, warm_bar.size), warmth, warm, Color(0, 0, 0, 0.45), 8))
 	v.add_child(warm_bar)
 	bottom.add_child(card)
 	Sfx.play("whoosh")
@@ -680,12 +680,12 @@ func _show_name() -> void:
 	var scol: Color = sp["color"]
 	while scol.get_luminance() < 0.55:
 		scol = scol.lerp(Color.WHITE, 0.2)
-	v.add_child(UI.section("A new Boki", scol))
-	v.add_child(UI.title("Name your %s" % sp["name"], 34))
-	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
-	v.add_child(UI.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
+	v.add_child(UiText.section("A new Boki", scol))
+	v.add_child(UiText.title("Name your %s" % sp["name"], 34))
+	v.add_child(UiText.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
+	v.add_child(UiText.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UiText.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
 	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(ne)
@@ -694,26 +694,26 @@ func _show_name() -> void:
 	var picks := UI.hbox(6)
 	var fill_picks := func(self_ref: Callable) -> void:
 		for ch in picks.get_children(): ch.queue_free()
-		var il := UI.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		var il := UiText.label("Ideas", 13, UI.MUTED); il.custom_minimum_size.x = 120; il.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		picks.add_child(il)
 		var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
 		for nm in pool.slice(0, 4):
 			var n2: String = nm
-			picks.add_child(UI.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
-		var more := UI.button("More", func(): self_ref.call(self_ref))
+			picks.add_child(UiWidgets.button(n2, func(): ne.text = n2; ne.caret_column = n2.length()))
+		var more := UiWidgets.button("More", func(): self_ref.call(self_ref))
 		more.flat = true
 		picks.add_child(more)
 	fill_picks.call(fill_picks)
 	v.add_child(picks)
 	var you_row := UI.hbox(8)
-	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
+	var yl := UiText.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = 120
 	you_row.add_child(yl)
 	var ye := LineEdit.new(); ye.text = Save.d.get("name", "Hunter"); ye.max_length = 16; ye.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(10)
-	btns.add_child(UI.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
-	var skip := UI.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
+	btns.add_child(UiWidgets.primary("Head out together", func(): _finish(sp_id, ne.text, ye.text, true), 240))
+	var skip := UiWidgets.button("Skip the tutorial", func(): _finish(sp_id, ne.text, ye.text, false), 180)
 	skip.flat = true
 	btns.add_child(skip)
 	v.add_child(btns)

@@ -29,7 +29,7 @@ static func build(parent: Control, on_pick: Callable, on_kit: Callable, on_hover
 static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, on_hover: Callable, gated: bool, on_locked: Callable) -> PanelContainer:
 	var open := unlocked(ak)
 	var can := open or not gated        # (can it be picked here)
-	var card := UI.tile_card(ak == cur, func():
+	var card := UiWidgets.tile_card(ak == cur, func():
 		if can: on_pick.call(ak)
 		elif on_locked.is_valid(): on_locked.call(ak), 10, Arch.color(ak))
 	card.custom_minimum_size = Vector2(CARD_W, 0)
@@ -39,16 +39,16 @@ static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, 
 	var col := UI.vbox(2); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(col)
-	col.add_child(UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if can else UI.FAINT, UI.big))
-	col.add_child(UI.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
+	col.add_child(UiText.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if can else UI.FAINT, UI.big))
+	col.add_child(UiText.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
 	if ak == cur:
-		col.add_child(UI.label("Playing", 12, UI.GOOD, UI.semi))
+		col.add_child(UiText.label("Playing", 12, UI.GOOD, UI.semi))
 	elif not open and gated:
-		col.add_child(UI.label("Locked", 12, UI.FAINT, UI.semi))
+		col.add_child(UiText.label("Locked", 12, UI.FAINT, UI.semi))
 		col.add_child(ClassCard.challenge_block(ak, 150.0))
 	elif not open:
-		col.add_child(UI.label("Try only: not open for expeditions yet", 12, ClassCard.GOAL_COL, UI.semi))
-	var kitb := UI.ghost("Kit (K)", func(): on_kit.call(ak), 0)
+		col.add_child(UiText.label("Try only: not open for expeditions yet", 12, ClassCard.GOAL_COL, UI.semi))
+	var kitb := UiWidgets.ghost("Kit (K)", func(): on_kit.call(ak), 0)
 	kitb.focus_mode = Control.FOCUS_NONE
 	col.add_child(kitb)
 	card.tooltip_text = ClassCard.kit_tip(ak)

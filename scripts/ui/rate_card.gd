@@ -14,7 +14,7 @@ static func gate(host: Control, then: Callable) -> void:
 
 static func open(host: Control, then: Callable) -> Control:
 	var scores := {}
-	var layer := UI.Modal.new()
+	var layer := UiShell.Modal.new()
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	var dim := ColorRect.new()
@@ -24,13 +24,13 @@ static func open(host: Control, then: Callable) -> Control:
 	var cc := CenterContainer.new()
 	cc.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(cc)
-	var p := UI.sheet(560)
+	var p := UiShell.sheet(560)
 	cc.add_child(p)
 	var v := UI.vbox(UI.GAP)
 	p.add_child(v)
-	v.add_child(UI.title("Rate this build", 24))
+	v.add_child(UiText.title("Rate this build", 24))
 	var intro := "Version %s. One tap per row, 1 is poor and 10 is great. Skipping is fine." % Net.VERSION
-	v.add_child(UI.para(intro, UI.T_BODY, UI.MUTED))
+	v.add_child(UiText.para(intro, UI.T_BODY, UI.MUTED))
 	var note := LineEdit.new()
 	var finished := [false]
 	var close := func(sent: bool) -> void:
@@ -42,10 +42,10 @@ static func open(host: Control, then: Callable) -> Control:
 			Feedback.submit(host, scores, note.text)
 		layer.queue_free()
 		then.call()
-	var send := UI.primary("Send", close.bind(true))
+	var send := UiWidgets.primary("Send", close.bind(true))
 	send.disabled = true
 	for row in ROWS:
-		v.add_child(UI.label(String(row[1]), UI.T_BODY, UI.INK, UI.semi))
+		v.add_child(UiText.label(String(row[1]), UI.T_BODY, UI.INK, UI.semi))
 		var line := UI.hbox(4)
 		var group := ButtonGroup.new()
 		for n in range(1, 11):
@@ -65,7 +65,7 @@ static func open(host: Control, then: Callable) -> Control:
 	v.add_child(note)
 	var buttons := UI.hbox(10)
 	buttons.alignment = BoxContainer.ALIGNMENT_END
-	buttons.add_child(UI.ghost("Skip", close.bind(false)))
+	buttons.add_child(UiWidgets.ghost("Skip", close.bind(false)))
 	buttons.add_child(send)
 	v.add_child(buttons)
 	layer.tree_exiting.connect(close.bind(false))   # Esc skips too

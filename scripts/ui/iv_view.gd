@@ -102,12 +102,12 @@ static func iv_bar(v: int, col: Color, w := 120.0, h := 8.0, flip := false) -> C
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.draw.connect(func():
 		var r := int(minf(c.size.y * 0.5, 4.0))
-		c.draw_style_box(UI.bar_box(TRACK, r), Rect2(Vector2.ZERO, c.size))
+		c.draw_style_box(UiWidgets.bar_box(TRACK, r), Rect2(Vector2.ZERO, c.size))
 		var fw := c.size.x * clampf(float(v) / 31.0, 0.0, 1.0)
 		if fw > 1.0:
 			var bw := maxf(fw, r * 2.0)
 			var fill := Rect2(Vector2(c.size.x - bw if flip else 0.0, 0), Vector2(bw, c.size.y))
-			c.draw_style_box(UI.bar_box(col, r), fill)
+			c.draw_style_box(UiWidgets.bar_box(col, r), fill)
 			if v >= 31:
 				c.draw_rect(fill.grow(-0.5), UI.GOLD, false, 1.0)
 		# faint marks at the judge's steps (16 pretty good, 26 very good)
@@ -126,19 +126,19 @@ static func rows(rec: Dictionary, words := true, name_w := 62.0, bar_w := 110.0)
 		var r := UI.hbox(8)
 		r.mouse_filter = Control.MOUSE_FILTER_PASS
 		r.tooltip_text = tip(k, iv)
-		var nl := UI.label(String(Care.IVS[k]["name"]), UI.T_SMALL, UI.MUTED)
+		var nl := UiText.label(String(Care.IVS[k]["name"]), UI.T_SMALL, UI.MUTED)
 		nl.custom_minimum_size.x = name_w
 		nl.mouse_filter = Control.MOUSE_FILTER_PASS
 		r.add_child(nl)
 		var b := iv_bar(iv, Care.IVS[k]["col"], bar_w, 8)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(b)
-		var nv := UI.label(str(iv), UI.T_SMALL, word_col(iv), UI.semi)
+		var nv := UiText.label(str(iv), UI.T_SMALL, word_col(iv), UI.semi)
 		nv.custom_minimum_size.x = 22
 		nv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		r.add_child(nv)
 		if words:
-			var wl := UI.label(Care.iv_word(iv), 12, word_col(iv))
+			var wl := UiText.label(Care.iv_word(iv), 12, word_col(iv))
 			wl.custom_minimum_size.x = 74
 			r.add_child(wl)
 		v.add_child(r)
@@ -155,16 +155,16 @@ static func cells(rec: Dictionary) -> HBoxContainer:
 		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		c.mouse_filter = Control.MOUSE_FILTER_PASS
 		c.tooltip_text = tip(k, iv)
-		var nl := UI.label(String(Care.IVS[k]["name"]), 12, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.35))
+		var nl := UiText.label(String(Care.IVS[k]["name"]), 12, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.35))
 		nl.mouse_filter = Control.MOUSE_FILTER_PASS
 		c.add_child(nl)
-		var nv := UI.label(str(iv), UI.T_HEAD, word_col(iv), UI.big)
+		var nv := UiText.label(str(iv), UI.T_HEAD, word_col(iv), UI.big)
 		nv.mouse_filter = Control.MOUSE_FILTER_PASS
 		c.add_child(nv)
 		var b := iv_bar(iv, Care.IVS[k]["col"], 56, 5)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		c.add_child(b)
-		var wl := UI.label(Care.iv_word(iv), 11, word_col(iv))
+		var wl := UiText.label(Care.iv_word(iv), 11, word_col(iv))
 		wl.mouse_filter = Control.MOUSE_FILTER_PASS
 		c.add_child(wl)
 		h.add_child(c)
@@ -179,15 +179,15 @@ static func word_list(rec: Dictionary) -> VBoxContainer:
 		var r := UI.hbox(6)
 		r.mouse_filter = Control.MOUSE_FILTER_PASS
 		r.tooltip_text = tip(k, iv)
-		var nl := UI.label(String(Care.IVS[k]["name"]), UI.T_SMALL, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.35))
+		var nl := UiText.label(String(Care.IVS[k]["name"]), UI.T_SMALL, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.35))
 		nl.custom_minimum_size.x = 52
 		nl.mouse_filter = Control.MOUSE_FILTER_PASS
 		r.add_child(nl)
-		var nv := UI.label(str(iv), UI.T_SMALL, word_col(iv), UI.semi)
+		var nv := UiText.label(str(iv), UI.T_SMALL, word_col(iv), UI.semi)
 		nv.custom_minimum_size.x = 22
 		nv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		r.add_child(nv)
-		r.add_child(UI.label(Care.iv_word(iv), UI.T_SMALL, word_col(iv)))
+		r.add_child(UiText.label(Care.iv_word(iv), UI.T_SMALL, word_col(iv)))
 		v.add_child(r)
 	return v
 
@@ -195,14 +195,14 @@ static func word_list(rec: Dictionary) -> VBoxContainer:
 static func grade_line(rec: Dictionary, size := UI.T_SMALL) -> HBoxContainer:
 	var h := UI.hbox(8)
 	var g := Care.iv_grade(rec)
-	h.add_child(UI.tag(String(g[0]), grade_col(rec)))
-	var tl := UI.label("%d / 155" % Care.iv_total(rec), size, UI.MUTED, UI.semi)
+	h.add_child(UiWidgets.tag(String(g[0]), grade_col(rec)))
+	var tl := UiText.label("%d / 155" % Care.iv_total(rec), size, UI.MUTED, UI.semi)
 	h.add_child(tl)
 	return h
 
 ## The heading for an IV block, with the explainer as its tooltip.
 static func heading(col := UI.FAINT.lightened(0.2)) -> Control:
-	var s := UI.section("Inborn  ·  IVs", col)
+	var s := UiText.section("Inborn  ·  IVs", col)
 	s.tooltip_text = Care.IV_EXPLAIN
 	s.mouse_filter = Control.MOUSE_FILTER_PASS
 	return s
@@ -213,7 +213,7 @@ static var _shown_now := false
 static func first_view_line(parent: Control) -> void:
 	if Save.d.get("tutorial", {}).get("ivs_seen", false) and not _shown_now:
 		return
-	var l := UI.para(Care.IV_EXPLAIN, 12, UI.ACCENT_HI)
+	var l := UiText.para(Care.IV_EXPLAIN, 12, UI.ACCENT_HI)
 	parent.add_child(l)
 	_shown_now = true
 	if Save.d.has("tutorial"): Save.d["tutorial"]["ivs_seen"] = true
@@ -233,7 +233,7 @@ static func mini(rec: Dictionary, h := 20.0, show_total := true) -> HBoxContaine
 	var strip := Mini.new(Care.ivs(rec), h)
 	row.add_child(strip)
 	if show_total:
-		var tl := UI.label("IVs %d/155  ·  %s" % [Care.iv_total(rec), Care.iv_grade(rec)[0]], 12, grade_col(rec), UI.semi)
+		var tl := UiText.label("IVs %d/155  ·  %s" % [Care.iv_total(rec), Care.iv_grade(rec)[0]], 12, grade_col(rec), UI.semi)
 		tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(tl)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -267,42 +267,42 @@ static func compare(a: Dictionary, b: Dictionary, bar_w := 120.0) -> VBoxContain
 	var ca: Color = Shiny.body(a).lerp(UI.INK, 0.3)
 	var cb: Color = Shiny.body(b).lerp(UI.INK, 0.3)
 	var hd := UI.hbox(8)
-	var an := UI.label(String(a["name"]), UI.T_SMALL, ca, UI.semi); an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var an := UiText.label(String(a["name"]), UI.T_SMALL, ca, UI.semi); an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	an.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hd.add_child(an)
-	var mid := UI.label("", 12, UI.MUTED); mid.custom_minimum_size.x = 64
+	var mid := UiText.label("", 12, UI.MUTED); mid.custom_minimum_size.x = 64
 	hd.add_child(mid)
-	var bn := UI.label(String(b["name"]), UI.T_SMALL, cb, UI.semi); bn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var bn := UiText.label(String(b["name"]), UI.T_SMALL, cb, UI.semi); bn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hd.add_child(bn)
 	v.add_child(hd)
 	for k in Care.IV_KEYS:
 		var x := int(va[k]); var y := int(vb[k])
 		var r := UI.hbox(8)
-		var xl := UI.label(str(x), UI.T_SMALL, word_col(x), UI.semi); xl.custom_minimum_size.x = 22
+		var xl := UiText.label(str(x), UI.T_SMALL, word_col(x), UI.semi); xl.custom_minimum_size.x = 22
 		xl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		r.add_child(xl)
 		var ba := iv_bar(x, Color(Care.IVS[k]["col"], 1.0 if x >= y else 0.45), bar_w, 8, true)     # grows toward the middle
 		ba.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(ba)
-		var nm := UI.label(String(Care.IVS[k]["name"]), 12, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.3))
+		var nm := UiText.label(String(Care.IVS[k]["name"]), 12, Color(Care.IVS[k]["col"]).lerp(UI.INK, 0.3))
 		nm.custom_minimum_size.x = 64
 		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		r.add_child(nm)
 		var bb := iv_bar(y, Color(Care.IVS[k]["col"], 1.0 if y >= x else 0.45), bar_w, 8)
 		bb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		r.add_child(bb)
-		var yl := UI.label(str(y), UI.T_SMALL, word_col(y), UI.semi); yl.custom_minimum_size.x = 22
+		var yl := UiText.label(str(y), UI.T_SMALL, word_col(y), UI.semi); yl.custom_minimum_size.x = 22
 		r.add_child(yl)
 		r.tooltip_text = "%s: %s %d, %s %d. An egg takes this from one of them %d%% of the time (either parent equally), otherwise it's a fresh roll." % [Care.IVS[k]["name"], a["name"], x, b["name"], y, int(round(100.0 * Care.IV_INHERIT / Care.IV_KEYS.size()))]
 		r.mouse_filter = Control.MOUSE_FILTER_PASS
 		v.add_child(r)
 	var tr := UI.hbox(8)
-	var ta := UI.label("%d" % Care.iv_total(a), UI.T_SMALL, grade_col(a), UI.semi); ta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var ta := UiText.label("%d" % Care.iv_total(a), UI.T_SMALL, grade_col(a), UI.semi); ta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ta.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	tr.add_child(ta)
-	var tm := UI.label("Total", 12, UI.MUTED); tm.custom_minimum_size.x = 64; tm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var tm := UiText.label("Total", 12, UI.MUTED); tm.custom_minimum_size.x = 64; tm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	tr.add_child(tm)
-	var tb := UI.label("%d" % Care.iv_total(b), UI.T_SMALL, grade_col(b), UI.semi); tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var tb := UiText.label("%d" % Care.iv_total(b), UI.T_SMALL, grade_col(b), UI.semi); tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tr.add_child(tb)
 	v.add_child(tr)
 	return v
@@ -319,9 +319,9 @@ static func pass_on(a: Dictionary, b: Dictionary) -> VBoxContainer:
 		if m >= 26: best.append("%s %d" % [Care.IVS[k]["name"], m])
 		if m > top_v: top_v = m; top_k = k
 	var pct := int(round(100.0 * Care.IV_INHERIT / Care.IV_KEYS.size()))
-	v.add_child(UI.para("An egg takes %d of these 5 from its parents (each from either one) and rolls %d fresh: every stat has a %d%% chance to come from them." % [Care.IV_INHERIT, Care.IV_KEYS.size() - Care.IV_INHERIT, pct], 12, UI.MUTED))
+	v.add_child(UiText.para("An egg takes %d of these 5 from its parents (each from either one) and rolls %d fresh: every stat has a %d%% chance to come from them." % [Care.IV_INHERIT, Care.IV_KEYS.size() - Care.IV_INHERIT, pct], 12, UI.MUTED))
 	if not best.is_empty():
-		v.add_child(UI.para("Could pass on: %s." % ", ".join(best), 12, UI.GOOD))
+		v.add_child(UiText.para("Could pass on: %s." % ", ".join(best), 12, UI.GOOD))
 	else:
-		v.add_child(UI.para("Could pass on at best: %s %d." % [Care.IVS[top_k]["name"], top_v], 12, UI.INK))
+		v.add_child(UiText.para("Could pass on at best: %s %d." % [Care.IVS[top_k]["name"], top_v], 12, UI.INK))
 	return v

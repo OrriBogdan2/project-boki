@@ -129,7 +129,7 @@ func shot_demo(which: PackedStringArray) -> void:
 				PracticeHero.open(Practice.of(psc))      # the Hunters picker (class titles)
 		"confirm":
 			open_pause(ctx)
-			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
+			UiShell.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
 				"Leave", close)
 		"tooltip":
 			tab = "Controls"
@@ -170,7 +170,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 		var s = Game.main.screen_node()
 		if s and s.has_method("on_menu_opened"):
 			s.on_menu_opened()
-	var pb := UI.scroll_panel(title_txt, width, back, "Back" if stack.size() > 0 else "Close", scroll)
+	var pb := UiShell.scroll_panel(title_txt, width, back, "Back" if stack.size() > 0 else "Close", scroll)
 	host.add_child(pb[0])
 	if not same:
 		UI.pop_in(pb[0])
@@ -209,13 +209,13 @@ func open_pause(where: String) -> void:
 	stack.clear()
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
-	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
+	UiShell.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
 	var bw := 388.0
 	var item := func(txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
-		var b := UI.button(txt, cb, bw, icon)
+		var b := UiWidgets.button(txt, cb, bw, icon)
 		if tier != "": b.theme_type_variation = tier
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		if key != "": UI.with_key(b, key)
+		if key != "": UiWidgets.with_key(b, key)
 		v.add_child(b)
 		return b
 	var res: Button = item.call("Resume", "next", close, "Esc", "Primary")
@@ -239,17 +239,17 @@ func open_pause(where: String) -> void:
 	var minor := HFlowContainer.new()
 	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
 	if where == "home":
-		minor.add_child(UI.ghost("Change your look", func():
+		minor.add_child(UiWidgets.ghost("Change your look", func():
 			close()
 			Game.goto("hatch", {"create": true})))
 	var scr = Game.main.screen_node() if Game.main else null
 	if scr and scr.has_method("unstick"):
-		minor.add_child(UI.ghost("I'm stuck", func():
+		minor.add_child(UiWidgets.ghost("I'm stuck", func():
 			close()
 			scr.unstick()
 			Sfx.play("whoosh")))
 	if admin_allowed():
-		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
+		minor.add_child(UiWidgets.ghost("Admin tools  (F1)", open_admin))
 	if minor.get_child_count() > 0:
 		v.add_child(minor)
 	v.add_child(UI.spacer(2))
@@ -263,7 +263,7 @@ func open_pause(where: String) -> void:
 			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = item.call("Leave match", "back", func():
-				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
+				UiShell.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
 		item.call("Save and go to the main menu", "home", func():
@@ -283,7 +283,7 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
-	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
+	UiShell.shell_tabs(v, SETTINGS_TABS, tab, func(t):
 		tab = t
 		_show_settings())
 	match tab:
@@ -294,12 +294,12 @@ func _show_settings() -> void:
 		"Video": _tab_video(v)
 		"Accessibility": _tab_access(v)
 		"Demo": _tab_demo(v)
-	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", func():
-		UI.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
+	UiShell.footer_left(v).add_child(UiWidgets.ghost("Reset to defaults", func():
+		UiShell.confirm(root, "Reset every setting?", "Volume, video, gameplay and every key binding go back to how the game ships.", "Reset", func():
 			Settings.reset_all()
 			_show_settings())))
-	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
-	UI.footer(v).add_child(done)
+	var done := UiWidgets.with_key(UiWidgets.primary("Done", back, 120), "Esc")
+	UiShell.footer(v).add_child(done)
 	(v.get_meta("shell") as Control).set_meta("primary", done)
 
 func _tab_gameplay(v: VBoxContainer) -> void:
@@ -331,7 +331,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
-	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
+	UiShell.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
@@ -473,7 +473,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 func _group(v: VBoxContainer, txt: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(4))
-	v.add_child(UI.section(txt, UI.FAINT.lightened(0.2)))
+	v.add_child(UiText.section(txt, UI.FAINT.lightened(0.2)))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
@@ -482,9 +482,9 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	lc.add_child(UI.label(label_txt, UI.T_BODY, UI.INK, UI.semi))
+	lc.add_child(UiText.label(label_txt, UI.T_BODY, UI.INK, UI.semi))
 	if hint != "":
-		lc.add_child(UI.para(hint, UI.T_SMALL - 1, UI.MUTED))
+		lc.add_child(UiText.para(hint, UI.T_SMALL - 1, UI.MUTED))
 	r.add_child(lc)
 	v.add_child(r)
 	return r
@@ -497,7 +497,7 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		var cell := UI.hbox(2)
 		cell.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var code: String = sl[slot]
-		var b := UI.button(_bind_text(code, slot), Callable(), 132)
+		var b := UiWidgets.button(_bind_text(code, slot), Callable(), 132)
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
@@ -508,7 +508,7 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 			b.theme_type_variation = "Chosen"
 			listen_lbl = null)
 		cell.add_child(b)
-		var x := UI.ghost("x", func():
+		var x := UiWidgets.ghost("x", func():
 			Settings.clear_bind(an, slot)
 			_show_settings())
 		x.custom_minimum_size.x = 26
@@ -532,7 +532,7 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 	sl.value = float(Settings.get_v(key))
 	sl.custom_minimum_size.x = 228
 	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var pct := UI.label("%d%%" % int(round(sl.value * 100.0)), UI.T_SMALL, UI.MUTED, UI.semi)
+	var pct := UiText.label("%d%%" % int(round(sl.value * 100.0)), UI.T_SMALL, UI.MUTED, UI.semi)
 	pct.custom_minimum_size.x = 44
 	pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	if key == "ui_scale":
@@ -560,7 +560,7 @@ func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> vo
 
 ## A quiet line of fine print under a group.
 func _note(v: VBoxContainer, txt: String) -> void:
-	v.add_child(UI.para(txt, UI.T_SMALL, UI.MUTED))
+	v.add_child(UiText.para(txt, UI.T_SMALL, UI.MUTED))
 
 func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable(), hint := "") -> void:
 	var r := _row(v, label_txt, hint)
@@ -596,12 +596,12 @@ func _finish_rebind(ev: InputEvent) -> void:
 	var oname := "\"%s\"" % named.get(other, other)
 	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
 	_show_settings()
-	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
+	var layer := UiShell.confirm(root, "Key already in use", txt, "Swap", func():
 		Settings.swap_bind(an, slot, ev, other, oslot)
 		_show_settings(), false)
 	set_meta("bind_conflict", layer)
 	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
-	var both := UI.ghost("Use for both", func():
+	var both := UiWidgets.ghost("Use for both", func():
 		layer.queue_free()
 		Settings.rebind(an, ev, slot)
 		_show_settings())
@@ -624,9 +624,9 @@ func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
 	if inv_tab == "Items":      # one currency, and only where it matters
-		UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
+		UiShell.head_extra(v).add_child(UiWidgets.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
 	var icon_of := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
-	UI.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Field Book"], inv_tab, func(t):
+	UiShell.shell_tabs(v, ["Items", "Seeds", "Crops", "Furniture", "Kin", "Field Book"], inv_tab, func(t):
 		inv_tab = t; UI._page_of.erase("Inventory"); open_inventory())
 	var grid := GridContainer.new(); grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 10); grid.add_theme_constant_override("v_separation", 10)
@@ -636,19 +636,19 @@ func open_inventory() -> void:
 		c.custom_minimum_size = Vector2(222, 0)
 		var cv := UI.vbox(6); c.add_child(cv)
 		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
+		var dot := UiWidgets.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
+		var tl := UiText.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true
 		tc.add_child(tl)
-		if count_txt != "": tc.add_child(UI.label(count_txt, UI.T_SMALL, UI.GOLD))
+		if count_txt != "": tc.add_child(UiText.label(count_txt, UI.T_SMALL, UI.GOLD))
 		top.add_child(tc)
 		cv.add_child(top)
 		if desc != "":
-			var dl := UI.para(desc, 12, UI.MUTED)
+			var dl := UiText.para(desc, 12, UI.MUTED)
 			cv.add_child(dl)
 		if action.is_valid():
-			cv.add_child(UI.button(action_txt, action))
+			cv.add_child(UiWidgets.button(action_txt, action))
 		grid.add_child(c)
 	var empty := true
 	match inv_tab:
@@ -702,7 +702,7 @@ func open_inventory() -> void:
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])
-		v.add_child(UI.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
+		v.add_child(UiWidgets.empty_state(String(icon_of.get(inv_tab, "gem")), es[0], es[1]))
 
 ## A Boki in the inventory's Boki tab: its portrait, name with its sex, level, form and bond.
 func _boki_card(rec: Dictionary) -> Control:
@@ -711,20 +711,20 @@ func _boki_card(rec: Dictionary) -> Control:
 	var h := UI.hbox(10); c.add_child(h)
 	h.add_child(KinPortrait.view(rec, get_tree(), 56.0))
 	var tv := UI.vbox(2); tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var nm := UI.name_with_sex(rec, String(rec["name"]), UI.T_BODY, UI.INK, UI.semi, 13.0)
+	var nm := UiWidgets.name_with_sex(rec, String(rec["name"]), UI.T_BODY, UI.INK, UI.semi, 13.0)
 	tv.add_child(nm)
-	tv.add_child(UI.label("Lv %d  ·  %s" % [int(rec["level"]), Evo.form_name(rec)], UI.T_SMALL, UI.MUTED))
+	tv.add_child(UiText.label("Lv %d  ·  %s" % [int(rec["level"]), Evo.form_name(rec)], UI.T_SMALL, UI.MUTED))
 	var bits: Array = ["%s bond" % Care.bond(rec)[1]]
 	if rec["uid"] == Save.d.get("active", ""): bits.push_front("Partner")
 	elif KinBox.is_boxed(rec): bits.push_front("In the Burrow")
-	tv.add_child(UI.label("  ·  ".join(bits), 12, UI.MUTED))
+	tv.add_child(UiText.label("  ·  ".join(bits), 12, UI.MUTED))
 	h.add_child(tv)
 	return c
 
 # ------------------------------------------------------------------ save files
 func open_saves() -> void:
 	var v := _page("saves", "Save files", 640, true)
-	UI.subtitle(v, "Each save has its own island, Boki and gems. Settings are shared.")
+	UiShell.subtitle(v, "Each save has its own island, Boki and gems. Settings are shared.")
 	var first: Button = null
 	for n in range(1, Save.SLOTS + 1):
 		var info := Save.slot_info(n)
@@ -732,7 +732,7 @@ func open_saves() -> void:
 		var c := UI.card(Color(UI.ACCENT, 0.1) if playing else UI.CARD, 14, 14)
 		if playing: UI.set_card_border(c, Color(UI.ACCENT, 0.6), 1)
 		var h := UI.hbox(14); c.add_child(h)
-		var num := UI.title(str(n), 30, UI.ACCENT_HI if playing else UI.MUTED)
+		var num := UiText.title(str(n), 30, UI.ACCENT_HI if playing else UI.MUTED)
 		num.custom_minimum_size.x = 26
 		num.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		h.add_child(num)
@@ -741,17 +741,17 @@ func open_saves() -> void:
 		var sn: int = n
 		if info["exists"]:
 			var tr := UI.hbox(8)
-			tr.add_child(UI.label(String(info["name"]), UI.T_HEAD, UI.INK, UI.big))
-			if playing: tr.add_child(UI.tag("Playing", UI.ACCENT))
+			tr.add_child(UiText.label(String(info["name"]), UI.T_HEAD, UI.INK, UI.big))
+			if playing: tr.add_child(UiWidgets.tag("Playing", UI.ACCENT))
 			col.add_child(tr)
-			col.add_child(UI.label("%d Boki  ·  %d gems  ·  %d expeditions  ·  %s" % [info["kin"], info["gems"], info["matches"], info["when"]], UI.T_SMALL, UI.MUTED))
+			col.add_child(UiText.label("%d Boki  ·  %d gems  ·  %d expeditions  ·  %s" % [info["kin"], info["gems"], info["matches"], info["when"]], UI.T_SMALL, UI.MUTED))
 			if not playing:
-				var pb := UI.primary("Play", func(): _play_slot(sn), 96)
+				var pb := UiWidgets.primary("Play", func(): _play_slot(sn), 96)
 				pb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				h.add_child(pb)
 				if first == null: first = pb
-			var del := UI.icon_button("close", func():
-				UI.confirm(root, "Delete save %d?" % sn, ("This is the save you're playing: deleting it takes you back to the title. " if playing else "") + "Its island, Boki and gems are gone for good.", "Delete", func():
+			var del := UiWidgets.icon_button("close", func():
+				UiShell.confirm(root, "Delete save %d?" % sn, ("This is the save you're playing: deleting it takes you back to the title. " if playing else "") + "Its island, Boki and gems are gone for good.", "Delete", func():
 					Save.delete_slot(sn)
 					if playing:
 						# that was the save in play: start over from the title, on this now-empty slot
@@ -763,9 +763,9 @@ func open_saves() -> void:
 			del.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			h.add_child(del)
 		else:
-			col.add_child(UI.label("Empty slot", UI.T_HEAD, UI.MUTED, UI.big))
-			col.add_child(UI.label("Start a new story here", UI.T_SMALL, UI.FAINT))
-			var nb := UI.button("New game", func(): _play_slot(sn), 120, "plus")
+			col.add_child(UiText.label("Empty slot", UI.T_HEAD, UI.MUTED, UI.big))
+			col.add_child(UiText.label("Start a new story here", UI.T_SMALL, UI.FAINT))
+			var nb := UiWidgets.button("New game", func(): _play_slot(sn), 120, "plus")
 			nb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			h.add_child(nb)
 		v.add_child(c)
@@ -784,20 +784,20 @@ func open_admin() -> void:
 		stack.append(page)
 	var c := ctx_now()
 	var v := _page("admin", "Admin tools", 640)
-	v.add_child(UI.label("For testing. F1 or ` opens this anywhere.", 13, UI.MUTED))
+	v.add_child(UiText.label("For testing. F1 or ` opens this anywhere.", 13, UI.MUTED))
 	var god := CheckButton.new()
 	god.text = "God mode: can't be hurt or fall, no cooldowns, endless ammo"
 	god.button_pressed = Game.god
 	god.toggled.connect(func(on): Game.god = on)
 	v.add_child(god)
 	# bot difficulty: Auto follows the run tier (and your experience); the rest force one
-	v.add_child(UI.section("Bot difficulty"))
+	v.add_child(UiText.section("Bot difficulty"))
 	var drow := HFlowContainer.new()
 	drow.add_theme_constant_override("h_separation", 8); drow.add_theme_constant_override("v_separation", 8)
 	var cur_d := String(Settings.get_v("bot_diff"))
 	for dk in ["auto"] + Data.BOT_ORDER:
 		var dkey: String = dk
-		drow.add_child(UI.choice("Auto" if dkey == "auto" else String(Data.BOT_DIFF[dkey]["name"]), dkey == cur_d, func():
+		drow.add_child(UiWidgets.choice("Auto" if dkey == "auto" else String(Data.BOT_DIFF[dkey]["name"]), dkey == cur_d, func():
 			Settings.set_v("bot_diff", dkey)
 			Sfx.play("pickup")
 			open_admin(), 104))
@@ -806,12 +806,12 @@ func open_admin() -> void:
 	if c == "match":
 		var mm = Game.main.screen_node()
 		dnote += "  This run: %s. Changes apply from the next expedition." % String(Data.BOT_DIFF[mm.bot_diff]["name"])
-	v.add_child(UI.label(dnote, 13, UI.MUTED))
+	v.add_child(UiText.label(dnote, 13, UI.MUTED))
 	var grid := GridContainer.new(); grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
 	v.add_child(grid)
 	var add := func(txt: String, f: Callable):
-		var b := UI.button(txt, func():
+		var b := UiWidgets.button(txt, func():
 			f.call()
 			Sfx.play("pickup")
 			Save.save_game()
@@ -847,7 +847,7 @@ func open_admin() -> void:
 		if c == "home": _reload_home())
 	add.call("Unlock every expedition tier", func(): Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10))
 	add.call("Replay the tutorials", func(): Save.d["tutorial"] = {})
-	var spawn := UI.button("Spawn a Boki…", open_spawn_kin, 290)
+	var spawn := UiWidgets.button("Spawn a Boki…", open_spawn_kin, 290)
 	grid.add_child(spawn)
 	if c == "home":
 		var h = Game.main.screen_node()
@@ -871,7 +871,7 @@ func open_admin() -> void:
 			if m.player and not m.player.out:
 				close()
 				m._extract(m.player))
-	var stat := UI.label("", 13, UI.MUTED)
+	var stat := UiText.label("", 13, UI.MUTED)
 	stat.name = "AdminStat"
 	v.add_child(stat)
 	_admin_refresh()
@@ -883,21 +883,21 @@ func open_spawn_kin() -> void:
 	if page != "spawn" and page != "":
 		stack.append(page)
 	var v := _page("spawn", "Spawn a Boki", 640)
-	v.add_child(UI.label("Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if it's a repeat or the farm is full).", 13, UI.MUTED))
+	v.add_child(UiText.label("Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if it's a repeat or the farm is full).", 13, UI.MUTED))
 	var mrow := HFlowContainer.new()
 	mrow.add_theme_constant_override("h_separation", 6); mrow.add_theme_constant_override("v_separation", 6)
-	mrow.add_child(UI.label("Mutation:", 13, UI.MUTED))
+	mrow.add_child(UiText.label("Mutation:", 13, UI.MUTED))
 	for mid in [""] + Mutations.ids():
 		var mk: String = mid
-		mrow.add_child(UI.choice("none" if mk == "" else Mutations.name_of(mk), admin_mut == mk, func(): admin_mut = mk; open_spawn_kin()))
-	mrow.add_child(UI.choice("Shimmer", admin_shimmer, func(): admin_shimmer = not admin_shimmer; open_spawn_kin()))
+		mrow.add_child(UiWidgets.choice("none" if mk == "" else Mutations.name_of(mk), admin_mut == mk, func(): admin_mut = mk; open_spawn_kin()))
+	mrow.add_child(UiWidgets.choice("Shimmer", admin_shimmer, func(): admin_shimmer = not admin_shimmer; open_spawn_kin()))
 	v.add_child(mrow)
 	var grid := GridContainer.new(); grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 8); grid.add_theme_constant_override("v_separation", 8)
 	v.add_child(grid)
 	for sp in Data.KIN:
 		var sid: String = sp
-		var b := UI.button(String(Data.KIN[sid]["name"]), func():
+		var b := UiWidgets.button(String(Data.KIN[sid]["name"]), func():
 			var rec := Save.new_kin(sid)
 			rec["level"] = 8
 			rec["trust"] = 60.0
@@ -915,7 +915,7 @@ func open_spawn_kin() -> void:
 			_admin_refresh(), 196)
 		b.add_theme_color_override("font_color", Data.KIN[sid]["color"])
 		grid.add_child(b)
-	var stat := UI.label("", 13, UI.MUTED)
+	var stat := UiText.label("", 13, UI.MUTED)
 	stat.name = "AdminStat"
 	v.add_child(stat)
 	_admin_refresh()

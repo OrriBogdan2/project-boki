@@ -61,7 +61,7 @@ func show_tab(t: String) -> void:
 func _build() -> void:
 	for ch in _body.get_children():
 		ch.queue_free()
-	_body.add_child(UI.tabs(TABS, tab, show_tab))
+	_body.add_child(UiWidgets.tabs(TABS, tab, show_tab))
 	match tab:
 		"Body": _body_rows()
 		"Face": _face_rows()
@@ -70,8 +70,8 @@ func _build() -> void:
 	_body.add_child(_view_row())
 	var foot := UI.hbox(10)
 	foot.alignment = BoxContainer.ALIGNMENT_END
-	foot.add_child(UI.ghost("Randomise", randomise, 130, "swap"))
-	foot.add_child(UI.primary("Looks good", func(): done.emit(look), 190))
+	foot.add_child(UiWidgets.ghost("Randomise", randomise, 130, "swap"))
+	foot.add_child(UiWidgets.primary("Looks good", func(): done.emit(look), 190))
 	_body.add_child(foot)
 
 func _body_rows() -> void:
@@ -86,7 +86,7 @@ func _face_rows() -> void:
 	presets.add_child(_row_label("Start from"))
 	for nm in MantleLook.rules()["presets"]:
 		var preset_name := String(nm)
-		presets.add_child(UI.button(preset_name, func(): _use_preset(preset_name)))
+		presets.add_child(UiWidgets.button(preset_name, func(): _use_preset(preset_name)))
 	_body.add_child(presets)
 	_pick_row("face", "Expression", Models.LOOK_FACES)
 	_slider_rows("face")
@@ -104,15 +104,15 @@ func _colour_rows() -> void:
 func _view_row() -> HBoxContainer:
 	var row := UI.hbox(6)
 	row.add_child(_row_label("See"))
-	row.add_child(UI.choice("Yourself", view == "", func(): show_view("")))
+	row.add_child(UiWidgets.choice("Yourself", view == "", func(): show_view("")))
 	if hunters.is_empty():
 		return row
 	var at := maxi(0, hunters.find(view))
 	var shown := String(hunters[at])
-	row.add_child(UI.choice(Arch.name_of(shown) if view != "" else "In a Relic", view != "",
+	row.add_child(UiWidgets.choice(Arch.name_of(shown) if view != "" else "In a Relic", view != "",
 		func(): show_view(shown)))
 	if view != "" and hunters.size() > 1:
-		row.add_child(UI.icon_button("next", func(): show_view(String(hunters[(at + 1) % hunters.size()])),
+		row.add_child(UiWidgets.icon_button("next", func(): show_view(String(hunters[(at + 1) % hunters.size()])),
 			"Next Hunter", 12.0))
 	return row
 
@@ -155,13 +155,13 @@ func _slider_row(key: String, text: String) -> void:
 func _pick_row(key: String, text: String, opts: Array) -> void:
 	var row := UI.hbox(8)
 	row.add_child(_row_label(text))
-	row.add_child(UI.icon_button("back", func(): _step(key, -1, opts.size()), "Previous", 12.0))
-	var val := UI.label(String(opts[clampi(int(look[key]), 0, opts.size() - 1)]), UI.T_BODY, UI.INK, UI.semi)
+	row.add_child(UiWidgets.icon_button("back", func(): _step(key, -1, opts.size()), "Previous", 12.0))
+	var val := UiText.label(String(opts[clampi(int(look[key]), 0, opts.size() - 1)]), UI.T_BODY, UI.INK, UI.semi)
 	val.custom_minimum_size.x = VALUE_W
 	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(val)
-	row.add_child(UI.icon_button("next", func(): _step(key, 1, opts.size()), "Next", 12.0))
+	row.add_child(UiWidgets.icon_button("next", func(): _step(key, 1, opts.size()), "Next", 12.0))
 	_body.add_child(row)
 
 func _step(key: String, d: int, n: int) -> void:
@@ -204,13 +204,13 @@ func _swatch(key: String, i: int, col: Color) -> Button:
 	return b
 
 func _row_label(text: String) -> Label:
-	var l := UI.label(text, UI.T_BODY, UI.MUTED)
+	var l := UiText.label(text, UI.T_BODY, UI.MUTED)
 	l.custom_minimum_size.x = LABEL_W
 	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return l
 
 func _note(text: String) -> void:
-	var l := UI.label(text, UI.T_SMALL, UI.ACCENT_HI)
+	var l := UiText.label(text, UI.T_SMALL, UI.ACCENT_HI)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size.x = 380
 	var m := MarginContainer.new()

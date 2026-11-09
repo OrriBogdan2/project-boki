@@ -28,7 +28,7 @@ func _shot(shot_name: String, caption: String) -> void:
 		main.fade.reveal(0.05)
 		await main.get_tree().create_timer(0.4).timeout
 	for i in 900:
-		if not UI.toast_busy(home.root_ui):
+		if not UiShell.toast_busy(home.root_ui):
 			break
 		await main.get_tree().process_frame
 	if home.hover_box:
