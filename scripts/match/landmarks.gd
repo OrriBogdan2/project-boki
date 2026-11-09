@@ -18,10 +18,15 @@ func build(parent: Node3D) -> void:
 	for ii in W.islands.size():
 		var I: Dictionary = W.islands[ii]
 		var role := String(I.get("role", ""))
-		if not role in ["heart", "camp", "nest", "shrine", "grove"] and not (W.layout_id == "" and ii > 0 and int(I.get("r", 0)) >= 9):
+		# an island's own "landmark" (from the map) overrides the biome's kind; "" means none
+		var own = I.get("landmark")
+		if own is String and own == "":
+			continue
+		var big_procgen: bool = W.layout_id == "" and ii > 0 and int(I.get("r", 0)) >= 9
+		if not own is String and not role in ["heart", "camp", "nest", "shrine", "grove"] and not big_procgen:
 			continue
 		var style := Flora.style_ok(String(I.get("biome", "")) if String(I.get("biome", "")) != "" else W.style_at(W.idx(int(I["c"].x), int(I["c"].y))))
-		var kind: String = KINDS.get(style, "giant_tree")
+		var kind: String = own if own is String else KINDS.get(style, "giant_tree")
 		if role == "grove": kind = "giant_tree"
 		if role == "heart" and kind == "ring" and Flora.v2() and W.heart_spot != Vector3.INF:
 			# the Heart's rune ring hangs over the vault itself, turning slowly round it
@@ -139,6 +144,12 @@ func _make(kind: String, style: String, at: Vector3) -> Node3D:
 			root.add_child(lamp)
 		"statue":
 			_sparks(root, Color(0.9, 0.95, 1.0), Vector3(0, 6.0, 0), 3.0, "snow")
+		"lighthouse":
+			_sparks(root, Color(0.9, 0.95, 1.0), Vector3(0, 7.0, 0), 3.0, "snow")
+		"menhirs":
+			_sparks(root, Color("c8a0ff"), Vector3(0, 3.5, 0), 3.0, "motes")
+		"obelisk":
+			_sparks(root, Color("fff4e0"), Vector3(0, 9.0, 0), 1.2, "motes")
 	return root
 
 ## The rune ring at the Heart's vault: set into the ground round the chest (inside its four
@@ -196,6 +207,9 @@ static func mesh(kind: String, style: String) -> ArrayMesh:
 		"spire": _spire(b, r)
 		"arch": _arch(b, r)
 		"ring": _ring_base(b, r)
+		"lighthouse": _lighthouse(b, r)
+		"menhirs": _menhirs(b, r)
+		"obelisk": _obelisk(b, r)
 		_: _giant_tree(b, style, r)
 	var m := b.commit()
 	_meshes[key] = m
@@ -416,3 +430,60 @@ static func _ring_mesh() -> ArrayMesh:
 			b.tri(a, c, bb); b.tri(a, d, c)
 	_ring = b.commit()
 	return _ring
+
+## Highwatch: a banded stone watchtower, its lantern room glowing pale blue, seen down the Watch Road.
+static func _lighthouse(b: Flora.MB, r: RandomNumberGenerator) -> void:
+	var st := [Color("3a4458"), Color("7a8aa4"), Color("c4d0e4"), Color("f0f6ff")]
+	var ht := 13.0
+	var pts: Array = []
+	var rad: Array = []
+	for k in 11:
+		var t := k / 10.0
+		pts.append(Vector3(0, t * 10.0, 0))
+		rad.append(lerpf(1.7, 1.0, t))
+	_column(b, pts, rad, 14, st, ht, 14, 0.02, 1.6)
+	# the gallery, the lantern room and its cap
+	Flora._tube(b, [Vector3(0, 10.0, 0), Vector3(0, 10.4, 0)], [1.45, 1.45], 14, st[1], st[2], ht, 0.0, 2.0, true)
+	var lamp := [Color("4aa8e0"), Color("9ae0ff"), Color("e0f8ff"), Color("ffffff")]
+	var lc := Vector3(0, 11.2, 0)
+	Flora._blob(b, lc, Vector3(0.8, 0.8, 0.8), [], [lc, 1.0], lamp, 10.4, 12.0, ht, 0.0, 1.0, 2, 3.0, 0.95)
+	Flora._shard(b, Vector3(0, 11.8, 0), Vector3.UP, 1.6, 1.15, st, ht, 0.0, 0.0)
+	for k in 4:
+		var a := TAU * k / 4.0 + 0.4
+		var p := Vector3(cos(a) * 1.75, 0.5, sin(a) * 1.75)
+		var sz := Vector3(0.7, 0.9, 0.7) * r.randf_range(0.8, 1.2)
+		Flora._blob(b, p, sz, [], [p, 1.0], st, 0.0, 1.6, ht, 0.3, k * 3.0, 2, 2.0)
+
+## Duskmoor: a ring of leaning standing stones round a trilithon, grey under violet lichen.
+static func _menhirs(b: Flora.MB, r: RandomNumberGenerator) -> void:
+	var st := [Color("2a2636"), Color("57506c"), Color("948aa8"), Color("c8bcd8")]
+	var ht := 7.0
+	for k in 7:
+		var a := TAU * k / 7.0 + r.randf_range(-0.15, 0.15)
+		var foot := Vector3(cos(a) * 3.4, 0.0, sin(a) * 3.4)
+		var lean := Vector3(cos(a) * r.randf_range(0.0, 0.25), 1.0, sin(a) * r.randf_range(0.0, 0.25)).normalized()
+		Flora._shard(b, foot, lean, r.randf_range(3.2, 5.0), r.randf_range(0.6, 0.85), st, ht, a, 0.0)
+	# the trilithon: two uprights and a lintel
+	for sx in [-1.0, 1.0]:
+		var post := [Vector3(sx * 1.1, 0, 0), Vector3(sx * 1.05, 5.2, 0)]
+		Flora._tube(b, post, [0.6, 0.5], 6, st[1], st[2], ht, 0.0, 2.0, true)
+	Flora._tube(b, [Vector3(-1.9, 5.5, 0), Vector3(1.9, 5.5, 0)], [0.55, 0.55], 6, st[1], st[3], ht, 0.0, 2.0, true)
+
+## Saltmere: a tall four-sided obelisk of white salt, crusted with salt crystals at its foot.
+static func _obelisk(b: Flora.MB, r: RandomNumberGenerator) -> void:
+	var st := [Color("8a7a68"), Color("d8ccb8"), Color("f4ece0"), Color("ffffff")]
+	var ht := 12.0
+	var pts: Array = []
+	var rad: Array = []
+	for k in 9:
+		var t := k / 8.0
+		pts.append(Vector3(0, t * 10.0, 0))
+		rad.append(lerpf(1.3, 0.7, t))
+	_column(b, pts, rad, 4, st, ht, 0, 0.0, 2.5)
+	Flora._shard(b, Vector3(0, 10.0, 0), Vector3.UP, 1.8, 0.95, st, ht, PI / 4.0, 0.3)
+	var salt := [Color("a8b8c0"), Color("e8f4f8"), Color("ffffff"), Color("ffffff")]
+	for k in 7:
+		var a := TAU * k / 7.0 + r.randf()
+		var foot := Vector3(cos(a) * 1.4, 0.0, sin(a) * 1.4)
+		var up := Vector3(cos(a) * 0.6, 1.0, sin(a) * 0.6).normalized()
+		Flora._shard(b, foot, up, r.randf_range(0.8, 1.8), 0.3, salt, ht, r.randf() * TAU, 0.2)
