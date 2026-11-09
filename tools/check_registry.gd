@@ -146,6 +146,8 @@ const CHECKS := {
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
+	"--death-recap-shots": ["res://tools/death_recap_shots.gd", "death_recap_shots", null],      # --shots-dir=<dir>
+	"--death-recap-check": ["res://tools/death_recap_check.gd", "death_recap_check", null],      # down/death card, spectate cycle
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],      # --shots-dir=<dir>
