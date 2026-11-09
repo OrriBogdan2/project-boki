@@ -34730,5 +34730,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_thunderstrich_lb_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lb",
+    "name": "Thunderstrich (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_la",
+    "name": "Thunderstrich (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_la_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lb",
+    "name": "Thunderstrich (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lb_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lb",
+    "name": "Thunderstrich (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lc",
+    "name": "Thunderstrich (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lc",
+    "name": "Thunderstrich (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lc",
+    "name": "Thunderstrich (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_thunderstrich_lc",
+    "name": "Thunderstrich (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_thunderstrich_lc_4.jpg",
+    "ok": true
   }
 ]
