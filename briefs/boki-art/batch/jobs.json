@@ -7890,17 +7890,6 @@
     "size": "2K"
   },
   {
-    "id": "stance_thunderstrich",
-    "name": "Thunderstrich (new stance)",
-    "refs": [
-      "briefs/boki-art/evolutions/Thunderstrich.jpg"
-    ],
-    "runs": 3,
-    "aspect": "16:9",
-    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Braced wide, wings flared up and out, neck reared high, storm plumage crackling. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
-    "size": "2K"
-  },
-  {
     "id": "stance_snuffapi",
     "name": "Snuffapi (new stance)",
     "refs": [
@@ -8000,17 +7989,6 @@
     "size": "2K"
   },
   {
-    "id": "stance_reapant",
-    "name": "Reapant (new stance)",
-    "refs": [
-      "briefs/boki-art/evolutions/Reapant.jpg"
-    ],
-    "runs": 3,
-    "aspect": "16:9",
-    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Rears up on hind legs, scythe forelimbs raised high, antennae spread. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
-    "size": "2K"
-  },
-  {
     "id": "stance_nettlynx",
     "name": "Nettlynx (new stance)",
     "refs": [
@@ -8019,17 +7997,6 @@
     "runs": 3,
     "aspect": "16:9",
     "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits on its haunches, tail wrapped around its paws, ears perked. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
-    "size": "2K"
-  },
-  {
-    "id": "stance_thistlynx",
-    "name": "Thistlynx (new stance)",
-    "refs": [
-      "briefs/boki-art/evolutions/Thistlynx.jpg"
-    ],
-    "runs": 3,
-    "aspect": "16:9",
-    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Low stalking prowl: belly near the ground, one forepaw lifted, head level, tail low. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
     "size": "2K"
   },
   {
@@ -15245,17 +15212,6 @@
     "size": "2K"
   },
   {
-    "id": "portrait_stance3_thunderstrich",
-    "name": "Thunderstrich (portrait)",
-    "refs": [
-      "briefs/boki-art/evolutions/Thunderstrich.jpg"
-    ],
-    "aspect": "1:1",
-    "runs": 3,
-    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Braced wide, wings flared up and out, neck reared high, storm plumage crackling. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
-    "size": "2K"
-  },
-  {
     "id": "portrait_stance3_barrelmander",
     "name": "Barrelmander (portrait)",
     "refs": [
@@ -15286,28 +15242,6 @@
     "aspect": "1:1",
     "runs": 3,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears up on hind legs bear-like, forepaws raised, stacks belching, chest furnace glowing. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
-    "size": "2K"
-  },
-  {
-    "id": "portrait_stance3_reapant",
-    "name": "Reapant (portrait)",
-    "refs": [
-      "briefs/boki-art/evolutions/Reapant.jpg"
-    ],
-    "aspect": "1:1",
-    "runs": 3,
-    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Rears up on hind legs, scythe forelimbs raised high, antennae spread. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
-    "size": "2K"
-  },
-  {
-    "id": "portrait_stance3_thistlynx",
-    "name": "Thistlynx (portrait)",
-    "refs": [
-      "briefs/boki-art/evolutions/Thistlynx.jpg"
-    ],
-    "aspect": "1:1",
-    "runs": 3,
-    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in exactly this stance, like official creature-encyclopedia art (never a stiff side-on standing pose): Low stalking prowl: belly near the ground, one forepaw lifted, head level, tail low. This stance is the whole point of the image: clearly different from the pose in image 1.. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "2K"
   },
   {

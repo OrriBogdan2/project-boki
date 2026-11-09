@@ -23,3 +23,5 @@ DROP|={'portrait_chandelotl_full','lodestick_r2'}
 DROP|={n+'_card3' for n in 'bladypus bullsfrog clinkpede fawngus glaciammoth glazolm grainspin grammite hydrangor lensling loafhopper lurklet malletary maracoil morelkin nymphane puffuse reelacine sarcobra starcap sundormouse tootle torpecone'.split()}
 # 03:20 ET: owner cut Puffamus (Teapotamus > Chuggamus). No more Puffamus jobs.
 DROP|={s['id'] for s in SPECS if 'puffamus' in s['id']}
+# 08:22Z: un-locking Reapant/Thistlynx/Thunderstrich for redesign re-admitted their old stance jobs; those designs are being replaced.
+DROP|={p+n for n in ('thunderstrich','reapant','thistlynx') for p in ('stance_','portrait_stance3_','portrait_stance2_')}
