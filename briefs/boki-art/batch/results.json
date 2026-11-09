@@ -35892,5 +35892,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_dreadmonite_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "scopeleon_card",
+    "name": "Scopeleon (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scopeleon_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadmonite_full",
+    "name": "Dreadmonite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dreadmonite_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadmonite_full",
+    "name": "Dreadmonite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dreadmonite_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gramofrill_full",
+    "name": "Gramofrill (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gramofrill_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blastopuff_full",
+    "name": "Blastopuff (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_blastopuff_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gramofrill_full",
+    "name": "Gramofrill (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gramofrill_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gramofrill_full",
+    "name": "Gramofrill (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gramofrill_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hatstag_full",
+    "name": "Hatstag (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_hatstag_full_3.jpg",
+    "ok": true
   }
 ]
