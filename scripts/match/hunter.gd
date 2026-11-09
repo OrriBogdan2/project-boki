@@ -1735,7 +1735,7 @@ func slot_info(slot: String) -> Dictionary:
 	var mki := MergeKit.slot_info(self, slot)
 	if not mki.is_empty():
 		return mki                       # merged: the form's slots
-	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge", "x"] or KinCommand.class_ults()):
+	if ak and (slot in ["sec", "utility", "k1", "e", "kin", "dash", "dodge", "x"]):
 		return ak.slot_info(slot)
 	var out := {"name": "", "short": "", "icon": "", "col": Color.WHITE, "desc": "", "cd": 0.0, "cd_max": 0.0, "charges": 0, "max_charges": 0, "verb": "", "ready": false, "level": ability_level(slot)}
 	match slot:
@@ -2078,8 +2078,7 @@ func sim(dt: float) -> void:
 	_tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
 	if inp["ult"]:
-		if ak and KinCommand.class_ults(): ak.use_r()
-		else: use_ultimate()
+		use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
 	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
