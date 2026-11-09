@@ -6,10 +6,11 @@ extends RefCounted
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
-const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
+var view := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
@@ -29,17 +30,22 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-view="):
+			var wh := a.substr(13).split("x")
+			view = Vector2i(int(wh[0]), int(wh[1]))
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
-	main.get_window().size = VIEW
+	main.get_window().size = view
 	main.get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
-	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
+	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
 	await _match()
 	await _farm()
-	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
+	var win := main.get_window()
+	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
+		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
+		win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
@@ -95,6 +101,7 @@ func _match() -> void:
 		added.clear()
 		last = now
 	_summary("match", fl)
+	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
@@ -136,12 +143,13 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"hud": hud_us / 1000.0,
 		"rcpu": RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu(),
+		"gpu": RenderingServer.viewport_get_measured_render_time_gpu(vp),
 		"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"tris": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 		"objs": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
 		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
-	rows.append("%s,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d" % [part, i, wall, script_ms, f["proc"], f["hud"],
-		f["rcpu"], f["draws"], f["tris"], f["objs"], f["nodes"]])
+	rows.append("%s,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d" % [part, i, wall, script_ms, f["proc"], f["hud"],
+		f["rcpu"], f["gpu"], f["draws"], f["tris"], f["objs"], f["nodes"]])
 	return f
 
 ## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as --perf-probe does.
@@ -174,14 +182,31 @@ func _summary(part: String, fl: Array) -> void:
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
 	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps)" % [part, fl.size(), _avg(fl, "wall"),
 		p99, 1000.0 / maxf(low, 0.001)])
-	print("BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, render cpu %.2f ms" % [
-		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
+	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
+		"render cpu %.2f ms, gpu %.2f ms"
+	print(cpu_line % [
+		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu"), _avg(fl, "gpu")])
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights()])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
+
+## Particle systems still emitting (a GPU one simulates every frame even off screen), by owner name.
+func _emitters() -> void:
+	var by := {}
+	for cls in ["GPUParticles3D", "CPUParticles3D"]:
+		for n in main.get_tree().root.find_children("*", cls, true, false):
+			if not n.get("emitting"):
+				continue
+			var up := String(n.get_parent().name).rstrip("0123456789@")
+			var key := "%s/%s" % [up, String(n.name).rstrip("0123456789@")]
+			by[key] = int(by.get(key, 0)) + 1
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	print("BENCH emitting particles (%d): %s" % [by.values().reduce(func(a, b): return a + b, 0),
+		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))])
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
