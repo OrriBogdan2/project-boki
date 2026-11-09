@@ -8,7 +8,7 @@ How this set was built:
 - **Shape:** 12 three-stage lines (one of them branches, so 37 species), 15 two-stage lines (30), 6 rares and 4 legendaries (single stage) = **77 species in 37 lines**.
 - **Eggs:** **25 lines are egg-only** (hatched, never found in the wild). Each has a one-line egg look that hints at what is inside. The 7 found lines and Reelacine list where they turn up. Legendaries come from bosses and events, not eggs.
 - **Special rules (kept rare):** 1 branching final (Gravigrub line, stat-picked like the existing four), 2 male/female lines (Grainspin line, Pavonazar), both based on real sex differences. No line has both.
-- **Types:** weighted to the types the roster was thin on. New type slots: Wild 13, Wyrm 11, Lunar 10, Gravity 10, Swarm 10, Echo 10, Spore 10, Stone 9, Venom 9, Shadow 7, Prism 6, Titan 6, Frost 6, Storm 4, Tide 2, Tempest 2, Bloom 2, Ember 0. Afterwards every type has 16 to 22 species except Tide (33); before this pass the spread was 4 to 31.
+- **Types:** weighted to the types the roster was thin on. New type slots (standard names, 2026-11-09): Normal 13, Dragon 11, Ghost 10, Ground 10, Bug 10, Psychic 10, Grass 12, Rock 9, Poison 9, Dark 7, Fairy 6, Steel 6, Ice 6, Electric 4, Water 2, Flying 2, Fire 0. Afterwards every type has 16 to 22 species except Water (33); before this pass the spread was 4 to 31.
 - **Base animals:** none reuse a roster animal. Skipped on purpose: stoats, otters, ratites, sloths, lorises, toads, capybaras, axolotls, black corvids. Spread across 37 lines: insects and arachnids 7, sea and deep-sea life 9, reptiles 6, amphibians 2 (olm, dart frog), rodents 2, marsupials and monotremes 3 (wombat, thylacine, platypus), other mammals 2 (tapir, fruit bat), birds 2, extinct animals 4 (pterosaur, Irish elk, woolly mammoth, plus the ammonite forms), mythic 1 (hydra).
 
 Every look line is written to drop into the standard sheet prompt (BOKI_50_DESIGNS.md shared rules: four-view turnaround, flat light, pale grey background, hand-painted style). Every species stands, crawls, swims or flies like an animal in every view; none stand or pose like a person.
@@ -17,43 +17,43 @@ Every look line is written to drop into the standard sheet prompt (BOKI_50_DESIG
 
 | # | Line (stages) | Stages | Types (by stage) | Egg-only | Special rule |
 |---|---|---|---|---|---|
-| 1 | Lensling > Scopeleon > Domeleon | 3 | Lunar / Lunar, Prism / Lunar, Prism | y | |
-| 2 | Lurklet > Snapler > Maulangler | 3 | Shadow / Shadow, Gravity / Shadow, Gravity | n | |
-| 3 | Cubbat > Pipwom > Critwom | 3 | Wild / Wild, Stone / Wild, Stone | y | |
-| 4 | Bathilus > Torpecone > Dreadmonite | 3 | Gravity / Gravity, Tide / Gravity, Tide | y | |
-| 5 | Mumblet > Klaxada > Sirencada | 3 | Swarm / Swarm, Echo / Echo, Swarm | n | |
-| 6 | Pawnfry > Gambitfin > Checkmare | 3 | Wild / Titan, Wild / Wyrm, Titan | y | |
-| 7 | Tootle > Gramofrill > Phonodrake | 3 | Echo / Echo, Wild / Echo, Wyrm | y | |
-| 8 | Grainspin > Sandwidow > Hourachnid | 3 | Stone / Stone, Shadow / Stone, Lunar | n | male/female looks |
-| 9 | Morelkin > Truffapir > Morelossus | 3 | Spore / Spore, Wild / Spore, Titan | y | |
-| 10 | Gravigrub > Orbeetle > Scarabit or Meteorab | 3 (4 forms) | Gravity / Gravity, Swarm / Gravity, Lunar or Gravity, Stone | n | branching final |
-| 11 | Olmlet > Glazolm > Kintsuwyrm | 3 | Wyrm / Wyrm, Prism / Wyrm, Prism | y | |
-| 12 | Polyshroom > Starcap > Medushroom | 3 | Spore / Spore, Tempest / Spore, Venom | y | |
-| 13 | Puffuse > Blastopuff | 2 | Storm / Storm, Gravity | y | |
-| 14 | Nymphane > Rosedart | 2 | Swarm / Swarm, Prism | y | |
-| 15 | Pocketpus > Bladypus | 2 | Venom / Venom, Wild | y | |
-| 16 | Foldbat > Fanpire | 2 | Echo / Echo, Tempest | y | |
-| 17 | Chiptero > Pickadactyl | 2 | Stone / Stone, Wyrm | y | |
-| 18 | Bullpole > Bullsfrog | 2 | Venom / Venom, Wild | y | |
-| 19 | Rattlebub > Maracoil | 2 | Echo / Echo, Venom | y | |
-| 20 | Narfoil > Parrywhal | 2 | Frost / Frost, Titan | y | |
-| 21 | Scoopsy > Sundormouse | 2 | Frost / Frost, Wild | y | |
-| 22 | Clinkpede > Chainipede | 2 | Venom / Venom, Swarm | n | |
-| 23 | Pinster > Tiltster | 2 | Storm / Storm, Wild | y | |
-| 24 | Fawngus > Hatstag | 2 | Spore / Spore, Bloom | n | |
-| 25 | Pagodito > Pagoguana | 2 | Wyrm / Wyrm, Stone | y | |
-| 26 | Grammite > Dobsabre | 2 | Swarm / Wyrm, Swarm | y | |
-| 27 | Proofhop > Loafhopper | 2 | Spore / Spore, Swarm | n | |
-| 28 | Reelacine (rare) | 1 | Shadow, Wild | n | |
-| 29 | Pavonazar (rare) | 1 | Lunar, Prism | y | male/female looks |
-| 30 | Malletary (rare) | 1 | Wild, Titan | y | |
-| 31 | Ghoulamari (rare) | 1 | Lunar, Shadow | y | |
-| 32 | Glacione (rare) | 1 | Frost, Lunar | y | |
-| 33 | Gilabacus (rare) | 1 | Venom, Lunar | y | |
-| 34 | Sarcobra (legendary) | 1 | Wyrm, Shadow | n | |
-| 35 | Glaciammoth (legendary) | 1 | Frost, Titan | n | |
-| 36 | Cetorgan (legendary) | 1 | Echo, Lunar | n | |
-| 37 | Hydrangor (legendary) | 1 | Bloom, Wyrm | n | |
+| 1 | Lensling > Scopeleon > Domeleon | 3 | Ghost / Ghost, Fairy / Ghost, Fairy | y | |
+| 2 | Lurklet > Snapler > Maulangler | 3 | Dark / Dark, Ground / Dark, Ground | n | |
+| 3 | Cubbat > Pipwom > Critwom | 3 | Normal / Normal, Rock / Normal, Rock | y | |
+| 4 | Bathilus > Torpecone > Dreadmonite | 3 | Ground / Ground, Water / Ground, Water | y | |
+| 5 | Mumblet > Klaxada > Sirencada | 3 | Bug / Bug, Psychic / Psychic, Bug | n | |
+| 6 | Pawnfry > Gambitfin > Checkmare | 3 | Normal / Steel, Normal / Dragon, Steel | y | |
+| 7 | Tootle > Gramofrill > Phonodrake | 3 | Psychic / Psychic, Normal / Psychic, Dragon | y | |
+| 8 | Grainspin > Sandwidow > Hourachnid | 3 | Rock / Rock, Dark / Rock, Ghost | n | male/female looks |
+| 9 | Morelkin > Truffapir > Morelossus | 3 | Grass / Grass, Normal / Grass, Steel | y | |
+| 10 | Gravigrub > Orbeetle > Scarabit or Meteorab | 3 (4 forms) | Ground / Ground, Bug / Ground, Ghost or Ground, Rock | n | branching final |
+| 11 | Olmlet > Glazolm > Kintsuwyrm | 3 | Dragon / Dragon, Fairy / Dragon, Fairy | y | |
+| 12 | Polyshroom > Starcap > Medushroom | 3 | Grass / Grass, Flying / Grass, Poison | y | |
+| 13 | Puffuse > Blastopuff | 2 | Electric / Electric, Ground | y | |
+| 14 | Nymphane > Rosedart | 2 | Bug / Bug, Fairy | y | |
+| 15 | Pocketpus > Bladypus | 2 | Poison / Poison, Normal | y | |
+| 16 | Foldbat > Fanpire | 2 | Psychic / Psychic, Flying | y | |
+| 17 | Chiptero > Pickadactyl | 2 | Rock / Rock, Dragon | y | |
+| 18 | Bullpole > Bullsfrog | 2 | Poison / Poison, Normal | y | |
+| 19 | Rattlebub > Maracoil | 2 | Psychic / Psychic, Poison | y | |
+| 20 | Narfoil > Parrywhal | 2 | Ice / Ice, Steel | y | |
+| 21 | Scoopsy > Sundormouse | 2 | Ice / Ice, Normal | y | |
+| 22 | Clinkpede > Chainipede | 2 | Poison / Poison, Bug | n | |
+| 23 | Pinster > Tiltster | 2 | Electric / Electric, Normal | y | |
+| 24 | Fawngus > Hatstag | 2 | Grass / Grass | n | |
+| 25 | Pagodito > Pagoguana | 2 | Dragon / Dragon, Rock | y | |
+| 26 | Grammite > Dobsabre | 2 | Bug / Dragon, Bug | y | |
+| 27 | Proofhop > Loafhopper | 2 | Grass / Grass, Bug | n | |
+| 28 | Reelacine (rare) | 1 | Dark, Normal | n | |
+| 29 | Pavonazar (rare) | 1 | Ghost, Fairy | y | male/female looks |
+| 30 | Malletary (rare) | 1 | Normal, Steel | y | |
+| 31 | Ghoulamari (rare) | 1 | Ghost, Dark | y | |
+| 32 | Glacione (rare) | 1 | Ice, Ghost | y | |
+| 33 | Gilabacus (rare) | 1 | Poison, Ghost | y | |
+| 34 | Sarcobra (legendary) | 1 | Dragon, Dark | n | |
+| 35 | Glaciammoth (legendary) | 1 | Ice, Steel | n | |
+| 36 | Cetorgan (legendary) | 1 | Psychic, Ghost | n | |
+| 37 | Hydrangor (legendary) | 1 | Grass, Dragon | n | |
 
 Egg-only: 25 lines (rows 1, 3, 4, 6, 7, 9, 11, 12, 13 to 21, 23, 25, 26, 29 to 33).
 
@@ -65,6 +65,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - 10 whole lines now stay single-type (Lurklet, Cubbat, Tootle, Olmlet, Pocketpus, Narfoil, Pinster, Proofhop, Chiptero, Foldbat lines).
 - In 8 more three-stage lines the middle form stays single-type and the second type arrives at the final (Lensling, Bathilus, Mumblet, Pawnfry, Grainspin, Morelkin, Gravigrub, Polyshroom lines).
 - New species: 49 single, 28 dual (was 27 / 50). The summary table above still shows the old typing; the per-species headers below are current.
+- Type names switched to standard ones on 2026-11-09 (owner): Wild=Normal, Ember=Fire, Tide=Water, Bloom+Spore=Grass, Storm=Electric, Frost=Ice, Stone=Rock, Gravity=Ground, Tempest=Flying, Wyrm=Dragon, Shadow=Dark, Venom=Poison, Swarm=Bug, Titan=Steel, Lunar=Ghost, Prism=Fairy, Echo=Psychic.
 
 # Three-stage lines
 
@@ -72,7 +73,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** brass-banded shell with one round glass lens window, as if something inside is peering out.
 **Ability link:** spots and marks far targets; the final aims its telescope crest like a cannon.
 
-### Lensling (1 of 3) · Lunar
+### Lensling (1 of 3) · Ghost
 - **Concept:** a baby chameleon curled up like a rolled star chart, peering through one brass lens eye.
 - **Rejected ideas:** gecko + magnifying glass; chameleon + paint swatch book.
 - **Mix:** chameleon + telescope lens
@@ -82,7 +83,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** held telescope, tripod, stars or sparkle particles, upright pose.
 - **Archetype:** cute
 
-### Scopeleon (2 of 3) · Lunar
+### Scopeleon (2 of 3) · Ghost
 - **Concept:** a chameleon whose swivelling eyes are two brass spyglasses.
 - **Rejected ideas:** chameleon + periscope (too close to Torpecone); chameleon + kaleidoscope.
 - **Mix:** chameleon + extending spyglass
@@ -92,7 +93,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** straps or harness, lenses floating, a copy of Lensling's spiral pose, upright.
 - **Archetype:** sleek
 
-### Domeleon (3 of 3) · Lunar, Prism
+### Domeleon (3 of 3) · Ghost, Fairy
 - **Concept:** a giant chameleon that is a living observatory, its crest a great telescope.
 - **Rejected ideas:** iguana + planetarium projector; chameleon + lighthouse (lamp clash with Lanterloris).
 - **Mix:** chameleon + observatory telescope
@@ -105,7 +106,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 ## 2. Lurklet line: anglerfish + steel bear trap (found: deep trenches and flooded caves)
 **Ability link:** sets itself as a trap: an ambush that snaps shut on whoever steps close.
 
-### Lurklet (1 of 3) · Shadow
+### Lurklet (1 of 3) · Dark
 - **Concept:** an anglerfish fry whose mouth is a tiny sprung trap.
 - **Rejected ideas:** anglerfish + street lamp (lamp clash); anglerfish + fishing reel.
 - **Mix:** anglerfish fry + spring trap
@@ -115,7 +116,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** chain, held bait, realistic fish, full-body glow.
 - **Archetype:** creepy
 
-### Snapler (2 of 3) · Shadow
+### Snapler (2 of 3) · Dark
 - **Concept:** a flat anglerfish that is a living bear trap.
 - **Rejected ideas:** flounder + mousetrap; anglerfish + jukebox.
 - **Mix:** flat anglerfish + bear trap
@@ -125,7 +126,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** chain, round body like Lurklet, ropes or wires, upright.
 - **Archetype:** tough
 
-### Maulangler (3 of 3) · Shadow
+### Maulangler (3 of 3) · Dark
 - **Concept:** a walking frogfish whose whole body snaps shut like a giant trap.
 - **Rejected ideas:** frogfish + Venus flytrap (too natural); gulper eel + rubbish-truck compactor.
 - **Mix:** walking frogfish + giant clamp trap
@@ -139,7 +140,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** ivory shell with black pips scattered over it like a rolled die.
 **Ability link:** wombats block burrows with their rump; this line rolls for luck crits and shields with its dice rump.
 
-### Cubbat (1 of 3) · Wild
+### Cubbat (1 of 3) · Normal
 - **Concept:** a wombat joey that is a fuzzy die.
 - **Rejected ideas:** wombat + sugar cube; quokka + puzzle cube.
 - **Mix:** wombat joey + die
@@ -149,7 +150,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** numbers or text, casino props, held dice, a round body.
 - **Archetype:** cute
 
-### Pipwom (2 of 3) · Wild
+### Pipwom (2 of 3) · Normal
 - **Concept:** a wombat whose rump is a six-pip shield die.
 - **Rejected ideas:** wombat + bulldozer blade; wombat + bunker door (Vaultara clash).
 - **Mix:** burrowing wombat + bone die
@@ -159,7 +160,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** cube body like Cubbat, numbers, text, saddle look.
 - **Archetype:** tough
 
-### Critwom (3 of 3) · Wild
+### Critwom (3 of 3) · Normal
 - **Concept:** a glyptodont-sized wombat whose shell is a twenty-sided die.
 - **Rejected ideas:** wombat + roulette wheel (wheel trap); wombat + bowling ball (Gravadillo look).
 - **Mix:** glyptodont-like giant wombat + twenty-sided die
@@ -174,7 +175,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** dives and surfaces: a bubble shield, then a torpedo ram, then a broadside.
 **Fundamental changes:** the line evolves through deep time: coiled nautilus, straight-shelled orthocone, giant ammonite.
 
-### Bathilus (1 of 3) · Gravity
+### Bathilus (1 of 3) · Ground
 - **Concept:** a nautilus that is a tiny bathysphere.
 - **Rejected ideas:** nautilus + pocket watch; nautilus + spiral staircase.
 - **Mix:** nautilus + bathysphere
@@ -184,7 +185,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** propeller, periscope, held objects, thin tentacles.
 - **Archetype:** cute
 
-### Torpecone (2 of 3) · Gravity
+### Torpecone (2 of 3) · Ground
 - **Concept:** an extinct straight-shelled nautiloid that is a living torpedo.
 - **Rejected ideas:** orthocone + traffic cone; orthocone + space rocket.
 - **Mix:** orthocone (extinct straight-shelled nautiloid) + torpedo
@@ -194,7 +195,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** coiled shell like Bathilus, a propeller, thin parts, upright.
 - **Archetype:** fast
 
-### Dreadmonite (3 of 3) · Gravity, Tide
+### Dreadmonite (3 of 3) · Ground, Water
 - **Concept:** a giant ammonite that is a battleship.
 - **Rejected ideas:** ammonite + grandfather-clock gears; ammonite + carousel (wheel trap).
 - **Mix:** giant ammonite + dreadnought battleship
@@ -207,7 +208,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 ## 5. Mumblet line: cicada + air-raid siren (found: dug up under forest trees in summer)
 **Ability link:** a silent digger that grows into a living siren: stun waves and a rising wail ultimate.
 
-### Mumblet (1 of 3) · Swarm
+### Mumblet (1 of 3) · Bug
 - **Concept:** a cicada nymph with a speaker-grille back that has not made a sound yet.
 - **Rejected ideas:** cicada nymph + alarm clock; mole cricket + megaphone.
 - **Mix:** cicada nymph + speaker grille
@@ -217,7 +218,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** wings, sound rings (it is silent), held tools.
 - **Archetype:** cute
 
-### Klaxada (2 of 3) · Swarm
+### Klaxada (2 of 3) · Bug
 - **Concept:** a cicada whose abdomen is a klaxon horn.
 - **Rejected ideas:** cicada + stadium horn; cicada + boombox.
 - **Mix:** adult cicada + klaxon horn
@@ -227,7 +228,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** nymph shovel legs, thin wings, a bell worn on it, upright.
 - **Archetype:** sleek
 
-### Sirencada (3 of 3) · Echo, Swarm
+### Sirencada (3 of 3) · Psychic, Bug
 - **Concept:** a giant cicada that is a living air-raid siren.
 - **Rejected ideas:** cicada + jet engine; cicada + foghorn.
 - **Mix:** giant cicada + air-raid siren
@@ -241,7 +242,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** black-and-white checkered shell.
 **Ability link:** "promotion": the line moves from pawn to knight to queen, gaining range at each stage.
 
-### Pawnfry (1 of 3) · Wild
+### Pawnfry (1 of 3) · Normal
 - **Concept:** a seahorse fry that is a chess pawn.
 - **Rejected ideas:** seahorse + rocking horse; seahorse + carousel horse.
 - **Mix:** seahorse fry + pawn
@@ -251,7 +252,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** board, squares, text, held objects.
 - **Archetype:** cute
 
-### Gambitfin (2 of 3) · Wild
+### Gambitfin (2 of 3) · Normal
 - **Concept:** a seahorse that is a carved chess knight.
 - **Rejected ideas:** seahorse + jousting lance; seahorse + horseshoe.
 - **Mix:** seahorse + chess knight
@@ -261,7 +262,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a rider, reins, saddle, a pawn shape like Pawnfry, a person-like stance.
 - **Archetype:** tough
 
-### Checkmare (3 of 3) · Wyrm, Titan
+### Checkmare (3 of 3) · Dragon, Steel
 - **Concept:** a leafy sea dragon that has been promoted to chess queen.
 - **Rejected ideas:** sea dragon + stage-show headdress (worn); leafy sea dragon + bonsai.
 - **Mix:** leafy sea dragon + chess queen
@@ -275,7 +276,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** glossy black shell with fine spiral grooves like a record and a gold centre spot.
 **Ability link:** a sound cone that knocks enemies back; the final blasts in four directions.
 
-### Tootle (1 of 3) · Echo
+### Tootle (1 of 3) · Psychic
 - **Concept:** a baby frilled lizard tooting through a trumpet frill.
 - **Rejected ideas:** frilled lizard + umbrella (Umbrathere clash); gecko + party blower.
 - **Mix:** baby frilled lizard + small trumpet
@@ -285,7 +286,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** held trumpet, music notes, upright pose.
 - **Archetype:** cute
 
-### Gramofrill (2 of 3) · Echo
+### Gramofrill (2 of 3) · Psychic
 - **Concept:** a frilled lizard whose frill is a gramophone horn.
 - **Rejected ideas:** frilled lizard + satellite dish; frilled lizard + lampshade.
 - **Mix:** frilled lizard + gramophone horn
@@ -295,7 +296,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a record player body, running upright on two legs, music notes.
 - **Archetype:** fast
 
-### Phonodrake (3 of 3) · Echo
+### Phonodrake (3 of 3) · Psychic
 - **Concept:** a dragon whose crown is four gramophone horns.
 - **Rejected ideas:** frill dragon + radio mast; frill dragon + bandstand.
 - **Mix:** frill dragon + four-horn gramophone
@@ -309,7 +310,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Ability link:** slows time in a zone; the final flips itself to reverse a fight's last few seconds of damage.
 **Male/female looks (through Sandwidow and Hourachnid; Grainspin the same):** like the real widow, the female is bigger, heavier and glossy black with red sand; the male is slimmer and smaller, tan with pale bands, with a smaller hourglass.
 
-### Grainspin (1 of 3) · Stone
+### Grainspin (1 of 3) · Rock
 - **Concept:** a spiderling with a sand-timer belly.
 - **Rejected ideas:** spiderling + snow globe; spiderling + kitchen egg timer.
 - **Mix:** spiderling + sand bulb
@@ -319,7 +320,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** web strands, thin legs, realistic spider hair.
 - **Archetype:** cute
 
-### Sandwidow (2 of 3) · Stone
+### Sandwidow (2 of 3) · Rock
 - **Concept:** a black widow whose red hourglass mark is a real glass hourglass.
 - **Rejected ideas:** black widow + chandelier (Snuffapi clash); tarantula + feather duster.
 - **Mix:** black widow + hourglass
@@ -329,7 +330,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** thin web lines, a round bulb like Grainspin, a clock face.
 - **Archetype:** sleek
 
-### Hourachnid (3 of 3) · Stone, Lunar
+### Hourachnid (3 of 3) · Rock, Ghost
 - **Concept:** a giant spider that is a toppled hourglass half buried in a desert.
 - **Rejected ideas:** trapdoor spider + sandcastle (Rampartoad clash); widow + metronome.
 - **Mix:** giant trapdoor-squat spider + toppled hourglass
@@ -343,7 +344,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** cream shell pitted like a honeycomb morel cap.
 **Ability link:** snuffles out hidden loot; spore clouds from its snout.
 
-### Morelkin (1 of 3) · Spore
+### Morelkin (1 of 3) · Grass
 - **Concept:** a tapir calf whose baby stripes are rows of tiny mushrooms.
 - **Rejected ideas:** tapir + vacuum-cleaner hose; tapir + garden hose.
 - **Mix:** tapir calf + button mushrooms
@@ -353,7 +354,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** mushrooms on its back like a garden, realistic tapir.
 - **Archetype:** cute
 
-### Truffapir (2 of 3) · Spore
+### Truffapir (2 of 3) · Grass
 - **Concept:** a tapir that has become the truffle it was hunting.
 - **Rejected ideas:** tapir + gas mask (worn); pig-nosed turtle + truffle.
 - **Mix:** tapir + truffle and morel
@@ -363,7 +364,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** stripes like Morelkin, caps on the back, upright.
 - **Archetype:** tough
 
-### Morelossus (3 of 3) · Spore, Titan
+### Morelossus (3 of 3) · Grass, Steel
 - **Concept:** a prehistoric giant tapir whose spine has grown into a ridge of morel towers.
 - **Rejected ideas:** tapir + steam calliope; tapir + termite city (Spirevark clash).
 - **Mix:** giant prehistoric tapir + morel towers
@@ -377,7 +378,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Branching:** higher Guard picks Scarabit, higher Power picks Meteorab (Speed not used; ties by affinity path as in GAME_RULES section 3). One Bokidex entry, two forms.
 **Ability link:** gravity wells: pulls enemies in and orbits pebbles as shields or shrapnel.
 
-### Gravigrub (1 of 3) · Gravity
+### Gravigrub (1 of 3) · Ground
 - **Concept:** a grub curled around its own little moon.
 - **Rejected ideas:** grub + glass marble; grub + gumball machine.
 - **Mix:** curled grub + moon
@@ -387,7 +388,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a ball being pushed, legs, wings.
 - **Archetype:** cute
 
-### Orbeetle (2 of 3) · Gravity
+### Orbeetle (2 of 3) · Ground
 - **Concept:** a dung beetle whose rear end is a ringed planet.
 - **Rejected ideas:** dung beetle + bowling ball; dung beetle + football.
 - **Mix:** dung beetle + ringed planet
@@ -397,7 +398,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a ball held or pushed, a grub body, upright.
 - **Archetype:** tough
 
-### Scarabit (3 of 3, Guard form) · Gravity, Lunar
+### Scarabit (3 of 3, Guard form) · Ground, Ghost
 - **Concept:** a scarab that has opened into a living orrery.
 - **Rejected ideas:** scarab + armillary sundial; scarab + merry-go-round.
 - **Mix:** giant scarab + orrery
@@ -407,7 +408,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** gears or clockwork, thin rings, a single planet like Orbeetle.
 - **Archetype:** majestic
 
-### Meteorab (3 of 3, Power form) · Gravity, Stone
+### Meteorab (3 of 3, Power form) · Ground, Rock
 - **Concept:** a beetle that is a falling meteorite with a horn.
 - **Rejected ideas:** beetle + wrecking ball; beetle + cannonball.
 - **Mix:** battering-ram scarab + meteorite
@@ -421,7 +422,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** white porcelain shell with one thin crack mended in gold.
 **Ability link:** folklore says olms are baby dragons; this line breaks and mends: it heals itself by "gilding" its cracks.
 
-### Olmlet (1 of 3) · Wyrm
+### Olmlet (1 of 3) · Dragon
 - **Concept:** the cave folklore 'baby dragon', made of mended porcelain.
 - **Rejected ideas:** olm + candle wax; olm + bubblegum.
 - **Mix:** baby olm + glazed porcelain
@@ -431,7 +432,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** teacup or vase shapes, realistic olm, glass.
 - **Archetype:** pretty
 
-### Glazolm (2 of 3) · Wyrm
+### Glazolm (2 of 3) · Dragon
 - **Concept:** a salamander of crackle-glaze pottery mended with gold.
 - **Rejected ideas:** salamander + teapot (Teapotamus clash); newt + piggy bank.
 - **Mix:** salamander + crackle-glaze porcelain
@@ -441,7 +442,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** noodle body like Olmlet, painted patterns, glass.
 - **Archetype:** pretty
 
-### Kintsuwyrm (3 of 3) · Wyrm
+### Kintsuwyrm (3 of 3) · Dragon
 - **Concept:** a dragon that was shattered and glued back together with gold.
 - **Rejected ideas:** dragon + willow-pattern plate; dragon + porcelain vase.
 - **Mix:** serpent dragon + kintsugi
@@ -456,7 +457,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Fundamental changes:** follows the real jellyfish life cycle: polyp, ephyra, medusa.
 **Ability link:** spore stings; the ephyra spins and glides; the medusa floats over the battle.
 
-### Polyshroom (1 of 3) · Spore
+### Polyshroom (1 of 3) · Grass
 - **Concept:** a jellyfish polyp that is a walking button mushroom.
 - **Rejected ideas:** polyp + lollipop; sea anemone + toadstool.
 - **Mix:** jellyfish polyp + stalked mushroom
@@ -466,7 +467,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** thin tentacles, rooted to a rock, a full mushroom cluster.
 - **Archetype:** creepy
 
-### Starcap (2 of 3) · Spore
+### Starcap (2 of 3) · Grass
 - **Concept:** a baby jellyfish that is a spinning mushroom throwing star.
 - **Rejected ideas:** ephyra + frisbee; ephyra + ceiling fan.
 - **Mix:** ephyra + gilled mushroom wedges
@@ -476,7 +477,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a stalk like Polyshroom, a bell shape, streamers.
 - **Archetype:** fast
 
-### Medushroom (3 of 3) · Spore, Venom
+### Medushroom (3 of 3) · Grass, Poison
 - **Concept:** a jellyfish whose bell is a toadstool cap.
 - **Rejected ideas:** jellyfish + parachute; jellyfish + hot-air balloon.
 - **Mix:** medusa jellyfish + toadstool
@@ -494,7 +495,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** round iron-black shell with a stubby fuse nub on top.
 **Ability link:** inflates and explodes into a stun burst, then regrows its fuse.
 
-### Puffuse (1 of 2) · Storm
+### Puffuse (1 of 2) · Electric
 - **Concept:** a pufferfish that is a cartoon bomb.
 - **Rejected ideas:** puffer + naval mine (too close to Dreadmonite); puffer + chestnut burr.
 - **Mix:** puffer + round bomb
@@ -504,7 +505,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** fire, flames, a skull mark, held matches.
 - **Archetype:** cute
 
-### Blastopuff (2 of 2) · Storm, Gravity
+### Blastopuff (2 of 2) · Electric, Ground
 - **Concept:** a spiny puffer that has hardened into a grenade.
 - **Rejected ideas:** puffer + morning-star mace (Mirrolin clash); puffer + cactus.
 - **Mix:** spiny puffer + iron grenade
@@ -518,7 +519,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** leaded-glass shell made of coloured panes.
 **Ability link:** the nymph's shooting mask jaw grabs; the adult throws coloured light beams through its wings.
 
-### Nymphane (1 of 2) · Swarm
+### Nymphane (1 of 2) · Bug
 - **Concept:** a dragonfly nymph armoured in bead-glass windows.
 - **Rejected ideas:** nymph + diving suit (worn); caddisfly larva + mosaic (reads as worn).
 - **Mix:** dragonfly nymph + bead glass
@@ -528,7 +529,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** wings, a church window frame, thin legs.
 - **Archetype:** creepy
 
-### Rosedart (2 of 2) · Swarm, Prism
+### Rosedart (2 of 2) · Bug, Fairy
 - **Concept:** a dragonfly whose wings are a cathedral rose window.
 - **Rejected ideas:** dragonfly + helicopter rotor; damselfly + javelin.
 - **Mix:** dragonfly + rose window
@@ -542,7 +543,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** glossy red shell with a steel-grey hinge seam running round its middle.
 **Ability link:** the platypus is an egg-laying mammal with venom spurs; this line flicks out blades.
 
-### Pocketpus (1 of 2) · Venom
+### Pocketpus (1 of 2) · Poison
 - **Concept:** a platypus whose bill is a folded pocket knife.
 - **Rejected ideas:** platypus + duck decoy; platypus + flip phone.
 - **Mix:** platypus + closed folding knife
@@ -552,7 +553,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a brand cross or logo, a held knife, open blades.
 - **Archetype:** cute
 
-### Bladypus (2 of 2) · Venom
+### Bladypus (2 of 2) · Poison
 - **Concept:** a platypus that is an open multi-tool.
 - **Rejected ideas:** platypus + garden trowel; platypus + cricket bat.
 - **Mix:** platypus + multi-tool
@@ -566,7 +567,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** shell ribbed with fine pleats like a folded fan.
 **Ability link:** folded it is a shield; opened, its wing fans throw cutting gusts and sound.
 
-### Foldbat (1 of 2) · Echo
+### Foldbat (1 of 2) · Psychic
 - **Concept:** a bat pup folded up like a closed fan.
 - **Rejected ideas:** bat pup + umbrella (Umbrathere clash); bat + folding deck chair.
 - **Mix:** bat pup + closed folding fan
@@ -576,7 +577,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** hanging upside down, open wings, held fan.
 - **Archetype:** cute
 
-### Fanpire (2 of 2) · Echo
+### Fanpire (2 of 2) · Psychic
 - **Concept:** a flying fox whose wings are iron war fans.
 - **Rejected ideas:** bat + kite (Kitlet clash); bat + window blinds.
 - **Mix:** flying fox + war fan
@@ -590,7 +591,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** grey shell like a fossil nodule with one chip mark knocked out of it.
 **Ability link:** mines ore nodes and dives in to strike.
 
-### Chiptero (1 of 2) · Stone
+### Chiptero (1 of 2) · Rock
 - **Concept:** a pterosaur hatchling knapped out of flint.
 - **Rejected ideas:** pterosaur + arrowhead; pterosaur + hand axe.
 - **Mix:** pterosaur hatchling + flint
@@ -600,7 +601,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** open wings, a held tool, feathers.
 - **Archetype:** cute
 
-### Pickadactyl (2 of 2) · Stone
+### Pickadactyl (2 of 2) · Rock
 - **Concept:** a pterosaur whose head is a double pickaxe.
 - **Rejected ideas:** pterosaur + hang glider (kite clash); pterosaur + ice axe.
 - **Mix:** pterosaur + double pickaxe
@@ -614,7 +615,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** glossy shell ringed red and black like a bullseye.
 **Ability link:** marks a target, then hits it with a barbed dart tongue.
 
-### Bullpole (1 of 2) · Venom
+### Bullpole (1 of 2) · Poison
 - **Concept:** a tadpole with a dart-flight tail.
 - **Rejected ideas:** tadpole + archery arrow; tadpole + shuttlecock (Glacione uses it).
 - **Mix:** tadpole + dart
@@ -624,7 +625,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** legs, a dartboard frame, numbers.
 - **Archetype:** fast
 
-### Bullsfrog (2 of 2) · Venom, Wild
+### Bullsfrog (2 of 2) · Poison, Normal
 - **Concept:** a poison dart frog that is the whole game of darts.
 - **Rejected ideas:** frog + archery target; tree frog + bowling pin.
 - **Mix:** dart frog + dartboard and darts
@@ -638,7 +639,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** shell painted in a maraca's dotted pattern; it rattles when shaken.
 **Ability link:** a rattle that confuses and taunts, then a venom strike.
 
-### Rattlebub (1 of 2) · Echo
+### Rattlebub (1 of 2) · Psychic
 - **Concept:** a baby rattlesnake with a maraca tail.
 - **Rejected ideas:** snake + baby's rattle toy; snake + tambourine.
 - **Mix:** snakelet + maraca
@@ -648,7 +649,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a held maraca, music notes.
 - **Archetype:** cute
 
-### Maracoil (2 of 2) · Echo, Venom
+### Maracoil (2 of 2) · Psychic, Poison
 - **Concept:** a rattlesnake that is a pair of maracas.
 - **Rejected ideas:** rattlesnake + snare drum; cobra + flute (snake-charmer cliche).
 - **Mix:** rattlesnake + twin maracas
@@ -662,7 +663,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** pale blue shell with a round bell-guard dome at the tip.
 **Ability link:** a duelist: lunge, parry (blocks one hit), riposte.
 
-### Narfoil (1 of 2) · Frost
+### Narfoil (1 of 2) · Ice
 - **Concept:** a narwhal calf whose tusk is a fencing foil.
 - **Rejected ideas:** narwhal + ice auger (too obvious); narwhal + barber's pole.
 - **Mix:** narwhal calf + fencing foil
@@ -672,7 +673,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a held sword, a fencing mask worn, a long tusk.
 - **Archetype:** cute
 
-### Parrywhal (2 of 2) · Frost
+### Parrywhal (2 of 2) · Ice
 - **Concept:** a narwhal that is a fencing champion: epee tusk, bell-guard brow, parry fins.
 - **Rejected ideas:** narwhal + unicorn horn (cliche); narwhal + candy cane.
 - **Mix:** narwhal + fencing champion
@@ -686,7 +687,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** cream shell flecked with pastel sprinkles and a frosty tip.
 **Ability link:** a sleepy healer that gives out cooling "brain-freeze" slows.
 
-### Scoopsy (1 of 2) · Frost
+### Scoopsy (1 of 2) · Ice
 - **Concept:** a dormouse curled up as a scoop of ice cream.
 - **Rejected ideas:** dormouse + snow globe (Terrarimit clash); dormouse + pillow.
 - **Mix:** dormouse + scoop of ice cream
@@ -696,7 +697,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a cone held, a bowl, cherries or toppings.
 - **Archetype:** cute
 
-### Sundormouse (2 of 2) · Frost, Wild
+### Sundormouse (2 of 2) · Ice, Normal
 - **Concept:** a dormouse that is a soft-serve with a waffle-cone spike tail.
 - **Rejected ideas:** dormouse + ice lolly; dormouse + sleeping bag (worn).
 - **Mix:** dormouse + soft-serve and waffle cone
@@ -709,7 +710,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 ## 22. Clinkpede line: centipede + saw chain (found: scrapyards and old mines)
 **Ability link:** a looping charge that saws through anything in its path.
 
-### Clinkpede (1 of 2) · Venom
+### Clinkpede (1 of 2) · Poison
 - **Concept:** a short centipede made of chunky chain links.
 - **Rejected ideas:** centipede + toy train (Chuggamus clash); millipede + zipper (Zippelith clash).
 - **Mix:** short centipede + chain links
@@ -719,7 +720,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** loose chain, thin legs, a motor.
 - **Archetype:** cute
 
-### Chainipede (2 of 2) · Venom, Swarm
+### Chainipede (2 of 2) · Poison, Bug
 - **Concept:** a centipede that is a living chainsaw chain.
 - **Rejected ideas:** centipede + bicycle chain (wheel trap); centipede + conveyor belt.
 - **Mix:** giant centipede + chainsaw chain
@@ -733,7 +734,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** chrome-silver shell like a pinball, with a spark-striped band.
 **Ability link:** enemies bounce off its bumpers for chain shocks; the final "tilts" to stun everyone nearby.
 
-### Pinster (1 of 2) · Storm
+### Pinster (1 of 2) · Electric
 - **Concept:** a hamster whose stuffed cheeks are pinball bumpers.
 - **Rejected ideas:** hamster + battery (too obvious for Storm); hamster + wheel dynamo (wheel trap).
 - **Mix:** hamster + pinball bumpers
@@ -743,7 +744,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a wheel, a glass cabinet, text or scores, a battery.
 - **Archetype:** cute
 
-### Tiltster (2 of 2) · Storm
+### Tiltster (2 of 2) · Electric
 - **Concept:** a hamster that is a whole pinball machine.
 - **Rejected ideas:** hamster + arcade claw machine; hamster + slot machine.
 - **Mix:** hamster + whole pinball machine
@@ -756,7 +757,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 ## 24. Fawngus line: Irish elk + hat stand of mushroom caps (found: misty bogs and old forests)
 **Ability link:** hangs a mushroom "cap" on each ally as a spore shield; the final throws them like discs.
 
-### Fawngus (1 of 2) · Spore
+### Fawngus (1 of 2) · Grass
 - **Concept:** a fawn whose spots are tiny hat pegs, each wearing a mushroom cap.
 - **Rejected ideas:** fawn + coral fungus (too obvious); fawn + pincushion.
 - **Mix:** fawn + hat pegs with mushroom caps
@@ -766,7 +767,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** antlers, a garden on its back, hats worn.
 - **Archetype:** pretty
 
-### Hatstag (2 of 2) · Spore, Bloom
+### Hatstag (2 of 2) · Grass
 - **Concept:** an Irish elk whose antlers are a hat stand hung with mushroom caps.
 - **Rejected ideas:** Irish elk + coral-fungus antlers (too obvious for Spore); elk + chandelier (Chandelapi clash).
 - **Mix:** giant Irish elk (extinct) + hat stand
@@ -780,7 +781,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** shell with tiered roof-tile ridges curling up at the tip.
 **Ability link:** a guardian that roots in place and throws up a sheltering roof shield.
 
-### Pagodito (1 of 2) · Wyrm
+### Pagodito (1 of 2) · Dragon
 - **Concept:** a baby iguana with one temple-roof eave for a crest.
 - **Rejected ideas:** iguana + paper lantern (Lanterloris clash); iguana + bonsai.
 - **Mix:** baby iguana + one pagoda eave
@@ -790,7 +791,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** tiers, a building, bells.
 - **Archetype:** tough
 
-### Pagoguana (2 of 2) · Wyrm, Stone
+### Pagoguana (2 of 2) · Dragon, Rock
 - **Concept:** a marine iguana whose crest is a five-tier pagoda.
 - **Rejected ideas:** iguana + stone staircase; iguana + city skyline.
 - **Mix:** marine iguana + tiered pagoda
@@ -804,7 +805,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 **Egg:** dark shell with two curved blade-shaped ridges crossing on top.
 **Ability link:** a scissor-strike with crossed mandibles.
 
-### Grammite (1 of 2) · Swarm
+### Grammite (1 of 2) · Bug
 - **Concept:** a river larva with dagger jaws.
 - **Rejected ideas:** larva + garden shears; hellgrammite + pliers.
 - **Mix:** hellgrammite larva + curved daggers
@@ -814,7 +815,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** wings, thin legs, hair.
 - **Archetype:** creepy
 
-### Dobsabre (2 of 2) · Wyrm, Swarm
+### Dobsabre (2 of 2) · Dragon, Bug
 - **Concept:** a dobsonfly whose jaws are crossed cavalry sabres.
 - **Rejected ideas:** dobsonfly + hedge trimmer; dobsonfly + bolt cutters.
 - **Mix:** dobsonfly + crossed sabres
@@ -827,7 +828,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 ## 27. Proofhop line: katydid + sourdough bread (found: warm kitchens' cellars and damp mills)
 **Ability link:** it "proves": grows bigger and tougher the longer a fight lasts, then bursts in a yeast-spore cloud.
 
-### Proofhop (1 of 2) · Spore
+### Proofhop (1 of 2) · Grass
 - **Concept:** a katydid nymph that is a ball of rising dough.
 - **Rejected ideas:** katydid + cordyceps fungus (too obvious for Spore); katydid + violin.
 - **Mix:** katydid nymph + ball of rising dough
@@ -837,7 +838,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a bowl, a baker's hat, realistic insect hair, thin antennae.
 - **Archetype:** cute
 
-### Loafhopper (2 of 2) · Spore
+### Loafhopper (2 of 2) · Grass
 - **Concept:** a katydid that is a scored sourdough loaf, crust spikes and all.
 - **Rejected ideas:** katydid + mouldy cheese; grasshopper + baguette (too thin).
 - **Mix:** katydid + scored sourdough loaf
@@ -851,7 +852,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 
 # Rares (single stage)
 
-## 28. Reelacine (rare) · Shadow, Wild (found: at dusk on old moors, rarely)
+## 28. Reelacine (rare) · Dark, Normal (found: at dusk on old moors, rarely)
 - **Concept:** the last thylacine, living on as old black-and-white film.
 - **Rejected ideas:** thylacine + barcode; thylacine + jail cage.
 - **Mix:** thylacine (extinct) + film reel; the last thylacine was filmed in black and white.
@@ -862,7 +863,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** sleek
 - **Ability link:** a "rewind" dash that leaves a flickering after-image.
 
-## 29. Pavonazar (rare) · Lunar, Prism (egg-only). Special rule: male/female looks
+## 29. Pavonazar (rare) · Ghost, Fairy (egg-only). Special rule: male/female looks
 - **Concept:** a peacock whose eye-spots are glass evil-eye charms.
 - **Rejected ideas:** peacock + slot machine; peacock + kaleidoscope.
 - **Egg:** deep blue glass shell with one white-and-blue eye bead.
@@ -875,7 +876,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** pretty
 - **Ability link:** "watched": marks every enemy in sight at once.
 
-## 30. Malletary (rare) · Wild, Titan (egg-only)
+## 30. Malletary (rare) · Normal, Steel (egg-only)
 - **Concept:** a secretary bird that stomps with war-hammer feet.
 - **Rejected ideas:** secretary bird + quill pen (ink clash with Ermink); shoebill + executioner axe (Anchorbill clash).
 - **Egg:** long pale shell with dark hammer-head-shaped bands.
@@ -887,7 +888,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** fast
 - **Ability link:** a stomp combo that hits harder each kick.
 
-## 31. Ghoulamari (rare) · Lunar, Shadow (egg-only)
+## 31. Ghoulamari (rare) · Ghost, Dark (egg-only)
 - **Concept:** a vampire squid that is a fortune-teller's crystal ball.
 - **Rejected ideas:** vampire squid + ghost fungus (too obvious); vampire squid + opera cloak (worn).
 - **Egg:** dark red shell with a clear round window and silver mist swirling behind it.
@@ -899,7 +900,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** creepy
 - **Ability link:** "foresees" the next attack and dodges it once per fight.
 
-## 32. Glacione (rare) · Frost, Lunar (egg-only)
+## 32. Glacione (rare) · Ice, Ghost (egg-only)
 - **Concept:** a sea angel that is a frosty shuttlecock.
 - **Rejected ideas:** sea angel + snowflake (too obvious for Frost); sea angel + music-box dancer (person-like).
 - **Egg:** clear ice shell with one frost-feather pattern inside.
@@ -911,7 +912,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** pretty
 - **Ability link:** "smash": flips and dive-bombs a target, then floats back up.
 
-## 33. Gilabacus (rare) · Venom, Lunar (egg-only)
+## 33. Gilabacus (rare) · Poison, Ghost (egg-only)
 - **Concept:** a Gila monster whose beaded hide is an abacus.
 - **Rejected ideas:** Gila monster + bead curtain; Gila monster + bead necklace (worn).
 - **Egg:** orange-and-black shell beaded in rows like an abacus.
@@ -927,7 +928,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 
 # Legendaries (single stage, boss and event only, no egg)
 
-## 34. Sarcobra · Wyrm, Shadow
+## 34. Sarcobra · Dragon, Dark
 - **Concept:** a cobra whose hood is a royal sarcophagus lid.
 - **Rejected ideas:** cobra + snake-charmer basket; cobra + pharaoh headdress (worn).
 - **Mix:** Egyptian cobra + golden sarcophagus
@@ -937,7 +938,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a human mask face, bandage wraps, a pharaoh headdress worn.
 - **Archetype:** majestic
 
-## 35. Glaciammoth · Frost, Titan
+## 35. Glaciammoth · Ice, Steel
 - **Concept:** a woolly mammoth that is a living permafrost time capsule.
 - **Rejected ideas:** mammoth + glacier (too obvious); mammoth + bobsled (blade clash with Skateron).
 - **Mix:** woolly mammoth + permafrost time capsule
@@ -948,7 +949,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Archetype:** majestic
 - **Ability link:** each time it is "thawed" (damaged) it frees a relic buff for its team.
 
-## 36. Cetorgan · Echo, Lunar
+## 36. Cetorgan · Psychic, Ghost
 - **Concept:** a blue whale that is a cathedral pipe organ.
 - **Rejected ideas:** whale + submarine (Bathilus clash); whale + airship.
 - **Mix:** blue whale + cathedral pipe organ
@@ -958,7 +959,7 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 - **Avoid:** a church building, stained glass (Rosedart), floating notes, thin pipes.
 - **Archetype:** majestic
 
-## 37. Hydrangor · Bloom, Wyrm
+## 37. Hydrangor · Grass, Dragon
 - **Concept:** a hydra whose heads are hydrangea blooms.
 - **Rejected ideas:** hydra + candelabra (Snuffapi clash); hydra + garden hose.
 - **Mix:** three-headed hydra + hydrangea flowers
@@ -974,24 +975,23 @@ Archetype spread of the 77: cute 19, tough 12, sleek 8, fast 8, pretty 8, creepy
 
 | Type | Now | New | Total |
 |---|---|---|---|
-| Tide | 31 | 2 | 33 |
-| Tempest | 20 | 2 | 22 |
-| Ember | 18 | 0 | 18 |
-| Shadow | 15 | 7 | 22 |
-| Bloom | 15 | 2 | 17 |
-| Titan | 14 | 6 | 20 |
-| Prism | 13 | 6 | 19 |
-| Storm | 12 | 4 | 16 |
-| Frost | 11 | 6 | 17 |
-| Venom | 10 | 9 | 19 |
-| Stone | 10 | 9 | 19 |
-| Lunar | 9 | 10 | 19 |
-| Gravity | 8 | 10 | 18 |
-| Swarm | 8 | 10 | 18 |
-| Echo | 8 | 10 | 18 |
-| Wyrm | 7 | 11 | 18 |
-| Spore | 6 | 10 | 16 |
-| Wild | 4 | 13 | 17 |
+| Grass | 16 | 11 | 27 |
+| Water | 22 | 1 | 23 |
+| Dark | 14 | 6 | 20 |
+| Poison | 10 | 9 | 19 |
+| Ghost | 9 | 10 | 19 |
+| Fire | 18 | 0 | 18 |
+| Ice | 11 | 6 | 17 |
+| Psychic | 8 | 9 | 17 |
+| Steel | 13 | 4 | 17 |
+| Dragon | 7 | 9 | 16 |
+| Rock | 9 | 7 | 16 |
+| Bug | 8 | 8 | 16 |
+| Electric | 10 | 4 | 14 |
+| Fairy | 11 | 3 | 14 |
+| Flying | 13 | 0 | 13 |
+| Normal | 4 | 9 | 13 |
+| Ground | 4 | 8 | 12 |
 
 ## Notes for main and art
 - **Egg-only flag:** 25 lines need an `egg_only` flag so they never spawn wild; all other lines can still breed normally.

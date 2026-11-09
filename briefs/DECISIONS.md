@@ -454,3 +454,5 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
   - **Summoned form:** damage doesn't end the summon early, but killing the Boki does. A killed summon turns back into a wisp. Options: (a) it returns to its owner, or (b) it becomes stealable. Owner leaning: stealable only if the owner is down or dead; otherwise the wisp flies back to the owner, which briefly reveals the owner's location. Recommend.
   - **Stolen-wisp summon:** open whether a stolen wisp can be summoned at all, and for how long. Recommend.
   - **Carry-passive stacking, and PvP vs PvE rules:** no owner opinion. Design pass proposes them.
+
+- 2026-11-09 (owner): types use standard names (Normal, Fire, Water, Grass, Electric, Ice, Rock, Ground, Flying, Dragon, Dark, Poison, Bug, Steel, Ghost, Fairy, Psychic). Spore and Bloom merged into Grass. Mapping in boki-art/GAME_RULES_NOV8.md.
