@@ -30201,5 +30201,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_sandwidow_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_truffapir",
+    "name": "Truffapir (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_truffapir_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sandwidow",
+    "name": "Sandwidow (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sandwidow_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sandwidow",
+    "name": "Sandwidow (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sandwidow",
+    "name": "Sandwidow (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sandwidow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_truffapir",
+    "name": "Truffapir (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_truffapir_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gramofrill",
+    "name": "Gramofrill (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_gramofrill_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_truffapir",
+    "name": "Truffapir (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_truffapir_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_truffapir",
+    "name": "Truffapir (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_truffapir_4.jpg",
+    "ok": true
   }
 ]
