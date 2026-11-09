@@ -98,7 +98,8 @@ func _rmb(m: Match, P: Hunter, tag: String) -> void:
 	P.ak.ch_rmb = 0.0
 	await _drawn(m.hud)
 	var first: Array = HudSlot.shown_pips["sec"]
-	ok(absf(float(first[0]) - 0.75) < 0.02 and first.slice(1).all(func(f): return f == 0.0) and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
+	var rest_empty: bool = first.slice(1).all(func(f): return f == 0.0)
+	ok(absf(float(first[0]) - 0.75) < 0.02 and rest_empty and m.hud.slot_text.get("sec", "") == HudSlot.cd_text(left),
 		"%s: RMB none ready, first pip at 75%%, countdown %.1fs" % [tag, left])
 
 ## The contextual slot's own timer while airborne: Kael's Meteor Drop on the RMB slot, Grimble's air
@@ -110,15 +111,18 @@ func _airborne(m: Match, P: Hunter, hid: int, kit: String) -> void:
 		P.ak.ch_rmb = 1.0
 		P.grounded = false
 		await _drawn(m.hud)
-		ok(m.hud.slot_text.get("sec", "") == HudSlot.cd_text(3.0), "Kael airborne: the RMB slot counts the Meteor Drop's own 3 s ('%s')" % m.hud.slot_text.get("sec", ""))
+		var txt: String = m.hud.slot_text.get("sec", "")
+		ok(txt == HudSlot.cd_text(3.0), "Kael airborne: the RMB slot counts the Meteor Drop's own 3 s ('%s')" % txt)
 		P.ak.cd["air"] = 0.0
 		P.ak.cd["rmb"] = 5.0
 		P.ak.ch_rmb = 0.0
 		await _drawn(m.hud)
-		ok(m.hud.slot_text.get("sec", "") == "", "Kael airborne: Meteor Drop ready while the Smash rests, slot shows no countdown")
+		txt = m.hud.slot_text.get("sec", "")
+		ok(txt == "", "Kael airborne: Meteor Drop ready while the Smash rests, slot shows no countdown")
 		P.grounded = true
 		await _drawn(m.hud)
-		ok(m.hud.slot_text.get("sec", "") == HudSlot.cd_text(5.0), "Kael on the ground: the Smash's own 5 s again")
+		txt = m.hud.slot_text.get("sec", "")
+		ok(txt == HudSlot.cd_text(5.0), "Kael on the ground: the Smash's own 5 s again")
 	elif kit == "dredge":
 		var full: float = P.ak.long_dash_cd()
 		P.ex_cd = full * 0.5

@@ -31,7 +31,8 @@ static func src(charges: float, cap: int, regen: float, air_cd: float, air_max: 
 static func of_hunter(h: Hunter) -> Dictionary:
 	var di := h.slot_info("dash")
 	var air_max := air_cd_of(h) if h.ak == null or h.ak.has_long_dash() else 0.0
-	return src(h.dashes, int(h.max_dashes()), h.dash_regen(), h.ex_cd, air_max, String(di["icon"]), di["col"], not h.grounded)
+	return src(h.dashes, int(h.max_dashes()), h.dash_regen(), h.ex_cd, air_max, String(di["icon"]), di["col"],
+		not h.grounded)
 
 ## How long the air dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func air_cd_of(h: Hunter) -> float:
