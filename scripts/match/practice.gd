@@ -36,6 +36,7 @@ static func attach(match_node: Match) -> Practice:
 	p.m = match_node
 	match_node.add_child(p)
 	p._build_bar()
+	KitDrill.attach(p)
 	return p
 
 ## The bar's entries: [id, label, icon, open, key cap]. The Arena and the training area share a loadout
