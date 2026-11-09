@@ -562,6 +562,19 @@ the loupe is scripted; the face's squint, teeth and gums and the glowing veins a
 
 Claire v2 total: 6 tasks, 85 credits. Prompts in art/wardens/src/claire_recipe.json; built pieces (ears, braid, tail, spear) in art/wardens/claire/IMPORT.md.
 
+### Meeko v2 (Pip, tender; owner redesign: capelet with heart brooch, wicker satchel, bandaged ear, goggles and flowers, constellations), 2026-11-08 (116 credits)
+| Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
+|---|---|---|---|---|---|---|
+| Meeko v2 edit front | 16:5x | 01a1bc10-acca-76f1-8769-d97060663188 | nano-banana-pro (image-to-image) | meeko_v2_turnaround front, arms out in an A-pose, wings and companions out | 9 | Kept |
+| Meeko v2 edit side | 16:5x | 01a1bc10-acda-716d-aa16-410fde30b30e | nano-banana-pro | as front, side | 9 | Kept |
+| Meeko v2 edit back | 16:5x | 01a1bc10-acea-77c3-9b06-00173d1db6c5 | nano-banana-pro | as front, back | 9 | Kept |
+| Meeko v2 edit 3/4 | 16:5x | 01a1bc10-ad34-7060-b567-c20bfec2f42e | nano-banana-pro | as front, three-quarter | 9 | Kept |
+| Meeko v2 body | 16:5x | 01a1bc12-21cd-7326-a163-bfa9a30aad63 | meshy-7.1 | the four edits as images and texture refs; geometry 2k, meshy-7 texture 8k, no PBR, no remesh, a-pose, enhancement off | 40 | **Kept** |
+| Meeko v2 head | 16:5x | 01a1bc12-21c9-734f-a228-441481f9f979 | meshy-7.1 | the four heads cropped from the turnaround (front, 3/4, side, back); as the body | 40 | **Kept** |
+
+Meeko v2 total: 6 tasks, 116 credits. The same rig and clips: only the two scans changed (tools/art1/pip_source.py's class
+rules, joints, arm and tail paths; pip_head_scan.py's scale from the cheek width at the nose). IMPORT.md "Meeko v2".
+
 ## A hand-made, already rigged model (Dredge, 2026-11-04): tools/blender/fit_rigged.py
 No Meshy. The model's own rigid skin and extra bones are kept; the script renames them onto the contract.
 1. **Inspect** it in Blender: bones (names, parents, heads), each vertex group's bounds, loose parts, materials,
