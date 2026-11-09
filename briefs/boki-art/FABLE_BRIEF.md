@@ -2,6 +2,16 @@
 
 You are writing the new art ruleset for Project Boki, an indie creature-collector action game. About 225 creatures ("Boki") each have a hero card, a four-view turnaround sheet and an encyclopedia portrait, all AI-generated. The owner: "people are very anti AI art, so I wonder what makes it look AI and how to fix that up." Your output decides how all 225 get re-rendered, so it must be concrete enough to paste into prompts and to check by eye.
 
+## Setup (do this first; the repo is about 6 GB, so never do a full checkout)
+```
+git clone --depth 1 --filter=blob:none --no-checkout --single-branch -b ext/agent-briefs https://github.com/OrriBogdan2/project-boki
+cd project-boki
+git sparse-checkout init --no-cone
+printf '%s\n' '/briefs/boki-art/*.md' '/briefs/boki-art/batch/*.py' '/briefs/boki-art/style_refs/' '/briefs/boki-art/cards/' > .git/info/sparse-checkout
+git checkout ext/agent-briefs
+```
+Sheets, portraits and generated images are NOT checked out: read any of them with `git show origin/ext/agent-briefs:<path> > /tmp/x.jpg` and view /tmp/x.jpg. Never check out `briefs/boki-art/batch/out/` (7,000+ images).
+
 ## Read first (all paths are in repo OrriBogdan2/project-boki, branch ext/agent-briefs)
 1. `briefs/boki-art/DEAI_RESEARCH.md`: research on what makes OUR art read as AI, the professional principles that fix each tell, and a verdict on the style test. Start here.
 2. `briefs/boki-art/STYLE_CANON.md`, `BOKI_DESIGN_RULES.md` (owner taste notes at the end), `GRADES.md`, `PANEL_BRIEF.md`: the current rules. Several current rules cause the AI look ("soft hand-painted shading", "big glossy eyes", "soft blush at every stage"): you may override them, but list every override and why.
@@ -28,4 +38,4 @@ OWNER STYLE PICK: (fill in from the owner's round-6 answer, e.g. "a for all six"
 4. `MARQUEE_HUMAN_PASS.md`: the ~20 Boki that should get a human paint-over (starters, legendaries, store/marketing art), with what the artist should fix on each.
 5. Then render nothing yourself; end with a 10-line summary: the biggest changes, what you overrode in the old canon, and the 3 risks to watch.
 
-Rules: do not commit or push; write the files and stop. Be concrete (numbers, named Boki examples), and keep each file short enough to use.
+Rules: commit ONLY your four new files to ext/agent-briefs and nothing else (no edits to existing files, no deletions): `git add` those four paths, commit, then `git pull --rebase` and `git push`; retry the pull+push if it is rejected (other agents push to this branch often). Then stop. Be concrete (numbers, named Boki examples), and keep each file short enough to use.
