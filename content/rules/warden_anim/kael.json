@@ -64,7 +64,9 @@
 			"clip": "wave"
 		},
 		"jug_slam": {
-			"clip": "slam"
+			"clip": "slam",
+			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
+			"blend_out": 0.2
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
@@ -79,7 +81,10 @@
 			"hold_from": 0.3
 		},
 		"jug_meteor_land": {
-			"clip": "meteor_land"
+			"clip": "meteor_land",
+			"fade": 0.05,
+			"time": [[0, 0], [0.13, 0.07], [0.5, 0.5]],
+			"blend_out": 0.15
 		},
 		"jug_dash": {
 			"clip": "dash"

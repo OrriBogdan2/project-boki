@@ -75,7 +75,10 @@
 			"hold_from": 0.2
 		},
 		"bul_smash": {
-			"clip": "lmb_slam"
+			"clip": "lmb_slam",
+			"fade": 0.04,
+			"time": [[0, 0.1], [0.1, 0.117], [0.5, 0.23]],
+			"blend_out": 0.38
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
@@ -121,7 +124,10 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"fade": 0.04,
+			"time": [[0, 0.1], [0.1, 0.15], [0.6, 0.3]],
+			"blend_out": 0.4
 		},
 		"mf_xform": {
 			"clip": "fuse"

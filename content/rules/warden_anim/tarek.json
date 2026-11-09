@@ -64,14 +64,19 @@
 			"hold_from": 0.3
 		},
 		"breah_slam": {
-			"clip": "rmb_slam"
+			"clip": "rmb_slam",
+			"time": [[0, 0], [0.66, 0.66], [0.76, 0.86], [1.36, 1.367]],
+			"blend_out": 0.2
 		},
 		"breah_dive": {
 			"clip": "rmb_dive",
 			"hold_from": 0.3
 		},
 		"breah_slam_land": {
-			"clip": "rmb_land"
+			"clip": "rmb_land",
+			"fade": 0.05,
+			"time": [[0, 0.1], [0.12, 0.4], [0.75, 0.733]],
+			"blend_out": 0.2
 		},
 		"breah_lunge": {
 			"clip": "rmb_lunge"
