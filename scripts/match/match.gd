@@ -725,6 +725,7 @@ func _start(o: Dictionary) -> void:
 	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
+	StatusLooks.of(self)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)

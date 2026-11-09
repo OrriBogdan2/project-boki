@@ -169,6 +169,7 @@ func _tick_sparks(dt: float) -> void:
 			continue
 		var n := int(s["n"])
 		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT)
+		StatusLooks.of(m).keep(f, "static")
 		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
 			# Live: arcs crawl down the body from the marker to the ground
 			var foot := ground(f.pos) + Vector3(fx().rng.randf_range(-0.5, 0.5), 0.05, fx().rng.randf_range(-0.5, 0.5))
