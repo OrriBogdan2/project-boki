@@ -120,6 +120,7 @@ const STRIDE := {
 	"selenfin": [1.50, 2.90],
 	"zapple": [0.75, 1.74],
 	"hivara": [0.63, 1.42],
+	"caecilith": [0.14, 0.35],
 	"glomwort": [1.50, 2.90],
 	"kestrike": [0.30, 0.42],
 	"kindlewren": [0.39, 0.50],
