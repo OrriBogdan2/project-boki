@@ -1,7 +1,10 @@
 # Warden 3D pipeline (Meshy image-to-3D -> bake -> Blender fit -> WardenSkeleton .glb)
 
-**Game budget (item 94, overrides the per-Warden IMPORT.md notes below):** every .glb at most 15k triangles
-(`tools/blender/decimate_warden.py` after the fit), imported with LODs; every texture VRAM-compressed, mipmapped,
+**Game budget (owner 11-09, overrides the per-Warden IMPORT.md notes below; was 15k, item 94):** every .glb at most
+26k triangles (~25k: the face, hands and weapon decimated as their own regions so they keep their density), with a
+2048 tangent-space normal map baked from the dense Meshy mesh (Cycles selected-to-active, then
+`paintkit.clean_normal`; lossless PNG in the glb, so export images AUTO, not JPEG). The worked examples: kael_finish,
+hem_finish (docs/art/wardens/revamp/). Imported with LODs where the cards allow; every texture VRAM-compressed, mipmapped,
 at most 2048². See RIG_CONTRACT.md "Budget and checks".
 
 **Start from docs/art/wardens/RECIPE_95.md** (2026-11-04: the golden recipe from Vex r3d, run by
@@ -84,7 +87,8 @@ Sparkle's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already 
 - The ink shell (outline.gdshader) is half the procedural heroes' width (`INK_WIDTH`) and, with `ink_mask`, never
   grows past the vertex colour's alpha x 2 cm: the fit writes how much room each vertex has before the shell would
   poke through a thin strand, a frayed hem or a fold (the r2 ragged fringe). Hair, eyes and glow have no shell.
-- Meshy's metallic, roughness and normal maps are not used (they read as plastic under the toon ramp).
+- Meshy's metallic, roughness and normal maps are not used (they read as plastic under the toon ramp); the normal
+  map that ships is our own bake from the dense scan onto the game mesh's UVs (see the budget above).
 
 ## What r1/r2 taught (kept in the recipe)
 - Never filter or decimate across Meshy's UV crumbs (r2's patchy facets and smeared face): bake to new UVs instead.
