@@ -54,7 +54,8 @@ func _grab(m: Match, T: Hunter) -> Image:
 func _save(arch: String, frames: Array) -> void:
 	var w: int = (frames[0] as Image).get_width()
 	var first: Image = frames[0]
-	var out := Image.create(w * frames.size() + GAP * (frames.size() - 1), first.get_height(), false, first.get_format())
+	var wide := w * frames.size() + GAP * (frames.size() - 1)
+	var out := Image.create(wide, first.get_height(), false, first.get_format())
 	out.fill(Color(0.05, 0.05, 0.07))
 	for i in frames.size():
 		var fr: Image = frames[i]
