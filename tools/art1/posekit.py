@@ -187,7 +187,8 @@ class Solver:
         on_W = hilt - q_on @ (Vector(lr["palm"]) - H0["hand.L"])
         w = P.get("Lw", 0.0)
         Wl = free_W.lerp(on_W, w)
-        q_free = q_hips.slerp(q_hips, 0.0)
+        # "LF" (fingers, palm normal) turns a free left hand; without it the hand rides the chest. Rest: fingers down, palm in (+x)
+        q_free = frame_of(*P["LF"]) @ frame_of((0, 0, -1), (1, 0, 0)).inverted() if "LF" in P else q_hips
         q_lh = q_free.slerp(q_on, w)
         Sl = D_hips(H0["upper_arm.L"])
         quL, qfL, _ = self.arm_ik("L", Sl, Wl, Vector((-0.65, -0.55, -0.45)), q_hips)
