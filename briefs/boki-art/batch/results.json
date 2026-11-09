@@ -36144,5 +36144,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_umbrink_u2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_barokat_b3",
+    "name": "Barokat",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_barokat_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card6",
+    "name": "Barokat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokat_card6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_umbrink_u2",
+    "name": "Umbrink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_umbrink_u2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card6",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card6",
+    "name": "Umbrink (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/umbrink_card6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_b3",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_card6",
+    "name": "Umbrink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrink_card6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrink_u2",
+    "name": "Umbrink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrink_u2_2.jpg",
+    "ok": true
   }
 ]
