@@ -69,6 +69,7 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | leash | 10 |
 | leash_swing | 2 |
 | rebloom_dist | 20 |
+| steal | {"_doc": "Stolen Boki wisps (KinSteal, decision 0041, WISP_DESIGN_OPEN.md Q6/Q8): loose_s = s a downed hunter's wisp floats loose; grab_r = m reach, grab_s = s holding interact; carry_max = stolen wisps one hunter carries; passive_k = share of each stolen carry passive; summon_k = share of its window for the one stolen summon, at least summon_min_s s.", "loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0} |
 
 ## boki_system (`content/rules/boki_system.json`)
 

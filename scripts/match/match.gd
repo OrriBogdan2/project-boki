@@ -4683,6 +4683,8 @@ func _update_interact(dt: float) -> void:
 				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
 					break
+		if best.is_empty():
+			best = KinSteal.interact_for(self, h, want, dt)      # 2b. grab a loose Boki wisp
 		# 3. wear gear lying on the ground (tunings are taken by walking over them)
 		if best.is_empty():
 			var bd := 1.5
@@ -5409,6 +5411,7 @@ func _finish() -> void:
 	if over:
 		return
 	over = true
+	KinSteal.match_end(self)
 	if Overlay.is_open():
 		if Overlay.closed.is_connected(_on_menu_closed):
 			Overlay.closed.disconnect(_on_menu_closed)

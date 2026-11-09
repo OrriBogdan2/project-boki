@@ -98,6 +98,10 @@ var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
+var loose_t := 0.0                # s its wisp floats loose, free to grab (KinSteal)
+var stolen_summoned := false      # a thief used its one summon this match (KinSteal)
+var back_home := false            # its loose wisp went back to its downed hunter, who keeps it this time (KinSteal)
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -158,6 +162,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	if owner_h:
 		comp = KinCompanion.new(self)
 	wisp = owner_h != null and KinWisp.mode(match_node)
+	home_h = owner_h
 	summon = KinSummon.new(self) if owner_h else null
 	set_model(KinWisp.look(self))
 	ring = MeshInstance3D.new()
@@ -188,7 +193,7 @@ func carry_style() -> String:
 ## On you by order (Return), settled in: its carry passives are on. A Boki out beside you, or carried only
 ## over a glide or a drop, gives nothing (docs/decisions/0002).
 func carried() -> bool:
-	return not dead and state == "shoulder" and settle >= 1.0 and cmd == "return"
+	return not dead and loose_t <= 0.0 and state == "shoulder" and settle >= 1.0 and cmd == "return"
 
 ## Walking at your side under the Follow order, close enough to count as "with you" (the death-box rules).
 func with_owner() -> bool:
@@ -600,7 +605,7 @@ func sim(dt: float) -> void:
 		runner.tick(dt)
 	if summon and not remote:
 		summon.tick(dt)
-	if KinWisp.ride(self):
+	if KinWisp.ride(self, dt):
 		if not remote:
 			KinRegen.tick(self, dt)
 		return
@@ -1058,6 +1063,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
+	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
 	if not model or KinWisp.render(self):
 		return

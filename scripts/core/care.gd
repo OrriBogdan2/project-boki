@@ -546,6 +546,9 @@ static func dex_mark(species: String, what: String, extra := "") -> void:
 		"form":
 			if extra != "" and not (e["forms"] as Array).has(extra): e["forms"].append(extra)
 		"shimmer": e["shimmer"] = true
+		"echo":           # a stolen wisp's soul echo (KinSteal)
+			e["seen"] = true
+			e["echo"] = int(e.get("echo", 0)) + 1
 		"mutation":
 			if extra != "" and not (e["mutations"] as Array).has(extra): e["mutations"].append(extra)
 
