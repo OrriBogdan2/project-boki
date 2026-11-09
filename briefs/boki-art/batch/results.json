@@ -49402,5 +49402,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_sporcupine_x1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_terrarimit_x1",
+    "name": "Terrarimit (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_terrarimit_x1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_skateron_x1",
+    "name": "Skateron (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_skateron_x1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrarimit_x1",
+    "name": "Terrarimit (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_terrarimit_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanternmit_x1",
+    "name": "Lanternmit (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lanternmit_x1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_geodemole_x1",
+    "name": "Geodemole (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_geodemole_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lanternmit_x1",
+    "name": "Lanternmit (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lanternmit_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrarimit_x1",
+    "name": "Terrarimit (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_terrarimit_x1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sporcupine_x1",
+    "name": "Sporcupine (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sporcupine_x1_3.jpg",
+    "ok": true
   }
 ]
