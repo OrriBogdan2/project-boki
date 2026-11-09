@@ -4428,3 +4428,8 @@ ART oarlet 8.47 briefs/boki-art/evolutions/Oarlet.jpg kind=turnaround panel=8.6/
 ART tinbrock 8.47 briefs/boki-art/evolutions/Tinbrock.jpg kind=turnaround panel=8.4/8.5/8.5
 
 READY ext/warden-bob-damp-rebased 92882bf31 (supersedes ext/warden-bob-damp ba31e5ef6; job 20261109-060200-a4, w2). Merged origin/main d255acbee: clean, no conflicts (only Net.VERSION and release.yml came in); one style fix, wrapped a long doc line in tools/anim_shots.gd for the style ratchet. Intent unchanged: WardenGait loco.bob damps hip bob at a run. Checks: --import ok, --anim-audit FAIL 0 (all 12), --check 0 failures, health --strict OK.
+## 01:37 ET 11-09 — art session: round 30 complete (s11, s14)
+ART starcap 8.33 briefs/boki-art/batch/out/c_starcap_4.jpg kind=concept status=owner-review panel=8.3/8.3/8.4
+ART narfoil 8.47 briefs/boki-art/batch/out/ta_narfoil_2.jpg kind=turnaround status=owner-review panel=8.6/8.4/8.4
+ART coolatee_r_w30 8.33 briefs/boki-art/batch/out/coolatee_r_w30_3.jpg kind=turnaround status=owner-review panel=8.3/8.4/8.3
+Round 31 queued (52 fixes; stance redos regenerate). Items already in the owner's queue are no longer re-fixed unless he comments.
