@@ -86,6 +86,16 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 - Her dash after-image is her own: three green fletch streaks at hip, chest and shoulder height (PinFx.afterimage), not the shared ghost.
 - Nameplate height: the shared 2.35 m fits at the new scale (ArchKit.plate_height, read by the HUD branch).
 
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). Her ranges are in whole metres; the source has no number for the Heavy Shot's range.
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| RMB Heavy Shot | 62 m/s (`rmb.pin.speed`) | 14 m, +3 at rank 3, up to +20% charged | 0.23 s | none | no, its full reach | [F] near-hitscan, about 6 body heights in one frame (at least 54 m/s); range unknown | match on speed, range has no source |
+| E Rain of Arrows | the wall appears at once | 9 m (`e.reach`), never nearer than 2 m | 0 s | arrows fall into it | yes: centred on the cursor distance | [F] a wall centred at the cursor distance (4.5 to 6 body heights seen), instant | match |
+| X Primal Forces | 90 m/s (`x.speed`), a beam | 18 m (`x.range`) | 0.20 s | none | no, past the cursor | [F] a beam at once along the line, about 1.5x normal range (the bow's 12 m x 1.5 = 18 m) | match |
+
 ## Small mechanics (fine print; source, footage, ours)
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|

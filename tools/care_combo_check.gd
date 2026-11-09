@@ -832,6 +832,12 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	var seed_shot: Dictionary = _mine(m, P)[-1]
+	var seed_v := (seed_shot["vel"] as Vector2).length()
+	ok(
+			"mm RMB: the seed leaves at 36 m/s and flies a fixed 15.3 m lane (source ~20 body heights/s)",
+			absf(seed_v - 36.0) < 0.1 and absf(float(seed_shot["life0"]) * seed_v - 15.3) < 0.1,
+			"%.1f m/s, %.1f m" % [seed_v, float(seed_shot["life0"]) * seed_v])
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:

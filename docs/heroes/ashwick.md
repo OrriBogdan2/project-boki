@@ -99,6 +99,15 @@ carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows 
 - Burst: Flue Flight plus the cloak, then straight into a merge and its ultimate, leaves a full-health light hunter standing
   (`--ashwick-combo-check`, "burst").
 
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). 
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| RMB Cinder Shot | 26 m/s (`rmb.speed`) | 14 m | 0.54 s | none | no, always its full length (owner review item 19) | [F] about 13 to 15 body heights a second (about 25 m/s); one miss ended near the cursor (6.5 body heights), which the owner overrode | match on speed; range is the owner's |
+| X Flue Flight | 12.6 m/s (`x.speed`), steered | 1.8 s of flight, about 22.7 m | the flight | none, low flight | follows the cursor, steers at up to 120 degrees a second | [F] about 7 body heights a second (12.6 m/s) for 1.4 s; ours 30% longer (owner item 20) | match |
+
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |
 |---|---|---|---|

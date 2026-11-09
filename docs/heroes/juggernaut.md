@@ -246,6 +246,15 @@ ultimate (now the X cooldown).
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
 
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). The hold-blast (LMB) and the Lunge and Meteor Drop (dashes, no projectile) are not in this table.
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| E Warchain, flying out | 32 m/s (`e.speed`) | 13 m (`e.range`) | 0.41 s | none | no, to its range or the first foe or wall | [F] about 7 body heights (12.6 m) in 0.4 s (31.5 m/s) | match |
+| E Warchain, the pull | 22 m/s (`e.reel_speed`) | the tether | 0.41 s for 9 m | none | to the anchor | [F] about 5 body heights (9 m) in 0.4 s (22.5 m/s) | match |
+
 ## Small mechanics
 
 From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Brall) and the owner's notes.

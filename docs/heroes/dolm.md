@@ -192,6 +192,15 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Basalt Spine, punch, then the merge | the target lives (burst cap) | `ult burst: ridge, punch, merge and its ultimate leave a full-health light hunter standing` |
 | Quake Fist charge, then her air dash (item 51) | the charge carries through and charges on (short of the auto punch); let go in it and she punches as it ends, in the air, carried on at about the dash's end speed (the punch step, 7 m/s in the air, along her aim) | `item 51: the Quake Fist charge carries through her air dash...`, `item 51: let go in the air dash...` |
 
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). The tap boulder (LMB) is in the LMB rows. The source has no launch speed for a punched rock.
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| Punched rock | 22 m/s (`rock.speed`) | 12 m (`rock.range`) | 0.55 s | none | no | [F] a flaming boulder along the aim; no speed or range seen | no source number |
+| Shift Landslide rock | 22 m/s (`rock.speed`) | 6 m (`dash.rock_range`) | 0.27 s | none | no | [F] the rock rolls on about 5 to 6 body heights after the dash (the sheet's scale: one body height about 1 m) | match |
+
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
