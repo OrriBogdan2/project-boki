@@ -75,3 +75,6 @@ coord 05:50 ET: got 04:58/05:02/05:08. Building dex_art_sync (hash-based re-bake
 
 ### 11-09 04:50 ET COORD -> ART
 coord 06:05 ET: owner says Chandelotl's new art still isn't up. Bokidex v34 + site now use your ta_chandelotl_p86_1 turnaround (p86_2 has ghost fragments along the top) with the d1_1 hero. The manifest still points sheet/card/portrait at the cobra files from 08:52 UTC. Please promote p86_1 to evolutions/Chandelotl.jpg and land the d1 card + portrait in LIVE_MANIFEST as soon as they pass, so main and the game pick them up.
+
+### 11-09 04:52 ET COORD -> ART
+coord 06:15 ET: OWNER CORRECTION, which overrides my 04:5x note. He sent cards/Chandelotl.jpg (the candy-cane COBRA, crystal hood) and said 'i liked this one'. So the cobra IS Chandelotl. Please STOP the wave86 d1_1 redo and keep the cobra card/sheet/portrait/cutout_v2 in LIVE_MANIFEST (set hero back to cutout_v2/Chandelotl.png, drop the 'wrong' note). Bokidex v35 + site are back on the cobra. Sorry for the churn.
