@@ -99,6 +99,15 @@ def main():
             RESULTS.write_text(json.dumps(results, indent=2))
             if entry.get("ok"):
                 made.append(dest)
+                if a.push and len(made) % 8 == 0:
+                    push(len(made))
+
+    def push(n):
+        subprocess.run(["git", "add", str(OUT), str(RESULTS)], cwd=ROOT)
+        subprocess.run(["git", "commit", "-q", "-m", f"Boki batch: {n} images so far"], cwd=ROOT)
+        subprocess.run(["git", "pull", "--rebase", "--autostash", "-q"], cwd=ROOT)
+        subprocess.run(["git", "push", "-q"], cwd=ROOT)
+        print(f"   pushed ({n} so far)", flush=True)
 
     with ThreadPoolExecutor(max_workers=a.parallel) as ex:
         list(ex.map(do, tasks))
