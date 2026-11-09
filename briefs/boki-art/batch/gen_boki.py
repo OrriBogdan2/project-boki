@@ -92,6 +92,9 @@ def main():
             except Exception as e:
                 entry["ok"] = False
                 entry["error"] = str(e)[:300]
+                if "API_KEY_INVALID" in str(e) or "PERMISSION_DENIED" in str(e):
+                    print("\nSTOPPING: the API key was rejected. Set it again with: export GEMINI_API_KEY=\"your key\"", flush=True)
+                    os._exit(2)
                 print(f"   {job['id']} run {run} attempt {attempt+1} failed: {entry['error']}", flush=True)
                 time.sleep(10 * (attempt + 1))
         with lock:
