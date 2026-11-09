@@ -65285,5 +65285,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_pavonazar_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_scoopsy_r4",
+    "name": "Scoopsy",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_scoopsy_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chiptero_r4",
+    "name": "Chiptero",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chiptero_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pagodito_r4",
+    "name": "Pagodito",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pagodito_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gambitfin_r4",
+    "name": "Gambitfin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gambitfin_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mumblet_r4",
+    "name": "Mumblet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_mumblet_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_barostorm_r4",
+    "name": "Barostorm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_barostorm_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scoopsy_r4",
+    "name": "Scoopsy",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_scoopsy_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole_r4",
+    "name": "Bullpole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_r4_1.jpg",
+    "ok": true
   }
 ]
