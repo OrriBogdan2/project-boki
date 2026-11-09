@@ -168,8 +168,8 @@ static func why_not(rec: Dictionary) -> String:
 	if rec.get("ghost_wait", false):
 		return "Away"
 	var ss := Care.starve_stage(rec)
-	if ss in ["weak", "refuse", "sick", "dead"]:
-		return "Too weak from hunger"
+	if ss == "sulky":
+		return "Sulking until it's fed"
 	return ""
 
 static func can_work(rec: Dictionary) -> bool:

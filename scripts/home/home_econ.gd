@@ -121,15 +121,12 @@ func tick(d: float) -> void:
 	if acc < 2.0:
 		return
 	acc = 0.0
-	# hoppers top themselves up; starving kin get noticed, and one that's gone too far dies
+	# hoppers top themselves up; hungry kin get noticed
 	for f in Econ.feeders():
 		if Econ.auto_refill(f) > 0:
 			refresh_feeder(f)
 	for rec in KinBox.farm():
 		var st := Care.starve_stage(rec)
-		if st == "dead":
-			_kin_died(rec, Econ.kin_dies(rec, "starved"))
-			continue
 		var was := String(told.get(rec["uid"], ""))
 		if st != was:
 			told[rec["uid"]] = st
@@ -139,18 +136,6 @@ func tick(d: float) -> void:
 					h._emote(k, "!", true)
 					h._say(k, BokiLines.say(rec, "want_food"), 0.0, false)
 				h._toast("%s: %s" % [rec["name"], String(Care.STARVE_INFO[st][0]).to_lower()])
-
-func _kin_died(rec: Dictionary, g: Dictionary) -> void:
-	var k: Dictionary = h._kin_entry(rec)
-	if not k.is_empty():
-		var n: Node3D = k["node"]
-		h.fx.burst(n.position + Vector3(0, 0.6, 0), Color("bff8ec"), 22, 2.5, 0.9, -1.0)
-		n.queue_free()
-		h.kins.erase(k)
-	build_graves()
-	Save.save_game()
-	_notice("%s has died" % g["name"], ["%s starved. It had nothing to eat for days." % g["name"],
-		"Its grave is in the graveyard, east of the farm.", "Keep a feeder filled so it never happens again." + (" A Soul Shrine can bring a Boki back." if not Save.has_building("shrine") else "")])
 
 # ------------------------------------------------------------------ what you can walk up to
 ## The nearest feeder, grave or the graveyard gate if it's closer than bd, as an interact entry.
@@ -547,24 +532,17 @@ func shop_goods() -> Array:
 ## Called once the home screen is up: what happened while you were away.
 func show_away() -> void:
 	var lines: Array = []
-	var died: Array = []
 	for e in away:
-		if e["kind"] == "died":
-			died.append(e["grave"])
-		elif e["kind"] == "starving":
+		if e["kind"] == "starving":
 			if String(told.get(e["rec"]["uid"], "")) == String(e["stage"]):
 				continue      # already told you about this stage (it's in the Boki's card and the log)
 			var info: Array = Care.STARVE_INFO[String(e["stage"])]
 			lines.append("%s: %s. %s" % [e["rec"]["name"], String(info[0]).to_lower(), info[1]])
 			told[e["rec"]["uid"]] = String(e["stage"])
 	away = []
-	for g in died:
-		_notice("%s has died" % g["name"], ["%s starved while you were away. It had nothing to eat for days." % g["name"],
-			"Its grave is in the graveyard, east of the farm. You can visit it there.",
-			"A filled feeder keeps your Boki fed while you're gone." + (" A Soul Shrine can bring a Boki back, a little changed." if not Save.has_building("shrine") else "")])
 	if not lines.is_empty():
 		lines.append("Fill a feeder (by the cooking pot), or feed them from their card.")
-		_notice("Your Boki are starving", lines)
+		_notice("Your Boki missed a meal", lines)
 
 func _notice(title: String, lines: Array) -> void:
 	if not h.is_inside_tree():
@@ -577,15 +555,6 @@ func _notice(title: String, lines: Array) -> void:
 		var lb := UI.label(String(l), 15, UI.INK)
 		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(lb)
-
-## Why your partner can't come out (starving too long), or "".
-func refuse_reason() -> String:
-	var ak := Save.active_kin()
-	if ak.is_empty():
-		return ""
-	if Care.starve_h(ak) >= Care.STARVE["refuse"]:
-		return "%s is too weak from hunger to come. Feed it (or fill a feeder) first, or pick another partner." % ak["name"]
-	return ""
 
 # ------------------------------------------------------------------ the graveyard
 func open_graveyard() -> void:

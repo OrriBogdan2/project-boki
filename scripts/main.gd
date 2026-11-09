@@ -1120,24 +1120,18 @@ func _economy_check() -> void:
 	rec["needs"]["food"] = 70.0; rec["needs_t"] = now - 3.0 * 86400.0; rec.erase("starve")
 	var ev := Econ.catch_up_all()
 	ok.call(ev.is_empty() and Care.starve_h(rec) == 0.0 and Care.need(rec, "food") > 0.0, "3 days away with an auto hopper and kibble: fed (food %d, %d kibble left)" % [int(Care.need(rec, "food")), Econ.pantry("kibble")])
-	# 5. starving, with nothing to eat: the timeline
+	# 5. nothing to eat for days: it sulks and stays alive (--needs-floor-check covers the floor)
 	Save.d["feeders"] = []
 	Save.d["items"]["kibble"] = 0
-	var line: Array = []
-	var died_at := -1.0
-	for days in [0.5, 1.0, 2.0, 3.0, 4.0, 5.0]:
-		var r2: Dictionary = rec.duplicate(true)
-		r2["uid"] = "starve%d" % int(days * 10)
-		r2["needs"] = {"food": 70.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
-		r2.erase("starve")
-		r2["needs_t"] = now - days * 86400.0
-		Save.d["roster"] = [r2]
-		var ev2 := Econ.catch_up_all()
-		var st := Care.starve_stage(r2) if not ev2.any(func(e): return e["kind"] == "died") else "dead"
-		if st == "dead" and died_at < 0.0: died_at = days
-		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
-	print("ECON  starving timeline: " + "  |  ".join(line))
-	ok.call(died_at >= 3.0 and died_at <= 5.0, "unfed with no feeder, a kin dies after several days (day %.1f)" % died_at)
+	var r2: Dictionary = rec.duplicate(true)
+	r2["uid"] = "starve50"
+	r2["needs"] = {"food": 70.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
+	r2.erase("starve")
+	r2["needs_t"] = now - 5.0 * 86400.0
+	Save.d["roster"] = [r2]
+	var ev2 := Econ.catch_up_all()
+	ok.call(Care.starve_stage(r2) == "sulky" and Save.d["roster"].has(r2) and Econ.graves().is_empty(), "unfed with no feeder for 5 days, a kin sulks and lives (%.0fh, %d events)" % [Care.starve_h(r2), ev2.size()])
+	Econ.kin_dies(r2, "starved")      # a grave from an old save, for the shrine below
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
 	# 6. the Soul Shrine brings one back, changed
 	var g: Dictionary = Econ.graves()[Econ.graves().size() - 1]

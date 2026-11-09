@@ -311,7 +311,7 @@ static func serve_any(rec: Dictionary) -> Dictionary:
 ## The time you were away, for every kin at once: the usual catch-up (Care.catch_up) for up to half
 ## a day, then for longer absences food runs down slowly, hour by hour, and hungry kin eat from the
 ## feeders in turn. Kin with nothing left to eat start to starve (Care's starve clock).
-## Returns what happened: [{kind: "died"|"starving", rec, ...}].
+## Returns what happened: [{kind: "starving", rec, stage}].
 static func catch_up_all() -> Array:
 	var roster: Array = Save.d["roster"]
 	var extra := {}
@@ -340,15 +340,13 @@ static func catch_up_all() -> Array:
 			Care.starve_step(rec, step)
 	return check_starving()
 
-## Kin whose starving has gone too far die; the rest get a warning. [{kind, rec, grave?}]
+## Hungry kin get a warning (a sulky one is the worst it gets). [{kind: "starving", rec, stage}]
 static func check_starving() -> Array:
 	var ev: Array = []
 	for rec in (Save.d["roster"] as Array).duplicate():
 		if KinBox.is_boxed(rec): continue
 		var st := Care.starve_stage(rec)
-		if st == "dead":
-			ev.append({"kind": "died", "rec": rec, "grave": kin_dies(rec, "starved")})
-		elif st != "":
+		if st != "":
 			ev.append({"kind": "starving", "rec": rec, "stage": st})
 	return ev
 

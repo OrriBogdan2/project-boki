@@ -2811,6 +2811,9 @@ func _pet_kin(k: Dictionary) -> void:
 func _play_with_kin(k: Dictionary) -> void:
 	if k.has("fetch"):
 		return
+	if Care.starve_stage(k["rec"]) == "sulky":
+		_emote(k, "…", true)      # pouting: no toys until it has eaten
+		return
 	var aim := cam.mouse_on_plane(0.0)
 	var dir := Vector2(aim.x - ppos.x, aim.z - ppos.z)
 	if dir.length() < 1.0: dir = Vector2(sin(pface), cos(pface)) * -1.0
@@ -3457,16 +3460,6 @@ func _start_duel() -> void:
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
-	var weak := hecon.refuse_reason()
-	if weak != "":
-		var wv := _new_panel("Too hungry to go", 560)
-		var wl := UI.label(weak, 15, UI.INK); wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		wv.add_child(wl)
-		var wr := UI.hbox(10)
-		wr.add_child(UI.primary("Feed it", func(): _open_feed(Save.active_kin()), 160))
-		wr.add_child(UI.button("Back", _open_expedition, 140))
-		wv.add_child(wr)
-		return
 	var td: Dictionary = Data.TIERS[exp_tier]
 	if not KinLoss.at_risk(exp_tier):
 		_start_match()
@@ -4008,7 +4001,7 @@ func _setup_care() -> void:
 	hecon.away = Econ.catch_up_all()
 	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_notices.gd)
 	var floor_ev := Lifeline.check()
-	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
+	if not floor_ev.is_empty():
 		_spawn_kin()
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
@@ -4199,7 +4192,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 
 ## Speed multiplier for a tired kin.
 func _care_speed(rec: Dictionary) -> float:
-	return (0.7 if Care.need(rec, "energy") < 25.0 else 1.0) * (0.7 if Care.starve_h(rec) >= Care.STARVE["weak"] else 1.0)
+	return (0.7 if Care.need(rec, "energy") < 25.0 else 1.0)
 
 # ---- care actions, from the kin's card; they play out in the world, not in a menu
 func _care_start(k: Dictionary) -> bool:
