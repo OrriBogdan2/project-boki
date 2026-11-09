@@ -234,7 +234,8 @@ func _check_numbers(m: Match) -> void:
 	for i in 12:
 		fx.number(at, 30.0, cream, false, "rifle")
 	var big := (_nums(fx, "rifle")[0]["node"] as Label3D).font_size
-	ok(big > low and big <= int(Fx.NUM_PLAIN_MAX), "a growing total grows its number (%d -> %d, never past %d)" % [low, big, int(Fx.NUM_PLAIN_MAX)])
+	var cap := int(Fx.NUM_PLAIN_MAX)
+	ok(big > low and big <= cap, "a growing total grows its number (%d -> %d, never past %d)" % [low, big, cap])
 	fx.number(at, 40.0, HudStyle.CRIT, true, "crit")
 	fx.number(at, 40.0, cream, false, "plain")
 	var cn := _nums(fx, "crit")[0]["node"] as Label3D
@@ -244,8 +245,8 @@ func _check_numbers(m: Match) -> void:
 	for i in 8:
 		fx.number(at, 7.0, cream, false, "slow")              # hits a pause apart: each starts a new number
 		for n in _nums(fx, "slow"): n["last"] = Fx.MERGE_T + 0.01
-	ok(_nums(fx, "slow").size() <= Fx.NUM_PER_STREAM,
-		"hits a pause apart never stack past %d numbers on one target (%d)" % [Fx.NUM_PER_STREAM, _nums(fx, "slow").size()])
+	var shown := _nums(fx, "slow").size()
+	ok(shown <= Fx.NUM_PER_STREAM, "hits a pause apart: at most %d on a target (%d)" % [Fx.NUM_PER_STREAM, shown])
 	for n in fx.nums.duplicate():
 		(n["node"] as Label3D).visible = false
 		fx.nums.erase(n)

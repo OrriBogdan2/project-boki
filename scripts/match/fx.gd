@@ -260,6 +260,10 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
 	ghosts.append({"node": mi, "t": 0.0, "col": col})
 
+## The stream key for a target's damage numbers: health and armour damage stay separate numbers.
+static func stream(target_nid: String, on_armor: bool) -> String:
+	return target_nid + "a" if on_armor else target_nid
+
 ## A damage or heal number. `key` names the stream it belongs to (the target's id, with an "a" on
 ## armour damage so health and armour read apart): hits on the same stream within MERGE_T add up on
 ## one number that sits on the target and grows, then floats off once the hits stop.
