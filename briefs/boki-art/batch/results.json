@@ -108,5 +108,1197 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stormit_2.png",
     "ok": true
+  },
+  {
+    "id": "bellowary_r",
+    "name": "Bellowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "canvastross_r",
+    "name": "Canvastross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/canvastross_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "canvastross_r",
+    "name": "Canvastross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bellowary_r",
+    "name": "Bellowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bubblisk_r",
+    "name": "Bubblisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bubblisk_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bubblisk_r",
+    "name": "Bubblisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bubblisk_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lunowl_r",
+    "name": "Lunowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lunowl_r",
+    "name": "Lunowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "murmurling_r",
+    "name": "Murmurling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "oarlet_r",
+    "name": "Oarlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarlet_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "murmurling_r",
+    "name": "Murmurling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "oarlet_r",
+    "name": "Oarlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarlet_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "amanitusk_r",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "blossmink_r",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "amanitusk_r",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "blossmink_r",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prismink_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prismink_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "anvilbrock_r",
+    "name": "Anvilbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anvilbrock_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "anvilbrock_r",
+    "name": "Anvilbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anvilbrock_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "skidlet",
+    "name": "Skidlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skidlet_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lanceron",
+    "name": "Lanceron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanceron_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "skidlet",
+    "name": "Skidlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skidlet_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lanceron",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "zipling",
+    "name": "Zipling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zipling_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "seamwyrm",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "seamwyrm",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "zipling",
+    "name": "Zipling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zipling_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "glassolotl",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glassolotl_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "glassolotl",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glassolotl_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "chandelotl",
+    "name": "Chandelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelotl_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "chandelotl",
+    "name": "Chandelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelotl_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "geodelotl",
+    "name": "Geodelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodelotl_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "terrarimit",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrarimit_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "geodelotl",
+    "name": "Geodelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodelotl_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "terrarimit",
+    "name": "Terrarimit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrarimit_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "arcestrel",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "arcestrel",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "voltalon",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "voltalon",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "latchling",
+    "name": "Latchling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/latchling_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "latchling",
+    "name": "Latchling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/latchling_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "vaultara",
+    "name": "Vaultara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vaultara_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "vaultara",
+    "name": "Vaultara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vaultara_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "ribbonwyrm",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "dragonkite",
+    "name": "Dragonkite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dragonkite_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "ribbonwyrm",
+    "name": "Ribbonwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "dragonkite",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "dribbara",
+    "name": "Dribbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dribbara_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "parasolth",
+    "name": "Parasolth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/parasolth_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "parasolth",
+    "name": "Parasolth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/parasolth_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "dribbara",
+    "name": "Dribbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dribbara_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "geysirbara",
+    "name": "Geysirbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geysirbara_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "geysirbara",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "glintmole",
+    "name": "Glintmole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glintmole_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "glintmole",
+    "name": "Glintmole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glintmole_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "kindlewren",
+    "name": "Kindlewren",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kindlewren_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "kindlewren",
+    "name": "Kindlewren",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kindlewren_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "prowyak",
+    "name": "Prowyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prowyak_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "prowyak",
+    "name": "Prowyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prowyak_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "frigatee",
+    "name": "Frigatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "boltstrich",
+    "name": "Boltstrich",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/boltstrich_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "frigatee",
+    "name": "Frigatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "boltstrich",
+    "name": "Boltstrich",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/boltstrich_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "snuffapi",
+    "name": "Snuffapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/snuffapi_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "snuffapi",
+    "name": "Snuffapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/snuffapi_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "barrelmander",
+    "name": "Barrelmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barrelmander_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "barrelmander",
+    "name": "Barrelmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barrelmander_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "marchleaf",
+    "name": "Marchleaf",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/marchleaf_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "marchleaf",
+    "name": "Marchleaf",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/marchleaf_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "nettlynx",
+    "name": "Nettlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nettlynx_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "nettlynx",
+    "name": "Nettlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nettlynx_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "thrumbird",
+    "name": "Thrumbird",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thrumbird_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "thrumbird",
+    "name": "Thrumbird",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thrumbird_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "echolop",
+    "name": "Echolop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/echolop_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "echolop",
+    "name": "Echolop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/echolop_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "rimeshrew",
+    "name": "Rimeshrew",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimeshrew_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "rimeshrew",
+    "name": "Rimeshrew",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimeshrew_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "cairnback",
+    "name": "Cairnback",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cairnback_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "cairnback",
+    "name": "Cairnback",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cairnback_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "hivara",
+    "name": "Hivara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hivara_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "zephyrak",
+    "name": "Zephyrak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zephyrak_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "hivara",
+    "name": "Hivara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hivara_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "zephyrak",
+    "name": "Zephyrak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zephyrak_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "rampartoad",
+    "name": "Rampartoad",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rampartoad_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "rampartoad",
+    "name": "Rampartoad",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rampartoad_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "anchorbill",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "anchorbill",
+    "name": "Anchorbill",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "crofthorn",
+    "name": "Crofthorn",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/crofthorn_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "crofthorn",
+    "name": "Crofthorn",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/crofthorn_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "buckleron",
+    "name": "Buckleron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "buckleron",
+    "name": "Buckleron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "spirevark",
+    "name": "Spirevark",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/spirevark_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "gravadillo",
+    "name": "Gravadillo",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gravadillo_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "spirevark",
+    "name": "Spirevark",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/spirevark_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "gravadillo",
+    "name": "Gravadillo",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gravadillo_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lodestick",
+    "name": "Lodestick",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestick_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lodestick",
+    "name": "Lodestick",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestick_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "glomwort",
+    "name": "Glomwort",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glomwort_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "glomwort",
+    "name": "Glomwort",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glomwort_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "pipewurm",
+    "name": "Pipewurm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipewurm_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "pipewurm",
+    "name": "Pipewurm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipewurm_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "knotwyrm",
+    "name": "Knotwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/knotwyrm_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "knotwyrm",
+    "name": "Knotwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/knotwyrm_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "gloamshell",
+    "name": "Gloamshell",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gloamshell_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "gloamshell",
+    "name": "Gloamshell",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamshell_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "mossgrade",
+    "name": "Mossgrade",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mossgrade_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "mossgrade",
+    "name": "Mossgrade",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossgrade_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "selenfin",
+    "name": "Selenfin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/selenfin_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "selenfin",
+    "name": "Selenfin",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenfin_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lanterloris",
+    "name": "Lanterloris",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanterloris_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lanterloris",
+    "name": "Lanterloris",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "terrasloth",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "terrasloth",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bellowary_r",
+    "name": "Bellowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "canvastross_r",
+    "name": "Canvastross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "canvastross_r",
+    "name": "Canvastross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/canvastross_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bellowary_r",
+    "name": "Bellowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bubblisk_r",
+    "name": "Bubblisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bubblisk_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lunowl_r",
+    "name": "Lunowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lunowl_r",
+    "name": "Lunowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bubblisk_r",
+    "name": "Bubblisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bubblisk_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "murmurling_r",
+    "name": "Murmurling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "murmurling_r",
+    "name": "Murmurling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "oarlet_r",
+    "name": "Oarlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarlet_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "oarlet_r",
+    "name": "Oarlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarlet_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "amanitusk_r",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "amanitusk_r",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "blossmink_r",
+    "name": "Blossmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blossmink_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "blossmink_r",
+    "name": "Blossmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blossmink_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prismink_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prismink_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "anvilbrock_r",
+    "name": "Anvilbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anvilbrock_r_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "anvilbrock_r",
+    "name": "Anvilbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anvilbrock_r_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "skidlet",
+    "name": "Skidlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skidlet_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "skidlet",
+    "name": "Skidlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skidlet_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lanceron",
+    "name": "Lanceron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanceron_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "lanceron",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "zipling",
+    "name": "Zipling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zipling_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "seamwyrm",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "seamwyrm",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_1.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "zipling",
+    "name": "Zipling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zipling_2.png",
+    "ok": false,
+    "error": "400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key not valid. Please pass a valid API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelang"
+  },
+  {
+    "id": "bellowary_r",
+    "name": "Bellowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "canvastross_r",
+    "name": "Canvastross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_r_1.png",
+    "ok": true
+  },
+  {
+    "id": "canvastross_r",
+    "name": "Canvastross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/canvastross_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "bellowary_r",
+    "name": "Bellowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_r_1.png",
+    "ok": true
+  },
+  {
+    "id": "bubblisk_r",
+    "name": "Bubblisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bubblisk_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "lunowl_r",
+    "name": "Lunowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_r_1.png",
+    "ok": true
+  },
+  {
+    "id": "lunowl_r",
+    "name": "Lunowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "bubblisk_r",
+    "name": "Bubblisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bubblisk_r_1.png",
+    "ok": true
   }
 ]
