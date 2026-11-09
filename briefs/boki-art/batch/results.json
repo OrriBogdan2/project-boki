@@ -37768,5 +37768,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_stance3_pyrraven_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_pyrraven",
+    "name": "Pyrraven (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_pyrraven_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_pyrraven",
+    "name": "Pyrraven (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_pyrraven_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_card",
+    "name": "Embrook (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/embrook_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_card",
+    "name": "Embrook (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/embrook_card_2.jpg",
+    "ok": true
   }
 ]
