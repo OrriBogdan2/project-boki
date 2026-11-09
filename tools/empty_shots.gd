@@ -200,7 +200,7 @@ func _gait(tree: SceneTree) -> void:
 	var stage := _stage(Vector3(0.0, 0.8, 5.6), Vector3(0.0, 0.8, 0.0), 30.0)
 	var anims := []
 	for b in 3:
-		var look := Unmasked.clean({"unmasked": true, "height": b, "build": b, "shroud": 1})      # (a Wrap: the legs show)
+		var look := Unmasked.clean({"unmasked": true, "height": b, "build": b, "shroud": 1})     # a Wrap: the legs show
 		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
 		m.get_node("Rig/Torso/Aim/Gun").free()
 		m.position = Vector3(-1.5 + 1.5 * b, 0, 0)

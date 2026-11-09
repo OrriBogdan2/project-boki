@@ -196,7 +196,8 @@ a turn pop of at most 8 cm a frame, idle creep of at most 2 cm.
 - **After:** run slide 21 to 24 % on all seven bodies, jog 19 to 26 %, walk 26 to 41 % (reported, not gated: the legs'
   swing still ramps with speed over 5.5 m/s, so a walk keeps 60 % of the idle legs; the slim builds are worst).
   Turn pop 2.0 to 3.4 cm a frame (the foot-shuffle), idle creep 0.0 cm.
-- Strip: `--empty-shots --only=gait` (GPU; short/slight, average, tall/sturdy running at 5 m/s, a stride in six shots,
-  tiles to stack into `docs/art/anim_audit/empty_gait.jpg`). Queued, not yet rendered: jobq 20261109-210326-18125.
+- Strip: `docs/art/anim_audit/empty_gait.jpg`: short/slight, average and tall/sturdy (Wrap shroud, so the legs show) running
+  at 5 m/s, six shots every 0.1 s, left to right then down (`--empty-shots --only=gait`, GPU job 20261109-212011-26241).
+  The feet stay on the floor through the stride and the taller bodies step wider.
 - Not done (ideas, not parity): the swing foot is toe-down and only 3 to 5 cm off the floor, a foot flip or a higher
   knee lift would read better; the walk's amplitude ramp (r1 = speed / 5.5) wants a walk-weighted blend.
