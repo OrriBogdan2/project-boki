@@ -43977,5 +43977,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/rimekit_card83_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rimekit_card83",
+    "name": "Rimekit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimekit_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimefang_card83",
+    "name": "Rimefang (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rimefang_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card83",
+    "name": "Selenwhale (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenwhale_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card83",
+    "name": "Selenwhale (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/selenwhale_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card83",
+    "name": "Tidalisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidalisk_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card83",
+    "name": "Tidalisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_card83",
+    "name": "Tidalisk (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidalisk_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_p83",
+    "name": "Canvastross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_p83_1.jpg",
+    "ok": true
   }
 ]
