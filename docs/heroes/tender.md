@@ -123,6 +123,45 @@ Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm das
 | Hearthlight runs out: the last heal blooms, no blast | `_hearth_end`, `_bloom` | "mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime)" |
 | A merge start ends Hearth Call (no pull, no bond; `hearth_call`) | `_drop_holds`, `ArchKit.drop_holds` | "mm merge: drop_holds ends Hearth Call" |
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
+or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
+ability; the hero's ultimate is X. Rules that hold for every pair not in the table: ArchKit has no shared cast lock,
+so the second goes now (both); every press is ignored, not buffered, while stunned or downed; the attack key is a
+held key (`Hunter.trigger`), so a tap that lands while the gun is blocked is lost and a held one fires on the first
+free frame; the glider won't open while a keyed move runs (`AirLimits.glide_locked`); a Merge start drops every
+hold, wind-up and charge with nothing fired (the `merge hold` lines of the check).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| Burrseed wind-up (fixed 1.0 s, half speed; owner item 118) | LMB | not shown; [F] the sheet's RMB is a 0.3 s hop with a push, which item 118 replaced | both: embers keep going (probed; the ember's own push anim is skipped while the lane shows) | unsettled (owner set the wind-up) | `_shot` skips `play` while `seed_aim` |
+| wind-up | RMB again | not shown | ignored, no new wind-up and no buzz (probed) | unsettled | `fire_rmb`: `if seed_aim: return` |
+| wind-up | E, X | not shown | both: the zone lights, the seed still throws at the end (probed) | unsettled | `cast_e` and `HeroUlt.press` have no `seed_aim` test |
+| wind-up | stun, Hex, downed | [W] stun cancels | the throw is lost and no charge is spent (it is paid at the throw) | match (generic stun rule) | `_tick_seed` -> `_seed_cancel` |
+| wind-up | jump | not shown | dash_flow `jump.rmb` buffer: the hop goes, the seed leaves after she lands; a held RMB through a jump, dash or mantle is kept | owner | items 118, 118b; item 51 row check |
+| Burrseed in the air, root delay (0.7 s) | LMB, RMB, E, X | [D] root "after a delay"; nothing blocks | all go | match | [D] Darkside Binding |
+| Hearthlight zone (2.5 s, then the bloom) | LMB, RMB, X | [D] "healing zone 2.5s"; [F] 0204 the zone follows her; nothing blocks | all go; the zone moves with her | match | `mm E` asserts; `Our kit` table |
+| zone (before it is thrown) | E again | [D], [F] 0204-0205: reactivate throws it to the cursor, near-instant | goes at once, no minimum delay; the zone flies 45 m/s | match | `mm E: ...` (recast throws) |
+| zone (after the throw) | E again | not shown | ignored; the cooldown runs from the first cast | unsettled | `e_recastable` |
+| Hearth Call channel (5 s) | LMB, RMB, E | [F] ult f26-f73: she walks, one hand raised; [D] only stun, knock or distance end it | all go, she keeps walking | match (nothing in the source blocks them) | `mm X` rows in the care ult check; [F] mooshmoosh.md:226 |
+| channel | X again | [D] no early end listed | swallowed (`ult_recast` true) | match | `ult_recast` |
+| channel | stun, knock, out of ring (12.6 m) | [D] "Canceled if Elluna is stunned, knocked, or moves too far" | it breaks on each; a downed ally keeps being healed and is pulled to her at the end | match | `care ult` check; ext/meeko-ult-cancels adds a check per case (in flight) |
+| channel | jump, glide | not shown | go (no cast lock; the glider waits only for a keyed move) | unsettled | [F] f41-f72 walking only |
+| any wind-up or channel | R (Merge) | not in the source (our rule) | dropped, no throw, a carried teammate is set down unbroken | ours | `merge hold` rows; `tender.md` Bearer |
+
+Fixes made: none. No source line contradicts a row; the pairs the source shows (the zone's recast, the channel's three
+ends, walking through the channel) already match. Suggestions only, not built: (1) a clip of an LMB held through the
+Burrseed's wind-up would say whether the source stops the gun for it; (2) the carry drop on any damage may be wider than
+the source's "too much damage" (ext/meeko-carry-drop-rebased is the in-flight fix). In flight and changing rows above:
+ext/meeko-rmb-orbit-1108 and ext/meeko-rmb-verify (a 0.35 s wind-up instead of 1.0 s, owner item 23), ext/meeko-rmb-motion-rebased-rebased-rebased
+(the release hop), ext/meeko-ult-cancels (the channel's cancel checks); re-read this table once they merge.
+
 ## Animation moves
 The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `HunterAnim.km_sample`). The kit plays them with `play()` for abilities, or `play_soft()` for procs (it waits for the current move to finish). She holds nothing (HunterAnim hold `palm`), so both hands are free and every move keys them (`fl` / `fr`).
 

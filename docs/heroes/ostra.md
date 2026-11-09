@@ -178,6 +178,45 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 - Bond: paid when a hunter is caught (a hit), topped up if one is knocked or killed inside it; never per tick. The sheet's
   0.4 per hunter capped at 0.8 is the main session's to set (KinBond.from_ult).
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
+or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
+ability; the hero's ultimate is X. Rules that hold for every pair not in the table: ArchKit has no shared cast lock,
+so the second goes now (both); every press is ignored, not buffered, while stunned or downed; the attack key is a
+held key (`Hunter.trigger`), so a tap that lands while the gun is blocked is lost and a held one fires on the first
+free frame; the glider won't open while a keyed move runs (`AirLimits.glide_locked`); a Merge start drops every
+hold, wind-up and charge with nothing fired (the `merge hold` lines of the check).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| Shard Snap wind-up (0.32 s, slowed 25%) and the 0.15 s recovery | LMB | not shown; patch notes: Void Snap slows him while casting (so he acts through it) | both: an orb goes (probed); the aim line turns to the Snap's two rails | unsettled (consistent with the slow) | dash_flow `rmb` source line; `snap` has no lock |
+| Snap wind-up | RMB again | [F] ostra.md:17 one shard cluster per tap; one charge | ignored (`snap` is not empty), no second charge spent | match | `fire_rmb` |
+| Snap wind-up | E | not shown | both: the seed drops, the Snap still releases (probed) | unsettled | `cast_e` has no `snap` test |
+| Snap wind-up | X | not shown | both (`HeroUlt.press` ignores `snap`) | unsettled | code |
+| Snap wind-up | stun, downed | [W] stun cancels | the Snap is dropped | match (generic stun rule) | `_tick_snap` |
+| Snap flight (29.5 m/s, to 13 m) | LMB, E, X, RMB | not shown | all go (nothing holds him after the release beat) | unsettled | `item 40` timing rows |
+| Brimseed planted, growing (6.5 s) | E again before 0.3 s | [F] ostra.md:19, 193 "recast after 0.3 s or more" | eaten: nothing pops, the seed keeps growing (`early_pops`) | match | `e_recast`; the seed rows of the combo check |
+| Brimseed | E again from 0.3 s | same, [D] "reactivate to detonate" | pops at once; damage 12.5 up to 3.5x with its age | match | `combo: Snap > seed on the stunned foe > pop` |
+| Brimseed (growing or full) | LMB, RMB, X, jump | not shown; the seed is a placed object | all go; it grows on | match | `combo: Seed > Trade puts the foe inside it` |
+| Brimseed left alone | its own end | [F] lists no expiry | fizzles after 10 s (an ours-only rider) | mismatch, not fixed: in flight as ext/motley-seed-fizzle (removes the timer) | Audit row "The seed pops by itself" (8e5c6340); the READY line of ext/motley-seed-fizzle |
+| Nightwell dome (1.0 s, filling; the cast pose) | LMB, RMB, E, glove, jump, glide, Shift | [F] ult f23-f33: held in the cast through the dome; owner 18:20 | all refused; no walking, no turning after 0.25 s; a held Shift is kept and goes the step it opens; a held LMB fires once he is free | match (footage and owner) | `well.locked` -> `cast_locked`, `can_shoot`; dash_flow `into_jump.x` lock and `into_dash.x` buffer; `lock: ...` in the ult check |
+| Nightwell open (3.5 s) | any press | [F] ult f50: "Void is free to act during it" (he is shooting) | everything goes at full speed | match | `release: ...` (ult check) |
+| Nightwell (cast or open) | X again | [F] a tap, no recast | ignored | match | `HeroUlt.press`, `ult_recast` default false |
+| Nightwell dome | stun, knock | not shown | frees him early; the well stays | unsettled (ours) | `lock: ...` in the ult check |
+| Trade aim (Shift held, 1.8 s lob after) | LMB, RMB, E, X | [D] Swap is a lob that swaps units; nothing blocks the others; owner 11-02: he hovers while the lantern flies | all go (the Trade's flight is his dash for DashFlow: rows `fire`) | match (owner, dash rows) | `item 32` row in Combinations; dash_interactions.md |
+| any wind-up or aim | R (Merge) | not in the source (our rule) | the Trade, its aim, the Snap wind-up and the orb prime drop; a placed Nightwell keeps going | ours | `merge hold: ...` rows |
+
+Fixes made: none. The pairs the source shows (the seed's 0.3 s recast minimum, the dome lock, the free well) already
+match. The one real mismatch, the 10 s seed fizzle, is already a READY branch (ext/motley-seed-fizzle, source lists no
+expiry), so it is not fixed here. Suggestions only, not built: a clip of LMB held through the Snap's wind-up would say
+whether the gun stops for it. The in-flight Motley branches (ext/motley-rework-2, models) don't touch these rules.
+
 ## Animation moves (KMovesStone)
 | Ability | Moves | Strip |
 |---|---|---|

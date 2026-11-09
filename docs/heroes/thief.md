@@ -182,6 +182,45 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 | X, then a merge | Encore ends, no blade after | `merge hold dancer: Encore's blades stop and its ring goes` |
 | Knock or assist | heal (25% in all), star and pillar | `dancer passive: a knock heals (25% in all), star + pillar` |
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked in this file, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card line
+or wiki line shows the pair: ours stays as it is and nothing was guessed. R is the Boki Merge here, not a hero
+ability; the hero's ultimate is X. Rules that hold for every pair not in the table: ArchKit has no shared cast lock,
+so the second goes now (both); every press is ignored, not buffered, while stunned or downed; the attack key is a
+held key (`Hunter.trigger`), so a tap that lands while the gun is blocked is lost and a held one fires on the first
+free frame; the glider won't open while a keyed move runs (`AirLimits.glide_locked`); a Merge start drops every
+hold, wind-up and charge with nothing fired (the `merge hold` lines of the check).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| any bolt (0.45 s cadence), Bola wind-up, dagger throw, Encore | LMB tap | [F] fires alternate hands, about 0.45 s apart; nothing else shown | a click that lands while the gun can't fire (cooling, or mid-cartwheel) is **kept for 0.45 s** and goes the first frame it can; it is the only kit with a click buffer | match for the cadence; the 0.45 s keep is ours (the footage can't show a buffer under 0.2 s) | `lmb_override` (`bolt_buf`); `combo dancer: ...`; Feel pass "Dash -> shot rhythm" |
+| Bola wind-up (0.4 s, the lane follows the aim) | LMB | [F] 0085-0102: lane 2-3 frames, whirl, sling; no bolt shown | both: a bolt goes and the Bola still throws (probed) | unsettled | [F] dancer.md:84-96 |
+| Bola wind-up | E, X | not shown | both (probed for E; X by the code: `HeroUlt.press` ignores `bola_cast`) | unsettled | `cast_e`, `HeroUlt.press` |
+| Bola wind-up | RMB again | not shown (one charge, 6.7 s card) | refused, no second wind-up | unsettled | `fire_rmb`: `if not bola_cast.is_empty() ...: return` |
+| Bola wind-up | stun, downed | [W] stun cancels | the Bola is lost (`_tick_bola_cast` `busy()`) | match (generic stun rule) | `_tick_bola_cast` |
+| Bola wind-up | jump | not shown | goes; the lane keeps following the aim | unsettled | no jump row in content/dash_flow/thief.json (a missing row combines) |
+| Bola flight and the Grounded foe | any | [D] Grounded: no jumping or dashing up (the target's rule) | the foe can't dash, jump or glide; Sable herself is free | match | `combo dancer: Bola > Grounded = no dash` |
+| Shadow Knife throw (0.12 s into the throw) and the stuck dagger (6 s) | LMB, RMB, X | not shown | all go; the dagger stays | unsettled | `_throw_knife`, `_stick` |
+| stuck dagger | E again | [D], [F] 0237-0238, 0278-0279: the recast blinks her to the dagger, one frame, a ghost chain; the dagger lasts at least 5 s | blinks at once through 5 afterimages; after 6 s she steps anyway | match | `combo dancer: Knife > E = step to them` |
+| Shadow Knife throw | E again before the dagger lands or sticks | not shown | refused with the buzz (the cooldown is running; nothing to blink to yet) | unsettled | `use_e`: the recast needs `e_t`, which `_stick` sets |
+| Encore (0.4 s ring grow, then 2 s of blades) | LMB, jump, Shift | [F] f41-f47, 0299-0302: she walks and fires the LMB freely, the ring rides with her | all go; Shift is the dash row `x` (and gives the Vault back on the cast) | match | `dancer X small mechanic: she walks and fires freely, the ring moves with her` |
+| Encore | RMB, E | not shown | both go | unsettled | `ThiefUlt` has no lock |
+| Encore | X again | [F] one press, no recast | ignored (`ult_recast` default false) | match | `HeroUlt.press` |
+| Encore | knock | not shown | ends it at once, what landed still pays the bond | unsettled (ours) | Assumptions 13 |
+| any wind-up, dagger or Encore | R (Merge) | not in the source (our rule) | Bola wind-up and Encore dropped, nothing fires | ours | `merge hold dancer: Encore's blades stop and its ring goes` |
+
+Fixes made: none. Where the source speaks (the free walk and LMB through the ult, the dagger's recast, the cadence)
+ours matches; nothing in the table contradicts a source line. Suggestions only, not built: a frame of an LMB pressed
+inside the Bola's 0.4 s lane would tell whether she can fire there (ours does). In flight and changing rows above:
+ext/sable-bola-instant-rebased (owner 121: the Bola releases at once, so its wind-up rows go away), ext/sable-dagger-barriers
+(the dagger sticks to barriers), ext/sable-lmb-range (8.5 m range); re-read this table once they merge.
+
 ## Animation moves
 
 `KMovesDJ` (scripts/match/kmoves_dj.gd): `thf_lmb_r` / `thf_lmb_l` (each throw starts cocked, out by
