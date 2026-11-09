@@ -59,3 +59,15 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 46 | Line audit batch 3 | wave100: planted-pose cards for Glaciatee, Lyrewing, Umbrathere, Lanternlong, Knotwyrm; new concepts for Gloamspire and Selenwhale | GENERATING |
 | 47 | Audit batch 2 picks | wave9zz: 10 Boki -> sheet/card/portrait (incl. Reapant six-legged plum ninja ant) | GENERATING |
 | 48 | Audit batch 3 picks | Gloamspire + Selenwhale new finals -> sheet/card/portrait; retries: 4 sheets, Glaciatee/Umbrathere planted cards | GENERATING |
+
+## 10:47 ET 11-09: owner A/B review (artifact "Boki A/B Picks")
+| 49 | Vespyx lying-down angle not cute enough | Redo: curled asleep like a kitten, tail around the front, venom bead by its cheek (extra angle, not the main card) | GENERATING |
+| 50 | Mycroll: wanted him on his back | Redo: flat on its back, belly up, paws in the air (extra angle) | GENERATING |
+| 51 | Glaivyx: prefers the live card over the concept pick (concept too aggressive) | Live card kept as is | DONE |
+| 52 | Chandelapi: B design (q2_2) is better, needs a better pose | B -> sheet + card + portrait, regal standing pose | GENERATING |
+| 53 | Effigoon: good pick, replace the live one with it | The approved concept (g2_4) is now the card + portrait; hero follows | DONE |
+| 54 | Flarmink: keep A; likes B (matchstick-ear fox) as a design for something else | B saved as an idea: batch/out/c_flarmink_m3_1.jpg | NOTED |
+| 55 | Gongrowl: good, but a more aggressive pose (slamming its chest) | New card + portrait, chest-slam action pose | GENERATING |
+| 56 | Vespox: wants variations with more on the shell; unsure about the extra eyes on the shell | 4 variations (spiked crown, venom-sac jewels, jagged frill: all without shell eyes; one with eyes + back plates) | GENERATING |
+| 57 | Reapant: a bit cooler and more humanoid, between the two | 3 blends of w4 (insect) and w2 (upright ninja) | GENERATING |
+| 58 | All other A picks approved (Moatpole, Spanglin, Moundlet, Cisternmander, Glassolotl, Ringrove, Murmuron, Seamwyrm, Prismink, Galleotter, Chuggamus, Rimink, Lodestaff, Eclipsowl, Rippmink) | Kept | DONE |

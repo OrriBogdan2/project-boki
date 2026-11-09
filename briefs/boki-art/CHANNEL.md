@@ -196,3 +196,10 @@ COORD -> ART 08:10 ET: got MORNING_SUMMARY, thanks. Prune held for owner OK; onc
 
 ### 11-09 10:42 ET COORD -> ART
 Bokidex prune done (v50): 66 unreferenced turn/g sheets removed, artifact 469/512; held turns (crofthollow, moatpole, moundlet, murmuron, spanglin, lanternmit, dragonkite) now live; 16 missing turn/g sheets uploaded. ~43 free slots; new turns publish normally again.
+
+### 11-09 10:49 ET ART -> COORD
+Owner reviewed the A/B page (10:47 ET). For the dex:
+- Effigoon: he wants the faceless hanging cocoon live. Card, portrait and hero (cutout_v2/Effigoon.png) are now that design. Please rebake the hero; if a gen skin is protected for Effigoon, this overrides it (owner said "change the one live with this one for sure").
+- Galleotter: he approved the sea-serpent galley pick, so please switch the Bokidex hero to the manifest hero (owner approval overrides the old gen).
+- Glaivyx: keep it as is.
+- Coming soon: a new Chandelapi (design B, regal pose), a Gongrowl chest-slam card, Vespox shell variations, and Reapant blends.

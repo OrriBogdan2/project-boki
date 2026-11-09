@@ -59,3 +59,4 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Embrook | live (your call: old Pyrraven art became Embrook) | Line audit says it is Kindlewren made taller, standing still (not a fundamental change, and middle stage should be in motion); I did not override your call | audit direction in LINE_AUDIT.md: lean hopping ember-crow mid-leap |
 | Dragonkite sheet | best of 3 tries (7.8) used, with ghost tail fragments cropped off the bottom, so it matches the new card | Below the bar; consistent set beats mixed old/new | old sheet saved as evolutions/Dragonkite_old.jpg |
 | Selenwhale card/portrait | the approved concept (c_selenwhale_x1_4) is used as the card and portrait for now, matching the new sheet; a cleaner card is retrying | Two card attempts scored 7.0-7.8 | old card in git history |
+| Flarmink alt | matchstick-ear fox (c_flarmink_m3_1) | Owner likes this design for some other Boki | idea bank |
