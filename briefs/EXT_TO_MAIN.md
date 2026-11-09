@@ -5110,3 +5110,4 @@ READY ext/gaps-bulwark 628060d6e (Albert footage gaps Nov 9 re-check, deep re-ve
 ## 03:38 ET 11-09 — OWNER CHANGES
 - Pyrraven line: the old Pyrraven art is now EMBROOK (t2; cards/Embrook.jpg, evolutions/Embrook.jpg, portraits/light/Embrook.jpg). Pyrraven (t3) gets a new bigger, demonic fire-bird design (generating).
 - Terrasloth: no longer a sloth (Umbrathere line is the sloth). New animal + greenhouse idea generating (tortoise/snail/hermit crab/pangolin/koala); new name follows the pick.
+READY ext/gaps-rimewright f9995df07 (supersedes ae1ca0399: Neve footage gaps Nov 9 re-check table in docs/heroes/rimewright.md; rows 1-5, 7, 9, 10 closed on main (asked 3, 4, 5, 10 already asserted by tm rows; 5 has owner override item 13), 8 in flight on ext/cooldown-parity-verify, 6 open (skating dart 1.6x footage vs none in data; suggestion only); doc only; rimewright-combo 90/0, hero-combo 304/0, reticle 0, health --strict OK, gen_wiki --check 47 unchanged)
