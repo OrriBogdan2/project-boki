@@ -17,7 +17,7 @@ const TEAM_COLORS := [Color("f2a24a"), Color("5ab0f0"), Color("e0607e"), Color("
 const TEAM_COLOR_GAP := 0.08
 ## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
 ## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
-## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0021), so it is capped at 30.
+## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
 const MATCH_PLAYERS := 30
 
 const CLASSES := {

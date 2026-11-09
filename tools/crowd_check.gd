@@ -1,5 +1,5 @@
 extends RefCounted
-## --crowd-check: what keeps a 40-hunter Hollow Crown (decision 0021) apart and cheap.
+## --crowd-check: what keeps a 40-hunter Hollow Crown (decision 0022) apart and cheap.
 ##   colours  every squad of a 40-solo match has its own team colour, no two closer than
 ##            Data.TEAM_COLOR_GAP in OKLab (the second twenty were deeper shades of the first, as
 ##            close as 0.028: two squads read as one)

@@ -1,4 +1,4 @@
-# 0021: The Hollow Crown at 2x, with a winding sky train and 30 hunters
+# 0022: The Hollow Crown at 2x, with a winding sky train and 30 hunters
 
 - **Status:** accepted
 - **Date:** 2026-11-08
