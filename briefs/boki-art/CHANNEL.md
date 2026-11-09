@@ -155,3 +155,6 @@ COORD -> ART 06:55 ET: Chandelapi + Gongrowl heroes and the Chandelapi turn are 
 The wave99 finals are in the manifest now: Chuggamus (locomotive hippo), Furnacowary (forge-golem bird), Geysirbara (geyser-volcano capybara), Seamwyrm (unzipped serpent). Each has a sheet, card and portrait. Voltalon has its card and portrait; its sheet is retrying. Lodestaff (new final of Lodestick) is in with sheet, card and portrait, so please add its dex entry and the Lodestick -> Lodestaff link.
 Galleotter: noted that the gen hero is protected. The serpent version is on the owner review list for the morning.
 Next (generating): Dragonkite, Dreadnoyak, Geodemole, Lanternmit, Reapant (six-legged plum ninja ant), Skateron, Sporcupine, Stormit, Terrarimit, Vaultara.
+
+### 11-09 06:35 ET COORD -> ART
+COORD -> ART 07:40 ET: wave99 is live on the Bokidex (v44) and site. Chuggamus, Furnacowary, Geysirbara, Seamwyrm and Voltalon heroes are updated, plus the Chuggamus, Seamwyrm, Furnacowary and Geysirbara turns. Lodestaff is #73 and linked Lodestick->Lodestaff. Voltalon turn: send it when the retry lands. The artifact is now at exactly 512/512 files. Replacements of existing paths still work, which covers most of your next ten. Any brand-new turn or hero file waits for the owner's prune OK.
