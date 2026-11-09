@@ -51201,5 +51201,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_vespox_v5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w6",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w6_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w6",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w7",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_w7_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w7",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w7_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_vespyx_lying2",
+    "name": "Vespyx (extra angle, lying)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/xang_vespyx_lying2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w7",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w7_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w7",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w7_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "xang_vespyx_lying2",
+    "name": "Vespyx (extra angle, lying)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/xang_vespyx_lying2_4.jpg",
+    "ok": true
   }
 ]
