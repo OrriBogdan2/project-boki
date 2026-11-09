@@ -82,17 +82,31 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 10 | Tenzo | dolm | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 24 | re-scored 11-08 from strips (ext/vfx-dolm): slam, RMB charge, hop landings and Basalt Spine are HeroVfx data (`content/vfx/dolm.json`): crack crater, wall, rock debris, crack lanes. Left: punch, boulder and launched-rock bursts in `dolm_kit` still draw `Fx` rings |
 | 10 | Motley | ostra | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | was 14. RMB, E and X are data-driven in sea teal over a void core, each with an afterglow; Nightwell now reads as a black well with teal arms (strips: jobq vfxq-ostra-abil-before/after). Left: the dome tell is a pale grey-teal, the Snap's flight is one bundle. Dash, LMB and the Swollen pink stay violet (void-jester-dash-feel-1108) |
-| 6 | Vex | gunslinger | 3 | 3 | 2 | 3 | 3 | 3 | 4 | 21 | `vv_fx` tracer and muzzle flashes; was ember orange through the shared layer, now lime; reload/E have no shape of their own |
-| 2 | Grimble | dredge | 2 | 2 | 2 | 2 | 3 | 2 | 3 | 16 | `ld_fx` primitives; hook chain is a beam with no weight; coin gold shares the stock flash gold |
-| 7 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
-| 9 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
-| 4 | Sable | thief | 2 | 3 | 2 | 3 | 3 | 2 | 3 | 18 | `dj_fx` slashes are thin; blink has no in/out pair; flashes hard-coded gold, not violet |
-| 3 | Albert | bulwark | 2 | 2 | 2 | 2 | 3 | 2 | 4 | 17 | `bjorn_fx` piles of rings/flashes (9 calls); shield reads as a flat disc; hard-coded gold |
+| 3 | Vex | gunslinger | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | was 15 (1/2/2/2/3/1/4). After (ext/vfx-gunslinger, `vfxq-after-gunslinger-2`, before/after pairs on ext/vfx-gunslinger-strips): every round has a lime tracer, a gun-sized flash and a hit spark; E is a needle of light; X is a reticle over a see-through disc, a streaking shell and a flame wall. Left: lime is low-contrast on yellow sand; the Burr cone and slide echoes are still `vv_fx` |
+| 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge. **After (ext/vfx-dredge): 26**, see below |
+| 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
+| 9 | Meeko | tender | 4 | 3 | 3 | 3 | 4 | 4 | 4 | 25 | after ext/vfx-tender (was 17: 2/2/2/3/3/1/4): all leaf, ember at its hit radius, lit soft zones, petals, heal afterglow, a Hearth Call swirl per tick. Left: fades are mostly linear; the shape is a stack of discs and swirls, not one form |
+| 9 | Sable | thief | 4 | 4 | 3 | 4 | 3 | 4 | 3 | 25 | after (`vfxq-after-thief-2`): bolt hits are a violet crescent slash with an afterglow, Cartwheel arcs wide with an afterglow, blink out/in bursts, no gold flashes, X ring a lit rim. Left: X blade hits still small against the 5.4 m ring; the ring wash still tints sand; the dash streaks are DJFx |
+| 9 | Albert | bulwark | 4 | 4 | 4 | 3 | 3 | 3 | 4 | 25 | after ext/vfx-bulwark (was 20: mint E dome, flat gold X box with dark cubes, brown plate wall): the aegis is a clear ivory dome with a rim halo, E an ivory column and a ring of rising motes, X erupts cell by cell (fissured ground, ivory shards, dark debris, a racing crack). Left: his bulky model hides the dome's upper half at reel zoom; LMB and dash still draw in the old gold and orange |
 | 9 | Sparkle | mage | 3 | 4 | 4 | 4 | 4 | 4 | 3 | 26 | was 20 (3/3/3/3/3/2/3). After (ext/vfx-mage, `vfxq-after-mage`, `vfxq-after-mage-lmb2`; before `vfxq-before-mage-reel`, same reel `tools/vfx_reel/mage.gd`; pairs on ext/vfx-mage-strips): all pink (#ff5ab4 body, #ffd6ee core) via content/vfx/mage.json; the range-wide dark violet disc under the Kitefall hang (the purple screen) is gone; Kitefall strikes as a white-hot core bolt inside a wide pink one, a flare, a shock wall and scorch the size of its 2.7 m hit, debris and a settling spark afterglow; Skycall the same at 1.5 m with a gathering countdown; the Storm Rod has a tip crackle, a trail and a shock-ring hit. Left: the finger bolt trail still reads thin at match zoom; Grounded draws a flat orange disc under the target (shared status look); sounds unchanged |
-| 8 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
+| 10 | Neve | rimewright | 4 | 4 | 3 | 3 | 4 | 4 | 4 | 26 | reads well (shards, shatter burst); the dash ice path is flat untextured boxes |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4→5 | 4 | 3→4 | 27→29 | the bar: slash arcs, burning lanes, debris. Done (ext/vfx-kael-polish): the X crescent is the strip's leading edge (was 4.3m across a 1.8m strip). Left: the LMB slash sound is a swish with no hard edge; the cleave sound's cut lands on the strike, sharp (was 84 ms late and 4 dB over its swish) |
-| 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar: layered flame with a hot core. Polish: soft-particle ground clipping, hold-blade glow |
+| 12 | Cinder | ashwick | 4 | 4 | 5 | 5 | 4 | 4 | 4 | 30 | the bar: layered flame with a hot core. Done (ext/vfx-cinder-polish): embers land and fade into the ground; a palm heat glow builds over 0.8 s of roaring and cools after. Left: Cinder Shot's pink-red body is off her orange signature (C) |
 
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
 linked from PR #14.
+
+### Grimble after (ext/vfx-dredge): 26
+| R | S | L | T | Sc | C | Snd | total |
+|---|---|---|---|---|---|---|---|
+| 4 | 4 | 4 | 4 | 3 | 4 | 3 | 26 (+10) |
+
+LMB, hold, hook/RMB, E and X now play `content/vfx/dredge.json` through HeroVfx, all in coin gold with white/pale cores.
+The hook is a gold chain of links (HeroVfx's new hold-only `chain` layer): it pays out slack and swaying, is yanked
+taut and glowing on the bite (a burst of coins, sparks and a flash on the target) and again on each haul, and throws
+sparks as it snaps back. The E and X telegraphs are gold; sparks rise along the cone's edge through the wind-up and
+charge, and each slam or wave ends in a gold sweep that burns away, a flash, debris and coins. Kept from LDFx: the bone
+hook (now a gold rim), the ghost anchor, the reel's chain ring, the stun spirals and the barge (dash not in scope).
+Sound is unchanged (3). Scale stays 3: the slugs read as small pale-gold dots with thin trails at match
+zoom; a gold body on sand or autumn ground has less contrast than on grass (the dark rims and char carry it).
