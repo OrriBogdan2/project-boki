@@ -3,7 +3,7 @@ extends RefCounted
 ## The Chore state of base life (GARDEN.md section 4): a work knack (scripts/core/work.gd) becomes something a Boki
 ## does because of who it is, not a Job Board. Ember minds the egg in the Nook (the rest of its home hatch time
 ## halves, once per egg), Mend cheers up a glum friend (joy up) and Haul fetches the ball back to the toy spot.
-## Watering waits for the snack patch. Save: Save.d["egg"]["minded"] is an optional key, no migration (cleared at the hatch).
+## Watering waits for the snack patch. Save: Save.d["egg"]["minded"] is an optional key, no migration.
 ## BaseLife runs this from its machine: k["life_chore"] = {kind, ...}.
 ## Each chore ends with one journal line on the Boki, in the shape CareJournal.note writes (rec["journal"]).
 
