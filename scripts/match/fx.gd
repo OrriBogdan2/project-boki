@@ -237,6 +237,7 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
 const PARTICLES := 0.6
+const DEBRIS_MAX := 6          # particles in one debris puff
 var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
 var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
 var wall_impact: WallImpact     # the crack decals where a wall stun landed
@@ -288,6 +289,11 @@ const HEAVY_DUST := Color(0.6, 0.55, 0.47, 0.95)   # a heavy landing's: darker t
 const AIR := Color(0.95, 0.97, 1.0, 0.95)      # a puff of air in the sky
 const PUFF_N := 10             # dots in a jump-out puff, before the quality thinning
 const SETTLE_N := 36           # dots in the dust round a drop rocket's landing, before the thinning
+## Particles that ride a mover: turf a dash kicks up, a trail behind a glide or a thrown lantern. Not a burst
+## (no `radial`, never thinned by `own_look`): capped at DEBRIS_MAX so it stays a few specks (--move-fx-check).
+func debris(at: Vector3, col: Color, amount := 4, speed := 2.0, life := 0.35, grav := 8.0, size_k := 1.0,
+		dir := Vector3.UP, spread := 60.0) -> void:
+	_emit(at, col, mini(amount, DEBRIS_MAX), speed, life, grav, size_k, dir, spread)
 
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8, col := DUST) -> void:
