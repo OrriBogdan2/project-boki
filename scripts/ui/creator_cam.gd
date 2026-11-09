@@ -5,9 +5,9 @@ extends RefCounted
 
 const FAR_CAM := Vector3(0.05, 1.2, 4.75)      # m: the whole body in frame
 const FAR_LOOK := Vector3(0.2, 0.98, 1.6)
-const NEAR_CAM := Vector3(0.45, 1.62, 3.05)    # m: the face fills the frame
-const NEAR_LOOK := Vector3(0.5, 1.58, 1.6)
-const HEAD_Y := 1.6                            # m: eye height of an average hunter (taller ones scale it)
+const NEAR_CAM := Vector3(0.3, 1.36, 3.7)      # m: the head and shoulders, the face right of the card
+const NEAR_LOOK := Vector3(0.3, 1.28, 1.6)
+const HEAD_Y := 1.35                           # m: head height of an average hunter (taller ones scale it)
 const WHEEL_STEP := 0.15                       # zoom per wheel notch
 
 ## Where the camera stands at this zoom, for a hunter this tall (Unmasked.HEIGHT_SCALE).

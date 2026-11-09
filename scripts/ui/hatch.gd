@@ -402,7 +402,8 @@ func _show_create() -> void:
 		_looks_good())
 	root_ui.add_child(card)
 	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46; card.offset_bottom += 46       # clear of the title
+	card.offset_top += 30; card.offset_bottom += 30       # clear of the title
+	card.grow_vertical = Control.GROW_DIRECTION_BOTH      # More looks... grows it up and down, not off the bottom
 
 func _looks_good() -> void:
 	Save.d["look"] = look.duplicate()

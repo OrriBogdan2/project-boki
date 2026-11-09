@@ -40,7 +40,7 @@ func _init() -> void:
 func _ready() -> void:
 	var v := UI.vbox(8)
 	add_child(v)
-	_rows = UI.vbox(8)
+	_rows = UI.vbox(6)
 	v.add_child(_rows)
 	v.add_child(_name_row())
 	v.add_child(_foot())
@@ -51,6 +51,7 @@ func _build() -> void:
 		_rows.remove_child(ch)
 		ch.queue_free()
 	if all_rows:
+		_rows.add_child(UI.label("Start from", 12, UI.ACCENT, UI.caps))
 		_rows.add_child(_preset_row())
 	for r in Unmasked.ROWS.size():
 		if not all_rows and not r in Unmasked.FIRST_ROWS:
@@ -94,18 +95,15 @@ func _row(row: Array) -> HBoxContainer:
 	hr.add_child(die)
 	return hr
 
-func _preset_row() -> HFlowContainer:
-	var fl := HFlowContainer.new()
-	fl.add_theme_constant_override("h_separation", 6)
-	fl.add_theme_constant_override("v_separation", 6)
-	var l := UI.label("Start from", UI.T_BODY, UI.MUTED)
-	l.custom_minimum_size.x = LABEL_W
-	l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	fl.add_child(l)
+func _preset_row() -> HBoxContainer:
+	var hr := UI.hbox(4)
 	for nm in PRESETS:
 		var preset_name: String = nm
-		fl.add_child(UI.button(preset_name, func(): use_preset(preset_name)))
-	return fl
+		var b := UI.button(preset_name, func(): use_preset(preset_name))
+		b.add_theme_font_size_override("font_size", 13)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hr.add_child(b)
+	return hr
 
 func _name_row() -> HBoxContainer:
 	var nr := UI.hbox(8)

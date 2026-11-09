@@ -176,6 +176,10 @@ func _polish(tree: SceneTree, hx) -> void:
 	var same := want.keys().all(func(k): return card.look[k] == want[k])
 	ok(same and card.look["gender"] == sex, "a preset sets the look and keeps Sex")
 	ok(card.look == Unmasked.clean(card.look), "every preset value is in its list")
+	await tree.process_frame
+	var vis: Rect2 = card.get_viewport_rect()
+	ok(vis.encloses(card.get_global_rect()) and card.size.y <= 660.0,
+		"with every row open the card fits a 1280x720 screen (%d tall)" % card.size.y)
 	hx.zoom = 0.0
 	var wheel := InputEventMouseButton.new()
 	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
