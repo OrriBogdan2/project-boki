@@ -77,6 +77,8 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
+var stowed := false          # "carry_stow" bones are put away
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -319,7 +321,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
-	if km != "":
+	if km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
@@ -385,6 +387,21 @@ func step(dt: float) -> void:
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
+	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
+
+## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
+func _carry(on: bool, dt: float) -> void:
+	carry_w = move_toward(carry_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if carry_w <= 0.0:
+		root.remove_meta(WardenCarry.SOCKET)
+		if stowed:
+			stowed = false
+			WardenCarry.stow(skel, d.get("carry_stow", []), 0.0)
+			_out(0.0)       # (a weapon bone with a size of its own gets it back)
+		return
+	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w))
+	stowed = true
+	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.

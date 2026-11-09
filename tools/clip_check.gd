@@ -108,6 +108,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	await _carry(id, m, sync, clips, dd)
 	m.free()
 
 func _named(dd: Dictionary) -> Array:
@@ -324,3 +325,64 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	for k in 12:
 		sync.call("_process", DT)
 	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+
+## The rescue carry (WardenCarry): the walk legs stay on the clips, both wrists come in round the socket the Boki
+## rides at, the data's weapon bones are put away, the legs keep stepping, and it lets go when the carry ends.
+func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var hips := WardenSkeleton.find(sk, "hips")
+	var s := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var plain := await _stride(sync, sk)
+	s["kmove"] = WardenCarry.MOVE
+	s["kmove_t"] = 0.5
+	var stride := await _stride(sync, sk)
+	var socket: Vector3 = m.get_meta(WardenCarry.SOCKET, Vector3.INF)
+	ok(clips.proc_w <= 0.0 and clips.carry_w >= 1.0 and socket != Vector3.INF,
+			"%s: the carry lies over the clips, not the rig, and leaves a socket" % id)
+	var height := 1.6 * absf(m.scale.y)
+	var hips_at := sk.global_transform * sk.get_bone_global_pose(hips).origin
+	var worst := 0.0
+	var front := INF
+	for side in ["L", "R"]:
+		var wrist := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
+		worst = maxf(worst, wrist.distance_to(socket))
+		front = minf(front, hips_at.z - wrist.z)       # (the model faces -Z)
+	ok(worst <= 0.3 * height and front > 0.05 * height,
+			"%s: both wrists cradle the Boki at the chest (%.2f m from the socket, %.2f m in front of the hips)"
+			% [id, worst, front])
+	ok(socket.y > hips_at.y and socket.y < hips_at.y + 0.9 * height,
+			"%s: the Boki rides at chest height (%.2f m over the hips)" % [id, socket.y - hips_at.y])
+	var held := 0.0
+	for nm in dd.get("carry_stow", []):
+		held = maxf(held, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
+	ok(held < 0.01, "%s: the weapon bones the data stows are put away (%.3f)" % [id, held])
+	ok(plain < 0.02 or stride >= plain * 0.75,
+			"%s: the legs keep stepping under it (%.2f m of stride, %.2f m without)" % [id, stride, plain])
+	s["kmove"] = "rs_done"
+	for k in 20:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+	ok(clips.proc_w <= 0.0, "%s: the stand-up beat stays on the clips" % id)
+	s.erase("kmove")
+	for k in 20:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+	var back := 1.0
+	for nm in dd.get("carry_stow", []):
+		back = minf(back, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
+	ok(clips.carry_w <= 0.0 and not m.has_meta(WardenCarry.SOCKET) and back > 0.5,
+			"%s: the carry lets go (socket gone, weapon back, size %.2f)" % [id, back])
+
+## How far the right shin swings front to back over 40 frames of the state.
+func _stride(sync: Node, sk: Skeleton3D) -> float:
+	var shin := WardenSkeleton.find(sk, "shin.R")
+	var lo := INF
+	var hi := -INF
+	for k in 40:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		var z := (sk.global_transform * sk.get_bone_global_pose(shin).origin).z
+		lo = minf(lo, z)
+		hi = maxf(hi, z)
+	return hi - lo
