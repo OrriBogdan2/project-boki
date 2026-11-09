@@ -42,6 +42,9 @@ func lk() -> CareLook:
 		look = CareLook.new(m, h)
 	return look
 
+func warm_fx(_at: Vector3) -> void:
+	lk().prewarm()
+
 ## A move that waits for the one playing to finish (passive procs never cut an ability's move).
 func play_soft(move: String) -> void:
 	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
