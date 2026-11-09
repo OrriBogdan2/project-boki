@@ -71,9 +71,13 @@ func _hunters() -> void:
 	Settings.reset_all()
 	Settings.set_v("tips", false)
 	_pin_reticle()
+	main.get_viewport().gui_disable_input = true      # (no tooltip pops up under the real cursor)
 	var strip_w := CROP.x * 3 * 4
 	for id in Arch.ids():
 		m.arena.set_arch(String(id), Arch.signature(String(id)))
+		for pn in m.hud.ui_extra:      # (the practice bar: its tooltips and its hide-the-reticle hover follow
+			if pn is Control:          # a desktop worker's real cursor, wherever that rests)
+				pn.visible = false
 		var tiles := []
 		for st in ["rest", "bloom", "hit", "crit"]:
 			# (the state is held every frame up to the shot: a 0.14 s flash or a decaying bloom would be gone
