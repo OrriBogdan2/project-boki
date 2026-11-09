@@ -912,8 +912,29 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off a 9.2s cooldown)",
-			float(K.cd["e"]) < 9.2 * 0.5, "%.2f" % float(K.cd["e"]))
+	ok("small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
+			float(K.cd["e"]) < 11.5 * 0.5, "%.2f" % float(K.cd["e"]))
+	P.slot_lv["kin"] = 1
+	# upgrade parity (docs/heroes/gunslinger.md): the source's tier II / III+IV numbers per slot
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([
+			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
+			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin") / K.power("sec"),
+		])
+	ok("upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3",
+			near.call(up[0][0], 6.5) and near.call(up[1][0], 5.4) and near.call(up[2][0], 4.3), str(up))
+	ok("upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3",
+			near.call(up[0][1], 8.5) and near.call(up[1][1], 7.4) and near.call(up[2][1], 6.3), str(up))
+	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
+			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
 	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
