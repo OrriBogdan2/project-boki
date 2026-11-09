@@ -27,8 +27,15 @@ const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 static var vis_rng := RandomNumberGenerator.new()
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
 const TRAIL_DT := 0.016       # s: a skinned shot leaves its trail every frame
-const ORB_CORE := [Color("3a0d5c"), Color("8a3fe0")]      # the orb's glass core, plain and at full charge
-const ORB_RIM := [Color("e070ff"), Color("ffeaff")]       # its rim, the same
+# Motley's sea teal and its tints (content/vfx/ostra.json): the orb, the spear, the sigils, the Nightwell
+static var VOID_MAIN := HeroVfx.col("ostra", "main")
+static var VOID_HOT := HeroVfx.col("ostra", "hot")
+static var VOID_WHITE := HeroVfx.col("ostra", "white")
+static var VOID_DEEP := HeroVfx.col("ostra", "deep")
+static var VOID_BLACK := HeroVfx.col("ostra", "void")
+static var VOID_PINK := HeroVfx.col("ostra", "swell")
+static var ORB_CORE := [VOID_DEEP, VOID_MAIN]      # the orb's glass core, plain and at full charge
+static var ORB_RIM := [VOID_MAIN, VOID_WHITE]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
 const ROCK_GLOW := Color("3a7cff")     # Tenzo's cobalt (content/vfx/dolm.json "main"): the cracks in his stone
 const ROCK_HOT := Color("9ad0ff")      # "hot": sparks off a flying rock
@@ -99,22 +106,22 @@ func _build(kind: String) -> Node3D:
 			_build_void_shot(n, kind)
 		"aura":
 			Models.part(
-				n, Models.sphere(1.25, 20), glass_mat(Color("7a1a68"), Color("ff4fd8"), 0.6, 0.12), Vector3(0, 1.0, 0)
+				n, Models.sphere(1.25, 20), glass_mat(VOID_DEEP, VOID_PINK, 0.6, 0.12), Vector3(0, 1.0, 0)
 			)
-			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(0.75, 0.12, 0.6, 0.45)), Vector3(0, 0.05, 0))
+			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(VOID_DEEP, 0.45)), Vector3(0, 0.05, 0))
 		"shard":
 			Models.part(n, lump(0.13), rock_mat(0.7, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.7, 1.3))
 		"column":
 			Models.part(
-				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("06231f"), Color("2ee6c0"), 0.75, 0.3),
+				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("06231f"), VOID_MAIN, 0.75, 0.3),
 				Vector3(0, 3.0, 0)
 			)
 		"well_dome":
-			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("041a17"), Color("b8fff0"), 0.45, 0.1), Vector3.ZERO)
+			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("041a17"), VOID_HOT, 0.45, 0.1), Vector3.ZERO)
 			Models.part(
 				n,
 				Models.sphere(0.3, 16),
-				Models.glow_mat(Color(1.0, 0.31, 0.85, 0.55)),
+				Models.glow_mat(Color(VOID_MAIN, 0.55)),
 				Vector3(0, 0.15, 0)
 			).name = "Core"
 		"well":
@@ -123,7 +130,7 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
 		"dark":
-			Models.part(n, Models.sphere(0.22, 16), glass_mat(Color("0a0012"), Color("f2eaff"), 1.0, 1.0), Vector3.ZERO)
+			Models.part(n, Models.sphere(0.22, 16), glass_mat(VOID_BLACK, VOID_WHITE, 1.0, 1.0), Vector3.ZERO)
 		"star":
 			_build_star(n)
 		"sigil":
@@ -145,7 +152,7 @@ func _build_rock(n: Node3D, kind: String) -> void:
 	body.name = "Spin"
 	Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
 	Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
-	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(1.0, 0.42, 0.1, 0.28)), Vector3.ZERO)
+	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(ROCK_GLOW, 0.28)), Vector3.ZERO)
 
 ## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
 ## top so the match camera reads it under his feet, a hot underside.
@@ -161,14 +168,14 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 	match kind:
 		"orb":
 			var o := Models.part(
-				n, Models.sphere(0.28, 12), glass_mat(Color("3a0d5c"), Color("e070ff"), 1.0, 0.75), Vector3.ZERO,
+				n, Models.sphere(0.28, 12), glass_mat(VOID_DEEP, VOID_MAIN, 1.0, 0.75), Vector3.ZERO,
 				Vector3(1.0, 1.0, 1.45)
 			)
 			o.name = "Spin"
-			var hot := Models.glow_mat(Color("ffd6ff"))
+			var hot := Models.glow_mat(VOID_HOT)
 			hot.render_priority = 1      # always over the glass (same-node alpha sorting flickers in flight)
 			Models.part(n, Models.sphere(0.09, 8), hot, Vector3(0, 0, -0.12)).name = "Hot"
-			_tail(n, 0.22, 1.2, Color(0.88, 0.25, 0.85, 0.55))
+			_tail(n, 0.22, 1.2, Color(VOID_MAIN, 0.55))
 		"spear":
 			var b := Node3D.new()
 			b.name = "Spin"
@@ -178,7 +185,7 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.2)
 				var len_ := 2.7 if i == 0 else 2.0
 				Models.part(
-					b, PrismMesh.new(), glass_mat(Color("06100f"), Color("2ee6c0"), 1.0, 0.85),
+					b, PrismMesh.new(), glass_mat(Color("06100f"), VOID_MAIN, 1.0, 0.85),
 					off + Vector3(0, 0, 0.15 * float(i % 2)), Vector3(0.26, len_, 0.26), Vector3(-PI * 0.5, 0, a)
 				)
 
@@ -223,14 +230,14 @@ func _build_star(n: Node3D) -> void:
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	Models.part(spin, Models.sphere(0.3, 14), glass_mat(Color("120838"), Color("8a6bff"), 1.0, 0.9), Vector3.ZERO)
+	Models.part(spin, Models.sphere(0.3, 14), glass_mat(VOID_DEEP, VOID_MAIN, 1.0, 0.9), Vector3.ZERO)
 	for i in 6:
 		var a := TAU * i / 6.0
 		Models.part(
-			spin, PrismMesh.new(), shade_mat(Color(0.62, 0.42, 1.0, 0.95)), Vector3(cos(a), sin(a), 0.0) * 0.36,
+			spin, PrismMesh.new(), shade_mat(Color(VOID_HOT, 0.95)), Vector3(cos(a), sin(a), 0.0) * 0.36,
 			Vector3(0.12, 0.3, 0.06), Vector3(0, 0, a - PI * 0.5)
 		)
-	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("d8c8ff")), Vector3.ZERO)
+	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(VOID_HOT), Vector3.ZERO)
 
 ## Ostra's Nightwell, radius 1 (scaled to the well): a near-black disc, four sea-teal spiral arms turning
 ## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
@@ -251,13 +258,13 @@ func _build_well(n: Node3D) -> void:
 		Models.part(
 			spin,
 			Models.sphere(0.07, 8),
-			Models.toon(Color("0c0414"), false, 0.0),
+			Models.toon(VOID_BLACK, false, 0.0),
 			Vector3(cos(a), 0.12, sin(a))
 		)
 	Models.part(
 		n,
 		Models.sphere(0.22, 14),
-		Models.glow_mat(Color(1.0, 0.31, 0.85, 0.85)),
+		Models.glow_mat(Color(VOID_MAIN, 0.85)),
 		Vector3(0, 0.1, 0)
 	).name = "Core"
 
@@ -336,7 +343,7 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 			fx.spark(p, back, ROCK_HOT, 2, 2.0, 30.0, 0.25, 4.0, 0.8)
 		"orb":
 			var k := float(e["k"])
-			var col := Color(0.9, 0.3 + 0.4 * k, 0.9, 0.7)
+			var col := Color(VOID_MAIN, 0.7)
 			fx.burst(p, col, 1 + roundi(k * 2.0), 0.6, 0.25, 0.0, 0.9 + 0.6 * k, back, 15.0)
 		"spear":
 			fx.burst(p, Color(0.18, 0.9, 0.75, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
@@ -346,10 +353,10 @@ func _impact(e: Dictionary, p: Vector3) -> void:
 	match String(e["kind"]):
 		"orb":
 			var k := float(e["k"])
-			fx.burst(p, Color(0.88, 0.3, 0.9, 0.85), 8 + roundi(k * 14.0), 3.0 + k * 2.5, 0.25, 0.0, 1.0 + 0.7 * k)
-			fx.flash(p, Color("e070ff"), 0.4 + 0.7 * k, 0.06 + 0.05 * k)
+			fx.burst(p, Color(VOID_MAIN, 0.85), 8 + roundi(k * 14.0), 3.0 + k * 2.5, 0.25, 0.0, 1.0 + 0.7 * k)
+			fx.flash(p, VOID_MAIN, 0.4 + 0.7 * k, 0.06 + 0.05 * k)
 			if k > 0.0:
-				fx.ring(p, 0.4 + k, Color("e070ff"), 0.22 + 0.1 * k)
+				fx.ring(p, 0.4 + k, VOID_MAIN, 0.22 + 0.1 * k)
 		"boulder":
 			fx.dust(p, 6)
 
@@ -473,7 +480,7 @@ func sigil(key: String, ent: Node3D, at: Vector3, r: float, fill: float, col: Co
 ## Something arriving out of nowhere at `at`: motes rushing in to a point, a dark core and a ring.
 func implode(at: Vector3, col: Color) -> void:
 	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 22, -6.0, 0.3, 0.0, 1.3)
-	m.fx.burst(at + Vector3(0, 1.0, 0), Color(0.08, 0.02, 0.14, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
+	m.fx.burst(at + Vector3(0, 1.0, 0), Color(VOID_BLACK, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
 	m.fx.ring(at, 1.2, Color(col, 0.9), 0.2)
 
 ## The grown seed's light column (it rises quickly, stays `secs`).

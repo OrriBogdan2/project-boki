@@ -33,7 +33,7 @@ const M_SMOKE := 13
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
-const CINDER_HALO := Color("6a5aff")
+static var CINDER_HALO := HeroVfx.col("ashwick", "red")
 const HOOK_R := 0.42          # m, the bone hook's curl
 const HOOK_BITS := 7          # pieces of the curl
 const ANCHOR_IRON := Color("3a3f48")
@@ -445,10 +445,10 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	var tail_col := col2
 	match kind:
 		"cinder":
-			# Cinder Shot: a red-pink fireball with a yellow core inside a violet halo, a dark smoke tail
+			# Cinder Shot: a deep red-orange fireball with a yellow core inside a red halo, a dark smoke tail
 			n.add_child(_rider_part("Halo", CINDER_HALO, CINDER_HALO, 1.15, 0.6))
 			n.add_child(_rider_part("Head", col, col2, 0.62, 1.0))
-			tail_col = Color(Color("3a2a3a"), 0.7)
+			tail_col = Color(HeroVfx.col("ashwick", "soot"), 0.7)
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
 	tr.name = "Trail"
 	n.add_child(tr)
