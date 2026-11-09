@@ -231,6 +231,20 @@ func _summon_data() -> void:
 			bad_ids.append(id)
 	ok(bad_ids.is_empty(), "summon: every species has a role x size window in the uptime band %s" % [bad_ids])
 	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
+	_dex_row()
+
+## The Field Book card's summon row shows the numbers the summon uses, with the right tag.
+func _dex_row() -> void:
+	var ids: Array = KinLib.kin_ids().filter(func(id): return Data.KIN.has(id))
+	ids.sort_custom(func(a, b): return KinSummon.times(KinLib.kin(a)).x < KinSummon.times(KinLib.kin(b)).x)
+	for spk in ["cindle", ids[0], ids[-1]]:   # Cindle plus the shortest and the longest window
+		var t := KinSummon.times(KinLib.kin(spk))
+		var row := DexView.summon_row(spk)
+		var txt := (row.find_child("SummonText", true, false) as Label).text
+		ok(txt == "Summon %d s / rest %d s" % [int(t.x), int(t.y)], "dex: %s card reads '%s'" % [spk, txt])
+		var tag := (row.get_child(2).get_child(0) as Label).text
+		ok(row.get_child_count() == 3 and tag == KinSummon.tag(t.x).to_upper(), "dex: %s card tag is %s" % [spk, tag])
+		row.free()
 
 ## The summon itself, on the player's Cindle with Boki wisps on.
 func _summon() -> void:

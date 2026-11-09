@@ -299,6 +299,9 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 			for k in 4:
 				var p0 := at + Vector2(-0.6 + k * 0.3, 0.2 - k * 0.3) * s
 				c.draw_line(p0, p0 + Vector2(0.18, 0.18) * s, Color(0, 0, 0, 0.5), maxf(1.0, w * 0.6), true)
+		"ring":        # the summon timer: a faint full ring with a bright three-quarter arc
+			c.draw_arc(at, 0.8 * s, 0.0, TAU, 24, Color(col, 0.3), w, true)
+			c.draw_arc(at, 0.8 * s, -PI / 2.0, PI, 18, col, w, true)
 		"pin":
 			c.draw_circle(at + Vector2(0, -0.3) * s, 0.5 * s, col)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.42, -0.05) * s, at + Vector2(0.42, -0.05) * s, at + Vector2(0, 0.9) * s]), col)
