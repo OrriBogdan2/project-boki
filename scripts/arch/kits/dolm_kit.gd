@@ -439,8 +439,8 @@ func _punch(k: float) -> void:
 	var stepv := float(pd["step_v"]) * (float(pd["air_k"]) if not h.grounded else 1.0)
 	h.vel.x = dir.x * stepv
 	h.vel.z = dir.y * stepv
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
 	m.fx.burst(fp, Color("e8c07a"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), MOLTEN, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)

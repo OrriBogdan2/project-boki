@@ -451,9 +451,9 @@ func _all() -> void:
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage, stun, Grounded",
-		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and KitStatus.grounded(T) and T.stun_t > 0.8,
-		"anchors %d took %.0f stun %.2f" % [K.anchors, ak.dmg(T) - hp0, T.stun_t]
+		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (the source E is slam, stun, dunk)",
+		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and not KitStatus.grounded(T) and T.stun_t > 0.8,
+		"anchors %d took %.0f stun %.2f gnd %s" % [K.anchors, ak.dmg(T) - hp0, T.stun_t, KitStatus.grounded(T)]
 	)
 	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
