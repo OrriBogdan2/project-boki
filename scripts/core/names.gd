@@ -250,5 +250,7 @@ static func bot_pool(taken: Array) -> Array:
 	rng.seed = randi()
 	for i in range(pool.size() - 1, 0, -1):
 		var j := rng.randi_range(0, i)
-		var swap = pool[i]; pool[i] = pool[j]; pool[j] = swap
+		var swap = pool[i]
+		pool[i] = pool[j]
+		pool[j] = swap
 	return pool

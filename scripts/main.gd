@@ -32,7 +32,7 @@ func _ready() -> void:
 	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
-	var demo := Demo.name_in(args)      # recording presets: a made-up save in memory, overlays hidden (docs/DEMO_PRESETS.md)
+	var demo := Demo.name_in(args)      # recording presets: a made-up save, overlays hidden (docs/DEMO_PRESETS.md)
 	if demo != "": Demo.setup(demo)
 	for a in args:
 		if a.begins_with("--overlay="):
@@ -2405,7 +2405,7 @@ func _truce_check() -> void:
 	if answered == "no answer": ok = false; print("TCHECK FAIL no answer")
 	if not T.allied(0, 1):
 		print("TCHECK (making the truce by hand for the rest of the check)")
-		for h in m.hunters: h.ctrl = "idle"      # (a swing already under way would land on the new partner and break the truce)
+		for h in m.hunters: h.ctrl = "idle"      # (a swing under way would land on the new partner, breaking the truce)
 		run.call(1.0)
 		for h in m.hunters: h.ctrl = "bot"
 		T.make(0, 1)
