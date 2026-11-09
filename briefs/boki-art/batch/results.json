@@ -33764,5 +33764,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_reelacine_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_sarcobra_full",
+    "name": "Sarcobra (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sarcobra_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_starcap_full",
+    "name": "Starcap (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_starcap_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reelacine_full",
+    "name": "Reelacine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_reelacine_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sarcobra_full",
+    "name": "Sarcobra (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_sarcobra_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sarcobra_full",
+    "name": "Sarcobra (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sarcobra_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_starcap_full",
+    "name": "Starcap (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_starcap_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_reelacine_full",
+    "name": "Reelacine (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_reelacine_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_torpecone_full",
+    "name": "Torpecone (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_torpecone_full_1.jpg",
+    "ok": true
   }
 ]
