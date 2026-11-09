@@ -693,7 +693,7 @@ func _start(o: Dictionary) -> void:
 	T = Data.TIERS[tier]
 	bot_diff = String(o.get("bot_diff", Settings.get_v("bot_diff")))
 	if not Data.BOT_DIFF.has(bot_diff):
-		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false))
+		bot_diff = Data.auto_bot_diff(tier, int(Save.d.get("extracts", 0)), o.get("tutorial", false) or o.get("training", false), Data.rookie_run(o))
 	bot_cfg = Data.BOT_DIFF[bot_diff]
 	_build_env()
 	music_dir = MusicDir.new()

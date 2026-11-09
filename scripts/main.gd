@@ -3247,8 +3247,9 @@ func _bot_sanity() -> void:
 				if h.roll_t > float(s["roll"]) + 0.05:
 					s["dashes"] = int(s["dashes"]) + 1
 				s["roll"] = h.roll_t
-				# (a ledge rise is a climb up a wall, not hanging in the air: it doesn't count)
-				if h.hit_marker() == "ring" and not h.gliding and h.lfloat.is_empty():
+				# (a ledge rise is a climb up a wall, and a kit's hover a flight: neither is hanging in the air)
+				var flying: bool = h.gliding or not h.lfloat.is_empty() or (h.ak != null and h.ak.hovering())
+				if h.hit_marker() == "ring" and not flying:
 					s["ring"] = float(s["ring"]) + Match.DT
 				s["t"] = float(s["t"]) + Match.DT
 				if float(s["t"]) >= WIN:

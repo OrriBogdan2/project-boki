@@ -171,7 +171,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["aim_t"] = float(a.get("aim_t", 0.0)) - dt
 		if a["aim_t"] <= 0.0:
 			a["aim_t"] = randf_range(0.7, 1.3)
-			a["aim_goal"] = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * (1.15 - a["skill"]) * 1.6
+			var err_m: float = (1.15 - a["skill"]) * 1.6 * float(df.get("aim_k", 1.0))
+			a["aim_goal"] = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * err_m
 		a["aim_err"] = (a["aim_err"] as Vector2).lerp(a.get("aim_goal", Vector2.ZERO), 1.0 - exp(-3.0 * dt))
 		var aim: Vector2 = Vector2(tgt.pos.x, tgt.pos.z) + lead + a["aim_err"]
 		inp["aim"] = Vector3(aim.x, tgt.hit_y() + 0.9, aim.y)
@@ -218,12 +219,14 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# abilities: easier bots only look for a chance every so often
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
 		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
-			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
+			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0) * float(df.get("abil_slow", 1.0))
 			if MergeKit.is_live(h):
 				MergeKit.bot_use(h)       # merged: the ultimate when foes are in range or the window is closing (its hero kit plays as usual below)
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
+				var holds: Dictionary = h.ak.bot_hold.duplicate()
 				h.ak.bot_use(tgt, d, los)
+				if df.get("plain", false): _plain_kit(h, holds)
 				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
 				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
 					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
@@ -546,6 +549,32 @@ func _crawl(m: Match, h: Hunter) -> void:
 	h.inp["move"] = mv
 
 ## Right click: the weapon's utility, used when a target is in reach.
+const EARLY_RELEASE := 0.55    # a rookie bot lets go of a charge at this share of the perfect hold
+
+## A rookie bot's kit use stays plain: a charge is let go early, and an E, R or ultimate that is already
+## up is not pressed again (a Sigil detonation, a Last Round release, an early landing).
+## `holds` is the kit's bot_hold before this look; only a hold the kit just started is cut.
+func _plain_kit(h: Hunter, holds: Dictionary) -> void:
+	var ak: ArchKit = h.ak
+	for k in ak.bot_hold:
+		if float(ak.bot_hold[k]) > float(holds[k]):
+			ak.bot_hold[k] = float(ak.bot_hold[k]) * EARLY_RELEASE
+	if ak.e_t > 0.0 and ak.e_recastable():
+		h.inp["sig"] = false
+	if ak.r_t > 0.0 or ak.ult_running():
+		h.inp["ult"] = false
+
+## Rival `o` is busy with someone who is not us (or ours): a bot that waits out the opening minutes
+## leaves it alone instead of joining in.
+func _in_others_fight(m: Match, h: Hunter, o: Hunter) -> bool:
+	var ot = o.ai.get("tgt")
+	if ot is Hunter and ot.team != h.team and ot.team != o.team:
+		return true
+	for x in m.hunters:
+		if x.team != h.team and x.team != o.team and x.ai.get("tgt") == o:
+			return true
+	return false
+
 func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:
 	var a := h.ai
 	# holding a charge-up (Rail Charge): keep holding until it's ready, then let go
@@ -566,6 +595,8 @@ func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:
 			h.inp["sec"] = true
 			if not ud.charge.is_empty():
 				a["hold"] = float(ud.bot.get("hold", ud.charge.get("time", 1.0)))
+				if (a.get("diff", {}) as Dictionary).get("plain", false):
+					a["hold"] = float(a["hold"]) * EARLY_RELEASE
 				h.inp["sec_hold"] = true
 
 ## Where a bot would aim one of its abilities right now, from the ability's "bot" hint, or
@@ -673,6 +704,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		var bounty: bool = m.rolling != null and o.has_meta("bounty")
 		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
+			continue
+		var calm_s := float((a.get("diff", {}) as Dictionary).get("calm_s", 0.0))
+		if not provoked and o is Hunter and m.time < calm_s and _in_others_fight(m, h, o):
 			continue
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue

@@ -137,19 +137,33 @@ const PERKS := {
 ##   skill: aim lead/accuracy and how often they think   react: seconds before they fire on a new target
 ##   dmg: their damage   fire: how much of the time they keep the trigger down
 ##   abil: how readily they use abilities and kin   aggro: how far they chase and how hard they press
+## The rookie tier (a new player's first ROOKIE_MATCHES expeditions, never in the Settings list) adds:
+##   aim_k: times the aim error   abil_slow: times the wait between ability looks
+##   plain: no charge held to its perfect release, no recast of an ability already up
+##   calm_s: seconds from the drop in which a bot leaves fights between others alone
 const BOT_DIFF := {
+	"rookie": {"name": "Rookie", "skill": 0.15, "react": 1.5, "dmg": 0.45, "fire": 0.25, "abil": 0.2, "aggro": 0.5,
+		"aim_k": 2.0, "abil_slow": 2.0, "plain": true, "calm_s": 120.0},
 	"easy": {"name": "Easy", "skill": 0.28, "react": 0.75, "dmg": 0.65, "fire": 0.5, "abil": 0.3, "aggro": 0.6},
 	"medium": {"name": "Medium", "skill": 0.5, "react": 0.45, "dmg": 0.82, "fire": 0.7, "abil": 0.55, "aggro": 0.8},
 	"hard": {"name": "Hard", "skill": 0.72, "react": 0.28, "dmg": 0.95, "fire": 0.85, "abil": 0.8, "aggro": 0.95},
 	"expert": {"name": "Expert", "skill": 0.92, "react": 0.16, "dmg": 1.05, "fire": 1.0, "abil": 1.0, "aggro": 1.1},
 }
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
+const ROOKIE_MATCHES := 3      # finished expeditions (Save "matches") that still get rookie bots
+
+## A new player's first expeditions, offline or on the local host; online lobbies keep the server's setting.
+static func rookie_run(opts: Dictionary) -> bool:
+	return not opts.has("net") and int(Save.d.get("matches", 0)) < ROOKIE_MATCHES
 
 ## Which difficulty "auto" means for a run: the tier sets the base (Meadow easy, Dusk Isles medium,
-## the Hollow hard) and lots of successful extractions push it up one step. The tutorial is always easy.
-static func auto_bot_diff(tier: int, extracts: int, tutorial := false) -> String:
+## the Hollow hard) and lots of successful extractions push it up one step. The tutorial is always easy;
+## a rookie run (a new player's first expeditions, offline) gets the rookie tier.
+static func auto_bot_diff(tier: int, extracts: int, tutorial := false, rookie := false) -> String:
 	if tutorial:
 		return "easy"
+	if rookie:
+		return "rookie"
 	var i := clampi(tier, 0, 2)
 	if extracts >= 12 * (i + 1):
 		i += 1
