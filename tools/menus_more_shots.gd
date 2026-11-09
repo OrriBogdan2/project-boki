@@ -1,5 +1,5 @@
 extends RefCounted
-## --menus-more-shots=<dir>: the title and the expedition panel with their More buttons closed and open
+## --menus-more-shots=<dir>: the title, the expedition panel and the Esc menu with their More buttons closed and open
 ## (run with a real renderer: jobq --needs gpu). Never touches the real save.
 
 var main: Node
@@ -36,6 +36,13 @@ func run(m: Node) -> void:
 	_press(home.panel_host, "More v")
 	await _settle(0.4)
 	await _shot("expedition_more")
+	home._close_panel()
+	Overlay.open_pause("home")
+	await _settle(0.6)
+	await _shot("pause_closed")
+	Overlay.pause_acts[2].call()
+	await _settle(0.4)
+	await _shot("pause_more")
 	print("MENUSMORE DONE")
 	main.get_tree().quit()
 

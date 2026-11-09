@@ -210,14 +210,14 @@ func close() -> void:
 	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
-## The Esc menu: Resume on top, the places you go most next, the rare ones as quiet links, and
-## leaving at the bottom.
+## The Esc menu: Continue, Settings, More... (the rarely used ones, folded), then leaving at the bottom.
+## Admin tools are not listed (F1 opens them for the owner).
 func open_pause(where: String) -> void:
 	ctx = where
 	Sfx.play("ui_open", null, -10.0)
 	stack.clear()
 	page = ""
-	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
+	var v := _page("pause", "Paused", 440)
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
 	var bw := 388.0
 	pause_acts.clear()
@@ -235,57 +235,63 @@ func open_pause(where: String) -> void:
 		if tab == "Controls": tab = "Gameplay"
 		open_settings()
 	var res: Button = item.call("Continue", "next", close, "Primary")
+	item.call("Settings", "gear", open_set)
+	var more: Button = item.call("More...", "satchel", func(): pass)
+	pause_acts[-1] = func(): more.pressed.emit()
+	var extra := GridContainer.new()        # two columns, so the open list still fits a 720p screen
+	extra.columns = 2
+	extra.add_theme_constant_override("v_separation", 0)
+	v.add_child(extra)
+	var add := func(txt: String, cb: Callable): extra.add_child(UI.ghost(txt, cb, bw / 2.0 - 2.0))
+	var practice: Practice = Practice.of(scr) if scr is Match else null
+	if practice:
+		add.call("Change Hunter", func():
+			close()
+			PracticeHero.open(practice))
+	if where != "match":
+		add.call("Inventory", open_inventory)
+		add.call("Save files", open_saves)
+		add.call("Save now", func():
+			Save.save_game()
+			Sfx.play("ui_open", null, -10.0))
+	if where == "home":
+		add.call("Training area", func():
+			close()
+			scr._start_training())
+		add.call("Change your look", func():
+			close()
+			Game.goto("hatch", {"create": true}))
+	if scr and scr.has_method("unstick"):
+		add.call("I'm stuck", func():
+			close()
+			scr.unstick()
+			Sfx.play("whoosh"))
+	if extra.get_child_count() > 0:
+		UI.fold_more(more, [extra], "More...", "Less")
+	else:
+		more.visible = false
+		pause_acts.pop_back()
+		extra.queue_free()
 	if where == "match":
 		var m = scr
 		var tut: bool = m.opts.get("tutorial", false) or m.opts.get("training", false)
 		var leave := func():
 			close()
 			Practice.leave(m, tut)
-		item.call("Settings", "gear", open_set)
 		if tut:
 			item.call("Leave the training area" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			item.call("Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "Danger")
 	else:
-		item.call("Save", "satchel", func():
-			Save.save_game()
-			Sfx.play("ui_open", null, -10.0))
 		item.call("Save and quit to menu", "home", func():
 			Save.save_game()
 			close()
 			RateCard.gate(root, func(): Game.goto("title")))
-		item.call("Settings", "gear", open_set)
 		if not OS.has_feature("web"):
 			item.call("Quit game", "close", func():
 				Save.save_game()
 				RateCard.gate(root, get_tree().quit))
-	# the rarely used ones: quiet text links in a row
-	var minor := HFlowContainer.new()
-	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
-	var practice: Practice = Practice.of(scr) if scr is Match else null
-	if practice:
-		minor.add_child(UI.ghost("Change Hunter", func(): close(); PracticeHero.open(practice)))
-	if where != "match":
-		minor.add_child(UI.ghost("Inventory", open_inventory))
-		minor.add_child(UI.ghost("Save files", open_saves))
-	if where == "home":
-		minor.add_child(UI.ghost("Training area", func():
-			close()
-			scr._start_training()))
-		minor.add_child(UI.ghost("Change your look", func():
-			close()
-			Game.goto("hatch", {"create": true})))
-	if scr and scr.has_method("unstick"):
-		minor.add_child(UI.ghost("I'm stuck", func():
-			close()
-			scr.unstick()
-			Sfx.play("whoosh")))
-	if admin_allowed():
-		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
-	if minor.get_child_count() > 0:
-		v.add_child(UI.spacer(2))
-		v.add_child(minor)
 	res.grab_focus.call_deferred()
 
 # ------------------------------------------------------------------ settings
