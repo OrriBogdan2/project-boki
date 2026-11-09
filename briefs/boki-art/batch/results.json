@@ -45461,5 +45461,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/chandelotl_card86_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_anchorhorn_p86",
+    "name": "Anchorhorn (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anchorhorn_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_p86",
+    "name": "Bastionpet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_p86",
+    "name": "Bastionpet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelotl_card86",
+    "name": "Chandelotl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelotl_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_rippmink",
+    "name": "Rippmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_rippmink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_rippmink",
+    "name": "Rippmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_rippmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bastionpet_p86",
+    "name": "Bastionpet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bastionpet_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_briarlynx_p86",
+    "name": "Briarlynx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_briarlynx_p86_3.jpg",
+    "ok": true
   }
 ]
