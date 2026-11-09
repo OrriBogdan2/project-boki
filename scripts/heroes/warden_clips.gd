@@ -324,7 +324,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	if String(s.get("act", "")) != "":
-		return {"proc": true}     # holding interact (a chest, a pickup, a hatch key): the rig plays the shared hold poses
+		return {"proc": true}     # holding interact: the rig plays the shared hold poses
 	if bool(s.get("stun", false)) and st.has("stun"):
 		return {"clip": st["stun"], "t": -1.0}
 	var em := String(s.get("emote", ""))

@@ -63,7 +63,8 @@ func run(main: Node) -> void:
 		h.set_hold("lift", HunterAnim.LIFT_T)
 		for at in LIFT_AT:
 			while t < float(at) - 0.001:
-				_frame(m, h); t += DT
+				_frame(m, h)
+				t += DT
 			await tree.process_frame
 			strip.blit_rect(await _grab(), Rect2i(0, 0, SIZE, SIZE), Vector2i(SIZE * c, SIZE * row))
 			c += 1
@@ -72,7 +73,8 @@ func run(main: Node) -> void:
 		t = 0.0
 		while t < CHEST_AT:
 			h.set_hold("chest", 0.15)
-			_frame(m, h); t += DT
+			_frame(m, h)
+			t += DT
 		await tree.process_frame
 		strip.blit_rect(await _grab(), Rect2i(0, 0, SIZE, SIZE), Vector2i(SIZE * c, SIZE * row))
 		c += 1

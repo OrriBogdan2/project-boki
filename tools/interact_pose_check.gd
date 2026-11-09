@@ -1,13 +1,13 @@
 extends RefCounted
-## --interact-pose-check: every Hunter plays a body action, not idle, for each interact state (a pickup's reach-lift-settle,
-## a chest's lid, a deathbox, a revive, a hatch key, a console). Per Hunter and state, the pose is read off the skeleton
-## through the real render path (Match.step, Hunter.render, the Sync node) and compared with the same Hunter standing in
-## idle: a hand or the head must move at least POSE_MIN of the Hunter's height. Moving off cancels the pose at once, and
-## the lift beat ends on its own. Never touches the save.
+## --interact-pose-check: every Hunter plays a body action, not idle, for each interact state (a pickup's
+## reach-lift-settle, a chest's lid, a deathbox, a revive, a hatch key, a console). Per Hunter and state, the pose is
+## read off the skeleton through the real render path (Match.step, Hunter.render, the Sync node) and compared with the
+## same Hunter standing in idle: a hand or the head must move at least POSE_MIN of the Hunter's height. Moving off
+## cancels the pose at once, and the lift beat ends on its own. Never touches the save.
 
 const DT := 1.0 / 60.0
 const STATES := ["lift", "chest", "loot", "revive", "key", "console"]
-const POSE_MIN := 0.08         # of the Hunter's height: how far a hand (against the hips) or the head must move off idle
+const POSE_MIN := 0.08         # of the Hunter's height: how far a hand or the head must move off idle
 const CANCEL_S := 0.25         # s: after the Hunter walks off, the pose is gone
 
 var bad := 0
@@ -68,7 +68,8 @@ func run(main: Node) -> void:
 		h.set_hold("lift", HunterAnim.LIFT_T)
 		var t := 0.0
 		while t < HunterAnim.LIFT_T + 0.3:
-			_frame(m, h); t += DT
+			_frame(m, h)
+			t += DT
 		ok(h.holding() == "" and h.anim.act_k < 0.2, "%s: the lift beat ends on its own" % arch)
 		h.set_hold("chest", 5.0)
 		for f in 30:
@@ -81,7 +82,8 @@ func run(main: Node) -> void:
 		for f in steps:
 			h.vel = Vector3(4.0, 0.0, 0.0)
 			_frame(m, h)
-		ok(k_held > 0.8 and h.anim.act_k < 0.1, "%s: moving off blends the pose out (%.2f -> %.2f in %.2fs)" % [arch, k_held, h.anim.act_k, CANCEL_S])
+		var gone: float = h.anim.act_k
+		ok(k_held > 0.8 and gone < 0.1, "%s: walking off blends the pose out (%.2f -> %.2f)" % [arch, k_held, gone])
 		h.set_hold("", 0.0)
 		m.queue_free()
 	print("INTERACT_DONE, failures: ", bad)
