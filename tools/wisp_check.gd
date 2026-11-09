@@ -31,6 +31,8 @@ func run(main_node: Node) -> void:
 	_bleed_out()
 	_teammate()
 	_boki_wisps()
+	_summon_data()
+	_summon()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
