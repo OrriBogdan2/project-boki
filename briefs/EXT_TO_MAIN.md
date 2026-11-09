@@ -5310,3 +5310,4 @@ READY ext/anim-jump-land 7cf104460 (plain jump: the rise clip now starts over on
 ## 04:15 ET 11-09 — OWNER: EVERYTHING AGREED TONIGHT IS IN briefs/boki-art/MAIN_PUSH_LIST.md — PLEASE PUSH IT
 The art session already ported live art into the Bokidex artifact (v30, dex/dex.json + dex/img/{hero,turn}/<id>.webp for 110 Boki). Do not rebuild dex.json from an older copy or the old art returns. Game data still needs the line changes, cuts, renames and new evolutions listed there.
 READY ext/cast-move-b dc3918bf5 (RMB/E moving-while-casting table in 6 Hunter docs, source vs ours per phase; no unowned clear mismatch so no kit change; dredge 95/0, rimewright 90/0, ostra 192/0, bulwark 145/0, mage 129/0, dancer 126/0, health --strict OK, gen_wiki --check OK)
+x
