@@ -27,6 +27,9 @@ var last_healed := 0.0
 func _init(kit: JuggernautKit) -> void:
 	k = kit
 
+var vel_before := Vector3.ZERO      # (debug readout) his velocity at the cast, before and after the ult touched it
+var vel_after := Vector3.ZERO
+
 func data() -> Dictionary:
 	return k.x_def()
 
@@ -49,10 +52,26 @@ func start() -> void:
 	var h := k.h
 	casts += 1
 	st = {"phase": "guard", "t": 0.0, "dir": h.aim_dir(), "blocks": 0, "last_block": -9.0}
+	_keep_momentum()
 	k.play("jug_guard")
 	_show_glow(true)
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(data()["short"]).to_upper(), GOLD, false)
 	k.vfx("guard_tell")
+
+## Casting keeps his motion: a share of the horizontal run carries into the guard (bleeding off over time), and an
+## upward speed already there (jump, launch, mantle) gets a bonus instead of being zeroed. Numbers: tuning "kael".
+func _keep_momentum() -> void:
+	var h := k.h
+	var tn := Tuning.of("kael")
+	vel_before = h.vel
+	var carry := Vector2(h.vel.x, h.vel.z) * float(tn["ult_carry_k"])
+	st["carry"] = carry
+	h.vel.x = carry.x
+	h.vel.z = carry.y
+	if h.vel.y >= float(tn["ult_up_min_mps"]):
+		h.vel.y += float(tn["ult_up_bonus_mps"])
+		st["rising"] = true
+	vel_after = h.vel
 
 ## E on a held chain, planted in the guard or the cleave. In the guard the pull goes now; the cleave's own moment
 ## takes it as the cleave lands.
@@ -80,7 +99,7 @@ func tick(dt: float) -> void:
 	st["t"] = float(st["t"]) + dt
 	match String(st["phase"]):
 		"guard":
-			_tick_guard(d)
+			_tick_guard(d, dt)
 		"strike":
 			if float(st["t"]) >= float(d["strike_t"]):
 				_land(d)
@@ -92,10 +111,16 @@ func tick(dt: float) -> void:
 				k.play("")           # the jump's own pose eases in over the follow-through
 
 ## The guard: planted (no jumping off either), the strip ahead follows the aim, gold sparks rise off him.
-func _tick_guard(d: Dictionary) -> void:
+func _tick_guard(d: Dictionary, dt: float) -> void:
 	var h := k.h
-	if h.vel.y > 0.0:
+	if h.vel.y > 0.0 and not st.get("rising", false):
 		h.vel.y = 0.0          # no jumping off the guard (it lands straight back)
+	var carry: Vector2 = st["carry"]
+	if carry.length() > 0.05:
+		carry *= maxf(0.0, 1.0 - float(Tuning.of("kael")["ult_carry_decay_per_s"]) * dt)
+		st["carry"] = carry
+		h.vel.x = carry.x
+		h.vel.z = carry.y
 	var aim := h.aim_dir()
 	var chain := k.warchain
 	if chain.pulling():

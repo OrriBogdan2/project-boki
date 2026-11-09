@@ -150,8 +150,8 @@ func e_free() -> void:
 	K.use_e()
 	var thrown := K.warchain.state == "throwing"
 	A.step(m, float(K.rmb_def()["windup"]))
-	A.ok("jug 113.5: the Slam started north strikes north after E goes east (both work)",
-			thrown and A.dmg(T) >= 20.0, "thrown %s, foe took %.0f" % [thrown, A.dmg(T)])
+	A.ok("jug 113.5: the Slam started north follows the cursor east after E: the north foe is spared",
+			thrown and A.dmg(T) <= 0.5, "thrown %s, foe took %.0f" % [thrown, A.dmg(T)])
 	await A.done(m)
 
 # ------------------------------------------------------------------ 6: the Meteor Drop straight down
