@@ -3705,3 +3705,4 @@ ART terrasloth reject briefs/boki-art/batch/out/terrasloth_1.png
 ART terrasloth reject briefs/boki-art/batch/out/terrasloth_2.png
 
 ## Nov 8 20:20 (art, owner): one special rule per line. Branching lines (starters, Echolop, Ermink, Jarmit) get NO male/female looks; only Bellowary, Gongibbon/Gongrowl, Kestrike/Arcestrel/Voltalon, Lunowl/Eclipsowl and Murmurling lines do. GAME_RULES_NOV8.md section 6 updated. vespox_f_r removed from approved.json (moved to "retired").
+- ext/tenzo-playtest-1108 update @ eedd47584: the re-rendered R clip is in. briefs/shots/tenzo-1108/r_void_after.mp4 shows the floor's warning: bright crossed cracks, a shake and grit puffs. r_void_after_warning.jpg is a still of it. The fix that made it show is reel-only: the reel rig keeps Match._process off, so it never drew Verbs; the game itself was unaffected.
