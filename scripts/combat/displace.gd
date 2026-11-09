@@ -27,8 +27,8 @@ const MIRROR_GRACE := 0.4    # s a mirror waits past its time for the owner's "e
 
 ## What a hit's options carry beyond the fixed hit fields (Match.net_send_hit), so a knock on a body another
 ## game owns lands the same there: its wall-slam stun, steer, weight, diminishing returns, burn time, slow
-## strength and Blight. Numbers only (heavy and dr travel as 1).
-const HIT_EXTRAS := ["kbi", "wallstun", "heavy", "dr", "slow_k", "burn_for", "blight"]
+## strength, Blight and a Riposte's straight-to-the-deathbox knock. Numbers only (heavy, dr and box travel as 1).
+const HIT_EXTRAS := ["kbi", "wallstun", "heavy", "dr", "slow_k", "burn_for", "blight", "box"]
 
 ## Tests read what would go out over Net without a connection.
 static var capture := false
@@ -276,7 +276,7 @@ static func apply_hit_extra(o: Dictionary, x) -> void:
 		return
 	for k in HIT_EXTRAS:
 		if (x as Dictionary).has(k):
-			o[k] = float(x[k]) if k not in ["heavy", "dr"] else float(x[k]) > 0.0
+			o[k] = float(x[k]) if k not in ["heavy", "dr", "box"] else float(x[k]) > 0.0
 func _send(x: Array) -> void:
 	var e := ["disp"] + x
 	if capture:

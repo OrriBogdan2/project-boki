@@ -2001,8 +2001,8 @@ func sim(dt: float) -> void:
 		# your other kin comes out of the satchel to pick you up if the active one can't
 		if kin and (kin as Kin).state == "downed" and kin2 and (kin2 as Kin).hp > 0.0:
 			swap_kin(true)
-		# a wisp doesn't bleed out: it's lost to enemy stomps, a finish, or more damage
-		if down_hp <= 0.0:
+		# a wisp doesn't bleed out: it's lost to enemy stomps, a finish, more damage or a Riposte's knock
+		if down_hp <= 0.0 or JuggernautKit.box_due(self, m.time):
 			m.eliminate(self, last_hit_by, "finished")
 			return
 	# bringing a teammate back at their deathbox: no attacks, and moving breaks it

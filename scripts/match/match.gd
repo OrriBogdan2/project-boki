@@ -2217,11 +2217,12 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
 	h.downed = true
+	JuggernautKit.mark_box(h, o, time)      # a Riposte knock goes on to the deathbox
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
 	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)

@@ -18,8 +18,7 @@ docs/wiki/Inspirations.md.
 - **Disagreements:** two guides say "double damage" to the wounded and a "four-hit combo with later hits
   stronger"; both are pre-patch, so the wiki wins. The Flame Step cooldown is 13s in the header and 11/9/7/6 in
   the notes; we use the notes' shape.
-- **Not reproduced:** mana, climbing double-height walls, dodges building Rage, Volcanic Rebuke sending a
-  knocked hunter straight to the deathbox, the turn lock after RMB into the dash.
+- **Not reproduced:** mana, climbing double-height walls, dodges building Rage, the turn lock after RMB into the dash.
 
 ## Scaling
 
@@ -277,6 +276,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
 | Knocking a hunter with the ult resets it | wiki R, in-game card | yes (ult f99-f101) | Built; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
+| A knock with the ult sends the hunter straight to the deathbox (wiki R: "Knocking an enemy sends them instantly to Deathbox"; patch 08.21.2024 keeps the reset) | wiki R, patch notes | n/a | Built: the cleave's hit carries `box`, the knocked hunter is a Wisp for 0.2s (decision 0019's pop-in) and then snuffed out, into the deathbox (`JuggernautKit.mark_box`/`box_due`); online the flag rides the hit's extras (Net.VERSION 0.24.5); any other knock stays down as usual; asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
 
@@ -300,6 +300,7 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 | E, E (pulled in), X, their hit | blocked in the guard, then the cleave lands | `combo jug: E > E > X = pulled in, a hit blocked, the cleave lands` |
 | X, two hits blocked | the cleave 40% harder | `juggernaut X small mechanic: two hits blocked make the answer 40% harder` |
 | X knocks a hunter | ready again at once | `juggernaut X small mechanic: knocking a hunter with it resets it; ...` |
+| X knocks a hunter | a Wisp for 0.2s, then out to the deathbox; a plain knock stays down; `box` rides a hit online | `juggernaut X parity: the Riposte's knock goes on to the deathbox ...` |
 | X, then a merge | the guard drops, no cleave | `merge hold jug: the Riposte's guard drops, no cleave` |
 | RMB hold, jump, full, release | lane, jump, flash, fling | `juggernaut RMB hold: you can jump while holding` and the lane/flash checks |
 | RMB hold that strikes nothing | Smash cooldown doubles | `combo jug: RMB hold miss = cooldown x2` |

@@ -260,6 +260,25 @@ func _start_riposte() -> bool:
 func ult_running() -> bool:
 	return riposte.running()
 
+## The source's Volcanic Rebuke (wiki R: "Knocking an enemy sends them instantly to Deathbox"): a hunter the
+## cleave knocks pops into their Wisp and is snuffed out a beat later (decision 0019's death state), into the
+## deathbox. The cleave's hit carries "box" (online too: Displace.HIT_EXTRAS), the knocked body's own game
+## runs it (Match.knock marks, Hunter's downed tick takes them out). Any other knock clears the mark.
+const BOX_AFTER := 0.2       # s: the Wisp's pop-in shows, then it is snuffed
+
+static func mark_box(t: Hunter, o: Dictionary, now: float) -> void:
+	if bool(o.get("box", false)):
+		t.set_meta("box_at", now + BOX_AFTER)
+	elif t.has_meta("box_at"):
+		t.remove_meta("box_at")
+
+## A Riposte-knocked Wisp's beat is up (once).
+static func box_due(t: Hunter, now: float) -> bool:
+	if not t.has_meta("box_at") or now < float(t.get_meta("box_at")):
+		return false
+	t.remove_meta("box_at")
+	return true
+
 ## Planted in the guard and the cleave: no other button does anything (but E on a held chain, use_e).
 func busy() -> bool:
 	return super.busy() or (riposte != null and riposte.move_k() <= 0.0)

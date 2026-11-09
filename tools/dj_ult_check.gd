@@ -235,14 +235,44 @@ func zedran(a) -> void:
 	T.hp = 10.0
 	K.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
-	A.step(m, 0.9)
+	var deaths0 := T.deaths
+	var seen_wisp := false
+	for _i in int(1.3 / A.DT):
+		m.step(A.DT)
+		seen_wisp = seen_wisp or T.downed
 	var knock_paid := _owed(P)
+	# the source's Volcanic Rebuke: the knock sends them straight to the deathbox (a Wisp for a beat, then out)
+	var boxed := seen_wisp and not T.downed and T.deaths == deaths0 + 1 and not T.has_meta("box_at")
+	var rules := boxed and _plain_knock_stays(m, T2) and _box_rides_net()
+	A.ok("juggernaut X parity: the Riposte's knock goes on to the deathbox (Wisp %.1fs, then out); "
+			% JuggernautKit.BOX_AFTER + "a plain knock stays down; \"box\" rides a hit online", rules,
+			"wisp %s downed %s deaths +%d" % [seen_wisp, T.downed, T.deaths - deaths0])
+	# back in for the cases after
+	T.out = false
+	T.gone = false
+	T.downed = false
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
-			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
+			boxed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
 	await A.done(m)
+
+## Any other knock leaves the hunter a Wisp: no deathbox beat.
+func _plain_knock_stays(m: Match, T: Hunter) -> bool:
+	A.fresh(T)
+	T.hp = 1.0
+	T.hurt(5.0, m.player, {"src": "abil"})
+	A.step(m, 0.5)
+	var stays := T.downed and not T.has_meta("box_at")
+	m.revive_hunter(T, null)
+	return stays
+
+## The flag survives Match.net_send_hit's extras into the knocked body's own game (Match._net_hit_in).
+func _box_rides_net() -> bool:
+	var o := {}
+	Displace.apply_hit_extra(o, Displace.hit_extra({"box": true, "heavy": true}))
+	return o.get("box") == true and Displace.hit_extra({"heavy": true}).get("box") == null
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:

@@ -1078,7 +1078,7 @@ ranks.)
 | RMB | tap / hold / air / with the chain | **Adaptive Strike**, 2.5s cooldown, 0.55s cast you aim freely with a warning overhead: press **Execution Slam** (x1.5 below 35% HP; its sweet spot resets R); hold **Fiery Lunge** (charged dash attack; cooldown doubled on a miss); airborne **Obsidian Slam** (slows; the centre ring +50%, stunned); during the chain pull **Scorching Spin** (anti-heal 5s) | **Smash**, 3s: tap a 0.5s wind-up (a red "!" over you, keep aiming) into a 3.2m cone, 26, +50% under 35%; its **sweet spot** (the far tip, 1.9-3.4m within 22° of your aim) is the payoff (SWEET SPOT, T4, `pay_rage`); at rank 3 it also crashes (see R below). Hold: a 3 -> 7m Lunge, 14 -> 22; a miss doubles the cooldown. Air: Meteor Drop 2.6m, 18 and slow 40%; the centre 1.2m +50% and stun 0.8. With the Warchain: see the combinations below (Scorching Spin, Chain Lunge, Haul Slam) |
 | Shift | tap | **Flame Step**: 2 charges, a dash attack in the facing direction; the tip deals double; a knock restores a charge | **Rampage**: 2 charges, 4.4m the way you face: 7 along it, the tip 14 and a big knock (stun 0.8 into a wall); a knock gives a charge back (the shared knock rule) |
 | E (their Q) | tap, recast | **Feysteel Chain**: attaches to an enemy (damage, anti-heal) or a wall; recast pulls you to it; the cooldown starts on the pull or when it breaks; a stun breaks it; not castable while rooted or grounded | **Warchain**: 10m, hooks a foe (8, blighted while tethered) or bites a wall, 4s; recast pulls you; the cooldown starts on the pull or the break (a miss breaks it); a stun breaks it; no throw while rooted or Grounded |
-| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
+| R | tap | **Volcanic Rebuke**: invulnerable 0.65s, then a strike that heals 60% of the damage dealt; a knock sends the hunter straight to the deathbox and resets its cooldown | **No R (kits2-nor).** Folded into Smash rank 3: the sweet spot also brings a **crash** down (3m, 24, push 7, heals 60% of the damage it deals); it rests 12s, and a knock on anyone it hit within 2s makes it ready at once. R is the Boki Merge |
 
 ### E + RMB combinations and the other cross-ability interactions
 
@@ -1165,8 +1165,7 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 
 - Mana: none of it (costs, refunds on hit, the Lunge's double cost) exists in our game.
 - Brall: climbing double-height walls; dodging shots building Blazing Spirit (his level-4 dash
-  upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
-  knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
+  upgrade); turn restriction when dashing out of a Smash.
 - Shiv: Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
