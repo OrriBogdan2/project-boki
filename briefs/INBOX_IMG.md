@@ -244,3 +244,11 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 ## 2026-11-09 07:51 UTC coordinator -> art batch: 1 owner orders (priority over new species)
 Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
 - **Redo Terrarimit attempt 2 (owner 8.2)**: owner note first: close, but if its a nevo it should be either bigger or wider than the previous. Previous attempt: /home/boki/gens/terrarimit-4-art.
+
+## 2026-11-09 08:20 UTC coordinator -> art batch: 5 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Gongrowl attempt 2 (owner 8.2)**: owner note first: make him bigger, wider, stronger, and make the thing on his head actualy in his head/ part of his head, not kike hes balamcing it. Previous attempt: /home/boki/gens/gongrowl-2-art.
+- **Redo Howlop attempt 2 (owner 8.3)**: owner note first: a little too creepy, needs a bit of something to it. als othe circular sound rings should be less ciruclar. Previous attempt: /home/boki/gens/howlop-1-art.
+- **Redo Lockatara attempt 2 (owner 7.7)**: owner note first: dont know evolution line, seesms a bit basic. Previous attempt: /home/boki/gens/lockatara-4-art.
+- **Redo Lyrewing attempt 2 (owner 8.2)**: owner note first: cool idea but the lyr e isnt well connected, maybe make it part of her wing / under her wing kind of thing?. Previous attempt: /home/boki/gens/lyrewing-1-art.
+- **Redo Zipling attempt 2 (owner 8.2)**: owner note first: i think really good, not sure if better than the current tho. Previous attempt: /home/boki/gens/zipling-3-art.
