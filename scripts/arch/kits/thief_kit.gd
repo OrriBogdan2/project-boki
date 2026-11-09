@@ -28,7 +28,7 @@ static var GLINT_EDGE := HeroVfx.col("thief", "glint")    # the dark violet edge
 static var GLINT_CORE := HeroVfx.col("thief", "hot")    # the glint's hot core
 # the blink's afterimages and the dash's after-image streaks: pale violet
 static var GHOST := HeroVfx.col("thief", "ghost")
-const KNOCK_STAR := Color("ff2a48")
+static var KNOCK_STAR := HeroVfx.col("thief", "main")   # the knock star on the foe: her violet, not Kael's red
 # the aim line while the next bolt is empowered (white-hot violet)
 static var EMP_LINE := HeroVfx.col("thief", "hot")
 static var AIM_LILAC := HeroVfx.col("thief", "aim")     # ... and otherwise
@@ -584,7 +584,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	h.heal(h.max_hp * float(rd.get("heal_knock", 0.15) if mine else rd.get("heal_assist", 0.25)))
 	var got := h.hp - hp0
 	if is_instance_valid(t):
-		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, Color(1, 0.9, 0.9))
+		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, BOLT_HEAD)
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")

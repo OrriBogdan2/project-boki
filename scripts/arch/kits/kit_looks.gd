@@ -113,11 +113,11 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, lump(0.13), rock_mat(0.7, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.7, 1.3))
 		"column":
 			Models.part(
-				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("06231f"), VOID_MAIN, 0.75, 0.3),
+				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(VOID_BLACK, VOID_MAIN, 0.75, 0.3),
 				Vector3(0, 3.0, 0)
 			)
 		"well_dome":
-			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("041a17"), VOID_HOT, 0.45, 0.1), Vector3.ZERO)
+			Models.part(n, Models.sphere(1.0, 24), glass_mat(VOID_BLACK, VOID_HOT, 0.45, 0.1), Vector3.ZERO)
 			Models.part(
 				n,
 				Models.sphere(0.3, 16),
@@ -185,7 +185,7 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.2)
 				var len_ := 2.7 if i == 0 else 2.0
 				Models.part(
-					b, PrismMesh.new(), glass_mat(Color("06100f"), VOID_MAIN, 1.0, 0.85),
+					b, PrismMesh.new(), glass_mat(VOID_BLACK, VOID_MAIN, 1.0, 0.85),
 					off + Vector3(0, 0, 0.15 * float(i % 2)), Vector3(0.26, len_, 0.26), Vector3(-PI * 0.5, 0, a)
 				)
 
@@ -246,7 +246,7 @@ func _build_well(n: Node3D) -> void:
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	var arm_mat := shade_mat(Color(0.18, 0.9, 0.75, 0.95))
+	var arm_mat := shade_mat(Color(VOID_MAIN, 0.95))
 	for arm in 4:
 		for j in 6:
 			var u := float(j + 1) / 6.0
@@ -346,7 +346,7 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 			var col := Color(VOID_MAIN, 0.7)
 			fx.burst(p, col, 1 + roundi(k * 2.0), 0.6, 0.25, 0.0, 0.9 + 0.6 * k, back, 15.0)
 		"spear":
-			fx.burst(p, Color(0.18, 0.9, 0.75, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
+			fx.burst(p, Color(VOID_MAIN, 0.8), 2, 1.5, 0.25, 0.0, 1.0, back, 20.0)
 
 func _impact(e: Dictionary, p: Vector3) -> void:
 	var fx: Fx = m.fx

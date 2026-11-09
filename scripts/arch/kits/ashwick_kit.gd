@@ -29,6 +29,7 @@ static var PILOT_CORE := HeroVfx.col("ashwick", "pilot_core")
 static var SHIELD_COL := HeroVfx.col("ashwick", "shield")
 # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
 static var HEAT_CORE := HeroVfx.col("ashwick", "hot")
+static var WHITE_HOT := HeroVfx.col("ashwick", "white")   # her near-white flame: Flashover word, pip tips, lane core
 const HEAT_RISE := 0.8                 # s of roaring before her palm glows at full heat
 const HEAT_COOL := 0.8                 # s it takes to cool from full heat once the fire stops
 const HEAT_SIZE := 1.2                 # the heat glow's scale at full heat (the pilot flame is 0.4)
@@ -172,7 +173,7 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 ## The Flashover payoff: the word, a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
 ## flash; the shared payoff's rings stay out of Cinder's fire.
 func _flashover_fx(f: Ent) -> void:
-	var col := Color("ffe0a0")
+	var col := WHITE_HOT
 	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
@@ -225,12 +226,12 @@ func _tick(dt: float) -> void:
 		if tells_visible():
 			# the Furnace Cloak's shield: a swirling ring of fire hugging Cinder while it holds (about 0.8 bh)
 			fx.place(
-				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, Color("ffc040"),
+				"swirl%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 0.55, 0), SHIELD_COL, HEAT_CORE,
 				1.8, m.time * 2.0, 1.0
 			)
 			fx.place(
-				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), Color("c8301a"),
-				Color("ff9a3a"), 1.45, -m.time * 2.6, 0.85
+				"swirl2%d" % h.get_instance_id(), "swirl", h.pos + Vector3(0, 1.25, 0), HeroVfx.col("ashwick", "red"),
+				PIP_COL, 1.45, -m.time * 2.6, 0.85
 			)
 	else:
 		st["shield_on"] = false
@@ -274,12 +275,12 @@ func _tick_tells(dt: float) -> void:
 			var rise := 0.06 if n == 3 and i == 1 else 0.0       # the middle of three pips sits a little higher
 			var off := Vector3((i - (n - 1) * 0.5) * 0.6, rise, 0)
 			fx.place(
-				"pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else Color("ff5a2a"), Color("fff0a0"),
+				"pip%d_%d" % [key, i], "pip", top + off, PIP_COL if lvl < 2 else SHIELD_COL, WHITE_HOT,
 				0.4 if lvl < 2 else 0.44
 			)
 		if lvl >= 2:
 			fx.place(
-				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
+				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), BOLT_COL, PIP_COL,
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
 
@@ -460,7 +461,7 @@ func rmb_hold_tick(_t: float) -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
-		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
+		h, "rmb", {"len": ln, "width": 0.42, "col": WHITE_HOT, "col2": BOLT_COL, "alpha": 0.9, "tip": true}
 	)
 
 func fire_rmb(c: Dictionary) -> void:
@@ -621,7 +622,7 @@ func _ram_looks(dir: Vector2) -> void:
 	if not bash.get("hop", false) and not bash.get("hit", false):
 		var skull := fx.place(
 			"skull%d" % h.get_instance_id(), "skull", h.pos + Vector3(0, 0.95, 0) - f3 * 0.5, SKULL_COL,
-			Color("ffe08a"), 1.6, atan2(-dir.x, -dir.y)
+			BOLT_CORE, 1.6, atan2(-dir.x, -dir.y)
 		)
 		skull.rotate_object_local(Vector3.RIGHT, SKULL_TILT)
 	HeroVfx.of(m).hold(h, "ram_trail")

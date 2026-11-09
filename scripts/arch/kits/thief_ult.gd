@@ -13,7 +13,7 @@ extends RefCounted
 # the ring and the blades: her signature violet (the source's is cyan)
 static var RING_COL := HeroVfx.col("thief", "main")
 static var RIM_COL := HeroVfx.col("thief", "hot")       # the outer band, where blades hit harder: her violet run hot
-const BLADE_TIP := Color("ffffff")
+static var BLADE_TIP := HeroVfx.col("thief", "white")
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
