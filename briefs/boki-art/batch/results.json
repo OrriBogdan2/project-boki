@@ -18763,5 +18763,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/seamwyrm_e2_w30_2.jpg",
     "ok": true
+  },
+  {
+    "id": "terrarimit_e_w30",
+    "name": "Terrarimit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w30",
+    "name": "Terrarimit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w30",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w30",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrasloth_r2_w30",
+    "name": "Terrasloth",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_e_w30",
+    "name": "Terrarimit",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/terrarimit_e_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_r_w30",
+    "name": "Tidalisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidalisk_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_r_w30",
+    "name": "Tidalisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_r_w30_2.jpg",
+    "ok": true
   }
 ]
