@@ -21206,5 +21206,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_chandelapi_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_barrelmander",
+    "name": "Barrelmander (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_barrelmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_barrelmander",
+    "name": "Barrelmander (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_barrelmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_barrelmander",
+    "name": "Barrelmander (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_barrelmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_tinbrock",
+    "name": "Tinbrock (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_tinbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_tinbrock",
+    "name": "Tinbrock (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_tinbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_tinbrock",
+    "name": "Tinbrock (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_tinbrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_chandelapi",
+    "name": "Chandelapi (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_chandelapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_anvilbrock",
+    "name": "Anvilbrock (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_anvilbrock_1.jpg",
+    "ok": true
   }
 ]
