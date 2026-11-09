@@ -29,7 +29,7 @@ const DEFAULTS := {
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
@@ -114,6 +114,8 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+		["kin_attack", "Boki order: attack my target"], ["kin_return", "Boki order: come back to me"],
+		["kin_hold", "Boki order: hold this position"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
@@ -121,7 +123,8 @@ const ACTIONS := [
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
-	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
+	["play", "Play fetch with a Boki"],
+		["whistle", "Whistle for your Boki (at home)"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
@@ -433,15 +436,25 @@ func clear_bind(action: String, slot: int) -> void:
 
 ## Other rebindable actions already using this key or button: [[action, slot], ...].
 func conflicts(ev: InputEvent, except := "") -> Array:
-	var s := ev_code(ev)
+	return conflicts_of_code(ev_code(ev), except)
+
+func conflicts_of_code(code: String, except := "") -> Array:
 	var out: Array = []
-	if s == "":
+	if code == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+			if sl[i] == code and not _shared_ok(a[0], except): out.append([a[0], i])
+	return out
+
+## Actions that clash with `action`: they hold one of its keys and could be pressed in the same place.
+func clashes(action: String) -> Array:
+	var out: Array = []
+	for c in slots(action):
+		for hit in conflicts_of_code(c, action):
+			if not out.has(hit[0]): out.append(hit[0])
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
