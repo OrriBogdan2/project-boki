@@ -389,6 +389,8 @@ func input(event: InputEvent) -> bool:
 		cheers.append(r)
 		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", runners[run.backed]["pos"], GARDEN_DB,
 				0.04, 1.2 if r == "great" else 1.0)
+		if r != "miss" and "verbs" in h:
+			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
 	return true

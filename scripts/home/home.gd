@@ -76,6 +76,7 @@ var grave_c := Vector3(50.0, 0, 32.0)
 var grave_r := 0
 var burrow_r := 0
 var _fx_sig := ""
+var verbs := HomeVerbs.new()       # your garden moves: feed, pat, toss, cheer (home_verbs.gd)
 var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
 var hsp: SnackPatch = null           # the garden snack patch (snack_patch.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
@@ -1319,6 +1320,7 @@ func _move_player(d: float) -> void:
 	if p_anim == null or p_anim.model != player:
 		p_anim = HunterAnim.new(player)
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
+	ps.merge(verbs.step(d))
 	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
@@ -2846,6 +2848,7 @@ func _pet_kin(k: Dictionary) -> void:
 	_care_trust(rec, "pet")
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
+	verbs.play("pat")
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
@@ -2878,6 +2881,7 @@ func _play_with_kin(k: Dictionary) -> void:
 	k.erase("chase"); k.erase("task")
 	_emote(k, "!")
 	Sfx.play("throw", null, -8.0)
+	verbs.play("toss")
 
 func _fetch_step(k: Dictionary, d: float) -> void:
 	var f: Dictionary = k["fetch"]
@@ -4285,6 +4289,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	k["pos"] = at
 	(k["node"] as Node3D).position = at
 	k["hold_t"] = 3.2
+	verbs.play("feed")
 	_face(at)
 	var food := MeshInstance3D.new()
 	food.mesh = Models.sphere(0.11, 10)
@@ -4477,6 +4482,7 @@ func _train_hit() -> void:
 		return
 	var r: String = train["bar"].press()
 	train["results"].append(r)
+	if r == "great": verbs.play("cheer")
 	train["round"] = int(train["round"]) + 1
 	train["wait"] = 1.1
 	_train_anim(train["k"], String(train["stat"]), r)

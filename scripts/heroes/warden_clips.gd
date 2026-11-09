@@ -321,6 +321,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
+	var act: Dictionary = d.get("act", {})
+	if act.has(String(s.get("act", ""))):
+		var clip := String(act[s["act"]])
+		return {"clip": clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(clip).length - 0.001)}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
