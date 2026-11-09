@@ -90,8 +90,8 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
 	if is_seen:
-		for t in KinTypes.of_species(Data.KIN.get(spk, {})):
-			top.add_child(TypeIcon.new(t, 16.0))
+		for ty in KinTypes.of_species(Data.KIN.get(spk, {})):
+			top.add_child(TypeIcon.new(ty, 16.0))
 	col.add_child(top)
 	var pic := CenterContainer.new()
 	pic.custom_minimum_size = Vector2(0, PORTRAIT + 4)
