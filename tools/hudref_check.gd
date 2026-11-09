@@ -6,6 +6,7 @@ extends RefCounted
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
+##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -171,6 +172,7 @@ func run(main_node: Node) -> void:
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
+	_check_deny(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -208,6 +210,41 @@ func _check_keys(P: Hunter) -> void:
 	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
 		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
 	P.ak.cd["x"] = 0.0
+
+## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
+## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
+## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+func _check_deny(P: Hunter) -> void:
+	var hud = P.m.hud
+	PressDeny.last.clear()
+	hud.slot_fx.erase("k1")
+	P.ak.cd["e"] = 6.0
+	var n0 := PressDeny.raised
+	P.ak.use_e()
+	ok(PressDeny.raised == n0 + 1 and String(hud.slot_fx.get("k1", {}).get("kind", "")) == "deny",
+		"E pressed on cooldown: one deny on the k1 slot (%d)" % (PressDeny.raised - n0))
+	P.ak.use_e()
+	ok(PressDeny.raised == n0 + 1, "pressed again inside %.1fs: still one deny" % PressDeny.THROTTLE_S)
+	P.cls = Arch.weight("ashwick")
+	P.set_arch("ashwick")
+	P.unlock_all()
+	var flow := P.ak.flow
+	ok(P.ak.id == "ashwick" and String(DashFlow.row_of("ashwick", "e", false)["mode"]) == "buffer",
+		"Cinder's ground dash buffers E (its row)")
+	PressDeny.last.clear()
+	P.ak.cd["e"] = 6.0
+	P.move_kind = "dash"
+	P.roll_t = 0.3
+	P.inp["sig"] = true
+	flow.route(Match.DT)
+	var held_mid := flow.held.has("e") and not bool(P.inp["sig"])
+	P.roll_t = 0.0
+	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
+	flow.route(Match.DT)
+	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
+		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+	P.stun_t = 0.0
+	flow.held.clear()
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

@@ -37,9 +37,9 @@ func _draw() -> void:
 	var r := Rect2(Vector2((size.x - SLOT) * 0.5, size.y - BOTTOM), Vector2(SLOT, SLOT))
 	DashSlot.draw(self, r, s)
 
-## A dash pressed with nothing to spend: the red shake, as on the match bar.
+## A dash pressed with nothing to spend: the red pulse and tick, as on the match bar.
 func deny() -> void:
-	slot_fx["dash"] = {"kind": "deny", "t": 0.0}
+	PressDeny.raise(self, "dash")
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
 	c.draw_style_box(HudStyle.box(col, rad, border, bw), r)
