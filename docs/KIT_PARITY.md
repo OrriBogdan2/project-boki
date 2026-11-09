@@ -219,3 +219,21 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## Recast windows (two-step abilities)
+
+Each recast against [D] supervive_kits.md and [F] the hero-ref sheets: when the recast opens, how long it stays open, what
+happens at the end, and when the cooldown starts (the cooldown rows are ext/cooldown-start-parity's). Owner items win.
+
+| Hunter, recast | Source | Ours | Verdict |
+|---|---|---|---|
+| Motley (`ostra`) E Brimseed pop | from 0.3 s [F card]; grows 6.5 s [F]; end unread; cd on the plant | `min_recast` 0.3, grows 6.5 s, waits, fizzles 10 s at full; cd on the plant | match (fizzle ours, owner audit 8e5c63403) |
+| Meeko (`tender`) E Hearthlight throw | while the 2.5 s zone is up, burst at its end [D]; recasts seen 0.4-1.6 s in [F] | any time in the 2.5 s ring, the throw keeps the time left, bloom at the end; cd on the press | match |
+| Albert (`bulwark`) LMB hammer recall | stays planted until recalled, no auto-return [D, F ≥3.6 s]; recall seen almost at once [F] | `lie_t` 0 (no auto-recall), `recall_lock` 0.22 s | match |
+| Tenzo (`dolm`) Shift Rock Hop | one dash, no recast [D] | 0.6 s per hop, 3 hops | owner item 111 |
+| Neve (`rimewright`) E Rink Wall freeze | "recast to freeze" [D]; not shown [F] | while it slides (4.5 s), frozen 6 s; cd on the cast | match |
+| Neve X Rimelock early end | any time cancels; late recast ("about 3.2-3.5 s in") stuns [D, F tamsin 222-223, 254]; auto at 3.5 s; cd on the cast | any time; **late window was 0.75 s, now 0.3 s** (`x.late`); auto at 3.5 s | **fixed**, asserted in --rimewright-combo-check |
+| Sparkle (`mage`) X Kitefall strike | second press lands; 1.6-2.0 s airborne seen, max unread; "about 2 s, auto-land" [F vireo 397, 427] | from 0.25 s in the air (`min_air`), auto-lands after 2 s | match |
+| Kael (`juggernaut`) E Warchain pull | while attached, ≥2.5 s seen [F]; cd on the pull or break (wiki) | 5 s tether; cd on the pull or break | match, lifetime unread |
+| Cinder (`ashwick`) X Flue Flight land | ends on a recast or the flight's end, 1.4 s [F linwick 206-226] | 1.8 s, recast lands; cd on the cast | owner item 20 (1.8 s) |
+| Sable (`thief`) E Shadow Knife blink | until 6 s, then forced; cd on the throw, refunds on hit [D] | 6 s, forced step; cd on the throw, refunds 0.25/0.5 | match |

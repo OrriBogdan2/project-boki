@@ -238,7 +238,7 @@ func rimewright() -> void:
 	await _rime_sight_and_cap()
 
 
-## X again: early (before the last 0.75 s) just breaks the shell; late cracks it open at two thirds.
+## X again: early (before the last 0.3 s) just breaks the shell; late cracks it open at two thirds.
 func _rime_recasts() -> void:
 	var r: Array = sc.setup("rimewright", 4.0)
 	var m: Match = r[0]
@@ -256,14 +256,23 @@ func _rime_recasts() -> void:
 	ok("tm X: after the early break she is free (not rooted or invulnerable)", P.root_t <= 0.0 and P.inv_t <= 0.06)
 	K.cd["x"] = 0.0
 	step(m, 1.0)
+	_press(P, m)
+	step(m, 2.95)
+	_press(P, m)
+	step(m, 0.1)
+	ok("tm X: the late window is the footage's last 0.3 s (from 3.2 s of 3.5 s): X at 3.0 s only breaks the shell",
+		absf(float(K.x_def()["late"]) - 0.3) < 0.001 and K.rime.is_empty() and int(K.stats["cancels"]) == 2
+		and T.hp >= h0 - 6.0 and T.stun_t <= 0.0, "late %.2f cancels %d" % [K.x_def()["late"], K.stats["cancels"]])
+	K.cd["x"] = 0.0
+	step(m, 1.0)
 	T.hp = T.max_hp
 	h0 = T.hp
 	_press(P, m)
-	step(m, 3.0)
+	step(m, 3.25)
 	_press(P, m)
 	var dealt := h0 - T.hp
 	var full := float(K.x_def()["dmg"]) * K.power("ult")
-	ok("tm X: X in the last 0.75 s cracks it open early at two thirds (small mechanic)", K.rime.is_empty()
+	ok("tm X: X in the last 0.3 s cracks it open early at two thirds (small mechanic)", K.rime.is_empty()
 		and dealt > full * 0.55 and dealt < full * 0.8 and T.stun_t > 0.3 and T.stun_t < 0.6,
 		"dealt %.0f of %.0f stun %.2f" % [dealt, full, T.stun_t])
 	K.cd["x"] = 0.0
