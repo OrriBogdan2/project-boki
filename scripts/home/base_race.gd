@@ -331,6 +331,7 @@ func entrants() -> Array:
 	return out.slice(0, 4)
 
 func use() -> void:
+	release()
 	var ks := entrants()
 	if ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
@@ -339,6 +340,7 @@ func use() -> void:
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
+	release()
 	var k: Dictionary = h._kin_entry(rec)
 	var T: Dictionary = rules()["train"]
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
@@ -527,6 +529,14 @@ static func hold(home, res: Dictionary) -> Array:
 		act(k, who[1])
 		ks.append(k)
 	return ks
+
+## A new Dash, lap or Shove ends the last result pose early, so its winner and loser can play again.
+func release() -> void:
+	let_go(held)
+	held = []
+	if h.get("hshove") != null:
+		BaseRace.let_go(h.hshove.held)
+		h.hshove.held = []
 
 static func let_go(ks: Array) -> void:
 	for k in ks:

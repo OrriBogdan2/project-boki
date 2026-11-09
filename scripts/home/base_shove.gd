@@ -172,6 +172,7 @@ func label() -> String:
 	return "Start a Stump Shove (back %s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
+	h.hrace.release()
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
 		h._toast("The Stump Shove needs two rested Boki out on the base")
