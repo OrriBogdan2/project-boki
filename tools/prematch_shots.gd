@@ -1,13 +1,17 @@
 extends RefCounted
-## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, before and after
-## the first chat line, as <dir>/<W>x<H>_<moment>.png, and the controls outside the safe margin. Run once per
-## size with a real renderer: godot -- --prematch-shots --size=1280x720 --shots-dir=out
+## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, four moments
+## (full 30 s, after the first chat line, 4 s left in the red pulse, locked in), as <dir>/<W>x<H>_<moment>.png,
+## and the controls outside the safe margin. Run once per size with a real renderer:
+## godot -- --prematch-shots --size=1280x720 --shots-dir=out (--size resizes the window).
 
-const MARGIN := 36.0      # px, the screen's edge padding: nothing may sit closer to the edge than this
+const MOMENTS := [["full", 30.0], ["chat", 30.0], ["red", 4.0], ["locked", 0.0]]
 
-## The visible controls under `node` (not its frame) that stick out of `area` less MARGIN, as "Class at rect".
+## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
+## margin, as "Class at rect".
 func outside(node: Node, area: Rect2) -> Array:
-	var safe := area.grow(-MARGIN + 1.0)
+	var pv = load("res://scripts/ui/prematch_view.gd")
+	var margin := float(maxi(pv.SAFE_MIN, int(area.size.y * pv.SAFE_FRAC)))
+	var safe := area.grow(-margin + 1.0)
 	var bad: Array = []
 	for c in node.find_children("*", "Control", true, false):
 		var inside := safe.encloses(c.get_global_rect())
@@ -40,13 +44,14 @@ func run(main: Node) -> void:
 	var tree := main.get_tree()
 	await main.fade.reveal(0.01)      # the boot splash stays up when a tool opens a screen by hand
 	await tree.create_timer(0.5).timeout      # let the window settle at its size
-	for moment in ["pick", "chat"]:
-		if moment == "chat":
+	for m in MOMENTS:
+		view.pm.left = m[1]
+		if m[0] == "chat":
 			view._add_chat("Ember", "push north, I hold the ridge", UI.INK)
 		for i in 20:
 			await tree.process_frame
 		var win := main.get_window().size
-		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, moment])
+		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
 		main.get_viewport().get_texture().get_image().save_png(path)
 		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
 		print("PREMATCHSHOT %s outside the safe area: %d %s" % [path, bad.size(), bad.slice(0, 3)])

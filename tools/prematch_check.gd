@@ -1,6 +1,6 @@
 extends RefCounted
 ## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0019-prematch-lobby.md).
-## The 90 s countdown and the lock at 0, picks refused once locked (and for a Hunter that isn't open),
+## The 30 s countdown and the lock at 0, picks refused once locked (and for a Hunter that isn't open),
 ## the admin toggle (Settings lobby_enabled) and which matches get a lobby, the squad the lobby and the
 ## loading screen share, the options the match starts with, chat lines, the voice hook, and the screen.
 
@@ -32,10 +32,10 @@ func run(main: Node) -> void:
 
 func _countdown() -> void:
 	var pm := Prematch.new(EXPEDITION.duplicate())
-	ok(Prematch.DURATION == 90.0 and pm.left == 90.0, "the lobby starts at 90 seconds")
-	pm.tick(30.0)
-	ok(is_equal_approx(pm.left, 60.0) and not pm.locked, "30 s later 60 s are left, picks still open")
-	pm.tick(59.9)
+	ok(Prematch.DURATION == 30.0 and pm.left == 30.0, "the lobby starts at 30 seconds")
+	pm.tick(10.0)
+	ok(is_equal_approx(pm.left, 20.0) and not pm.locked, "10 s later 20 s are left, picks still open")
+	pm.tick(19.9)
 	ok(not pm.locked, "0.1 s before the end picks are still open")
 	pm.tick(0.2)
 	ok(pm.left == 0.0 and pm.locked, "at 0 the timer stops and picks lock")
@@ -117,19 +117,31 @@ func _screen(main: Node) -> void:
 	await main.get_tree().process_frame
 	ok(view.grid.get_child_count() == Arch.ids().size(), "the screen shows every Hunter")
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
-	ok(view.timer_label.text == "1:30", "the screen counts down from 1:30 (%s)" % view.timer_label.text)
+	ok(view.timer_label.text == "0:30", "the screen counts down from 0:30 (%s)" % view.timer_label.text)
 	_declutter(view)
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
 	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
 	view._show_chat_line(true)
 	ok(view.chat_in.visible and not view.chat_hint.visible, "Enter opens the input in place of the line")
+	var ink: Color = view.timer_label.get_theme_color("font_color")
+	ok(view.note_label.text == "" and ink == UI.INK, "30 s out: plain digits, no note")
+	view.pm.left = 4.0
+	view._tick_label()
+	ok(view.timer_label.get_theme_color("font_color") != ink, "the last seconds turn the digits red")
+	view.pm.left = 30.0
+	view._tick_label()
 	view.chat_in.text = "hello"
 	view._send_chat()
 	await main.get_tree().process_frame
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
 	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
 	ok(log_open, "the first message opens the log and the input folds back")
+	view.pm.pick = "bulwark"
 	view.pm.left = 0.0
+	view._process(0.0)
+	ok(view.pm.locked and view.timer_label.text == "0:00", "at 0 the digits read 0:00 and the pick locks")
+	var note: String = view.note_label.text
+	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
 	view.set_process(false)
 	view.queue_free()
 
