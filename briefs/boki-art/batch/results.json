@@ -18231,5 +18231,103 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_teapotamus_p_w29_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_skateron_pe_w29",
+    "name": "Skateron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pe_w29",
+    "name": "Skateron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_p_w29",
+    "name": "Teapotamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_p_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe_w29",
+    "name": "Ringrove (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_p_w29",
+    "name": "Teapotamus (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_p_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_p_w29",
+    "name": "Teapotamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_p_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card",
+    "name": "Eclipsowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card",
+    "name": "Chandelapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_card",
+    "name": "Arcestrel (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dribbara_card",
+    "name": "Dribbara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dribbara_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dribbara_card",
+    "name": "Dribbara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dribbara_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ermink_card",
+    "name": "Ermink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ermink_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card",
+    "name": "Eclipsowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ermink_card",
+    "name": "Ermink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ermink_card_1.jpg",
+    "ok": true
   }
 ]
