@@ -3,7 +3,7 @@ extends RefCounted
 ## rival standing at medium range: an ally bot ~12 m away has to reach them and finish the revive in
 ## time (open ground; a wall in the way; the player down by the island's edge; the player down on
 ## the far side of a terrace step). And with a rival behind a wall, the bot never fires without a
-## clear shot. Prints PASS/FAIL.
+## clear shot. First, the downed loop's numbers against the source (docs/DOWNED.md). Prints PASS/FAIL.
 
 var bad := 0
 var m: Match
@@ -84,9 +84,46 @@ func _case(name: String, at: Vector3, from: Vector3, foe_at: Vector3, limit: flo
 	ok(not p.downed, "%s: revived in %.1fs (reached at %.1fs, %d hops, start %.1fm, rival %.1fm)%s" % [name, t, reached, hops, Vector2(from.x - at.x, from.z - at.z).length(), Vector2(foe_at.x - at.x, foe_at.z - at.z).length(), "" if not p.downed else " bot at %s, player at %s" % [bot.pos.snapped(Vector3(0.1, 0.1, 0.1)), p.pos.snapped(Vector3(0.1, 0.1, 0.1))]])
 	bot.ctrl = "idle"; bot.inp["move"] = Vector2.ZERO; bot.inp["fire"] = false
 
+## The numbers docs/DOWNED.md sets from the source, then the wisp ticking them: revive speed with one
+## and two teammates, the bar draining when they step off, and the finisher's length.
+func _numbers() -> void:
+	var r := Life.R
+	ok(is_equal_approx(r["bleed_out"], 15.0), "bleed-out 15 s [patch]")
+	ok(r["crowd"] == [1.0, 0.75, 0.58, 0.47], "crowd curve 1 / 0.75 / 0.58 / 0.47 [D]")
+	ok(is_equal_approx(r["stomp_commit"] + r["stomp_time"], 3.0), "finisher 3 s from the first press [footage]")
+	ok(int(ceil(r["stomp_time"] / r["stomp_cycle"] - 0.7)) == 3, "three stomps in the finisher")
+	var p: Hunter = m.player
+	var mates: Array = m.hunters.filter(func(x): return x.team == p.team and x != p)
+	var far := p.pos + Vector3(30, 0, 0)
+	for h in m.hunters:
+		if h != p: _put(h, far)
+	m.knock(p, null, {})
+	var steps := func(sec: float) -> void:
+		for i in int(round(sec / Match.DT)): Life.tick_wisps(m, Match.DT)
+	# one teammate: revive_time; two: revive_time / 1.75
+	_put(mates[0], p.pos)
+	steps.call(r["revive_time"] * 0.5)
+	ok(absf(p.revive - 0.5) < 0.02, "one reviver: half way at half of %.1f s (%.2f)" % [r["revive_time"], p.revive])
+	_put(mates[1], p.pos)
+	steps.call(0.5)
+	var two: float = 0.5 + 0.5 / r["revive_time"] * Life.crowd(2)
+	ok(absf(p.revive - two) < 0.02, "two revivers: x%.2f speed (%.2f, want %.2f)" % [Life.crowd(2), p.revive, two])
+	# both step off: the bar drains and the wisp bleeds again [wiki]
+	for mate in mates:
+		_put(mate, far)
+	var hp0: float = p.down_hp
+	var rv0: float = p.revive
+	steps.call(1.0)
+	var drained := p.revive < rv0 - 0.4 and p.down_hp < hp0
+	ok(drained, "stepping off drains the bar (%.2f -> %.2f) and the wisp" % [rv0, p.revive])
+	m.revive_hunter(p, null)
+	ok(is_equal_approx(p.hp, p.max_hp * r["revive_hp"]), "back up at %d%% HP" % int(r["revive_hp"] * 100.0))
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
+	_fresh()
+	_numbers()
 	_fresh()
 	var w := m.world
 	# ---- 1. open ground

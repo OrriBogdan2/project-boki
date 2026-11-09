@@ -16,9 +16,9 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 |---|---|---|---|
 | Knocked | 0 HP with a teammate still up → you become a **wisp** (the hero pops into a glowing Wisp, docs/decisions/0019; a revive pops the hero back): drift slowly, can't attack, dash, jump or glide, and can't be shot | crawl at 40% speed | [wiki] "heavily slowed" / [est] |
 | Bleed-out | Wisp drains on its own | **15s** | [patch] |
-| Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
+| Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up on the source curve (x1, x1.75, x2.33, x2.80); step off and the bar drains again. Numbers vs the source: docs/DOWNED.md | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] / [D] curve |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
-| Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
+| Execute | Enemy holds E on the wisp (0.2s) to start the stomp: they're locked in place for three stomps (2.8s), then you're dead | **3s** in all | [footage] |
 | Takedown reward | Knocking or killing an enemy hunter (not a mob) heals 5% of max health and brings every dash charge back at once (`DashReset`); the local hunter gets the reset cue and a pop on the Shift icon | +250 HP, +1 dash | [patch] |
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |

@@ -17,7 +17,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 |---|---|---|
 | players | 20 | hunters in an expedition (solos, duos or trios) |
 | length | 360 | seconds until the islands fall |
-| down_hp | 100 | so about 40 seconds downed before you bleed out |
+| down_hp | 100 | a wisp's pool; it drains over Life.R.bleed_out (15 s) |
 
 ## Down, death and revive
 
@@ -29,13 +29,13 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | revive_radius | 1.6 | a teammate this close revives you |
 | revive_time | 4 |  |
 | revive_hp | 0.25 | back on your feet with a quarter of your health |
-| extra_reviver | 0.5 | each extra teammate on you: +50% speed |
+| crowd | [1.0, 0.75, 0.58, 0.47] | speed each 1st..4th+ person on a wisp adds (revive, stomp) |
+| revive_decay | 0.5 | revive bar lost per second when nobody revives (the wiki) |
 | stomp_mult | 2.5 | an enemy standing on a wisp drains it this much faster and blocks the revive |
 | stomp_slow | 0.4 | ...and pins it: the wisp drifts at this fraction of its normal speed |
-| execute_time | 3 | (old: hold interact on an enemy wisp; now the stomp below) |
 | stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
-| stomp_time | 2.4 | ...then you're locked in for this long, three stomps and done |
-| stomp_cycle | 0.7 | one foot-lift-and-slam |
+| stomp_time | 2.8 | ...then you're locked in: about 3 s in all |
+| stomp_cycle | 0.8 | seconds per foot-lift-and-slam: three stomps fit in stomp_time |
 | kin_revive_time | 8 | your kin pulling you up (as long as Supervive's Guardian Angel self-revive) |
 | box_revive_hp | 0.25 | same as a wisp revive |
 | soul_time | 90 | box revive window |

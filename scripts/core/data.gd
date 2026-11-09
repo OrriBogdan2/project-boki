@@ -412,5 +412,5 @@ const MATCH := {
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,
 	"bleed": 2.5,          # downed health lost per second
-	"down_hp": 100.0,      # so about 40 seconds downed before you bleed out
+	"down_hp": 100.0,      # a wisp's pool; it drains over Life.R.bleed_out (15 s)
 }
