@@ -64,6 +64,7 @@ static func parse(v: Variant, rep: GrammarReport) -> AbilitySpec:
 		a.stages.append(s)
 		if a.from == "owner" and s.delivery and String(s.delivery.params.get("origin", "")) == "caster":
 			rep.err(GrammarReport.join("stages", i) + ".delivery.origin", "a from:owner ability happens at the hunter; use origin owner or aim, not caster")
+	KinFence.ability(a, rep)
 	return a
 
 static func _grammar(d: Dictionary, rep: GrammarReport) -> void:
