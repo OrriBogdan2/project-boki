@@ -25,7 +25,7 @@ V('oarter_r2','Oarter',E+'Oarlet.jpg','mid',
  "bright, cheeky eyes and a sly, toothy grin","river brown and honey wood, with a sea-blue accent",
  "chubby, sitting, looking like image 1",'tide','fast')
 for _i,_n,_r,_pose in [('ribbonwyrm','Ribbonwyrm',E,'winding through the air with its kite wings spread and its bow tail trailing'),
-                        ('ringrove','Ringrove',T,'standing calmly with its mushroom ring glowing and spear quills raised')]:
+                        ('ringrove','Ringrove',T,'lumbering forward and swinging its spear quills out wide, spores drifting off its mushroom ring')]:
     P(_i,_n,_r+_n+'.jpg',_pose)
 U('ribbonwyrm','Ribbonwyrm',E+'Ribbonwyrm.jpg')
 U('ringrove','Ringrove',T+'Ringrove.jpg')

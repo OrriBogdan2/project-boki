@@ -2660,5 +2660,313 @@
     "size": "4K",
     "prompt": "Re-render image 1 at full quality: keep it exactly the same, the same creature, design, colours, every detail, the same views in the same layout and the same plain background. Only increase the sharpness and finish. Do not change, add or remove anything.",
     "aspect": "16:9"
+  },
+  {
+    "id": "portrait_vespox_r",
+    "name": "Vespox (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Vespox.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: crouched low and ready to pounce, tail sting raised and one pincer snapping. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lanternmit_r",
+    "name": "Lanternmit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lanternmit.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: peeking proudly from its glowing lantern shell with its big claw raised. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_stormit_r",
+    "name": "Stormit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Stormit.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: scuttling sideways in a jittery panic with sparks jumping off its claws. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_bubblisk_r",
+    "name": "Bubblisk (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bubblisk.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: mid-pounce, blowing a big wobbly bubble with a sly grin. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lunowl_r",
+    "name": "Lunowl (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: swooping silently down past the moon with its moth wings spread wide. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_murmurling_r",
+    "name": "Murmurling (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Murmurling.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: mid-song with its pipe tail fanned and music notes rising. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_oarlet_r",
+    "name": "Oarlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Oarlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: paddling forward proudly with its paddle tail raised. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_amanitusk_r",
+    "name": "Amanitusk (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Amanitusk.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: charging head-down with toxic spores bursting from its caps. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_anvilbrock_r",
+    "name": "Anvilbrock (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: braced to charge, hammer paws planted and stripe glowing. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_blossmink_r",
+    "name": "Blossmink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Blossmink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: prancing with petals swirling off its leaf-brush tail. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_prismink_r",
+    "name": "Prismink (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Prismink.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: bounding mid-air leaving a rainbow brushstroke behind it. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_skidlet_r",
+    "name": "Skidlet (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Skidlet.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: wobbling on one skate blade, wings out for balance. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_lanceron_r",
+    "name": "Lanceron (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lanceron.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: striking forward with its ice-lance beak, blade wings flared. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_seamwyrm_r",
+    "name": "Seamwyrm (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Seamwyrm.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: rearing up with its zipper jaws wide open and glowing. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_cairnback_r",
+    "name": "Cairnback (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Cairnback.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: standing proud with its ibex horns raised and moss swaying on its cairn. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_crofthorn_r",
+    "name": "Crofthorn (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Crofthorn.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: chewing calmly with flowers swaying on its back garden. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_geodelotl_r",
+    "name": "Geodelotl (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Geodelotl.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: braced low, crystal cavities glittering. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_gloamshell_r",
+    "name": "Gloamshell (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gloamshell.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: peeking shyly from its glowing obsidian shell. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_glomwort_r",
+    "name": "Glomwort (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Glomwort.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: oozing forward with a goofy grin, puffballs puffing spores. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_hivara_r",
+    "name": "Hivara (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Hivara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: poised to strike with scythe forelegs raised and wings buzzing. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_marchleaf_r",
+    "name": "Marchleaf (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Marchleaf.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: marching forward with leaf-blade mandibles open. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_nettlynx_r",
+    "name": "Nettlynx (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Nettlynx.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: hissing playfully with nettle ears flared. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_rampartoad_r",
+    "name": "Rampartoad (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Rampartoad.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: squatting stubbornly, battlements bristling. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_terrarimit_r",
+    "name": "Terrarimit (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Terrarimit.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: scuttling slowly, its garden dome glowing. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_thrumbird_r",
+    "name": "Thrumbird (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Thrumbird.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: hovering with sound rings blurring its wings. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_vaultara_r",
+    "name": "Vaultara (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Vaultara.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: planted firmly, keyhole eye glowing. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_voltalon_r",
+    "name": "Voltalon (portrait)",
+    "refs": [
+      "briefs/boki-art/evolutions/Voltalon.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: wings flared wide, lightning crackling between its feathers. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_zephyrak_r",
+    "name": "Zephyrak (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Zephyrak.jpg"
+    ],
+    "aspect": "1:1",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a dynamic action pose caught mid-motion that shows off its signature part and personality: swooping through the air in a long S. Frame it like a striking hero shot for a creature encyclopedia: a dramatic three-quarter angle from slightly below, its body twisting through the frame with a strong diagonal line of action, its head turned to the side and its eyes looking at something off-frame, never looking at the camera, never a straight front view, never standing still. A touch of energy from its type around it (a few sparks, petals, droplets or embers), kept small. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "2K"
   }
 ]
