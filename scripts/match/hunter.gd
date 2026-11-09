@@ -459,6 +459,9 @@ func buff(stat: String) -> float:
 func mass() -> float:
 	return float(cdat.get("mass", 1.0))
 
+func usual_slow() -> float:
+	return 0.35
+
 func hittable() -> bool:
 	return not dead and not out and not extracted and not riding
 
@@ -750,7 +753,7 @@ func _shot_down() -> void:
 	gliding = false
 	glide_cd = 2.5
 	shot_down = true
-	stun_t = maxf(stun_t, 0.35)
+	add_stun(0.35)
 	vel = Vector3(vel.x * 0.3, minf(vel.y, -6.0), vel.z * 0.3)
 	m.fx.burst(pos + Vector3(0, 1.8, 0), Color("ff9a5a"), 14, 3.0, 0.45, 6.0, 0.8)
 	m.sfx("knock", pos, -2.0, 1.3)
@@ -2162,7 +2165,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult() * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
@@ -2359,7 +2362,7 @@ func _physics(dt: float) -> void:
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
-			stun_t = maxf(stun_t, st)
+			add_stun(st)
 			m.on_wall_slam(self)
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
@@ -2398,7 +2401,7 @@ func _physics(dt: float) -> void:
 			if shot_down:
 				# spiked onto the ground [wiki]: a 0.7s stun and a little extra damage
 				shot_down = false
-				stun_t = maxf(stun_t, SPIKE_STUN)
+				add_stun(SPIKE_STUN)
 				hurt(SPIKE_DMG, last_hit_by, {"src": "fall"})
 				m.fx.dust(pos, 12)
 				m.fx.ring(pos + Vector3(0, 0.05, 0), 1.6, Color(1.0, 0.6, 0.4, 0.6), 0.3)

@@ -57,8 +57,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
 			e.set_meta("dsr_until", maxf(float(e.get_meta("dsr_until", 0.0)), float(m.time) + secs))
-			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, k if k > 0.0 else 0.4)
-			e.slow_t = maxf(e.slow_t, secs)
+			e.add_slow(secs, k if k > 0.0 else 0.4)
 			if not was_d: _show(e, kind, secs)
 		"vul":
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)

@@ -69,7 +69,7 @@ static func tick(m) -> void:
 			m.set_meta("hudref_up_done", true)
 			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
-		if st: st.slow_t = maxf(st.slow_t, 1.0)
+		if st: st.add_slow(1.0)
 
 static func _stand(m, h: Hunter, at: Vector3) -> void:
 	var g: Vector3 = m.world.free_spot_near(at, [], 0.6, 0.5, 3.0)
