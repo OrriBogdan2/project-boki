@@ -300,6 +300,12 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	var first := K.launches - l0
+	var recovery := P.fire_cd
+	ok(
+		"cancel: the punch's recovery is the card's 0.6 s, the boulder's",
+		recovery > 0.5 and recovery <= 0.6 and float(ld["punch"]["rate"]) == float(ld["boulder"]["rate"]),
+		"fire_cd %.2f punch %.2f boulder %.2f" % [recovery, float(ld["punch"]["rate"]), float(ld["boulder"]["rate"])]
+	)
 	step(m, 0.3)
 	ok(
 		"combo: a punch along a row launches every rock in a stream",

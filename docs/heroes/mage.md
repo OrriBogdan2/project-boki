@@ -79,6 +79,48 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 
 Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen, and each ability's frames are a separate stretch of the clip, so no pair is shown back to back),
+[W] the wiki page linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours is
+origin/main d255acbee, read in the code (cancel-matrix-b pass, 11-09). **Unsettled** means no frame, card line or wiki
+line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no
+shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack key does
+nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB bolt (0.648 s cadence) | LMB | one bolt per 0.8 s held | next bolt on the cadence while held | owner (items 70, 116: faster than the 0.8 s card) | `LMB: ...` lines |
+| LMB held | RMB, E | not shown ("she stood still in every LMB shot") | both: the bolts keep leaving while the rod is held | unsettled | [F] 0003-0020, open question 5 |
+| RMB tap (under 0.33 s) | RMB | "Cast time increased from 0.25 >>> 0.33 seconds"; earlier "minimum cast time 0.2 >>> 0.4" | the throw **waits** to 0.33 s; a second press is denied (one charge), no queue | match | [W] patches 05.03.25, 20.11.24; `small: ...` |
+| RMB held (rod) | LMB, E | not shown | both | unsettled | |
+| RMB held | X | not shown | the cast is refused while the rod is held; the hold goes on | unsettled | `MageUlt.cast` |
+| Storm Rod throw | any | spear flight is nearly instant | free at once | unsettled | [F] 0063 |
+| Wirerun charge (to 0.9 s, press to release) | LMB, RMB, E | not shown | both: the bolts, the rod and Skycall go while she charges | unsettled | [F] open question 5 |
+| Wirerun charge | X | not shown | **ignored** (refused, not buffered) | unsettled | `MageUlt.cast` |
+| Wirerun charge | jump | not shown | **ignored**: the walk and the jump are zeroed while she holds it | unsettled | [F] open question 5 |
+| Wirerun charge | stun, root, ground | "Stuns, Roots, Grounds, and Glider cancel the state" | the charge is cut and stays spent | match | [W] patch 05.03.25; `a stun mid-hold cancels Wirerun` |
+| Wirerun charge or run | glide | "Glider cancel the state" (ignore projectiles) | the glider stays shut until the dash ends | **mismatch, not fixed**: the wiki says the glider ends the state, so a glide opens inside it; what the dash does then is not stated | [W] patch 05.03.25 |
+| Wirerun through a full-Static foe | Wirerun | "Surge is ready again at once"; "dashes straight back" | back at once | match | [F] 0133-0171; the dash rows |
+| E Skycall flick (held up to 1 s) | E release | "the video can't tell which" (release or second click) | the release commits; a tap commits away | match (the input is the data's "HOLD AND DRAG") | [D]; [F] 0184-0186 |
+| E flick or countdown (0.8 s) | any | not shown | free: LMB, RMB, X all go | unsettled | [F] 0181-0226 |
+| X Kitefall crouch (0.3 s) and climb | X | "REACTIVATE to crash down" | the second press is **queued** and lands her when the hang starts | match | [D]; [F] 0349-0395 |
+| X hang (from 0.25 s, up to 1.7 s) | X | reactivate crashes down | lands at the cursor in 0.2 s | match | [D]; [F] "stayed up 1.2 to 1.8 s" |
+| X hang | LMB | not shown | **an attack press also lands her** (from 0.25 s in; a button already down at the cast does not) | ours (the source names only the reactivate) | `MageUlt._wants_down` |
+| X crouch to strike | RMB, E | not shown | **ignored** (`busy`), not buffered | unsettled | `MageKit.busy` |
+| X crouch to strike | jump, Shift | not shown | the crouch combines (owner item 51); in the hang a jump or Shift does nothing | owner | #51; content/dash_flow `into_jump.x` |
+| X hang | glide | "Glider cancel the state" | shut (`h.gliding` cleared) | **mismatch, not fixed**: same wiki line as the Wirerun row, what ends is not stated | [W] patch 05.03.25 |
+| X strike (0.5 s crackle) | any | not shown | free at once | unsettled | |
+
+Fixes made: none. Two rows are mismatches the wiki shows but doesn't finish (a glider ending Wirerun or Kitefall's
+invulnerable state): the wiki gives the state change, not what the dash or the hang does next, so no guess was built.
+Suggestions (not built): the LMB landing in Kitefall's hang is ours (the source names only the reactivate); if the
+owner wants strict parity, X would be the only landing key.
+
 ## Combinations
 | Combination | What fires | Check |
 |---|---|---|

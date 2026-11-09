@@ -98,6 +98,49 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 - His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
 - Nameplate at 2.6 m (`plate_offset` in the archetype JSON, read by `HudPlate.plate_offset(h)`).
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen, and each ability's frames are a separate stretch of the clip, so no pair is shown back to back),
+[W] the wiki page linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours is
+origin/main d255acbee, read in the code (cancel-matrix-b pass, 11-09). **Unsettled** means no frame, card line or wiki
+line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no
+shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack key does
+nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB tap, throw (arm cocks 0.12 s, then the hammer leaves) | LMB | "a recall lockout time of 0.25 seconds" | ignored in the first 0.25 s (no buffer); after it, a press recalls | match | [W] patch 20.11.24; `bjorn small: a recall in the first 0.25 s is ignored` |
+| Hammer out (planted or flying) | LMB tap | "PRESS to throw hammer, reactivate to recall" | recalls (not while it is already coming back) | match | [D]; [F] 0028-0031, 0406-0426 |
+| Hammer out | LMB held | the data gives no hold-with-hammer-out rule | the press recalls; the swing cannot charge while the hammer is out, a button still down starts the charge once it is caught | unsettled | |
+| LMB held (charge, from 0.2 s) | RMB | not shown | **cancels** the charge (no swing, the button must come up first); the aegis rises 0.1 s later | unsettled | [F] 0102-0145 hold, 0179+ shield: separate stretches |
+| LMB held | E | not shown | **cancels** the charge, Mending Ground goes | unsettled | |
+| LMB held | X | not shown | **cancels** the charge, he plants for Faultline | unsettled | |
+| LMB held | jump | not shown | the charge goes on through the jump and swings where he lets go | owner | #51, content/dash_flow `hold.lmb`; `bjorn #51 hold > jump` |
+| LMB held | glide | not shown | **cancels** the charge (as a mantle, a knock or a stun do) | ours | `_hold_interrupted`; documented in the Shift / jump row above |
+| Swing (release step, then the 0.61 s recovery) | LMB | "~0.4 s recovery", no word on presses | waits only while the button is held: the charge starts when the recovery ends; a tap that is let go inside it is dropped | unsettled | [F] 0146-0149 |
+| Swing recovery | RMB, E, X | not shown | both: each goes at once | unsettled | |
+| Swing, spin (Shift) wind-down | glide | "winddown frames where Oath can't immediately enter a glider state" | shut for 0.3 s | match (the length is ours: the patch gives no number) | [W] patch 05.02.25; `bjorn small: wind-down after the slam` |
+| RMB held (aegis up) | LMB | not shown | **ignored**: no throw, no recall, no swing while the aegis stands ("behind the raised shield you can't swing or throw"); a button still down starts the charge when it drops | unsettled | `BulwarkKit.fire_ok` |
+| RMB held | E | "only heals shield if shield is active" (Regen Field) | both: Mending Ground goes, the aegis stays and is mended | match (the patch implies the cast with the shield up) | [W] patch 11.12.24 |
+| RMB held | X | not shown | the aegis comes down, he plants | unsettled | `_drop_holds` |
+| RMB held, 0.1 s cast | LMB | "0.15 s" (card) | a throw pressed inside the 0.1 s goes; after that it is ignored | unsettled | [F] 0179 |
+| E (1 s column, 4 s zone) | any | tap, no lock shown | instant: nothing is held; LMB, RMB, X all go | unsettled | [F] 0412-0421 |
+| X Faultline wind-up (0.4 s) and slam (planted to 0.6 s) | LMB | "planted for the wind-up and slam only (f25-f31, ~0.6 s)" | ignored (not buffered) | match | [F] ult f25-f31; owner #48 |
+| X wind-up | RMB | not shown | ignored (denied) | unsettled | |
+| X wind-up | E | not shown | both: the zone goes, the wind-up runs on | unsettled | |
+| X wind-up | jump | not shown (planted) | **both**: the walk is zeroed but a jump rises straight up while the hammer is overhead | unsettled (flagged below) | `BjornUlt.tick` keeps `vel.y` |
+| X after the slam (fissure running) | any | "he shifts position: he's free to move" | free: LMB, RMB, E and jump all go | match | [F] ult f31-f49; owner #48 |
+| X wind-up | stun | not shown | interrupts it, cooldown back to 8 s | ours | Assumptions above |
+
+Fixes made: none. Every source line above already matches; the rest is unsettled, so nothing was changed on a guess.
+Suggestions (not built): a jump in the Faultline plant is the one pair where ours contradicts its own "planted" rule;
+the footage cannot show a jump press, so a frame or the owner has to say; the same goes for whether a raised aegis
+should block the recall.
+
 ## Small mechanics (fine print; source, footage, ours)
 | Mechanic | Source | Footage | Ours | Check |
 |---|---|---|---|---|
