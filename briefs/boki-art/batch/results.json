@@ -15403,5 +15403,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/lashyx_e_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "lunowl_f_e_w28",
+    "name": "Lunowl (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_f_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_f_e_w28",
+    "name": "Lunowl (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_f_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_e_w28",
+    "name": "Oarter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_f_e_w28",
+    "name": "Lunowl (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lunowl_f_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_e_w28",
+    "name": "Oarter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarter_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback_pe_w28",
+    "name": "Cairnback (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_e_w28",
+    "name": "Oarter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/oarter_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback_pe_w28",
+    "name": "Cairnback (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_pe_w28_2.jpg",
+    "ok": true
   }
 ]
