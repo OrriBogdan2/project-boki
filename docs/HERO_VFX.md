@@ -72,7 +72,9 @@ the Boki's feet and chest and uses the shared `Fx` pools only (dots, streaks, on
 no shader and no per-frame code. It does not recolour the effect itself, so colour keeps meaning the effect.
 Budget per cast: at most 10 dots, 8 streaks, 3 rings (before the quality preset's `fx` factor). `--kin-type-fx-check`
 asserts coverage of all 18 types, distinct colours and shapes, the budget and a real cast. Sheet:
-`--kin-type-sheet --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`).
+`--kin-type-sheet --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`). Tuned on grass over GPU sheets 20261109-121559 (too faint),
+20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
+The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
 
 | Type | Species | Colour | Accent | Before |
 |---|---|---|---|---|
