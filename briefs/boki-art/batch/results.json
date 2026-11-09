@@ -20590,5 +20590,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_flarmink_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_ermink",
+    "name": "Ermink (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_flarmink",
+    "name": "Flarmink (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_flarmink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_voltmink",
+    "name": "Voltmink (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_voltmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_rimink",
+    "name": "Rimink (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_rimink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_mycroll",
+    "name": "Mycroll (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_mycroll_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_rimink",
+    "name": "Rimink (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_rimink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_rimink",
+    "name": "Rimink (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_rimink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lunink",
+    "name": "Lunink (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_lunink_3.jpg",
+    "ok": true
   }
 ]
