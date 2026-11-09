@@ -21740,6 +21740,17 @@
     "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Chuggamus, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a purple hippo standing on four thick piston-shaped legs with flat round feet. Its belly and sides are smooth copper hide shaped like a locomotive boiler. A copper smokestack-shaped horn grows on its snout, puffing a little steam. Its lower jaw is shaped like a cowcatcher grille, with a glowing firebox mouth and two ivory tusks. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
   },
   {
+    "id": "rd2_gongrowl_v2",
+    "name": "Gongrowl (redesign concept, round 2)",
+    "refs": [
+      "briefs/boki-art/evolutions/Gongrowl.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): Gongrowl, a redesign of the creature shown from four sides in image 1. Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. New design: a gorilla with Boki proportions: a big round head (about a quarter of its height) with a short bronze crest growing from its skull, broad shoulders and long arms. In the middle of its chest the skin itself is a round bronze gong, set into the chest like a breastbone, with dark fur all round its edge and nothing round its shoulders or back. Bronze knuckles grown from its fists. Near-black fur with a lighter grey lit shape on its shoulders. It faces the viewer, roaring, pounding the gong in its chest with one fist. Keep its curled tail. Every part of it grows out of its own body with a thick fused base, as if it was born that way. Clearly an animal with Boki proportions (a slightly oversized head, bold simple shapes). View: a gentle three-quarter view with both eyes showing. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
