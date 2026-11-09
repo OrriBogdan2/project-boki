@@ -1,5 +1,5 @@
 extends RefCounted
-## Ryzz items 70-74: faster autos and a longer Wirerun (70), Skycall's orb fling and pull
+## Sparkle items 70-74: faster autos and a longer Wirerun (70), Skycall's orb fling and pull
 ## (71), the committed Skycall vector (73) and the Storm Rod's single Static (74). Item 72 (Kitefall's Static
 ## spread) is in tools/vv_ult_check.gd. Runs inside --mage-combo-check and reports through its ok().
 

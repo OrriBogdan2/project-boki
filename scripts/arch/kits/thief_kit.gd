@@ -10,7 +10,7 @@ extends ArchKit
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
 ## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
-##   Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
+##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
 ##   What other presses do during the cartwheel: content/dash_flow/thief.json (DashFlow).
@@ -429,7 +429,7 @@ func on_dash(use_ex: bool) -> bool:
 	var air := use_ex or not h.grounded
 	if use_ex:
 		h.ex_next = false            # her own distance and time, not the class's long dash
-		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1}, true)
+		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1})
 		h.dash_is_ex = true
 		h.vel.y = maxf(h.vel.y, 0.0)
 	else:
@@ -490,14 +490,6 @@ func play(move: String) -> void:
 	if encore.running() and move in ThiefUlt.DANCED_OVER:
 		return
 	super.play(move)
-
-## Presses during the Cartwheel: the bolt fires mid-flip when its row says so.
-func fires_in_dash() -> bool:
-	return String(flow.row("lmb")["mode"]) == "fire"
-
-## flip_for picks the flip from her facing, so she keeps the cursor through it and a sideways Vault is a true cartwheel.
-func aims_in_dash() -> bool:
-	return fires_in_dash()
 
 ## Her own after-images on every dash: cyan streaks and a spinning cyan star where her hands were (not the
 ## shared team-colour pill).

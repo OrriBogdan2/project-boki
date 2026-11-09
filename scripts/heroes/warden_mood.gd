@@ -4,11 +4,15 @@ extends RefCounted
 ## hanging companion that reacts. Cosmetic only; nothing here touches the kit. Data: warden_anim/<art>.json "mood":
 ##   "kmoves": kit move -> mood; "downed", "hit", "emote", "default": moods; "hit_t": s a hit's mood lasts
 ##   "companion": the bone it wiggles and shivers; "lure": the material tag of its glow; "flare_kmoves": its moves
-## Moods: calm, happy, angry, determined, sad. A kit calls poke(model, "shiver") for a blocked hit, and sets the root
+##   "faces": {material tag: {mood: atlas cell}}: faces drawn on an atlas (the glb's `eyes-mood_<tag>` texture)
+##   in place of the glass, one per companion; "blink_cell" is the cell of a blink
+## Moods: calm, happy, angry, determined, sad (+ sleepy, shy, cry for atlas faces).
+## A kit calls poke(model, "shiver") for a blocked hit, and sets the root
 ## meta FLARE while its big moment runs.
 
-const IDS := {"calm": 0, "happy": 1, "angry": 2, "determined": 3, "sad": 4}
+const IDS := {"calm": 0, "happy": 1, "angry": 2, "determined": 3, "sad": 4, "sleepy": 5, "shy": 6, "cry": 7}
 const FACE_SHADER := preload("res://shaders/warden_mood.gdshader")
+const ATLAS_SHADER := preload("res://shaders/warden_mood_atlas.gdshader")
 const POKE := "mood_poke"     # root meta: the time left of a shiver
 const FLARE := "lure_flare"   # root meta: bool, the lure burns bright
 const FADE := 7.0             # 1/s: one mood into the next
@@ -29,6 +33,7 @@ var root: Node3D
 var skel: Skeleton3D
 var d: Dictionary
 var face: ShaderMaterial
+var atlas: Array = []         # [ShaderMaterial, {mood id: cell}] per atlas face
 var lure: Array = []          # the lure's materials
 var lure_base := 1.0
 var lure_k := 0.0
@@ -62,7 +67,15 @@ func _setup(glb: Node3D) -> void:
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si)
 			var nm := String(src.resource_name) if src else ""
-			if nm.begins_with("eyes-mood"):
+			var tag := nm.trim_prefix("eyes-mood_")
+			if nm.begins_with("eyes-mood_") and d.get("faces", {}).has(tag) and src is BaseMaterial3D:
+				var am := ShaderMaterial.new()
+				am.shader = ATLAS_SHADER
+				am.set_shader_parameter("atlas", (src as BaseMaterial3D).albedo_texture)
+				am.set_shader_parameter("blink_cell", int(d.get("blink_cell", -1)))
+				atlas.append([am, d["faces"][tag]])
+				(mi as MeshInstance3D).set_surface_override_material(si, am)
+			elif nm.begins_with("eyes-mood"):
 				face = ShaderMaterial.new()
 				face.shader = FACE_SHADER
 				(mi as MeshInstance3D).set_surface_override_material(si, face)
@@ -112,6 +125,10 @@ func _want(s: Dictionary) -> String:
 		return String(d.get("hit", "angry"))
 	return String(d.get("default", "calm"))
 
+## The atlas cell of mood id `id` in a face's map (a mood it has no cell for shows its calm one).
+func _cell(map: Dictionary, id: int) -> int:
+	return int(map.get(IDS.find_key(id), map.get("calm", 0)))
+
 func step(dt: float) -> void:
 	t += dt
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
@@ -128,6 +145,12 @@ func step(dt: float) -> void:
 		face.set_shader_parameter("k", k)
 		var b := fmod(t, BLINK_EVERY)
 		face.set_shader_parameter("blink", 1.0 if b < BLINK_T else 0.0)
+	for a in atlas:
+		var m := a[0] as ShaderMaterial
+		m.set_shader_parameter("from_cell", _cell(a[1], was))
+		m.set_shader_parameter("to_cell", _cell(a[1], cur))
+		m.set_shader_parameter("k", k)
+		m.set_shader_parameter("blink", 1.0 if fmod(t, BLINK_EVERY) < BLINK_T else 0.0)
 	var left := float(root.get_meta(POKE, 0.0))
 	if left > 0.0:
 		root.set_meta(POKE, maxf(0.0, left - dt))

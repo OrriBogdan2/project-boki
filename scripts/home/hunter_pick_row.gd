@@ -11,9 +11,9 @@ const CHIP_FACE := 24         # px: the Warden's face on each Hunter's chip
 static func add(home: Node, parent: Control) -> String:
 	var cur := Arch.of_save()
 	var hd := UI.hbox(8)
-	hd.add_child(UI.section("Mask"))
+	hd.add_child(UI.section("Relic"))
 	hd.add_child(UI.fill())
-	hd.add_child(UI.ghost("All Masks", func(): HomeClasses.open(home, cur), 0))
+	hd.add_child(UI.ghost("All Relics", func(): HomeClasses.open(home, cur), 0))
 	parent.add_child(hd)
 	var flow := HFlowContainer.new()
 	flow.add_theme_constant_override("h_separation", 6)
