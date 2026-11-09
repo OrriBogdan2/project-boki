@@ -67077,5 +67077,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/meteorab_card104_1.jpg",
     "ok": true
+  },
+  {
+    "id": "scarabit_card104",
+    "name": "Scarabit (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scarabit_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chainipede_card104",
+    "name": "Chainipede (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chainipede_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chainipede_card104",
+    "name": "Chainipede (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chainipede_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "meteorab_card104",
+    "name": "Meteorab (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/meteorab_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scarabit_card104",
+    "name": "Scarabit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scarabit_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "meteorab_card104",
+    "name": "Meteorab (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/meteorab_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "scarabit_card104",
+    "name": "Scarabit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scarabit_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_f_card104",
+    "name": "Eclipsowl female (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_1.jpg",
+    "ok": true
   }
 ]
