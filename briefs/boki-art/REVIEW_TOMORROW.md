@@ -56,3 +56,4 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Forgebrock | live stays | audit redos peaked at 7.8 | c_forgebrock_x2_3, x3_3 |
 | Gloamspire | x1_4 gnarly crystal slug-spire in a shadow pool (7.9) queued | Line audit: weak final; just under the bar but clearly better | live card |
 | Selenwhale (Lunarca) | x1_4 vast cratered moon-whale (8.0) queued | Line audit: weak final | live card |
+| Embrook | live (your call: old Pyrraven art became Embrook) | Line audit says it is Kindlewren made taller, standing still (not a fundamental change, and middle stage should be in motion); I did not override your call | audit direction in LINE_AUDIT.md: lean hopping ember-crow mid-leap |
