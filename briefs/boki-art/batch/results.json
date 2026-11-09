@@ -71368,5 +71368,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rd_snapler_v2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_snapler_v2",
+    "name": "Snapler (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_snapler_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_snapler_v2",
+    "name": "Snapler (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_snapler_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_snapler_v2",
+    "name": "Snapler (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_snapler_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_maulangler_v2",
+    "name": "Maulangler (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_maulangler_v2_4.jpg",
+    "ok": true
   }
 ]
