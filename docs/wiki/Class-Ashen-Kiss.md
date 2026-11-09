@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
+**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. In the flight only the Furnace Cloak works (no stream of fire, Cinder Shot, Shift, gloves or items: the keys are ignored until you land), and a knockback speeds you up. The carpet never forms over the abyss. 36s.
 
 ### Ranks
 
