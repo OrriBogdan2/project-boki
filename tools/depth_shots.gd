@@ -49,7 +49,8 @@ func _step_to(w: World, x: int, z: int, d: Vector2i) -> int:
 func _find(test: Callable) -> Array:
 	var found := _find_spread(test, 1, 0)
 	var w := m.world
-	return found[0] if not found.is_empty() else [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1), Vector2i(w.w / 2, w.h / 2 - 3)]
+	if not found.is_empty(): return found[0]
+	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1), Vector2i(w.w / 2, w.h / 2 - 3)]
 
 ## Up to `count` such tiles, each at least `apart` tiles from the ones before it.
 func _find_spread(test: Callable, count: int, apart: int) -> Array:
