@@ -79,6 +79,8 @@ sentences, and a grown, Devoted Boki talks freely.
   out by trying, and the card remembers. Each kind of care builds a little trust once a farm day
   (5 minutes), so a Boki raised only at home still grows close. Reaching a new bond rank is a
   moment: it hops to you with a heart and a line, and a card says what the rank brings.
+- **Taking it out.** The expedition panel says under your partner what its raising does for the
+  run (for example "+10% damage, +10% health" when it's in great shape, a cost when it's run down).
 - **Coming home.** After an expedition (or two minutes or more away), the Boki out on the farm
   notice you and run over to say hello, the ones that trust you most first. Wary or napping ones
   don't.

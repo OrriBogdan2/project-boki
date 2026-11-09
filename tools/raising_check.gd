@@ -110,6 +110,17 @@ func _welcome(home, k: Dictionary) -> void:
 	await main.get_tree().create_timer(KinWelcome.START_S + 0.2).timeout
 	ok(not k.has("called_t"), "back from a minute in a menu: no rush")
 
+## The expedition panel's line: good care reads as a bonus, a run-down Boki as a cost.
+func _care_line(rec: Dictionary) -> void:
+	var kept: Dictionary = (rec["needs"] as Dictionary).duplicate()
+	rec["needs"] = {"food": 95.0, "energy": 95.0, "joy": 95.0, "clean": 95.0}
+	var good := Care.care_line(rec)
+	rec["needs"] = {"food": 10.0, "energy": 10.0, "joy": 10.0, "clean": 10.0}
+	var poor := Care.care_line(rec)
+	rec["needs"] = kept
+	ok(good.contains("+10% health") and poor.contains("-18% damage"),
+		"the expedition panel says what raising does: \"%s\" / \"%s\"" % [good, poor])
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -139,6 +150,7 @@ func run(m: Node) -> void:
 		"the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"]))
 	ok(pets == 1 and pets2 == 1, "the same care before the next expedition is one memory (%d, %d)" % [pets, pets2])
 	_fetch_trains(home, k)
+	_care_line(rec)
 	await _meals_lean(home, k)
 	# a week of farm days with the usual care and no expeditions: it grows Close
 	for day in 7:
