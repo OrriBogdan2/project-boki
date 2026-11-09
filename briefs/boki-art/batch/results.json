@@ -72523,5 +72523,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fam_ringrove_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fam_sporcupine_a",
+    "name": "Sporcupine (match Mycroll, a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fam_sporcupine_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fam_sporcupine_b",
+    "name": "Sporcupine (match Mycroll, b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fam_sporcupine_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fam_ringrove_b",
+    "name": "Ringrove (match Mycroll, b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fam_ringrove_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fam_ringrove_a",
+    "name": "Ringrove (match Mycroll, a)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fam_ringrove_a_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fam_sporcupine_b",
+    "name": "Sporcupine (match Mycroll, b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fam_sporcupine_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fam_ringrove_a",
+    "name": "Ringrove (match Mycroll, a)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fam_ringrove_a_4.jpg",
+    "ok": true
   }
 ]
