@@ -1,7 +1,7 @@
 extends "res://tools/combo51_shots.gd"
-## --hero-vfx-reel --shots-dir=<dir> [--reel-hero=<arch>] [--reel-only=<part>] [--reel-generic]: a Hero's whole ability set played
-## through in a live Arena match at the match camera, for the approval gate. One PNG sheet per ability (a grid
-## of crops round the action, <dir>/<hero>_<part>.png) and REEL_MARK lines with the frame each part starts on.
+## --hero-vfx-reel --shots-dir=<dir> [--reel-hero=<arch>] [--reel-only=<part>] [--reel-generic]: a Hero's whole
+## ability set played through in a live Arena match at the match camera, for the approval gate. One PNG sheet per
+## ability (a grid of crops round the action, <dir>/<hero>_<part>.png) and REEL_MARK lines with the frame each part starts on.
 ## A Hero with a script of its own (tools/vfx_reel/<arch>.gd, extending this one: parts() and `_part_<name>` funcs)
 ## plays its scripted parts; Kael and Lisette's are below; any other plays the generic set (LMB, RMB, Shift, E, R,
 ## with E and R pressed a second time for a recast marker). --reel-generic plays the generic set for any Hero, so
@@ -145,7 +145,8 @@ func _part_e() -> void:
 	var cast := func(t: float):
 		P.inp["sig"] = _at(t, 0.1) or _at(t, 1.5)
 		_aim(T.pos)
-	await _go(2.4, cast, _sheet("e", "E at the dummy, E again at 1.5 s (a recast)", [0.15, 0.3, 0.5, 0.8, 1.2, 1.55, 1.7, 2.0, 2.3]), 2.5)
+	await _go(2.4, cast, _sheet("e", "E at the dummy, E again at 1.5 s (a recast)",
+			[0.15, 0.3, 0.5, 0.8, 1.2, 1.55, 1.7, 2.0, 2.3]), 2.5)
 	await _go(GAP)
 
 func _part_r() -> void:
@@ -157,7 +158,8 @@ func _part_r() -> void:
 		elif _at(t, 1.6):
 			P.ak.cast_ult()
 		_aim(T.pos)
-	await _go(2.8, cast, _sheet("r", "R, the ultimate, R again at 1.6 s (a recast)", [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
+	await _go(2.8, cast, _sheet("r", "R, the ultimate, R again at 1.6 s (a recast)",
+			[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael

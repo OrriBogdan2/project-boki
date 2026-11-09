@@ -22,7 +22,8 @@ const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10,
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
-const LOD_NEAR := 20.0         # m from the camera focus: full detail
+const KEEP_RESERVE := 120      # of MAX_LIVE only "keep" layers may use (decor stops at MAX_LIVE less this)
+const LOD_NEAR := 20.0        # m from the camera focus: full detail
 const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
@@ -562,11 +563,14 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "smoke" if kind == "smoke" else "char"))
 	mt.set_shader_parameter("stretch", float(layer.get("stretch", 0.05)))
 	mt.set_shader_parameter("gain", view_k(h))
-	var want := _num(layer, "n", o, 12.0) * float(Settings.q("fx")) * lod * view_k(h)
-	var room := maxi(0, MAX_LIVE - live_n)
+	# a "keep" layer carries gameplay (a zone, an aim, a charge, a heal): the preset's thinning and shortening skip it
+	# and it may use the reserve, so decor layers are the first to go
+	var keep := bool(layer.get("keep", false))
+	var want := _num(layer, "n", o, 12.0) * (1.0 if keep else float(Settings.q("fx"))) * lod * view_k(h)
+	var room := maxi(0, MAX_LIVE - (0 if keep else KEEP_RESERVE) - live_n)
 	var n := mini(mini(int(want), int(AMOUNT[kind])), room)
 	p.amount_ratio = float(n) / float(AMOUNT[kind])
-	p.lifetime = _num(layer, "life", o, 0.5) * float(Settings.q("fx_life"))
+	p.lifetime = _num(layer, "life", o, 0.5) * (1.0 if keep else float(Settings.q("fx_life")))
 	return n
 
 func _way(layer: Dictionary, dir: Vector2) -> Vector3:
