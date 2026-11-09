@@ -171,6 +171,7 @@ func run(main_node: Node) -> void:
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
+	await _check_gear_reveal(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -208,6 +209,35 @@ func _check_keys(P: Hunter) -> void:
 	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
 		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
 	P.ak.cd["x"] = 0.0
+
+## 7. Empty gear slots and belt slots stay hidden: only filled ones are drawn; holding the info key shows all
+## the gear slots and one plain line per item.
+func _check_gear_reveal(P: Hunter) -> void:
+	var hud = P.m.hud
+	P.gear = Gear.empty_slots()
+	P.belt = UtilityBelt.empty()
+	await hud.panels.draw
+	await main.get_tree().process_frame
+	var spots := func(prefix: String) -> int:
+		return hud.hover_spots.filter(func(x): return String(x[1]).begins_with(prefix)).size()
+	ok(spots.call("gslot:") == 0 and spots.call("util") == 0, "a new hunter: no gear slots and no belt slots drawn")
+	var armor: String = Gear.ids_for(2)[0]
+	P.gear[2] = {"id": armor, "rar": 0}
+	var tonic: String = UtilityBelt.stock_ids()[0]
+	P.belt[1] = {"id": tonic, "n": 1}
+	await hud.panels.draw
+	await main.get_tree().process_frame
+	ok(GearPanel.shown(P) == [2] and spots.call("gslot:") == 1, "one armor piece: only the armor slot is drawn")
+	ok(spots.call("util") == 1, "one belt item: only its slot is drawn, with its key")
+	Input.action_press("scores")
+	var held := GearPanel.shown(P).size() == Gear.SLOTS.size()
+	var line := GearPanel._card_line(P, 2)
+	var empty_line := GearPanel._card_line(P, 0)
+	Input.action_release("scores")
+	ok(held and line.contains(Gear.desc_of(armor, 0)) and empty_line == "Glove 1: empty",
+		"holding the info key: every gear slot and a plain line per item ('%s' / '%s')" % [line, empty_line])
+	P.gear = Gear.empty_slots()
+	P.belt = UtilityBelt.empty()
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

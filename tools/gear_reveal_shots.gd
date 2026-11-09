@@ -20,12 +20,12 @@ func run(main_node: Node) -> void:
 		await main.get_tree().process_frame
 		P.gear = Gear.empty_slots()
 		P.belt = UtilityBelt.empty()
-		await _go(0.6, Callable(), [[0.5, "full", "%d_new" % sz.y, "%dp: a new hunter, nothing worn or carried" % sz.y]])
+		await _shot("new", "a new hunter, nothing worn or carried")
 		P.gear[2] = {"id": armor, "rar": 1}
 		P.belt[0] = {"id": tonic, "n": 2}
-		await _go(0.6, Callable(), [[0.5, "full", "%d_one" % sz.y, "%dp: one armor piece and one tonic" % sz.y]])
+		await _shot("one", "one armor piece and one tonic")
 		Input.action_press("scores")
-		await _go(0.6, Callable(), [[0.5, "full", "%d_held" % sz.y, "%dp: the same with the info key held" % sz.y]])
+		await _shot("held", "the same with the info key held")
 		Input.action_release("scores")
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
@@ -34,3 +34,7 @@ func run(main_node: Node) -> void:
 	f.close()
 	print("GEARSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
+func _shot(part: String, caption: String) -> void:
+	var h := main.get_window().size.y
+	await _go(0.6, Callable(), [[0.5, "full", "%d_%s" % [h, part], "%dp: %s" % [h, caption]]])
