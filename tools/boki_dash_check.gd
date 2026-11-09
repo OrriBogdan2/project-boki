@@ -1,12 +1,14 @@
 extends RefCounted
 ## --boki-dash-check: item 185 (bug 181's root cause). With every Boki species bonded in turn, Sable's dash and
-## Kael's RMB Lunge keep the no-Boki baseline exactly: the same path step by step (so the same duration and
+## Kael's RMB Lunge keep the no-Boki baseline: the same path while the move rolls (so the same duration and
 ## distance), the same kit move on every step (the animation frames) and the same i-frames. Dashes are the hero's
-## own (DECISIONS 2026-11-05): a Boki rider that blinks, repeats or cuts a dash fails here.
+## own (DECISIONS 2026-11-05): a Boki rider that blinks, repeats or cuts a dash fails here. A speed stat is
+## allowed (the agency rule, 2026-11-06), so the exit slide may differ by SLIDE_TOL.
 
 const STEPS := 90                # 1.5 s at 60 Hz: the whole move and its recovery
 const LUNGE_HOLD := 0.45         # s RMB held: past the tap's Slam, into the Lunge (tools/dash_frames.gd)
-const POS_TOL := 0.01            # m a step's position may differ from the baseline's
+const POS_TOL := 0.01            # m a step's position may differ from the baseline's while the move rolls
+const SLIDE_TOL := 0.06          # m the end point may differ: the exit hands over at run speed, a speed stat scales it
 const CASES := {"thief": "dash", "juggernaut": "rmb"}
 
 var bad := 0
@@ -117,13 +119,17 @@ func _sum(tr: Array) -> String:
 	return "%d roll steps, %d i-frame steps, %.2f m, moves %s" % [rolls, invs,
 		Vector2(last["x"], last["z"]).length(), ",".join(moves)]
 
-## The first step where `tr` leaves the baseline, or -1.
+## The first step where `tr` leaves the baseline, or -1. The path must match while the move rolls; after it
+## the exit slide carries the run (HunterMove.dash_exit), which a Boki's speed stat legitimately scales, so only
+## the end point is held to SLIDE_TOL there.
 func _diverges(base: Array, tr: Array) -> int:
 	for i in base.size():
 		var a: Dictionary = base[i]
 		var b: Dictionary = tr[i]
 		var off := Vector2(a["x"] - b["x"], a["z"] - b["z"]).length()
-		if off > POS_TOL or a["move"] != b["move"] or a["roll"] != b["roll"] or a["inv"] != b["inv"]:
+		var rolling: bool = a["roll"] or (i > 0 and base[i - 1]["roll"])
+		if (rolling and off > POS_TOL) or off > SLIDE_TOL \
+				or a["move"] != b["move"] or a["roll"] != b["roll"] or a["inv"] != b["inv"]:
 			return i
 	return -1
 
