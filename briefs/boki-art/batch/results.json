@@ -29452,5 +29452,103 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/snuffapi_card3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "umbrathere_card3",
+    "name": "Umbrathere (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrathere_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card3",
+    "name": "Umbrathere (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrathere_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card3",
+    "name": "Umbrathere (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/umbrathere_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "zippelith_card3",
+    "name": "Zippelith (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zippelith_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "zippelith_card3",
+    "name": "Zippelith (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/zippelith_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "zippelith_card3",
+    "name": "Zippelith (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zippelith_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a3",
+    "name": "Glassolotl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "blotlet_card3",
+    "name": "Blotlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blotlet_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a3",
+    "name": "Glassolotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blotlet_card3",
+    "name": "Blotlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blotlet_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pebblamb_card3",
+    "name": "Pebblamb (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pebblamb_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_o",
+    "name": "Bucketmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_o_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a3",
+    "name": "Glassolotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_o",
+    "name": "Bucketmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_o_1.jpg",
+    "ok": true
   }
 ]
