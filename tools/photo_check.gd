@@ -34,7 +34,7 @@ func _new_save() -> void:
 	d["roster"].append(first)
 	d["roster"].append(Save.new_kin("zapple", "Mochi"))
 	d["active"] = first["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true}
 	Save.d = d
 	HomeLayout.ensure(d)
 
@@ -54,7 +54,6 @@ func run(m: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	home._close_panel()
 	await _frames(30)
 	var photo: HomePhoto = home.photo
 	var yaw0: float = home.cam.yaw_to
