@@ -7,7 +7,7 @@ extends CanvasLayer
 signal shown
 
 const TIPS := [
-	"Hold Mouse 5 (or Space) in the air to glide. You can open your glider off any booster too.",
+	"Jump, then press %J again in the air and hold it to glide. Any booster lets you open your glider too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
@@ -30,8 +30,8 @@ const TIPS := [
 	"Go down for good and the Boki you brought are left behind. Old Pell's Black Market sells back the ones nobody claims.",
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
-	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
+	"Jump off the skyship over an island nobody else picked. Press %J in the air to open your glider early for a longer, slower last stretch.",
+	"Falling all the way into the abyss is death. Glide (press %J again in the air, then hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
@@ -115,7 +115,7 @@ func setup(opts: Dictionary) -> void:
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
-	tip = tips[randi() % tips.size()]
+	tip = String(tips[randi() % tips.size()]).replace("%J", Settings.key_cap("jump"))
 	lore = LORE[randi() % LORE.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
