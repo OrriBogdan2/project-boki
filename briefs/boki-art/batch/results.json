@@ -46861,5 +46861,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_howlop_gap_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_hydrangor_gap",
+    "name": "Hydrangor (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hydrangor_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_loafhopper_gap",
+    "name": "Loafhopper (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_loafhopper_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_howlop_gap",
+    "name": "Howlop (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_howlop_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hydrangor_gap",
+    "name": "Hydrangor (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_hydrangor_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_loafhopper_gap",
+    "name": "Loafhopper (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_loafhopper_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_loafhopper_gap",
+    "name": "Loafhopper (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_loafhopper_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hydrangor_gap",
+    "name": "Hydrangor (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hydrangor_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lurklet_gap",
+    "name": "Lurklet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lurklet_gap_1.jpg",
+    "ok": true
   }
 ]
