@@ -1,7 +1,7 @@
 extends RefCounted
 ## --boki-guard-shots --shots-dir=<dir>: a big Boki (Gravadillo) on the Return order guarding its hunter while
-## he runs, jumps and glides (owner 11-08, docs/decisions/0022): frames guard_000.. at the match camera, for a
-## clip. It stays at his side, never under or in him, and curls up on his back while he glides. Needs a renderer.
+## he runs, jumps and glides (docs/decisions/0022): frames guard_000.. at the match camera, for a clip. It
+## stays at his side, never under or in him, and curls up on his back while he glides. Needs a renderer.
 
 const DT := 1.0 / 60.0
 const EVERY := 3                 # frames between saved shots (20 fps clip)
@@ -67,7 +67,8 @@ func _step(m: Match, P: Hunter, tree: SceneTree, keep: bool) -> void:
 	await tree.process_frame
 	if Engine.get_process_frames() % 30 == 0:
 		var gk := P.kin as Kin
-		print("GUARD beside %s, %.2f m from him, feet %+.2f m" % [gk.beside, P.flat_dist(gk), gk.seen_pos().y - P.pos.y])
+		var feet := gk.seen_pos().y - P.pos.y
+		print("GUARD beside %s, %.2f m from him, feet %+.2f m" % [gk.beside, P.flat_dist(gk), feet])
 	if keep and Engine.get_process_frames() % EVERY == 0:
 		await RenderingServer.frame_post_draw
 		tree.root.get_viewport().get_texture().get_image().save_png(out.path_join("guard_%03d.png" % n))
