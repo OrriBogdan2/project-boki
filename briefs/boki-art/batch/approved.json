@@ -23,6 +23,18 @@
       "pick": 2,
       "grade": 8.5,
       "note": "storm bottle, copper coils, jittery face"
+    },
+    {
+      "id": "bubblisk_r",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "soap-film baby, rainbow eyes, bubble; re-laid from 5 views"
+    },
+    {
+      "id": "lunowl_r",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "crater moon face, crescent brow, moth wings"
     }
   ],
   "rerolled": [
@@ -31,6 +43,18 @@
       "grade": 8.0,
       "why": "reads as Sporcupine with more mushrooms, not a final form",
       "new": "ringrove_r2"
+    },
+    {
+      "id": "bellowary_r",
+      "grade": 8.0,
+      "why": "chest strap and saddle still appear",
+      "new": "bellowary_r2"
+    },
+    {
+      "id": "canvastross_r",
+      "grade": 7.5,
+      "why": "wings stiff and vertical again, keel reads as a strap",
+      "new": "canvastross_r2"
     }
   ],
   "sent_to_owner": []

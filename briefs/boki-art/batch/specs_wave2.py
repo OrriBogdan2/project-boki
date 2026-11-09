@@ -11,3 +11,29 @@ V('vespox_f','Vespox (female)',E+'Vespox.jpg','female',
  "A slightly slimmer, longer-legged young fox on all four legs in every view, with a softer, paler lavender coat and darker plum stockings. Her tail is longer and thinner, curling into a tight spiral over her back to a slender hooked sting with a glowing lime-green bulb. Her pincers are narrower and sharper, like curved shears. Instead of shoulder plates she has a neat row of small chitin plates down her spine like a crest, and tall ears with dark tufts.",
  "narrow, sly lime-green eyes with a dark flick at the outer corners and a confident, closed-mouth smile with one fang","pale lavender and plum, with a lime-green accent",
  "standing upright, blush, a curvy human body, a collar",'venom','sleek')
+
+# --- after round 1 grading ---
+B('bellowary_r2','Bellowary',
+ "A tall, round flightless forge-bird standing on two thick legs, nothing on its back: its whole round chest and belly are a living pleated leather bellows, the pleats part of its skin with ember light glowing deep in the folds, and it has no straps, belts or bands anywhere. Its head crest is a tall brass chimney cowl grown from its skull, puffing smoke, and its long beak is a glowing brass nozzle. Soot-black feathers cover its back and wings, its short tail fan ends in glowing ember tips, its neck is bright blue with short red wattles, and huge curved bronze spur blades grow from the backs of its legs.",
+ "small, round, fiery orange eyes and a cocky, hot-tempered glare","soot black and bright blue, with a brass and ember-orange accent",
+ "a turkey head, straps, a harness, a saddle, leg bands, a rider",'ember','fast')
+B('canvastross_r2','Canvastross',
+ "A big, round, plump albatross gliding pose with its long wings spread out flat to the sides like a ship's sails in the wind, not raised up: each wing is a patched off-white canvas sail stretched between curved dark wooden bones growing from its shoulders like ship's ribs, the sail edges stitched and frayed, and each wingtip ends in an iron harpoon point grown from the bone. Its tail is a short fan of stiff canvas feathers, and its pale gold beak is heavy and hooked.",
+ "droopy, half-lidded gold eyes in dark eye patches and a gruff, battle-worn scowl, a grumpy old sea captain","white and canvas cream, with an iron-grey and sky-blue accent",
+ "wings pointing straight up, straps, a keel, a saddle, ropes, a mast, a ship hull",'tempest','majestic')
+V('mothlet','Mothlet',T+'Lunowl.jpg','baby',
+ "A tiny, round, fluffy owlet in lavender down with two stubby pale-green moth wings and short fuzzy antennae, its pale moon-face disc just forming.",
+ "huge, round, sleepy gold eyes and a tiny curious beak","lavender grey and pale mint green, with a moonlight-gold accent",
+ "a realistic owl, a moon on its head, a halo",'lunar','cute')
+V('eclipsowl','Eclipsowl',T+'Lunowl.jpg','final',
+ "A great, tall, imposing owl whose facial disc has become a dark eclipse ringed with a bright silver corona, its huge luna-moth wings spread wide like a cloak with glowing crescent eye-spots, long sweeping antennae like a crown, and long silver crescent-moon talons.",
+ "huge, glowing gold eyes inside the eclipse and a cold, ancient, all-knowing stare","midnight purple and silver, with a pale mint and moonlight-gold accent",
+ "a realistic owl, a moon on its head, a halo, a held object",'lunar','majestic')
+V('frothisk','Frothisk',T+'Bubblisk.jpg','mid',
+ "A sleek young basilisk lizard low on four long legs, built to run across water, whose glossy soap-film body is now longer and leaner, with a tall frill of foamy bubbles down its back, a long loop-tipped bubble-wand tail with a sharp rim, and big flat feet trailing foam.",
+ "bright rainbow eyes and a cocky, fast grin","pearly white and sea blue, with a rainbow sheen accent",
+ "standing upright, a metal ring, a held bubble",'prism','fast')
+V('tidalisk','Tidalisk',T+'Bubblisk.jpg','final',
+ "A big, powerful basilisk dragon running across the water on its hind legs only when sprinting, here shown on all four, whose back crest is a curling breaking wave of glassy foam and bubbles, its body glossy and rainbow-sheened, its tail ending in a huge bubble-wand loop with a razor rim, and sharp crystal claws.",
+ "fierce rainbow eyes and a wide, toothy grin","sea blue and pearly white, with a rainbow sheen accent",
+ "standing upright like a person, a held bubble, fish fins",'prism','majestic')

@@ -758,5 +758,93 @@
     "runs": 2,
     "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: scuttling sideways in a jittery panic with sparks jumping off its claws. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
     "size": "4K"
+  },
+  {
+    "id": "portrait_bubblisk",
+    "name": "Bubblisk (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bubblisk.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: mid-pounce, blowing a big wobbly bubble with a sly grin. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "portrait_lunowl",
+    "name": "Lunowl (portrait)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "aspect": "16:9",
+    "runs": 2,
+    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a lively three-quarter view with a little attitude that fits its personality: perched with its moth wings half spread, staring straight at you. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain soft light background in a pale tint of its main colour with a gentle vignette, a soft contact shadow under it, no scenery, no other creatures, no text, no frame, no turnaround views.",
+    "size": "4K"
+  },
+  {
+    "id": "bellowary_r2",
+    "name": "Bellowary",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game: an endearing but dangerous creature built from one clear idea, a real animal fused with an object so that the object is part of its body. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Do not copy image 1's creatures, faces or colours. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A tall, round flightless forge-bird standing on two thick legs, nothing on its back: its whole round chest and belly are a living pleated leather bellows, the pleats part of its skin with ember light glowing deep in the folds, and it has no straps, belts or bands anywhere. Its head crest is a tall brass chimney cowl grown from its skull, puffing smoke, and its long beak is a glowing brass nozzle. Soot-black feathers cover its back and wings, its short tail fan ends in glowing ember tips, its neck is bright blue with short red wattles, and huge curved bronze spur blades grow from the backs of its legs. Face: small, round, fiery orange eyes and a cocky, hot-tempered glare. Main colours: soot black and bright blue, with a brass and ember-orange accent. Avoid: a turkey head, straps, a harness, a saddle, leg bands, a rider. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: fast: lean and forward-leaning, with swept-back shapes.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "canvastross_r2",
+    "name": "Canvastross",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game: an endearing but dangerous creature built from one clear idea, a real animal fused with an object so that the object is part of its body. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Do not copy image 1's creatures, faces or colours. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A big, round, plump albatross gliding pose with its long wings spread out flat to the sides like a ship's sails in the wind, not raised up: each wing is a patched off-white canvas sail stretched between curved dark wooden bones growing from its shoulders like ship's ribs, the sail edges stitched and frayed, and each wingtip ends in an iron harpoon point grown from the bone. Its tail is a short fan of stiff canvas feathers, and its pale gold beak is heavy and hooked. Face: droopy, half-lidded gold eyes in dark eye patches and a gruff, battle-worn scowl, a grumpy old sea captain. Main colours: white and canvas cream, with an iron-grey and sky-blue accent. Avoid: wings pointing straight up, straps, a keel, a saddle, ropes, a mast, a ship hull. Element: tempest, shown clearly by wind-swept streamers and sky-blue swirl markings. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "mothlet",
+    "name": "Mothlet",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A tiny, round, fluffy owlet in lavender down with two stubby pale-green moth wings and short fuzzy antennae, its pale moon-face disc just forming. Face: huge, round, sleepy gold eyes and a tiny curious beak. Main colours: lavender grey and pale mint green, with a moonlight-gold accent. Avoid: a realistic owl, a moon on its head, a halo. Element: lunar, shown clearly by a soft pale moonlight glow and crescent markings. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "eclipsowl",
+    "name": "Eclipsowl",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A great, tall, imposing owl whose facial disc has become a dark eclipse ringed with a bright silver corona, its huge luna-moth wings spread wide like a cloak with glowing crescent eye-spots, long sweeping antennae like a crown, and long silver crescent-moon talons. Face: huge, glowing gold eyes inside the eclipse and a cold, ancient, all-knowing stare. Main colours: midnight purple and silver, with a pale mint and moonlight-gold accent. Avoid: a realistic owl, a moon on its head, a halo, a held object. Element: lunar, shown clearly by a soft pale moonlight glow and crescent markings. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "frothisk",
+    "name": "Frothisk",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bubblisk.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family: the same species, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but bigger and older with its own new silhouette, and clearly not yet a final form. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A sleek young basilisk lizard low on four long legs, built to run across water, whose glossy soap-film body is now longer and leaner, with a tall frill of foamy bubbles down its back, a long loop-tipped bubble-wand tail with a sharp rim, and big flat feet trailing foam. Face: bright rainbow eyes and a cocky, fast grin. Main colours: pearly white and sea blue, with a rainbow sheen accent. Avoid: standing upright, a metal ring, a held bubble. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: fast: lean and forward-leaning, with swept-back shapes.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
+  },
+  {
+    "id": "tidalisk",
+    "name": "Tidalisk",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bubblisk.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell at a glance they are related, but much bigger, stronger and more impressive, clearly a final form with its own new silhouette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A big, powerful basilisk dragon running across the water on its hind legs only when sprinting, here shown on all four, whose back crest is a curling breaking wave of glassy foam and bubbles, its body glossy and rainbow-sheened, its tail ending in a huge bubble-wand loop with a razor rim, and sharp crystal claws. Face: fierce rainbow eyes and a wide, toothy grin. Main colours: sea blue and pearly white, with a rainbow sheen accent. Avoid: standing upright like a person, a held bubble, fish fins. Element: prism, shown clearly by glassy crystal facets that throw rainbow glints. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "4K"
   }
 ]

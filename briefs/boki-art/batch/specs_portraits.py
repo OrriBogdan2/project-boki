@@ -12,3 +12,5 @@ P('chuggamus', 'Chuggamus', T + 'Chuggamus.jpg', 'charging forward with steam bl
 P('vespox', 'Vespox', E + 'Vespox.jpg', 'crouched low and ready to pounce, tail sting raised and one pincer snapping')
 P('lanternmit', 'Lanternmit', E + 'Lanternmit.jpg', 'peeking proudly from its glowing lantern shell with its big claw raised')
 P('stormit', 'Stormit', E + 'Stormit.jpg', 'scuttling sideways in a jittery panic with sparks jumping off its claws')
+P('bubblisk', 'Bubblisk', T + 'Bubblisk.jpg', 'mid-pounce, blowing a big wobbly bubble with a sly grin')
+P('lunowl', 'Lunowl', T + 'Lunowl.jpg', 'perched with its moth wings half spread, staring straight at you')
