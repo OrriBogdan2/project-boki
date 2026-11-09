@@ -156,3 +156,14 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/gunslinger.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![gunslinger v2 strips](../art/anim_audit/v2_gunslinger.jpg)
+
+- Gait: run slide 23 % of speed (gate 25 %), arms against the legs +0.89, bob 6.9 cm: the Nov 8 numbers survive the retarget. T-pose share 0 % in both attacks; free-arm travel 0.10 / 0.14 body heights.
+- Gun on the hand: the pistol is skinned to `forearm.R`, so it moves rigidly with the arm (nothing to align in the clip map).
+- Idle to walk first-pose gap 0.29 body heights, unchanged (blend-covered).
+- Result: no regression; no clip or map edits needed.
+- Timing: the "Timing pass" frames (`tools/vex_anim_time_check.gd`, on `ext/anim-time-vex`) were re-run on the v2 clips in `--gunslinger-combo-check`: 109 checks, 0 failures; every move blends in within 0.12 s and hits on the press's frame.

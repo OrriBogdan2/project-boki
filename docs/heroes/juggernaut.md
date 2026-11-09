@@ -347,3 +347,13 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/juggernaut.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![juggernaut v2 strips](../art/anim_audit/v2_juggernaut.jpg)
+
+- Gait: run slide 12 %, arms against the legs +0.84, bob 15.7 cm: unchanged from Nov 8. Slam still flings the free arm 1.7 body heights and holds it out 46 % of the clip (slash 29 %): unchanged, not fixed (our own idea, see the report).
+- Sword on the hand: it is skinned to `hand.R`, so `grip_l` is gone and the one-handed v2 sheet keeps one gripping hand. `--kael-sword-check` lost its v1 hand-on-hilt assert with the skinned sword; it is back: `hand.R` stays within 0.1 m of the hilt in every clip (measured 0.072 m).
+- Support hand: `hand.L` is off the hilt 0.30-0.38 m in the Lunge holds and 0.57 m at the Slam wind-up (0.12 m at the strike). The v2 sheet is a one-handed greatsword, so this is kept and reported, not a regression to fix.
+- Timing: `tools/kael_anim_check.gd` (on `ext/anim-time-kael`) re-run on the v2 clips in `--juggernaut-combo-check`: 200 checks, 0 failures; every strike frame sits within a frame of the kit's hit (slam 0.60 s vs kit 0.583 s).
