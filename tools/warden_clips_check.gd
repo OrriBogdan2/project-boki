@@ -4,6 +4,8 @@ extends RefCounted
 ## clip is as long as the kit's move; the blend tree plays them (a move changes the pose, kit time drives it); the
 ## locomotion blends (a run moves the feet); the skinned weapon stays on its bone through every move and only one
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
+## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
+## move ends keeps them on the legs' own layer (no snap into the stance).
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -11,6 +13,8 @@ const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
 const PREFIX := {"breaker": ["bulwark", "bul_"]}
 const SKIP := ["bul_smash_late"]
+const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
+const AIR_FRAMES := 20          # frames of each air cast checked
 
 var bad := 0
 var holder: Node3D
@@ -27,6 +31,8 @@ func run(main: Node) -> void:
 	for art_name in PREFIX:
 		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
 	_companions()
+	for id in Arch.ORDER:
+		_air_legs(String(id))
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -244,6 +250,57 @@ func _whirl(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, sk: Skeleton3D, st:
 	_play(m, an, sync, st, 12)
 	ok(worst < 0.6, "breaker: the kit's angle turns the skinned hammer (worst %.2f rad off)" % worst)
 	ok(reach <= 2.8, "breaker: the whirl's head stays inside the slam's reach (%.2f m of 2.8)" % reach)
+
+## Two of the Hero side by side through the same fall, one casting each "air_legs" move: their legs match. Then each
+## move again, landing halfway: the move never takes the legs back.
+func _air_legs(id: String) -> void:
+	var cfg := WardenClips.data(WardenGlb.art(id))
+	var moves: Array = (cfg.get("kmoves", {}) as Dictionary).keys().filter(
+			func(k): return bool(cfg["kmoves"][k].get("air_legs", false)))
+	if moves.is_empty():
+		return
+	var pair: Array = []
+	for i in 2:
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		m.set_meta("anim_seed", 1)       # (the same idle stream for both)
+		holder.add_child(m)
+		pair.append([m, HunterAnim.new(m), m.get_node("Warden/Sync") as WardenGlb.Sync])
+	var sk := WardenGlb.skeleton(pair[1][0].get_node("Warden"))
+	var sk_fall := WardenGlb.skeleton(pair[0][0].get_node("Warden"))
+	var fall := {"vel": Vector3(0, -2.0, 0), "face": 0.0, "grounded": false}
+	var worst := 0.0
+	var worst_mv := ""
+	for k in moves:
+		for p in pair:
+			_play(p[0], p[1], p[2], fall, AIR_FRAMES)
+		var cast := fall.duplicate()
+		cast["kmove"] = k
+		for f in AIR_FRAMES:
+			cast["kmove_t"] = f * DT
+			_play(pair[0][0], pair[0][1], pair[0][2], fall, 1)
+			_play(pair[1][0], pair[1][1], pair[1][2], cast, 1)
+			for b in WardenGlb.LEG_BONES:
+				var off := sk.get_bone_pose_rotation(WardenSkeleton.find(sk, b)).angle_to(
+						sk_fall.get_bone_pose_rotation(WardenSkeleton.find(sk_fall, b)))
+				if off > worst:
+					worst = off
+					worst_mv = "%s %s f%d" % [k, b, f]
+	ok(worst <= LEGS_TOL, "%s: %d air casts keep the fall's legs (worst %.3f rad, %s)" % [id, moves.size(), worst,
+			worst_mv])
+	var snaps: Array = []
+	var clips: WardenClips = pair[1][2].clips
+	for k in moves:
+		var cast := {"vel": Vector3(0, -2.0, 0), "face": 0.0, "grounded": false, "kmove": k}
+		for f in AIR_FRAMES:
+			cast["kmove_t"] = f * DT
+			cast["grounded"] = f >= AIR_FRAMES / 2
+			_play(pair[1][0], pair[1][1], pair[1][2], cast, 1)
+			if cast["grounded"] and clips.act_w > 0.01 and not k in snaps:
+				snaps.append(k)
+		_play(pair[1][0], pair[1][1], pair[1][2], {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 20)
+	ok(snaps.is_empty(), "%s: landing mid-cast keeps the legs off the planted stance (%s)" % [id, str(snaps)])
+	for p in pair:
+		p[0].free()
 
 func _play(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:
