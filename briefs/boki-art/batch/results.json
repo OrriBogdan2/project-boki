@@ -44621,5 +44621,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_chandelapi_p86_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_lanceron_r86",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lanceron_r86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_canvastross_r86",
+    "name": "Canvastross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_canvastross_r86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimefang_r86",
+    "name": "Rimefang",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimefang_r86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mortarfly_p86",
+    "name": "Mortarfly",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_mortarfly_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthollow_p86",
+    "name": "Crofthollow",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_canvastross_r86",
+    "name": "Canvastross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_canvastross_r86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanceron_r86",
+    "name": "Lanceron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lanceron_r86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_p86",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_p86_1.jpg",
+    "ok": true
   }
 ]
