@@ -25021,5 +25021,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/kestrike_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "voltmink_card2",
+    "name": "Voltmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltmink_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_card2",
+    "name": "Voltmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltmink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wyrmink_card2",
+    "name": "Wyrmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wyrmink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_card2",
+    "name": "Lanterloris (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_card2",
+    "name": "Lockatara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lockatara_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wyrmink_card2",
+    "name": "Wyrmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wyrmink_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_card2",
+    "name": "Lanterloris (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanterloris_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_card2",
+    "name": "Lockatara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockatara_card2_2.jpg",
+    "ok": true
   }
 ]
