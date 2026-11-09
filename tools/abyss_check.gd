@@ -113,7 +113,10 @@ func _run(sec: float, drive: Callable) -> Dictionary:
 			break
 	return r
 
-func run(main: Node) -> void:
+## Opens a quiet match for the rim tests (this check, --glider-heat-check, --abyss-fall-check, --abyss-fall-clip):
+## one local hunter with the plain class dash (archetype dashes: --archetype-check), no monsters, no kin, and god
+## mode, so a fall puts you back at the marker instead of ending the run.
+func _open(main: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
@@ -122,7 +125,7 @@ func run(main: Node) -> void:
 	m.mobs.clear()
 	w = m.world
 	h = m.hunters[0]
-	h.set_arch("")      # edge physics with the plain class dash (archetype dashes: --archetype-check)
+	h.set_arch("")
 	for o in m.hunters:
 		o.ctrl = "idle"
 		if o != h: o.teleport(w.random_ground())
@@ -130,9 +133,22 @@ func run(main: Node) -> void:
 	for kk in [h.kin, h.kin2]:
 		if kk: m.kins.erase(kk); kk.queue_free()
 	h.kin = null; h.kin2 = null
-	m.opts["god"] = true             # a fall puts you back at the marker instead of ending the run
+	m.opts["god"] = true
 	marker = w.random_ground()
 	h.ai["land"] = marker
+
+## Draws one frame of `span` seconds without stepping the match: the camera and the models catch up to where
+## things are now (the match camera is only driven from Match._process).
+func _frame(span: float) -> void:
+	if m.cam and m.player and DisplayServer.get_name() != "headless":
+		Input.warp_mouse(m.cam.unproject_position(m.player.pos))     # the camera leans toward the pointer
+	m.hitstop = 0.0
+	m.slowmo = 0.0
+	m.acc = Match.DT * 0.999 - DashPace.frame_dt(m, span)
+	m._process(span)
+
+func run(main: Node) -> void:
+	_open(main)
 	var edges := _edges(10)
 	var lv0 := edges.filter(func(e): return float(e["top"]) < 0.05).size()
 	print("ACHECK %d test rims (%d at ground level), lowest top %.1f" % [edges.size(), lv0, w.lowest_top() if w.has_method("lowest_top") else 0.0])

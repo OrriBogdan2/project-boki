@@ -50,28 +50,7 @@ func _opens(e: Dictionary, fuel: float, cd: float, btn: bool) -> bool:
 	return r
 
 func run(main: Node) -> void:
-	m = Match.new()
-	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
-	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
-	m.mobs.clear()
-	w = m.world
-	h = m.hunters[0]
-	h.set_arch("")
-	for o in m.hunters:
-		o.ctrl = "idle"
-		if o != h: o.teleport(w.random_ground())
-	h.ctrl = "local"
-	for kk in [h.kin, h.kin2]:
-		if kk:
-			m.kins.erase(kk)
-			kk.queue_free()
-	h.kin = null
-	h.kin2 = null
-	m.opts["god"] = true
-	marker = w.random_ground()
-	h.ai["land"] = marker
+	_open(main)
 	var edges := _edges(6)
 	ok(edges.size() > 0, "found test rims (%d)" % edges.size())
 	var e: Dictionary = edges[0]
