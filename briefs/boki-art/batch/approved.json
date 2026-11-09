@@ -692,6 +692,61 @@
    "id": "wyrmink_card2",
    "pick": 1,
    "grade": 8.6
+  },
+  {
+   "id": "arcestrel_card2",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "dribbara_card2",
+   "pick": 2,
+   "grade": 8.5
+  },
+  {
+   "id": "ermink_card2",
+   "pick": 1,
+   "grade": 8.57
+  },
+  {
+   "id": "frothisk_card2",
+   "pick": 2,
+   "grade": 8.6
+  },
+  {
+   "id": "geysirbara_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "kerchick_card2",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "lunink_card2",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "oarlet_card2",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "parasolth_card2",
+   "pick": 2,
+   "grade": 8.57
+  },
+  {
+   "id": "rimink_card2",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "rippmink_card2",
+   "pick": 1,
+   "grade": 8.53
   }
  ],
  "rerolled": [

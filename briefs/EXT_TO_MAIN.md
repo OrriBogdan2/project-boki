@@ -4536,3 +4536,16 @@ ART wyrmink 8.6 briefs/boki-art/cards/Wyrmink.jpg kind=card panel=8.6/8.6/8.6
 The ink-pool design formerly shown as Umbrink is now its own species **Slog** (Dark), middle of a new line Blotlet > Slog > Sloggoth (ROSTER_200_NEW.md §38). Files moved: evolutions/Slog.jpg, cards/Slog.jpg. Please rename the Umbrink Bokidex entry's art to Slog and add the Slog line. **Umbrink** (Ermink's Shadow Ink form) is being redone as a real jet-black, smoke-tailed stoat; it has no art until that passes.
 ART slog 8.43 briefs/boki-art/cards/Slog.jpg kind=card
 ART slog 8.5 briefs/boki-art/evolutions/Slog.jpg kind=turnaround
+
+## 02:00 ET 11-09 — art session: round 31 group s20 (hero cards)
+ART arcestrel 8.53 briefs/boki-art/cards/Arcestrel.jpg kind=card panel=8.5/8.5/8.6
+ART dribbara 8.5 briefs/boki-art/cards/Dribbara.jpg kind=card panel=8.6/8.5/8.4
+ART ermink 8.57 briefs/boki-art/cards/Ermink.jpg kind=card panel=8.5/8.6/8.6
+ART frothisk 8.6 briefs/boki-art/cards/Frothisk.jpg kind=card panel=8.6/8.5/8.7
+ART geysirbara 8.4 briefs/boki-art/cards/Geysirbara.jpg kind=card panel=8.3/8.5/8.4
+ART kerchick 8.47 briefs/boki-art/cards/Kerchick.jpg kind=card panel=8.5/8.4/8.5
+ART lunink 8.5 briefs/boki-art/cards/Lunink.jpg kind=card panel=8.6/8.3/8.6
+ART oarlet 8.47 briefs/boki-art/cards/Oarlet.jpg kind=card panel=8.4/8.5/8.5
+ART parasolth 8.57 briefs/boki-art/cards/Parasolth.jpg kind=card panel=8.6/8.5/8.6
+ART rimink 8.33 briefs/boki-art/cards/Rimink.jpg kind=card panel=8.5/8.1/8.4
+ART rippmink 8.53 briefs/boki-art/cards/Rippmink.jpg kind=card panel=8.6/8.4/8.6
