@@ -5,6 +5,8 @@ extends RefCounted
 ##   plates: five rivals in a row in front of you, one per plate state (full; just hit, showing the
 ##           chip; armoured with a shield; low and slowed; downed), your abilities unlocked with one
 ##           cooling down. Everyone else stands still.
+##   wash:   the plates row, you at 18% health, hit at HIT_AT by a rival standing to your left
+##           (the low-health wash, heavier on that edge: HurtWash).
 ##   fight:  every hunter bunched up around you; after 4s they fight, so many plates overlap.
 ##   busy:   the fight setup, and at BUSY_AT a burst of popups at once (an ally knocked, a level-up,
 ##           a hint, toasts and a repeat): shoot it with --shot-time a little after BUSY_AT.
@@ -12,6 +14,7 @@ extends RefCounted
 const UP_AT := 2.45       # s: ... and the level-up, so its pulse is mid-swell at 2.5s
 const HIT_AT := 2.35      # s of match time: close enough to a 2.5s shot that the chip still holds on slow frames
 const BUSY_AT := 2.0      # s of match time: the busy burst
+const WASH_HP := 0.18     # share of max health you're left on in the wash scene
 
 ## The match options for `--hudref-demo=<mode>` (Main reads the command line).
 static func opts(arg: String) -> Dictionary:
@@ -22,6 +25,7 @@ static func tick(m) -> void:
 	if mode == "" or m.player == null or m.time < 0.05:
 		return
 	var P: Hunter = m.player
+	var row := mode == "plates" or mode == "wash"     # (the wash scene is the plates row, low on health)
 	if not m.has_meta("hudref_set"):
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
@@ -32,14 +36,14 @@ static func tick(m) -> void:
 		P.lvl = 7
 		P.skill_pts = 0
 		for s in P.slot_lv: P.slot_lv[s] = 1
-		if mode == "plates": _plates(m, P)
+		if row: _plates(m, P, mode == "wash")
 		else: _fight(m, P)
 	# (the pointer rests at the bottom edge so you face the row, below everyone; the camera doesn't lead)
 	var vp: Viewport = m.get_viewport()
 	if vp: vp.warp_mouse(Vector2(vp.get_visible_rect().size.x * 0.5, vp.get_visible_rect().size.y - 6.0))
 	for h in m.hunters:
 		if h == P: continue
-		if mode == "plates" or m.time < 4.0:
+		if row or m.time < 4.0:
 			h.ctrl = "idle"
 			for k in h.inp: if h.inp[k] is bool: h.inp[k] = false
 			h.inp["move"] = Vector2.ZERO
@@ -54,16 +58,18 @@ static func tick(m) -> void:
 			kn.stow()                                      # everyone's Boki rides their shoulder, out of the fight
 	m.bubbles.clear()      # no Boki chatter or callouts over the plates
 	m.pings.clear()
-	if mode != "plates":
+	if not row:
 		P.hp = maxf(P.hp, P.max_hp * 0.4)    # (you stay up for the picture)
 	if mode == "busy" and m.time >= BUSY_AT and not m.has_meta("hudref_busy"):
 		m.set_meta("hudref_busy", true)
 		_busy(m, P)
-	if mode == "plates":
+	if row:
 		var hit: Hunter = m.get_meta("hudref_hit", null)
 		if hit and m.time >= HIT_AT and not m.has_meta("hudref_hit_done"):
 			m.set_meta("hudref_hit_done", true)
 			hit.hurt(46.0, P)
+			var left: Hunter = m.get_meta("hudref_wash", null)
+			if left: P.hurt(1.0, left)
 		var up: Hunter = m.get_meta("hudref_up", null)
 		if up and m.time >= UP_AT and not m.has_meta("hudref_up_done"):
 			m.set_meta("hudref_up_done", true)
@@ -84,7 +90,7 @@ static func _stand(m, h: Hunter, at: Vector3) -> void:
 	h.armor = h.max_armor * 0.6
 	h.shield = 0.0
 
-static func _plates(m, P: Hunter) -> void:
+static func _plates(m, P: Hunter, wash: bool) -> void:
 	var foes: Array = m.hunters.filter(func(x): return x != P)
 	var base: Vector3 = P.pos
 	for i in foes.size():
@@ -92,7 +98,7 @@ static func _plates(m, P: Hunter) -> void:
 		var row := Vector3((float(i) - 2.0) * 2.4, 0, 4.4) if i < 5 else Vector3((float(i) - 6.0) * 3.0, 0, -7.5)
 		_stand(m, h, base + row)
 		h.lvl = 3 + i
-	P.hp = P.max_hp * 0.62
+	P.hp = P.max_hp * (WASH_HP if wash else 0.62)
 	P.armor = P.max_armor * 0.5
 	if P.ak and P.ak.cd.has("e"): P.ak.cd["e"] = 6.4
 	if foes.size() < 5:
@@ -107,6 +113,10 @@ static func _plates(m, P: Hunter) -> void:
 	(foes[3] as Hunter).armor = 0.0
 	m.set_meta("hudref_stun", foes[3])
 	m.knock(foes[4], P, {})                                              # downed
+	var back: Array = foes.slice(5).filter(func(x): return x.team != P.team)
+	if wash and not back.is_empty():
+		_stand(m, back[0], base + Vector3(-6.0, 0, 0))                   # the rival who hits you, on your left
+		m.set_meta("hudref_wash", back[0])
 
 static func _fight(m, P: Hunter) -> void:
 	var base: Vector3 = P.pos
