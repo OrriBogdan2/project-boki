@@ -491,7 +491,7 @@ func e_recast() -> bool:
 	if hearth.is_empty() or hearth.get("tossed", false):
 		return true
 	var ed := e_def()
-	var to := AimMode.point(h, float(ed["reach"]), AimMode.CURSOR, 0.0)
+	var to := AimMode.place(h, float(ed["reach"]))
 	# carrying someone: a toss aimed at yourself lands on them
 	var cs := carrying()
 	if not cs.is_empty() and Vector2(to.x - h.pos.x, to.z - h.pos.z).length() < 2.0:
