@@ -5467,3 +5467,4 @@ READY ext/glider-heat-parity e8de9552e (glider heat parity)
 - perf-occluders numbers (--perf-bench --quality=medium, same worker rp1-0 RTX 4090 Forward+, 30 s match): main vs branch: draws 903 -> 883, visible tris 399k -> 374k, objects 2094 -> 2019, render cpu 4.35 -> 5.13 ms, wall avg 49.3 ms both (bench frame time is script-bound, so no wall change). Modest win: the map is mostly flat islands. Low stays off (medium gain is small, low machines are CPU-bound); farm/home unchanged. Occluders are ~3.0k boxes / 10.6k tris on the 216-tile map. Only Forward+ renders them (compat ignores them).
 READY ext/perf-occluders 352163646 (baked occluders)
 READY ext/secondary-motion-settle 362c30a08 (secondary motion settle)
+READY ext/slam-follow-through 95a835c7e (slam follow-through)
