@@ -2313,12 +2313,13 @@ func _physics(dt: float) -> void:
 		var fw := mv.normalized() * spd * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
-		# caught on a corner: slip sideways around it rather than sticking
+	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and (hv.length() > 1.0 or mv.length() > 0.3):
+		# caught on a corner: slip sideways around it rather than sticking (the keys' own pull counts
+		# when the corner has already eaten the speed: running at a wall corner used to crawl past it)
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
-		var want := hv.length() * dt
+		var want := maxf(hv.length(), spd * mv.length()) * dt
 		if moved < want * 0.35:
-			var dn := hv.normalized()
+			var dn := (hv if hv.length() > 1.0 else mv).normalized()
 			# (try first the side that leads away from what stopped you, never round toward it)
 			var wn := -Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
 			var sides := [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]
@@ -2329,6 +2330,9 @@ func _physics(dt: float) -> void:
 				if _occ(tx, tz, guard) == 0.0:
 					pos.x = tx; pos.z = tz
 					break
+	if (b1 > 0.0 or b2 > 0.0) and step_up == 0.0 and spirit_t <= 0.0 and _occ(pos.x, pos.z, false) > 0.0:
+		var out_to: Vector2 = m.world.eject(pos.x, pos.z, r, pos.y)     # inside a wall or prop: out to the nearest free spot
+		pos.x = out_to.x; pos.z = out_to.y
 	# a safety net: pushing to move for a second without going anywhere means something has us
 	# wedged, so step out to the nearest open ground
 	if grounded and mv.length() > 0.3 and stun_t <= 0.0 and root_t <= 0.0 and not remote and grap.is_empty():

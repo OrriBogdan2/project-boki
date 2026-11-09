@@ -229,6 +229,18 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 			break
 	return p
 
+## The nearest spot to (x, z) where a body of radius r with feet at y is free of walls and props: a body
+## that dropped past a terrace edge or glided down into a prop is inside one, and every step it tries is
+## blocked. Rings of 0.1 m out to 1.5 m; the spot itself when nothing near is free.
+func eject(x: float, z: float, r: float, y: float) -> Vector2:
+	for ring in range(1, 16):
+		for k in 16:
+			var a := TAU * k / 16.0
+			var q := Vector2(x + cos(a) * ring * 0.1, z + sin(a) * ring * 0.1)
+			if occupy(q.x, q.y, r, y, false) == 0.0:
+				return q
+	return Vector2(x, z)
+
 ## Line of sight at height y between two points (rocks and higher ground block it).
 func los(a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
