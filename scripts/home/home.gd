@@ -1736,7 +1736,7 @@ func _rack_buy(id: String) -> void:
 	Save.d["gems"] = int(Save.d["gems"]) - cost
 	if not Save.d.has("gliders"): Save.d["gliders"] = []
 	Save.d["gliders"].append(id)
-	Sfx.play("unlock")
+	Sfx.play(FarmCue.BUY)
 	_toast("%s unlocked!" % Gliders.get_skin(id)["name"])
 	_rack_equip(id)
 
@@ -2751,7 +2751,7 @@ func _challenge_card(c: Array, ready: bool) -> Control:
 		var cb := UI.primary("Claim +%d" % int(c[5]), func():
 			var g := Progress.claim(c[0])
 			if g > 0:
-				Sfx.play("unlock")
+				Sfx.play(FarmCue.GOAL)
 				_toast("%s done!  +%d gems" % [c[1], g])
 				_refresh_top()
 			_open_challenges(), 0)
@@ -3570,7 +3570,7 @@ func _play_evolutions() -> void:
 		k["t"] = 3.0
 		fx.burst(at + Vector3(0, 0.5, 0), tint, 36, 5.0, 0.8, 4.0, 1.3)
 		fx.ring(at, 3.0, Color(tint, 0.9), 0.5)
-		Sfx.play("unlock")
+		Sfx.play(FarmCue.LEVEL)
 		Sfx.play("kin_happy")
 		_emote(k, "★")
 		building_now = false
@@ -3684,7 +3684,7 @@ func _construct(b: String) -> void:
 			Sfx.play("build", null, -3.0, 0.15)
 			fx.dust(l["at"] + Vector3(randf_range(-1.4, 1.4), 0, randf_range(-1.0, 1.0)), 10))
 	get_tree().create_timer(1.55).timeout.connect(func():
-		Sfx.play("unlock")
+		Sfx.play(FarmCue.APPEAR)
 		fx.burst(l["at"] + Vector3(0, 2.6, 0), UI.GOLD, 26, 6.0, 0.8, 8.0, 1.2)
 		fx.ring(l["at"], 4.0, Color(UI.GOLD, 0.9), 0.5)
 		l["built"] = true
@@ -3723,7 +3723,7 @@ func _build_bridge_now(k: String) -> void:
 	cam.zoom_to = 1.15
 	get_tree().create_timer(n * 0.06 + 0.4).timeout.connect(func():
 		world.open_bridge(br["tiles"])
-		Sfx.play("unlock")
+		Sfx.play(FarmCue.APPEAR)
 		var far: Vector3 = _plank_spots(k)[n - 1]
 		fx.burst(far + Vector3(0, 1.0, 0), UI.GOLD, 24, 5.0, 0.8)
 		var lbl: Label3D = br["label"]
@@ -4801,7 +4801,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
-	Sfx.play("unlock")
+	Sfx.play(FarmCue.APPEAR)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.

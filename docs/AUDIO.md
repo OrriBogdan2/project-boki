@@ -30,6 +30,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
+- Farm reactions: `farm_appear` (a new thing shows up), `farm_buy` (a purchase, sale or trade), `farm_level` (a level or stage up), `farm_goal` (a goal done), made in `tools/gen_sfx_ui.py` and played through the `FarmCue` constants (`scripts/home/farm_cue.gd`). The farm never plays the bare `unlock`; `--farm-sound-check` guards it.
 
 ## Sound sets (`content/sfx/<group>.json`)
 ```json

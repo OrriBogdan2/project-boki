@@ -1871,7 +1871,7 @@ func set_theme(t: String) -> void:
 	apply(true)
 	Save.save_game()
 	h._refresh_top()
-	Sfx.play("unlock", null, -6.0)
+	Sfx.play(FarmCue.APPEAR, null, -6.0)
 	_build_bar()
 
 func open_expand() -> void:
@@ -1907,7 +1907,7 @@ func expand() -> bool:
 	Save.save_game()
 	undo.clear()
 	pending_toast = "The island grew: +%d tiles" % gain
-	Sfx.play("unlock")
+	Sfx.play(FarmCue.LEVEL)
 	if h.is_inside_tree() and not "--home-build-check" in OS.get_cmdline_user_args():
 		Game.goto("home", {})
 	return true

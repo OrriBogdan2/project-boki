@@ -104,5 +104,5 @@ static func preview_slot(hunter_id: String) -> String:
 func pick(id: String) -> void:
 	if not ClassUnlock.choose_second(id):
 		return
-	Sfx.play("unlock", null, -6.0)
+	Sfx.play(FarmCue.APPEAR, null, -6.0)
 	chat.taken(id)

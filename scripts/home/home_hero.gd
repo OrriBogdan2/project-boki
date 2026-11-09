@@ -28,7 +28,7 @@ static func pick(home: Node, ak: String) -> void:
 	if home.fx:
 		home.fx.burst(home.ppos + Vector3(0, home.py + 1.0, 0), col, 28, 4.0, 0.6)
 		home.fx.burst(home.ppos + Vector3(0, home.py + 0.3, 0), Color.WHITE, 12, 2.5, 0.4)
-	Sfx.play("unlock", null, -6.0, 0.0, 1.15)
+	Sfx.play(FarmCue.APPEAR, null, -6.0, 0.0, 1.15)
 	Sfx.play("whoosh", null, -10.0, 0.0, 1.3)
 	var pl: Node3D = home.player
 	var tw: Tween = pl.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)      # (bound to the body: it stops if the body is swapped again)

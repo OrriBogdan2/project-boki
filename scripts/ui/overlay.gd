@@ -908,7 +908,7 @@ func open_spawn_kin() -> void:
 			KinBox.route_new(rec)
 			Care.dex_got(rec)
 			Save.save_game()
-			Sfx.play("unlock")
+			Sfx.play(FarmCue.APPEAR)
 			var s = Game.main.screen_node() if Game.main else null
 			if s and s.has_method("_spawn_kin"):
 				s._spawn_kin()

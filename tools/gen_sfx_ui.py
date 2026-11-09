@@ -134,6 +134,35 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+# ---------------------------------------------------------------- farm reactions (scripts/home/farm_cue.gd)
+# The four short cues that replace the bare unlock chime on the farm; each is a fraction of its length.
+def farm_appear(i):
+    """A new thing appears: a soft swell and a rising pair with a small shimmer."""
+    return finish(room(mix(swell(True, 0.22, 600, 2600) * 0.3, at(pluck(NOTE['E5'], 0.3, 0.08), 0.06),
+                           at(pluck(NOTE['A5'], 0.4, 0.11), 0.16),
+                           at(S.chime(NOTE['E6'], 0.4, 0.15, ((1.0, 0.6), (2.76, 0.2))) * 0.2, 0.18)), 0.6), 4800)
+
+
+def farm_buy(i):
+    """A purchase or trade: a wood tick, then two quick bright tines (a coin and its change)."""
+    return finish(room(mix(pluck(NOTE['A5'] * 1.5, 0.06, 0.012, 0.3) * 0.6, at(pluck(NOTE['D6'], 0.22, 0.05), 0.03),
+                           at(pluck(NOTE['A5'], 0.3, 0.09), 0.1)), 0.4), 5000)
+
+
+def farm_level(i):
+    """A level or stage up: a short rising run of four, the last one held."""
+    run = [at(pluck(NOTE[n], 0.25 if k < 3 else 0.55, 0.06 if k < 3 else 0.2), 0.065 * k)
+           for k, n in enumerate(['G4', 'C5', 'E5', 'G5'])]
+    return finish(room(mix(*run, at(pluck(NOTE['C6'], 0.5, 0.18) * 0.6, 0.26)), 0.7), 5200)
+
+
+def farm_goal(i):
+    """A goal done: a gentle resolved cadence, G then the C-E-G chord, with a bell on top."""
+    chord = mix(pluck(NOTE['C5'], 0.7, 0.2), pluck(NOTE['E5'], 0.7, 0.2) * 0.8, pluck(NOTE['G5'], 0.7, 0.2) * 0.7)
+    return finish(room(mix(pluck(NOTE['G4'], 0.2, 0.05), at(chord, 0.11),
+                           at(S.chime(NOTE['C6'], 0.7, 0.3, ((1.0, 0.6), (2.76, 0.2))) * 0.25, 0.13)), 0.8), 5200)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -149,6 +178,8 @@ def main():
     S.save_cat('unlock', unlock(0), 'ui')
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
+    for name, fn in (('farm_appear', farm_appear), ('farm_buy', farm_buy), ('farm_level', farm_level), ('farm_goal', farm_goal)):
+        S.save_cat(name, fn(0), 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
 
 

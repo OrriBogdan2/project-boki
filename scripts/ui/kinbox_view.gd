@@ -209,7 +209,7 @@ func _build_farm(fk: Array) -> void:
 			var why := KinBox.expand()
 			if why != "": _fail(why)
 			else:
-				Sfx.play("unlock")
+				Sfx.play(FarmCue.BUY)
 				_done("The Boki Cottages grew: room for %d Boki on the farm" % KinBox.farm_cap())
 				if home and home.has_method("_refresh_top"): home._refresh_top(), FARM_COLS * CELL.x + 6)
 		eb.tooltip_text = "A Boki Cottage expansion: +2 Boki out on the farm"

@@ -101,7 +101,7 @@ func _complete() -> void:
 		return
 	finished = true
 	Save.save_game()
-	Sfx.play("unlock", null, -3.0, 0.0, 1.0)
+	Sfx.play(FarmCue.GOAL, null, -3.0, 0.0, 1.0)
 	if viewer: viewer.burst()
 	btn.disabled = true
 	btn.text = "%s unlocked" % Arch.name_of(id)

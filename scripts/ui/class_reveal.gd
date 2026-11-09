@@ -122,7 +122,7 @@ func _ready() -> void:
 	v.add_child(btns)
 	root.set_meta("class_id", id)
 	# the moment: the burst, a chime, the Hunter pops into the ring, text eases in
-	Sfx.play("unlock", null, -4.0, 0.0, 1.0)
+	Sfx.play(FarmCue.APPEAR, null, -4.0, 0.0, 1.0)
 	Sfx.play("whoosh", null, -9.0, 0.0, 0.8)
 	var tw := create_tween().set_parallel(true)
 	tw.tween_property(tex, "modulate:a", 1.0, 0.25)

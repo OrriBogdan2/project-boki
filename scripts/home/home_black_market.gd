@@ -132,7 +132,7 @@ func _rare_card(e: Dictionary) -> Control:
 	var eid := String(e["id"])
 	var buy := UI.button(str(int(e["price"])), func():
 		var r := BlackMarket.buy(eid)
-		Sfx.play("unlock" if r["ok"] else "ui_deny")
+		Sfx.play(FarmCue.BUY if r["ok"] else "ui_deny")
 		h._toast(("%s is yours" % BlackMarket.name_of(key)) if r["ok"] else String(r["why"]))
 		h._refresh_top()
 		open(), 76, "gem")
@@ -212,7 +212,7 @@ func _offer_row(L: Dictionary) -> HBoxContainer:
 		var res := Ransom.offer(L, int(bids.get(uid, int(sl.value))), String(messages.get(uid, "")))
 		said[uid] = String(res["line"])
 		if res["result"] == "accept":
-			Sfx.play("unlock")
+			Sfx.play(FarmCue.BUY)
 			h._toast("%s is coming home!" % rec["name"])
 			said.erase(uid)
 			messages.erase(uid)
@@ -227,7 +227,7 @@ func _offer_row(L: Dictionary) -> HBoxContainer:
 	row.add_child(ob)
 	var pay := UI.primary("Pay %d" % int(L["ask"]), func():
 		if Ransom.pay(L):
-			Sfx.play("unlock")
+			Sfx.play(FarmCue.BUY)
 			h._toast("%s is coming home!" % rec["name"])
 			said.erase(uid)
 			h._refresh_top()

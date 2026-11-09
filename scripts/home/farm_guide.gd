@@ -90,7 +90,7 @@ func _poll() -> void:
 	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
 		h._toast(String(FarmTutorial.rules()["done_toast"]).replace("{gems}", gems))
-		Sfx.play("unlock", null, -6.0)
+		Sfx.play(FarmCue.GOAL, null, -6.0)
 		h._refresh_top()
 	if GoalTracker.signature() != sig:
 		refresh()

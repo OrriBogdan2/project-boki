@@ -646,7 +646,7 @@ func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 		var b := UI.primary("Keep its soul in the shrine", func():
 			var w := Econ.keep_soul(g)
 			if w != "": h._toast(w); return
-			Sfx.play("unlock", null, -4.0)
+			Sfx.play(FarmCue.APPEAR, null, -4.0)
 			build_graves()
 			Save.save_game()
 			open_grave(g), 260)
@@ -679,7 +679,7 @@ func _revive(g: Dictionary) -> void:
 	var at: Vector3 = h.lots["shrine"]["at"] if h.lots.has("shrine") else h.ppos
 	h.fx.burst(at + Vector3(0, 1.4, 0), Color("bff8ec"), 40, 4.0, 1.2, -1.0)
 	h.fx.ring(at, 3.0, Color("9ff0e0"), 0.6)
-	Sfx.play("unlock")
+	Sfx.play(FarmCue.APPEAR)
 	var ke: Dictionary = h._kin_entry(rec)
 	if not ke.is_empty():
 		ke["pos"] = at + Vector3(0, 0, 2.0); (ke["node"] as Node3D).position = ke["pos"]; ke["hold_t"] = 3.0
@@ -716,7 +716,7 @@ func open_shrine() -> void:
 			var why := "" if Econ.souls_kept() < Econ.SHRINE_SLOTS else "The shrine is full"
 			var b := UI.button("Keep its soul", func():
 				if Econ.keep_soul(gg) == "":
-					Sfx.play("unlock", null, -4.0); build_graves(); Save.save_game()
+					Sfx.play(FarmCue.APPEAR, null, -4.0); build_graves(); Save.save_game()
 				open_shrine(), 150)
 			b.disabled = why != ""
 			b.tooltip_text = why
@@ -836,7 +836,7 @@ func _upgrade_btn(which: String, what: String, now: int, caps: Array) -> Control
 	var b := UI.ghost("%s %d → %d  ·  %dg %ds" % [what, now, int(caps[lvl + 1]), int(c[0]), int(c[1])], func():
 		var why := Econ.upgrade(which)
 		if why != "": h._toast(why); return
-		Sfx.play("unlock")
+		Sfx.play(FarmCue.BUY)
 		Save.save_game()
 		h._refresh_top()
 		open_armory(), 0, "plus")
@@ -989,7 +989,7 @@ func _treasure(v: VBoxContainer) -> void:
 			for id in (Save.d["valuables"] as Dictionary).keys():
 				if id == "soul_ember": continue
 				while int(Save.d["valuables"].get(id, 0)) > 0: g += Econ.sell_valuable(id)
-			Sfx.play("unlock"); h._toast("+%d gems" % g); Save.save_game(); h._refresh_top(); open_armory(), 380))
+			Sfx.play(FarmCue.BUY); h._toast("+%d gems" % g); Save.save_game(); h._refresh_top(); open_armory(), 380))
 
 # ------------------------------------------------------------------ the expedition panel
 ## "From your armory" rows for the expedition panel: the five gear slots, ‹ › to cycle what's stored.

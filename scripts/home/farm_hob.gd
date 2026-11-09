@@ -87,7 +87,7 @@ func tick(dt: float) -> void:
 		poll_t = 1.0
 		if FarmBuilder.toast_due():
 			h._toast(String(rules()["toast"]))
-			Sfx.play("unlock", node.position, -8.0)
+			Sfx.play(FarmCue.APPEAR, node.position, -8.0)
 
 ## Walks to where he stands; there he hammers at a site, else waits facing you (or out over the farm).
 func _walk(dt: float) -> void:
