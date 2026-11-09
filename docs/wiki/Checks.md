@@ -51,7 +51,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
-| `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
+| `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges; the first-downed hint card shows once per save, never in the tutorial |
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |

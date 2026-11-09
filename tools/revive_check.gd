@@ -84,6 +84,40 @@ func _case(name: String, at: Vector3, from: Vector3, foe_at: Vector3, limit: flo
 	ok(not p.downed, "%s: revived in %.1fs (reached at %.1fs, %d hops, start %.1fm, rival %.1fm)%s" % [name, t, reached, hops, Vector2(from.x - at.x, from.z - at.z).length(), Vector2(foe_at.x - at.x, foe_at.z - at.z).length(), "" if not p.downed else " bot at %s, player at %s" % [bot.pos.snapped(Vector3(0.1, 0.1, 0.1)), p.pos.snapped(Vector3(0.1, 0.1, 0.1))]])
 	bot.ctrl = "idle"; bot.inp["move"] = Vector2.ZERO; bot.inp["fire"] = false
 
+## The first time the local player is downed in a real match, one hint card (content/rules/tutorial.json
+## "tips"), even with no Boki out; the same save is never told again; the tutorial never shows it.
+func _first_downed_tip() -> void:
+	var tip: String = Content.rules("tutorial")["tips"]["down"]
+	Save.d["tutorial"].erase("down_wisp")
+	for case_name in ["real match", "second time on the same save", "tutorial"]:
+		if case_name == "tutorial":
+			Save.d["tutorial"].erase("down_wisp")
+		if m: m.queue_free()
+		m = Match.new()
+		main.add_child(m)
+		var opts := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
+		opts["tutorial"] = case_name == "tutorial"
+		m.start(opts)
+		m.set_process(false)
+		var p: Hunter = m.player
+		if p.kin:
+			m.kins.erase(p.kin)
+			p.kin.queue_free()
+			p.kin = null
+		m._tip_t = 2.0
+		m._tips()
+		m.hud.msgs.clear()
+		ok(not (m.hud.msgs.texts().has(tip)), "%s: nothing before the fall" % case_name)
+		p.downed = true
+		m._tips()
+		var lane: MsgLane = m.hud.msgs
+		var shown := lane.count() == 1 and lane.texts().has(tip)
+		ok(shown == (case_name == "real match"), "%s: card %s" % [case_name, "shown" if shown else "not shown"])
+		m.hud.msgs.clear()
+		m._tips()
+		ok(m.hud.msgs.count() == 0, "%s: no repeat while still down" % case_name)
+	ok(not tip.contains("%") and tip.length() < 120, "the card is one short plain line")
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -219,5 +253,6 @@ func run(mn: Node) -> void:
 						if blind <= 3: print("REVIVE  blind shot: bot %s foe %s grounded %s" % [bp0.snapped(Vector3(0.01, 0.01, 0.01)), fp0.snapped(Vector3(0.01, 0.01, 0.01)), bot.grounded])
 						break
 		ok(aimed > 0 and blind == 0 and hops <= 3, "%s: no shots without a clear line, no hopping at it (after the rival %d of %d frames, %d firing, %d blind, %d hops)" % [variant, aimed, frames, fired, blind, hops])
+	_first_downed_tip()
 	print("REVIVE CHECK %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))
 	main.get_tree().quit()

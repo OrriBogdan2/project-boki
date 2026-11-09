@@ -6084,6 +6084,8 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	if player.downed:
+		_tip("down_wisp", Content.rules("tutorial")["tips"]["down"])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -6105,8 +6107,6 @@ func _tips() -> void:
 			"dock": _tip("exit_dock", "Call the skiff at the horn, hold out, board before it leaves")
 			"hatch": _tip("exit_hatch", "A Rift Key opens this hatch (%s)  ·  three can drop through" % Settings.key_cap("interact"))
 			"outpost": _tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
-	if player.downed:
-		_tip("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
