@@ -34,6 +34,7 @@ const CHECKS := {
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--kin-type-fx-check": ["res://tools/kin_type_fx_check.gd", "kin_type_fx_check", null],      # 18 type accents
 	"--kin-type-sheet": ["res://tools/kin_type_sheet.gd", "kin_type_sheet", null],      # --shots-dir=<dir>
+	"--fusion-event-sheet": ["res://tools/fusion_event_sheet.gd", "fusion_event_sheet", null],      # --shots-dir=<dir> [--only=a,b]
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
