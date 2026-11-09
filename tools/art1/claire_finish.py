@@ -10,12 +10,13 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import meshkit as M, claire_pieces as K, claire_paint as P
 from meshkit import smooth, Piece
-from paintkit import hexc, mix
+from paintkit import hexc, mix, clean_normal
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
+NRM_CAGE, NRM_RAY = 0.003, 0.008      # m: the normal bake cage's extrusion, its ray's reach (cinder_finish)
 MATS = ["skin-face", "skin-body", "cloth-dress", "fur-trim", "ice-horn", "ice-wing", "ice-bright"]
 SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "ear": 0.8, "tailpuff": 0.6, "braid": 0.8, "flake": 0.5,
          "blade": 0.5, "shaft": 1.1, "head": 0.6, "butt": 0.5, "heart": 0.7, "heartcore": 0.6, "prong": 0.4, "collarA": 0.3, "collarB": 0.3, "Low": 1.0}
@@ -434,6 +435,28 @@ def blur(a_, m, r):
 
 AO = blur(AO, (PID >= 0).astype(np.float32), 3)
 
+# ---- the normal map: the scan's dense surface (under Meshy's normal texture) on the game mesh; the built pieces stay flat
+for mt in src.data.materials:
+    nt = mt.node_tree
+    surface = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL").inputs["Surface"]
+    nt.links.new(next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED").outputs[0], surface)
+nrm_img = bpy.data.images.new("bake_normal", ATLAS, ATLAS)
+nrm_img.colorspace_settings.name = "Non-Color"
+for mt in me.materials:
+    mt.node_tree.nodes.active.image = nrm_img
+src.hide_render = False
+src.select_set(True)
+sc.cycles.samples = 16
+sc.render.bake.use_selected_to_active = True
+sc.render.bake.cage_extrusion, sc.render.bake.max_ray_distance = NRM_CAGE, NRM_RAY
+sc.render.bake.normal_space = "TANGENT"
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=12)
+sc.render.bake.use_selected_to_active = False
+src.hide_render = True
+NRM = np.array(nrm_img.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
+NRM[PID != 0] = (0.5, 0.5, 1.0)
+print("normal baked, wrong hits flattened %.4f" % clean_normal(NRM))
+
 # each scan face's slot, by its paint (her hair shades as paint on the face's surface: the hair slot's toon goes slate on a pale colour)
 is_hair = np.zeros(nf, bool)
 arm_face = np.zeros(nf, bool)
@@ -556,9 +579,16 @@ atlas = bpy.data.images.new("claire_atlas", ATLAS, ATLAS)
 px = np.ones((ATLAS, ATLAS, 4), np.float32)
 px[..., :3] = np.clip(OUTC, 0, 1)
 atlas.pixels.foreach_set(px.ravel())
-atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.png")
-atlas.file_format = "PNG"
+atlas.filepath_raw = os.path.join(os.path.dirname(OUT), "atlas.jpg")
+atlas.file_format = "JPEG"
 atlas.save()
+nrm_out = bpy.data.images.new("claire_normal", ATLAS, ATLAS)
+nrm_out.colorspace_settings.name = "Non-Color"
+px[..., :3] = NRM
+nrm_out.pixels.foreach_set(px.ravel())
+nrm_out.filepath_raw = os.path.join(os.path.dirname(OUT), "normal.png")
+nrm_out.file_format = "PNG"      # lossless (JPEG bends a normal by 4 degrees on average); the engine compresses it (RG)
+nrm_out.save()
 print("atlas saved")
 
 for mt in me.materials:
@@ -572,6 +602,11 @@ for mt in me.materials:
     tn = nt.nodes.new("ShaderNodeTexImage")
     tn.image = atlas
     nt.links.new(tn.outputs[0], pb.inputs[0])
+    nn = nt.nodes.new("ShaderNodeTexImage")
+    nn.image = nrm_out
+    nm_ = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(nn.outputs[0], nm_.inputs["Color"])
+    nt.links.new(nm_.outputs[0], pb.inputs["Normal"])
 
 attr = me.color_attributes.new("ink", "FLOAT_COLOR", "POINT")
 ic = np.ones((len(me.vertices), 4), np.float32)
@@ -651,5 +686,5 @@ objs = [arm, ob] + [o for o in bpy.data.objects if o.type == "EMPTY"]
 for o in list(bpy.data.objects):
     if o.name in ("Src", "Low"):
         bpy.data.objects.remove(o)
-WK.export(OUT, objs, image_format="JPEG", colors=True)
+WK.export(OUT, objs, colors=True)
 print("exported", OUT, os.path.getsize(OUT))

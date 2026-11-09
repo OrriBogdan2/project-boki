@@ -9,6 +9,8 @@ Scan: the turnaround's four views cropped, Meshy image-to-image (nano-banana-pro
 - `claire_finish.py`, `claire_paint.py`: one 2048 atlas, 7 surfaces, texel-space paint; the face is the scan's own paint; lids; ears white with a pink front and frosted tips; fur held under pure white so it survives the match camera.
 - `claire_clips.py`: 49 clips at 30 fps on the kit's tm_ timings.
 
-Budget: 13.6k tris including the spear (S1 cap 15k), 7 surfaces, VRAM-compressed atlas, LODs on.
+Budget (before the revamp): 13.6k tris including the spear, 7 surfaces, VRAM-compressed atlas, LODs on.
+**Revamp (owner 11-09):** 23.5k tris (face 3.4k) with `CLAIRE_LOW_TRIS=22000 CLAIRE_FACE_TRIS=5000`, plus a 2048 tangent-space normal map baked from the dense scan in claire_finish.py (the built pieces stay flat); the atlas ships as JPEG, the normal map as PNG. The fresh meshy-7.1 runs (rv_on/rv_off) did not beat runA.
+`*_normal.png.import`: `compress/mode=2`, `compress/normal_map=1` (RG); the normal map shades at warden_look's `normal_k` (1.0). Before/after renders: docs/art/wardens/revamp/claire/.
 Rig: archetype body legs 2.04, torso 0.96, shoulder 0.84, neck -0.04, size 1.1, then `--warden-rig-json --warden=rimewright` (unchanged by v2).
 Anchors kept by name: `anchor_tail_tip` now sits on the puff (its bloom dropped from warden_look.json), `anchor_clasp` on the braid's snowflake, `anchor_head_top` over the ears' base.
