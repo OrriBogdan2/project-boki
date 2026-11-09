@@ -2140,5 +2140,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_vespox_2.png",
     "ok": true
+  },
+  {
+    "id": "portrait_lanternmit",
+    "name": "Lanternmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_1.png",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanternmit",
+    "name": "Lanternmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanternmit_2.png",
+    "ok": true
+  },
+  {
+    "id": "portrait_stormit",
+    "name": "Stormit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stormit_1.png",
+    "ok": true
+  },
+  {
+    "id": "portrait_stormit",
+    "name": "Stormit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stormit_2.png",
+    "ok": true
   }
 ]
