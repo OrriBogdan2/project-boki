@@ -242,7 +242,19 @@ func zedran(a) -> void:
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
+	_cleave_fits(U.data())
 	await A.done(m)
+
+## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
+func _cleave_fits(d: Dictionary) -> void:
+	var sweep: Dictionary = HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"][0]
+	var ln := float(d["len"])
+	var radius := float(sweep["size_x"]) * ln
+	var tip := float(sweep["fwd_x"]) * ln + radius
+	var half := radius * sin(deg_to_rad(float(sweep["arc"])) * 0.5)
+	var w := float(d["width"])
+	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
+			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:
