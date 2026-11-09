@@ -403,6 +403,10 @@ func _tick_rain(dt: float) -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
+	if HeroUlt.ready(self) and los and dist > 4.0 and dist < 14.0:
+		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+		HunterKeys.ult_pressed(h)
+		return
 	# Hail Wall across their path (lead them a little), from mid range
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist < float(e_def()["reach"]) + 1.0 and dist > 3.0 and randf() < 0.35:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.4; h.inp["sig"] = true; return

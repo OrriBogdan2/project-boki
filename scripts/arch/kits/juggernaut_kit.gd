@@ -943,6 +943,8 @@ func start_e_cd() -> void:
 	cd["e"] = float(e_def().get("cooldown", 13.0)) * cd_k("kin")
 
 # ------------------------------------------------------------------ bots
+const PERFECT_LEAD := 0.07     # s past full charge a bot lets the Lunge go (the perfect window is 0.15 s wide)
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
@@ -956,22 +958,21 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["sec"] = true
 		return
 	# chained to them: run a Chain Lunge down it, wind up a Smash and pull into a Haul Slam, or just pull
-	if warchain.hooked() and warchain.target != null and dist > 3.5 and not rmb_down:
+	if warchain.hooked() and warchain.target != null and dist > 2.0 and not rmb_down:
 		var roll := randf()
-		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.25:
+		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.2:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 			bot_hold["rmb"] = 1.0
 			return
-		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.45:
+		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.4:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 			bot_hold["rmb"] = 1.2
 			st["bot_haul_at"] = m.time + 0.45
 			return
-		if roll < 0.8:
-			h.inp["sig"] = true
-			return
+		h.inp["sig"] = true
+		return
 	var worth_chain := dist > 3.0 or (not rmb_ready() and dist > 1.2)
 	var chain_up := int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and warchain.state == "ready"
 	if chain_up and los and worth_chain and dist < float(e_def()["range"]) - 0.5 and randf() < 0.4:
@@ -988,9 +989,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		elif dist < 7.0 and randf() < 0.45:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
-			var hold_t := float(rmb_def()["hold"])
-			var far_k := clampf((dist - 3.0) / 4.0, 0.0, 1.0)
-			bot_hold["rmb"] = hold_t + (float(rmb_def()["full_t"]) - hold_t) * far_k + 0.05
+			bot_hold["rmb"] = rmb_charge_full() + PERFECT_LEAD       # a full charge let go in the perfect window
 	# keep the wound-up slam on them while it winds up
 	if not slam_w.is_empty():
 		h.inp["aim"] = tgt.pos

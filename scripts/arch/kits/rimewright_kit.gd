@@ -780,6 +780,9 @@ func _tick_wall(dt: float) -> void:
 		return
 	var ed := e_def()
 	var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
+	if bool(wall["sliding"]) and st.has("bot_freeze_t") and float(wall["t"]) >= float(st["bot_freeze_t"]):
+		st.erase("bot_freeze_t")
+		e_recast()
 	if bool(wall["sliding"]):
 		wall["t"] = float(wall["t"]) + dt
 		var dir: Vector2 = wall["dir"]
@@ -1064,15 +1067,14 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
-	if int(h.slot_lv["kin"]) > 0 and not wall.is_empty() and bool(wall["sliding"]) and float(wall["t"]) > 1.2:
-		h.inp["sig"] = true          # freeze it where it stands
-	elif (int(h.slot_lv["kin"]) > 0
+	if (int(h.slot_lv["kin"]) > 0
 			and float(cd["e"]) <= 0.0
 			and dist < 9.0
 			and los
 			and (h.hp < h.max_hp * 0.8 or randf() < 0.1)):
 		h.inp["aim"] = tgt.pos
 		h.inp["sig"] = true
+		st["bot_freeze_t"] = randf_range(0.15, 0.45)      # s into the slide the bot freezes the wall where it stands
 	# skate in to the darts' range, or away when hurt
 	if rinkrun.is_empty() and h.dashes >= 1.0 and h.grounded and randf() < 0.25:
 		if h.hp < h.max_hp * 0.4:

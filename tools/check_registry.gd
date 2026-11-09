@@ -47,6 +47,7 @@ const CHECKS := {
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
+	"--bot-kit-use": ["res://tools/bot_kit_use_check.gd", "bot_kit_use_check", null],      # bots use every kit slot (docs/BOT_KIT_USE.md)
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185
