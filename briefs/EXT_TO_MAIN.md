@@ -3840,3 +3840,16 @@ READY ext/sable-bola-instant-rebased 2024f0105 (supersedes ext/sable-bola-instan
 
 ## Nov 8 21:25 ET art session -> coordinator: rejects now carry a decimal grade
 Owner asked for decimal grades on everything (8.1, 8.2, ...). From now on reject lines have an extra 5th field: `ART <id> reject <path> grade=7.8`. Passes are unchanged (`ART <id> <grade> <path>`). Please show the reject grade in the Bokidex if your importer can; if it splits on spaces and takes 4 fields, nothing breaks. Details: briefs/boki-art/GRADES.md (bottom).
+
+## 2026-11-09 feel (job 20261109-020055-a4, w2): READY demo-record-ready-1109 (escalation of 20261108-231224-a1)
+READY ext/demo-record-ready-1109 5e0493be1 (off origin/main d255acbee; supersedes the 70960e039 READY above; no ext/mc candidate on origin to add).
+New on top of 70960e039 (+52 -6, 7 files): the busy expedition opens every Hunter's kit from the drop (opts "unlocked": no padlocks on RMB/Shift/E; bots then skip their starting gear); recording hides foe plates aboard or gliding from the skyship (HudPlate.hidden; the live game keeps them) and the farm's Goals card; DashPace.rehearse no longer errors when a match is left mid-load. --demo-quick-check now 24 checks and logs the expedition's build steps.
+3 paths (Settings > Demo > Quick start, or --demo=expedition|farm|hatch; Recording mode = F10 / --record):
+- Expedition (busy): 20 seats, showcase Hunters, you = Kael, Lace-kit mate leads the drop. GPU (RTX 4090 workers rp1-1/rp2-x, 1920x1080, record on): ready 26.6-29.6 s cold, 13.9 s on a second load; 15.7-20.4 fps. Headless w2: 9.4 s cold, 4.7 s second load.
+- Farm (grown): 2.3 s, 54.7 fps (one ~1 s hitch in the first seconds).
+- Hatch: 0.5 s, 60.1 fps, clean.
+--perf-bench (rp1-1 4090): match 46.8 ms avg (~21 fps), p99 94.4, script 23.1 ms (hunters 4.9, kins 3.6, bots 3.5, mobs 3.1); farm 5.5 ms.
+BIG blockers, not fixed: (1) expedition fps ~16-21 on GPU workers: CPU-bound match sim, not the demo setup (the perf branches claim 1-6%). (2) first expedition load: build.hunters 6.8-7.7 s + build.warm_up 6.7-7.2 s (shader compile, cold cache). Workaround for the shoot: start the busy expedition once, go back to the title, start it again (about half the load), and start capture after the loading screen. Untested alternative for B-roll: Godot --write-movie with --fixed-fps 60 gives smooth 60 fps footage at any sim speed.
+Still ugly on camera: minimap labels overlap (Stormcrown Eyrie/East, Sunken Forge/Ashen) (jobq/done/20261109-022548-19999/out/demo_expedition_b.png); the farm Hunter is a dark hooded default look (demo_farm_b.png). Clean: hatch egg (demo_hatch_b.png).
+5 best moments: 1 Kael, airborne Smash (Meteor Drop: jump + RMB) onto The Crown plaza. 2 Lace, Spirit Walk (Shift) into Starpiercer (ult), off the Highwatch cliffs. 3 Neve, Skate through the air on the ice ribbon across Frostgate gaps, then Rimelock. 4 Cinder, Flue Flight (ult) lava carpet + Furnace Cloak blast on Cinder Steps. 5 Meeko, Hearthlight bloom healing the squad at the Thornhive lair. (Bonus: the egg on the hatch dais.) Admin god mode (Settings) refills the ult between takes.
+Checks: --demo-quick-check 24/0 headless (GPU: 1 fail, the expedition load time), --check 0, health --strict OK. Full suite not run (usage). No PR (no gh on w2). Not merged.
