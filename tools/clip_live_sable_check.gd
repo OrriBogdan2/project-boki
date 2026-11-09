@@ -41,9 +41,9 @@ func _run(m: Match, P: Hunter, n: int, seen: Dictionary) -> void:
 func _wing_bend(h: Hunter) -> float:
 	var sk := WardenGlb.skeleton(h.model.get_node("Warden"))
 	var q: Array = []
-	for i in 4:
+	for i in 3:
 		q.append(sk.get_bone_global_pose(sk.find_bone("spring_wingR_%d" % i)).origin)
-	return ((q[1] - q[0]) as Vector3).angle_to((q[3] - q[2]) as Vector3)
+	return ((q[1] - q[0]) as Vector3).angle_to((q[2] - q[1]) as Vector3)
 
 func _shown(h: Hunter) -> int:
 	var n := 0

@@ -22,6 +22,14 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+## Props that ride a hand (anchor node: its hand bone). Held means the distance must not drift over a clip.
+const HELD := {
+	"rimewright": {"anchor_blade_root": "hand.R", "weapon_muzzle": "hand.R"},
+	"mage": {"anchor_gun_L": "hand.L", "anchor_gun_R": "hand.R"},
+	"thief": {"anchor_blade_root": "hand.R", "anchor_blade_root_l": "hand.L"},
+	"dolm": {"anchor_fist_R": "hand.R", "anchor_fist_L": "hand.L", "anchor_gauntlet_R": "forearm.R"},
+}
+const MAX_PROP_DRIFT := 0.03     # of the Hunter's height: a held prop's distance to its hand over a clip
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -83,6 +91,7 @@ func _hero(main: Node, id: String) -> void:
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
+	row["props"] = await _held(m, sync, clips, sk, id, hgt, String(lc["idle"]))
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
@@ -91,6 +100,31 @@ func _hero(main: Node, id: String) -> void:
 	if not id in NO_LEGS:
 		_gate(id, top)
 	m.free()
+
+## How far each held prop's anchor wanders from its hand bone over the idle and the attacks (body heights).
+func _held(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: String, hgt: float, idle: String) -> Dictionary:
+	var out := {}
+	for an in HELD.get(id, {}):
+		var node := WardenGlb.anchor(m, an)
+		var bone := WardenSkeleton.find(sk, String(HELD[id][an]))
+		var lo := INF
+		var hi := -INF
+		for clip in [idle] + ATTACKS[id]:
+			var length := clips.lib.get_animation(clip).length
+			for i in 12:
+				clips.force = {"clip": clip, "t": minf(length * i / 11.0, length - 0.001)}
+				sync.call("_process", DT)
+				await m.get_tree().process_frame      # (a bone attachment follows its bone a frame later)
+				var d := node.global_position.distance_to(sk.global_transform * sk.get_bone_global_pose(bone).origin)
+				lo = minf(lo, d)
+				hi = maxf(hi, d)
+		clips.force = {}
+		out[an] = {"dist": lo / hgt, "drift": (hi - lo) / hgt}
+		print("PROP %-10s %s on %s: %.2f H, drift %.3f H" % [id, an, HELD[id][an], lo / hgt, (hi - lo) / hgt])
+		if (hi - lo) / hgt > MAX_PROP_DRIFT:
+			print("FAIL %s: %s drifts %.3f H off %s" % [id, an, (hi - lo) / hgt, HELD[id][an]])
+			bad += 1
+	return out
 
 func _gate(id: String, top: Dictionary) -> void:
 	var share: float = top["slide"] / SPEEDS[2]
