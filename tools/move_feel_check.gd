@@ -63,6 +63,8 @@ const T := {
 	"dive_cancel_h":           ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
 	"dive_timeout_s":          ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
 	"dive_swoop_speed":        ["~", [12.0, 15.0], "m/s", "[game data] swoop 2.5x the fall, capped at GLIDE_MAX"],
+	"dive_land_vy":            ["<=", 4.0, "m/s", "[game data] held down: the glide catches 3.5 m up, lands at its sink"],
+	"dive_release_glide_t":    ["~", [0.3, 0.7], "s", "[game data] let go high up: the usual catch, back gliding"],
 	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed":      [">=", 10.5, "m/s", "[wiki] momentum preserved while gliding"],
 	"dashglide_2s_speed":      [">=", 9.0, "m/s", "[wiki] momentum preserved while gliding"],
@@ -479,6 +481,7 @@ func _glide_dive() -> void:
 	var peak := 0.0
 	var cancel_h := -1.0
 	var was_on := false
+	var land_vy := 0.0
 	for i in 300:
 		P.inp["glide"] = true
 		P.inp["crouch"] = i >= 30
@@ -493,9 +496,14 @@ func _glide_dive() -> void:
 		was_on = P.glide_dive.on
 		if P.grounded:
 			break
+		land_vy = -P.vel.y        # the fall speed the landing step starts from
 	rec("dive_vy", peak)
 	rec("dive_vy_t", t90)
 	rec("dive_cancel_h", cancel_h)
+	# held to the ground: the glide catches you at the cancel height and you land under it, at its sink
+	ok(P.grounded and not P.gliding, "dive_held_lands: a dive held to the ground reaches it under the glider")
+	rec("dive_land_vy", land_vy)
+	ok(P.land_t <= 0.0, "dive_land_soft: no hard-land beat after a dive held to the ground")
 	# the keys in the plunge against the keys under the glider, from a standstill
 	var side := []
 	for diving in [true, false]:
@@ -519,6 +527,7 @@ func _glide_dive() -> void:
 	_reset(flat + Vector3(0, 60.0, 0), false)
 	P.inp["jump"] = true
 	var swoop := 0.0
+	var t_glide := -1.0
 	for i in 132:
 		P.inp["glide"] = true
 		P.inp["crouch"] = i < 72
@@ -526,7 +535,11 @@ func _glide_dive() -> void:
 		m.step(DT)
 		if i >= 72:
 			swoop = maxf(swoop, _hv(P).length())
+			if t_glide < 0.0 and -P.vel.y <= HunterMove.glide_pull_vy + 0.2:
+				t_glide = (i - 71) * DT
 	rec("dive_swoop_speed", swoop)
+	rec("dive_release_glide_t", t_glide if t_glide > 0.0 else 9.0)
+	ok(P.gliding and not P.grounded and not P.glide_dive.on, "dive_release_glides: back under the glider, not landed")
 	# holding on: the plunge times out, and stays off until a fresh press
 	_reset(flat + Vector3(0, 360.0, 0), false)
 	P.inp["jump"] = true

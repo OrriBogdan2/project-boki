@@ -30,5 +30,7 @@ and costs no new bind. A dedicated bind stays open as the alternative if the own
   is local-only until `diving` joins the snapshot.
 - Checks: `--move-feel-check` rows `dive_*` assert each source number; docs/MOVEMENT_FEEL.md and
   docs/SUPERVIVE_FEEL.md updated.
-- Debt: the dive cancels 3.5 m up but the canopy can't brake 32.5 m/s in that height, so you land hard
-  (no fall damage exists). Source behaviour near the ground is unknown.
+- Near the ground (2026-11-09): the source cancels the dive at GlideDiveCancelDistance and the glide holds
+  you from there; its catch constant is in the encrypted code. `GlideDive.catch_rate` sizes the canopy's
+  catch to be back at the sink by the ground, so a dive held down lands at the glide's sink with no
+  hard-land beat (`dive_land_vy`, `dive_release_glide_t` rows). Let go high up and the usual catch applies.

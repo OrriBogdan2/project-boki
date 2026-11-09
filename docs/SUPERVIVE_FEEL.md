@@ -22,7 +22,7 @@ The owner read these straight from the installed game (config files, curve table
 | Tall-ledge climb | Myth and Brall only | | **Yes**: Archer and Juggernaut (+0.9 m reach) |
 | Abyss | death 1750 uu below; fall speed capped 1200 easing to 1000 uu/s between 100 and 1650 uu down; mantling out of the abyss allowed | 17.5 m; 12 to 10 m/s between 1 and 16.5 m | **Yes**: `Hunter.ABYSS_EXTRA` (17.5 m), `HunterMove.fall_cap` (12 m/s anywhere, easing to 10 in the abyss): ~1.9 s from the lip to the point of no return |
 | Glide | height hold toward 850 uu; min Z -350 uu/s; start fall -85; swoop converts 2.5x falling speed to forward speed over 1.5 s | 8.5 m; -3.5 m/s | **Yes**: above 8.5 m the glider sinks at 3.5 m/s and the drop past its usual sink becomes speed (2.5x, fading over 1.5 s; `GlideLift.sink`) |
-| Dive | Z target -3250 uu/s, ZForceMax 350,000 / Mass 100, XY force x0.25, cancel 350 uu up, 10 s timeout | -32.5 m/s at 35 m/s², steer 0.25, 3.5 m, 10 s | **Yes**: hold crouch under the glider (`GlideDive`, `HunterMove.dive_*`); the key is ours, the source names none |
+| Dive | Z target -3250 uu/s, ZForceMax 350,000 / Mass 100, XY force x0.25, cancel 350 uu up, 10 s timeout | -32.5 m/s at 35 m/s², steer 0.25, 3.5 m, 10 s; held to the ground the glide catches from 3.5 m and you land at its sink | **Yes**: hold crouch under the glider (`GlideDive`, `HunterMove.dive_*`); the key is ours, the source names none |
 
 Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Keep current tuning for those (TODO).
 

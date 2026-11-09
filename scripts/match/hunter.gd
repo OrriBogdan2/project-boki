@@ -2257,7 +2257,7 @@ func _physics(dt: float) -> void:
 		else:
 			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
 			if vel.y < -sink:
-				vel.y = move_toward(vel.y, -sink, GLIDE_CATCH * dt)    # the canopy catches you over a beat
+				vel.y = move_toward(vel.y, -sink, GlideDive.catch_rate(self, sink) * dt)    # the canopy catches you: over a beat, or by the ground after a dive
 			else:
 				vel.y = maxf(vel.y - GLIDE_GRAV * glide_lift.gravity_scale() * dt, -sink)
 			# [footage] over the abyss a glider holds at island level instead of sinking below it,
