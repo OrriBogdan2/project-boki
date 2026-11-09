@@ -26407,5 +26407,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/mycroll_card3_4.jpg",
     "ok": true
+  },
+  {
+    "id": "vespyx_card3",
+    "name": "Vespyx (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vespyx_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mycroll_card3",
+    "name": "Mycroll (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mycroll_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_card",
+    "name": "Dreadnoyak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mycroll_card3",
+    "name": "Mycroll (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mycroll_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary_card",
+    "name": "Furnacowary (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/furnacowary_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "furnacowary_card",
+    "name": "Furnacowary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/furnacowary_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_card",
+    "name": "Geodemole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card",
+    "name": "Lyrewing (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_card_1.jpg",
+    "ok": true
   }
 ]
