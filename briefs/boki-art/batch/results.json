@@ -1356,5 +1356,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/blossmink_r_1.png",
     "ok": true
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prismink_r_1.png",
+    "ok": true
+  },
+  {
+    "id": "prismink_r",
+    "name": "Prismink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prismink_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "anvilbrock_r",
+    "name": "Anvilbrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anvilbrock_r_1.png",
+    "ok": true
+  },
+  {
+    "id": "anvilbrock_r",
+    "name": "Anvilbrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anvilbrock_r_2.png",
+    "ok": true
+  },
+  {
+    "id": "skidlet",
+    "name": "Skidlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skidlet_1.png",
+    "ok": true
+  },
+  {
+    "id": "lanceron",
+    "name": "Lanceron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanceron_1.png",
+    "ok": true
+  },
+  {
+    "id": "skidlet",
+    "name": "Skidlet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skidlet_2.png",
+    "ok": true
+  },
+  {
+    "id": "lanceron",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_2.png",
+    "ok": true
   }
 ]
