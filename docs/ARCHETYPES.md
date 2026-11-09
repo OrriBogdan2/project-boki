@@ -743,7 +743,7 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 |---|---|
 | Rail Charge, Earthshatter, Tripwire Mine, Breach, Bulwark, Shadow Step | archetype RMB variants (above) |
 | Razor Disc, Leash Bolt, Riposte | retired as RMBs (the data stays and can return as gloves) |
-| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Swap) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
+| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Mark) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
 | `kin` slot | archetype E |
 
 ## 8. Open questions

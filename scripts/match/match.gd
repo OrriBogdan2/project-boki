@@ -4040,7 +4040,8 @@ func _separate() -> void:
 			var l := d.length()
 			if l < mind and l > 0.0001:
 				var push := d / l * (mind - l) * 0.5
-				var wa := 1.0 / a.mass(); var wb := 1.0 / b.mass()
+				var own := b is Kin and (b as Kin).owner_h == a      # your own Boki steps aside, never shoves you
+				var wa := 0.0 if own else 1.0 / a.mass(); var wb := 1.0 / b.mass()
 				var tot := wa + wb
 				var pa := -push * (wa / tot) * 2.0
 				var pb := push * (wb / tot) * 2.0
