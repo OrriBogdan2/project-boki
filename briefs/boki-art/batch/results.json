@@ -28556,5 +28556,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_snuffapi_stance_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_snuffapi_stance",
+    "name": "Snuffapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_snuffapi_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_soakybara_stance",
+    "name": "Soakybara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_soakybara_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sporcupine_stance",
+    "name": "Sporcupine",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_sporcupine_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sporcupine_stance",
+    "name": "Sporcupine",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sporcupine_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pebblamb",
+    "name": "Pebblamb (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pebblamb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pebblamb",
+    "name": "Pebblamb (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pebblamb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pebblamb",
+    "name": "Pebblamb (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pebblamb_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pebblamb",
+    "name": "Pebblamb (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pebblamb_2.jpg",
+    "ok": true
   }
 ]
