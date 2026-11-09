@@ -456,3 +456,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
   - **Carry-passive stacking, and PvP vs PvE rules:** no owner opinion. Design pass proposes them.
 
 - 2026-11-08 22:29 ET (owner): 18 types: Normal, Fire, Water, Grass, Spore, Electric, Ice, Rock, Psychic (was Gravity), Flying, Dragon, Dark, Poison, Bug, Steel, Fairy (was Lunar), Crystal (was Prism), Sound (was Echo). Table at the bottom of boki-art/GAME_RULES_NOV8.md.
+
+## 2026-11-09 owner: ONE Boki 2D style, anchored on Vespyx + Mycroll (projectboki.com Boki wall)
+- The style reference for every Boki 2D image is briefs/boki-art/style_refs/boki_style_ref_2d.png (Vespyx + Mycroll website cards): soft hand-painted shading, clean dark outline, big glossy eyes, blush, rounded cute shapes. boki_style_ref_v2/v3 are retired as style refs (they drifted).
+- Same framing for all: full body, gentle 3/4 view (not straight-on front, owner: "some are very front facing"), plain background, feet on a floor line. Size within an evolution line is relative (the baby is smaller, the final form fills the frame; dex hero_scale.py does this).
+- Spec + rollout: briefs/boki-art/STYLE_CANON.md (coordinator). Sample of 6 first, owner picks, then every species gets a matching hero card.
