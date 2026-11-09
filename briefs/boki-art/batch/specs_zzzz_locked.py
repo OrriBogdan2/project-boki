@@ -21,3 +21,5 @@ DROP|={'portrait_stance3_'+n for n in ('arcestrel','briarlynx','galleotter','fla
 DROP|={'portrait_chandelotl_full','lodestick_r2'}
 # 03:06 ET: new-species sheets get one card job (<n>_card) from the roster wave; skip the duplicate _card3 from wave50.
 DROP|={n+'_card3' for n in 'bladypus bullsfrog clinkpede fawngus glaciammoth glazolm grainspin grammite hydrangor lensling loafhopper lurklet malletary maracoil morelkin nymphane puffuse reelacine sarcobra starcap sundormouse tootle torpecone'.split()}
+# 03:20 ET: owner cut Puffamus (Teapotamus > Chuggamus). No more Puffamus jobs.
+DROP|={s['id'] for s in SPECS if 'puffamus' in s['id']}
