@@ -65068,5 +65068,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_shinobant_r4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_soakybara_r4",
+    "name": "Soakybara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_soakybara_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_anchorhorn_r4",
+    "name": "Anchorhorn",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_anchorhorn_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_reapant_r4",
+    "name": "Reapant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_reapant_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_shinobant_r4",
+    "name": "Shinobant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_shinobant_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthorn_r4",
+    "name": "Crofthorn",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_crofthorn_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glazolm_r4",
+    "name": "Glazolm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glazolm_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_spanglin_r4",
+    "name": "Spanglin",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_spanglin_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_soakybara_r4",
+    "name": "Soakybara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_soakybara_r4_2.jpg",
+    "ok": true
   }
 ]
