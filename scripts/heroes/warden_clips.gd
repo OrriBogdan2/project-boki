@@ -296,7 +296,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
+		var kt := float(s.get("kmove_t", 0.0))
+		var tt := _time_map(mv, kt)
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
@@ -304,10 +305,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
+		# (with a "time" map the clip ends at its last kit point; "left": s of the kit's clock to the clip's end)
+		var left := float(mv["time"][-1][0]) - kt if mv.has("time") else length - tt
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
-		elif tt >= length:
+		elif tt >= length or left <= 0.0:
 			if not mv.has("hold_from"):
 				return {}
 			var from := float(mv["hold_from"])
@@ -317,8 +320,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if up is String:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+		var pick := {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
+		# ("blend_out": s before the clip's end over which the body goes back to the legs while the clip plays on)
+		var out := float(mv.get("blend_out", 0.0))
+		if out > 0.0 and left <= out:
+			pick["blend_out"] = out
+		return pick
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -340,6 +348,18 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
 
+## "time": [[kit s, clip s], ...] straight between the points: the clip's own clock against the kit's (a flat stretch
+## holds the impact, a steep one skips a dead one); the last point is the clip's end (it may stop short of its keys).
+static func _time_map(mv: Dictionary, tt: float) -> float:
+	var pts: Array = mv.get("time", [])
+	if pts.is_empty() or tt <= float(pts[0][0]):
+		return tt if pts.is_empty() else float(pts[0][1])
+	for i in range(1, pts.size()):
+		if tt <= float(pts[i][0]):
+			var k := inverse_lerp(float(pts[i - 1][0]), float(pts[i][0]), tt)
+			return lerpf(float(pts[i - 1][1]), float(pts[i][1]), k)
+	return float(pts[-1][1])
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
 	var want := force
@@ -350,7 +370,8 @@ func step(dt: float) -> void:
 	if not proc and bool(want.get("upper", false)):
 		_node("anim_u").animation = String(want["clip"])
 		_p("seek_u/seek_request", float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		var out := float(want.get("blend_out", 0.0))
+		up_w = move_toward(up_w, 0.0, dt / out) if out > 0.0 else move_toward(up_w, 1.0, dt / FADE)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
@@ -367,7 +388,9 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
+		var out := float(want.get("blend_out", 0.0))
+		act_w = move_toward(act_w, 0.0, dt / out) if out > 0.0 \
+				else move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)

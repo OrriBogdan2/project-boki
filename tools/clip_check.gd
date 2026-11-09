@@ -196,6 +196,14 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var end_t := float(def["keys"][-1][0])
 		var length := clips.lib.get_animation(String(moves[km]["clip"])).length
+		var pts: Array = moves[km].get("time", [])
+		if not pts.is_empty():     # ("time": the clip ends at its last kit point; the map stays on the clip, in order)
+			var on := true
+			for i in pts.size():
+				var c := float(pts[i][1])
+				on = on and c >= 0.0 and c <= length + 0.001 and (i == 0 or pts[i][0] > pts[i - 1][0])
+			ok(on, "%s %s: the time map stays on the clip, in order" % [id, km])
+			length = float(pts[-1][0])
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off

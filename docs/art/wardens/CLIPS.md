@@ -19,6 +19,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
+  `time` [[kit s, clip s], ...] (slam follow-through, docs/art/SLAM_FOLLOW.md): the clip's clock against the kit's, straight between the points. A flat stretch holds the impact, a steep one skips a dead stretch, and the last point is the clip's end (it may stop short of the clip's own keys; then the last point's kit time = the table's last key). `fade`: blend-in s (0.04-0.05 on a hit at the kit's t=0, so the impact pose lands in 2-3 frames). `blend_out`: s before the clip's end over which the body goes back to the legs while the clip plays on, so it is back on them at the kit's recover (no 0.16 s overrun, no whip). --slam-follow-check measures it.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
