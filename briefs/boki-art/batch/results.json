@@ -33820,5 +33820,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_torpecone_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_sundormouse_full",
+    "name": "Sundormouse (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_sundormouse_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tootle_full",
+    "name": "Tootle (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tootle_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tootle_full",
+    "name": "Tootle (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tootle_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tootle_full",
+    "name": "Tootle (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tootle_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_starcap_full",
+    "name": "Starcap (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_starcap_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sundormouse_full",
+    "name": "Sundormouse (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sundormouse_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sundormouse_full",
+    "name": "Sundormouse (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_sundormouse_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_torpecone_full",
+    "name": "Torpecone (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_torpecone_full_3.jpg",
+    "ok": true
   }
 ]
