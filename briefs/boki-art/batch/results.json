@@ -26008,5 +26008,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_flarmink_v2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_howlop_v2",
+    "name": "Howlop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_howlop_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_howlop_v2",
+    "name": "Howlop (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_howlop_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_howlop_v2",
+    "name": "Howlop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_howlop_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_lamb",
+    "name": "Sea-glass Boki (lamb)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_seaglass_lamb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_koala",
+    "name": "Sea-glass Boki (koala)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_seaglass_koala_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_koala",
+    "name": "Sea-glass Boki (koala)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_seaglass_koala_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_redpanda",
+    "name": "Sea-glass Boki (redpanda)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_seaglass_redpanda_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_seaglass_koala",
+    "name": "Sea-glass Boki (koala)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_seaglass_koala_1.jpg",
+    "ok": true
   }
 ]
