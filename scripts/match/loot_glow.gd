@@ -52,13 +52,18 @@ static func _res(r: int) -> Dictionary:
 	var look: Dictionary = LOOKS[r]
 	var col: Color = Data.RARITY[r]["color"]
 	var halo := SphereMesh.new()
-	halo.radius = float(look["halo_r"]); halo.height = halo.radius * 2.0
-	halo.radial_segments = SEGMENTS; halo.rings = SEGMENTS / 2
+	halo.radius = float(look["halo_r"])
+	halo.height = halo.radius * 2.0
+	halo.radial_segments = SEGMENTS
+	halo.rings = SEGMENTS / 2
 	var res := {"halo": halo, "halo_mat": Models.glow_mat(Color(col, float(look["halo_a"])))}
 	if float(look["pillar_h"]) > 0.0:
 		var pillar := CylinderMesh.new()
-		pillar.top_radius = PILLAR_R.x; pillar.bottom_radius = PILLAR_R.y
-		pillar.height = float(look["pillar_h"]); pillar.radial_segments = SEGMENTS; pillar.rings = 1
+		pillar.top_radius = PILLAR_R.x
+		pillar.bottom_radius = PILLAR_R.y
+		pillar.height = float(look["pillar_h"])
+		pillar.radial_segments = SEGMENTS
+		pillar.rings = 1
 		res["pillar"] = pillar
 		res["pillar_mat"] = Models.glow_mat(Color(col, float(look["pillar_a"])))
 	_shared[r] = res

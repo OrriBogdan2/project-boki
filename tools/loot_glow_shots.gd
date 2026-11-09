@@ -36,11 +36,11 @@ func run(main_node: Node) -> void:
 	_row(at)
 	await _go(0.8)
 	_take("loot_grass", "Common to Legendary on grass at match zoom, a Legendary deathbox on the right")
-	var slab := _plate(at, 14.0, 0.06, STONE, true)
+	var slab := _plate(at, 14.0, 0.06, STONE)
 	await _go(0.4)
 	_take("loot_stone", "The same row on a grey stone slab")
 	slab.queue_free()
-	var canopy := _plate(at + Vector3(0, 4.5, -1.0), 18.0, 0.3, Color("303030"), true)
+	var canopy := _plate(at + Vector3(0, 4.5, -1.0), 18.0, 0.3, Color("303030"))
 	await _go(0.6)
 	_take("loot_shadow", "The same row under a canopy, in its shadow")
 	canopy.queue_free()
@@ -68,18 +68,18 @@ func _row(at: Vector3) -> void:
 	var armor: Array = Gear.ALL.keys().filter(func(id): return Gear.slot_of(String(id)) == 2)
 	for r in Data.RARITY.size():
 		m.spawn_gear(String(armor[r % armor.size()]), r, at + Vector3((r - 2) * SPACING, 0, 0), "shot%d" % r, false)
-	var b := {"owner": P, "team": P.team, "pos": at + Vector3(3.5 * SPACING, 0, 0), "gems": 0, "seeds": {}, "caught": [], "belt": {},
-		"soul_until": 0.0, "prog": {}, "node": null, "empty": false, "gear": [{"id": String(armor[0]), "rar": 4}], "pack": []}
+	var b := {"gear": [{"id": String(armor[0]), "rar": 4}], "pack": [],
+		"gems": 0, "seeds": {}, "caught": [], "belt": []}
 	var n := Models.deathbox(Life.box_color(b), Life.box_rarity(b))
-	n.position = b["pos"]
+	n.position = at + Vector3(3.5 * SPACING, 0, 0)
 	m.add_child(n)
 
-func _plate(at: Vector3, size: float, thick: float, col: Color, shadow: bool) -> MeshInstance3D:
+func _plate(at: Vector3, side: float, thick: float, col: Color) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new(); bm.size = Vector3(size, thick, size)
+	var bm := BoxMesh.new()
+	bm.size = Vector3(side, thick, side)
 	mi.mesh = bm
 	mi.material_override = Models.toon(col, false)
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadow else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = at + Vector3(0, thick * 0.5, 0)
 	m.add_child(mi)
 	return mi
