@@ -10,7 +10,9 @@ extends RefCounted
 ## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
 ## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
 ## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
-## a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
+## a dim wisp, a resting summon refuses, the snapshot carries it. The stolen-wisp looks (StolenWisp): loose
+## wisps bob and pulse, a grab puts a thin side-colour ring and a tether on it, a scatter sends each wisp its own
+## way, the flight home trails and arrives, all within the particle budget. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -29,6 +31,7 @@ func run(main_node: Node) -> void:
 	_boki_wisps()
 	_summon_data()
 	_summon()
+	_stolen()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -282,3 +285,83 @@ func _summon() -> void:
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
 	ok(not other.wisp and absf(other.summon.left - s.left) < 0.11,
 		"online: the snapshot shows the summoned Boki and its seconds")
+
+func _stolen() -> void:
+	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true})
+	var thief: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != thief.team)[0]
+	var at := thief.position + Vector3(6, 1.3, 0)
+	var a := StolenWisp.spawn(m, "cindle", {}, at)
+	var b := StolenWisp.spawn(m, "puddlet", {}, at)
+	var body := a.model.get_node("Body") as Node3D
+	var lo := 9.0
+	var hi := -9.0
+	for i in 240:
+		a.tick(1.0 / 60.0)
+		lo = minf(lo, body.position.y)
+		hi = maxf(hi, body.position.y)
+	ok(a.state == StolenWisp.State.LOOSE and a.position == at and hi - lo > StolenWisp.BOB_M,
+			"stolen: a loose wisp bobs in place (%.2f m)" % (hi - lo))
+	var dims := []
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		dims.append(float(body.get_instance_shader_parameter("dim")))
+	ok(dims.min() < StolenWisp.PULSE_LOW + 0.05 and dims.max() > 0.98 and dims.min() >= StolenWisp.PULSE_LOW - 0.01,
+			"...and pulses softly (%.2f to %.2f)" % [dims.min(), dims.max()])
+	a.grab(thief, 0)
+	b.grab(thief, 1)
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	ok(a.col.is_equal_approx(SideColor.of(m, thief)) and not a.col.is_equal_approx(SideColor.FOE),
+			"stolen: the ring takes the thief's side colour")
+	var torus := a._ring.mesh as TorusMesh
+	ok(torus.outer_radius - torus.inner_radius <= 0.03 and (a._tether.mesh as CylinderMesh).top_radius <= 0.02,
+			"...thin ring and thin tether")
+	ok(a.position.y - thief.position.y > 1.0 and absf(a._ring.global_position.y - a.global_position.y) < 0.01,
+			"...round the wisp, up at shoulder height, never on the ground")
+	ok(a.position.distance_to(b.position) > 0.5, "...two stolen wisps float apart")
+	var run := thief.position
+	for i in 30:
+		thief.position += Vector3(0.3, 0, 0)
+		a.tick(1.0 / 60.0)
+	var chest := thief.position + Vector3(0, StolenWisp.CHEST_Y, 0)
+	var tl := a._tether.global_transform
+	ok(tl.basis.y.length() > 1.5 and tl.origin.distance_to((chest + a.global_position) * 0.5) < 0.05,
+			"...a running thief drags the tether out (%.1f m)" % tl.basis.y.length())
+	ok(a.get_children().all(func(n): return not n is CPUParticles3D),
+			"...no particles of its own beyond the body's sparkles")
+	thief.position = run
+	var from := a.global_position
+	m.fx.radial = 0
+	a.scatter(0, 2)
+	b.scatter(1, 2)
+	ok(a._ring == null or a._ring.is_queued_for_deletion(), "scatter: the ring and tether let go")
+	for i in int(StolenWisp.SCATTER_S * 60.0) + 2:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	var da := a.position - from
+	var db := b.position - from
+	ok(a.state == StolenWisp.State.LOOSE and b.state == StolenWisp.State.LOOSE, "...each settles loose again")
+	ok(da.length() > 3.0 and db.length() > 3.0 and absf(da.angle_to(db)) > 0.6,
+			"...and darted its own way (%.0f deg apart)" % rad_to_deg(da.angle_to(db)))
+	ok(m.fx.radial >= 2, "...a small burst marks each")
+	var sparkles := 0
+	for w in [a, b]:
+		sparkles += (w.model.get_node("Trail") as CPUParticles3D).amount
+	ok(sparkles + 8 * BokiWispLook.TRAIL_AMOUNT < 300,
+			"particles: ten wisps stay under the 300 budget (%d now)" % sparkles)
+	var homed := [false]
+	a.arrived.connect(func(): homed[0] = true)
+	a.go_home(foe)
+	for i in 5:
+		a.tick(1.0 / 60.0)
+	ok(a._ribbon != null and (a._ribbon.mesh as ImmediateMesh).get_surface_count() == 1,
+			"home: a ribbon trails behind the flight")
+	for i in 400:
+		if homed[0]:
+			break
+		a.tick(1.0 / 60.0)
+	ok(homed[0] and a.is_queued_for_deletion(),
+			"...it arrives at its owner within %.1f s and folds in" % StolenWisp.HOME_S.y)
+	b.queue_free()
