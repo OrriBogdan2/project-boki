@@ -27,7 +27,8 @@ const ALLOWED := [
 	["scripts/match/level_growth.gd", "h.hp += want", "a level's extra health"],
 ]
 const STRIP_T := [0.0, 0.05, 0.12, 0.2, 0.3, 0.45]     # s after the heal / the shield gain, one crop each
-const CROP := 320                                    # px: each crop's side
+const CROP_SRC := 200                                # px: each crop's side on screen...
+const CROP := 360                                    # ... and in the strip (scaled up)
 
 var bad := 0
 var _dir := ""
@@ -65,7 +66,7 @@ func run(main: Node) -> void:
 		if o.team != P.team and rival == null: rival = o
 	ok(ally != null and rival != null, "a squadmate and a rival are in the match")
 	ally.teleport(P.pos + Vector3(2.0, 0, 0))
-	rival.teleport(P.pos + Vector3(-2.0, 0, 3.0))
+	rival.teleport(P.pos + Vector3(-9.0, 0, 6.0))       # (out of the strip and out of the fight)
 	await _settle(main, m, P, 0.3)
 	await _self_heal(main, m, P)
 	await _sources(main, m, P, ally)
@@ -257,8 +258,10 @@ func _crop(main: Node, P: Hunter) -> void:
 	var img := vp.get_texture().get_image()
 	var c := vp.get_camera_3d().unproject_position(P.position + Vector3(0, 1.0, 0))
 	c *= Vector2(img.get_size()) / vp.get_visible_rect().size
-	var box := Rect2i(Vector2i(c) - Vector2i(CROP / 2, CROP / 2 + 40), Vector2i(CROP, CROP))
-	_crops.append(img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size()))))
+	var box := Rect2i(Vector2i(c) - Vector2i(CROP_SRC / 2, CROP_SRC / 2 + 30), Vector2i(CROP_SRC, CROP_SRC))
+	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
+	crop.resize(CROP, CROP)
+	_crops.append(crop)
 
 ## Two rows (the heal, the shield gain), one crop per STRIP_T.
 func _save_strip() -> void:

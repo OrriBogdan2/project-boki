@@ -14,6 +14,7 @@ const POP_RING := 1.1            # m: radius of the break ring
 const POP_S := 0.22              # s: how long the break ring lasts
 const GAIN_META := "shield_gain_at"
 const GAIN_S := 0.18             # s: the shell shows white after a gain
+const GAIN_WIDTH_K := 1.8        # ... and this much wider than the shield's own line
 
 static var _inks := {}           # [the model's own ink material, colour] -> its shield version (shared)
 
@@ -21,14 +22,15 @@ static var _inks := {}           # [the model's own ink material, colour] -> its
 static func tick(h: Hunter) -> void:
 	var up := h.shield > 0.0 and not h.downed and not h.out
 	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.25) if up else Color.BLACK
-	if up and h.m.time - float(h.get_meta(GAIN_META, -1.0)) < GAIN_S:
+	var flash: bool = up and h.m.time - float(h.get_meta(GAIN_META, -1.0)) < GAIN_S
+	if flash:
 		col = Color.WHITE
 	var shown_col: Color = h.get_meta(META, Color.BLACK)
 	var same_body := is_same(_rim_mats(h), h.mats)
 	if up == h.has_meta(META) and (not up or (shown_col == col and same_body)):
 		return
 	if up:
-		_rim_on(h, col)
+		_rim_on(h, col, flash)
 	else:
 		_rim_off(h)
 		if h.shield_t > 0.0:
@@ -72,7 +74,7 @@ static func _see_through(mi: MeshInstance3D) -> bool:
 	var mat := mi.material_override as ShaderMaterial
 	return mat != null and mat.shader in [Models.GLOW, Models.RING, Models.AURA]
 
-static func _rim_on(h: Hunter, col: Color) -> void:
+static func _rim_on(h: Hunter, col: Color, flash: bool) -> void:
 	if h.has_meta(META):
 		_rim_off(h)
 	var saved := {}
@@ -81,7 +83,7 @@ static func _rim_on(h: Hunter, col: Color) -> void:
 		if own == null or own.get_shader_parameter("glow_shell") == true:
 			continue
 		saved[mt] = own
-		(mt as Material).next_pass = _ink(own, col)
+		(mt as Material).next_pass = _ink(own, col, INK_WIDTH_K * (GAIN_WIDTH_K if flash else 1.0))
 	h.set_meta("shield_rim_saved", saved)
 	h.set_meta(META, col)
 	h.set_meta("shield_rim_mats", h.mats)
@@ -95,14 +97,14 @@ static func _rim_off(h: Hunter) -> void:
 		if h.has_meta(key):
 			h.remove_meta(key)
 
-## The shield version of a model's ink outline: the side colour, wider, kept at every distance.
-static func _ink(own: ShaderMaterial, col: Color) -> ShaderMaterial:
-	var key := [own, col]
+## The shield version of a model's ink outline: the side colour, `width_k` times wider, kept at every distance.
+static func _ink(own: ShaderMaterial, col: Color, width_k: float) -> ShaderMaterial:
+	var key := [own, col, width_k]
 	if not _inks.has(key):
 		var ink := own.duplicate() as ShaderMaterial
 		ink.set_shader_parameter("color", col)
 		var w: Variant = own.get_shader_parameter("width")
-		ink.set_shader_parameter("width", (float(w) if w != null else 0.00125) * INK_WIDTH_K)
+		ink.set_shader_parameter("width", (float(w) if w != null else 0.00125) * width_k)
 		ink.set_shader_parameter("far_cut", 0.0)
 		ink.set_shader_parameter("far_thin", 0.0)
 		_inks[key] = ink

@@ -13,11 +13,12 @@ const MERGE_S := 0.3          # s: heals on one body inside this window show as 
 const BIG_K := 0.1            # of max health: a rival's heal this big (per window) is shown
 const SYNC_MIN := 2.0         # hp: a remote rise per snapshot under this is regen, not a heal
 const GREEN := Color("8ff0a0")
-const RISE_N := 12            # dots in the green rise
+const RISE_N := 22            # dots in the green rise
 const RISE_SPEED := 3.0       # m/s: how fast they leave the feet
 const RISE_LIFT := 5.0        # m/s²: they speed up as they climb (negative gravity)
 const RISE_S := 0.55          # s: how long they live (about a body height)
 const RISE_SPREAD := 18.0     # degrees off straight up
+const RISE_SIZE := 1.5        # dot size (Fx.burst size_k)
 
 var m: Match
 var heals := 0                # (checks) heals read, quiet ones too
@@ -47,7 +48,7 @@ func healed(e: Ent, n: float, quiet := false) -> void:
 	if not quiet and not bool(w[2]) and _shows(e, float(w[0])):
 		w[2] = true
 		rises += 1
-		m.fx.burst(e.pos + Vector3(0, 0.25, 0), GREEN, RISE_N, RISE_SPEED, RISE_S, -RISE_LIFT, 1.0, Vector3.UP,
+		m.fx.burst(e.pos + Vector3(0, 0.25, 0), GREEN, RISE_N, RISE_SPEED, RISE_S, -RISE_LIFT, RISE_SIZE, Vector3.UP,
 			RISE_SPREAD)
 
 ## Raise `e`'s shield to at least `amount`; a real gain flashes the shell (a Boki has none: a small ring).
