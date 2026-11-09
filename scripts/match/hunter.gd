@@ -797,7 +797,6 @@ func do_jump() -> void:
 		# press jump mid-flight off a jump pad and the glider opens, keeping the launch's speed
 		if not pad.get("ledge", false) and float(pad["t"]) > 0.12 and can_glide():
 			pad = {}
-			vel.y = minf(vel.y, 2.0)
 			_open_glider()
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
@@ -907,6 +906,7 @@ func _open_glider() -> void:
 	_glide_armed = true
 	grounded = false
 	_glider_sfx("open")
+	vel.y = Loco.glide_start(vel.y)
 	glide_lift.open_kick(self)
 
 var boost_fx_t := 0.0               # the boost trail lasts while you're well above cruise speed (render)
@@ -2500,6 +2500,7 @@ func _update_glide(dt: float) -> void:
 			m.sfx("glide", pos, -2.0, 1.4)
 			add_stat("feathers")
 		_glider_sfx("open")
+		vel.y = Loco.glide_start(vel.y)
 		glide_lift.open_kick(self)
 
 # Ledge float: touch the side of any ground above you while you're still alive and you float
