@@ -54,6 +54,10 @@ func tilt(b: Basis, speed: float) -> Basis:
 	if k <= 0.01: return b
 	return b * Basis(Vector3.RIGHT, -STROKE_TILT * k * clampf(speed / maxf(0.1, h.SPEED * SWIM_SPEED), 0.0, 1.0))
 
+## What HunterAnim needs to wade (shallow) or swim (deep): the hunter's own wade and stroke, not a glide.
+func anim_state() -> Dictionary:
+	return {"wade": was == 1, "swim": swimming}
+
 ## Splashes, strokes and sounds as you go in, swim about and climb out.
 func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 	swimming = wdep == 2 and not air
