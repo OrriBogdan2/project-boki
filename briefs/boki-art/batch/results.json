@@ -32756,5 +32756,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_gramofrill_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_blastopuff",
+    "name": "Blastopuff",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_blastopuff_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_blastopuff",
+    "name": "Blastopuff",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_blastopuff_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dreadmonite",
+    "name": "Dreadmonite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_dreadmonite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_dreadmonite",
+    "name": "Dreadmonite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_dreadmonite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chainipede",
+    "name": "Chainipede",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gramofrill",
+    "name": "Gramofrill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gramofrill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chainipede",
+    "name": "Chainipede",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_hatstag",
+    "name": "Hatstag",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_hatstag_1.jpg",
+    "ok": true
   }
 ]
