@@ -608,10 +608,19 @@ func juggernaut(a) -> void:
 	K.cd["rmb"] = 0.0
 	A.hold(m, P, 0.95)
 	A.step(m, 0.5)
-	var far := 7.5 * float(K.dash_feel()["dist"])       # the full fling, after the global dash feel
-	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
-			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
-			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
+	var ld: Dictionary = K.rmb_def()["lunge"]
+	# the full fling; a perfect release adds perfect_k on top
+	var far := float(ld["dist"][1]) * float(K.dash_feel()["dist"])
+	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes the full length",
+			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4
+			and P.flat_dist(home) < far * float(ld["perfect_k"]) + 0.5,
+			"cd %.1f moved %.1f far %.1f" % [float(K.cd["rmb"]), P.flat_dist(home), far])
+	# footage gap 3: the source's Charge Dash runs ~2.5 to 3 bh (4.5 to 5.4 m) [F]; the perfect release
+	# stays the owner's
+	A.ok("juggernaut footage gap 3: the Lunge flings 4.5 to 5.4 m, +20% on a perfect release",
+			is_equal_approx(float(ld["dist"][0]), 4.5) and is_equal_approx(float(ld["dist"][1]), 5.4)
+			and is_equal_approx(float(ld["perfect_k"]), 1.2),
+			"dist %s perfect_k %.2f" % [str(ld["dist"]), float(ld["perfect_k"])])
 	# air: the downward slam slows, the centre takes more and is stunned
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
@@ -673,6 +682,22 @@ func juggernaut(a) -> void:
 			K.tips >= 1 and A.dmg(T) >= 14.0 and P.dashes < 2.5,
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
 	A.ok("juggernaut dash: the tip does not stun into a wall", T.wallstun <= 0.0, "wallstun %.2f" % T.wallstun)
+	# footage gap 6: the source's Quick Dash runs ~2 bh (3.6 m) in ~0.2 s [F]; set as-is, off the global dash feel
+	var dd: Dictionary = K.dash_def()
+	var feel: Dictionary = K.dash_feel()
+	A.ok("juggernaut footage gap 6: Rampage 3.6 m in 0.2 s, off the global dash feel",
+			is_equal_approx(float(dd["dist"]), 3.6) and is_equal_approx(float(dd["time"]), 0.2)
+			and is_equal_approx(float(feel["dist"]), 1.0) and is_equal_approx(float(feel["time"]), 1.0),
+			"dist %.1f time %.2f feel %s" % [float(dd["dist"]), float(dd["time"]), str(feel)])
+	A.step(m, 1.0)
+	P.teleport(home)
+	T.teleport(home + Vector3(0, 0, 12.0))
+	A.aim_at(P, home + Vector3(8.0, 0, 0))
+	P.dashes = 3.0
+	P.do_dash()                         # no move input: the Rampage drives the way he aims
+	A.step(m, 0.6)
+	A.ok("juggernaut footage gap 6: the Rampage travels 3.6 m on open ground",
+			absf(P.flat_dist(home) - float(dd["dist"])) < 0.5, "moved %.2f" % P.flat_dist(home))
 	# rank 3: a shot dodged through the dash feeds Rage (through the real dodge hook); rank 1 does not
 	K.res = 0.0
 	K.on_perfect_dodge()
