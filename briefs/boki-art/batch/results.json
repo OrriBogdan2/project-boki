@@ -6436,5 +6436,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/geysirbara_x_1.jpg",
     "ok": true
+  },
+  {
+    "id": "chandelapi_x",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_x",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_x",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_x",
+    "name": "Anchorbill",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "anchorbill_x",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodelotl_x",
+    "name": "Geodelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodelotl_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_x",
+    "name": "Forgebrock",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaivyx_x",
+    "name": "Glaivyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaivyx_x_2.jpg",
+    "ok": true
   }
 ]
