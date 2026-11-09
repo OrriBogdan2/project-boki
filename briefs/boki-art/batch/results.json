@@ -22025,5 +22025,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/zephyrak_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "zippelith_card",
+    "name": "Zippelith (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zippelith_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "zephyrak_card",
+    "name": "Zephyrak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zephyrak_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_pe_w30",
+    "name": "Bellowary (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "zippelith_card",
+    "name": "Zippelith (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zippelith_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ermink_pe_w30",
+    "name": "Ermink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe_w30",
+    "name": "Crofthorn (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe_w30",
+    "name": "Canvastross (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe_w30",
+    "name": "Crofthorn (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe_w30",
+    "name": "Canvastross (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_pe_w30",
+    "name": "Boltstrich (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe_w30",
+    "name": "Canvastross (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe_w30",
+    "name": "Canvastross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_w30_1.jpg",
+    "ok": true
   }
 ]
