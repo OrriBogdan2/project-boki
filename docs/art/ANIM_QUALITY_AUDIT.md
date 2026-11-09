@@ -14,7 +14,7 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   - **counter**: the reach-weighted negative correlation of each hand and the same side's foot (forward position).
     +1 is a natural counter-swing, -1 is pacing (arm and leg of one side go forward together).
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
-  - **bob**, **steps/s** (cadence), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
+  - **bob**, **steps/s** (cadence, timed between a leg's forward crossings), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
   - Attack rows (two per Hunter): the largest one-frame hand jump and the free arm's travel (body heights), and the
     share of frames with an arm raised 60 degrees or more and sideways (T-pose).
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
@@ -61,7 +61,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 |---|---|---|---|---|---|---|
 | `archer` | 65 → 29 | 46 → 13 | 2.5 → 4.7 | -0.95 → +0.87 | 5 | 3.3 |
 | `ashwick` | 6 → 5 | 18 → 12 | 5.1 → 4.6 | -0.93 → +0.80 | 9 | 2.5 |
-| `bulwark` | 22 → 18 | 25 → 15 | 4.0 → 4.6 | +0.17 → +0.66 | 4 | 4.2 |
+| `bulwark` | 22 → 16 | 25 → 11 | 4.0 → 4.6 | +0.17 → +0.80 | 4 | 3.5 |
 | `dolm` | 54 → 25 | 38 → 18 | 3.1 → 5.5 | -0.86 → +0.72 | 4 | 3.3 |
 | `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 | 2.5 |
 | `gunslinger` | 50 → 21 | 25 → 13 | 3.6 → 4.5 | +0.90 → +0.90 | 7 | 3.3 |
@@ -91,10 +91,16 @@ posts scroll at the move speed).
 
 ![ashwick walk and run, before and after](anim_audit/ashwick.jpg)
 
-**Mossy (`bulwark`)**
-1. Cadence was 5 steps/s on a 2 m giant (a shuffle); now 4.2 with the slower clip.
-2. The left arm hung nearly still against the legs (counter +0.17, now +0.66). Slide 25 % to 15 % (`foot_mps` 6.0, stride 1.3: a slower clip also eases the 5 steps/s).
+**Albert (`bulwark`)**
+1. Cadence was 5 steps/s on a 2 m giant (a shuffle), 4.4 after the slide tune; now 3.5 at a run and 2.6 at a walk
+   (`foot_mps` [3.1, 7.4] plays the clips at rate 0.65), a heavy planted stride: the thighs stretch 1.35 / 1.55 so the
+   slower clip still covers the ground (run slide 15 % to 11 %, walk 16 %). The body of 1.5 medium Hunters keeps the
+   game's 4.85 m/s; only the legs read heavier.
+2. The left arm hung nearly still against the legs (counter +0.17, now +0.80): the shield arm swings 0.5, the hammer arm
+   keeps its carry and sways 0.2 against its leg, so the hammer head rocks with the stride instead of riding level.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
+4. Open: at a jog (3.4 m/s, between the walk and run rings) the walk and run clips blend out of phase and the feet
+   slide 80 %; the gate reads the run only, and Albert's game speed sits at the run ring.
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
@@ -171,5 +177,5 @@ Split into backlog items per Hunter (role build):
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.2 m/s; the gate only reads the run.
+- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
