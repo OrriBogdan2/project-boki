@@ -43193,5 +43193,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_anchorhorn_z1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_cisternmander_z1",
+    "name": "Cisternmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_z1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_z2",
+    "name": "Cisternmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_z2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_z1",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_z1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_z2",
+    "name": "Cisternmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_z2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bastionpet_z2",
+    "name": "Bastionpet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bastionpet_z2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_z2",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_z2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bastionpet_z1",
+    "name": "Bastionpet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bastionpet_z1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bastionpet_z2",
+    "name": "Bastionpet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bastionpet_z2_1.jpg",
+    "ok": true
   }
 ]
