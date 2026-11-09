@@ -49598,5 +49598,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_dreadnoyak_x3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_forgebrock_x3",
+    "name": "Forgebrock (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_x3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x3",
+    "name": "Vaultara (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x3",
+    "name": "Vaultara (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x3",
+    "name": "Dreadnoyak (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_forgebrock_x3",
+    "name": "Forgebrock (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_x3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_furnacowary_p99",
+    "name": "Furnacowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_furnacowary_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x3",
+    "name": "Dreadnoyak (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x3",
+    "name": "Vaultara (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x3_2.jpg",
+    "ok": true
   }
 ]
