@@ -15865,5 +15865,103 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_barokat_r2a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2c",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2d",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2d_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_oomphe",
+    "name": "Bellowary",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_oomphe_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_oomph",
+    "name": "Bellowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_oomph_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_oomphe",
+    "name": "Bellowary",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_oomphe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_oomph",
+    "name": "Bellowary",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_oomph_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w29",
+    "name": "Malletary (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2_w29",
+    "name": "Bellowary (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w29",
+    "name": "Malletary (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w29",
+    "name": "Malletary (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2_w29",
+    "name": "Bellowary (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse_w29",
+    "name": "Sundormouse (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary_r_w29",
+    "name": "Malletary (concept r)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_malletary_r_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2_w29",
+    "name": "Bellowary (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_w29_3.jpg",
+    "ok": true
   }
 ]
