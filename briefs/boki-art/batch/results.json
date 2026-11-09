@@ -11098,5 +11098,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_pe_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe",
+    "name": "Rimeshrew (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe",
+    "name": "Ringrove (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe",
+    "name": "Rimeshrew (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pe",
+    "name": "Skateron (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pe",
+    "name": "Skateron (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe",
+    "name": "Ringrove (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snuffapi_pe",
+    "name": "Snuffapi (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_snuffapi_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_snuffapi_pe",
+    "name": "Snuffapi (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_snuffapi_pe_2.jpg",
+    "ok": true
   }
 ]
