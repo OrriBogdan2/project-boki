@@ -793,6 +793,19 @@ def cover_report(C, lv, owner):
         rows.append((b, share, T[b]))
     return rows
 
+# What the ground sounds like where it is not grass, stone, wood or snow (StepSurface): tile rects
+# [x0, z0, x1, z1], a later one over an earlier one. Sound only; the look is the biome's.
+surfaces = [
+    dict(kind="sand", rect=[8, 164, 46, 204], name="Saltmere shore"),
+    dict(kind="water", rect=[14, 186, 28, 196], name="Saltmere tide pool"),
+    dict(kind="sand", rect=[196, 172, 206, 196], name="Duskmoor skiff beach"),
+    dict(kind="water", rect=[92, 172, 100, 178], name="Nest Glade pool"),
+    dict(kind="metal", rect=[34, 108, 50, 122], name="Forge Yard iron floor"),
+    dict(kind="metal", rect=[40, 64, 52, 76], name="The Kilns grating"),
+    dict(kind="metal", rect=[53, 143, 67, 157], name="Sunken Forge scrap"),
+]
+
+
 def main():
     lv, owner, stairs = rasterize()
     C = place_cover(lv, owner, stairs)
@@ -814,7 +827,7 @@ def main():
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=pads, updrafts=updrafts,
-               winds=[], docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
+               winds=[], surfaces=surfaces, docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)
