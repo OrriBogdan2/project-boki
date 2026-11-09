@@ -42325,5 +42325,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_eclipsowl_d1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d1",
+    "name": "Eclipsowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d1",
+    "name": "Eclipsowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_y3",
+    "name": "Ringrove (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ringrove_y3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d1",
+    "name": "Eclipsowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d3",
+    "name": "Eclipsowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d2",
+    "name": "Eclipsowl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d2",
+    "name": "Eclipsowl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_d2",
+    "name": "Eclipsowl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_d2_1.jpg",
+    "ok": true
   }
 ]
