@@ -8116,5 +8116,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/flarmink_e_3.jpg",
     "ok": true
+  },
+  {
+    "id": "geodelotl_e",
+    "name": "Geodelotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodelotl_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodelotl_e",
+    "name": "Geodelotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodelotl_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_e",
+    "name": "Geodemole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_e",
+    "name": "Geodemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/geodemole_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodelotl_e",
+    "name": "Geodelotl",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodelotl_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geodemole_e",
+    "name": "Geodemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_r",
+    "name": "Forgebrock",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_4k",
+    "name": "Teapotamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/teapotamus_4k_1.jpg",
+    "ok": true
   }
 ]
