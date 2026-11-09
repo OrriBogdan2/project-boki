@@ -42073,5 +42073,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_cisternmander_b3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_barrelmander_bat",
+    "name": "Barrelmander (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_bat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bucketmander_bat",
+    "name": "Bucketmander (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bucketmander_bat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barrelmander_bat",
+    "name": "Barrelmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_bat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barrelmander_bat",
+    "name": "Barrelmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_bat_1.jpg",
+    "ok": true
   }
 ]
