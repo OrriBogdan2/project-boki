@@ -1,8 +1,7 @@
 extends RefCounted
 ## --airheal-check: heals and abilities in the air, and the cost of drinking.
-##  1. In the opening drop, pressing a heal breaks out of it: the glider folds, you fall free with
-##     your speed, and the tonic finishes and heals while you're still airborne.
-##  2. Pressing an ability mid-drop breaks out of it too (a human's; bots never do).
+##  1. In the opening drop a heal does nothing: the drop is steering only (item 162, AirLimits).
+##  2. Nor does an ability press (the rest of the drop's keys: --air-limits-check).
 ##  3. Gliding normally, a heal folds the glider and the drink keeps going.
 ##  4. Drinking leaves you vulnerable: a hit does CONSUME_VULN times the damage and spills the
 ##     drink (the tonic is kept); the same for an armor kit.
@@ -54,18 +53,13 @@ func run(main: Node) -> void:
 	var hp0 := P.hp
 	P.inp["util1"] = true
 	_steps(m, 1)
-	ok(not P.dropping and not P.gliding, "a heal mid-drop breaks out of it and folds the glider")
-	ok(P.drink_t > 0.0, "and the drink starts in the air")
-	ok(not P.grounded, "still airborne")
-	var frames := int(ceil(Hunter.DRINK_TIME / Match.DT)) + 3
-	_steps(m, frames)
-	ok(P.hp > hp0 + 1.0 and P.tonics == 1, "the tonic finishes and heals in the air (hp %.0f -> %.0f, tonics left %d)" % [hp0, P.hp, P.tonics])
-	ok(not P.grounded, "it finished before landing (%.1fm up)" % (P.pos.y - m.world.ground_at(P.pos.x, P.pos.z)))
+	ok(P.dropping and P.gliding, "a heal mid-drop leaves the drop and its glider as they are")
+	ok(P.drink_t <= 0.0 and P.tonics == 2 and P.hp == hp0, "and nothing is drunk (tonics %d)" % P.tonics)
 	# ---- 2. an ability mid-drop
 	_start_drop(m, P, g0)
 	P.inp["sec"] = true
 	_steps(m, 1)
-	ok(not P.dropping, "an ability press mid-drop breaks out of it too")
+	ok(P.dropping, "an ability press mid-drop does nothing either")
 	# ---- 3. gliding normally: a heal folds the glider and keeps drinking
 	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "gear1", "gear2", "glide", "jump", "dash", "fire"]:
 		P.inp[k] = false

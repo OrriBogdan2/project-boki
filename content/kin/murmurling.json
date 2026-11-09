@@ -1,0 +1,20 @@
+{
+	"id": "murmurling",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/murmurling.json.",
+	"size": {
+		"cm": 44,
+		"kg": 9.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#4c2928",
+		"belly": "#e0ccc8",
+		"glow": "#ffb99a",
+		"wing": "#6a433a"
+	},
+	"work": {
+		"ranch": 3,
+		"bloom": 2,
+		"craft": 1
+	}
+}

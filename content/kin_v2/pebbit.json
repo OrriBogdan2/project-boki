@@ -75,24 +75,6 @@
 			}
 		]
 	},
-	"dodge_rider": {
-		"name": "Gravity Wake",
-		"on_end": [
-			{
-				"delivery": {
-					"type": "burst",
-					"origin": "owner",
-					"radius": 3.5
-				},
-				"effects": [
-					{
-						"type": "pull",
-						"strength": 8
-					}
-				]
-			}
-		]
-	},
 	"active": "slam",
 	"auto": "rock_guard",
 	"merge": "titan",

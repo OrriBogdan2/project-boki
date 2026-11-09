@@ -1,0 +1,19 @@
+{
+	"id": "lilybara",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/lilybara.json.",
+	"size": {
+		"cm": 70,
+		"kg": 60.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#4c9e9a",
+		"belly": "#90d3d8",
+		"glow": "#a0ffcf"
+	},
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
+	}
+}
