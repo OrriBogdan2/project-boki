@@ -50837,5 +50837,47 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/gloamspire_cardy_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gloamspire_py",
+    "name": "Gloamspire (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gloamspire_py_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamspire_py",
+    "name": "Gloamspire (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamspire_py_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_py",
+    "name": "Selenwhale (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_py_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_py",
+    "name": "Selenwhale (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_py_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gloamspire_py",
+    "name": "Gloamspire (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gloamspire_py_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_py",
+    "name": "Selenwhale (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_py_1.jpg",
+    "ok": true
   }
 ]
