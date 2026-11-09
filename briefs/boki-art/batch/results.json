@@ -48716,5 +48716,47 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/murmuron_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_galleotter_p96",
+    "name": "Galleotter (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_p96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p96",
+    "name": "Chandelapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_galleotter_p96",
+    "name": "Galleotter (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_p96_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_galleotter_p96",
+    "name": "Galleotter (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_p96_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p96",
+    "name": "Chandelapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p96_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_p96",
+    "name": "Chandelapi (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_p96_2.jpg",
+    "ok": true
   }
 ]
