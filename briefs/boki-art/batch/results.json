@@ -69149,5 +69149,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_glacione_n3_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glacione_n3",
+    "name": "Glacione (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glacione_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_n3",
+    "name": "Glacione (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glacione_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_n2",
+    "name": "Glacione (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glacione_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_n2",
+    "name": "Glacione (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glacione_n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_n3",
+    "name": "Glacione (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_n3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole_card108",
+    "name": "Druzemole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipwom_card108",
+    "name": "Pipwom (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipwom_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_n2",
+    "name": "Glacione (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glacione_n2_2.jpg",
+    "ok": true
   }
 ]
