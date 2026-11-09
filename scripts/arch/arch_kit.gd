@@ -229,6 +229,7 @@ func tick(dt: float) -> void:
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick_knocks()
 	_tick(dt)
+	if not curved.is_empty(): _tick_curve(dt)
 	_tells(dt)
 	_tick_charge(dt)
 	_tick_recast(dt)
@@ -526,6 +527,7 @@ func dash_dir() -> Vector2:
 	return move.normalized()
 
 static var _dash_feel := {}
+var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
 
 ## The global dash feel for this hunter (content/rules/dash_feel.json): {dist, time} multipliers.
 func dash_feel() -> Dictionary:
@@ -534,7 +536,9 @@ func dash_feel() -> Dictionary:
 	return _dash_feel.get(id, _dash_feel["default"])
 
 ## A travelling dash of a given length and time (the Effects dash, so perfect dodges and the dash
-## buffer all work as before). The hero's own: no Boki changes it (DECISIONS 2026-11-05, --boki-dash-check).
+## buffer all work as before). extra "curved": the hero's measured ground dash, which then runs on its
+## dash_feel "curve" (docs/decisions/0025) instead of a constant speed. The hero's own: no Boki changes it
+## (DECISIONS 2026-11-05, --boki-dash-check).
 func travel(dist: float, t: float, extra := {}) -> void:
 	var feel := dash_feel()
 	dist *= float(feel["dist"])
@@ -543,8 +547,20 @@ func travel(dist: float, t: float, extra := {}) -> void:
 	for k in extra:
 		e[k] = extra[k]
 	Effects.run([e], h, {"slot": "dodge", "ability": String(dash_def().get("id", "dash")), "level": rank("dash")})
+	var curve: Array = feel.get("curve", [])
+	var on_curve := bool(extra.get("curved", false)) and not curve.is_empty() and h.roll_t > 0.0
+	curved = {"t0": h.roll_t, "speed": h.roll_speed, "curve": curve, "at": h.dash_at} if on_curve else {}
 	Feel.dash_sound(m, id, h.pos, h)
 	CombatBus.ability_used.emit(h, String(dash_def().get("id", "dash")), "dodge")
+
+## The curved dash this step: the dash's mean speed times its curve at the middle of the step. A new
+## dash (dash_at moved) or the dash ending drops it; the hand-over is HunterMove.dash_exit's.
+func _tick_curve(dt: float) -> void:
+	if h.roll_t <= 0.0 or h.dash_at != float(curved["at"]):
+		curved = {}
+		return
+	var u := 1.0 - (h.roll_t - dt * 0.5) / float(curved["t0"])
+	h.roll_speed = float(curved["speed"]) * HunterMove.dash_k(curved["curve"], u)
 
 # ------------------------------------------------------------------ infusion and the grammar
 ## The kin's infusion, or {} with no kin able to fight.
