@@ -1,4 +1,4 @@
-# 0019 - The Heartspark loop (prototype)
+# 0023 - The Heartspark loop (prototype)
 
 Status: prototype on `ext/heartspark`. Owner decision of 2026-11-08: every expedition is a fight over the Heart.
 Heart Night (the later all-night variant) is deliberately **not** built.
