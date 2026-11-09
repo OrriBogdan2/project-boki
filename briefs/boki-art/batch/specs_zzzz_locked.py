@@ -43,3 +43,6 @@ DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_B1}|{n+
 _PICKED_R4=('arcestrel','soakybara','geysirbara','lockatara','glazolm','slog','crofthorn','anchorhorn','spanglin','tinbrock','shinobant','reapant','harvantis','lurklet','bulwartoad','barostorm','quivertoad','bonsolith','mumblet','chiptero','narfoil','pinster','pagodito','pavonazar','bullpole','pocketpus','scoopsy','gambitfin','hourachnid','rosedart','fanpire','chainipede','scarabit','meteorab')
 DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_R4}|{n+'_card3' for n in _PICKED_R4}|{p+n for n in _PICKED_R4 for p in ('stance_','portrait_stance3_','portrait_stance2_')})}
 DROP|={'c_checkmare','c_klaxada','c_pagoguana','c_pickadactyl','c_parrywhal','c_tiltster','c_critwom','c_sirencada'}
+# 15:58 ET 11-09: round-5 picks live; same protection as round 4.
+_PICKED_R5=('druzemole','pipwom','checkmare','pickadactyl','parrywhal','tiltster','pagoguana','cetorgan','ghoulamari','wayshell','siegephant','aurostag','cindermaw','sphinxblight','klaxada','glacione')
+DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_R5}|{n+'_card3' for n in _PICKED_R5}|{p+n for n in _PICKED_R5 for p in ('stance_','portrait_stance3_','portrait_stance2_')})}

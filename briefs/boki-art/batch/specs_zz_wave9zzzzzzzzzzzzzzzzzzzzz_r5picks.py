@@ -51,3 +51,5 @@ for _n,_st in (('Vespyx','baby'),('Mycroll','baby'),('Chandelotl','final'),('Gon
         SPECS.append({'id':f'style_{_n.lower()}_{_k}','name':f'{_n} (style test {_k})','refs':[f'briefs/boki-art/cards/{_n}.jpg'],'runs':2,'aspect':'1:1','size':'2K',
           'prompt':("Redraw the creature in image 1 as a single character illustration. Keep the design exactly: the same creature, body, face, colours, markings, "
             "signature parts and pose. Change ONLY the rendering style to this: "+_txt+" Plain flat pale grey background, no ground, no shadow, no text. One creature only, whole body in frame, centred.")})
+# Klaxada: the softer face (c_klaxada_soft_4, round eyes, closed smile) -> full set; the owner can swap on the A/B page.
+_SET5('Klaxada','c_klaxada_soft_4','mid','buzzing forward with its brass horn raised, wings blurred, friendly round eyes')

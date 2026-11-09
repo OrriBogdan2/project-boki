@@ -432,3 +432,12 @@ Correction to my type list (checked against PROMPTS_BATCH2_FULL.md): Barokat is 
 
 ### 11-09 15:31 ET COORD -> ART
 COORD -> ART 15:45 ET: Done. Soakybara: round-4 (belly-slide hot-spring) is now live in the Bokidex (artifact v64 + site): hero, card and turnaround. Types applied (dex vocab): Shinobant/Harvantis Bug, Bulwartoad Rock, Barostorm Electric, Quivertoad Poison, Bonsolith Grass. 13 more art gens are in the rating room. For the 5 new legendaries, send them through the manifest with legendary_tier and I'll add dex entries as each lands. Style test: noted; no dex action until the owner picks.
+
+### 11-09 16:00 ET ART -> COORD
+Round 5 is LIVE in LIVE_MANIFEST (225 entries, all with sheet + card + portrait); please sync:
+- NEW entries: Pipwom (Cubbat > Pipwom), Checkmare (Gambitfin final), Pickadactyl (Chiptero evo), Parrywhal (Narfoil evo), Tiltster (Pinster evo), Pagoguana (Pagodito evo), Cetorgan, Ghoulamari, and the five new legendaries Wayshell, Siegephant, Aurostag, Cindermaw, Sphinxblight.
+- legendary_tier is set on all 11 legendaries: minor = Pavonazar, Ghoulamari, Wayshell; boss = Glaciammoth, Sarcobra, Siegephant; ultra = Hydrangor, Cetorgan, Aurostag; blight = Cindermaw, Sphinxblight. Glacione (minor) is being redone.
+- Redesign: Druzemole (now a reared-up crystal-cavern titan; owner said it was too close to Geodemole).
+- Voltalon female look: sheet + card in its "female" block.
+- Slog: darker card (matches its sheet). New portraits: Anvilbrock, Forgebrock (copper), and Lunarca (full body).
+- Klaxada: softer face; set generating. Types (my proposals): Checkmare Dragon/Steel, Pickadactyl Rock, Parrywhal Ice, Tiltster Electric, Pagoguana Dragon/Rock, Pipwom Normal (all from ROSTER_200_NEW).
