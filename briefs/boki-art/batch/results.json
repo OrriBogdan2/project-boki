@@ -9145,5 +9145,75 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_proofhop_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_proofhop",
+    "name": "Proofhop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_proofhop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite",
+    "name": "Grammite (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grammite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary",
+    "name": "Malletary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_malletary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary",
+    "name": "Malletary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_malletary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine",
+    "name": "Reelacine (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reelacine_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_malletary",
+    "name": "Malletary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_malletary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari",
+    "name": "Ghoulamari (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar",
+    "name": "Pavonazar (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine",
+    "name": "Reelacine (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reelacine_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar",
+    "name": "Pavonazar (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_2.jpg",
+    "ok": true
   }
 ]
