@@ -2263,6 +2263,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
 		net_event(["knock", h.nid, credit.nid if credit else ""])
+	SquadAlerts.down(self, h)
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -2345,6 +2346,7 @@ func revive_hunter(h: Hunter, by: Ent) -> void:
 	sfx("revive", h.pos, 0.0)
 	fx.ring(h.pos, 1.8, Color("9ee2a0"), 0.4)
 	add_feed("%s is back up" % h.pname)
+	SquadAlerts.up(self, h)
 	if h.kin and h.kin.comp and h.kin.state != "downed" and by != h.kin:
 		h.kin.comp.on_owner_up()
 	if by is Hunter and by != h:
@@ -2370,6 +2372,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
 	add_feed(out_text(HeroTitle.of_hunter(h), why))
+	SquadAlerts.out(self, h)
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
@@ -5816,6 +5819,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
+				SquadAlerts.down(self, who)
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by == player:
 					player.knocks += 1
@@ -5831,6 +5835,7 @@ func _net_ev(x, from: String) -> void:
 					player.kills += 1
 					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
+				SquadAlerts.out(self, who)
 				if who.kin:
 					who.kin.dead = true
 					who.kin.visible = false
@@ -5841,6 +5846,7 @@ func _net_ev(x, from: String) -> void:
 				who.downed = false
 				who.revive = 0.0
 				sfx("revive", who.pos, 0.0)
+				SquadAlerts.up(self, who)
 				_rev_out.erase(who.nid)
 		"xc":
 			if exits: exits.net_in(x)

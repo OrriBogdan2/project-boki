@@ -57,6 +57,7 @@ var amb: AudioStreamPlayer
 var amb_name := ""
 var music_bus := 0
 var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
+var _duck_amb: AudioEffectAmplify    # the same on the Ambience bus, used when duck() is asked for the ambience too
 var _duck_tw: Tween
 
 func _ready() -> void:
@@ -144,6 +145,8 @@ func _setup_mix() -> void:
 	# the music ducks under big moments on its own bus, so it works for one track or for layers
 	_duck_fx = AudioEffectAmplify.new()
 	AudioServer.add_bus_effect(music_bus, _duck_fx)
+	_duck_amb = AudioEffectAmplify.new()
+	AudioServer.add_bus_effect(AudioServer.get_bus_index("Ambience"), _duck_amb)
 	var mlim2 := AudioEffectHardLimiter.new()
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music_bus, mlim2)
@@ -222,7 +225,7 @@ func play_ambience(name: String) -> void:
 	create_tween().tween_property(amb, "volume_db", -14.0, 2.0)
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
-func duck(seconds: float, depth_db := -8.0) -> void:
+func duck(seconds: float, depth_db := -8.0, with_ambience := false) -> void:
 	if _duck_fx == null:
 		return
 	if _duck_tw and _duck_tw.is_valid():
@@ -230,8 +233,10 @@ func duck(seconds: float, depth_db := -8.0) -> void:
 	var tw := create_tween()
 	_duck_tw = tw
 	tw.tween_property(_duck_fx, "volume_db", minf(depth_db, _duck_fx.volume_db), 0.18).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(_duck_amb, "volume_db", minf(depth_db, _duck_amb.volume_db) if with_ambience else 0.0, 0.18).set_trans(Tween.TRANS_SINE)
 	tw.tween_interval(seconds)
 	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(_duck_amb, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;

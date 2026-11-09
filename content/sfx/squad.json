@@ -1,0 +1,9 @@
+{
+ "group": "squad",
+ "name": "Squad alerts",
+ "script": "tools/gen_sfx_squad.py",
+ "sounds": {
+  "squad_down": "signature", "squad_up": "signature", "squad_wipe": "signature", "squad_last": "signature"
+ },
+ "signature": []
+}
