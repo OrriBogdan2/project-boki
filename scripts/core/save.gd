@@ -142,6 +142,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
 		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
+	BokiQuirks.set_sex(rec)
 	Care.ensure(rec)
 	return rec
 
