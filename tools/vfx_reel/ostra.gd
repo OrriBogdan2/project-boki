@@ -12,7 +12,7 @@ func _part_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(T.pos)
-	await _go(5.0, cast, _sheet("r", "R, Nightwell: the dome, the whirlpool opening and pulling the dummy in, the close",
+	await _go(5.0, cast, _sheet("r", "R, Nightwell: the dome, the whirlpool opening and pulling the dummy in",
 		[0.6, 1.3, 2.0, 2.8, 3.6, 4.3, 4.65, 4.8, 4.95], func(): return (P.pos + T.pos) * 0.5), 2.5)
 	await _go(GAP)
 

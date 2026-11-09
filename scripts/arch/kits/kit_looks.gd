@@ -23,6 +23,7 @@ extends Node3D
 
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
+const WELL_SH := preload("res://shaders/nightwell.gdshader")
 ## Looks draw their variety from their own generator, never the global one (bots and rolls share it,
 ## so a rock's crack pattern must not change what a bot decides).
 static var vis_rng := RandomNumberGenerator.new()
@@ -276,34 +277,20 @@ func _build_star(n: Node3D) -> void:
 		)
 	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("d8c8ff")), Vector3.ZERO)
 
-## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
-## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
+## Ostra's Nightwell, radius 1 (scaled to the well): a whirlpool (shaders/nightwell) on a flat quad. Turn it with
+## well_set.
 func _build_well(n: Node3D) -> void:
-	Models.part(n, Models.cyl(1.0, 1.0, 0.03, 32), shade_mat(Color(0.14, 0.03, 0.3, 0.88)), Vector3.ZERO)
-	var spin := Node3D.new()
-	spin.name = "Spin"
-	n.add_child(spin)
-	var arm_mat := shade_mat(Color(0.7, 0.36, 1.0, 0.95))
-	for arm in 4:
-		for j in 6:
-			var u := float(j + 1) / 6.0
-			var ang := TAU * arm / 4.0 + u * 2.2
-			var at := Vector3(cos(ang), 0.03, sin(ang)) * u * 0.92
-			Models.part(spin, Models.box(0.03 + 0.05 * u, 0.01, 0.16), arm_mat, at, Vector3.ONE, Vector3(0, -ang, 0))
-	for i in 8:
-		var a := TAU * i / 8.0
-		Models.part(
-			spin,
-			Models.sphere(0.07, 8),
-			Models.toon(Color("0c0414"), false, 0.0),
-			Vector3(cos(a), 0.12, sin(a))
-		)
-	Models.part(
-		n,
-		Models.sphere(0.22, 14),
-		Models.glow_mat(Color(1.0, 0.31, 0.85, 0.85)),
-		Vector3(0, 0.1, 0)
-	).name = "Core"
+	var disc := PlaneMesh.new()
+	disc.size = Vector2(2.0, 2.0)
+	var mt := ShaderMaterial.new()
+	mt.shader = WELL_SH
+	Models.part(n, disc, mt, Vector3.ZERO).name = "Disc"
+
+## The well's whirlpool `secs` into its open phase; `empowered` (cast Swollen) widens and heats the rim.
+static func well_set(n: Node3D, secs: float, empowered: bool) -> void:
+	var mt := (n.get_node("Disc") as MeshInstance3D).material_override as ShaderMaterial
+	mt.set_shader_parameter("clock", secs)
+	mt.set_shader_parameter("power", 1.0 if empowered else 0.0)
 
 func _take(kind: String) -> Node3D:
 	var p: Array = pools.get(kind, [])
