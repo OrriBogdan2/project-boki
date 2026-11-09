@@ -77,11 +77,14 @@ func _shown(rv: LegendaryReveal, k: Kin) -> void:
 	ok("sting: its sound is there", ResourceLoader.exists("res://audio/legendary_sting.wav"))
 
 func _shots(main: Node, m: Match, k: Kin) -> void:
-	var at := k.global_position
-	m.player.teleport(at + Vector3(0, 0, 14))
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)      # the boot splash stays up when a check starts the match by hand
+	var start := m.player.pos           # 40+ m off (Legendary.pick_spot)
+	m.player.teleport(k.global_position + Vector3(0, 0, 7))
 	m.cam.snap(m.player.pos)
 	await _save(main, m, "reveal_near.png")
-	m.player.teleport(at + Vector3(60, 0, 60))
+	m.player.teleport(start)
 	m.cam.snap(m.player.pos)
 	await _save(main, m, "reveal_far.png")
 

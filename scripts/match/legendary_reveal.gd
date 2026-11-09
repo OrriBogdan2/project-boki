@@ -11,6 +11,7 @@ extends RefCounted
 const STING_DB := -2.0         # the sting's level: heard by everyone, no falloff
 const PULSE_HZ := 0.5          # the beam's slow breathing (cycles per second)
 const BEAM_W := 1.3            # the beam's width over the lair beam's (it stands in open ground)
+const BEAM_DROP := Vector3(0, -3.5, 0)   # m: the lair beam starts over its walls; this one at the Boki's feet
 
 var plan: SpawnPlan
 var kin: Kin = null            # the legendary while it is out; null before and after
@@ -36,7 +37,7 @@ func tick() -> void:
 	if not is_instance_valid(kin) or kin.dead:
 		clear()
 		return
-	beam.position = kin.global_position
+	beam.position = kin.global_position + BEAM_DROP
 	var k := 1.0 + 0.08 * sin(m.time * TAU * PULSE_HZ)
 	beam.scale = Vector3(BEAM_W * k, 1.0, BEAM_W * k)
 
@@ -55,7 +56,7 @@ func color() -> Color:
 func _show(m: Match) -> void:
 	beam = BossModels.alert_beam(color())
 	m.add_child(beam)
-	beam.position = kin.global_position
+	beam.position = kin.global_position + BEAM_DROP
 	m.sfx("legendary_sting", null, STING_DB)
 	var species_name := String(Data.KIN[plan.legend]["name"])
 	banner = "A legendary Boki has appeared: %s" % species_name
