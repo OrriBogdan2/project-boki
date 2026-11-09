@@ -83,7 +83,7 @@ func fresh() -> Dictionary:
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {},
+		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"buildings": [],
 		"music": [],

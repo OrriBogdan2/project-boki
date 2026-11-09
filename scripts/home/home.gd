@@ -4300,6 +4300,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	(k["node"] as Node3D).rotation.y = atan2(-(fp.x - at.x), -(fp.z - at.z))
 	var res := Care.feed(rec, f)
 	if res["ok"]:
+		GardenFirstDay.mark("feed", self)
 		# taken out of the pantry now, so two quick feeds can't both use the last one
 		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
 		else: Save.d["items"][f] = int(Save.d["items"][f]) - 1
@@ -4822,6 +4823,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	var esp: String = rec["species"] if randf() < 0.5 else ok["species"]
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_t"] = Time.get_unix_time_from_system(); ok["bred_t"] = rec["bred_t"]
+	GardenFirstDay.mark("pair", self)
 	Save.d["egg"]["gift"] = Mentor.take_gift()      # a retired mentor's gift for this egg ({} if none)
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
 	Save.remember(ok, "egg", "had an egg with %s" % rec["name"], 2.0)

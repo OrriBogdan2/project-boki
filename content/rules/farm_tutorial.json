@@ -245,10 +245,22 @@
 	"done_toast": "Tutorial done! +{gems} gems",
 	"skip_label": "Skip tutorial",
 	"stay_label": "Stay",
+	"first_day": {
+		"reward_gems": 15,
+		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.",
+		"rows": [
+			{"id": "feed", "text": "Feed your Boki"},
+			{"id": "toy", "text": "Play with a toy"},
+			{"id": "race", "text": "Run your first race"},
+			{"id": "nap", "text": "See a nap pile"},
+			{"id": "pair", "text": "Pair two Boki in the Nook"}
+		]
+	},
 	"tracker": {
 		"title": "Goals",
 		"max": 5,
 		"per_source": {
+			"first_day": 5,
 			"unlock": 2,
 			"mastery": 1,
 			"milestone": 1,

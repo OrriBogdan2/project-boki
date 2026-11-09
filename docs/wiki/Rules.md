@@ -502,7 +502,8 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
 | stay_label | Stay |
-| tracker | {"title": "Goals", "max": 5, "per_source": {"unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
+| first_day | {"reward_gems": 15, "doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.", "rows": [{"id": "feed", "text": "Feed your Boki"}, {"id": "toy", "text": "Play with a toy"}, {"id": "race", "text": "Run your first race"}, {"id": "nap", "text": "See a nap pile"}, {"id": "pair", "text": "Pair two Boki in the Nook"}]} |
+| tracker | {"title": "Goals", "max": 5, "per_source": {"first_day": 5, "unlock": 2, "mastery": 1, "milestone": 1, "level": 1}, "per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."} |
 | tool_toasts | {"axe": "Hob hands you an axe.", "pickaxe": "And a pickaxe for the rocks, too."} |
 | gems_toast | Hob gives you %d gems to buy seeds |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |

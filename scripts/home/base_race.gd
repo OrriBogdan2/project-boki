@@ -457,6 +457,7 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 	bar.close()
 	if finished:
+		GardenFirstDay.mark("race", h)
 		if solo_rec.is_empty():
 			_race_card(res)
 			result_sounds(h, res)

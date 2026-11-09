@@ -235,6 +235,7 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	for o in h.kins:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
+			GardenFirstDay.mark("nap", h)
 			add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
 
 ## HomeToys runs the play (walk, play, squabble, finish); the machine only shows it and lets go when it is done.
