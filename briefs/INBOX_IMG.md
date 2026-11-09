@@ -218,3 +218,8 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 - **Redo Gongibbon attempt 2 (owner 8.3)**: owner note first: kind of basic. Previous attempt: /home/boki/gens/gongibbon-1-art.
 - **Redo Lanterloris attempt 2 (owner 8.3)**: owner note first: kind ac onfused what this i going for. Previous attempt: /home/boki/gens/lanterloris-1-art.
 - **Redo Marchleaf attempt 2 (owner 8.4)**: owner note first: a bit generic, close. Previous attempt: /home/boki/gens/marchleaf-1-art.
+
+## 2026-11-09 07:00 UTC coordinator -> art batch: 2 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Bucketmander attempt 2 (owner 8.0)**: owner note first: close but ugly. Previous attempt: /home/boki/gens/bucketmander-3-art.
+- **Redo Glassolotl attempt 2 (owner 8.4)**: owner note first: almost there but needs to have a better pose or body ro something - the crystals arent good here.. Previous attempt: /home/boki/gens/glassolotl-2-art.
