@@ -118,6 +118,7 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 
 func _key_pill(key: String) -> Control:
 	var pill := UI.card(Color(1, 1, 1, 0.16), 3, 5)
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE      # a drag that starts on the key still drags the slot
 	pill.add_child(UI.label(key, 11, INK, UI.big))
 	return pill
 
