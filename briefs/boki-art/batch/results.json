@@ -48548,5 +48548,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_lodestaff_e1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w3",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card96",
+    "name": "Gongrowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_card96_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w3",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card96",
+    "name": "Galleotter (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_card96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card96",
+    "name": "Gongrowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_card96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card96",
+    "name": "Galleotter (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_card96_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card96",
+    "name": "Gongrowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongrowl_card96_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card96",
+    "name": "Chandelapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chandelapi_card96_2.jpg",
+    "ok": true
   }
 ]
