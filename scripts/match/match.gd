@@ -736,6 +736,9 @@ func _start(o: Dictionary) -> void:
 			biomes.place_hazards()
 		else:
 			biomes.free_up(); biomes = null
+	if big and not layout.is_empty():
+		hot = HotZone.new(world, String(o.get("hot", HotZone.pick(layout.get("islands", []), seed_val))))
+		if not hot.active(): hot = null
 	# the combat systems listen to hits and statuses: bond meter and combos
 	_bond_cb = func(a, t, amt, tags): Bond.on_hit(a, t, amt, tags)
 	_combo_cb = func(t, st, by, dur): Combos.record(t, st, by, dur)
@@ -1232,6 +1235,7 @@ const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
+var hot: HotZone = null           # this match's hot drop zone (scripts/match/hot_zone.gd)
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
 
 func _setup_ship() -> void:

@@ -1,0 +1,7 @@
+{
+	"desc": "The hot drop zone (owner, Nov 7): each match picks one named area with better loot. Picked from the map's non-perch islands by seed, never the same one twice in a row in this game. Shown on the drop map and the minimap in one colour with a label.",
+	"tier_up": 1,
+	"tier_up_doc": "Rarity steps added to chest and monster loot inside the zone (on top of the region's own bonus).",
+	"color": "ff6a3d",
+	"label": "HOT ZONE"
+}

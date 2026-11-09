@@ -270,6 +270,17 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## hot_zone (`content/rules/hot_zone.json`)
+
+The hot drop zone (owner, Nov 7): each match picks one named area with better loot. Picked from the map's non-perch islands by seed, never the same one twice in a row in this game. Shown on the drop map and the minimap in one colour with a label.
+
+| Setting | Value |
+|---|---|
+| tier_up | 1 |
+| tier_up_doc | Rarity steps added to chest and monster loot inside the zone (on top of the region's own bonus). |
+| color | ff6a3d |
+| label | HOT ZONE |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 

@@ -673,6 +673,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	_draw_map_labels(w, inner, view, k, riding)
+	if m.hot: m.hot.paint_mini(self, inner, to_map, on_map, riding)
 	if m.skytrain:
 		_draw_map_train(inner, view, k)
 	# your view cone, faintly
