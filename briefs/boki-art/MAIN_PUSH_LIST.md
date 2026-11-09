@@ -51,3 +51,9 @@ Lyrewing (harp wings), Canvastross, Tidalisk, Thistlynx/Briarlynx (cartoon face)
 from ROSTER_200_NEW.md + LIVE_MANIFEST.json.
 
 Renames: see briefs/boki-art/NAME_CHANGES.md (13 old -> new names; owner authorized 04:54 ET, may veto). Art files keep old names; use LIVE_MANIFEST.json "display_name" and keep the old name as an alias in game data.
+
+## 5. Male/female looks in the Bokidex and game (owner 14:34 ET 11-09: "make sure we are putting female/male differences in visuals in the bokidex, make sure main does this")
+- Species with "sex_forms": true in LIVE_MANIFEST.json show the female look when the Boki is female (GAME_RULES_NOV8.md section 6; sex is 50/50, saved per Boki).
+- Art: the main sheet/card/portrait is the male look. The entry's "female" block holds the female sheet/card/portrait as they land. Babies differ little or not at all, so they may have no "female" block: use the main art.
+- Lines: Bellowlet > Furnacowary; Gongibbon > Gongrowl; Kestrike > Arcestrel > Voltalon; Mothlet > Lunowl > Eclipsowl; Murmurling > Murmuron; Grainspin > Sandwidow > Hourachnid; Pavonazar (rare).
+- Ready now: female sheets for Kestrike, Lunowl, Gongibbon. Generating: Furnacowary, Eclipsowl, Murmurling, Murmuron, Sandwidow (sheet + card), then Voltalon, Arcestrel and Gongrowl.

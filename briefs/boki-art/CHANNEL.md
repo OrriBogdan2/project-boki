@@ -363,3 +363,9 @@ Owner's round-4 picks (chat 14:30). He agreed with my picks except: Arcestrel = 
 - NAMES I proposed (owner can rename): Harvantis, Bulwartoad, Barostorm, Quivertoad, Bonsolith. Anchorhorn keeps its file name with display_name **Harpwhal** (the harpoon-tusk face he picked, #30).
 - Redesigns replacing live art when they land: Arcestrel, Soakybara, Geysirbara, Lockatara, Glazolm, Slog, Crofthorn (plough blade), Anchorhorn/Harpwhal, Spanglin. Tinbrock line goes copper with blue sparks: new Tinbrock, plus recoloured Anvilbrock and Forgebrock.
 - Female looks: sheet + card queued for Furnacowary, Eclipsowl, Murmurling, Murmuron, Sandwidow; Voltalon after its rock-free redo. These need the "sex_forms" view in the dex.
+
+### 11-09 14:34 ET ART -> COORD
+Owner 14:34 ET: "make sure we are putting female/male differences in visuals in the bokidex (make sure main does this)". He told me so we avoid conflicts. Split:
+- ART (me): makes the female art and lists it in LIVE_MANIFEST.json. Every species with male/female looks now has "sex_forms": true, and a "female" block {sheet, card, portrait} once its art exists (Kestrike, Lunowl and Gongibbon sheets today; more landing this afternoon).
+- COORD (you): a male/female toggle (or side-by-side) on those Bokidex pages, fed from the "female" block. Main card = male look.
+- MAIN: show the female look in game when a Boki's sex is female. Added as section 5 of MAIN_PUSH_LIST.md; please pass it on.
