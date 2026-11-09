@@ -3,6 +3,14 @@ extends RefCounted
 ## How many particles the scene is drawing: the VFX budget (docs/PERF.md, under 4,000 on screen at once) is
 ## counted here, by --perf-bench and --particle-budget-check.
 
+## A CPU emitter built for the full look, cut to the preset in effect: fewer particles that live shorter
+## (Settings.QUALITY fx and fx_life; High and Ultra leave it as it is).
+static func tune(p: CPUParticles3D) -> void:
+	var life := float(Settings.q("fx_life"))
+	p.amount = maxi(2, int(round(p.amount * float(Settings.q("fx")))))
+	p.lifetime *= life
+	p.preprocess *= life
+
 
 ## A GPU emitter simulates amount x amount_ratio particles whether or not it is on screen; a CPU one amount.
 static func of(n: Node) -> int:
