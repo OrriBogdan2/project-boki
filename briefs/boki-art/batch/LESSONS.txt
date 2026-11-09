@@ -1,0 +1,7 @@
+# Lessons from the review panel and the owner. Every line below is added to every new prompt (build_jobs.py).
+# Add a line whenever the same failure shows up 3+ times. Keep each line short and concrete.
+No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn.
+No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea.
+No faded, ghost or duplicate rows of the creature: exactly one clean row of views.
+Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality.
+No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body.
