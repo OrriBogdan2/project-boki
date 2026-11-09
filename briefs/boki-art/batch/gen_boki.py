@@ -22,7 +22,7 @@ def main():
     ap.add_argument("--push", action="store_true", help="git commit and push the new images")
     ap.add_argument("--only", default="", help="comma-separated job ids")
     ap.add_argument("--size", default=None, help="override size, e.g. 2K")
-    ap.add_argument("--parallel", type=int, default=12, help="images generated at the same time")
+    ap.add_argument("--parallel", type=int, default=24, help="images generated at the same time")
     ap.add_argument("--watch", action="store_true", help="keep running: pull new jobs every minute, generate, push")
     a = ap.parse_args()
     if not any(os.environ.get(k) for k in ("GEMINI_API_KEY", "OPENROUTER_API_KEY", "GOOGLE_CLOUD_PROJECT", "VERTEX_API_KEY")):
@@ -176,13 +176,13 @@ def openrouter_image(prompt, ref_paths, aspect, size):
     return base64.b64decode(d["b64_json"])
 
 def watch():
-    print("Watch mode: checking for new jobs every 60 s. Press Ctrl+C to stop.")
+    print("Watch mode: checking for new jobs every 20 s. Press Ctrl+C to stop.")
     while True:
         subprocess.run(["git", "pull", "--rebase", "--autostash", "-q"], cwd=ROOT)
         rc = subprocess.run([sys.executable, __file__, "--push"] + [x for x in sys.argv[1:] if x != "--watch"], cwd=ROOT).returncode
         if rc not in (0, None):
             print("run exited with", rc)
-        time.sleep(60)
+        time.sleep(20)
 
 if __name__ == "__main__":
     if "--watch" in sys.argv:
