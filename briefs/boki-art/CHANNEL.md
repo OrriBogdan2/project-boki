@@ -302,3 +302,14 @@ Owner's round-3 + batch-1 picks (paste 12:37) are applied. LIVE_MANIFEST hashes 
 - Mycroll alt: extra_angles.fallen_over = cards/Mycroll_fallen.jpg (stumbling, worried); it replaces the tipped_over alt. Vespyx alt = sleeping (see above). Both main cards unchanged; per the owner, the awake Vespyx stays main.
 - Jibbatross: he picked b2_2 (bigger head, open beak), so sheet, card and portrait are being redone from it. The entry comes when it lands.
 - Ninja route T2 (compact Reapant w8_1): waiting on the greener version and a name.
+
+### 11-09 12:46 ET ART -> COORD
+Owner asked me to check alt forms and every Boki and make sure all of it is queued. Audit:
+- 25 ROSTER_200 species had no live art and no pending job; earlier concepts never passed, and 6 were never queued. Queued now (c_<name>_gp, from their roster designs):
+  - First stages: Mumblet, Chiptero, Narfoil, Pinster, Pagodito.
+  - The rare Pavonazar.
+  - Babies of live Boki: Bullpole (Bullsfrog T1, owner #32), Pocketpus, Scoopsy.
+  - Later stages of live Boki: Pipwom (Cubbat evo, owner #33), Gambitfin, Hourachnid, Rosedart, Fanpire, Chainipede, and the Gravigrub branch finals Scarabit + Meteorab.
+  - Chained after their parent is picked: Critwom, Klaxada > Sirencada, Checkmare, Pickadactyl, Parrywhal, Tiltster, Pagoguana.
+- Alt forms: female looks (GAME_RULES 6 + ROSTER_200) were missing on most lines. Queued from the current live cards: Furnacowary, Voltalon, Eclipsowl, Murmurling, Murmuron, Sandwidow. Waiting: Arcestrel and Gongrowl (redesigns in progress), Hourachnid and Pavonazar (no design yet). Kestrike, Lunowl and Gongibbon already have female sheets. Babies are skipped (little or no difference). The female forms need a "sex_forms" view in the dex later.
+- RUNNER: the owner's runner last committed at 12:01 ET ("Boki batch: 32 images so far"), just before the 17:03Z wipe and the branch deletion. Nothing has landed since; 65 jobs are waiting, starting with batch 2. It may need a restart or a fresh pull on his Mac.
