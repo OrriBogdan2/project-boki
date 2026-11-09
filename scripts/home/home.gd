@@ -2784,6 +2784,11 @@ func _kin_act(k: Dictionary) -> void:
 		"brush": _care_brush(rec)
 		_: _pet_kin(k)
 
+## Farm XP for a kin (GardenXp); a form or mutation it earns plays out as soon as nothing is open.
+func _garden_xp(rec: Dictionary, action: String, love: bool, points := 0) -> void:
+	GardenXp.give(rec, action, love, points)
+	_play_evolutions.call_deferred()
+
 func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	if float(k.get("nap_t", 0.0)) > 0.0:
@@ -2794,6 +2799,7 @@ func _pet_kin(k: Dictionary) -> void:
 	if now_s >= float(k.get("pet_ok", 0.0)):
 		k["pet_ok"] = now_s + 20.0
 		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
+		_garden_xp(rec, "pet", loves_pet)
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
@@ -2862,6 +2868,7 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				Care.change(rec, "joy", 24.0 if loves_fetch else 14.0)
 				Care.change(rec, "energy", -6.0)
 				Care.change(rec, "clean", -4.0)
+				_garden_xp(rec, "fetch", loves_fetch)
 				if loves_fetch and Care.discover(rec, "play"): _toast("%s loves playing fetch" % rec["name"])
 				if int(rec.get("played", -1)) != int(Save.d["matches"]):
 					rec["played"] = int(Save.d["matches"])
@@ -4270,6 +4277,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if Data.CROPS.has(f):
 		for af in Evo.AFF:
 			if Evo.AFF[af]["food"] == f: Evo.add(rec, af, 6.0)
+	_garden_xp(rec, "feed", res["love"])
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
@@ -4506,6 +4514,7 @@ func _finish_training() -> void:
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
+	_garden_xp(rec, "drill", false, pts)
 	if int(rec.get("trained_m", -1)) != int(Save.d["matches"]):
 		rec["trained_m"] = int(Save.d["matches"])
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)

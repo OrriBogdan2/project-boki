@@ -256,6 +256,22 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | gems_toast | Hob gives you %d gems to buy seeds |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |
 
+## garden_xp (`content/rules/garden_xp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models. |
+| feed | 2 |
+| feed_love | 5 |
+| pet | 1 |
+| pet_love | 2 |
+| fetch | 3 |
+| fetch_love | 6 |
+| drill_per_point | 1 |
+| pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0} |
+
 ## gear (`content/rules/gear.json`)
 
 
