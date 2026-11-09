@@ -3424,3 +3424,6 @@ READY ext/farm-tut-tools-cam 2781ad15e (job 20261109-001512-a1, deep follow-up t
 
 ## 2026-11-09 deep (job 20261109-003042-a4): CLAIM Boki 3D: Mirrolin (nacrolin) from the owner's new concept sheet
 - CLAIM: BOKI_50_DESIGNS 'Mirrolin (`nacrolin`)' REDESIGNED, new model from briefs/art-refs/boki/nacrolin_turnaround.png (7e91f47b5): sheet check, then build via tools/art1 + Meshy, shared rig for its body type, standard clip set, Boki checks, turntable. Branch ext/boki-nacrolin-v2 from origin/main.
+
+## 2026-11-09 deep (job 20261109-003111-a4): CLAIM Boki 3D: Chuggamus (scaldamus) from the owner's new concept sheet
+- CLAIM: sheet check of briefs/art-refs/boki/scaldamus_turnaround.png, then Meshy build via tools/art1 + tools/meshy/meshy_task.py on the shared rig for its body type, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-scaldamus from origin/main.
