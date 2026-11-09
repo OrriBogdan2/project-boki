@@ -11840,5 +11840,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_lurklet_e_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_mumblet_e",
+    "name": "Mumblet (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_e",
+    "name": "Mumblet (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pawnfry_e",
+    "name": "Pawnfry (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pawnfry_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_polyshroom_e",
+    "name": "Polyshroom (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_polyshroom_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pawnfry_e",
+    "name": "Pawnfry (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pawnfry_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pawnfry_e",
+    "name": "Pawnfry (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pawnfry_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_polyshroom_e",
+    "name": "Polyshroom (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_polyshroom_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_e",
+    "name": "Mumblet (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_1.jpg",
+    "ok": true
   }
 ]
