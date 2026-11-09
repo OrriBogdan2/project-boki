@@ -44201,5 +44201,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_lyrewing_p83_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lyrewing_p83",
+    "name": "Lyrewing (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lyrewing_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lyrewing_p83",
+    "name": "Lyrewing (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lyrewing_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth_p83",
+    "name": "Parasolth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth_p83",
+    "name": "Parasolth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossbastion_p83",
+    "name": "Mossbastion (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_mossbastion_p83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossbastion_p83",
+    "name": "Mossbastion (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mossbastion_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_p83",
+    "name": "Pipeworth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ribbonwyrm_p83",
+    "name": "Ribbonwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_p83_2.jpg",
+    "ok": true
   }
 ]
