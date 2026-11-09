@@ -37852,5 +37852,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_glaciatee_s1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaciatee_s2",
+    "name": "Glaciatee (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s3",
+    "name": "Glaciatee (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s4",
+    "name": "Glaciatee (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s5",
+    "name": "Glaciatee (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s1",
+    "name": "Glaciatee (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s2",
+    "name": "Glaciatee (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s1",
+    "name": "Glaciatee (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciatee_s1",
+    "name": "Glaciatee (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaciatee_s1_3.jpg",
+    "ok": true
   }
 ]
