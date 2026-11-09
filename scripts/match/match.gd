@@ -3886,6 +3886,7 @@ func step(dt: float) -> void:
 		# (keys pressed meanwhile don't carry over: a Space now must not jump you off at the edge)
 		for k in pending_input: pending_input[k] = false
 		skydrop.tick_plan(dt)
+		hints.tick(dt)      # (the hot zone's hint goes with the drop map)
 		if String(opts.get("map_demo", "")) == "plan" and player and skydrop.clock > 1.2 and not has_meta("map_demo_done"):
 			# test: your ping on a vault, beside the bots' picks
 			set_meta("map_demo_done", true)
