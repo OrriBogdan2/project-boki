@@ -1,4 +1,4 @@
-"""ART-1 Vex, stage A (from kael_source.py): the Meshy scan of the owner's turnaround -> the contract's rest pose.
+"""ART-1 Vex, stage A (from kael_source.py): the Meshy scan of the owner's v2 turnaround (briefs/art-refs/vex_v2/) -> the contract's rest pose.
 Scan joints are read off gridded renders; each vertex gets soft weights by distance to the bone segments, then moves bone by
 bone onto the rig (a length along the bone, a girth across it), so the proportions land on the armature without Blender's bone
 heat. Then the rebuilt parts are cut away and the body decimated. In: the scan glb, kael_rig.json. Out: stage/source.blend,
@@ -16,12 +16,12 @@ SCAN, RIG, OUT = a[0], a[1], a[2]
 LOW_TRIS = 5400
 CUT_FORE = 0.12                  # along the left forearm: the sleeve ends here
 CHIN_Z = 1.668                   # the scan head goes above this; rebuilt from the scan in vex_head
-SOLE = -0.95                    # the scan's sole (z)
+SOLE = -0.946                   # the scan's sole (z)
 ANKLE = 0.16                    # the rig has no ankle node: the foot bone sits here (sole on 0)
 # Scan joints (flipped to face +Y, his right +X, z from the sole), measured on grid_front/grid_right.
-S_J = {"neck": (0, -0.02, 1.614), "pelvis": (0, -0.02, 1.03), "crown": (0, -0.02, 1.9), "shoulder.R": (0.18, -0.02, 1.54), "elbow.R": (0.31, -0.02, 1.26), "wrist.R": (0.47, 0, 1.09),
-       "shoulder.L": (-0.18, -0.02, 1.54), "elbow.L": (-0.30, -0.02, 1.26), "wrist.L": (-0.47, 0, 1.09), "hip.R": (0.095, -0.01, 1.01), "knee.R": (0.16, -0.02, 0.59),
-       "ankle.R": (0.19, -0.07, 0.17), "hip.L": (-0.095, -0.01, 1.01), "knee.L": (-0.155, -0.02, 0.59), "ankle.L": (-0.19, -0.07, 0.17)}
+S_J = {"neck": (0, -0.02, 1.616), "pelvis": (0, -0.02, 1.03), "crown": (0, -0.02, 1.896), "shoulder.R": (0.18, -0.02, 1.53), "elbow.R": (0.265, -0.02, 1.245),
+       "wrist.R": (0.425, 0, 1.02), "shoulder.L": (-0.18, -0.02, 1.53), "elbow.L": (-0.258, -0.02, 1.245), "wrist.L": (-0.424, 0, 1.016), "hip.R": (0.095, -0.01, 1.0),
+       "knee.R": (0.11, -0.02, 0.566), "ankle.R": (0.14, -0.07, 0.166), "hip.L": (-0.095, -0.01, 1.0), "knee.L": (-0.11, -0.02, 0.566), "ankle.L": (-0.136, -0.07, 0.166)}
 # name: (scan head, scan tail, rig head bone, rig tail bone or point, reach radius, girth)
 rig = json.load(open(RIG))["bones"]
 
@@ -152,11 +152,11 @@ low = src.copy()
 low.data = src.data.copy()
 low.name = "Low"
 bpy.context.scene.collection.objects.link(low)
-# cut: her whole right arm (the cannon replaces it, the shoulder plate closes the hole), the left forearm below the sleeve and the hand (rebuilt in vex_arm)
+# cut: her right forearm and hand (the minigun is her forearm from the elbow down, its cuff closes the sleeve), the left forearm below the sleeve and the hand (rebuilt in vex_arm)
 elbow = np.array(S_J["elbow.L"], float); wrist = np.array(S_J["wrist.L"], float); u_ = wrist - elbow
 hL = ((P - elbow) @ u_) / (u_ @ u_)
 cutL = (hL > CUT_FORE) * (GROUP["forearm.L"] + GROUP["hand.L"]) 
-cutR = GROUP["upper_arm.R"] + GROUP["forearm.R"] + GROUP["hand.R"]
+cutR = GROUP["forearm.R"] + GROUP["hand.R"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()

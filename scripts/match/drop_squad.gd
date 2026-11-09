@@ -225,7 +225,7 @@ func pass_lead(h: Hunter, to: Hunter = null, from_net := false) -> bool:
 
 ## Break away from the squad's drop: you jump and steer on your own.
 func separate(h: Hunter, from_net := false) -> bool:
-	if is_lead(h) or h.drop_solo or not (h.riding or h.dropping):
+	if is_lead(h) or h.drop_solo or not (h.riding or h.dropping) or not DropLaunch.can_separate(h):
 		return false
 	h.drop_solo = true
 	h.drop_follow = null
