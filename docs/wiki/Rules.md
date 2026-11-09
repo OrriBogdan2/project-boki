@@ -503,6 +503,42 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | face | {"bulwark": [0.52, 0.29], "archer": [0.39, 0.38], "juggernaut": [0.49, 0.33], "thief": [0.42, 0.38], "mage": [0.52, 0.46], "dolm": [0.47, 0.37], "ostra": [0.44, 0.47], "ashwick": [0.55, 0.33], "gunslinger": [0.41, 0.32], "tender": [0.49, 0.41], "rimewright": [0.42, 0.47], "dredge": [0.41, 0.44]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.35, 0.36], "juggernaut": [0.58, 0.3], "thief": [0.7, 0.19], "mage": [0.55, 0.22], "dolm": [0.57, 0.32], "ostra": [0.71, 0.25], "ashwick": [0.52, 0.27], "rimewright": [0.64, 0.23], "dredge": [0.73, 0.25], "gunslinger": [0.64, 0.19], "tender": [0.23, 0.32]} |
 
+## race (`content/rules/race.json`)
+
+The Dash, the first Boki-vs-Boki race (scripts/home/base_race.gd, briefs/design/GARDEN.md section 5). Metres, seconds, metres per second.
+
+| Setting | Value |
+|---|---|
+| stretches | [{"id": "straight", "name": "the straight", "to": [8.0, 0.0], "stats": {"speed": 1.0}, "lean": ["ember", "storm", "venom"]}, {"id": "water", "name": "the pond", "to": [8.0, -4.5], "stats": {"speed": 0.5, "guard": 0.5}, "lean": ["frost", "lunar", "prism"]}, {"id": "climb", "name": "the climb", "to": [3.0, -4.5], "stats": {"speed": 0.5, "power": 0.5}, "lean": ["stone", "titan", "gravity", "spore", "swarm"]}, {"id": "jump", "name": "the gap", "to": [0.0, 0.0], "stats": {"speed": 0.5, "focus": 0.5}, "lean": ["tempest", "echo", "shadow", "bloom"]}] |
+| _stretches | the loop from the start post, in order: where each stretch ends (x, z from the post), which Care stats set its pace (weights), and which element leans run it best |
+| base_mps | 1.6 |
+| _base_mps | pace of a Boki with no trained stats |
+| stat_mps | 0.02 |
+| _stat_mps | extra pace per weighted stat point (stats run 0 to 12 + 6 a level) |
+| lean_edge | 0.25 |
+| _lean_edge | pace bonus on a stretch that suits the Boki's element lean (Frost swims the pond, Tempest glides the gap) |
+| mood_edge | 0.12 |
+| _mood_edge | pace swing from mood: Care.condition 100 is this much faster, 0 this much slower, 50 even |
+| wobble | 0.18 |
+| _wobble | random pace swing either way, rerolled every wobble_s, so the favourite can still lose |
+| wobble_s | 0.7 |
+| cheer_marks | [0.25, 0.5, 0.75] |
+| _cheer_marks | how far round the loop your Boki is when each cheer press comes up |
+| cheer_boost | {"great": 0.3, "good": 0.15, "miss": 0.0} |
+| _cheer_boost | pace bonus for cheer_s after a press, by how well it was timed (the Training post drill's grades) |
+| cheer_s | 2 |
+| cheer_window_s | 1.8 |
+| _cheer_window_s | how long the cheer bar waits for a press before it counts as a miss |
+| win_joy | 15 |
+| win_trust | 3 |
+| lose_joy | -6 |
+| _lose_joy | the loser sulks: joy lost per race lost |
+| gems_backed_win | 3 |
+| gems_other_win | 1 |
+| _gems_backed_win | gems for you when the Boki you cheered for wins (gems_other_win when another of yours does) |
+| rival_nudge | 0.05 |
+| _rival_nudge | how far a race moves the winner and each loser toward rivals (rec bonds, -1 to 1) |
+
 ## revive (`content/rules/revive.json`)
 
 

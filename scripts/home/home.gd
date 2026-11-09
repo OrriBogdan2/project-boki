@@ -57,6 +57,7 @@ var hob: FarmHob = null            # Hob the builder: talks, blueprints, the sec
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var toys: HomeToys = null        # the base's balls, posts and tubs, played with on their own (home_toys.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
+var race: BaseRace = null     # the Dash start post by the Training post (base_race.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
@@ -1021,6 +1022,7 @@ func _process(delta: float) -> void:
 	if hg: hg.tick(d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	if race: race.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
@@ -2014,6 +2016,7 @@ func _find_interact() -> void:
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
+	if race and race.near(p2) and best.is_empty(): best = {"kind": "race"}
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2160,6 +2163,7 @@ func _label_for(it: Dictionary) -> String:
 			return "Spend time with %s" % rec["name"]
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
+		"race": return race.prompt()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2194,6 +2198,7 @@ func _use(it: Dictionary) -> void:
 		"yard":
 			var ak := Save.active_kin()
 			if not ak.is_empty(): _open_train(ak)
+		"race": race.start()
 		"nook": _open_nook()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
@@ -2219,6 +2224,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 	elif hb and event.is_action_pressed("build") and hb.can_build():
 		hb.toggle()
+		get_viewport().set_input_as_handled()
+		return
+	if race and race.input(event):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
@@ -4007,6 +4015,8 @@ func _setup_care() -> void:
 	if visit.is_empty():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
+		race = BaseRace.new(self)
+		race.build()
 	if not visit.is_empty():
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
@@ -4431,14 +4441,7 @@ func _train_label() -> void:
 func _draw_train() -> void:
 	if train.is_empty() or not is_instance_valid(train_draw):
 		return
-	var w := train_draw.size.x
-	var h := train_draw.size.y
-	train_draw.draw_rect(Rect2(0, h * 0.3, w, h * 0.4), Color(1, 1, 1, 0.1))
-	var z: float = train["zone"]
-	train_draw.draw_rect(Rect2(w * (z - 0.16), h * 0.3, w * 0.32, h * 0.4), Color(UI.ACCENT, 0.45))
-	train_draw.draw_rect(Rect2(w * (z - 0.06), h * 0.2, w * 0.12, h * 0.6), UI.GOLD)
-	var mx := w * float(train["m"])
-	train_draw.draw_rect(Rect2(mx - 3, 0, 6, h), UI.INK)
+	TimingDrill.draw(train_draw, train)
 
 func _train_process(d: float) -> void:
 	if train.is_empty():
@@ -4448,17 +4451,13 @@ func _train_process(d: float) -> void:
 		if float(train["wait"]) <= 0.0 and int(train["round"]) >= 3:
 			_finish_training()
 		return
-	var m := float(train["m"]) + float(train["dir"]) * float(train["speed"]) * d
-	if m > 1.0: m = 2.0 - m; train["dir"] = -1.0
-	if m < 0.0: m = -m; train["dir"] = 1.0
-	train["m"] = m
+	TimingDrill.sweep(train, d)
 	if is_instance_valid(train_draw): train_draw.queue_redraw()
 
 func _train_hit() -> void:
 	if train.is_empty() or float(train["wait"]) > 0.0:
 		return
-	var off := absf(float(train["m"]) - float(train["zone"]))
-	var r := "great" if off < 0.06 else ("good" if off < 0.16 else "miss")
+	var r := TimingDrill.grade(train)
 	train["results"].append(r)
 	train["round"] = int(train["round"]) + 1
 	train["wait"] = 1.1
