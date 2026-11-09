@@ -74,6 +74,7 @@ const CHECKS := {
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185
 	"--boki-agency-check": ["res://tools/boki_agency_check.gd", "boki_agency_check", null],      # item 184b
+	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],      # golden Hunter movement traces (--update)
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
