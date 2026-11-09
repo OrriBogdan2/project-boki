@@ -56,3 +56,10 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+
+## Shot floor (LMB projectiles)
+Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s
+beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p at the default camera distance, inside a
+side-coded rim (foe's shots red-orange, your side's cool and softer), drawn over particles (render priority). The shot keeps
+its own look and Hunter ability colour. It is visual only: the hit radius `s["r"]` is never touched. `--shot-size-check`
+reads each kit's beacon radius in pixels at 720p and 1080p; `--shot-size-shots --shots-dir=<dir> --res=720|1080` shoots them.
