@@ -4374,3 +4374,13 @@ ART pawnfry 8.5 briefs/boki-art/turnarounds/Pawnfry.jpg kind=turnaround panel=8.
 ART pocketpus 8.43 briefs/boki-art/batch/out/ta_pocketpus_1.jpg kind=turnaround status=owner-review panel=8.4/8.5/8.4
 ART polyshroom 8.53 briefs/boki-art/turnarounds/Polyshroom.jpg kind=turnaround panel=8.4/8.6/8.6
 ART proofhop 8.5 briefs/boki-art/turnarounds/Proofhop.jpg kind=turnaround panel=8.4/8.5/8.6
+
+## 01:12 ET 11-09 — art session: round 29 results, group s9 (evolution sheets + relics)
+Pass: Sparkle relic. Owner review below (3 relaid to one row by script). Round 29 complete; round 30 fixes queued (_w30).
+ART anchorbill 8.37 briefs/boki-art/review/anchorbill_r2_w29_1_row.jpg kind=turnaround status=owner-review panel=8.3/8.4/8.4
+ART kestrike 8.43 briefs/boki-art/batch/out/kestrike_f_e_w29_3.jpg kind=turnaround status=owner-review panel=8.4/8.5/8.4
+ART mothlet 8.47 briefs/boki-art/batch/out/mothlet_r3_w29_3.jpg kind=turnaround status=owner-review panel=8.4/8.4/8.6
+ART relic sparkle briefs/boki-art/relics/Sparkle.jpg grade 8.53/10
+ART wickapi 8.33 briefs/boki-art/batch/out/wickapi_r2_w29_2.jpg kind=turnaround status=owner-review panel=8.2/8.2/8.6
+ART geysirbara 8.27 briefs/boki-art/review/geysirbara_r2_w29_1_row.jpg kind=turnaround status=owner-review panel=8.0/8.4/8.4 note=relaid-out-to-one-row
+ART lanceron 8.23 briefs/boki-art/review/lanceron_r_w29_1_row.jpg kind=turnaround status=owner-review panel=8.1/8.2/8.4 note=relaid-out-to-one-row
