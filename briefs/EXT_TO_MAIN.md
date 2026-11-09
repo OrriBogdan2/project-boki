@@ -3771,3 +3771,5 @@ READY ext/ui-void-masks-2 08c29a320 (job 20261109-014512-a1, deep follow-up to 2
 - --perf-budget-check low (rp1-1): draws 1112 PASS, tris 492k PASS, shadow lights 1 PASS, frame ms worst 308 FAIL (script/hitch-bound, expedition-fps/load-shaders slice).
 - Texture audit rechecked: the lossless PNGs are vendor palettes (1024², no mips on purpose), face/card atlases and UI; GLB textures are extracted and imported with VRAM compression. Nothing changed.
 - Checks: --quality-check 0 fails, health --strict OK. Not merged.
+
+READY ext/hunter-screen-name-v2 (w2, 11-09): hunter screens show NAME (Tenzo) big, title subtitle. PR not opened (no gh on w2; open from branch). Shots: docs/shots/hunter_name_{before,after}.png on the branch. Supersedes ext/hunter-screen-name. Checks: health --strict, hero-title, hunter-unlock, class-unlock ok.
