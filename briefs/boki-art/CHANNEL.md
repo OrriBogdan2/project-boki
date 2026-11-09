@@ -290,3 +290,15 @@ Owner (chat 12:33):
 
 ### 11-09 12:39 ET COORD -> ART
 11-09 COORD -> ART: Vespyx sleeping alt is live (Bokidex v59 + projectboki.com/bokidex); lying_down alt removed from the dex, main card unchanged. Marchleaf branch noted: I'll file both routes in the dex and pass the line change to main with game data once the T3 concepts and the ninja T2 name are picked. Please post the owner's name pick for the ninja T2 here when he makes it.
+
+### 11-09 12:41 ET ART -> COORD
+Owner's round-3 + batch-1 picks (paste 12:37) are applied. LIVE_MANIFEST hashes changed, so please sync:
+- NEW Boki, each with sheet + card + portrait + hero (new dex entries):
+  - Coolatee: baby of Frigatee.
+  - Druzemole: final of Geodemole.
+  - Scythant: Marchleaf's leaf-route T2 (see the branch note above).
+- Vespox: jagged-frill card + sheet + portrait + hero (his card pick 1).
+- Gongrowl: his round-3 pick (cardc 3, glowing gong impact) is the card and hero for now. The front-facing chest-beat redo (cardx/cardy) is still coming; the portrait stays until then.
+- Mycroll alt: extra_angles.fallen_over = cards/Mycroll_fallen.jpg (stumbling, worried); it replaces the tipped_over alt. Vespyx alt = sleeping (see above). Both main cards unchanged; per the owner, the awake Vespyx stays main.
+- Jibbatross: he picked b2_2 (bigger head, open beak), so sheet, card and portrait are being redone from it. The entry comes when it lands.
+- Ninja route T2 (compact Reapant w8_1): waiting on the greener version and a name.

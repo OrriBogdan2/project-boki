@@ -752,9 +752,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Gongrowl.png",
   "hash": {
    "sheet": "5c63f212be66",
-   "card": "80a37563b3d9",
+   "card": "da5c7a4c158b",
    "portrait": "856d1b08ade8",
-   "hero": "777a69836721"
+   "hero": "6cd1eaa8ca9e"
   }
  },
  "Grainspin": {
@@ -1298,9 +1298,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Mycroll.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Mycroll.png",
   "extra_angles": {
-   "tipped_over": {
-    "card": "briefs/boki-art/cards/Mycroll_tipped.jpg",
-    "portrait": "briefs/boki-art/portraits/light/Mycroll_tipped.jpg"
+   "fallen_over": {
+    "card": "briefs/boki-art/cards/Mycroll_fallen.jpg",
+    "note": "owner 12:37 ET 11-09: fallen over on its side, stumbling and worried (xang_mycroll_fallen_3); alt only, main card unchanged"
    }
   },
   "hash": {
@@ -2074,10 +2074,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Vespox.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Vespox.png",
   "hash": {
-   "sheet": "3647f4f22210",
-   "card": "2cb359da3778",
-   "portrait": "7fb37c7d16ed",
-   "hero": "f7054775d4e4"
+   "sheet": "e856db828057",
+   "card": "c44aba782d79",
+   "portrait": "fe7432b8ad33",
+   "hero": "44704c30eced"
   }
  },
  "Vespyx": {
@@ -2439,6 +2439,45 @@
    "card": "02ee46c5c113",
    "portrait": "0a2e91a90209",
    "hero": "612957861f14"
+  }
+ },
+ "Coolatee": {
+  "sheet": "briefs/boki-art/turnarounds/Coolatee.jpg",
+  "card": "briefs/boki-art/cards/Coolatee.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Coolatee.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
+  "hash": {
+   "sheet": "328270117d7d",
+   "card": "165c25b22a98",
+   "portrait": "dcc513e9bf4d",
+   "hero": "eb6ec111d839"
+  }
+ },
+ "Druzemole": {
+  "sheet": "briefs/boki-art/turnarounds/Druzemole.jpg",
+  "card": "briefs/boki-art/cards/Druzemole.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Druzemole.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Druzemole.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Druzemole.png",
+  "hash": {
+   "sheet": "4119a5c26c25",
+   "card": "8d58ebcfd764",
+   "portrait": "2326caa81fcb",
+   "hero": "71c60ea75bac"
+  }
+ },
+ "Scythant": {
+  "sheet": "briefs/boki-art/turnarounds/Scythant.jpg",
+  "card": "briefs/boki-art/cards/Scythant.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Scythant.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Scythant.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Scythant.png",
+  "hash": {
+   "sheet": "3dbf8be97582",
+   "card": "c90a18d0d408",
+   "portrait": "8d7153c2b97b",
+   "hero": "1fb35a5ab890"
   }
  }
 }

@@ -1,7 +1,7 @@
-# Boki art live manifest (regenerated 11:23 UTC 11-09)
+# Boki art live manifest (regenerated 12:40 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-186 Boki, 186 with all three. Missing something: 
+189 Boki, 189 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -31,6 +31,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Chuggamus | ✓ | ✓ | ✓ |
 | Cisternmander (Vatmander) | ✓ | ✓ | ✓ |
 | Clinkpede | ✓ | ✓ | ✓ |
+| Coolatee | ✓ | ✓ | ✓ |
 | Crofthollow | ✓ | ✓ | ✓ |
 | Crofthorn | ✓ | ✓ | ✓ |
 | Cubbat | ✓ | ✓ | ✓ |
@@ -40,6 +41,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Dreadmonite | ✓ | ✓ | ✓ |
 | Dreadnoyak | ✓ | ✓ | ✓ |
 | Dribbara | ✓ | ✓ | ✓ |
+| Druzemole | ✓ | ✓ | ✓ |
 | Echolop | ✓ | ✓ | ✓ |
 | Eclipsowl | ✓ | ✓ | ✓ |
 | Effigeetle | ✓ | ✓ | ✓ |
@@ -152,6 +154,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Sandwidow | ✓ | ✓ | ✓ |
 | Sarcobra | ✓ | ✓ | ✓ |
 | Scopeleon | ✓ | ✓ | ✓ |
+| Scythant | ✓ | ✓ | ✓ |
 | Seamwyrm | ✓ | ✓ | ✓ |
 | Selenfin | ✓ | ✓ | ✓ |
 | Selenwhale (Lunarca) | ✓ | ✓ | ✓ |

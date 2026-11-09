@@ -35,3 +35,6 @@ DROP|={s['id'] for s in SPECS if (s['id'] in {n+'_card' for n in _PICKED}|{n+'_c
 # 06:25 ET: stance jobs for Boki under redesign are pointless (the design is changing). Drop them all.
 _REDES=('vaultara','dreadnoyak','voltalon','geysirbara','chuggamus','seamwyrm','forgebrock','furnacowary','lanternmit','stormit','terrarimit','sporcupine','geodemole','skateron','dragonkite','gongrowl','galleotter','chandelapi','reapant')
 DROP|={s['id'] for s in SPECS if 'stance' in s['id'] and any(n in s['id'] for n in _REDES)}
+# 12:41 ET 11-09: owner-picked new designs (OWNER REVIEW batch 1): no auto hero-card or stance re-poses over the picked cards.
+_PICKED_B1=('coolatee','druzemole','scythant','jibbatross')
+DROP|={s['id'] for s in SPECS if s['id'] in ({n+'_card' for n in _PICKED_B1}|{n+'_card3' for n in _PICKED_B1}|{p+n for n in _PICKED_B1 for p in ('stance_','portrait_stance3_','portrait_stance2_')})}
