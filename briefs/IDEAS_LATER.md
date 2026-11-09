@@ -7,8 +7,8 @@
 - 2026-11-09 Types: if a type is thin (no Ghost or Ground now, low Normal/Psychic/Spore), add new Boki or
   new types later; the type list is allowed to grow.
 
-## Blight ground hazard (owner, 2026-11-09)
-Blighted areas have Blight sludge on the ground that hurts to step on, unless you carry the essence/wisp of a Blight
+## Environmental hazards (owner, 2026-11-09)
+Ground hazards per biome; Blight is one version. Example: blighted areas have Blight sludge on the ground that hurts to step on, unless you carry the essence/wisp of a Blight
 (Spore) Boki. Water and Ice Boki also help (wash or freeze it; e.g. reduced damage or a path), other types may get
 partial counters. Ties to: Spore = Blight's corrupted type; soul-linked Boki/wisp idea. Needs a design pass (damage per
 second, how counters stack, visual read) before a build job.
