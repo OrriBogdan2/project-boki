@@ -37,6 +37,9 @@ func shots(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 31})
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
 	await main.get_tree().create_timer(1.0).timeout
 	print("HOTZONE zone ", m.hot.id, " planning ", m.skydrop.planning)
 	m.hud.full_map.open(true)
