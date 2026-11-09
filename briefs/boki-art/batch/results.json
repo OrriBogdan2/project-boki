@@ -52097,5 +52097,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/coolatee_cardb_1.jpg",
     "ok": true
+  },
+  {
+    "id": "coolatee_cardb",
+    "name": "Coolatee (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/coolatee_cardb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_cardb",
+    "name": "Scythant (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scythant_cardb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_cardb",
+    "name": "Coolatee (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/coolatee_cardb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_druzemole_pb",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_druzemole_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scythant_pb",
+    "name": "Scythant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_scythant_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_cardb",
+    "name": "Scythant (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scythant_cardb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_jibbatross_pb",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_jibbatross_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scythant_pb",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_scythant_pb_1.jpg",
+    "ok": true
   }
 ]
