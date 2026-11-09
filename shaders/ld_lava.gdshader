@@ -15,16 +15,20 @@ void fragment() {
 	float heat = 1.0 - smoothstep(0.1, 0.8, life);               // the fresh carpet is hot, then it cools
 	float flow = fbm3(vec2(UV.x * progress * 1.2 - TIME * 0.35, UV.y * 2.5 + TIME * 0.2 + seed));
 	float crack_n = vnoise(vec2(UV.x * progress * 3.0 + TIME * 0.8, UV.y * 6.0));
-	// the body fills the whole strip (UV.y 0..1 is the damage width), only the last few cm soften
-	float body = 1.0 - smoothstep(0.9, 1.0, across + flow * 0.06);
+	// the body fills the whole strip (UV.y 0..1 is the damage width); a thin dark crust at the very rim gives the
+	// band its shape on bright ground, and the hot line sits just inside it (a deep yellow-orange, not cream)
+	float body = 1.0 - smoothstep(0.94, 1.0, across + flow * 0.04);
 	float core = 1.0 - smoothstep(0.2, 0.85, across + flow * 0.25);
-	float edge = smoothstep(0.62, 0.9, across + flow * 0.1) * body;
+	float crust = smoothstep(0.86, 0.93, across + flow * 0.05);
+	float edge = smoothstep(0.58, 0.8, across + flow * 0.1) * (1.0 - crust);
 	float crack = smoothstep(0.55, 0.85, crack_n) * core;
-	vec3 molten = mix(color.rgb * 0.7, color.rgb, core);
-	vec3 col = mix(molten, color2.rgb, edge * (1.0 - heat));      // the edge is the hot line, then it chars
-	col = mix(col, vec3(1.0, 0.85, 0.35), edge * heat * 0.75);
-	col += vec3(1.0, 0.85, 0.35) * crack * 0.9 * (0.4 + 0.6 * heat);
-	col = mix(col, color2.rgb, smoothstep(0.3, 1.0, life) * 0.45);
+	vec3 hot = vec3(1.0, 0.66, 0.12);
+	vec3 col = mix(color.rgb * 0.75, color.rgb, core);
+	col = mix(col, hot, edge * heat * 0.85);                      // the edge is the hot line, then it chars
+	col = mix(col, color2.rgb, edge * (1.0 - heat) * 0.7);
+	col += vec3(1.0, 0.8, 0.3) * crack * 0.8 * (0.4 + 0.6 * heat);
+	col *= 1.0 - 0.35 * smoothstep(0.3, 1.0, life);               // the body darkens as it cools but stays orange
+	col = mix(col, color2.rgb, crust * (0.65 + 0.3 * (1.0 - heat)));
 	float ends = smoothstep(0.0, 0.08, UV.x) * (1.0 - smoothstep(0.92, 1.0, UV.x));
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
 	ALBEDO = col;

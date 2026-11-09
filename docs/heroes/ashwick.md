@@ -92,7 +92,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
 carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows the owner's data (more damage, speed and a shield).
-- Look (parity, Nov 9): the carpet is drawn as wide as it burns (`trail_w` 1.8m, asserted in `--ashwick-combo-check`), a thick red-orange band with a hot yellow edge that cools to char over its 5.2s (`shaders/ld_lava.gdshader`); no carpet over the abyss. Gameplay unchanged.
+- Look (parity, Nov 9): the carpet is drawn as wide as it burns (`trail_w` 1.8m, asserted in `--ashwick-combo-check`), a thick red-orange band with a thin dark crust at the rim and a hot yellow-orange line inside it that cools to char over its 5.2s (the body darkens but stays orange) (`shaders/ld_lava.gdshader`); no carpet over the abyss. Gameplay unchanged.
 - Numbers keep the source's ratios: cooldown 32s against the cloak's 10.5s (source 25s : 8.3s); the carpet ticks far below the
   hose (about 1/6 of its damage a second, as in the footage), and its value is the slow and the Ignite build-up.
 - Bond: an enemy hunter the carpet burns fills the Boki bond (a hit; a knock or a kill counts higher), the best event of the cast
