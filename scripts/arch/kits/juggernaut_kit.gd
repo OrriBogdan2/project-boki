@@ -208,7 +208,13 @@ func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
 	if meteor.running(): return meteor.move_k()
 	if not slam_w.is_empty(): return 0.6
+	if lunge_charging(): return float(rmb_def()["lunge"]["walk_k"])
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
+
+## RMB held past the tap on the ground, off the chain: the Lunge charging (rmb_hold_tick's lane and pose).
+func lunge_charging() -> bool:
+	var held := rmb_down and rmb_t > float(rmb_def()["hold"])
+	return held and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false)
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
 ## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
@@ -545,7 +551,7 @@ func rmb_auto_t() -> float:
 ## down the chain instead: letting go is a Chain Lunge along it.
 func rmb_hold_tick(t: float) -> void:
 	var sd := rmb_def()
-	if t <= float(sd["hold"]) or rmb_ctx.get("air", false) or rmb_ctx.get("e", false):
+	if not lunge_charging():
 		return
 	# the Lunge charging: a lane grows ahead of you with a fill, magenta and flashing at full; the cursor ring
 	# fills; a rising whine on the way in, a ping at full
