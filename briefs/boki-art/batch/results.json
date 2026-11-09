@@ -5855,5 +5855,68 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/glaciatee_1.jpg",
     "ok": true
+  },
+  {
+    "id": "glaciatee",
+    "name": "Glaciatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee",
+    "name": "Frigatee (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris",
+    "name": "Lanterloris (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frigatee",
+    "name": "Frigatee (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frigatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dribbara",
+    "name": "Dribbara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dribbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris",
+    "name": "Lanterloris (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl",
+    "name": "Glassolotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl",
+    "name": "Glassolotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole_r",
+    "name": "Druzemole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/druzemole_r_1.jpg",
+    "ok": true
   }
 ]
