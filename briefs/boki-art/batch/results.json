@@ -31195,5 +31195,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_lyrewing_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_puffamus_full",
+    "name": "Puffamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_puffamus_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarter_full",
+    "name": "Oarter (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarter_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lyrewing_full",
+    "name": "Lyrewing (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lyrewing_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lyrewing_full",
+    "name": "Lyrewing (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lyrewing_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarter_full",
+    "name": "Oarter (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_oarter_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarter_full",
+    "name": "Oarter (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_oarter_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_puffamus_full",
+    "name": "Puffamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_puffamus_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_full",
+    "name": "Pyrraven (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_full_3.jpg",
+    "ok": true
   }
 ]
