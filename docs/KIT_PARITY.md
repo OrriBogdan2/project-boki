@@ -219,3 +219,25 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## LMB numbers (2026-11-09, branch ext/lmb-range-parity)
+
+LMB projectile speed, max range, spread or bloom, and whether it stops at the cursor, for the 11 Hunters other than Sable (`ext/sable-lmb-range` has her). Ours is from `content/weapons/*.json` and the kit JSONs; source is `supervive_kits.md` and the footage sheets' aim rows (1 bh = 1.8 m). Melee reach, width and arc are the hit-shape job and are not here. Owner rows stay.
+
+| Hunter | Ours: speed, range, spread, aim | Source | Verdict |
+|---|---|---|---|
+| Vex | 74 m/s, 11 m, 0.03 rad, full range | Past the cursor to max range [F venator]; no speed, range or spread number | match (mode); numbers unsourced |
+| Zedran | blast 36 m/s, 7 to 14 m by hold, full range | About 20 bh/s = 36 m/s, past the cursor [F juggernaut]; range not caught | match |
+| Pin | 60 / 80 m/s, 12 / 16 m, none; stage 1 stops at the cursor, Supercharged flies full range | Stage 1 lands at the cursor (arrow at about 6 bh), Supercharged past it, near-hitscan [F pin gap 1] | match |
+| Cinder | stream 16 m/s, 7 m, 0.5 to 2.2 m wide, full length | About 4 bh = 7.2 m regardless of the cursor, narrow to 1 to 1.5 bh [F linwick] | match |
+| Albert | throw 24 m/s, recall 34, 9 m max (2.5 min), stops at the cursor | Lands at the cursor, 5 to 7 bh in 0.2 to 0.4 s, never thrown past about 7 bh [F bjorn] | match in mode; max range unmeasured |
+| Tenzo | boulder 20 m/s, 11 m, none, full range | 10 to 12 bh/s = 18 to 22 m/s [F breah]; stop at cursor or not never shown (open question 1) | match; aim open |
+| Grimble | 18 m/s slowing, 6.3 m, fan 20 at rest, bloom to +10 (30 firing), fixed range | About 3.5 bh = 6.3 m whatever the cursor; fan about 30 firing, 20 rested [F dredge gap 11] | **fixed**: fan was 30 rest, 45 firing |
+| Vireo (Sparkle) | 37 m/s, 13 m, none, `aim: max` | Past the cursor, 7.5 to 8 bh [F vireo gap 3] | differ (owner items 70, 116) |
+| Motley | 30 m/s (x1.4 charged), 14 m, none, full range | Past the cursor to max range [F ostra] | differ (owner item 60) |
+| Meeko | 30 m/s, 13 m (Empowered x1.4), none, full range | 3 to 4 bh per 5 fps frame = 27 to 36 m/s; past the cursor to about 7 to 8 bh [F mooshmoosh] | **fixed**: range was 12 m |
+| Tamsin | 16 m/s (x1.5 heavy), 10 m (x1.3), bow 10 deg, turn 12 rad/s, full range | Homing arcs toward the cursor; range, speed and stop at the cursor not shown [F tamsin] | match; aim open |
+
+Fixed (asserted): Grimble fan 20 deg and bloom cap +10 (`--dredge-combo-check`); Meeko ember range 13 m (`--care-combo-check`).
+
+Suggestions, not built: Albert throw max 9 m to about 12.6 m (7 bh, the farthest seen); measure Tenzo's and Tamsin's stop at the cursor with a near-cursor dummy; Meeko's Empowered range follows the new 13 m (x1.4 = 18.2 m).

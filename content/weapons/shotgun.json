@@ -7,7 +7,7 @@
 	"primary": {
 		"dmg": 2.0,
 		"pellets": 7,
-		"fan_deg": 30.0,
+		"fan_deg": 20.0,
 		"rate": 0.5,
 		"speed": 18,
 		"decel": 30.0,
@@ -19,7 +19,7 @@
 		"sfx": "shotgun",
 		"pellet_floor": 0.457,
 		"bloom_deg": 4.0,
-		"bloom_max_deg": 15.0,
+		"bloom_max_deg": 10.0,
 		"bloom_recover": 30.0,
 		"desc": "Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Spread grows with each shot and settles when you stop.",
 		"kick": 0.16,

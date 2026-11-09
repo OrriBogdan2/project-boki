@@ -749,6 +749,7 @@ func tender() -> void:
 	ok(
 			"mm LMB: the ember flies its full range past the cursor",
 			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
+	ok("mm LMB: the ember's range is 13 m (footage 7 to 8 bh at 1.8 m)", absf(float(P.wpn["range"]) - 13.0) < 0.01)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],

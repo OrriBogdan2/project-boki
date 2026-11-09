@@ -380,8 +380,13 @@ func _all() -> void:
 	)
 	ok(
 		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
+		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 20.0 and float(cone.get("deg", 0.0)) <= 30.5,
 		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
+	)
+	ok(
+		"gun: the fan rests at 20 degrees and blooms to 30 at most (footage 20 rested, 30 firing)",
+		absf(float(P.wpn["fan_deg"]) - 20.0) < 0.01
+		and absf(float(P.wpn["fan_deg"]) + float(P.wpn["bloom_max_deg"]) - 30.0) < 0.01
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	ak.step(m, 1.0)
