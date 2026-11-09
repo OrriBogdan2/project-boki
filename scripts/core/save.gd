@@ -8,14 +8,15 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 11
+const VERSION := 12
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
+		11: "_migrate_11_to_12"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -137,6 +138,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"traits": tr,
 		"trust": 35.0,
 		"memory": [],
+		"bonds": {},          # uid -> -1..1, friends and rivals on the base (BaseLife)
 		"matches": 0, "wins": 0, "kos": 0,
 		"born": int(Time.get_unix_time_from_system()),
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
@@ -289,6 +291,12 @@ func _migrate_9_to_10(data: Dictionary) -> void:
 ## v10 -> v11: the house starts empty; a played house keeps its furniture, now all movable (HouseSave).
 func _migrate_10_to_11(data: Dictionary) -> void:
 	HouseSave.migrate(data)
+
+## v11 -> v12: base life. Every Boki starts with no friends or rivals: rec["bonds"] = {} (BaseLife).
+func _migrate_11_to_12(data: Dictionary) -> void:
+	for r in data.get("roster", []):
+		if not r.has("bonds"):
+			r["bonds"] = {}
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
