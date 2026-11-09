@@ -1,9 +1,11 @@
 class_name HomeToys
 extends RefCounted
-## The Boki base's playthings (content/rules/toys.json, GARDEN.md section 4): a ball, a climbing post and
-## a splash tub, placed in build mode and used on their own. Only while farm_build.json base_mode is on.
+## The Boki base's playthings (content/rules/toys.json, GARDEN.md section 4): a ball, a climbing post, a
+## splash tub, a warm stone and a dig patch, placed in build mode and used on their own. Only while
+## farm_build.json base_mode is on.
 ## An idle Boki with room to be happier picks a toy by its lean and traits (a Flying or Rock Boki likes
-## the post, Water and Ice the tub), walks to it, plays, and gains the toy's stat through Care.add_stat.
+## the post, Water and Ice the tub, Fire the stone, Grass and Bug the patch), walks to it, plays, and gains
+## the toy's stat through Care.add_stat.
 ## A second Boki may join the first; two hot tempers squabble and the newcomer huffs off.
 ## k["play"] = {u: toy uid, phase: "go" | "play", t: seconds}. home.gd calls pick, step and pose.
 
@@ -155,9 +157,14 @@ func _temper(k: Dictionary) -> float:
 func _finish(k: Dictionary, t: Dictionary) -> void:
 	var R := rules()
 	var rec: Dictionary = k["rec"]
-	var stat := String(R["toys"][t["id"]]["stat"])
+	var def: Dictionary = R["toys"][t["id"]]
+	var stat := String(def["stat"])
 	var gained := Care.add_stat(rec, stat, int(R["stat_gain"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
+	if randf() < float(def.get("snack", 0.0)):
+		var item := String(R["snack_item"])
+		Save.add_item(item, 1)
+		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
@@ -180,7 +187,8 @@ func _ball(u: int) -> Node3D:
 
 ## The play pose, over the usual bounce (after _quirk): readable at a glance. The ball hops and rolls, the
 ## Boki leans in and nudges it; the post is climbed and slid down; the tub is splashed in (the "happy"
-## wiggle comes from joy_t in step). A squabble leaves a short growl.
+## wiggle comes from joy_t in step); the stone is leaned on and basked on, slow breaths; the patch is dug at,
+## paws going, dirt flying. A squabble leaves a short growl.
 func pose(k: Dictionary, n: Node3D, d: float) -> void:
 	var body := n.get_node_or_null("Body") as Node3D
 	if float(k.get("huff_t", 0.0)) > 0.0:
@@ -214,3 +222,15 @@ func pose(k: Dictionary, n: Node3D, d: float) -> void:
 			body.rotation.z = sin(s * 12.0) * 0.2
 			if randf() < d * 5.0:
 				h.fx.burst(tp + Vector3(0, 0.5, 0), Color("8fd0ff"), 5, 2.0, 0.4)
+		"toy_stone":
+			body.position.y = 0.02 + sin(s * 1.6) * 0.03
+			body.rotation.x = -0.3
+			n.set_meta("pose", "comfort")
+			if randf() < d * 1.2:
+				h.fx.burst(tp + Vector3(0, 0.6, 0), Color("ffb066"), 2, 0.8, 0.9, -1.0)
+		"toy_dig":
+			body.position.y = absf(sin(s * 10.0)) * 0.05
+			body.rotation.x = -0.45 + sin(s * 10.0) * 0.12
+			n.set_meta("pose", "point")
+			if randf() < d * 4.0:
+				h.fx.burst(tp + Vector3(0, 0.2, 0), Color("7d5a38"), 4, 2.2, 0.45)
