@@ -32644,5 +32644,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_echolop_stance_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_rimink_stance",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimink_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lashyx_stance",
+    "name": "Lashyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lashyx_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lunowl_stance",
+    "name": "Lunowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lunowl_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_skateron_stance",
+    "name": "Skateron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_skateron_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lashyx_stance",
+    "name": "Lashyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lashyx_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lunowl_stance",
+    "name": "Lunowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lunowl_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimink_stance",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimink_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_skateron_stance",
+    "name": "Skateron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_skateron_stance_2.jpg",
+    "ok": true
   }
 ]
