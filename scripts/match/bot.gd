@@ -984,13 +984,16 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
+	var W: World = m.world
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
-		if m.world.is_block(p.x, p.y) or m.world.is_block(p.x + side.x, p.y + side.y) or m.world.is_block(p.x - side.x, p.y - side.y):
+		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
+		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
+		if W.tile_kind(p.x, p.y) != World.T_GROUND:
 			return false
-		# the abyss blocks a walk too: straight at a goal across a bay in the island, the edge guard
-		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
-		if m.world.is_void(p.x, p.y):
+		if W.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
+			return false
+		if W.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
 	return true
 
