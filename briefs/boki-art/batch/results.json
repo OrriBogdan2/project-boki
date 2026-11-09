@@ -50431,5 +50431,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/terrarimit_cardz_2.jpg",
     "ok": true
+  },
+  {
+    "id": "terrarimit_cardz",
+    "name": "Terrarimit (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/terrarimit_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "vaultara_cardz",
+    "name": "Vaultara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vaultara_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vaultara_cardz",
+    "name": "Vaultara (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vaultara_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_pz",
+    "name": "Dragonkite (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_pz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_pz",
+    "name": "Dragonkite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vaultara_cardz",
+    "name": "Vaultara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vaultara_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_pz",
+    "name": "Dragonkite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dreadnoyak_pz",
+    "name": "Dreadnoyak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dreadnoyak_pz_2.jpg",
+    "ok": true
   }
 ]
