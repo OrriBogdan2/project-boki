@@ -31867,5 +31867,40 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_stance3_gongibbon_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_gongibbon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_gongibbon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_jarmit",
+    "name": "Jarmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_jarmit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_jarmit",
+    "name": "Jarmit (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_jarmit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_jarmit",
+    "name": "Jarmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_jarmit_1.jpg",
+    "ok": true
   }
 ]
