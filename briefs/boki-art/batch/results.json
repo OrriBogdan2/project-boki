@@ -7521,5 +7521,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/wyrmink_x_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_r",
+    "name": "Tidalisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wyrmink_x",
+    "name": "Wyrmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wyrmink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_r",
+    "name": "Tidalisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zipling_r",
+    "name": "Zipling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_r",
+    "name": "Tinbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zipling_r",
+    "name": "Zipling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_r",
+    "name": "Tinbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_vex",
+    "name": "Relic: Vex",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_vex_2.jpg",
+    "ok": true
   }
 ]
