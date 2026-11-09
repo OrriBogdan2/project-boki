@@ -135,7 +135,8 @@ func _steal() -> void:
 	var row: Array = []
 	row.resize(KinNet.KIN_AT)
 	row.append_array(KinNet.kin_extra(fk))
-	ok(row.size() == KinNet.KIN_END, "net: the kin row fills the KinNet table (%d of %d)" % [row.size(), KinNet.KIN_END])
+	var fill := "net: the kin row fills the KinNet table (%d of %d)" % [row.size(), KinNet.KIN_END]
+	ok(row.size() == KinNet.KIN_END, fill)
 	KinSteal.match_end(m)
 	ok(not KinSteal.taken(fk) and fk.owner_h == f and fk.team == f.team,
 		"match end: every stolen wisp goes home to its owner")
