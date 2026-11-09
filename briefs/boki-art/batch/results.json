@@ -20758,5 +20758,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/stance_glaivyx_3.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_lashyx",
+    "name": "Lashyx (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_lashyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lashyx",
+    "name": "Lashyx (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_lashyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_teapotamus",
+    "name": "Teapotamus (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_teapotamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lashyx",
+    "name": "Lashyx (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_lashyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_teapotamus",
+    "name": "Teapotamus (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_teapotamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_puffamus",
+    "name": "Puffamus (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_puffamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_puffamus",
+    "name": "Puffamus (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_puffamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_puffamus",
+    "name": "Puffamus (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_puffamus_1.jpg",
+    "ok": true
   }
 ]
