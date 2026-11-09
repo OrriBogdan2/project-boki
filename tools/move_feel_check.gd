@@ -107,6 +107,10 @@ const T := {
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
 	# range moved up by that 0.46; the camera did not change)
 	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
+	"knock_kael_slam_m":       ["~", [1.55, 1.70], "m", "Kael Finishing Slam push 6 (juggernaut.json rmb.slam)"],
+	"knock_albert_charge_m":   ["~", [3.85, 4.00], "m", "Albert Shield Charge shove 11 (bulwark.json dash.charge_kb)"],
+	"knock_grimble_anchor_m":  ["<=", 0.01, "m", "Grimble Anchor Drop: a downward spike, no sideways knock"],
+	"knock_class_spread_m":    ["<=", 0.01, "m", "[game data] every Hunter has Mass 100"],
 	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
@@ -214,6 +218,7 @@ func run(main: Node) -> void:
 	_ledge()
 	_drop()
 	_landing()
+	_knock()
 	_camera()
 	_screen_scale()
 	_e2e()
@@ -269,6 +274,37 @@ func _ground() -> void:
 		rec("ground_turn90_t", t90)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+# ---------------------------------------------------------------- knock
+## The three reference knocks (docs/MOVEMENT_FEEL.md "Knock distance") on a light, a medium and a heavy
+## target, through Displace (the synced knock path): every class slides the same distance.
+const REF_KNOCKS := {"knock_kael_slam_m": 6.0, "knock_albert_charge_m": 11.0, "knock_grimble_anchor_m": 0.0}
+const ANCHOR_SPIKE := -16.0     # dredge_kit _slammed: m.displace.spike(f, -16)
+func _knock() -> void:
+	var spread := 0.0
+	for key in REF_KNOCKS:
+		var lo := INF
+		var hi := -INF
+		for c in ["light", "medium", "heavy"]:
+			ok(not Data.CLASSES[c].has("mass"), "class %s carries no mass" % c)
+			P.cls = c
+			P.cdat = Data.CLASSES[c]
+			_reset(flat + Vector3(-3.0, 0, 0))
+			var x0 := P.pos.x
+			if REF_KNOCKS[key] > 0.0:
+				m.displace.knock(P, Vector2(float(REF_KNOCKS[key]), 0.0))
+			else:
+				m.displace.spike(P, ANCHOR_SPIKE)
+			_steps(90)
+			var d := P.pos.x - x0
+			print("MFEEL knock %s on %s: %.3f m" % [key, c, d])
+			lo = minf(lo, d)
+			hi = maxf(hi, d)
+		rec(key, hi)
+		spread = maxf(spread, hi - lo)
+	rec("knock_class_spread_m", spread)
+	P.cls = "medium"
+	P.cdat = Data.CLASSES["medium"]
 
 # ---------------------------------------------------------------- jump
 func _jump() -> void:

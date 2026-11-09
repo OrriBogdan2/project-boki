@@ -456,9 +456,6 @@ func buff(stat: String) -> float:
 	var b: Array = kbuffs.get(stat, [0.0, 0.0])
 	return float(b[0]) if float(b[1]) > 0.0 else 0.0
 
-func mass() -> float:
-	return float(cdat.get("mass", 1.0))
-
 func hittable() -> bool:
 	return not dead and not out and not extracted and not riding
 
@@ -759,7 +756,8 @@ func _shot_down() -> void:
 
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so.
+## pops you into the air unless the attack says so. Every Hunter takes it the same (no per-class mass:
+## the source gives every Hunter Mass 100).
 var knock_t := 0.0
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
@@ -767,13 +765,13 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
 	var k := kbv * (1.0 - owner_stat("knockback_resist"))
-	var s := k.length() / mass()
-	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift / mass() >= 3.0):
+	var s := k.length()
+	if s >= Capture.HARD_KNOCK or (lift >= 0.0 and lift >= 3.0):
 		launched_at = m.time
 	if s < 0.05:
 		if lift >= 0.0:
 			# a straight-up lift (a slam's crater, an eruption) with no sideways push
-			vel.y = maxf(vel.y, minf(9.0, lift / mass()))
+			vel.y = maxf(vel.y, minf(9.0, lift))
 			grounded = false
 		return
 	if s > 4.0:
@@ -786,7 +784,7 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s > 2.5:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 	if lift >= 0.0:
-		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
+		vel.y = maxf(vel.y, minf(9.0, lift))
 		grounded = false
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:
