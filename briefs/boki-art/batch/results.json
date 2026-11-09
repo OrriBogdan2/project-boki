@@ -29662,5 +29662,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/blotlet_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pebblamb_card",
+    "name": "Pebblamb (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pebblamb_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sloggoth_card",
+    "name": "Sloggoth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sloggoth_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pebblamb_card",
+    "name": "Pebblamb (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pebblamb_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sloggoth_card",
+    "name": "Sloggoth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sloggoth_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v1",
+    "name": "Glassolotl (variant v1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v3",
+    "name": "Glassolotl (variant v3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v3",
+    "name": "Glassolotl (variant v3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v2",
+    "name": "Glassolotl (variant v2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v1",
+    "name": "Glassolotl (variant v1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v2",
+    "name": "Glassolotl (variant v2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v3",
+    "name": "Glassolotl (variant v3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_v2",
+    "name": "Glassolotl (variant v2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_v2_2.jpg",
+    "ok": true
   }
 ]
