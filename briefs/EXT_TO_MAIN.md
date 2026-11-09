@@ -4809,3 +4809,109 @@ READY ext/remove-hex 16e00c03d (Hex critter status + "hex" Net event removed, Ne
 READY ext/albert-parity-verify b69c6ca3b (cuts Guard meter and Shield Slam via parity-bulwark-guardcut b2e942eb4 merged onto main; R strike 2 and eruption 25 to data ratios 31/396 vs 192 throw, lane, slow and Spin Dash asserted in --bulwark-combo-check 126/0; health --strict OK, gen_wiki --check OK)
 READY ext/remove-class-ults e7455a857 (remove class_ults flag + class R path, DEBT line deleted)
 READY ext/anim-react-audit 807d9386e (hit reaction audit: new --react-audit gate (12 Hunters, 29 FAIL -> 0) and --anim-shots --react strips, table+strips in docs/art/REACT_AUDIT.md; fixed Mossy's invisible hit (root-keyed, now a hips bump: read 0.01 -> 0.15), Lace's half-size back hit (1.8x) and the slow light recovery of Lace/Neve/Sable/Sparkle (retime, settle 0.33-0.37 -> 0.20-0.30 s), re-keyed in the .glb by tools/art1/glb_react.py + glb_retime.py (same file as ext/anim-hand-tenzo); merge after ext/anim-quality-audit (merged in); --clip-check 0, --warden-clips-check 0, health --strict OK, gen_wiki --check unchanged; strips rendered on rpc1 llvmpipe, no GPU run)
+
+## 03:08 ET 11-09 — Boki art tick (fast lane f10-f18, panel w33c): 104 items. Live: 24 new-species turnarounds, 21 portraits, 8 cards. Owner queue: Glassolotl rock-candy variants (pick v3), 17 stance images (turnarounds in those stances are generating), 12 next-stage concepts. stance3_* items are square stance images for the line view, not Dex portraits.
+ART bucketmander_o 7.5 briefs/boki-art/batch/out/c_bucketmander_o_1.jpg kind=concept status=owner-review
+ART glassolotl_a3 8.0 briefs/boki-art/batch/out/c_glassolotl_a3_1.jpg kind=concept status=owner-review
+ART glassolotl_v1 7.6 briefs/boki-art/batch/out/c_glassolotl_v1_3.jpg kind=concept status=owner-review
+ART glassolotl_v2 8.1 briefs/boki-art/batch/out/c_glassolotl_v2_3.jpg kind=concept status=owner-review
+ART glassolotl_v3 8.4 briefs/boki-art/batch/out/c_glassolotl_v3_3.jpg kind=concept status=owner-review
+ART bladypus 8.5 briefs/boki-art/turnarounds/Bladypus.jpg kind=turnaround
+ART bullsfrog 8.5 briefs/boki-art/turnarounds/Bullsfrog.jpg kind=turnaround
+ART cetorgan 7.6 briefs/boki-art/batch/out/ta_cetorgan_1.jpg kind=turnaround status=owner-review
+ART clinkpede 8.4 briefs/boki-art/turnarounds/Clinkpede.jpg kind=turnaround
+ART fawngus 8.5 briefs/boki-art/turnarounds/Fawngus.jpg kind=turnaround
+ART glaciammoth 8.5 briefs/boki-art/turnarounds/Glaciammoth.jpg kind=turnaround
+ART glazolm 8.3 briefs/boki-art/turnarounds/Glazolm.jpg kind=turnaround
+ART grainspin 8.4 briefs/boki-art/turnarounds/Grainspin.jpg kind=turnaround
+ART grammite 8.5 briefs/boki-art/turnarounds/Grammite.jpg kind=turnaround
+ART hydrangor 8.1 briefs/boki-art/turnarounds/Hydrangor.jpg kind=turnaround
+ART lensling 8.7 briefs/boki-art/turnarounds/Lensling.jpg kind=turnaround
+ART loafhopper 8.0 briefs/boki-art/turnarounds/Loafhopper.jpg kind=turnaround
+ART lurklet 8.6 briefs/boki-art/turnarounds/Lurklet.jpg kind=turnaround
+ART malletary 8.6 briefs/boki-art/turnarounds/Malletary.jpg kind=turnaround
+ART maracoil 8.2 briefs/boki-art/turnarounds/Maracoil.jpg kind=turnaround
+ART morelkin 8.6 briefs/boki-art/turnarounds/Morelkin.jpg kind=turnaround
+ART nymphane 8.6 briefs/boki-art/turnarounds/Nymphane.jpg kind=turnaround
+ART puffuse 8.5 briefs/boki-art/turnarounds/Puffuse.jpg kind=turnaround
+ART reelacine 8.5 briefs/boki-art/turnarounds/Reelacine.jpg kind=turnaround
+ART sarcobra 8.6 briefs/boki-art/turnarounds/Sarcobra.jpg kind=turnaround
+ART starcap 8.5 briefs/boki-art/turnarounds/Starcap.jpg kind=turnaround
+ART sundormouse 8.6 briefs/boki-art/turnarounds/Sundormouse.jpg kind=turnaround
+ART tootle 8.5 briefs/boki-art/turnarounds/Tootle.jpg kind=turnaround
+ART torpecone 8.5 briefs/boki-art/turnarounds/Torpecone.jpg kind=turnaround
+ART stance3_anvilbrock 8.4 briefs/boki-art/batch/out/portrait_stance3_anvilbrock_3.jpg kind=portrait status=owner-review
+ART stance3_barrelmander 8.3 briefs/boki-art/batch/out/portrait_stance3_barrelmander_1.jpg kind=portrait status=owner-review
+ART stance3_chuggamus 7.7 briefs/boki-art/batch/out/portrait_stance3_chuggamus_1.jpg kind=portrait status=owner-review
+ART stance3_echolop 8.6 briefs/boki-art/batch/out/portrait_stance3_echolop_1.jpg kind=portrait status=owner-review
+ART stance3_eclipsowl 8.6 briefs/boki-art/batch/out/portrait_stance3_eclipsowl_3.jpg kind=portrait status=owner-review
+ART stance3_forgebrock 8.3 briefs/boki-art/batch/out/portrait_stance3_forgebrock_3.jpg kind=portrait status=owner-review
+ART stance3_frigatee 8.6 briefs/boki-art/batch/out/portrait_stance3_frigatee_2.jpg kind=portrait status=owner-review
+ART stance3_glintmole 8.7 briefs/boki-art/batch/out/portrait_stance3_glintmole_1.jpg kind=portrait status=owner-review
+ART stance3_gongibbon 8.3 briefs/boki-art/batch/out/portrait_stance3_gongibbon_1.jpg kind=portrait status=owner-review
+ART stance3_jarmit 8.5 briefs/boki-art/batch/out/portrait_stance3_jarmit_1.jpg kind=portrait status=owner-review
+ART stance3_kitlet 8.8 briefs/boki-art/batch/out/portrait_stance3_kitlet_1.jpg kind=portrait status=owner-review
+ART stance3_lashyx 8.4 briefs/boki-art/batch/out/portrait_stance3_lashyx_1.jpg kind=portrait status=owner-review
+ART stance3_lunowl 8.5 briefs/boki-art/batch/out/portrait_stance3_lunowl_1.jpg kind=portrait status=owner-review
+ART stance3_rimink 8.3 briefs/boki-art/batch/out/portrait_stance3_rimink_2.jpg kind=portrait status=owner-review
+ART stance3_skateron 8.6 briefs/boki-art/batch/out/portrait_stance3_skateron_1.jpg kind=portrait status=owner-review
+ART stance3_skidlet 8.5 briefs/boki-art/batch/out/portrait_stance3_skidlet_1.jpg kind=portrait status=owner-review
+ART stance3_umbrathere 8.4 briefs/boki-art/batch/out/portrait_stance3_umbrathere_1.jpg kind=portrait status=owner-review
+ART anchorbill 8.5 briefs/boki-art/portraits/light/Anchorbill.jpg kind=portrait
+ART arcestrel 8.6 briefs/boki-art/portraits/light/Arcestrel.jpg kind=portrait
+ART bellowlet 8.6 briefs/boki-art/portraits/light/Bellowlet.jpg kind=portrait
+ART blotlet 8.6 briefs/boki-art/portraits/light/Blotlet.jpg kind=portrait
+ART briarlynx 8.3 briefs/boki-art/batch/out/portrait_briarlynx_full_1.jpg kind=portrait status=owner-review
+ART buckleron 8.6 briefs/boki-art/portraits/light/Buckleron.jpg kind=portrait
+ART chandelapi 8.6 briefs/boki-art/portraits/light/Chandelapi.jpg kind=portrait
+ART cisternmander 8.5 briefs/boki-art/portraits/light/Cisternmander.jpg kind=portrait
+ART dragonkite 8.7 briefs/boki-art/portraits/light/Dragonkite.jpg kind=portrait
+ART dreadnoyak 8.5 briefs/boki-art/portraits/light/Dreadnoyak.jpg kind=portrait
+ART dribbara 8.7 briefs/boki-art/portraits/light/Dribbara.jpg kind=portrait
+ART eclipsowl 8.6 briefs/boki-art/portraits/light/Eclipsowl.jpg kind=portrait
+ART fizzlet 8.6 briefs/boki-art/portraits/light/Fizzlet.jpg kind=portrait
+ART flarmink 8.5 briefs/boki-art/portraits/light/Flarmink.jpg kind=portrait
+ART foldbat 8.6 briefs/boki-art/portraits/light/Foldbat.jpg kind=portrait
+ART forgebrock 8.4 briefs/boki-art/batch/out/portrait_forgebrock_full_2.jpg kind=portrait status=owner-review
+ART frothisk 8.7 briefs/boki-art/portraits/light/Frothisk.jpg kind=portrait
+ART furnacowary 8.2 briefs/boki-art/batch/out/portrait_furnacowary_full_1.jpg kind=portrait status=owner-review
+ART galleotter 8.5 briefs/boki-art/portraits/light/Galleotter.jpg kind=portrait
+ART geodemole 8.5 briefs/boki-art/portraits/light/Geodemole.jpg kind=portrait
+ART geysirbara 8.6 briefs/boki-art/portraits/light/Geysirbara.jpg kind=portrait
+ART glaivyx 8.5 briefs/boki-art/portraits/light/Glaivyx.jpg kind=portrait
+ART gongrowl 8.2 briefs/boki-art/batch/out/portrait_gongrowl_full_2.jpg kind=portrait status=owner-review
+ART howlop 8.3 briefs/boki-art/batch/out/portrait_howlop_full_1.jpg kind=portrait status=owner-review
+ART kayak 8.6 briefs/boki-art/portraits/light/Kayak.jpg kind=portrait
+ART lashyx 8.5 briefs/boki-art/portraits/light/Lashyx.jpg kind=portrait
+ART latchling 8.5 briefs/boki-art/portraits/light/Latchling.jpg kind=portrait
+ART lockatara 8.4 briefs/boki-art/batch/out/portrait_lockatara_full_1.jpg kind=portrait status=owner-review
+ART lunink 8.5 briefs/boki-art/portraits/light/Lunink.jpg kind=portrait
+ART lyrewing 8.2 briefs/boki-art/batch/out/portrait_lyrewing_full_1.jpg kind=portrait status=owner-review
+ART mothlet 8.6 briefs/boki-art/portraits/light/Mothlet.jpg kind=portrait
+ART oarter 8.5 briefs/boki-art/portraits/light/Oarter.jpg kind=portrait
+ART pebblamb 8.7 briefs/boki-art/portraits/light/Pebblamb.jpg kind=portrait
+ART puffamus 8.2 briefs/boki-art/batch/out/portrait_puffamus_full_1.jpg kind=portrait status=owner-review
+ART pyrraven 8.5 briefs/boki-art/portraits/light/Pyrraven.jpg kind=portrait
+ART rattlebub 8.7 briefs/boki-art/portraits/light/Rattlebub.jpg kind=portrait
+ART reapant 8.5 briefs/boki-art/portraits/light/Reapant.jpg kind=portrait
+ART rimink 8.5 briefs/boki-art/portraits/light/Rimink.jpg kind=portrait
+ART rippmink 8.5 briefs/boki-art/portraits/light/Rippmink.jpg kind=portrait
+ART slog 8.4 briefs/boki-art/batch/out/portrait_slog_full_3.jpg kind=portrait status=owner-review
+ART sloggoth 8.5 briefs/boki-art/portraits/light/Sloggoth.jpg kind=portrait
+ART sporcupine 8.2 briefs/boki-art/batch/out/portrait_sporcupine_full_3.jpg kind=portrait status=owner-review
+ART teapotamus 8.3 briefs/boki-art/batch/out/portrait_teapotamus_full_1.jpg kind=portrait status=owner-review
+ART terrasloth 8.5 briefs/boki-art/portraits/light/Terrasloth.jpg kind=portrait
+ART thistlynx 8.5 briefs/boki-art/portraits/light/Thistlynx.jpg kind=portrait
+ART thunderstrich 8.3 briefs/boki-art/batch/out/portrait_thunderstrich_full_1.jpg kind=portrait status=owner-review
+ART tidalisk 8.6 briefs/boki-art/portraits/light/Tidalisk.jpg kind=portrait
+ART voltmink 8.3 briefs/boki-art/batch/out/portrait_voltmink_full_1.jpg kind=portrait status=owner-review
+ART wickapi 8.7 briefs/boki-art/portraits/light/Wickapi.jpg kind=portrait
+ART wyrmink 8.6 briefs/boki-art/portraits/light/Wyrmink.jpg kind=portrait
+ART zipling 8.2 briefs/boki-art/batch/out/portrait_zipling_full_3.jpg kind=portrait status=owner-review
+ART blotlet 8.6 briefs/boki-art/cards/Blotlet.jpg kind=card
+ART briarlynx 8.5 briefs/boki-art/cards/Briarlynx.jpg kind=card
+ART glomwort 8.5 briefs/boki-art/cards/Glomwort.jpg kind=card
+ART pebblamb 8.6 briefs/boki-art/cards/Pebblamb.jpg kind=card
+ART sloggoth 8.5 briefs/boki-art/cards/Sloggoth.jpg kind=card
+ART teapotamus 8.4 briefs/boki-art/cards/Teapotamus.jpg kind=card
+ART zippelith 8.6 briefs/boki-art/cards/Zippelith.jpg kind=card

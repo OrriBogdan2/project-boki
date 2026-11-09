@@ -19,3 +19,5 @@ for _s in SPECS:
 # design), Chandelotl waits on the Glassolotl variant pick, lodestick_r2 is an old-wave leftover.
 DROP|={'portrait_stance3_'+n for n in ('arcestrel','briarlynx','galleotter','flarmink','chandelotl','glassolotl','prismander','zippelith')}
 DROP|={'portrait_chandelotl_full','lodestick_r2'}
+# 03:06 ET: new-species sheets get one card job (<n>_card) from the roster wave; skip the duplicate _card3 from wave50.
+DROP|={n+'_card3' for n in 'bladypus bullsfrog clinkpede fawngus glaciammoth glazolm grainspin grammite hydrangor lensling loafhopper lurklet malletary maracoil morelkin nymphane puffuse reelacine sarcobra starcap sundormouse tootle torpecone'.split()}
