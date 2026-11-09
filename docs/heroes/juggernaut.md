@@ -320,6 +320,35 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 `jug_chainlunge`, `jug_haul_wind` / `jug_haulslam`, `jug_roar` (Enraged). Strips: `--arena-demo=anim_<move>`
 (scripts/arch/dj_demo.gd).
 
+## Animation timing (Nov 9: parity pass against the 5 fps footage)
+
+Kael's v2 clips are the v1 clips retargeted by bone name, so each strike is a one-frame snap off frame 0 followed by an
+eased follow-through. Measured offline through `WardenClips` (kael.glb clips swept at 60 Hz; the "strike" is the blade
+tip's fastest frame) and in `--juggernaut-combo-check` (tools/kael_anim_check.gd: the kit's own hit moment, the first
+hp drop on a dummy, on the move clock `kmove_t`). Source times from briefs/hero-ref/juggernaut.md (one frame = 0.2 s).
+A `lead` in content/rules/warden_anim/kael.json shifts the clip on the kit's clock: positive skips the cock, negative
+holds the first frame (docs/art/wardens/CLIPS.md). Kit numbers untouched.
+
+| Move | Source (s) | Ours before (clip strike / kit hit / clip end) | Ours after | Status |
+|---|---|---|---|---|
+| `jug_slash_r` `jug_slash_l` | 1 frame wind-up, 1 frame swing, alternating [f26/29/33] | 0.02-0.03 / 0.033 / 0.27 | same | matches; asserted |
+| `jug_wave_wind` (held) | a 0.6-1.0 s charge, the arc around him [f87] | pose from the tap window (0.22), held from 0.5 | same | matches; asserted (never on a tap) |
+| `jug_wave` | the blast fires on release | 0.07 / 0.017 / 0.60 | lead 0.05: strike 0.02 | fixed; asserted |
+| `jug_slam` | 0.6 s wind-up, blade cocked low, then the strike [f155-158] | 0.60 / 0.583 / 1.13 | same | matches; asserted |
+| `jug_lunge_wind` (held) | lane grows 0.6-0.8 s to full [f121-127] | pose from the hold threshold (0.3), held from 0.45 | same | matches; asserted (never on a tap) |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.03 / 0.217 (arrival) / 0.60 | lead -0.17: the coiled frame 0 holds through the travel, thrust 0.20 | fixed; asserted |
+| `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.217 | same | matches; asserted |
+| `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
+| `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.25 / 0.233 / 0.40 | same | matches; asserted |
+| `jug_chain` / `jug_reel` | throw; pull about 0.4 s [f303-333] | throw 0.02 (hook at 0.183); reel 0.03 / pull from 0.017, arrive 0.283 | same | matches |
+| `jug_haul_wind` (held) / `jug_haulslam` | - | pose only once armed; 0.02 / 0.000 / 0.47 | same | no source; asserted |
+| `jug_guard` (held) / `jug_riposte` | guard 0.4-1.0 s, then the crescent [f425-439] | guard 0.65; strike 0.02 / 0.117 (after the 0.1 s step) / 0.47 | lead -0.08: the dropped blade holds the step, cleave 0.10 | fixed; asserted |
+| `jug_spin` `jug_chainlunge` `jug_exdash` | spin on arrival [f333-336] | spin runs on the press (0.000); chainlunge 0.03 / 0.20 | same | left alone (the chain lunge is unlisted) |
+
+Left alone: the tap-RMB overhead strike (ext/kael-tap-ult-1108 is unmerged; the Finishing Slam above is main's tap).
+An Enrage on a hit plays `jug_roar` over the move's clip (`_enrage_fx`), so a hit that fills Rage shows the roar, not
+the follow-through.
+
 ## Look and sound (all ours)
 
 His moments are recipes in content/vfx/juggernaut.json, played by the shared HeroVfx (docs/HERO_VFX.md): flame arcs, burning

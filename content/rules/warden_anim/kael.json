@@ -62,7 +62,8 @@
 			"fade": 0.2
 		},
 		"jug_wave": {
-			"clip": "wave"
+			"clip": "wave",
+			"lead": 0.05
 		},
 		"jug_slam": {
 			"clip": "slam"
@@ -73,14 +74,16 @@
 			"fade": 0.18
 		},
 		"jug_lunge": {
-			"clip": "lunge"
+			"clip": "lunge",
+			"lead": -0.17
 		},
 		"jug_meteor": {
 			"clip": "meteor",
 			"hold_from": 0.3
 		},
 		"jug_meteor_land": {
-			"clip": "meteor_land"
+			"clip": "meteor_land",
+			"lead": 0.13
 		},
 		"jug_dash": {
 			"clip": "dash"
@@ -114,7 +117,8 @@
 			"hold_from": 0.2
 		},
 		"jug_riposte": {
-			"clip": "riposte"
+			"clip": "riposte",
+			"lead": -0.08
 		},
 		"jug_roar": {
 			"clip": "roar",
@@ -192,7 +196,7 @@
 		],
 		[
 			"jug_riposte",
-			0.3
+			0.47
 		],
 		[
 			"jug_slam",
