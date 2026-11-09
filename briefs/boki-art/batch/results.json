@@ -31139,5 +31139,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_lashyx_full_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lashyx_full",
+    "name": "Lashyx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lashyx_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_latchling_full",
+    "name": "Latchling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_latchling_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_latchling_full",
+    "name": "Latchling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_latchling_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunink_full",
+    "name": "Lunink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunink_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunink_full",
+    "name": "Lunink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunink_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_latchling_full",
+    "name": "Latchling (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_latchling_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunink_full",
+    "name": "Lunink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lunink_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lyrewing_full",
+    "name": "Lyrewing (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lyrewing_full_1.jpg",
+    "ok": true
   }
 ]
