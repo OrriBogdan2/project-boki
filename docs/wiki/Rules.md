@@ -125,6 +125,14 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | sight_range | 24 |
 | sight_places_kept | 3 |
 
+## care (`content/rules/care.json`)
+
+Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglect never kills (owner 2026-11-08): a Boki left unfed bottoms out at sick, then recovers with care. Other losses (expeditions, the Black Market) are unchanged.
+
+| Setting | Value |
+|---|---|
+| natural_death | False |
+
 ## chest_keys (`content/rules/chest_keys.json`)
 
 
