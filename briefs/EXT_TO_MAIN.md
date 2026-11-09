@@ -5824,3 +5824,4 @@ READY ext/farm-boki-sex e29a16728 (job 20261109-211530-a1, supersedes 66a4e49bf:
 READY ext/anim-strafe-back 5f53bb1ca (back-run and strafe planted-foot for all 12 Hunters: dir_foot, rate_max, side_legs, audit direction gate, strips; STACKED on ext/feel-facing-turn d5333f969 + ext/fire-on-run-layer d733b077b + ext/anim-quality-audit, merge those first; 5 cm/step not reached, needs foot IK or Blender clips)
 READY ext/hunter-revamp-af 9c4958960 (hunter revamp A-F: cinder 22.1k, claire 23.5k, dredge 24.9k with baked normal maps, tri cap 25k; breaker reverted, scripts drifted, v2 pending)
 READY ext/hunter-revamp-af 73f39ab5c (hunter revamp A-F: cinder 22.1k, claire 23.5k, dredge 24.9k with 2048 baked normal maps, tri cap 25k; breaker reverted: main scripts drifted, v2 pending)
+READY ext/sfx-mob-alert 30e6a701c (monster camp alert on aggro, once per camp per 3 s, plus quiet idle murmur; --match-audio-check extended)
