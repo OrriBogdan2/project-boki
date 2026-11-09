@@ -1,0 +1,11 @@
+{
+	"_doc": "Where each Hero's rounds leave the v2 model (scripts/arch/shot_origin.gd, docs/HERO_VFX.md 'Shot origins'). at: [side (+ right), forward] m from the feet along the aim, one per hand, taken shot by shot; nodes: the .glb empties the muzzle flash sits on. Measured on the v2 models at the release pose (docs/art/vfx_origins).",
+	"gunslinger": {"lmb": {"at": [[0.0, 0.32]], "nodes": ["weapon_muzzle"]}},
+	"archer": {"lmb": {"at": [[-0.52, 0.35]], "nodes": ["anchor_nock"]}},
+	"mage": {"lmb": {"at": [[0.15, 0.35], [-0.52, 0.45]]}},
+	"thief": {"lmb": {"at": [[0.07, 0.42], [-0.5, 0.4]], "nodes": ["weapon_muzzle", "weapon_muzzle_l"]},
+		"e": {"at": [[0.21, 0.22]], "nodes": ["weapon_muzzle"]}},
+	"dredge": {"lmb": {"at": [[-0.19, 0.56]], "nodes": ["weapon_muzzle"]}},
+	"ashwick": {"rmb": {"at": [[-0.3, 0.5]], "nodes": ["weapon_muzzle"]}},
+	"dolm": {"throw": {"at": [[0.07, 0.3]], "nodes": ["anchor_fist_R"]}}
+}

@@ -12,6 +12,7 @@ var h: Hunter
 var m: Node
 var id := ""
 var d: Dictionary = {}
+var rounds_seated := 0             # the Hunter's shot count ShotOrigin last seated up to
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
@@ -193,6 +194,7 @@ func tick(dt: float) -> void:
 			_r_end()
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick_knocks()
+	rounds_seated = ShotOrigin.tick(h, rounds_seated)
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)

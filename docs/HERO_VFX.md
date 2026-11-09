@@ -46,6 +46,14 @@ the aim), with `hand` r / l between them for a point that rides a hand bone. So 
 the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
+## Shot origins
+`content/shot_origins.json` (read by `scripts/arch/shot_origin.gd`) says where a Hero's rounds leave the v2 model, per
+move: `at` is a list of [side (+ right), forward] m from the feet along the aim, taken shot by shot (Sable's two
+crossbows, Sparkle's two hands), and `nodes` lists the .glb empties the muzzle flash sits on. The attack key's rounds are
+seated the step after they fire (`ArchKit.tick`); a kit that fires its own round calls `ShotOrigin.point` / `seat`. A
+seated round keeps its height (the hit band) and speed and still ends where it would have. Measured from the reels in
+`docs/art/vfx_origins/`; `--hero-vfx-check` keeps every origin on the body.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.

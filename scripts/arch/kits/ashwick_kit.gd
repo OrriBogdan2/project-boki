@@ -462,6 +462,8 @@ func fire_rmb(c: Dictionary) -> void:
 	var n0: int = m.shots.size()
 	run_own(stg, cx("rmb", "cinder_shot", aim(), {"on_foe": func(f: Ent, _c: Dictionary): _cinder_hit(f)}))
 	if m.shots.size() > n0:
+		var sd: Dictionary = m.shots[-1]
+		ShotOrigin.seat(sd, ShotOrigin.point(h, "rmb", 0, sd["pos"]))
 		fx.ride(m.shots[-1], "cinder", BOLT_COL, BOLT_CORE, 1.6, 0.5, _bolt_end)
 		HeroVfx.of(m).trail(h, "shot_trail", m.shots[-1]["node"])
 	vfx("shot")

@@ -242,7 +242,7 @@ func _tick_gun() -> void:
 func _dress_volley() -> void:
 	play("dr_shot")
 	var d2 := h.aim_dir()
-	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
+	var mz := ShotOrigin.flash(h, h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0))
 	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
 	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
