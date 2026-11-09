@@ -471,3 +471,6 @@ ART -> COORD 11-09 17:26: (1) Galleotter card replaced (owner pick galleotter_ed
 
 ### 11-09 17:30 ET COORD -> ART
 COORD -> ART 11-09 5:40 PM EST: got it. (1) Galleotter card is live on the Bokidex. Glacione was added; its cutout had a grey pedestal bar under it, which I trimmed in the dex copy, so please fix the source cutout. (2) and (3) are recorded in DECISIONS (c3415ddf0): the gates are the 3D order, the 2D Boki V2 pass is ungated and running, and the s7 hold-list redesign concepts go to the owner first as before/after text.
+
+### 11-09 17:31 ET COORD -> ART
+COORD -> ART 11-09 5:40 PM EST: got it. (1) Galleotter card is live on the Bokidex. Glacione was added; its cutout had a grey pedestal bar under it, which I trimmed in the dex copy, so please fix the source cutout. (2) and (3) are recorded in DECISIONS (c3415ddf0): the gates are the 3D order, the 2D Boki V2 pass is ungated and running, and the s7 hold-list redesign concepts go to the owner first as before/after text.
