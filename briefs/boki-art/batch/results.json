@@ -3012,5 +3012,373 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/gravadillo_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "knotwyrm_r",
+    "name": "Knotwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/knotwyrm_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravadillo_r",
+    "name": "Gravadillo",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gravadillo_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_r",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "knotwyrm_r",
+    "name": "Knotwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/knotwyrm_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "latchling_r",
+    "name": "Latchling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/latchling_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "latchling_r",
+    "name": "Latchling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/latchling_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "lodestick_r",
+    "name": "Lodestick",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestick_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "lodestick_r",
+    "name": "Lodestick",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestick_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "mossgrade_r",
+    "name": "Mossgrade",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mossgrade_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "mossgrade_r",
+    "name": "Mossgrade",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossgrade_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "pipewurm_r",
+    "name": "Pipewurm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipewurm_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "pipewurm_r",
+    "name": "Pipewurm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipewurm_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "ribbonwyrm_r",
+    "name": "Ribbonwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "ribbonwyrm_r",
+    "name": "Ribbonwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "rimeshrew_r",
+    "name": "Rimeshrew",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimeshrew_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "vespox_f_r",
+    "name": "Vespox (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_f_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "rimeshrew_r",
+    "name": "Rimeshrew",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimeshrew_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "vespox_f_r",
+    "name": "Vespox (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_f_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_chuggamus_r",
+    "name": "Chuggamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_r_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_chuggamus_r",
+    "name": "Chuggamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_r_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_cairnback",
+    "name": "Cairnback (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_cairnback",
+    "name": "Cairnback (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_crofthorn",
+    "name": "Crofthorn (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_crofthorn",
+    "name": "Crofthorn (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_geodelotl",
+    "name": "Geodelotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geodelotl_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_geodelotl",
+    "name": "Geodelotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geodelotl_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_gloamshell",
+    "name": "Gloamshell (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_gloamshell",
+    "name": "Gloamshell (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gloamshell_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_glomwort",
+    "name": "Glomwort (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_glomwort",
+    "name": "Glomwort (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_hivara",
+    "name": "Hivara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_hivara",
+    "name": "Hivara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_marchleaf",
+    "name": "Marchleaf (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_marchleaf",
+    "name": "Marchleaf (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_nettlynx",
+    "name": "Nettlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_nettlynx",
+    "name": "Nettlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_rampartoad",
+    "name": "Rampartoad (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_rampartoad",
+    "name": "Rampartoad (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_terrarimit",
+    "name": "Terrarimit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_terrarimit_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_thrumbird",
+    "name": "Thrumbird (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_terrarimit",
+    "name": "Terrarimit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_terrarimit_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_thrumbird",
+    "name": "Thrumbird (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_vaultara",
+    "name": "Vaultara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_1.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_vaultara",
+    "name": "Vaultara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_2.jpg",
+    "ok": false,
+    "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': \"You exceeded your spend-based rate limit. Your spending rate has exceeded the allowed limit for your account's billing history and tier. Please reduce the rate of your requests or wait before retrying. For more information, head to: https:/"
+  },
+  {
+    "id": "portrait_voltalon",
+    "name": "Voltalon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltalon",
+    "name": "Voltalon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak",
+    "name": "Zephyrak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_1.jpg",
+    "ok": true
   }
 ]
