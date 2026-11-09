@@ -5332,3 +5332,4 @@ READY ext/revive-online c71a5e5fb (online deaths drop a deathbox; BoxRevive and 
 READY ext/anim-stomp-drink-1 f81646d8a (stomp, drink, revive-kneel clips for Vex, Lace, Cinder via tools/art1/actionkit.py; Kael left procedural: v2 rig has no clips script)
 READY ext/parity-interrupts-b 1d8cccab7 (interrupt rules B)
 READY ext/level-growth-parity 051b53e20 (WeaponPath level bonuses removed; HP/AP growth kept as the source's ~6%/level; per-level asserts in --level-hud-check)
+READY ext/parity-interrupts-a a65a3b102 (interrupt rules A)
