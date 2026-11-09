@@ -55,3 +55,10 @@ Still differs (KIT_PARITY gaps 5 to 8, docs/heroes/archer.md):
 - LMB (two-stage draw, perfect quick draw), E (cone, slow 35%, anti-heal), R (3 shots, cd 60): match. Dash to LMB buffers, 8 of 17 flow rows unsourced.
 By eye (footage 110 to 604 next to the reel): the source shows a big white burst at the impact of Impaling Shot, a dark blue ghost-world look with the glowing portal during Spirit Walk, and a wide green arc of arrows for Rain of Arrows. Ours reads as thin red thread lines and small needle hits at the match camera; the impact has far less weight than the source's burst and my sampled dash frames show no phase look for the walk (watch the dash parts).
 
+## Grimble the Scrap King (`dredge`, source Kingpin): [dredge.mp4](dredge.mp4)
+Still differs (KIT_PARITY gaps 11, 13, docs/heroes/dredge.md):
+- Dash: three chained dashes, cd 10 (owner); the source has one dash every 7 s with its own air dash slot at 12.5 s. Ours shares the slot and the air dash is scaled twice (3.1 m, single 3.7 m) (gaps 11, 13).
+- E (Slam) and R (Kaiju Blast): mechanics match, cooldowns are 0.58x (7 vs 12 s, 21 vs 36 s). RMB: 0.67x (12 vs 18 s); reaches 11.5 m through terrain, reel, braced shuffle: match. LMB seven-slug blast with bloom, passive Salvage stacks: match.
+- Not built: enemies Grounded on arrival is ours-only (Grounded on E), no bonus armour damage without spread, no destructible bonus (docs/heroes/dredge.md).
+By eye (footage 46 to 302 next to the reel): the source's Buckshot is a wide fan of small blue pellets and its Kaiju Grasp a thick magenta arm with a diamond marker on the hooked foe; Kaiju Blast is a green beam with a wide ground telegraph. Ours at the match camera shows the slugs as a thin pink dotted line, and the blast reads smaller; the spread of seven slugs is hard to see in the reel.
+
