@@ -4861,5 +4861,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/sporcupine_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "voltmink_r",
+    "name": "Voltmink (owner redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltmink_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_r2b",
+    "name": "Teapotamus (redo, cuter, from old sheet)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/teapotamus_r2b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_r2",
+    "name": "Teapotamus (redo, cuter)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/teapotamus_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "teapotamus_r2b",
+    "name": "Teapotamus (redo, cuter, from old sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/teapotamus_r2b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross",
+    "name": "Canvastross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross",
+    "name": "Canvastross (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelotl",
+    "name": "Chandelotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelotl",
+    "name": "Chandelotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_1.jpg",
+    "ok": true
   }
 ]
