@@ -63521,5 +63521,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_pavonazar_gp_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pavonazar_gp",
+    "name": "Pavonazar (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pavonazar_gp",
+    "name": "Pavonazar (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pavonazar_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_gp",
+    "name": "Bullpole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullpole_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_gp",
+    "name": "Bullpole (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullpole_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_gp",
+    "name": "Bullpole (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bullpole_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole_gp",
+    "name": "Bullpole (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullpole_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pocketpus_gp",
+    "name": "Pocketpus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pocketpus_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pipwom_gp",
+    "name": "Pipwom (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pipwom_gp_1.jpg",
+    "ok": true
   }
 ]
