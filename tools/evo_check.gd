@@ -1,9 +1,12 @@
 extends RefCounted
 ## --evo-check: evolution by species (Evo, content/rules/evolve.json, docs/decisions/0024).
-## Each condition (level, Ink, trade) evolves the Boki, a branch follows its leading affinity, a Boki
+## Each condition (level, Ink, trade) evolves the Boki, a training-branch final follows the higher
+## trained stat (a tie by affinity) and the Boki screen's lean says which, every line has at most
+## one special rule (a branch or male/female looks), a Boki
 ## never evolves into a species without art and does once the art exists, levels stop at the cap,
 ## a v11 save keeps its levels and forms, bosses and the wild drop Inks, and bred babies are 50/50
-## female and male whatever their parents are. Test lines are put into the loaded rules and taken
+## female and male whatever their parents are, and a Boki's sex survives a save round trip and an
+## old save. Test lines are put into the loaded rules and taken
 ## out again; the save is never written.
 
 const SEX_BABIES := 600           # babies bred per parent pair: enough for a 50/50 split to show
@@ -46,6 +49,9 @@ func run(main: Node) -> void:
 	_migrate()
 	_inks()
 	_sex()
+	_branch()
+	_one_rule()
+	_sex_saved()
 	var lines: Dictionary = Evo.rules()["lines"]
 	for a in _added:
 		if a[1] == null: lines.erase(a[0])
@@ -66,17 +72,18 @@ func _data() -> void:
 			if id == "" or id != id.to_lower(): wrong.append(sp)
 			var ink := String(Goods.good(String(o.get("item", ""))).get("kind", ""))
 			if o.has("item") and ink != "ink": wrong.append(sp)
-			if o.has("path") and not Evo.AFF.has(String(o["path"])): wrong.append(sp)
+			if o.has("stat") and not Evo.STAT_AFF.has(String(o["stat"])): wrong.append(sp)
 			var by_level: bool = not o.has("item") and not o.get("trade", false)
-			if by_level and int(lines[sp].get("level", 0)) < 2: wrong.append(sp)
+			var stage := int(KinLib.entry(sp).roster.get("stage", 1)) if KinLib.entry(sp) else 0
+			if by_level and int(lines[sp].get("level", 0)) != (8 if stage == 1 else 16): wrong.append(sp)
 	ok(wrong.is_empty() and lines.size() > 0,
-		"every evolution line in evolve.json is well formed (%d lines; wrong: %s)" % [lines.size(), str(wrong)])
+		"every evolution line is well formed, Grown 8 / Elder 16 (%d lines; wrong: %s)" % [lines.size(), str(wrong)])
 	ok(Evo.cap() == 100, "the level cap is 100 (%d)" % Evo.cap())
 	var erm: Array = lines.get("ermink", {}).get("into", [])
 	var jar: Array = lines.get("jarmit", {}).get("into", [])
 	ok(erm.size() == 9 and jar.size() == 3, "Ermink has 9 Ink forms and Jarmit 3 Ink branches")
 
-## Level: it evolves at its own level, not before; a branch follows its leading affinity.
+## Level: it evolves at its own level, not before (branches: _branch).
 func _level() -> void:
 	_line("pebbit", {"level": 10, "into": [{"id": "cindle"}]})
 	var rec := _kin("pebbit", 9)
@@ -92,17 +99,6 @@ func _level() -> void:
 	var said := Evo.describe(ev, rec)
 	ok(String(ev.get("to", "")) == String(Data.KIN["cindle"]["name"]) and said.contains(String(ev["to"])),
 		"level: the event names the new species: %s" % said)
-	_line("glintmole", {"level": 5,
-		"into": [{"id": "burrlet", "path": "fierce"}, {"id": "puddlet", "path": "swift"}]})
-	var sw := _kin("glintmole", 5)
-	Evo.add(sw, "swift", 500.0)
-	Evo.on_level(sw)
-	var fi := _kin("glintmole", 5)
-	Evo.add(fi, "fierce", 500.0)
-	Evo.on_level(fi)
-	ok(sw["species"] == "puddlet" and fi["species"] == "burrlet",
-		"level: a branch follows the leading affinity (swift %s, fierce %s)" % [sw["species"], fi["species"]])
-
 ## Item: only the right Ink, used from the goods, evolves it; it's used up only when it works.
 func _item() -> void:
 	_line("zapple", {"into": [{"id": "wisplet", "item": "ink_lunar"}, {"id": "kestrike", "item": "ink_storm"}]})
@@ -200,19 +196,30 @@ func _inks() -> void:
 		var named := Goods.name_of("good:ink_" + t) == String(t).capitalize() + " Ink"
 		if String(Goods.good("ink_" + t).get("kind", "")) != "ink" or not named: missing.append(t)
 	ok(missing.is_empty(), "inks: all nine Inks are market goods named '<Type> Ink' (missing: %s)" % str(missing))
-	var boss_inks: Array = []
+	var no_ink: Array = []
 	for bid in Data.BOSSES:
-		if Data.MOBS[bid].has("ink"):
-			boss_inks.append(bid)
-			var ink := String(Data.MOBS[bid]["ink"])
-			ok(types.has(ink), "inks: %s drops a real Ink (%s)" % [bid, ink])
-	ok(boss_inks.has("serpent"),
-		"inks: the Sky Serpent (Wyrm) drops the Wyrm Ink (bosses with an Ink: %s)" % str(boss_inks))
+		var ink := String(Data.MOBS[bid].get("ink", "any"))
+		if ink != "any" and not types.has(ink): no_ink.append(bid)
+	ok(no_ink.is_empty() and String(Data.MOBS["serpent"].get("ink", "")) == "wyrm",
+		"inks: every boss drops an Ink, the Sky Serpent its Wyrm Ink (wrong: %s)" % str(no_ink))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
-	var got := Goods.on_result(1, rng, {"ink_wyrm": 1, "bosses": 1})
-	ok(got.has("good:ink_wyrm") and Goods.have("good:ink_wyrm") >= 1,
-		"inks: the killer's ink_wyrm stat comes home as a Wyrm Ink (%s)" % str(got))
+	var got := Goods.on_result(1, rng, {"ink_wyrm": 1, "ink_any": 1, "bosses": 1})
+	var inks: Array = got.filter(func(k): return String(Goods.good(Goods.id_of(k)).get("kind", "")) == "ink")
+	ok(got.has("good:ink_wyrm") and inks.size() >= 2,
+		"inks: a Wyrm boss kill brings a Wyrm Ink and an Ink-less boss kill any Ink (%s)" % str(got))
+	var black: Array = Goods.catalogue().filter(func(k): return String(k).begins_with("good:ink_"))
+	ok(black.size() == 9 and black.all(func(k): return Goods.rarity_of(k) in ["rare", "epic"]),
+		"inks: all nine are in the Black Market's rare stock pool (%d)" % black.size())
+	var erm := _kin("ermink", 1)
+	Goods.give("good:ink_tide")
+	var to := Evo.next_for(erm, "item", "ink_tide")
+	var used := Evo.use_ink(erm, "ink_tide")
+	var waits := not Evo.has_art("rippmink")
+	ok(to == "rippmink" and (used.is_empty() == waits) and (Goods.have("good:ink_tide") == (1 if waits else 0)),
+		"inks: Tide Ink on Ermink makes Rippmink (art ready %s; the Ink is kept until it is)" % str(not waits))
+	ok(Evo.inks_for(erm).size() == 9 and Evo.inks_for(_kin("cindle", 1)).is_empty(),
+		"inks: the Boki screen lists Ermink's nine Inks and none for a Vespyx")
 	var wild := 0
 	for i in INK_RUNS:
 		for key in Goods.on_result(0, rng):
@@ -237,3 +244,82 @@ func _sex() -> void:
 		var share := float(f) / SEX_BABIES
 		ok(absf(share - 0.5) < SEX_SLACK,
 			"sex: babies of %s+%s parents are %.0f%% female (50/50)" % [pair[0], pair[1], share * 100.0])
+
+## Training-branch finals: the higher trained stat picks it, a tie goes by affinity, and the lean
+## on the Boki screen names the same final before it evolves.
+func _branch() -> void:
+	_line("glintmole", {"level": 5, "into": [{"id": "burrlet", "stat": "power"}, {"id": "puddlet", "stat": "speed"}]})
+	var cases := [[{"power": 9, "speed": 3}, "", "burrlet", "higher Power"],
+		[{"power": 2, "speed": 7}, "", "puddlet", "higher Speed"],
+		[{"power": 4, "speed": 4}, "swift", "puddlet", "a tie, swift"],
+		[{"power": 4, "speed": 4}, "fierce", "burrlet", "a tie, fierce"]]
+	for c in cases:
+		var rec := _kin("glintmole", 5)
+		for st in c[0]: rec["stats"][st] = c[0][st]
+		if c[1] != "": Evo.add(rec, c[1], 500.0)
+		var leant := String(Evo.lean(rec).get("id", ""))
+		var ev := Evo.on_level(rec)
+		ok(rec["species"] == c[2] and leant == c[2],
+			"branch: %s evolves into %s (lean said %s)" % [c[3], rec["species"], leant])
+		if c[1] == "": ok(String(ev.get("stat", "")) != "" and Evo.describe(ev, rec).contains("training"),
+			"branch: the event says training decided it: %s" % Evo.describe(ev, rec))
+	var want := {"sporcupine": ["guard", "power"], "vespox": ["power", "speed"], "glassolotl": ["guard", "speed"],
+		"zapple": ["power", "speed"]}
+	var got := {}
+	var file: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/evolve.json"))["lines"]
+	for sp in file:      # the file, not the loaded rules (the other tests swap test lines in)
+		var into: Array = file[sp]["into"]
+		if into.any(func(o): return o.has("stat")): got[sp] = into.map(func(o): return String(o["stat"]))
+	for sp in got: got[sp].sort()
+	ok(got == want, "branch: exactly the four lines branch by training: %s" % str(got))
+	var sporc := {"species": "sporcupine", "stats": {"power": 3, "guard": 8}}
+	ok(Evo.lean(_kin("cindle", 1)).is_empty() and String(Evo.lean(sporc).get("id", "")) == "ringrove",
+		"branch: no lean on a Vespyx; a Guard-trained Sporcupine leans Ringrove (%s)" % str(Evo.lean(sporc)))
+
+## One special rule per line: a branching final (training or Ink) or male/female looks, never both,
+## and the looks only on the owner's list.
+func _one_rule() -> void:
+	var looks := ["bellowlet", "cindowary", "furnacowary", "gibbelle", "gongrowl", "kestrike", "arcestrel",
+		"voltalon", "wisplet", "eclipsowl", "murmurling"]
+	var rules := {}           # line id -> [branches, has looks]
+	var flagged: Array = []
+	for id in KinLib.roster_ids():
+		var k := KinLib.entry(id)
+		var ln := String(k.roster.get("line", id))
+		if not rules.has(ln): rules[ln] = [0, false]
+		if KinLib.sex_forms(id):
+			rules[ln][1] = true
+			flagged.append(id)
+		if (Evo.rules()["lines"].get(id, {}).get("into", []) as Array).size() > 1: rules[ln][0] += 1
+	var both: Array = rules.keys().filter(func(ln): return rules[ln][0] > 1 or (rules[ln][0] > 0 and rules[ln][1]))
+	ok(both.is_empty(), "one rule: no line has two special rules (%d lines; wrong: %s)" % [rules.size(), str(both)])
+	flagged.sort()
+	looks.sort()
+	ok(flagged == looks, "one rule: male/female looks on exactly the owner's lines (%s)" % str(flagged))
+	var male := BokiRig.PATH % ["kestrike", "kestrike"]
+	var has_f := ResourceLoader.exists(BokiRig.FEMALE_PATH % ["kestrike", "kestrike"])
+	ok(BokiRig.model_path("kestrike", "f") == male or has_f,
+		"one rule: a female Kestrike without its own model falls back to the male one")
+	ok(BokiRig.model_path("cindle", "f") == BokiRig.PATH % ["cindle", "cindle"],
+		"one rule: a branching line keeps one look")
+
+## Sex is saved with the Boki: a round trip through the save keeps it, a wild Boki has one from its
+## match seed, and an old record without one gets it once and keeps it.
+func _sex_saved() -> void:
+	var sexes := {}
+	var kept := true
+	for i in 40:
+		var rec := Save.new_kin("cindle", "", 1000 + i)
+		var back: Dictionary = JSON.parse_string(JSON.stringify(rec))
+		sexes[Unique.sex(back)] = true
+		kept = kept and String(back["dna"].get("sex", "")) == Unique.sex(rec) and Unique.sex(rec) in ["f", "m"]
+	ok(kept, "sex: forty Boki keep their sex through a save round trip")
+	ok(sexes.size() == 2, "sex: forty seeded wild Boki come in both sexes")
+	var old := Save.new_kin("cindle", "", 77)
+	var was := Unique.sex(old)
+	(old["dna"] as Dictionary).erase("sex")
+	Unique.ensure_sex(old)
+	var first := String(old["dna"]["sex"])
+	Unique.ensure_sex(old)
+	ok(first == was and String(old["dna"]["sex"]) == first,
+		"sex: an old save's Boki gets its sex once, the same one its seed always gave (%s)" % first)

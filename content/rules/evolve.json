@@ -1,5 +1,5 @@
 {
- "desc": "Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (a level-up at or past it). 'into': the options; 'path' picks a branch by the Boki's leading affinity (fierce/steadfast/curious/swift), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.",
+ "desc": "Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (Grown 8 for the first form, Elder 16 for the second) (a level-up at or past it). 'into': the options; 'stat' picks a branch by the higher trained stat (power/guard/speed) when it evolves, a tie by its affinity (fierce power, steadfast guard, swift speed), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.",
  "cap": 100,
  "cap_doc": "The highest level a Boki can reach.",
  "lines": {
@@ -49,20 +49,20 @@
      "id": "sporcupine"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "sporcupine": {
    "into": [
     {
      "id": "amanitusk",
-     "path": "fierce"
+     "stat": "power"
     },
     {
      "id": "ringrove",
-     "path": "steadfast"
+     "stat": "guard"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "cindle": {
    "into": [
@@ -70,20 +70,20 @@
      "id": "vespox"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "vespox": {
    "into": [
     {
      "id": "glaivyx",
-     "path": "fierce"
+     "stat": "power"
     },
     {
      "id": "lashyx",
-     "path": "swift"
+     "stat": "speed"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "puddlet": {
    "into": [
@@ -91,20 +91,20 @@
      "id": "glassolotl"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "glassolotl": {
    "into": [
     {
      "id": "chandelotl",
-     "path": "curious"
+     "stat": "speed"
     },
     {
      "id": "geodelotl",
-     "path": "steadfast"
+     "stat": "guard"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "teapotamus": {
    "into": [
@@ -112,7 +112,7 @@
      "id": "puffamus"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "puffamus": {
    "into": [
@@ -120,7 +120,7 @@
      "id": "scaldamus"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "kerchick": {
    "into": [
@@ -128,7 +128,7 @@
      "id": "jibbatross"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "jibbatross": {
    "into": [
@@ -136,7 +136,7 @@
      "id": "squalltross"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "skidlet": {
    "into": [
@@ -144,7 +144,7 @@
      "id": "hoarheron"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "hoarheron": {
    "into": [
@@ -152,7 +152,7 @@
      "id": "lanceron"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "zipling": {
    "into": [
@@ -160,7 +160,7 @@
      "id": "caecilith"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "caecilith": {
    "into": [
@@ -168,7 +168,7 @@
      "id": "seamwyrm"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "glintmole": {
    "into": [
@@ -176,7 +176,7 @@
      "id": "geodemole"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "geodemole": {
    "into": [
@@ -184,7 +184,7 @@
      "id": "druzemole"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "kindlewren": {
    "into": [
@@ -192,7 +192,7 @@
      "id": "embrook"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "embrook": {
    "into": [
@@ -200,7 +200,7 @@
      "id": "pyrraven"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "oarlet": {
    "into": [
@@ -208,7 +208,7 @@
      "id": "oarter"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "oarter": {
    "into": [
@@ -216,7 +216,7 @@
      "id": "galleotter"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "kitlet": {
    "into": [
@@ -224,7 +224,7 @@
      "id": "ribbonwyrm"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "ribbonwyrm": {
    "into": [
@@ -232,7 +232,7 @@
      "id": "dragonkite"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "bellowlet": {
    "into": [
@@ -240,7 +240,7 @@
      "id": "cindowary"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "cindowary": {
    "into": [
@@ -248,7 +248,7 @@
      "id": "furnacowary"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "dribbara": {
    "into": [
@@ -256,7 +256,7 @@
      "id": "lilybara"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "lilybara": {
    "into": [
@@ -264,7 +264,7 @@
      "id": "geysirbara"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "parasolth": {
    "into": [
@@ -272,7 +272,7 @@
      "id": "umbrathere"
     }
    ],
-   "level": 30
+   "level": 8
   },
   "kayak": {
    "into": [
@@ -280,7 +280,7 @@
      "id": "glaciyak"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "glaciyak": {
    "into": [
@@ -288,7 +288,7 @@
      "id": "dreadnoyak"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "coolatee": {
    "into": [
@@ -296,7 +296,7 @@
      "id": "floenatee"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "floenatee": {
    "into": [
@@ -304,7 +304,7 @@
      "id": "glaciatee"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "fizzlet": {
    "into": [
@@ -312,7 +312,7 @@
      "id": "nimbostrich"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "nimbostrich": {
    "into": [
@@ -320,7 +320,7 @@
      "id": "thunderstrich"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "wickapi": {
    "into": [
@@ -328,7 +328,7 @@
      "id": "duskapi"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "duskapi": {
    "into": [
@@ -336,7 +336,7 @@
      "id": "chandelapi"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "bucketmander": {
    "into": [
@@ -344,7 +344,7 @@
      "id": "spatewader"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "spatewader": {
    "into": [
@@ -352,7 +352,7 @@
      "id": "cisternmander"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "tinbrock": {
    "into": [
@@ -360,7 +360,7 @@
      "id": "kilnbadger"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "kilnbadger": {
    "into": [
@@ -368,7 +368,7 @@
      "id": "forgebrock"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "opalisk": {
    "into": [
@@ -376,7 +376,7 @@
      "id": "frothisk"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "frothisk": {
    "into": [
@@ -384,7 +384,7 @@
      "id": "tidalisk"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "kestrike": {
    "into": [
@@ -392,7 +392,7 @@
      "id": "arcestrel"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "arcestrel": {
    "into": [
@@ -400,7 +400,7 @@
      "id": "voltalon"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "marchleaf": {
    "into": [
@@ -408,7 +408,7 @@
      "id": "scythant"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "scythant": {
    "into": [
@@ -416,7 +416,7 @@
      "id": "reapant"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "nettlynx": {
    "into": [
@@ -424,7 +424,7 @@
      "id": "thistlynx"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "thistlynx": {
    "into": [
@@ -432,7 +432,7 @@
      "id": "briarlynx"
     }
    ],
-   "level": 36
+   "level": 16
   },
   "thrumbird": {
    "into": [
@@ -440,7 +440,7 @@
      "id": "lyrewing"
     }
    ],
-   "level": 30
+   "level": 8
   },
   "mothlet": {
    "into": [
@@ -448,7 +448,7 @@
      "id": "wisplet"
     }
    ],
-   "level": 14
+   "level": 8
   },
   "wisplet": {
    "into": [
@@ -456,20 +456,20 @@
      "id": "eclipsowl"
     }
    ],
-   "level": 32
+   "level": 16
   },
   "zapple": {
    "into": [
     {
      "id": "howlop",
-     "path": "fierce"
+     "stat": "power"
     },
     {
      "id": "chimelop",
-     "path": "curious"
+     "stat": "speed"
     }
    ],
-   "level": 16
+   "level": 8
   },
   "gibbelle": {
    "into": [
@@ -477,7 +477,7 @@
      "id": "gongrowl"
     }
    ],
-   "level": 30
+   "level": 8
   },
   "latchling": {
    "into": [
@@ -485,7 +485,7 @@
      "id": "tuatrune"
     }
    ],
-   "level": 20
+   "level": 8
   },
   "tuatrune": {
    "into": [
@@ -493,7 +493,7 @@
      "id": "vaultara"
     }
    ],
-   "level": 40
+   "level": 16
   },
   "jarmit": {
    "into": [

@@ -10,6 +10,7 @@
 		"art": "new",
 		"line": "mothlet",
 		"stage": 3,
-		"from": "wisplet"
+		"from": "wisplet",
+		"sex_forms": true
 	}
 }

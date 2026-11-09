@@ -10,6 +10,7 @@
 		"art": "locked",
 		"line": "gibbelle",
 		"stage": 2,
-		"from": "gibbelle"
+		"from": "gibbelle",
+		"sex_forms": true
 	}
 }

@@ -81,6 +81,11 @@ static func roster_ids() -> Array:
 static func entry(id: String) -> KinSpec:
 	return lib()["kin"].get(id, lib()["stubs"].get(id, null))
 
+## True for a species with a female look next to the male one (roster sex_forms).
+static func sex_forms(id: String) -> bool:
+	var k := entry(id)
+	return k != null and bool(k.roster.get("sex_forms", false))
+
 static func merge_of(species_id: String) -> MergeSpec:
 	var k := kin(species_id)
 	return merge(k.merge) if k else null

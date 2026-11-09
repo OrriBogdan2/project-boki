@@ -7,6 +7,7 @@ extends Node
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
+const FEMALE_PATH := "res://art/kin/%s/%s_f.glb"     # a sex_forms species' female look (the main sheet is male)
 ## Where the eyes and the top of the head sit (m), per species: what KinModels.build returns for the accessories.
 ## "hip" is the height its legs hold it at, which the limb roll stretches: 0 for a Boki without legs. One that "hover"s
 ## gets a soft shadow on the ground under it.
@@ -178,6 +179,11 @@ static var _shadow_mat: StandardMaterial3D
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
+## The model for this sex: a sex_forms species' female look when its file exists, else the male look.
+static func model_path(kin_id: String, sex: String) -> String:
+	var f := FEMALE_PATH % [kin_id, kin_id]
+	return f if sex == "f" and KinLib.sex_forms(kin_id) and ResourceLoader.exists(f) else PATH % [kin_id, kin_id]
+
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
 static func work_clip(k: Dictionary) -> String:
 	if not k.has("job"):
@@ -192,7 +198,7 @@ static func work_clip(k: Dictionary) -> String:
 ## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	var model_root := (load(model_path(kin_id, String(c.get("sex", "")))) as PackedScene).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()

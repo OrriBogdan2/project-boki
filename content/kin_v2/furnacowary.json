@@ -10,6 +10,7 @@
 		"art": "new",
 		"line": "bellowlet",
 		"stage": 3,
-		"from": "cindowary"
+		"from": "cindowary",
+		"sex_forms": true
 	}
 }

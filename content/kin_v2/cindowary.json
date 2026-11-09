@@ -122,6 +122,7 @@
 		"art": "locked",
 		"line": "bellowlet",
 		"stage": 2,
-		"from": "bellowlet"
+		"from": "bellowlet",
+		"sex_forms": true
 	}
 }

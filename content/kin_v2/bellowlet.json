@@ -8,6 +8,7 @@
 	"roster": {
 		"art": "new",
 		"line": "bellowlet",
-		"stage": 1
+		"stage": 1,
+		"sex_forms": true
 	}
 }

@@ -11,7 +11,7 @@ var display_name := ""
 var animals: Array = []
 var theme := "none"
 var type2 := ""              # optional second type, a theme other than the first
-var roster := {}             # art, line, stage, from, raised, ink: its place in the roster (docs/boki/ROSTER.md)
+var roster := {}             # art, line, stage, from, ink, sex_forms: its place in the roster (docs/boki/ROSTER.md)
 var data_only := false       # in the roster without a model yet: loaded for the dex, never spawned
 var flavor := ""
 var colors := {}             # body belly glow wing: hex
@@ -192,16 +192,16 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	return k
 
 ## The roster block: art status, the id of the line's first form, the stage, the form it evolves
-## from, and the raising path (raised) or Ink that picks its branch.
+## from, the Ink that picks its branch, and sex_forms (a female look next to the male one).
 static func _roster(v: Variant, rep: GrammarReport) -> Dictionary:
 	var r := rep.obj(v, "roster")
-	rep.keys(r, "roster", ["art", "line", "stage", "from", "raised", "ink"], ["art", "line", "stage"])
+	rep.keys(r, "roster", ["art", "line", "stage", "from", "ink", "sex_forms"], ["art", "line", "stage"])
 	var out := {"art": rep.choice(r, "art", ROSTER_ART, "roster"), "line": rep.ident(r, "line", "roster"),
 		"stage": int(rep.number(r, "stage", "roster", 1, 3, null, true)), "from": rep.ident(r, "from", "roster", false)}
-	if r.has("raised"):
-		out["raised"] = rep.choice(r, "raised", KinParts.AFFINITIES, "roster")
 	if r.has("ink"):
 		out["ink"] = rep.choice(r, "ink", KinParts.THEMES, "roster")
+	if r.has("sex_forms"):
+		out["sex_forms"] = rep.param(r, "sex_forms", ["bool", null, null, false, "", ""], "roster")
 	return out
 
 ## The optional infusion block: one effect part per socket (hit, ctrl, guard, util), a list of

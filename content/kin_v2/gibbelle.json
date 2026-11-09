@@ -117,6 +117,7 @@
 	"roster": {
 		"art": "locked",
 		"line": "gibbelle",
-		"stage": 1
+		"stage": 1,
+		"sex_forms": true
 	}
 }

@@ -118,6 +118,7 @@
 		"art": "todo",
 		"line": "mothlet",
 		"stage": 2,
-		"from": "mothlet"
+		"from": "mothlet",
+		"sex_forms": true
 	}
 }

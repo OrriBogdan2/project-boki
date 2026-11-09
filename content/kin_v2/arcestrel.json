@@ -10,6 +10,7 @@
 		"art": "new",
 		"line": "kestrike",
 		"stage": 2,
-		"from": "kestrike"
+		"from": "kestrike",
+		"sex_forms": true
 	}
 }

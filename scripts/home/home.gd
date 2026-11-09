@@ -3051,15 +3051,7 @@ func _open_kin(rec: Dictionary) -> void:
 			more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 			c2.add_child(more)
 		"Growth":
-			var lead := Evo.leading(rec)
-			var lv := int(rec["level"])
-			var next_form := (lv / 4 + 1) * 4
-			var next_mut := lv + ((2 - lv % 4) + 4) % 4
-			if next_mut == lv: next_mut += 4
-			c1.add_child(UI.section("Growing toward", UI.FAINT.lightened(0.2)))
-			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
-			c1.add_child(UI.label("New form at level %d  ·  mutation at %d" % [next_form, next_mut], UI.T_SMALL, UI.MUTED))
-			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
+			EvoView.growth(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
 			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))

@@ -124,6 +124,7 @@
 	"roster": {
 		"art": "todo",
 		"line": "kestrike",
-		"stage": 1
+		"stage": 1,
+		"sex_forms": true
 	}
 }
