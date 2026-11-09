@@ -145,7 +145,7 @@ func _first_arrival() -> void:
 
 func _offer() -> void:
 	var hob: FarmHob = home.hob
-	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Mask talk before the house is down")
+	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Relic talk before the house is down")
 	FarmTutorial.mark("chop")
 	Work.add_mat("wood", 10)
 	home.guide.place_house()
