@@ -246,13 +246,14 @@ const MOBS := {
 		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
 	"warden": {"name": "The Watcher", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
-	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
+	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin,
+	# and one whose kin is of an Ink's type ("ink") gives that Ink to its killer (Goods.on_result)
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
 		"r": 1.6, "gems": 40, "color": Color("7d7468"), "attack": "boss", "slam_r": 3.8, "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "cairnback", "enrage": 75.0},
 	"serpent": {"name": "Stormcoil, the Sky Serpent", "hp": 1250.0, "speed": 5.2, "dmg": 22.0, "range": 10.0, "windup": 0.95, "cd": 1.5,
 		"r": 1.15, "gems": 40, "color": Color("3f86b8"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
-		"egg": "zephyrak", "enrage": 75.0},
+		"egg": "zephyrak", "enrage": 75.0, "ink": "wyrm"},
 	"brood": {"name": "The Brood Mother", "hp": 1350.0, "speed": 2.3, "dmg": 18.0, "range": 9.0, "windup": 1.0, "cd": 1.7,
 		"r": 1.55, "gems": 40, "color": Color("8a9a3a"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "hivara", "enrage": 75.0},
