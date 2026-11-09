@@ -48,7 +48,7 @@ RX('stormit','Stormit',E+'Jarmit.jpg','mid',
 RX('terrarimit','Terrarimit',E+'Jarmit.jpg','mid',
  "A wide, low walking garden: the crab has spread out into a flat moss-covered island with a broken glass terrarium dome on top, ferns and flowers sprouting from its legs and back, tiny stones and a little pond on its shell.",
  "calm, kind eyes on short stalks and a gentle smile","moss green and earthy brown, with a flower-pink accent","a jar on a crab, a tall dome",'bloom','tough')
-_INK2=" Its body plan, pose and silhouette must be clearly different from image 1 and from every other Ink form, not a recolour of image 1."
+_INK2=" Its body plan, pose and silhouette must be clearly different from image 1 and from every other Ink form, not a recolour of image 1. It is a grown-up final form: clearly bigger than image 1 (about twice its size) with a more mature, longer, stronger build."
 RX('flarmink','Flarmink',E+'Ermink.jpg','final',
  "A low, long fire weasel whose whole body is one sweeping brushstroke of flame that tapers into a long burning tail, its legs short flicks of ink-fire, racing forward."+_INK2,
  "bright, cocky orange eyes and a wide grin","ink black and flame orange, with a yellow accent","standing upright like image 1",'ember','fast')

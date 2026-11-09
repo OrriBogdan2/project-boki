@@ -30,3 +30,7 @@ Pass = no veto, every seat >= 8.0, average >= 8.5, and at least two seats pick t
 
 ## STYLE_CANON (owner 11-09, briefs/boki-art/STYLE_CANON.md) — read it
 One Boki 2D style anchored on style_refs/boki_style_ref_2d.png. For hero cards (`*_card`) and new art: gentle 3/4 view (25-35 deg, head toward viewer, both eyes), characterful grounded pose, centred with ~8% margin, plain flat pale grey #E8E8EE, no shadow/glow/halo, thin dark outline, big glossy eyes, soft blush. Judge cards against it.
+
+## Ermink family (owner 23:22)
+- Ermink is the small base form; all nine Ink forms must read clearly BIGGER and more grown-up than Ermink (about twice its size, longer, stronger build).
+- Every Ink form needs its own distinct pose and silhouette: Flarmink racing streak, Rippmink diving wave, Blossmink low lounging log, Voltmink loose lanky stride, Prismink low crouch, Rimink tall prowl, Lunink gliding flight, Umbrink ink pool, Wyrmink coiling in the air. Two Ink forms in similar poses = the later one fails.

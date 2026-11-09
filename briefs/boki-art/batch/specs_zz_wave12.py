@@ -17,7 +17,7 @@ V('tidalisk_x','Tidalisk',T+'Bubblisk.jpg','final',
  "A big, powerful water-running basilisk three times the size of image 1, mid-sprint on its hind legs over a splash of water with its body leaning forward, its body deep teal with sleek armoured scales, a huge sail crest of iridescent bubble membrane along its back that throws rainbow light, long webbed toes and a long whip tail ending in a cluster of bubbles."+DIFF+NOCOPY+UNIQ,
  "fierce, confident amber eyes and a wide, fanged grin","deep teal and sea-green, with a rainbow soap-film accent on the sail only",
  "a pale lavender body, an axolotl, standing like a person",'tide','majestic')
-_INK=" Its body plan, pose and silhouette must be clearly different from image 1 and from every other Ink form, not a recolour of image 1."
+_INK=" Its body plan, pose and silhouette must be clearly different from image 1 and from every other Ink form, not a recolour of image 1. It is a grown-up final form: clearly bigger than image 1 (about twice its size) with a more mature, longer, stronger build."
 V('blossmink_x','Blossmink',E+'Ermink.jpg','final',
  "A squat, wide, low-slung stoat curled like a mossy log on all fours, draped in a thick moss mantle with ink-brush blossom petals growing through it, flowering vines trailing from its back and a heavy bushy tail like a flowering shrub."+_INK+ALL4,
  "sleepy, content green eyes and a soft, smug smile","moss green and ink black, with a pink blossom accent",
