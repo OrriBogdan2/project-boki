@@ -5029,5 +5029,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gravadillo_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_geysirbara",
+    "name": "Geysirbara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_galleotter",
+    "name": "Galleotter (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm",
+    "name": "Pipewurm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_latchling",
+    "name": "Latchling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_latchling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade",
+    "name": "Mossgrade (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm",
+    "name": "Pipewurm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm",
+    "name": "Knotwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth",
+    "name": "Parasolth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_knotwyrm",
+    "name": "Knotwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_knotwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_latchling",
+    "name": "Latchling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_latchling_2.jpg",
+    "ok": true
   }
 ]
