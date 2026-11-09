@@ -5757,3 +5757,4 @@ READY ext/tut-start-here 5bf8865de (Hunter pick, prematch and Expedition panel: 
 READY ext/anim-garden-actions 50869956b (pet, give, cheer clips for Vex, Kael, Lace, Cinder; home path wired, race cheer pending ext/garden-race)
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
+READY ext/home-verbs-anim c8bf505c3 (home player moves)
