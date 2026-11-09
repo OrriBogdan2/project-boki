@@ -5819,7 +5819,7 @@ func _net_ev(x, from: String) -> void:
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by == player:
 					player.knocks += 1
-					KnockCallout.say(self, "knock", who)
+					KnockCallout.say(self, "knock", who, true)
 					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
@@ -5830,7 +5830,7 @@ func _net_ev(x, from: String) -> void:
 				who.out = true
 				if by == player:
 					player.kills += 1
-					KnockCallout.say(self, "out", who)
+					KnockCallout.say(self, "out", who, true)
 					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:

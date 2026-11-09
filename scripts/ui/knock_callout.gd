@@ -21,9 +21,14 @@ const OUTLINE := Color(0.03, 0.02, 0.05, 0.95)
 var lines: Array[Dictionary] = []       # {"word", "name", "col", "t"}: what is on screen now
 var _font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
-## "knock" or "out" of `victim`, for the HUD of `m` (nothing if the match has none).
-static func say(m: Match, kind: String, victim: Hunter) -> void:
-	if m == null or m.hud == null or victim == null:
+## "knock" or "out" of `victim`, for the HUD of `m` (nothing if the match has none). `confirm`
+## also plays the confirm sound (knock_confirm / kill): the online client's events, where Juice doesn't run.
+static func say(m: Match, kind: String, victim: Hunter, confirm := false) -> void:
+	if m == null or victim == null:
+		return
+	if confirm:
+		m.sfx("knock_confirm" if kind == "knock" else "kill", null, -6.0 if kind == "knock" else -3.0)
+	if m.hud == null:
 		return
 	var host: Node = m.hud
 	var callout: KnockCallout = null
