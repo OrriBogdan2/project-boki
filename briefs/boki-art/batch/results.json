@@ -27093,5 +27093,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/ta_prismander_a_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_prismander_a_w32",
+    "name": "Prismander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a_w32",
+    "name": "Prismander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a_w32",
+    "name": "Prismander",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w32",
+    "name": "Amanitusk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w32",
+    "name": "Amanitusk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w32",
+    "name": "Amanitusk",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "amanitusk_e_w32",
+    "name": "Amanitusk",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/amanitusk_e_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_e_w32",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_e_w32_1.jpg",
+    "ok": true
   }
 ]
