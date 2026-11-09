@@ -48079,5 +48079,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_gap",
+    "name": "Tinbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_2.jpg",
+    "ok": true
   }
 ]
