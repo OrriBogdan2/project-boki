@@ -18063,5 +18063,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe_w29",
+    "name": "Marchleaf (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe_w29",
+    "name": "Marchleaf (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_pe_w29",
+    "name": "Marchleaf (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanterloris_pe_w29",
+    "name": "Lanterloris (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanterloris_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe_w29",
+    "name": "Pipewurm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w29",
+    "name": "Prowyak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe_w29",
+    "name": "Pipewurm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe_w29",
+    "name": "Pipewurm (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w29",
+    "name": "Rimeshrew (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipewurm_pe_w29",
+    "name": "Pipewurm (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_pipewurm_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w29",
+    "name": "Prowyak (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w29",
+    "name": "Prowyak (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w29_3.jpg",
+    "ok": true
   }
 ]
