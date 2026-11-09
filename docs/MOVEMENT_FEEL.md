@@ -211,6 +211,27 @@ Other checks:
   Measured opening 6m deep at -8 m/s: peak over the lip -0.39m before, +0.77m after; time near the top (above the lip, under 1 m/s vertical) 0.00s before, 0.38s after. Heat rules are unchanged.
 - The `--mantle-check` steering-away window is 24 steps (was 12): a ledge now catches you earlier in the jump, so reversing out takes longer to show as distance.
 
+## Wall kick and wall bounce for every Hunter (`--wallmove-check`, `tools/wallmove_hunters_check.gd`)
+
+DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyone, every interaction chainable. The check puts each of the 12 Hunters in the Training Area's strip beside a 16 m wall and tries both moves: from a run, from a jump, out of the ground dash, out of the air dash, and in the air 0.05 / 0.2 / 0.45 / 0.8 s after LMB, RMB, E, X and Shift (each tapped and held; the held RMB sets `sec_hold`). A case counts only when the body is still at the wall (or reached it at 4 m/s into it); a kit move that took it off the wall, down to the ground or head-on into it is "n/a", not a block.
+
+| Move | Result for all 12 Hunters |
+|---|---|
+| Kick from a run, a jump, the ground dash, the air dash | works |
+| Kick after LMB, RMB, E, X, Shift (tap and hold), 0.05-0.8 s | works; no ability keeps the jump from the wall (`do_jump` only refuses stun, a grapple, Grounded, `cast_locked` and a ledge rise, and no kit holds those at the wall) |
+| Bounce after the same buttons | works wherever the hit is angled and at 4 m/s |
+| Bounce out of the ground dash | **was blocked for Kael** (fixed, below); the rest bounce |
+
+**Fixed:** Kael's dash is a shove (`dash.shove`) and `Hunter.shove` stays set after the dash ends, so a jump out of it never bounced (`WallMoves.hit` refused while `shove` was non-empty). The refusal now applies only while the dash runs (`roll_t > 0`), which is what it was for: a ram doesn't rebound off the wall it hits. `--wallmove-check` fails on the old line (juggernaut, bounce:dash).
+
+**Commits (the kit owns the body, so no kick or bounce; sources):**
+- Motley's Lantern Trade (Shift): while the lantern flies (1.8 s) he hovers in place and a jump press does nothing: "owner dash note (Nov 2)", `docs/heroes/ostra.md`. Not a wall problem, so no change.
+- The probe's n/a cases (not blocks): Tenzo's RMB in the air is a slam that lands him; Kael's RMB (lunge, meteor) and E (Warchain) and Dredge's and Vex's E move the body off the wall or down. The move is the point of the button, so nothing was changed for them.
+
+**Open (not fixed, no source or owner line decides it):** Claire's rink skate (E held, X): the skate steers her at the wall head-on (hit within 16 degrees of the normal), so an angled bounce never shows. In `COMMITS` of the check until someone decides the skate should rebound. The case would need her skate heading to come from the keys, not the aim.
+
+**Suggestion (not built, parity):** a run is 4.4-4.9 m/s, so a plain run-and-jump bounces only when it meets the wall between 20 and about 26-35 degrees off the normal (`BOUNCE_MIN_INTO` 4 m/s and `BOUNCE_HEAD_ON_DEG` 20 are our estimates, no source number). Tenzo's and Claire's runs didn't bounce at 25 degrees (they are slowest in the air). If the source bounces off a walking jump, drop `BOUNCE_MIN_INTO` to about 3 m/s.
+
 ## Physics pass: SUPERVIVE's game data (`physics76`)
 
 Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in SUPERVIVE_DATA.md.
