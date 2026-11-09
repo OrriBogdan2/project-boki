@@ -17846,5 +17846,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w29_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w29",
+    "name": "Gongibbon (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_pe_w29",
+    "name": "Glintmole (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glintmole_pe_w29",
+    "name": "Glintmole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glintmole_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon_pe_w29",
+    "name": "Gongibbon (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w29",
+    "name": "Gravadillo (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w29",
+    "name": "Gravadillo (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w29",
+    "name": "Gravadillo (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravadillo_pe_w29",
+    "name": "Gravadillo (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_gravadillo_pe_w29_4.jpg",
+    "ok": true
   }
 ]
