@@ -87,7 +87,7 @@
  "Briarlynx": {
   "sheet": "briefs/boki-art/turnarounds/Briarlynx.jpg",
   "card": "briefs/boki-art/cards/Briarlynx.jpg",
-  "portrait": null,
+  "portrait": "briefs/boki-art/portraits/light/Briarlynx.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Briarlynx.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Briarlynx.png"
  },
@@ -1035,9 +1035,10 @@
  },
  "Thistlynx": {
   "sheet": "briefs/boki-art/evolutions/Thistlynx.jpg",
-  "card": null,
+  "card": "briefs/boki-art/cards/Thistlynx.jpg",
   "portrait": "briefs/boki-art/portraits/light/Thistlynx.jpg",
-  "cutout": "briefs/boki-art/portraits/cutout/Thistlynx.png"
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Thistlynx.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Thistlynx.png"
  },
  "Thrumbird": {
   "sheet": "briefs/boki-art/turnarounds/Thrumbird.jpg",
@@ -1232,5 +1233,24 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png",
   "display_name": "Lunarca"
+ },
+ "Anchorhorn": {
+  "sheet": "briefs/boki-art/turnarounds/Anchorhorn.jpg",
+  "card": "briefs/boki-art/cards/Anchorhorn.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Anchorhorn.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Anchorhorn.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Anchorhorn.png"
+ },
+ "Bastionpet": {
+  "sheet": "briefs/boki-art/turnarounds/Bastionpet.jpg",
+  "card": "briefs/boki-art/cards/Bastionpet.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Bastionpet.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Bastionpet.png"
+ },
+ "Crofthollow": {
+  "card": "briefs/boki-art/cards/Crofthollow.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Crofthollow.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Crofthollow.png",
+  "portrait": "briefs/boki-art/portraits/light/Crofthollow.jpg"
  }
 }

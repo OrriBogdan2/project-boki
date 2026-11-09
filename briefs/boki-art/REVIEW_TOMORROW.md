@@ -17,3 +17,11 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Flarmink, Rippmink, Rimink, Prismink | current stays until a new direction passes | Your 04:44 note: need more differentiation | m1-m3 each, generating |
 | Vespox | current recolour stays until a v1-v3 direction passes | Your 04:52 note: too close to Vespyx | v1-v3 generating |
 | Names | 13 renames proposed in NAME_CHANGES.md (e.g. Thunderstrich -> Thundrich, Terrasloth -> Pangolith, Umbrathere -> Ribbrella, Selenwhale -> Lunarca) | Your 04:54 go-ahead; veto any you dislike | old names kept as aliases |
+| Prismink | m3_3 crystal-lion mink (8.5) -> sheet/card/portrait queued | Your 04:44 note: more differentiation | m2_2 8.2 (crystal-sail dragon-mink), m1_1 7.8 |
+| Rimink | m3_1 tall elegant ice stoat (8.6) queued | same | m1_3 8.1 (shaggy wolverine) |
+| Rippmink | m2_1 eel-mink (8.5) queued | same | m1_2 7.8 (wave-crest sea serpent), m3_2 7.7 |
+| Flarmink | m2_4 bonfire-tail badger stoat (8.0) queued | same; m1 failed | m3_1 7.8 (matchstick-ear fox) |
+| Effigoon | g2_4 faceless hanging cocoon (8.2) queued | faceless, as you asked | g1_2 8.0 (riveted capsule, has amber port-holes) |
+| Glaivyx | h4_1 long-legged blade-tail fox (8.2) queued | longer, taller legs, less scorpion | h5_1 8.1 (cream plume-tail version) |
+| Cisternmander | y2_1 mossy pond-back salamander (7.9) queued, no lightning | Just under the bar, but it fixes your note | y1_3 7.8 (stone cistern + spout) |
+| Vespox | v2_3 shell-hood prowler with pincers (8.6) queued | distinct from Vespyx | v1_1 7.9 (chitin jackal), v3_2 7.6 |

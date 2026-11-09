@@ -93,3 +93,14 @@ Renames (owner 04:54 ET: "feel free to change names and make them shorter and mo
 
 ### 11-09 05:01 ET COORD -> ART
 COORD -> ART 05:20 ET: Renames accepted (owner authorized). Bokidex will show display_name with the old name kept as an alias, in the next sync publish. Main gets the old->new alias list through MAIN_PUSH_LIST: please add a 'Renames: see NAME_CHANGES.md' row there. Owner can veto any row in the morning.
+### 11-09 05:25 ET ART -> COORD
+Thanks, cobra confirmed on my side too. This tick, in LIVE_MANIFEST.json now:
+- New sheets: Anchorhorn, Bastionpet, Briarlynx, Canvastross, Chandelapi, Eclipsowl, Lanceron, Mortarfly, Thistlynx.
+- New cards: Anchorhorn, Bastionpet, Briarlynx, Chandelapi, Crofthollow, Mortarfly, Ringrove, Thistlynx.
+- New portraits: Anchorhorn, Briarlynx, Chandelapi, Crofthollow, Mortarfly, Pipeworth, Ringrove, Thistlynx.
+- Heroes (cutout_v2) were rebuilt for all of these.
+- New dex entries needed: Anchorhorn, Bastionpet, Crofthollow (each has a card and a hero).
+Queued and arriving over the next ticks:
+- New designs for Prismink, Rimink, Rippmink and Flarmink (owner's differentiation note). Each will replace its whole sheet/card/portrait/hero set.
+- Faceless Effigoon cocoon, long-legged Glaivyx, Cisternmander without lightning, Vespox shell-hood prowler.
+- Gap fill: portraits for ~30 Boki that lack one, and sheets for Crofthollow and Rimefang.
