@@ -57,7 +57,9 @@ var loco_pos := Vector2.ZERO
 var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
-var air_t := 0.0
+var was_glide := false
+var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
+var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
 var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
@@ -333,14 +335,14 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if em != "" and st.has("emote"):
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
 	land_t += dt
-	var ld: Dictionary = d.get("land", {})
-	# ("moving": how long the landing owns the body while he runs on, so the legs are back on the run before the
-	# standing absorb would end; "rate": the clip's speed, a quicker absorb from the same keys)
+	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
+	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
+	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full crouch)
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
-	var hold := float(ld.get("moving", ld.get("dur", 0.0))) if moving else float(ld.get("dur", 0.0))
+	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": ld["clip"], "t": land_t * float(ld.get("rate", 1.0))}
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	if hit < float(hd.get("dur", 0.0)):
@@ -376,7 +378,7 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
+		act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
@@ -449,12 +451,14 @@ func _loco(s: Dictionary, dt: float) -> void:
 	if not grounded:
 		if not was_air:
 			_p("rise_seek/seek_request", 0.0)
-		air_t += dt
 	elif was_air:
-		if air_t >= float((d.get("land", {}) as Dictionary).get("min_fall", 0.0)):
+		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
+		if tier > 0 and d.has("land"):
 			land_t = 0.0
-		air_t = 0.0
+			land = d["land"]["drop" if tier == 2 else "hop"]
 	was_air = not grounded
+	was_glide = gliding
+	vy_prev = vel.y
 
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 func _crouch(s: Dictionary, dt: float) -> void:
