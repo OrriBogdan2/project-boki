@@ -5786,3 +5786,5 @@ READY ext/feel-first-cast-warm 27d6f01f4 (first-cast warm: kit effect pools fill
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
+
+READY ext/vfx-albert-faultline a77a06570 (Faultline: one outlined lane with a glowing crack, light-column eruption, stun stars; 360 Smash ring at hit radius; combo 148/0, hero-vfx OK, health OK, wiki OK; before/after strips in docs/parity_reel/albert_faultline)

@@ -1,6 +1,0 @@
-before_pack_*: main's Backpack window: worn pieces as four tall rows, no slot keys, no compare
-before_loot_*: main's deathbox window alone, your things not shown
-after_pack_*: Inventory: every slot with its key (Q, V, 1-4), perks, backpack list
-after_tip_*: compare card on a backpack piece: only changed numbers, green better / red worse
-after_loot_*: deathbox with your inventory side by side
-(files named *_1080p are 1920x1080, *_720p are 1280x720; ext/ui-inventory 591c0c742)

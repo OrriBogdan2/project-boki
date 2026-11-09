@@ -1,4 +1,0 @@
-{"grammar": 1, "id": "bad_json", "name": "Typo",
- "trigger": {"type": "on_cast"}
- "stages": []
-}
