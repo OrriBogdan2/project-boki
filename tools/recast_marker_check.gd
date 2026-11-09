@@ -13,6 +13,8 @@ func run(main_node: Node, mode: String = "check") -> void:
 			out = a.substr(12)
 	if mode == "shots":
 		DirAccess.make_dir_recursive_absolute(out)
+		if main.get("fade") != null:
+			main.fade.reveal(0.01)       # drop the boot splash
 	for arch in ["ostra", "tender", "bulwark", "thief"]:
 		await _hero(arch, mode == "shots")
 	print("PAIRCHECK recast-marker DONE, %d checks, failures: %d" % [n, fails])
@@ -65,7 +67,7 @@ func _hero(arch: String, shot: bool) -> void:
 	m.queue_free()
 
 func _shoot(m: Match, arch: String) -> void:
-	for i in 12:
+	for i in 30:
 		m.step(DT)
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(out.path_join("%s.png" % arch))
