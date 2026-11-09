@@ -558,15 +558,6 @@ class KitPreview extends Control:
 				draw_circle(pt, R * (0.6 + 0.5 * k11), col)
 				draw_arc(pt, R * (1.1 + 0.6 * k11), 0, TAU, 14, Color(col, 0.5), 2.0, true)
 				hit = k11 >= 1.0 and t < 0.95
-			"hex":
-				var k12 := clampf(t / 0.5, 0.0, 1.0)
-				if k12 < 1.0:
-					draw_circle(me.lerp(foe, k12), R * 0.7, col)
-				else:
-					# the foe turned into a small critter, a ring of runes over it
-					draw_circle(foe + Vector2(0, R * 0.5), R * 0.6, Color("f7c6ff"))
-					draw_arc(foe, R * 2.0, t * 6.0, t * 6.0 + TAU * 0.8, 16, Color(col, 0.8), 2.0, true)
-					foe = Vector2(-99, -99)
 			"mirror":
 				for sgn in [-1.0, 1.0]:
 					var mp := me + Vector2(R * 1.5, sgn * h * 0.25)

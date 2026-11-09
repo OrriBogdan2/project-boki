@@ -13,7 +13,7 @@ The current model is **owner-authoritative per entity**, not server-authoritativ
   wild Boki, the Blight. `Net.owner_of(nid)` decides: ids starting with `P` belong to that peer,
   the rest to the host.
 - Owners send **snapshots** of what they own. Anyone who hits something they don't own sends the hit to
-  its owner, which applies it. One-off happenings (effects, catches, chests, hexes) go as events.
+  its owner, which applies it. One-off happenings (effects, catches, chests) go as events.
 
 A move to a server-authoritative model (clients send inputs only) is planned in
 `docs/ARCHITECTURE_PLAN.md` on the `design` branch. Nothing of it is built yet.
@@ -40,7 +40,7 @@ lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `po
 |---|---|---|
 | `st` | Every owner, every 0.1 s; the host's world every 0.15 s | Snapshots of owned entities, with the match time as a header. Unreliable channel. |
 | `hit` | Anyone who hits something they don't own | `[target nid, damage, knockback x, z, lift, crit, ...]`, applied by the owner |
-| `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `hex`, `knock`, `out`, `catch` / `caught`, `chest`, and more |
+| `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `knock`, `out`, `catch` / `caught`, `chest`, and more |
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
 

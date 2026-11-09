@@ -5789,10 +5789,6 @@ func _net_ev(x, from: String) -> void:
 		"kst":
 			# a kit status (Grounded, Blight, Shred) landed on a body: its own game runs the rule
 			KitStatus.from_net(self, x)
-		"hex":
-			# a Mage's Hex landed: the body's own game runs the rules, every game shows the critter
-			who = ents_by_id.get(String(x[1]), null)
-			if who is Hunter: Hex.apply(who as Hunter, float(x[2]), false)
 		"s":
 			var col := Color.html(String(x[8]))
 			var ex := {"cos": true}

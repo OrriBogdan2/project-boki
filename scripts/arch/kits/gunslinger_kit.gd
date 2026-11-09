@@ -594,7 +594,7 @@ func _end_needle() -> void:
 func _tick_needle(dt: float) -> void:
 	var ed := e_def()
 	needle["t"] = float(needle["t"]) + dt
-	if h.downed or h.stun_t > 0.0 or Hex.active(h):
+	if h.downed or h.stun_t > 0.0:
 		_end_needle()
 		return
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)

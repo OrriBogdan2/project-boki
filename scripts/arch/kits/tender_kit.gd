@@ -205,14 +205,14 @@ func carrying() -> Array:
 	return CareUtil.carried_of(m, h)
 
 func can_pick() -> bool:
-	return lock_t <= 0.0 and h.stun_t <= 0.0 and h.root_t <= 0.0 and not busy() and not Hex.active(h)
+	return lock_t <= 0.0 and h.stun_t <= 0.0 and h.root_t <= 0.0 and not busy()
 
 func _tick_carry(dt: float) -> void:
 	var pd: Dictionary = d["passive"]
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
+		if h.stun_t > 0.0 or h.root_t > 0.0:
 			drop_all(true)
 			return
 		var down := bool(h.inp.get(SETDOWN, false))
