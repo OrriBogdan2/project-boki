@@ -75,12 +75,14 @@ func _hunters() -> void:
 		m.arena.set_arch(String(id), Arch.signature(String(id)))
 		var tiles := []
 		for st in ["rest", "bloom", "hit", "crit"]:
-			m.player.recoil = 1.0 if st == "bloom" else 0.0
-			if st == "hit" or st == "crit":
-				m.hud.hitmarker(st == "crit")
-			var img := await _frame(2 if st.begins_with("hit") or st == "crit" else 12)
-			var c := Vector2i(Vector2(img.get_size()) * AT)
-			var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+			# (the state is held every frame up to the shot: a 0.14 s flash or a decaying bloom would be gone
+			# by the capture on a slow renderer)
+			var hold := func():
+				m.player.recoil = 1.0 if st == "bloom" else 0.0
+				if st == "hit" or st == "crit":
+					m.hud.hitmarker(st == "crit")
+			var img := await _frame(12, hold)
+			var crop := img.get_region(Rect2i(_cursor_px(img) - CROP / 2, CROP))
 			crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 			tiles.append(crop)
 		var strip := Image.create(strip_w, CROP.y * 3, false, Image.FORMAT_RGBA8)
@@ -116,10 +118,21 @@ func _level_spot(at: Vector3, offsets: Array) -> Vector3:
 			return p
 	return at + offsets[0]
 
+## Where the HUD drew the reticle, in image pixels: the HUD canvas's own mouse position (a real window
+## on a desktop worker may not take the warp), through the canvas transform, scaled to the image size.
+func _cursor_px(img: Image) -> Vector2i:
+	var vp := main.get_viewport()
+	var at: Vector2 = m.hud.c.get_global_transform_with_canvas() * m.hud.c.get_local_mouse_position()
+	var px := at * Vector2(img.get_size()) / vp.get_visible_rect().size
+	var half := Vector2(CROP / 2)
+	return Vector2i(px.clamp(half, Vector2(img.get_size()) - half))
+
 ## A few frames with the cursor held at AT, then the frame as an image.
-func _frame(frames := 20) -> Image:
+func _frame(frames := 20, hold := Callable()) -> Image:
 	var vp := main.get_viewport()
 	for i in frames:
 		vp.warp_mouse(vp.get_visible_rect().size * AT)
+		if hold.is_valid():
+			hold.call()
 		await main.get_tree().process_frame
 	return vp.get_texture().get_image()
