@@ -20,6 +20,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+  `stomp` (a downed foe, Life.R stomp_cycle 0.7 s, the slam at 0.7 of it = 0.49 s) and `drink` (Hunter.DRINK_TIME 1.1 s) are clips as long as the cycle / the drink, seeked by the game's phase; `drink` is upper-body only while he moves. `reviving` is a kneel loop. A Hunter with no such clip keeps the rig's own stomp, drink and kneel (leave them in `procedural`).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree

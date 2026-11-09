@@ -30,8 +30,8 @@
 		"mm_call": {"clip": "call", "upper": true}, "mm_call_hold": {"clip": "call_hold", "hold_from": 0.0, "upper": true}, "mm_call_end": {"clip": "call_end", "upper": true},
 		"mf_xform": {"clip": "fusion"}
 	},
-	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"states": {"downed": "downed", "reviving": "revive", "stomp": "stomp", "drink": "drink", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 1.0], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
-	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"procedural": ["ledge", "mantle", "base"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"]
 }

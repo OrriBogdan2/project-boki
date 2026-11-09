@@ -111,6 +111,8 @@
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
+		"stomp": "stomp",
+		"drink": "drink",
 		"dead": "death",
 		"dead_t": 1.5,
 		"stun": "stun",
@@ -162,9 +164,7 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"stomp",
-		"base",
-		"drink"
+		"base"
 	],
 	"upper": [
 		"hips",
