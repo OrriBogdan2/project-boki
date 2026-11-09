@@ -64193,5 +64193,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_barokat_ev2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_barokat_ev2",
+    "name": "Barokat evolution (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_barokat_ev2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_ev2",
+    "name": "Barokat evolution (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_barokat_ev2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_ev1",
+    "name": "Barokat evolution (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_barokat_ev1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_ev1",
+    "name": "Barokat evolution (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_barokat_ev1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_ev1",
+    "name": "Barokat evolution (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_barokat_ev1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_ev3",
+    "name": "Barokat evolution (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_barokat_ev3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_buckleron_ev2",
+    "name": "Buckleron next stage (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_buckleron_ev2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog_t3n1",
+    "name": "Bullsfrog final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_t3n1_2.jpg",
+    "ok": true
   }
 ]
