@@ -298,7 +298,7 @@ growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of
 |---|---|
 | shoulder | as before: rides your shoulder, its carry passives and shot riders work once it has settled |
 | perch | sits on your pack; same passive rules. Its throw is a **dive**: it rises off your pack and comes straight down on the spot (11 m reach, strikes only as it lands, a little wider). Lunowl's perch also gives +20% glide |
-| mount | you ride it: the hunter sits up on its back (`Kin.ride_height`), ground speed and jump from `carry.mount`, -15% damage taken and half knockback (Gravadillo). You can't glide while mounted: when you open the glider it curls up into a ball on your back and its passives pause until you land |
+| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m` and never below your feet. -15% damage taken and half knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
 
 Carry passives and merge passives feed one place, `Hunter.owner_stat`, capped at the carry or
 merge maximum: move speed, jumps, air dodges, glide, dodge charges and regen, armor (wears slower),
@@ -384,7 +384,7 @@ hand-coded mechanic from the reviewed list · **core** = stays in core code, not
 | thorn_patch | Mycroll, auto | zone 2.6, 4 s → damage 4 a tick, slow 0.8; cue foes_clumped | yes |
 | chain_spark | Echolop, E | beam (seek) 7 m → damage 14, stun 0.4 (jolt); chain 2 jumps; repeat (echo) | yes |
 | echolocate | Echolop, auto (owner) | burst r18 at owner → mark reveal 3 s, buff crit 1.5 s on owner (uses the big-area utility rule) | yes |
-| moon_swap | Lunowl, E | projectile 9 m → damage 4, **signature swap** (owner), stun 0.4 | signature |
+| moon_mark | Lunowl, E | projectile 9 m → damage 4, stun 0.4, mark reveal 4 s + vulnerable 15% 4 s (was Moon Swap; KinFence) | utility |
 | updraft | Lunowl, auto (owner) | burst r0 at owner → lift owner 14 (+3 forward), buff glider_cool | yes |
 
 Field changes: `burn: n` (n dps for 3 s) became `damage` with `over: 3`; `blight` became a `mark`

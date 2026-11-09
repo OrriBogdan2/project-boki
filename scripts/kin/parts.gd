@@ -174,7 +174,7 @@ const EFFECTS := {
 			"amount": ["float", 0.0, 1.0, 0.0, "x", "size of the boost; bounds depend on the stat (BUFF_STATS); 0 = the stat's default"],
 			"duration": ["float", 0.5, 8.0, 3.0, "s", "how long (ignored by dash_refill and glider_cool)"]}},
 	"signature": {"cat": "utility", "cost": 3, "targets": ["foes", "owner", "self", "allies"], "doc": "a hand-coded mechanic from the reviewed SIGNATURES list",
-		"params": {"id": ["enum", ["swap", "decoy", "bridge"], null, null, "", "which signature mechanic"]}},
+		"params": {"id": ["enum", ["decoy", "bridge"], null, null, "", "which signature mechanic"]}},
 }
 
 ## Buff stats: [min, max, default, unit, doc]. amount 0 in a file means "use the default".
@@ -190,8 +190,6 @@ const BUFF_STATS := {
 
 ## Signature mechanics: hand-coded, reviewed one by one (Phase 6). Their own parameters.
 const SIGNATURES := {
-	"swap": {"doc": "the target trades places with the caster or its hunter", "params": {
-		"who": ["enum", ["owner", "caster"], null, "owner", "", "who trades places with the target"]}},
 	"decoy": {"doc": "leaves a copy of the origin unit that draws bots' fire", "params": {
 		"duration": ["float", 0.5, 3.0, 1.8, "s", "how long the copy stays"]}},
 	"bridge": {"doc": "abyss along the aim becomes walkable ground for a while", "params": {
@@ -330,7 +328,7 @@ const STATS := {
 const CARRY := {
 	"shoulder": {"sizes": ["small"], "doc": "rides your shoulder; its passive works once it has settled"},
 	"perch": {"sizes": ["small", "medium"], "doc": "perches on your pack; same passive rules as shoulder"},
-	"mount": {"sizes": ["large"], "doc": "a big kin you ride: it changes your movement, and you can't glide while mounted"},
+	"mount": {"sizes": ["large"], "doc": "a big kin: on Return it guards at your side, never under you; only its giant Fusion form is ridden (mount speed and jump apply then)"},
 }
 const MOUNT := {
 	"speed": ["float", 0.8, 1.3, 1.0, "x", "ground speed while riding"],
