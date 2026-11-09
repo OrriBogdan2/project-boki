@@ -21598,5 +21598,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/kindlewren_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "knotwyrm_card",
+    "name": "Knotwyrm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/knotwyrm_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "knotwyrm_card",
+    "name": "Knotwyrm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/knotwyrm_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_card",
+    "name": "Lanterloris (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanterloris_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanterloris_card",
+    "name": "Lanterloris (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanterloris_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "marchleaf_card",
+    "name": "Marchleaf (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/marchleaf_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_card",
+    "name": "Lockatara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lockatara_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_card",
+    "name": "Lockatara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockatara_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "marchleaf_card",
+    "name": "Marchleaf (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/marchleaf_card_2.jpg",
+    "ok": true
   }
 ]
