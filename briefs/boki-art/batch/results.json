@@ -35780,5 +35780,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/gramofrill_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "medushroom_card",
+    "name": "Medushroom (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/medushroom_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hatstag_card",
+    "name": "Hatstag (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hatstag_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kintsuwyrm_card",
+    "name": "Kintsuwyrm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kintsuwyrm_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "medushroom_card",
+    "name": "Medushroom (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/medushroom_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hatstag_card",
+    "name": "Hatstag (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hatstag_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sandwidow_card",
+    "name": "Sandwidow (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sandwidow_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kintsuwyrm_card",
+    "name": "Kintsuwyrm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kintsuwyrm_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blastopuff_full",
+    "name": "Blastopuff (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_blastopuff_full_1.jpg",
+    "ok": true
   }
 ]
