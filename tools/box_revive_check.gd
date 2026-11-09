@@ -5,7 +5,8 @@ extends RefCounted
 ##  2. While channelling a hit does Hunter.CONSUME_VULN times the damage (the tonic's multiplier) and
 ##     breaks it; holding on does nothing until interact is let go and held again.
 ##  3. Walking breaks it; fire is held off while channelling.
-##  4. The second box revive of the same Hunter is slower (the diminishing curve).
+##  4. A second box revive is no slower; two teammates on a wisp revive it 1.5x as fast and two
+##     enemies stomp it 1.5x as fast as one (the source's crowd curve, Life.R["crowd"]).
 ##  5. A beacon brings back every dead teammate at once; while it's lit every player is told
 ##     (toast + map/world marker state) and its hum carries beacon_hear_m; "bcn" events from another
 ##     game light it, put it out and use it.
@@ -89,6 +90,7 @@ func run(main: Node) -> void:
 	_hits(B, C, foe)
 	_moves(B, C)
 	_beacon(A, B, C, foe)
+	_crowd(A, B, C, m.hunters.filter(func(x): return x.team != A.team and not x.out).slice(0, 2))
 	_bot(B, C, home)
 	print("BOX REVIVE CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
@@ -99,14 +101,14 @@ func _box_revive(B: Hunter, C: Hunter) -> void:
 	m.eliminate(B, null, "finished")
 	var bx := Life.box_of(m, B)
 	ok(B.out and not bx.is_empty() and Life.soul_here(m, bx), "a fallen teammate leaves a box with their soul in it")
-	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for(B) - 7.5) < 0.01,
-		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for(B))
+	ok(absf(float(BoxRevive.rules()["box_revive_s"]) - 7.5) < 0.01 and absf(BoxRevive.time_for() - 7.5) < 0.01,
+		"a box revive is a 7.5 s channel the first time (%.2fs)" % BoxRevive.time_for())
 	var ring: Node = (bx["node"] as Node).get_node_or_null("OwnerRing")
 	ok(ring != null and Life.owner_col(m, bx) == m.mate_col(B), "an ally box wears its owner's squad colour")
 	_spot(C, bx["pos"] + Vector3(0.4, 0, 0))
 	var t0 := m.time
 	C.inp["interact"] = true
-	_run(BoxRevive.time_for(B) * 0.5)
+	_run(BoxRevive.time_for() * 0.5)
 	var hum := String(bx.get("hum_key", ""))
 	ok(C.box_reviving() and hum != "" and Sfx.loop_on(hum), "mid-channel: kneeling over the box, and it hums")
 	var prog := float(bx.get("rev_prog", 0.0))
@@ -123,8 +125,8 @@ func _box_revive(B: Hunter, C: Hunter) -> void:
 	ok(not Sfx.loop_on(hum), "the hum stops once it's done")
 
 func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
-	var second := BoxRevive.time_for(B)
-	ok(absf(second - 7.5 / 0.75) < 0.05, "the second box revive of a Hunter is slower (%.2fs)" % second)
+	var again := BoxRevive.time_for()
+	ok(absf(again - 7.5) < 0.01, "a second box revive of a Hunter is no slower (%.2fs)" % again)
 	_calm(C)
 	var h0 := C.hp
 	C.hurt(10.0, foe, {"src": "abil"})
@@ -149,10 +151,41 @@ func _hits(B: Hunter, C: Hunter, foe: Hunter) -> void:
 	ok(C.box_t == 0.0 and not C.box_reviving(), "holding on does nothing until interact is pressed again")
 	C.inp["interact"] = false
 	_run(Match.DT * 2.0)
-	var need := BoxRevive.time_for(B)
+	var need := BoxRevive.time_for()
 	var took := _channel(C, B, 15.0) - Match.DT * 2.0
 	ok(not B.out and absf(took - need) < 0.15,
 		"pressed again it starts over and takes the full %.1fs (%.2fs)" % [need, took])
+
+## Two teammates, then two enemies, standing on B's wisp.
+func _crowd(A: Hunter, B: Hunter, C: Hunter, foes: Array) -> void:
+	_spot(B, C.pos + Vector3(2.5, 0, 0))
+	for i in foes.size(): _spot(foes[i], C.pos + Vector3(20, 0, i))
+	_knock(B, foes[0])
+	var t0 := m.time
+	while B.downed and m.time - t0 < 10.0:
+		_spot(A, B.pos + Vector3(0.6, 0, 0))     # held in the ring, the bodies push apart
+		_spot(C, B.pos - Vector3(0.6, 0, 0))
+		_run(Match.DT)
+	var want := float(Life.R["revive_time"]) / 1.5
+	ok(not B.downed and absf(m.time - t0 - want) < 0.1,
+		"two on a wisp revive it in %.2fs (want %.2fs)" % [m.time - t0, want])
+	_spot(A, B.pos + Vector3(-8, 0, 0))
+	_spot(C, B.pos + Vector3(-8, 0, 1))
+	_spot(foes[0], B.pos + Vector3(0.5, 0, 0))
+	_spot(foes[1], B.pos - Vector3(0.5, 0, 0))
+	_knock(B, foes[0])
+	_run(Match.DT)
+	var hp0 := B.down_hp
+	_run(1.0)
+	var rate := (hp0 - B.down_hp) / (Data.MATCH["down_hp"] / Life.R["bleed_out"])
+	var want_rate: float = Life.R["stomp_mult"] * 1.5
+	ok(absf(rate - want_rate) < 0.1, "two stompers drain it %.2fx (want %.2fx)" % [rate, want_rate])
+
+## Knocks B with their Boki kept out of sight, so only Hunters on the wisp count.
+func _knock(B: Hunter, by: Hunter) -> void:
+	m.knock(B, by, {})
+	for kk in [B.kin, B.kin2]:
+		if kk: (kk as Kin).state = "away"
 
 func _moves(B: Hunter, C: Hunter) -> void:
 	_spot(B, C.pos + Vector3(2.5, 0, 0))
@@ -224,7 +257,6 @@ func _bot(B: Hunter, C: Hunter, home: Vector3) -> void:
 	_calm(C)
 	_spot(B, home)
 	_spot(C, home + Vector3(6, 0, 2))
-	_run(0.5)
 	m.eliminate(B, null, "finished")
 	C.ctrl = "bot"
 	C.ai = m.bot_brain.new_mind(m.rng, 0.6, m.bot_cfg)

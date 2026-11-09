@@ -26,11 +26,11 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | Rule | Value | Meaning |
 |---|---|---|
 | bleed_out | 15 | seconds a wisp lasts on its own |
-| revive_radius | 1.6 | a teammate this close revives you |
-| revive_time | 4 |  |
-| revive_hp | 0.25 | back on your feet with a quarter of your health |
-| extra_reviver | 0.5 | each extra teammate on you: +50% speed |
-| stomp_mult | 2.5 | an enemy standing on a wisp drains it this much faster and blocks the revive |
+| revive_radius | 1.6 | a teammate this close revives you (source silent) |
+| revive_time | 4 | one teammate (docs/decisions/0022) |
+| revive_hp | 0.25 | back on your feet with a quarter of your health (wiki: "X%") |
+| crowd | [1.0, 0.75, 0.58, 0.47] | each of n Hunters on one wisp works at crowd (0022) |
+| stomp_mult | 2.5 | one enemy on a wisp drains it this much faster and blocks the revive |
 | stomp_slow | 0.4 | ...and pins it: the wisp drifts at this fraction of its normal speed |
 | execute_time | 3 | (old: hold interact on an enemy wisp; now the stomp below) |
 | stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
@@ -457,8 +457,6 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | _doc | Box revives and revive beacons (docs/decisions/0018-box-revive-and-beacons.md; scripts/match/box_revive.gd, beacons.gd). Seconds and metres. |
 | box_revive_s | 7.5 |
 | _box_revive_s | hold interact at a teammate's deathbox this long to bring them back (owner: a 7-8 s exposed channel) |
-| box_diminish | [1.0, 0.75, 0.58, 0.47] |
-| _box_diminish | channel speed for the 1st, 2nd, 3rd, 4th+ box revive of the same Hunter in a match (the source's revive curve) |
 | beacon_s | 4 |
 | _beacon_s | stand on a beacon this long to bring back every dead teammate (owner: a short channel) |
 | beacon_hear_m | 120 |

@@ -107,7 +107,7 @@ func _ring() -> void:
 	var b := Life.box_of(m, _mate())
 	P.teleport(b["pos"] + Vector3(0.6, 0, 0.4))
 	P.inp["interact"] = true
-	await _go(BoxRevive.time_for(_mate()) * 0.55)
+	await _go(BoxRevive.time_for() * 0.55)
 	_take("revive_ring", "Bringing the teammate back: the ring round the box and the one over the reviver, the"
 		+ " prompt bar, the VULNERABLE tell")
 	P.inp["interact"] = false

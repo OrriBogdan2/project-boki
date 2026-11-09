@@ -1,6 +1,6 @@
 # 0018: Box revive and loud revive beacons
 
-- **Status:** accepted
+- **Status:** accepted (the repeat-revive curve: superseded by 0022)
 - **Date:** 2026-11-05
 - **Area:** match flow / networking / UI
 
@@ -18,8 +18,7 @@ dead squad back, loudly, with every player told where it is going off. Nobody ca
    beacons, rings and the alarm on the world, the minimap and the full map.
 
 ## Decision
-Option 2. Timings live in `content/rules/revive.json` (box channel, the source's diminishing curve
-per box revive of the same Hunter, beacon channel, how far the beacon is heard). The beacon alarm is
+Option 2. Timings live in `content/rules/revive.json` (box channel, beacon channel, how far the beacon is heard). The beacon alarm is
 one match-wide state per beacon, so every player's HUD reads the same thing; online it travels as a
 new `"bcn"` event on the existing `"ev"` topic (lit / out / used).
 

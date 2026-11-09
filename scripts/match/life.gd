@@ -10,11 +10,12 @@ class_name Life
 
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
-	"revive_radius": 1.6,       # [est] a teammate this close revives you
-	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
-	"extra_reviver": 0.5,       # each extra teammate on you: +50% speed [design]
-	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
+	"revive_radius": 1.6,       # [est] a teammate this close revives you (source silent)
+	"revive_time": 4.0,         # [wiki "a few seconds"] [est] one teammate (docs/decisions/0022)
+	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health (wiki: "X%")
+	# 1 to 4 on a wisp: 1, 1.5, 1.75, 1.875x in all, for teammates reviving and enemies stomping alike
+	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] each of n Hunters on one wisp works at crowd[n-1] (0022)
+	"stomp_mult": 2.5,          # [design] one enemy on a wisp drains it this much faster and blocks the revive [wiki]
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
 	"execute_time": 3.0,        # [footage] (old: hold interact on an enemy wisp; now the stomp below)
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
@@ -63,6 +64,11 @@ static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
 
 # ------------------------------------------------------------------ wisps
+## How much faster n Hunters on one wisp revive (or stomp) it than one: the source's curve.
+static func crowd(n: int) -> float:
+	var c: Array = R["crowd"]
+	return n * float(c[mini(n, c.size()) - 1])
+
 ## Every frame, for each wisp: teammates on it revive it, enemies on it stomp it, otherwise it
 ## bleeds out.
 static func tick_wisps(m: Match, dt: float) -> void:
@@ -106,10 +112,10 @@ static func tick_wisps(m: Match, dt: float) -> void:
 		o.set_meta("stomped", foes > 0)
 		if foes > 0:
 			# stomped: drains fast and nobody can pick you up
-			o.down_hp -= base * R["stomp_mult"] * dt
+			o.down_hp -= base * R["stomp_mult"] * crowd(foes) * dt
 			o.revive = maxf(0.0, o.revive - dt * 0.5)
 		elif allies > 0:
-			o.revive += dt / R["revive_time"] * (1.0 + R["extra_reviver"] * (allies - 1))
+			o.revive += dt / R["revive_time"] * crowd(allies)
 			if o.revive >= 1.0:
 				trace(m, "wisp revive %s" % o.pname)
 				for rv in revivers: (rv as Hunter).revives += 1
