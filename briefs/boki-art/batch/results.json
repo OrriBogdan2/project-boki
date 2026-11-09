@@ -4532,5 +4532,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/wickapi_1.jpg",
     "ok": true
+  },
+  {
+    "id": "wickapi",
+    "name": "Wickapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wickapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich",
+    "name": "Thunderstrich",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/thunderstrich_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "thunderstrich",
+    "name": "Thunderstrich",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thunderstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant",
+    "name": "Reapant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/reapant_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander",
+    "name": "Cisternmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cisternmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander",
+    "name": "Cisternmander",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/cisternmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bucketmander",
+    "name": "Bucketmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bucketmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander",
+    "name": "Cisternmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cisternmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scythant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant",
+    "name": "Reapant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reapant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant",
+    "name": "Scythant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scythant_3.jpg",
+    "ok": true
   }
 ]
