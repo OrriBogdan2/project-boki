@@ -13,6 +13,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+from boki_meshy import MeshShape
 import boki_sdf
 import face
 import importlib
@@ -41,10 +42,12 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "marchleaf": ("marchleaf", "marchleaf", "marchleaf_anim"),
          "mossgrade": ("mossgrade", "mossgrade", "mossgrade_anim"),
          "nettlynx": ("nettlynx", "nettlynx", "nettlynx_anim"),
-         "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim")}
+         "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim"),
+         "gibbelle": ("gongibbon", "gongibbon", "gongibbon_anim")}
 creature = paint = anim = None
 ATLAS_PX = 2048
 GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
+MESHY_UV_SMOOTH = 10      # smoothing passes before a Meshy body's UV unwrap: its fur bumps would split it into crumbs
 SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
 
 
@@ -102,9 +105,12 @@ class Piece:
 def mesh_pieces():
     out = []
     for name, (shape, h, tris) in creature.parts().items():
-        v, q = boki_sdf.mesh_shape(shape, h)
-        v, t = decimated(v, q, tris)
-        v = shape.project(v, steps=2)
+        if isinstance(shape, MeshShape):     # a body from a Meshy model, already on its surface
+            v, t = shape.mesh(tris)
+        else:
+            v, q = boki_sdf.mesh_shape(shape, h)
+            v, t = decimated(v, q, tris)
+            v = shape.project(v, steps=2)
         slot = 2 if name in getattr(creature, "LIT_PIECES", ()) else 1 if name in creature.GLOW_PIECES else 0
         out.append(Piece(name, shape, v, t, slot))
         print("piece", name, len(v), len(t))
@@ -132,13 +138,19 @@ def join(pieces):
     return np.concatenate(vs), np.concatenate(ts), np.concatenate(ids)
 
 
-def uv_unwrap(obj):
+def uv_unwrap(obj, smooth=0):
+    """Smart UV islands; `smooth` passes even out a bumpy surface first so its islands stay large (and LODs possible)."""
     bpy.context.view_layer.objects.active = obj
     obj.select_set(True)
+    rest = np.zeros(len(obj.data.vertices) * 3)
+    obj.data.vertices.foreach_get("co", rest)
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.select_all(action="SELECT")
+    if smooth:
+        bpy.ops.mesh.vertices_smooth(factor=1.0, repeat=smooth)
     bpy.ops.uv.smart_project(angle_limit=math.radians(52), island_margin=0.006)
     bpy.ops.object.mode_set(mode="OBJECT")
+    obj.data.vertices.foreach_set("co", rest)
     obj.select_set(False)
     n = len(obj.data.loops)
     uv = np.zeros(n * 2)
@@ -313,7 +325,8 @@ def build_geometry():
     pieces = mesh_pieces()
     verts, tris, piece_of = join(pieces)
     obj = mesh_object("Body", verts, tris)
-    uv = uv_unwrap(obj)
+    meshy = any(isinstance(pc.shape, MeshShape) for pc in pieces)
+    uv = uv_unwrap(obj, MESHY_UV_SMOOTH if meshy else 0)
     print("uv done", time.time())
     atlas = bake_atlas(pieces, verts, tris, piece_of, uv, ATLAS_PX)
     img = image_from(SPECIES + "_atlas", atlas)
