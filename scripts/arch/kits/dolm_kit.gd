@@ -54,7 +54,7 @@ const STONES_RANGE := 12.0     # m: how far the seeing-stones watch a foe
 const STONES_EVERY := 0.2      # s between picks
 var stones_t := 0.0
 
-const WARM_ROCKS := 16         # spare rocks built at match load: a rank-3 Stone Row (6), a Basalt Spine (9) and the hop's, all up at once
+const WARM_ROCKS := 16         # spare rocks built at match load: a rank-3 Row (6), a Spine (9) and the hop's, all up
 
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]

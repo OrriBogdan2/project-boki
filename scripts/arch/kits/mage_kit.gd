@@ -26,7 +26,7 @@ var run_t := 0.0               # Wirerun streaking (s left): the model is a ligh
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
-const COIL_ARCS := 8           # arcs a Coil hit strings up in one frame (its crackle and the wire), one pooled node each
+const COIL_ARCS := 8           # arcs a Coil hit strings up in one frame (crackle and wire), one pooled node each
 
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
 var rod_full := false
