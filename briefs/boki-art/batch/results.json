@@ -31755,5 +31755,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_stance3_anvilbrock_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_barrelmander",
+    "name": "Barrelmander (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_barrelmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_anvilbrock",
+    "name": "Anvilbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_anvilbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_forgebrock",
+    "name": "Forgebrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_forgebrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_anvilbrock",
+    "name": "Anvilbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_anvilbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_lunowl",
+    "name": "Lunowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lunowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_forgebrock",
+    "name": "Forgebrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_forgebrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_forgebrock",
+    "name": "Forgebrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_lunowl",
+    "name": "Lunowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lunowl_2.jpg",
+    "ok": true
   }
 ]
