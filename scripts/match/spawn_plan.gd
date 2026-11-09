@@ -40,9 +40,11 @@ var rolled := false
 var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
 var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
 var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
+var reveal: LegendaryReveal    # its beam, minimap star, banner and sting, on every game
 var _t := 0.0
 
 func _init(match_node: Match) -> void:
+	reveal = LegendaryReveal.new(self)
 	m = match_node
 	for k in CATS:
 		cats[k] = (CATS[k] as Dictionary).duplicate()
@@ -230,6 +232,7 @@ func _spawn_rare(p: Vector3, r: RandomNumberGenerator) -> Kin:
 
 # ------------------------------------------------------------------ what each squad knows
 func tick(dt: float) -> void:
+	reveal.tick()
 	_t -= dt
 	if _t > 0.0:
 		return

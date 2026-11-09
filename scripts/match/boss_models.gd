@@ -444,8 +444,9 @@ static func vent(col: Color, r: float, top: float) -> Node3D:
 	return root
 
 ## A lair fight is on: a shaft of light over the lair, seen from across the map, with a slow ring of
-## light round its foot. "Shaft" pulses; Lairs tints it gold once the boss falls.
-static func alert_beam(col: Color, half: float) -> Node3D:
+## light round its foot (half: the lair's half-size; 0 leaves the ring out, as LegendaryReveal does).
+## "Shaft" pulses; Lairs tints it gold once the boss falls.
+static func alert_beam(col: Color, half := 0.0) -> Node3D:
 	var root := Node3D.new()
 	# (it starts over the walls and stops below where the camera sits, so from the usual angle it reads
 	# as a shaft standing over the lair rather than a glare across the screen)
@@ -457,6 +458,8 @@ static func alert_beam(col: Color, half: float) -> Node3D:
 	core.name = "Core"
 	var cap := Models.part(root, Models.sphere(0.9, 12), Models.glow_mat(Color(col.lightened(0.4), 0.35)), Vector3(0, 22.2, 0))
 	cap.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if half <= 0.0:
+		return root
 	var ring := MeshInstance3D.new(); ring.mesh = Models.flat_quad(half * 2.0 + 4.0)
 	ring.material_override = Models.ring_mat(Color(col, 0.32), 0.02); ring.position.y = 0.08; ring.name = "Ring"
 	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
