@@ -28,6 +28,8 @@ func run(main: Node) -> void:
 	k.teleport(P.pos + Vector3(-1.5, 0, 1.5))
 	KinCommand.order(P, "return")
 	var tree := main.get_tree()
+	m.cam.user_zoom = 0.6
+	_clear_view(m, P)
 	for f in 90:
 		await _step(m, P, tree, false)
 	for f in 240:
@@ -35,7 +37,7 @@ func run(main: Node) -> void:
 		if f in [60, 150]:
 			P.do_jump()
 		await _step(m, P, tree, true)
-	P.teleport(P.pos + Vector3(0, 7.0, 0))
+	P.teleport(P.pos + Vector3(0, 3.5, 0))
 	P.grounded = false
 	for f in 120:
 		P.gliding = true
@@ -47,6 +49,14 @@ func run(main: Node) -> void:
 	print("BOKI_GUARD_SHOTS_DONE ", n)
 	tree.quit(0)
 
+## Trees and rocks hide the pair: everything standing above the ground goes for the clip, but the bodies.
+func _clear_view(m: Match, P: Hunter) -> void:
+	for g in m.find_children("*", "GeometryInstance3D", true, false):
+		var gi := g as GeometryInstance3D
+		var body := P.is_ancestor_of(gi) or P.kin.is_ancestor_of(gi)
+		if not body and (gi.global_transform.origin.y > P.pos.y + 0.4 or gi is MultiMeshInstance3D):
+			gi.visible = false
+
 func _step(m: Match, P: Hunter, tree: SceneTree, keep: bool) -> void:
 	m.step(DT)
 	for h in m.hunters:
@@ -55,6 +65,9 @@ func _step(m: Match, P: Hunter, tree: SceneTree, keep: bool) -> void:
 		k.render(DT, 1.0)
 	m.cam.snap(P.pos)
 	await tree.process_frame
+	if Engine.get_process_frames() % 30 == 0:
+		var gk := P.kin as Kin
+		print("GUARD beside %s, %.2f m from him, feet %+.2f m" % [gk.beside, P.flat_dist(gk), gk.seen_pos().y - P.pos.y])
 	if keep and Engine.get_process_frames() % EVERY == 0:
 		await RenderingServer.frame_post_draw
 		tree.root.get_viewport().get_texture().get_image().save_png(out.path_join("guard_%03d.png" % n))
