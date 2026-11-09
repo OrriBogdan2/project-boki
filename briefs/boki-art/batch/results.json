@@ -4616,5 +4616,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/scythant_3.jpg",
     "ok": true
+  },
+  {
+    "id": "bucketmander",
+    "name": "Bucketmander",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bucketmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bucketmander",
+    "name": "Bucketmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bucketmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant",
+    "name": "Reapant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/reapant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant",
+    "name": "Scythant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scythant_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx",
+    "name": "Briarlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/briarlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx",
+    "name": "Thistlynx",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/thistlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx",
+    "name": "Thistlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thistlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx",
+    "name": "Briarlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/briarlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing",
+    "name": "Lyrewing",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing",
+    "name": "Lyrewing",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowlet",
+    "name": "Bellowlet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "briarlynx",
+    "name": "Briarlynx",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/briarlynx_3.jpg",
+    "ok": true
   }
 ]
