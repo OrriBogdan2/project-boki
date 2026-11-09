@@ -3,10 +3,10 @@ def P(i, name, ref, pose):
     SPECS.append({'id': 'portrait_' + i, 'name': name + ' (portrait)', 'refs': [ref], 'aspect': '1:1', 'runs': 2,
       'prompt': ("Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. "
         "Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. "
-        "Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: " + pose + ". "
+        "Show it once, full body, in an interesting, characteristic pose full of personality and attitude, like official creature-encyclopedia art (never a stiff side-on standing pose): " + pose + ". "
         "A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. "
         "No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. "
-        "Centered, the whole body in frame with a little space around it, filling most of the square. "
+        "Framed like an official creature-encyclopedia entry: the creature is centred and big, filling about 85 percent of the square, with only a thin margin around it and nothing cut off. "
         "Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. "
         "Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.")})
 P('chuggamus', 'Chuggamus', T + 'Chuggamus.jpg', 'charging forward with steam blasting from its nostrils and its firebox blazing')
