@@ -147,9 +147,9 @@ const CHECKS := {
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
-	"--stolen-hud-check": ["res://tools/stolen_hud_check.gd", "stolen_hud_check", null],      # stolen wisp rows on the HUD; --shots-dir=<dir>
+	"--stolen-hud-check": ["res://tools/stolen_hud_check.gd", "stolen_hud_check", null],      # --shots-dir=<dir>
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
-	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # summon ring + tags on the Boki box; --shots-dir=<dir>
+	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018

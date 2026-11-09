@@ -27,3 +27,7 @@ loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-
 - Net.VERSION 0.30.0: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
   Boki's own game. Clashes with ext/wisp-guardian's index 28 / 0.29.0: renumber on merge.
 - match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it.
+- HUD (ext/ui-stolen-wisps): up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside
+  an ally-blue thief ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's
+  squad row wears a count badge (`TeamBoki`). It sits on the Boki box's group, so the HUD stays at five groups.
+  `--stolen-hud-check` covers it.

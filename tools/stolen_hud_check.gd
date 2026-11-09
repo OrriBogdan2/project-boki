@@ -75,10 +75,13 @@ func _rows() -> void:
 	await _drawn()
 	ok(BokiHud.stolen_shown.size() == 1, "one stolen wisp: one row (%d)" % BokiHud.stolen_shown.size())
 	var row: Dictionary = BokiHud.stolen_shown[0] if not BokiHud.stolen_shown.is_empty() else {}
-	var want := KinText.passives(k1.ks.carry_passives, share) if not k1.ks.carry_passives.is_empty() else "no carry bonus"
+	var want := "no carry bonus"
+	if not k1.ks.carry_passives.is_empty():
+		want = KinText.passives(k1.ks.carry_passives, share)
 	ok(row.get("passive", "") == want and row.get("name", "") == String(k1.rec.get("name", "Boki")),
 		"...its name and its carry passive at %d%% (%s)" % [int(share * 100.0), str(row.get("passive"))])
-	ok(row.get("state", "") == "ready" and TeamBoki.stolen_shown.is_empty(), "...its one summon ready; no teammate badge for your own")
+	ok(row.get("state", "") == "ready" and TeamBoki.stolen_shown.is_empty(),
+		"...its one summon ready; no teammate badge for your own")
 	p.kin.summon.cd = 40.0
 	ok(KinSummon.press(p), "the stolen wisp is summoned")
 	_frames(0.5)
@@ -91,12 +94,14 @@ func _rows() -> void:
 	var k2 := _steal(p, foes[1])
 	k2.summon.cd = 0.0
 	await _drawn()
-	ok(BokiHud.stolen_shown.size() == 2 and BokiHud.stolen_shown[1]["state"] == "ready", "a second wisp: two rows, the new one ready")
+	ok(BokiHud.stolen_shown.size() == 2 and BokiHud.stolen_shown[1]["state"] == "ready",
+		"a second wisp: two rows, the new one ready")
 	await _shot("two")
 	var k3 := _steal(mate, foes[2])
 	ok(KinSteal.count(mate) == 1 and KinSteal.stolen(k3), "a teammate carries a wisp")
 	await _drawn()
-	ok(TeamBoki.stolen_shown.get(mate.nid, 0) == 1, "...their squad row shows the count 1 (%s)" % str(TeamBoki.stolen_shown))
+	ok(TeamBoki.stolen_shown.get(mate.nid, 0) == 1,
+		"...their squad row shows the count 1 (%s)" % str(TeamBoki.stolen_shown))
 	await _shot("mate")
 	for f in foes:
 		if f.downed:

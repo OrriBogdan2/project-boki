@@ -173,8 +173,11 @@ static func stolen_rows(h: Hunter) -> Array:
 	var share := float(KinSteal.rules()["passive_k"])
 	for k in h.m.kins:
 		if k.owner_h == h and KinSteal.stolen(k) and not k.dead and k.ks != null:
+			var passive := "no carry bonus"
+			if not k.ks.carry_passives.is_empty():
+				passive = KinText.passives(k.ks.carry_passives, share)
 			out.append({"kin": k, "name": String(k.rec.get("name", "Boki")), "state": stolen_state(k),
-				"passive": KinText.passives(k.ks.carry_passives, share) if not k.ks.carry_passives.is_empty() else "no carry bonus"})
+				"passive": passive})
 	return out
 
 static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
@@ -200,7 +203,8 @@ static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
 		else:
 			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
 			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, HudStyle.MUTED if st == "used" else glow, 3)
+			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
+			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
 		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
 		y -= STOLEN_H + 3.0
 
