@@ -200,6 +200,10 @@ func rimewright() -> void:
 	ok("tm X: sealed in, the 4 bh rink shown to everyone, the cast move", not K.rime.is_empty()
 		and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.2) < 0.05
 		and K.ulk().showing("rink") and K.ulk().showing("bud") and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
+	var petal := K.ulk().held["bud"]["n"].get_node("Petal0").get_child(0) as MeshInstance3D
+	var bud_h := petal.mesh.get_aabb().size.y
+	ok("tm X: the frost bud is six petals, each under 2 m (sized to her, not the 7.2 m rink)",
+		K.ulk().held["bud"]["n"].get_child_count() == 7 and bud_h < 2.0, "%.2f m" % bud_h)
 	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
 		absf(float(K.cd["x"]) - 80.0) < 0.5
 		and _bond_kind(K) == "")
@@ -228,6 +232,13 @@ func rimewright() -> void:
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])
 	ok("tm X: the crash plays its own move", K.anim_id == "tm_rime_crash", K.anim_id)
+	var fxs: Array = K.ulk().live.map(func(e): return String(e["fx"]))
+	var lances := 0
+	for e in K.ulk().live:
+		if String(e["fx"]) == "lances":
+			lances = (e["n"] as Node3D).get_child_count()
+	ok("tm X: the crash throws 30+ long ice shards and a light column", lances >= 30 and "pillar" in fxs,
+		"%d shards, %s" % [lances, fxs])
 	ok("tm X: the crash pays the bond as a hit and the meter fills by 0.6",
 		_bond_kind(K) == "hit" and P.ult - meter0 > 0.59,
 		"%s +%.2f" % [_bond_kind(K), P.ult - meter0])
