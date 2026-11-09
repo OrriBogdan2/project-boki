@@ -100,6 +100,95 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | mentor_radius_doc | m from the Soul Shrine a mentor strolls. |
 | clash | 0.55 |
 | clash_doc | the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more. |
+## base_race (`content/rules/base_race.json`)
+
+The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/home/base_race.gd). Only with farm_build.json base_mode on. 2 to 4 Boki run one lap of a short loop next to the Training post; you back your partner and cheer with the training drill's timing bar at three marks. Units: metres, seconds, metres a second; joy and trust are 0-100 points, bonds -1..1.
+
+| Setting | Value |
+|---|---|
+| stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
+| stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
+| pace | 1.1 |
+| pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. |
+| speed_per_point | 0.015 |
+| speed_per_point_doc | Each trained Speed point (Care stats) adds this much pace, as a fraction. |
+| mood | [0.85, 1.1] |
+| mood_doc | Pace multiplier at joy 0 and at joy 100 (linear in between): a glum Boki drags its feet. |
+| swim_per_tide | 0.12 |
+| swim_per_tide_doc | The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist. |
+| glide | 1.45 |
+| glide_doc | The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it. |
+| wobble | 0.1 |
+| wobble_doc | Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win. |
+| cheer | {"great": 1.15, "good": 1.07, "miss": 1.0} |
+| cheer_doc | Your backed Boki's pace on the next stretch after each mark's press. |
+| friend_at | 0.4 |
+| rival_at | -0.4 |
+| bonds_doc | rec['bonds'][uid] at or above friend_at: friends; at or below rival_at: rivals. |
+| friend_near | 1.2 |
+| friend_pull | 0.6 |
+| friend_doc | Friends within friend_near m of each other run side by side: each one's pace moves this fraction of the way to the other's. |
+| bump_near | 0.6 |
+| bump_slow | 0.5 |
+| bump_s | 0.7 |
+| bump_doc | Rivals within bump_near m bump once a stretch: both run at bump_slow times the pace for bump_s seconds. |
+| lane | 0.45 |
+| lane_doc | m between lanes. |
+| min_energy | 20 |
+| energy | 10 |
+| energy_doc | A Boki needs min_energy to race and spends this much running. |
+| win_joy | 15 |
+| win_trust | 3 |
+| lose_joy | -10 |
+| gems_win | 6 |
+| gems_ran | 2 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other race. |
+| rival_step | 0.15 |
+| friend_step | 0.05 |
+| close_s | 0.6 |
+| result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
+| card_s | 6 |
+| card_s_doc | s the result card stays up. |
+
+## base_shove (`content/rules/base_shove.json`)
+
+Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.2, scripts/home/base_shove.gd). Only with farm_build.json base_mode on. Two Boki push on a stump from opposite sides until one is shoved off balance; you back your partner and press once, timed on the training drill's bar. Units: seconds, stump balance -1..1 (a side wins at its own end), joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| push | 1 |
+| push_doc | Push force of a Boki with no Power points, before mood, trust and the type edge. |
+| power_per_point | 0.005 |
+| guard_per_point | 0.005 |
+| stats_doc | Each trained Power point adds this fraction to its push; each Guard point adds this fraction to its hold (half a percent a point, like the match bonus); 20 points are worth about the 10% type edge. A side's push against the other's hold is push / hold, so the drift is attacker over defender both ways. |
+| mood | [0.92, 1.08] |
+| mood_doc | Push multiplier at joy 0 and at joy 100 (linear in between). |
+| trust_max | 1.05 |
+| trust_doc | Push multiplier at trust 100 (linear from 1.0 at trust 0). |
+| edge | 1.1 |
+| edge_doc | Push multiplier for a Boki whose species theme beats the other's in 'beats' (a 10% edge, never both ways). |
+| beats | {"ember": ["frost", "bloom", "swarm"], "frost": ["storm", "tempest", "gravity"], "bloom": ["stone", "echo", "spore"], "stone": ["ember", "venom", "shadow"], "storm": ["swarm", "prism", "titan"], "shadow": ["lunar", "prism", "echo"], "lunar": ["spore", "venom", "gravity"], "venom": ["bloom", "swarm", "tempest"]} |
+| beats_doc | Species themes (content/kin_v2 'theme'); a theme missing from this table has no edge either way. |
+| rate | 1 |
+| rate_doc | Balance moved a second for a net push of 1.0 (push over hold, one side minus the other). |
+| wobble | 0.7 |
+| wobble_s | 0.5 |
+| wobble_doc | Every wobble_s seconds each side's push is rolled within +-wobble, so the stronger Boki is likely, not certain, to win. |
+| max_s | 30 |
+| max_doc | A bout still level at this many seconds goes to whoever has the stump leaning their way. |
+| shove | {"great": 1.15, "good": 1.07, "miss": 1.0} |
+| shove_s | 1.5 |
+| shove_doc | Your one timed press: your backed Boki's push is multiplied by this for shove_s seconds. |
+| min_energy | 20 |
+| energy | 8 |
+| energy_doc | A Boki needs min_energy to push and spends this much. |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -8 |
+| gems_win | 4 |
+| gems_ran | 1 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other bout. |
+| card_s | 6 |
 
 ## boki_lines (`content/rules/boki_lines.json`)
 
