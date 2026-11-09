@@ -4085,3 +4085,65 @@ Merge after `ext/anim-quality-audit` (it sits on it). Neve's walk_*/run_* re-key
 - Alternative not taken: arms swing with the push (speed-skating coaching); keyed that first, it reads as pacing from the side (-0.84).
 
 READY ext/no-rolling-rebased 9b7b53152 (worker w2, job 20261109-034530-a3; SUPERSEDES ext/no-rolling daa669ea1): ext/no-rolling merged with origin/main d255acbee. Conflicts only in match.gd: kept main's item-163 DropLaunch.start and launch camera, adapted to the single ship (ship / ship_pos(), no ship_of/ship_pos_of). Also fixed WideLayout ref in loading.gd and ship_of in tools/drop_launch_check.gd; style baseline re-synced (tightened only). Checks: --import clean, --check 0, --drop-launch-check 0, --keybind-check 0, --boki-system-check 0, --simtest --seed=5 0 script errors, health.py --strict OK. Not rerun: --teammate-check, --bot-sanity-check (see the original entry). No gh on w2, integrator opens the PR.
+## Nov 8 23:35 ET art -> coordinator: portraits for EVERY existing Boki, both styles (owner: 'put them all in the Bokidex')
+Every Boki that has a portrait now has portraits/<Name>.jpg (light default), portraits/dark/<Name>.jpg (navy card) and portraits/cutout/<Name>.png (transparent). Please import all of them now as the Bokidex hero image (light by default, dark on dark cards).
+- status=pass: panel average 8.5+. status=review: panel 8.0-8.47, shown now for the owner's review; a small fix is queued and will replace it when it passes. status=old-design: interim art of a Boki that is being redesigned.
+- Boki in redesign with no portrait yet keep their current image until the new design passes: Anchorbill, Arcestrel, Buckleron, Chandelapi, Chandelotl, Dragonkite, Dribbara, Eclipsowl, Flarmink, Forgebrock, Frothisk, Galleotter, Geysirbara, Glaivyx, Gongrowl, Lashyx, Latchling, Lockatara, Lunink, Puffamus, Rimink, Rippmink, Sporcupine, Tidalisk, Tinbrock, Umbrink, Voltmink. Wyrmink and Teapotamus passed their new sheets; their portraits are next in the queue.
+ART barokat 8.37 briefs/boki-art/portraits/Barokat.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Barokat.jpg cutout=briefs/boki-art/portraits/cutout/Barokat.png
+ART bellowary 8.33 briefs/boki-art/portraits/Bellowary.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Bellowary.jpg cutout=briefs/boki-art/portraits/cutout/Bellowary.png
+ART boltstrich 8.3 briefs/boki-art/portraits/Boltstrich.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Boltstrich.jpg cutout=briefs/boki-art/portraits/cutout/Boltstrich.png
+ART cairnback 8.37 briefs/boki-art/portraits/Cairnback.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Cairnback.jpg cutout=briefs/boki-art/portraits/cutout/Cairnback.png
+ART canvastross 8.13 briefs/boki-art/portraits/Canvastross.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Canvastross.jpg cutout=briefs/boki-art/portraits/cutout/Canvastross.png
+ART crofthorn 8.47 briefs/boki-art/portraits/Crofthorn.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Crofthorn.jpg cutout=briefs/boki-art/portraits/cutout/Crofthorn.png
+ART echolop 8.33 briefs/boki-art/portraits/Echolop.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Echolop.jpg cutout=briefs/boki-art/portraits/cutout/Echolop.png
+ART effigeetle 8.43 briefs/boki-art/portraits/Effigeetle.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Effigeetle.jpg cutout=briefs/boki-art/portraits/cutout/Effigeetle.png
+ART ermink 8.47 briefs/boki-art/portraits/Ermink.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Ermink.jpg cutout=briefs/boki-art/portraits/cutout/Ermink.png
+ART frigatee 8.27 briefs/boki-art/portraits/Frigatee.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Frigatee.jpg cutout=briefs/boki-art/portraits/cutout/Frigatee.png
+ART glintmole 8.43 briefs/boki-art/portraits/Glintmole.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Glintmole.jpg cutout=briefs/boki-art/portraits/cutout/Glintmole.png
+ART gloamshell 8.13 briefs/boki-art/portraits/Gloamshell.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Gloamshell.jpg cutout=briefs/boki-art/portraits/cutout/Gloamshell.png
+ART glomwort 8.4 briefs/boki-art/portraits/Glomwort.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Glomwort.jpg cutout=briefs/boki-art/portraits/cutout/Glomwort.png
+ART gongibbon 8.27 briefs/boki-art/portraits/Gongibbon.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Gongibbon.jpg cutout=briefs/boki-art/portraits/cutout/Gongibbon.png
+ART gravadillo 8.17 briefs/boki-art/portraits/Gravadillo.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Gravadillo.jpg cutout=briefs/boki-art/portraits/cutout/Gravadillo.png
+ART hivara 8.4 briefs/boki-art/portraits/Hivara.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Hivara.jpg cutout=briefs/boki-art/portraits/cutout/Hivara.png
+ART kerchick 8.07 briefs/boki-art/portraits/Kerchick.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Kerchick.jpg cutout=briefs/boki-art/portraits/cutout/Kerchick.png
+ART kestrike 8.13 briefs/boki-art/portraits/Kestrike.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Kestrike.jpg cutout=briefs/boki-art/portraits/cutout/Kestrike.png
+ART kindlewren 8.4 briefs/boki-art/portraits/Kindlewren.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Kindlewren.jpg cutout=briefs/boki-art/portraits/cutout/Kindlewren.png
+ART kitlet 8.27 briefs/boki-art/portraits/Kitlet.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Kitlet.jpg cutout=briefs/boki-art/portraits/cutout/Kitlet.png
+ART knotwyrm 8.43 briefs/boki-art/portraits/Knotwyrm.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Knotwyrm.jpg cutout=briefs/boki-art/portraits/cutout/Knotwyrm.png
+ART lanterloris 8.27 briefs/boki-art/portraits/Lanterloris.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Lanterloris.jpg cutout=briefs/boki-art/portraits/cutout/Lanterloris.png
+ART lunowl 8.17 briefs/boki-art/portraits/Lunowl.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Lunowl.jpg cutout=briefs/boki-art/portraits/cutout/Lunowl.png
+ART marchleaf 8.0 briefs/boki-art/portraits/Marchleaf.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Marchleaf.jpg cutout=briefs/boki-art/portraits/cutout/Marchleaf.png
+ART mirrolin 8.4 briefs/boki-art/portraits/Mirrolin.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Mirrolin.jpg cutout=briefs/boki-art/portraits/cutout/Mirrolin.png
+ART mossgrade 8.1 briefs/boki-art/portraits/Mossgrade.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Mossgrade.jpg cutout=briefs/boki-art/portraits/cutout/Mossgrade.png
+ART murmurling 8.2 briefs/boki-art/portraits/Murmurling.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Murmurling.jpg cutout=briefs/boki-art/portraits/cutout/Murmurling.png
+ART nettlynx 8.3 briefs/boki-art/portraits/Nettlynx.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Nettlynx.jpg cutout=briefs/boki-art/portraits/cutout/Nettlynx.png
+ART oarlet 8.4 briefs/boki-art/portraits/Oarlet.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Oarlet.jpg cutout=briefs/boki-art/portraits/cutout/Oarlet.png
+ART parasolth 8.33 briefs/boki-art/portraits/Parasolth.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Parasolth.jpg cutout=briefs/boki-art/portraits/cutout/Parasolth.png
+ART pipewurm 8.37 briefs/boki-art/portraits/Pipewurm.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Pipewurm.jpg cutout=briefs/boki-art/portraits/cutout/Pipewurm.png
+ART prismander 8.4 briefs/boki-art/portraits/Prismander.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Prismander.jpg cutout=briefs/boki-art/portraits/cutout/Prismander.png
+ART prowyak 8.33 briefs/boki-art/portraits/Prowyak.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Prowyak.jpg cutout=briefs/boki-art/portraits/cutout/Prowyak.png
+ART rampartoad 8.2 briefs/boki-art/portraits/Rampartoad.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Rampartoad.jpg cutout=briefs/boki-art/portraits/cutout/Rampartoad.png
+ART ribbonwyrm 8.47 briefs/boki-art/portraits/Ribbonwyrm.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Ribbonwyrm.jpg cutout=briefs/boki-art/portraits/cutout/Ribbonwyrm.png
+ART rimeshrew 8.37 briefs/boki-art/portraits/Rimeshrew.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Rimeshrew.jpg cutout=briefs/boki-art/portraits/cutout/Rimeshrew.png
+ART ringrove 8.3 briefs/boki-art/portraits/Ringrove.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Ringrove.jpg cutout=briefs/boki-art/portraits/cutout/Ringrove.png
+ART selenfin 7.9 briefs/boki-art/portraits/Selenfin.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Selenfin.jpg cutout=briefs/boki-art/portraits/cutout/Selenfin.png
+ART skateron 8.43 briefs/boki-art/portraits/Skateron.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Skateron.jpg cutout=briefs/boki-art/portraits/cutout/Skateron.png
+ART snuffapi 8.17 briefs/boki-art/portraits/Snuffapi.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Snuffapi.jpg cutout=briefs/boki-art/portraits/cutout/Snuffapi.png
+ART soakybara 7.8 briefs/boki-art/portraits/Soakybara.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Soakybara.jpg cutout=briefs/boki-art/portraits/cutout/Soakybara.png
+ART spirevark 8.23 briefs/boki-art/portraits/Spirevark.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Spirevark.jpg cutout=briefs/boki-art/portraits/cutout/Spirevark.png
+ART umbrathere 8.47 briefs/boki-art/portraits/Umbrathere.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Umbrathere.jpg cutout=briefs/boki-art/portraits/cutout/Umbrathere.png
+ART zephyrak 8.23 briefs/boki-art/portraits/Zephyrak.jpg kind=portrait status=review dark=briefs/boki-art/portraits/dark/Zephyrak.jpg cutout=briefs/boki-art/portraits/cutout/Zephyrak.png
+ART amanitusk 0 briefs/boki-art/portraits/light/Amanitusk.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Amanitusk.jpg cutout=briefs/boki-art/portraits/cutout/Amanitusk.png
+ART blossmink 0 briefs/boki-art/portraits/light/Blossmink.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Blossmink.jpg cutout=briefs/boki-art/portraits/cutout/Blossmink.png
+ART geodelotl 0 briefs/boki-art/portraits/light/Geodelotl.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Geodelotl.jpg cutout=briefs/boki-art/portraits/cutout/Geodelotl.png
+ART lanceron 0 briefs/boki-art/portraits/light/Lanceron.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Lanceron.jpg cutout=briefs/boki-art/portraits/cutout/Lanceron.png
+ART lanternmit 0 briefs/boki-art/portraits/light/Lanternmit.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Lanternmit.jpg cutout=briefs/boki-art/portraits/cutout/Lanternmit.png
+ART prismink 0 briefs/boki-art/portraits/light/Prismink.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Prismink.jpg cutout=briefs/boki-art/portraits/cutout/Prismink.png
+ART seamwyrm 0 briefs/boki-art/portraits/light/Seamwyrm.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Seamwyrm.jpg cutout=briefs/boki-art/portraits/cutout/Seamwyrm.png
+ART stormit 0 briefs/boki-art/portraits/light/Stormit.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Stormit.jpg cutout=briefs/boki-art/portraits/cutout/Stormit.png
+ART terrarimit 0 briefs/boki-art/portraits/light/Terrarimit.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Terrarimit.jpg cutout=briefs/boki-art/portraits/cutout/Terrarimit.png
+ART vaultara 0 briefs/boki-art/portraits/light/Vaultara.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Vaultara.jpg cutout=briefs/boki-art/portraits/cutout/Vaultara.png
+ART vespox 0 briefs/boki-art/portraits/light/Vespox.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Vespox.jpg cutout=briefs/boki-art/portraits/cutout/Vespox.png
+ART voltalon 0 briefs/boki-art/portraits/light/Voltalon.jpg kind=portrait status=old-design dark=briefs/boki-art/portraits/dark/Voltalon.jpg cutout=briefs/boki-art/portraits/cutout/Voltalon.png
+ART vespyx 9.0 briefs/boki-art/portraits/light/Vespyx.jpg kind=portrait status=pass owner-approved dark=briefs/boki-art/portraits/dark/Vespyx.jpg cutout=briefs/boki-art/portraits/cutout/Vespyx.png
+ART mycroll 9.0 briefs/boki-art/portraits/light/Mycroll.jpg kind=portrait status=pass dark=briefs/boki-art/portraits/dark/Mycroll.jpg cutout=briefs/boki-art/portraits/cutout/Mycroll.png
