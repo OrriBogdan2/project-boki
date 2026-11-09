@@ -25077,5 +25077,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lockatara_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "marchleaf_card2",
+    "name": "Marchleaf (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/marchleaf_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "marchleaf_card2",
+    "name": "Marchleaf (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/marchleaf_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossgrade_card2",
+    "name": "Mossgrade (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mossgrade_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_card2",
+    "name": "Murmurling (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_card2",
+    "name": "Murmurling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossgrade_card2",
+    "name": "Mossgrade (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossgrade_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "nettlynx_card2",
+    "name": "Nettlynx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nettlynx_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pawnfry_card2",
+    "name": "Pawnfry (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pawnfry_card2_1.jpg",
+    "ok": true
   }
 ]
