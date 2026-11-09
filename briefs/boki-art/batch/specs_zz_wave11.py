@@ -23,8 +23,6 @@ V('wickapi_r','Wickapi',T+'Snuffapi.jpg','baby',
 # Batch A grades: Chandelapi pass (C); Fizzlet B is close but its copper ankle cuffs read as worn bands -> edit job; 3 rerolls.
 X('fizzlet_e','Fizzlet',E+'Fizzlet_draft.jpg',
  "turn the copper rings around its ankles into small copper scales that are part of its feet, with no cuffs or bands around the legs, and keep the yellow sparks fewer and smaller.",runs=3)
-P('chandelapi','Chandelapi',E+'Chandelapi.jpg','standing tall and proud, head turned, its candelabra crown lit')
-U('chandelapi','Chandelapi',E+'Chandelapi.jpg')
 V('chimelop_r','Chimelop',T+'Echolop.jpg','final',
  "A long-legged, slender hare twice the size of image 1, caught mid-leap, whose long ears grow into scalloped silver flares shaped like bells, with no separate hanging bells, a bell-shaped fluffy tail and fine silver ripples in its fur."+DIFF+NOCOPY,
  "calm, dreamy violet eyes and a gentle smile","pale lavender and silver, with a moonlight accent",

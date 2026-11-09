@@ -3281,28 +3281,6 @@
     "size": "2K"
   },
   {
-    "id": "portrait_chandelapi",
-    "name": "Chandelapi (portrait)",
-    "refs": [
-      "briefs/boki-art/evolutions/Chandelapi.jpg"
-    ],
-    "aspect": "1:1",
-    "runs": 2,
-    "prompt": "Official creature-collector encyclopedia portrait of the exact creature in image 1, for a fantasy action game. Keep its design exactly as in image 1: the same body, colours, markings, face, eyes and every detail, nothing added or removed. Show it once, full body, in a simple, characteristic pose full of personality, like official creature-encyclopedia art: standing tall and proud, head turned, its candelabra crown lit. A natural three-quarter view at eye level with a clear, readable silhouette and a little movement in the body, its head turned slightly so it looks off to the side, not straight at the camera, not a straight front view. No effects at all: no sparks, petals, embers, smoke, glow bursts or motion lines. Centered, the whole body in frame with a little space around it, filling most of the square. Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not realistic. Plain flat white background, no shadow, no vignette, no scenery, no other creatures, no text, no frame, no turnaround views.",
-    "size": "2K"
-  },
-  {
-    "id": "chandelapi_4k",
-    "name": "Chandelapi",
-    "refs": [
-      "briefs/boki-art/evolutions/Chandelapi.jpg"
-    ],
-    "runs": 1,
-    "size": "4K",
-    "prompt": "Re-render image 1 at full quality: keep it exactly the same, the same creature, design, colours, every detail, the same views in the same layout and the same plain background. Only increase the sharpness and finish. Do not change, add or remove anything.",
-    "aspect": "16:9"
-  },
-  {
     "id": "chimelop_r",
     "name": "Chimelop",
     "refs": [
