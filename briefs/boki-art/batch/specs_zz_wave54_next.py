@@ -1,5 +1,5 @@
 # Tick 03:05 ET 11-09 (fast lane f10-f18 + panel w33c):
-# 1) Glassolotl rock-candy upgrade: pick c_glassolotl_v3 run 3 (8.4, "same creature, much less plain") -> turnaround.
+# 1) Glassolotl rock-candy upgrade (OWNER CHOSE v3 at 03:07 ET): c_glassolotl_v3 run 3 (8.4, "same creature, much less plain") -> turnaround.
 # 2) Stance images that reached 7.5+ -> turnaround in that stance (ta_<n>_stance), so each line gets distinct stances.
 # 3) Fix round (_w33) for items under 7.5: Glaivyx stance image, Dobsabre concept, with the critics' fix notes.
 import json as _j54
