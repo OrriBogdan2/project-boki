@@ -43809,5 +43809,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lanternlong_card83_2.jpg",
     "ok": true
+  },
+  {
+    "id": "lyrewing_card83",
+    "name": "Lyrewing (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card83",
+    "name": "Lyrewing (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lyrewing_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternlong_card83",
+    "name": "Lanternlong (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternlong_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card83",
+    "name": "Lyrewing (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lyrewing_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossbastion_card83",
+    "name": "Mossbastion (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mossbastion_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossbastion_card83",
+    "name": "Mossbastion (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mossbastion_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mossbastion_card83",
+    "name": "Mossbastion (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mossbastion_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipeworth_card83",
+    "name": "Pipeworth (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pipeworth_card83_3.jpg",
+    "ok": true
   }
 ]
