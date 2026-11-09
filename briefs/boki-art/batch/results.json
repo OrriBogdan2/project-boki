@@ -18581,5 +18581,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lunink_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "parasolth_card",
+    "name": "Parasolth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/parasolth_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_card",
+    "name": "Puffamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_v",
+    "name": "Chimelop (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chimelop_v_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_v",
+    "name": "Bucketmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_v_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_v",
+    "name": "Chimelop (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chimelop_v_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_v",
+    "name": "Bucketmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_v_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_v",
+    "name": "Bucketmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_v_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_v",
+    "name": "Chimelop (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chimelop_v_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_v",
+    "name": "Chandelapi (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_v_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bucketmander_v",
+    "name": "Bucketmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bucketmander_v_3.jpg",
+    "ok": true
   }
 ]
