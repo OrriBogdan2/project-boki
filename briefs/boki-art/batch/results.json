@@ -3443,5 +3443,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pipewurm_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "vespox_f_r",
+    "name": "Vespox (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_f_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_f_r",
+    "name": "Vespox (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_f_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimeshrew_r",
+    "name": "Rimeshrew",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimeshrew_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimeshrew_r",
+    "name": "Rimeshrew",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimeshrew_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chuggamus_r",
+    "name": "Chuggamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ribbonwyrm_r",
+    "name": "Ribbonwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ribbonwyrm_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chuggamus_r",
+    "name": "Chuggamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback",
+    "name": "Cairnback (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_1.jpg",
+    "ok": true
   }
 ]
