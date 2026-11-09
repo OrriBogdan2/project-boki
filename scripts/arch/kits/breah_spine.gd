@@ -203,6 +203,7 @@ func _raise(p: Vector3, along: Vector2) -> void:
 	last_rise_t = m.time
 	m.fx.burst(p + Vector3(0, 0.5, 0), Color("ff6a1f"), 10, 5.0, 0.35, 6.0, 1.1)
 	m.fx.flash(p + Vector3(0, 0.4, 0), Color("ffc070"), 0.8, 0.07)
+	DolmImpact.rise(m, p)
 	for f in k.foes_in(p, float(xd()["slow_r"])):
 		var o := {"src": "abil", "ab": "x", "slow": float(xd()["slow_t"]), "slow_k": float(xd()["slow_k"])}
 		f.hurt(float(xd()["rise_dmg"]) * k.power("x"), k.h, o)
