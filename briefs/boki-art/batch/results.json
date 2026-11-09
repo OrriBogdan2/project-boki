@@ -49542,5 +49542,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_furnacowary_p99_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_geysirbara_p99",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_geysirbara_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_forgebrock_x3",
+    "name": "Forgebrock (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_x3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_voltalon_p99",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_voltalon_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_geysirbara_p99",
+    "name": "Geysirbara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_geysirbara_p99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lodestaff_p99",
+    "name": "Lodestaff",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lodestaff_p99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_forgebrock_x3",
+    "name": "Forgebrock (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_forgebrock_x3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x3",
+    "name": "Dreadnoyak (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x3",
+    "name": "Dreadnoyak (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x3_3.jpg",
+    "ok": true
   }
 ]
