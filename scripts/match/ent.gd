@@ -317,7 +317,9 @@ func tick_status(dt: float) -> void:
 		burn_t -= dt
 		if not remote:
 			hp -= burn_dps * dt
-			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
+			# like direct hits, only burns that involve you show numbers (yours, or on you)
+			var yours := self == m.player or HunterFeats.credit_of(burn_by) == m.player
+			if yours and int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
 				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false, nid)
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})

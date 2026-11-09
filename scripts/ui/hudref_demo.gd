@@ -136,6 +136,7 @@ static func _volleys(m, P: Hunter) -> void:
 	if prev < 0.0:
 		(foes[3] as Hunter).burn_t = 3.0
 		(foes[3] as Hunter).burn_dps = 24.0
+		(foes[3] as Hunter).burn_by = P
 	if t < 1.4 and int(t / 0.08) != int(prev / 0.08):
 		(foes[0] as Hunter).hurt(9.0, P)
 	if t < 1.4 and int(t / 0.1) != int(prev / 0.1):

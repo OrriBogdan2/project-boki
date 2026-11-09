@@ -247,6 +247,22 @@ func _check_numbers(m: Match) -> void:
 		for n in _nums(fx, "slow"): n["last"] = Fx.MERGE_T + 0.01
 	var shown := _nums(fx, "slow").size()
 	ok(shown <= Fx.NUM_PER_STREAM, "hits a pause apart: at most %d on a target (%d)" % [Fx.NUM_PER_STREAM, shown])
+	# a burn between two rivals shows nothing; the same burn lit by you ticks into one number
+	var rivals: Array = m.hunters.filter(func(x): return x != m.player and not x.dead and not (x as Hunter).downed)
+	if rivals.size() >= 2:
+		var a: Hunter = rivals[0]
+		var b: Hunter = rivals[1]
+		a.hp = a.max_hp
+		a.burn_t = 1.2
+		a.burn_dps = 20.0
+		a.burn_by = b
+		for i in 40: a.tick_status(1.0 / 60.0)
+		ok(_nums(fx, a.nid).is_empty(), "a rival burning another rival shows no numbers")
+		a.burn_t = 1.2
+		a.burn_by = m.player
+		for i in 40: a.tick_status(1.0 / 60.0)
+		ok(_nums(fx, a.nid).size() == 1, "your burn's ticks merge into one number (%d)" % _nums(fx, a.nid).size())
+		a.burn_t = 0.0
 	for n in fx.nums.duplicate():
 		(n["node"] as Label3D).visible = false
 		fx.nums.erase(n)
