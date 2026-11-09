@@ -5,8 +5,8 @@ extends RefCounted
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes. Fight effects (FxPool): a flurry of rings, ghosts, bolts, beams and
-## telegraphs adds no node to the Fx and every mesh is hidden again once they end.
+## once and reused until it changes. Fight effects (FxPool): a flurry of rings, ghosts, bolts and beams
+## adds no node to the Fx and every mesh is hidden again once they end (telegraphs are freed, not pooled).
 
 var main: Node
 var fails := 0
@@ -239,8 +239,7 @@ func _plates() -> void:
 func _fx_pools() -> void:
 	var fx: Fx = m.fx
 	var kids := fx.get_child_count()
-	var out := [fx.ring_pool.live(), fx.ghost_pool.live(), fx.bolt_pool.live(), fx.beam_pool.live(),
-		fx.tele_pool.live()]
+	var out := [fx.ring_pool.live(), fx.ghost_pool.live(), fx.bolt_pool.live(), fx.beam_pool.live()]
 	var tele: Array = []
 	for i in 3:
 		var at := Vector3(i, 0, 0)
@@ -251,8 +250,7 @@ func _fx_pools() -> void:
 		tele.append(fx.telegraph_rect(at, Vector2.RIGHT, 3.0, 1.0, Color.RED))
 	for t in tele:
 		fx.end_telegraph(t)
-	ok(fx.ring_pool.live() == int(out[0]) + 3 and fx.tele_pool.live() == int(out[4]),
-		"a flurry takes pooled meshes (3 more rings out, the telegraphs back)")
+	ok(fx.ring_pool.live() == int(out[0]) + 3, "a flurry takes pooled meshes (3 more rings out)")
 	for i in 60:
 		fx._process(0.02)
 		await main.get_tree().process_frame

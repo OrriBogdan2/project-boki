@@ -1,6 +1,6 @@
 class_name FxPool
 extends RefCounted
-## A reuse list of one kind of effect mesh (a ring, a ghost, a bolt segment, a beam quad, a telegraph).
+## A reuse list of one kind of effect mesh (a ring, a ghost, a bolt segment, a beam quad).
 ## The match builds a few at load; an effect takes one, restyles it, and gives it back when it ends, so
 ## no fight creates or frees nodes (item 94, "pool and reuse nodes").
 

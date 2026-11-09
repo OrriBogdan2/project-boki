@@ -28,7 +28,6 @@ var ring_pool: FxPool
 var ghost_pool: FxPool
 var bolt_pool: FxPool
 var beam_pool: FxPool
-var tele_pool: FxPool
 
 func _ready() -> void:
 	particles = PARTICLES * float(Settings.q("fx"))
@@ -89,7 +88,6 @@ func _build_pools() -> void:
 	ghost_pool = FxPool.new(self, _make_ghost, 12)
 	bolt_pool = FxPool.new(self, _make_bolt, 18)
 	beam_pool = FxPool.new(self, _make_beam, 8)
-	tele_pool = FxPool.new(self, _make_tele, 8)
 
 func _mesh_node(mesh: Mesh, mat: Material) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -110,11 +108,6 @@ func _make_beam() -> MeshInstance3D:
 	var m := ShaderMaterial.new()
 	m.shader = load("res://shaders/light_shaft.gdshader")
 	return _mesh_node(QuadMesh.new(), m)      # QuadMesh's default size is 1 x 1
-
-func _make_tele() -> MeshInstance3D:
-	var m := ShaderMaterial.new()
-	m.shader = TELEGRAPH
-	return _mesh_node(null, m)
 
 func _build_sparks() -> void:
 	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
@@ -389,6 +382,7 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 		return
 	radial += 1
 	var mi := ring_pool.take()
+	mi.material_override.set_shader_parameter("color", col)
 	mi.global_position = at + Vector3(0, 0.08, 0)
 	mi.scale = Vector3.ONE * 0.1
 	rings.append({"node": mi, "t": 0.0, "dur": dur, "r": radius, "col": col})
@@ -472,12 +466,16 @@ func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
 
 # ---- telegraphs
 func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
-	var mi := tele_pool.take()
-	mi.material_override.set_shader_parameter("color", col)
-	mi.material_override.set_shader_parameter("shape", shape)
-	mi.material_override.set_shader_parameter("progress", 0.0)
-	mi.rotation = Vector3.ZERO
-	mi.remove_meta("len")
+	# not pooled: callers keep the handle (tweens, is_instance_valid guards) after it ends, so a reused
+	# node could be ended or moved by its old owner; telegraphs are per attack, not per shot
+	var mi := MeshInstance3D.new()
+	var mat := ShaderMaterial.new()
+	mat.shader = TELEGRAPH
+	mat.set_shader_parameter("color", col)
+	mat.set_shader_parameter("shape", shape)
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi)
 	teles.append(mi)
 	return mi
 
@@ -505,7 +503,7 @@ func telegraph_progress(mi: Node3D, p: float) -> void:
 
 func end_telegraph(mi: Node3D) -> void:
 	teles.erase(mi)
-	tele_pool.give(mi)
+	mi.queue_free()
 
 func _process(delta: float) -> void:
 	for n in nums.duplicate():
