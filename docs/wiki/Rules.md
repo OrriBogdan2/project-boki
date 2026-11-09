@@ -464,6 +464,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | beacon_hear_m | 120 |
 | _beacon_hear_m | how far the beacon's alarm loop carries; the notice itself reaches every player on the map |
 
+## servers (`content/rules/servers.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Matchmaker regions for online play (OnlineSession). The client picks the one whose /health answers fastest, or the Settings override. |
+| regions | [{"id": "eu", "name": "Europe", "url": "http://2.31.98.197:8080"}, {"id": "us", "name": "North America", "url": "http://5.161.241.179:8080"}] |
+
 ## sfx_levels (`content/rules/sfx_levels.json`)
 
 

@@ -2,7 +2,7 @@ extends Control
 ## Play online: pick a mode, queue at the nearest matchmaker, see where you are in the line, and
 ## go straight into the match when it's made (OnlineSession does the work; this shows it).
 
-const MODES := [["duel", "Duel", "You against one hunter.", "knock"], ["arena", "Arena", "Four against four.", "burst"],
+const MODES := [["arena", "Arena", "Four against four.", "burst"],
 	["trio", "Expedition", "Squads of three on the islands, with their Boki.", "portal"]]
 
 var opts := {}

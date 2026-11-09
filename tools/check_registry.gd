@@ -162,6 +162,7 @@ const CHECKS := {
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--server-check": ["res://tools/server_check.gd", "server_check", null],      # a match server, players, refusals
 	"--server-e2e-check": ["res://tools/server_e2e_check.gd", "server_e2e_check", null],      # matchmaker + server
+	"--duel-queue-check": ["res://tools/duel_queue_check.gd", "duel_queue_check", null],      # LIVE: the EU matchmaker
 	"--join-": ["res://tools/join_client.gd", "join_client", null],      # a headless player for the server checks
 }
 

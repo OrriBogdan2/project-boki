@@ -360,6 +360,7 @@ func _training() -> void:
 		m.arena != null and m.arena.dummies.size() == 6 and m.duel_pad != Vector3.INF
 			and m.duel_pad.distance_to(Arena.WING) < Arena.WING_R + 2.0
 	)
+	await _duel_ring(m)
 	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)
 	m.arena.set_arch("thief")
 	ok("training: archetype swap", P.arch == "thief")
@@ -425,3 +426,40 @@ func _loadout() -> void:
 	)
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
 	ok("expedition panel uses KitCard.strip", src.contains("KitCard.strip(cur_a"))
+
+## The duel ring's choices (opened where interact on the pad opens them): Fight a bot always, Find a duel
+## when a matchmaker is configured, searching with Cancel while queued, the refusal text on an error.
+func _duel_ring(m: Match) -> void:
+	var ring := DuelRing.open(m)
+	ok("duel ring: opens and pauses the match", ring.layer != null and m.paused)
+	var texts := _texts(ring.layer)
+	ok("duel ring: Fight a bot is offered", "Fight a bot" in texts)
+	ok("duel ring: no friend duel button (no 1v1 invite exists)", not ("Fight a friend" in texts))
+	var online := OnlineSession.configured()
+	ok("duel ring: Find a duel only with a matchmaker", ("Find a duel" in texts) == online, str(online))
+	if online:
+		var session := OnlineSession.get_session()
+		session.state = "queue"
+		session.place = 3
+		session.changed.emit()
+		texts = _texts(ring.layer)
+		ok("duel ring: searching shows the place and Cancel",
+			texts.any(func(t): return t.contains("number 3")) and "Cancel search" in texts)
+		ok("duel ring: no choices while searching", not ("Fight a bot" in texts))
+		session.state = "error"
+		session.message = "No matchmaking server answered."
+		session.changed.emit()
+		texts = _texts(ring.layer)
+		ok("duel ring: an error shows its text beside the choices",
+			"No matchmaking server answered." in texts and "Fight a bot" in texts)
+		session.state = "idle"
+	ring.close()
+	await main.get_tree().process_frame
+	ok("duel ring: Back gives the match back", not m.paused and not is_instance_valid(ring.layer))
+
+func _texts(node: Node) -> Array:
+	var out: Array = []
+	for c in node.find_children("*", "", true, false):
+		if c is Label or c is Button:
+			out.append(String(c.text))
+	return out

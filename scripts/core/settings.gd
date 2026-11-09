@@ -13,7 +13,7 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	"region": "auto",      # online: the matchmaker region, "auto" = whichever answers fastest (content/rules/servers.json)
+	"region": "auto",      # online matchmaker region; "auto" = the fastest
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
