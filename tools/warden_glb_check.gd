@@ -122,7 +122,7 @@ func _contract(a: String) -> void:
 	var tris := 0
 	var slots := {}
 	var unskinned := 0
-	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+	for mi in _body_meshes(m):
 		var mesh := (mi as MeshInstance3D).mesh
 		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
 		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
@@ -132,6 +132,7 @@ func _contract(a: String) -> void:
 			tris += mesh.surface_get_array_index_len(si) / 3
 			var src := mesh.surface_get_material(si)
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
+	_ink_shells(m, a)
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
 	var cap: int = TRIS_OVER.get(a, TRIS_MAX)
 	ok(unskinned == 0 and tris <= cap and slots.size() <= SLOT_MAX and unknown.is_empty(),
@@ -266,12 +267,12 @@ func _shading(a: String) -> void:
 	var textured := 0
 	var relief := 0
 	var no_relief := 0
-	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+	for mi in _body_meshes(m):
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm and sm.shader == WardenMood.FACE_SHADER:
-				continue        # (a face drawn on glass: no atlas, no toon)
+			if sm and sm.shader in [WardenMood.FACE_SHADER, WardenMood.ATLAS_SHADER]:
+				continue        # (a face drawn on glass or a mood eye off its cell atlas: no toon)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
@@ -287,7 +288,7 @@ func _shading(a: String) -> void:
 			if sm and sm.shader == WardenGlb.FLAME:
 				shows = true      # (fire: no paint of its own)
 			elif sm and atlas:
-				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")
@@ -410,7 +411,7 @@ func _own_look(a: String) -> void:
 	var slots: Dictionary = own.get("slots", {})
 	var seen := 0
 	var wrong: Array = []
-	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+	for mi in _body_meshes(m):
 		var mesh := (mi as MeshInstance3D).mesh
 		for si in mesh.get_surface_count():
 			var src := mesh.surface_get_material(si)
@@ -610,3 +611,26 @@ func _setting(a: String) -> void:
 	on.free()
 	ok(proc and back, "%s: the Warden models setting turns it procedural (%s) and back to its 3D model (%s)"
 			% [a, str(proc), str(back)])
+
+## The model's own meshes: not WardenMerge's ink shells, which draw the ink pass its surfaces gave up.
+func _body_meshes(m: Node) -> Array:
+	var shells := WardenMerge.inks(m)
+	return m.get_node("Warden").find_children("*", "MeshInstance3D", true, false).filter(
+			func(mi): return not mi in shells)
+
+## Each ink shell is its body's skinned copy on the outline shader, and no surface of that body still wears
+## the same ink as a pass (it would draw twice).
+func _ink_shells(m: Node, a: String) -> void:
+	var bad: Array = []
+	var shells := WardenMerge.inks(m)
+	for shell: MeshInstance3D in shells:
+		var body := shell.get_parent() as MeshInstance3D
+		var ink := shell.material_override as ShaderMaterial
+		var twice := range(body.mesh.get_surface_count()).any(
+				func(si): return body.get_active_material(si).next_pass == ink)
+		if ink == null or ink.shader != Models.OUTLINE or shell.skin != body.skin or twice \
+				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
+			bad.append(shell.name)
+	ok(bad.is_empty(),
+			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
+			% [a, shells.size(), str(bad)])
