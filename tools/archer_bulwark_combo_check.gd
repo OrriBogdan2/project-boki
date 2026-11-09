@@ -629,7 +629,6 @@ func _archer_combos() -> void:
 	)
 	await done(m)
 
-## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
 ## The Heavy Shot's impact is sized to its charge and bigger on a wall pin; the dash start and end have no burst.
 func _impact_looks() -> void:
 	var mv: Dictionary = HeroVfx.data("archer")["moves"]
@@ -652,6 +651,7 @@ func _flare_reach(rec: Dictionary, k: float) -> float:
 			widest = maxf(widest, float(layer["size"]) * (1.0 + float(layer.get("size_k", 0.0)) * k))
 	return widest
 
+## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
 func _spin(lvl: int) -> float:
 	var r := setup("bulwark", 2.2)
 	var m: Match = r[0]
