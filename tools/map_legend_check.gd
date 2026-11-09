@@ -100,8 +100,11 @@ func _match(main: Node) -> void:
 		var screen := Rect2(Vector2.ZERO, sz).grow(-1.0)
 		var squad := Rect2(Vector2(0, fm.rect.position.y), Vector2(fm.rect.position.x, fm.squad_h()))
 		var beside: bool = pr.end.x <= fm.rect.position.x and not pr.intersects(squad)
-		var corner: bool = fm.rect.grow(-1.0).encloses(pr) and pr.size.x <= fm.rect.size.x * 0.6 and pr.size.y <= fm.rect.size.y * 0.4
-		ok(screen.encloses(pr) and (beside or corner), "the full key (%d) sits %s at %dx%d" % [all.size(), "beside the map under the squad" if beside else "in the map's corner", sz.x, sz.y])
+		var small: bool = pr.size.x <= fm.rect.size.x * 0.6 and pr.size.y <= fm.rect.size.y * 0.4
+		var corner: bool = fm.rect.grow(-1.0).encloses(pr) and small
+		var where := "beside the map under the squad" if beside else "in the map's corner"
+		var fits: bool = screen.encloses(pr) and (beside or corner)
+		ok(fits, "the full key (%d) sits %s at %dx%d" % [all.size(), where, sz.x, sz.y])
 	m.hud.c.draw.connect(func():
 		fm._layout(SIZES[0])
 		MapLegend.draw(fm, all)
