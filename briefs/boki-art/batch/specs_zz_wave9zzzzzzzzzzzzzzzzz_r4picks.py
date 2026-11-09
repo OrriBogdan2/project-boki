@@ -46,7 +46,8 @@ _PAL=("recolour it to match its new baby form: warm copper-bronze fur, a soot-gr
 for _n in ('Anvilbrock','Forgebrock'):
     SPECS.append({'id':f'{_n.lower()}_card104','name':_n+' (hero card recolour)','refs':[_C+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
       'prompt':"Edit image 1: keep everything exactly the same: the same creature, design, pose, style and plain pale grey background. Only change this: "+_PAL})
-    X(f'ta_{_n.lower()}_r4',_n,'briefs/boki-art/evolutions/'+_n+'.jpg',_PAL)
+    _sd='evolutions' if (HERE.parent/'evolutions'/(_n+'.jpg')).exists() else 'turnarounds'
+    X(f'ta_{_n.lower()}_r4',_n,f'briefs/boki-art/{_sd}/{_n}.jpg',_PAL)
 # Pipwom redo (owner: face/arm placement looked bugged): Boki proportions, clear anatomy.
 for _k,_b in enumerate([
  "A stocky wombat cub-grown-up walking on all four legs, a big round head with big glossy eyes clearly at the FRONT of its body, four separate legs each clearly attached under the body, its rump grown into a big ivory six-pip die shield, small pip dots down its spine.",
