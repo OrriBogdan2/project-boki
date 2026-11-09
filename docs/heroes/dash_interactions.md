@@ -97,7 +97,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ashwick | hold RMB through an air dash |  | the hold carries through and lets go there |
 | ashwick | hold RMB through a jump |  | the hold carries through and lets go there |
 | tender | ground dash -> LMB | Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.2s skip ends (held to the dash end, the default: nothing in the source shows otherwise). | buffered to the dash's end |
-| tender | ground dash -> RMB | Data: Darkside Binding has no dash rule. Footage: not cast from a dash. Ours: the seed is thrown from the skip (its own small hop and push). | fires mid-dash |
+| tender | ground dash -> RMB | Data: Darkside Binding has no dash rule. Footage: not cast from a dash. Ours: owner item 23, the quick wind-up. | **exception:** buffered to the dash's end (The press starts the 0.35 s wind-up mid-skip; the seed leaves as it ends, after the 0.17 s skip) |
 | tender | ground dash -> E | Data: Moonlight Blessing is a zone on herself that follows her. Footage: not cast from a dash. Ours: the light goes up on her mid-skip and moves with her. | fires mid-dash |
 | tender | ground dash -> ult (X) | Data: the channel is cancelled only by stun, knock or range, not by moving. Footage (ult f41-f72): she walks while it runs. Ours: the tether starts mid-skip. | fires mid-dash |
 | tender | ground dash -> Q glove | No source glove. | fires mid-dash |
@@ -112,7 +112,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | tender | ult (X) -> dash | Data: cancelled only by stun, knock or moving too far. Footage: she walks through the channel. Ours: Shift goes at once and the tether holds while she stays in the ring. | the dash goes, the ability keeps running |
 | tender | Q glove -> dash | No source glove. | the dash goes, the ability keeps running |
 | tender | jump -> LMB |  | fires mid-jump (default) |
-| tender | jump -> RMB | Ours: owner items 118 and 118b, the wind-up and snap release. | **exception:** buffered to the landing (Burrseed's fixed 1 s wind-up outlasts the hop, so the seed leaves after she lands) |
+| tender | jump -> RMB | Ours: owner items 118 and 118b, the wind-up and snap release. | **exception:** buffered to the landing (Burrseed's wind-up is a planted throw (0.35 s), so the seed leaves after she lands) |
 | tender | jump -> E |  | fires mid-jump (default) |
 | tender | jump -> ult (X) |  | fires mid-jump (default) |
 | tender | jump -> Q glove |  | fires mid-jump (default) |
