@@ -144,11 +144,13 @@ func _string_fades(m: Match, P: Hunter, home: Vector3) -> void:
 	var rec := {"n": P.shot_n, "k": [], "w": [], "sd": {}}
 	var fire := func():
 		P.inp["fire"] = true
-		for r in vfx.ribbons:          # (the kit dresses a round on the step after it leaves; its outer ribbon first)
-			if not (rec["sd"] as Dictionary).is_empty() and r["follow"] == rec["sd"].get("node"):
-				(rec["w"] as Array).append(float(r["width"]))
-				rec["sd"] = {}
-				break
+		# the kit dresses a round on the step after it leaves: its two newest ribbons (shot nodes are pooled, so
+		# older ribbons may follow the same node), the outer one is the wider
+		var node: Variant = (rec["sd"] as Dictionary).get("node")
+		var mine: Array = vfx.ribbons.filter(func(r: Dictionary) -> bool: return node != null and r["follow"] == node)
+		if not mine.is_empty():
+			(rec["w"] as Array).append(maxf(float(mine[-1]["width"]), float(mine[-2]["width"]) if mine.size() > 1 else 0.0))
+			rec["sd"] = {}
 		if P.shot_n > int(rec["n"]):
 			rec["n"] = P.shot_n
 			rec["sd"] = C._last_shot(m, P)
