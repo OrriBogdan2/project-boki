@@ -37,9 +37,11 @@ func _stage(main: Node) -> Dictionary:
 	host.add_child(sun)
 	sun.rotation_degrees = Vector3(-50, 30, 0)
 	var ground := MeshInstance3D.new()
-	var plane := PlaneMesh.new(); plane.size = Vector2(30, 30)
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(30, 30)
 	ground.mesh = plane
-	var gm := StandardMaterial3D.new(); gm.albedo_color = Color("6c9a4c")
+	var gm := StandardMaterial3D.new()
+	gm.albedo_color = Color("6c9a4c")
 	ground.material_override = gm
 	host.add_child(ground)
 	var fx := Fx.new()
@@ -54,7 +56,8 @@ func _species_of(type: String) -> String:
 
 func _make(stage: Dictionary, spk: String, watcher: bool) -> EvolveMoment:
 	var m := EvolveMoment.new()
-	m.host = stage["host"]; m.fx = stage["fx"]
+	m.host = stage["host"]
+	m.fx = stage["fx"]
 	m.old = Models.kin(spk, Save.new_kin(spk, "A"))
 	m.fresh = Models.kin(spk, Save.new_kin(spk, "B"))
 	m.col = DexView.type_col(DexView.type_of(spk))
@@ -74,7 +77,10 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	var w: Node3D = m.watchers[0]["node"]
 	var facing_before := absf(angle_difference(w.rotation.y, atan2(w.position.x, w.position.z)))
 	var radial := fx.radial
-	var peak := 0.0; var wash_peak := 0.0; var swap_t := -1.0; var wash_mid := 0.0
+	var peak := 0.0
+	var wash_peak := 0.0
+	var wash_mid := 0.0
+	var swap_t := -1.0
 	var t := 0.0
 	while t < EvolveMoment.LENGTH:
 		t += STEP
@@ -82,25 +88,36 @@ func _check(_main: Node, stage: Dictionary) -> void:
 		var cur: Node3D = m.fresh if m.swapped else m.old
 		peak = maxf(peak, cur.scale.x / m.base.x)
 		wash_peak = maxf(wash_peak, m.wash.albedo_color.a)
-		if m.swapped and swap_t < 0.0: swap_t = t
-		if absf(t - EvolveMoment.SWAP_AT) < STEP * 0.5: wash_mid = m.wash.albedo_color.a
-	ok(EvolveMoment.LENGTH >= 1.2 and EvolveMoment.LENGTH <= 1.8, "the moment is about 1.5 s (%.2f)" % EvolveMoment.LENGTH)
+		if m.swapped and swap_t < 0.0:
+			swap_t = t
+		if absf(t - EvolveMoment.SWAP_AT) < STEP * 0.5:
+			wash_mid = m.wash.albedo_color.a
+	var len_s := EvolveMoment.LENGTH
+	var swap_at := EvolveMoment.SWAP_AT
+	ok(len_s >= 1.2 and len_s <= 1.8, "the moment is about 1.5 s (%.2f)" % len_s)
 	ok(peak >= 1.1 and peak <= 1.2, "the silhouette swells to %.2fx" % peak)
-	ok(wash_peak >= 0.8 and wash_mid >= 0.8, "the type colour washes over it to %.2f at the swap" % wash_peak)
-	ok(swap_t >= EvolveMoment.SWAP_AT - 0.01 and swap_t <= EvolveMoment.SWAP_AT + STEP + 0.01, "the new form takes its place at the peak (%.2f s)" % swap_t)
+	ok(wash_peak >= 0.8 and wash_mid >= 0.8, "the type colour washes over it to %.2f" % wash_peak)
+	ok(absf(swap_t - swap_at) <= STEP + 0.01, "the new form takes over at the peak (%.2f s)" % swap_t)
 	ok(m.fresh.visible and not m.old.visible, "the new form is shown and the old one hidden")
-	ok(m.wash.albedo_color.a < 0.01 and m.sparkled == EvolveMoment.SPARKLE_AT.size() and absf(m.fresh.scale.x - m.base.x) < 0.01, "the glow is gone, the soft sparkles played, the size settled")
+	var settled := absf(m.fresh.scale.x - m.base.x) < 0.01
+	var played: bool = m.sparkled == EvolveMoment.SPARKLE_AT.size()
+	ok(m.wash.albedo_color.a < 0.01 and played and settled, "the glow is gone, sparkles played, size settled")
 	ok(fx.radial == radial, "no burst or ring (radial stays %d)" % radial)
 	var facing_after := absf(angle_difference(w.rotation.y, atan2(w.position.x, w.position.z)))
-	ok(facing_before > 1.0 and facing_after < 0.15, "a Boki nearby turns to watch (%.2f -> %.2f rad off)" % [facing_before, facing_after])
+	var turned := "(%.2f -> %.2f)" % [facing_before, facing_after]
+	ok(facing_before > 1.0 and facing_after < 0.15, "a Boki nearby turns to watch " + turned)
 	m.finish()
-	ok(not _washed(m.fresh) and m.light.is_queued_for_deletion() and m.old.is_queued_for_deletion(), "the wash and light come off, the old model goes")
+	var gone: bool = m.light.is_queued_for_deletion() and m.old.is_queued_for_deletion()
+	ok(not _washed(m.fresh) and gone, "the wash and light come off, the old model goes")
 	var cam: Camera3D = stage["cam"]
-	ok(EvolveMoment.on_screen(cam, Vector3.ZERO) and not EvolveMoment.on_screen(cam, Vector3(60, 0, 0)) and not EvolveMoment.on_screen(cam, Vector3(0, 0, 40)),
-		"in view gets the moment, off screen and behind the camera do not")
+	var seen := EvolveMoment.on_screen(cam, Vector3.ZERO)
+	var far := EvolveMoment.on_screen(cam, Vector3(60, 0, 0))
+	var behind := EvolveMoment.on_screen(cam, Vector3(0, 0, 40))
+	ok(seen and not far and not behind, "in view gets the moment, off screen and behind the camera do not")
 	var kins := [{"node": w}, {"node": m.fresh, "indoors": true}, {"node": m.old, "busy": true}]
-	ok(EvolveMoment.watchers_of(kins, {}, Vector3.ZERO).size() == 1 and EvolveMoment.watchers_of(kins, kins[0], Vector3.ZERO).is_empty(),
-		"only idle outdoor Boki close by watch, never the one changing")
+	var near := EvolveMoment.watchers_of(kins, {}, Vector3.ZERO)
+	var self_only := EvolveMoment.watchers_of(kins, kins[0], Vector3.ZERO)
+	ok(near.size() == 1 and self_only.is_empty(), "only idle outdoor Boki close by watch, never the one changing")
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
 	var body := src.substr(src.find("func _play_evolutions"), 2600)
 	body = body.substr(0, body.find("# ---- buildings"))
