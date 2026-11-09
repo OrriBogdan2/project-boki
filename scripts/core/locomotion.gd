@@ -25,7 +25,6 @@ static var air_counter := 0.0
 static var air_side := 0.0
 static var air_drag := 0.0
 static var air_idle_drag := 0.0
-static var glide_accel := 0.0
 static var glide_turn := 0.0
 static var glide_turn_fast := 0.0
 static var glide_brake := 0.0
@@ -55,7 +54,6 @@ static func load_tuning() -> bool:
 	air_drag = a["drag"]
 	air_idle_drag = a["idle_drag"]
 	var g: Dictionary = T["glide"]
-	glide_accel = g["accel"]
 	glide_turn = g["turn"]
 	glide_turn_fast = g["turn_fast"]
 	glide_brake = g["brake"]
@@ -134,6 +132,11 @@ static func air_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vecto
 	across = across.move_toward(Vector2.ZERO, a * air_side)
 	return (wd * along + across).limit_length(maxf(s, cap))
 
+## Vertical speed the step the glider opens: falling at least HunterMove.glide_start_vy ([game data]
+## GlideStartFallSpeedMin), so a rising jump is cut and an open never adds speed.
+static func glide_start(vy: float) -> float:
+	return minf(vy, -HunterMove.glide_start_vy)
+
 ## One glide step. `wish` = keys x cruise speed `gs`; `carry` = the most this hunter carries from Shift. Speed
 ## above cruise bleeds back within ~1.5 s (glide_drag; glide_drag_steer while steering), faster above `carry`;
 ## at or under cruise the glider pulls toward where you steer; a let-go coasts. Turns in wider arcs when fast.
@@ -149,7 +152,7 @@ static func glide_step(hv: Vector2, wish: Vector2, gs: float, carry: float, dt: 
 	if ws < 0.05:
 		return hv if s > gs else hv.move_toward(Vector2.ZERO, glide_coast * dt)
 	if s <= gs + 0.05:
-		return hv.move_toward(wish, glide_accel * dt)
+		return hv.move_toward(wish, HunterMove.glide_accel * dt)
 	var d := hv / s
 	var ang := d.angle_to(wish / ws)
 	if absf(ang) > deg_to_rad(glide_brake_deg):
