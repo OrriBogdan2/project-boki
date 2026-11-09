@@ -471,3 +471,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - This replaces "Frozen: farm-builder depth" for the garden. Builder, crop and economy depth is cut back, not grown. Design brief: briefs/design/GARDEN.md (coming). Until it's approved, don't start new farm-economy work.
 
 - 2026-11-09 (owner): Geodemole has TWO approved versions of the same Boki: intact (art geodemole-3-art) and broken/cracked-geode (geodemole-r-3-art). Keep both; 3D/kits treat the broken one as a second form (e.g. damaged/evolved state), not a redo or reject.
+## 2026-11-09: legendary Boki (owner)
+- About 5 very rare **legendary** Boki. Each map has a small chance to spawn one: **20% per match** that any legendary appears on that map (owner: "less than 30%, I want it rare"). If one rolls, it picks uniformly from that map's eligible legendaries. At most one per match.
+- The roster starts with the game's 3 rare/boss kin: Cairnback, Hivara and Zephyrak. Two more will be designed (2D first, through the art pipeline). Each map lists 1-3 eligible legendaries so every map can roll one.
+- In the Bokidex, legendaries always sit at the very end.
+- Tuning knob: `legendary_spawn_chance` per map (default 0.20). Alternative considered: a per-legendary chance of about 5%, which gives about 23% for any of 5. Rejected because one per-map roll is easier to tune and reason about.
