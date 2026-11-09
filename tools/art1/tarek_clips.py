@@ -231,7 +231,20 @@ DOWNED = m(LOOSE, pos=(0, 0.02, -0.62), hips=(-26, 4, 6), head=(30, 6, 0), hr=ha
            fr=(AX + 0.08, -0.34, AZ + 0.04), fl=(-AX - 0.08, 0.0, AZ), fra=-60.0, fla=-10.0, frt=0.0, flt=0.0, kr=(0.3, 1, 0), kl=(-0.3, 1, 0), lip=-0.7, jaw=0.32, fing_r=1.0, fing_l=0.6)
 C.bake("downed", 1.8, [(0, DOWNED), (1.8, {})], over=breathe(1.8, 2.2), loop=True)
 REV = m(DOWNED, pos=(0, 0.0, -0.46), hips=(-14, 0, 0), head=(2, 0, 0), hr=hand(0.1, 0.34, -0.3), hl=lhand(0.1, 0.34, -0.3), lip=0.1, jaw=0.1, fing_l=1.0)
-C.bake("revive", 1.2, [(0, REV), (1.2, {})], over=breathe(0.9, 2.0), loop=True)
+# revive: kneeling over a friend, both stone fists pressing their chest in two heavy pushes (the Life.R revive is 4 s: a steady loop)
+REV_P = m(REV, pos=(0, 0.02, -0.5), hips=(-22, 0, 0), head=(8, 0, 0), hr=hand(0.1, 0.34, -0.38), hl=lhand(0.1, 0.34, -0.38), jaw=0.2)
+C.bake("revive", 1.2, [(0, REV), (0.2, m(REV_P, e="in")), (0.4, m(REV, e="out")), (0.6, REV), (0.8, m(REV_P, e="in")), (1.0, m(REV, e="out")), (1.2, REV)], over=breathe(1.2, 1.0), loop=True)
+# stomp (one cycle = Life.R stomp_cycle 0.7 s, the stone boot lands at 0.7 of it): the weight rocks back onto the left leg, the right knee lifts
+# high with the fists drawn up, hangs a beat, then the whole of him comes down through the boot
+ST0 = m(STANCE, hr=hand(0.1, 0.12, -0.34), hl=lhand(0.06, 0.28, -0.34), jaw=0.15, lip=-0.6)
+ST1 = m(ST0, pos=(-0.03, -0.02, -0.08), hips=(-6, 0, 4), head=(-2, -4, 12), fr=(AX + 0.04, 0.05, AZ + 0.18), fra=-20.0, frt=-10.0, kr=(0.4, 1, 0))
+ST2 = m(ST1, pos=(-0.03, -0.02, -0.02), hips=(-2, 0, 6), head=(-10, -4, 12), hr=hand(0.14, 0.1, -0.26), hl=lhand(0.1, 0.2, -0.28), fr=(AX + 0.05, 0.16, AZ + 0.34), fra=-30.0, jaw=0.4, lip=-1.0)
+ST3 = m(ST0, pos=(0.02, 0.03, -0.2), hips=(-24, 2, 2), head=(14, -4, 10), hr=hand(0.12, 0.26, -0.5), hl=lhand(0.08, 0.34, -0.5), fr=(AX + 0.08, 0.16, AZ), fra=0.0, frt=-18.0, jaw=0.7, lip=-1.0)
+C.bake("stomp", 0.7, [(0, ST0), (0.16, m(ST1, e="out")), (0.38, m(ST2, e="out")), (0.49, m(ST3, e="in")), (0.58, m(ST3, pos=(0.02, 0.02, -0.15), hips=(-16, 1, 3)), ), (0.7, ST0)], loop=True)
+# drink (Hunter.DRINK_TIME 1.1 s): the left fist brings the flask up under his chin, his head tips back, a long swallow, the flask lowers with a grunt of satisfaction
+DR1 = m(LOOSE, hl=lhand(0.0, 0.2, -0.05), hips=(-2, -2.5, -4), head=(-3, 5, 7), fing_l=1.0, thumb_l=1.0)
+DR2 = m(DR1, hl=lhand(-0.04, 0.16, 0.1), hips=(2, -2, -4), head=(-24, 4, 6), jaw=0.3, lip=0.4)
+C.bake("drink", 1.1, [(0, LOOSE), (0.22, m(DR1, e="out")), (0.36, DR2), (0.8, m(DR2, head=(-28, 4, 6))), (0.9, m(DR1, head=(4, 5, 7), jaw=0.5, lip=0.8), ), (1.1, LOOSE)])
 # death: buckles to the knees, falls on his side; ends lying still (a one-shot: DeathFX keeps the last frame)
 SIDE = m(DOWNED, pos=(0.62, 0.0, 0.2), rot=(0, -84, 0), hips=(-6, 0, 0), head=(6, 10, 0), hr=hand(0.3, 0.3, -0.5), hl=lhand(0.3, -0.1, -0.5), fr=(0.66, -0.12, 0.3), fl=(0.56, 0.18, 0.13), fra=0.0, fla=0.0, fing_r=0.3, fing_l=0.3, jaw=0.2, lip=0.0)
 C.bake("death", 1.6, [(0, LOOSE), (0.16, m(LOOSE, pos=(0, -0.05, -0.1), hips=(14, 0, 4), head=(-20, 0, 0), jaw=0.6, lip=-1.0, fing_r=0.1, fing_l=0.1, e="snap")),

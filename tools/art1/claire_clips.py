@@ -276,8 +276,21 @@ def clips():
           "FL": (-0.16, 0.3, A_Z - 0.05), "FR": (0.03, 0.34, A_Z - 0.05), "FLy": 1.2, "FRy": 1.0, "FLp": -0.3, "FRp": -0.3, "brow": -0.9, "lid": 0.6, "smile": -0.3, "skirt": 0.0}
     d2 = dict(dn, tor=(0.27, 0.05, 0.12), pel=(-0.03, -0.1, -0.615), hed=(0.3, 0, 0.1))
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, d2), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.1, 0.05, 0.05), hed=(-0.1, 0, 0), lid=0.3, brow=-0.5, G=(0.33, 0.3, 0.72))),
-                                 (0.95, {"pel": (0, -0.05, -0.34), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.26, 0, 0), "FL": (-0.1, -0.18, A_Z), "FR": (0.12, 0.26, A_Z), "FLy": 0.3, "FRy": 0, "FLp": 0.0, "FRp": 0.0, "G": (0.3, 0.36, 0.86), "LP": (-0.3, 0.2, 0.84), "lid": 0.25, "smile": 0.2}), (1.6, END)]))
+    # revive: down on one knee beside a friend, the spear planted upright as a brace, her free hand pressing their chest in two soft pushes, her head bowed close
+    kn = {"pel": (0.0, 0.06, -0.36), "prt": (0.22, 0.08, 0.0), "tor": (0.26, 0.04, 0.04), "hed": (0.2, 0.0, 0.0), "G": (0.3, 0.2, 0.72), "BE": spr(2, 84, (-0.35, -0.9, -0.1)), "LP": (-0.2, 0.3, 0.66), "LH": (-0.9, 0, 0.0), "fing": 0.4,
+          "FL": (-0.12, 0.2, A_Z), "FR": (0.1, -0.2, A_Z + 0.02), "FLy": 0.3, "FRy": -0.3, "FRp": 1.1, "brow": -0.3, "lid": 0.1, "smile": 0.1}
+    pr = dict(kn, pel=(0.0, 0.07, -0.39), tor=(0.32, 0.04, 0.04), hed=(0.26, 0.0, 0.0), LP=(-0.2, 0.3, 0.57))
+    out.append(C("revive", 1.2, [(0.0, kn), (0.2, pr, "in"), (0.4, kn, "out"), (0.6, kn), (0.8, pr, "in"), (1.0, kn, "out"), (1.2, kn)], loop=True))
+    # stomp (one cycle = Life.R stomp_cycle 0.7 s, the foot lands at 0.7 of it): not a tantrum; the spear is planted and leaned on, the skate comes up behind her, hangs, and comes down firmly through the ice
+    sp0 = dict(READY, pel=(0.0, 0.0, -0.06), prt=(0.06, 0.1, -0.02), tor=(0.06, -0.06, 0.03), hed=(0.05, 0.06, 0.0), G=(0.3, 0.2, 0.96), LP=(-0.3, 0.12, 0.96), brow=-0.7, smile=0.0, lid=0.04)
+    sp1 = dict(sp0, pel=(-0.02, -0.01, -0.07), tor=(-0.06, -0.06, 0.03), FR=(0.095, 0.08, A_Z + 0.1), FRp=-0.4, G=(0.32, 0.18, 1.04), LP=(-0.32, 0.12, 1.04))
+    sp2 = dict(sp1, pel=(-0.02, 0.0, -0.02), FR=(0.1, 0.18, A_Z + 0.22), FRp=-0.5, hed=(-0.08, 0.06, 0.0), G=(0.32, 0.16, 1.1), LP=(-0.32, 0.12, 1.1))
+    sp3 = dict(sp0, pel=(0.0, 0.03, -0.12), prt=(0.22, 0.1, -0.02), tor=(0.22, -0.06, 0.03), hed=(0.2, 0.06, 0.0), FR=(0.1, 0.12, A_Z), FRp=0.0, G=(0.3, 0.24, 0.84), LP=(-0.3, 0.2, 0.84), brow=-0.9, skirt=0.2)
+    out.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(0.0, 0.02, -0.08), tor=(0.15, -0.06, 0.03)), "out"), (0.7, sp0)], loop=True))
+    # drink (Hunter.DRINK_TIME 1.1 s): the free hand lifts the flask while the spear stays in the other; a small tilt of the head, eyes closed, one slow swallow, a quiet breath out
+    dr1 = dict(END, LP=(-0.14, 0.16, 1.24), LH=(-1.5, 0, 0.0), fing=0.9, hed=(-0.02, 0.06, 0.0), tor=(0.0, -0.06, 0.03))
+    dr2 = dict(dr1, hed=(-0.3, 0.06, 0.0), tor=(-0.08, -0.06, 0.03), lid=0.95, brow=-0.1, smile=0.3, LP=(-0.13, 0.15, 1.3))
+    out.append(C("drink", 1.1, [(0.0, END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-0.34, 0.06, 0.0))), (0.9, dict(dr1, hed=(0.08, 0.06, 0.0), lid=0.3, smile=0.6), "out"), (1.1, END)]))
     # death: the spear slips, she folds softly to her knees and over onto her side, hands drawn in
     dd0 = {"pel": (0, -0.02, -0.08), "prt": (-0.08, 0, 0), "tor": (-0.16, 0, 0), "hed": (-0.1, 0.1, 0), "lid": 0.4, "brow": -1.0, "smile": -0.4, "LP": (-0.16, 0.18, 1.24), "LH": (-0.8, 0, 0.3), "G": (0.3, 0.2, 0.9)}
     dd1 = {"pel": (0, 0.0, -0.46), "prt": (0.25, 0, 0.12), "tor": (0.3, 0, 0.12), "hed": (0.3, 0.1, 0.1), "G": (0.36, 0.34, 0.42), "BE": spr(30, 30, (-0.3, -0.9, 0.0)), "LP": (-0.2, 0.18, 0.74), "FL": (-0.12, -0.2, A_Z - 0.04), "FR": (0.12, -0.14, A_Z - 0.04), "FLp": 0.8, "FRp": 0.8, "lid": 0.7, "skirt": 0.2}

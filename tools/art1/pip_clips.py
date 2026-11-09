@@ -322,7 +322,22 @@ def clips():
     d2 = dict(dn)
     d2.update({"tor": (0.34, 0, 0.05), "pel": (0.0, -0.05, -0.28), "hed": (0.34, 0.2, 0.1), "G": (0.06, 0.30, 0.59)})
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, d2), (2.4, dn)]))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, hed=(-0.1, 0, 0), lid=0.05, brow=-0.5, ear=0.5)), (0.95, {"pel": (0.0, -0.01, -0.12), "prt": (0.26, 0, 0), "tor": (0.2, 0, 0), "hed": (-0.26, 0, 0), "G": (0.2, 0.26, 0.78), "LP": (-0.2, 0.2, 0.62), "FL": (-0.13, 0.08, A), "FR": (0.13, -0.08, A), "FLy": 0.16, "FRy": -0.22, "lid": 0.0, "ear": 0.3, "brow": 0.4}), (1.6, END)]))
+    # revive: down on one knee beside a friend, the lantern held low over them, her free paw pressing their chest in two small pushes; ears forward, brave
+    kn = {"pel": (0.0, 0.05, -0.30), "prt": (0.24, 0, 0), "tor": (0.26, 0, 0), "hed": (0.18, 0.1, 0.0), "G": (SH + 0.1, 0.30, 0.55), "BE": be((0.1, 0.2, -1.0)), "LP": (-0.12, 0.30, 0.56), "Lh": (-1.0, 0.7, 0.0),
+          "FL": (-0.14, 0.17, A), "FR": (0.12, -0.20, A + 0.02), "FLy": 0.2, "FRy": -0.3, "FRp": 1.2, "brow": 0.3, "lid": -0.08, "ear": 0.2, "fing": 0.8, "skirt": 0.2, "wing": -0.1}
+    pr = dict(kn, pel=(0.0, 0.06, -0.33), tor=(0.32, 0, 0), hed=(0.24, 0.1, 0.0), LP=(-0.12, 0.30, 0.47), G=(SH + 0.1, 0.30, 0.52), ear=0.35)
+    out.append(C("revive", 1.2, [(0.0, kn), (0.2, pr, "in"), (0.4, kn, "out"), (0.6, kn), (0.8, pr, "in"), (1.0, kn, "out"), (1.2, kn)], loop=True))
+    # stomp (one cycle = Life.R stomp_cycle 0.7 s, the foot lands at 0.7 of it): weight over the left foot, the right comes up behind a lean, hangs, and drops with her whole weight
+    sp0 = {"pel": (-0.03, 0.0, -0.05), "prt": (0.1, 0, 0), "tor": (0.12, 0, 0), "hed": (0.05, 0, 0), "G": (SH + 0.14, 0.2, 0.84), "LP": (-0.3, 0.2, 0.84), "Lh": (-0.4, -0.2, 0.0),
+           "FL": (-0.12, 0.03, A), "FR": (0.13, -0.03, A), "FLy": 0.16, "FRy": -0.22, "brow": -0.9, "lid": -0.1, "jaw": 0.2, "ear": 0.5, "fing": 0.8, "wing": 0.1, "wfl": 0.12, "wfq": 3.0}
+    sp1 = dict(sp0, pel=(-0.05, -0.01, -0.07), prt=(-0.08, 0, 0), tor=(-0.1, 0, 0), FR=(0.13, -0.02, A + 0.1), FRp=-0.4, G=(SH + 0.2, 0.16, 0.96), LP=(-0.4, 0.14, 0.98))
+    sp2 = dict(sp1, pel=(-0.05, 0.0, -0.02), FR=(0.14, 0.12, A + 0.24), FRp=-0.5, hed=(-0.12, 0, 0), G=(SH + 0.22, 0.14, 1.04), LP=(-0.42, 0.12, 1.06), jaw=0.5)
+    sp3 = dict(sp0, pel=(-0.025, 0.02, -0.12), prt=(0.3, 0, 0), tor=(0.3, 0, 0), hed=(0.22, 0, 0), FR=(0.14, 0.12, A), FRp=0.0, G=(SH + 0.16, 0.24, 0.7), LP=(-0.26, 0.24, 0.72), jaw=0.7, ear=0.9, skirt=0.3, wfl=0.2)
+    out.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(-0.03, 0.02, -0.08), prt=(0.2, 0, 0), tor=(0.2, 0, 0)), "out"), (0.7, sp0)], loop=True))
+    # drink (Hunter.DRINK_TIME 1.1 s): the left paw brings the flask up, eyes shut, head back for a long swallow, a satisfied shudder of the ears, and the paw comes down
+    dr1 = {"LP": (-0.06, 0.20, 1.12), "Lh": (-1.6, 0.6, 0.0), "tor": (0.0, 0, 0), "hed": (-0.04, 0.0, 0.0), "fing": 0.9, "ear": 0.1, "brow": 0.1}
+    dr2 = dict(dr1, hed=(-0.36, 0.0, 0.0), tor=(-0.1, 0, 0), lid=0.95, jaw=0.3, ear=0.0, brow=0.4, LP=(-0.05, 0.19, 1.16), pel=(0.0, 0.0, 0.0), prt=(0.0, 0, 0))
+    out.append(C("drink", 1.1, [(0.0, END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-0.4, 0.0, 0.0), LP=(-0.05, 0.19, 1.18))), (0.9, dict(dr1, hed=(0.1, 0.0, 0.0), lid=0.3, ear=0.5, jaw=0.5, brow=0.5), "out"), (1.1, END)]))
     # death: the lantern arm drops last: she sinks, curls over it and goes still
     dd = {"pel": (0.0, -0.04, -0.27), "prt": (0.72, 0.1, 0.2), "tor": (0.62, 0.1, 0.2), "hed": (0.3, 0.4, 0.2), "G": (0.16, 0.44, 0.12), "BE": be((0.3, 0.3, -0.9)), "LP": (-0.20, 0.50, 0.14), "Lh": (-1.4, 0, 0), "FL": (-0.16, -0.26, 0.11), "FR": (0.18, -0.30, 0.11), "FLp": 1.3, "FRp": 1.3, "FLy": 0.0, "FRy": 0.0, "lid": 1.0, "brow": -0.5, "ear": 1.0, "fing": 0.1, "jaw": 0.15, "skirt": 0.4, "wing": -0.4, "wb": 0.7, "tailw": 1.0}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.07, -0.05), "prt": (-0.22, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.34, 0, 0), "lid": -0.1, "brow": -1, "jaw": 0.8, "ear": 0.8, "G": (SH + 0.2, 0.14, 0.86)}, "out"),
