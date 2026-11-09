@@ -6,7 +6,8 @@ extends RefCounted
 ## loadout). Each must load the same model file (WardenGlb.path, and the .glb really dressed, not the
 ## procedural fallback), the same kit script (ArchKit), the same node tree (auto names stripped, hidden flags
 ## kept) and the same skeleton bone scales (a bone scaled to nothing hides what is skinned to it: the sun on
-## pauldron.L). Run with no save (the title screen before a profile) and with a fresh one.
+## pauldron.L). Run with no save (the title screen before a profile) and with a fresh one, and again after the
+## title screen has built its own Hunters.
 
 const BASE := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 var fails := 0
@@ -67,6 +68,7 @@ func _cmp(a: String, what: String, ref: Dictionary, got: Dictionary) -> void:
 func run(main: Node) -> void:
 	Save.no_write = true
 	var ids: Array = Arch.ids()
+	var refs := {}
 	for save_mode in ["none", "fresh"]:
 		if save_mode == "fresh":
 			Save.reset()
@@ -74,6 +76,7 @@ func run(main: Node) -> void:
 			var mo: Dictionary = BASE.duplicate()
 			mo.merge({"arch": a, "cls": Arch.weight(a), "weapon": Arch.signature(a)}, true)
 			var ref: Dictionary = await _build(main, mo)
+			refs[a] = ref
 			if not ref["glb"] and WardenGlb.has_model(a):
 				fails += 1
 				print("FAIL hunter_parity %s: a real match draws the procedural model though %s exists"
@@ -83,6 +86,25 @@ func run(main: Node) -> void:
 			var from: String = ids[0] if a != ids[0] else ids[1]
 			var swapped: Dictionary = await _build(main, Match.arena_opts(from), a)
 			_cmp(a, "training swap from %s (%s save)" % [from, save_mode], ref, swapped)
+	# The owner's route: the title screen first (it builds its own squad and a glider with Models.hunter, which
+	# fill the session's model caches), then the Training Area. Every Hunter must still match the match built
+	# before the title ever showed. Twice: as a Warden of the default kit, then leading as Meeko.
+	for lead in ["", "tender"]:
+		if lead != "":
+			Save.d["arch"] = lead
+			Save.d["cls"] = Arch.weight(lead)
+		var title: Node = load("res://scripts/ui/title.gd").new()
+		main.add_child(title)
+		for i in 30:
+			await main.get_tree().process_frame
+		title.queue_free()
+		await main.get_tree().process_frame
+		for a in ids:
+			var from: String = Arch.of_save()
+			if a == from:
+				from = ids[0] if a != ids[0] else ids[1]
+			var after: Dictionary = await _build(main, Match.arena_opts(from), a)
+			_cmp(a, "training after the title (lead %s)" % (lead if lead != "" else "default"), refs[a], after)
 	if fails == 0:
 		print("OK hunter_parity: %d Hunters match the real match in the Training Area" % ids.size())
 	else:
