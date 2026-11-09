@@ -2,12 +2,14 @@ extends RefCounted
 ## The glider's dive pose (GlideDivePose), run by --move-feel-check for each of the 12 Hunters on its own model: it
 ## is up within 0.1 s of the plunge starting and differs from the glide pose the clips show (the hand sits well off
 ## where the glide holds it), it hands back to the glide after the pull-out, a touchdown drops it at once, and
-## heavier bodies pull out with less swing than light ones. Never touches the save.
+## heavier bodies pull out with less swing than light ones. The hands stay on the forearms through the handover from
+## the clips to the rig (a clip's hand once stuck to the rig and floated off the arm). Never touches the save.
 
 const DT := 1.0 / 60.0
 const START_S := 0.1          # s: the pose must be up this soon after the plunge starts
 const HAND_MOVED := 0.15      # m: the hand's move against the glide, in the hip's own frame
 const RECOVER_S := 1.0        # s: the pull-out is over by this long after release
+const FOREARM_SLACK := 1.25   # the elbow-to-wrist span may grow by this factor at most against the glide's
 
 var failures := 0
 var _lines: Array = []
@@ -43,6 +45,7 @@ func _hunter(holder: Node3D, id: String) -> float:
 	sync.set_process(false)
 	_run(anim, sync, s, 40)
 	var glide_hand := _hand(sync)
+	var glide_arm := _forearm(sync)
 	s["gliding"] = false
 	s["diving"] = true
 	s["plunge"] = true
@@ -53,6 +56,9 @@ func _hunter(holder: Node3D, id: String) -> float:
 	var moved := (_hand(sync) - glide_hand).length()
 	_ok(moved >= HAND_MOVED, "%s hand %.2f m off the glide pose" % [id, moved])
 	_run(anim, sync, s, 20)
+	var arm := _forearm(sync)
+	_ok(arm <= glide_arm * FOREARM_SLACK,
+			"%s hands on the forearms in the dive (%.2f m, glide %.2f)" % [id, arm, glide_arm])
 	s["gliding"] = true
 	s["diving"] = false
 	s["plunge"] = false
@@ -85,3 +91,12 @@ func _hand(sync: WardenGlb.Sync) -> Vector3:
 	var hips := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hips"))
 	var hand := sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand.L"))
 	return hips.basis.inverse() * (hand.origin - hips.origin)
+
+## The longer elbow-to-wrist span of the two arms (m, skeleton space).
+func _forearm(sync: WardenGlb.Sync) -> float:
+	var sk := sync.skel
+	var most := 0.0
+	for sd in ["L", "R"]:
+		var el := sk.get_bone_global_pose(WardenSkeleton.find(sk, "forearm." + sd)).origin
+		most = maxf(most, el.distance_to(sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + sd)).origin))
+	return most
