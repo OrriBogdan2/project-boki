@@ -46469,5 +46469,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_effigoon_p88_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_effigoon_p88",
+    "name": "Effigoon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_effigoon_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaivyx_p88",
+    "name": "Glaivyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glaivyx_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_flarmink_p88",
+    "name": "Flarmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_flarmink_p88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaivyx_p88",
+    "name": "Glaivyx (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glaivyx_p88_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_effigoon_p88",
+    "name": "Effigoon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_effigoon_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaivyx_p88",
+    "name": "Glaivyx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glaivyx_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_p88",
+    "name": "Cisternmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespox_p88",
+    "name": "Vespox (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_vespox_p88_3.jpg",
+    "ok": true
   }
 ]
