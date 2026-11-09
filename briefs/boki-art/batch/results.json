@@ -14787,5 +14787,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_w28_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_mossgrade_pe_w28",
+    "name": "Mossgrade (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_pe_w28",
+    "name": "Oarlet (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_pe_w28",
+    "name": "Oarlet (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w28",
+    "name": "Prowyak (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w28",
+    "name": "Prowyak (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w28",
+    "name": "Prowyak (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe_w28",
+    "name": "Ringrove (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe_w28",
+    "name": "Ringrove (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w28_3.jpg",
+    "ok": true
   }
 ]
