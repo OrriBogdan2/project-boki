@@ -1,7 +1,7 @@
 {
 	"doc": "Neve's hand-keyed clips (art/wardens/claire/claire.glb) and which game state plays which (scripts/heroes/warden_clips.gd). She skates everywhere: walk and run are her strokes, tm_skate is Rink Run.",
 	"skinned_weapon": true,
-	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R"},
+	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "x_breath": "hips"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
