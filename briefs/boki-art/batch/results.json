@@ -26813,5 +26813,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_glazolm_w32_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_grammite_n_w32",
+    "name": "Grammite (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_grammite_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_n_w32",
+    "name": "Grammite (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grammite_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_n_w32",
+    "name": "Grammite (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_grammite_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_n_w32",
+    "name": "Hydrangor (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_n_w32",
+    "name": "Hydrangor (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper_w32",
+    "name": "Loafhopper (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_n_w32",
+    "name": "Hydrangor (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_loafhopper_w32",
+    "name": "Loafhopper (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_loafhopper_w32_4.jpg",
+    "ok": true
   }
 ]
