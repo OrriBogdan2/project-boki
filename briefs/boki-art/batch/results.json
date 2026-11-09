@@ -47666,5 +47666,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_lodestick_e2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_prismink_r93",
+    "name": "Prismink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prismink_r93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_p93",
+    "name": "Glassolotl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_p93_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_p93",
+    "name": "Glassolotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_p93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_r93",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_r93_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cisternmander_r93",
+    "name": "Cisternmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_cisternmander_r93_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cisternmander_r93",
+    "name": "Cisternmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_cisternmander_r93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glassolotl_p93",
+    "name": "Glassolotl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glassolotl_p93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_flarmink_r93",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_flarmink_r93_2.jpg",
+    "ok": true
   }
 ]
