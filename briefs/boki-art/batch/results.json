@@ -5099,5 +5099,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_latchling_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_parasolth",
+    "name": "Parasolth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mossgrade",
+    "name": "Mossgrade (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mossgrade_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak",
+    "name": "Prowyak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin",
+    "name": "Selenfin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zipling",
+    "name": "Zipling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenfin",
+    "name": "Selenfin (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_selenfin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock",
+    "name": "Tinbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew",
+    "name": "Rimeshrew (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk",
+    "name": "Tidalisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zipling",
+    "name": "Zipling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_zipling_1.jpg",
+    "ok": true
   }
 ]
