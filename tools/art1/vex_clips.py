@@ -12,6 +12,7 @@ sys.path.insert(0, HERE)
 from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, frame_of
 import vex_cannon as VC, vex_arm as VA
 import crouchkit
+import actionkit
 
 A_Z = 0.16
 SP = 0.0
@@ -154,9 +155,22 @@ def crouch_set():
     return crouchkit.quick(C, READY, KNEEL, PROWL, hands=("LP",), scan=0.26, dip_t=0.2)
 
 
+# ---- stomp, drink, revive (item 145): the cannon stays low on its arm; the left, brass hand does the rest
+ACT = {
+    "stomp": {"top": {"LP": (-0.42, 0.04, 1.14), "BE": aim(-8, -50)}, "hit": {"LP": (-0.3, 0.1, 0.84), "BE": aim(-6, -42)}},
+    "drink": {"sip": {"LQ": (-1.3, 0.0, 0.0), "BE": aim(-6, -62)}},
+    "revive": {"kneel": {"LP": (-0.12, 0.5, 0.4), "LQ": (0.9, 0.0, 0.0), "BE": aim(-34, -34), "UA": (-30, -50)}},
+}
+
+
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("LP",), (-0.045, 0.17, 1.64), ACT)
+
+
 def clips():
     out = [FnClip("idle", 3.2, idle), FnClip("stance", 3.0, stance)]
     out += crouch_set()
+    out += action_set()
     for nm, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(named(gait(0.45, h, 0.86), "walk_" + nm))
         out.append(named(gait(1.0, h, 0.58), "run_" + nm))
@@ -217,7 +231,6 @@ def clips():
     dn = {"pel": (0, -0.08, -0.72), "prt": (-0.32, 0.3, 0.42), "tor": (0.2, 0, 0.0), "hed": (0.24, 0, 0.1), "FL": (-0.28, 0.42, A_Z - 0.03), "FR": (0.1, 0.5, A_Z - 0.03), "FLy": 0.6, "FRy": 0.2, "FLp": 0.5, "FRp": 0.4,
           "BE": aim(-40, -6), "UA": (-40, -30), "LP": (-0.34, -0.1, 0.22), "LQ": (0, 0, 0), "lid": 0.65, "brow": -0.8, "fing": 0.0}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.3, 0, 0), hed=(0.38, 0, 0.1))), (2.4, dn)], loop=True))
-    out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.32, 0, 0.1), hed=(-0.1, 0, 0), lid=0.3, brow=0.8)), (0.95, dict(READY, pel=(0, -0.02, -0.26), prt=(0.32, 0, 0), tor=(0.3, 0, 0), hed=(-0.3, 0, 0), FR=(0.16, -0.28, A_Z), LP=(-0.3, 0.1, 0.62), BE=aim(-16, -42))), (1.6, READY)]))
     dead = {"pel": (0, -0.1, -0.86), "prt": (-1.35, 0.1, 0.1), "tor": (0.1, 0.1, -0.1), "hed": (-0.1, 0.4, 0.3), "FL": (-0.2, 0.6, A_Z - 0.04), "FR": (0.16, 0.68, A_Z - 0.04), "FLy": 0.4, "FRy": -0.4, "FLp": 0.6, "FRp": 0.6,
             "BE": aim(-58, 4), "UA": (-80, -2), "LP": (-0.42, -0.2, 0.2), "LQ": (0, 0, 0), "lid": 1.0, "brow": -0.3, "fing": 0.0}
     out.append(C("death", 1.5, [(0.0, READY), (0.16, dict(READY, pel=(0, -0.08, -0.08), tor=(-0.3, 0, 0.1), hed=(-0.4, 0, 0), lid=0.2, brow=-1, BE=aim(-20, -30)), "out"),

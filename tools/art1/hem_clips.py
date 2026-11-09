@@ -15,6 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import hem_pieces as H
+import actionkit
 import crouchkit
 from posekit import Clip, FnClip, Solver, ang_dir as D, frame_of, two_bone
 
@@ -230,9 +231,19 @@ def crouch_set():
     return crouchkit.quick(C, READY, STALK, STILL, hands=("G", "RF"), scan=0.22)
 
 
+ACT = {"stomp": {"set": {"G": (-0.3, 0.2, 0.78), "RF": (0.3, 0.06, 0.92)}, "top": {"G": (-0.38, 0.12, 0.98), "RF": (0.46, 0.02, 1.0)}, "hit": {"G": (-0.3, 0.2, 0.72), "RF": (0.34, 0.1, 0.9)}},
+       "drink": {"hand": "G", "sip": {"BA": n3((0.0, 0.25, -1.0)), "BS": n3((0.0, -1.0, 0.0))}},
+       "revive": {"kneel": {"G": (-0.14, 0.46, 0.36), "RF": (0.16, 0.46, 0.34), "BA": n3((0.05, 0.95, 0.1)), "BS": n3((0.0, -0.1, 1.0)), "RD": n3((0, 0.2, -1)), "RP": (-1, 0, 0), "fing": 0.3}}}
+
+
+def action_set():
+    return actionkit.clips(C, READY, A_Z, ("G", "RF"), (-0.06, 0.17, 1.55), ACT)
+
+
 def clips():
     out = [F("idle", 3.6, idle), F("stance", 4.6, stance)]
     out += crouch_set()
+    out += action_set()
     wk, rn = 1.04, 0.66
     for n, h in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
         out.append(F("walk_" + n, wk, gait(0.45, h)))
@@ -305,7 +316,6 @@ def clips():
     DN = {"pel": (0.0, -0.1, -0.44), "prt": (0.45, 0.0, -0.1), "tor": (0.3, 0.1, 0.08), "hed": (-0.3, -0.08, 0.05), "FL": (-0.17, 0.18, A_Z), "FR": (0.14, -0.34, 0.12), "FRp": 1.15, "FLy": 0.2, "FRy": -0.1,
           "G": (-0.27, 0.32, 0.45), "BA": n3((0.05, 0.1, 1.0)), "BS": n3((0.0, -1.0, 0.1)), "RF": (0.17, 0.05, 0.5), "RD": n3((0, 0.2, -1)), "RP": (-1, 0, 0), "Rpole": (0.6, -0.6, -0.2), "Lpole": (-1, -0.2, -0.2), "brow": -0.6, "lid": 0.5, "fing": 0.3}
     out.append(C("downed", 2.4, [(0.0, DN), (1.2, dict(DN, tor=(0.34, 0.1, 0.08), pel=(0.0, -0.1, -0.455), hed=(-0.26, -0.12, 0.05))), (2.4, DN)], True))
-    out.append(C("revive", 1.3, [(0.0, DN), (0.5, dict(DN, tor=(0.1, 0.1, 0.05), hed=(-0.15, 0, 0), pel=(0, -0.08, -0.34))), (1.0, {"pel": (0, -0.02, -0.11), "prt": (0.15, 0, 0), "tor": (0.2, 0.1, 0.05), "FR": (0.1, -0.1, A_Z), "FRp": 0.3, "G": (-0.25, 0.15, 0.72), "BA": READY["BA"], "BS": READY["BS"], "brow": 0.3, "lid": 0.15}), (1.3, dict(READY))]))
     DD = {"pel": (0.06, -0.12, -0.70), "prt": (1.45, 0.3, 0.35), "tor": (0.1, 0.2, 0.25), "hed": (0.15, 0.6, 0.15), "FL": (-0.1, -0.5, 0.12), "FR": (0.22, -0.56, 0.1), "FLp": 1.4, "FRp": 1.4,
           "G": (-0.42, 0.42, 0.1), "BA": n3((0.05, 0.98, 0.12)), "BS": n3((0.0, -0.12, 0.98)), "RF": (0.3, 0.48, 0.1), "RD": n3((0.2, 0.9, -0.1)), "RP": (0, 0, -1), "Rpole": (0.9, 0, 0.3), "Lpole": (-0.9, 0, 0.3), "brow": -0.5, "lid": 1.0, "fing": 0.1}
     out.append(C("death", 1.5, [(0.0, dict(READY)), (0.16, {"tor": (-0.3, 0, 0), "hed": (-0.5, 0, 0), "lid": 0.2, "brow": -1.0, "RF": (0.2, 0.1, 1.0)}, "out"),

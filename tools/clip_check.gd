@@ -207,6 +207,14 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if pre != "" and String(km).begins_with(pre) and not moves.has(km):
 			unmapped.append(km)
 	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
+	# the shared actions: a stomp clip is the game's cycle with the slam at Life's hit beat, a drink clip is the drink
+	var st: Dictionary = dd.get("states", {})
+	for k in ["stomp", "drink"]:
+		if not st.has(k):
+			continue
+		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else Hunter.DRINK_TIME
+		var dur := clips.lib.get_animation(String(st[k])).length
+		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
 
 ## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand.
 func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:

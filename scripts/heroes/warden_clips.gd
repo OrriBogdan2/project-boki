@@ -4,7 +4,7 @@ extends RefCounted
 ## so the moves flow. Which state plays what is data, content/rules/warden_anim/<art>.json; no file: it
 ## stays on HunterAnim. HunterAnim still runs and stays the source of truth for the state (it hands its state over
 ## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
-## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
+## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, bases) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
@@ -321,6 +321,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
+	for k in ["stomp", "drink"]:
+		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and st.has(k):
+			# the phase is the clip's time (the slam stays on the game's beat); a drink is the upper body only
+			var dur := lib.get_animation(String(st[k])).length
+			return {"clip": st[k], "t": ph * dur, "upper": k == "drink"}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
