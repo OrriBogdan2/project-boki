@@ -1,7 +1,8 @@
 extends RefCounted
 ## --edge-read-check: what the terrain shader's edge cues rely on (shaders/terrain.gdshader, void_at). The
-## height texture is 0 over the abyss and above 0 over every ground tile (so a cold abyss rim never lands on a
-## terrace lip), and the Hollow Crown has both kinds of edge: ground beside the abyss and ground above lower ground.
+## height texture's b marks the abyss (1) and ground touching it (0.5) and nothing else, so a cold abyss rim never
+## lands on a terrace lip and an abyss edge never reads warm on raised ground; the Hollow Crown has both kinds of
+## edge: ground beside the abyss and ground above lower ground.
 
 const MIN_EDGES := 20     # tiles of each kind a map worth the cues has
 const TerrainMesh := preload("res://scripts/match/terrain_mesh.gd")
@@ -20,6 +21,7 @@ func run(main: Node) -> void:
 	tm._fill_grid()
 	var img: Image = tm.height_texture().get_image()
 	var wrong := 0
+	var wrong_b := 0
 	var abyss_edges := 0
 	var lips := 0
 	for z in w.h:
@@ -27,6 +29,8 @@ func run(main: Node) -> void:
 			var r: float = img.get_pixel(x, z).r
 			var is_void: bool = w.kind[w.idx(x, z)] == World.T_VOID
 			if (r == 0.0) != is_void and not w.bridge.has(w.idx(x, z)): wrong += 1
+			var want_b := 1.0 if r == 0.0 else (0.5 if _touches(img, x, z) else 0.0)
+			if absf(img.get_pixel(x, z).b - want_b) > 0.01: wrong_b += 1
 			if is_void or w.kind[w.idx(x, z)] != World.T_GROUND: continue
 			for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
 				if not w.inb(x + d.x, z + d.y): continue
@@ -34,7 +38,18 @@ func run(main: Node) -> void:
 				if w.kind[j] == World.T_VOID: abyss_edges += 1
 				elif w.kind[j] == World.T_GROUND and w.level[w.idx(x, z)] > w.level[j]: lips += 1
 	ok(wrong == 0, "height texture is 0 exactly over the abyss (%d tiles disagree)" % wrong)
+	ok(wrong_b == 0, "abyss mark (b) is 1 on the abyss, 0.5 on ground touching it, 0 elsewhere (%d tiles disagree)" % wrong_b)
 	ok(abyss_edges >= MIN_EDGES, "%d ground tiles beside the abyss" % abyss_edges)
 	ok(lips >= MIN_EDGES, "%d terrace lip tiles over lower ground" % lips)
 	print("EDGEREAD_CHECK %s" % ("FAILED %d" % bad if bad > 0 else "PASSED"))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Any of the 8 tiles around (x, z) is abyss (off the map counts as abyss).
+func _touches(img: Image, x: int, z: int) -> bool:
+	for dz in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			var px: int = x + dx
+			var pz: int = z + dz
+			if px < 0 or pz < 0 or px >= img.get_width() or pz >= img.get_height(): return true
+			if img.get_pixel(px, pz).r == 0.0: return true
+	return false

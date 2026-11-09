@@ -137,15 +137,23 @@ func _mesh(vv: PackedVector3Array, nn: PackedVector3Array, cc: PackedColorArray,
 
 ## A small texture of tile heights (R) and blockers (G), for the shader's soft contact shadows.
 func height_texture() -> ImageTexture:
-	var img := Image.create(w, h, false, Image.FORMAT_RG8)
+	var img := Image.create(w, h, false, Image.FORMAT_RGB8)
 	for z in h:
 		for x in w:
 			var lv := v(x, z)
+			# b: 1 over the abyss, 0.5 on ground touching it (8 around), 0 elsewhere. The terrain shader tells an
+			# abyss edge from a terrace lip by it (docs/EDGE_READ.md); the level in r can't, once filtered.
+			var vb := 1.0 if lv < 0 else 0.0
+			if lv >= 0:
+				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)]:
+					if v(x + d.x, z + d.y) < 0:   # PAD keeps the map border in range (void)
+						vb = 0.5
+						break
 			# rocks, trees and walls darken the ground at their feet (buildings and other set pieces
 			# marked no_deco bring their own shadows)
 			var i: int = W.idx(x, z)
 			var blk := 1.0 if lv >= 0 and W.kind[i] == W.T_BLOCK and not W.no_deco.has(i) else 0.0
-			img.set_pixel(x, z, Color(float(lv + 1) / 32.0, blk, 0))
+			img.set_pixel(x, z, Color(float(lv + 1) / 32.0, blk, vb))
 	return ImageTexture.create_from_image(img)
 
 # ------------------------------------------------------------------ grid data
