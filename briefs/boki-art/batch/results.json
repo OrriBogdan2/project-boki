@@ -63857,5 +63857,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_furnacowary_f_n_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_furnacowary_f_n",
+    "name": "Furnacowary (female form concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_f_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_voltalon_f_n",
+    "name": "Voltalon (female form concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_voltalon_f_n_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_voltalon_f_n",
+    "name": "Voltalon (female form concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_voltalon_f_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_voltalon_f_n",
+    "name": "Voltalon (female form concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_voltalon_f_n_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_furnacowary_f_n",
+    "name": "Furnacowary (female form concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_furnacowary_f_n_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_voltalon_f_n",
+    "name": "Voltalon (female form concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_voltalon_f_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_eclipsowl_f_n",
+    "name": "Eclipsowl (female form concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_eclipsowl_f_n_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmurling_f_n",
+    "name": "Murmurling (female form concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_murmurling_f_n_2.jpg",
+    "ok": true
   }
 ]
