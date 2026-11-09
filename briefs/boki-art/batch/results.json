@@ -47470,5 +47470,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_spanglin_e1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_spanglin_e1",
+    "name": "Spanglin (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_spanglin_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_spanglin_e1",
+    "name": "Spanglin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_spanglin_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_e3",
+    "name": "Murmuron (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_murmuron_e3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_e3",
+    "name": "Murmuron (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_murmuron_e3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_e3",
+    "name": "Murmuron (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_murmuron_e3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_e3",
+    "name": "Murmuron (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_murmuron_e3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_spanglin_e3",
+    "name": "Spanglin (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_spanglin_e3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_murmuron_e2",
+    "name": "Murmuron (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_murmuron_e2_4.jpg",
+    "ok": true
   }
 ]
