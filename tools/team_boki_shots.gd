@@ -43,5 +43,6 @@ func _frames(n: int) -> void:
 func _shot(dir: String, file: String) -> void:
 	var sz := main.get_viewport().get_visible_rect().size
 	var img := main.get_viewport().get_texture().get_image()
-	img.get_region(Rect2i(0, 0, int(img.get_width() * 0.3), int(img.get_height() * 0.55))).save_png(dir.path_join(file + ".png"))
+	var crop := Rect2i(0, 0, int(img.get_width() * 0.3), int(img.get_height() * 0.55))
+	img.get_region(crop).save_png(dir.path_join(file + ".png"))
 	print("TEAMBOKISHOT %s window %s" % [file, str(sz)])
