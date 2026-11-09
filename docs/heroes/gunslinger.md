@@ -50,7 +50,7 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Shift cooldown (LOW) | (c) | 8.5s sits between the data (11.5) and the footage (7.5) |
 | Air dash barrel roll; LMB during it (LOW) | (b) | `fires_in_dash` reads the dash's LMB row (fire), so the rifle keeps going through the air roll too. The roll itself is ours (the source never shows an air dash). Assert `Vex audit: the rifle fires through her air roll` |
 | Dash -> E (LOW) | (c) | Kept "fire" (item 51); the footage's braced stand is the plain cast |
-| Passive, E numbers, X (-) | (c) | Match the data |
+| Passive, E numbers, R (-) | (c) | Match the data |
 | She/her in the shown text (LOW) | (b) | `gunslinger.json` fantasy ("her rifle"), this page and the kit comments |
 | Stale `dash_spent` tell (LOW) | (b) | "an ember afterimage and faint skid streaks" |
 
@@ -72,7 +72,7 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | LMB | reticle | two arcs "( )" bracket the hunter left and right while firing, about 0.7 bh [footage 0026, 0099] | none | two thin arcs 1.25m out either side, on your screen only, while the rifle fires |
 | RMB | launcher shot | the owner, item 112: fired from the cannon's top launcher, "the bigger explosion thing, not the minigun" (replaces the side toss and the footage's overhand) | cocked over the shoulder, an overhand whip, leaving 1.6m up | no throw: a recoil kick on the cannon, a muzzle puff and the grenade thunk |
 | E | recoil | a ~0.5 bh shove back on fire [footage] | the shove, and a screen shake on your own camera | the shove; no screen shake (owner rule 50) |
-| X | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
+| R | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
 | Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
 
 ## Per-slot table
@@ -83,8 +83,8 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | Shift Slipstep | tap / hold | where you move, not the aim | tap 4.8 m skid, hold 7 m slide that is owed 40% more cooldown (the kit-data pass: no refund for releasing early); you shoot through either; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
 | E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line follows the cursor until the shot, and the beam goes exactly along it | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
-| X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
-| R / T | | | the Boki Merge (the Boki system's key) | | | |
+| R Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
+| X | | | Fuse with your Boki (the Boki system's key) | | | |
 
 ## Combinations
 | Combination | What fires | Check |
@@ -142,8 +142,8 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
   pays the hit share (see the report's owner questions).
 
 ## Ultimate choice
-X is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
-reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
+R is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
+reference sheet's "Ultimate (on R)" section. It was never folded into another slot during the kit pass, so no
 slot changes. The Boki Merge is on its own key.
 
 ## Engine notes
@@ -151,7 +151,7 @@ slot changes. The Boki Merge is on its own key.
   `scripts/match/kmoves_vv.gd`; rifle model `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_vex.py`.
 - Rattled ("Dazed" on screen) is a `KitStatus` status carried by the existing Net event. No Net change.
 - Cinderfall: `scripts/arch/kits/gunslinger_ult.gd` (GunslingerUlt) on the shared ult base `scripts/arch/hero_ult.gd`
-  (HeroUlt); X reaches it through main's HunterKeys.ult_pressed and `GunslingerKit.cast_ult()`; numbers in
+  (HeroUlt); R reaches it through main's HunterKeys.ult_pressed and `GunslingerKit.cast_ult()`; numbers in
   `gunslinger.json` `x`.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
