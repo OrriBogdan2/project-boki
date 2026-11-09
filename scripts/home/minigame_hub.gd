@@ -4,8 +4,9 @@ extends RefCounted
 ## base has (the Dash, Stump Shove, Seek, Spark Volley), each with its one-line rule and best Boki.
 ## It needs no farm tutorial step and never touches tutorial state, so skipping the tutorial stays
 ## lossless. The list is content/rules/minigames.json; a game is listed only when Home holds it in
-## the member named there, so a base without a game simply doesn't show it (Home.get returns null
-## for a variable it lacks). Picking one closes the picker and calls the game's use().
+## the member named there and its fixture ("node") is placed, so a base without a game, or without
+## the Training post the fixtures stand by, simply doesn't show it (Home.get returns null for a
+## variable it lacks). Picking one closes the picker and calls the game's use().
 ## Results: Save.d["game_board"] = {game id: {"last": name, "wins": {name: count}}}; older saves
 ## start with {}, so there is no migration.
 
@@ -41,7 +42,7 @@ static func listed(home: Node) -> Array:
 	var out: Array = []
 	for g in rules()["games"]:
 		var obj: Variant = home.get(String(g["member"]))
-		if obj != null:
+		if obj != null and is_instance_valid(obj.get(String(g["node"]))):     # its post is placed
 			out.append({"id": g["id"], "name": g["name"], "rule": g["rule"], "game": obj})
 	return out
 
@@ -51,7 +52,7 @@ static func open(home) -> void:
 	var games := listed(home)
 	var sub := "Pick a game to play with your Boki."
 	if games.is_empty():
-		sub = "No garden games are built here yet."
+		sub = "No garden games here yet: they stand by the Training post."
 	UI.subtitle(v, sub)
 	for g in games:
 		v.add_child(_card(home, g))
