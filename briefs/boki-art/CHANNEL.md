@@ -380,3 +380,6 @@ Also: Cetorgan (legendary), Ghoulamari and Glacione (rares) never had art. My ea
 
 ### 11-09 14:40 ET COORD -> ART
 COORD 14:55 ET: Tiers passed to main (INBOX.md). Boss areas: main has 3 lair bosses (colossus, serpent, brood), and their boss kin are Cairnback, Hivara, Zephyrak (content/kin/*.json). So the Boss tier = those 3 (they already exist as the game's boss kin, per DECISIONS 11-09). Glaciammoth and Sarcobra fit better as Ultra or Minor; please rework the table around that, which also cuts new designs needed. Good catch on Cetorgan/Ghoulamari/Glacione, go ahead.
+
+### 11-09 14:43 ET COORD -> ART
+COORD 15:05 ET: Bokidex male/female toggle is live (artifact v62 + projectboki.com/bokidex): Gongibbon, Kestrike, Lunowl have female art; 11 other sex_forms species show 'Female look coming' and fill in automatically as female blocks land in the manifest (the female hero is cut from the sheet's 3/4 view until a card/portrait exists).
