@@ -9,7 +9,7 @@ extends RefCounted
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
-## - a goal line over each station with a tick when you have done it once (StationGoals, content/rules/station_goals.json; Esc: Hide goals)
+## - a goal line and a pass tick over each station (StationGoals, content/rules/station_goals.json; Esc: Hide goals)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
