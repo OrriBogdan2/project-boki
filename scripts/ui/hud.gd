@@ -563,6 +563,7 @@ func _draw_top(sz: Vector2) -> void:
 	if m.tut:
 		TutorialHud.draw(self, sz)
 		return
+	if m.guide: m.guide.draw(self, sz)
 	# top right, as in Supervive: squads left, your kills, your knocks, your gems
 	var teams := {}
 	for h in m.hunters:
