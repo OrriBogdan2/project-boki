@@ -19,6 +19,8 @@
 	"pile_doc": "how close two napping friends may lie, as a share of their normal personal space.",
 	"friend_at": 0.5,
 	"rival_at": -0.5,
+	"parent_weight": 0.5,
+	"parent_weight_doc": "added to a young (not yet Grown) Boki's liking for its own parent when it picks who to greet or nap beside; a weight, so a parent it has fallen out with (bond -0.5 or less) still loses.",
 	"bond_doc": "a bond at or above friend_at is a friendship, at or below rival_at a rivalry.",
 	"bond_tag": 0.07,
 	"bond_tag_doc": "added to both Boki's bond each time one tags the other in a game of tag.",

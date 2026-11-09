@@ -37,3 +37,9 @@ check: `--base-life-check`.
   do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
   migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
   `CareJournal.note`).
+- Parents (GARDEN.md section 6): `Care.breed` saves who gave what in `rec["gifts"]` (`Parentage`; the parents' uids
+  are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
+  yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
+  (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
+  The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
+  Check: `--baby-parents-check`.
