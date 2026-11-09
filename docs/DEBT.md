@@ -4,7 +4,7 @@ Each line: the debt, why it matters, and the fix. Remove the line when it's fixe
 
 - God files: match.gd (~6.9k lines), home.gd (~5.8k), main.gd (~4k, mostly inline checks), hud.gd (~3.8k), models.gd, hunter.gd, world.gd. These make every change risky and slow to review. Split by system into focused modules, then lower the budgets in tools/health.py.
 - Checks hooked inline in main.gd (about 48 `--*-check` branches). Move each into tools/<name>_check.gd behind one registry so main.gd is only startup.
-- Duplicate content versions: content/abilities + abilities_v2, kin + kin_v2. Migrate the callers to one version and delete the other.
+- Duplicate content versions: kin + kin_v2. Migrate the callers to one version and delete the other. (Abilities are settled: `content/hunter_abilities` is the hunter effect-list format read by `Content.ability`; `content/abilities_v2` is the kin grammar's AbilitySpec. Different schemas and systems, both live; the grammar folders keep their `_v2` suffix with kin_v2/merges_v2/evolution_v2 until that set is renamed as one.)
 - Dynamic calls (`has_method`, `get_script_method_list`, `call("...")`) used for optional features. Replace them with typed references or CombatBus signals.
 - Internal names still say kin/Kinfall/archetype while the game says Boki/Project Boki/class. Rename gradually with tools/rebrand.py, never in a big bang.
 - Timing checks (--hitch-check, --load-check) are noisy on the shared 2-CPU machine. Move them to CI with stable hardware, or mark them advisory.
