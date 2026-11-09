@@ -518,6 +518,13 @@ static func fetch(arch: String) -> void:
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
 
+## Starts reading the .glb files a match's build dresses (your Warden and your dealt squadmates', opts "mates"),
+## so they load on a loader thread while the world builds instead of in build.hunters.
+static func fetch_for(opts: Dictionary) -> void:
+	fetch(String(opts.get("arch", Save.d.get("arch", ""))))
+	for mt in opts.get("mates", []):
+		fetch(String((mt as Dictionary).get("arch", "")))
+
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:
 	fetch(arch)
@@ -556,16 +563,21 @@ static func _skinned_weapon(root: Node3D) -> void:
 		mag.mesh = null
 		mag.visible = false
 
-## The rig rest of the Warden's model in the neutral look (built once a session).
+## The rig rest of the Warden's model in the neutral look: baked (WardenRest), else measured once a session.
 static func neutral_rest(arch: String) -> Dictionary:
 	if not _neutral.has(arch):
-		_measuring = true
-		var look := PlayerLook.neutral()
-		var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
-		_measuring = false
-		_neutral[arch] = m.get_meta("rig_rest")
-		m.free()
+		var baked := WardenRest.baked(arch)
+		_neutral[arch] = baked if not baked.is_empty() else measure_rest(arch)
 	return _neutral[arch]
+
+## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
+static func measure_rest(arch: String) -> Dictionary:
+	_measuring = true
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+	_measuring = false
+	var rest: Dictionary = m.get_meta("rig_rest")
+	m.free()
+	return rest
 
 ## Hides the procedural body's meshes, leaving the KEEP pieces.
 static func _hide_body(n: Node) -> void:

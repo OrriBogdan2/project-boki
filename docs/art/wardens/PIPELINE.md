@@ -70,7 +70,8 @@ Sparkle's emissive layer `use_emit`/`emit_tex` (ext/warden-meshy-ryzz). Already 
    --shots-dir=<dir> --sheets=<dir with <id>.png>` (turnarounds, close-ups, front_34 and back_34, moves) and the
    clean match frame `--arena=<id> --record=2 --no-tips --arena-demo=pose --demo-zoom=1.0 --arena-shot=<png>` with a
    x4 crop. Composite with `B tools/meshy/compose.py`. Look at every one, the back too.
-10. **Checks** (fresh XDG, real output only): `--warden-glb-check`, `--warden-model-check`, `--mantle-look-check`,
+10. **Checks** (fresh XDG, real output only): `--warden-glb-check`, `--warden-rest-check` (after a procedural rig
+    change run `-- --warden-rest-bake` and commit content/rules/warden_rest.json), `--warden-model-check`, `--mantle-look-check`,
     `--move-feel-check`, `--<id>-combo-check`, `--weapon-clip-check`, `--warden-stance-check` (scratch branch),
     `python3 tools/health.py --strict`, style_lint.
 11. **Log and commit:** every Meshy task in the run log below; `git grep` for the key's prefix finds nothing.
