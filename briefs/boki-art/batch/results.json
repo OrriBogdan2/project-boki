@@ -18707,5 +18707,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_tootle_v_1.jpg",
     "ok": true
+  },
+  {
+    "id": "scythant_r_w30",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scythant_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w30",
+    "name": "Scythant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scythant_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w30",
+    "name": "Scythant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scythant_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w30",
+    "name": "Seamwyrm",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w30",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w30",
+    "name": "Seamwyrm",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w30",
+    "name": "Scythant",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/scythant_r_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w30",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w30_2.jpg",
+    "ok": true
   }
 ]
