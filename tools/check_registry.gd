@@ -29,6 +29,7 @@ const CHECKS := {
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--anim-lod-check": ["res://tools/anim_lod_check.gd", "anim_lod_check", null],      # owner 11-08 expedition fps
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
+	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
