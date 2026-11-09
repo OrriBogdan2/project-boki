@@ -31,6 +31,7 @@ const IRON := Color("3a3f48")
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
+const FIST_REACH := 0.55               # share of the slam radius from him to the giant fist (the cone's middle)
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const ALLY_SLACK := 0.35               # m past the hook's own radius an ally in its path is caught (a little generous)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
@@ -457,7 +458,14 @@ func cast_e() -> bool:
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
 	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
+	var hop := float(ed["hop"]) if h.grounded else 0.0
+	vfx("anchor_wind", _fist_spot(hop), slam_dir, {"r": float(ed["radius"])})
 	return true
+
+## Where the giant fist comes down: over the slam's cone, past the hop he takes in the wind-up (on the ground).
+func _fist_spot(hop := 0.0) -> Vector3:
+	var ed := e_def()
+	return ground(h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * (hop + float(ed["radius"]) * FIST_REACH))
 
 func use_e() -> void:
 	if not pull.is_empty():
@@ -522,6 +530,7 @@ func _anchor() -> void:
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
+	vfx("anchor_slam", _fist_spot(), dd, {"r": float(ed["radius"])})
 	fx.crescent(h.pos + Vector3(0, 0.25, 0), dd, float(ed["angle"]), float(ed["radius"]), ANCHOR_COL, IRON, 0.25)
 	fx.scorch(fist, 1.6, 1.4, Color("8a7a66"), Color("2a241e"))          # cracked ground under the fist
 	fx.scorch(at, float(ed["radius"]) * 0.7, 1.2, Color("6a5e50"), Color("2a241e"))

@@ -13,6 +13,7 @@ const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
+const int M_FIST = 8;       // a giant scrap fist, facing the camera: forms raised, then smashes down (slam) and crumbles
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 
 uniform int mode = 0;
@@ -29,6 +30,7 @@ uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
+uniform bool slam = false;  // M_FIST: the strike (falls and lands) instead of the wind-up (forms, raised)
 
 void vertex() {
 	if (billboard) {
@@ -218,6 +220,44 @@ vec4 vortex(vec2 uv) {
 	return vec4(c * fade, a);
 }
 
+// signed distance to a rounded box, and to a capsule, in the fist's own space
+float box_d(vec2 p, vec2 half_size, float r) {
+	vec2 q = abs(p) - half_size + r;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+float fist_d(vec2 p) {
+	float d = box_d(p - vec2(0.0, 0.0), vec2(0.4, 0.3), 0.1);                    // the palm and back of the hand
+	for (int i = 0; i < 4; i++) {
+		float x = -0.3 + 0.2 * float(i);
+		d = min(d, length(p - vec2(x, -0.3)) - 0.105);                           // four curled fingers, knuckles down
+	}
+	d = min(d, box_d(p - vec2(0.0, 0.62), vec2(0.24, 0.34), 0.06));            // the arm, held up out of the frame
+	return min(d, length(p - vec2(-0.43, -0.04)) - 0.13);                       // the thumb across the side
+}
+
+vec4 fist(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float fall = slam ? smoothstep(0.0, 0.16, life) : 0.0;
+	float shift = mix(0.55, -0.45, fall * fall);                                // raised, then driven down to the ground
+	shift += slam ? 0.0 : 0.12 * life - 0.1;                                    // rising as it forms
+	vec2 q = (p - vec2(0.0, shift)) / 0.9;
+	float d = fist_d(q);
+	float dust = fbm3(p * 5.0 + seed);                                          // which bits of scrap are there yet
+	float built = slam ? 1.0 - smoothstep(0.55, 1.0, life) : smoothstep(0.0, 0.85, life);
+	float shown = smoothstep(dust - 0.08, dust + 0.02, built * 1.15);
+	float body = (1.0 - smoothstep(-0.015, 0.015, d)) * shown;
+	float plates = cracks(q * 6.0 + seed);
+	float seam = smoothstep(0.0, 0.12, plates);                                 // dark seams between the plates
+	float tone = h21(floor(q * 6.0 + seed));                                    // each plate its own metal
+	float rivet = 1.0 - smoothstep(0.03, 0.06, length(fract(q * 6.0 + 0.5) - 0.5));
+	float rim = 1.0 - smoothstep(0.0, 0.1, -d);                                 // lit edge
+	float glow = slam ? smoothstep(0.1, 0.2, life) * (1.0 - smoothstep(0.2, 0.45, life)) : life;
+	vec3 metal = mix(col3.rgb, col.rgb * 0.7, 0.25 + 0.55 * tone) * (0.45 + 0.55 * seam);
+	vec3 c = metal + col.rgb * rim * 0.55 + col2.rgb * (rim * glow * 0.5 + rivet * 0.35);
+	return vec4(c * body, body * 0.95);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
@@ -227,6 +267,7 @@ void fragment() {
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
+	else if (mode == M_FIST) { v = fist(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;

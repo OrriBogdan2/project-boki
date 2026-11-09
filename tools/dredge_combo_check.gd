@@ -149,6 +149,7 @@ func _slam_tell() -> void:
 	ak.fresh(T)
 	ak.fresh(T2)
 	K.cd["e"] = 0.0
+	Sfx.listener = P.pos          # the looks draw only near the listener
 	P.ak.use_e()
 	ak.step(m, 0.2)
 	var tell: Dictionary = AimKit.entry(P, "e_tell")
@@ -162,6 +163,15 @@ func _slam_tell() -> void:
 			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
 		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
 	)
+	var vfx := HeroVfx.of(m)
+	var wind_fist := _fist_layer(vfx)
+	ok(
+		"anchor fist: a giant scrap fist forms over the cone for the wind-up, as wide as the cone is deep",
+		int(vfx.plays.get("anchor_wind", 0)) == 1 and not wind_fist.is_empty()
+			and absf((wind_fist["s0"] as Vector3).x - 3.0 * reach) < 0.01
+			and absf(float(wind_fist["dur"]) - float(ed["windup"])) < 0.01,
+		"plays %s fist %s" % [vfx.plays, wind_fist.get("s0")]
+	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while K.wind > 0.03:
 		ak.step(m, ak.DT)
@@ -173,7 +183,22 @@ func _slam_tell() -> void:
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
 		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
 	)
+	var slam_fist := _fist_layer(vfx)
+	ok(
+		"anchor fist: it smashes down on the strike frame, once, with no extra ring or burst of its own",
+		int(vfx.plays.get("anchor_slam", 0)) == 1 and not slam_fist.is_empty()
+			and bool(slam_fist["mat"].get_shader_parameter("slam")),
+		"plays %s" % [vfx.plays]
+	)
 	await ak.done(m)
+
+## The newest giant fist look running ({} when none).
+func _fist_layer(vfx: HeroVfx) -> Dictionary:
+	for i in range(vfx.live.size() - 1, -1, -1):
+		var e: Dictionary = vfx.live[i]
+		if (e["mat"] as ShaderMaterial).get_shader_parameter("mode") == HeroVfx.MODES["fist"]:
+			return e
+	return {}
 
 ## Item 35: his own dash moves, a low clawing lunge on the ground and a pounce in the air, used by no other
 ## hero; each lands by the end of its 0.18 s dash and is over before the next barge of a run may start.

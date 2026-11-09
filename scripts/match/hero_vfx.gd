@@ -13,12 +13,13 @@ extends Node3D
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
-const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7}
+const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
+	"fist": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
+	"fist": 3, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -304,7 +305,7 @@ func _surface_node(kind: String) -> Node3D:
 			mi.mesh = plane
 		"skirt":
 			mi.mesh = _cylinder()
-		"flare":
+		"flare", "fist":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -443,6 +444,9 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		"flare":
 			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
+		"fist":
+			mt.set_shader_parameter("slam", bool(layer.get("slam", false)))
+			p.y += extent * 0.5                                    # the picture stands on the ground
 		"vortex":
 			s0 = Vector3(extent * 2.0, 1.0, extent * 2.0)
 			s1 = s0 * float(layer.get("grow", 1.0))

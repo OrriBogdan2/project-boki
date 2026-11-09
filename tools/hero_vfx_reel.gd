@@ -12,7 +12,7 @@ extends "res://tools/combo51_shots.gd"
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["lmb", "hook"]}
+	"dredge": ["lmb", "hook", "e"]}
 const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
