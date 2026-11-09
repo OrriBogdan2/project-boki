@@ -205,6 +205,10 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
 | 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 19 dash-flow rows have no source `[?]` (Hem 8, Ryzz 5, Tarek 6), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
+| 21 | Hem's Hail Wall and every other ability don't hit Wisps (downed hunters): `Match.foes_of` skips `downed` (verified 2026-11-09; decision 0019 made the Wisp a picture only) | Let area abilities hit downed hunters, or owner keeps | match.gd `foes_of`, arch_kit.gd `foes_in` | M, owner (touches every kit) |
+| 22 | Sable's and Tarek's X ultimates have no ranks: `HeroUlt` casts read `power("x")`, and `slot_lv` has no `x`, so rank is always 1; `slot_lv["ult"]` (max 2) ranks the Boki R only. No rank 2 damage or cooldown for Sable, no +2.5 s Tetraform terrain per rank for Tarek. Decision 0022 is not on main | Map `x` to the ult rank, add per-hero rank data (the source's levels 2 and 3) | hunter.gd `ability_level`, arch_kit.gd, thief_ult.gd, breah_spine.gd | M, owner (rank design) |
+| 23 | Grimble's unspread armour bonus is not on main; `origin/ext/grimble-unspread-bonus` (1592226f9: zero-bloom volley wears armour 66% faster, combo-check asserts it) is unmerged | Merge that branch | dredge_kit.gd, dredge.json | S, merge |
+| 24 | Ryzz's Lightning Strike can't launch Wisps, and Static Charged detonation gives no mana (no mana in game). Wisps exist (0019) but are a picture only | Same decision as gap 21 | mage_kit.gd | M, owner |
 
 ## Item 20: jump speed and the unsourced flow rows
 

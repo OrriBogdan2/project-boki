@@ -73,7 +73,7 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 - During Spirit Walk she can still shoot and cast, and moves 10% faster (the sheet measures +5-10% outside); at rank 3, 33% more inside something, fading over the walk.
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
-- Not built: the double-wall climb (no heightmap equivalent) and Hail Wall damaging wisps (our downed hunters take no ability damage).
+- Not built: Hail Wall damaging wisps (our downed hunters take no ability damage; `Match.foes_of` skips them, docs/KIT_PARITY.md gap 21). The double-wall climb is built (`climb_tall`).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
 - Starpiercer: each beam nocks for 0.5 s (the footage shows a 0.4-0.8 s draw; the fine print says no charge) and the next nock waits 1.0 s: 1.5 s a shot like the footage (f48/f63/f78), all three inside the 6 s window.
@@ -103,13 +103,13 @@ Rows of briefs/specs/kit-audit/zedran_bjorn_pin.md (it audited main 200effce). (
 | Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
 | Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
 | Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
-| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: our heightmap mantle has no double-wall case (Assumptions) | - |
+| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd and the ledge grab (hunter.gd `TALL_CLIMB_EXTRA`) | `climb_tall: Archer mantles a 3.2 m wall, Breaker does not` (--archer-combo-check) |
 | Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
 | Ult: pierces enemies, longer range, knocks back | [wiki](https://supervive.wiki.gg/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: our downed hunters aren't hit by ability damage (Assumptions) | - |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: our downed hunters (shown as Wisps, decision 0019) aren't hit by ability damage; open gap 21 in docs/KIT_PARITY.md (Assumptions) | - |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |

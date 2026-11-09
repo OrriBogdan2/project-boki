@@ -17,6 +17,7 @@ func run(main_node: Node) -> void:
 	launch.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		await _tall_climb()
 		await ult.pin()
 		await own.pin()
 	if both or "--bulwark-combo-check" in args:
@@ -625,6 +626,29 @@ func _archer_combos() -> void:
 		"ghost %.2f" % P.spirit_t
 	)
 	await done(m)
+
+## Double-high ledges: Archer (content/rules/hunter_move.json climb_tall) jumps onto a 3.2 m wall (four
+## terraces) that a hero without it cannot mantle (docs/heroes/archer.md, Climb double-high walls).
+func _tall_climb() -> void:
+	var top := {}
+	for who in ["archer", "bulwark"]:
+		var r := setup(who, 7.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var home: Vector3 = r[4]
+		var lv: int = r[5]
+		for dz in range(-3, 4):
+			for dx in range(2, 6):
+				m.world.level[m.world.idx(int(home.x) + dx, int(home.z) + dz)] = lv + 4
+		top[who] = 0.0
+		step(m, 1.5, func():
+			P.inp["move"] = Vector2(1, 0)
+			P.inp["jump"] = P.grounded and P.pos.x > home.x + 0.9
+			top[who] = maxf(float(top[who]), P.pos.y - home.y))
+		await done(m)
+	ok("climb_tall: Archer mantles a 3.2 m wall, Breaker does not",
+		float(top["archer"]) > 3.0 and float(top["bulwark"]) < 2.0,
+		"best rise archer %.2f m, bulwark %.2f m" % [top["archer"], top["bulwark"]])
 
 ## The 360 Smash's spin hit on the first foe with the hunter at level `lvl`.
 func _spin(lvl: int) -> float:
