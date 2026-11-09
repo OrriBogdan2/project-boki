@@ -54,9 +54,13 @@ func run(m: Node) -> void:
 	ok(KinBox.farm().size() == cap and KinBox.boxed().size() == 3, "nine Boki: %d out (the cap), 3 asleep" % cap)
 	var H = load("res://scripts/home/home.gd").new()
 	main.add_child(H)
-	for _f in 4: await main.get_tree().process_frame
+	for _f in 900:
+		await main.get_tree().process_frame
+		if H.kins.size() == cap and is_instance_valid(H.burrow_node): break
+	if main.get("fade") != null:
+		main.fade.reveal(0.01)
 	BurrowPanel.open(H)
-	for _f in 2: await main.get_tree().process_frame
+	for _f in 6: await main.get_tree().process_frame
 	var rows: Array = H.find_children("Row_*", "PanelContainer", true, false)
 	ok(H.panel_open == "Boki Burrow" and rows.size() == 9, "the panel lists all nine Boki, out and asleep")
 	await _shot(H)
