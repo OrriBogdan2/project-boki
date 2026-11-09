@@ -21,7 +21,7 @@
 				"c": "main", "c2": "hot"}
 		]},
 		"cast_trail": {"fx": [
-			{"p": "ribbon", "size": 0.28, "life": 2.0, "tail": 0.18, "c": "pink", "c2": "hot", "c3": "lilac"}
+			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.26, "c": "pink", "c2": "hot", "c3": "lilac"}
 		]},
 		"kindled": {"fx": [
 			{"p": "flare", "y": 1.0, "size": 1.3, "grow": 1.3, "life": 0.25, "c": "lilac", "c2": "hot", "c3": "char"},

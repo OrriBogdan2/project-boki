@@ -753,6 +753,11 @@ func tender() -> void:
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
 			"%s %d" % [K.anim_id, K.stats["swirls"]])
+	var comet := K.lk().skins[0]["n"] as Node3D
+	var tail_mesh := (comet.get_node("Tail").get_child(0) as MeshInstance3D).mesh as PlaneMesh
+	ok(
+			"mm LMB: the comet has a trail to follow at the match camera (0.8 m wide, 3.4 m long)",
+			absf(tail_mesh.size.x - 0.8) < 0.01 and absf(tail_mesh.size.y - 3.4) < 0.01, str(tail_mesh.size))
 	step(m, 0.6)
 	_moon_shot_parity(m, P, K)
 	# --- Kindle ramp and its foot glow; nodes stay pooled while firing

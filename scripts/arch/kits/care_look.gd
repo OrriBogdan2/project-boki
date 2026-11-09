@@ -97,13 +97,13 @@ func _build(kind: String) -> Node3D:
 	n.name = kind
 	match kind:
 		"ember":
-			# a mote of her lantern's star: a 0.52 m teardrop comet head of soft gold with a near-white core, a
-			# pastel pink halo and a wide 2 m gold tail, so it reads in flight at gameplay zoom (starlight, not fire)
-			var head := Models.sphere(0.26, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.7)))
-			_off(Models.part(n, Models.sphere(0.12, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.08)))
-			_off(Models.part(n, Models.sphere(0.46, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
-			_tail(n, 0.5, 2.0, Color("ffe0a0", 1.0))
+			# a comet to follow at the match camera (source: Moon Shot, a bright head with a long trail): a 0.7 m
+			# gold teardrop with a near-white core, a pink halo and a 0.8 m wide, 3.4 m long gold tail
+			var head := Models.sphere(0.34, 12)
+			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
+			_off(Models.part(n, Models.sphere(0.2, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.1)))
+			_off(Models.part(n, Models.sphere(0.6, 10), orb_mat(Color("f6a6c8", 0.5)), Vector3.ZERO))
+			_tail(n, 0.8, 3.4, Color("ffe0a0", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -118,6 +118,13 @@ func _build(kind: String) -> Node3D:
 						sp, Models.cyl(0.0, 0.035, 0.16, 5), Models.toon(Color("e6f2a0"), true, 0.9), dv * 0.18))
 				sm.basis = Basis(Quaternion(Vector3.UP, dv.normalized()))
 			_off(Models.part(n, Models.sphere(0.34, 10), orb_mat(Color("c8e07a", 0.3)), Vector3.ZERO))
+			# the rune ring (source: Bound by Fate): a violet hoop 0.9 m across, square to the flight
+			var ring_pm := PlaneMesh.new()
+			ring_pm.size = Vector2(0.9, 0.9)
+			var rune_mat := disc_mat(Color("a070ff", 0.9), Color("e0c8ff"), 0.0)
+			rune_mat.set_shader_parameter("fill", 0.35)
+			rune_mat.set_shader_parameter("rim_w", 0.16)
+			_off(Models.part(n, ring_pm, rune_mat, Vector3.ZERO)).rotation = Vector3(PI * 0.5, 0, 0)
 			_tail(n, 0.22, 1.4, Color("e8f6b8", 0.55))
 		"shard":
 			# an ice dart: a long ice-blue four-sided crystal with dark teal edges, tip first, and a short
@@ -499,7 +506,10 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 					n, col, p.get("rim", col.lightened(0.4)), float(p.get("a", 1.0)), float(p.get("pattern", 0.0)),
 					float(p.get("sweep", -1.0)), float(p.get("spin", 0.0)))
 			var dm := n.get_node_or_null("Disc") as MeshInstance3D
-			if dm: (dm.material_override as ShaderMaterial).set_shader_parameter("fill", float(p.get("fill", 1.0)))
+			if dm:
+				var dsm := dm.material_override as ShaderMaterial
+				dsm.set_shader_parameter("fill", float(p.get("fill", 1.0)))
+				dsm.set_shader_parameter("rim_w", float(p.get("rim_w", 0.08)))
 			var lamp := n.get_node_or_null("Lamp") as Node3D
 			if lamp:
 				lamp.scale = Vector3(1.0 / maxf(0.1, r), 1.0, 1.0 / maxf(0.1, r))

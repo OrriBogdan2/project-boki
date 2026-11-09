@@ -430,8 +430,8 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
-					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 2.2, "rim_w": 0.14,
+					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 1.0})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
 		if float(b["left"]) <= 0.0:
 			burrs.erase(b)
@@ -538,10 +538,11 @@ func _tick_hearth(dt: float) -> void:
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
 	var tossed := bool(hearth.get("tossed", false))
-	# on her: a soft warm ring with a faint inside; thrown: a filled disc, warm amber in the middle shading
-	# to teal, a bright rim, its lantern floating over the middle
+	# on her: a filled warm disc with a wide bright edge (source: a big bright disc); thrown: warm amber in the
+	# middle shading to teal, a brighter fill, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
+	var look_p := {
+		"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 1.0, "rim_w": 0.16, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
 		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
