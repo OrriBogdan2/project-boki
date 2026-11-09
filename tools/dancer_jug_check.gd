@@ -460,10 +460,10 @@ func juggernaut(a) -> void:
 	var air_r3 := K.air_cooldown()
 	P.slot_lv["sec"] = 1
 	P.slot_lv["kin"] = 1
-	A.ok("juggernaut ranks: Smash +20% at rank 2 and 3, Warchain cooldown -12.5% / -37.5%, Meteor Drop 7.2s -> 4.8s",
+	A.ok("juggernaut ranks: Smash +20% at rank 2 and 3, Warchain cooldown -12.5% / -37.5%, Meteor Drop 9s -> 6s",
 			absf(float(smash_ks[0]) - 1.0) < 0.001 and absf(float(smash_ks[1]) - 1.2) < 0.001
 			and absf(float(smash_ks[2]) - 1.4) < 0.001 and absf(float(chain_ks[1]) - 0.875) < 0.001
-			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 7.2) < 0.001 and absf(air_r3 - 4.8) < 0.001,
+			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 9.0) < 0.001 and absf(air_r3 - 6.0) < 0.001,
 			"%s %s %.1f %.1f" % [smash_ks, chain_ks, air_r1, air_r3])
 	# Rage (Blazing Spirit): damage fills it; nothing below full; Enraged gives damage, dash and ability haste
 	K.res = 0.0
@@ -620,8 +620,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB air: Meteor Drop slows, centre stunned",
 			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0,
 			"took %.0f slow %.2f stun %.2f" % [A.dmg(T), T.slow_t, T.stun_t])
-	A.ok("juggernaut Meteor Drop: its own 7.2s slot, the Smash charge untouched",
-			float(K.cd["air"]) > 6.0 and float(K.cd["air"]) <= 7.2 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
+	A.ok("juggernaut Meteor Drop: its own 9s slot, the Smash charge untouched",
+			float(K.cd["air"]) > 7.0 and float(K.cd["air"]) <= 9.0 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
 			"air cd %.2f smash charge %.1f cd %.2f" % [float(K.cd["air"]), K.ch_rmb, float(K.cd["rmb"])])
 	P.teleport(T.pos + Vector3(-4.0, 3.0, 0))
 	P.grounded = false

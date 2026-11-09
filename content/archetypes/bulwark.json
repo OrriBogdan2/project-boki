@@ -187,7 +187,7 @@
 		"icon": "quake",
 		"col": "#ff9a3a",
 		"unlock": 6,
-		"cooldown": 40.0,
+		"cooldown": 50.0,
 		"windup": 0.4,
 		"plant": 0.2,
 		"cells": 4,

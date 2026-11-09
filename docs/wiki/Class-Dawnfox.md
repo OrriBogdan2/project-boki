@@ -80,13 +80,13 @@ What the in-game kit card (K) says.
 
 **Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
 
-**Burrseed (RMB, 10.5s cooldown).**
+**Burrseed (RMB, 11.5s cooldown).**
 
 - *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
-**Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
+**Hearthlight (E, 12s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
-**Hearth Call (hunter ultimate, from level 6, 46s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
+**Hearth Call (hunter ultimate, from level 6, 60s cooldown).** Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you.
 
 ### Ranks
 

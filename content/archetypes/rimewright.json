@@ -81,7 +81,7 @@
 		"short": "Spear",
 		"icon": "binding",
 		"col": "#8fe8d8",
-		"cooldown": 10.2,
+		"cooldown": 12.0,
 		"charges": 2,
 		"hold": 0.2,
 		"lance": {
@@ -114,7 +114,7 @@
 		"short": "Rink",
 		"icon": "dome",
 		"col": "#9af0e6",
-		"cooldown": 17.0,
+		"cooldown": 20.0,
 		"hp": 70.0,
 		"slide": 4.5,
 		"time": 4.5,

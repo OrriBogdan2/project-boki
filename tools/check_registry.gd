@@ -117,6 +117,7 @@ const CHECKS := {
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
+	"--cooldown-parity-check": ["res://tools/cooldown_parity_check.gd", "cooldown_parity_check", null],
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	"--hitbox-size-shots": ["res://tools/hitbox_size_shots.gd", "hitbox_size_shots", null],

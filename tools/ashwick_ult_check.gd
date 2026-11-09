@@ -66,8 +66,8 @@ func _flight() -> void:
 		"flights +%d" % (J.flights - casts0)
 	)
 	ok(
-		"ult cast: its own cooldown starts (36s, the data's 45s at the kit's 0.8)",
-		absf(float(K.cd["x"]) - 36.0) < 0.2 and float(K.cd["e"]) == 0.0,
+		"ult cast: its own cooldown starts (45s, the data)",
+		absf(float(K.cd["x"]) - 45.0) < 0.2 and float(K.cd["e"]) == 0.0,
 		"cd %.1f" % float(K.cd["x"])
 	)
 	ak.step(m, 0.25, func(): ak.aim_at(P, home + Vector3(10, 0, 0)))

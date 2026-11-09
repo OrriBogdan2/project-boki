@@ -70,15 +70,15 @@ What the in-game kit card (K) says.
 
 **Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
 
-**Barge (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
+**Barge (dash, Shift, 7s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
-**Abyssal Hand (RMB, 12s cooldown).**
+**Abyssal Hand (RMB, 18s cooldown).**
 
 - *Tap:* Your abyssal arm reaches 11.5m through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it.
 
-**Anchor Drop (E, 7s cooldown).** Raise your fist while the area fills on the ground in front of you (0.38s), then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
+**Anchor Drop (E, 12s cooldown).** Raise your fist while the area fills on the ground in front of you (0.38s), then slam it down into that 3m cone: 25 damage, stun 1.1s, slammed to the ground and Grounded. In the air you smash straight down and the anchor lands with you: a 3.2m ring, up to +50% damage by height. Over the abyss it slams where you are instead. Rank 3: double damage on a foe over the abyss and +0.2s stun.
 
-**Brass Broadside (hunter ultimate, from level 6, 21s cooldown).** Charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area, and it turns with your aim). You can walk slowly while it charges and fires. Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
+**Brass Broadside (hunter ultimate, from level 6, 36s cooldown).** Charge for 1.1s while a 105 degree fan grows on the ground ahead (everyone sees it: it is the exact area, and it turns with your aim). You can walk slowly while it charges and fires. Then two waves 0.6s apart, six heavy brass slugs each, out to 5.9m: 4 damage a slug and Anti-Heal for 3s. Up close every slug lands. A stun during the charge stops it (back in 8s). 21s.
 
 ### Ranks
 

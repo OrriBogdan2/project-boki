@@ -79,11 +79,11 @@ What the in-game kit card (K) says.
 
 **Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
 
-**Ice Spear (RMB, 10.2s cooldown, 2 charges).**
+**Ice Spear (RMB, 12s cooldown, 2 charges).**
 
 - *Tap:* Hold to see the landing ring at the cursor (up to 12m) as the spear forms between your palms; let go and you push it out. The spear drives out to the cursor (the further, the longer it takes) and lands there (or on a foe in the way): 18 damage and a short slow to foes within 1.2m, and a 2.2m slow zone (35% slower, Chill) for 1.8s, then it detonates: 60 damage in 2.7m and a brief encasing slow. 2 charges.
 
-**Rink Wall (E, 17s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
+**Rink Wall (E, 20s cooldown).** A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.
 
 **Rimelock (hunter ultimate, from level 6, 80s cooldown).** Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun.
 

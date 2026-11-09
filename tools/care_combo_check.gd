@@ -1084,7 +1084,7 @@ func _dashes_cute() -> void:
 	await _moosh_audit()
 
 ## Audit: the glide is airborne only (on the ground with the hop spent, Shift is refused, never a glide
-## along the ground); the move keys steer the glide (air control); Burrseed 10.5 s (the data's ratio to E);
+## along the ground); the move keys steer the glide (air control); Burrseed 11.5 s (the data);
 ## her Ember Cast has no magazine and no slow while firing (the source has neither).
 func _moosh_audit() -> void:
 	var r: Array = sc.setup("tender", 20.0)
@@ -1121,8 +1121,8 @@ func _moosh_audit() -> void:
 			turned > 40.0 and turned < 90.0, "turned %.0f deg in 0.4 s" % turned)
 	step(m, 1.0)
 	ok(
-			"mm RMB: Burrseed 10.5 s (the data's 11.5 : 12 against Hearthlight's 11 s)",
-			absf(float(K.rmb_def()["cooldown"]) - 10.5) < 0.01)
+			"mm RMB: Burrseed 11.5 s (the data)",
+			absf(float(K.rmb_def()["cooldown"]) - 11.5) < 0.01)
 	ok(
 			"mm LMB: Ember Cast has no magazine to reload and no slow while firing (the source has neither)",
 			int(P.wpn["mag"]) >= 99 and float(P.wpn["fire_slow"]) >= 1.0)
@@ -1496,8 +1496,8 @@ func rimewright() -> void:
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
 	ok(
-			"tm RMB: two charges on a 10.2 s cooldown",
-			K.rmb_charges() == 2 and K.cd["rmb"] > 9.0 and K.cd["rmb"] <= 10.2, "cd %.2f" % K.cd["rmb"])
+			"tm RMB: two charges on a 12 s cooldown",
+			K.rmb_charges() == 2 and K.cd["rmb"] > 10.8 and K.cd["rmb"] <= 12.0, "cd %.2f" % K.cd["rmb"])
 	ok(
 			"tm RMB: a foe in the zone is slowed and Chilled", T.slow_t > 0.0 and T.slow_k >= 0.34 and K.chilled(T),
 			"slow %.2f" % T.slow_k)

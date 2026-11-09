@@ -600,7 +600,7 @@ func lunge_k(t: float) -> float:
 func smash_k() -> float:
 	return 1.0 + 0.2 * float(clampi(rank("sec") - 1, 0, 2))
 
-## The Meteor Drop's own cooldown, 2.4s shorter at rank 3.
+## The Meteor Drop's own cooldown, 3s shorter at rank 3 (the data).
 func air_cooldown() -> float:
 	var dd: Dictionary = rmb_def()["drop"]
 	return float(dd["cooldown"]) - (float(dd["r3_cut"]) if rank("sec") >= 3 else 0.0)
