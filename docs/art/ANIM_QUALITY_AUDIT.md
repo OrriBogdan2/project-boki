@@ -97,6 +97,8 @@ posts scroll at the move speed).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
+![bulwark lmb_throw and lmb_slam at 30 fps (0 to 0.233 s), before and after the retime: `--anim-shots --close --frames=16`, llvmpipe on rpc1](anim_audit/bulwark_hand.jpg)
+
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
 2. Arms swung with their own side's leg (counter -0.86, fixed to +0.72).
