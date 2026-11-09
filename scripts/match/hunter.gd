@@ -86,7 +86,6 @@ var reload_t := 0.0
 var fire_cd := 0.0
 var dashes := 2.0
 var roll_t := 0.0
-var roll_total := 1.0            # s the current dash runs in all (its ease, Loco.dash_k)
 var roll_dir := Vector2.ZERO
 var inv_t := 0.0
 var coyote := 0.0
@@ -1127,8 +1126,7 @@ func dash_with(e: Dictionary) -> void:
 		roll_t = float(cdat.get("ex_time", roll_t * 1.45))
 		roll_speed = float(cdat.get("ex_dist", roll_speed * roll_t)) / roll_t
 		vel.y = maxf(vel.y, 0.0)
-	roll_t *= Loco.dash_time_k(arch)      # a hunter whose dash is slowed (tuning.json dash_ease) keeps its distance
-	roll_total = roll_t
+	roll_t /= Loco.dash_speed(arch)      # a hunter whose dash is slowed (tuning.json dash_speed) keeps its distance
 	inv_t = maxf(inv_t, float(e.get("invuln", 0.14)))
 	shove = {"hit": {}, "kb": float(e.get("shove_kb", 9.0)), "dmg": float(e.get("shove_dmg", 0.0)), "ws": float(e.get("wallstun", 0.0))} if e.get("shove", false) else {}
 	if float(e.get("phase", 0.0)) > 0.0:
@@ -2082,7 +2080,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = Loco.dash_hv(roll_dir * roll_speed, arch, roll_t, roll_total)     # eased per hunter (tuning.json)
+		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():

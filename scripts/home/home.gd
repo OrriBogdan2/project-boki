@@ -1040,8 +1040,7 @@ func _process(delta: float) -> void:
 var gliding := false
 var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
 var dash_t := 0.0
-var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv eases it)
-var dash_total := 0.0
+var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv scales it)
 var dash_charges := 2.0
 var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
 var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
@@ -1146,8 +1145,7 @@ func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	if dir.length() < 0.1:
 		dir = Vector2(-sin(pface), -cos(pface))
 	dash_v = dir.normalized() * speed
-	dash_t = time * Loco.dash_time_k(String(Save.d.get("arch", "")))      # a slowed dash keeps its distance
-	dash_total = dash_t
+	dash_t = time / Loco.dash_speed(String(Save.d.get("arch", "")))      # a slowed dash keeps its distance
 	gliding = false
 	Sfx.play("whoosh", null, -6.0, 0.1, 1.2)
 	if fx: fx.dust(ppos, 6)
@@ -1193,7 +1191,7 @@ func _move_player(d: float) -> void:
 	var run := float(row["speed"]) * water.speed_mul(wdep, air)
 	if dash_t > 0.0:
 		dash_t -= d
-		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")), dash_t, dash_total)
+		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")))
 		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
 	elif gliding:
 		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
