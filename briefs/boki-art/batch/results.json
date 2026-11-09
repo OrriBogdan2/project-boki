@@ -19533,5 +19533,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_glacione_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_glacione",
+    "name": "Glacione",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glacione_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pinster",
+    "name": "Pinster",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pinster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pinster",
+    "name": "Pinster",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pinster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster",
+    "name": "Tiltster (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_tiltster_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster",
+    "name": "Tiltster (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_tiltster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster",
+    "name": "Tiltster (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tiltster_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster",
+    "name": "Tiltster (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tiltster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil",
+    "name": "Maracoil (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_maracoil_2.jpg",
+    "ok": true
   }
 ]
