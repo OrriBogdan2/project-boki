@@ -10,6 +10,7 @@ static var last_pos := Vector3.INF
 static func drive(m: Match) -> void:
 	var tu: Tutorial = m.tut
 	tu.ack()
+	tu.pell.test_skip()
 	if tu.step != last_step:
 		var live := m.mobs.filter(func(x): return not x.dead).size()
 		print("TUT step ", tu.step, " ", tu.id(), " t=", snapped(m.time, 0.1), " mobs=", live)
