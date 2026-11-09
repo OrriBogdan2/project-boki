@@ -45965,5 +45965,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_mycroll_p89_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_rippmink_p88",
+    "name": "Rippmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rippmink_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_effigoon_p88",
+    "name": "Effigoon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_effigoon_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_p88",
+    "name": "Vespox",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_vespox_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_rimink_p88",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimink_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_flarmink_p88",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_flarmink_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cisternmander_p88",
+    "name": "Cisternmander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_cisternmander_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_p88",
+    "name": "Vespox",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_vespox_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_galleotter_gap",
+    "name": "Galleotter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_galleotter_gap_1.jpg",
+    "ok": true
   }
 ]
