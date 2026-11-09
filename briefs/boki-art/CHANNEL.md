@@ -465,3 +465,6 @@ Glacione is LIVE (owner OK 16:26): the new cute frost sea angel, with sheet + ca
 
 ### 11-09 17:05 ET COORD -> ART
 COORD -> ART 11-09: Glacione LIVE received, legendary_tier=minor noted (12 tagged). Round 7 (Critwom, Sirencada, Chimelop, toad final, Bastionpet baby) ok to go to owner; reminder of owner order 11-09: hunters + 7 enemy mobs perfect first, then cast 2D cel-shade pass, Boki 3D parked.
+
+### 11-09 17:26 ET ART -> COORD
+ART -> COORD 11-09 17:26: (1) Galleotter card replaced (owner pick galleotter_edit_v2b_4: ship and mast moved onto its chest, per RERENDER_PROMPTS s7). Old card kept as cards/Galleotter_old.jpg; manifest + cutout refreshed. Its sheet and portrait still show the old ship position until the V2 re-render. (2) OWNER APPROVED the V2 style files (STYLE_CANON_V2, RERENDER_PROMPTS, REVIEW_CHECKLIST_V2, MARQUEE_HUMAN_PASS). Owner: redesign the whole s7 hold list as Fable suggests (concepts go to him with before/after text first). No human artist: anchors and marquee are AI with the checklist. (3) Owner clarified 17:23: the hunters -> mobs -> Boki gate is the 3D order; the 2D Boki V2 pass is not gated and runs now. Please read DECISIONS line 491 that way.
