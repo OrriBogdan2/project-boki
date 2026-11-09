@@ -1,0 +1,17 @@
+{
+ "id": "smoke",
+ "name": "Smoke bomb",
+ "short": "Smoke",
+ "icon": "smoke",
+ "col": "b8b0c8",
+ "use": "smoke",
+ "cd": 2.0,
+ "max": 3,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 35,
+ "desc": "A cloud that hides everyone inside it, like tall grass, for 8s."
+}

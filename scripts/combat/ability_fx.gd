@@ -90,7 +90,7 @@ static func _far(m: Node, at: Vector3) -> bool:
 ## the delivery (a rail's bolt of light, a cone's blast fan, a wall's slam, a trap's spark, a blink's
 ## implosion). o: optional {range, radius}.
 static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vector2, col: Color, o := {}) -> void:
-	if m == null or m.get("fx") == null or caster == null or _far(m, at):
+	if m == null or m.get("fx") == null or caster == null or _far(m, at) or m.fx.own_look:
 		return
 	var fx: Fx = m.fx
 	var mine := _mine(m, caster)
@@ -112,32 +112,23 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 			fx.flash(hand, hot, 0.9, 0.12)
 			fx.spark(hand, d3, hot, 14, 16.0, 14.0, 0.2, 0.0, 1.4)
 			fx.ring(at, 1.6, Color(col, 0.9), 0.25)
-			if mine:
-				m.cam.add_trauma(0.18)
-				m.cam.punch(0.05)
 		"cone", "burst":
 			fx.flash(hand, hot, 1.2, 0.12)
 			fx.spark(hand, d3 if delivery == "cone" else Vector3.UP, hot, 26, 15.0, 32.0 if delivery == "cone" else 150.0, 0.24, 2.0, 1.5)
 			fx.burst(hand + d3 * 0.8, Color(0.85, 0.82, 0.78, 0.4), 10, 2.5, 0.6, -0.5, 2.0, d3 if delivery == "cone" else Vector3.UP, 25.0 if delivery == "cone" else 180.0)
 			fx.ring(at + d3 * 1.2, float(o.get("radius", 4.0)) * 0.8, Color(col, 0.8), 0.25)
-			if mine:
-				m.cam.add_trauma(0.25)       # (Feel: a strong RMB is tier 2, own-cast cap 0.25)
-				m.cam.punch(0.06)
 		"projectile", "disc":
 			fx.flash(hand, hot, 0.65, 0.09)
 			fx.spark(hand, d3, hot, 9, 10.0, 18.0, 0.16, 0.0, 1.1)
-			if mine: m.cam.add_trauma(0.05)
 		"leap", "launch", "dash":
 			fx.dust(at, 12)
 			fx.ring(at, 1.8, Color(col, 0.8), 0.25)
 			fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, 10, 7.0, 60.0, 0.25, 10.0, 1.0)
-			if mine and delivery == "leap": m.cam.add_trauma(0.05)
 		"wall", "summon":
 			fx.flash(at + Vector3(0, 1.0, 0), hot, 1.0, 0.14)
 			fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, 16, 8.0, 70.0, 0.3, 8.0, 1.2)
 			fx.ring(at, 2.0, Color(col, 0.85), 0.3)
 			fx.dust(at, 10)
-			if mine: m.cam.add_trauma(0.12)
 		"reflect", "aura":
 			fx.flash(hand, hot, 0.9, 0.14)
 			fx.ring(at, float(o.get("radius", 1.9)), Color(col, 0.95), 0.3)
@@ -155,7 +146,6 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 			fx.flash(at + Vector3(0, 0.9, 0), hot, 1.0, 0.14)
 			fx.spark(at + Vector3(0, 0.9, 0), Vector3.UP, hot, 14, 8.0, 180.0, 0.25, 0.0, 1.0)
 			fx.ring(at, 1.4, Color(col, 0.85), 0.22)
-			if mine: m.cam.add_trauma(0.08)
 
 ## An area landing (a slam, a mine going off, an ability's burst): a shockwave the size of what it
 ## covers, rubble and dust, and a shake that fades with distance (§5.5 leap landing / big area).
@@ -171,8 +161,8 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 	fx.dust(at, int(8 + r * 4))
 	if r >= 1.5:
 		m.sfx("ab_slam", at, (-2.0 if r > 2.0 else -5.0) + _vol(m, caster, at), clampf(1.25 - r * 0.08, 0.85, 1.2))
-		if caster != null and _mine(m, caster): m.cam.add_trauma(0.2)
-		else: m.shake(0.15 + r * 0.06, at)
+		if r >= 3.0 and caster is Ent and not _mine(m, caster):
+			Shake.incoming_big(m, at, 0.5, caster as Ent)
 
 ## What an ability hit does to the one it hit, readable at a glance and by ear (Juice.hit calls this
 ## for every ability hit): the category's impact sound, then the status: a stun rings round their
@@ -208,7 +198,6 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 	# the shake for whoever landed it (§5.5: T2 0.08, T3 0.15); the victim's comes from Match
 	if credit == p and target != p and not feel_owns():
 		var t3 := stun > 0.0 or root > 0.0 or d >= 22.0 or kb.length() >= 8.0
-		m.cam.add_trauma(0.15 if t3 else 0.08)
 		if t3 and stun > 0.0: m.freeze_frame(0.045)     # (Feel tier 3, target side)
 
 ## A held charge building (a charge-shot's hold): a glow gathering at the hand that grows and

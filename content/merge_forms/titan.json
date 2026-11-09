@@ -1,0 +1,157 @@
+{
+	"desc": "Heavy Star: the slow, immovable slammer. Units: seconds, metres, hp. Numbers are the same for every player; only baseline follows the weight class.",
+	"name": "Heavy Star",
+	"palette": {
+		"body": "#34384e",
+		"glow": "#b48cff",
+		"accent": "#ffd27a"
+	},
+	"sound": {
+		"xform": "boom",
+		"pitch": 0.55,
+		"ult": "boom"
+	},
+	"look": {
+		"scale": 1.45,
+		"part_k": 1.15,
+		"ring": 5.0,
+		"parts": [
+			"rock_plates",
+			"star_crown",
+			"gravity_ring"
+		],
+		"why": "~30% bigger: reads as the heaviest form from across the map"
+	},
+	"shell_k": 1.3,
+	"shell_why": "x1.3: the toughest shell",
+	"baseline": {
+		"light": {
+			"move_speed": 0.14
+		},
+		"medium": {
+			"move_speed": 0.08
+		},
+		"heavy": {
+			"move_speed": 0.03
+		},
+		"why": "run-speed bonus by weight class (a light hero keeps the most speed; merge cap +40%)"
+	},
+	"r": {
+		"name": "Collapse",
+		"icon": "quake",
+		"range": 11.0,
+		"end": 1.2,
+		"bot_range": 8.0,
+		"desc": "Leap to the marked circle, crash into a crater that pulls foes in, then launches them.",
+		"why": "0.65s leap with a filling ground marker (7m = the pull's reach), the launch lands 0.4s after the crash",
+		"beats": [
+			{
+				"at": 0.0,
+				"effects": [
+					{
+						"type": "leap",
+						"time": 0.65,
+						"color": "#b48cff",
+						"on_land": [
+							{
+								"type": "pull",
+								"radius": 7.0,
+								"strength": 15.0,
+								"color": "#b48cff"
+							},
+							{
+								"type": "area",
+								"radius": 5.0,
+								"dmg": 18,
+								"color": "#b48cff"
+							},
+							{
+								"type": "area",
+								"radius": 5.0,
+								"delay": 0.4,
+								"dmg": 48,
+								"kb": 15.0,
+								"lift": 9.0,
+								"color": "#e8d6ff"
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	"aug": {
+		"lmb": {
+			"name": "Star Slam",
+			"icon": "slam",
+			"desc": "Every 3rd attack slams the ground where it lands: a small knockback.",
+			"every": 3,
+			"slam": {
+				"type": "area",
+				"at": "here",
+				"radius": 2.6,
+				"dmg": 14,
+				"kb": 8.0,
+				"color": "#b48cff"
+			}
+		},
+		"rmb": {
+			"name": "Gravity Well",
+			"icon": "anchor",
+			"desc": "Your right click also drags nearby foes in and slows them. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "pull",
+					"at": "self",
+					"radius": 5.0,
+					"strength": 10.0,
+					"color": "#b48cff"
+				},
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 4.5,
+					"dmg": 6,
+					"slow": 1.5,
+					"slow_k": 0.35,
+					"color": "#b48cff"
+				}
+			]
+		},
+		"e": {
+			"name": "Quake",
+			"icon": "quake",
+			"desc": "Your E also quakes the ground around you: damage and a hard shove. Recharges 20% faster.",
+			"cd_k": 0.8,
+			"effects": [
+				{
+					"type": "area",
+					"at": "self",
+					"radius": 4.2,
+					"dmg": 12,
+					"kb": 9.0,
+					"lift": 2.0,
+					"color": "#d6bcff"
+				}
+			]
+		},
+		"dash": {
+			"kind": "charge",
+			"name": "Armoured Charge",
+			"icon": "roll",
+			"desc": "Your dash is armoured and shoves everything it runs through.",
+			"dmg": 8,
+			"shove": 9.0,
+			"width": 1.5,
+			"window": 0.45,
+			"guard": 0.5,
+			"color": "#b48cff"
+		},
+		"stats": {
+			"damage_reduction": 0.2,
+			"knockback_resist": 0.5
+		}
+	},
+	"aug_why": "the augment set of this Boki type, identical for every hero: LMB rider, RMB and E add-on effects, the form dash and a modest passive"
+}

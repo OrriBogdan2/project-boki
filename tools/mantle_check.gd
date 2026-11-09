@@ -254,7 +254,7 @@ func _steering(walls: Array) -> void:
 					start = Vector2(h.pos.x, h.pos.z); res["i0_" + mode] = i; went = true
 				if mode == "away" and went and left_at < 0 and not h.mantling():
 					left_at = i - int(res["i0_" + mode])
-				if start != Vector2.INF and i - int(res["i0_" + mode]) >= 12:
+				if start != Vector2.INF and i - int(res["i0_" + mode]) >= 24:
 					break
 			if not went:
 				res[mode] = null

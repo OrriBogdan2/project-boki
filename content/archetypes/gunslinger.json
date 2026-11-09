@@ -1,31 +1,165 @@
 {
 	"id": "gunslinger",
-	"name": "Gunslinger",
+	"title": "Hired Gun",
+	"base_name": "Vex",
+	"gender": "female",
+	"personality": "A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now.\nThe Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew.",
 	"weight": "medium",
-	"color": "#ffcf6a",
-	"fantasy": "The duelist. A rhythm of six, trick shots off walls, slide and reload.",
-	"silhouette": "the brim and coat tails",
-	"card": {"loop": "Hits and rolls load six Chambers; at 6 your Trick Shot is a Called Shot: a stunning crit that reloads you.", "dash": "Tap to roll (+2 Chambers, a third of a reload); hold to slide and shoot, full reload at the end.", "passive": "Chambers: each weapon hit loads one, a roll two; at 6 the gun glows gold: Called Shot.", "rmb": "A ricochet Trick Shot off walls and foes; hold for a piercing Rail Charge.", "e": "Quickdraw: 3s of faster fire, an instant reload and a dash charge back.", "r": "Lock every rival in sight, then fire one round per lock.", "weapons": {"rifle": "Steady auto fire; damage drops on long strings.", "burst_rifle": "Three-round bursts."}},
-	"weapons": ["rifle", "burst_rifle"],
-	"resource": {"id": "chambers", "name": "Chambers", "max": 6, "kind": "count", "gap": 0.25, "roll": 2, "wait": 4.0, "drain": 1.0, "called_k": 0.7, "called_stun": 0.4, "col": "#ffd23f"},
-	"passive": {"name": "Six Chambers", "desc": "Each weapon hit loads a chamber (one per 0.25s); a tap roll loads 2. At 6 the gun glows gold and your next Trick Shot is a Called Shot: +70% (a Rail +35%), a crit and stun 0.4, and when it lands the cylinder spins a full magazine in. Chambers drain after 4s without a hit."},
-	"dash": {"id": "slide", "name": "Slide Reload", "icon": "dash", "col": "#ffe0a0", "cd": 9.0,
-		"tap_t": 0.18, "roll": 3.4, "roll_t": 0.15, "invuln": 0.14, "reload": 0.35, "slide": 6.0, "slide_t": 0.5, "refund": 0.3,
-		"desc": "Tap: a 3.4m roll that slips 35% of the magazine in (roll through a hit as it lands: your next shots crit). Hold: a 6m low slide you can shoot from that fully reloads at the end; let go early to refund 30%."},
-	"rmb": {"delivery": "projectile", "name": "Trick Shot", "short": "Trick", "icon": "skypierce", "col": "#ffe27a", "cooldown": 7.0, "charges": 1, "hold": 0.2,
-		"trick": {"range": 9.0, "speed": 60.0, "dmg": 12.0, "walls": 2, "foe_jump": 5.0, "bounce_k": 0.2}, "rail": {"time": 1.0, "dmg": [10, 34], "range": [9, 17], "stun": 0.6},
-		"recoil": {"kick": 7.0, "lift": 8.5, "push": 6.0, "dmg": 10.0}, "double": {"gap": 0.1, "k": 0.6},
-		"variants": {"tap": "A ricochet round 9m: 12 damage, bounces off up to 2 walls and on to a second foe (+20% a bounce).", "hold": "Rail Charge: hold up to 1s, a piercing rail 10 to 34 damage, 9 to 17m; full charge stuns 0.6.", "air": "Recoil Shot: fire down and forward, kicked 3m up and back, the target pushed 6.", "during_e": "During Quickdraw it fires two rounds, the second 0.1s later at 60%.", "full": "At 6 Chambers: a Called Shot (+70%, crit, stun 0.4; a full reload when it lands)."},
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"}},
-	"e": {"delivery": "burst", "name": "Quickdraw", "short": "Quick", "icon": "haymaker", "col": "#ffb36a", "cooldown": 16.0, "time": 3.0, "fire_rate": 0.25, "pd_k": 2.0,
-		"desc": "For 3s: fire 25% faster, an instant reload, a dash charge back, and your next Slide Reload's perfect-dodge window is twice as long.",
-		"sockets": {"guard": "add", "util": "add"}},
-	"r": {"delivery": "projectile", "name": "Last Round", "short": "Last", "icon": "skypierce", "col": "#ffd23f", "cooldown": 100.0, "fuse": 0.45, "fuse_guard": "none", "reach": 12.0, "channel": 1.2, "self_slow": 0.6, "base": 16.0, "per_s": 12.0, "stun": 0.5,
-		"desc": "Channel up to 1.2s (slowed): gold lock lines draw to every rival hunter within 12m in sight. Press R again (or wait) to fire one round per lock: 16 + 12 per second locked; a full lock stuns 0.5. Breaking line of sight drops the lock.",
-		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add"}},
-	"order": ["sec", "dash", "kin", "sec", "dash", "ult", "sec", "kin", "ult", "gear"],
-	"rank3": {"sec": "+1 wall bounce", "dash": "a perfect dodge also loads 2 chambers", "kin": "+1s", "ult": "14m reach"},
-	"rank2": {"sec": "Rank 2: cooldown 7s -> 6.3s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 16s -> 14.4s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 100s -> 85s, +30% duration, +15% damage; 14m reach."},
-	"rank_next": {"sec": "Rank 3: cooldown 7s -> 5.6s, damage +30%; +1 wall bounce.", "kin": "Rank 3: cooldown 16s -> 12.8s, damage +30%; +1s.", "dash": "Rank 3: recharge 9s -> 6.3s; a perfect dodge also loads 2 chambers."},
-	"tells": {"half": "the gold cylinder over the hat fills pip by pip", "full": "a gold glow at the gun, the cylinder spinning, a click", "dash_spent": "dust streak and shell casings"}
+	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
+	"color": "#ff9a5c",
+	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
+	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
+	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
+	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
+	"card": {
+		"loop": "Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts.",
+		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
+		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
+		"rmb": "Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it.",
+		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
+		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
+		"weapons": {
+			"quill_rifle": "Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers)."
+		}
+	},
+	"signature": "quill_rifle",
+	"resource": {
+		"id": "fever",
+		"name": "Fever",
+		"max": 1,
+		"kind": "count",
+		"vamp": 0.06,
+		"wait": 3.5,
+		"rattle_k": 0.9,
+		"col": "#ff9a5c"
+	},
+	"passive": {
+		"name": "Hot Streak",
+		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch."
+	},
+	"dash": {
+		"id": "slipstep",
+		"name": "Slipstep",
+		"icon": "dash",
+		"col": "#ffc89a",
+		"cd": 8.5,
+		"tap_t": 0.18,
+		"roll": 4.8,
+		"roll_t": 0.45,
+		"invuln": 0.1,
+		"slide": 7.0,
+		"slide_t": 0.55,
+		"hold_cost": 0.4,
+		"desc": "Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
+		"air_k": 0.667
+	},
+	"rmb": {
+		"delivery": "projectile",
+		"name": "Burr Charge",
+		"short": "Burr",
+		"icon": "skypierce",
+		"col": "#ffb36a",
+		"cooldown": 6.5,
+		"charges": 1,
+		"burr": {
+			"speed": 26.0,
+			"range": 10.5,
+			"lane_w": 0.72,
+			"fuse": 0.9,
+			"cone_len": 6.0,
+			"cone_deg": 100.0,
+			"hit_dmg": 22.0,
+			"cone_dmg": 16.0,
+			"cone_rattle": 1.4,
+			"push": 11.0,
+			"wall_stun": 0.7,
+			"wall_daze": 0.6
+		},
+		"variants": {
+			"tap": "Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
+			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"mod": "add"
+		}
+	},
+	"e": {
+		"delivery": "burst",
+		"name": "Longneedle",
+		"short": "Needle",
+		"icon": "haymaker",
+		"col": "#ffe0a0",
+		"cooldown": 11.5,
+		"charge": 0.6,
+		"self_slow": 1.0,
+		"range": 18.0,
+		"width": 0.9,
+		"view_zoom": 0.25,
+		"dmg": 36.0,
+		"rattle_k": 0.2,
+		"shave": 0.2,
+		"shave_rank3": 0.3,
+		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core, tracking your aim while your view pulls out along it. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"guard": "add"
+		},
+		"linger": 0.75,
+		"recoil": 6.0
+	},
+	"x": {
+		"name": "Cinderfall",
+		"short": "Fall",
+		"icon": "earthshatter",
+		"col": "#ff7a3c",
+		"cooldown": 42.0,
+		"range": 14.0,
+		"radius": 3.4,
+		"core_r": 1.2,
+		"core_k": 0.5,
+		"delay": 1.6,
+		"dmg": 24.0,
+		"zone_t": 3.0,
+		"tick": 0.5,
+		"tick_dmg": 3.0,
+		"slow": 0.3,
+		"slow_t": 0.6,
+		"desc": "Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin"
+	],
+	"rank3": {
+		"sec": "resets when you knock a hunter",
+		"dash": "a burst of speed for 2s when a slide ends",
+		"kin": "every hunter hit takes 30% off the cooldown"
+	},
+	"rank2": {
+		"sec": "Rank 2: cooldown 6.5s -> 5.9s, damage +15%.",
+		"dash": "Rank 2: recharge 8.5s -> 7.7s.",
+		"kin": "Rank 2: cooldown 11.5s -> 10.4s, damage +20%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: cooldown 6.5s -> 5.2s; resets when you knock a hunter.",
+		"dash": "Rank 3: recharge 8.5s -> 6.8s; +25% speed for 2s when a slide ends.",
+		"kin": "Rank 3: cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown."
+	},
+	"tells": {
+		"half": "a lit Fever pip over the bar while the lifesteal runs",
+		"full": "the same lit pip and a heat shimmer",
+		"dash_spent": "an ember afterimage and faint skid streaks"
+	}
 }

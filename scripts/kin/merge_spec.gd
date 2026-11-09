@@ -11,8 +11,6 @@ var display_name := ""
 var flavor := ""
 var theme := "none"
 var duration := 6.0
-var grow_duration := 1.0     # extra seconds at full kin level and bond
-var grow_strength := 0.1     # extra strength at full kin level and bond
 var passives: Array = []     # [{stat, amount, category}]
 var on_shot := {}            # {effects: Array[PartSpec], splash, chain}
 var on_start: Array[StageSpec] = []
@@ -20,7 +18,7 @@ var on_end: Array[StageSpec] = []
 var pulses: Array = []       # [{every, stage: StageSpec}]
 var merged := {}             # slot ("active" | "auto") -> {stage, add_modifiers: Array[PartSpec], scale: {param: k}}
 
-const FIELDS := ["grammar", "id", "name", "flavor", "theme", "duration", "grow_duration", "grow_strength", "passives", "on_shot", "on_start", "on_end", "pulses", "merged"]
+const FIELDS := ["grammar", "id", "name", "flavor", "theme", "duration", "passives", "on_shot", "on_start", "on_end", "pulses", "merged"]
 const REQUIRED := ["grammar", "id", "name", "duration", "passives"]
 
 static func parse(v: Variant, rep: GrammarReport) -> MergeSpec:
@@ -38,8 +36,6 @@ static func parse(v: Variant, rep: GrammarReport) -> MergeSpec:
 	if not KinParts.THEMES.has(m.theme):
 		rep.err("theme", "unknown theme '%s' (themes are cosmetic: %s)" % [m.theme, ", ".join(KinParts.THEMES)])
 	m.duration = float(rep.param(d, "duration", KinParts.MERGE["duration"], ""))
-	m.grow_duration = float(rep.param(d, "grow_duration", KinParts.MERGE["grow_duration"], ""))
-	m.grow_strength = float(rep.param(d, "grow_strength", KinParts.MERGE["grow_strength"], ""))
 	m.passives = parse_passives(d.get("passives", []), "passives", rep, "merge")
 	if d.has("on_shot"):
 		m.on_shot = parse_on_shot(d["on_shot"], "on_shot", rep)

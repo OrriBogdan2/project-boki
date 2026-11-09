@@ -1,19 +1,19 @@
 class_name Duel
 extends RefCounted
 ## The duel room, next to the Training Grounds: you against one sparring bot hunter on an empty
-## island. Pick its class, weapon, glove, difficulty and behaviour (fight / dodge only / stand
+## island. Pick its Hunter, glove, difficulty and behaviour (fight / dodge only / stand
 ## still), reset whenever you like, and watch your numbers: damage dealt and taken, how many of your
 ## shots land, how many of its shots you dodge, and knocks. Nobody dies here: a knock resets the round.
 
-const CLASSES := ["light", "medium", "heavy"]
 const MODES := ["fight", "dodge", "still"]
 const MODE_NAMES := {"fight": "Fights back", "dodge": "Only dodges", "still": "Stands still"}
 
 var m: Match
 var bot: Hunter = null
-var cls := "medium"
+var arch := "gunslinger"       # the bot's Hunter (its weight follows)
 var weapon := ""
 var glove := ""
+var glove2 := ""        # the bot's second glove, on V (item 69)
 var diff := "medium"
 var mode := "fight"
 var home_at := Vector3.ZERO      # where you start each round
@@ -29,7 +29,7 @@ var _test_cast := -1.0
 func setup(match_node: Match) -> void:
 	m = match_node
 	diff = String(Settings.get_v("bot_diff")) if Data.BOT_DIFF.has(String(Settings.get_v("bot_diff"))) else "medium"
-	cls = CLASSES[randi() % 3]
+	arch = String(Arch.ids()[randi() % Arch.ids().size()])
 	weapon = ""
 	_clear_stats()
 	if m.player:
@@ -75,17 +75,17 @@ func _spot_for_bot(from: Vector3) -> Vector3:
 func spawn_bot() -> void:
 	if bot and is_instance_valid(bot):
 		_remove_bot()
-	var pool: Array = Data.CLASSES[cls]["weapons"]
-	if weapon == "" or not pool.has(weapon):
-		weapon = String(pool[0])
-	var kit := {"weapon": weapon, "perk": ""}
-	bot = m.make_hunter(m.next_id("duel"), 1, cls, "Sparring %s" % String(Data.CLASSES[cls].get("name", cls.capitalize())), "bot", m.bot_kin_record(), bot_at, kit, {})
+	var kit := {"arch": arch, "weapon": Arch.signature(arch), "perk": ""}
+	bot = m.make_hunter(m.next_id("duel"), 1, Arch.weight(arch), "Sparring %s" % Arch.name_of(arch, true), "bot", m.bot_kin_record(), bot_at, kit, {})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
+	weapon = bot.wid          # (its archetype's signature weapon: nobody swaps)
 	bot.lives = 99
 	bot.tonics = 0
 	if glove != "" and Gear.ALL.has(glove):
-		bot.gear[Gear.slot_of(glove)] = {"id": glove, "rar": 2}
-		bot.refresh_gear()
+		bot.gear[0] = {"id": glove, "rar": 2}
+	if glove2 != "" and Gear.ALL.has(glove2) and glove2 != glove:
+		bot.gear[1] = {"id": glove2, "rar": 2}
+	bot.refresh_gear()
 	reset()
 
 func _remove_bot() -> void:
@@ -203,15 +203,17 @@ func _on_hit(by, t, d, tags) -> void:
 func cycle(what: String, step := 1) -> void:
 	match what:
 		"cls":
-			cls = CLASSES[(CLASSES.find(cls) + step + 3) % 3]
+			var ids := Arch.ids()      # ("cls" is the Hunter row: the key the duel check steps)
+			arch = String(ids[(ids.find(arch) + step + ids.size()) % ids.size()])
 			weapon = ""
-		"weapon":
-			var pool: Array = Data.CLASSES[cls]["weapons"]
-			weapon = String(pool[(pool.find(weapon) + step + pool.size()) % pool.size()])
 		"glove":
 			var keys: Array = [""] + Gear.ALL.keys().filter(func(g): return Gear.active(String(g)))
 			keys.sort()
 			glove = String(keys[(keys.find(glove) + step + keys.size()) % keys.size()])
+		"glove2":
+			var keys2: Array = [""] + Gear.ALL.keys().filter(func(g): return Gear.active(String(g)))
+			keys2.sort()
+			glove2 = String(keys2[(keys2.find(glove2) + step + keys2.size()) % keys2.size()])
 		"diff":
 			var order: Array = Data.BOT_ORDER
 			diff = String(order[(order.find(diff) + step + order.size()) % order.size()])
@@ -222,9 +224,10 @@ func cycle(what: String, step := 1) -> void:
 
 func pick_text(what: String) -> String:
 	match what:
-		"cls": return String(Data.CLASSES[cls].get("name", cls.capitalize()))
-		"weapon": return String(Data.weapon_stats(weapon, 0).get("name", weapon)) if weapon != "" else "-"
+		"cls": return Arch.name_of(arch)
+		"weapon": return String(Data.weapon_stats(weapon).get("name", weapon)) if weapon != "" else "-"
 		"glove": return String(Gear.ALL[glove]["name"]) if glove != "" and Gear.ALL.has(glove) else "None"
+		"glove2": return String(Gear.ALL[glove2]["name"]) if glove2 != "" and Gear.ALL.has(glove2) else "None"
 		"diff": return String(Data.BOT_DIFF[diff]["name"])
 		"mode": return String(MODE_NAMES[mode])
 	return ""
@@ -233,7 +236,7 @@ func pick_text(what: String) -> String:
 var keys_node: Node = null
 var menu_layer: CanvasLayer = null
 
-## B opens the setup menu, X resets the round. A little node so keys work even while paused.
+## B opens the setup menu, Backspace resets the round. A little node so keys work even while paused.
 class DuelKeys extends Node:
 	var d: Duel
 	func _init(owner_duel: Duel) -> void:
@@ -247,7 +250,7 @@ class DuelKeys extends Node:
 			if d.menu_layer: d.close_menu()
 			elif not Overlay.is_open(): d.open_menu()
 			get_viewport().set_input_as_handled()
-		elif k == KEY_X and d.menu_layer == null and not d.m.paused:
+		elif k == KEY_BACKSPACE and d.menu_layer == null and not d.m.paused:
 			d.reset()
 			get_viewport().set_input_as_handled()
 		elif k == KEY_ESCAPE and d.menu_layer:
@@ -266,7 +269,6 @@ func open_menu() -> void:
 	m.add_child(menu_layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.theme = UI.theme()
 	menu_layer.add_child(root)
 	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.4)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -281,8 +283,10 @@ func open_menu() -> void:
 func _fill_menu(v: VBoxContainer) -> void:
 	for ch in v.get_children():
 		ch.queue_free()
-	v.add_child(UI.label("Changing the class, weapon, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
-	for row in [["cls", "Class"], ["weapon", "Weapon"], ["glove", "Glove (Q)"], ["diff", "Difficulty"], ["mode", "Behaviour"]]:
+	v.add_child(UI.label("Changing the Hunter, glove or difficulty brings in a fresh bot. The behaviour switches on the spot.", 14, UI.MUTED))
+	var rows := [["cls", "Hunter"], ["glove", "Glove 1 (%s)" % Gloves.key_cap(0)]]
+	rows += [["glove2", "Glove 2 (%s)" % Gloves.key_cap(1)], ["diff", "Difficulty"], ["mode", "Behaviour"]]
+	for row in rows:
 		var what: String = row[0]
 		var h := UI.hbox(8)
 		var l := UI.label(row[1], 15, UI.MUTED); l.custom_minimum_size.x = 120
@@ -293,12 +297,35 @@ func _fill_menu(v: VBoxContainer) -> void:
 		h.add_child(val)
 		h.add_child(UI.button("›", func(): cycle(what, 1); _fill_menu(v), 44))
 		v.add_child(h)
+	if m.arena:
+		v.add_child(_kin_row(v))      # your Boki: any species, a loaner if you don't own it (never saved)
 	var acts := UI.hbox(8)
 	acts.add_child(UI.button("Reset round", func(): reset(); close_menu(), 150))
 	acts.add_child(UI.button("Heal both", func(): heal_both(), 130))
 	acts.add_child(UI.button("Clear stats", func(): _clear_stats(); round_n = 1, 130))
 	v.add_child(acts)
-	v.add_child(UI.label("B opens this menu  ·  X resets the round  ·  Esc leaves the room", 13, UI.MUTED))
+	v.add_child(UI.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
+
+## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
+## that never reaches your roster; the training area has no way out).
+func _kin_row(v: VBoxContainer) -> HBoxContainer:
+	var P: Hunter = m.player
+	var opts: Array = m.arena._kin_choices()
+	var cur := String((P.kin as Kin).species) if P.kin and not (P.kin as Kin).dead else ""
+	var i := maxi(0, opts.find(cur))
+	var h := UI.hbox(8)
+	var l := UI.label("Your Boki", 15, UI.MUTED); l.custom_minimum_size.x = 120
+	h.add_child(l)
+	var step := func(d: int):
+		m.arena.set_kin(String(opts[posmod(i + d, opts.size())]))
+		_fill_menu(v)
+	h.add_child(UI.button("‹", func(): step.call(-1), 44))
+	var nm := "None" if cur == "" else String(Data.KIN.get(cur, {}).get("name", cur))
+	var val := UI.label(nm, 16, UI.INK); val.custom_minimum_size.x = 200
+	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	h.add_child(val)
+	h.add_child(UI.button("›", func(): step.call(1), 44))
+	return h
 
 func close_menu() -> void:
 	if menu_layer:

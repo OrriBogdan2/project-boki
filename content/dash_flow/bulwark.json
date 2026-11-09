@@ -1,0 +1,34 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "buffer", "source": "data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair)"},
+			"rmb": {"mode": "fire", "source": "data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash)"},
+			"e": {"mode": "fire", "source": "data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair)"},
+			"x": {"mode": "cancel", "source": "data: Abyssalbreaker sends a fissure from where he stands; footage f25-f31: he is planted for the slam. It ends the dash where he is (no footage of the pair)"},
+			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
+		},
+		"air": {
+			"lmb": {"mode": "buffer", "source": "footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends"},
+			"rmb": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
+			"e": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
+			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is"},
+			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "variant": "short", "source": "wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown. Owner item 51 overrides the ending: the short plain dash goes on a full charge (with the charge kept the reduced cooldown has no reason left) and the swing keeps charging through it (hold.lmb.ground); in the swing's step or the perfect launch, Shift goes at once"},
+		"rmb": {"mode": "fire", "variant": "charge", "source": "data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it"},
+		"e": {"mode": "fire", "source": "data: Regen Field stays round the hammer; the dash doesn't touch it"},
+		"x": {"mode": "buffer", "reason": "planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant", "source": "Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: Oath planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts."},
+		"q": {"mode": "fire", "source": "gloves are our own (no source)"}
+	},
+	"hold": {
+		"lmb": {
+			"ground": {"mode": "keep", "source": "Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it"},
+			"air": {"mode": "keep", "source": "Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is)"},
+			"jump": {"mode": "keep"},
+			"mantle": {"mode": "cancel", "reason": "owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)", "source": "Owner item 30; the source has no mantle rule."}
+		}
+	}
+}

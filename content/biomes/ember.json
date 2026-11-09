@@ -50,17 +50,7 @@
 		}
 	],
 	"loot": {
-		"weapons": {
-			"shotgun": 4,
-			"greatsword": 3,
-			"minigun": 2,
-			"rifle": 1,
-			"smg": 1,
-			"sniper": 1,
-			"burst_rifle": 1,
-			"longsword": 1,
-			"twin_blades": 1
-		},
+		"slots": {"glove": 1.6, "armor": 1.2},
 		"rarity_bonus": 0,
 		"gear": [
 			"ember"

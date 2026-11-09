@@ -28,6 +28,6 @@ void fragment() {
 	float body = 1.0 - smoothstep(mix(0.55, 0.15, softness), 1.0, d);
 	float c = 1.0 - smoothstep(0.0, 0.35, d);
 	float fog = vis_fog(wp);
-	ALBEDO = (COLOR.rgb * body + vec3(1.0) * c * core * body) * intensity * (1.0 - fog * 0.75);
+	ALBEDO = (COLOR.rgb * body + vec3(1.0) * c * core * body) * intensity * (1.0 - fog * 0.6);
 	ALPHA = body * COLOR.a;
 }

@@ -81,7 +81,7 @@ static func origin_text(rec: Dictionary) -> String:
 	var tn := String(w.get("tier_name", ""))
 	if tn != "": place += (" (%s)" % tn) if place != "" else tn
 	match String(o.get("how", "unknown")):
-		"wild": return "Tamed in the wild" + ((" at " + place) if place != "" else "")
+		"wild": return "Scanned in the wild" + ((" at " + place) if place != "" else "")
 		"taken": return "Taken from %s" % String(o.get("from", "a rival")) + ((" at " + place) if place != "" else "")
 		"egg": return "Hatched in your Nesting Nook"
 		"boss_egg":
@@ -90,6 +90,10 @@ static func origin_text(rec: Dictionary) -> String:
 			return "Hatched from a Rare Egg" + ((" from %s" % bn) if bn != "" else "")
 		"starter": return "Your first partner, hatched from the egg you chose"
 		"market": return "Bought at the market" + ((" from %s" % String(o["from"])) if String(o.get("from", "")) != "" else "")
+		"shelter":
+			var giver := String(o.get("from", ""))
+			return "Adopted from the shelter" + ((", raised by %s" % giver) if giver != "" else "")
+		"transfer": return "Handed to you by %s" % String(o.get("from", "another hunter"))
 		"event": return "Met at an event" + ((" at " + place) if place != "" else "")
 	return "From before records were kept"
 
@@ -190,12 +194,14 @@ static func origin_short(rec: Dictionary) -> String:
 	var w: Dictionary = o.get("where", {}) if typeof(o.get("where", null)) == TYPE_DICTIONARY else {}
 	var place := String(w.get("island", w.get("map", "")))
 	match String(o.get("how", "unknown")):
-		"wild": return "Tamed" + ((" at " + place) if place != "" else " in the wild")
+		"wild": return "Scanned" + ((" at " + place) if place != "" else " in the wild")
 		"taken": return "Taken from %s" % String(o.get("from", "a rival"))
 		"egg": return "Hatched at home"
 		"boss_egg": return "Hatched from a Rare Egg"
 		"starter": return "Your first partner"
 		"market": return "From the market"
+		"shelter": return "Adopted from the shelter"
+		"transfer": return "Handed to you"
 		"event": return "Met at an event"
 	return "Before records"
 

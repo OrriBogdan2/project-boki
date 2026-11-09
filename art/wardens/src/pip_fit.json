@@ -1,0 +1,558 @@
+{
+ "body_glb": "~/meshy/pip_r2/bakeB/low.glb",
+ "rig": "art/wardens/src/pip_rig.json",
+ "out": "art/wardens/pip/pip.glb",
+ "blend": "~/meshy/pip_r2/fit.blend",
+ "turn": 180,
+ "max_tris": 34000,
+ "floater_verts": 8,
+ "snap_r": 0.045,
+ "scale_joints": [
+  "hip.L",
+  "shoulder.L"
+ ],
+ "joints": {
+  "crown": [
+   0,
+   -0.16,
+   0.77
+  ],
+  "neck": [
+   0,
+   -0.14,
+   0.36
+  ],
+  "shoulder.L": [
+   0.14,
+   -0.16,
+   0.25
+  ],
+  "shoulder.R": [
+   -0.14,
+   -0.16,
+   0.25
+  ],
+  "elbow.L": [
+   0.33,
+   -0.24,
+   0.04
+  ],
+  "elbow.R": [
+   -0.33,
+   -0.24,
+   0.04
+  ],
+  "hand.L": [
+   0.46,
+   -0.29,
+   -0.1
+  ],
+  "hand.R": [
+   -0.46,
+   -0.29,
+   -0.1
+  ],
+  "fingers.L": [
+   0.52,
+   -0.3,
+   -0.13
+  ],
+  "fingers.R": [
+   -0.52,
+   -0.3,
+   -0.13
+  ],
+  "hip.L": [
+   0.07,
+   -0.14,
+   -0.26
+  ],
+  "hip.R": [
+   -0.07,
+   -0.14,
+   -0.26
+  ],
+  "knee.L": [
+   0.065,
+   -0.06,
+   -0.54
+  ],
+  "knee.R": [
+   -0.065,
+   -0.06,
+   -0.54
+  ],
+  "ankle.L": [
+   0.06,
+   -0.05,
+   -0.8
+  ],
+  "ankle.R": [
+   -0.06,
+   -0.05,
+   -0.8
+  ]
+ },
+ "snap_y": false,
+ "chunk": {
+  "head": 1.14,
+  "girth": 1.12,
+  "limbs": {
+   "thigh.L": 1.3,
+   "thigh.R": 1.3,
+   "shin.L": 1.15,
+   "shin.R": 1.15,
+   "hips": 1.1,
+   "upper_arm.L": 1.25,
+   "upper_arm.R": 1.25,
+   "forearm.L": 1.2,
+   "forearm.R": 1.2
+  }
+ },
+ "lift": [
+  0.88,
+  1.05,
+  1.1
+ ],
+ "glow_min": [
+  2.0,
+  2.0,
+  -1.0
+ ],
+ "normal_smooth": 8,
+ "pad": 32,
+ "cap_holes": true,
+ "cap_flat": true,
+ "ink_room": 0.02,
+ "atlas_px": 2048,
+ "slot_rules": [
+  {
+   "slot": "cloth",
+   "hsv": [
+    0.38,
+    0.62,
+    0.18,
+    1.0,
+    0.08,
+    1.0
+   ]
+  },
+  {
+   "slot": "cloth",
+   "hsv": [
+    0.2,
+    0.38,
+    0.3,
+    1.0,
+    0.15,
+    1.0
+   ]
+  },
+  {
+   "slot": "metal",
+   "box": [
+    null,
+    null,
+    null,
+    null,
+    0.45,
+    null
+   ],
+   "hsv": [
+    0.06,
+    0.18,
+    0.25,
+    1.0,
+    0.3,
+    1.0
+   ]
+  },
+  {
+   "slot": "leather",
+   "hsv": [
+    0.03,
+    0.14,
+    0.25,
+    0.85,
+    0.12,
+    0.62
+   ]
+  },
+  {
+   "slot": "skin"
+  }
+ ],
+ "slot_vote": 4,
+ "fit_weights": true,
+ "wings": [
+  {
+   "name": "wing_up_R",
+   "kind": "up",
+   "root": [
+    0.03,
+    -0.13,
+    0.95
+   ],
+   "tip": [
+    0.64776,
+    -0.33592,
+    1.4252
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.406,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  },
+  {
+   "name": "wing_up_L",
+   "kind": "up",
+   "root": [
+    -0.03,
+    -0.13,
+    0.95
+   ],
+   "tip": [
+    -0.64776,
+    -0.33592,
+    1.4252
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.406,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  },
+  {
+   "name": "wing_lo_R",
+   "kind": "lo",
+   "root": [
+    0.03,
+    -0.13,
+    0.88
+   ],
+   "tip": [
+    0.5052,
+    -0.27256,
+    0.46815999999999997
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.304,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  },
+  {
+   "name": "wing_lo_L",
+   "kind": "lo",
+   "root": [
+    -0.03,
+    -0.13,
+    0.88
+   ],
+   "tip": [
+    -0.5052,
+    -0.27256,
+    0.46815999999999997
+   ],
+   "across": [
+    0,
+    0,
+    1
+   ],
+   "width": 0.304,
+   "bow": [
+    0,
+    -0.02,
+    0
+   ],
+   "bones": 2
+  }
+ ],
+ "wing_look": {
+  "up": {
+   "base": "ffb0d8",
+   "tints": [
+    "ffc0e0",
+    "ffb8dc",
+    "f8c0f0"
+   ],
+   "tint_k": 0.3,
+   "alpha": 0.55,
+   "rim": "ffe8f6",
+   "rim_alpha": 0.9,
+   "edge": 0.9,
+   "edge_col": "ff8cc4",
+   "edge_alpha": 0.9,
+   "vein": "ffffff",
+   "vein_w": 0.004,
+   "vein_alpha": 0.9,
+   "veins": 0,
+   "cells": [],
+   "power": 0.5,
+   "skew": 0.55,
+   "root_w": 0.06
+  },
+  "lo": {
+   "base": "ffb0d8",
+   "tints": [
+    "ffc0e0",
+    "ffb8dc",
+    "f8c0f0"
+   ],
+   "tint_k": 0.3,
+   "alpha": 0.55,
+   "rim": "ffe8f6",
+   "rim_alpha": 0.9,
+   "edge": 0.9,
+   "edge_col": "ff8cc4",
+   "edge_alpha": 0.9,
+   "vein": "ffffff",
+   "vein_w": 0.004,
+   "vein_alpha": 0.9,
+   "veins": 0,
+   "cells": [],
+   "power": 0.55,
+   "skew": 0.6,
+   "root_w": 0.06
+  }
+ },
+ "lantern": {
+  "at": [
+   -0.186,
+   0.0,
+   0.6
+  ],
+  "size": 2.2,
+  "parent": "hand.L",
+  "name": "hang_lantern"
+ },
+ "lantern_look": {
+  "colours": {
+   "copper": "8e4e26",
+   "glass": "e8781e"
+  },
+  "arch": true,
+  "frame": "3a1c0c",
+  "core": "ffc864",
+  "core_r": 0.38
+ },
+ "weight_rules": [],
+ "smooth": {
+  "iterations": 5,
+  "sigma_s": 4.0,
+  "sigma_r": 0.12
+ },
+ "ramps": [
+  {
+   "name": "pink fur",
+   "slots": [
+    "skin"
+   ],
+   "hsv": [
+    0.86,
+    0.05,
+    0.26,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "6c3a48",
+    "8c5262",
+    "aa6a78",
+    "c4848e",
+    "d4949c",
+    "e0a8ae"
+   ]
+  },
+  {
+   "name": "cream fur",
+   "slots": [
+    "skin"
+   ],
+   "hsv": [
+    0.04,
+    0.16,
+    0.06,
+    0.3,
+    0.62,
+    1.0
+   ],
+   "ramp": [
+    "c89c8c",
+    "e0bca6",
+    "eecbb4",
+    "f4d8c4"
+   ]
+  },
+  {
+   "name": "cape",
+   "slots": [
+    "cloth"
+   ],
+   "hsv": [
+    0.38,
+    0.62,
+    0.0,
+    1.0,
+    0.0,
+    1.0
+   ],
+   "ramp": [
+    "15292e",
+    "1f3d44",
+    "2c555c",
+    "43737a"
+   ]
+  },
+  {
+   "name": "leather",
+   "slots": [
+    "leather"
+   ],
+   "ramp": [
+    "3e2418",
+    "5c3a28",
+    "7e5440",
+    "a07460"
+   ]
+  },
+  {
+   "name": "brass",
+   "slots": [
+    "metal"
+   ],
+   "ramp": [
+    "4a3418",
+    "6e5228",
+    "94743c",
+    "c0a060"
+   ]
+  }
+ ],
+ "despeckle": 2,
+ "cut_fitted": [
+  [
+   -0.45,
+   0.45,
+   -0.8,
+   -0.13,
+   0.05,
+   0.74
+  ]
+ ],
+ "fluff_tail": {
+  "name": "tail",
+  "parent": "tail",
+  "path": [
+   [
+    0,
+    -0.13,
+    0.72
+   ],
+   [
+    -0.08,
+    -0.24,
+    0.58
+   ],
+   [
+    -0.22,
+    -0.26,
+    0.42
+   ],
+   [
+    -0.36,
+    -0.18,
+    0.3
+   ],
+   [
+    -0.46,
+    -0.06,
+    0.32
+   ],
+   [
+    -0.5,
+    0.02,
+    0.45
+   ],
+   [
+    -0.46,
+    0.05,
+    0.58
+   ]
+  ],
+  "radii": [
+   0.06,
+   0.144,
+   0.216,
+   0.228,
+   0.192,
+   0.132,
+   0.048
+  ],
+  "base": "b46a78",
+  "tip": "fbe8d8",
+  "shade": "9c5c6a",
+  "tip_from": 0.58,
+  "bones": 5,
+  "clumps": 10,
+  "sides": 20,
+  "samples": 48,
+  "slot": "fur",
+  "fluff": 0.22
+ },
+ "flower_crown": {
+  "ring": true,
+  "centre": [
+   0.0,
+   -0.02,
+   1.575
+  ],
+  "r": 0.365,
+  "tilt": -12,
+  "n": 34,
+  "size": 0.036,
+  "out": 0.016,
+  "bone": "head"
+ },
+ "cape": {
+  "z0": 1.17,
+  "z1": 0.78,
+  "w0": 0.24,
+  "w1": 0.36,
+  "out": 0.02,
+  "wrap": 0.14,
+  "folds": 3,
+  "fold": 0.014,
+  "colours": [
+   "24484f",
+   "2f5d64",
+   "3d7178",
+   "4c858a"
+  ],
+  "bone": "hips",
+  "y_lo": -0.42
+ }
+}

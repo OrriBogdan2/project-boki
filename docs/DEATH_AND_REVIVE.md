@@ -1,6 +1,6 @@
 # Down, death, revive and respawn (built on Supervive's rules, tuned for extraction)
 
-Code: `scripts/match/`. Rules per mode: `data/rules/trios.tres`, `duos.tres`, `solo.tres` (script `life_rules.gd`; every value is tagged in that file). Rules per run tier: `data/tiers/shallows.tres`, `deeps.tres`, `abyss.tres`.
+Code: `scripts/match/` (`life.gd`, `box_revive.gd`, `beacons.gd`; numbers in `content/rules/revive.json`). Rules per mode: `data/rules/trios.tres`, `duos.tres`, `solo.tres` (script `life_rules.gd`; every value is tagged in that file). Rules per run tier: `data/tiers/shallows.tres`, `deeps.tres`, `abyss.tres`.
 
 ## The flow
 
@@ -8,31 +8,32 @@ Code: `scripts/match/`. Rules per mode: `data/rules/trios.tres`, `duos.tres`, `s
 ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped──► DEAD (deathbox)
   ▲                  │                                                    │
   └── ally stands on you (4s) ◄┘                                          │
-  ├── teammate holds E at your deathbox (8s, soul still there) ◄──────────┤
-  └── teammate stands on a revive beacon (6s) ◄───────────────────────────┘
+  ├── teammate holds F at your deathbox (7.5s, soul still there) ◄────────┤
+  └── teammate stands on a revive beacon (4s, whole squad) ◄──────────────┘
 ```
 
 | Step | Rule | Value | Source |
 |---|---|---|---|
-| Knocked | 0 HP with a teammate still up → you become a **wisp**: crawl slowly, can't attack, dash, jump or glide, and can't be shot | crawl at 40% speed | [wiki] "heavily slowed" / [est] |
+| Knocked | 0 HP with a teammate still up → you become a **wisp** (the hero pops into a glowing Wisp, docs/decisions/0019; a revive pops the hero back): drift slowly, can't attack, dash, jump or glide, and can't be shot | crawl at 40% speed | [wiki] "heavily slowed" / [est] |
 | Bleed-out | Wisp drains on its own | **15s** | [patch] |
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
 | Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
-| Knock reward | The knocker heals and gets a dash charge back | +250 HP, +1 dash | [patch] |
+| Takedown reward | Knocking or killing an enemy hunter (not a mob) heals 5% of max health and brings every dash charge back at once (`DashReset`); the local hunter gets the reset cue and a pop on the Shift icon | +250 HP, +1 dash | [patch] |
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |
 | Box colour | Grey / blue / purple / gold by value | 500 / 2k / 5k | [patch] (colour by value) |
-| Deathbox revive | Teammate holds E at your box while your soul is there, kneeling and locked in place, with a loud rising hum anyone within ~30m hears (rivals get a minimap sound ping; bots come to look). Damage cancels the channel (let go and start again). **You get the box's loot back** | **8s**, 25% HP, 90s soul window | [wiki] / [design] |
+| Deathbox revive | Teammate holds F at your box while your soul is there (`BoxRevive`, docs/decisions/0018). While channelling they can't attack and take **×1.2 damage** (the tonic's `Hunter.CONSUME_VULN`); a real hit, moving, dashing, jumping or a stun cancels it (let go of F and hold it again). A loud rising hum anyone within ~30m hears (rivals get a minimap sound ping; bots come to look); a progress ring on the box and round the reviver. You come back at the box with your Boki and **the box's loot back**. Each later box revive of the same Hunter in a match is slower (the source's curve 1.0 / 0.75 / 0.58 / 0.47) | **7.5s**, 25% HP, 90s soul window | owner (101b) / [data] |
+| Whose box | A teammate's box wears their squad colour (body tint and a ring) with their face, name and soul timer over it; a rival's is red. Your squad's boxes always show on the minimap and the full map, a rival's while it's within your sight | — | owner (101) |
 | Looting | Press F at a box: a window lists everything in it (icon, rarity colour, "upgrade" where it beats yours). Click to take items one at a time (a glove or weapon swap leaves yours in the box); press F again or Smart loot to take everything useful and leave worse gear. Bots still hold F for 1s | instant | [design] |
-| Revive beacon | Teammate stands on it: brings back every dead or downed teammate. Single use. Map-wide alert. Two teams on it pauses (doesn't reset) | **6s** | [patch] 1.0 |
+| Revive beacon | Several per map, shown on the minimap and full map. Teammate stands on it: brings back every dead or downed teammate at once, wherever they fell (`Beacons`). Single use. Two teams on it pauses (doesn't reset). **Loud:** while it's lit every player gets a horn, a toast with its direction, a pulsing marker on both maps and an arrow in the world, and its hum carries 120m. Online the `"bcn"` event carries lit / out / used | **4s** | owner (101b) |
 | Everbeacon | Unlimited uses, can't be contested | **10s** | [patch] |
 | Beacon revive | Full HP but **no loot** (your box stays where it was, so go get it), plus resurrection sickness | −25% damage for **12s** | [patch] + [design] |
 
 **Why this works for extraction:**
 - Getting picked up from a wisp costs nothing.
-- A box revive costs a dangerous, noisy 8s channel, but you keep your loot.
-- A beacon revive is safe-ish, but you come back empty-handed.
+- A box revive costs a dangerous, noisy 7.5s channel (you take more damage and can't fight), but you keep your loot.
+- A beacon revive is quick, but it tells the whole map where you are, and you come back empty-handed.
 - Every death creates a "go back for the box" decision, which is the extraction loop.
 
 ## Solos: my recommendation
@@ -58,10 +59,12 @@ Risk scales with the tier you queue into (`data/tiers/*.tres`, script `run_tier.
 | Tier | Kin you have on you when you die | Kin out of your hands (thrown, following a teammate) | Loot value |
 |---|---|---|---|
 | **Shallows** (1) | Stay with you, never lost | Follow a living teammate, or flee home | ×1 |
-| **Deeps** (2) | **Drop into your deathbox: anyone can loot them** | Follow a teammate, or flee home | ×1.75 |
-| **Abyss** (3) | **Drop into your deathbox: lootable** | **Can be captured by enemies** (hold E, 3s) | ×2.75 |
+| **Deeps** (2) | **Never lost (docs/decisions/0008)** | Follow a teammate, or flee home | ×1.75 |
+| **Abyss** (3) | **Drop dazed and guard the spot; revive, then pick it up and carry it for 3.5s to take it back** | **Enemies can scan them** | ×2.75 |
 
 All names and multipliers are placeholders.
+
+**Superseded by docs/decisions/0008-boki-loss.md** (the Boki drops dazed beside the deathbox instead of into it; the notes below describe the old box rules).
 
 **Getting a kin back in the Deeps or Abyss:**
 - A box revive by your teammate brings you back with your loot and your kin.

@@ -151,6 +151,11 @@ static func _weak_k(caster: Node) -> float:
 	var o: Node = owner_of(caster)
 	return 0.5 if o and "weak_t" in o and float(o.weak_t) > 0.0 else 1.0
 
+## Heals and shields from a hunter's ability: _weak_k, grown by their level's ability power (LevelGrowth).
+## A Boki's own heals don't grow with its hunter's level.
+static func _heal_k(caster: Node) -> float:
+	return _weak_k(caster) * LevelGrowth.ap(caster)
+
 static func _m(caster: Node) -> Node:
 	return caster.get("m") if caster else null
 
@@ -227,7 +232,7 @@ static func level_k(ctx: Dictionary) -> float:
 static func _power(caster: Node, ctx: Dictionary) -> float:
 	var m = _m(caster)
 	if caster is Hunter:
-		return m.dmg_mult(caster) * level_k(ctx)
+		return m.dmg_mult(caster) * level_k(ctx) * LevelGrowth.ap(caster)
 	return float(ctx.get("power", 1.0)) * level_k(ctx)
 
 static func _hit_opts(e: Dictionary, ctx: Dictionary, kb: Vector2, caster: Node) -> Dictionary:
@@ -303,7 +308,6 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.ring(at, r, col, 0.3)
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
-			if r > 2.0: m.shake(0.3, at)
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
@@ -317,7 +321,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						o["stun"] = maxf(float(o.get("stun", 0.0)), float(e["spike"].get("stun", 0.8)))
 						o.erase("lift")
 						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
-						f.vel.y = -16.0
+						m.displace.spike(f, -16.0)
 					f.hurt(dmg, caster, o)
 		"cone":
 			var d := _aim_dir(caster, ctx)
@@ -362,7 +366,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			for f in m.foes_of(caster.team):
 				var rel := Vector2(at.x - f.pos.x, at.z - f.pos.z)
 				if rel.length() < r + f.r and rel.length() > 0.4 and absf(f.pos.y - at.y) < 2.5:
-					f.impulse(rel.normalized() * float(e.get("strength", 6.0)) * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
+					m.displace.knock(f, rel.normalized() * float(e.get("strength", 6.0)) * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
 		"zone":
 			var at := _where(e, caster, ctx, "aim")
 			m.fields.add(caster, at, e, ctx, pw)
@@ -434,12 +438,12 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				if t is Hunter: AbilityFx.cast(m, t, "launch", t.pos, Vector2.ZERO, col)
 		"heal":
 			for t in _targets(e, caster):
-				_heal(t, float(e.get("amount", 20.0)) * _weak_k(caster))
+				_heal(t, float(e.get("amount", 20.0)) * _heal_k(caster))
 				m.fx.burst(t.pos + Vector3(0, 1.0, 0), Color("8fe0a0"), 12, 2.5, 0.5, -3.0)
 		"shield":
 			for t in _targets(e, caster):
 				if "shield" in t:
-					t.shield = maxf(float(t.shield), float(e.get("amount", 40.0)) * _weak_k(caster))
+					t.shield = maxf(float(t.shield), float(e.get("amount", 40.0)) * _heal_k(caster))
 					if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 5.0)))
 				m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", caster.pos, -3.0)
@@ -503,7 +507,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				m.fx.burst(a + Vector3(0, 0.9, 0), col, 16, 4.0, 0.4)
 				m.fx.burst(b + Vector3(0, 0.9, 0), col, 16, 4.0, 0.4)
 				m.fx.bolt(a + Vector3(0, 1.0, 0), b + Vector3(0, 1.0, 0), col)
-				who.teleport(b); tgt.teleport(a)
+				who.teleport(b); m.displace.teleport(tgt, a)
 				who.vel = Vector3.ZERO; tgt.vel = Vector3.ZERO
 				if who is Hunter: (who as Hunter).gliding = false
 				if tgt is Hunter: (tgt as Hunter).gliding = false
@@ -617,9 +621,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				var who_l: Array = [h]
 				if h.kin and h.kin.state in ["active", "giant"] and h.kin.flat_dist(at) < rad + 0.5: who_l.append(h.kin)
 				for t in who_l:
-					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _weak_k(caster))
+					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster))
 					if float(e.get("shield", 0.0)) > 0.0 and "shield" in t:
-						t.shield = maxf(float(t.shield), float(e["shield"]) * _weak_k(caster))
+						t.shield = maxf(float(t.shield), float(e["shield"]) * _heal_k(caster))
 						if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 4.0)))
 					if float(e.get("haste", 0.0)) > 0.0 and "haste_t" in t: t.haste_t = maxf(float(t.haste_t), float(e["haste"]))
 					if e.get("cleanse", false) and t is Ent:
@@ -698,4 +702,3 @@ static func _fissure(e: Dictionary, caster: Node, ctx: Dictionary, m: Node, pw: 
 			if i % 2 == 0: m.sfx("thump", at, -6.0, 1.2)
 		if i == 0: go.call()
 		else: m.later(every * i, go)
-	m.shake(0.25, start)

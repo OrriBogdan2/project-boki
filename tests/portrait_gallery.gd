@@ -8,7 +8,7 @@ func _ready() -> void:
 	var i := 0
 	for cls in Data.CLASSES:
 		for j in 4:
-			var look := Models.random_look()
+			var look := PlayerLook.random()
 			var vp := Portraits.make(cls, Data.TEAM_COLORS[j % Data.TEAM_COLORS.size()], String(Data.CLASSES[cls]["weapon"]), look)
 			add_child(vp)
 			var tr := TextureRect.new()

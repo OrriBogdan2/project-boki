@@ -1,129 +1,108 @@
 # Project Boki abilities
 
-Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gloves/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities, dodge riders and merges (E, its auto active, the Shift rider and R) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
+Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
 
 This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.
 
 ## Archetypes (the kit you play)
 
-Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), R (ultimate, run level 6, rank 2 at 9) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. With a full bond meter, R is Bonded: the kin merges 0.2s after the ult. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).
+Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `scripts/arch/arch_kit.gd` and `scripts/arch/kits/*`; design in docs/ARCHETYPES.md). The archetype owns RMB (with contextual variants), Shift (its dash shape), E (utility), X (the hunter ultimate, run level 6, rank 2 at 9; none yet) and a passive with its resource; the weapon owns LMB; Q is the glove; C is the kin's own ability (it hops out, casts, hops back) and G or middle mouse sends / recalls the kin. T is the Merge with your Boki (a full bond meter), R reloads. The kin's typing fills each ability's sockets (docs/ARCHETYPES.md §4).
 
 | Archetype | Weight | Weapons | Dash | Passive | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| **Thief** | light | Twin Blades / SMG | Flicker | Marks | Knife | Smoke Veil (18s) | Heist (70s) |
-| **Archer** | light | Longbow / Sniper | Grapple Arrow | Focus | Snare | Flare Arrow (16s) | Skyfall Volley (75s) |
-| **Mage** | medium | Spellstaff / Longsword | Blink | Overload (Heat) | Bolt | Sigil (14s) | Meteor (70s) |
-| **Gunslinger** | medium | Rifle / Burst Rifle | Slide Reload | Six Chambers | Trick Shot | Quickdraw (16s) | Last Round (70s) |
-| **Juggernaut** | heavy | Greatsword / Shotgun / Minigun | Rampage | Rage | Smash | Iron Hide (16s) | Avalanche (75s) |
-| **Bulwark** | heavy | Tower Shield & Mace / Minigun | Interpose | Guard | Shield | Rally Banner (18s) | Bastion (80s) |
+| **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
+| **Lace** | light | Longbow | Spirit Walk | Hawk Sense | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
+| **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
+| **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
-_The cutpurse. Slips behind you, marks you, cashes in, gone in smoke._
+_The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 
-- **Passive: Marks.** Hits from behind (or in the Ambush window) Mark the target: up to 3, 6s, +5% damage from you each. At 3 your next Knife on them Cashes In: +50% damage and your dash charge back.
-- **Shift: Flicker** (6.5s a charge). Tap twice: two quick 2.3m steps on one charge (the second any way you like within 0.7s). Shots pass through each step. After the last step your next hit counts as from behind (Ambush, 1s).
-- **RMB: Knife** (8s):
-  - tap: Throw a knife 9m: 10 damage and a Mark. Recast within 1.5s of a hit to Shadow Step behind them (Ambush).
-  - hold: Fan: 3 knives in a 35° fan, 6m, 6 damage, slow, a Mark each.
-  - in the air: Drop Knife: the Shadow Step recast becomes a dive, a 1.5m burst for 8 behind them.
-  - with E: Inside your smoke the knife is silent and its streak hidden.
-  - resource full: Cash In: a target at 3 Marks takes +50% and refunds your dash.
-- **E: Smoke Veil** (18s). A 3.5m cloud at the cursor (up to 6m) for 5s: everyone inside is hidden from outside, like tall grass. Attacking reveals you for 0.5s. Foes inside are slowed.
-- **R: Heist** (70s, level 6). Gold lines mark up to 4 rival hunters within 9m (0.4s, anyone who dashes out or breaks sight drops out), then four blink strikes 0.2s apart: 14 damage and 3 Marks each. You end behind the last with Ambush open.
+- **Passive: Marks.** Every weapon hit puts a Mark on the target (one per 0.3s, up to 5, each lasting 4s and refreshed by the next): your weapon hits on them deal +8% per Mark. A Primed hit adds 2, the Bola 1. The fifth Mark pays out Jackpot (below). A knock heals you 15% of your health on top of the usual knock heal (25% in all); an assist heals 25%.
+- **Shift: Vault** (6.5s a charge). A 3.4m flip (shots pass through it) and +30% speed until your next hit (2s at most). Your next weapon hit within 3s is Primed: +10 damage, 2 Marks and Shred (+15% damage taken for 3s). Landing it resets Vault.
+- **RMB: Bola** (12s):
+  - tap: Throw a spinning Bola 10m: 6 damage and a Mark; the first foe it wraps is Grounded for 1.5s (no dash, jump or glide; slowed 25%) and the Bola flies on 5m. If it catches a second foe, both are stunned 0.9 and take +13 (TANGLED).
+  - in the air: Thrown from the air the same way.
+- **E: Shadow Knife** (18s). Throw a dagger 12m that sticks in the first foe (8 damage, slowed 50% for 2.5s) or in a wall or the ground where it stops. Press E again to step to it at once; after 5s you step to it anyway.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
 
-### Archer (light)
+### Lace (light)
 
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
-- **Passive: Focus.** Builds while you stand still (full in 1.4s), sneak (2.8s), 50% faster on high ground. Drains while running and drops 40 when hit. At 100 your next shot is fully drawn or aimed at once, with +20% range.
-- **Shift: Grapple Arrow** (7s a charge). A line arrow at the cursor (9m). If it bites a wall, rock or ledge you zip to it and climb on top; if it bites nothing you hop 3.2m back. Works from a glide and cools it.
-- **RMB: Snare** (9s, 2 charges):
-  - tap: A snare arrow 11m: 8 damage and root 0.6 on a foe; on the ground it plants a Tripwire (root 1.2, reveal 3s).
-  - hold: Pinning Shot: 14m, 16 damage, push 6, pierces 1; pushed into a wall within 3m roots 1.2.
-  - in the air: Plunge: shoot straight down, push 8 around you, lift yourself 3m, cool the glider.
-  - with E: Inside your Flare zone snares seek revealed targets.
-  - resource full: At 100 Focus the tap roots 1.0.
-- **E: Flare Arrow** (16s). Lob a flare up to 14m: it reveals everyone within 7m for 4s, and the zone keeps revealing anyone who walks in. Shows traps, stealth and smoke.
-- **R: Skyfall Volley** (75s, level 6). Aim a 5m circle up to 16m: 0.8s of arrows arcing up, then 5 waves 0.4s apart (6 damage, slow). The last roots 1.0 in the inner 2m.
-- Level-up order (bots too): RMB, Dash, E, RMB, E, R, RMB, Dash, R, E
+- **Passive: Hawk Sense.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
+- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+- **RMB: Heavy Shot** (16s):
+  - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
+- **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+- Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, E
 
-### Mage (medium)
+### Sparkle (light)
 
-_The runecaster. Draws sigils, throws bolts that take on the kin's nature, and runs dangerously hot._
+_The storm-kite runner. Charges you up shot by shot, then runs straight through you and comes out the other side with the dash back._
 
-- **Passive: Overload (Heat).** RMB adds 20 Heat (a hold 35), E adds 25; it cools after 1.2s. At 70+ you're Overcharged: RMB and E +25% damage and radius, bolts pierce. At 100 you Vent: a 0.4s ring, then a 3m nova (14, push 9), Heat 0, RMB locked 1s.
-- **Shift: Blink** (9s a charge). A 0.12s windup (everyone sees the sigil where you'll land), then you teleport up to 5.5m, through walls, never into the abyss. A rune left behind bursts 0.6s later: slow.
-- **RMB: Bolt** (2.5s):
-  - tap: A bolt 10m: 14 damage and a slow (your kin's nature changes the slow).
-  - hold: Lance: a 14m beam, 24 damage, pierces; you're slowed while it charges and foes see the line.
-  - in the air: Starfall: a bolt into the ground under you: 10 damage, push 7, lifts you 2m and cools the glider.
-  - with E: Through your Sigil a bolt splits into 3; a Lance chains to 2 more.
-  - resource full: Overcharged (70+ Heat): +25% and pierces.
-- **E: Sigil** (14s). Draw a 3m rune up to 9m away for 6s: allies inside move 15% faster and your bolts split through it. Press E again to detonate: a 0.3s flash, then 10 damage and a lift.
-- **R: Meteor** (70s, level 6). Aim a 4m circle up to 14m: 1.0s of a burning rock coming down, then 30 damage and a lift; anyone already in the air is spiked (+50%, stun 0.8). Burning ground for 2s. Cast Overcharged and your Heat resets without a Vent.
-- Level-up order (bots too): RMB, E, Dash, RMB, E, R, RMB, E, R, Dash
+- **Passive: Sparks.** Your bolts, Coilshot and Skycall each load a Spark onto what they hit (up to 4, 4.5s, refreshed by every hit). At 4 the foe is Live: a ring of crackling pips over them that everyone sees. Wirerun through a Live foe for a Blowout: 8 damage plus 15% of their health, a T4 hit, their Sparks spent and your dash recharged on the spot. Knocking a hunter down heals you for 15% of your health.
+- **Shift: Wirerun** (9s a charge). Press and hold: a lane grows from 5 to 8.5m over 0.45s for everyone to see; let go and you streak along it. Shots pass straight through you for the whole run, and every foe you cross takes 10. Crossing a Live foe is a Blowout and gives the dash straight back. Picking up a charge mote also gives it back.
+- **RMB: Coilshot** (10s):
+  - tap: A quick Coilshot (it still takes 0.33s to wind): 9 damage, 6m, a short throw.
+  - hold: Hold up to 1s: up to 15 damage, 13m and a big throw. A foe thrown into a wall or into another foe is stunned 0.8s (so is the one they hit). Hitting a hunter drops a charge mote 0.5s later: pick it up for your dash back.
+- **E: Skycall** (12s). Mark a spot up to 9m away (a filling ring everyone sees); 0.55s later lightning strikes it: 14 damage, a Spark, and everyone inside is flung along your aim and Grounded for 1.2s (no dashing). It also flings any charge mote it catches, so you can steal a rival's.
+- Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
-### Gunslinger (medium)
+### Marlowe (medium)
 
-_The duelist. A rhythm of six, trick shots off walls, slide and reload._
+_The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands._
 
-- **Passive: Six Chambers.** Each weapon hit loads a chamber (one per 0.25s); a tap roll loads 2. At 6 the gun glows gold and your next Trick Shot is a Called Shot: +40%, a crit and stun 0.4. Chambers drain after 4s without a hit.
-- **Shift: Slide Reload** (9s a charge). Tap: a 3.4m roll that slips 35% of the magazine in (roll through a hit as it lands: your next shots crit). Hold: a 6m low slide you can shoot from that fully reloads at the end; let go early to refund 30%.
-- **RMB: Trick Shot** (7s):
-  - tap: A ricochet round 9m: 12 damage, bounces off up to 2 walls and on to a second foe (+20% a bounce).
-  - hold: Rail Charge: hold up to 1s, a piercing rail 10 to 34 damage, 9 to 17m; full charge stuns 0.6.
-  - in the air: Recoil Shot: fire down and forward, kicked 3m up and back, the target pushed 6.
-  - with E: During Quickdraw it fires two rounds, the second 0.1s later at 60%.
-  - resource full: At 6 Chambers: a Called Shot (+40%, crit, stun 0.4).
-- **E: Quickdraw** (16s). For 3s: fire 25% faster, an instant reload, a dash charge back, and your next Slide Reload's perfect-dodge window is twice as long.
-- **R: Last Round** (70s, level 6). Channel up to 1.2s (slowed): gold lock lines draw to every rival hunter within 12m in sight. Press R again (or wait) to fire one round per lock: 16 + 12 per second locked; a full lock stuns 0.5. Breaking line of sight drops the lock.
-- Level-up order (bots too): RMB, Dash, E, RMB, Dash, R, RMB, E, R, Q
+- **Passive: Fever.** Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
+- **Shift: Slipstep** (11.5s a charge). Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it.
+- **RMB: Burr Charge** (9s):
+  - tap: Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.
+  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%.
+- **E: Longneedle** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
+- Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Juggernaut (heavy)
 
-_The wrecking ball. Gets angrier, crashes through, slams you into the wall._
+_The wrecking ball. Burns hotter with every hit, chains you in, and finishes it._
 
-- **Passive: Rage.** +6 per hit, +10 per 10% of your health lost, +20 on a wall slam; cools after 3s out of a fight. At 100 you're Enraged for 5s: your next Smash is empowered (+50% knock; Earthshatter +1m and stuns everyone it lifts) and Rampage winds up twice as fast.
-- **Shift: Rampage** (12s a charge). Tap: an unstoppable shoulder charge, 3m, shoves 10 (stun 1.2 into a wall). Hold: wind up to 0.7s while an arrow grows 3 to 7m for everyone to see, then charge it and carry the first hunter to a wall.
-- **RMB: Smash** (9s):
-  - tap: The weapon's knock cone: an Overhead Smash (3m, 18, push 6), or the Shotgun's Breach.
-  - hold: Earthshatter: leap up to 7m, a 3m crater that lifts, spikes the airborne (+60%, stun 1.0).
-  - in the air: Meteor Drop: slam straight down, a 2.5m burst (16, lift, spike stun 0.6).
-  - with E: During Iron Hide the tap pulls foes within 4m in first.
-  - resource full: Enraged: +50% knock, Earthshatter +1m and stuns everyone it lifts.
-- **E: Iron Hide** (16s). 3s of 30% less damage and no knockback, with a cleanse on cast. When it ends a 2.5m burst shrugs everyone off (push 10).
-- **R: Avalanche** (75s, level 6). A 0.35s roar, then 5s unstoppable (no stun, root or knockback; slows half strength) and 30% faster, stomping every 0.5s (6, push 6). The first wall slam on each foe stuns 1.0. Rampage charges refill.
+- **Passive: Rage.** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
+- **Shift: Rampage** (9s a charge). A 4.4m dash attack the way you face (2 charges): 7 to foes along it; the tip at its end hits twice as hard, 14 and a big knock (stun 0.8 into a wall). A knock gives a charge back.
+- **RMB: Smash** (3s):
+  - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
+  - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
+  - in the air: Meteor Drop: slam straight down, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+- **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
-### Bulwark (heavy)
+### Mossy (heavy)
 
-_The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge._
+_The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your shield, walls or Interpose guard blocks becomes Guard (1 per 2 blocked, max 100). Spent by Shield Slam (50), the Interpose ally shield (20) and Bastion (all of it, +1s per 50).
-- **Shift: Interpose** (12s a charge). Tap: a braced 2.6m step that blocks shots from the front during it and 0.3s after, unshoveable. With an ally under the cursor (8m): leap to them, shield allies near the landing 15 and push foes off them.
-- **RMB: Shield** (6s):
-  - tap: Bash: a 2.5m cone, 10 damage, push 8, stun 0.8 into a wall.
-  - hold: Raise the shield: 160 HP, regenerating; it blocks from the front.
+- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
+- **RMB: Aegis** (6s):
+  - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
+  - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - with E: Inside your Banner the shield is wider and a Bash heals allies behind you 8.
-  - resource full: Guard 50+: Shield Slam, push 12 and stun 0.6 even without a wall (spends 50).
-- **E: Rally Banner** (18s). Plant a banner up to 7m away for 6s (60 HP, 4m): allies inside gain 6 shield a second (up to 24), foes inside are slowed.
-- **R: Bastion** (80s, level 6). A 0.35s plant, then a 4.5m dome for 4s: rival shots from outside stop at it, foes inside are pushed out, allies inside regenerate 8/s. Spends all your Guard for +1s per 50.
-- Level-up order (bots too): RMB, Dash, E, RMB, E, R, RMB, Dash, R, Q
+  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
+- **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
+- Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
 The old class dashes and weapon RMBs below are kept as data (the verbs return as gloves and other content); a hunter with no archetype still uses them.
 
 ## Ranks
 
-Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). Per rank past the first:
+Every run starts with abilities locked (see `Hunter.slot_lv`). A skill point unlocks a slot at rank 1 and further points raise it (RMB, Q, Shift, E: ranks 1-3; R: ranks 1-2). You choose where each point goes: Alt + the ability's key, or click the gold + on its slot (`RankMarks`, `RankClick`), so one ability can be maxed first; tier pips over each slot show its rank and turn gold at max, and a new point shows the ALT+key hint for a few seconds. Bots spend by their kit's `order`. Per rank past the first:
 
 - damage +15% (`Effects.level_k`)
 - cooldown 10% shorter (RMB, Q via `AbilityRunner`/`Hunter.rank_cd_k`, E via `KinRunner`); Shift dashes recharge 15% faster
 - each verb grows the numbers that define it (`Effects.RANK_GROW`): walls +20% health, +15% time, +10% length; mirrors +20% time; tethers +15% time, +20% snap stun; traps +15% time and root; zones +15% time, +10% radius; fissures +10% length; shots +10% range and +15% stun/root/slow; pulls +15% strength; chains +1 hop per rank; yanks and swaps +25% stun; bridges +20% time; cloaks/decoys/reveals +20-25% time; shields and heals +15%; blinks +10% distance; blink-strike crit window +25%
 - kin abilities grow through the core rank table `KinRules.RANK_GROW` (never through data), clamped to each part's bounds
-- the merge (R) at rank 2 lasts 30% longer and its effects hit 15% harder
+- the merge at rank 2 lasts 30% longer and its effects hit 15% harder
 - dash and charge distances never grow: dashes stay short
 
 An ability JSON can override any of these with `"per_level": {"key": flat amount per rank}`.
@@ -138,19 +117,6 @@ Each class has its own dodge verb. Grounded with a charge, Shift does the class 
 | Medium | **Combat Roll** (3.4m) | 1 / 9.0s | Medium: a quick roll that slips a third of a magazine in on the way. Roll through a hit as it lands for a perfect dodge: your next shots crit. |
 | Heavy | **Shoulder Charge** (3.1m) | 2 / 12.0s | Heavy: a short charge nothing can knock back (2 charges). Anyone you run into is bowled aside, and slammed into a wall they're stunned 1.2s. |
 
-### Kin dodge riders
-
-The kin you brought adds a rider to every class dodge (`dodge_rider` in `content/kin_v2/<id>.json`).
-
-| Kin | Rider | What it adds |
-|---|---|---|
-| Mycroll | **Spore Puff** | where you start: zone 1.5m: 2 damage, slow |
-| Vespyx | **Venom Trail** | what you pass through: 3 damage, 12 damage over 3s, blight 3s |
-| Gravadillo | **Gravity Wake** | where you stop: burst 3.5m: pull |
-| Prismander | **Prism Decoy** | where you start: burst 0m: decoy |
-| Lunowl | **Moon Blink** | the dodge is an instant blink |
-| Echolop | **Echo Step** | a second, shorter dodge a beat later |
-
 ## RMB: weapon signature abilities (no archetype)
 
 Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, landing circle, wall footprint or arc); release to cast. Rail Charge charges while held instead.
@@ -160,7 +126,7 @@ Right click is your weapon's own verb. Hold RMB to see its telegraph (lane, land
 | Burst Rifle | medium | **Leash Bolt** | tether | 10s | A bolt that leashes whoever it hits to you for 3.5s. If they get 6m away it snaps: 22 damage, stunned 1s, dragged back. |
 | Greatsword | heavy | **Earthshatter** | leap slam | 10s | Leap up to 7m and smash down: everyone within 3m is thrown into the air; anyone already airborne is spiked (+60% damage, stunned 1s). |
 | Longsword | medium | **Riposte** | reflect | 8s | Raise your blade for 0.7s: shots hitting your front fly back at the shooter (+30%), and a sword or claw that hits it is parried and stunned 1s. |
-| Minigun | heavy | **Bulwark** | shield wall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
+| Minigun | heavy | **Bracewall** | shield wall | 12s | Raise a 3m energy shield in front of you for 5s (160 HP). It turns with your aim and stops enemy shots; yours go through. |
 | Rifle | medium | **Rail Charge** | charge-shot | 8s | Hold to charge for up to 1s, let go to fire a rail that pierces everyone in its line: 10 to 34 damage, 9 to 17m, full charge stuns. |
 | Shotgun | heavy | **Breach** | knockback | 8s | A point-blank blast that throws everyone in front of you 6m back (into a wall: stunned) and kicks you backwards out of the fight. |
 | SMG | light | **Razor Disc** | boomerang | 7s | Throw a spinning disc 8m that cuts everything it passes, then flies back to you and cuts them again. |
@@ -191,91 +157,85 @@ Gloves drop in runs. Rarer gloves keep the same verb with bigger numbers: damage
 | **Smoke Glove** | stealth zone | 22s | A cloud that hides everyone inside it, like tall grass, for 8s. |
 | **Decoy Glove** | decoy | 18s | Leave a glowing copy of yourself where you stand and vanish for 1.5s, moving faster. Bots keep shooting the copy. |
 
-Passive gloves (no Q, stats only): **Glider Glove** (Glide 20% faster and longer.); **Swift Glove** (10% faster on foot.); **Focus Glove** (Abilities recharge 18% faster.); **Cooling Glove** (Your glider holds 45% more heat.); **Power Glove** (12% more damage.); **Plated Glove** (25 more armor.)
+Passive gloves (no Q, stats only): **Bastion Plate** (Heavy plate: lots of armor, a little slower on foot.); **Glider Glove** (Glide faster and longer.); **Springheel Boots** (Sprung soles: faster on foot.); **Field Surgeon's Kit** (Needle and thread: tonics heal more.); **Focus Glove** (Abilities recharge faster.); **Gale Mantle** (A light cloak that catches the wind: some armor and a faster glide.); **Cooling Glove** (Your glider holds more heat.); **Magpie Pouch** (Shiny things stick: gems you pick up are worth more.); **Power Glove** (More damage.); **Quickstep Boots** (Spring-loaded heels: dashes come back sooner and a touch more speed.); **Quilted Coat** (Padded and warm: more health and some armor.); **Wayfarer's Satchel** (A deep bag: one more backpack slot (two from Epic).); **Skylark Boots** (Feathered cuffs: your glider lasts longer.); **Brass Spyglass** (See further through grass and gloom.); **Tinker's Roll** (A roll of small tools: reloads faster.); **Brace Plate** (A bolted breastplate: extra armor.); **Windstep Boots** (Light soles for the air: a faster glide that runs hot later.)
 
-## E, the kin's own ability, and R, the merge
+## E, the kin's own ability, and the merge
 
-Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (C), a dodge rider and a merge (R, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
+Each kin has one E ability (`active`), an auto active it uses by itself (`auto`), a throw (G) and a merge (the Merge key, X by default, unlocked at run level 6 with a full bond meter). Its abilities are built from grammar parts; the lines below are the creators' flavour text. In a match the HUD and hover panels read the parts themselves (`KinText`). E is cast from your shoulder (you perform it) or by the kin where it stands, aimed at the cursor.
 
 ### Mycroll (Hedgehog + Toadstool, shoulder)
 
 - **E: Puffcap Mines** (trap, 10s): Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - **Throw (C)**: stuns what it hits; also root.
-- **Shift rider: Spore Puff**
-- **R: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
+- **Merge: Sporewake** (8s): Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.
 
 ### Cairnback (Tortoise + Ibex, mount)
 
 - **E: Boulder Heave** (projectile, 9s): Cairnback heaves a rune-lit boulder 8m. Where it lands everyone within 2.6m is thrown up and stunned; anyone already airborne is spiked.
 - **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - **Throw (C)**: stuns what it hits; also push.
-- **R: Cairn Colossus** (8s): Cairnback rises into a rune-carved colossus under you for 8s: towering armor, and every stomp quakes the ground and stuns.
+- **Merge: Cairn Colossus** (8s): Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.
 
 ### Vespyx (Fox + Scorpion, shoulder)
 
 - **E: Stinger Hook** (projectile, 8s): Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.
 - **Auto: Stinger Dash** (dash, 9s): On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
 - **Throw (C)**: stuns what it hits; also 15 damage over 3s.
-- **Shift rider: Venom Trail**
-- **R: Venom Mantle** (7s): Vespyx fuses onto you as venomous armor for 7s: 30% more damage, and your shots poison and burst.
+- **Merge: Venom Mantle** (7s): Vespyx fuses onto you as venomous armor for 7s: 20% more damage, and your shots poison and burst.
 
 ### Hivara (Honeybee + Praying mantis, shoulder)
 
 - **E: Hive Swarm** (cone, 9s): Hivara looses a buzzing swarm in a 5m cone: stung, poisoned and slowed. The swarm then hangs over the spot for 3s, stinging anyone inside.
 - **Auto: Spore Patch** (zone, 11s): On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.
 - **Throw (C)**: stuns what it hits; also slow.
-- **R: Hive Crown** (7s): Hivara crowns you with its hive for 7s: 30% more damage, and every shot stings, poisons and slows.
+- **Merge: Hive Crown** (7s): Hivara crowns you with its hive for 7s: 20% more damage, and every shot stings, poisons and slows.
 
 ### Gravadillo (Armadillo + Rhino beetle, mount)
 
 - **E: Gravity Slam** (leap, 9s): Gravadillo drops onto the spot like a meteor: everything within 3.5m is sucked into the crater and flung up; anyone already airborne is spiked.
 - **Auto: Mass Guard** (wall, 12s): When you're under fire, Gravadillo curls into a heavy plate in front of you for 3s that stops enemy shots (120 HP).
 - **Throw (C)**: stuns what it hits; also push.
-- **Shift rider: Gravity Wake**
-- **R: Heavy Star** (8s): Gravadillo collapses into a towering heavy star for 8s. Huge health, and every stomp launches foes away.
+- **Merge: Heavy Star** (10s): Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Merge again brings the whole sky down.
 
 ### Prismander (Axolotl, shoulder)
 
 - **E: Prism Wall** (wall, 10s): Prismander raises a 4m crystal wall at the spot: enemy shots that hit it bounce back at them. Lasts 4.5s or 140 damage.
 - **Auto: Refraction** (burst, 12s): When you're hurt, Prismander wraps you in a 1s mirror shell: shots that reach you fly back at the shooter, and you get a 20 shield.
 - **Throw (C)**: stuns what it hits; also slow.
-- **Shift rider: Prism Decoy**
-- **R: Prism Shell** (7s): Prismander wraps around you as a shell of living crystal for 7s: an 80 point shield, steady healing, and shots that slow.
+- **Merge: Prism Shell** (10s): Prismander grows a crystal shell around you for 10s. Piercing shards, a prism that throws shots back, a healing crystal wall, and Merge again shatters the shell outward.
 
 ### Lunowl (Owl + Luna moth, perch)
 
 - **E: Moon Swap** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
 - **Auto: Moonlift** (burst, 14s): On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - **Throw (C)**: stuns what it hits; also push.
-- **Shift rider: Moon Blink**
-- **R: Eclipse** (7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- **Merge: Eclipse** (7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 
 ### Echolop (Hare + Bat, shoulder)
 
 - **E: Echo Chain** (beam, 7s): A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.
 - **Auto: Echolocate** (burst, 14s): On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
 - **Throw (C)**: stuns what it hits; also stun.
-- **Shift rider: Echo Step**
-- **R: Resonance** (6s): Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
+- **Merge: Resonance** (6s): Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.
 
 ### Zephyrak (Moray eel + Swift, shoulder)
 
 - **E: Gale Lance** (dash, 8s): Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
 - **Auto: Storm Arc** (beam, 10s): On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
 - **Throw (C)**: stuns what it hits; also stun.
-- **R: Stormwing** (7s): Zephyrak coils round you as living storm for 7s: 35% faster, every dodge back, and each shot arcs to a second foe.
+- **Merge: Stormwing** (10s): Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Merge again calls a thunderhead down on everyone near.
 
 ## Element variants of shared verbs
 
 Several verbs appear in more than one element, tuned to fit it:
 
 - **Hook / yank**: Hook Glove (neutral, drags to your feet or zips you to terrain), Stinger Hook (venom: poisons and blights), Leash Bolt (tether that snaps back).
-- **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bulwark (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
+- **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bracewall (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
 - **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries melee), Refraction (prism, auto when hurt), Prism Wall (reflecting wall).
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
-- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places), Lunar dash rider.
-- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud), Spore dash rider.
+- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).
+- **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
 
 ## Readability
 

@@ -40,6 +40,11 @@ var labels: Array = []   # {name, pos: Vector3, kind: "poi" | "choke"} for the m
 var layout_id := ""      # "" for a generated map, else the authored layout's id
 var dyn_walls: Array = []  # barrier walls from abilities (see Verbs): some block movement too
 var authored_portals: Array = []   # Vector2 tile spots from an authored layout, in opening order
+var hand := false        # a fully hand-made layout ("hand": true): nothing placed by dice (see tools/make_hollowcrown.py)
+var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed (ramps, bridge flights)
+var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
+var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
+var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
 ## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
 ## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
 var exit_defs: Array = []
@@ -141,9 +146,10 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-func occupy(x: float, z: float, r: float, y: float, guard: bool) -> float:
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees and ability barriers don't block, terrain still does.
+func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
-	if not dyn_walls.is_empty():
+	if not dyn_walls.is_empty() and not ghost:
 		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y)
 		if wb > 0.0:
 			return wb
@@ -151,7 +157,7 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool) -> float:
 	# corners and fit through one-tile gaps instead of snagging. The body is a true circle against each
 	# blocker tile's square (it used to be 9 sample points: a tile's corner could poke in between them,
 	# and then walking along the face or away from it caught on the corner: "stuck, like a magnet")
-	var bt := _block_hit(x, z, r * BLOCK_BODY - BLOCK_SKIN, y)
+	var bt := 0.0 if ghost else _block_hit(x, z, r * BLOCK_BODY - BLOCK_SKIN, y)
 	if bt > 0.0:
 		return bt
 	# an island is solid all the way down: below its top, its whole column is a wall. (A wall is
@@ -235,6 +241,7 @@ func los(a: Vector3, b: Vector3, y: float) -> bool:
 		if ground_at(px, pz) > y + 0.2:
 			return false
 	for wl in dyn_walls:
+		if not Verbs.blocks_sight(wl): continue
 		if y > float(wl["y"]) - 0.3 and y < float(wl["y"]) + Verbs.WALL_H and Geometry2D.segment_intersects_segment(Vector2(a.x, a.z), Vector2(b.x, b.z), wl["a"], wl["b"]) != null:
 			return false
 	return true
@@ -449,6 +456,10 @@ func generate(seed_val: int, size := 64, n_islands := 7) -> void:
 	if bigmap:
 		_place_compounds()
 	_place_stairs()
+	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # no lone posts a shot could clip
+	_clear_strays()
+	BlockPrune.prune(self, BlockPrune.MIN_TILES)      # (a wall piece that leaned on a stray rock)
+	BlockPrune.fill_pockets(self)                     # no ground sealed in by rocks to be trapped in (item 151)
 
 ## On the big islands the point of interest sits inside a walled compound: a square of stone walls
 ## with a gate in each side and a squat tower at each corner, so each island reads as one place
@@ -523,6 +534,9 @@ func _stair_run(c: Vector2i, d: Vector2i) -> Array:
 
 func _place_stairs() -> void:
 	stairs.clear()
+	if hand:
+		stairs = authored_stairs.duplicate()     # a hand-made map has exactly the flights it drew
+		return
 	var srng := RandomNumberGenerator.new(); srng.seed = rng.seed + 41
 	var spots_all: Array = spawns + portal_spots
 	for c in chest_spots: spots_all.append(c["pos"])
@@ -571,6 +585,7 @@ func _place_stairs() -> void:
 var wall_mat: ShaderMaterial = null   # walls fade where they hide the player
 var walls := {}           # tile index -> true: built stone walls (drawn as walls, not rocks)
 var bush := {}            # tile index -> true: tall grass you can hide in
+var live_bush := {}       # tile index -> count: a disguised Shrubling sits there (cover like any clump)
 var props := {}           # blocker tile index -> what stands there: "ruin" (an old pillar) or "camp" (crates); else a tree or rock
 
 func _wall_at(q: Vector2i, ii: int) -> void:
@@ -578,8 +593,18 @@ func _wall_at(q: Vector2i, ii: int) -> void:
 		kind[idx(q.x, q.y)] = T_BLOCK
 		walls[idx(q.x, q.y)] = true
 
+var strays: Array = []       # tile indices of the scattered random rocks, cleared before the map is built
+
+## Item 151: no stray rocks to snag on (they looked a step high and blocked like a wall). They're placed and then
+## cleared, so every spot, spawn and chest the generator picks around them lands where it always has.
+func _clear_strays() -> void:
+	for i: int in strays:
+		if kind[i] == T_BLOCK and not walls.has(i) and not props.has(i):
+			kind[i] = T_GROUND
+	strays.clear()
+
 func _place_blockers() -> void:
-	walls.clear(); bush.clear()
+	walls.clear(); bush.clear(); live_bush.clear(); strays.clear()
 	for ii in islands.size():
 		var isl: Dictionary = islands[ii]
 		var cells: Array = isl["cells"]
@@ -589,6 +614,7 @@ func _place_blockers() -> void:
 				continue
 			if rng.randf() < 0.03:
 				kind[i] = T_BLOCK
+				strays.append(i)        # cleared once every spot is placed (item 151), so the spots stay put
 		# stone walls to fight around and peek past: straight runs with a doorway, corners,
 		# rows of pillars, and on big islands a broken square keep
 		var n_walls := 1 + int(cells.size() / 110) + rng.randi_range(0, 1)
@@ -637,7 +663,7 @@ func vis_texture() -> ImageTexture:
 
 func in_bush(x: float, z: float) -> bool:
 	var ix := int(floor(x)); var iz := int(floor(z))
-	return inb(ix, iz) and bush.has(idx(ix, iz)) and kind[idx(ix, iz)] == T_GROUND
+	return inb(ix, iz) and (bush.has(idx(ix, iz)) or live_bush.has(idx(ix, iz))) and kind[idx(ix, iz)] == T_GROUND
 
 func _edge_cell_toward(isl: int, target: Vector2, avoid: Array = [], spacing := PAD_SPACING) -> Vector2i:
 	var best := Vector2i(-1, -1); var bd := 1e9
@@ -862,6 +888,7 @@ func _inward(isl: int, from: Vector3, away: Vector3) -> Vector3:
 
 var shrine_spots: Array = []     # Vector3
 var break_spots: Array = []      # {pos, kind: crate | pot | barrel}
+var tree_spots: Array = []       # Vector3: every tree's foot (screenshot tooling: --see-demo)
 var weapon_spots: Array = []     # Vector3, a found weapon lying in the open
 var heart_spot := Vector3.INF
 
@@ -916,41 +943,41 @@ func _near(p: Vector3, dist: float, ang: float, isl: int, taken: Dictionary) -> 
 func _dress_poi(ii: int, role: String, poi: Vector3, toward_mid: float, taken: Dictionary) -> void:
 	match role:
 		"heart":
-			# the vault: the best chest in the middle, ringed by rocks, two guard camps
+			# the vault: a chest in the middle, ringed by rocks, two guard camps
 			heart_spot = poi
-			chest_spots.append({"pos": poi, "tier": 2})
+			chest_spots.append({"pos": poi})
 			_pillars(poi, [Vector2(3.2, 3.2), Vector2(-3.2, 3.2), Vector2(3.2, -3.2), Vector2(-3.2, -3.2)], "ruin")
 			for k in 2:
 				var cp := _near(poi, 4.5, a0_of(ii) + PI * k, ii, taken)
 				if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "heavy"})
 			var side := _near(poi, 6.0, a0_of(ii) + PI * 0.5, ii, taken)
-			if side != Vector3.INF: chest_spots.append({"pos": side, "tier": 1})
+			if side != Vector3.INF: chest_spots.append({"pos": side})
 		"camp":
-			# a rare chest with the monsters standing between it and the middle of the map
-			chest_spots.append({"pos": poi, "tier": 1})
+			# a chest with the monsters standing between it and the middle of the map
+			chest_spots.append({"pos": poi})
 			var cp := _near(poi, 2.6, toward_mid, ii, taken)
 			if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "normal"})
 			_pillars(poi, [Vector2(cos(toward_mid + 1.3), sin(toward_mid + 1.3)) * 2.2, Vector2(cos(toward_mid - 1.3), sin(toward_mid - 1.3)) * 2.2], "camp")
 		"nest":
-			# wild kin around a nest, a small guard, a plain chest off to the side
+			# wild kin around a nest, a small guard, a chest off to the side
 			for k in 2:
 				var wp := _near(poi, 1.8, toward_mid + PI * k, ii, taken)
 				if wp != Vector3.INF: wild_spots.append(wp)
 			var cp := _near(poi, 3.5, toward_mid + PI * 0.5, ii, taken)
 			if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "light"})
 			var ch := _near(poi, 3.5, toward_mid - PI * 0.5, ii, taken)
-			if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+			if ch != Vector3.INF: chest_spots.append({"pos": ch})
 			islands[ii]["nest"] = poi
 		"landing":
 			# an outer landing where squads come down and gates open: two chests, no monsters
 			for k in 2:
 				var ch := _near(poi, 2.8, toward_mid + PI * (0.5 + k), ii, taken)
-				if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+				if ch != Vector3.INF: chest_spots.append({"pos": ch})
 		"grove":
-			# quiet: two plain chests and a light camp
+			# quiet: two chests and a light camp
 			for k in 2:
 				var ch := _near(poi, 2.8, toward_mid + PI * (0.5 + k), ii, taken)
-				if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+				if ch != Vector3.INF: chest_spots.append({"pos": ch})
 			var cp := _near(poi, 1.0, toward_mid, ii, taken)
 			if cp != Vector3.INF: camp_spots.append({"pos": cp, "island": ii, "kind": "light"})
 			if rng.randf() < 0.5:
@@ -960,7 +987,7 @@ func _dress_poi(ii: int, role: String, poi: Vector3, toward_mid: float, taken: D
 			shrine_spots.append(poi)
 			_pillars(poi, [Vector2(2.2, 0), Vector2(-2.2, 0), Vector2(0, 2.2), Vector2(0, -2.2)], "ruin")
 			var ch := _near(poi, 3.6, toward_mid + PI, ii, taken)
-			if ch != Vector3.INF: chest_spots.append({"pos": ch, "tier": 0})
+			if ch != Vector3.INF: chest_spots.append({"pos": ch})
 
 func _place_spots() -> void:
 	shrine_spots.clear()
@@ -1020,7 +1047,7 @@ func _place_spots() -> void:
 			var p2 := _near(poi, 9.5, away, ii, taken)
 			if p2 == Vector3.INF:
 				continue
-			chest_spots.append({"pos": p2, "tier": 0})
+			chest_spots.append({"pos": p2})
 			var cp2 := _near(p2, 2.6, away + PI * 0.5, ii, taken)
 			if cp2 != Vector3.INF: camp_spots.append({"pos": cp2, "island": ii, "kind": "light"})
 	# authored maps put their exits exactly where the layout says, in the order they open
@@ -1069,7 +1096,7 @@ func _place_spots() -> void:
 			if p == Vector3.INF:
 				continue
 			var roll := rng.randf()
-			var bk := "crate" if roll < 0.45 else ("pot" if roll < 0.75 else "barrel")
+			var bk := Breakables.kind_for(roll)
 			break_spots.append({"pos": p, "kind": bk})
 			if rng.randf() < 0.55:
 				var q := _near(p, 1.0, rng.randf() * TAU, ii, taken)
@@ -1146,6 +1173,7 @@ func build_meshes() -> void:
 	mat.set_shader_parameter("height_tex", tm.height_texture())
 	mat.set_shader_parameter("map_size", Vector2(w, h))
 	mat.set_shader_parameter("use_ao", true)
+	mat.set_shader_parameter("depth_k", DepthCues.k())
 	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)
 	if Flora.on():
 		var bt := _biome_textures()
@@ -1335,6 +1363,14 @@ static func _thin(items: Array, keep: float, seed_i: int) -> Array:
 
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
+	if shadows:
+		# rocks and trees under the caster size go in batches of their own that don't cast (item 94)
+		var parts := ShadowPolicy.split_instances(items, mesh)
+		if not (parts[1] as Array).is_empty():
+			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk)
+		items = parts[0]
+		if items.is_empty():
+			return
 	var cls := _scatter_class(label, chunk)
 	var draw_k := float(Settings.q("draw"))
 	var vis_end := 0.0
@@ -1579,6 +1615,7 @@ func _decorate() -> void:
 				camps.append(cp)
 				continue
 			if _pack_prop(packed, what, i, Vector3(x + 0.5, y, z + 0.5), drng):
+				if what == "tree": tree_spots.append(Vector3(x + 0.5, y, z + 0.5))
 				if what in ["tree", "rock"]:
 					_undergrowth(packed, x, z, drng)
 				continue
@@ -2083,10 +2120,12 @@ static func load_layout(id: String) -> Dictionary:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
 	return d if typeof(d) == TYPE_DICTIONARY else {}
 
-## Which authored map an expedition of this tier uses (all tiers share Skyreach for now, each with
-## its own palette and monsters).
+## Which authored map an expedition of this tier uses (all tiers share the Hollow Crown for now, each
+## with its own palette and monsters; Skyreach is kept as content and loads with opts.map = "skyreach").
 static func layout_for_tier(_tier: int) -> String:
-	return "skyreach"
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--map="): return String(a).substr(6)     # tooling: every expedition on another map
+	return "hollowcrown"
 
 ## A biome's data (content/biomes/<id>.json), cached.
 static var _biomes := {}
@@ -2126,7 +2165,20 @@ static func _shape_d(S: Dictionary, pt: Vector2) -> float:
 		var cp: Array = S["capsule"]
 		var a := Vector2(float(cp[0]), float(cp[1])); var b := Vector2(float(cp[2]), float(cp[3]))
 		return Geometry2D.get_closest_point_to_segment(pt, a, b).distance_to(pt) / maxf(0.5, float(S["r"]))
+	if S.has("poly"):
+		# a hand-drawn outline: 1 on the line, falling to 0 six tiles inside (so the coast's wobble
+		# and the underside's depth work the same as for the round shapes)
+		var P := _poly_pts(S)
+		var dmin := 1e9
+		for k in P.size():
+			dmin = minf(dmin, Geometry2D.get_closest_point_to_segment(pt, P[k], P[(k + 1) % P.size()]).distance_to(pt))
+		return 1.0 - minf(dmin, 6.0) / 6.0 if Geometry2D.is_point_in_polygon(pt, P) else 1.0 + dmin / 6.0
 	return 99.0
+
+static func _poly_pts(S: Dictionary) -> PackedVector2Array:
+	var P := PackedVector2Array()
+	for q in S["poly"]: P.append(_v2(q))
+	return P
 
 static func _shape_box(S: Dictionary) -> Rect2:
 	if S.has("circle"):
@@ -2142,6 +2194,11 @@ static func _shape_box(S: Dictionary) -> Rect2:
 		var cp: Array = S["capsule"]; var rr := float(S["r"]) + 2.0
 		var a := Vector2(float(cp[0]), float(cp[1])); var b := Vector2(float(cp[2]), float(cp[3]))
 		return Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)) - Vector2(rr, rr), (b - a).abs() + Vector2(rr, rr) * 2.0)
+	if S.has("poly"):
+		var P := _poly_pts(S)
+		var bb := Rect2(P[0], Vector2.ZERO)
+		for q in P: bb = bb.expand(q)
+		return bb.grow(3.0)
 	return Rect2()
 
 func generate_authored(L: Dictionary, seed_val: int) -> void:
@@ -2155,6 +2212,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	links.clear(); rings.clear(); winds.clear(); updrafts.clear()
 	sheer.clear(); lip.clear(); labels.clear(); walls.clear(); bush.clear(); paint.clear(); authored_portals.clear(); train_route = {}; props.clear()
 	layout_id = String(L.get("id", "authored"))
+	hand = bool(L.get("hand", false))
+	authored_stairs.clear(); warden_posts.clear(); trap_spots.clear()
+	regions = L.get("regions", [])
 	# the ground is the same every match: its noise and depths come from the layout, not the match
 	var lr := RandomNumberGenerator.new(); lr.seed = int(L.get("seed", 1))
 	var nz := FastNoiseLite.new(); nz.seed = int(L.get("seed", 1)); nz.frequency = 0.055   # broad, gentle coastlines
@@ -2200,6 +2260,10 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				cells.append(Vector2i(x, z))
 		var c0: Dictionary = shapes[0]
 		var cen := _shape_box(c0).get_center() if not (c0.has("circle") or c0.has("ellipse")) else _v2(c0.get("circle", c0.get("ellipse", [0, 0])))
+		if c0.has("poly"):
+			cen = Vector2.ZERO
+			for q in _poly_pts(c0): cen += q
+			cen /= float(_poly_pts(c0).size())
 		var poi := _v2(D.get("poi", [cen.x, cen.y]))
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
@@ -2216,6 +2280,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				"role": String(D.get("role", "")), "height": top_lv * LEVEL})
 	await _slice()
 	await _tidy_ground()
+	for ii in defs.size():
+		for R in (defs[ii] as Dictionary).get("ramps", []):
+			HandLayout.stamp_ramp(self, R, ii)
 	# land bridges: narrow, sheer-sided necks of ground between two islands. The whole bridge
 	# belongs to the first island, so walking along it never changes which island you're on.
 	var neck := {}
@@ -2229,6 +2296,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		var rr := float(B.get("r", 1.4))
 		var lv0 := int(level[idx(int(p0.x), int(p0.y))]) if kind[idx(int(p0.x), int(p0.y))] != T_VOID else 0
 		var lv1 := int(level[idx(int(p1.x), int(p1.y))]) if kind[idx(int(p1.x), int(p1.y))] != T_VOID else 0
+		var flight := Vector2i.ZERO
+		if lv0 != lv1 and (absf(p1.x - p0.x) < 0.01 or absf(p1.y - p0.y) < 0.01):
+			flight = Vector2i(signi(int(signf(p1.x - p0.x))), signi(int(signf(p1.y - p0.y))))
 		for z in range(int(minf(p0.y, p1.y) - rr - 1), int(maxf(p0.y, p1.y) + rr + 2)):
 			for x in range(int(minf(p0.x, p1.x) - rr - 1), int(maxf(p0.x, p1.x) + rr + 2)):
 				if not inb(x, z):
@@ -2244,6 +2314,18 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 				island[i] = a
 				var t := clampf(p0.distance_to(q) / maxf(0.01, p0.distance_to(p1)), 0.0, 1.0)
 				level[i] = mini(lv0, lv1) if t > 0.15 and t < 0.85 else (lv0 if t <= 0.15 else lv1)
+				if flight != Vector2i.ZERO:
+					# ends at different heights: a straight flight of stairs in the middle of the span,
+					# one row per terrace (axis-aligned bridges only)
+					var s := (pt - p0).dot(Vector2(flight))
+					var s0 := p0.distance_to(p1) * 0.5 - absi(lv1 - lv0) * 0.5
+					var j := int(floor(s - s0))
+					if j < 0: level[i] = lv0
+					elif j >= absi(lv1 - lv0): level[i] = lv1
+					elif lv1 > lv0:
+						level[i] = lv0 + j; authored_stairs[i] = flight
+					else:
+						level[i] = lv0 - j - 1; authored_stairs[i] = -flight
 				depth[i] = -1.6
 				neck[i] = true
 				islands[a]["cells"].append(Vector2i(x, z))
@@ -2372,6 +2454,17 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	await _slice()
 	for G in L.get("glides", []):
 		await _slice()
+		if G is Dictionary:
+			# a hand-placed route: run off at take, come down at land (bots follow these)
+			var ga: int = ids.get(String(G["a"]), -1); var gb: int = ids.get(String(G["b"]), -1)
+			if ga < 0 or gb < 0:
+				continue
+			var tk := _v2(G["take"]); var ld := _v2(G["land"])
+			links.append({"from": ga, "to": gb, "take": Vector3(floor(tk.x) + 0.5, ground_at(tk.x, tk.y), floor(tk.y) + 0.5),
+				"land": Vector3(floor(ld.x) + 0.5, ground_at(ld.x, ld.y), floor(ld.y) + 0.5), "glide": true})
+			if String(G.get("name", "")) != "":
+				labels.append({"name": String(G["name"]), "pos": Vector3((tk.x + ld.x) * 0.5, 0, (tk.y + ld.y) * 0.5), "kind": "choke"})
+			continue
 		var a: int = ids.get(String(G[0]), -1); var b: int = ids.get(String(G[1]), -1)
 		if a < 0 or b < 0:
 			continue
@@ -2393,7 +2486,10 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
 				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
 	await _slice()
-	_place_spots()
+	if hand:
+		HandLayout.place_spots(self, defs)
+	else:
+		_place_spots()
 	await _slice()
 	_clear_lair_spots()
 	await _slice()
@@ -2410,7 +2506,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var cx := int(ch[0]); var cz := int(ch[1])
 			if inb(cx, cz) and kind[idx(cx, cz)] != T_VOID:
 				kind[idx(cx, cz)] = T_GROUND
-				chest_spots.append({"pos": Vector3(cx + 0.5, level[idx(cx, cz)] * LEVEL, cz + 0.5), "tier": int(ch[2])})
+				chest_spots.append({"pos": Vector3(cx + 0.5, level[idx(cx, cz)] * LEVEL, cz + 0.5)})
 		if D2.has("weapon"):
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:
@@ -2418,91 +2514,12 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	await _slice()
 	_place_stairs()
 
-## The sky train's loop: a ring round the middle of the map. At each stop a short stone pier runs
-## out from the islands on either side to the track, so you can just walk on; between stops, wherever
-## the ring passes a bridge or a rim, the track dips under it.
 func _build_train(T: Dictionary, neck: Dictionary) -> void:
-	var c := _v2(T.get("center", [w * 0.5, h * 0.5]))
-	var R := float(T.get("r", 30.0))
-	var n := int(ceil(TAU * R / TRAIN_STEP))
-	var stops: Array = T.get("stations", [])
-	var names: Array = T.get("names", [])
-	var st_s: Array = []
-	for a in stops:
-		var ang := deg_to_rad(float(a))
-		st_s.append(fposmod(ang, TAU) * R)
-		var dir := Vector2(cos(ang), sin(ang))
-		# piers: from the nearest ground inside and outside the ring, up to the track's edge
-		for side: float in [-1.0, 1.0]:
-			var found := -1.0
-			var r0 := R + side * 1.7
-			for k in 30:
-				var rr := r0 + side * k * 0.5
-				var q := c + dir * rr
-				if inb(int(q.x), int(q.y)) and kind[idx(int(q.x), int(q.y))] == T_GROUND and not neck.has(idx(int(q.x), int(q.y))) \
-						and level[idx(int(q.x), int(q.y))] < 4:
-					found = rr; break
-			if found < 0.0:
-				continue
-			var g0 := c + dir * found
-			var gi := idx(int(g0.x), int(g0.y))
-			var owner := island[gi]; var lv := level[gi]
-			var p0 := c + dir * (found - side * 2.0); var p1 := c + dir * r0
-			for z in range(int(minf(p0.y, p1.y)) - 3, int(maxf(p0.y, p1.y)) + 4):
-				for x in range(int(minf(p0.x, p1.x)) - 3, int(maxf(p0.x, p1.x)) + 4):
-					if not inb(x, z):
-						continue
-					var pt := Vector2(x + 0.5, z + 0.5)
-					if Geometry2D.get_closest_point_to_segment(pt, p0, p1).distance_to(pt) > 1.6:
-						continue
-					var i := idx(x, z)
-					if kind[i] != T_VOID:
-						continue
-					kind[i] = T_GROUND; island[i] = owner; level[i] = lv; depth[i] = -1.6
-					neck[i] = true
-					islands[owner]["cells"].append(Vector2i(x, z))
-		if names.size() > st_s.size() - 1:
-			var at := c + dir * R
-			labels.append({"name": String(names[st_s.size() - 1]), "pos": Vector3(at.x, 0, at.y), "kind": "rail"})
-	# the deck height round the loop: level with the ground at the stops, under anything in the way
-	var want := PackedFloat32Array(); want.resize(n)
-	for k in n:
-		var s := k * TRAIN_STEP
-		var ang := s / R
-		var q := c + Vector2(cos(ang), sin(ang)) * R
-		var near_stop := false
-		for ss in st_s:
-			var ds := absf(fposmod(s - float(ss) + TAU * R * 0.5, TAU * R) - TAU * R * 0.5)
-			if ds < 5.0: near_stop = true
-		var blocked := false
-		if not near_stop:
-			for z in range(int(q.y - 3), int(q.y + 4)):
-				for x in range(int(q.x - 3), int(q.x + 4)):
-					# (high perches float well clear of the cars)
-					if inb(x, z) and kind[idx(x, z)] != T_VOID and level[idx(x, z)] < 6 and Vector2(x + 0.5, z + 0.5).distance_to(q) < 2.9:
-						blocked = true
-		want[k] = TRAIN_DIVE if blocked else 0.0
-	# ramps: the deck never changes height faster than the dive over ~8 tiles
-	var slope := absf(TRAIN_DIVE) / 8.0 * TRAIN_STEP
-	var y := want.duplicate()
-	for _pass in 2:
-		for k in range(1, n * 2):
-			y[k % n] = minf(y[k % n], y[(k - 1) % n] + slope)
-		for k in range(n * 2 - 2, -1, -1):
-			y[k % n] = minf(y[k % n], y[(k + 1) % n] + slope)
-	var pts := PackedVector3Array(); pts.resize(n)
-	for k in n:
-		var ang := k * TRAIN_STEP / R
-		pts[k] = Vector3(c.x + cos(ang) * R, y[k], c.y + sin(ang) * R)
-	train_route = {"pts": pts, "len": n * TRAIN_STEP, "stations": st_s, "names": names, "spec": T, "center": c, "r": R}
+	TrainRoute.build(self, T, neck)
 
 ## Where the track is a given arc length round the loop (wraps), and its heading there.
 func train_at(s: float) -> Vector3:
-	var pts: PackedVector3Array = train_route["pts"]
-	var n := pts.size()
-	var f := fposmod(s, float(train_route["len"])) / TRAIN_STEP
-	var k := int(f) % n
-	return pts[k].lerp(pts[(k + 1) % n], f - floor(f))
+	return TrainRoute.at(self, s)
 
 ## Walls, pillars and tall grass from the layout, plus a light scatter of rocks for cover away from
 ## the edges, the bridges and the points of interest.
@@ -2526,10 +2543,19 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 					if Vector2(x + 0.5, z + 0.5).distance_to(bc) > rad + rng.randf_range(-0.2, 0.3): continue
 					if inb(x, z) and kind[idx(x, z)] == T_GROUND and island[idx(x, z)] == ii and edge_dist(x, z, 2) >= 2:
 						bush[idx(x, z)] = true
+		# hand-placed cover: boulder blocks, single trees, camp supply piles
+		for rk in D.get("rocks", []):
+			for z in range(int(rk[1]), int(rk[3]) + 1):
+				for x in range(int(rk[0]), int(rk[2]) + 1):
+					HandLayout.block(self, x, z, ii, "rock", neck)
+		for tr in D.get("trees", []):
+			HandLayout.block(self, int(tr[0]), int(tr[1]), ii, "tree", neck)
+		for cr in D.get("crates", []):
+			HandLayout.block(self, int(cr[0]), int(cr[1]), ii, "camp", neck)
 		# cover: a few deliberate rock formations (a 2x2 boulder, an L, a short ridge) spaced well
 		# apart on open, flat ground, never single random blocks scattered everywhere
 		var poi := _v2(D.get("poi", [0, 0]))
-		if D.get("perch", false) or D.get("no_rocks", false):
+		if D.get("perch", false) or D.get("no_rocks", false) or hand:
 			continue
 		var cells2: Array = islands[ii]["cells"].duplicate()
 		var want := int(cells2.size() / 240)

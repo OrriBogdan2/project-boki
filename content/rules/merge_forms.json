@@ -1,0 +1,330 @@
+{
+	"desc": "How a merge looks and plays (docs/decisions/0003). Forms with a kit live in content/merge_forms/<merge id>.json. This file holds the shared timings, the stat-style fallback every other Boki gets until its form is written (the Boki's type picks its look, rider and dash trail; the same for everyone, no tiers), and the weak surge.",
+	"xform_s": 0.7,
+	"xform_contact_s": 0.45,
+	"ult_lock_s": 1.5,
+	"warn_s": 3.0,
+	"release_rest_s": 6.0,
+	"timeout_rest_s": 10.0,
+	"afterglow": {
+		"secs": 3.0,
+		"move_speed": 0.15,
+		"shield_frac": 0.08
+	},
+	"damage_cap": 0.2,
+	"window_note": "warn_s: the last seconds of the window flash, tick and pulse; release_rest_s: how long the Boki rests beside you after you release with the ultimate (no C, no orders, carried bonuses on); timeout_rest_s: a merge that runs out of time instead (no release) leaves the Boki resting this long, so releasing is always the better play. afterglow: after a release the hunter gets secs seconds of move_speed (x) and a shield of shield_frac of max health. damage_cap: the most the stat-based damage bonus can total while merged (x); gear and perks you already had are never cut.",
+	"xform_note": "seconds: the transformation lasts 0.7 and you are invulnerable for all of it; the Boki lands in you at 0.45 (flash, shockwave, the silhouette pops in); the Merge key again unlocks 1.5s after the form appears",
+	"fallback": {
+		"haste": 0.12,
+		"size": 1.0,
+		"ult_s": 0.5,
+		"burst": {
+			"radius": 4.0,
+			"dmg": 24,
+			"kb": 8.0
+		},
+		"note": "haste = faster class-ability cooldowns (x); burst = the basic ultimate of a Boki without a form: m radius, hp damage, knockback; ult_s = its wind-up in seconds; dash = the form dash of a Boki without a form: for window s what you dash through (width m) takes the type's dash dmg and rider, then haste_s s of haste",
+		"dash": {
+			"kind": "trail",
+			"name": "Rush",
+			"window": 0.45,
+			"width": 1.2,
+			"haste_s": 1.5
+		}
+	},
+	"surge": {
+		"name": "Surge",
+		"duration": 3.0,
+		"color": "#e8f4ff",
+		"passives": [
+			[
+				"damage",
+				0.1
+			],
+			[
+				"move_speed",
+				0.1
+			]
+		],
+		"haste": 0.12,
+		"flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."
+	},
+	"types": {
+		"venom": {
+			"style": "nova",
+			"parts": [
+				"fangs",
+				"tail",
+				"crest"
+			],
+			"word": "VENOM",
+			"rider": {
+				"burn": 5.0,
+				"burn_for": 3.0
+			},
+			"dash": {
+				"dmg": 8.0,
+				"burn": 4.0,
+				"burn_for": 3.0
+			}
+		},
+		"spore": {
+			"style": "bloom",
+			"parts": [
+				"crest",
+				"plates",
+				"halo"
+			],
+			"word": "SPORE",
+			"rider": {
+				"slow_k": 0.25,
+				"slow_s": 1.6
+			},
+			"dash": {
+				"dmg": 6.0,
+				"slow_k": 0.3,
+				"slow_s": 1.4
+			}
+		},
+		"gravity": {
+			"style": "quake",
+			"parts": [
+				"plates",
+				"spikes",
+				"halo"
+			],
+			"word": "GRAVITY",
+			"rider": {
+				"kb": -3.5
+			},
+			"dash": {
+				"dmg": 10.0,
+				"kb": -4.0
+			}
+		},
+		"prism": {
+			"style": "prism",
+			"parts": [
+				"crest",
+				"halo",
+				"wings"
+			],
+			"word": "PRISM",
+			"rider": {
+				"chain": 0.35
+			},
+			"dash": {
+				"dmg": 8.0,
+				"chain": 0.35
+			}
+		},
+		"lunar": {
+			"style": "spiral",
+			"parts": [
+				"halo",
+				"wings",
+				"crest"
+			],
+			"word": "LUNAR",
+			"rider": {
+				"leech": 0.06
+			},
+			"dash": {
+				"dmg": 6.0,
+				"leech": 0.06
+			}
+		},
+		"echo": {
+			"style": "storm",
+			"parts": [
+				"antennae",
+				"crest",
+				"wings"
+			],
+			"word": "ECHO",
+			"rider": {
+				"chain": 0.3
+			},
+			"dash": {
+				"dmg": 8.0,
+				"chain": 0.3
+			}
+		},
+		"ember": {
+			"style": "pillar",
+			"parts": [
+				"horns",
+				"crest",
+				"tail"
+			],
+			"word": "EMBER",
+			"rider": {
+				"burn": 7.0,
+				"burn_for": 2.5
+			},
+			"dash": {
+				"dmg": 10.0,
+				"burn": 6.0,
+				"burn_for": 2.5
+			}
+		},
+		"frost": {
+			"style": "bloom",
+			"parts": [
+				"spikes",
+				"crest",
+				"halo"
+			],
+			"word": "FROST",
+			"rider": {
+				"slow_k": 0.35,
+				"slow_s": 1.8
+			},
+			"dash": {
+				"dmg": 6.0,
+				"slow_k": 0.4,
+				"slow_s": 1.6
+			}
+		},
+		"storm": {
+			"style": "storm",
+			"parts": [
+				"wings",
+				"crest",
+				"antennae"
+			],
+			"word": "STORM",
+			"rider": {
+				"chain": 0.4
+			},
+			"dash": {
+				"dmg": 9.0,
+				"chain": 0.4
+			}
+		},
+		"stone": {
+			"style": "quake",
+			"parts": [
+				"plates",
+				"horns",
+				"spikes"
+			],
+			"word": "STONE",
+			"rider": {
+				"kb": 4.5
+			},
+			"dash": {
+				"dmg": 12.0,
+				"kb": 5.0
+			}
+		},
+		"bloom": {
+			"style": "bloom",
+			"parts": [
+				"crest",
+				"wings",
+				"halo"
+			],
+			"word": "BLOOM",
+			"rider": {
+				"leech": 0.07
+			},
+			"dash": {
+				"dmg": 5.0,
+				"leech": 0.07
+			}
+		},
+		"shadow": {
+			"style": "spiral",
+			"parts": [
+				"horns",
+				"wings",
+				"tail"
+			],
+			"word": "SHADOW",
+			"rider": {
+				"slow_k": 0.2,
+				"slow_s": 1.2,
+				"leech": 0.04
+			},
+			"dash": {
+				"dmg": 8.0,
+				"slow_k": 0.25,
+				"slow_s": 1.2
+			}
+		},
+		"titan": {
+			"style": "quake",
+			"parts": [
+				"horns",
+				"plates",
+				"spikes"
+			],
+			"word": "TITAN",
+			"rider": {
+				"kb": 5.5
+			},
+			"dash": {
+				"dmg": 14.0,
+				"kb": 6.0
+			}
+		},
+		"swarm": {
+			"style": "storm",
+			"parts": [
+				"antennae",
+				"wings",
+				"spikes"
+			],
+			"word": "SWARM",
+			"rider": {
+				"burn": 3.5,
+				"burn_for": 2.0,
+				"chain": 0.25
+			},
+			"dash": {
+				"dmg": 6.0,
+				"burn": 3.0,
+				"burn_for": 2.0
+			}
+		},
+		"tempest": {
+			"style": "storm",
+			"parts": [
+				"wings",
+				"crest",
+				"halo"
+			],
+			"word": "TEMPEST",
+			"rider": {
+				"chain": 0.45
+			},
+			"dash": {
+				"dmg": 9.0,
+				"chain": 0.45
+			}
+		},
+		"none": {
+			"style": "nova",
+			"parts": [
+				"crest",
+				"halo",
+				"plates"
+			],
+			"word": "MERGE",
+			"rider": {
+				"kb": 2.0
+			},
+			"dash": {
+				"dmg": 6.0,
+				"kb": 2.0
+			}
+		}
+	},
+	"shell_base": {
+		"light": 80,
+		"medium": 110,
+		"heavy": 150
+	},
+	"shell_note": "hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost."
+}

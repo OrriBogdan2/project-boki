@@ -12,7 +12,7 @@ global uniform vec4 vis_ally0;     // xy = position (x, z), zw = aim direction
 global uniform vec4 vis_ally1;
 global uniform vec4 vis_ally2;
 global uniform float vis_ally_range;   // how far teammates see (the raid condition shortens it)
-global uniform float vis_dark;         // how dark it is outside sight (0.42; darker at night)
+global uniform float vis_dark;         // how dark it is outside sight (0.7; darker at night)
 
 // How lit a point is by one viewer: 1 inside the circle or the unblocked cone, 0 outside.
 float vis_one(vec2 eye, vec2 dir, float range, vec2 wp, int max_steps) {
@@ -49,10 +49,13 @@ float vis_fog(vec3 wp) {
 	return 1.0 - lit;
 }
 
-// Outside sight: much darker, cooler and greyer. Inside: a touch brighter, so the lit space pops.
+// Outside sight: darker, cooler and greyer, but still readable (the scene has to read on camera:
+// was 42% brightness and 60% grey, now 70% (vis_dark, RaidLook.VIS_DARK) and 40%; the old values turned everything outside the cone near black). Inside: a
+// touch brighter, so the lit space pops. What's hidden stays hidden either way: rival hunters and
+// Boki out of sight aren't drawn at all (Match._update_vision), this only shades the world.
 vec3 vis_apply(vec3 c, float fog) {
 	if (vis_on < 0.5) { return c; }
-	vec3 grey = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.62, 0.7, 0.98);
-	vec3 dark = mix(c, grey, 0.6) * vis_dark;
-	return mix(c * 1.06, dark, fog);
+	vec3 grey = vec3(dot(c, vec3(0.3, 0.59, 0.11))) * vec3(0.7, 0.76, 0.98);
+	vec3 dark = mix(c, grey, 0.4) * vis_dark;
+	return mix(c * 1.05, dark, fog);
 }

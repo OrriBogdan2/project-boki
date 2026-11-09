@@ -1,0 +1,12 @@
+{
+ "_doc": "Bonus chest keys on top of the carrier quota (docs/decisions/0007-keys-and-cover.md, scripts/match/key_bonus.gd). Odds are chances per source; a {odds, two} source gives 2 keys on 'two' of its hits. Low on purpose, so a spare key feels like luck. Rolled on the keys' own seeded stream (seed_add), so no other loot shifts. Target: 20-30% more keys than chests on an average match (--keys-check measures it). Keys are never sold in shops.",
+ "seed_add": 977,
+ "boss":    {"odds": 0.40, "two": 0.25},
+ "elite":   {"odds": 0.25, "two": 0.15},
+ "monster": 0.03,
+ "pot":     0.02,
+ "crate":   0.04,
+ "barrel":  0.02,
+ "keg":     0.02,
+ "train_crate": 0.04
+}

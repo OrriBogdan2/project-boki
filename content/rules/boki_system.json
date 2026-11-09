@@ -1,0 +1,86 @@
+{
+	"desc": "The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.",
+	"class_ults": false,
+	"class_ults_doc": "false: the Merge key is the Merge for every class. true: it runs the class's own ultimate again (ArchKit.use_r), kept for the hero-port work to fold into kits.",
+	"bond_from_ult": {
+		"hit": 0.6,
+		"knock": 0.7,
+		"kill": 0.8
+	},
+	"bond_from_ult_doc": "Share of the bond bar a hero's own ultimate pays (KinBond.from_ult): the best event of one cast counts (a hit, a knock, a kill), never added per target. Fighting still fills the bar, so Merge is never locked behind the ult.",
+	"g_hold_s": 0.35,
+	"throw_range": 9.0,
+	"throw_range_dive": 11.0,
+	"recall_range": 24.0,
+	"merge_leap_range": 32.0,
+	"land_stagger": {
+		"radius": 1.7,
+		"stun": 0.7,
+		"kb": 3.0,
+		"dmg_k": 0.8
+	},
+	"recall_hit": {
+		"width": 0.9,
+		"dmg_k": 1.0,
+		"stun": 0.35,
+		"kb": 5.0
+	},
+	"loss": {
+		"desc": "Losing a Boki (docs/decisions/0008). loss_min_tier: tiers below it are safe (your Boki goes home with you when you die); from it up, a Boki drops dazed when its hunter dies, guards the spot, and can be scanned by an enemy. bond_ping_s: seconds between map pings of the hunter carrying a captured Boki. guard_r: metres from the deathbox a dropped Boki stands.",
+		"loss_min_tier": 2,
+		"bond_ping_s": 15.0,
+		"guard_r": 1.4
+	},
+	"regen": {
+		"carried_pct_s": 0.06,
+		"out_pct_s": 0.015,
+		"out_delay_s": 6.0,
+		"desc": "Health a Boki wins back on its own, as a share of max health per second: on you (Return, settled) 6%/s; out beside you 1.5%/s once it has gone out_delay_s without taking damage. A downed Boki never regenerates (rescue it). Kin.regen_quiet counts the seconds since it last lost health; Blight cuts it like any healing."
+	},
+	"down": {
+		"recover_s_trusting": 15.0,
+		"recover_s_wary": 20.0,
+		"recover_hp": 0.2,
+		"rescue_hp": 0.6,
+		"rescue_s": 3.5,
+		"rescue_r": 1.5,
+		"rescue_block_s": 0.6,
+		"contest_r": 1.2,
+		"carry_speed_k": 0.9,
+		"carry_lift_s": 0.3,
+		"rescue_done_s": 0.45
+	},
+	"follow": {
+		"separation_r": 1.2,
+		"path_every_s": 0.45,
+		"path_goal_moved": 3,
+		"path_fail_backoff_s": 1.5,
+		"path_lookahead": 8,
+		"path_window": 12,
+		"stuck_s": 1.0,
+		"hop_dur": 0.38,
+		"hop_height": 1.1,
+		"hop_on_air_s": 0.4,
+		"hop_off_steady_s": 0.35,
+		"away_dist": 8.0,
+		"combat_radius": 12.0,
+		"hesitate_s": 0.3,
+		"sic_cd": 1.0,
+		"sic_speed": 18.0,
+		"engage_range": 9.0,
+		"disengage_range": 4.0,
+		"guard_leash": 24.0,
+		"chase_leash": 30.0
+	},
+	"follow_doc": "stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. disengage_range: m; after an explicit Follow in a fight, a foe hitting the Boki or you from this close sends it back into the fight. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you.",
+	"wheel": {
+		"deadzone_px": 30,
+		"pop_s": 0.14,
+		"radius_px": 92
+	},
+	"charge_impact": {
+		"radius_k": 1.35,
+		"stun_add": 0.3,
+		"kb_k": 1.4
+	}
+}

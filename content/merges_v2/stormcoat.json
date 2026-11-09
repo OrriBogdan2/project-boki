@@ -5,8 +5,6 @@
 	"flavor": "Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.",
 	"theme": "echo",
 	"duration": 6,
-	"grow_duration": 1.0,
-	"grow_strength": 0.1,
 	"passives": [
 		{
 			"stat": "move_speed",

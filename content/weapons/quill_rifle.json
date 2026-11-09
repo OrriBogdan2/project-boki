@@ -1,0 +1,29 @@
+{
+	"id": "quill_rifle",
+	"name": "Quill Rifle",
+	"classes": [
+		"medium"
+	],
+	"primary": {
+		"dmg": 6.0,
+		"rate": 0.12,
+		"speed": 74,
+		"mag": 30,
+		"kb": 1.0,
+		"spread": 0.03,
+		"range": 11.0,
+		"size": 0.13,
+		"color": "#ffb36a",
+		"sfx": "vn_rifle",
+		"sustain_loss": 0.5,
+		"sustain_rounds": 10,
+		"refill_after": 0.35,
+		"refill_rate": 40.0,
+		"desc": "A long-shrouded auto rifle fed from a 30-round drum that refills fast whenever the trigger rests (no reloading by hand); run it dry and it fires again once the drum is full, about a second later. It fires out to full range. Long strings of fire lose half their punch after ten rounds; Dazed foes take 90% more.",
+		"kick": 0.06,
+		"tracer": 1.2,
+		"aim": "max",
+		"fire_slow": 1.0
+	},
+	"utility": ""
+}

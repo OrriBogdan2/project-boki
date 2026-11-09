@@ -1,0 +1,19 @@
+{
+	"id": "umbrathere",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/umbrathere.json.",
+	"size": {
+		"cm": 60,
+		"kg": 30.0,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#3e412f",
+		"belly": "#7b806a",
+		"glow": "#dfff7a"
+	},
+	"work": {
+		"forage": 3,
+		"craft": 2,
+		"haul": 1
+	}
+}

@@ -1,0 +1,23 @@
+{
+ "id": "stim",
+ "name": "Swift draught",
+ "short": "Swift",
+ "icon": "dash",
+ "col": "ffd76a",
+ "use": "fx",
+ "cd": 2.0,
+ "max": 3,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 35,
+ "desc": "Move 35% faster for 6s.",
+ "effects": [
+  {
+   "type": "haste",
+   "time": 6.0
+  }
+ ]
+}

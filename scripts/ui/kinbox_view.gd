@@ -171,7 +171,7 @@ func _done(t: String) -> void:
 	if home and home.has_method("_refresh_burrow"): home._refresh_burrow()
 
 func _fail(t: String) -> void:
-	Sfx.play("warn", null, -8.0)
+	Sfx.play("ui_deny", null, -8.0)
 	_say(t, UI.BAD)
 
 ## Rebuilds the farm list, the page and the side panel (the toolbar stays, so typing keeps focus).
@@ -280,16 +280,11 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	var picked := not empty and String(rec["uid"]) == sel
 	var bg := Color(0.13, 0.14, 0.2, 1.0) if not empty else Color(0.1, 0.1, 0.15, 0.55)
 	if where == "farm" and empty: bg = Color(0.12, 0.17, 0.13, 0.5)
-	var sbx := StyleBoxFlat.new()
-	sbx.bg_color = bg
-	sbx.set_corner_radius_all(10)
-	sbx.content_margin_left = 4; sbx.content_margin_right = 4; sbx.content_margin_top = 3; sbx.content_margin_bottom = 3
 	# no rarity frames: a rare Boki looks rare in its own picture (docs/POSITIONING.md)
+	var edge := Color(1, 1, 1, 0.05 if empty else 0.08)
 	if picked:
-		sbx.border_color = UI.ACCENT; sbx.set_border_width_all(2)
-	else:
-		sbx.border_color = Color(1, 1, 1, 0.05 if empty else 0.08); sbx.set_border_width_all(1)
-	c.add_theme_stylebox_override("panel", sbx)
+		edge = UI.ACCENT
+	c.add_theme_stylebox_override("panel", UI.frame(bg, UI.R_CTRL, edge, 2 if picked else 1, 4, 3))
 	c.set_drag_forwarding(func(_p): return _drag(rec, c), _can_drop, func(_p, d): _drop_on(d, where, rec, slot))
 	if empty:
 		if where == "farm":
@@ -421,6 +416,7 @@ func _build_detail() -> void:
 	tv.add_child(UI.label("Level %d %s  ·  %s" % [int(rec["level"]), Evo.form_name(rec), String(sp["type"]).capitalize()], 13, UI.INK))
 	var where := KinBox.went_text(rec) if KinBox.is_boxed(rec) else "Out on the farm"
 	if String(rec["uid"]) == str(Save.d.get("active", "")): where = "Your partner, on the farm"
+	if KinIndoors.status(rec) != "": where = KinIndoors.status(rec)
 	tv.add_child(UI.label(where, 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.GOOD))
 	top.add_child(tv)
 	detail.add_child(top)

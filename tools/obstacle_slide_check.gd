@@ -102,6 +102,10 @@ func _map(main: Node, label: String, opts: Dictionary) -> void:
 				# away from where you actually touch it (you may have slid round a corner on the way in)
 				var away := _away(c, p0)
 				if away == Vector2.ZERO: continue
+				# (walking off an island is allowed now, only bots keep an edge guard: a cluster at the lip whose
+				# way out is over the edge isn't an escape on the ground, so it isn't counted here)
+				var ahead := p0 + away * 0.8
+				if w.is_void(ahead.x, ahead.y) or w.ground_at(ahead.x, ahead.y) < P.pos.y - 0.5: continue
 				n_esc += 1
 				var trace: Array = []
 				for i in 6:

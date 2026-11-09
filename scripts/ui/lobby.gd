@@ -16,7 +16,6 @@ func setup(o: Dictionary) -> void:
 func _ready() -> void:
 	Sfx.play_music("title")
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	theme = UI.theme()
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
 	var pb := UI.scroll_panel("Play online", 640, func(): Game.goto("home"), "Back")
@@ -34,8 +33,7 @@ func _ready() -> void:
 	v.add_child(UI.section("Teams"))
 	var modes := UI.hbox(2)
 	var track := PanelContainer.new()
-	var tsb := UI._box(UI.WELL, 11, Color(1, 1, 1, 0.05), 1); UI._pad(tsb, 3, 3)
-	track.add_theme_stylebox_override("panel", tsb)
+	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
 	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	track.add_child(modes)
 	for m in [["ffa", "Everyone for themselves"], ["duo", "Teams of 2"], ["trio", "Teams of 3"]]:
@@ -74,7 +72,13 @@ func _refresh_modes() -> void:
 
 func _announce() -> void:
 	var k := Save.active_kin()
-	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": opts.get("cls", Data.class_of_save()), "weapon": Save.d.get("weapon", ""), "arch": Arch.of_save(), "ready": is_ready, "lobby": 1,
+	var arch := ClassUnlock.online_arch(Arch.of_save())      # (Settings > Demo > All masks open is offline only)
+	var cls: String = opts.get("cls", Data.class_of_save())
+	var weapon: String = Save.d.get("weapon", "")
+	if arch != Arch.of_save():
+		cls = Arch.weight(arch)
+		weapon = Arch.signature(arch)
+	Net.set_presence({"name": Save.d.get("name", "Hunter"), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready, "lobby": 1,
 		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
 
 func _toggle_ready() -> void:
@@ -88,7 +92,7 @@ func _refresh() -> void:
 		return
 	for c in list_box.get_children():
 		c.queue_free()
-	var how: String = {"room": "through this artifact's room", "server": "to the Project Boki server"}.get(Net.mode, "between browser tabs on this computer (the room isn't available here)")
+	var how: String = {"room": "to the room", "server": "to the Project Boki server"}.get(Net.mode, "on this computer")
 	if Net.mode != "":
 		status.text = "Connected %s. %d player%s here." % [how, Net.peers.size(), "" if Net.peers.size() == 1 else "s"]
 	elif Net.deny_reason != "":
@@ -107,7 +111,7 @@ func _refresh() -> void:
 		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(nm)
 		var kin: Dictionary = p.get("kin", {})
-		var info := UI.label("%s · %s" % [Data.CLASSES.get(p.get("cls", "medium"), Data.CLASSES["medium"])["name"], Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
+		var info := UI.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
 		info.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(info)
 		h.add_child(UI.tag("Ready" if p.get("ready", false) else "Not ready", UI.GOOD if p.get("ready", false) else UI.MUTED))
@@ -131,7 +135,7 @@ func _start() -> void:
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
-		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append({"peer": id, "team": i / squad, "name": p.get("name", "Hunter"), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(ceil(Data.MATCH_PLAYERS / float(squad))))
 	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, 20), "squad": squad, "tier": int(opts.get("tier", 0))}
 	Net.lobby_emit("start", d)
@@ -147,5 +151,4 @@ func _on_msg(topic: String, data, _from: String) -> void:
 
 func _go(d: Dictionary) -> void:
 	Save.d["cls"] = opts.get("cls", Save.d.get("cls", "medium"))
-	Game.last_tier = int(d.get("tier", 0))
-	Game.goto("match", {"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))})
+	Game.start_match({"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))})

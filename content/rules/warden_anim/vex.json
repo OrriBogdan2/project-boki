@@ -1,0 +1,31 @@
+{
+	"doc": "Vex's hand-keyed clips (art/wardens/vex/vex.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Her right forearm IS the minigun (v2): rigid on forearm.R, its barrels on gatling; the launcher bone has no mesh, its FX points sit on its pivot at the drum's mouth.",
+	"skinned_weapon": true,
+	"extra_bones": {"lid.L": "head", "brow.L": "head", "brow.R": "head", "fingers.L": "hand.L", "thumb.L": "hand.L", "foot.L": "shin.L", "foot.R": "shin.R", "coin": "hand.L", "launcher": "forearm.R", "gatling": "forearm.R"},
+	"offset_bones": ["coin", "brow.L", "brow.R"],
+	"bone_scale": {"gatling": 0.8, "launcher": 0.9},
+	"blade": {"root": "anchor_gatling_root", "root_bone": "forearm.R", "tip": "weapon_muzzle", "bone": "gatling"},
+	"loco": {
+		"idle": "idle", "stance": "stance", "stance_after": 6.0,
+		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
+		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
+		"walk_speed": 2.1, "run_speed": 4.55
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dash_ex"},
+	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"kmoves": {
+		"gunslinger_lmb": {"clip": "lmb", "upper": "moving"},
+		"gunslinger_rmb": {"clip": "rmb", "upper": "moving"},
+		"gunslinger_dash": {"clip": "dash", "legs_heading": true},
+		"gunslinger_dash_ex": {"clip": "dash_ex"},
+		"gunslinger_e": {"clip": "e"},
+		"gunslinger_x": {"clip": "x"},
+		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
+		"mf_xform": {"clip": "fusion"}
+	},
+	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
+	"flow": [["gunslinger_lmb", 0.25], ["gunslinger_lmb", 0.12], ["gunslinger_dash", 0.5], ["gunslinger_lmb", 0.25], ["gunslinger_rmb", 0.4], ["gunslinger_e", 1.0], ["gunslinger_knock", 0.5], ["gunslinger_x", 0.5]],
+	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"]
+}

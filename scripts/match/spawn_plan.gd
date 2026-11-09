@@ -186,7 +186,6 @@ func roll(seed_val: int) -> void:
 ## whatever a registered spawner brings.
 func spawn_all() -> void:
 	var wr := RandomNumberGenerator.new(); wr.seed = m.seed_val * 53 + 11
-	var keys: Array = Data.weapon_ids()
 	for c in cands:
 		if not c["active"]:
 			continue
@@ -194,15 +193,14 @@ func spawn_all() -> void:
 		var p: Vector3 = c["pos"]
 		match String(c["cat"]):
 			"vault":
-				c["ref"] = m.add_chest(p, 2)
+				c["ref"] = m.add_chest(p)
 			"cache":
-				c["ref"] = m.add_chest(p, 1)
-				# and a good weapon beside it, the same for everyone online
-				var wk := String(keys[wr.randi() % keys.size()])
-				var rar := clampi(Data.roll_rarity(wr, 1), 2, 4)
+				c["ref"] = m.add_chest(p)
+				# and a good piece of gear beside it, the same for everyone online
+				var gg := GearDrops.roll_gear(wr, 1, 2, -1, m.biomes.slot_lean_at(p) if m.biomes else {})
 				var wp := m.world.free_spot_near(p + Vector3(1.4, 0, 0.4), [p], 0.6)
 				wp.y = m.world.ground_at(wp.x, wp.z)
-				m.spawn_weapon(wk, rar, wp, "sc%d" % int(c["i"]), false, -1, Loot.weapon(wk, rar, Loot.roll_element(wr, m.world.biome_at(p.x, p.z))))
+				m.spawn_gear(String(gg["id"]), int(gg["rar"]), wp, "sc%d" % int(c["i"]), false)
 			"rare_kin":
 				if not m.net_on or m.is_host:
 					c["ref"] = _spawn_rare(p, wr)

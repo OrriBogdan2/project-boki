@@ -53,7 +53,7 @@ func run(m: Node) -> void:
 	var got: Dictionary = (res.get("caught", []) as Array)[0] if not (res.get("caught", []) as Array).is_empty() else {}
 	ok(not got.is_empty() and KinBox.is_boxed(got) and String(got.get("went", "")) == "box", "caught on an expedition: a repeat lands in the box (%s)" % KinBox.went_text(got))
 	Care.dex_sync()
-	ok((Save.d["dex"][sps[1]]["mutations"] as Array).has("giant"), "the Kindex records a Giant %s" % Data.KIN[sps[1]]["name"])
+	ok((Save.d["dex"][sps[1]]["mutations"] as Array).has("giant"), "the Field Book records a Giant %s" % Data.KIN[sps[1]]["name"])
 	# ---------------------------------------------------------------- 2. moving, sorting, releasing
 	ok(KinBox.to_farm(dup) != "", "can't bring one out onto a full farm: \"%s\"" % KinBox.to_farm(dup))
 	ok(KinBox.to_box(st) != "", "the partner/starter stays on the farm: \"%s\"" % KinBox.to_box(st))

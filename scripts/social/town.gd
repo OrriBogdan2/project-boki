@@ -52,7 +52,7 @@ func _ready() -> void:
 		_build_hub()
 		Sfx.play_music("hub")
 	Sfx.play_ambience("home")
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
+	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.worn(), Arch.of_save())
 	add_child(player)
 	player.position = ppos
 	for a in OS.get_cmdline_user_args():
@@ -424,7 +424,8 @@ func _unhandled_input(event: InputEvent) -> void:
 # ------------------------------------------------------------------ ui
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
-	root_ui = Control.new(); root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root_ui.theme = UI.theme()
+	root_ui = Control.new()
+	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
 	var top := UI.card(Color(0.06, 0.07, 0.1, 0.78), 12, 12)
@@ -473,18 +474,7 @@ func _close_panel() -> void:
 	panel_open = ""
 
 func _toast(txt: String) -> void:
-	var c := UI.card(Color(0.06, 0.07, 0.1, 0.9), 12, 18)
-	var l := UI.label(txt, 20, UI.GOLD, UI.big)
-	l.autowrap_mode = TextServer.AUTOWRAP_OFF
-	c.add_child(l)
-	root_ui.add_child(c)
-	c.reset_size()
-	var vp := get_viewport().get_visible_rect().size
-	c.position = Vector2((vp.x - c.size.x) * 0.5, 100)
-	var tw := create_tween()
-	tw.tween_interval(2.4)
-	tw.tween_property(c, "modulate:a", 0.0, 0.4)
-	tw.tween_callback(c.queue_free)
+	UI.toast(root_ui, txt)
 
 func _row(v: VBoxContainer, text: String, col := UI.INK, size := 15) -> HBoxContainer:
 	var row := UI.hbox(10)
@@ -557,7 +547,7 @@ func _open_visits() -> void:
 # ---- market
 func _open_market() -> void:
 	var v := _new_panel("Market", 600)
-	v.add_child(UI.label("Players sell seeds, crops and Boki here. You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
+	v.add_child(UI.label("Players sell seeds and crops here. (Boki are never sold: hand one to a friend from the Shelter.) You have %d gems." % int(Save.d["gems"]), 14, UI.MUTED))
 	var list := _loading(v)
 	Social.list_market(func(rows: Array):
 		if not _clear(list): return
@@ -567,14 +557,8 @@ func _open_market() -> void:
 			var l: Dictionary = r["l"]
 			var key: String = l["key"]
 			var mine: bool = l["seller"] == Social.me
-			var row: HBoxContainer
-			if l["kind"] == "kin":
-				var ck: Dictionary = l["kin"]
-				row = _row(list, "%s the %s  ·  Lv %d%s  ·  %d gems  ·  from %s" % [ck["name"], Data.KIN[key]["name"], int(ck["level"]), "  ·  shimmer" if ck["shimmer"] else "",
-					int(l["price"]), l["seller_name"]], Data.KIN[key]["color"])
-			else:
-				row = _row(list, "%s%s  ·  %d gems  ·  from %s" % [Data.CROPS[key]["name"], " seed" if l["kind"] == "seed" else "",
-					int(l["price"]), l["seller_name"]], Data.CROPS[key]["color"])
+			var row := _row(list, "%s%s  ·  %d gems  ·  from %s" % [Data.CROPS[key]["name"], " seed" if l["kind"] == "seed" else "",
+				int(l["price"]), l["seller_name"]], Data.CROPS[key]["color"])
 			var lid: String = r["id"]
 			if mine:
 				var tb := UI.button("Take back", func():
@@ -613,22 +597,6 @@ func _open_market() -> void:
 					if panel_open == "Market": _open_market()), 200))
 	if not any:
 		v.add_child(UI.label("You have no seeds or crops to sell yet.", 14, UI.MUTED))
-	# kin: one at a time leaves your farm and waits at the market until someone buys it
-	v.add_child(UI.section("Sell a Boki"))
-	var roster: Array = Save.d["roster"]
-	if roster.size() <= 1:
-		v.add_child(UI.label("You need at least two Boki to sell one.", 14, UI.MUTED))
-	else:
-		for rec in roster:
-			var price := Social.kin_price(int(rec["level"]))
-			var row := _row(v, "%s  ·  Lv %d %s" % [rec["name"], int(rec["level"]), Evo.form_name(rec)], Data.KIN[rec["species"]]["color"])
-			var uid: String = rec["uid"]
-			var nm: String = rec["name"]
-			row.add_child(UI.button("Sell for %d gems" % price, func():
-				_lock()
-				Social.sell_kin(uid, price, func(okk: bool):
-					if okk: _toast("%s is waiting at the market. You'll be paid when someone takes them home." % nm)
-					if panel_open == "Market": _open_market()), 200))
 
 # ---- notice board
 func _open_notices() -> void:
@@ -754,5 +722,5 @@ func _fake_members() -> Array:
 		var rec := Save.new_kin(sp[i % sp.size()])
 		rec["level"] = rng.randi_range(2, 18)
 		Evo.simulate(rec, rng)
-		out.append({"id": "fake%d" % i, "d": Social.clean_island({"name": ["Wren", "Ollie", "Mara", "Tobin", "Ivy", "Juno", "Pip"][i], "roster": [rec], "active": rec["uid"], "buildings": ["cottage"]})})
+		out.append({"id": "fake%d" % i, "d": Social.clean_island({"name": ["Wren", "Ollie", "Mara", "Tobin", "Ivy", "Juno", "Pudding"][i], "roster": [rec], "active": rec["uid"], "buildings": ["cottage"]})})
 	return out

@@ -1,21 +1,184 @@
 {
 	"id": "mage",
-	"name": "Mage",
-	"weight": "medium",
-	"color": "#7fb8ff",
-	"fantasy": "The spell duelist. Runes you, hexes you into a critter, blinks away and snaps back.",
-	"silhouette": "the hat and robe flare",
-	"card": {"loop": "Bolt a foe to Rune them; your next spell on them detonates it (Overcharged: a Flashpoint). Hex, Blink, snap back.", "dash": "Blink up to 5.5m (through walls); dash again within 3s to snap back to the sigil you left.", "passive": "Runes: a second spell on a Runed foe detonates it (16, root). Heat 70+: Flashpoint; 100: Vent.", "rmb": "Guided Bolt: keep holding and it bends toward your cursor; it hits harder the longer it flies.", "e": "Hex: a dodgeable bolt that turns a hunter into a harmless critter for 1.3s.", "r": "Encore: two mirror images recast your last spell, then echo every Bolt and Hex for 4s.", "weapons": {"spellstaff": "Slow, heavy magic orbs; every 4th hits harder.", "longsword": "A reaching 3-hit combo; hold for a thrust."}},
-	"weapons": ["spellstaff", "longsword"],
-	"resource": {"id": "heat", "name": "Heat", "max": 100, "kind": "risk", "tap": 15.0, "e": 25.0, "decay": 18.0, "wait": 1.2, "over": 70.0, "vent_t": 0.4, "vent_r": 3.0, "vent_dmg": 14.0, "vent_push": 9.0, "lock": 1.0, "rune_t": 4.0, "burst_dmg": 16.0, "burst_root": 0.5, "flash_dmg": 30.0, "flash_root": 0.8, "flash_r": 2.6, "flash_splash": 14.0, "col": "#ffe6a0"},
-	"passive": {"name": "Runes and Heat", "desc": "A Guided Bolt that hits Runes the target (4s, a ring over its head everyone sees). Your next spell on a Runed foe (a Bolt, a Hex, an echo) detonates the Rune: a Runeburst, 16 damage and root 0.5. Casting builds Heat (a Bolt 15, a Hex 25); at 70+ you're Overcharged (+25%) and a detonation is a Flashpoint: 30 damage, 14 to everyone within 2.6m, root 0.8, all your Heat spent with no Vent, and the Bolt back. At 100 you Vent: a 0.4s ring, then a 3m nova (14, push 9), Heat 0, RMB locked 1s."},
-	"dash": {"id": "blink", "name": "Blink", "icon": "blink", "col": "#a8c8ff", "cd": 9.0, "dist": 5.5, "air_dist": 4.0, "windup": 0.12, "rune_t": 0.6, "rune_r": 1.5, "rune_slow": 0.25, "rune_slow_t": 0.8, "desc": "A 0.12s windup (everyone sees the sigil where you'll land), then you teleport up to 5.5m, through walls, never into the abyss. The sigil you leave slows foes 0.6s later, and for 3s you can dash again to snap back to it (free).", "back_t": 3.0},
-	"rmb": {"delivery": "projectile", "name": "Guided Bolt", "short": "Bolt", "icon": "fireball", "col": "#9ad8ff", "cooldown": 2.5, "charges": 1, "hold": 0.0, "bolt": {"speed": 15.0, "life": 2.2, "turn": 6.0, "ramp": 1.6, "dmg": [10.0, 22.0], "slow": 0.2, "slow_t": 0.6}, "starfall": {"radius": 2.5, "dmg": 10.0, "push": 7.0, "lift": 7.5, "cool": 0.15}, "over_k": 0.25, "variants": {"tap": "A slow bolt (15 m/s, 2.2s); keep holding and it bends toward your cursor (round cover). 10 damage, up to 22 after 1.6s in flight; it Runes what it hits.", "air": "Starfall: a bolt into the ground under you: 10 damage, push 7, lifts you and cools the glider.", "during_r": "During Encore both mirrors echo it at 60%.", "full": "Overcharged (70+ Heat): +25%."}, "sockets": {"hit": "add", "ctrl": "swap", "ctrl_cap": "soft", "mod": "add"}},
-	"e": {"delivery": "projectile", "name": "Hex", "short": "Hex", "icon": "pulse", "col": "#e2b8ff", "cooldown": 14.0, "speed": 20.0, "range": 11.0, "dmg": 4.0, "time": 1.3, "mob_stun": 1.0, "desc": "A dodgeable bolt (20 m/s, 11m): a hunter it hits becomes a harmless critter for 1.3s (half speed, no attacks, casts, dashes or glides); monsters are stunned 1s. On a Runed foe it detonates the Rune too.", "sockets": {"hit": "add", "util": "add"}},
-	"r": {"delivery": "projectile", "name": "Encore", "short": "Encore", "icon": "vanish", "col": "#c4a8ff", "cooldown": 100.0, "fuse": 0.55, "fuse_guard": "none", "time": 4.0, "offset": 1.6, "echo_k": 0.6, "tell": 0.55, "desc": "A 0.55s fuse, then two mirror images appear at your sides and recast your last spell (Bolt or Hex) at full power; for 4s they echo every Bolt and Hex you cast at 60%. Their bolts steer with yours.", "sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
-	"order": ["sec", "kin", "dash", "sec", "kin", "ult", "sec", "kin", "ult", "dash"],
-	"rank3": {"sec": "the bolt turns 30% faster", "kin": "Hex lasts 0.3s longer", "dash": "the sigil's slow doubles", "ult": "the mirrors last 5.2s"},
-	"rank2": {"sec": "Rank 2: cooldown 2.5s -> 2.2s, damage +15%.", "dash": "Rank 2: recharge 9s -> 7.6s per charge.", "kin": "Rank 2: cooldown 14s -> 12.6s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 100s -> 85s, +30% duration, +15% damage; the mirrors last 5.2s."},
-	"rank_next": {"sec": "Rank 3: cooldown 2.5s -> 2s, damage +30%; the bolt turns 30% faster.", "kin": "Rank 3: cooldown 14s -> 11.2s, damage +30%; Hex lasts 0.3s longer.", "dash": "Rank 3: recharge 9s -> 6.3s; the sigil's slow doubles."},
-	"tells": {"half": "rune motes orbit the Mage (one per 20 Heat); a rune ring over every Runed foe", "full": "white-hot orbiting runes (Overcharged); the Runes throb", "dash_spent": "the sigil left behind, dash pip dark"}
+	"title": "Storm Chaser",
+	"base_name": "Sparkle",
+	"gender": "female",
+	"personality": "A street kid struck by the Wyrm's storm in the market square. The bolt took her right eye and left the storm inside her, burning hot pink.\nShe climbs the highest spires to chase storms, throws lightning straight from her hands, and swears she'll give the Wyrm's bolt back to it someday. She has never told anyone she is also looking for Rink, the boy she lost in the storm.",
+	"weight": "light",
+	"plate_offset": 2.2,
+	"body": {"size": 1.098, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.05, "shoulder": 0.85, "build": 0.92, "hit_r": 0.4},
+	"model_glow": {"core": "#ff3fb4"},
+	"color": "#5fe3c8",
+	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
+	"silhouette": "the copper rod mast and kite pennant on the back",
+	"card": {
+		"loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.",
+		"dash": "Wirerun: tap for a short zap, hold to charge a longer lane, let go to streak; through a 4-Static foe it hits double and comes back at once, and a run that came back goes 1.5x further and charges faster.",
+		"passive": "Static: every hit adds a stack (4 max, shown over their head). The 4th calls a sky bolt and makes them Live.",
+		"rmb": "Storm Rod: hold to summon a copper rod, let go to throw it to full range. It adds 1 Static, knocks the first foe back, stuns them on a wall and leaves a charge orb that gives Wirerun back.",
+		"e": "Skycall: drop a circle at your cursor, hold and drag the mouse to pick the drag, let go. 0.8s later lightning drags everyone inside that way (an arrow shows it) and grounds them.",
+		"x": "Kitefall (ultimate, level 6): launch up out of reach, then strike down at your cursor anywhere in a wide ring. It knocks everyone round the landing back and adds Static, spreading the highest count to all it hits.",
+		"weapons": {
+			"coilcaster": "Finger bolts every 0.65s, left hand then right, out to full range; each stops on the first foe it hits and adds 1 Static."
+		}
+	},
+	"signature": "coilcaster",
+	"resource": {
+		"id": "sparks",
+		"name": "Static",
+		"max": 4,
+		"kind": "on_targets",
+		"dur": 4.5,
+		"gap": 0.15,
+		"blow_dmg": 16.0,
+		"blow_pct": 0.18,
+		"col": "#c6fff2"
+	},
+	"passive": {
+		"name": "Static",
+		"desc": "Your finger bolts, Storm Rod and Skycall each add Static to what they hit (one each; up to 4, 4.5s, refreshed by every hit). A marker over their head shows the count, with sparks on them that grow with every stack. The 4th stack calls a sky bolt onto them: they are Live. Wirerun through a Live foe for a Blowout: the run hits double, plus 16 damage and 18% of their health, their Static is spent and Wirerun is back at once. Only a charge orb picked up (by Wirerun or pulled in with Skycall) also gives it back. Knocking a hunter down heals you for 15% of your health."
+	},
+	"dash": {
+		"id": "wirerun",
+		"name": "Wirerun",
+		"icon": "dash",
+		"col": "#9ff5e0",
+		"cd": 8.0,
+		"reset_mult": 1.5,
+		"reset_charge": 0.75,
+		"reset_window": 5.0,
+		"dist": [
+			7.5,
+			13.0
+		],
+		"hold": 0.6,
+		"speed": 40.0,
+		"dmg": 20.0,
+		"width": 0.9,
+		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 7.5 to 13m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 40m/s (shots pass through you), carrying that drift. Every foe you cross takes 20. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
+		"auto": 0.9,
+		"full_mult": 2.0,
+		"end_r": 2.25,
+		"drift_k": 1.0,
+		"rank3_mult": 2.0
+	},
+	"rmb": {
+		"delivery": "projectile",
+		"name": "Storm Rod",
+		"short": "Rod",
+		"icon": "shock",
+		"col": "#7dffd8",
+		"cooldown": 8.0,
+		"charges": 1,
+		"hold": 1.0,
+		"min_t": 0.33,
+		"coil": {
+			"dmg": [
+				18.0,
+				30.0
+			],
+			"range": 13.0,
+			"speed": 55.0,
+			"push": [
+				6.0,
+				9.0
+			],
+			"stun": 0.8,
+			"slam_r": 1.4,
+			"mote_t": 0.05,
+			"mote_life": 4.0,
+			"mote_r": 1.1
+		},
+		"variants": {
+			"tap": "Let go early (it still takes 0.3s to summon): 18 damage and a short knock, flying the full 13m lane.",
+			"hold": "Hold to 1s (your body flashes when it's full; at 1.2s it throws itself): 30 damage and about 1.8m of knockback. Thrown into a wall or another foe they're stunned 0.8s. Every foe hit leaves a charge orb at the impact: a pickup that gives Wirerun back when you run through it or Skycall pulls it to you. It adds no Static."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"mod": "add"
+		},
+		"auto": 1.2,
+		"rank3_mult": 1.5
+	},
+	"e": {
+		"delivery": "burst",
+		"name": "Skycall",
+		"short": "Sky",
+		"icon": "updraft",
+		"col": "#b8f7ff",
+		"cooldown": 10.5,
+		"reach": 11.0,
+		"delay": 0.8,
+		"radius": 1.5,
+		"dmg": 20.0,
+		"slide_dist": 3.4,
+		"slide_t": 1.1,
+		"grounded": 1.5,
+		"desc": "Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 20 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.",
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"util": "add"
+		},
+		"drag_max": 1.0,
+		"fling_dist": 6.0,
+		"fling_t": 0.3,
+		"pull_reach": 9.0,
+		"stacks": 1
+	},
+	"x": {
+		"name": "Kitefall",
+		"short": "Fall",
+		"icon": "quake",
+		"col": "#ffd36a",
+		"cooldown": 42.0,
+		"windup": 0.3,
+		"rise": 0.3,
+		"height": 5.0,
+		"min_air": 0.25,
+		"hover": 1.7,
+		"drop": 0.2,
+		"after": 0.5,
+		"range": 14.4,
+		"radius": 2.7,
+		"dmg": 22.0,
+		"push": 8.0,
+		"lift": 0.4,
+		"stacks": 1,
+				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin"
+	],
+	"rank3": {
+		"sec": "+50% damage",
+		"kin": "cooldown 3s shorter",
+		"dash": "the run's own hit deals double"
+	},
+	"rank2": {
+		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
+		"dash": "Rank 2: recharge 8s -> 7.2s.",
+		"kin": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; +50% damage on top.",
+		"kin": "Rank 3: cooldown 10.5s -> 5.4s (3s off), damage +30%.",
+		"dash": "Rank 3: recharge 8s -> 6.4s; the run's own hit deals double."
+	},
+	"tells": {
+		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
+		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",
+		"dash_spent": "a fading lightning streak where the run went"
+	}
 }

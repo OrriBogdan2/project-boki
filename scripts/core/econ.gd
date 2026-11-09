@@ -1,8 +1,7 @@
 class_name Econ
 ## The home side of loot and kin keeping, all on the save (Save.d):
-##   armory    weapons and gloves you brought home (Loot items), a storage cap you can raise, the
-##             loadout you take on the next expedition, valuables to sell and scrap to upgrade with
-##   backpack  how many slots you get on an expedition (pack_lvl)
+##   armory    gloves and boots you brought home (Loot items), a storage cap you can raise, the
+##             loadout you take on the next expedition (Equal), valuables to sell and scrap to upgrade with
 ##   feeders   troughs on the farm you fill with food; hungry kin help themselves, even while you're away
 ##   graves    kin that died (starved), with their memories; the Soul Shrine brings one back, changed
 ## Starvation itself is in Care (the starve clock); what it leads to (death, a grave) is here.
@@ -10,8 +9,6 @@ class_name Econ
 # ------------------------------------------------------------------ numbers
 const ARM_CAPS := [16, 24, 32, 40]
 const ARM_UPGRADE := [[100, 6], [220, 14], [400, 25]]       # [gems, scrap] for the next level
-const PACK_CAPS := [6, 8, 10, 12]
-const PACK_UPGRADE := [[120, 4], [260, 10], [450, 20]]
 
 const FEEDERS := {
 	"trough": {"name": "Wooden trough", "cap": 6, "mult": 1.0, "seats": 3, "auto": false, "joy": 0.0, "price": 40, "col": Color("a07850"),
@@ -43,7 +40,7 @@ const TITLES := ["the Returned", "Twice-Born", "Soulbright", "Lantern-Lit", "Emb
 static func ensure() -> void:
 	var d := Save.d
 	ensure_min()
-	for k in ["arm_lvl", "pack_lvl", "scrap"]:
+	for k in ["arm_lvl", "scrap"]:
 		if not d.has(k): d[k] = 0
 	for k in ["feeders", "graves"]:
 		if not d.has(k): d[k] = []
@@ -57,9 +54,12 @@ static func ensure() -> void:
 		for it in d["raid_out"]:
 			_store(it)
 		d["raid_out"] = []
+	Equal.recover_belt()        # utility brought on an expedition that never ended goes back in the stash
+	Backpacks.ensure()          # owned backpacks, the pick, and one left out by a crash
 
+## Backpack slots on an expedition before any bonus: the same for everyone (Equal.base_pack).
 static func pack_cap() -> int:
-	return PACK_CAPS[clampi(int(Save.d.get("pack_lvl", 0)), 0, PACK_CAPS.size() - 1)]
+	return Equal.base_pack()
 
 static func arm_cap() -> int:
 	return ARM_CAPS[clampi(int(Save.d.get("arm_lvl", 0)), 0, ARM_CAPS.size() - 1)]
@@ -88,7 +88,7 @@ static func sell(uid: String) -> int:
 	var it := find(uid)
 	if it.is_empty(): return 0
 	var g := Loot.sell_price(it)
-	_remove(uid)
+	remove(uid)
 	Save.d["gems"] = int(Save.d["gems"]) + g
 	return g
 
@@ -96,11 +96,12 @@ static func salvage(uid: String) -> int:
 	var it := find(uid)
 	if it.is_empty(): return 0
 	var n := Loot.scrap_of(it)
-	_remove(uid)
+	remove(uid)
 	Save.d["scrap"] = int(Save.d.get("scrap", 0)) + n
 	return n
 
-static func _remove(uid: String) -> void:
+## Takes a piece out of the armory, and out of the loadout if it was picked.
+static func remove(uid: String) -> void:
 	var arr: Array = Save.d["armory"]
 	for i in arr.size():
 		if String(arr[i].get("uid", "")) == uid:
@@ -129,10 +130,10 @@ static func use_ember() -> bool:
 	if int(vd["soul_ember"]) <= 0: vd.erase("soul_ember")
 	return true
 
-## Buy the next armory or backpack level. which: "arm" or "pack". Returns "" or why not.
+## Buy the next armory storage level. Returns "" or why not.
 static func upgrade(which: String) -> String:
 	var lvl := int(Save.d.get(which + "_lvl", 0))
-	var costs: Array = ARM_UPGRADE if which == "arm" else PACK_UPGRADE
+	var costs: Array = ARM_UPGRADE
 	if lvl >= costs.size(): return "Fully upgraded"
 	var c: Array = costs[lvl]
 	if int(Save.d["gems"]) < int(c[0]): return "Not enough gems"
@@ -142,7 +143,11 @@ static func upgrade(which: String) -> String:
 	Save.d[which + "_lvl"] = lvl + 1
 	return ""
 
-## The loadout: slot "weapon", "glove0" (active) or "glove1" (passive) -> an armory uid, or "" for none.
+## The loadout: slot "gear0", "gear1", "gear3" (glove on Q, glove on V, boots; either kind of glove
+## fits either glove slot, never the same glove twice: Gear.WORN_NAMES, Gloves) -> an armory uid, or
+## "" for none.
+const LOADOUT_SLOTS := ["gear0", "gear1", "gear3"]
+
 static func loadout(slot: String) -> Dictionary:
 	var uid := String(Save.d.get("loadout", {}).get(slot, ""))
 	return find(uid) if uid != "" else {}
@@ -151,19 +156,32 @@ static func set_loadout(slot: String, uid: String) -> void:
 	if uid == "": Save.d["loadout"].erase(slot)
 	else: Save.d["loadout"][slot] = uid
 
-static func glove_slot(it: Dictionary) -> String:
-	return "glove%d" % Gear.slot_of(String(it.get("id", "")))
+## The loadout slot a piece goes in: boots "gear3"; a glove keeps the glove slot it already has,
+## else the first free one (Q, then V), else Q.
+static func gear_slot(it: Dictionary) -> String:
+	var id := String(it.get("id", ""))
+	if not Gear.is_glove(id):
+		return "gear%d" % Gear.slot_of(id)
+	var lo: Dictionary = Save.d.get("loadout", {})
+	for s in ["gear0", "gear1"]:
+		if String(lo.get(s, "")) == String(it.get("uid", "-")): return s
+	for s in ["gear0", "gear1"]:
+		if loadout(s).is_empty(): return s
+	return "gear0"
 
-## Setting out: the loadout leaves the armory and rides with you (at risk until you're home).
-static func begin_raid() -> Array:
-	var out: Array = []
-	for slot in ["weapon", "glove0", "glove1"]:
-		var it := loadout(slot)
-		if it.is_empty(): continue
-		Save.d["armory"].erase(it)
-		out.append(it)
-	Save.d["raid_out"] = out.duplicate(true)
-	return out
+## Can this armory piece go in this loadout slot? Gloves in either glove slot (not the glove the
+## other slot already holds, nor a second copy of it), boots in "gear3".
+static func fits_slot(it: Dictionary, slot: String) -> bool:
+	var id := String(it.get("id", ""))
+	if String(it.get("t", "")) != "gear" or not Gear.ALL.has(id):
+		return false
+	if not Gear.is_glove(id):
+		return slot == "gear%d" % Gear.slot_of(id)
+	if not slot in ["gear0", "gear1"]:
+		return false
+	var other := loadout("gear1" if slot == "gear0" else "gear0")
+	return other.is_empty() \
+			or (String(other.get("uid", "")) != String(it.get("uid", "")) and String(other.get("id", "")) != id)
 
 ## Back from an expedition: what you carried goes into the armory (sold if it's full), what you
 ## lost is gone. Fills out["haul"], out["lost_items"], out["arm_sold"].
@@ -177,13 +195,21 @@ static func after_raid(r: Dictionary, out: Dictionary) -> void:
 		for it in r.get("haul", []):
 			var item: Dictionary = (it as Dictionary).duplicate(true)
 			if not item.has("uid"): item["uid"] = Loot._uid()
-			if String(item.get("t", "")) != "val" and armory().size() >= arm_cap():
+			if Equal.salvages(item):
+				# armor is found in matches, never kept or brought: it salvages into gems (and the usual materials,
+				# below)
+				var sg: int = EqualMigrate.rate(int(item.get("rar", 0)))["gems"]
+				Save.d["gems"] = int(Save.d["gems"]) + sg
+				out["salvage_gems"] = int(out.get("salvage_gems", 0)) + sg
+				item["salvaged"] = true
+			elif String(item.get("t", "")) != "val" and armory().size() >= arm_cap():
 				out["arm_sold"] = int(out["arm_sold"]) + Loot.sell_price(item)
 				Save.d["gems"] = int(Save.d["gems"]) + Loot.sell_price(item)
 				item["sold"] = true
 			else:
 				_store(item)
 			out["haul"].append(item)
+		out["mats"] = GearSave.extract_mats(out["haul"])
 	else:
 		out["lost_items"] = r.get("lost_items", [])
 	# loadout pieces that didn't come home are gone from it
@@ -419,13 +445,13 @@ static func revive(g: Dictionary, rng: RandomNumberGenerator = null) -> Dictiona
 static func revive_why(g: Dictionary) -> String:
 	if not Save.has_building("shrine"): return "Build the Soul Shrine first"
 	if not g.get("soul", false): return "Gather its soul into the shrine first"
-	if embers() <= 0: return "Needs a Soul Ember (found in vaults and on Wardens)"
+	if embers() <= 0: return "Needs a Soul Ember (found in vaults and on Watchers)"
 	if int(Save.d["gems"]) < revive_cost(g): return "Needs %d gems" % revive_cost(g)
 	return ""
 
 ## What the shrine itself needs before you can build it.
 static func shrine_why() -> String:
 	if int(Save.d.get("extracts", 0)) < 3 and not Game.modding(): return "Make it out of %d more expedition%s first" % [3 - int(Save.d.get("extracts", 0)), "" if 3 - int(Save.d.get("extracts", 0)) == 1 else "s"]
-	if embers() <= 0: return "It needs a Soul Ember to light it (found in vaults and on Wardens)"
+	if embers() <= 0: return "It needs a Soul Ember to light it (found in vaults and on Watchers)"
 	if int(Save.d["gems"]) < int(Data.BUILDINGS["shrine"]["cost"]): return "Not enough gems"
 	return ""

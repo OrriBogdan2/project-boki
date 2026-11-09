@@ -11,14 +11,20 @@ static var _cache := {}
 ## The six archetypes, two per weight class (docs/ARCHETYPES.md). Until the archetype system exists
 ## each class wears its default; any of the six can be asked for (galleries, the creator preview).
 const ARCHES := {
-	"thief": {"name": "Thief", "cls": "light"},
-	"archer": {"name": "Archer", "cls": "light"},
-	"mage": {"name": "Mage", "cls": "medium"},
-	"gunslinger": {"name": "Gunslinger", "cls": "medium"},
-	"juggernaut": {"name": "Juggernaut", "cls": "heavy"},
-	"bulwark": {"name": "Bulwark", "cls": "heavy"},
+	"thief": {"cls": "light"},
+	"archer": {"cls": "light"},
+	"mage": {"cls": "light"},
+	"gunslinger": {"cls": "medium"},
+	"juggernaut": {"cls": "heavy"},
+	"bulwark": {"cls": "heavy"},
+	"dredge": {"cls": "heavy"},
+	"ashwick": {"cls": "heavy"},
+	"tender": {"cls": "medium"},
+	"rimewright": {"cls": "light"},
+	"dolm": {"cls": "medium"},
+	"ostra": {"cls": "medium"},
 }
-const ARCH_ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark"]
+const ARCH_ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]
 const ARCH_DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 ## Which archetype a hunter wears: asked for by name, else from the look, else the class default.

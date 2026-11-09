@@ -1,0 +1,33 @@
+{
+	"id": "hoar_fan",
+	"name": "Hoar Fan",
+	"classes": [
+		"light"
+	],
+	"primary": {
+		"dmg": 4.0,
+		"rate": 0.18,
+		"speed": 16,
+		"kb": 0.4,
+		"spread": 0.0,
+		"range": 10.0,
+		"size": 0.26,
+		"color": "#bff7ef",
+		"sfx": "rime_shard",
+		"fire_slow": 0.9,
+		"desc": "A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe nearest your cursor toward the end of their flight: four darts, then three large ones that hit twice as hard, fly faster and reach further, and round again. Eight on one foe Shatter them. While skating they fly as fast, thick beams that home in the same way.",
+		"kick": 0.04,
+		"bow_deg": 10.0,
+		"turn": 12.0,
+		"home_from": 0.35,
+		"home_full": 0.7,
+		"cursor_r": 3.5,
+		"acquire": 9.0,
+		"cone_deg": 75.0,
+		"skate_speed": 30.0,
+		"burst": 4,
+		"heavy": {"n": 3, "dmg_k": 2.0, "speed_k": 1.5, "range_k": 1.3, "size_k": 1.5},
+		"aim": "max"
+	},
+	"utility": ""
+}

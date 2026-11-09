@@ -1,0 +1,17 @@
+{
+ "id": "chest_key",
+ "name": "Chest Key",
+ "short": "Chest Key",
+ "icon": "key",
+ "col": "ffd27a",
+ "use": "key",
+ "cd": 0.0,
+ "bring": [
+  0,
+  0,
+  0
+ ],
+ "price": 0,
+ "key": true,
+ "desc": "Opens a locked chest. Press its key beside one to open it, or anywhere else to ping the nearest one on your map. Found in the match only; lost in your deathbox if you go down. Holds up to 3 (content/rules/keys.json)."
+}

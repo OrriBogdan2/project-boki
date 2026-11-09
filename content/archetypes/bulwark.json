@@ -1,22 +1,240 @@
 {
 	"id": "bulwark",
-	"name": "Bulwark",
+	"title": "Barnacle Knight",
+	"base_name": "Albert",
+	"gender": "male",
+	"personality": "A ferryman who carried refugees across the ice the night of the Hollowing and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks.\nHe doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.",
 	"weight": "heavy",
 	"color": "#8fd0ff",
-	"fantasy": "The squad's shield. Holds the line, plants a banner, leaps in to save an ally at the edge.",
-	"silhouette": "the shield shape and the banner",
-	"card": {"loop": "Block to build Guard, then bash, charge or smash foes into walls or each other: Crushed stuns them and heals you.", "dash": "Whirl: a spinning dash that knocks foes aside; with the shield up, a Shield Charge.", "passive": "Guard from blocking (50 = Shield Slam); knock a foe into a wall or a foe: Crushed (stun, heal).", "lmb": "Tap: throw the mace (passes through, recall it); hold: a Crushing Blow that carries you on.", "rmb": "Hold to raise the shield and block; let go (or tap) to Bash.", "e": "Mending Ground: a healing burst at the lying mace (or your aim) after 1s.", "r": "Fissure: a crack runs forward and stuns, then the ground erupts and slows.", "weapons": {"tower_shield": "Throw the mace and call it back; hold for a Crushing Blow.", "minigun": "Spin up, then a hose of rounds."}},
-	"weapons": ["tower_shield", "minigun"],
-	"resource": {"id": "guard", "name": "Guard", "max": 100, "kind": "meter", "per_hp": 0.5, "decay": 5.0, "wait": 3.0, "slam": 50.0, "crush_reach": 1.5, "crush_stun": 0.8, "crush_dmg": 8.0, "crush_heal": 14.0, "col": "#fff1b8"},
-	"passive": {"name": "Guard", "desc": "Damage your shield blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Bash is a Shield Slam (push 12, stun 0.6, spends 50) and Fissure spends it all for +1 pulse per 50. Crushed: a Bash, Shield Charge or full Crushing Blow that knocks a foe into a wall or another foe stuns it 0.8 (8 damage) and heals you 14."},
-	"lmb": {"tap": 0.2, "full": 1.25, "throw_dmg": 16.0, "throw_range": 9.0, "throw_speed": 24.0, "throw_rate": 0.55, "recall_dmg": 10.0, "recall_speed": 30.0, "lie_t": 6.0, "vision_r": 4.5, "smash_dmg": [14.0, 34.0], "smash_kb": [4.0, 12.0], "smash_reach": 2.8, "smash_arc": 130.0, "smash_stun": 0.4, "smash_rate": 0.7},
-	"dash": {"id": "whirl", "name": "Whirl", "icon": "brightshield", "col": "#cfe8ff", "cd": 10.0, "whirl": 3.6, "whirl_speed": 17.0, "whirl_kb": 7.0, "whirl_dmg": 6.0, "charge": 4.2, "charge_speed": 18.0, "charge_kb": 11.0, "charge_dmg": 10.0, "desc": "Whirl: a 3.6m spinning dash that knocks foes aside (6 damage, push 7). With the shield raised it's a Shield Charge: 4.2m behind the shield, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed)."},
-	"rmb": {"delivery": "cone", "name": "Shield", "short": "Shield", "icon": "wall", "col": "#9ad8ff", "cooldown": 6.0, "charges": 1, "hold": 0.2, "shield": {"hp": 160.0, "regen": 20.0, "wait": 2.0, "lock": 3.0, "len": 3.0, "arc": 140.0, "slow": 0.6}, "bash": {"radius": 2.6, "angle": 100.0, "dmg": 12.0, "push": 9.0}, "slam": {"push": 12.0, "stun": 0.6, "tell": 0.3, "dmg": 18.0}, "surf_heat": 1.25, "variants": {"hold": "Raise the shield: 160 HP, regenerating; it blocks from the front and you walk slower.", "tap": "Bash: a 2.6m cone, 12 damage, push 9 (into a wall or a foe: Crushed). Letting go after a block bashes too.", "air": "Shield Surf: hold to block from the front while gliding.", "full": "Guard 50+: Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."}, "sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "guard": "add", "mod": "add"}},
-	"e": {"delivery": "burst", "name": "Mending Ground", "short": "Mend", "icon": "dome", "col": "#8fe3c8", "cooldown": 16.0, "reach": 7.0, "radius": 3.5, "delay": 1.0, "heal": 26.0, "shield": 60.0, "slow": 0.25, "desc": "Mark ground up to 7m away (or where your thrown mace lies): 1s later it bursts, healing allies inside 26 and mending your shield 60; foes inside are slowed.", "sockets": {"guard": "add", "ctrl": "swap", "ctrl_cap": "soft", "util": "add", "hit": "add"}},
-	"r": {"delivery": "burst", "name": "Fissure", "short": "Fissure", "icon": "quake", "col": "#ffcf8a", "cooldown": 110.0, "fuse": 0.5, "fuse_guard": "unstoppable", "reach": 14.0, "width": 2.2, "crack_speed": 40.0, "crack_dmg": 8.0, "stun": 0.6, "erupt_after": 0.35, "pulses": 3, "every": 0.3, "pulse_dmg": 9.0, "slow": 0.45, "tell": 0.35, "desc": "A 0.5s unstoppable fuse, then a crack runs 14m forward (walls and rises stop it): 8 damage and stun 0.6 to everyone it passes. Then the line erupts in 3 pulses 0.3s apart (9 damage, slow 0.45 each); +1 pulse per 50 Guard, which it spends.", "sockets": {"guard": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add", "hit": "add"}},
-	"order": ["sec", "dash", "kin", "sec", "kin", "ult", "sec", "dash", "ult", "gear"],
-	"rank3": {"sec": "shield HP +60", "dash": "Whirl and Shield Charge +1m", "kin": "Mending Ground +0.5m and heals 10 more", "ult": "Fissure reaches 17m"},
-	"rank2": {"sec": "Rank 2: cooldown 6s -> 5.4s, damage +15%.", "dash": "Rank 2: recharge 10s -> 8.5s per charge.", "kin": "Rank 2: cooldown 16s -> 14.4s, damage +15%.", "ult": "Rank 2 (level 9): cooldown 110s -> 93.5s, +30% duration, +15% damage; Fissure reaches 17m."},
-	"rank_next": {"sec": "Rank 3: cooldown 6s -> 4.8s, damage +30%; shield HP +60.", "kin": "Rank 3: cooldown 16s -> 12.8s, damage +30%; Mending Ground +0.5m and heals 10 more.", "dash": "Rank 3: recharge 10s -> 7s; Whirl and Shield Charge +1m."},
-	"tells": {"half": "three rune pips over the helm light at 33 / 66 / 100 Guard", "full": "a gold crest light and a gold shield; a 0.3s shield flare before a Slam", "dash_spent": "dash pips dark"}
+	"body": {
+		"size": 2.0, "bulk": 0.8,
+		"build": 1.4,
+		"hit_r": 0.46,
+		"head": 0.3,
+		"legs": 0.46,
+		"torso": 1.06,
+		"shoulder": 1.35,
+		"neck": 0.0
+	},
+	"model_glow": {"core": "#1fe0cc", "edge": "#0f9a94", "compass": "#ffb347", "lure": "#8ff5e0", "strength": 1.5},
+	"plate_offset": 2.6,
+	"fantasy": "The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot.",
+	"silhouette": "the frozen prow shield and the long ice-cased oar",
+	"card": {
+		"loop": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
+		"role": "Frontline tank: block with your aegis, then knock foes into walls with your hammer to stun them.",
+		"lmb": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you.",
+		"rmb": "Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown.",
+		"e": "A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
+		"dash": "360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown).",
+		"passive": "Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it.",
+		"x": "Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up.",
+		"weapons": {
+			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you."
+		}
+	},
+	"signature": "tower_shield",
+	"resource": {
+		"id": "guard",
+		"name": "Guard",
+		"max": 100,
+		"kind": "meter",
+		"per_hp": 0.5,
+		"decay": 5.0,
+		"wait": 3.0,
+		"slam": 50.0,
+		"crush_reach": 1.5,
+		"crush_stun": 0.5,
+		"crush_dmg": 8.0,
+		"col": "#fff1b8"
+	},
+	"passive": {
+		"name": "Guard",
+		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage)."
+	},
+	"lmb": {
+		"tap": 0.2,
+		"full": 1.25,
+		"spin_turns": [2.5, 4.0],
+		"throw_dmg": 12.0,
+		"throw_range": 9.0,
+		"throw_speed": 24.0,
+		"throw_rate": 0.45,
+		"recall_dmg": 12.0,
+		"recall_speed": 34.0,
+		"lie_t": 0.0,
+		"vision_r": 4.5,
+		"smash_dmg": [
+			36.0,
+			66.0
+		],
+		"smash_kb": [
+			5.0,
+			13.0
+		],
+		"smash_reach": 2.8,
+		"smash_arc": 180.0,
+		"smash_stun": 0.4,
+		"smash_rate": 0.61,
+		"carry": [
+			1.5,
+			1.8
+		],
+		"perfect": {
+			"window": 0.18,
+			"dist": 4.0,
+			"time": 0.3,
+			"kb_k": 1.4
+		},
+		"throw_min": 2.5,
+		"recall_lock": 0.22
+	},
+	"dash": {
+		"id": "smash360",
+		"name": "360 Smash",
+		"icon": "cleave",
+		"col": "#cfe8ff",
+		"cd": 8.0,
+		"whirl": 3.5,
+		"whirl_speed": 20.5,
+		"whirl_kb": 7.0,
+		"whirl_dmg": 24.0,
+		"charge": 4.2,
+		"charge_speed": 18.0,
+		"charge_kb": 11.0,
+		"charge_dmg": 10.0,
+		"desc": "360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.",
+		"short": 2.6,
+		"spin_r": 2.2
+	},
+	"rmb": {
+		"delivery": "cone",
+		"name": "Aegis",
+		"short": "Aegis",
+		"icon": "wall",
+		"col": "#9ad8ff",
+		"cooldown": 6.0,
+		"cd_per_rank": 1.5,
+		"charges": 1,
+		"hold": 0.1,
+		"shield": {
+			"hp": 160.0,
+			"hp_rank": 0.25,
+			"regen": 20.0,
+			"regen_rank3": 30.0,
+			"wait": 2.0,
+			"wait_rank3": 1.4,
+			"lock": 3.0,
+			"lock_rank3": 2.0,
+			"len": 4.2,
+			"arc": 140.0,
+			"slow": 0.6,
+			"push": 2.0,
+			"push_gap": 0.6,
+			"push_speed": 14.0
+		},
+		"slam": {
+			"radius": 2.6,
+			"angle": 100.0,
+			"push": 12.0,
+			"stun": 0.6,
+			"dmg": 18.0
+		},
+		"surf_heat": 1.25,
+		"variants": {
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
+			"air": "Shield Surf: hold to block from the front while gliding.",
+			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"guard": "add",
+			"mod": "add"
+		}
+	},
+	"e": {
+		"delivery": "burst",
+		"name": "Mending Ground",
+		"short": "Mend",
+		"icon": "dome",
+		"col": "#8fe3c8",
+		"cooldown": 12.0,
+		"cooldown_rank3": 8.0,
+		"reach": 0.0,
+		"radius": 3.5,
+		"delay": 1.0,
+		"time": 4.0,
+		"every": 0.5,
+		"tick_heal": 2.0,
+		"heal": 18.0,
+		"shield": 60.0,
+		"desc": "A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.",
+		"sockets": {
+			"guard": "add",
+			"ctrl": "swap",
+			"ctrl_cap": "soft",
+			"util": "add",
+			"hit": "add"
+		},
+		"revive": 0.35
+	},
+	"x": {
+		"name": "Faultline",
+		"short": "Fault",
+		"icon": "quake",
+		"col": "#ff9a3a",
+		"unlock": 6,
+		"cooldown": 40.0,
+		"windup": 0.4,
+		"plant": 0.2,
+		"cells": 4,
+		"cell_len": 4.0,
+		"width": 4.5,
+		"lead": 0.2,
+		"cell_t": 0.15,
+		"strike_dmg": 4.0,
+		"strike_stun": 0.5,
+		"dmg": 18.0,
+		"lift": 7.0,
+		"slow": 0.5,
+		"slow_t": 1.5,
+		"scar_t": 10.0,
+		"scar_w": 1.4,
+		"scar_slow": 0.2,
+		"refund": 8.0,
+		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"kin",
+		"sec",
+		"dash",
+		"gear"
+	],
+	"rank3": {
+		"sec": "shield HP +50% in all and it repairs and regenerates faster",
+		"dash": "the 360 Smash refunds the Shield Charge when it hits",
+		"kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"
+	},
+	"rank2": {
+		"sec": "Rank 2: shield HP +25% (160 -> 200), damage +15%.",
+		"dash": "Rank 2: recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s.",
+		"kin": "Rank 2: healing +25% (burst 18 -> 22), damage +15%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
+		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
+		"dash": "Rank 3: recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
+	},
+	"tells": {
+		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
+		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",
+		"dash_spent": "dash pips dark"
+	}
 }

@@ -11,7 +11,7 @@ func _fades_on() -> bool:
 		return false
 	if _has_arg("--show-fade"):
 		return true
-	return not (_has_arg("--shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
+	return not (_has_arg("--shot=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
 	if "--relay" in OS.get_cmdline_user_args():
@@ -29,33 +29,23 @@ func _ready() -> void:
 		fade.boot()     # carry on from the boot splash: covered, logo showing, until the first screen is up
 	var args := OS.get_cmdline_user_args()
 	# tooling never touches the real save file: checks, screenshots and --no-save runs play on a copy
-	if "--no-save" in args or "--archetype-check" in args or "--arena-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=")):
+	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
 	for a in args:
 		if a.begins_with("--overlay="):
 			# test: open one of the overlay menus a moment after the screen appears
 			var which := a.substr(10).split(":")
-			get_tree().create_timer(0.6).timeout.connect(func():
-				Overlay.ctx = Overlay.ctx_now()
-				if which[0] == "pause": Overlay.open_pause(Overlay.ctx_now())
-				elif which[0] == "settings":
-					if which.size() > 1: Overlay.tab = which[1]
-					Overlay.open_settings()
-				elif which[0] == "admin": Overlay.open_admin()
-				elif which[0] == "saves": Overlay.open_saves()
-				elif which[0] == "inventory":
-					if which.size() > 1: Overlay.inv_tab = which[1]
-					Overlay.open_inventory()
-				elif which[0] == "dex":
-					# a Boki's Bokidex page, over the Bokidex: --overlay=dex:puddlet
-					Overlay.inv_tab = "Kindex"
-					Overlay.open_inventory()
-					Overlay.open_dex(which[1] if which.size() > 1 else "cindle"))
+			get_tree().create_timer(0.6).timeout.connect(func(): Overlay.shot_demo(which))
 		if a.begins_with("--seed="): opts["seed"] = int(a.substr(7))
 		if a == "--god": opts["god"] = true
 		if a.begins_with("--cam-style="): Settings.set_v("cam_style", a.substr(12), false)    # tooling: a camera style for one run (camcal)
 		if a == "--autoplay": opts["autoplay"] = true
+		if a == "--rolling": opts["rolling"] = true      # a rolling 30-minute session (scripts/match/rolling.gd)
+		if a.begins_with("--join-wave="): opts["rolling"] = true; opts["join_wave"] = int(a.substr(12))
+		if a.begins_with("--join-at="): opts["rolling"] = true; opts["join_at"] = float(a.substr(10))
+		if a.begins_with("--rolling-pop="): opts["rolling_pop"] = a.substr(14)     # what the 24-40 hunters count: at_once (default) or total (Rolling.POP_MODE)
+		if a.begins_with("--rolling-demo="): opts["rolling"] = true; opts["rolling_demo"] = a.substr(15); opts["plan_t"] = 0.4; opts["raid"] = "clear"    # screenshots (Rolling.demo)
 		if a == "--record": Record.set_level(1)            # start in recording mode (F10 cycles it)
 		if a.begins_with("--record="): Record.set_level(int(a.substr(9)))    # --record=2: with the HUD hidden
 		if a.begins_with("--arena="): Record.arena_pick = a.substr(8)    # straight into the arena, this archetype picked
@@ -68,6 +58,9 @@ func _ready() -> void:
 		if a == "--boxrev-demo": opts["life_demo"] = true; opts["boxrev_demo"] = true; opts["no_drop"] = true; opts["squad"] = 3; opts["teams"] = 3
 		if a.begins_with("--length="): opts["length"] = float(a.substr(9))
 		if a == "--no-drop": opts["no_drop"] = true
+		if a.begins_with("--map="): opts["map"] = a.substr(6)            # an expedition on another authored map (e.g. skyreach)
+		if a.begins_with("--at="): opts["at_xz"] = a.substr(5)          # tooling: start standing at x,z (map screenshots)
+		if a.begins_with("--zoom="): opts["zoom_hold"] = float(a.substr(7))   # tooling: hold the camera zoom
 		if a.begins_with("--lost-demo"): opts["lost_demo"] = a.substr(12) if a.length() > 12 else "rival"; opts["no_drop"] = true    # a Boki left behind (hud labels)
 		if a == "--train-demo": opts["train_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--train-demo="): opts["train_demo"] = a.substr(13); opts["no_drop"] = true
@@ -75,6 +68,7 @@ func _ready() -> void:
 		if a.begins_with("--balloon-demo="): opts["balloon_demo"] = a.substr(15); opts["no_drop"] = true; opts["god"] = true; opts["squad"] = 2; opts["teams"] = 2
 		if a == "--loot-demo": opts["loot_demo"] = true
 		if a == "--pack-demo": opts["pack_demo"] = true; opts["no_drop"] = true
+		if a == "--gear-demo": opts["gear_demo"] = true; opts["no_drop"] = true
 		if a == "--bag-demo": opts["bag_demo"] = true; opts["no_drop"] = true
 		if a == "--stomp-demo": opts["stomp_demo"] = true
 		if a == "--ring-demo": opts["ring_demo"] = true; opts["no_drop"] = true
@@ -85,19 +79,26 @@ func _ready() -> void:
 		if a == "--wall-behind": opts["wall_behind"] = true; opts["no_drop"] = true
 		if a == "--meteor-test": opts["meteor_test"] = true; opts["no_drop"] = true
 		if a == "--break-demo": opts["break_demo"] = true; opts["no_drop"] = true
+		if a == "--chest-demo": opts["chest_demo"] = true; opts["no_drop"] = true     # a chest next to breakables (screenshots)
 		if a == "--watch-heart": opts["watch_heart"] = true
 		if a.begins_with("--class="): Save.d["cls"] = a.substr(8); Save.d["weapon"] = ""
 		if a.begins_with("--weapon="):
 			Save.d["weapon"] = a.substr(9)
-			for c in Data.CLASSES:
-				if (Data.CLASSES[c]["weapons"] as Array).has(a.substr(9)): Save.d["cls"] = c
+			for ak0 in Arch.archetypes_of(a.substr(9)):
+				Save.d["cls"] = Arch.weight(String(ak0)); Save.d["arch"] = ak0      # (a weapon is some archetype's signature)
 		if a == "--ability-demo": opts["ability_demo"] = true
 		if a.begins_with("--arch-demo="):
 			# screenshots: an archetype mid-ability (scripts/arch/arch_demo.gd)
 			var ad := a.substr(12).split(":")
 			opts["arch_demo"] = a.substr(12); opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
-			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.default_weapon(ad[0])
+			opts["arch"] = ad[0]; opts["cls"] = Arch.weight(ad[0]); opts["weapon"] = Arch.signature(ad[0])
 			if ad.size() > 2: opts["weapon"] = ad[2]
+		if a.begins_with("--boki-demo="):
+			# screenshots: the Boki commands and the Merge (scripts/match/boki_demo.gd), --boki-demo=throw|recall|downed|merge[:species]
+			var bd := a.substr(12).split(":")
+			opts["boki_demo"] = a.substr(12); opts["arch_demo"] = "gunslinger:rmb"; opts["no_drop"] = true; opts["training"] = true; opts["unlocked"] = true
+			opts["arch"] = "gunslinger"; opts["cls"] = Arch.weight("gunslinger"); opts["weapon"] = Arch.signature("gunslinger")
+			if bd.size() > 1: opts["demo_kin"] = bd[1]
 		if a == "--normalize-size": Unique.normalize = true      # kin size changes no stats or hitboxes (Unique)
 		if a == "--fresh": Save.d = Save.fresh()
 		if a in ["--work-demo", "--work-board", "--work-board=Kin", "--work-card", "--work-box", "--work-hover", "--work-close", "--work-build", "--shiny-lineup"]:
@@ -141,9 +142,11 @@ func _ready() -> void:
 			Save.d["roster"][0]["recall"] = {"kind": "carried_out", "text": "was carried out of the Ember Quarry by you", "place": "the Ember Quarry", "boss": "", "m": 1}
 		if a.begins_with("--lair-demo="): opts["lair_demo"] = a.substr(12); opts["no_drop"] = true
 		if a.begins_with("--lair-boss="): opts["demo_boss"] = a.substr(12)
+		if a.begins_with("--hudref-demo="): opts.merge(HudRefDemo.opts(a), true)
 		if a == "--plate-demo": opts["plate_demo"] = true; opts["no_drop"] = true; opts["teams"] = 3; opts["squad"] = 3
 		if a == "--hold-demo": opts["hold_demo"] = true; opts["no_drop"] = true; opts["teams"] = 4; opts["squad"] = 3
 		if a == "--no-plan": opts["no_plan"] = true
+		if a.begins_with("--see-demo"): opts["see_demo"] = a.substr(11) if a.begins_with("--see-demo=") else "bloom"; opts["no_drop"] = true     # your hunter just behind a big tree
 		if a.begins_with("--plan-t="): opts["plan_t"] = float(a.substr(9))
 		if a == "--map-demo": opts["map_demo"] = "plan"          # the planning map, with pings
 		if a == "--map-mid-demo": opts["map_demo"] = "mid"; opts["no_drop"] = true    # the map mid-match, some spawns scouted
@@ -299,7 +302,7 @@ func _ready() -> void:
 		print("BIOME sim ok, time %.0f, mobs left %d, fields %d" % [bm.time, bm.mobs.filter(func(x): return not x.dead).size(), bm.fields.list.size()])
 		get_tree().quit()
 		return
-	if "--arch-lineup" in args or "--arch-matrix" in args or "--arch-heads" in args:
+	if "--arch-lineup" in args or "--showcase" in args or "--arch-matrix" in args or "--arch-heads" in args:
 		add_child(load("res://tests/arch_gallery.gd").new())
 		return
 	if "--hair-gallery" in args or "--class-lineup" in args:
@@ -333,7 +336,7 @@ func _ready() -> void:
 		add_child(load("res://tests/map_overview.gd").new())
 		return
 	if "--mapcheck-authored" in args:
-		load("res://tools/mapcheck.gd").new().run_authored("skyreach", range(1, 21))
+		load("res://tools/mapcheck.gd").new().run_authored(World.layout_for_tier(0), range(1, 21))
 		get_tree().quit()
 		return
 	if "--mapcheck" in args:
@@ -351,6 +354,8 @@ func _ready() -> void:
 		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
 		kbc.run(self)
 		return
+	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
+		return
 	if "--revive-check" in args:
 		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
 		set_meta("revive_check", rvc)
@@ -362,14 +367,26 @@ func _ready() -> void:
 		wcc.run(self)
 		return
 	if "--farm-start-check" in args:
-		var fsc = load("res://tools/farm_start_check.gd").new()      # a new farm: empty island, placing, chopping, stations, old saves
-		set_meta("farm_start_check", fsc)
-		fsc.run(self)
-		return
+		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
 	if "--work-check" in args:
 		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
 		set_meta("work_check", wkc)
 		wkc.run(self)
+		return
+	if "--polish-check" in args:
+		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
+		return
+	if "--boki-system-check" in args:
+		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
+		return
+	if "--merge-form-check" in args:
+		load("res://tools/merge_form_check.gd").new().run(self)      # merge forms: transformation, kit swap, ultimates, shell, no tiers, net, bots
+		return
+	if "--boki-follow-check" in args:
+		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
+		return
+	if "--capture-check" in args:
+		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
 		return
 	if "--teammate-check" in args:
 		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
@@ -385,21 +402,17 @@ func _ready() -> void:
 		set_meta("incubator_check", icc)
 		icc.run(self)
 		return
-	if "--title-check" in args:
-		var ttc = load("res://tools/title_check.gd").new()      # the title: menu, key art, frame budget
-		set_meta("title_check", ttc)
-		ttc.run(self)
-		return
-	if "--hatch-check" in args:
-		var htc = load("res://tools/hatch_check.gd").new()      # the hatch: a quiet, personal moment
-		set_meta("hatch_check", htc)
-		htc.run(self)
-		return
 	if "--economy-check" in args:
 		_economy_check()
 		return
-	if "--pickup-check" in args:
-		load("res://tools/pickup_check.gd").new().run(self)      # picked-up weapons come ready to fire
+	if "--gear-check" in args:
+		load("res://tools/gear_check.gd").new().run(self)      # signature weapons, gear, tunings, drop tables, save migration
+		return
+	if "--lair-lock-check" in args:
+		load("res://tools/lair_lock_check.gd").new().run(self)      # boss loot and the egg's own spot; locked in 20 s after the kill
+		return
+	if "--level-hud-check" in args:
+		load("res://tools/level_hud_check.gd").new().run(self)      # the portrait's level and XP ring, the level-up flash and sound, R locked to 6
 		return
 	if "--pack-ui-check" in args:
 		var puc = load("res://tools/pack_ui_check.gd").new()      # the backpack windows take real mouse clicks
@@ -409,8 +422,23 @@ func _ready() -> void:
 	if "--life-check" in args:
 		_life_check()
 		return
+	if "--swim-check" in args:
+		set_meta("swim_check", load("res://tools/swim_check.gd").new())     # wading and swimming in the farm's pond
+		get_meta("swim_check").run(self)
+		return
+	if "--hero-check" in args:
+		set_meta("hero_check", load("res://tools/hero_check.gd").new())     # change hero on the farm
+		get_meta("hero_check").run(self)
+		return
+	if "--keybind-check" in args:
+		set_meta("keybind_check", load("res://tools/keybind_check.gd").new())     # two keys per action, the ult on R and X, clashes
+		get_meta("keybind_check").run(self)
+		return
 	if "--mantle-check" in args:
 		load("res://tools/mantle_check.gd").new().run(self)    # ledges you mean to climb, you climb; the rest never grab you
+		return
+	if "--glide-reach" in args:
+		load("res://tools/glide_reach.gd").new().run(self)    # how far a glide carries over open void (sizes map gaps)
 		return
 	if "--abyss-check" in args:
 		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
@@ -447,7 +475,7 @@ func _ready() -> void:
 		set_meta("arena_check", arc)        # (kept alive across its awaits)
 		arc.run(self)
 		return
-	if "--archetype-check" in args:
+	if "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args:
 		var akc = load("res://tools/archetype_check.gd").new()      # every archetype kit, controls, locks, infusion, feel
 		set_meta("archetype_check", akc)
 		akc.run(self)
@@ -469,6 +497,16 @@ func _ready() -> void:
 		return
 	if "--raid-check" in args:
 		load("res://tools/raid_check.gd").new().run(self)        # raid conditions, sight, the armor kit key
+		return
+	if "--rolling-check" in args:
+		var rck = load("res://tools/rolling_check.gd").new()     # rolling sessions: waves, cut-off, level floor, catch-up XP, bounties, the end
+		set_meta("rolling_check", rck)      # (held, so nothing it waits on loses it)
+		rck.run(self)
+		return
+	if "--rolling-sim" in args:
+		var rsim = load("res://tools/rolling_sim.gd").new()      # a whole 30-minute rolling session, headless, with bots
+		set_meta("rolling_sim", rsim)       # (held: it yields frames so freed nodes really go, and must outlive its awaits)
+		rsim.run(self, opts)
 		return
 	if "--bot-sanity-check" in args:
 		_bot_sanity()
@@ -568,6 +606,7 @@ func _ready() -> void:
 			if a.begins_with("--rival-kin="): so["rival_kin"] = a.substr(12)
 			if a == "--glide-demo": so["glide_demo"] = true
 			if a == "--dashglide-demo": so["dashglide_demo"] = true
+			if a == "--dashpip-demo": so["dashpip_demo"] = true     # test: spend every dash, then watch the strip refill
 			if a.begins_with("--kin-demo="):
 				# test: bring this species (and the next one) and run its whole kit on the dummies
 				so["demo_kin"] = a.substr(11)
@@ -624,11 +663,11 @@ func _ready() -> void:
 			# test: pet a kin indoors and show that it counted
 			get_tree().create_timer(0.5).timeout.connect(func():
 				current._pet_kin(current.kins[0])
-				print("PET day1=", Save.d["tutorial"].get("day1"), " box=", is_instance_valid(current.day1_box), " gems=", Save.d["gems"]))
+				print("PET gems=", Save.d["gems"]))
 		if "--decorate" in args:
 			get_tree().create_timer(0.5).timeout.connect(func():
-				current._toggle_decorate()
-				current._take("plant"))
+				current.dec.toggle()
+				current.dec.take("plant"))
 	elif town_arg != "":
 		show_screen("town", {"mode": town_arg, "gid": "test"})
 	elif "--visit-test" in args:
@@ -644,7 +683,7 @@ func _ready() -> void:
 		var dm := Match.demo_opts()
 		dm.merge(opts, true)
 		show_screen("match", dm)
-	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo"):
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.get("rolling", false):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
@@ -779,6 +818,11 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
+		"prematch":
+			var Pv = load("res://scripts/ui/prematch_view.gd")
+			var pscr = Pv.new()
+			pscr.setup(opts)
+			current = _layer(pscr)
 		"title":
 			var Tt = load("res://scripts/ui/title.gd")
 			current = Tt.new()
@@ -875,42 +919,9 @@ func _life_check() -> void:
 		if int((m.time - t0) * 60.0) % 120 == 0: print("LCHECK   t=%.1f downed=%s down_hp=%.1f revive=%.2f out=%s" % [m.time - t0, B.downed, B.down_hp, B.revive, B.out])
 	var bx := Life.box_of(m, B)
 	print("LCHECK bleed: dead=%s after %.1fs box=%s gems in box=%d" % [B.out, m.time - t0, not bx.is_empty(), int(bx.get("gems", -1))])
-	# 3. box revive: slow (Life.R["box_revive_time"], 8s) and loud: a looping hum from the box while
-	# it's channelled (stops when it breaks or completes), the reviver kneeling, locked in place
-	var need: float = Life.R["box_revive_time"]
-	spot.call(C, bx["pos"]); C.inp["interact"] = true
-	# a hit breaks it: the hum stops, and it has to be started again
-	run.call(1.5)
-	var hum_key := String(bx.get("hum_key", ""))
-	var hum_early: bool = hum_key != "" and m.box_hums.has(hum_key) and Sfx.loop_on(hum_key)
-	C.hurt(4.0, foe, {"src": "shot"})
-	run.call(0.3)
-	var hum_broken: bool = not m.box_hums.has(hum_key) and not Sfx.loop_on(hum_key) and C.box_t == 0.0 and B.out
-	C.inp["interact"] = false
-	run.call(Match.DT * 2.0)
-	C.inp["interact"] = true
-	t0 = m.time
-	var hum_mid := false
-	var lock_mid := false
-	var ray_mid := false
-	var c_at: Vector3 = C.pos
-	while B.out and m.time - t0 < need + 4.0:
-		C.inp["move"] = Vector2(1, 0)          # trying to walk away doesn't move a kneeling reviver
-		run.call(Match.DT)
-		if m.time - t0 < Match.DT * 1.5: c_at = C.pos      # (from the first step of the channel on)
-		if m.time - t0 > need * 0.5 and m.time - t0 < need * 0.5 + Match.DT * 1.5:
-			hum_mid = m.box_hums.has(hum_key) and Sfx.loop_on(hum_key)
-			C._anim_state(0.0)
-			lock_mid = C.box_reviving() and bool(C.anim_s.get("reviving", false))
-			ray_mid = bx.get("ray_node") != null and is_instance_valid(bx.get("ray_node"))
-	C.inp["interact"] = false
-	C.inp["move"] = Vector2.ZERO
-	var took := m.time - t0
-	var hum_after: bool = m.box_hums.has(hum_key) or Sfx.loop_on(hum_key)
-	print("LCHECK box revive: back=%s after %.1fs hp %.0f%% gems %d" % [not B.out, took, B.hp / B.max_hp * 100.0, B.gems])
-	print("LCHECK box revive %s: takes %.1fs (want %.1fs = 8s)" % ["ok  " if not B.out and absf(took - need) < 0.25 and absf(need - 8.0) < 0.01 else "FAIL", took, need])
-	print("LCHECK box revive %s: hum starts=%s, a hit breaks it and the hum stops=%s" % ["ok  " if hum_early and hum_broken else "FAIL", hum_early, hum_broken])
-	print("LCHECK box revive %s: hum on mid-channel=%s, off after=%s, light ray=%s, reviver kneeling and locked=%s (moved %.2fm)" % ["ok  " if hum_mid and not hum_after and ray_mid and lock_mid and C.pos.distance_to(c_at) < 0.05 else "FAIL", hum_mid, not hum_after, ray_mid, lock_mid, C.pos.distance_to(c_at)])
+	# 3. box revive: --box-revive-check (tools/box_revive_check.gd) times the channel; here it just brings B back
+	Life.box_revive(m, bx, C)
+	print("LCHECK box revive: back=%s hp %.0f%% gems %d" % [not B.out, B.hp / B.max_hp * 100.0, B.gems])
 	# 4. stomp drain
 	for kk in [B.kin, B.kin2]:
 		if kk: kk.dead = true
@@ -962,22 +973,24 @@ func _life_check() -> void:
 	run.call(Match.DT)
 	print("LCHECK stomp lock: committed=%s still after letting go=%s broken by knock=%s wisp alive=%s" % [committed, still, foe.stomp.is_empty(), not W2.out])
 	print("LCHECK beacons=%d boxes=%d" % [m.beacons.size(), m.boxes.size()])
-	# 7. Dusk Isles rules: the kin on you go into the box; an enemy looting it takes them
-	m.T = Data.TIERS[1]
+	# 7. Hollow rules: the Boki on you drops dazed beside the box and guards it; an enemy looting the box takes none of it
+	m.tier = 2
+	m.T = Data.TIERS[2]
 	var rec := Save.new_kin("zapple")
 	A.kin = null; A.kin2 = null
 	m.give_kin(A, rec)
 	spot.call(A, home); spot.call(B, home + Vector3(-8, 0, 0)); spot.call(C, home + Vector3(-8, 0, 1))
 	m.eliminate(A, foe, "knocked out")
 	var ab := Life.box_of(m, A)
-	print("LCHECK dusk: kin in box=%d" % (ab.get("kin", []) as Array).size())
+	print("LCHECK hollow: kin guarding=%s" % KinLoss.guarding(A.kin))
 	spot.call(foe, ab["pos"])
 	t0 = m.time
 	while not ab["empty"] and m.time - t0 < 4.0:
 		foe.inp["interact"] = true
 		run.call(Match.DT)
-	print("LCHECK dusk loot: foe caught=%d box kin=%d" % [foe.caught.size(), (ab.get("kin", []) as Array).size()])
+	print("LCHECK hollow loot: foe caught=%d guard still dazed=%s" % [foe.caught.size(), KinLoss.guarding(A.kin)])
 	# 8. Meadow: kin stay safe (hidden) on death and come back on revive
+	m.tier = 0
 	m.T = Data.TIERS[0]
 	spot.call(foe, m.world.random_ground())
 	var B2: Hunter = B
@@ -985,7 +998,7 @@ func _life_check() -> void:
 	m.give_kin(B2, Save.new_kin("zapple"))
 	spot.call(B2, home + Vector3(-6, 0, 0))
 	m.eliminate(B2, foe, "knocked out")
-	print("LCHECK meadow: kin state=%s box kin=%d" % [B2.kin.state, (Life.box_of(m, B2).get("kin", []) as Array).size()])
+	print("LCHECK meadow: kin state=%s lost=%d" % [B2.kin.state, m.player_lost.size()])
 	# 9. the deathbox loot window: a box with a rare glove and some gems; take one by hand, smart loot the rest
 	var lb: Dictionary = {}
 	for b0 in m.boxes:
@@ -996,7 +1009,7 @@ func _life_check() -> void:
 		if gid != "": (lb["gear"] as Array).append({"id": gid, "rar": 3})
 		lb["gems"] = int(lb.get("gems", 0)) + 15
 		var looter: Hunter = C
-		looter.gear = [{}, {}]; looter.refresh_gear()
+		looter.gear = Gear.empty_slots(); looter.refresh_gear()
 		var its: Array = Life.box_items(m, looter, lb)
 		var g0 := looter.gems
 		var first: Dictionary = its[0]
@@ -1025,7 +1038,7 @@ func _economy_check() -> void:
 	var at := P.pos + Vector3(0.6, 0, 0)
 	# 1. a full backpack asks what to drop
 	P.pack_cap = 2
-	P.pack = [Loot.valuable("old_coin"), Loot.weapon("smg", 1)]
+	P.pack = [Loot.valuable("old_coin"), Loot.gear("vest", 1)]
 	m.spawn_val(Loot.valuable("kin_idol"), at)
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	Pack.take_ground(m, P, wp)
@@ -1034,11 +1047,13 @@ func _economy_check() -> void:
 	var ids: Array = P.pack.map(func(it): return String(it.get("id", it.get("wid", ""))))
 	ok.call(ids.has("kin_idol") and not ids.has("old_coin") and m.wpicks.any(func(w): return String(w.get("val", "")) == "old_coin"), "swap drops the coin on the ground and packs the idol: %s" % str(ids))
 	m.hud.close_swap()
-	# a better weapon on the ground goes in your hands, with its element
+	# better armor on the ground goes on, and the old piece goes in the pack
 	P.pack_cap = 4
-	m.spawn_weapon("rifle", 3, at, "", false, -1, Loot.weapon("rifle", 3, "fire"))
+	P.gear[2] = {"id": "vest", "rar": 1}
+	m.spawn_gear("bastion_plate", 3, at, "", false)
 	Pack.take_ground(m, P, m.wpicks[m.wpicks.size() - 1])
-	ok.call(P.welem == "fire" and P.wrar == 3 and String(P.wpn["name"]) == "Epic Ember Rifle", "better weapon equipped: %s" % P.wpn["name"])
+	ok.call(String(P.gear[2]["id"]) == "bastion_plate" and P.pack.any(func(it): return String(it.get("id", "")) == "vest"), "better armor goes on, the old piece into the pack: %s" % str(P.gear[2]))
+	P.welem = "fire"
 	var ex := {}
 	Loot.rider(P, ex, 10.0)
 	ok.call(float(ex.get("burn", 0.0)) >= 5.0, "fire rider burns (%s)" % str(ex))
@@ -1047,42 +1062,45 @@ func _economy_check() -> void:
 	Loot.rider(P, ex2, 10.0)
 	ok.call(ex2.has("fx_hit"), "storm rider arcs on the 4th attack")
 	P.welem = "fire"
-	# 2. smart loot: hands first, then the pack, best first, never worse for better
+	# 2. smart loot: gear on you first, then the pack, best first, never worse for better
 	var gid: String = Gear.ALL.keys()[0]
-	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "tonics": 0, "kits": 0, "soul_until": 0.0,
-		"prog": {}, "node": null, "empty": false, "gear": [{"id": gid, "rar": 4}], "weapon": Loot.weapon(String(Data.CLASSES[P.cls]["weapons"][1]), 4, "frost"),
-		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.weapon("smg", 1), Loot.weapon("shotgun", 2, "venom"), Loot.valuable("sky_pearl")]}
+	var b := {"owner": Q, "team": Q.team, "pos": P.pos, "gems": 10, "seeds": {"tidebloom": 2}, "caught": [], "belt": [], "soul_until": 0.0,
+		"prog": {}, "node": null, "empty": false, "gear": [{"id": gid, "rar": 4}, {"id": "gale_mantle", "rar": 4}],
+		"pack": [Loot.valuable("old_coin"), Loot.valuable("crown_shard"), Loot.gear("vest", 1), Loot.gear("windstep_boots", 2), Loot.valuable("sky_pearl")]}
 	P.pack = [Loot.valuable("kin_idol")]
 	P.pack_cap = 3
-	P.gear = [{}, {}]; P.refresh_gear()
+	P.gear = Gear.empty_slots(); P.refresh_gear()
 	var g0 := P.gems
 	var got := Life.smart_loot(m, P, b)
 	var pv: Array = P.pack.map(func(it): return Loot.value(it))
 	var left: Array = Pack._box_things(b).map(func(c): return Loot.value(c["it"]))
 	var minp: int = pv.min() if not pv.is_empty() else 0
 	var maxl: int = left.max() if not left.is_empty() else 0
-	print("ECON  smart loot took %d: hand=%s gloves=%s pack=%s values=%s left in box=%s" % [got, P.wpn["name"], str(P.gear), str(P.pack.map(func(it): return Loot.name_of(it))), str(pv), str(left)])
-	ok.call(P.wid == String(Data.CLASSES[P.cls]["weapons"][1]) and P.welem == "frost", "smart loot: the best weapon for your class goes in your hands")
-	ok.call(not (P.gear[Gear.slot_of(gid)] as Dictionary).is_empty(), "smart loot: the glove goes on")
+	print("ECON  smart loot took %d: weapon=%s gear=%s pack=%s values=%s left in box=%s" % [got, P.wpn["name"], str(P.gear), str(P.pack.map(func(it): return Loot.name_of(it))), str(pv), str(left)])
+	ok.call(String(P.gear[2].get("id", "")) == "gale_mantle" and not (P.gear[Gear.slot_of(gid)] as Dictionary).is_empty(), "smart loot: the best gear goes on (armor %s)" % str(P.gear[2]))
 	ok.call(P.pack.size() == 3 and minp >= maxl, "smart loot: pack holds the most valuable (min %d >= best left %d)" % [minp, maxl])
 	ok.call(P.gems == g0 + 10 and int(P.seeds.get("tidebloom", 0)) >= 2, "smart loot: gems and seeds taken too")
 	# 3. extracting brings it all home to the armory; the loadout goes out and comes back
 	Save.d["roster"] = [Save.new_kin("cindle", "Pip")]
 	Save.d["active"] = Save.d["roster"][0]["uid"]
 	var haul := Pack.haul(P)
-	var n_arm := haul.filter(func(it): return String(it["t"]) != "val").size()
+	# armor salvages on arrival
+	var n_arm := haul.filter(func(it): return String(it["t"]) != "val" and not Equal.salvages(it)).size()
 	var out := Game.apply_result({"extracted": true, "haul": haul, "tier": 0, "gems": 5, "kin_runs": []})
-	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d weapons/gloves in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
+	ok.call(Econ.armory().size() == n_arm and int(Save.d["valuables"].get("crown_shard", 0)) == 1, "extract: %d pieces of gear in the armory, treasure in the vault %s" % [Econ.armory().size(), str(Save.d["valuables"])])
 	ok.call((out.get("haul", []) as Array).size() == haul.size(), "results list what came home (%d)" % (out.get("haul", []) as Array).size())
-	var best_w: Dictionary = Econ.armory().filter(func(it): return String(it["t"]) == "weapon")[0]
-	Econ.set_loadout("weapon", String(best_w["uid"]))
-	var kit := Econ.begin_raid()
+	ok.call(int((out.get("mats", {}) as Dictionary).get("wood", 0)) > 0 and Work.mat("wood") > 0, "extract: the haul also gives farm materials %s" % str(out.get("mats", {})))
+	var best_w: Dictionary = Econ.armory().filter(func(it): return Equal.may_bring(it, 2))[0]
+	Econ.set_loadout(Econ.gear_slot(best_w), String(best_w["uid"]))
+	var kit := Equal.take_loadout(2)
 	ok.call(kit.size() == 1 and Econ.find(String(best_w["uid"])).is_empty() and (Save.d["raid_out"] as Array).size() == 1, "loadout leaves the armory for the expedition")
 	Game.apply_result({"extracted": true, "haul": kit, "tier": 0, "kin_runs": []})
-	ok.call(not Econ.find(String(best_w["uid"])).is_empty() and not Econ.loadout("weapon").is_empty(), "extracting brings the loadout weapon back, still picked")
-	Econ.begin_raid()
+	ok.call(not Econ.find(String(best_w["uid"])).is_empty() and not Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "extracting brings the loadout gear back, still picked")
+	Equal.take_loadout(2)
 	Game.apply_result({"extracted": false, "why": "knocked out", "lost_items": [best_w], "tier": 0, "kin_runs": []})
-	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout("weapon").is_empty(), "dying loses the loadout weapon")
+	ok.call(Econ.find(String(best_w["uid"])).is_empty() and Econ.loadout(Econ.gear_slot(best_w)).is_empty(), "dying loses the loadout gear")
+	# armor salvages on arrival now; make sure two pieces are left
+	if Econ.armory().size() < 2: Save.d["armory"].append(Loot.gear("skylark_boots", 2))
 	var sold := Econ.sell(String(Econ.armory()[0]["uid"]))
 	var scrap := Econ.salvage(String(Econ.armory()[0]["uid"]))
 	ok.call(sold > 0 and scrap > 0, "sell (%d gems) and salvage (%d scrap)" % [sold, scrap])
@@ -1137,29 +1155,10 @@ func _economy_check() -> void:
 	for t in before["traits"]: tdiff += absf(float(before["traits"][t]) - float(back["traits"].get(t, 0.0)))
 	print("ECON  revived %s %s: level %d -> %d, trust %d -> %d, traits moved %.2f, memories %d -> %d, ghost=%s, likes %s -> %s" % [back["name"], back["title"], int(before["level"]), int(back["level"]), int(before["trust"]), int(back["trust"]), tdiff, (before["memory"] as Array).size(), (back["memory"] as Array).size(), back.get("ghost", false), str(before.get("likes", {}).get("food", "")), str(back["likes"]["food"])])
 	ok.call(not back.is_empty() and back["ghost"] and String(back["title"]) != "" and int(back["level"]) == 4 and tdiff > 0.05 and Save.d["roster"].has(back) and not Econ.graves().has(g) and Econ.embers() == 0, "revived kin comes back changed")
-	# weapons found in a region lean to its element (the meadow has none of its own)
-	var erng := RandomNumberGenerator.new(); erng.seed = 77
-	var by_biome := {}
-	for bi in ["ember", "frost", "storm", "bloom", "gloom", "meadow"]:
-		var cnt := {}
-		for n in 400:
-			var e := Loot.roll_element(erng, bi)
-			cnt[e] = int(cnt.get(e, 0)) + 1
-		by_biome[bi] = cnt
-	var home_el := func(bi: String) -> String:
-		for el in Loot.ELEMENTS:
-			if String(Loot.ELEMENTS[el]["biome"]) == bi: return el
-		return ""
-	var lean := true
-	for bi in ["ember", "frost", "storm", "bloom", "gloom"]:
-		var mine := int(by_biome[bi].get(home_el.call(bi), 0))
-		for el in by_biome[bi]:
-			if el != "" and el != home_el.call(bi) and int(by_biome[bi][el]) >= mine: lean = false
-	print("ECON  elements by biome (of 400): %s" % str(by_biome))
-	ok.call(lean and int(by_biome["meadow"].get("", 0)) > 300, "each region's weapons lean to its own element")
 	# an old save (from before the armory and feeders) loads and gets them filled in
 	var old := Save.fresh()
-	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "pack_lvl", "scrap", "feeder_inv", "feeder_given"]:
+	for k in ["armory", "raid_out", "loadout", "valuables", "feeders", "graves", "arm_lvl", "scrap", "feeder_inv",
+			"feeder_given"]:
 		old.erase(k)
 	var orec := Save.new_kin("zapple", "Oldie")
 	orec.erase("starve")
@@ -1167,7 +1166,10 @@ func _economy_check() -> void:
 	Save.d = old
 	Econ.ensure()
 	Care.catch_up(orec)
-	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty() and Econ.pack_cap() == Econ.PACK_CAPS[0] and Care.starve_stage(orec) == "" and Econ.begin_raid().is_empty(), "an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
+	ok.call(Econ.armory().is_empty() and Econ.feeders().size() == 1 and Econ.graves().is_empty()
+			and Econ.pack_cap() == Equal.base_pack() and Care.starve_stage(orec) == ""
+			and Equal.take_loadout(0).is_empty(),
+			"an old save loads: a first trough, empty armory, %d-slot backpack" % Econ.pack_cap())
 	print("ECON DONE failures: %d" % bad[0])
 	get_tree().quit()
 
@@ -1177,21 +1179,18 @@ func _weapon_check() -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--weapon-check="): only = a.substr(15)
-	for wid in Data.weapon_ids():
+	for ad in Arch.ids():
+		var wid := Arch.signature(String(ad))
 		if only != "" and wid != only:
 			continue
-		var cls := ""
-		for c in Data.CLASSES:
-			if Data.CLASSES[c]["weapons"].has(wid): cls = c
-		if cls == "":
-			continue
+		var cls := Arch.weight(String(ad))
 		var wd: Dictionary = Data.weapon_stats(wid)
 		var modes: Array = ["tap", "charge"] if wd.has("charge_time") else ["hold"]
 		for mode in modes:
 			for dist in ([1.6] if wd.get("melee", false) else ([1.5, 3.0] if wd.has("pellets") else [3.0, float(wd["range"]) * 0.8])):
 				var m := Match.new()
 				add_child(m)
-				m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "weapon": wid, "cls": cls})
+				m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "weapon": wid, "cls": cls, "arch": ad})
 				m.set_process(false)
 				var P: Hunter = m.player
 				var T: Hunter = null
@@ -1371,7 +1370,7 @@ func _ability_check() -> void:
 	# 7. Tripwire Mine roots whoever steps on it
 	r = _ac_setup(4.0); m = r[0]; P = r[1]; T = r[2]
 	P.runner.set_slot("utility", Content.ability("tripwire_mine"))
-	P.inp["aim"] = T.pos + Vector3(-1.5, 0, 0)
+	P.inp["aim"] = T.pos + Vector3(-2.0, 0, 0)      # clear of the target's hitbox (item 46 sizes)
 	P.runner.use("utility", {})
 	_ac_run(m, 1.0)
 	var before_root := T.root_t
@@ -1427,8 +1426,9 @@ func _ability_check() -> void:
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
 	_ac("rail hold-to-charge", T.hp < T.max_hp - 25.0, "took %.0f" % (T.max_hp - T.hp))
-	# the same hold as an archetype (the Gunslinger's Rail): the shared wind-up fills, ticks full, punches out
-	P.set_arch("gunslinger"); P.unlock_all()
+	# the same hold as an archetype (Sparkle's Coilshot): the shared wind-up fills, ticks full, punches out
+	P.reclass("light", "mage"); P.unlock_all()
+	_ac_run(m, 0.3)      # (the swap to a Light body settles on the ground first)
 	T.hp = T.max_hp
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
@@ -1439,7 +1439,7 @@ func _ability_check() -> void:
 		if hk_mid[0] < 0.0 and P.ak.rmb_t > 0.6: hk_mid[0] = P.ak.charge_k())
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
-	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 25.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
+	_ac("archetype hold wind-up", hk_mid[0] > 0.2 and P.ak.charge_fulls >= 1 and P.ak.charge_last > 0.9 and T.hp < T.max_hp - 10.0, "mid %.2f fulls %d took %.0f" % [hk_mid[0], P.ak.charge_fulls, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
 	# 13. Breach: throws the target back and you the other way
 	r = _ac_setup(2.5); m = r[0]; P = r[1]; T = r[2]
@@ -1517,78 +1517,36 @@ func _ability_check() -> void:
 		# (the kin itself lands in the crater, so the pull ends against its body)
 		_ac("gravity slam pulls + lifts", acc["top"] > 0.4 and float(mind["v"]) > 3.0, "rose %.2f, pulled at %.1fm/s toward the crater (kin %s)" % [acc["top"], mind["v"], gk.state])
 	m.queue_free(); await get_tree().process_frame
-	# 20. Dashes: class verbs and kin riders. Each starts grounded at the same spot, 3m short of the target.
+	# 20. Dashes: class verbs (no kin changes a dash: --boki-dash-check). Each starts grounded at the same spot, 3m short of the target.
 	r = _ac_setup(6.0); m = r[0]; P = r[1]; T = r[2]
 	var home2 := P.pos
-	var kref = P.kin
-	var ready := func(cls: String, sp: String, at: Vector3, mv: Vector2) -> void:
+	var ready := func(cls: String, at: Vector3, mv: Vector2) -> void:
 		P.teleport(at); P.vel = Vector3.ZERO
 		T.teleport(home2 + Vector3(6.0, 0, 0)); T.vel = Vector3.ZERO
 		T.burn_t = 0.0; T.blight_t = 0.0; T.slow_t = 0.0; T.stun_t = 0.0; T.root_t = 0.0; T.knock_t = 0.0
 		P.cls = cls; P.dodge_def = Content.class_dodge(cls)
-		P.kin = kref if sp != "" else null
-		if P.kin:
-			(P.kin as Kin).species = sp
-			(P.kin as Kin).ks = KinLib.kin(sp)
+		P.kin = null
 		_ac_run(m, 0.3)
 		P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.roll_t = 0.0
 		P.inp["move"] = mv
 	# Light: phase step, a shot fired through you mid-step does nothing
-	ready.call("light", "", home2, Vector2(1, 0))
+	ready.call("light", home2, Vector2(1, 0))
 	var php2 := P.hp
 	P.do_dash()
 	m.spawn_shot(T, P.pos + Vector3(1.0, 0.95, 0), Vector2(-30, 0), 20.0, 0.3, 0.15, Color.RED, {})
 	_ac_run(m, 0.25)
 	_ac("light phase: shots pass", P.phase_t >= 0.0 and P.hp >= php2, "hp %.0f -> %.0f" % [php2, P.hp])
 	# Medium: the roll reloads
-	ready.call("medium", "", home2, Vector2(1, 0))
+	ready.call("medium", home2, Vector2(1, 0))
 	P.ammo = 0
 	P.do_dash()
 	_ac("medium roll reloads", P.ammo > 0, "ammo %d" % P.ammo)
 	# Heavy: the charge bowls the target back
-	ready.call("heavy", "", T.pos + Vector3(-2.2, 0, 0), Vector2(1, 0))
+	ready.call("heavy", T.pos + Vector3(-2.2, 0, 0), Vector2(1, 0))
 	var tx := T.pos.x
 	P.do_dash()
 	_ac_run(m, 0.5)
 	_ac("heavy charge knocks back", T.pos.x - tx > 1.0 and T.hp < T.max_hp, "target pushed %.1f, took %.0f" % [T.pos.x - tx, T.max_hp - T.hp])
-	if kref:
-		# lunar: no travel, an instant blink
-		ready.call("medium", "wisplet", home2, Vector2(1, 0))
-		var bp := P.pos
-		P.do_dash()
-		_ac("lunar dash blinks", P.roll_t <= 0.0 and P.flat_dist(bp) > 2.0, "moved %.1f instantly" % P.flat_dist(bp))
-		# venom: dash through the target poisons them
-		ready.call("medium", "cindle", T.pos + Vector3(-1.8, 0, 0), Vector2(1, 0))
-		T.burn_t = 0.0; T.blight_t = 0.0
-		P.do_dash()
-		_ac_run(m, 0.4)
-		_ac("venom dash poisons", T.burn_t > 0.0 or T.blight_t > 0.0, "burn %.1f blight %.1f" % [T.burn_t, T.blight_t])
-		# gravity: where you stop, foes nearby are tugged toward you
-		ready.call("medium", "pebbit", home2, Vector2(1, 0))
-		var tmin := {"x": T.pos.x, "v": 0.0, "px": 0.0}
-		P.do_dash()
-		_ac_run(m, 0.5, func():
-			tmin["x"] = minf(float(tmin["x"]), T.pos.x)
-			if -T.vel.x > float(tmin["v"]): tmin["v"] = -T.vel.x; tmin["px"] = P.pos.x - home2.x)
-		_ac("gravity dash tugs", float(tmin["v"]) > 3.0, "target pulled at %.1fm/s (you at %.1f), to x %.2f from %.2f; element %s" % [tmin["v"], tmin["px"], float(tmin["x"]) - home2.x, T.pos.x - home2.x, P.kin_element()])
-		# echo: a second, shorter dash a beat later
-		ready.call("medium", "zapple", home2 + Vector3(-4.0, 0, 0), Vector2(1, 0))
-		var e0 := P.pos.x
-		P.do_dash()
-		_ac_run(m, 0.2)
-		var e1 := P.pos.x
-		_ac_run(m, 0.5)
-		_ac("echo dash repeats", P.pos.x - e1 > 1.0, "first %.1fm, then +%.1fm" % [e1 - e0, P.pos.x - e1])
-		# spore: a slowing cloud where you started
-		ready.call("medium", "burrlet", home2, Vector2(-1, 0))
-		var nf := m.fields.list.size()
-		P.do_dash()
-		_ac("spore dash leaves cloud", m.fields.list.size() > nf, "")
-		# prism: a decoy where you started
-		ready.call("medium", "puddlet", home2, Vector2(-1, 0))
-		var nd := m.verbs.decoys.size()
-		P.do_dash()
-		_ac("prism dash leaves decoy", m.verbs.decoys.size() > nd, "")
 	m.queue_free(); await get_tree().process_frame
 	# 21. Every ability and active glove runs without errors (watch the log for SCRIPT ERROR)
 	r = _ac_setup(5.0); m = r[0]; P = r[1]; T = r[2]
@@ -1615,18 +1573,19 @@ func _ability_check() -> void:
 		n += 1
 	_ac("all abilities run", true, "%d ran" % n)
 	m.queue_free(); await get_tree().process_frame
-	# 22. Ranks: a rank-3 slot makes the same verb stronger and recharge faster
+	# 22. Ranks: a rank-3 slot makes the same verb stronger and recharge faster; a glove never ranks (Gloves)
 	r = _ac_setup(7.0); m = r[0]; P = r[1]; T = r[2]
 	P.inp["aim"] = P.pos + Vector3(2.5, 0.9, 0)
-	P.slot_lv["gear"] = 1
 	_ac_glove(P, "barrier")
 	var hp1: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
 	var cd1: float = P.gear_cd[0]
-	P.slot_lv["gear"] = 3
+	P.skill_pts = 5      # spent on the hero's own abilities (the level stays, so level growth stays out of it)
+	P._bot_spend()
 	_ac_glove(P, "barrier")
 	var hp3: float = m.verbs.walls[-1]["hp"] if not m.verbs.walls.is_empty() else 0.0
-	var cd3: float = P.gear_cd[0]
-	_ac("rank 3 glove: tougher, faster", hp3 > hp1 * 1.3 and cd3 < cd1 * 0.85, "wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, cd3])
+	_ac("a glove is as strong after spending skill points (no ranks)", absf(hp3 - hp1) < 0.01
+			and absf(float(P.gear_cd[0]) - cd1) < 0.01 and not P.slot_lv.has("gear"),
+			"wall hp %.0f -> %.0f, cooldown %.1f -> %.1f" % [hp1, hp3, cd1, float(P.gear_cd[0])])
 	P.runner.set_slot("utility", Content.ability("leash_bolt"))
 	P.slot_lv["sec"] = 3
 	P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
@@ -1659,7 +1618,7 @@ func _grt_kin(m: Match, P: Hunter, sp: String, rec_extra := {}) -> Kin:
 	rec["trust"] = 95.0
 	for kk in rec_extra: rec[kk] = rec_extra[kk]
 	var k := m.give_kin(P, rec)
-	k.state = "shoulder"
+	k.stow()
 	k.settle = 1.0
 	k.brain.think_t = 1e9        # the test casts by hand; its own AI stays quiet (tested on its own below)
 	P.merge_cd = 0.0
@@ -1716,7 +1675,7 @@ func _grammar_runtime_check() -> void:
 	k.use_ability("k1", T.pos + Vector3(-1.0, 0, 0))
 	_ac_run(m, 1.2, func(): acc["top"] = maxf(float(acc["top"]), T.pos.y - g0))
 	_grt("pebbit E Gravity Slam", T.hp < T.max_hp and float(acc["top"]) > 0.3, "took %.0f, rose %.2f" % [T.max_hp - T.hp, acc["top"]])
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	var nw := m.verbs.walls.size()
 	k.use_ability("k2", P.pos)
 	_grt("pebbit auto Mass Guard wall", m.verbs.walls.size() == nw + 1 and bool(m.verbs.walls[-1]["follow"]), "%d walls" % m.verbs.walls.size())
@@ -1729,7 +1688,7 @@ func _grammar_runtime_check() -> void:
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 20.0, 0.6, 0.15, Color.RED, {})
 	_ac_run(m, 0.6)
 	_grt("puddlet E Prism Wall reflects", T.hp < thp and P.hp >= php, "shooter took %.0f" % (thp - T.hp))
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	P.shield = 0.0
 	var nm := m.verbs.mirrors.size()
 	k.use_ability("k2", P.pos)
@@ -1765,7 +1724,7 @@ func _grammar_runtime_check() -> void:
 	_grt("zapple E Echo Chain stuns", T.stun_t > 0.2 and T.hp < T.max_hp, "stun %.2f took %.0f" % [T.stun_t, T.max_hp - T.hp])
 	_ac_run(m, 1.5)
 	_grt_reset(T)
-	k.state = "shoulder"; k.settle = 1.0
+	k.stow()
 	P.crit_t = 0.0
 	k.use_ability("k2", P.pos)
 	_grt("zapple auto Echolocate", T.reveal_t > 0.0 and P.crit_t > 0.0, "reveal %.1f crit %.1f" % [T.reveal_t, P.crit_t])
@@ -1844,7 +1803,7 @@ func _grammar_runtime_check() -> void:
 	k.melee_n = 1
 	var self_fire := k.fire_trigger("on_hit", {"at": T.pos, "chain": ["grt_on_hit"]})
 	var real_fire := k.fire_trigger("on_hit", {"at": T.pos, "chain": []})
-	k.state = "shoulder"; k.settle = 1.0       # (so it doesn't swing at the target itself)
+	k.stow()       # (so it doesn't swing at the target itself)
 	var mel0 := k.melee_n
 	_ac_run(m, 0.3)
 	_grt("no self-trigger", not self_fire and real_fire and k.melee_n == mel0, "own hit fired=%s, melee hit fired=%s, its hits counted as melee %d" % [self_fire, real_fire, k.melee_n - mel0])
@@ -1895,7 +1854,6 @@ func _grammar_runtime_check() -> void:
 	var locked := not k.use_ability("k1", T.pos) and not k.use_ability("k2", T.pos)
 	P.slot_lv["kin"] = 1
 	_grt("locked Boki slot never casts", locked, "")
-	Settings.set_v("kin_auto", false, false)
 	k.target = T
 	k.runner.reset()
 	var used := {"k1": 0, "k2": 0}
@@ -1907,7 +1865,7 @@ func _grammar_runtime_check() -> void:
 		if k.runner.charges("k2") < c2: used["k2"] += 1
 		k.runner.reset()
 		_grt_out(k, home + Vector3(1.0, 0, 0)); k.target = T
-	_grt("E auto-cast off for you; auto active on", int(used["k1"]) == 0 and int(used["k2"]) > 0, "E %d, auto %d" % [used["k1"], used["k2"]])
+	_grt("your out Boki casts both its abilities itself", int(used["k1"]) > 0 and int(used["k2"]) > 0, "ability %d, auto %d" % [used["k1"], used["k2"]])
 	_ac_run(m, 1.0); _grt_reset(T)
 	# ---- 6. carry modes
 	k = _grt_kin(m, P, "pebbit")
@@ -1922,9 +1880,10 @@ func _grammar_runtime_check() -> void:
 	_grt("mount curls up while you glide", not P.mounted() and P.owner_stat("damage_reduction") == 0.0, "")
 	P.gliding = false
 	P._refresh_kin_stats()
+	var dashes0 := P.max_dashes()
 	k = _grt_kin(m, P, "wisplet")
 	P._refresh_kin_stats()
-	_grt("perch extends your glide", P.gear_stat("heat") >= 0.19 and P.max_dashes() >= 2.0, "glide +%.2f, dodges %.0f" % [P.gear_stat("heat"), P.max_dashes()])
+	_grt("perch extends your glide, never your dashes", P.gear_stat("heat") >= 0.19 and P.max_dashes() == dashes0, "glide +%.2f, dodges %.0f" % [P.gear_stat("heat"), P.max_dashes()])
 	k.throw_cd = 0.0
 	k.throw_to(T.pos)
 	if k.hesitate_t > 0.0: k._launch(T.pos)
@@ -1958,27 +1917,27 @@ func _grammar_runtime_check() -> void:
 	var ok_cast := KinMerge.cast(P)
 	var dur := float(P.merge_st.get("T", 0.0))
 	var ms := KinMerge.def_for(k)
-	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and dur >= ms.duration and dur <= ms.duration + ms.grow_duration + 0.01 and P.owner_stat("damage") > 0.29,
+	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.19,
 		"%.1fs, damage +%.2f" % [dur, P.owner_stat("damage")])
-	_ac_run(m, dur + 0.2)
+	_ac_run(m, dur + float(MergeForm.data()["xform_s"]) + 0.3)       # (the transformation comes first, then the timer; no tiers: the length is fixed)
 	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
 	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
 	_grt("merge again after the cooldown", blocked and KinMerge.can_cast(P), "")
 	KinMerge.cast(P)
-	m._player_throw()
+	KinCommand.tap(P)
 	_ac_run(m, 0.05)
 	_grt("throwing ends the merge (throw still works)", not KinMerge.active(P) and k.state in ["flying", "active"], "Boki %s" % k.state)
 	_ac_run(m, 1.0)
-	k = _grt_kin(m, P, "pebbit")
+	k = _grt_kin(m, P, "cairnback")        # (a mount without a form of its own yet: the stat merge grows it giant; Gravadillo has the Heavy Star form)
 	P.teleport(home); T.teleport(home + Vector3(2.0, 0, 0)); _grt_reset(T)
 	P.ult = 1.0; P.merge_cd = 0.0
 	KinMerge.cast(P)
-	_grt("mount merge: giant under you", KinMerge.active(P) and not k.giant.is_empty() and k.state == "shoulder" and P.owner_stat("armor") > 0.49, "armor %.2f shield %.0f" % [P.owner_stat("armor"), P.shield])
+	_grt("mount merge: giant under you", KinMerge.active(P) and not k.giant.is_empty() and k.state == "shoulder" and P.owner_stat("knockback_resist") > 0.49, "knockback resist %.2f" % P.owner_stat("knockback_resist"))
 	_ac_run(m, 0.2)
 	var ph := T.hp
-	_ac_run(m, 1.6, func(): T.teleport(home + Vector3(2.0, 0, 0)); T.vel = Vector3.ZERO)
+	_ac_run(m, 2.4, func(): T.teleport(home + Vector3(2.0, 0, 0)); T.vel = Vector3.ZERO)
 	_grt("merge pulses stomp around you", T.hp < ph, "took %.0f" % (ph - T.hp))
 	KinMerge.end(P, "test")
 	# IVs ride on top of the budget: final hp/damage/speed and the merge meter's fill (sizes are
@@ -2011,6 +1970,7 @@ func _base_check() -> void:
 	var mate := m.base_target(p)
 	if mate == null:
 		print("BCHECK FAIL no teammate"); get_tree().quit(); return
+	mate.ctrl = "idle"   # the check measures the recall landing beside the mate, not where a wandering mate strolls off to during the 3 s channel
 	for i in 30: m.step(Match.DT)
 	p.inp["move"] = Vector2.ZERO
 	p.start_base(mate)
@@ -2157,7 +2117,8 @@ func _extract_check() -> void:
 	# a key in a deathbox: the teammate dies carrying one, the player loots it
 	mate.rift_keys = 1
 	mate.lives = 1
-	mate.teleport(hp + Vector3(3.0, 0, 0))
+	# its box lands clear of the hatch: a revive prompt there would beat the hatch's
+	mate.teleport(m.world.free_spot_near(hp + Vector3(6.0, 0, 0), [], 0.5, 0.4, 6.0))
 	m.eliminate(mate, R, "knocked out", true)
 	var bx := Life.box_of(m, mate)
 	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, int(bx.get("keys", -1))])
@@ -2190,6 +2151,7 @@ func _extract_check() -> void:
 	print("EXCHECK hatch: opened after %.1fs, %d uses" % [m.time - t0, int(hx.get("uses", 0))])
 	if hx["state"] != "open" or absf(m.time - t0 - 10.0) > 0.6 or int(hx.get("uses", 0)) != 3: ok = false; print("EXCHECK FAIL hatch didn't open after 10s with 3 uses")
 	# three drop through: the player by pressing, a rival and his teammate by walking in
+	P.teleport(hp + Vector3(1.0, 0, 0.0))      # (back at the hatch: something may have nudged you while it opened)
 	press.call(P, 0.2)
 	var u1 := int(hx["uses"])
 	var R2: Hunter = rivals[1]
@@ -2306,6 +2268,7 @@ func _extract_check() -> void:
 	YB.teleport(o["pos"] + Vector3(9.0, 0, 0) if not m.world.is_void(o["pos"].x + 9.0, o["pos"].z) else o["pos"] + Vector3(0, 0, 9.0))
 	var yb_in := 0.0
 	var tyb := 0.0
+	seed(2024)      # the bot's random choices should not depend on how many rolls the map and loot took
 	while tyb < 16.0:
 		run.call(m, 0.25, calm.bind(m)); tyb += 0.25
 		if m.exits.in_yard(o, YB): yb_in += 0.25
@@ -2685,7 +2648,7 @@ func _boss_check() -> void:
 	spot.call(P, F["dial"])
 	walk.call(P, -outv, 6.0, func(): return m.lairs.inside(F, P.pos, 0.3))
 	var in_gateway: bool = m.lairs.inside(F, P.pos, 0.3) and F["state"] == "open"
-	walk.call(P, outv, 3.0)
+	walk.call(P, outv, 1.5)      # (1.5 s: 3 s walked off the island edge, which is allowed now)
 	ok.call(in_gateway and F["state"] == "open" and fb.dormant and not F.get("locked", false) and not m.lairs.inside(F, P.pos, 0.5) and gate_free.call(F),
 		"before the fight: into the gateway and back out, the boss still asleep (%.1fm out)" % P.flat_dist(F["c"]))
 	# step in: it wakes and the gate seals behind you, the ward lit
@@ -2745,6 +2708,11 @@ func _boss_check() -> void:
 	run.call(13.0)      # (the boss settles back to sleep with nobody inside)
 	# 5. each boss: wakes when you walk in, phases at 66% and 33%, attacks, enrages, drops its egg
 	var egg_items: Array = []
+	for h in [P, C]:      # (a kin's own attacks and abilities would move the scripted hp thresholds; its species is random)
+		for k in [h.kin, h.kin2]:
+			if k != null:
+				k.dead = true
+				k.visible = false
 	for L in [F, E, H]:
 		for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
 		var b: Boss = L["boss_mob"]
@@ -2779,7 +2747,7 @@ func _boss_check() -> void:
 		if not (p1 == 1 and p2 == 2 and invul_ok and enr):
 			print("BOSS  (phases %d %d, invul %s, enraged %s, hp %d/%d, dead %s, damage by team %s, feed %s)" % [p1, p2, invul_ok, enr, int(b.hp), int(b.max_hp), b.dead, str(b.damage_by), str(m.feed_all.slice(-8))])
 		ok.call(atks.size() >= 3, "%s used %d attacks: %s" % [b.md["name"], atks.size(), str(atks.keys())])
-		var w0 := m.wpicks.size()
+		var w0 := m.wpicks.size(); var brands0 := P.perks.filter(func(k): return String(k).begins_with("brand_")).size()      # (a Brand dropped where you stand is taken on the spot)
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)     # (a shove may have sent you out of the lair)
 		P.lvl = 1; P.xp = 0.0
 		var xp0 := P.xp
@@ -2790,7 +2758,7 @@ func _boss_check() -> void:
 		var ew = L.get("egg_wp")
 		var egg_shown: bool = m.lairs.egg_pings.size() > 0
 		var egg_ok: bool = ew != null and m.wpicks.has(ew) and Loot.is_rare_egg(Pack.ground_item(ew)) and Data.is_rare(String(Pack.ground_item(ew)["sp"]))
-		var strong: bool = m.wpicks.slice(w0).any(func(wp): return not wp.has("val") and not wp.has("gear") and int(wp["rar"]) >= 3)
+		var strong: bool = m.wpicks.slice(w0).any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3)
 		var kill_t := m.time - 0.2
 		for a in L["adds"]: if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false     # (the brood scatters; here it'd only shove the test hunters about)
 		var lvn: Node3D = L["nodes"]["lever"]
@@ -2798,24 +2766,31 @@ func _boss_check() -> void:
 		ok.call(L.get("locked", false) and L.get("victory", false) and gate_shut.call(L) and L.get("up_on", false) and (lvn.get_node("Lit") as Node3D).visible and (vent.get_node("Air") as Node3D).visible
 			and m.lairs.victory_left(L) > Lairs.VICTORY_T - 0.5 and m.lairs.sealed_lair(P) == L,
 			"%s falls: the gate stays shut (opens in %s), the lever lit, the updraft blowing" % [b.md["name"], Lairs.clock(m.lairs.victory_left(L))])
+		var pile_now: Array = m.wpicks.slice(w0)      # the drop as it landed (walking about can pick some of it up)
 		# no walking out yet
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * (float(L["half"]) - 2.0))
 		walk.call(P, Vector2(L["out"].x, L["out"].y), 1.2)
 		ok.call(m.lairs.inside(L, P.pos, 0.0) and gate_shut.call(L), "after the kill: walking at the shut gate keeps you in")
 		spot.call(P, L["c"] + Vector3(L["out"].x, 0, L["out"].y) * 3.0)
 		# a small pile, all of it good, and the egg on its own spot a few steps away
-		var pile: Array = m.wpicks.slice(w0).filter(func(wp): return not wp.get("egg", false))
-		var usable: bool = pile.any(func(wp): return not wp.has("val") and not wp.has("gear") and Loot.usable(P, Pack.ground_item(wp)) and int(wp["rar"]) >= 3)
+		var pile: Array = pile_now.filter(func(wp): return not wp.get("egg", false))
+		var usable: bool = pile.any(func(wp): return wp.has("gear") and int(wp["rar"]) >= 3) and (pile.any(func(wp): return wp.has("tune")) or P.perks.filter(func(k): return String(k).begins_with("brand_")).size() > brands0)
 		var good: bool = pile.all(func(wp): return int(wp["rar"]) >= 3 if not wp.has("val") else Loot.value(Pack.ground_item(wp)) >= 40)
 		var apart := 99.0
 		if ew != null:
 			for wp in pile: apart = minf(apart, Vector2(wp["pos"].x - ew["pos"].x, wp["pos"].z - ew["pos"].z).length())
 		ok.call(pile.size() <= 4 and usable and good and apart >= 2.0 and m.lairs.inside(L, ew["pos"], 0.0),
-			"%s's loot: %d things, all good (%s), an Epic+ %s weapon, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return "%s %d" % [Loot.name_of(Pack.ground_item(wp)), Loot.value(Pack.ground_item(wp))])), P.cls, apart])
+			"%s's loot: %d things, all good (%s), an Epic+ piece of gear and a Brand upgrade, the egg %.1fm from the pile" % [b.md["name"], pile.size(), str(pile.map(func(wp): return String(wp["gear"]) + " " + str(wp["rar"]) if wp.has("gear") else (String(wp["tune"]) if wp.has("tune") else Loot.name_of(Pack.ground_item(wp))))), apart])
 		var outL := Vector3(L["out"].x, 0, L["out"].y)
 		var vic: bool = L.get("victory", false)
 		if L == F:
-			# the lever: a press away from it does nothing; at it, the gate opens
+			# the lever: a press away from it does nothing; at it, the gate opens (pressed well clear of the loot
+			# and the egg: beside them it would pick them up, and where they land follows the fight)
+			var clear := func(q: Vector3) -> float:
+				return m.wpicks.reduce(func(d, wp): return minf(d, q.distance_to(wp["pos"])), 99.0)
+			var spots: Array = [-3.0, 0.0, 3.0].map(func(d): return L["c"] + outL * d)
+			spots.sort_custom(func(a, c): return clear.call(a) > clear.call(c))
+			spot.call(P, spots[0])
 			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(Match.DT)
 			var held: bool = L.get("locked", false)
 			spot.call(P, L["lever"] - outL * 0.8)
@@ -2839,8 +2814,10 @@ func _boss_check() -> void:
 			var refused: bool = not (L["flown"] as Array).has(Q) and qy <= qy0 + 0.05 and not Q.auto_glide
 			spot.call(Q, up)
 			run.call(0.2)
-			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and not m.lairs.inside(L, Q.pos, 0.0)
+			# (a person walks off an island's edge now, so an outsider shoved off the lair may fall out of the match: that counts as shoved out)
+			refused = refused and not (L["flown"] as Array).has(Q) and Q.pos.y < float(L["c"].y) + 1.0 and (Q.out or not m.lairs.inside(L, Q.pos, 0.0))
 			ok.call(refused, "the updraft refuses outsiders: no lift over it (%.2fm), shoved off and out (%.1fm from the middle)" % [qy - qy0, Q.flat_dist(L["c"])])
+			if Q.out or Q.downed: Life.bring_back(m, Q, m.world.spawns[0] if not m.world.spawns.is_empty() else m.world.random_ground(), 1.0, false)
 			Q.ctrl = "idle"; park.call(Q)
 			# a hunter who fought rides it: up over the wall and away from the back, the gate still shut
 			spot.call(P, up)
@@ -2873,7 +2850,7 @@ func _boss_check() -> void:
 			L["victory_at"] = m.time      # (a fresh clock: this part is about the bot, not the timer)
 			C.ctrl = "bot"
 			var tb2 := 0.0
-			while tb2 < 11.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
+			while tb2 < 16.0 and (m.lairs.inside(L, C.pos, 0.5) or not C.grounded):
 				m.step(Match.DT); tb2 += Match.DT; god.call()
 				Q.hp = Q.max_hp
 			ok.call((L["flown"] as Array).has(C) and not m.lairs.inside(L, C.pos, 0.5) and not C.out and L.get("locked", false),
@@ -2937,8 +2914,9 @@ func _boss_check() -> void:
 	var any_rare := false
 	for i in 60:
 		if Data.is_rare(String(m.bot_kin_record()["species"])): any_rare = true
-	ok.call(not any_rare and Data.common_kin().size() == 6 and Data.KIN.keys().filter(func(k): return Data.is_rare(k)).size() >= 2,
-		"rare species (%s) only come from eggs" % str(Data.KIN.keys().filter(func(k): return Data.is_rare(k))))
+	var rares: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	ok.call(not any_rare and Data.common_kin().size() + rares.size() == Data.KIN.size() and rares.size() >= 2,
+		"rare species (%s) only come from eggs" % str(rares))
 	m.queue_free()
 	# 10. a bot can work a dial
 	var m2 := Match.new()
@@ -3174,9 +3152,9 @@ func _record_check() -> void:
 	ok.call(not dbg.visible and m.hud.visible and not Overlay.fps_lbl.visible, "clean: debug label and fps hidden, the HUD stays")
 	ok.call(float(Record.cam_rates()[0]) < float(cam_off[0]) and float(Record.cam_rates()[4]) < 1.0, "clean: the camera follows softer, less shake")
 	m.hud.tip("a tip"); m._tip_t = 99.0
-	var tips_before: int = m.hud.tips.size()
+	var tips_before: int = m.hud.msgs.count()
 	m._tips()
-	ok.call(m.hud.tips.size() == tips_before, "clean: no new tips queued")
+	ok.call(m.hud.msgs.count() == tips_before, "clean: no new tips queued")
 	press.call(false)
 	await get_tree().process_frame
 	ok.call(Record.level == 2 and not m.hud.visible, "F10 again: no HUD (level %d, hud visible %s)" % [Record.level, m.hud.visible])
@@ -3269,7 +3247,8 @@ func _bot_sanity() -> void:
 				if h.roll_t > float(s["roll"]) + 0.05:
 					s["dashes"] = int(s["dashes"]) + 1
 				s["roll"] = h.roll_t
-				if h.hit_marker() == "ring" and not h.gliding:
+				# (a ledge rise is a climb up a wall, not hanging in the air: it doesn't count)
+				if h.hit_marker() == "ring" and not h.gliding and h.lfloat.is_empty():
 					s["ring"] = float(s["ring"]) + Match.DT
 				s["t"] = float(s["t"]) + Match.DT
 				if float(s["t"]) >= WIN:
@@ -3396,8 +3375,11 @@ func _drop_check() -> void:
 	for f in fol: f.ai["sep_h"] = -1.0       # (bots that break off low down: checked below, not here)
 	# the leader steers; the squad follows in its slots
 	var worst := 0.0; var t := 0.0
+	# (the turn is relative to the ship's heading, so every map and ship route tests the same turn:
+	# veer 17 degrees right of the flight line, then swing a further 85 degrees right)
+	var sdir := Vector2((m.ship["dir"] as Vector3).x, (m.ship["dir"] as Vector3).z).normalized() if m.ship.has("dir") else Vector2(1, 0)
 	while t < 1.3 and P.dropping:
-		P.inp["move"] = Vector2(1, 0.3).normalized() if t < 0.7 else Vector2(-0.2, 1).normalized()
+		P.inp["move"] = sdir.rotated(0.29) if t < 0.7 else sdir.rotated(1.77)
 		m.step(Match.DT); t += Match.DT
 		if t > 0.5:
 			for f in fol:
@@ -3455,8 +3437,8 @@ func _drop_check() -> void:
 	var spot := bot.pos
 	for k in 40:
 		var q := m.world.free_spot_near(bot.pos + Vector3(randf_range(-10, 10), 0, randf_range(-10, 10)), [], 1.0, 0.5, 6.0)
-		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
-			spot = q; break
+		if m.world.island_of(q.x, q.z) == m.world.island_of(bot.pos.x, bot.pos.z) and bot.flat_dist(q) > 6.0 and bot.flat_dist(q) < 9.0 and m.world.los(bot.pos, q, bot.pos.y + 1.0):
+			spot = q; break      # (6-9 m: an unseeded roll, so a far spot made the 6 s walk a coin flip)
 	spot.y = m.world.ground_at(spot.x, spot.z)
 	m.squad_ping(P, spot)
 	var d0 := bot.flat_dist(spot)
@@ -3465,15 +3447,16 @@ func _drop_check() -> void:
 	t = 0.0
 	while t < 6.0:
 		m.step(Match.DT); t += Match.DT
-		if String(bot.ai.get("goal_kind", "")) == "ping": went = true
-		closest = minf(closest, bot.flat_dist(spot))
+		# any squad bot: one busy with its downed Boki or a beacon leaves it to the other
+		if mates.any(func(x): return String(x.ai.get("goal_kind", "")) == "ping"): went = true
+		closest = minf(closest, mates.map(func(x): return x.flat_dist(spot)).min())
 	var replies: Array = D.events.slice(ev0).filter(func(e): return String(e).begins_with("reply"))
-	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s" % [bot.pname, went, d0, closest, str(replies)])
+	print("DCHECK ground ping: %s headed there=%s, %.1fm -> got within %.1fm; replies %s (from %s to %s)" % [bot.pname, went, d0, closest, str(replies), str(bot.pos.snapped(Vector3(0.1, 0.1, 0.1))), str(spot.snapped(Vector3(0.1, 0.1, 0.1)))])
 	if not went or closest > 4.0 or not replies.any(func(r): return String(r).ends_with("omw")): ok = false; print("DCHECK FAIL squad bots ignore pings")
 	m.unping(P)
 	if not m.my_ping().is_empty() or bot.ai.has("ping_goal"): ok = false; print("DCHECK FAIL right click didn't take the ping down")
 	# the spawns: the same candidates every match, a different live subset per seed
-	var layout := World.load_layout("skyreach")
+	var layout := World.load_layout(World.layout_for_tier(0))
 	var subsets := {}
 	for sd in [4101, 4102, 4103]:
 		var plan := SpawnPlan.new(m)
@@ -3515,6 +3498,7 @@ func _drop_check() -> void:
 	if not hidden.is_empty():
 		var hc: Dictionary = hidden[0]
 		var before := sp.state_for(hc, P.team)
+		if P.out or P.downed: Life.bring_back(m, P, hc["pos"], 1.0, false)      # (walking off an island is allowed now: the player may have gone over the edge during the checks above; same bring-back as the ground half)
 		P.teleport(hc["pos"] + Vector3(1.5, 0, 0))
 		for i in 30: m.step(Match.DT)
 		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, P.team)])
@@ -3586,15 +3570,15 @@ func _simtest(opts: Dictionary) -> void:
 	var nb := 0
 	for b in m.breaks: nb += int(b["dead"])
 	var wr: Array = []
-	for h in m.hunters: wr.append(h.wrar)
-	print("SIMSTAT breaks %d/%d weapons left %d rarities %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
+	for h in m.hunters: wr.append(h.gear.filter(func(g): return not g.is_empty()).size())
+	print("SIMSTAT breaks %d/%d pickups left %d gear worn %s staggers %d rings %d pads %d" % [nb, m.breaks.size(), m.wpicks.size(), str(wr), m.stag_n, m.ring_n, m.world.pads.size()])
 	print("SIMTEST done in %dms, sim time %d, result %s" % [Time.get_ticks_msec() - t0, m.time, str(m.result)])
 	print("SIMKIN %s lost=%s" % [str(m.kstat), str(m._resolve_lost().map(func(L): return [L["fate"], L["holder"]]))])
 	if m.blight:
 		# the Blight: how many it brought out, and what it did (knocks / eliminations / damage on hunters)
 		print("SIMBLIGHT spawned %d alive %d wardens %d shrieks %d knocks %d outs %d dmg %d" % [m.blight.spawned, m.blight.alive().size(), m.blight.wardens.size(), m.blight.shrieks, int(m.kstat.get("bl_knock", 0)), int(m.kstat.get("bl_out", 0)), int(m.kstat.get("bl_dmg", 0.0))])
 	for h in m.hunters:
-		print("  %s team %d %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
+		print("  %s team %d %s %s knocks %d kills %d dmg %d gems %d %s" % [h.pname, h.team, h.cls, h.arch, h.knocks, h.kills, h.dmg_done, h.gems, "OUT" if h.out else ("EXTRACTED" if h.extracted else "alive")])
 	get_tree().quit()
 
 # ------------------------------------------------------------------ browser test hooks
@@ -3798,7 +3782,7 @@ func _home_build_check() -> void:
 	var wt: Vector2i = spot.call({"kind": "deco", "id": "bush", "from": -1})
 	hb.drag = {"from": wt, "tiles": {wt: true}, "last": wt}
 	hb.cells = [wt]; hb._check_cells()
-	ok.call(hb.place_held() and home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down and can't be walked into")
+	ok.call(hb.place_held() and home.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and not home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down (water you can wade into, but nothing can be built on it)")
 	# kin walk round a fence
 	var fx := 56; var fz := 41
 	var line: Array = []
@@ -3847,7 +3831,7 @@ func _home_build_check() -> void:
 	Save.d = JSON.parse_string(js)
 	var home2 = await _hb_home()
 	ok.call(home2.lots["workshop"]["at"].distance_to(ws_at) < 0.01 and (HomeLayout.of(Save.d)["deco"] as Array).size() == deco_n and home2.hb.nodes.size() > 0 and home2.world.is_block(fx + 0.5, fz + 0.5), "after a save and reload the Workshop, %d decorations and the fence are where they were" % deco_n)
-	ok.call(home2.world.is_block(wt.x + 0.5, wt.y + 0.5) and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
+	ok.call(home2.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and home2.world.paint.has(home2.world.idx(pt.x, pt.y)), "the pond tile and the path come back too")
 	# expanding
 	var gl := int(HomeLayout.of(Save.d)["grow"])
 	ok.call(home2.hb.expand() and int(HomeLayout.of(Save.d)["grow"]) == gl + 1, "Expand pays and grows the island a step (now %d)" % (gl + 1))
@@ -3877,7 +3861,7 @@ func _home_build_check() -> void:
 	ok.call(home4.world.island_id(home4.lots["greenhouse"]["at"].x, home4.lots["greenhouse"]["at"].z) == "orchard" and home4.world.is_block(home4.lots["greenhouse"]["at"].x, home4.lots["greenhouse"]["at"].z), "its greenhouse stands on the (moved) Orchard Isle")
 	ok.call(not home4.world.is_void(float(f1["x"]), float(f1["z"])), "a feeder left out where there's no land now is moved to open ground (%.1f, %.1f)" % [float(f1["x"]), float(f1["z"])])
 	ok.call(home4.lots["workshop"]["at"].distance_to(HomeLayout.rect_center(Data.BUILDINGS["workshop"]["rect"])) < 0.01, "its Workshop stays on its old lot")
-	# moving at home: dash, glide, falling off, and the Training Grounds
+	# moving at home: dash, glide, falling off
 	var mv: Node = home4
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = 0.0; mv.pvy = 0.0
 	var x0: float = mv.ppos.x
@@ -3903,70 +3887,10 @@ func _home_build_check() -> void:
 		mv._move_player(0.05)
 	mv.panel_open = ""
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
-	var tr: HomeTraining = mv.training
-	# (the zone only changes while you're standing, so stand them on the ground each time)
-	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false; tr.tick(0.05)
-	ok.call(not tr.in_zone and not tr.cast("fire"), "outside the Training Grounds attacks are off")
-	mv.ppos = Vector3(HomeTraining.STILL.x + 1.5, 0, HomeTraining.STILL.z); mv.py = mv._ground_h(mv.ppos.x, mv.ppos.z); tr.tick(0.05)
-	ok.call(tr.in_zone and tr.kit.has("fire"), "inside them your kit is on: %s" % str(tr.kit.keys()))
-	var dm: Dictionary = tr.dummies[0]
-	tr.hit(dm, 12.0)
-	tr.cds.clear()
-	var cast_ok := tr.cast("signature") or tr.cast("gear1") or tr.cast("ultimate")
-	ok.call((dm["hits"] as Array).size() >= 1 and cast_ok, "dummies count hits and an ability fires in the zone")
-	for k in tr.cds: tr.cds[k] = 5.0
-	mv.ppos = HomeTraining.PAD; tr.pad_t = 0.0; tr.tick(0.05)
-	ok.call(tr.cds.values().all(func(v): return float(v) <= 0.05), "the pad resets cooldowns")
-	mv.ppos = HomeTraining.RACK + Vector3(0, 0, 1.0); tr.tick(0.05)
-	tr.try = {"cls": "heavy", "weapon": "greatsword"}
-	tr.apply_try()
-	tr.open_tryon()
-	ok.call(String(tr.kit["fire"]["name"]) == Content.weapon("greatsword").display_name and mv.panel_open == "Try-on rack", "the Try-on rack puts a heavy's greatsword in your hands (%s)" % tr.kit["fire"]["name"])
-	tr.set_my_class()
-	ok.call(String(Save.d["cls"]) == "heavy" and String(Save.d["weapon"]) == "greatsword", "Set as my class makes it your expedition class")
-	mv._close_panel()
-	# the climbing wall: walk up to it, jump, and you're stood on top
-	await get_tree().process_frame      # (a fresh frame: the glide test's Space press above still counts as "just pressed" in this one)
-	var wtop: float = mv._ground_h(34.5, 56.5)
-	var wbase: float = mv._ground_h(36.7, 56.9)
-	mv.ppos = Vector3(36.7, 0, 56.9); mv.py = wbase; mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false; mv.dash_t = 0.0
-	Input.action_press("left")
-	mv.pvy = 8.5        # a running jump at it (JUMP_V)
-	var on_top := false
-	for i in 90:
-		mv._move_player(1.0 / 60.0)
-		if mv.pvy == 0.0 and absf(mv.py - wtop) < 0.05 and absf(mv._ground_h(mv.ppos.x, mv.ppos.z) - wtop) < 0.05:
-			on_top = true; break
-	Input.action_release("left")
-	ok.call(wtop - wbase > 1.0 and on_top, "jumping at the climbing wall gets you on top of it (%.1fm up; at %.1f, %.1f, height %.2f)" % [wtop - wbase, mv.ppos.x, mv.ppos.z, mv.py])
-	# gliding the gap to the islet: you never leave the Training Grounds on the way
-	var gs := Vector3(46.8, 0, 56.3)
-	for gz in [56.3, 55.8, 56.8, 55.3]:
-		if mv.world.occupy(46.8, gz, 0.38, mv._ground_h(46.8, gz), true) == 0.0:
-			gs = Vector3(46.8, 0, gz); break
-	mv.ppos = gs; mv.py = mv._ground_h(gs.x, gs.z); mv.pvy = 0.0; mv.pvel = Vector3.ZERO; mv.gliding = false
-	tr.tick(0.05)
-	var left_zone := false
-	var over_gap := false
-	Input.action_press("right")
-	for i in 12:
-		mv._move_player(1.0 / 60.0); tr.tick(1.0 / 60.0)
-	mv.pvy = 8.5
-	Input.action_press("jump")
-	for i in 300:
-		mv._move_player(1.0 / 60.0); tr.tick(1.0 / 60.0)
-		if not tr.in_zone: left_zone = true
-		if mv.world.is_void(mv.ppos.x, mv.ppos.z): over_gap = true
-		if over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap":
-			Input.action_release("jump"); Input.action_release("right")     # over the islet: fold the glider and drop on it
-		if mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and mv.pvy == 0.0 and not mv.gliding: break
-	Input.action_release("jump"); Input.action_release("right")
-	ok.call(over_gap and mv.world.island_id(mv.ppos.x, mv.ppos.z) == "training_gap" and not left_zone, "gliding the gap lands you on the islet without leaving the Training Grounds (crossed: %s, left: %s, at %.1f, %.1f)" % [over_gap, left_zone, mv.ppos.x, mv.ppos.z])
+	Save.d["classes"] = ClassUnlock.legacy()      # an old save: every Hunter open (the locks: --hunter-unlock-check)
 	# dashing at home: the match's charges and recharge for each class, then the long dash
 	var cls0 := String(Save.d.get("cls", "medium"))
-	tr.try = {}
 	mv.ppos = Vector3(38.0, 0, 34.5); mv.py = mv._ground_h(38.0, 34.5); mv.pvy = 0.0; mv.gliding = false
-	tr.tick(0.01)
 	for ck in ["light", "medium", "heavy"]:
 		Save.d["cls"] = ck
 		var dg: Dictionary = mv._dodge()

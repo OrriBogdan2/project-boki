@@ -1,0 +1,17 @@
+{
+ "id": "medkit",
+ "name": "Mending kit",
+ "short": "Mend",
+ "icon": "medkit",
+ "col": "8fe0a0",
+ "use": "mend",
+ "cd": 2.0,
+ "max": 3,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 45,
+ "desc": "Heals 40 health and mends 20 armor at once."
+}

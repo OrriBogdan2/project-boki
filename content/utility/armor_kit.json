@@ -1,0 +1,17 @@
+{
+ "id": "armor_kit",
+ "name": "Armor kit",
+ "short": "Kit",
+ "icon": "anvil",
+ "col": "dfe9f7",
+ "use": "repair",
+ "cd": 0.0,
+ "max": 4,
+ "bring": [
+  2,
+  3,
+  4
+ ],
+ "price": 40,
+ "desc": "Repairs your armor to full. You are open while you repair."
+}

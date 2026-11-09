@@ -33,12 +33,14 @@ func _init(h, match_node: Match) -> void:
 
 func open(by_plan := false) -> void:
 	is_open = true
+	Sfx.play("ui_open", null, -8.0)
 	auto = by_plan
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
 
 func close() -> void:
+	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
 	_press = Vector2.INF
@@ -183,10 +185,13 @@ func draw(sz: Vector2) -> void:
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
+	ReviveHud.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
+	_wave_ships(c)
 	_pings(c, team)
 	_enemies(c, team)
+	_bounties(c, team)
 	_squad(c, team)
 	_legend(c, sz, team)
 	_side(c, sz)
@@ -210,6 +215,7 @@ func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
 
 func _map_title() -> String:
 	if m.world.layout_id == "skyreach": return "SKYREACH"
+	if m.world.layout_id == "hollowcrown": return "THE HOLLOW CROWN"
 	return "THE ISLANDS"
 
 func _exit_word(x: Dictionary) -> String:
@@ -404,6 +410,38 @@ func _ship(c: Control) -> void:
 	c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), GOLD)
 	hud._ctext(sp + Vector2(0, -14), "SKYSHIP", 10, GOLD, hud.big)
 
+## A rolling session's other drop waves: their skyships and routes, in amber (anyone can see a ship).
+func _wave_ships(c: Control) -> void:
+	if m.rolling == null:
+		return
+	for s in m.ships:
+		if s.get("gone", false) or s.get("node") == null:
+			continue
+		var a := to_screen(s["a"]); var b := to_screen(s["b"])
+		var L := a.distance_to(b)
+		var d := 0.0
+		while d < L:
+			c.draw_line(a.lerp(b, d / L), a.lerp(b, minf(1.0, (d + 6.0) / L)), Color(1.0, 0.72, 0.35, 0.4), 2.0, true)
+			d += 12.0
+		var sp := to_screen(m.ship_pos_of(s))
+		sp = Vector2(clampf(sp.x, rect.position.x + 8, rect.end.x - 8), clampf(sp.y, rect.position.y + 8, rect.end.y - 8))
+		var dir: Vector3 = s["dir"]
+		var fw := Vector2(dir.x, dir.z).normalized(); var sd := Vector2(-fw.y, fw.x)
+		c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), Color("ffb64a"))
+		hud._ctext(sp + Vector2(0, -14), "DROP WAVE", 10, Color("ffb64a"), hud.big)
+
+## Hunters with a bounty on them (a rolling session): everyone sees where they are.
+func _bounties(c: Control, team: int) -> void:
+	if m.rolling == null:
+		return
+	for h in m.hunters:
+		if h.team == team or not h.has_meta("bounty") or h.out or h.extracted:
+			continue
+		var pv := to_screen(h.pos)
+		if rect.has_point(pv):
+			hud.bounty_marker(c, pv, 1.25)
+			hud._ctext(pv + Vector2(0, -16), "LV %d" % h.lvl, 10, Color("ffb64a"), hud.big)
+
 ## A lair fight you heard: the boss's icon at the lair, a pulsing ring and what's going on there
 ## (the fight and its seal's clock, or that the boss has fallen and the gate's clock).
 func _lair_alerts(c: Control) -> void:
@@ -495,6 +533,10 @@ func _squad(c: Control, team: int) -> void:
 			hud._ctext(pv + Vector2(0, -9), h.pname.substr(0, 1), 12, col, hud.big)
 		if m.skydrop and m.skydrop.is_lead(h) and (h.riding or h.dropping):
 			crown(c, pv + Vector2(0, -20 if not h.riding else -24), col if h != m.player else GOLD)
+	for dk in BokiHud.squad_downed(m):
+		var dv := to_screen(dk.position)
+		if rect.has_point(dv):
+			BokiHud.map_dot(c, dv, dk, 7.0, m.time)
 
 func crown(c: Control, p: Vector2, col: Color) -> void:
 	var pts := PackedVector2Array([p + Vector2(-7, 4), p + Vector2(-7, -3), p + Vector2(-3.5, 0), p + Vector2(0, -5), p + Vector2(3.5, 0), p + Vector2(7, -3), p + Vector2(7, 4)])
@@ -565,7 +607,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
 	# exits, under the spawns
-	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 104 + (22 if not m.shrines.is_empty() else 0)))
+	var exit_rows := 3 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
 	if r2.end.y < sz.y - 10 and m.exits:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
@@ -575,9 +618,14 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			var col := Exits.color_of(fake)
 			_exit_glyph(c, String(ex[i][0]), Vector2(r2.position.x + 26, r2.position.y + 42 + i * 22), col)
 			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + i * 22), String(ex[i][1]), 12, INK)
+		var row_y := r2.position.y + 42 + 3 * 22
 		if not m.shrines.is_empty():
-			shrine_glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42 + 3 * 22), 5.5)
-			hud._text(Vector2(r2.position.x + 48, r2.position.y + 47 + 3 * 22), "Shrine (hold F: a power-up)", 12, INK)
+			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Shrine (hold F: a power-up)", 12, INK)
+			row_y += 22
+		if not m.beacons.is_empty():
+			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 	match kind:
@@ -587,8 +635,7 @@ func _exit_glyph(c: Control, kind: String, pv: Vector2, col: Color) -> void:
 		"hatch":
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), col)
 		"outpost":
-			c.draw_rect(Rect2(pv - Vector2(5.5, 5.5), Vector2(11, 11)), col, false, 2.0)
-			c.draw_circle(pv, 2.2, col)
+			OutpostGlyph.draw(c, pv, 1.0, col, Color(0.55, 0.58, 0.64, 0.9), 0.0)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:

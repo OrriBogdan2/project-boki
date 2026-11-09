@@ -122,7 +122,7 @@ func _offer_target(h: Hunter) -> int:
 func _offer(h: Hunter) -> void:
 	var to := _offer_target(h)
 	if to < 0:
-		if h == m.player and m.hud: m.hud.toast_small("Nobody in sight to offer a truce to", Color("f4f1e6"))
+		if h == m.player and m.hud: m.hud.toast_small("No one to offer a truce", Color("f4f1e6"))
 		return
 	if allied(h.team, to):
 		return
@@ -248,7 +248,7 @@ func strength(team: int) -> float:
 			s += 0.3
 			continue
 		s += 1.0 + 1.5 * (h.hp + h.armor) / maxf(1.0, h.max_hp + h.max_armor) + 0.2 * h.armor_tier
-		if h.kin and not h.kin.dead and (h.kin as Kin).state != "fainted": s += 0.3
+		if h.kin and not h.kin.dead and (h.kin as Kin).state != "downed": s += 0.3
 	return s
 
 ## The other squads close by that this squad can see.

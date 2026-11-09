@@ -5,8 +5,11 @@ extends RefCounted
 ## create them (see Effects), the match ticks them, checks every shot against them and draws them.
 ## Each one is plain data plus one scene node, so new abilities are new JSON, not new code.
 
+const DECOY_A := 0.28      # the decoy ghost's opacity (brighter blooms into a flash at every dash start)
+
 var m: Node = null
 var walls: Array = []     # {a, b: Vector2, y, hp, max_hp, t, team, by, block: "enemy"|"all", move, reflect, node, col, touch, follow, th}
+var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden), reused so a held prism does not rebuild its panels each press
 var mirrors: Array = []   # {ent, t, r, arc, team, k, riposte, node, col, front}
 var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
@@ -16,6 +19,7 @@ var decoys: Array = []    # {pos, team, t, node, owner}
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
+const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 
 func _init(match_node: Node) -> void:
 	m = match_node
@@ -53,7 +57,8 @@ func _wall_node(w: Dictionary) -> Node3D:
 	rim.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var base := Models.part(n, Models.box(length + 0.1, 0.1, WALL_TH * 2.4), Models.glow_mat(Color(col, 0.8)), Vector3(0, 0.05, 0))
 	base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	for sx in [-0.5, 0.5]:
+	# (a wall carried in front of a Hunter has no opaque posts: the bearer always shows through it)
+	for sx in ([] if w["follow"] else [-0.5, 0.5]):
 		Models.part(n, Models.box(0.22, WALL_H + 0.2, WALL_TH * 2.6), Models.toon(col.darkened(0.25), true, 0.6), Vector3(length * sx, (WALL_H + 0.2) * 0.5, 0))
 	if w["reflect"]:
 		# a prism wall: facets that catch the light
@@ -85,6 +90,11 @@ func _break_wall(w: Dictionary) -> void:
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).queue_free()
 
+## Whether a barrier blocks sight (World.los). A wall carried in front of a Hunter (a raised aegis, a Boki's
+## Mass Guard) never does: it would hide its own bearer from everyone they face.
+static func blocks_sight(w: Dictionary) -> bool:
+	return not bool(w.get("follow", false))
+
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.)
 static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> float:
 	for w in list:
@@ -92,17 +102,56 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 			continue
 		if absf(y - float(w["y"])) > 1.9:
 			continue
+		# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
+		var top := StoneStand.top_for(w) if w.has("top") else 3.0
+		if y >= float(w["y"]) + top - World.STEP:
+			continue
 		var p := Vector2(x, z)
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
 		if p.distance_to(c) < r * 0.8 + float(w["th"]):
-			return float(w["y"]) + 3.0
+			return float(w["y"]) + top
 	return 0.0
 
 # ------------------------------------------------------------------ reflect windows
-func add_mirror(ent: Node, e: Dictionary) -> void:
+## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.
+func add_mirror(ent: Node, e: Dictionary) -> Dictionary:
 	var col := Color(String(e.get("color", "#bff6ff")))
 	var arc := float(e.get("arc", -1.0))
 	var r := float(e.get("radius", 1.7))
+	var key := "%.2f|%.2f|%s" % [arc, r, col.to_html(false)]
+	var pool: Array = _mirror_pool.get(key, [])
+	var n: Node3D = null
+	while not pool.is_empty() and n == null:
+		var cand: Node3D = pool.pop_back()
+		if is_instance_valid(cand):
+			n = cand
+			n.visible = true
+	if n == null:
+		n = _build_mirror(arc, r, col)
+		n.set_meta("pool_key", key)
+		m.add_child(n)
+	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
+		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
+	m.sfx("shield", ent.pos, -3.0, 1.4)
+	return mirrors[-1]
+
+func _release_mirror(mr: Dictionary) -> void:
+	var nd = mr["node"]
+	if not is_instance_valid(nd):
+		return
+	var key := String(nd.get_meta("pool_key", ""))
+	if key == "":
+		nd.queue_free()
+		return
+	(nd as Node3D).visible = false
+	var pool: Array = _mirror_pool.get(key, [])
+	if pool.size() < 4:
+		pool.append(nd)
+		_mirror_pool[key] = pool
+	else:
+		nd.queue_free()
+
+func _build_mirror(arc: float, r: float, col: Color) -> Node3D:
 	var n := Node3D.new()
 	if arc > -0.99:
 		# a curved frontal shield: a fan of glowing panels
@@ -111,15 +160,9 @@ func add_mirror(ent: Node, e: Dictionary) -> void:
 			var a := -half + 2.0 * half * i / 6.0
 			var pnl := Models.part(n, Models.box(r * 2.0 * half / 6.0 + 0.08, 1.7, 0.08), Models.glow_mat(Color(col, 0.55)), Vector3(sin(a) * r, 0.95, -cos(a) * r), Vector3.ONE, Vector3(0, -a, 0))
 			pnl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	else:
-		var s := Models.part(n, Models.sphere(r, 20), Models.glow_mat(Color(col, 0.22)), Vector3(0, 0.9, 0))
-		s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var rg := Models.part(n, Models.flat_quad(r * 2.0), Models.ring_mat(Color(col, 0.9), 0.08), Vector3(0, 0.08, 0))
 	rg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	m.add_child(n)
-	mirrors.append({"ent": ent, "t": float(e.get("time", 0.6)), "t0": float(e.get("time", 0.6)), "r": r, "arc": arc, "team": int(ent.team),
-		"k": minf(float(e.get("dmg_k", 1.25)), KinRules.REFLECT_MAX), "riposte": float(e.get("riposte", 0.0)), "node": n, "col": col, "caught": 0})
-	m.sfx("shield", ent.pos, -3.0, 1.4)
+	return n
 
 func _mirror_dir(mr: Dictionary) -> Vector2:
 	var ent = mr["ent"]
@@ -219,9 +262,12 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 
 # ------------------------------------------------------------------ forced movement
 ## Pull a body to a spot over `dur` seconds in a low arc. Hunters fly there with their own physics;
-## monsters and kin are carried.
+## monsters and kin are carried. A body another game owns is yanked there by its own game.
 func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 	if ent == null or ent.dead:
+		return
+	if ent.remote:
+		m.displace.yank_remote(ent, to, dur, hop)      # its own game runs this same yank (Displace)
 		return
 	if ent is Hunter:
 		var h := ent as Hunter
@@ -240,9 +286,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 # ------------------------------------------------------------------ decoys
 func add_decoy(owner: Hunter, at: Vector3, time: float, col: Color) -> void:
 	var n := Node3D.new()
-	var body := Models.part(n, Models.capsule(0.32, 1.5), Models.glow_mat(Color(col, 0.55)), Vector3(0, 0.8, 0))
+	# soft and see-through: a hunter-shaped ghost left behind, not a flash where the dash set off
+	var body := Models.part(n, Models.capsule(0.32, 1.5), Models.glow_mat(Color(col, DECOY_A)), Vector3(0, 0.8, 0))
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var head := Models.part(n, Models.sphere(0.24, 10), Models.glow_mat(Color(col.lightened(0.3), 0.7)), Vector3(0, 1.75, 0))
+	var head_mat := Models.glow_mat(Color(col.lightened(0.3), DECOY_A + 0.1))
+	var head := Models.part(n, Models.sphere(0.24, 10), head_mat, Vector3(0, 1.75, 0))
 	head.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(n)
 	n.global_position = at
@@ -266,7 +314,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	for w in walls:
 		if w["block"] != "all" and int(w["team"]) == int(s["team"]):
 			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + WALL_H + 0.3:
+		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
 			continue
 		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
 		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
@@ -347,6 +395,11 @@ func _take_shot(s: Dictionary, v: Vector2, by, team: int, k: float) -> void:
 	if s["node"]:
 		(s["node"] as MeshInstance3D).material_override.set_shader_parameter("color", Color("ffffff").lerp(s["col"], 0.4))
 
+## A hit that a wall's owner says it took (a raised shield blocking a blow from the front): as a shot on it.
+func absorb(w: Dictionary, dmg: float) -> void:
+	if walls.has(w):
+		_hit_wall(w, dmg, Color.WHITE)
+
 func _hit_wall(w: Dictionary, dmg: float, _col: Color) -> void:
 	# a Bulwark's shield (or any wall an archetype raised) turns what it blocks into Guard
 	var by = w.get("by")
@@ -393,7 +446,7 @@ func tick(dt: float) -> void:
 		mr["t"] = float(mr["t"]) - dt
 		if float(mr["t"]) <= 0.0 or not is_instance_valid(mr["ent"]) or mr["ent"].dead:
 			mirrors.erase(mr)
-			if is_instance_valid(mr["node"]): mr["node"].queue_free()
+			_release_mirror(mr)
 	for t in tethers.duplicate():
 		var a = t["a"]; var b = t["b"]
 		if not is_instance_valid(a) or not is_instance_valid(b) or a.dead or b.dead or (b is Hunter and (b.downed or b.out)):
@@ -481,7 +534,6 @@ func tick(dt: float) -> void:
 		dc["t"] = float(dc["t"]) - dt
 		if float(dc["t"]) <= 0.0:
 			if is_instance_valid(dc["node"]):
-				m.fx.burst((dc["pos"] as Vector3) + Vector3(0, 1.0, 0), Color("ffffff"), 10, 3.0, 0.3)
 				dc["node"].queue_free()
 			decoys.erase(dc)
 
@@ -520,6 +572,8 @@ func render(_alpha: float) -> void:
 			var a := 0.18 + 0.3 * hk
 			if float(w["hit_t"]) > 0.0: c = c.lerp(Color.WHITE, 0.7); a = 0.75
 			if float(w["t"]) < 0.6: a *= 0.5 + 0.5 * sin(m.time * 30.0)
+			if w["follow"]:
+				a *= CARRIED_A
 			body.material_override.set_shader_parameter("color", Color(c, a))
 	for mr in mirrors:
 		var n2: Node3D = mr["node"]
@@ -569,3 +623,7 @@ func clear() -> void:
 	for mr in mirrors:
 		if is_instance_valid(mr["node"]): mr["node"].queue_free()
 	mirrors.clear()
+	for k in _mirror_pool:
+		for nd in _mirror_pool[k]:
+			if is_instance_valid(nd): nd.queue_free()
+	_mirror_pool.clear()

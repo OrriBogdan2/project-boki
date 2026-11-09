@@ -236,6 +236,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		var tm := TorusMesh.new(); tm.inner_radius = 0.22; tm.outer_radius = 0.3
 		crown.mesh = tm
 		crown.material_override = Models.glow_mat(Color("ffd27a"))
+		crown.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF      # (a glow: no shadow, item 94)
 		crown.position.y = 1.15 + Data.MOBS[mb.mkind]["r"] * 0.8
 		mb.add_child(crown)
 
@@ -350,6 +351,18 @@ func place_hazards() -> void:
 	for p in w.portal_spots: taken.append(p)
 	for c in w.chest_spots: taken.append(c["pos"])
 	for c in w.camp_spots: taken.append(c["pos"])
+	if w.hand:
+		# a hand-made map lists its trap spots (World.trap_spots); which trap goes there is the
+		# region's own (its biome's hazards, in turn)
+		var nth := {}
+		for ts in w.trap_spots:
+			var ii := int(ts["island"])
+			var hz: Array = (defs.get(String(w.islands[ii].get("biome", "")), {}) as Dictionary).get("hazards", [])
+			if hz.is_empty():
+				continue
+			_add_hazard(String(hz[int(nth.get(ii, 0)) % hz.size()]["kind"]), ts["pos"])
+			nth[ii] = int(nth.get(ii, 0)) + 1
+		return
 	for ii in w.islands.size():
 		if w.islands[ii].get("perch", false):
 			continue      # the perches' danger is the drop, not traps
@@ -439,9 +452,11 @@ func _near_hunter(p: Vector3, d: float) -> Hunter:
 		if dd < bd: bd = dd; best = h
 	return best
 
+## Hazards run on every game, each on its own clock: a game only hurts, pulls or slows the bodies it owns, so
+## a player online is hit once (by their own game), not once per game.
 func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary) -> void:
 	for f in m.foes_of(-3):
-		if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
+		if not f.remote and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
 			var oo := o.duplicate(); oo["tags"] = ["mut", "hazard"]; oo["src"] = "hazard"
 			f.hurt(dmg * float(m.T.get("mob", 1.0)), null, oo)
 
@@ -471,8 +486,7 @@ func _tick_hazards(dt: float) -> void:
 						_zap(p + Vector3(0, 3.3, 0), at2 + Vector3(0, 0.3, 0))
 						m.fx.burst(at2 + Vector3(0, 0.4, 0), Color("fff9c0"), 30, 7.0, 0.35, 2.0, 1.2)
 						m.sfx("boom", at2, -4.0, 1.5)
-						m.shake(0.35, at2)
-						_hit_area(at2, 1.8, 14.0, {"stun": 0.4})
+						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true})
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"lava_vent":
 				hz["t"] = float(hz["t"]) - dt
@@ -489,7 +503,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("ff9a3a"), 34, 7.5, 0.7, 9.0, 1.4)
 						m.sfx("boom", p, -4.0, 0.8)
 						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0})
-						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
 						if core: core.scale = Vector3.ONE
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"spore_pod":
@@ -508,7 +522,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("d88aff"), 28, 4.0, 0.8, -1.0, 1.4)
 						m.sfx("thump", p, -4.0, 0.7)
-						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
 						if pod: pod.visible = false
 						hz["phase"] = "spent"; hz["t"] = 14.0
 				else:
@@ -537,27 +551,16 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.burst(p + Vector3(0, 0.3, 0), Color("b08aff"), 8, -3.0, 0.4, 0.0, 1.0)
 						for f in m.foes_of(-3):
 							var to := Vector2(p.x - f.pos.x, p.z - f.pos.z)
-							if to.length() < 4.5 + f.r and absf(f.pos.y - p.y) < 2.0:
+							if not f.remote and to.length() < 4.5 + f.r and absf(f.pos.y - p.y) < 2.0:
 								if to.length() > 0.6: f.impulse(to.normalized() * 3.2, 0.0)
 								if to.length() < 1.3: f.hurt(3.0 * float(m.T.get("mob", 1.0)), null, {"src": "hazard", "tags": ["mut", "hazard"]})
 					if float(hz["t"]) <= 0.0:
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(7.0, 10.0)
 
 # ------------------------------------------------------------------ loot
-## A weapon for a chest at p: the region leans toward its own weapons.
-func weapon_at(p: Vector3, keys: Array) -> String:
-	var L: Dictionary = _biome(p).get("loot", {})
-	var wts: Dictionary = L.get("weapons", {})
-	if wts.is_empty():
-		return String(keys[randi() % keys.size()])
-	var tot := 0.0
-	for k in wts: if keys.has(k): tot += float(wts[k])
-	var r := rng.randf() * tot
-	for k in wts:
-		if not keys.has(k): continue
-		r -= float(wts[k])
-		if r <= 0.0: return String(k)
-	return String(keys[randi() % keys.size()])
+## Slot weights for gear found at p (by slot name): the region leans toward its own kind of gear.
+func slot_lean_at(p: Vector3) -> Dictionary:
+	return _biome(p).get("loot", {}).get("slots", {})
 
 ## Extra rarity steps for loot in this region (the Gloom pays better), plus the island's danger.
 func rarity_bonus_at(p: Vector3) -> int:

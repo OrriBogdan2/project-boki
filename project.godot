@@ -3,12 +3,14 @@ config_version=5
 
 [application]
 config/name="Project Boki"
-config/description="Raise Boki on your farm, then take them into PvPvE extraction matches."
+config/description="Raise Boki on your farm, wear the Mask of a fallen Hunter, then race rival crews to the Wyrmheart in PvPvE extraction matches."
 config/use_custom_user_dir=true
 config/custom_user_dir_name="godot/app_userdata/Kinfall"
 config/custom_user_dir_name.windows="Godot/app_userdata/Kinfall"
 config/custom_user_dir_name.macos="Godot/app_userdata/Kinfall"
 run/main_scene="res://scenes/main.tscn"
+config/icon="res://art/brand/icon_512.png"
+config/windows_native_icon="res://art/brand/icon.ico"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 run/max_fps=0
 boot_splash/bg_color=Color(0.02, 0.015, 0.035, 1)
@@ -87,13 +89,25 @@ vis_ally2={
 "type": "vec4",
 "value": Vector4(0, 0, 0, -1)
 }
+see_cam={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+see_a={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
+see_b={
+"type": "vec4",
+"value": Vector4(0, 0, 0, 0)
+}
 vis_ally_range={
 "type": "float",
 "value": 24.0
 }
 vis_dark={
 "type": "float",
-"value": 0.42
+"value": 0.7
 }
 
 [physics]

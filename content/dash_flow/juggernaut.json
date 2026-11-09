@@ -1,0 +1,103 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {
+				"mode": "buffer",
+				"source": "Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends."
+			},
+			"rmb": {
+				"mode": "fire",
+				"carry": true,
+				"source": "Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it."
+			},
+			"e": {
+				"mode": "fire",
+				"source": "Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on."
+			},
+			"x": {
+				"mode": "cancel",
+				"source": "Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard."
+			},
+			"q": {
+				"mode": "fire",
+				"source": "No source (the glove is ours). Ours: as every hero's default, it goes mid-dash."
+			}
+		},
+		"air": {
+			"lmb": {
+				"mode": "buffer",
+				"source": "No source: the footage shows no air dash (he uses the Air Slam in the air). Ours: as on the ground, the slash swings at the end."
+			},
+			"rmb": {
+				"mode": "cancel",
+				"source": "Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once."
+			},
+			"e": {
+				"mode": "fire",
+				"source": "No source for the air dash. Ours: the throw goes mid-dash."
+			},
+			"x": {
+				"mode": "cancel",
+				"source": "Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up."
+			},
+			"q": {
+				"mode": "fire",
+				"source": "No source (the glove is ours)."
+			}
+		}
+	},
+	"into_dash": {
+		"lmb": {
+			"mode": "fire",
+			"source": "Footage card for his dash: 'Dash while attacking in your facing direction'; data: nothing ends a held Molten Greatsword charge. Ours: Shift goes at once between slashes, and a Searing Wave charge carries through the Rampage (hold.lmb)."
+		},
+		"rmb": {
+			"mode": "fire",
+			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s)."
+		},
+		"e": {
+			"mode": "cancel",
+			"carry": true,
+			"source": "Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes."
+		},
+		"x": {
+			"mode": "buffer",
+			"reason": "The source plants him through the guard: he can't move until the counter has struck.",
+			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted', the strike at f39. Ours: Shift in the guard or the cleave is held and goes the step the cleave lands; in the recovery after it, Shift goes at once."
+		}
+	},
+	"hold": {
+		"lmb": {
+			"ground": {
+				"mode": "keep",
+				"source": "Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's crouch and drive and goes on charging after it; let go in it, the wave goes as the drive ends."
+			},
+			"air": {
+				"mode": "keep",
+				"source": "As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air."
+			},
+			"jump": {
+				"mode": "keep"
+			}
+		},
+		"rmb": {
+			"ground": {
+				"mode": "keep"
+			},
+			"air": {
+				"mode": "keep"
+			},
+			"jump": {
+				"mode": "keep"
+			}
+		}
+	},
+	"into_jump": {
+		"x": {
+			"mode": "lock",
+			"reason": "The source plants him through the guard: no jump until the counter has struck.",
+			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
+		}
+	}
+}

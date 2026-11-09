@@ -1,6 +1,6 @@
 {
 	"id": "tower_shield",
-	"name": "Tower Shield & Mace",
+	"name": "War Hammer & Aegis",
 	"classes": [
 		"heavy"
 	],
@@ -14,8 +14,6 @@
 		"rate": 0.55,
 		"combo_reset": 0.8,
 		"speed": 40,
-		"mag": 1,
-		"reload": 0.1,
 		"kb": 3.0,
 		"spread": 0.0,
 		"range": 2.4,
@@ -27,7 +25,7 @@
 		"size": 0.24,
 		"color": "#d8e8ff",
 		"sfx": "cleave",
-		"desc": "Tap to throw the mace: it passes through foes, lies where it lands (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to wind up a Crushing Blow (full at 1.25s: 34 damage, a big knock, stun 0.4) that carries you forward. Right click raises the tower shield.",
+		"desc": "Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis.",
 		"kick": 0.09
 	},
 	"utility": ""

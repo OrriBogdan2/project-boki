@@ -1,0 +1,7 @@
+{
+ "_doc": "Quiet growth on every level-up (scripts/match/level_growth.gd). Each level a hunter reaches adds hp (a share of the class's base health) and ap (ability power: a multiplier on ability damage, and on healing and shields from abilities). Levels 2-6 use the full rate; levels 7-10 use half_from's half rate. Nothing pops up for it: the level badge flashes and its tooltip shows the totals.",
+ "hp": 0.06,
+ "ap": 0.05,
+ "half_from": 7,
+ "half_k": 0.5
+}

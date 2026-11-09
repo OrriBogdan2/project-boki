@@ -1,0 +1,36 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "buffer", "source": "Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.2s skip ends (held to the dash end, the default: nothing in the source shows otherwise)."},
+			"rmb": {"mode": "fire", "source": "Data: Darkside Binding has no dash rule. Footage: not cast from a dash. Ours: the seed is thrown from the skip (its own small hop and push)."},
+			"e": {"mode": "fire", "source": "Data: Moonlight Blessing is a zone on herself that follows her. Footage: not cast from a dash. Ours: the light goes up on her mid-skip and moves with her."},
+			"x": {"mode": "fire", "source": "Data: the channel is cancelled only by stun, knock or range, not by moving. Footage (ult f41-f72): she walks while it runs. Ours: the tether starts mid-skip."},
+			"q": {"mode": "fire", "source": "No source glove."}
+		},
+		"air": {
+			"lmb": {"mode": "buffer", "source": "Data: Lunar Air Dash, further in the air. Footage (730.7-732.4 s): a streak then a seated float with the arms out; no shot during it, she walks out with the arms raised. Ours: the ember goes as the float ends."},
+			"rmb": {"mode": "fire", "source": "Data: no dash rule. Footage: not shown from the air dash. Ours: the seed leaves from the float."},
+			"e": {"mode": "fire", "source": "Data: the zone sits on her. Footage: not shown from the air dash. Ours: the light goes up on her mid-float."},
+			"x": {"mode": "fire", "source": "Data: moving doesn't cancel the channel. Ours: the tether starts mid-float."},
+			"q": {"mode": "fire", "source": "No source glove."}
+		}
+	},
+	"jump": {
+		"rmb": {"mode": "buffer", "reason": "Burrseed's fixed 1 s wind-up outlasts the hop, so the seed leaves after she lands", "source": "Ours: owner items 118 and 118b, the wind-up and snap release."}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Footage (716.3-717.6 s): she pushes embers while moving. Ours: Shift skips at once between embers."},
+		"rmb": {"mode": "fire", "source": "Ours: Shift while aiming the seed skips; the throw still goes on release."},
+		"e": {"mode": "fire", "source": "Data: the zone follows her (recast throws it). Ours: Shift goes at once, the light moves with her."},
+		"x": {"mode": "fire", "source": "Data: cancelled only by stun, knock or moving too far. Footage: she walks through the channel. Ours: Shift goes at once and the tether holds while she stays in the ring."},
+		"q": {"mode": "fire", "source": "No source glove."}
+	},
+	"hold": {
+		"rmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		}
+	}
+}

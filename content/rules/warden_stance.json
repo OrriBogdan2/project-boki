@@ -1,0 +1,174 @@
+{
+	"doc": "Each Warden's signature stance on the shared rig (scripts/match/warden_stance.gd), keyed by archetype id. gait: how the body stands and moves over its class (HunterAnim.STANCE keys: knee, width, lean, bounce, arm, elbow, cadence, stride, fidgets). pose: offsets on the rig's bones, full in idle and blended into run, aim and abilities at the blend weights below. spine: forward lean (rad, + forward). tilt: the shoulders drop toward the weight leg (rad). twist: the shoulders turn (rad, + left). hip: the hips shift over the weight leg (m). lift: the body up (m, + up). back: the hips back (m). knee: extra bend in both knees (rad). spread: the legs wider apart (rad). free_leg: the free leg's hip (+ forward) and knee bend (rad). head: pitch (+ chin up), yaw (+ left), roll (+ toward the left shoulder) (rad). arm_l: the free left hand's place from its rest (m, model space: x right, y up, z back). carry: the weapon's idle place under Aim, pos (m) and rot (pitch, yaw, roll, rad), free_l 1 to let the left hand off it (free_r 1: the right, for a weapon carried in the left hand); it blends to the aim pose the moment the Hunter fires. leg: the weight leg (l or r). idle: breath (rate, rad/s), breath_amp (x the breathing), shift (s on the weight leg before a short shift to the other), fidget (every and dur in s; body, head, hip and gun offsets at the fidget's peak, wave times over).",
+	"blend": {
+		"move": 0.45,
+		"aim": 0.55,
+		"ability": 0.4,
+		"rate": 7.0
+	},
+	"check": {
+		"min_spine": 0.08,
+		"min_hip": 0.03,
+		"min_diff": 0.15,
+		"fidget_within": 12.0
+	},
+	"gunslinger": {
+		"gait": {"lean": 0.03, "width": 0.13, "knee": 0.2},
+		"leg": "r",
+		"pose": {
+			"spine": -0.15, "tilt": 0.1, "twist": 0.16, "hip": 0.06, "knee": 0.0, "free_leg": [0.28, 0.32],
+			"head": [0.06, 0.16, 0.1], "arm_l": [0.05, 0.08, 0.1],
+			"carry": {"pos": [0.23, -0.12, 0.0], "rot": [-1.05, 0.0, 0.12], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 2.0, "breath_amp": 1.0, "shift": 9.0,
+			"fidget": {"every": 6.5, "dur": 1.3, "wave": 2, "gun": [0.18, 0.0, 0.0], "head": [0.0, -0.25, 0.0]}
+		}
+	},
+	"archer": {
+		"gait": {"knee": 0.16, "lean": 0.0, "width": 0.1},
+		"leg": "l",
+		"pose": {
+			"spine": 0.22, "tilt": 0.04, "twist": -0.1, "hip": 0.03, "back": 0.04, "knee": 0.12, "spread": 0.03, "free_leg": [0.1, 0.1],
+			"head": [-0.1, 0.0, 0.0], "arm_l": [0.0, 0.0, 0.0],
+			"carry": {"pos": [-0.3, -0.38, -0.08], "rot": [-0.75, 0.25, 0.5], "free_l": 0.0, "free_r": 1.0}
+		},
+		"idle": {
+			"breath": 2.3, "breath_amp": 0.8, "shift": 7.0,
+			"fidget": {"every": 5.0, "dur": 1.6, "wave": 1, "head": [0.0, 0.55, 0.0], "body": [0.06, 0.15, 0.0]}
+		}
+	},
+	"mage": {
+		"gait": {"lean": -0.03, "knee": 0.12, "width": 0.07, "arm": 0.8},
+		"leg": "r",
+		"pose": {
+			"spine": -0.06, "tilt": 0.15, "twist": 0.12, "hip": 0.09, "knee": 0.0, "free_leg": [0.24, 0.3],
+			"head": [0.08, -0.12, 0.14], "arm_l": [-0.06, -0.08, 0.02],
+			"carry": {"pos": [0.2, -0.3, 0.03], "rot": [-1.4, 0.5, 0.3], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 1.8, "breath_amp": 1.1, "shift": 8.0,
+			"fidget": {"every": 7.0, "dur": 1.2, "wave": 0, "head": [-0.22, 0.3, -0.18], "body": [-0.06, 0.0, 0.0]}
+		}
+	},
+	"juggernaut": {
+		"gait": {"lean": 0.0, "width": 0.18, "knee": 0.12, "arm": 0.7},
+		"leg": "r",
+		"pose": {
+			"spine": -0.2, "tilt": 0.05, "twist": -0.1, "hip": 0.02, "knee": 0.0, "spread": 0.03, "free_leg": [0.1, 0.1],
+			"head": [0.16, 0.0, 0.0], "arm_l": [-0.02, -0.08, 0.06],
+			"carry": {"pos": [0.28, -0.38, -0.16], "rot": [-0.85, 1.0, 0.75], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 1.35, "breath_amp": 1.5, "shift": 11.0,
+			"fidget": {"every": 7.5, "dur": 1.8, "wave": 2, "head": [0.0, 0.0, 0.3], "body": [0.06, 0.0, 0.0]}
+		}
+	},
+	"bulwark": {
+		"gait": {"lean": 0.0, "width": 0.24, "knee": 0.3, "arm": 0.7},
+		"leg": "l",
+		"pose": {
+			"spine": 0.14, "tilt": 0.02, "twist": 0.18, "hip": 0.012, "knee": 0.12, "spread": 0.08, "free_leg": [0.3, 0.2],
+			"head": [0.12, -0.1, 0.0], "arm_l": [0.0, 0.0, 0.0],
+			"carry": {"pos": [0.3, 0.27, 0.0], "rot": [2.7, 0.0, -0.6], "free_l": 0.0}
+		},
+		"idle": {
+			"breath": 1.5, "breath_amp": 1.3, "shift": 12.0,
+			"fidget": {"every": 8.0, "dur": 1.0, "wave": 0, "body": [-0.1, 0.0, 0.0], "hip": [0.0, -0.03, 0.0]}
+		}
+	},
+	"ostra": {
+		"gait": {"lean": 0.0, "width": 0.05, "knee": 0.05, "bounce": 0.0, "arm": 0.8},
+		"leg": "r",
+		"pose": {
+			"spine": 0.44, "tilt": 0.1, "twist": 0.08, "hip": 0.0, "lift": 0.02, "knee": 0.35, "free_leg": [-0.25, 0.35],
+			"head": [0.1, 0.0, 0.16], "arm_l": [-0.06, -0.1, -0.14],
+			"carry": {"pos": [0.3, 0.5, -0.12], "rot": [-0.3, -0.3, 0.0], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 1.4, "breath_amp": 0.7, "shift": 10.0,
+			"fidget": {"every": 6.0, "dur": 2.0, "wave": 1, "body": [0.0, 0.12, -0.08], "head": [0.0, 0.3, 0.0]}
+		}
+	},
+	"tender": {
+		"gait": {"lean": 0.24, "knee": 0.32, "width": 0.1, "bounce": 1.1, "arm": 1.3, "cadence": 1.25},
+		"leg": "l",
+		"pose": {
+			"spine": 0.06, "tilt": -0.07, "twist": 0.0, "hip": 0.03, "lift": 0.03, "knee": 0.12, "free_leg": [0.1, 0.4],
+			"head": [0.12, 0.08, 0.22], "arm_l": [-0.02, 0.42, -0.22],
+			"carry": {"pos": [0.12, -0.12, -0.24], "rot": [0.0, 0.0, 0.0], "free_l": 0.0}
+		},
+		"idle": {
+			"breath": 2.9, "breath_amp": 1.0, "shift": 5.0,
+			"fidget": {"every": 4.5, "dur": 0.9, "wave": 2, "hip": [0.0, 0.05, 0.0], "head": [0.0, 0.0, -0.3]}
+		}
+	},
+	"rimewright": {
+		"gait": {"knee": 0.22, "lean": 0.14, "width": 0.1, "bounce": 0.4, "arm": 1.25, "cadence": 1.4},
+		"leg": "l",
+		"pose": {
+			"spine": 0.04, "tilt": -0.05, "twist": -0.1, "hip": 0.03, "knee": 0.02, "free_leg": [0.08, 0.18],
+			"head": [0.06, 0.18, -0.1], "arm_l": [-0.2, 0.38, -0.02],
+			"carry": {"pos": [0.31, -0.12, -0.09], "rot": [1.5708, 0.0, 0.06], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 2.4, "breath_amp": 0.8, "shift": 10.0,
+			"fidget": {"every": 6.0, "dur": 1.8, "wave": 1, "body": [0.0, 0.25, 0.0], "head": [0.0, -0.2, 0.1]}
+		}
+	},
+	"dredge": {
+		"gait": {"knee": 0.26, "lean": 0.0, "width": 0.22, "bounce": 0.0, "arm": 0.75, "cadence": 0.9, "stride": 0.7,
+			"fidgets": ["shoulders", "neck", "stretch"]},
+		"leg": "r",
+		"pose": {
+			"spine": 0.04, "tilt": 0.07, "twist": 0.05, "hip": 0.015, "knee": 0.22, "spread": 0.04, "free_leg": [0.1, 0.15],
+			"head": [0.02, 0.0, 0.0], "arm_l": [0.06, -0.12, -0.04],
+			"carry": {"pos": [0.2, -0.34, -0.12], "rot": [-0.75, 0.25, 0.0], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 1.5, "breath_amp": 1.6, "shift": 12.0,
+			"fidget": {"every": 6.0, "dur": 1.6, "wave": 0, "body": [0.12, 0.0, 0.0], "head": [-0.15, 0.0, 0.0]}
+		}
+	},
+	"ashwick": {
+		"gait": {"knee": 0.2, "lean": 0.02, "width": 0.12, "bounce": 0.6, "arm": 0.9, "cadence": 1.8, "stride": 0.45,
+			"fidgets": ["bounce", "bob", "weapon"]},
+		"leg": "r",
+		"pose": {
+			"spine": 0.24, "tilt": 0.05, "twist": -0.1, "hip": 0.02, "knee": 0.45, "spread": 0.03, "free_leg": [0.2, 0.2],
+			"head": [0.24, -0.12, 0.1], "arm_l": [0.12, 0.2, -0.2],
+			"carry": {"pos": [-0.171, -0.288, -0.177], "rot": [-0.45, 1.25, 0.0], "free_l": 0.0, "free_r": 1.0}
+		},
+		"idle": {
+			"breath": 2.4, "breath_amp": 1.0, "shift": 6.0,
+			"fidget": {"every": 5.0, "dur": 1.0, "wave": 3, "body": [0.0, 0.06, 0.0], "head": [0.12, 0.0, 0.0]}
+		}
+	},
+	"dolm": {
+		"gait": {"lean": 0.04, "width": 0.08, "knee": 0.04, "bounce": 0.0, "arm": 0.9},
+		"leg": "l",
+		"pose": {
+			"spine": -0.04, "tilt": 0.06, "twist": 0.0, "hip": 0.035, "knee": -0.05, "free_leg": [0.0, 0.04],
+			"head": [0.04, 0.12, 0.12], "arm_l": [-0.06, -0.1, 0.2],
+			"carry": {"pos": [0.28, 0.05, -0.2], "rot": [0.0, 0.0, 0.0], "free_l": 1.0}
+		},
+		"idle": {
+			"breath": 1.6, "breath_amp": 0.8, "shift": 8.0,
+			"fidget": {"every": 6.0, "dur": 2.0, "wave": 0, "head": [0.0, -0.5, -0.55]}
+		}
+	},
+	"thief": {
+		"gait": {"knee": 0.2, "lean": 0.08, "width": 0.13, "bounce": 1.7, "arm": 1.35},
+		"leg": "r",
+		"pose": {
+			"spine": 0.03, "tilt": 0.04, "twist": 0.1, "hip": 0.02, "back": 0.02, "knee": 0.02, "spread": 0.2,
+			"free_leg": [0.3, 0.2], "head": [0.12, -0.12, 0.0], "arm_l": [0.0, 0.0, 0.0]
+		},
+		"idle": {
+			"breath": 3.1, "breath_amp": 1.2, "shift": 6.0,
+			"fidget": {"every": 5.0, "dur": 0.8, "wave": 0, "hip": [0.0, -0.05, 0.03], "body": [-0.12, 0.0, 0.0]}
+		}
+	},
+	"empty_f": {"gait": {"knee": 0.14, "lean": 0.02, "width": 0.07}, "leg": "r", "pose": {"spine": -0.04, "tilt": 0.12, "twist": 0.08, "hip": 0.07, "knee": 0.0, "free_leg": [0.2, 0.3], "head": [0.04, 0.1, -0.1], "arm_l": [0.04, 0.06, 0.02]}, "idle": {"breath": 2.2, "breath_amp": 0.9, "shift": 8.0, "fidget": {"every": 7.0, "dur": 1.4, "wave": 1, "head": [0.0, 0.3, 0.0], "body": [0.0, 0.08, 0.04]}}},
+	"empty_m": {"gait": {"knee": 0.18, "lean": 0.04, "width": 0.12}, "leg": "l", "pose": {"spine": 0.04, "tilt": 0.02, "twist": 0.04, "hip": 0.02, "knee": 0.04, "spread": 0.05, "free_leg": [0.06, 0.08], "head": [0.02, 0.0, 0.0], "arm_l": [0.0, 0.0, 0.0]}, "idle": {"breath": 2.0, "breath_amp": 1.0, "shift": 10.0, "fidget": {"every": 8.0, "dur": 1.4, "wave": 1, "head": [0.0, -0.3, 0.0], "body": [0.04, 0.0, 0.0]}}}
+}

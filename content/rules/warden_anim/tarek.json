@@ -1,0 +1,142 @@
+{
+	"doc": "Tenzo's hand-keyed clips (art/wardens/tarek/tarek.glb) and which game state plays which (scripts/heroes/warden_clips.gd). His weapon is his fists: the rock bracers and hands are skinned in the body, the Gun node follows the right fist (blade).",
+	"skinned_weapon": true,
+	"legs_rigid": true,
+	"extra_bones": {
+		"foot.L": "shin.L",
+		"foot.R": "shin.R",
+		"jaw": "head",
+		"lip.L": "head",
+		"lip.R": "head"
+	},
+	"blade": {
+		"root": "anchor_wrist_R",
+		"tip": "weapon_muzzle"
+	},
+	"loco": {
+		"idle": "idle",
+		"stance": "stance",
+		"stance_after": 4.0,
+		"walk": {
+			"f": "walk_f",
+			"b": "walk_b",
+			"l": "walk_l",
+			"r": "walk_r"
+		},
+		"run": {
+			"f": "run_f",
+			"b": "run_b",
+			"l": "run_l",
+			"r": "run_r"
+		},
+		"walk_speed": 2.2,
+		"run_speed": 5.0
+	},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"air": {
+		"rise": "jump",
+		"fall": "fall",
+		"glide": "glide",
+		"dive": "dive"
+	},
+	"land": {
+		"clip": "land",
+		"dur": 0.42,
+		"min_fall": 0.5
+	},
+	"kmoves": {
+		"breah_throw": {
+			"clip": "lmb_throw"
+		},
+		"breah_wind": {
+			"clip": "lmb_wind",
+			"hold_from": 0.24
+		},
+		"breah_punch": {
+			"clip": "lmb_punch"
+		},
+		"breah_crouch": {
+			"clip": "rmb_gather",
+			"hold_from": 0.16
+		},
+		"breah_leap": {
+			"clip": "rmb_leap",
+			"hold_from": 0.3
+		},
+		"breah_slam": {
+			"clip": "rmb_slam"
+		},
+		"breah_dive": {
+			"clip": "rmb_dive",
+			"hold_from": 0.3
+		},
+		"breah_slam_land": {
+			"clip": "rmb_land"
+		},
+		"breah_lunge": {
+			"clip": "rmb_lunge"
+		},
+		"breah_leap_land": {
+			"clip": "dash_land"
+		},
+		"breah_exdash": {
+			"clip": "dash_air"
+		},
+		"breah_raise": {
+			"clip": "e_row"
+		},
+		"breah_sense": {
+			"clip": "sense"
+		},
+		"breah_spine_aim": {
+			"clip": "x_aim",
+			"hold_from": 0.12
+		},
+		"breah_spine": {
+			"clip": "x_spine"
+		},
+		"mf_xform": {
+			"clip": "fuse"
+		},
+		"breah_hop": {
+			"clip": "dash_hop"
+		},
+		"breah_skate": {
+			"clip": "dash_skate",
+			"hold_from": 0.22
+		}
+	},
+	"states": {
+		"downed": "downed",
+		"reviving": "revive",
+		"dead": "death",
+		"dead_t": 1.6,
+		"stun": "stun",
+		"emote": "emote_toss",
+		"hit": {
+			"front": "hit_f",
+			"back": "hit_b",
+			"dur": 0.4
+		}
+	},
+	"procedural": [
+		"ledge",
+		"mantle",
+		"stomp",
+		"base",
+		"drink"
+	],
+	"upper": [
+		"hips",
+		"head",
+		"upper_arm.L",
+		"forearm.L",
+		"hand.L",
+		"upper_arm.R",
+		"forearm.R",
+		"hand.R",
+		"jaw",
+		"lip.L",
+		"lip.R"
+	]
+}

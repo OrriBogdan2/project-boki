@@ -1,0 +1,87 @@
+{
+ "doc": "Vex (gunslinger): RECIPE_95 spec, the golden recipe (docs/art/wardens/RECIPE_95.md). python3 tools/meshy/recipe.py art/wardens/src/vex_recipe.json <steps>",
+ "name": "vex",
+ "arch": "gunslinger",
+ "tag": "r3e",
+ "raw": "~/meshy/vex_r3b",
+ "art": {
+  "ref": "origin/ext/imagegen",
+  "turnaround": "docs/art/gen/wardens_r3/vex_turnaround.webp",
+  "side": "docs/art/gen/wardens_r3/vex_side.webp",
+  "portrait": "docs/art/gen/wardens_r3/vex_portrait.webp",
+  "face": "docs/art/gen/wardens_r3/vex_face.webp",
+  "head_sheet": "docs/art/gen/wardens_r3/vex_head_sheet.webp",
+  "eyeplate_ref": "docs/art/gen/review/vex_eyeplate_detail_ref.webp"
+ },
+ "views": [
+  {
+   "name": "front",
+   "x0": 0,
+   "x1": 528,
+   "kill": [
+    [
+     500,
+     600,
+     528,
+     1116
+    ]
+   ]
+  },
+  {
+   "name": "tq",
+   "x0": 518,
+   "x1": 1040,
+   "kill": [
+    [
+     518,
+     0,
+     540,
+     600
+    ]
+   ]
+  },
+  {
+   "name": "side",
+   "x0": 1050,
+   "x1": 1490
+  },
+  {
+   "name": "back",
+   "x0": 1490,
+   "x1": 2000
+  }
+ ],
+ "edits": {
+  "front": "Edit this character concept art (a front view). Make exactly these changes: 1) Her left arm (the human arm on the RIGHT side of the image, its gloved hand resting on her belt): make it hang straight down, relaxed, a little away from her hip, the open hand in its black fingerless glove beside her thigh, the green cuff and forearm tattoos kept. 2) Remove BOTH long green braids completely, with their copper wire, bolts and green end tufts: her green hair ends at her shoulders and nothing hangs below them; show the jacket, the shoulder ring, the bullet belt, the arm and the grey background where the braid was. Keep everything else exactly the same: the same young woman, her face, sultry smirk and smoky makeup, the brass eye-plate with the glowing green lens over her right eye, the choppy toxic-green bangs and shoulder-length hair, the brass and gunmetal neck plating with green-glowing seams, the six-barrel machine-gun right arm with the grey ammo box on its shoulder, the bullet belt over her left shoulder and the brass ring on that shoulder, the black crop top with green trim, the cropped black jacket, the green tattoos, the studded belts, the dark trousers, the combat boots, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background.",
+  "tq": "Edit this character concept art (a three-quarter view). Make exactly these changes: 1) Her left arm (the human arm on the RIGHT side of the image, its gloved hand resting on her belt): make it hang straight down, relaxed, a little away from her hip, the open hand in its black fingerless glove beside her thigh, the green cuff and forearm tattoos kept. 2) Remove BOTH long green braids completely, with their copper wire, bolts and green end tufts: her green hair ends at her shoulders and nothing hangs below them; show the jacket, the shoulder ring, the bullet belt, the arm and the grey background where the braid was. Keep everything else exactly the same: the same young woman, her face, sultry smirk and smoky makeup, the brass eye-plate with the glowing green lens over her right eye, the choppy toxic-green bangs and shoulder-length hair, the brass and gunmetal neck plating with green-glowing seams, the six-barrel machine-gun right arm with the grey ammo box on its shoulder, the bullet belt over her left shoulder and the brass ring on that shoulder, the black crop top with green trim, the cropped black jacket, the green tattoos, the studded belts, the dark trousers, the combat boots, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background.",
+  "side": "Edit this character concept art (a pure side view of her right side, facing right). Make exactly these changes: 1) Remove the long green braid hanging down her back completely, with its copper wire, bolts and green end tuft: her green hair ends at her shoulders and nothing hangs below them. 2) Remove the black ribbed hoses that loop from the backpack down to the machine-gun arm. 3) Her left arm must not be visible at all: it hangs straight down on the far side of her body, completely hidden behind her torso and hip, so nothing of the left arm, its sleeve or its hand shows behind her back; behind her back there is only the backpack and the grey background. Keep everything else exactly the same: the same young woman, her face, sultry smirk and smoky makeup, the brass eye-plate with the glowing green lens over her right eye, the choppy toxic-green bangs and shoulder-length hair, the brass and gunmetal neck plating with green-glowing seams, the six-barrel machine-gun right arm with the grey ammo box on its shoulder and its bullet feed, the backpack box and canister, the black crop top with green trim, the green tattoos, the studded belts, the dark trousers, the combat boots, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background.",
+  "back": "Edit this character concept art (a view from behind). Make exactly these changes: 1) Her left arm (the human arm on the LEFT side of the image, its hand on her hip): make it hang straight down, relaxed, a little away from her hip, the hand in its black fingerless glove beside her thigh, the green cuff kept. 2) Remove BOTH long green braids completely, with their copper wire, bolts and green end tufts: her green hair ends at her shoulders and nothing hangs below them. 3) Remove the black ribbed hoses that run from the backpack down across her lower back to the machine-gun arm; keep the backpack box with its gears and the canister. The machine-gun arm stays on the RIGHT side of the image. Keep everything else exactly the same: the same young woman, her face, sultry smirk and smoky makeup, the brass eye-plate with the glowing green lens over her right eye, the choppy toxic-green bangs and shoulder-length hair, the brass and gunmetal neck plating with green-glowing seams, the six-barrel machine-gun right arm with the grey ammo box on its shoulder, the bullet belt over her left shoulder and the brass ring on that shoulder, the black crop top with green trim, the cropped black jacket, the green tattoos, the studded belts, the dark trousers, the combat boots, all colours, the painted art style and line work, the framing, scale and position of the figure, and the plain light grey background."
+ },
+ "use": {
+  "side": "edit_side2"
+ },
+ "meshy": {
+  "order": [
+   "front",
+   "tq",
+   "side",
+   "back"
+  ],
+  "variants": {
+   "A_noenh": {
+    "enhance": "off"
+   },
+   "B_enh": {
+    "enhance": "on"
+   }
+  },
+  "keep": "A_noenh"
+ },
+ "bake": "art/wardens/src/vex_bake.json",
+ "fit": "art/wardens/src/vex_fit.json",
+ "shots_worktree": "/home/boki/boki-vex-r3b-stance",
+ "stance_worktree": "/home/boki/boki-vex-r3b-stance",
+ "match_crop": "200:170:540:270",
+ "combo_check": "--gunslinger-combo-check",
+ "demo_at": "-4.5,0"
+}

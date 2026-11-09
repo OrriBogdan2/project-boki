@@ -22,12 +22,14 @@ const STYLES := {
 
 var focus := Vector3.ZERO
 var target: Node3D = null
-var trauma := 0.0
+var shake_amp := 0.0          # a shake in progress (see Shake: only big hits on you)
+var shake_left := 0.0
+var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
+var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
 var lead := 1.0
-var kick := 0.0               # a quick zoom-in punch on big moments
-var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), the opposite of kick
+var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
@@ -61,6 +63,17 @@ const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
+
+## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
+## about 0.2 s, no shake. Only the casting player's camera ever hears about it.
+const CAST_EASE := 16.0       # 1/s
+const CAST_HOLD := 0.04       # s a request lasts, so the view lets go as soon as the kit stops asking
+const CAST_STEP := 1.0 / 60.0 # s a frame can take off that at most
+const CAST_EDGE := 1.5        # m kept between the hunter and the edge of the screen
+var cast_k := 0.0             # 0 = the usual view, 1 = fully pushed out
+var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
+var cast_left := 0.0
+var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
 
 var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
@@ -103,15 +116,42 @@ func snap(p: Vector3) -> void:
 	lead_off = Vector3.ZERO
 	_apply(Vector3.ZERO)
 
-func punch(a: float) -> void:
-	kick = maxf(kick, a)
-
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
 func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
 
-func add_trauma(a: float) -> void:
-	trauma = minf(1.0, trauma + a * float(Settings.get_v("shake")))
+## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
+func punch(_a: float) -> void:
+	pass
+
+## Asked each step of an aimed cast: push out by `zoom_k` and frame the line of `reach` metres along `dir`.
+func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
+	cast_left = CAST_HOLD
+	cast_zoom = zoom_k
+	var pan_by := 0.0 if follow_mode == "locked" else minf(reach * 0.5, _cast_room(dir, zoom_k))
+	cast_pan = Vector3(dir.x, 0.0, dir.y) * pan_by
+
+## Metres the view can lean along `dir` at that zoom with the hunter still on screen.
+func _cast_room(dir: Vector2, zoom_k: float) -> float:
+	var view := get_viewport().get_visible_rect().size
+	var half_up := dist * dist_mul * zoom * (1.0 + zoom_k) * tan(deg_to_rad(fov) * 0.5)
+	var room := Vector2(half_up * view.x / maxf(1.0, view.y), half_up / sin(pitch)) - Vector2.ONE * CAST_EDGE
+	var turned := dir.rotated(yaw)
+	return minf(room.x / maxf(0.001, absf(turned.x)), room.y / maxf(0.001, absf(turned.y)))
+
+func _tick_cast(delta: float) -> void:
+	cast_left = maxf(0.0, cast_left - minf(delta, CAST_STEP))      # (a slow frame mustn't outlast the kit's request)
+	cast_k = lerpf(cast_k, 1.0 if cast_left > 0.0 else 0.0, 1.0 - exp(-CAST_EASE * delta))
+	if cast_k < 0.001:
+		cast_k = 0.0
+
+## The zoom an aimed cast adds right now.
+func cast_wide() -> float:
+	return 1.0 + cast_zoom * cast_k
+
+func rumble(amp: float, secs: float) -> void:
+	shake_amp = maxf(shake_amp, amp)
+	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
 
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
@@ -158,25 +198,26 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
-	focus = base + pan + lead_off
+	_tick_cast(delta)
+	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
 	yaw = lerp_angle(yaw, yaw_to, minf(1.0, delta * 1.6))
 	var shake := Vector3.ZERO
-	if trauma > 0.0:
-		var s := trauma * trauma * 0.6 * float(rr[4])
+	if shake_left > 0.0:
+		var s := shake_amp * float(rr[4])
 		shake = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
-		trauma = maxf(0.0, trauma - delta * 1.8)
+		shake_total += minf(delta, shake_left)
+		shake_left = maxf(0.0, shake_left - delta)
+		if shake_left <= 0.0:
+			shake_amp = 0.0
 	_apply(shake)
 	Sfx.listener = focus
 
 func _apply(shake: Vector3) -> void:
-	kick = maxf(0.0, kick - get_process_delta_time() * 0.5)
-	if Record.clean():
-		kick = 0.0          # (recording: no zoom punches)
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 - kick) * (1.0 + pull)
+	var z := zoom * (1.0 + pull) * cast_wide()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
@@ -191,6 +232,30 @@ func _apply(shake: Vector3) -> void:
 	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)
 	position = aim + back * d + shake
 	look_at(aim + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
+
+## Character lean (feelfix): hunters are tipped back (their tops away from the camera, so their
+## fronts turn up to face it) by this much, about their feet, so at the calibrated angle you see
+## faces and bodies (as in the reference footage) instead of the tops of hats, without changing the
+## world's framing. Faded out for the bird's-eye and the
+## ship's chase view. The world is drawn at the style's pitch; characters read as if at ~pitch - lean.
+const CHAR_LEAN := deg_to_rad(20.0)
+func char_lean() -> Basis:
+	var k := top * top * (3.0 - 2.0 * top)
+	var c := chase * chase * (3.0 - 2.0 * chase)
+	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c)
+	if a < 0.001:
+		return Basis()
+	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
+
+## A body's basis: leaned toward the camera (char_lean), then turned to `face`, keeping its scale.
+func char_basis(face: float, scl: Vector3) -> Basis:
+	return char_lean() * Basis(Vector3.UP, face).scaled_local(scl)
+
+## The mouse's ray into the world: [origin, direction]. A ground-targeted move reads this, not inp["aim"] (that is the
+## ray cut at the shooter's own height, or a foe's: right for shots, far off the ground under the cursor).
+func mouse_ray() -> Array:
+	var mp := get_viewport().get_mouse_position()
+	return [project_ray_origin(mp), project_ray_normal(mp)]
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:

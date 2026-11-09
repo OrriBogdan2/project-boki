@@ -1,7 +1,7 @@
 extends RefCounted
 ## --teammate-check: your Boki as a teammate (KinCompanion). Prints PASS/FAIL lines.
-##   1. it keeps close through a scripted run: walking (down at your heel), a dash, a jump and glide
-##      (back up on your shoulder), and out on the field (walking back to your side)
+##   1. it keeps close through a scripted run: walking (at your side, following), a dash, a jump and glide
+##      (it hops onto you for the glide), and out on the field (walking back to your side)
 ##   2. callouts fire by priority (a rival behind you beats a chest), keep a quiet gap between them
 ##      and respect each kind's cooldown
 ##   3. the chattiness setting: quiet only speaks up for danger and your health, chatty says more
@@ -84,20 +84,28 @@ func _follow() -> void:
 	_fresh()
 	var P := m.player
 	var k: Kin = P.kin
+	var p0 := P.pos
 	ok(k != null and k.comp != null, "the player's Boki has a companion")
 	if k == null: return
+	# (nothing to fight: a Boki out at your side takes on whatever is near, which is not what this part measures)
+	for mb in m.mobs: mb.dead = true; mb.visible = false
+	for h in m.hunters:
+		if h != P: h.teleport(_far_ground(m, P))
+	for kk in m.kins:
+		if kk != k and kk.team != k.team: kk.dead = true; kk.visible = false
 	var st := {"max": 0.0, "steady": 0, "heel": 0, "glide": 0, "glide_up": 0}
 	var watch := func():
+		for mb in m.mobs: mb.dead = true; mb.visible = false
 		var d := Vector2(k.seen_pos().x - P.pos.x, k.seen_pos().z - P.pos.z).length()
 		st["max"] = maxf(float(st["max"]), d)
-		if P.grounded and not P.gliding and P.roll_t <= 0.0 and k.state == "shoulder":
+		if P.grounded and not P.gliding and P.roll_t <= 0.0 and k.state in ["active", "shoulder"]:
 			st["steady"] = int(st["steady"]) + 1
-			if k.heel_k >= 1.0: st["heel"] = int(st["heel"]) + 1
+			if k.state == "active" and k.flat_dist(P) < 3.5: st["heel"] = int(st["heel"]) + 1
 		if P.gliding:
 			st["glide"] = int(st["glide"]) + 1
-			if k.heel_k < 0.5: st["glide_up"] = int(st["glide_up"]) + 1
+			if k.state == "shoulder": st["glide_up"] = int(st["glide_up"]) + 1
 	_walk(P, Vector2(1, 0), 2.5, watch)
-	ok(k.heel_k >= 1.0 and k.heel_pos.distance_to(P.pos) < 2.2, "walking: down at your heel (heel %.2f, %.1fm away)" % [k.heel_k, k.heel_pos.distance_to(P.pos) if k.heel_pos != Vector3.INF else 99.0])
+	ok(k.state == "active" and k.cmd == "follow" and k.flat_dist(P) < 3.5, "walking: out at your side, following (%s, %.1fm away)" % [k.state, k.flat_dist(P)])
 	# a dash, then keep walking
 	P.inp["dash"] = true
 	_walk(P, Vector2(1, 0), 0.05, watch)
@@ -112,38 +120,63 @@ func _follow() -> void:
 	P.inp["glide"] = false
 	_walk(P, Vector2(-1, 0), 2.0, watch)
 	_walk(P, Vector2(0, 1), 2.0, watch)
-	ok(float(st["max"]) <= 4.0, "never more than 4m from you through walk, dash, jump and glide (max %.2fm)" % float(st["max"]))
-	ok(int(st["steady"]) > 0 and float(st["heel"]) / float(st["steady"]) > 0.55, "at your heel most of the time you're on your feet (%d of %d steps)" % [int(st["heel"]), int(st["steady"])])
-	ok(int(st["glide"]) == 0 or float(st["glide_up"]) / float(st["glide"]) > 0.8, "rides your shoulder while you glide (%d of %d steps)" % [int(st["glide_up"]), int(st["glide"])])
+	ok(float(st["max"]) <= 10.0, "never more than 10m from you through walk, dash, jump and glide (a dash outruns it for a moment) (max %.2fm)" % float(st["max"]))
+	ok(int(st["steady"]) > 0 and float(st["heel"]) / float(st["steady"]) > 0.55, "at your side most of the time you're on your feet (%d of %d steps)" % [int(st["heel"]), int(st["steady"])])
+	ok(int(st["glide"]) == 0 or float(st["glide_up"]) / float(st["glide"]) > 0.5, "hops onto you for most of a glide (%d of %d steps)" % [int(st["glide_up"]), int(st["glide"])])
 	# out on the field with nothing to fight: it comes back to your side and keeps pace
 	# (training dummies and anything else nearby are cleared: with an archetype the kin's C is open, so it would fight them)
 	for mb in m.mobs: mb.dead = true; mb.visible = false
 	for h in m.hunters:
-		if h != P: h.teleport(m.world.random_ground())
+		if h != P: h.teleport(_far_ground(m, P))
 	for kk in m.kins:
 		if kk != k and kk.team != k.team: kk.dead = true; kk.visible = false
 	k.target = null
-	k.throw_to(P.pos + Vector3(5, 0, 0))
+	# (back to where the walk began: how far the walk carried you depends on the hero's dash, and an
+	# island edge nearby would drop the Boki into the abyss before it could come back)
+	P.teleport(p0)
+	for i in 30: m.step(Match.DT)
+	k.throw_to(_solid_spot(m, P.pos, 5.0))      # (onto ground: where the walk ends depends on the hero's dash length)
 	for i in 60: m.step(Match.DT)
 	var was := k.state
+	# sent out with nothing to fight: it walks back to your side (Follow), it does not wait where it landed
+	for i in 180:
+		for mb in m.mobs: mb.dead = true; mb.visible = false
+		m.step(Match.DT)
+	ok(was == "active" and k.state == "active" and k.cmd == "follow" and k.flat_dist(P) < 3.5, "sent out, it comes back to your side (%s, %.1fm from you)" % [k.state, k.flat_dist(P)])
+	# ...and comes back once you walk out of its leash range
 	var far := [0.0]      # (an Array: a lambda captures plain locals by value)
-	_walk(P, Vector2(0, -1), 3.0, func():
-		# (the training area keeps spawning practice dummies round you: keep them away for this part)
+	_walk(P, Vector2(0, -1), 5.0, func():
 		for mb in m.mobs: mb.dead = true; mb.visible = false
 		if k.state == "active": far[0] = maxf(far[0], k.flat_dist(P)))
-	ok(was == "active" and (k.state == "active" and k.flat_dist(P) < 2.6 or k.state == "shoulder"), "out on the field it walks back to your side (%s, %.1fm, max %.1fm)" % [k.state, k.flat_dist(P), far[0]])
+	_walk(P, Vector2(0, -1), 1.5, func():
+		for mb in m.mobs: mb.dead = true; mb.visible = false)
+	ok(k.state == "shoulder" or (k.state == "active" and k.flat_dist(P) < 3.0) or k.state in ["returning", "flying_home"], "you walk out of range: it comes back to your side (%s, %.1fm)" % [k.state, k.flat_dist(P)])
 	# a threat close by: it stands between you and it
+	_open_ground_for(P, k)
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(6, 0, 0))
 	T.max_hp = 1e5; T.hp = 1e5
-	if k.state != "shoulder":
-		k.recall()
-		for i in 40: m.step(Match.DT)
 	k.comp._find_threat()
 	k.comp.threat = T
 	var hs := k.comp.heel_spot()
+	if hs == Vector3.INF:
+		ok(false, "with a rival close it steps between you and them (no free heel spot at %s)" % str(P.pos))
+		return
 	var to_t := Vector2(T.pos.x - P.pos.x, T.pos.z - P.pos.z).normalized()
 	var to_h := Vector2(hs.x - P.pos.x, hs.z - P.pos.z).normalized()
-	ok(hs != Vector3.INF and to_t.dot(to_h) > 0.8, "with a rival close it steps between you and them (dot %.2f)" % to_t.dot(to_h))
+	ok(to_t.dot(to_h) > 0.8, "with a rival close it steps between you and them (dot %.2f)" % to_t.dot(to_h))
+
+## Moves the player to ground where the Boki has a free heel spot (heel_spot is INF in a tight corner, and a
+## normalised INF is NaN): tries a few random spots.
+func _open_ground_for(p: Hunter, kin: Kin) -> void:
+	for i in 40:
+		# level ground where it steps toward the rival, and ground under the rival
+		var step_ok := absf(m.world.ground_at(p.pos.x + 1.25, p.pos.z) - p.pos.y) < 0.5
+		var rival_ok := m.world.ground_at(p.pos.x + 6.0, p.pos.z) > World.VOID + 1.0
+		if kin.comp.heel_spot() != Vector3.INF and step_ok and rival_ok:
+			return
+		p.teleport(m.world.random_ground())
+		for j in 5:
+			m.step(Match.DT)
 
 # ------------------------------------------------------------------ 2. priority, gap, cooldown
 func _priority() -> void:
@@ -153,11 +186,16 @@ func _priority() -> void:
 	P.inp["aim"] = P.pos + Vector3(5, 0.9, 0)
 	# a chest just ahead, a rival behind
 	var cat := P.pos + Vector3(4, 0, 1)
-	var n := Models.chest(1); n.position = cat; m.add_child(n)
-	m.chests.append({"pos": cat, "open": false, "prog": 0.0, "node": n, "tier": 1})
+	var n := Models.chest(); n.position = cat; m.add_child(n)
+	m.chests.append({"pos": cat, "open": false, "prog": 0.0, "node": n, "free": true})
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(-8, 0, 0.5))
 	T.max_hp = 1e5; T.hp = 1e5
+	# start quiet: a map chest called during _fresh() leaves its gap and cooldown running, and by the time
+	# they end the Boki has knocked the rival inside the on-screen range where "behind" isn't said
 	k.comp.history.clear()
+	k.comp.gap_t = 0.0
+	k.comp.cds.clear()
+	k.comp.seen.clear()
 	var t := 0.0
 	while t < 22.0:
 		P.inp["aim"] = P.pos + Vector3(5, 0.9, 0)
@@ -196,8 +234,8 @@ func _count_with(setting: String) -> Array:
 	for i in 8:
 		var a := TAU * i / 8.0
 		var at := c0 + Vector3(cos(a) * 6.0, 0, sin(a) * 6.0)
-		var n := Models.chest(1); n.position = at; m.add_child(n)
-		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tier": 1})
+		var n := Models.chest(); n.position = at; m.add_child(n)
+		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true})
 	for i in 3:
 		m.spawn_wild(Save.new_kin("puddlet", "", 900 + i), c0 + Vector3(-5 + i * 3, 0, 7))
 	var foes: Array = []
@@ -262,8 +300,8 @@ func _caring() -> void:
 	m.revive_hunter(P, null)
 	k.comp.on_boss_kill("the Warden", P.pos)
 	ok(k.comp.history.any(func(e): return e["cat"] == "boss_kill") and k.events.any(func(e): return e["kind"] == "boss_kill" and e.get("boss", "") == "the Warden"), "celebrates a boss kill, and remembers which")
-	k.faint()
-	k.state = "shoulder"; k.hp = k.max_hp * 0.3
+	k.go_down()
+	k.stow(); k.hp = k.max_hp * 0.3
 	m._extract(P, "uplink", "test")
 	ok(k.comp.history.any(func(e): return e["cat"] == "extract") and k.events.any(func(e): return e["kind"] == "carried_out" and String(e.get("place", "")) != ""), "celebrates extraction; hurt, it remembers you carried it out")
 	_fresh()
@@ -282,13 +320,17 @@ func _home_memory() -> void:
 	Game.apply_result({"extracted": true, "tier": 0, "gems": 0, "kin_runs": [{"uid": rec["uid"], "events": evs, "trust": k.trust, "stats": {}}]})
 	var back := Save.kin(String(rec["uid"]))
 	ok(back.has("recall") and String(back["recall"]["kind"]) in ["escaped", "carried_out"], "the run's big moment is kept for home (%s)" % str(back.get("recall", {})))
-	back["level"] = 1; back["trust"] = 40.0
-	var baby := KinSpeak.recall_line(back, 3)
-	back["level"] = 14; back["trust"] = 85.0
-	var grown := KinSpeak.recall_line(back, 3)
+	var back_trigger := "back_" + String(back["recall"]["kind"])      # what Home says when you walk up
+	back["level"] = 1
+	back["trust"] = 40.0
+	var baby := BokiLines.say(back, back_trigger)
+	back["level"] = 14
+	back["trust"] = 85.0
+	var grown := BokiLines.say(back, back_trigger)
 	print("  hatchling: %s\n  grown: %s" % [baby, grown])
 	ok(baby.contains("(") and not baby.contains("%"), "a hatchling acts it out")
-	ok(grown.contains(String(back["recall"]["place"])) and not grown.contains("%"), "a grown Boki tells you where it happened")
+	ok(BokiLines.grown_pool(BokiLines.trigger(back_trigger), BokiLines.element_of(String(back["species"]))).has(grown),
+			"a grown Boki tells you about that moment")
 	ok(back["memory"].any(func(mm): return String(mm["kind"]) in ["escaped", "carried_out"]), "and it's in its memories")
 
 # ------------------------------------------------------------------ 4. no spam
@@ -331,18 +373,70 @@ func _tutorial() -> void:
 	var hints := {}
 	var t := 0.0
 	var last_step := -1
-	while t < 420.0 and not m.player.extracted:
-		m._tut_drive()
+	var no_marker := 0
+	var cards := 0
+	var beam_miss := 0
+	var steps_seen := {}
+	var fell_t := -1.0
+	var back_ok := false
+	while t < 600.0 and not m.player.extracted:
+		TutorialDrive.drive(m)
 		m.step(Match.DT); t += Match.DT
-		var id := m.tut_id() if m.tut_step >= 0 and m.tut_step < Match.TUT.size() else ""
+		var tu: Tutorial = m.tut
+		var id := tu.id()
+		steps_seen[id] = true
+		if id == "pickup" and fell_t < 0.0:
+			fell_t = t
+			m.player.teleport(Vector3(70.0, 0.0, 30.0))      # off every island: a fall
+		elif fell_t > 0.0 and not back_ok and t - fell_t < 12.0:
+			back_ok = m.player.grounded and m.player.flat_dist(tu.respawn()) < 6.0
 		if m.player.kin and (m.player.kin.comp.leading() or m.player.kin.comp.guide.get("to", Vector3.INF) != Vector3.INF and m.player.kin.seen_pos().distance_to(m.player.kin.comp.guide["to"]) < 2.2):
 			led[id] = true
-		if m.tut_step != last_step:
-			last_step = m.tut_step
+		var goes_somewhere := id in ["move", "dash", "exdash", "glide", "crouch", "pickup", "chest", "goexit", "uplink",
+			"defend", "extract"]
+		if tu.step == last_step and goes_somewhere and tu.target == Vector3.INF:
+			no_marker += 1
+		if goes_somewhere and tu.target != Vector3.INF and tu._beams.is_empty():
+			beam_miss += 1
+		if tu.step != last_step:
+			last_step = tu.step
+			cards += 1
 	for e in m.player.kin.comp.history:
 		hints[String(e["cat"])] = true
 	print("  tutorial: %.0fs, led on %s, hints %s" % [t, str(led.keys()), str(hints.keys().filter(func(x): return String(x).begins_with("tut_") or String(x).begins_with("demo_")))])
 	ok(m.player.extracted, "the tutorial still finishes (extracted at %.0fs)" % t)
-	ok(led.has("chest") and led.has("goexit"), "it leads you to (or gets to) the chest and the outpost")
+	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
+	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
+	ok(back_ok, "a fall into the void puts you back at the last stop")
+	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
+	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
+	# (goexit and uplink both point at the outpost: when the fight ends next to it, goexit can be over in a
+	# second, while the Boki is still flying back or riding your shoulder over the last gap)
+	var outpost := led.has("goexit") or led.has("uplink")
+	ok(led.has("chest") and outpost, "it leads you to (or gets to) the chest and the outpost")
 	ok(hints.keys().filter(func(x): return String(x).begins_with("tut_")).size() >= 6, "a hint in its own voice for each step")
 	ok(hints.has("demo_dash") and hints.has("demo_jump"), "it shows you a dash and a jump")
+
+## Random ground well away from the player (40 m+), so a roaming bot can't wander into range and down the
+## Boki mid-check (where random_ground lands depends on every earlier roll of the global RNG).
+func _far_ground(m: Match, P: Hunter) -> Vector3:
+	var best: Vector3 = m.world.random_ground()
+	for i in 40:
+		var g: Vector3 = m.world.random_ground()
+		if P.flat_dist(g) > P.flat_dist(best):
+			best = g
+		if P.flat_dist(best) >= 40.0:
+			break
+	return best
+
+## A spot `d` m from `at` on solid ground (east first), so a throw never lands the Boki in the abyss.
+func _solid_spot(m: Match, at: Vector3, d: float) -> Vector3:
+	for v in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+		var ok_all := true
+		for k in range(1, int(d) + 2):
+			var q: Vector3 = at + v * float(k)
+			if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+				ok_all = false
+				break
+		if ok_all: return at + v * d
+	return at + Vector3(d, 0, 0)

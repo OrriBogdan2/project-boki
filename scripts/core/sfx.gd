@@ -4,27 +4,39 @@ extends Node
 ## across the map stays soft. The SFX bus has a gentle compressor, a touch of room reverb and a
 ## limiter, so a crowd of sounds blends together instead of piling up into peaks.
 
-const NAMES := ["smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
+const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
-	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done",
+	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
 	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "knock_confirm", "extract_ok",
 	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
 	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
-	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam"]
+	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
+	"hero_blowout", "hero_skewer", "dr_anchor", "as_ignite", "pay_rockfall", "pay_collapse",
+	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
+	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "ab_hit": 60, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
+const MIN_GAP := {"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
+	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90
 const STACK_DB := 3.5
+## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
+## this far under every call's own level, so a blast reads as a thump in the mix rather than the loudest thing
+## on screen. BLAST_PEAK_DB is the agreed ceiling for a blast's file peak plus this gain (checked in
+## --tender-combo-check).
+const BLAST := ["boom", "ab_blast", "ab_slam"]
+const BLAST_DB := -7.0
+const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
+var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 
@@ -33,6 +45,7 @@ var players: Array[AudioStreamPlayer] = []
 var next := 0
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
+var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
 var rng := RandomNumberGenerator.new()
 
@@ -60,7 +73,7 @@ func _ready() -> void:
 		add_child(mp); music.append(mp)
 	amb = AudioStreamPlayer.new(); amb.bus = "Ambience"; amb.volume_db = -80.0
 	add_child(amb)
-	for n in NAMES + VOICES:
+	for n in NAMES + VOICES + SfxKits.NAMES + VVSfx.NAMES:      # (VVSfx: Sparkle and Vex)
 		var takes: Array = []
 		var s = load("res://audio/%s.wav" % n) if ResourceLoader.exists("res://audio/%s.wav" % n) else null
 		if s: takes.append(s)
@@ -72,11 +85,23 @@ func _ready() -> void:
 			streams[n] = takes[0]
 		elif takes.size() > 1:
 			streams[n] = takes
+	_load_reach()
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+
+## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
+## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
+func _load_reach() -> void:
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if not f.ends_with(".json"):
+			continue
+		var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+		if d is Dictionary:
+			for sname in (d as Dictionary).get("reach", {}):
+				sound_reach[sname] = float(d["reach"][sname])
 
 ## The effects on the buses: SFX gets a soft compressor, a little room and a limiter; far-away sounds
 ## are low-passed on their way into it; the master has a last safety limiter.
@@ -243,6 +268,37 @@ func set_layers(want: Dictionary) -> void:
 	for st in want:
 		layer_want[st] = clampf(float(want[st]), 0.0, 1.0)
 
+## A match leaving the tree (extract, death, quit, a rematch; Match._exit_tree): everything it started
+## stops. The layered score and the abyss / ruins beds fade out (the title asks for the "match" wind that
+## is already the current ambience, an early return, so it would never clear them), every keyed loop
+## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
+## next screen's play_music / play_ambience, which crossfade them.
+func reset_scene_audio(fade := 1.2) -> void:
+	if not layers.is_empty():
+		_stop_layers(fade)
+		music_name = ""
+	if not amb_layers.is_empty():
+		clear_amb_layers(fade)
+	for key in loops.keys():
+		loop_stop(key)
+	for p in players:
+		p.stop()
+
+## How many players that never end on their own are still sounding (a looping pool voice, keyed loops,
+## score stems and beds): 0 once a match's reset_scene_audio has run and the fades are done
+## (--match-audio-check). A pool one-shot ends by itself, so a farm footstep doesn't count.
+func match_voices() -> int:
+	var n := 0
+	for p in players:
+		if p.playing and loops_forever(p.stream):
+			n += 1
+	for key in loops:
+		if is_instance_valid(loops[key]["p"]): n += 1
+	for c in get_children():
+		if c is AudioStreamPlayer and c.playing and not c in players and not c in music and c != amb:
+			n += 1          # also a stem or bed or loop still fading out
+	return n
+
 func _stop_layers(fade: float) -> void:
 	for st in layers:
 		var p: AudioStreamPlayer = layers[st]
@@ -269,15 +325,17 @@ func amb_layer(name: String, level: float) -> void:
 		amb_layers[name] = {"p": p, "want": 0.0}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
 
-func clear_amb_layers() -> void:
+func clear_amb_layers(fade := 1.0) -> void:
 	for n in amb_layers:
 		var p: AudioStreamPlayer = amb_layers[n]["p"]
 		var tw := create_tween()
-		tw.tween_property(p, "volume_db", -60.0, 1.0)
+		tw.tween_property(p, "volume_db", -60.0, fade)
 		tw.tween_callback(p.queue_free)
 	amb_layers = {}
 
 func _process(delta: float) -> void:
+	if not loops.is_empty():
+		_drop_stale_holds()
 	for n in amb_layers:
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
@@ -333,14 +391,14 @@ func _voice(pos) -> AudioStreamPlayer:
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
 func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
-	if not streams.has(sname):
+	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return
 	var now := Time.get_ticks_msec()
-	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, 30))
-	if sname.begins_with("step_"): gap = 25      # footsteps: several people can walk at once
+	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
+	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
 		return
-	var v := vol_db + _distance_db(pos)
+	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
 		return
 	var times: Array = recent.get(sname, [])
@@ -362,11 +420,35 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	p.stream = st
+	p.stream = _once(st)
 	p.volume_db = v
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
 
+## A pool voice is never reused while it plays, so a looping file sent through play() would sound
+## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
+## get a copy of a looping file that plays once; a sound that should last goes through loop_hold.
+var _once_of := {}
+func _once(st: AudioStream) -> AudioStream:
+	if not loops_forever(st):
+		return st
+	if not _once_of.has(st):
+		var c := (st as AudioStreamWAV).duplicate() as AudioStreamWAV
+		c.loop_mode = AudioStreamWAV.LOOP_DISABLED
+		_once_of[st] = c
+	return _once_of[st]
+
+static func loops_forever(st: AudioStream) -> bool:
+	return st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode != AudioStreamWAV.LOOP_DISABLED
+
+
+## The "reset" cue (a dash or ability is back): the variant picked in Settings > Gameplay (a, b or c),
+## synthesized by tools/gen_reset_sfx.py. A UI sound for the one who got it, so it carries no position.
+const RESET_CUES := ["a", "b", "c"]
+const RESET_CUE_DB := -3.0       # dB: bright, so it sits a little under the combat sounds' level
+func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
+	var v := String(Settings.get_v("reset_cue"))
+	play("reset_" + (v if v in RESET_CUES else "a"), null, vol_db, 0.0)
 
 ## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
 ## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
@@ -381,7 +463,8 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	var p := AudioStreamPlayer.new()
 	p.bus = "SFX"
 	add_child(p)
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": reach}
+	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
+	loops[key] = {"p": p, "pos": pos, "vol": vol_db, "reach": carry}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
@@ -412,6 +495,20 @@ func loop_stop(key: String) -> void:
 		tw.tween_property(p, "volume_db", -60.0, 0.12)
 		tw.tween_callback(p.queue_free)
 
+## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
+## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
+const HOLD_MS := 250
+func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
+	loop_start(key, sname, pos, vol_db)
+	loops[key]["held"] = Time.get_ticks_msec()
+	loop_set(key, pos, pitch)
+
+func _drop_stale_holds() -> void:
+	var now := Time.get_ticks_msec()
+	for key in loops.keys():
+		if now - int(loops[key].get("held", now)) > HOLD_MS:
+			loop_stop(key)
+
 func loop_on(key: String) -> bool:
 	return loops.has(key)
 
@@ -440,3 +537,27 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	p.volume_db = v
 	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
 	p.play()
+
+## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
+## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no
+## edit to the shared list.
+var _lazy_miss := {}
+func _lazy(sname: String) -> bool:
+	if _lazy_miss.has(sname):
+		return false
+	var takes: Array = []
+	var paths: Array = ["res://audio/%s.wav" % sname]
+	for i in range(1, 5):
+		paths.append("res://audio/%s_%d.wav" % [sname, i])
+	for path in paths:
+		if ResourceLoader.exists(path):
+			takes.append(load(path))
+	if takes.is_empty():
+		_lazy_miss[sname] = true
+		return false
+	streams[sname] = takes[0] if takes.size() == 1 else takes
+	return true
+
+## Whether a sound exists (loading it on first ask, as play does).
+func ensure(sname: String) -> bool:
+	return streams.has(sname) or _lazy(sname)

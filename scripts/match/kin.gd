@@ -14,7 +14,7 @@ var sp: Dictionary = {}
 var rec: Dictionary = {}          # the saved record (player kin) or a generated one (bots, wild)
 var owner_h: Hunter = null
 var unseen := false             # a rival's kin out of the local player's sight
-var state := "shoulder"           # shoulder | flying | active | returning | flying_home | fainted | reviving | wild | dazed | bench | fused
+var state := "shoulder"           # shoulder | flying | active | returning | flying_home | downed | reviving | wild | dazed | bench | fused | away
 var settle := 1.0                 # 0..1 while settling onto the shoulder
 var traits := {}
 var trust := 50.0
@@ -25,11 +25,39 @@ var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
+## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
+## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
+var hold_at := Vector3.INF
+var cmd := "follow"               # its standing order (KinFollow): follow | guard | chase | return. State "shoulder" is "return" or a short traversal carry
+var chase_target: Ent = null      # chase: what it sticks to
+var rest_t := 0.0                 # s left resting after the owner's merge release (land_pumped): no C, orders, Sic
+var disengaged := false           # an explicit Follow / Call back in a fight: it stays at your side until you attack, it or you are hit up close, or you Sic/Chase (KinFollow.disengage)
+var path: Array = []              # its A* path (KinPath), recomputed on path_t
+var path_goal := Vector2i.ZERO
+var path_t := 0.0
+var path_searches := 0          # A* searches it has run (a check counts them)
+var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
+var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
+var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
+var gap_v := false
+var rng := RandomNumberGenerator.new()    # its own seeded stream (init_kin): decisions never shift other systems' rolls
+var marked := {}                  # foe nid -> m.time until which your hits on it fill the bond meter faster (Bond.on_hit)
 var ignore_until := {}          # Ent -> m.time: targets it gave up on, left alone for a few seconds
 var fly: Dictionary = {}          # thrown, leaping or rushing
 var pend_skill := Vector3.INF     # ability to cast when it lands
 var pend_slot := ""
-var faint_t := 0.0
+var down_t := 0.0                 # downed: seconds until it comes round on its own (KinDowned)
+var down_total := 0.0
+var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it and carry it; a drop loses it)
+var rescue_on := false            # downed: its owner is carrying it in their arms right now
+var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
+var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
+var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
+var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
+var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a drop)
+var down_void := false            # downed: it fell into the abyss, only the timer brings it back
+var last_safe := Vector3.INF      # the last solid ground it stood on, where a fall marks it
+var beacon: MeshInstance3D = null # the downed marker pillar (KinDowned.render)
 var hesitate_t := 0.0
 var hesitate_to := Vector3.INF
 var revive_wait := 0.0
@@ -40,7 +68,9 @@ var hop_ph := 0.0
 var home := Vector3.ZERO          # wild kin wander around here
 var wander_to := Vector3.INF
 var dazed_t := 0.0
-var catch_prog := 0.0
+var catch_prog := 0.0             # (net) 5.0 once a client has asked the host to take it (Match._catch)
+var scan_by: Hunter = null        # who is scanning it right now: its daze timer waits (Capture)
+var scan_at := -9.0               # when that was last confirmed (a scan whose hunter vanished lets go after a few seconds)
 var angry_at: Ent = null
 var power := 1.0                  # treat bonus
 var events := []                  # things that happened this match, written to memory afterwards
@@ -65,19 +95,7 @@ var lost_from := ""               # a kin left behind by a hunter who went down 
 var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
 var ring: MeshInstance3D = null   # the team-coloured ring under it
-var shell_fx: Node3D = null       # the glow around its hunter while fused
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
-# walking at your heel: while it's "on your shoulder" (carried, thrown from there) and you're on the
-# ground, it hops down and trots beside you instead, and hops back up when you jump, dash or glide.
-# Only where it's drawn changes; everything else still treats it as carried.
-var heel_k := 0.0                 # 0 riding, 1 down at your heel
-var heel_pos := Vector3.INF
-var heel_prev := Vector3.INF
-var heel_face := 0.0
-var heel_moving := false
-var heel_t := 0.0                 # how long you've been steady on your feet
-var heel_spot_c := Vector3.INF
-var heel_spot_t := 0.0
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -126,8 +144,9 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	max_hp *= float(um["hp"]); hp = max_hp
 	speed *= float(um["speed"])
 	r = 0.36 * (1.0 + minf(rec.get("forms", []).size() * 0.08, 0.4)) * (1.3 if ks and ks.size == "large" else 1.0) * Unique.hit_scale(rec, norm)
-	state = "shoulder" if owner_h else "wild"
+	state = "active" if owner_h else "wild"       # a Boki walks beside you from the start (KinFollow); the shoulder is the Return order
 	settle = 1.0
+	rng.seed = hash(m.seed_val) * 31 + absi(id.hash())
 	runner = KinRunner.new()
 	if ks:
 		runner.set_slot("k1", KinLib.ability(ks.active))
@@ -162,9 +181,20 @@ func mass() -> float:
 func carry_style() -> String:
 	return ks.carry_style if ks else "shoulder"
 
-## Riding with its hunter, settled in (its carry passives are on).
+## On you by order (Return), settled in: its carry passives are on. A Boki out beside you, or carried only
+## over a glide or a drop, gives nothing (docs/decisions/0002).
 func carried() -> bool:
-	return not dead and state == "shoulder" and settle >= 1.0
+	return not dead and state == "shoulder" and settle >= 1.0 and cmd == "return"
+
+## Walking at your side under the Follow order, close enough to count as "with you" (the death-box rules).
+func with_owner() -> bool:
+	return state == "active" and cmd == "follow" and owner_h != null and flat_dist(owner_h) < 6.0
+
+## Putting it on you by order, settled (the Return order; tools and setups use this).
+func stow() -> void:
+	cmd = "return"; state = "shoulder"; settle = 1.0; fly = {}; target = null; hold_at = Vector3.INF; chase_target = null
+	if owner_h:
+		pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
 
 ## Ability strength: treats and care, plus its level growth (capped by tier).
 func ability_power() -> float:
@@ -177,7 +207,11 @@ func slot_open(_slot: String) -> bool:
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
-	return not dead and state not in ["fainted", "reviving", "bench", "wild", "dazed", "away"]
+	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
+
+## Resting after the merge ultimate (docs/decisions/0004)?
+func resting() -> bool:
+	return rest_t > 0.0 and not dead
 
 # ------------------------------------------------------------------ mind
 func courage() -> float:
@@ -214,6 +248,8 @@ func note(kindk: String, text: String, trust_d := 0.0) -> void:
 	trust = clampf(trust + trust_d, 0.0, 100.0)
 
 func bark(cat: String, extra := "") -> void:
+	if state == "fused" and owner_h != null and KinMerge.in_form(owner_h):
+		return          # (inside you: it says nothing)
 	if bark_cd > 0.0 and cat not in ["refuse", "hesitate", "revive", "callout"]:
 		return
 	bark_cd = 3.0
@@ -223,38 +259,50 @@ func bark(cat: String, extra := "") -> void:
 
 # ------------------------------------------------------------------ owner commands
 func throw_to(p: Vector3, slot := "") -> void:
-	if state != "shoulder" or dead:
+	if dead or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
 		return
-	if hesitate_t > 0.0 or throw_cd > 0.0:
+	if state == "active":
+		if slot == "":
+			_order_sic(p)       # out beside you: it leaps at the spot
 		return
-	if settle < 0.35:
-		return
-	var verdict := consider_throw(p) if owner_h.is_local() or randf() < 0.3 else "go"
-	if verdict == "refuse":
-		bark("refuse")
-		m.sfx("kin_unsure", owner_h.pos, -2.0, Unique.voice(rec))
-		note("refused", "refused to jump into a fight that looked too dangerous", -1.0)
+	if state != "shoulder" or settle < 0.35:
 		return
 	if slot != "":
 		pend_skill = p
 		pend_slot = slot
+	_order_sic(p, true)
+
+## Sic: after the Boki's own verdict (consider_throw). In a fight it never refuses: a short hesitation and a bark.
+func _order_sic(p: Vector3, from_shoulder := false) -> void:
+	var verdict := consider_throw(p) if owner_h.is_local() or rng.randf() < 0.3 else "go"
+	if verdict == "refuse" and KinFollow.in_combat(self, p):
+		verdict = "hesitate"
+	if verdict == "refuse":
+		bark("refuse")
+		m.sfx("kin_unsure", owner_h.pos, -2.0, Unique.voice(rec))
+		note("refused", "refused to jump into a fight that looked too dangerous", -1.0)
+		pend_slot = ""; pend_skill = Vector3.INF
+		return
 	if verdict == "hesitate":
-		hesitate_t = 0.45
+		hesitate_t = float(KinFollow.rules()["hesitate_s"])
 		hesitate_to = p
-		bark("hesitate")
+		if trust < 60.0 or not owner_h.is_local():
+			bark("hesitate")
 		m.sfx("kin_unsure", owner_h.pos, -4.0, Unique.voice(rec))
 		return
-	_launch(p)
+	if from_shoulder:
+		_launch(p)
+	else:
+		KinFollow.sic(self, p)
 
 func _launch(p: Vector3) -> void:
 	st_throws += 1
+	disengaged = false
 	var dive := carry_style() == "perch"
 	# a perched kin is thrown as a dive: up off your pack, then straight down onto the spot
 	var start := owner_h.pos + Vector3(0, 3.4 if dive else 1.5, 0)
-	if heel_k >= 0.5 and heel_pos != Vector3.INF and not dive:
-		start = heel_pos + Vector3(0, 0.4, 0)     # it jumps from where it's standing at your heel
 	var dist := Vector2(p.x - start.x, p.z - start.z).length()
-	var maxd := 11.0 if dive else 9.0
+	var maxd := float(KinCommand.rules()["throw_range_dive" if dive else "throw_range"])
 	var d2 := Vector2(p.x - start.x, p.z - start.z)
 	if dist > maxd:
 		d2 = d2.normalized() * maxd
@@ -263,29 +311,43 @@ func _launch(p: Vector3) -> void:
 	tgt.y = g if g > World.VOID + 1.0 else owner_h.pos.y
 	var dur := clampf(d2.length() / (24.0 if dive else 16.0), 0.18, 0.55)
 	teleport(start)
-	fly = {"from": start, "to": tgt, "t": 0.0, "dur": dur, "hit": {}, "dive": dive}
+	fly = {"from": start, "to": tgt, "t": 0.0, "dur": dur, "hit": {}, "dive": dive, "charge": carry_style() == "mount"}
 	state = "flying"
 	settle = 0.0
+	if cmd == "return":
+		cmd = "follow"        # sent out from your shoulder: it is out beside you now
+	hold_at = tgt if cmd == "guard" else Vector3.INF
+	last_safe = owner_h.pos
 	m.sfx("throw", owner_h.pos, 0.0)
+	KinNet.event(m, "throw", self, tgt)
 	CombatBus.kin_thrown.emit(self, owner_h)
 	if danger_at(tgt) > 1.2 and hp < max_hp * 0.4:
 		note("reckless", "was thrown into danger while hurt", -2.0)
 	if randf() < 0.35:
 		bark("throw")
 
-## Calls it back. It leaps straight to your shoulder, and can't be thrown again for a moment.
+## Call back: it leaps to your side (or onto you under the Return order) and hits what is on its path.
+## It can't be sent again for a moment.
 func recall() -> void:
 	if state in ["active", "flying", "returning"] and not fly.get("leap", false) and not fly.get("rush", false):
-		if state == "active" and t("temper") > 0.72 and target and target.hp < target.max_hp * 0.3 and randf() < 0.6:
+		if state == "active" and t("temper") > 0.72 and target and target.hp < target.max_hp * 0.3 and rng.randf() < 0.6:
 			bark("ignore")
 			hesitate_t = 0.6
 			hesitate_to = Vector3.INF
 			return
-		var to := Vector2(owner_h.pos.x - pos.x, owner_h.pos.z - pos.z)
-		fly = {"from": pos, "to": owner_h.pos + Vector3(0, 1.5, 0), "t": 0.0, "dur": clampf(to.length() / 22.0, 0.15, 0.45), "hit": {}, "leap": true, "home": true}
-		state = "flying_home"
+		fly = {}
+		if cmd == "return":
+			KinFollow.leap(self, owner_h.pos + Vector3(0, 1.5, 0), "shoulder", true)
+		else:
+			KinFollow.leap(self, KinFollow.side_spot(self), "side", true)
 		throw_cd = float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
+		hold_at = Vector3.INF
+		if cmd == "guard" or cmd == "chase":
+			cmd = "follow"; chase_target = null
+		if cmd == "follow":
+			KinFollow.disengage(self)       # Call back in a fight: it stays with you
 		m.sfx("recall", pos, -6.0)
+		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
 		fire_trigger("on_recall", {"at": owner_h.pos})
 
@@ -420,23 +482,32 @@ func merge_in(giant_form: bool) -> void:
 	pend_skill = Vector3.INF
 	if giant_form:
 		state = "shoulder"
+		cmd = "return"         # the giant form is ridden: carried() and mounted() need the Return order
+		chase_target = null
+		hold_at = Vector3.INF
 		settle = 1.0
 		giant = {"scale": 1.8, "t0": m.time}
-		m.shake(0.6, owner_h.pos)
 		m.sfx("boom", owner_h.pos, 0.0, 0.6)
 	else:
 		state = "fused"
 		teleport(owner_h.pos + Vector3(0, 1.0, 0))
-		if shell_fx == null and owner_h.model:
-			shell_fx = Models.kin_shell(sp.get("glow", sp["color"]))
-			owner_h.add_child(shell_fx)
-	m.fx.flash(owner_h.pos + Vector3(0, 1.0, 0), sp.get("glow", sp["color"]), 1.8, 0.12)
+
+## R with the Boki out: it leaps back to you (hitting what is in its way) and the merge starts when it
+## lands on your shoulder, mid-air. Returns false if it can't (it is busy being something else).
+func merge_leap() -> bool:
+	if not state in ["active", "flying", "returning", "flying_home"] or owner_h == null:
+		return false
+	var to := owner_h.pos + Vector3(0, 1.5, 0)
+	fly = {"from": pos, "to": to, "t": 0.0, "dur": clampf(flat_dist(owner_h) / 26.0, 0.2, 0.5), "hit": {}, "leap": true, "home": true, "cmd": true, "merge": true}
+	state = "flying_home"
+	hold_at = Vector3.INF
+	target = null
+	m.sfx("recall", pos, -4.0)
+	KinNet.event(m, "merge_leap", self)
+	return true
 
 ## KinMerge ends it: back to riding with you, ready to throw again straight away.
 func merge_out() -> void:
-	if shell_fx:
-		shell_fx.queue_free()
-		shell_fx = null
 	if not giant.is_empty():
 		giant = {}
 		m.fx.burst(pos + Vector3(0, 0.6, 0), sp["color"], 20, 4.0)
@@ -444,6 +515,34 @@ func merge_out() -> void:
 		_hop_on()
 		settle = 1.0
 		m.fx.burst(pos, sp["color"], 16, 3.0)
+
+## The merge ended with its ultimate: the Boki lands beside you pumped, following, and rests for `secs`
+## (no C, no Sic, no orders until it is over; its carried bonuses still apply).
+func land_pumped(secs: float) -> void:
+	if dead or owner_h == null:
+		return
+	giant = {}
+	disengaged = false
+	if state == "fused":
+		merge_pop()
+	rest_t = secs
+	m.fx.burst(pos + Vector3(0, 1.0, 0), sp["color"], 22, 4.0)
+	m.fx.ring(pos, 1.6, Color(sp["color"], 0.9), 0.35)
+	m.sfx("kin_happy", pos, -4.0, Unique.voice(rec))
+	KinNet.event(m, "rest", self, owner_h.pos, "%.1f" % secs)
+	if owner_h.is_local():
+		KinCommand.say(owner_h, "%s is pumped: back in %ds" % [rec.get("name", "Your Boki"), int(ceil(secs))], sp["color"])
+
+## A merge with a form ended: the Boki springs out beside you, following (not downed, never a shoulder hop).
+func merge_pop() -> void:
+	if state != "fused" or owner_h == null or dead:
+		return
+	teleport(owner_h.pos + Vector3(0, 1.0, 0))
+	cmd = "follow"
+	hold_at = Vector3.INF
+	target = null
+	fly = {}
+	KinFollow.leap(self, KinFollow.side_spot(self), "side")
 
 func _sim_fused(_dt: float) -> void:
 	if owner_h == null or owner_h.out:
@@ -464,10 +563,12 @@ func bench() -> void:
 	pend_skill = Vector3.INF
 
 func unbench() -> void:
-	state = "shoulder" if hp > 0.0 else "fainted"
+	state = "shoulder"
 	settle = 0.2
 	if owner_h:
 		pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
+	if hp <= 0.0:
+		go_down()
 
 # ------------------------------------------------------------------ simulation
 func sim(dt: float) -> void:
@@ -479,8 +580,13 @@ func sim(dt: float) -> void:
 		if owner_h: pos = owner_h.pos; prev = pos
 		return
 	tick_status(dt)
-	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t"]:
+	var was_rest := rest_t > 0.0
+	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
 		set(k, maxf(0.0, get(k) - dt))
+	if was_rest and rest_t <= 0.0 and owner_h:
+		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
+		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
+		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt
 		if shield_t <= 0.0: shield = 0.0
@@ -493,29 +599,27 @@ func sim(dt: float) -> void:
 			pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
 		if comp:
 			comp._decay(dt)
-		_heel_tick(dt)
 		return
 	if hesitate_t > 0.0:
 		hesitate_t -= dt
-		if hesitate_t <= 0.0 and hesitate_to != Vector3.INF and state == "shoulder":
-			_launch(hesitate_to)
-		elif hesitate_t <= 0.0 and state == "active" and hesitate_to == Vector3.INF:
-			recall()
+		if hesitate_t <= 0.0:
+			var to := hesitate_to
+			hesitate_to = Vector3.INF
+			if to != Vector3.INF and state == "shoulder":
+				_launch(to)
+			elif to != Vector3.INF and state == "active":
+				KinFollow.sic(self, to)
+			elif state == "active":
+				recall()
+	KinFollow.ride_the_drop(self)      # on the ship or in the drop it rides on your shoulder
 	think_t -= dt
-	# a hop-out cast (C with an archetype): once its move is done the kin hops straight back
-	if has_meta("hop_back") and m.time >= float(get_meta("hop_back")):
-		if state == "active" and owner_h and not owner_h.out:
-			remove_meta("hop_back")
-			recall()
-		elif state not in ["flying", "active"]:
-			remove_meta("hop_back")
 	match state:
 		"shoulder": _sim_shoulder(dt)
 		"flying": _sim_fly(dt)
 		"flying_home": _sim_fly_home(dt)
 		"active": _sim_active(dt)
 		"returning": _sim_return(dt)
-		"fainted": _sim_fainted(dt)
+		"downed": KinDowned.tick(self, dt)
 		"reviving": _sim_revive(dt)
 		"wild": _sim_wild(dt)
 		"dazed": _sim_dazed(dt)
@@ -527,68 +631,20 @@ func sim(dt: float) -> void:
 				hp = minf(max_hp, hp + max_hp * 0.02 * dt)   # resting in your satchel
 	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain:
 		brain.think_abilities(dt)
+	KinRegen.tick(self, dt)
 	if comp:
 		comp.tick(dt)
-	_heel_tick(dt)
-
-## Down at your heel or up on your shoulder (only how it's drawn; see heel_k).
-func _heel_tick(dt: float) -> void:
-	heel_prev = heel_pos
-	var o := owner_h
-	var want := false
-	if state == "shoulder" and o and comp and carry_style() in ["shoulder", "perch"] and giant.is_empty() \
-			and not o.out and not o.extracted and not o.dropping and not o.riding and not o.downed:
-		var steady: bool = o.grounded and not o.gliding and o.roll_t <= 0.0 and o.pad.is_empty() and o.grap.is_empty()
-		heel_t = heel_t + dt if steady else 0.0
-		want = heel_t > 0.3 and settle >= 1.0 and hesitate_t <= 0.0
-	else:
-		heel_t = 0.0
-	if want:
-		heel_spot_t -= dt
-		if heel_spot_t <= 0.0 or heel_spot_c == Vector3.INF:
-			heel_spot_t = 0.15
-			heel_spot_c = comp.heel_spot()
-		if heel_spot_c == Vector3.INF:
-			want = false
-	heel_moving = false
-	if want:
-		var tgt := heel_spot_c
-		if heel_pos == Vector3.INF or heel_k <= 0.0:
-			heel_pos = tgt
-		var to := Vector2(tgt.x - heel_pos.x, tgt.z - heel_pos.z)
-		var step := (maxf(Vector2(o.vel.x, o.vel.z).length(), speed * 0.6) + 3.0) * dt
-		if to.length() > 0.08:
-			var mv := to.normalized() * minf(to.length(), step)
-			heel_pos += Vector3(mv.x, 0, mv.y)
-			heel_moving = to.length() > 0.25
-			if heel_moving:
-				heel_face = lerp_angle(heel_face, atan2(-to.x, -to.y), minf(1.0, dt * 12.0))
-		var g: float = m.world.ground_at(heel_pos.x, heel_pos.z)
-		heel_pos.y = g if g > World.VOID + 1.0 and not m.world.is_void(heel_pos.x, heel_pos.z) else tgt.y
-		if Vector2(heel_pos.x - o.pos.x, heel_pos.z - o.pos.z).length() > 3.8:
-			want = false        # fell behind (a dash, a jump pad): back up onto the shoulder
-		elif not heel_moving:
-			# standing about: it looks where you look, or at what it's on about
-			var lk: Vector3 = comp.look if comp.look != Vector3.INF else (o.inp.get("aim", o.pos) if o.inp else o.pos)
-			var ld := Vector2(lk.x - heel_pos.x, lk.z - heel_pos.z)
-			if ld.length() > 0.4:
-				heel_face = lerp_angle(heel_face, atan2(-ld.x, -ld.y), minf(1.0, dt * 6.0))
-	heel_k = move_toward(heel_k, 1.0 if want else 0.0, dt * 4.0)
-	if heel_k <= 0.0:
-		heel_pos = Vector3.INF
-		heel_prev = Vector3.INF
 
 ## Where its speech bubble sits.
 func bubble_at() -> Vector3:
-	if state == "shoulder" and owner_h and heel_k < 0.5:
+	if state == "shoulder" and owner_h:
 		return owner_h.position + Vector3(0, 2.3, 0)
 	return position + Vector3(0, 1.2, 0)
 
-## Where it is for the eye (down at your heel counts), for tests and callers that care.
+## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h:
-		var top := owner_h.pos + Vector3(0, 1.5, 0)
-		return top.lerp(heel_pos, heel_k) if heel_pos != Vector3.INF else top
+		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
 func _sim_shoulder(dt: float) -> void:
@@ -599,6 +655,8 @@ func _sim_shoulder(dt: float) -> void:
 	settle = minf(1.0, settle + dt / 1.0)
 	if owner_h.downed:
 		_consider_revive(dt)
+	elif cmd != "return":
+		KinFollow.carry_tick(self, dt)       # carried over a glide or a drop: down again once you are steady
 
 func _sim_fly(dt: float) -> void:
 	fly["t"] += dt
@@ -645,7 +703,6 @@ func _sim_fly(dt: float) -> void:
 				fire_trigger("on_throw", {"at": f.pos})
 				m.sfx("kinhit", pos, 0.0)
 				m.fx.burst(pos, sp["color"], 14, 4.0)
-				m.shake(0.25, pos)
 				if owner_h and owner_h.is_local():
 					m.freeze_frame(0.06)
 				target = f
@@ -655,6 +712,9 @@ func _sim_fly(dt: float) -> void:
 		var rush_end: Array = fly["e"].get("on_end", []) if rush else []
 		var kx_land = fly.get("kx_land", null)
 		var kx_end = fly["e"].get("kx_end", null) if rush else null
+		var thrown: bool = not rush and not fly.get("leap", false)
+		var charged: bool = fly.get("charge", false)
+		var hit_set: Dictionary = fly.get("hit", {})
 		fly = {}
 		var g := ground()
 		if g <= World.VOID + 1.0:
@@ -665,9 +725,10 @@ func _sim_fly(dt: float) -> void:
 			grounded = true
 		vel = Vector3.ZERO
 		state = "active"
+		if thrown:
+			KinStrike.land(self, hit_set, charged)       # a thrown Boki staggers what it lands on (a charging mount harder)
 		if not land.is_empty():
 			m.fx.dust(pos, 14)
-			m.shake(0.35, pos)
 			var c2 := lctx.duplicate(); c2["at"] = pos
 			Effects.run(land, self, c2)
 		if not rush_end.is_empty():
@@ -675,7 +736,6 @@ func _sim_fly(dt: float) -> void:
 			Effects.run(rush_end, self, c3)
 		if kx_land is Callable:
 			m.fx.dust(pos, 14)
-			m.shake(0.35, pos)
 			(kx_land as Callable).call(pos)
 		if kx_end is Callable:
 			(kx_end as Callable).call(pos)
@@ -689,12 +749,27 @@ func _sim_fly(dt: float) -> void:
 func _sim_fly_home(dt: float) -> void:
 	if owner_h == null or owner_h.out:
 		return
+	var side: bool = fly.get("dest", "shoulder") == "side"
 	fly["t"] += dt
-	fly["to"] = owner_h.pos + Vector3(0, 1.5, 0)
+	if side:
+		fly["to"] = KinFollow.side_spot(self)
+	else:
+		fly["to"] = owner_h.pos + Vector3(0, 1.5, 0)
 	var k := clampf(fly["t"] / fly["dur"], 0.0, 1.0)
-	pos = (fly["from"] as Vector3).lerp(fly["to"], k) + Vector3(0, sin(k * PI) * 1.4, 0)
+	var was := pos
+	pos = (fly["from"] as Vector3).lerp(fly["to"], k) + Vector3(0, sin(k * PI) * float(fly.get("height", 1.4)), 0)
+	if fly.get("cmd", false):
+		KinStrike.sweep(self, was, pos)       # a commanded leap hits everything on its path
+		if fly.is_empty():
+			return
 	if k >= 1.0:
+		if side:
+			KinFollow.land_side(self)
+			return
+		var merge_now: bool = fly.get("merge", false)
 		_hop_on()
+		if merge_now and not KinMerge.cast(owner_h):
+			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 
 func walkable_to(p: Vector3) -> bool:
 	var d := Vector2(p.x - pos.x, p.z - pos.z)
@@ -708,6 +783,11 @@ func walkable_to(p: Vector3) -> bool:
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):
 		return
+	if disengaged and not KinFollow.in_combat(self, pos):
+		disengaged = false          # the fight is over: the next one starts engaged again
+	if cmd == "return" and owner_h != null:
+		KinFollow.set_cmd(self, "return", null)       # Return was ordered while it was in the air: it lands, then goes onto you
+		return
 	var guard: Ent = _wisp_threat() if owner_h and owner_h.downed else null
 	if guard:
 		# someone's come to stomp or execute your hunter: the kin goes for them first
@@ -716,17 +796,26 @@ func _sim_active(dt: float) -> void:
 		_consider_revive(dt)
 		if state != "active":
 			return
-	# cautious kin back off to you when they're hurt
-	if owner_h and hp < max_hp * brain.retreat_frac():
+	# a hurt, cautious Boki stays at your side and sits the fight out
+	var hang_back: bool = owner_h != null and hp < max_hp * brain.retreat_frac()
+	if hang_back:
 		if bark_cd <= 0.0:
 			bark("scared")
-		state = "returning"
+		target = null
+	if chase_target != null and (not is_instance_valid(chase_target) or chase_target.dead or not chase_target.hittable()):
+		chase_target = null
+		if cmd == "chase":
+			cmd = "follow"
+	if owner_h and flat_dist(owner_h) > (brain.leash() if cmd == "follow" else KinFollow.leash(self)):
+		state = "returning"      # wandered off after a fight: run back (a hop when it cannot walk)
 		return
-	if owner_h and flat_dist(owner_h) > brain.leash():
-		state = "returning"
-		return
-	if guard == null and (target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or randf() < dt * 0.5):
-		target = brain.pick_target()
+	if guard == null and not hang_back:
+		if KinFollow.is_disengaged(self):
+			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
+		elif cmd == "chase" and chase_target != null:
+			target = chase_target
+		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if root_t > 0.0 or stun_t > 0.0:
@@ -736,7 +825,7 @@ func _sim_active(dt: float) -> void:
 		var d := to.length()
 		var reach: float = sp["range"] + target.r
 		if d > reach * 0.8:
-			wish = to.normalized() * spd
+			wish = KinFollow.steer(self, target.pos, dt, spd, false)
 			# chasing something it can't get to (up a ledge, round a wall): give up on it for a while
 			# and come back to you, instead of standing there pressing into the wall
 			chase_stall = chase_stall + dt if Vector2(vel.x, vel.z).length() < spd * 0.35 and spd > 0.0 else 0.0
@@ -745,7 +834,7 @@ func _sim_active(dt: float) -> void:
 				ignore_until[target] = m.time + 5.0
 				target = null
 				wish = Vector2.ZERO
-		if d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5:
+		if target and d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5:
 			atk_cd = 0.95
 			lunge_t = 0.15
 			vel.x += to.normalized().x * 5.0; vel.z += to.normalized().y * 5.0
@@ -755,31 +844,14 @@ func _sim_active(dt: float) -> void:
 			melee_n += 1
 			fire_trigger("on_hit", {"at": tp})
 	elif owner_h:
-		# no fight for it: back to your side like a teammate, at your heel or between you and
-		# whatever's close; it hops onto your shoulder if you glide off
-		var to := Vector2(owner_h.pos.x - pos.x, owner_h.pos.z - pos.z)
-		if owner_h.gliding and to.length() > 2.5:
-			state = "returning"
+		# no fight for it: back to your side like a teammate (or its guard spot); it hops onto you if you glide off
+		wish = KinFollow.idle(self, dt, spd)
+		if state != "active":
 			return
-		var spot: Vector3 = comp.heel_spot() if comp else Vector3.INF
-		if spot != Vector3.INF and to.length() < 8.0:
-			# keep pace like a teammate: move with you (your velocity) plus a pull toward the heel spot.
-			# Chasing the spot at its own run speed alone left it trailing ~3.5m behind a hunter who
-			# runs faster than it does (archetype paces, hastes, dash carry)
-			var ts := Vector2(spot.x - pos.x, spot.z - pos.z)
-			var ov := Vector2(owner_h.vel.x, owner_h.vel.z)
-			if ts.length() > 0.5 or ov.length() > 0.3:
-				wish = (ov + ts * HEEL_PULL).limit_length(maxf(spd * 1.45, ov.length() * 1.3))
-				if root_t > 0.0 or stun_t > 0.0: wish = Vector2.ZERO
-		elif to.length() > brain.idle_radius() + 1.0:
-			wish = to.normalized() * spd
-		if to.length() > 6.0 and not walkable_to(owner_h.pos):
-			state = "returning"
-		elif to.length() > 8.0:
-			state = "returning"      # well off (after a fight): run back hard, or leap, rather than amble
+		if root_t > 0.0 or stun_t > 0.0:
+			wish = Vector2.ZERO
 	_ground_move(wish, dt)
-
-const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place kin closes on its heel spot, on top of your pace
+	KinFollow.watch_stuck(self, wish, dt)
 
 func _ground_move(wish: Vector2, dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
@@ -796,73 +868,63 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	vel.x = hv.x; vel.z = hv.y
 	slide(dt)
 	body_vertical(dt)
+	if grounded and not m.world.is_void(pos.x, pos.z):
+		last_safe = pos
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
 
 func _sim_return(dt: float) -> void:
 	if owner_h == null or owner_h.out:
 		return
-	var to := Vector2(owner_h.pos.x - pos.x, owner_h.pos.z - pos.z)
-	if to.length() < 1.2:
-		_hop_on()
+	var goal: Vector3 = owner_h.pos if cmd == "return" else KinFollow.side_spot(self)
+	var to := Vector2(goal.x - pos.x, goal.z - pos.z)
+	if to.length() < (1.2 if cmd == "return" else 2.2):
+		if cmd == "return":
+			_hop_on()
+		else:
+			state = "active"
 		return
-	if not walkable_to(owner_h.pos) or to.length() > 9.0:
-		# leap straight back to the shoulder
-		fly = {"from": pos, "to": owner_h.pos + Vector3(0, 1.5, 0), "t": 0.0, "dur": clampf(to.length() / 18.0, 0.2, 0.6), "hit": {}, "leap": true, "home": true}
-		state = "flying_home"
+	if to.length() > 9.0:
+		KinFollow.hop_back(self)        # well off: a visible leap rather than an amble
 		return
-	_ground_move(to.normalized() * speed * 1.25, dt)
+	var wish := KinFollow.steer(self, goal, dt, speed * 1.25, false)
+	_ground_move(wish, dt)
+	KinFollow.watch_stuck(self, wish, dt)
 
 func _hop_on() -> void:
+	hold_at = Vector3.INF
 	state = "shoulder"
 	settle = 0.0
 	target = null
 	fly = {}
 	pos = owner_h.pos + Vector3(0, 1.5, 0)
 
-func _sim_fainted(dt: float) -> void:
-	faint_t -= dt
-	if not over_void():
-		body_vertical(dt)
-	if faint_t <= 0.0 and owner_h and not owner_h.out:
-		hp = max_hp * 0.5
-		_hop_on()
-		m.fx.burst(owner_h.pos + Vector3(0, 1.5, 0), sp["color"], 10, 2.0)
-
-func faint(fell := false) -> void:
-	_end_merge("fainted")
-	state = "fainted"
-	faint_t = 8.0
-	hp = 0.0
-	target = null
-	fly = {}
-	m.fx.burst(pos + Vector3(0, 0.4, 0), sp["color"], 16, 3.0)
+func go_down(fell := false) -> void:
+	_end_merge("downed")
+	KinDowned.begin(self, fell)
 	if owner_h:
-		note("fainted", "fainted in a fight" if not fell else "fell off the island", -0.5)
-		if fell:
-			pos = owner_h.pos
-			prev = pos
-	m.on_kin_faint(self)
+		note("fainted", "went down in a fight" if not fell else "fell off the island", -0.5)
+	m.on_kin_down(self)
 
 func _on_zero(_by: Ent, _opts: Dictionary) -> void:
-	if state in ["dazed", "fainted"]:
+	if state in ["dazed", "downed"]:
 		hp = maxf(hp, 1.0)
 		return
 	if is_wild():
 		hp = 1.0
 		_daze()
 		return
-	faint()
+	go_down()
 
 func fall_out() -> void:
 	if is_wild():
 		dead = true
 		m.on_fell(self)
 		return
-	faint(true)
+	go_down(true)
 
 func _consider_revive(dt: float) -> void:
-	if state == "fainted" or hp <= 0.0:
+	if state == "downed" or hp <= 0.0:
 		return
 	if revive_wait <= 0.0:
 		# loyal kin rush in; a kin that doesn't trust you takes a moment
@@ -948,16 +1010,20 @@ func _daze() -> void:
 	m.on_wild_dazed(self)
 
 func _sim_dazed(dt: float) -> void:
-	dazed_t -= dt
+	if scan_by != null and (not is_instance_valid(scan_by) or m.time - scan_at > Capture.HOLD_OVER):
+		scan_by = null
+	if scan_by == null:
+		dazed_t -= dt         # (it stays dazed while someone is scanning it)
 	_ground_move(Vector2.ZERO, dt)
 	hp = minf(max_hp * 0.25, hp + dt * 0.5)
+	KinLoss.tick_guard(self, dt)
 	if dazed_t <= 0.0:
 		state = "wild"
 		hp = max_hp * 0.45
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused"]:
+	if state in ["dazed", "bench", "fused", "downed"]:
 		return 0.0
 	if is_wild() and by and by is Hunter:
 		angry_at = by
@@ -977,13 +1043,14 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead and state != "bench" and state != "away" and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding))
+	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
+	KinDowned.render(self, delta)
 	if not model:
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")
 	hop_ph += delta * (9.0 if Vector2(vel.x, vel.z).length() > 0.5 else 3.0)
-	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home"]
+	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home", "downed"]
 	if ring:
 		ring.visible = visible and (out_now or has_meta("lineup")) and not unseen
 		if ring.visible:
@@ -1007,6 +1074,8 @@ func render(delta: float, alpha: float) -> void:
 	if parts:
 		(parts as CPUParticles3D).emitting = visible and state not in ["shoulder", "bench", "fused"] and not unseen
 	if state == "fused" and owner_h and owner_h.model:
+		if MergeXform.boki_pose(self):
+			return           # (the transformation: it flies in on a spiral)
 		# wrapped around its hunter's back as armor
 		global_position = owner_h.model.global_position + Vector3(0, 1.05, 0) + Vector3(sin(owner_h.face), 0, cos(owner_h.face)) * 0.32
 		model.rotation.y = owner_h.face
@@ -1014,18 +1083,15 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", "perch" if state == "shoulder" and heel_k < 0.5 else ("attack" if lunge_t > 0.0 else ""))
+	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if lunge_t > 0.0 else ""))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
 		pose_now = "nudge"
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
-	if state == "shoulder" and owner_h and owner_h.model and carry_style() == "mount" and not owner_h.gliding:
-		_render_mount(delta, body)
-		return
-	if state == "shoulder" and owner_h and owner_h.model and heel_k > 0.0 and heel_pos != Vector3.INF:
-		_render_heel(delta, alpha, body)
+	if state == "shoulder" and owner_h and owner_h.model and carry_style() == "mount" and not owner_h.gliding and (cmd == "return" or not giant.is_empty()):
+		_render_mount(delta, body)       # you ride it (the Return order, or merged); carried over a glide it curls up on your back below
 		return
 	if state == "shoulder" and owner_h and owner_h.model and carry_style() != "shoulder":
 		# perched on the pack (or a mount curled up into a ball on your back while you glide)
@@ -1065,9 +1131,9 @@ func render(delta: float, alpha: float) -> void:
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
-	model.set_meta("dazed", state in ["fainted", "dazed"] or stun_t > 0.0)
-	if state in ["fainted", "dazed"]:
-		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "fainted" else 0.0, delta * 6.0)
+	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	if state in ["downed", "dazed"]:
+		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
@@ -1077,48 +1143,25 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x += delta * 14.0
 	if state in ["active", "reviving"]:
 		_render_attention(delta, body)
+	_render_demo()
+	Capture.dissolve(self)
+	KinDowned.scoop_pose(self)
 
-## Down at its hunter's heel (or hovering at their flank, for a percher): the hop down from the
-## shoulder and back up is the blend between the two spots, with an arc.
-func _render_heel(delta: float, alpha: float, body: Node3D) -> void:
-	var o := owner_h
-	var perch := carry_style() == "perch"
-	var top: Vector3
-	var top_s: float
-	if perch:
-		var torso: Node3D = o.model.get_node("Rig/Torso")
-		top = torso.global_transform * Vector3(0, 0.92, 0.3)
-		top_s = 0.62
-	else:
-		top = (o.model.get_node("Rig/Torso/Shoulder") as Node3D).global_position
-		top_s = 0.55
-	var hp := heel_prev.lerp(heel_pos, alpha) if heel_prev != Vector3.INF else heel_pos
-	var low := hp + Vector3(0, 1.1 if perch else 0.0, 0)
-	# a little show-and-tell for the tutorial: a dash, a jump, a hop
-	if comp and comp.demo.size() > 0:
-		var dk := clampf(float(comp.demo["t"]) / 0.9, 0.0, 1.0)
-		var dd: Vector2 = comp.demo.get("dir", Vector2(0, -1))
-		match String(comp.demo["kind"]):
-			"dash":
-				var sd: Vector2 = Vector2(-dd.y, dd.x) * comp.side
-				low += Vector3(sd.x, 0, sd.y) * sin(dk * PI) * 2.2
-				if dk < 0.1 and m.fx: m.fx.dust(hp, 4)
-			"jump":
-				low += Vector3(dd.x, 0, dd.y) * sin(dk * PI) * 1.2 + Vector3(0, sin(dk * PI) * 1.8, 0)
-			"hop":
-				low += Vector3(0, absf(sin(dk * PI * 2.0)) * 0.45, 0)
-	var hk := heel_k
-	global_position = top.lerp(low, hk) + Vector3(0, sin(hk * PI) * 0.7, 0)
-	model.rotation.y = lerp_angle(o.face, heel_face, hk)
-	var evo := float(model.get_meta("evo_scale", 1.0))
-	model.scale = Vector3.ONE * lerpf(top_s * minf(evo, 1.2), 0.95 * evo, hk)
-	if heel_moving:
-		hop_ph += delta * 6.0
-	body.position.y = absf(sin(hop_ph)) * (0.12 if heel_moving else 0.0)
-	body.rotation.x = 0.0
-	body.rotation.z = lerpf(body.rotation.z, 0.0, minf(1.0, delta * 8.0))
-	body.rotation.y = 0.0
-	_render_attention(delta, body)
+## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
+func _render_demo() -> void:
+	if comp == null or comp.demo.size() == 0 or state != "active":
+		return
+	var dk := clampf(float(comp.demo["t"]) / 0.9, 0.0, 1.0)
+	var dd: Vector2 = comp.demo.get("dir", Vector2(0, -1))
+	match String(comp.demo["kind"]):
+		"dash":
+			var sd: Vector2 = Vector2(-dd.y, dd.x) * comp.side
+			global_position += Vector3(sd.x, 0, sd.y) * sin(dk * PI) * 2.2
+			if dk < 0.1 and m.fx: m.fx.dust(pos, 4)
+		"jump":
+			global_position += Vector3(dd.x, 0, dd.y) * sin(dk * PI) * 1.2 + Vector3(0, sin(dk * PI) * 1.8, 0)
+		"hop":
+			global_position += Vector3(0, absf(sin(dk * PI * 2.0)) * 0.45, 0)
 
 ## Where its head is: turned toward what it's calling out (or what you're aiming at), bouncing
 ## when it cheers, pulled back in a flinch.
@@ -1169,5 +1212,5 @@ func _render_mount(delta: float, body: Node3D) -> void:
 		ring.visible = false
 
 func _exit_tree() -> void:
-	if shell_fx and is_instance_valid(shell_fx):
-		shell_fx.queue_free()
+	if beacon and is_instance_valid(beacon):
+		beacon.queue_free()

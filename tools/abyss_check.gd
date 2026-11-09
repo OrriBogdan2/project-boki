@@ -38,6 +38,13 @@ func _edges(n: int, sheer := false) -> Array:
 			if not w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) or w.is_void(g.x, g.z): continue
 			var is_sheer := w.sheer.has(gi) or w.sheer.has(ti)
 			if is_sheer != sheer: continue
+			# (and a grabbable rim stays grabbable two tiles either way along it: a hand-made map's sheer
+			# arcs end somewhere, and a float that drifts along the face onto a sheer stretch isn't a ledge test)
+			var mixed := false
+			for s2 in [-2.0, -1.0, 1.0, 2.0]:
+				for q2 in [Vector2(g.x + d.y * s2, g.z + d.x * s2), Vector2(g.x + d.x * 0.9 + d.y * s2, g.z + d.y * 0.9 + d.x * s2)]:
+					if w.sheer.has(w.idx(int(floor(q2.x)), int(floor(q2.y)))) != sheer and not w.is_void(q2.x, q2.y): mixed = true
+			if mixed: continue
 			var open := true
 			for dd in [1.1, 1.6, 2.2, 2.8, 3.4, 4.0]:
 				for s in [-0.6, 0.0, 0.6]:
@@ -178,6 +185,31 @@ func run(main: Node) -> void:
 		h.inp["move"] = d0 if t < 0.3 else Vector2.ZERO
 		h.inp["dash"] = t < Match.DT * 1.5)
 	ok(r0["fell"] and _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]) < KILL_DEPTH + 1.0, "dashing off an edge: lost %.1fm below the lip (%.1fm below the lowest lip around) after %.2fs" % [float(e0["top"]) - float(r0["low"]), _ref(Vector3(e0["ex"], e0["top"], e0["ez"])) - float(r0["low"]), r0["t"]])
+	# walking (no dash, no jump) toward the edge takes a player over it: the edge doesn't hold you
+	var wgood := 0; var wn := 0; var bheld := 0
+	for e in edges.slice(0, 6):
+		var dw: Vector2 = e["dir"]
+		for who in ["local", "bot"]:
+			_reset(Vector3(e["ex"] - dw.x * 1.2, e["top"], e["ez"] - dw.y * 1.2), Vector3.ZERO)
+			h.grounded = true; h.last_gy = e["top"]
+			h.ctrl = who
+			var lowest: float = e["top"]; var went := false
+			for i in int(1.6 / Match.DT):
+				h.inp["move"] = dw
+				h.inp["glide"] = false
+				m.step(Match.DT)
+				lowest = minf(lowest, h.pos.y)
+				if w.is_void(h.pos.x, h.pos.z) and not h.grounded and h.pos.y < float(e["top"]) - 1.0:
+					went = true; break
+			h.inp["move"] = Vector2.ZERO
+			if who == "local":
+				wn += 1
+				if went: wgood += 1
+				else: print("ACHECK   walk-off miss at %s: lowest %.2f top %.2f at %s" % [str(e["at"]), lowest, e["top"], str(h.pos)])
+			elif not went and not w.is_void(h.pos.x, h.pos.z): bheld += 1
+	h.ctrl = "local"
+	ok(wgood == wn, "walking toward an edge goes over it and falls: %d of %d" % [wgood, wn])
+	ok(bheld == wn, "bots walking at an edge keep their edge guard: %d of %d held" % [bheld, wn])
 	# ---------------------------------------------------------------- 4. dash, glide, knockback from below
 	var ins := 0.0; var cases := 0
 	for e in edges:
@@ -311,7 +343,7 @@ func _lift_report(where: String, rows: Array) -> void:
 	ok(grows, "%s: the deeper you are, the harder it pulls you up (fastest climb rises with depth)" % where)
 	ok(float(rows[0][1]) <= 6.5, "%s: just under the lip the lift is gentle (%.1f m/s at %.0fm)" % [where, float(rows[0][1]), float(rows[0][0])])
 
-## The same at home (the farm's rims, and the Training Grounds use the same movement).
+## The same at home (the farm's rims use the same movement).
 func _home_lift(hm, e: Dictionary) -> void:
 	var dir: Vector2 = e["dir"]; var top: float = e["top"]
 	var DT := 1.0 / 60.0
@@ -398,5 +430,19 @@ func _home(main: Node) -> void:
 	ok(climbed == near_n, "home: caught the island's side from below and pulled up %d of %d" % [climbed, near_n])
 	ok(grabbed_deep == 0 and lost == n - near_n and lost_low < World.ABYSS_DEPTH + Hunter.ABYSS_EXTRA + 2.0, "home: deeper, you slide off and the wind sets you back at the same point of no return as out there: %d of %d, deepest %.1fm" % [lost, n - near_n, lost_low])
 	ok(inside < 0.05, "home: never inside or under the island (deepest %.2fm)" % inside)
+	# walking toward the farm island's edge takes you over it
+	var hw := 0
+	for e in edges.slice(0, 4):
+		var dw: Vector2 = e["dir"]
+		hm.lfl = {}; hm.climb = {}; hm.gliding = false; hm.dash_t = 0.0; hm.pvy = 0.0; hm.pvel = Vector3.ZERO
+		hm.ppos = Vector3(e["ex"] - dw.x * 1.2, 0, e["ez"] - dw.y * 1.2); hm.py = e["top"]
+		hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dw.x, 0, dw.y) * 3.0
+		for i in 120:
+			_press(dw)
+			hm._move_player(DT)
+			if hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.py < float(e["top"]) - 1.0:
+				hw += 1; break
+		_press(Vector2.ZERO)
+	ok(hw == mini(4, edges.size()), "home: walking toward the edge goes over it and falls: %d of %d" % [hw, mini(4, edges.size())])
 	_home_lift(hm, edges[0])
 	hm.queue_free()

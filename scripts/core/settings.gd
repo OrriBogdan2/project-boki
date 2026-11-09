@@ -9,17 +9,32 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 2, "shadows": true, "ui_scale": 1.0, "show_fps": false,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 3, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"shake": 1.0, "cam_lead": 1.0, "cam_style": "supervive", "cam_follow": "supervive", "dash_hold": false, "damage_numbers": true, "tips": true, "cast_on_press": true, "crouch_toggle": false, "mod_mode": false, "kin_auto": false, "kin_chatter": "normal", "bot_diff": "auto",
+	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
+	"warden_models": {},
+	# how keys behave (Controls)
+	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
+	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
+	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
+	"reticle_outline": true,
+	# camera
+	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	# sounds
+	"reset_cue": "a",
 	# accessibility
-	"reduce_flashes": false, "hud_opacity": 1.0,
+	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
-	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "rec_level": 0,
+	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0,
 }
+## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
+## the first time it's written after they went.
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
+
 ## Graphics presets (Video → Quality). High is the game's full look; Low and Medium trade detail for
 ## speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the plain
 ## settings (msaa, shadows) and these knobs, which the renderer and the world builder read through q():
@@ -48,26 +63,32 @@ func quality() -> String:
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
 
+## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
+## (show_fps was a toggle before, so a saved true is the plain rate).
+func fps_mode() -> String:
+	match int(v.get("show_fps", 0)):
+		0: return ""
+		1: return "fps"
+	return "full"
+
 ## A knob of the preset in effect (see QUALITY).
 func q(key: String):
 	return QUALITY[quality()].get(key, QUALITY["high"][key])
 
-## A first guess from the graphics adapter: software renderers get Low, integrated GPUs and browsers
-## Medium, discrete GPUs High. The first expedition's loading screen then measures real frames and
-## steps it down if they come in slow (see note_benchmark).
+## A first guess from the graphics adapter: software renderers get Low, everything else Medium (the
+## default the game is tuned to hold 60 fps at; High and Ultra are a pick in Settings > Video). The first
+## expedition's loading screen then measures real frames and steps it down if they come in slow
+## (see note_benchmark).
 func detect_quality() -> String:
 	if OS.has_feature("web"):
 		return "medium"
 	if DisplayServer.get_name() == "headless":
 		return "high"
-	match RenderingServer.get_video_adapter_type():
-		RenderingDevice.DEVICE_TYPE_DISCRETE_GPU: return "high"
-		RenderingDevice.DEVICE_TYPE_INTEGRATED_GPU, RenderingDevice.DEVICE_TYPE_VIRTUAL_GPU: return "medium"
-		RenderingDevice.DEVICE_TYPE_CPU: return "low"
+	if RenderingServer.get_video_adapter_type() == RenderingDevice.DEVICE_TYPE_CPU:
+		return "low"
 	var nm := RenderingServer.get_video_adapter_name().to_lower()
 	if nm.contains("llvmpipe") or nm.contains("swiftshader") or nm.contains("software"): return "low"
-	if nm.contains("intel") or nm.contains("integrated") or nm.contains("vega") and nm.contains("graphics"): return "medium"
-	return "high"
+	return "medium"
 
 ## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
 ## from the skyship). Too slow for 60 fps steps the preset down once and remembers it.
@@ -90,12 +111,19 @@ const KEYS_V := 3
 ## Rebindable actions, in the order the controls list shows them.
 const ACTIONS := [
 	["up", "Move up"], ["down", "Move down"], ["left", "Move left"], ["right", "Move right"],
-	["fire", "Weapon attack"], ["secondary", "Archetype ability (right click)"], ["dash", "Archetype dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
-	["gear1", "Glove active"], ["signature", "Archetype utility (E)"], ["kin_ability", "Boki ability (hops out, casts, hops back)"], ["throw", "Send / recall Boki"], ["ultimate", "Archetype ultimate (bonded when bond is full)"], ["base", "Base to a teammate (squads)"],
-	["interact", "Use, tame, revive, pet"], ["tonic", "Heal (tonic, or armor kit when health is full)"], ["armor_kit", "Repair armor (armor kit)"], ["scores", "Scoreboard"], ["emote", "Emote wheel (hold, in a match)"],
+	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
+	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
+	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
+	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
+	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
+	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
+	["emote", "Emote wheel (hold, in a match)"],
+	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["rotate", "Turn a piece (build mode)"],
+	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 ]
 
@@ -116,26 +144,44 @@ func _ready() -> void:
 	else:
 		# older saves kept a few settings inside the save file
 		var old: Dictionary = Save.d.get("settings", {})
-		for pair in [["volume", "master"], ["music", "music"], ["shake", "shake"], ["cam_lead", "cam_lead"]]:
+		for pair in [["volume", "master"], ["music", "music"], ["cam_lead", "cam_lead"]]:
 			if old.has(pair[0]): v[pair[1]] = float(old[pair[0]])
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
 		v["cam_follow"] = "supervive"     # the new Supervive-style cursor lean becomes everyone's default once
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}          # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
+	KeyMigrate.run(v)
+	_migrate_belt_keys()
 	if int(v.get("video_v", 1)) < 2 or not cf.has_section_key("s", "video_v"):
 		# crisper by default: 4x MSAA on desktop (the browser build stays on 2x)
 		if int(v.get("msaa", 2)) == 2 or not cf.has_section_key("s", "msaa"): v["msaa"] = 2 if OS.has_feature("web") else 4
 		v["video_v"] = 2
+	if int(v.get("video_v", 2)) < 3:
+		# Medium became the default (item 94): an automatic pick of High or Ultra steps down once; a hand pick stays
+		if String(v.get("quality", "auto")) == "auto" and String(v.get("quality_found", "")) in ["high", "ultra"]:
+			v["quality_found"] = "medium"
+		v["video_v"] = 3
+	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--quality="):
 			v["quality"] = a.substr(10); _quality_basics = true      # tooling: try a preset without saving it
+	if REMOVED.any(func(k): return cf.has_section_key("s", k)):
+		save.call_deferred()
 	if not cf.has_section_key("s", "crouch_toggle") and OS.has_feature("web"):
 		v["crouch_toggle"] = true      # browsers close the tab on Ctrl+W, so don't make people hold Ctrl
 	get_tree().node_added.connect(_on_node_added)
 	get_tree().root.size_changed.connect(_apply_ui_scale)
+
+## The heal and armor-kit keys became belt slots 1 and 2 (ext/equal): custom bindings move across.
+func _migrate_belt_keys() -> void:
+	var ks: Dictionary = v["keys"]
+	for pair in [["tonic", "util1"], ["armor_kit", "util2"]]:
+		if ks.has(pair[0]):
+			if not ks.has(pair[1]): ks[pair[1]] = ks[pair[0]]
+			ks.erase(pair[0])
 
 ## Called by Game once the input actions exist, so saved key bindings can replace them.
 func apply_all() -> void:
@@ -182,6 +228,9 @@ func set_v(k: String, val, write := true) -> void:
 func save() -> void:
 	var cf := ConfigFile.new()
 	cf.load(PATH)          # keeps the other sections (the last save slot)
+	for k in REMOVED:
+		if cf.has_section_key("s", k):
+			cf.erase_section_key("s", k)
 	for k in v:
 		cf.set_value("s", k, v[k])
 	cf.save(PATH)
@@ -341,31 +390,98 @@ func _bind(action: String, list: Array) -> void:
 			var m := InputEventMouseButton.new(); m.button_index = int(parts[1])
 			InputMap.action_add_event(action, m)
 
-## Replaces an action's main binding with this key or mouse button.
-func rebind(action: String, ev: InputEvent) -> void:
+## The saved form of a key or mouse button ("key:69", "mouse:2"), or "" for anything else.
+func ev_code(ev: InputEvent) -> String:
+	if ev is InputEventKey: return "key:%d" % (ev as InputEventKey).physical_keycode
+	if ev is InputEventMouseButton: return "mouse:%d" % (ev as InputEventMouseButton).button_index
+	return ""
+
+## An action's two binding slots, [primary, secondary] ("" when a slot is empty).
+func slots(action: String) -> Array:
 	var list := _events_to_list(InputMap.action_get_events(action))
-	var s := ""
-	if ev is InputEventKey: s = "key:%d" % (ev as InputEventKey).physical_keycode
-	elif ev is InputEventMouseButton: s = "mouse:%d" % (ev as InputEventMouseButton).button_index
-	if s == "":
-		return
-	# keep any second binding (the arrow keys for moving), replace the first
-	if list.size() > 0: list[0] = s
-	else: list.append(s)
+	var saved: Array = v["keys"].get(action, [])
+	# (an empty primary is kept in the save as "", which InputMap can't hold)
+	if saved.size() >= 2 and String(saved[0]) == "": list.push_front("")
+	while list.size() < 2: list.append("")
+	return [String(list[0]), String(list[1])]
+
+func _set_slots(action: String, sl: Array) -> void:
+	var list: Array = [String(sl[0]), String(sl[1])]
+	if list[1] == "": list.resize(1)
+	if list.size() == 1 and list[0] == "": list = []
 	_bind(action, list)
 	var keys: Dictionary = v["keys"]
 	keys[action] = list
 	save()
 	changed.emit("keys")
 
+## Sets one binding slot of an action (0 primary, 1 secondary) to this key or mouse button.
+func rebind(action: String, ev: InputEvent, slot := 0) -> void:
+	var s := ev_code(ev)
+	if s == "":
+		return
+	var sl := slots(action)
+	sl[slot] = s
+	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_set_slots(action, sl)
+
+## Empties one binding slot.
+func clear_bind(action: String, slot: int) -> void:
+	var sl := slots(action)
+	sl[slot] = ""
+	_set_slots(action, sl)
+
+## Other rebindable actions already using this key or button: [[action, slot], ...].
+func conflicts(ev: InputEvent, except := "") -> Array:
+	var s := ev_code(ev)
+	var out: Array = []
+	if s == "":
+		return out
+	for a in ACTIONS:
+		if a[0] == except: continue
+		var sl := slots(a[0])
+		for i in 2:
+			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+	return out
+
+## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+func _shared_ok(a: String, b: String) -> bool:
+	for p in SHARED_OK:
+		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
+	return false
+
+## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
+## `action` had there.
+func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+	var mine := slots(action)
+	var theirs := slots(other)
+	theirs[other_slot] = mine[slot]
+	mine[slot] = ev_code(ev)
+	_set_slots(other, theirs)
+	_set_slots(action, mine)
+
+func code_text(s: String) -> String:
+	var parts := s.split(":")
+	if parts.size() != 2: return ""
+	if parts[0] == "key": return OS.get_keycode_string(int(parts[1]))
+	return {1: "LMB", 2: "RMB", 3: "MMB", 4: "Wheel up", 5: "Wheel down", 8: "Mouse 4", 9: "Mouse 5"}.get(int(parts[1]), "Mouse %s" % parts[1])
+
 func binding_text(action: String) -> String:
 	var names: Array = []
-	for e in InputMap.action_get_events(action):
-		if e is InputEventKey:
-			names.append(OS.get_keycode_string((e as InputEventKey).physical_keycode))
-		elif e is InputEventMouseButton:
-			names.append({1: "LMB", 2: "RMB", 3: "MMB", 4: "Wheel up", 5: "Wheel down", 8: "Mouse 4", 9: "Mouse 5"}.get((e as InputEventMouseButton).button_index, "Mouse %d" % (e as InputEventMouseButton).button_index))
+	for c in slots(action):
+		if c != "": names.append(code_text(c))
 	return " / ".join(names) if names.size() > 0 else "unbound"
+
+## Both bindings, short ("R / X"), where a prompt has room for them.
+func key_caps(action: String) -> String:
+	var out: Array = []
+	for c in slots(action):
+		if c == "": continue
+		var t := code_text(c)
+		t = {"Mouse 4": "M4", "Mouse 5": "M5"}.get(t, t)
+		out.append(t.to_upper() if c.begins_with("key:") else t)
+	return " / ".join(out) if out.size() > 0 else "?"
 
 ## The first binding of an action, short, for HUD key caps ("E", "LMB").
 func key_cap(action: String) -> String:

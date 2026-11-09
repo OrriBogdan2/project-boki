@@ -227,6 +227,8 @@ static func slot_cost() -> int:
 static func expand() -> String:
 	var c := slot_cost()
 	if c < 0: return "The Incubator has all its cradles"
+	var locked := FarmUnlocks.cradle_lock(slots() + 1)
+	if locked != "": return locked
 	if int(Save.d["gems"]) < c and not Game.modding(): return "Not enough gems (%d)" % c
 	if not Game.modding(): Save.d["gems"] = int(Save.d["gems"]) - c
 	_inc()["slots"] = slots() + 1

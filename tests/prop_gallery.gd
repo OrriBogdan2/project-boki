@@ -36,7 +36,7 @@ func _ready() -> void:
 		cam_at = Vector3(0, 17.0, 27.0)
 	else:
 		var rng := RandomNumberGenerator.new(); rng.seed = 3
-		items = [Models.chest(0), Models.chest(1), Models.chest(2), Models.breakable("crate"), Models.breakable("barrel"), Models.breakable("pot"), Models.deathbox(Color("6ad8ff"))]
+		items = [Models.chest(), Models.chest(), Models.chest(), Models.breakable("crate"), Models.breakable("barrel"), Models.breakable("pot"), Models.deathbox(Color("6ad8ff"))]
 		if Flora.v2():
 			items.append(PropSculpt.camp(rng))
 		if not "--prop-close" in args:
@@ -67,7 +67,7 @@ func _ready() -> void:
 func _legend(args: PackedStringArray) -> void:
 	var rng := RandomNumberGenerator.new(); rng.seed = 7
 	var rows := [
-		["LOOT", [Models.chest(0), Models.chest(1), Models.chest(2), Models.weapon_drop("rifle", 3), Models.gear_drop(Color("ffd36a"), 2), Models.deathbox(Color("6ad8ff"))], 2.3],
+		["LOOT", [Models.chest(), Models.chest(), Models.chest(), Models.weapon_drop("rifle", 3), Models.gear_drop(Color("ffd36a"), 2), Models.deathbox(Color("6ad8ff"))], 2.3],
 		["BREAKABLES", [Models.breakable("crate"), Models.breakable("pot"), Models.breakable("barrel"), Models.breakable("crate"), Models.breakable("pot")], 2.0],
 		["INTERACTABLES", [Models.shrine(), ExitModels.hatch(), ExitModels.uplink(), ExitModels.rift_key(), BossModels.rare_egg(Color("ff8ac8")), Models.revive_beacon()], 3.6],
 		["DECOR", [Models.rock(rng, 0.9), PropSculpt.camp(rng), Models.rock(rng, 0.6), Models.nest()], 2.6],

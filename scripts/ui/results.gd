@@ -3,7 +3,6 @@ extends Control
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	theme = UI.theme()
 
 func show_result(r: Dictionary) -> void:
 	Sfx.play_music("title")
@@ -52,6 +51,7 @@ func show_result(r: Dictionary) -> void:
 	kr.add_child(UI.tag("Extracted" if won else "Didn't make it", UI.TEAL if won else Color("ff9a8a")))
 	kr.add_child(UI.label(kick, UI.T_CAPS, UI.FAINT, UI.caps))
 	head.add_child(kr)
+	head.add_child(UI.label(HeroTitle.label(String(Save.d.get("name", "Hunter")), Arch.of_save()), UI.T_BODY, UI.MUTED))
 	head.add_child(UI.title("You made it out" if won else _lost_title(r.get("why", "")), 46, UI.INK))
 	var how_line := String({"skiff": "Flew out on the skiff from %s. ", "hatch": "Slipped out through a rift hatch. ", "uplink": "Rode the lift out of %s. "}.get(String(r.get("how", "")), ""))
 	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
@@ -77,6 +77,7 @@ func show_result(r: Dictionary) -> void:
 		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
 		small.add_child(one)
 	v.add_child(small)
+	v.add_child(ClassCard.results_strip(s))
 	if won:
 		var chips: Array = []
 		if int(s["gems"]) > 0:
@@ -118,8 +119,11 @@ func show_result(r: Dictionary) -> void:
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
 		for i in haul.size():
 			var it: Dictionary = haul[i]
-			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + ("  (sold)" if it.get("sold", false) else ""), Loot.el_col(it), 0.9 + i * 0.1))
+			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + _fate_note(it), Loot.col_of(it), 0.9 + i * 0.1))
 		v.add_child(hf)
+		if int(s.get("salvage_gems", 0)) > 0:
+			v.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
+					UI.GOLD))
 		if int(s.get("arm_sold", 0)) > 0:
 			v.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
 	var lost_it: Array = s.get("lost_items", [])
@@ -143,13 +147,20 @@ func show_result(r: Dictionary) -> void:
 			match String(ln["fate"]):
 				"squad": txt = "%s was carried home by your squadmate %s." % [kk["name"], ln["holder"]]; col = UI.GOOD
 				"home": txt = "%s found its own way home. It trusts you that much." % kk["name"]; col = UI.GOOD
-				"rival": txt = "%s was taken home by %s. Make them an offer at the Ransom House, or find them out there and take it back." % [kk["name"], ln["holder"]]
-				_: txt = "Nobody came for %s. It's waiting at the Ransom House on your farm." % kk["name"]; col = Color("ffd58a")
+				"rival": txt = "%s was taken home by %s. Make them an offer at the Black Market, or find them out there and take it back." % [kk["name"], ln["holder"]]
+				_: txt = "Nobody came for %s. It's waiting at the Black Market on your farm." % kk["name"]; col = Color("ffd58a")
 			var l := UI.label(txt, 15, col); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			lv.add_child(l)
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
+	for line in s.get("market_news", []):
+		v.add_child(_note(String(line), UI.GOLD))
+	if not (s.get("exchange_fills", []) as Array).is_empty():
+		v.add_child(_note("%d of your Exchange offers filled while you were out." % (s["exchange_fills"] as Array).size(), UI.GOLD))
+	for fe in s.get("floor", []):
+		if String(fe.get("kind", "")) == "stray":
+			v.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
 	if s.get("kin_stranded", false):
 		v.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
 	if int(s.get("vault_gems", 0)) > 0:
@@ -296,7 +307,7 @@ func _stage(r: Dictionary, s: Dictionary) -> void:
 	w3.add_child(isl)
 	var tr := Models.tree(rng, Color("5a9a4f"), "round"); tr.position = Vector3(-1.4, 0, -1.2); w3.add_child(tr)
 	var rk := Models.rock(rng, 0.7); rk.position = Vector3(1.5, 0, -0.9); w3.add_child(rk)
-	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Data.weapon_for(Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Save.d.get("look", {}), Arch.of_save())
+	hunter_node = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], Arch.weapon_for(Arch.of_save(), Data.class_of_save(), String(Save.d.get("weapon", ""))), "", Unmasked.mask_look(), Arch.of_save())
 	hunter_node.position = Vector3(-0.3, 0, 0.3); hunter_node.rotation.y = PI + 0.5
 	var ring := hunter_node.get_node_or_null("TeamRing") as Node3D
 	if ring: ring.visible = false
@@ -332,3 +343,11 @@ func _lost_title(why: String) -> String:
 		"train": return "Hit by the Sky Train"
 		"left": return "You left the match"
 	return "Knocked out"
+
+## What happened to a hauled piece on arrival: sold (the armory was full), salvaged (armor), or kept.
+func _fate_note(it: Dictionary) -> String:
+	if it.get("sold", false):
+		return "  (sold)"
+	if it.get("salvaged", false):
+		return "  (salvaged)"
+	return ""

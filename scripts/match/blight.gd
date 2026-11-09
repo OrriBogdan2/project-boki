@@ -194,7 +194,7 @@ func sim(dt: float) -> void:
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
-		m.on_wall_slam(self, 1.0)
+		m.on_wall_slam(self)
 		hurt(8.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
@@ -372,7 +372,6 @@ func shriek_fx() -> void:
 	m.fx.ring(pos, 6.0, Color("ff5a2a"), 0.6)
 	m.fx.ring(pos, 10.0, Color("ff8a4a"), 0.9)
 	m.fx.burst(pos + Vector3(0, 2.0, 0), BlightModels.EMBER, 26, 5.0, 0.7, -2.0)
-	m.shake(0.25, pos)
 	m.on_blight_shriek(self)
 
 func _begin_attack() -> void:

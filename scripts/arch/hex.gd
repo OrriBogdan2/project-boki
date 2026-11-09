@@ -27,7 +27,6 @@ static func apply(h: Hunter, dur: float, send := true) -> void:
 		m.fx.word(h.pos + Vector3(0, 2.2, 0), "HEXED", Color("e2b8ff"), true)
 		m.sfx("portal", h.pos, -2.0, 1.6)
 		m.sfx("kin_unsure", h.pos, -4.0, 1.6)
-		if h == m.get("player") and m.hud: m.hud.toast_small("HEXED  ·  you can't fight for a moment", Color("e2b8ff"))
 	if send and m.get("net_on") and not h.dead:
 		m.net_event(["hex", h.nid, snappedf(dur, 0.01)])
 
@@ -45,7 +44,7 @@ static func tick(h: Hunter, _dt: float) -> void:
 		return
 	if not h.remote:
 		h.gliding = false
-		for k in ["fire", "sec", "sig", "ult", "dash", "gear1", "gear2", "kin_ab", "tonic", "kit", "throw"]:
+		for k in ["fire", "sec", "sig", "ult", "dash", "gear1", "gear2", "kin_ab", "throw"] + UtilityBelt.KEYS:
 			if h.inp.has(k): h.inp[k] = false
 		h.inp["sec_hold"] = false
 	var c: Node3D = h.get_node_or_null("HexCritter")

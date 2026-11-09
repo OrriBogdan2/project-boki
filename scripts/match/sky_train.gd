@@ -401,13 +401,12 @@ func _build_cars() -> void:
 ## One crate per flat car: early-game loot, the last car's a little better.
 func _attach_crates() -> void:
 	for k in range(1, cars_n):
-		var tier := 1 if k == cars_n - 1 else 0
-		var n := Models.chest(tier)
+		var n := Models.chest()
 		m.add_child(n)
 		var off := Vector3(0, 0, CAR_LEN * 0.18 * (1.0 if k % 2 == 0 else -1.0))
 		var at: Vector3 = (cur[k] as Transform3D) * off
 		n.position = at
-		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "tier": tier, "ride": k, "off": off})
+		m.chests.append({"pos": at, "open": false, "prog": 0.0, "node": n, "free": true, "ride": k, "off": off})
 
 func _visuals(dt: float, moving: bool) -> void:
 	for k in cars_n:

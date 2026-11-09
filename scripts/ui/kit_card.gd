@@ -1,32 +1,57 @@
 class_name KitCard
 extends PanelContainer
-## One archetype's whole kit on one page (docs/ARCHETYPES.md): dash, passive and its resource, LMB,
-## RMB (with its variants), E and R, each with an icon, its key, a one-line description and a tiny
-## looping preview; a one-line "how the kit fits together"; and the Boki's own C ability and what its
-## type does to the kit (infusion). Clicking a tile opens that ability's detail page in the same
-## frame (no pagination, no resizing: the card is always SIZE). Used in the Arena / training (K) and
-## on the expedition loadout (KitCard.strip, a compact row that opens the full card).
+## One archetype's whole kit on one page (docs/ARCHETYPES.md), simple and visual: a header (portrait,
+## name, weight), then one row per ability (Passive, LMB, RMB, E, Dash, the hunter's ultimate, the Boki
+## Fusion), each with its key cap, a big icon, its name and one short line. A row's "Details" opens that
+## ability's page (preview, every rule) in the same frame (no scroll, no resizing: the card is always
+## SIZE). Used in the Arena / training (K) and on the expedition loadout (KitCard.strip, a compact row
+## that opens the full card).
 
-const SIZE := Vector2(890, 600)
-const BODY_H := 372.0
-const TILE := Vector2(431, 116)
-const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r"]
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "R"}
-const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate"}
+const SIZE := Vector2(800, 620)
+const BODY_H := 468.0
+const ROW_H := 54.0
+const MAX_LINE := 74    # chars: a row's one line
+const PORTRAIT := Vector2(76, 76)    # px: the Hunter's portrait in the header
+const SLOTS := ["dash", "passive", "lmb", "rmb", "e", "r", "x"]
+## The order the card lists them in: the kit as it is played, then the ultimate and the Fusion.
+const ROWS := ["passive", "lmb", "rmb", "e", "dash", "x", "r"]
+## Icons the kits name that the icon set draws under another id (weapons and four stray names).
+const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow": "sniper", "flamethrower": "fireball",
+	"tower_shield": "bulwark", "rubble_fists": "haymaker", "tether_lantern": "tether", "hoar_fan": "wave",
+	"lantern_crook": "mend", "earthshatter": "quake", "bolt": "fireball", "shield": "bulwark", "dash2": "dash"}
+## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
+const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
+## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
+## ultimate on its "x" tile.
+static func _cap(slot: String) -> String:
+	if slot == "x":
+		return Settings.key_cap("hunter_ult")
+	if slot == "r":
+		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
+	return String(KEYS[slot])
+
+const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
+	"x": "Ultimate"}
 ## Which looping preview each archetype's abilities get (KitPreview kinds).
 const PREVIEW := {
-	"thief": {"dash": "dash2", "passive": "marks", "rmb": "knife", "e": "zone", "r": "lines"},
-	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "r": "arrows3"},
-	"mage": {"dash": "blink", "passive": "marks", "rmb": "steer", "e": "hex", "r": "mirror"},
-	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "buff", "r": "lines"},
-	"juggernaut": {"dash": "charge", "passive": "meter", "rmb": "leap", "e": "buff", "r": "burst"},
-	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "r": "fissure"},
+	"thief": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "knife", "x": "lines"},
+	"archer": {"dash": "grapple", "passive": "meter", "rmb": "heavy", "e": "rainwall", "x": "arrows3"},
+	"mage": {"dash": "dash2", "passive": "marks", "rmb": "heavy", "e": "zone", "x": "leap"},
+	"gunslinger": {"dash": "dash", "passive": "pips", "rmb": "projectile", "e": "lines", "x": "zone"},
+	"juggernaut": {"dash": "dash2", "passive": "meter", "rmb": "charge", "e": "grapple", "x": "leap"},
+	"bulwark": {"dash": "charge", "passive": "meter", "rmb": "shield", "e": "zone", "x": "fissure"},
+	"dredge": {"dash": "dash2", "passive": "meter", "rmb": "grapple", "e": "charge", "x": "shots"},
+	"ashwick": {"dash": "dash", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "steer"},
+	"tender": {"dash": "dash", "passive": "marks", "rmb": "projectile", "e": "zone"},
+	"rimewright": {"dash": "charge", "passive": "marks", "rmb": "projectile", "e": "shield"},
+	"dolm": {"dash": "dash2", "passive": "meter", "rmb": "heavy", "e": "zone", "x": "fissure"},
+	"ostra": {"dash": "blink", "passive": "meter", "rmb": "projectile", "e": "zone", "x": "zone"},
 }
 
 var arch := ""
 var kin_sp := ""
 var body: Control = null
-var grid: GridContainer = null
+var grid: VBoxContainer = null
 var page := ""                 # "" = the grid, or the slot whose detail page is open
 var on_close: Callable
 
@@ -40,117 +65,93 @@ static func make(arch_id: String, kin_species := "", close_cb := Callable()) -> 
 	return c
 
 func _build() -> void:
-	theme = UI.theme()
 	custom_minimum_size = SIZE
 	size = SIZE
-	add_theme_stylebox_override("panel", _box(Color(0.055, 0.06, 0.09, 0.96), 16, Color(Arch.color(arch), 0.55), 2))
-	var d := Arch.def(arch)
-	var cd: Dictionary = d.get("card", {})
+	var frame := UiFrame.raised(UI.SURFACE, UI.R_PANEL, 30, UI.RIM)
+	frame.edge = Color(Arch.color(arch), 0.55)
+	frame.edge_w = 2
+	add_theme_stylebox_override("panel", frame.padded(16, 14))
 	var col := Arch.color(arch)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	add_child(v)
-	# header: name, weight, weapons; the close button
+	# header: portrait, name, weight and weapons; the close button
 	var hd := HBoxContainer.new()
-	hd.add_theme_constant_override("separation", 12)
+	hd.add_theme_constant_override("separation", 14)
 	v.add_child(hd)
-	var nm := UI.label(Arch.name_of(arch).to_upper(), 30, col, UI.big)
-	hd.add_child(nm)
+	hd.add_child(Portraits.Pic.new(arch, PORTRAIT, col))
+	var tv := VBoxContainer.new()
+	tv.add_theme_constant_override("separation", 2)
+	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	tv.add_child(UI.label(Arch.name_of(arch), 34, col, UI.big))
 	var wn: Array = Arch.weapons(arch).map(func(w): return String(Data.weapon_stats(w).get("name", w)))
-	var sub := UI.label("%s  ·  %s" % [String(d.get("weight", "")).to_upper(), "  /  ".join(wn)], 14, UI.MUTED, UI.big)
-	sub.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hd.add_child(sub)
+	var wt := Arch.weight(arch).capitalize() if Arch.weight(arch) != "" else "Support"
+	tv.add_child(UI.label("  ·  ".join([wt] + wn), 16, UI.MUTED, UI.big))
+	hd.add_child(tv)
 	hd.add_child(UI.fill())
 	if on_close.is_valid():
-		hd.add_child(UI.ghost("Close  (K)", on_close, 120))
-	# how the kit fits together: one line
-	var lp := PanelContainer.new()
-	lp.add_theme_stylebox_override("panel", _box(Color(col, 0.14), 10, Color(0, 0, 0, 0), 0, 12, 8))
-	var ll := UI.label(String(cd.get("loop", d.get("fantasy", ""))), 17, UI.INK, UI.big)
-	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lp.add_child(ll)
-	v.add_child(lp)
-	# the body: six tiles, or one tile's detail page
+		var cb := UI.ghost("Close  (K)", on_close, 120)
+		cb.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		hd.add_child(cb)
+	# the body: one row per ability, or one ability's detail page
 	body = Control.new()
-	body.custom_minimum_size = Vector2(SIZE.x - 36, BODY_H)
+	body.custom_minimum_size = Vector2(SIZE.x - 32, BODY_H)
 	body.clip_contents = true
 	v.add_child(body)
 	_show_grid()
-	# the Boki
-	v.add_child(_kin_strip())
 
 func _show_grid() -> void:
 	page = ""
 	for ch in body.get_children():
 		ch.queue_free()
-	grid = GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	grid = VBoxContainer.new()
+	grid.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	grid.add_theme_constant_override("separation", 5)
 	body.add_child(grid)
-	for s in SLOTS:
-		grid.add_child(_tile(s))
+	for s in card_slots(arch):
+		grid.add_child(_row(s))
 
-## One ability: icon and key, name and a short tag, one line, a looping preview. Click: details.
-func _tile(slot: String) -> Control:
+## One ability: key cap, a big icon, its name (and how it is pressed) and one short line, then Details.
+func _row(slot: String) -> Control:
 	var info := slot_text(arch, slot)
 	var col: Color = info["col"]
-	var t := Button.new()
-	t.custom_minimum_size = TILE
-	t.focus_mode = Control.FOCUS_NONE
-	t.flat = true
-	var n := _box(Color(1, 1, 1, 0.045), 12, Color(col, 0.35), 1)
-	var hv := _box(Color(1, 1, 1, 0.085), 12, Color(col, 0.8), 2)
-	t.add_theme_stylebox_override("normal", n)
-	t.add_theme_stylebox_override("hover", hv)
-	t.add_theme_stylebox_override("pressed", hv)
-	t.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	t.pressed.connect(func(): _show_detail(slot))
-	t.set_meta("slot", slot)
+	var p := PanelContainer.new()
+	p.custom_minimum_size = Vector2(0, ROW_H)
+	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.3), 1, 12, 3))
+	p.set_meta("slot", slot)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	row.offset_left = 10; row.offset_right = -10; row.offset_top = 8; row.offset_bottom = -8
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	t.add_child(row)
-	var ic := VBoxContainer.new()
-	ic.custom_minimum_size = Vector2(54, 0)
-	ic.alignment = BoxContainer.ALIGNMENT_CENTER
-	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var dot := UI.IconDot.new(String(info["icon"]), col, 38.0)
-	dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	ic.add_child(dot)
-	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(String(KEYS[slot]), 11)
-		kc.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		kc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ic.add_child(kc)
-	row.add_child(ic)
+	row.add_theme_constant_override("separation", 12)
+	p.add_child(row)
+	var kc_box := CenterContainer.new()
+	kc_box.custom_minimum_size = Vector2(64, 0)
+	var cap := _cap(slot)
+	kc_box.add_child(UI.keycap(cap, 14) if cap != "" else UI.label("PASSIVE", 12, UI.MUTED, UI.big))
+	row.add_child(kc_box)
+	var dot := UI.IconDot.new(String(info["icon"]), col, 40.0)
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(dot)
 	var tv := VBoxContainer.new()
-	tv.add_theme_constant_override("separation", 3)
+	tv.add_theme_constant_override("separation", 0)
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var top := HBoxContainer.new()
-	top.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var nl := UI.label(String(info["name"]), 18, UI.INK, UI.big)
-	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	top.add_child(nl)
-	var tg := UI.label("  " + String(info["tag"]), 12, Color(col, 0.95), UI.big)
-	tg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	top.add_child(tg)
+	top.add_child(UI.label(String(info["name"]), 18, UI.INK, UI.big))
+	if String(info.get("how", "")) != "":
+		var hw := UI.label("   " + String(info["how"]), 13, Color(col.lightened(0.2), 0.95), UI.big)
+		hw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		top.add_child(hw)
 	tv.add_child(top)
-	var ln := UI.label(String(info["line"]), 13, UI.MUTED)
-	ln.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	ln.custom_minimum_size = Vector2(220, 0)
-	ln.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var line := String(info["line"])
+	if slot == "r" and kin_sp != "" and not KinCommand.class_ults():
+		var bn := String(Data.KIN.get(kin_sp, {}).get("name", kin_sp))
+		line = "Fuse with your %s: its colour and type change your abilities." % bn
+	var ln := UI.label(short_line(line, String(info["name"])), 13, UI.MUTED)
 	tv.add_child(ln)
 	row.add_child(tv)
-	var pv := KitPreview.new(preview_kind(arch, slot), col)
-	pv.custom_minimum_size = Vector2(104, 80)
-	pv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(pv)
-	return t
+	var db := UI.ghost("Details", func(): _show_detail(slot), 84)
+	db.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(db)
+	return p
 
 ## An ability's page: everything about it, in the same frame as the grid.
 func _show_detail(slot: String) -> void:
@@ -180,8 +181,8 @@ func _show_detail(slot: String) -> void:
 	top.add_theme_constant_override("separation", 10)
 	top.add_child(UI.IconDot.new(String(info["icon"]), col, 30.0))
 	top.add_child(UI.label(String(info["name"]), 24, UI.INK, UI.big))
-	if String(KEYS[slot]) != "":
-		var kc := UI.keycap(String(KEYS[slot]), 13)
+	if _cap(slot) != "":
+		var kc := UI.keycap(_cap(slot), 13)
 		kc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(kc)
 	v.add_child(top)
@@ -192,43 +193,16 @@ func _show_detail(slot: String) -> void:
 		p.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(p)
 
-## The Boki strip: its own C ability and how its type changes this kit.
-func _kin_strip() -> Control:
-	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", _box(Color(1, 1, 1, 0.04), 10, Color(1, 1, 1, 0.08), 1, 12, 8))
-	p.custom_minimum_size = Vector2(0, 92)
-	var ks: KinSpec = KinLib.kin(kin_sp) if kin_sp != "" else null
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 4)
-	p.add_child(v)
-	if ks == null:
-		v.add_child(UI.label("No Boki: bring one and its type infuses this kit (and gives you its own C ability).", 14, UI.MUTED))
-		return p
-	var kc: Color = Data.KIN.get(kin_sp, {}).get("color", Color.WHITE)
-	var top := HBoxContainer.new()
-	top.add_theme_constant_override("separation", 10)
-	top.add_child(UI.label(String(Data.KIN.get(kin_sp, {}).get("name", ks.display_name)).to_upper(), 16, kc, UI.big))
-	top.add_child(UI.label(String(ks.theme).capitalize(), 13, UI.MUTED, UI.big))
-	var ab := KinLib.ability(ks.active)
-	if ab:
-		var kk := UI.keycap(Settings.key_cap("kin_ability"), 11)
-		kk.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		top.add_child(kk)
-		var an := UI.label("%s:  %s" % [ab.display_name, _first(KinText.ability(ab), 78)], 14, UI.INK)
-		an.autowrap_mode = TextServer.AUTOWRAP_OFF
-		an.clip_text = true
-		an.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		top.add_child(an)
-	v.add_child(top)
-	var inf := infusion_lines(arch, ks)
-	var il := UI.label("Its type infuses your kit:  " + "   ·   ".join(inf), 13, Color(kc.lightened(0.35), 0.95))
-	il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	il.custom_minimum_size = Vector2(SIZE.x - 70, 0)
-	v.add_child(il)
-	return p
-
 # ------------------------------------------------------------------ data → text
 ## Name, icon, colour, a short tag, the one line, and the detail page's paragraphs for one slot.
+## The slots an archetype has (no R tile for the heroes whose R is the Boki Merge; an X tile for a hero ultimate).
+static func slots_of(a: String) -> Array:
+	return SLOTS.filter(func(s): return not s in ["r", "x"] or Arch.def(a).has(s))
+
+## The rows the card lists: the kit, the hunter's ultimate if it has one, and the Boki Fusion always.
+static func card_slots(a: String) -> Array:
+	return ROWS.filter(func(s): return s == "r" or s in slots_of(a))
+
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
 	var cd: Dictionary = d.get("card", {})
@@ -243,14 +217,19 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
 			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
-				"tag": "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
+				"tag": "no key · always on" if String(rd.get("kind", "")) == "none" else "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
-			out["detail"] = [["", String(d["passive"]["desc"])], ["What enemies see", "%s; full: %s." % [String(tl.get("half", "")), String(tl.get("full", ""))]]]
+			out["detail"] = [["", String(d["passive"]["desc"])]]
+			if tl.has("half"):
+				var seen := "%s; full: %s." % [String(tl["half"]), String(tl.get("full", ""))]
+				out["detail"].append(["What enemies see", seen])
+			if d.has("jackpot"):
+				out["detail"].append([String(d["jackpot"]["name"]), String(d["jackpot"]["desc"])])
 		"lmb":
 			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
 			var w0 := String(ws[0]) if not ws.is_empty() else ""
-			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "your weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
+			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "signature weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
 			var det: Array = []
 			for w in ws:
 				var st: Dictionary = Data.weapon_stats(w)
@@ -263,7 +242,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): keys.append({"tap": "tap", "hold": "hold", "air": "air", "during_e": "in E", "full": "full"}[v])
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%ss · %s" % [KinText.n(float(sd.get("cooldown", 8.0))), " / ".join(keys)], "line": String(cd.get("rmb", ""))}, true)
+				"tag": "%ss · %s" % [KinText.n(float(sd.get("cooldown", 8.0))), " / ".join(keys)], "line": String(cd.get("rmb", "")),
+				"how": _how(keys)}, true)
 			var det: Array = []
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): det.append([{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During E", "full": "Resource full"}[v], String(vs[v])])
@@ -274,13 +254,31 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
 				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+		"x":
+			var xd: Dictionary = d["x"]
+			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
+			var xcol := Color(String(xd.get("col", "#ffffff")))
+			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
+				"tag": tag, "line": String(cd.get("x", ""))}, true)
+			out["detail"] = [["", String(xd.get("desc", ""))],
+				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Fusion on %s."
+					% Settings.key_cap("ultimate")]]
+		"r" when not d.has("r"):
+			# no hero ultimate: the Merge key is the Boki's Merge
+			out.merge({"name": "Boki Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
+			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
-			var sd: Dictionary = d["r"]
-			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))], "line": String(cd.get("r", ""))}, true)
-			var g := "you're unstoppable while it winds up" if String(sd.get("fuse_guard", "none")) == "unstoppable" else "a stun or knock during the wind-up cancels it"
-			out["detail"] = [["", String(sd.get("desc", ""))], ["Fuse", "%ss wind-up everyone can see; %s." % [KinText.n(float(sd.get("fuse", 0.45))), g]],
-				["Bonded", "With a full bond meter your Boki merges with you as it fires."]] + _ranks(a, "ult")
+			# the Merge key is the Merge for every class; the class's own ultimate is held back behind
+			# boki_system.json class_ults until the hero-port work folds it into the kits
+			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
+			var on := KinCommand.class_ults() and not sd.is_empty()
+			out.merge({"name": String(sd["name"]) if on else "Fusion", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
+				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
+			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
+				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
+				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
+				] + ([["Held back", "%s: %s (the Hunter's own ultimate, off while the Fusion is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+	out["icon"] = ICON_FIX.get(out["icon"], out["icon"])
 	return out
 
 ## The ranks to come, in order (rank 2's concrete change first, then rank 3's special), as one row
@@ -306,6 +304,7 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 	var d := Arch.def(a)
 	for slot in ["rmb", "e", "r"]:
 		var sd: Dictionary = d.get(slot, {})
+		if sd.is_empty(): continue
 		var f := Arch.fill(sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst")))
 		var notes: Array = (f.get("notes", []) as Array).filter(func(x): return not String(x).contains("fallback")).map(func(x):
 			var s := String(x)
@@ -315,6 +314,30 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 		var txt := ", ".join(notes.slice(0, 2)) if not notes.is_empty() else "+10% power"
 		out.append("%s: %s" % [String(sd.get("name", slot)), txt])
 	return out
+
+## One short line from a card text: the first sentence, without a leading "Name: ", cut at a clause
+## so it fits a row.
+static func short_line(t: String, nm := "") -> String:
+	var s := t.strip_edges()
+	var colon := s.find(": ")
+	if nm != "" and s.begins_with(nm) and colon > 0 and colon < 46:
+		s = s.substr(colon + 2).strip_edges()
+	for sep in [". ", "; "]:
+		var i := s.find(sep)
+		if i >= 24:
+			s = s.substr(0, i)
+	s = s.trim_suffix(".")
+	if s.length() > MAX_LINE:
+		var cut := s.rfind(", ", MAX_LINE)
+		if cut < 28:
+			cut = s.rfind(" ", MAX_LINE)
+		s = s.substr(0, cut)
+	return s.substr(0, 1).to_upper() + s.substr(1) + "."
+
+## How a right click is pressed, from its variants: "Tap only", "Hold only", "Tap / Hold / Air".
+static func _how(variants: Array) -> String:
+	var ways := variants.filter(func(k): return k in ["tap", "hold", "air"]).map(func(k): return String(k).capitalize())
+	return " / ".join(ways) + (" only" if ways.size() == 1 else "")
 
 static func _charges(a: String) -> String:
 	return str(int(Data.CLASSES.get(Arch.weight(a), {}).get("dashes", 1)))
@@ -329,16 +352,6 @@ static func _first(t: String, n: int) -> String:
 	var s := t.split(". ")[0]
 	return s if s.length() <= n else s.substr(0, n - 1) + "…"
 
-static func _box(bg: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0, ph := 14, pv := 12) -> StyleBoxFlat:
-	var b := StyleBoxFlat.new()
-	b.bg_color = bg
-	b.set_corner_radius_all(rad)
-	b.border_color = border
-	b.set_border_width_all(bw)
-	b.content_margin_left = ph; b.content_margin_right = ph
-	b.content_margin_top = pv; b.content_margin_bottom = pv
-	return b
-
 # ------------------------------------------------------------------ the compact row (loadout)
 ## A one-row summary for the expedition loadout: six small tiles (icon, key, name) and the kit's
 ## one-line loop; clicking anywhere calls open_cb (which shows the full card).
@@ -348,15 +361,17 @@ static func strip(a: String, open_cb: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	v.add_child(row)
-	for s in SLOTS:
+	for s in slots_of(a):
 		var info := slot_text(a, s)
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
-		b.add_theme_stylebox_override("normal", _box(Color(1, 1, 1, 0.05), 10, Color(info["col"], 0.35), 1, 4, 4))
-		b.add_theme_stylebox_override("hover", _box(Color(1, 1, 1, 0.1), 10, Color(info["col"], 0.85), 2, 4, 4))
-		b.add_theme_stylebox_override("pressed", _box(Color(1, 1, 1, 0.1), 10, Color(info["col"], 0.85), 2, 4, 4))
+		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
+		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
+		b.add_theme_stylebox_override("normal", rest_box)
+		b.add_theme_stylebox_override("hover", lit_box)
+		b.add_theme_stylebox_override("pressed", lit_box)
 		b.pressed.connect(open_cb)
 		b.set_meta("slot", s)
 		var bv := VBoxContainer.new()
@@ -367,7 +382,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var dot := UI.IconDot.new(String(info["icon"]), info["col"], 26.0)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		bv.add_child(dot)
-		var k := String(KEYS[s]) if String(KEYS[s]) != "" else "passive"
+		var k := _cap(s) if _cap(s) != "" else "passive"
 		var kl := UI.label(k, 10, UI.MUTED, UI.big)
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE

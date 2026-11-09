@@ -1,10 +1,13 @@
 class_name Gliders
 ## Glider skins: a canopy shape and colours, a trail, and its own sounds when it opens and closes.
-## Bought with gems at the glider rack by the portal, or earned. Purely cosmetic.
+## Bought with gems at the glider rack by the portal, or earned. Purely cosmetic: a skin never changes
+## how a glider handles (the glide numbers are the movement rules'); --hunter-unlock-check holds every
+## entry to the keys below.
 ##   cloth / stripe / edge: colours ("team" and "hero" mean the hunter's own colours)
-##   shape: wing | leaf | bat | kite | moth      trail: "" | leaves | embers | sparkle | dust | sparks
-##   sound: cloth | rustle | leather | chime | flame | flutter | zap  (gentle whooshes, see Synth.glider)
-##   cost: gems; unlock: "stat:n" earned instead (Progress.stat), e.g. "extracts:10"
+##   shape: wing | leaf | bat | kite | moth | crane | boki      trail: "" | leaves | embers | sparkle | dust | sparks
+##   sound: cloth | rustle | leather | chime | flame | flutter | zap | paper | coo  (see Synth.glider)
+##   cost: gems; unlock: "stat:n" earned instead (Progress.stat, `how` says it), e.g. "extracts:10",
+##   or "mastery": a Hunter's mastery goal gives it (content/rules/class_unlock.json)
 
 const LIST := [
 	{"id": "classic", "name": "Field Wing", "desc": "The standard-issue striped wing every hunter starts with.",
@@ -22,8 +25,41 @@ const LIST := [
 	{"id": "ember", "name": "Ember Wing", "desc": "Smoulders the whole way down. Opens with a whump of flame.",
 		"cloth": "ff8a3a", "stripe": "ffd23f", "edge": "8a2a1a", "shape": "wing", "trail": "embers", "sound": "flame", "cost": 450},
 	{"id": "storm", "name": "Stormcatcher", "desc": "Crackles with static every time it catches the wind. Earned: extract 10 times.",
-		"cloth": "2f3c78", "stripe": "9af0ff", "edge": "ffe85a", "shape": "kite", "trail": "sparks", "sound": "zap", "unlock": "extracts:10"},
+		"cloth": "2f3c78", "stripe": "9af0ff", "edge": "ffe85a", "shape": "kite", "trail": "sparks", "sound": "zap",
+		"unlock": "extracts:10", "how": "Make it out of 10 expeditions"},
+	{"id": "boki_wings", "name": "Boki Wings", "desc": "Soft feathered wings with a Boki's round tips. They coo as they open.",
+		"cloth": "fff3c4", "stripe": "7ad0a8", "edge": "3f7a5f", "shape": "boki", "trail": "leaves", "sound": "coo",
+		"unlock": "caught:5", "how": "Bring 5 wild Boki home"},
+	{"id": "swift_crane", "name": "Swift Crane", "desc": "A sky-blue paper crane, folded sharp for speed.",
+		"cloth": "e6f4ff", "stripe": "4aa8ff", "edge": "1d3f6b", "shape": "crane", "trail": "sparkle", "sound": "paper",
+		"unlock": "rings:25", "how": "Fly through 25 air rings"},
+	{"id": "paper_crane", "name": "Paper Crane", "desc": "Folded from one great sheet, a red stamp on each wing.",
+		"cloth": "f6f1e6", "stripe": "d94f4f", "edge": "c9bfae", "shape": "crane", "trail": "dust", "sound": "paper",
+		"unlock": "mastery"},
+	{"id": "patchwork", "name": "Patchwork Wing", "desc": "A cloth wing stitched from salvaged sailcloth.",
+		"cloth": "c99a6b", "stripe": "5a7d9a", "edge": "6b4a2f", "shape": "wing", "trail": "", "sound": "cloth",
+		"unlock": "mastery"},
+	{"id": "ember_leaf", "name": "Ember Leaf", "desc": "An autumn leaf still glowing at the edges.",
+		"cloth": "e0662e", "stripe": "ffc04a", "edge": "7a2410", "shape": "leaf", "trail": "embers", "sound": "rustle",
+		"unlock": "mastery"},
+	{"id": "dusk_moth", "name": "Dusk Moth", "desc": "Violet moth wings that shed a faint dust.",
+		"cloth": "4a3f6b", "stripe": "e8b4ff", "edge": "241b36", "shape": "moth", "trail": "dust", "sound": "flutter",
+		"unlock": "mastery"},
+	{"id": "frost_kite", "name": "Frost Kite", "desc": "Rime-white panels that glitter in the cold.",
+		"cloth": "dff4ff", "stripe": "7cc8f0", "edge": "ffffff", "shape": "kite", "trail": "sparkle", "sound": "chime",
+		"unlock": "mastery"},
+	{"id": "puff_wings", "name": "Puffball Wings", "desc": "Round, fluffy Boki wings in sunset pinks.",
+		"cloth": "ffe0ef", "stripe": "ffb3d1", "edge": "c77fa0", "shape": "boki", "trail": "dust", "sound": "coo",
+		"unlock": "mastery"},
+	{"id": "slate_kite", "name": "Slate Kite", "desc": "Stone-grey panels edged with moss.",
+		"cloth": "8a8f96", "stripe": "5f7a52", "edge": "3b3f44", "shape": "kite", "trail": "dust", "sound": "cloth",
+		"unlock": "mastery"},
+	{"id": "lantern_moth", "name": "Lantern Moth", "desc": "Night-blue wings with two warm lantern spots.",
+		"cloth": "2a2350", "stripe": "ffd27a", "edge": "120e26", "shape": "moth", "trail": "sparkle", "sound": "chime",
+		"unlock": "mastery"},
 ]
+## The keys a skin may have: what it looks and sounds like and how you get it, never how it flies.
+const SKIN_KEYS := ["id", "name", "desc", "cloth", "stripe", "edge", "shape", "trail", "sound", "cost", "unlock", "how"]
 
 static func get_skin(id: String) -> Dictionary:
 	for g in LIST:
@@ -34,11 +70,37 @@ static func owned(id: String) -> bool:
 	var g := get_skin(id)
 	if int(g.get("cost", 0)) == 0 and not g.has("unlock"):
 		return true
+	if String(g.get("unlock", "")) == "mastery":
+		return ClassUnlock.reward_earned("glider", id)
 	if g.has("unlock"):
 		var p := String(g["unlock"]).split(":")
 		if Progress.stat(p[0]) >= int(p[1]):
 			return true
 	return Save.d.get("gliders", []).has(id)
+
+## How an earned skin is earned, with its progress ("" for one you buy or already own).
+static func how(id: String) -> String:
+	var g := get_skin(id)
+	if not g.has("unlock") or owned(id):
+		return ""
+	if String(g["unlock"]) == "mastery":
+		var src := ClassUnlock.reward_source("glider", id)
+		if src.is_empty():
+			return ""
+		var gp := ClassUnlock.mastery_progress(String(src["id"]), int(src["index"]))
+		return "%s mastery: %s (%d/%d)" % [Arch.name_of(String(src["id"])), String(src["goal"]["text"]),
+				int(gp["have"]), int(gp["need"])]
+	var p := String(g["unlock"]).split(":")
+	return "%s (%d/%s)" % [String(g.get("how", "")), mini(Progress.stat(p[0]), int(p[1])), p[1]]
+
+## Glide on an owned skin from now on. Returns false for one you don't own.
+static func equip(id: String) -> bool:
+	if not owned(id):
+		return false
+	if not Save.d.has("look"):
+		Save.d["look"] = Unmasked.default_look()
+	Save.d["look"]["glider"] = id
+	return true
 
 static func equipped() -> String:
 	var id := String(Save.d.get("look", {}).get("glider", "classic"))
@@ -128,6 +190,16 @@ static func _outline_at(shape: String, span: float, x: float) -> Array:
 			var hind := 0.3 * sin(PI * clampf((u - 0.05) / 0.6, 0.0, 1.0))
 			lead = fore * 0.9 + 0.05; trail = maxf(0.1, hind) + 0.05
 			y = -0.2 * u * u
+		"crane":
+			# folded paper: straight edges meeting at a crease, wings held flat with a slight lift
+			lead = 0.38 * (1.0 - u) + 0.05
+			trail = 0.22 * (1.0 - absf(u - 0.35) / 0.65) + 0.04
+			y = -0.1 * u
+		"boki":
+			# round feathered wings: a soft leading edge and feather tips scalloping the back
+			lead = 0.3 * sqrt(maxf(0.0, 1.0 - u * u)) + 0.05
+			trail = 0.3 * (1.0 - u * 0.35) - 0.07 * absf(sin(u * PI * 4.0))
+			y = -0.24 * u * u
 	return [y, lead, trail]
 
 ## A point on the canopy: x across the span, t from the leading edge (0) to the trailing edge (1).
@@ -168,6 +240,14 @@ static func _pattern(shape: String, k: int, j: int, segs: int, um: float, cloth:
 			if j == 1 and absf(um - 0.5) < 0.12: return stripe              # an eye spot on each wing
 			if j == 1 and absf(um - 0.5) < 0.2: return stripe.lerp(cloth, 0.55)
 			return cloth.lerp(edge, 0.12 * j)
+		"crane":
+			if k == segs / 4 or k == segs - 1 - segs / 4: return edge          # the fold lines
+			if j == 1 and absf(um - 0.55) < 0.1: return stripe              # a stamp on each wing
+			return cloth.darkened(0.08 * j)                                 # each fold catches less light
+		"boki":
+			if um > 0.88: return edge
+			if j == 2 and k % 2 == 0: return stripe                         # the feather tips
+			return cloth.lerp(stripe, 0.15 * j)
 	return cloth
 
 ## A trail of particles behind the glider while it's open (or null for none).

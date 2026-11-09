@@ -11,7 +11,7 @@ func _ready() -> void:
 	w.biome = Data.TIERS[0]["biome"].duplicate()
 	w.clouds = Data.TIERS[0]["clouds"]
 	add_child(w)
-	w.generate_authored(World.load_layout("skyreach"), 7)
+	w.generate_authored(World.load_layout(_map_id()), 7)
 	w.build_meshes()
 	for lb in w.labels:
 		var l := Label3D.new()
@@ -44,3 +44,9 @@ func _ready() -> void:
 	cam.far = 400.0
 	add_child(cam)
 	cam.make_current()
+
+## --map=<id> picks the layout (default: the expedition map, World.layout_for_tier(0)).
+func _map_id() -> String:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--map="): return String(a).substr(6)
+	return World.layout_for_tier(0)

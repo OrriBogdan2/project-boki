@@ -1,0 +1,18 @@
+{
+ "id": "rift_key",
+ "name": "Rift Key",
+ "short": "Rift Key",
+ "icon": "key",
+ "col": "b98aff",
+ "use": "key",
+ "cd": 0.0,
+ "max": 1,
+ "bring": [
+  0,
+  0,
+  0
+ ],
+ "price": 0,
+ "key": true,
+ "desc": "Opens a sealed rift hatch: a quiet way out. Press its key beside a hatch to unlock it, or anywhere else to ping the nearest one on your map. Found in the match only; lost in your deathbox if you go down."
+}

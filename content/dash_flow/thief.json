@@ -1,0 +1,26 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Dancer: ThiefKit.fires_in_dash reads dash.*.lmb.mode and ThiefKit._empowers reads dash.*.lmb.variant; a move another press starts mid-cartwheel waits out the flip (ThiefKit.play). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "fire", "variant": "empowered", "source": "Data: Quickflip dashes and empowers the next Arcslinger (+214 damage); landing it resets Quickflip. Footage 0193: the Cartwheel and the empowered shot leave on the same frame, so the bolt goes mid-flip."},
+			"rmb": {"mode": "fire", "source": "Data says nothing on casting during Quickflip. Footage never shows Trickshot mid-flip; kept firing: the 0.4s lane starts mid-flip and the throw lands after it."},
+			"e": {"mode": "fire", "source": "Data: Farstep Dagger has no dash rule. Footage never shows it mid-flip. Ours: the throw goes mid-flip; the recast blink ends the cartwheel (she arrives standing)."},
+			"x": {"mode": "fire", "source": "Data: Fusillade resets Quickflip; footage (0296-0303): she walks and fires freely through it; nothing shows it locked out by a dash."},
+			"q": {"mode": "fire", "source": "Not in the data or footage (gloves are ours); fires like her other actives."}
+		},
+		"air": {
+			"lmb": {"mode": "fire", "variant": "empowered", "source": "Data: Quickflip is the same from a jump (empowers the next Arcslinger). Footage 0129-0134 air Cartwheel, then the gold empowered aim line at 0139-0142 and the big shot at 0143."},
+			"rmb": {"mode": "fire", "source": "Not shown in the data or footage; same as on the ground."},
+			"e": {"mode": "fire", "source": "Not shown in the data or footage; same as on the ground (the recast blink ends the cartwheel)."},
+			"x": {"mode": "fire", "source": "Not shown from the air; same as on the ground."},
+			"q": {"mode": "fire", "source": "Not in the source; same as her other actives."}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Footage 0187 -> 0193: the empowered hit lands and the next Cartwheel follows at once; a bolt in flight keeps going."},
+		"rmb": {"mode": "fire", "source": "Not shown in the data or footage. Ours: Shift in the Bola's 0.4s wind-up cartwheels and the Bola still goes at the end of the wind-up."},
+		"e": {"mode": "fire", "source": "Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to."},
+		"x": {"mode": "fire", "source": "Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back."},
+		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	}
+}

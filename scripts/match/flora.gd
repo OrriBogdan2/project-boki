@@ -101,10 +101,29 @@ static func material(kind: String, outline := true) -> ShaderMaterial:
 			m.set_shader_parameter("sway", 0.0); m.set_shader_parameter("wrap", 0.25)
 		_:
 			m.set_shader_parameter("sway", 0.0); m.set_shader_parameter("rim_amount", 0.32)
+	# tall props thin out when they stand between the camera and your hunter or Boki (see.gdshaderinc):
+	# the sphere each one is tested as [centre height, radius], in the mesh's own metres
+	var see: Array = SEE.get(kind, [])
+	if not see.is_empty():
+		m.set_shader_parameter("see_y", float(see[0])); m.set_shader_parameter("see_r", float(see[1]))
 	if outline:
-		m.next_pass = Assets.outline_mat()
+		m.next_pass = Assets.outline_mat() if see.is_empty() else _see_outline(see)
 	_mats[key] = m
 	return m
+
+## Tall props that thin out over your hunter: kind -> [sphere centre height, radius] (m, unscaled).
+## Trees (round, blossom and pine: 3-4.6 m, canopy ~2.5 m across) and ruin pillars (1.5-2.7 m);
+## boulders stay solid (about a metre tall, they never hide a whole hunter).
+const SEE := {"tree": [2.55, 1.6], "pine": [2.55, 1.6], "pillar": [1.3, 0.95]}
+static var _see_outlines := {}
+static func _see_outline(see: Array) -> ShaderMaterial:
+	var key := str(see)
+	if not _see_outlines.has(key):
+		var o := ShaderMaterial.new()
+		o.shader = load("res://shaders/outline_see.gdshader")
+		o.set_shader_parameter("see_y", float(see[0])); o.set_shader_parameter("see_r", float(see[1]))
+		_see_outlines[key] = o
+	return _see_outlines[key]
 
 ## A single prop as a node (for one-offs like the home island's decorations).
 static func node(kind: String, style: String, variant: int, scale := 1.0) -> Node3D:

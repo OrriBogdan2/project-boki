@@ -71,7 +71,7 @@ func ground() -> float:
 		var d: float = st.deck_y(pos)
 		if d > World.VOID + 1.0 and (g < d or g > pos.y + 0.9):
 			g = d
-	return g
+	return StoneStand.top_under(m.world.dyn_walls, pos, r, g)
 
 ## The height shots and blasts aim at to hit this body. (A hunter who has dropped below an
 ## island's lip is hit through the balloon floating at ground level above them.)
@@ -82,7 +82,10 @@ func over_void() -> bool:
 	if not m.world.is_void(pos.x, pos.z):
 		return false
 	var st = m.get("skytrain")
-	return not (st and st.deck_y(pos, 3.0) > World.VOID + 1.0)
+	if st and st.deck_y(pos, 3.0) > World.VOID + 1.0:
+		return false
+	# a standable rock under the feet is ground (Tarek's Basalt Spine over the abyss)
+	return StoneStand.top_under(m.world.dyn_walls, pos, r, World.VOID) <= World.VOID + 1.0
 
 func flat_dist(o) -> float:
 	var p: Vector3 = o.pos if o is Ent else o
@@ -102,6 +105,13 @@ func hittable() -> bool:
 func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if dead or dmg <= 0.0:
 		return 0.0
+	# the Demo match: a fresh lander who hasn't started anything takes no damage (Match.demo_shielded)
+	if m is Match:
+		var mt := m as Match
+		if by and by == mt.player and self != mt.player:
+			mt.player_engaged = true
+		if mt.demo_shielded(self):
+			return 0.0
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):

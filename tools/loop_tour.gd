@@ -149,8 +149,8 @@ func _process(_d: float) -> void:
 			get_viewport().warp_mouse(c3.unproject_position(p + Vector3(0, 0.6, 0)))
 
 func _fake_save() -> void:
-	Save.d["look"] = Models.default_look()
-	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.default_weapon(arch)
+	Save.d["look"] = Unmasked.default_look()
+	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	var rec := Save.new_kin("cindle", "Ember")
 	rec["trust"] = 55.0; rec["starter"] = true
 	Save.d["roster"] = [rec]; Save.d["active"] = rec["uid"]
@@ -174,29 +174,21 @@ func _front() -> void:
 	var pr2 := cur()
 	if pr2 and pr2.has_method("_finish"): pr2._finish()
 	await wait(3.5)
-	await shot("story")
+	await shot("card")
 	var hx := cur()
-	if hx == null or not hx.has_method("_next_story"):
+	if hx == null or not hx.has_method("_end_intro"):
 		note_bad("not on the hatch screen after the prologue"); return
-	for i in 3:
-		hx._next_story()
-		await wait(0.4)
-	await wait(1.5)
-	await shot("creator")
-	var guard := 0
-	while Arch.of_save() != arch and guard < 8:
-		hx._step_arch(1); guard += 1
-		await wait(0.3)
-	await wait(1.2)
-	await shot("creator_" + arch)
-	press("Looks good")
+	hx._end_intro()
 	await wait(2.0)
+	await shot("hunter_pick")
+	hx._take_hunter([ClassUnlock.starters()[0]])
+	await wait(1.0)
 	await shot("egg_pick")
 	hx._pick(0)
 	await wait(0.8)
 	await shot("egg_chosen")
 	press("Hatch it")
-	await wait(1.0)
+	await wait(2.5)
 	for i in 7:
 		hx._tap_egg()
 		await wait(0.35)
@@ -224,7 +216,7 @@ func _find_class(nd: Node, cname: String) -> Node:
 	return null
 
 func _wait_home() -> void:
-	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("home/home.gd") and c.get("player") != null, 120.0, "the farm")
+	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("home/home.gd") and c.get("player") != null, 600.0, "the farm")
 	await wait(3.0)
 
 # ------------------------------------------------------------------ 2. the farm
@@ -249,6 +241,7 @@ func _home() -> void:
 	await shot("farm_walk")
 	Input.action_release("right"); Input.action_release("down")
 	await wait(0.5)
+	await _farm_start(h)
 	if h.kins.is_empty():
 		note_bad("no Boki on the farm")
 	else:
@@ -281,18 +274,9 @@ func _home() -> void:
 		await shot("loadout_bottom")
 	h._close_panel()
 	await wait(0.4)
-	# the Training Grounds isle at home
-	if h.training:
-		h.ppos = HomeTraining.STILL + Vector3(1.6, 0, 0.4)
-		h.cam.snap(h.ppos)
-		await wait(1.0)
-		for i in 4:
-			h.training.cds.clear(); h.training.cast("fire")
-			await wait(0.3)
-		await shot("farm_training_grounds")
 	# the training area (a match)
 	h._start_training()
-	await _wait_match(60.0)
+	await _wait_match(600.0)
 	god = true
 	await mwait(2.0)
 	await shot("training_area")
@@ -302,6 +286,77 @@ func _home() -> void:
 	god = false
 	Game.goto("home")
 	await _wait_home()
+
+## A new farm-start island has no house, crop plots or pot until you put them down. Build mode (B):
+## take each from the Buildings tab, find a spot where its ghost tints green, place it; then plant a
+## seed in the first plot and water it. (An old-style farm already has its plots: nothing to place.)
+func _farm_start(h) -> void:
+	if not h.fs:
+		print("TOUR classic farm: %d plots already out" % h.plots.size())
+		return
+	var hb: HomeBuild = h.hb
+	if hb == null:
+		note_bad("no build mode on the farm"); return
+	print("TOUR farm start: %d plots, house placed %s, %d gems" % [h.plots.size(), h.spots.get("house", Vector3(-999, 0, 0)).x > 0.0, int(Save.d["gems"])])
+	if not hb.active: hb.toggle()
+	await wait(1.0)
+	await shot("farm_build_mode")
+	var near: Vector3 = h.ppos
+	for id in ["house", "crop_patch", "cook_pot"]:
+		if HomeLayout.max_of(id, h._d()) > 0 and HomeLayout.count_of(id, h._d()) >= HomeLayout.max_of(id, h._d()):
+			continue      # (already there)
+		if id == "crop_patch" and not h.plots.is_empty():
+			continue
+		hb.take(id)
+		if hb.held.is_empty():
+			note_bad("build mode wouldn't hand over the %s (%d gems)" % [id, int(Save.d["gems"])]); continue
+		var cs := _build_spot(hb, near + {"house": Vector3(0, 0, -7), "crop_patch": Vector3(6, 0, -3), "cook_pot": Vector3(-4, 0, -3)}[id])
+		if cs.is_empty():
+			note_bad("no room for the %s near %s" % [id, str(near)]); hb._drop_held(); continue
+		# point the build "mouse" at it (build mode follows the cursor every frame)
+		var sz := HomeLayout.size_of(id, int(hb.held["r"]))
+		hb.debug_m = Vector2(float(cs[0].x) + sz.x * 0.5, float(cs[0].y) + sz.y * 0.5)
+		hb.cells = cs; hb._check_cells(); hb._draw_cells()
+		await wait(0.6)
+		if id != "cook_pot": await shot("farm_place_%s" % id)
+		if not hb.place_held():
+			note_bad("the %s wouldn't go down (%s)" % [id, hb.why])
+		await wait(0.6)
+	hb.debug_m = Vector2.INF
+	if hb.active: hb.toggle()
+	await wait(0.8)
+	print("TOUR placed: %d plots, house at %s, %d gems left" % [h.plots.size(), str(h.spots.get("house")), int(Save.d["gems"])])
+	if h.plots.is_empty():
+		note_bad("still no crop plots after placing a patch"); return
+	# plant the first seed and water it, through the plot's own panel
+	var pn: Node3D = h.plots[0]
+	h.ppos = pn.position + Vector3(1.0, 0, 1.0); h.player.position = h.ppos; h.cam.snap(h.ppos)
+	await wait(0.8)
+	if not (Save.d["seeds"] as Dictionary).values().any(func(v): return int(v) > 0):
+		Save.d["seeds"]["tidebloom"] = 1      # (the tour may have spent them: give it one to show planting)
+	h._open_plot("plots", 0)
+	await wait(0.8)
+	await shot("farm_plant_panel")
+	if not press("Plant"): return
+	await wait(0.6)
+	h._open_plot("plots", 0)      # an unwatered seedling: this waters it
+	await wait(0.8)
+	var d: Dictionary = Save.d["plots"][0]
+	print("TOUR plot 0: crop=%s watered=%s" % [d["crop"], float(d.get("wt", 0.0)) > 0.0])
+	if String(d["crop"]) == "" or float(d.get("wt", 0.0)) <= 0.0: note_bad("the first plot isn't planted and watered (%s)" % str(d))
+	await shot("farm_planted")
+	if String(h.panel_open) != "": h._close_panel()
+
+## The nearest cells to p where the held building fits ([] if none).
+func _build_spot(hb: HomeBuild, p: Vector3) -> Array:
+	var sz := HomeLayout.size_of(String(hb.held["id"]), int(hb.held["r"]))
+	for rad in range(0, 24):
+		for k in 48:
+			var a := float(k) / 48.0 * TAU
+			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5)); var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
+			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
+			if hb.fits(hb.held, cs): return cs
+	return []
 
 # ------------------------------------------------------------------ 3. the expedition
 func _wait_match(cap: float) -> bool:
@@ -313,7 +368,7 @@ func _expedition() -> void:
 		Game.goto("home")
 		await _wait_home()
 		h = cur()
-	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.default_weapon(arch)
+	Save.d["arch"] = arch; Save.d["cls"] = Arch.weight(arch); Save.d["weapon"] = Arch.signature(arch)
 	h._open_expedition()
 	await wait(1.0)
 	await shot("exp_loadout")
@@ -324,18 +379,18 @@ func _expedition() -> void:
 	for i in 3:
 		await wait(1.6)
 		await shot("loading_%d" % (i + 1))
-	if not await _wait_match(120.0):
+	if not await _wait_match(600.0):
 		return
 	var m = _match()
 	god = true
 	if m.skydrop and m.skydrop.planning:
 		await shot("drop_planning")
-		await until(func(): return not m.skydrop.planning, 30.0, "planning to end")
+		await until(func(): return not m.skydrop.planning, 300.0, "planning to end")
 	await mwait(1.0)
 	await shot("skyship")
 	await mwait(3.0)
 	# jump when the ship is over land
-	await until(func(): return not m.player.riding or not m.world.is_void(m.ship_pos().x, m.ship_pos().z) and m.time > 4.0, 60.0, "the ship to cross land")
+	await until(func(): return not m.player.riding or not m.world.is_void(m.ship_pos().x, m.ship_pos().z) and m.time > 4.0, 300.0, "the ship to cross land")
 	if m.player.riding:
 		await key("jump")
 		await mwait(0.3)
@@ -346,7 +401,7 @@ func _expedition() -> void:
 	await shot("drop_high")
 	await mwait(3.0)
 	await shot("drop_mid")
-	await until(func(): return not m.player.dropping and m.player.grounded, 60.0, "landing")
+	await until(func(): return not m.player.dropping and m.player.grounded, 300.0, "landing")
 	await mwait(0.6)
 	await shot("landed")
 	# (direct awaits: resuming these through Callable.call() once crashed Godot 4.6.2 with SIGSEGV)
@@ -356,7 +411,7 @@ func _expedition() -> void:
 	if _gone(m): return
 	await _cast_round(m, "exp", true)
 	if _gone(m): return
-	await _tame(m)
+	await _scan(m)
 	if _gone(m): return
 	await _lair(m)
 	if _gone(m): return
@@ -420,11 +475,28 @@ func _level_up(m) -> void:
 	await mwait(0.8)
 	await shot("level_%d" % P.lvl)
 	# spend the points the way a player does: press a locked ability with a point to spare
-	for a in ["secondary", "signature", "dash", "kin_ability", "gear1", "ultimate"]:
+	var spot: Vector3 = P.pos
+	aim_at = spot + _safe_dir(m, P) * 4.0      # (a dash goes toward the cursor: point it at ground, and put the hunter back after each press)
+	for a in ["secondary", "signature", "dash", "gear1", "ultimate"]:
 		await key(a)
 		await mwait(0.3)
+		if is_instance_valid(m) and (P.pos - spot).length() > 0.5:
+			P.teleport(spot)
+	aim_at = null
 	print("TOUR slots after spending: %s, points left %d" % [str(P.slot_lv), P.skill_pts])
 	await shot("skills_spent")
+
+## A flat direction from the hunter that has solid ground for the next 14 m (most open one of eight).
+func _safe_dir(m, P) -> Vector3:
+	var best := Vector3(1, 0, 0); var best_n := -1
+	for i in 8:
+		var d := Vector3(cos(i * TAU / 8.0), 0, sin(i * TAU / 8.0))
+		var n := 0
+		for r in [3.0, 6.0, 9.0, 12.0, 14.0]:
+			var q: Vector3 = P.pos + d * r
+			if not m.world.is_void(q.x, q.z) and absf(m.world.ground_at(q.x, q.z) - P.pos.y) < 1.5: n += 1
+		if n > best_n: best_n = n; best = d
+	return best
 
 ## E, R, the RMB variants (tap, hold, in the air), dash, the Boki's C and G, each with a shot.
 func _cast_round(m, tag: String, wait_cd: bool) -> void:
@@ -433,14 +505,22 @@ func _cast_round(m, tag: String, wait_cd: bool) -> void:
 		P.unlock_all()
 		P.lvl = 6; P.skill_pts = 1; P.level_slot("ult")
 	var mb := _nearest_mob(m, 25.0)
-	var tgt = mb if mb else P.pos + Vector3(4, 0, 0)
+	var tgt = mb if mb else P.pos + _safe_dir(m, P) * 4.0
 	aim_at = tgt
+	var home: Vector3 = P.pos
 	var casts := [["secondary", "rmb_tap", 0.1], ["secondary", "rmb_hold", 1.2], ["signature", "e", 0.12], ["dash", "dash", 0.1],
-		["kin_ability", "boki_c", 0.12], ["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
+		["throw", "boki_g", 0.12], ["ultimate", "r", 0.12]]
 	for c in casts:
 		if wait_cd:
 			await mwait(1.5)
 		var a: String = c[0]
+		if not is_instance_valid(m) or m.over: return
+		# (a dash or the Boki's pull carries the hunter 6-10 m: start each cast from the same solid spot
+		# and, with no monster to aim at, toward ground, so one cast can't walk the tour off the island)
+		if (P.pos - home).length() > 1.0:
+			P.teleport(home)
+		if not mb:
+			aim_at = P.pos + _safe_dir(m, P) * 4.0
 		P.ult = 1.0 if a == "ultimate" else P.ult
 		Input.action_press(a)
 		await frames(2)
@@ -458,38 +538,48 @@ func _cast_round(m, tag: String, wait_cd: bool) -> void:
 	await mwait(0.2)
 	await shot("%s_rmb_air" % tag)
 	await mwait(1.0)
-	if Input.is_action_pressed("throw") == false and P.kin and String(P.kin.get("state")) != "shoulder":
+	if Input.is_action_pressed("throw") == false and P.kin and KinCommand.is_away(P, P.kin):
 		await key("throw")      # call the Boki back
 	aim_at = null
 	print("TOUR %s casts done, kstat %s" % [tag, str(m.kstat)])
 
-func _tame(m) -> void:
+func _scan(m) -> void:
 	var P: Hunter = m.player
 	var rec := Save.new_kin("puddlet", "", 77)
 	rec["level"] = 3
+	# (somewhere clear of deathboxes: a box beside you takes the F press before the Boki does)
+	for b in m.boxes:
+		if P.flat_dist(b["pos"]) < 4.0:
+			var away: Vector3 = m.world.free_spot_near(P.pos + (P.pos - b["pos"]).normalized() * 6.0, [], 0.8, 0.4, 8.0)
+			P.teleport(Vector3(away.x, m.world.ground_at(away.x, away.z), away.z)); m.cam.snap(P.pos)
+			break
 	var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(2.2, 0, 1.0), [], 0.8, 0.4, 6.0)
 	var k = m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
 	await mwait(0.8)
-	await shot("tame_dazed")
+	await shot("scan_dazed")
 	var w0 := Time.get_ticks_msec()
 	var caught := false
 	var caught0: int = P.caught.size()
-	while Time.get_ticks_msec() - w0 < 30000:
+	var t_scan: float = m.time
+	while m.time - t_scan < 40.0 and Time.get_ticks_msec() - w0 < 600000 and is_instance_valid(m) and not m.over:      # (sim seconds: a slow box renders a sim second in several real ones)
 		var near: float = P.flat_dist(k) if is_instance_valid(k) else 0.0
 		if near > 1.4:
 			var to: Vector3 = k.pos + (P.pos - k.pos).normalized() * 1.0
 			P.teleport(Vector3(to.x, m.world.ground_at(to.x, to.z), to.z))
 		Input.action_press("interact")
 		await mwait(0.6)
-		if not caught and Time.get_ticks_msec() - w0 > 600 and Time.get_ticks_msec() - w0 < 2200:
-			await shot("tame_holding")
+		# (a daze wears off: a player who sees it wake knocks it out again)
+		if is_instance_valid(k) and not k.dead and k.state != "dazed" and Capture.state(P).is_empty():
+			k.hp = 1.0; k._daze()
+		if not caught and Time.get_ticks_msec() - w0 > 600 and Time.get_ticks_msec() - w0 < 2200:   # (the scan runs on its own after 0.4s)
+			await shot("scan_holding")
 		if not is_instance_valid(k) or k.dead or P.caught.size() > caught0:
 			caught = true; break
 	Input.action_release("interact")
-	print("TOUR tame caught=%s interact='%s'" % [caught, String(m.interact.get("label", ""))])
-	if not caught: note_bad("couldn't tame the dazed Boki")
+	print("TOUR scan caught=%s interact='%s'" % [caught, String(m.interact.get("label", ""))])
+	if not caught: note_bad("couldn't scan the dazed Boki")
 	await mwait(1.0)
-	await shot("tame_done")
+	await shot("scan_done")
 
 func _lair(m) -> void:
 	var P: Hunter = m.player
@@ -502,8 +592,19 @@ func _lair(m) -> void:
 	var L: Dictionary = LS[0]
 	print("TOUR lair %s (%s)" % [L["name"], L["boss"]])
 	var dp: Vector3 = L["dial"]
-	var at: Vector3 = dp + Vector3(L["out"].x, 0, L["out"].y) * 0.9
-	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	# stand within reach of the dial (Lairs.DIAL_R): the lectern and the lair wall are solid, so a spot
+	# that lands inside one gets pushed out beyond reach (seen: 2.6 m away, the dial never started)
+	var o3 := Vector3(L["out"].x, 0, L["out"].y)
+	var s3 := Vector3(-L["out"].y, 0, L["out"].x)
+	var in_reach := false
+	for off in [o3 * 0.9, s3 * 0.9, -s3 * 0.9, -o3 * 0.9, o3 * 1.2 + s3 * 0.6, o3 * 0.6]:
+		var at: Vector3 = dp + off
+		P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+		await frames(3)
+		if P.flat_dist(dp) < Lairs.DIAL_R - 0.3 and absf(P.pos.y - dp.y) < 1.2:
+			in_reach = true; break
+	print("TOUR dial reach: %.2f m, dy %.2f, in reach %s" % [P.flat_dist(dp), P.pos.y - dp.y, in_reach])
+	if not in_reach: note_bad("no standable spot within reach of the dial (%.1f m away)" % P.flat_dist(dp))
 	m.cam.snap(P.pos)
 	for g in L["guards"]: if is_instance_valid(g): g.dead = true; g.visible = false
 	await mwait(1.0)
@@ -512,7 +613,8 @@ func _lair(m) -> void:
 	var w0 := Time.get_ticks_msec()
 	var shots_dial := 0
 	await key("interact", 0.05)
-	while L["state"] == "sealed" and Time.get_ticks_msec() - w0 < 40000:
+	var dial_t0: float = m.time
+	while L["state"] == "sealed" and m.time - dial_t0 < 40.0 and Time.get_ticks_msec() - w0 < 600000:
 		var on := false
 		if float(L["jam"]) <= 0.0 and float(L["grace"]) <= 0.0:
 			var nxt: float = float(L["needle"]) + float(L["dir"]) * float(m.lairs.speed_of(L)) * 0.05
@@ -524,7 +626,7 @@ func _lair(m) -> void:
 			if shots_dial < 2: shots_dial += 1; await shot("lair_dial_%d" % shots_dial)
 		else:
 			await get_tree().process_frame
-	print("TOUR dial: state %s lock %d fails %d" % [L["state"], int(L["lock"]), int(L["fails"])])
+	print("TOUR dial: state %s lock %d fails %d (%.1f m from the dial, user %s)" % [L["state"], int(L["lock"]), int(L["fails"]), P.flat_dist(dp), str(L["user"].pname) if L["user"] != null else "none"])
 	if L["state"] == "sealed":
 		note_bad("couldn't open the dial in 40 s (fails %d) - opening it" % int(L["fails"]))
 		m.lairs.open(L, P, "dial")
@@ -558,10 +660,12 @@ func _lair(m) -> void:
 	await shot("boss_dead")
 	await mwait(1.5)
 	await shot("boss_loot")
-	if not m.perk_offer.is_empty():
-		await key_event(KEY_1)       # take the boss's first perk
+	var orbs := PerkOrbs.list(m)
+	if not orbs.is_empty():
+		var op: Vector3 = orbs[0]["pos"]
+		P.teleport(Vector3(op.x, m.world.ground_at(op.x, op.z), op.z))       # walk into the boss's first perk orb
 		await mwait(0.6)
-		print("TOUR perk taken, offer open: %s" % (not m.perk_offer.is_empty()))
+		print("TOUR perk orbs left after taking one: %d" % PerkOrbs.list(m).size())
 	var egg: Dictionary = L.get("egg_wp", {})
 	if not egg.is_empty():
 		var ep: Vector3 = egg["pos"]
@@ -617,27 +721,32 @@ func _extract(m) -> void:
 	print("TOUR uplink state %s" % best["state"])
 	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("label", ""))])
 	var i := 0
+	var ticks := 0
 	var w0 := Time.get_ticks_msec()
 	while is_instance_valid(m) and best["state"] in ["charging", "fizzling"] and Time.get_ticks_msec() - w0 < 600000:
 		# (rivals parked in the yard contest it and it never charges: send them elsewhere)
 		for o in m.hunters:
 			if is_instance_valid(o) and o != P and not o.out and o.team != P.team and o.flat_dist(cp) < 12.0:
 				o.teleport(m.world.spawns[(m.hunters.find(o) * 3) % m.world.spawns.size()])
-		await mwait(8.0)
-		i += 1
-		if i <= 3: await shot("uplink_charging_%d" % i)
-		if P.flat_dist(cp) > 3.0:
+		# (the monster waves knock the hunter out of the 3.6 m yard, and an empty yard drains the charge: look every
+		# second and step back in, which is what a player does)
+		await mwait(1.0)
+		ticks += 1
+		if ticks % 8 == 0 and i < 3:
+			i += 1
+			await shot("uplink_charging_%d" % i)
+		if not m.exits.in_yard(best, P):
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	print("TOUR uplink now %s" % best["state"])
 	await shot("uplink_open")
 	# step into the light
-	await until(func(): return P.extracted or m.over or not is_instance_valid(m), 40.0, "extracting")
+	await mwait(1.0)
 	if is_instance_valid(m) and not P.extracted and not m.over:
 		P.teleport(Vector3(cp.x, m.world.ground_at(cp.x, cp.z), cp.z))
 		await until(func(): return not is_instance_valid(m) or P.extracted or m.over, 30.0, "extracting in the lift")
 	await wait(2.0)
 	await shot("extracted")
-	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("results.gd"), 60.0, "the results")
+	await until(func(): var c := cur(); return c != null and c.get_script() and c.get_script().resource_path.ends_with("results.gd"), 300.0, "the results")
 	god = false
 	await wait(2.0)
 	await shot("results")
@@ -651,7 +760,9 @@ func _extract(m) -> void:
 	if h and Save.d["roster"].size() > 1:
 		var nk: Dictionary = Save.d["roster"][-1]
 		var ke: Dictionary = h._kin_entry(nk)
-		if not ke.is_empty():
+		if KinBox.is_boxed(nk):
+			print("TOUR the caught Boki %s went to the Boki Burrow (the farm has that kind already)" % nk["name"])
+		elif not ke.is_empty():
 			h.ppos = ke["pos"] + Vector3(1.3, 0, 0.9); h.cam.snap(h.ppos)
 			await wait(1.5)
 			await shot("home_new_boki")

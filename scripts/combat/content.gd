@@ -37,6 +37,10 @@ static func class_dodge(cls: String) -> AbilityDef:
 static func rules(id: String) -> Dictionary:
 	return _load("rules", id)
 
+## A merge form with a kit (docs/decisions/0003): content/merge_forms/<merge id>.json, {} when that Boki has none yet.
+static func merge_form(id: String) -> Dictionary:
+	return _load("merge_forms", id)
+
 static var _combos: Array = []
 static func combos() -> Array:
 	if _combos.is_empty():

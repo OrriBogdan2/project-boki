@@ -62,11 +62,26 @@ Weapon utilities (RMB) and class dodges. (Kin abilities are the grammar's, above
 (the class `dodge` ability).
 
 
-## A new glove: `content/gloves/<id>.json`
+## A hero's signature weapon: `"signature"` in `content/archetypes/<id>.json`
 
-Gloves are found on the run (chests, vaults, bosses) and last one expedition. A glove with a `cd`
-above 0 is an **active** glove and goes in the Q slot; one with `cd` 0 is **passive** and goes in the
-other slot. Picking one up replaces the glove in its slot.
+Every hunter carries ONE weapon for the whole run: the archetype's signature. Weapons are never found,
+swapped or sold. They grow through upgrade perks (`"wup"` entries in `Data.PERKS`, see
+`scripts/match/weapon_ups.gd`). A new hero names its weapon with one key and adds the weapon file:
+
+```json
+"signature": "longbow",
+```
+
+The weapon itself lives in `content/weapons/<id>.json`. An older archetype file with a `weapons` list still
+loads (its first entry is the signature), so hero branches written before the gear model keep working.
+
+## New gear: `content/gear/<id>.json`
+
+Gear is found on the run (chests, crates, the Blight, bosses) and kept for the expedition (or brought home
+by extracting). Five slots: `glove` (active, Q), `passive` (glove), `armor`, `boots`, `kit`. Pieces
+without a `slot` key are gloves (a `cd` above 0 is the active one). Each piece has a rarity, Common to
+Legendary, that scales its `stats` (Gear.mult). Picking one up replaces the piece in its slot. What drops
+where is in `content/rules/gear.json` (tables of rolls: `gear` or `tune`, with chance, bonus, min_rar).
 
 ```json
 {
@@ -80,7 +95,7 @@ other slot. Picking one up replaces the glove in its slot.
 }
 ```
 
-- `stats`: `speed`, `glide_speed`, `heat`, `armor`, `dmg`, `cdr` (scaled up by rarity).
+- `stats`: `speed`, `glide_speed`, `heat`, `armor`, `dmg`, `cdr`, `hp`, `reload`, `tonic`, `pack`, `dodge`, `gems`, `sight` (scaled up by rarity; Gear.stat_text names them).
 - `effects`: the same building blocks abilities use (see `scripts/combat/effects.gd`). The older
   actives (jump pad, gust, platform, smoke, mending, seeker, shock) are coded in `Match.use_gear`.
 - `icon`: any id from `scripts/ui/icons.gd`.

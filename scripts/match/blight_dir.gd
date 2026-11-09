@@ -22,8 +22,8 @@ const RAMP := 420.0               # seconds (per squad) from the soft start to f
 const HEAT_SPAWN := 1.0
 const CAP_BASE := 5               # Blight alive at once (all squads), on top of the Wardens
 const CAP_MAX := 18
-const LOUD := {"shot": 15.0, "boom": 24.0, "revive": 9.0, "kin": 8.0, "chest": 13.0, "dash": 7.0, "step": 4.5, "shriek": 16.0}
-const HEAT := {"shot": 0.04, "boom": 0.15, "revive": 0.05, "kin": 0.02, "chest": 0.12, "dash": 0.03, "step": 0.0, "shriek": 0.25}
+const LOUD := {"shot": 15.0, "boom": 24.0, "revive": 9.0, "kin": 8.0, "chest": 13.0, "dash": 7.0, "step": 4.5, "shriek": 16.0, "scan": 12.0}
+const HEAT := {"shot": 0.04, "boom": 0.15, "revive": 0.05, "kin": 0.02, "chest": 0.12, "dash": 0.03, "step": 0.0, "shriek": 0.25, "scan": 0.05}
 
 var m: Match
 var rng := RandomNumberGenerator.new()
@@ -85,7 +85,7 @@ func time_k(t: float) -> float:
 
 ## The Blight's strength at a spot, against a squad.
 func level(p: Vector3, team: int) -> float:
-	var tk := time_k(squad_time(team)) if team >= 0 else time_k(m.time)
+	var tk := time_k(squad_time(team)) if team >= 0 else time_k(m.sess_time())
 	return clampf((0.1 + 0.9 * tk) * region_k(p) * raid_k, 0.0, LVL_MAX)
 
 func level_vs(b: Blight, team: int) -> float:
@@ -93,7 +93,7 @@ func level_vs(b: Blight, team: int) -> float:
 
 ## A Warden or a Skitter between squads: as strong as the match is old, where it stands.
 func level_here(p: Vector3) -> float:
-	return clampf((0.1 + 0.9 * time_k(m.time)) * region_k(p) * raid_k, 0.0, LVL_MAX)
+	return clampf((0.1 + 0.9 * time_k(m.sess_time())) * region_k(p) * raid_k, 0.0, LVL_MAX)
 
 func on_landed(h: Hunter) -> void:
 	if not land_at.has(h.team):
@@ -124,6 +124,24 @@ func setup() -> void:
 
 func _warden_spot(ii: int) -> Vector3:
 	var w := m.world
+	if w.hand:
+		# a hand-made map says where Wardens may stand (World.warden_posts): the dice only pick which
+		var posts: Array = w.warden_posts.filter(func(wp): return int(wp["island"]) == ii)
+		for k in range(posts.size() - 1, 0, -1):
+			var j := rng.randi_range(0, k)
+			var tmp = posts[k]; posts[k] = posts[j]; posts[j] = tmp
+		for wp in posts:
+			var q: Vector3 = wp["pos"]
+			if _near_any(q, wardens.map(func(b): return b.pos), 6.0):
+				continue
+			if m.lairs and not m.lairs.lair_of(q, 6.0).is_empty():
+				continue
+			if _near_any(q, w.camp_spots.map(func(c): return c["pos"]), 9.0) or _near_any(q, w.spawns, 8.0):
+				continue
+			if m.exits and _near_any(q, m.exits.list.map(func(x): return x["pos"]), 9.0):
+				continue
+			return q
+		return Vector3.INF
 	for _t in 24:
 		var p := _rand_ground(ii)
 		if p == Vector3.INF or w.is_void(p.x, p.z) or w.is_block(p.x, p.z):

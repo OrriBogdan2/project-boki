@@ -1,561 +1,826 @@
 class_name MageKit
 extends ArchKit
-## Mage (medium): a tricky, mobile spell duelist (kits4: LeBlanc-style combos, a Sinclair-style
-## steerable RMB; ideas only, our names and numbers). docs/ARCHETYPES.md "Kit loops".
+## Sparkle (archetype id "mage", light): the storm-kite runner. docs/heroes/mage.md has the per-slot
+## table, the assumptions and the research notes (briefs/hero-ref/vireo.md, owner playtest notes).
 ##
-## - RMB, Guided Bolt: fire on the press; keep holding and it bends toward your cursor (round cover
-##   onto a target); it hits harder the longer it flies (10 -> 22 over 1.6s). A hit Runes the target.
-## - Passive, Runes and Heat: a second spell on a Runed foe detonates the Rune: a Runeburst (16, root
-##   0.5, T4). Casting builds Heat; Overcharged (70+) a detonation is a Flashpoint instead (30, a burst
-##   on everyone near, root 0.8, Heat spent with no Vent, the Bolt back). At 100 you Vent.
-## - E, Hex: a dodgeable bolt that turns a hunter into a harmless critter for 1.3s (half speed, no
-##   attacks, casts, dashes or glides); on a Runed foe it detonates the Rune too.
-## - Dash, Blink: 0.12s windup, up to 5.5m (through walls); a sigil stays where you left; dash again
-##   within 3s to snap back to it.
-## - R, Encore: two mirror images at your sides recast your last spell at once, then echo every Bolt
-##   and Hex you cast for 4s (60%).
+## Loop: finger bolts (1 Static each, every 0.8s, out to full range), Storm Rod and Skycall (2) load
+## Static onto a foe; at 4 a sky bolt lands on them and they are Live. Wirerun (hold: the lane and its
+## end ring grow with the charge, you can't steer and you keep your height, any drift carries) through
+## a Live foe is a Blowout: the run hits double, Static spent, Wirerun back at once (the only reset).
+## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
+## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
-var vent := {}                 # a Vent winding up: {t}
-var lock_t := 0.0              # RMB locked after a Vent
-var blink := {}                # Blink's windup: {t, to, from, ex}
-var blink_back := {}           # the snap-back window: {t, to, k, node}
-var bolts: Array = []          # live Guided Bolts: {pos, dir, t, node, k, steer, hum, seg}
-var runes := {}                # foe id -> {e, t, node}: Runes on targets
-var orbit: Node3D = null       # the Heat tell: rune motes orbiting the Mage
-var was_over := false
-var armed_at := -9.0
-var encore := {}               # R: {t, nodes, fx}
-var last_spell := "bolt"
-var detonations := 0           # Runebursts + Flashpoints (tests)
-var flashpoints := 0
-var hexes := 0                 # Hexes that landed (tests)
+const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS), on the teal
+const COPPER := Color("e08a46")
+const VIOLET := Color("3a1c8c")
+const DEEP_GOLD := Color("e0900a")   # the aim kit whitens its accent: this lands as a rich gold
+const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal that reads on bright grass
+const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
+const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
+const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
+const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
-func over() -> bool:
-	return res >= float(res_def().get("over", 70.0))
+var sparks := {}               # foe id -> {e, n, t}
+var wire := {}                 # Wirerun held: {t, y, air, end}
+var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
+var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
+var mote_pool: Array = []      # orb nodes, reused
+var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
+var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
+var rod_full := false
+var blowouts := 0              # tests and the demo
+var reset_dash_boost := false  # a reset armed the next Wirerun: further, charged quicker
+var reset_boost_t := 0.0       # s left on it
+var slams := 0
+var orb_bursts := 0
+var lmb_n := 0                 # finger bolts fired (left, right, left...)
+var last_shot := 0
+var last_dash_kind := ""
+var last_strike := {}          # tests: the last Skycall's {at, dir}
+var last_push := 0.0           # tests: how hard the last rod knocked
+var echo_t := 0.0
+var ult: MageUlt               # Kitefall, her ultimate on X
+var sky: MageSky               # Skycall (E) and the orbs it flings
+var gum                        # the bubble she blows and pops (mage_gum.gd)
+
+func _setup() -> void:
+	ult = MageUlt.new(self)
+	sky = MageSky.new(self)
+	gum = load("res://scripts/arch/kits/mage_gum.gd").new(self)
+	# her round is fired after this kit's tick, so its stock orb would draw one frame as a white ball at
+	# her hand before _tick_lmb skins it: hide it just before that frame is drawn
+	RenderingServer.frame_pre_draw.connect(_hide_fresh_round)
+
+## Hides the stock orb of the round she just fired (the kit's jagged bolt is the round's look).
+func _hide_fresh_round() -> void:
+	if h == null or not is_instance_valid(h) or h.shot_n == last_shot:
+		return
+	var shots: Array = m.get("shots")
+	for i in range(shots.size() - 1, -1, -1):
+		if shots[i]["by"] == h and not (shots[i]["x"] as Dictionary).has("src"):
+			var orb := shots[i].get("node") as Node3D
+			if orb != null and is_instance_valid(orb):
+				orb.visible = false
+			return
+
+## A rival went down: she pops her gum at them.
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if mine:
+		gum.blow()
+
+func fx() -> VVFx:
+	return VVFx.of(m)
+
+func cast_ult() -> bool:
+	return HeroUlt.press(self, ult.cast)
+
+func has_ult() -> bool:
+	return true
+
+func ult_running() -> bool:
+	return ult.busy()
+
+func ult_recast() -> bool:
+	return ult.recast()
+
+## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
+## a jump still do).
+func busy() -> bool:
+	return super.busy() or ult.busy()
+
+func fire_ok() -> bool:
+	return not ult.busy()
 
 func full_ready() -> bool:
-	return over()
+	for k in sparks:
+		if int(sparks[k]["n"]) >= int(res_def()["max"]):
+			return true
+	return false
+
+func _best() -> int:
+	var best := 0
+	for k in sparks: best = maxi(best, int(sparks[k]["n"]))
+	return best
 
 func res_text() -> String:
-	return "%d HOT" % int(res) if over() else "%d" % int(res)
+	return "%d/%d" % [_best(), int(res_def()["max"])]
+
+func res_frac() -> float:
+	return float(_best()) / float(res_def()["max"])
 
 func ready_label() -> String:
-	var any := false
-	for key in runes:
-		if is_instance_valid(runes[key]["e"]): any = true
-	if any and over(): return "RUNED  ·  OVERCHARGED: FLASHPOINT"
-	if any: return "RUNED  ·  hit it again"
-	if over(): return "OVERCHARGED"
-	return ""
+	return "LIVE FOE: WIRERUN THROUGH" if full_ready() else ""
 
-func add_heat(v: float) -> void:
-	add_res(v)
-	touch_res(float(res_def().get("wait", 1.2)))
-	if res >= res_max() - 0.01 and vent.is_empty():
-		_start_vent()
+func live(f: Ent) -> bool:
+	var s = sparks.get(f.get_instance_id())
+	return s != null and int(s["n"]) >= int(res_def()["max"])
 
-func move_k() -> float:
-	return 1.0
+func spark_n(f: Ent) -> int:
+	var s = sparks.get(f.get_instance_id())
+	return int(s["n"]) if s != null else 0
 
-func fire_ok_rmb() -> bool:
-	return lock_t <= 0.0
+func _top(f: Ent) -> float:
+	return 2.25 * (float((f as Hunter).cdat.get("scale", 1.0)) if f is Hunter else 0.85)
 
-## The steer is a hold, not a charge (the bolt's hum is its feedback).
-func rmb_charge_full() -> float:
-	return 0.0
-
-func _tick(dt: float) -> void:
-	var rd := res_def()
-	lock_t = maxf(0.0, lock_t - dt)
-	if res_wait <= 0.0 and vent.is_empty():
-		add_res(-float(rd.get("decay", 18.0)) * dt)
-	if not vent.is_empty():
-		vent["t"] = float(vent["t"]) - dt
-		if float(vent["t"]) <= 0.0:
-			_vent()
-	if not blink.is_empty():
-		blink["t"] = float(blink["t"]) - dt
-		if float(blink["t"]) <= 0.0:
-			_do_blink()
-	if not blink_back.is_empty():
-		blink_back["t"] = float(blink_back["t"]) - dt
-		if float(blink_back["t"]) <= 0.0: _end_back()
-	_tick_bolts(dt)
-	_tick_runes_on(dt)
-	if not encore.is_empty(): _tick_encore(dt)
-	var ov := over() and vent.is_empty()
-	if ov and not was_over and m.time - armed_at > 2.0:
-		armed_at = m.time
-		armed_fx("OVERCHARGED", "")
-	was_over = ov
-	_tick_orbit()
-	net_pulse(dt, ov)
-
-# ---- the Vent: a 0.4s ring collapsing onto you (everyone sees it), then the nova ----
-func _start_vent() -> void:
-	var rd := res_def()
-	vent = {"t": float(rd.get("vent_t", 0.4))}
-	tele_circle(h.pos, float(rd.get("vent_r", 3.0)), res_col(), float(rd.get("vent_t", 0.4)))
-	m.sfx("warn", h.pos, -2.0, 1.5)
-	m.fx.burst(h.pos + Vector3(0, 1.4, 0), Color(1, 1, 1, 0.7), 16, 2.5, 0.4, -3.0)
-	net_ring(h.pos, float(rd.get("vent_r", 3.0)), res_col())
-
-func _vent() -> void:
-	var rd := res_def()
-	vent = {}
-	res = 0.0
-	lock_t = float(rd.get("lock", 1.0))
-	var stg := StageSpec.parse({"delivery": {"type": "burst", "origin": "caster", "radius": float(rd.get("vent_r", 3.0))},
-		"effects": [{"type": "damage", "amount": float(rd.get("vent_dmg", 14.0))}, {"type": "push", "strength": float(rd.get("vent_push", 9.0))}]}, "", GrammarReport.new())
-	run(stg, cx("rmb", "vent", h.pos, {"no_floor": true}))
-	m.fx.word(h.pos + Vector3(0, 2.3, 0), "VENT", res_col(), true)
-	Feel.shake(m, "t3", h, h.pos)
-
-## The Heat tell on the Mage (everyone sees it): a rune mote per 20 Heat orbiting the waist, calm
-## below 70, burning, faster and lit from 70 (Overcharged).
-func _tick_orbit() -> void:
-	if orbit == null or not is_instance_valid(orbit):
-		orbit = own_node()
-		for i in 5:
-			var d := MeshInstance3D.new()
-			d.mesh = Models.box(0.16, 0.16, 0.16)
-			d.material_override = Models.glow_mat(Color(Arch.color(id), 0.95))
-			d.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			orbit.add_child(d)
-		var lt := OmniLight3D.new()
-		lt.name = "Light"
-		lt.light_color = res_col()
-		lt.omni_range = 3.0
-		orbit.add_child(lt)
-	var n := int(ceil(res / 20.0 - 0.01))
-	orbit.visible = tells_visible() and n > 0
-	if not orbit.visible:
-		return
-	var sc := float(h.cdat.get("scale", 1.0))
-	orbit.global_position = h.position + Vector3(0, 1.05 * sc, 0)
-	var ov := over()
-	var hot := res_col().lerp(Color("ffb070"), 0.35)
-	var a: float = m.time * (5.5 if ov else 2.0)
-	for i in 5:
-		var d := orbit.get_child(i) as MeshInstance3D
-		d.visible = i < n
-		var ang := a + TAU * i / 5.0
-		var rad := (0.85 if ov else 0.7) * sc
-		d.position = Vector3(cos(ang) * rad, 0.15 * sin(m.time * 3.0 + i), sin(ang) * rad)
-		d.rotation = Vector3(m.time * 2.0, m.time * 3.0 + i, 0.0)
-		d.scale = Vector3.ONE * ((1.4 + 0.25 * sin(m.time * 14.0 + i)) if ov else 1.0)
-		d.material_override.set_shader_parameter("color", Color(hot, 1.0) if ov else Color(Arch.color(id), 0.9))
-	(orbit.get_node("Light") as OmniLight3D).light_energy = (1.6 + 0.6 * sin(m.time * 12.0)) if ov else 0.0
-
-# ------------------------------------------------------------------ Runes (marks on targets) and detonation
-func runed(f: Ent) -> bool:
-	return f != null and runes.has(f.get_instance_id()) and is_instance_valid(runes[f.get_instance_id()]["e"])
-
-func _add_rune(f: Ent) -> void:
-	var key := f.get_instance_id()
-	if runes.has(key):
-		runes[key]["t"] = float(res_def().get("rune_t", 4.0))
-		return
-	var n := Node3D.new()
-	n.top_level = true
-	var ring := MeshInstance3D.new()
-	ring.mesh = Models.flat_quad(1.2)
-	ring.material_override = Models.ring_mat(Color(Arch.color(id), 0.95), 0.12)
-	n.add_child(ring)
-	var gem := MeshInstance3D.new()
-	gem.mesh = Models.box(0.22, 0.22, 0.22)
-	gem.material_override = solid_mat(Arch.color(id).lightened(0.3))
-	gem.rotation = Vector3(PI * 0.25, 0, PI * 0.25)
-	n.add_child(gem)
-	m.add_child(n)
-	runes[key] = {"e": f, "t": float(res_def().get("rune_t", 4.0)), "node": n}
-	m.fx.word(f.pos + Vector3(0, 2.3, 0), "RUNED", Arch.color(id), false)
-	m.sfx("zap", f.pos, -6.0, 1.6)
-	net_ring(f.pos, 1.0, Arch.color(id))
-
-func _clear_rune(key: int) -> void:
-	if not runes.has(key): return
-	var n: Node3D = runes[key]["node"]
-	if is_instance_valid(n): n.queue_free()
-	runes.erase(key)
-
-func _tick_runes_on(dt: float) -> void:
-	for key in runes.keys():
-		var r: Dictionary = runes[key]
-		var f: Ent = r["e"]
-		r["t"] = float(r["t"]) - dt
-		if float(r["t"]) <= 0.0 or not is_instance_valid(f) or f.dead:
-			_clear_rune(key)
-			continue
-		var n: Node3D = r["node"]
-		if is_instance_valid(n):
-			n.global_position = f.position + Vector3(0, 2.75 if f is Hunter else 1.9, 0)
-			n.rotation.y = m.time * 3.0
-			n.scale = Vector3.ONE * ((1.15 + 0.15 * sin(m.time * 12.0)) if over() else 1.0)
-
-func teardown() -> void:
-	for key in runes.keys(): _clear_rune(key)
-	for b in bolts:
-		if is_instance_valid(b["node"]): (b["node"] as Node3D).queue_free()
-	bolts.clear()
-	super.teardown()
-
-## A spell landed on `f`: a Runed foe detonates; a Bolt Runes a fresh one.
-func spell_hit(f: Ent, spell: String) -> void:
+# ------------------------------------------------------------------ Static
+func add_spark(f: Ent, n := 1) -> void:
 	if f == null or not is_instance_valid(f) or f.dead or f.team == h.team:
 		return
-	if runed(f):
-		_clear_rune(f.get_instance_id())
-		var tgt := f
-		m.later(0.02, func(): if is_instance_valid(h) and is_instance_valid(tgt) and not tgt.dead: _detonate(tgt, spell != "hex"))
-	elif spell == "bolt":
-		_add_rune(f)
-
-## The payoff: a Runeburst, or Overcharged a Flashpoint (all the Heat, a burst on everyone near).
-func _detonate(f: Ent, root: bool) -> void:
+	if f is Hunter and (f as Hunter).downed:
+		return
+	var key := f.get_instance_id()
 	var rd := res_def()
-	detonations += 1
-	var dir := h.dir_to(f)
-	if over() and vent.is_empty():
-		flashpoints += 1
-		res = 0.0; vent = {}; was_over = false
-		var hot := res_col().lerp(Color.WHITE, 0.35)
-		f.hurt(float(rd["flash_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "flashpoint"], "payoff": true, "crit": true, "root": float(rd["flash_root"]) if root else 0.0, "dr": true})
-		for o in foes_in(f.pos, float(rd["flash_r"])):
-			if o != f: o.hurt(float(rd["flash_splash"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "flashpoint"], "root": float(rd["flash_root"]) * 0.5, "dr": true, "kb": Vector2(o.pos.x - f.pos.x, o.pos.z - f.pos.z).normalized() * 4.0})
-		m.sfx("pay_flashpoint", f.pos, 0.0, 1.0)
-		payoff_fx(f.pos, "FLASHPOINT", hot, "", dir, f)
-		m.fx.ring(f.pos, float(rd["flash_r"]), Color(res_col(), 0.9), 0.45)
-		m.fx.burst(f.pos + Vector3(0, 0.6, 0), Color("ff9a4a"), 30, 9.0, 0.6, 3.0, 1.5)
-		ch_rmb = float(rmb_charges()); cd["rmb"] = 0.0; lock_t = 0.0
-		h._ab_feedback("sec", "ready")
-	else:
-		f.hurt(float(rd["burst_dmg"]) * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "runeburst"], "payoff": true, "crit": true, "root": float(rd["burst_root"]) if root else 0.0, "dr": true})
-		m.sfx("pay_flashpoint", f.pos, -3.0, 1.45)
-		payoff_fx(f.pos, "RUNEBURST", Arch.color(id).lightened(0.2), "", dir, f)
-	CombatBus.ability_used.emit(h, "runeburst", "secondary")
+	var s: Dictionary = sparks.get(key, {"e": f, "n": 0, "t": 0.0})
+	var was := int(s["n"])
+	s["n"] = mini(int(rd["max"]), was + n)
+	s["t"] = float(rd["dur"])
+	sparks[key] = s
+	if int(s["n"]) >= int(rd["max"]) and was < int(rd["max"]):
+		# the 4th stack: a bolt drops out of the sky onto them
+		var top := f.position + Vector3(0, 9.0, 0)
+		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
+		fx().arc(top + Vector3(0.4, 0, -0.3), f.position + Vector3(0, 1.0, 0), TEAL, PINK, 0.5, 0.2)
+		m.fx.flash(f.position + Vector3(0, 1.1, 0), PINK, 1.1, 0.1)
+		m.sfx("vv_static_full", f.pos, -2.0)
+		# the word goes above the marker so the two never print over each other
+		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
+		if anim_id == "" or m.time - anim_at > 0.3: play("mage_live")
+		net_bolt(top, f.position, TEAL)
+	elif int(s["n"]) > was:
+		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
 
-# ------------------------------------------------------------------ dash: Blink (snap back within 3s)
-func on_dash(use_ex: bool) -> bool:
-	var dd := dash_def()
-	if not blink_back.is_empty():
-		# snap back to the sigil you left
-		var to: Vector3 = blink_back["to"]
-		var from := h.pos
-		_end_back()
-		_land_blink(from, to, false)
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SNAP BACK", col_of(dd), false)
-		st["last_dash"] = "back"
-		return true
-	if not blink.is_empty():
-		return true
-	var air := not h.grounded or h.gliding
-	if not spend_dash(use_ex and not air):
-		return true
-	var reach := float(dd["air_dist"]) if air else float(dd["dist"])
-	var a := aim()
-	var dv := Vector2(a.x - h.pos.x, a.z - h.pos.z)
-	if dv.length() > reach: dv = dv.normalized() * reach
-	if dv.length() < 0.5: dv = h.aim_dir() * reach
-	var to := h.pos + Vector3(dv.x, 0, dv.y)
-	to = _safe_spot(to) if not air else Vector3(to.x, h.pos.y, to.z)
-	# the 0.12s windup: a sigil at the destination, for everyone
-	tele_circle(ground(to), 0.6, col_of(dd), float(dd["windup"]))
-	m.sfx("portal", h.pos, -6.0, 1.9)
-	blink = {"t": float(dd["windup"]), "to": to, "air": air, "vel": h.vel}
-	st["last_dash"] = "blink"
-	CombatBus.ability_used.emit(h, "blink", "dodge")
+func clear_sparks(f: Ent) -> void:
+	var key := f.get_instance_id()
+	if sparks.has(key):
+		sparks.erase(key)
+		fx().unmark("vs%d" % key)
+
+func _tick_sparks(dt: float) -> void:
+	var mx := int(res_def()["max"])
+	for key in sparks.keys():
+		var s: Dictionary = sparks[key]
+		var fv = s["e"]     # untyped first: a freed foe can't be assigned to a typed var
+		var f: Ent = fv if is_instance_valid(fv) else null
+		if not ult.busy():                 # (Kitefall can't refresh it: it waits for the strike that spreads it)
+			s["t"] = float(s["t"]) - dt
+		if not is_instance_valid(f) or f.dead or float(s["t"]) <= 0.0 or (f is Hunter and (f as Hunter).downed):
+			sparks.erase(key)
+			fx().unmark("vs%d" % key)
+			continue
+		var n := int(s["n"])
+		fx().marker("vs%d" % key, f, n, mx, TEAL, PINK, _top(f) + MARK_LIFT)
+		if n >= mx and int(m.time * 7.0) != int((m.time - dt) * 7.0):
+			# Live: arcs crawl down the body from the marker to the ground
+			var foot := ground(f.pos) + Vector3(fx().rng.randf_range(-0.5, 0.5), 0.05, fx().rng.randf_range(-0.5, 0.5))
+			fx().arc(f.position + Vector3(0, _top(f) - 0.3, 0), foot, TEAL, PINK, 0.35, 0.12)
+
+func _tick(dt: float) -> void:
+	_tick_sparks(dt)
+	gum.tick(dt)
+	if reset_dash_boost:
+		reset_boost_t -= dt
+		reset_dash_boost = reset_boost_t > 0.0
+	ult.tick(dt)
+	_tick_echo(dt)
+	_tick_trail()
+	_tick_motes(dt)
+	sky.tick(dt)
+	_tick_lmb()
+	if not wire.is_empty():
+		_tick_wire(dt)
+	if run_t > 0.0:
+		_tick_run(dt)
+	if rmb_down:
+		_tick_rod()
+	elif rod != null and rod.visible:
+		rod.visible = false
+	net_pulse(dt, full_ready())
+
+func own_dash_trail() -> bool:
 	return true
 
-## Never into the abyss: an over-the-abyss destination comes back toward you onto ground.
-func _safe_spot(p: Vector3) -> Vector3:
-	var from := h.pos
-	var k := 1.0
-	while k > 0.0:
-		var q := from.lerp(p, k)
-		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
-			return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
-		k -= 0.1
-	return from
+## Moves whose hand leaves a teal swoosh: [hand, from s, to s].
+const TRAILS := {"mage_lmb_l": ["l", 0.0, 0.12], "mage_lmb_r": ["r", 0.0, 0.12], "mage_e": ["l", 0.0, 0.34],
+	"mage_e_snap": ["l", 0.0, 0.12], "mage_live": ["l", 0.0, 0.12], "mage_rmb": ["r", 0.0, 0.2]}
 
-func _do_blink() -> void:
-	var b := blink
-	blink = {}
-	if h.downed or h.stun_t > 0.0 or Hex.active(h):
+func _tick_trail() -> void:
+	var tr: Array = TRAILS.get(anim_id, [])
+	var t := float(m.time) - anim_at
+	if tr.is_empty() or h.anim == null or t < float(tr[1]) or t > float(tr[2]):
 		return
-	_land_blink(h.pos, b["to"], true, bool(b.get("air", false)), b.get("vel", Vector3.ZERO))
+	var hand: Node3D = h.anim.hand_l if String(tr[0]) == "l" else h.anim.hand_r
+	if hand != null:
+		fx().trail("vt%d" % h.get_instance_id(), hand.global_position, TEAL, PINK, 0.24)
 
-func _land_blink(from: Vector3, to: Vector3, first: bool, air := false, keep_vel := Vector3.ZERO) -> void:
+## Her own after-images on the air dash and the Wirerun streak: her silhouette in teal (pink on the streak).
+func _tick_echo(dt: float) -> void:
+	if h.roll_t <= 0.0 and run_t <= 0.0:
+		echo_t = 0.0
+		return
+	echo_t -= dt
+	if echo_t > 0.0:
+		return
+	echo_t = ECHO_GAP
+	fx().echo(h, PINK.lerp(TEAL, 0.35) if run_t > 0.0 else TEAL, 0.3)
+
+func teardown() -> void:
+	super.teardown()
+	if RenderingServer.frame_pre_draw.is_connected(_hide_fresh_round):
+		RenderingServer.frame_pre_draw.disconnect(_hide_fresh_round)
+	for k in sparks.keys():
+		fx().unmark("vs%d" % k)
+	sparks.clear()
+	for mt in motes.duplicate():
+		_free_mote(mt, false)
+	motes.clear()
+	strikes.clear()
+	ult.drop()
+	_end_wire(false)
+	if run_t > 0.0 and h.model: h.model.visible = true
+	run_t = 0.0
+
+# ------------------------------------------------------------------ passive: weapon hits, knocks
+func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
+	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
+		return
+	if String(o.get("src", "")) == "shot" and not o.has("ab"):
+		add_spark(t)
+
+# ------------------------------------------------------------------ LMB: the finger gun
+## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
+## at the fingertip and sparks at the feet; the round becomes a jagged bolt with a spark impact.
+func _tick_lmb() -> void:
+	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
+	if h.is_local() and idle and not h.downed:
+		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
+		AimKit.line(h, "lmb", {"len": float(h.wpn.get("range", 13.0)), "col": Color(1, 1, 1, 0.55), "alpha": 0.8})
+	if h.shot_n == last_shot:
+		return
+	last_shot = h.shot_n
+	var sd: Dictionary = {}
+	var shots: Array = m.get("shots")
+	for i in range(shots.size() - 1, -1, -1):
+		if shots[i]["by"] == h and not (shots[i]["x"] as Dictionary).has("src"):
+			sd = shots[i]
+			break
+	if sd.is_empty():
+		return
+	lmb_n += 1
+	var left := lmb_n % 2 == 1
+	var d := h.aim_dir()
+	# (from the fingertip of the hand that fires: the arm is still coming up, so where that fingertip will be. The round
+	# has already flown a tick from the old muzzle: it gets that time back, so her reach stays what it was)
+	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE)
+	var was_at: Vector3 = sd["pos"]
+	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD
+	var speed := (sd["vel"] as Vector2).length()
+	if speed > 0.1:
+		sd["life"] = float(sd["life"]) + Vector2(was_at.x - p.x, was_at.z - p.z).length() / speed
+	sd["pos"] = p
+	sd["prev"] = p
+	sd["start"] = p
+	play("mage_lmb_l" if left else "mage_lmb_r")
+	# a teal thrust from the shoulder to the fingertip, then (at the release key, 0.06 s) the fingertip
+	# crackles; pink sparks pop at her feet, a jagged bolt rides the round
+	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
+	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, PINK, 0.3, 0.12)
+	m.later(0.06, _fingertip.bind(left))
+	m.fx.spark(h.pos + Vector3(0, 0.1, 0), Vector3.UP, PINK, 4, 3.0, 80.0, 0.2, 6.0, 0.7)
+	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
+
+## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
+func _fingertip(left: bool) -> void:
+	if not is_instance_valid(h) or h.anim == null:
+		return
+	var hand: Node3D = h.anim.hand_l if left else h.anim.hand_r
+	if hand == null:
+		return
+	var d := h.aim_dir()
+	var tip := hand.global_position + Vector3(d.x, 0, d.y) * 0.15
+	if h.model:
+		var at := WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
+		if at != null:
+			tip = at.global_position
+	fx().crackle(tip, TEAL, PINK, 0.6, 4, 0.08)
+	fx().star(tip, TEAL, PINK, 0.75, 0.08)
+
+## Where a finger bolt ended: a fan of splinters sprays back toward the caster and a crackle.
+func _bolt_end(at: Vector3, vel: Vector2, from: Vector3) -> void:
+	var back := Vector2(from.x - at.x, from.z - at.z).normalized() if vel.length() > 0.1 else Vector2(0, 1)
+	for i in 4:
+		var a := (float(i) - 1.5) * 0.45 + fx().rng.randf_range(-0.15, 0.15)
+		var bd := back.rotated(a)
+		var ln := fx().rng.randf_range(0.5, 1.0)
+		var tip := at + Vector3(bd.x * ln, fx().rng.randf_range(0.0, 0.4), bd.y * ln)
+		fx().arc(at, tip, TEAL, PINK, 0.26, 0.12)
+	fx().star(at, TEAL, PINK, 0.6, 0.12)
+
+# ------------------------------------------------------------------ dash: Wirerun
+func dash_charge() -> float:
+	return clampf(float(wire["t"]) / wire_hold(), 0.0, 1.0) if not wire.is_empty() else -1.0
+
+## The Wirerun comes back (a Blowout, a charge orb): the next one runs further and charges quicker, so resets chain.
+func grant_reset() -> void:
+	h.dashes = h.max_dashes()
+	reset_dash_boost = true
+	reset_boost_t = float(dash_def()["reset_window"])
+
+## Seconds to a full charge: the running one's, or the next one's.
+func wire_hold() -> float:
 	var dd := dash_def()
-	m.fx.burst(from + Vector3(0, 0.9, 0), col_of(dd), 16, 3.0, 0.3)
-	h.teleport(to)
-	h.vel = keep_vel if air else Vector3.ZERO
-	h.phase_t = maxf(h.phase_t, 0.1)
-	m.fx.burst(to + Vector3(0, 0.9, 0), col_of(dd), 16, 3.0, 0.3)
-	Feel.dash_sound(m, id, to, h)
-	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), col_of(dd))
-	if not first:
-		return
-	# the sigil you leave: it slows foes on it 0.6s later, and for 3s you can snap back to it
-	var rp := rider_points(from, to)
-	var dbl := 2.0 if rank("dash") >= 3 else 1.0
-	var rune := ground(from)
-	tele_circle(rune, float(dd["rune_r"]), Feel.cat_color("control"), float(dd["rune_t"]))
-	m.later(float(dd["rune_t"]), func():
-		if not is_instance_valid(h): return
-		var stg := StageSpec.parse({"delivery": {"type": "burst", "origin": "here", "radius": float(dd["rune_r"])},
-			"effects": [{"type": "slow", "duration": minf(4.0, float(dd["rune_slow_t"]) * dbl), "strength": minf(0.6, float(dd["rune_slow"]) * dbl)}]}, "", GrammarReport.new())
-		run(stg, cx("dash", "blink_rune", rune, {"at": rune, "no_floor": true})))
-	var n := own_node()
-	var ring := MeshInstance3D.new()
-	ring.mesh = Models.flat_quad(1.6)
-	ring.material_override = Models.ring_mat(Color(col_of(dd), 0.9), 0.1)
-	n.add_child(ring)
-	n.global_position = rune + Vector3(0, 0.1, 0)
-	blink_back = {"t": float(dd.get("back_t", 3.0)), "to": rune, "node": n}
-	if rp.get("repeat") != null:
-		blink_back["t"] = float(blink_back["t"]) + 1.0
+	var boosted := bool(wire.get("boost", false)) if not wire.is_empty() else reset_dash_boost
+	return float(dd["hold"]) * (float(dd["reset_charge"]) if boosted else 1.0)
 
-func _end_back() -> void:
-	var n: Node3D = blink_back.get("node")
-	if n and is_instance_valid(n):
-		self_nodes.erase(n)
-		n.queue_free()
-	blink_back = {}
+func wire_reach() -> float:
+	var dd := dash_def()
+	var boosted := bool(wire.get("boost", false)) if not wire.is_empty() else reset_dash_boost
+	return float(dd["reset_mult"]) if boosted else 1.0
 
-# ------------------------------------------------------------------ RMB: Guided Bolt
-## Fires on the press; while you keep holding, the bolt bends toward your cursor.
-func press_rmb() -> void:
-	if busy() or lock_t > 0.0 or not vent.is_empty():
-		h._ab_feedback("sec", "deny")
-		return
-	if rmb_down:
-		return
-	var air := not h.grounded or h.gliding
-	if not spend_rmb(): return
-	rmb_down = true
+func wire_len(t: float) -> float:
+	var dd := dash_def()
+	var L := lerpf(float(dd["dist"][0]), float(dd["dist"][1]), clampf(t / wire_hold(), 0.0, 1.0))
+	return L * wire_reach()
+
+func run_time(L: float) -> float:
+	var dd := dash_def()
+	# a constant speed (so a longer run takes longer), slowed by the global dash feel like every dash
+	return maxf(0.1, L / float(dd["speed"])) * float(dash_feel()["time"])
+
+func on_dash(use_ex: bool) -> bool:
+	if ult.airborne():
+		return true         # Kitefall's flight is its own move (content/dash_flow/mage.json); its crouch combines
+	if use_ex and (h.dashes < 1.0 or wire.size() > 0 or run_t > 0.0):
+		# no charge left: the long air dash / extra dash, her base dash's own look (a tumble, a teal streak)
+		if not wire.is_empty() or run_t > 0.0 or not spend_dash(true):
+			return true
+		var a := h.position + Vector3(0, 0.9, 0)
+		var ex_dist := float(h.cdat.get("ex_dist", 5.0))
+		travel(ex_dist, float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "phase": 1.0})
+		play("mage_dash_ex")
+		fx().arc(a, a + Vector3(h.roll_dir.x, 0, h.roll_dir.y) * ex_dist, TEAL, PINK, 0.45, 0.3)
+		last_dash_kind = "ex"
+		return true
+	if not wire.is_empty() or run_t > 0.0:
+		return true
+	if KitStatus.grounded(h) or h.root_t > 0.0:
+		h._ab_feedback("dash", "deny")
+		return true
+	if not spend_dash(false):          # the cooldown starts on the press
+		return true
+	wire = {"t": 0.0, "y": h.pos.y, "air": not h.grounded, "boost": reset_dash_boost}
+	reset_dash_boost = false
+	play("mage_dash")
+	# a bolt slams down onto her: the charging tell
+	fx().arc(h.position + Vector3(0, 8.0, 0), h.position + Vector3(0, 0.3, 0), col_of(dash_def()), PINK, 0.8, 0.22)
+	m.sfx("vv_surge_charge", h.pos, -3.0)
+	return true
+
+## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
+## still waiting for its flick and a Kitefall in the air (she drops where she took off), with nothing released.
+func _drop_holds() -> void:
+	_end_wire(true)
+	ult.drop()
+	rmb_down = false
 	rmb_t = 0.0
-	rmb_ctx = {"air": air, "e": false, "r": not encore.is_empty(), "full": over()}
-	if air:
-		_starfall()
-		rmb_down = false
-		last_variant = "air"
-		return
-	last_variant = "full" if over() else ("during_r" if not encore.is_empty() else "tap")
-	last_spell = "bolt"
-	_spawn_bolt(h.pos + Vector3(h.aim_dir().x * 0.6, 1.05, h.aim_dir().y * 0.6), h.aim_dir(), 1.0, true)
-	add_heat(float(res_def()["tap"]))
-	if not encore.is_empty(): _echo("bolt")
+	if rod != null: rod.visible = false
+	for s in strikes.duplicate():
+		if String(s["phase"]) == "flick": strikes.erase(s)
 
-func fire_rmb(_c: Dictionary) -> void:
-	pass         # (the bolt went on the press; letting go just stops the steering)
+func _end_wire(refund: bool) -> void:
+	if wire.is_empty(): return
+	if refund: h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
+	wire = {}
+	AimKit.hide(h, "dash")
+	AimKit.hide(h, "dash_end")
+
+## A random offset `across` m to each side and `low` to `high` m up (cosmetic: the effects' own dice).
+func _jitter(across: float, low: float, high: float) -> Vector3:
+	var r := fx().rng
+	return Vector3(r.randf_range(-across, across), r.randf_range(low, high), r.randf_range(-across, across))
+
+## The drift you carry: your ground speed right now (it bleeds off while you hold).
+func _drift() -> Vector2:
+	return Vector2(h.vel.x, h.vel.z) * float(dash_def().get("drift_k", 1.0))
+
+func _tick_wire(dt: float) -> void:
+	var dd := dash_def()
+	wire["t"] = float(wire["t"]) + dt
+	var t := float(wire["t"])
+	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
+		_end_wire(false)                # the charge was spent on the press: cut, it's gone
+		return
+	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
+	h.inp["move"] = Vector2.ZERO
+	h.inp["jump"] = false
+	h.knock_t = maxf(h.knock_t, dt * 1.5)
+	if bool(wire["air"]):
+		h.vel.y = 0.0
+		h.pos.y = float(wire["y"])
+	var d := h.aim_dir()
+	var L := wire_len(t)
+	var k := clampf(t / wire_hold(), 0.0, 1.0)
+	var dr := _drift()
+	var end := h.pos + Vector3(d.x * L, 0, d.y * L) + Vector3(dr.x, 0, dr.y) * run_time(L)
+	wire["end"] = end
+	wire["len"] = L
+	var full_len := float(dd["dist"][1]) * wire_reach()
+	var lane := {"len": full_len, "width": 0.35, "rails": true, "chevrons": 5, "fill": L / full_len, "col": col_of(dd)}
+	AimKit.lane(h, "dash", lane)
+	var ring := {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": PINK}
+	ring["all"] = true
+	ring["hot"] = k * 0.6
+	AimKit.circle(h, "dash_end", ring)
+	AimKit.charge(h, k, {"col": col_of(dd), "col2": PINK})
+	if fx().rng.randf() < 0.35:
+		fx().arc(h.position + _jitter(0.4, 0.2, 1.4), h.position + _jitter(0.5, 0.2, 1.6), TEAL, PINK, 0.18, 0.08)
+	var auto_t := float(dd.get("auto", float(dd["hold"]) + 0.3)) * wire_hold() / float(dd["hold"])
+	if not held("dash") or t >= auto_t:
+		_end_wire(false)
+		_run(L, d, dr)
+
+func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
+	var dd := dash_def()
+	var time := run_time(L)
+	var a := h.position + Vector3(0, 0.9, 0)
+	travel(L, time / float(dash_feel()["time"]), {"invuln": time + 0.05, "phase": 1.0, "dir": d})
+	# momentum carries: the streak adds the drift you had
+	var v := d * (L / time) + drift
+	h.roll_dir = v.normalized()
+	h.roll_speed = v.length()
+	h.phase_t = maxf(h.phase_t, time + 0.05)
+	run_t = time
+	last_dash_kind = "wire"
+	play("mage_dash_go")
+	var dmg := float(dd["dmg"]) * run_rank_k()
+	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
+	var b := a + Vector3(v.x, 0, v.y) * time
+	fx().arc(a, b, TEAL, PINK, 1.1, time + 0.25)
+	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), PINK, PINK.lightened(0.5), 0.5, time + 0.15)
+	net_bolt(a, b, col_of(dd))
+	m.sfx("vv_surge_go", h.pos, -1.0)
+	if h.model: h.model.visible = false
+	m.later(time, _arrive)
+
+## The streak itself: the body is hidden behind her own pink-teal after-images (_tick_echo); orbs crossed burst.
+func _tick_run(dt: float) -> void:
+	run_t -= dt
+	if h.model:
+		h.model.visible = false
+	for mt in motes.duplicate():
+		if _mote_reached(mt):
+			_burst_mote(mt)
+	if run_t <= 0.0 and h.model:
+		h.model.visible = true
+
+func _arrive() -> void:
+	if not is_instance_valid(h): return
+	run_t = 0.0
+	if h.model: h.model.visible = true
+	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
+	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
+	if ult.phase() != MageUlt.CROUCH:
+		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
+
+func _wire_hit(f: Ent, dmg: float) -> void:
+	if not is_instance_valid(f) or f.dead: return
+	var was_live := live(f)
+	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
+	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
+	m.fx.burst(f.pos + Vector3(0, 0.9, 0), TEAL, 10, 3.5, 0.3)
+	if was_live and is_instance_valid(f) and not f.dead:
+		_blowout(f)
+
+func _blowout(f: Ent) -> void:
+	var rd := res_def()
+	var dmg := (float(rd["blow_dmg"]) + float(rd["blow_pct"]) * f.max_hp) * power("dash")
+	clear_sparks(f)
+	blowouts += 1
+	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
+	grant_reset()                             # the dash comes straight back: the only reset
+	h.dash_buf = 0.0
+	fx().arc(f.position + Vector3(0, 6.0, 0), f.position + Vector3(0, 0.1, 0), TEAL, PINK, 1.0, 0.3)
+	payoff_fx(f.pos, "BLOWOUT", PINK, "", h.dir_to(f), f)
+	m.sfx("hero_blowout", f.pos, 0.0)        # its own voice (tools/gen_hero_sfx.py)
+	# the refund tell on her: copper coil columns and a starburst (our own look)
+	var me := ground(h.pos)
+	for i in 3:
+		var a := TAU * i / 3.0
+		fx().pillar(me + Vector3(cos(a) * 0.55, 0, sin(a) * 0.55), COPPER, PINK, 3.2, 0.22, 1.2, false)
+	DashReset.cue(h)
+
+# ------------------------------------------------------------------ RMB: Storm Rod
+func rmb_charge_full() -> float:
+	return float(rmb_def()["hold"])
 
 func rmb_auto_t() -> float:
-	return float(rmb_def()["bolt"]["life"]) + 0.2
+	return float(rmb_def().get("auto", float(rmb_def()["hold"]) + 0.2))
 
-func _spawn_bolt(at: Vector3, dir: Vector2, k: float, steer: bool) -> void:
+func rmb_hold_tick(t: float) -> void:
+	if rod == null or not is_instance_valid(rod) or not rod.visible:
+		_summon_rod()
+	var k := clampf(t / float(rmb_def()["hold"]), 0.0, 1.0)
+	if k >= 1.0 and not rod_full:
+		rod_full = true
+		# full: her whole body flashes white for a beat
+		m.fx.flash(h.position + Vector3(0, 1.0, 0), Color.WHITE, 1.6, 0.1)
+		m.fx.flash(h.position + Vector3(0, 1.6, 0), PINK, 0.9, 0.08)
+		AimKit.flare(h, {"col2": PINK})
+		m.sfx("vv_rod_full", h.pos, -3.0)
+
+func _summon_rod() -> void:
+	rod_full = false
+	if rod == null or not is_instance_valid(rod):
+		rod = _build_rod()
+	rod.visible = true
+	play("mage_rmb_hold")
+	_tick_rod()
+	# it arrives in her hand: a flash and a crackle off the tip
+	var tip := rod.global_position - rod.global_basis.z * 0.75
+	m.fx.flash(_rod_hand(), PINK, 1.0, 0.08)
+	fx().crackle(tip, TEAL, PINK, 0.8, 5, 0.16)
+	fx().star(tip, TEAL, PINK, 1.0, 0.14)
+	m.sfx("vv_rod_summon", h.pos, -3.0)
+
+func shows_charge_ball() -> bool:
+	return false                   # the summoned rod is her charge tell
+
+## The Storm Rod: a 1.3 m copper shaft along -Z (the tip) with a dark grip at +0.25 where the hand
+## holds it, three teal windings and a teal crystal tip with a pink heart.
+func _build_rod() -> Node3D:
 	var n := own_node()
-	var core := MeshInstance3D.new()
-	core.mesh = Models.sphere(0.22, 12)
-	core.material_override = Models.glow_mat(Color(col_of(rmb_def()), 1.0))
-	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	n.add_child(core)
-	var lt := OmniLight3D.new()
-	lt.light_color = col_of(rmb_def())
-	lt.light_energy = 1.2
-	lt.omni_range = 2.2
-	n.add_child(lt)
-	n.global_position = at
-	bolts.append({"pos": at, "dir": dir.normalized(), "t": 0.0, "node": n, "k": k, "steer": steer, "hum": 0.0, "seg": 0.0, "last": at})
-	m.sfx("zap", h.pos, -3.0, 0.8)
-	m.sfx("ab_throw", h.pos, -6.0, 1.5)
-	m.fx.flash(at, col_of(rmb_def()), 0.5, 0.06)
+	var along := Vector3(PI / 2, 0, 0)
+	var teal := solid_mat(TEAL)
+	Models.part(n, Models.cyl(0.045, 0.045, 1.3, 10), Models.shiny(COPPER, 0.8), Vector3.ZERO, Vector3.ONE, along)
+	var grip := Models.toon(Color("2a2233"))
+	Models.part(n, Models.cyl(0.058, 0.058, 0.24, 10), grip, Vector3(0, 0, 0.25), Vector3.ONE, along)
+	for i in 3:
+		Models.part(n, Models.cyl(0.066, 0.066, 0.04, 10), teal, Vector3(0, 0, -0.1 - 0.17 * i), Vector3.ONE, along)
+	Models.part(n, Models.crystal(0.09, 0.42, 4), teal, Vector3(0, 0, -0.68), Vector3.ONE, -along)
+	Models.part(n, Models.sphere(0.06, 8), solid_mat(PINK), Vector3(0, 0, -0.72))
+	for ch in n.get_children():
+		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return n
 
-func _tick_bolts(dt: float) -> void:
-	if bolts.is_empty():
-		return
-	var bd: Dictionary = rmb_def()["bolt"]
-	var steering := rmb_down and held("rmb")
-	var a := aim()
-	for b in bolts.duplicate():
-		var n: Node3D = b["node"]
-		b["t"] = float(b["t"]) + dt
-		var p: Vector3 = b["pos"]
-		var dir: Vector2 = b["dir"]
-		if steering and bool(b["steer"]):
-			# bend toward the cursor
-			var want := Vector2(a.x - p.x, a.z - p.z)
-			if want.length() > 0.3:
-				var ang := dir.angle_to(want.normalized())
-				var turn := float(bd["turn"]) * (1.3 if rank("sec") >= 3 else 1.0) * dt
-				dir = dir.rotated(clampf(ang, -turn, turn))
-				b["dir"] = dir
-		var q := p + Vector3(dir.x, 0, dir.y) * float(bd["speed"]) * dt
-		var gq: float = m.world.ground_at(q.x, q.z)
-		var fk := clampf(float(b["t"]) / float(bd["ramp"]), 0.0, 1.0)
-		var done: bool = float(b["t"]) >= float(bd["life"]) or m.world.is_block(q.x, q.z) or gq > p.y - 0.3
-		if not done:
-			p = q
-			for f in foes_in(p - Vector3(0, 1.0, 0), 0.75, 2.0):
-				_bolt_hit(f, b, fk)
-				done = true
-				break
-		b["pos"] = p
-		if is_instance_valid(n):
-			n.global_position = p
-			n.scale = Vector3.ONE * (0.8 + 0.9 * fk)
-		# the hum climbs as it flies; a trail of sparks
-		b["hum"] = float(b["hum"]) - dt
-		if float(b["hum"]) <= 0.0:
-			b["hum"] = 0.12
-			m.sfx("ab_whirr", p, lerpf(-14.0, -7.0, fk), lerpf(1.0, 1.9, fk))
-		m.fx.burst(p, col_of(rmb_def()), 1, 0.6, 0.25, 0.0, 0.6 + 0.6 * fk)
-		b["seg"] = float(b["seg"]) - dt
-		if float(b["seg"]) <= 0.0:
-			b["seg"] = 0.1
-			net_bolt(b["last"], p, col_of(rmb_def()))        # remote players see the path
-			b["last"] = p
-		if done:
-			if is_instance_valid(n):
-				m.fx.burst(p, col_of(rmb_def()), 10, 3.0, 0.3)
-				self_nodes.erase(n)
-				n.queue_free()
-			bolts.erase(b)
-
-func _bolt_hit(f: Ent, b: Dictionary, fk: float) -> void:
-	var bd: Dictionary = rmb_def()["bolt"]
-	var ok := 1.0 + (float(rmb_def().get("over_k", 0.25)) if over() else 0.0)
-	var dmg := lerpf(float(bd["dmg"][0]), float(bd["dmg"][1]), fk) * float(b["k"]) * ok
-	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "here", "radius": 0.0},
-		"effects": [{"type": "damage", "amount": dmg}, {"type": "slow", "duration": float(bd["slow_t"]), "strength": float(bd["slow"])}]})
-	KinExec.apply_foe(stg.effects, f, cx("rmb", "guided_bolt", f.pos, {"at": f.pos, "dir": b["dir"]}), f.pos, stg)
-	m.fx.ring(f.pos, 0.8 + 0.6 * fk, col_of(rmb_def()), 0.2)
-	m.sfx("ab_hit", f.pos, -4.0, lerpf(1.3, 0.9, fk))
-	spell_hit(f, "bolt")
-
-## Starfall (in the air): a bolt into the ground under you, a lift and a cooler glider.
-func _starfall() -> void:
-	var sf: Dictionary = rmb_def()["starfall"]
-	var stg := stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(sf["radius"])},
-		"effects": [{"type": "damage", "amount": float(sf["dmg"])}, {"type": "push", "strength": float(sf["push"])}]})
-	run(stg, cx("rmb", "starfall", h.pos))
-	h.vel.y = maxf(h.vel.y, float(sf["lift"]))
-	h.gliding = false; h.grounded = false
-	h.glide_fuel = minf(1.0, h.glide_fuel + float(sf["cool"]))
-	add_heat(float(res_def()["tap"]))
-
-# ------------------------------------------------------------------ E: Hex
-func cast_e() -> bool:
-	last_spell = "hex"
-	_hex_bolt(h.pos + Vector3(0, 1.0, 0), aim(), 1.0)
-	add_heat(float(res_def()["e"]))
-	if not encore.is_empty(): _echo("hex")
-	return true
-
-func _hex_bolt(_from: Vector3, at: Vector3, k: float) -> void:
-	var ed := e_def()
-	var stg := stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]), "range": float(ed["range"]), "size": 0.26},
-		"effects": [{"type": "damage", "amount": float(ed["dmg"]) * k}]})
-	run(stg, cx("e", "hex", at, {"on_foe": func(f: Ent, _c: Dictionary): _hex_hit(f, k)}))
-	m.sfx("portal", h.pos, -3.0, 1.4)
-	m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("e2b8ff"), 0.6, 0.08)
-
-func _hex_hit(f: Ent, k: float) -> void:
-	var ed := e_def()
-	spell_hit(f, "hex")
-	if f is Hunter:
-		hexes += 1
-		Hex.apply(f as Hunter, float(ed["time"]) * k + (0.3 if rank("kin") >= 3 else 0.0))
-	elif is_instance_valid(f) and not f.dead:
-		f.hurt(0.1, h, {"stun": float(ed["mob_stun"]) * k, "src": "abil", "ab": "k1", "tags": ["k1", "hex"]})
-
-# ------------------------------------------------------------------ R: Encore
-func cast_r() -> bool:
-	var rd := r_def()
-	var t := float(rd["time"]) * r_dur_k()
-	var nodes: Array = []
-	for i in 2:
-		var n := own_node()
-		var orb := MeshInstance3D.new()
-		orb.mesh = Models.sphere(0.3, 12)
-		orb.material_override = Models.glow_mat(Color(col_of(rd), 0.9))
-		n.add_child(orb)
-		nodes.append(n)
-	encore = {"t": t, "nodes": nodes, "fx": 0.0}
-	r_t = t
-	_place_mirrors()
-	for n in nodes:
-		m.fx.burst((n as Node3D).global_position, col_of(rd), 20, 4.0, 0.4, -1.0, 1.2)
-		net_ring((n as Node3D).global_position, 1.2, col_of(rd))
-	m.sfx("bond", h.pos, -3.0, 1.4)
-	m.sfx("portal", h.pos, -2.0, 0.8)
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "ENCORE", col_of(rd), true)
-	# the mirrors recast your last spell straight away, at full power
-	_echo(last_spell, 1.0)
-	return true
-
-func _mirror_spots() -> Array:
+## Her right hand in the world (the rig's), or where it would be by her shoulder.
+func _rod_hand() -> Vector3:
+	if h.anim != null and h.anim.hand_r != null:
+		return h.anim.hand_r.global_position
 	var d := h.aim_dir()
-	var side := Vector2(-d.y, d.x)
-	var off := float(r_def()["offset"])
-	return [h.pos + Vector3(side.x, 0, side.y) * off + Vector3(0, 1.0, 0), h.pos - Vector3(side.x, 0, side.y) * off + Vector3(0, 1.0, 0)]
+	return h.position + Vector3(0, 1.4, 0) + Vector3(d.y, 0, -d.x) * 0.3
 
-func _place_mirrors() -> void:
-	var sp := _mirror_spots()
-	var nodes: Array = encore.get("nodes", [])
-	for i in nodes.size():
-		if is_instance_valid(nodes[i]): (nodes[i] as Node3D).global_position = sp[i]
+## While held: the rod upright in her raised right hand, crackling; the fixed double-rail lane to full range.
+func _tick_rod() -> void:
+	var cd_ := rmb_def()["coil"] as Dictionary
+	var d := h.aim_dir()
+	var k := clampf(rmb_t / float(rmb_def()["hold"]), 0.0, 1.0)
+	if rod != null and is_instance_valid(rod) and rod.visible:
+		var out := Vector3(d.y, 0, -d.x) * 0.45          # leaned out past her right shoulder: reads from above
+		var up := (Vector3(d.x * 0.3, 1.0, d.y * 0.3) + out).normalized()
+		rod.global_position = _rod_hand() + up * 0.25
+		rod.look_at(rod.global_position + up, Vector3(d.x, 0, d.y))
+		if fx().rng.randf() < 0.35:
+			var tip := rod.global_position + up * 0.75
+			fx().arc(tip, tip + _jitter(0.35, -0.6, 0.2), TEAL, PINK, 0.22, 0.08)
+	var lane := {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k}
+	lane["col"] = col_of(rmb_def())
+	lane["col_full"] = PINK
+	AimKit.lane(h, "rmb", lane)
+	AimKit.charge(h, k, {"col": col_of(rmb_def()), "col2": PINK, "flare": false})
 
-func _tick_encore(dt: float) -> void:
-	encore["t"] = float(encore["t"]) - dt
-	_place_mirrors()
-	encore["fx"] = float(encore["fx"]) - dt
-	if float(encore["fx"]) <= 0.0 and tells_visible():
-		encore["fx"] = 0.12
-		for p in _mirror_spots():
-			m.fx.ghost(Vector3(p.x, h.position.y, p.z), h.face, Color(col_of(r_def()), 0.8), float(h.cdat["scale"]))
-	if float(encore["t"]) <= 0.0:
-		for n in encore.get("nodes", []):
-			if is_instance_valid(n):
-				m.fx.burst((n as Node3D).global_position, col_of(r_def()), 12, 3.0, 0.3)
-				self_nodes.erase(n)
-				(n as Node3D).queue_free()
-		encore = {}
+func fire_rmb(c: Dictionary) -> void:
+	AimKit.hide(h, "rmb")
+	if rod != null and is_instance_valid(rod):
+		rod.visible = false
+	var sd := rmb_def()
+	if not spend_rmb():
+		return
+	var held_t := float(c["t"])
+	var min_t := float(sd["min_t"])
+	var k := clampf((held_t - min_t) / (float(sd["hold"]) - min_t), 0.0, 1.0)
+	last_variant = "hold" if k > 0.5 else "tap"
+	play("mage_rmb")
+	var wait := maxf(0.0, min_t - held_t)
+	if wait > 0.0:
+		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _coil(k))
+	else:
+		_coil(k)
 
-## The mirrors recast a spell from their spots, 0.2s later (at `k`, 60% by default).
-func _echo(spell: String, k := -1.0) -> void:
-	var kk := float(r_def()["echo_k"]) if k < 0.0 else k
-	m.later(0.2, func():
-		if not is_instance_valid(h) or h.downed: return
-		for p in _mirror_spots():
-			var dir := Vector2(aim().x - p.x, aim().z - p.z).normalized()
-			if spell == "hex":
-				var stg := stage("e", {"delivery": {"type": "projectile", "origin": "here", "speed": float(e_def()["speed"]), "range": float(e_def()["range"]), "size": 0.22},
-					"effects": [{"type": "damage", "amount": float(e_def()["dmg"]) * kk}]})
-				run(stg, cx("e", "hex_echo", aim(), {"at": p, "dir": dir, "on_foe": func(f: Ent, _c: Dictionary): _hex_hit(f, kk)}))
-			else:
-				_spawn_bolt(p, dir, kk, true)
-			m.fx.flash(p, col_of(r_def()), 0.5, 0.06))
+## Rank 3 of the Storm Rod: its throw hits harder (rmb.rank3_mult).
+func rod_rank_k() -> float:
+	return float(rmb_def()["rank3_mult"]) if rank("sec") >= 3 else 1.0
+
+## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
+func run_rank_k() -> float:
+	return float(dash_def()["rank3_mult"]) if rank("dash") >= 3 else 1.0
+
+func _coil(k: float) -> void:
+	var cd_ := rmb_def()["coil"] as Dictionary
+	var dir := h.aim_dir()
+	var dmg := lerpf(float(cd_["dmg"][0]), float(cd_["dmg"][1]), k)
+	var rng := float(cd_["range"])                       # a fixed lane: the charge never changes the range
+	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
+	last_push = push
+	dmg *= rod_rank_k()
+	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
+	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
+	var stg := stage("rmb", {"delivery": delivery, "effects": effects})
+	var done := {"hit": false}
+	var shots: Array = m.get("shots")
+	var n0 := shots.size()
+	run(stg, cx("rmb", "coilshot", aim(), {"on_foe": func(f: Ent, _c: Dictionary):
+		if not done["hit"]:
+			done["hit"] = true
+			_coil_hit(f, dir, k)}))
+	var a := h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6)
+	if shots.size() > n0 and shots[-1]["by"] == h:
+		fx().ride(shots[-1], "bolt", TEAL, PINK, 3.2, 0.7, func(at: Vector3, _v: Vector2): _rod_end(at))
+	else:
+		fx().arc(a, a + Vector3(dir.x, 0, dir.y) * rng, TEAL, PINK, 0.7, 0.2)
+	m.fx.flash(a, PINK, 0.9, 0.08)
+	m.sfx("vv_rod_throw", h.pos, -1.0, 1.0 + 0.2 * (1.0 - k))
+
+func _rod_end(at: Vector3) -> void:
+	fx().star(at, TEAL, PINK, 1.0, 0.16)
+	m.fx.burst(at, PINK, 14, 4.0, 0.35, 2.0, 1.4)
+
+func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
+	if not is_instance_valid(f) or f.dead:
+		return
+	var cd_ := rmb_def()["coil"] as Dictionary
+	add_spark(f)
+	m.sfx("mage_rod_hit", f.pos, -2.0)
+	# the pink blast, a teal crackle and a shock ring round them
+	m.fx.flash(f.position + Vector3(0, 1.0, 0), PINK, 1.6, 0.12)
+	m.fx.burst(f.position + Vector3(0, 1.0, 0), PINK, 18, 4.5, 0.45, 1.0, 1.8)
+	fx().crackle(f.position + Vector3(0, 1.0, 0), TEAL, PINK, 1.0, 5, 0.18)
+	fx().ring(ground(f.pos), 2.2, TEAL, PINK, 0.35)
+	# thrown into a wall or another foe: stunned (so is the one it hits)
+	var reach := 1.6 + 1.4 * k
+	var other: Ent = null
+	for o in foes_in(f.pos + Vector3(dir.x, 0, dir.y) * (f.r + reach * 0.6), reach * 0.6):
+		if o != f:
+			other = o
+			break
+	if other != null or terrain_behind(f, dir, reach):
+		slams += 1
+		var stn := float(cd_["stun"])
+		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
+		f.hurt(0.1, h, slam)
+		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
+		fx().ring(ground(f.pos), 1.6, PINK, COPPER, 0.25)
+		m.sfx("ab_wall", f.pos, -2.0, 1.3)
+		if other != null:
+			other.hurt(0.1, h, slam.duplicate(true))
+			add_spark(other)
+	# every foe hit leaves a charge orb at the impact (dummies and monsters too)
+	var at := ground(f.pos)
+	m.later(float(cd_["mote_t"]), func(): _drop_mote(at))
+
+# ------------------------------------------------------------------ charge orbs
+func _drop_mote(at: Vector3) -> void:
+	if not is_instance_valid(h) or h.downed:
+		return
+	var cd_ := rmb_def()["coil"] as Dictionary
+	var n: Node3D = null
+	for p in mote_pool:
+		if is_instance_valid(p) and not (p as Node3D).visible:
+			n = p
+			break
+	if n == null:
+		n = _build_mote()
+	n.visible = true
+	n.global_position = at + Vector3(0, 0.55, 0)
+	var mote := {"pos": at, "t": float(cd_["mote_life"]), "node": n, "owner": h}
+	mote["arc"] = 0.0
+	motes.append(mote)
+	fx().ring(at, float(cd_["mote_r"]) + 0.3, PINK, TEAL, 0.3)
+	m.sfx("vv_orb", at, -5.0)
+	net_ring(at, 1.0, PINK)
+
+## A charge orb: a pink core in a teal shell wound with two teal bands (it spins), its own light; short
+## arcs crackle off it in _tick_motes. Solid colours, so it reads pink and teal, not a white glow.
+func _build_mote() -> Node3D:
+	var n := own_node()
+	var core := Models.part(n, Models.sphere(0.24, 12), solid_mat(PINK))
+	core.sorting_offset = 1.0              # drawn after the shell: the pink heart shows through
+	Models.part(n, Models.sphere(0.36, 12), solid_mat(Color(TEAL, 0.22)))
+	for i in 2:
+		var band := TorusMesh.new()
+		band.inner_radius = 0.33
+		band.outer_radius = 0.39
+		Models.part(n, band, solid_mat(TEAL), Vector3.ZERO, Vector3.ONE, Vector3(0.9 * (i * 2 - 1), 0, 0.5))
+	for ch in n.get_children():
+		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var lt := OmniLight3D.new()
+	lt.light_color = PINK
+	lt.omni_range = 2.4
+	lt.light_energy = 1.2
+	n.add_child(lt)
+	mote_pool.append(n)
+	return n
+
+## Two or three short arcs jump off the orb's shell every ~0.12 s.
+func _crackle_mote(mt: Dictionary, dt: float) -> void:
+	mt["arc"] = float(mt.get("arc", 0.0)) - dt
+	if float(mt["arc"]) > 0.0:
+		return
+	mt["arc"] = 0.12
+	var c: Vector3 = (mt["node"] as Node3D).global_position
+	for i in 2 + fx().rng.randi() % 2:
+		var out := _jitter(1.0, -0.6, 0.8).normalized()
+		fx().arc(c + out * 0.3, c + out * 0.85 + _jitter(0.15, -0.1, 0.1), TEAL, PINK, 0.28, 0.1)
+
+func _tick_motes(dt: float) -> void:
+	for mt in motes.duplicate():
+		var n: Node3D = mt["node"]
+		if mt.has("fly"):
+			_fly_mote(mt, dt)
+		else:
+			mt["t"] = float(mt["t"]) - dt
+			if run_t <= 0.0 and not h.downed and _mote_reached(mt):   # walking over a resting orb picks it up
+				_grab_mote(mt)
+				continue
+		if is_instance_valid(n):
+			var mp: Vector3 = mt["pos"]
+			n.global_position = mp + Vector3(0, 0.55 + 0.12 * sin(m.time * 5.0), 0)
+			n.rotation.y += dt * 4.0
+			_crackle_mote(mt, dt)
+		if float(mt["t"]) <= 0.0:
+			_free_mote(mt, true)
+
+## Her body is over the orb (flat distance, the orb's pickup radius plus her own).
+func _mote_reached(mt: Dictionary) -> bool:
+	var mp: Vector3 = mt["pos"]
+	return Vector2(h.pos.x - mp.x, h.pos.z - mp.z).length() < float(rmb_def()["coil"]["mote_r"]) + h.r
+
+## A flung orb glides to where it lands; one pulled to her ends in her hands (see _grab_mote).
+func _fly_mote(mt: Dictionary, dt: float) -> void:
+	var fly: Dictionary = mt["fly"]
+	var dur := float(e_def()["fling_t"])
+	fly["t"] = float(fly["t"]) + dt
+	var u := clampf(float(fly["t"]) / dur, 0.0, 1.0)
+	var to: Vector3 = fly["to"]
+	if bool(fly["home"]):
+		to = ground(h.pos)
+	mt["pos"] = (fly["from"] as Vector3).lerp(to, 1.0 - (1.0 - u) * (1.0 - u))
+	if u >= 1.0:
+		mt.erase("fly")
+		if bool(fly["home"]):
+			_grab_mote(mt)
+
+## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
+## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+func _grab_mote(mt: Dictionary) -> void:
+	orb_bursts += 1
+	var was_spent := h.dashes < h.max_dashes()
+	h.dashes = h.max_dashes()
+	h.dash_buf = 0.0
+	if was_spent:
+		grant_reset()
+		m.fx.flash(h.position + Vector3(0, 1.0, 0), PINK, 2.4, 0.16)
+		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
+		DashReset.cue(h, "orb")
+	_free_mote(mt, false)
+
+## Wirerun through an orb picks it up like a hand does.
+func _burst_mote(mt: Dictionary) -> void:
+	m.sfx("vv_orb", mt["pos"], -1.0, 1.5)
+	_grab_mote(mt)
+
+func _free_mote(mt: Dictionary, fizzle: bool) -> void:
+	var n = mt.get("node")
+	if n != null and is_instance_valid(n):
+		(n as Node3D).visible = false
+		if fizzle:
+			m.fx.burst((n as Node3D).global_position, PINK, 6, 1.5, 0.3, 0.0, 0.7)
+	motes.erase(mt)
+
+# ------------------------------------------------------------------ E: Skycall (mage_sky.gd)
+func cast_e() -> bool:
+	return sky.cast()
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if int(h.slot_lv["ult"]) > 0 and float(cd["r"]) <= 0.0 and tgt is Hunter and los and dist < 10.0 and randf() < 0.35:
-		h.inp["aim"] = tgt.pos; h.inp["ult"] = true; return
-	# Hex a rival hunter (always worth it on a Runed one: it detonates)
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and tgt is Hunter and los and dist < float(e_def()["range"]) - 1.0 and (runed(tgt) or randf() < 0.3):
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0); h.inp["sig"] = true; return
-	# a Guided Bolt, steered onto them (the bot's aim follows the target while it holds)
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and lock_t <= 0.0 and dist < 16.0 and (res < 75.0 or dist < 3.0):
-		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
+	var aimp := tgt.pos + Vector3(0, 0.9, 0)
+	if not wire.is_empty() or rmb_down or ult.busy():
+		h.inp["aim"] = aimp
+		return
+	if HeroUlt.ready(self) and tgt is Hunter and los and dist < float(x_def()["range"]) and randf() < 0.35:
+		h.inp["aim"] = aimp
+		if HunterKeys.ult_pressed(h):
+			return
+	if float(cd["e"]) <= 0.0 and int(h.slot_lv["kin"]) > 0 and los and dist < 10.0 and randf() < 0.3:
+		h.inp["aim"] = aimp
+		h.inp["sig"] = true
+		return
+	if live(tgt) and h.dashes >= 1.0 and dist < 11.0 and los:
+		h.inp["aim"] = aimp
+		h.inp["dash"] = true
+		bot_hold["dash"] = clampf((dist + 1.5 - 5.0) / 3.5, 0.05, 1.0) * float(dash_def()["hold"]) + 0.05
+		return
+	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.5 and randf() < 0.4:
+		h.inp["aim"] = aimp
 		h.inp["sec"] = true
-		bot_hold["rmb"] = clampf(dist / float(rmb_def()["bolt"]["speed"]) + 0.3, 0.4, 1.6)
-	# Blink out when it's going badly; snap back once it's safe
-	if int(h.slot_lv["dash"]) > 0:
-		if blink_back.is_empty() and h.dashes >= 1.0 and dist < 4.0 and h.hp < h.max_hp * 0.5 and randf() < 0.5:
-			var away := -h.dir_to(tgt)
-			h.inp["aim"] = h.pos + Vector3(away.x, 0, away.y) * 5.0
-			h.inp["dash"] = true
-		elif not blink_back.is_empty() and h.hp > h.max_hp * 0.55 and float(blink_back["t"]) < 1.5 and randf() < 0.4:
-			h.inp["dash"] = true
+		bot_hold["rmb"] = (0.6 + randf() * 0.5) if dist > 5.0 else 0.0

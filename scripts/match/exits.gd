@@ -45,8 +45,6 @@ const LIFT_T := 15.0
 const UPLINK_CD := 30.0
 const STEAL_T := 5.0          # holding someone else's uplink alone this long makes it yours
 const WAVE_CAP := 7           # monsters a single exit's waves can have alive at once
-const KEY_PRICE := 140        # at the market stall
-const KEYS_PER_DAY := 2
 
 var m: Match
 var list: Array = []          # every exit, see _add_*
@@ -70,11 +68,12 @@ func setup(match_node: Match) -> void:
 	if docks.size() > 1:
 		var keep: int = m.rng.randi_range(0, docks.size() - 1)
 		var fr := [0.62, 0.74, 0.86, 0.9, 0.93]
+		if m.rolling: fr = [0.84, 0.89, 0.93, 0.95]     # a rolling session: the docks close in its last few minutes
 		var k := 0
 		for i in docks.size():
 			if i == keep:
 				continue
-			docks[i]["close_at"] = m.length * float(fr[mini(k, fr.size() - 1)])
+			docks[i]["close_at"] = m.at_sess(float(fr[mini(k, fr.size() - 1)]))
 			k += 1
 		docks[keep]["last"] = true
 	for i in list.size():
@@ -146,7 +145,7 @@ func _add_dock(d: Dictionary) -> void:
 	sk.rotation.y = yaw
 	m.add_child(sk)
 	list.append({"kind": "dock", "pos": beacon, "berth": berth, "out": out, "node": n, "skiff": sk, "name": (nm + " Dock") if nm != "" else "Skiff Dock",
-		"state": "idle", "t": 0.0, "open_at": m.length * 0.18, "close_at": 1e9, "team": -1, "caller": "", "hold": {}, "waves": 0, "wave_t": 0.0, "aboard": []})
+		"state": "idle", "t": 0.0, "open_at": m.at_sess(0.18), "close_at": 1e9, "team": -1, "caller": "", "hold": {}, "waves": 0, "wave_t": 0.0, "aboard": []})
 
 func _add_hatch(d: Dictionary) -> void:
 	var p: Vector3 = d["pos"]
@@ -166,7 +165,7 @@ func _add_outpost(d: Dictionary, tut: bool) -> void:
 		_place(pal, at)
 	var nm := _island_name(at)
 	list.append({"kind": "outpost", "pos": at, "node": n, "name": (nm + " Outpost") if nm != "" else "Outpost", "state": "idle", "t": 0.0, "prog": 0.0,
-		"open_at": 0.0 if tut else m.length * 0.22, "team": -1, "hold": {}, "waves": 0, "wave_t": 0.0, "contested": false, "steal": 0.0, "tut": tut})
+		"open_at": 0.0 if tut else m.at_sess(0.22), "team": -1, "hold": {}, "waves": 0, "wave_t": 0.0, "contested": false, "steal": 0.0, "tut": tut})
 
 # ------------------------------------------------------------------ queries
 func of_kind(k: String) -> Array:
@@ -265,7 +264,7 @@ func interact_for(h: Hunter) -> Dictionary:
 						if h.rift_keys > 0:
 							best = {"act": "open", "need": KEY_HOLD, "label": "%s: Unlock with Rift Key  ·  opens in %ds, 3 can drop through (you have %d key%s)" % [key, int(HATCH_UNLOCK_T), h.rift_keys, "" if h.rift_keys == 1 else "s"]}
 						else:
-							best = {"label": "Needs a Rift Key  ·  vaults, bosses, elite monsters, the market"}
+							best = {"label": "Needs a Rift Key  ·  vaults, bosses, elite monsters"}
 					"unlocking":
 						best = {"label": "The hatch is opening  ·  %ds  ·  hold out" % int(ceil(float(x["t"])))}
 					"open":
@@ -355,7 +354,6 @@ func _call(x: Dictionary, h: Hunter) -> void:
 	m.sfx("warn", x["pos"], 0.0, 0.7)
 	m.ping(x["pos"], ExitModels.DOCK)
 	m.fx.ring(x["berth"], 4.0, ExitModels.DOCK, 0.6)
-	m.shake(0.15, x["pos"])
 	var mine: bool = m.player != null and h.team == m.player.team
 	m.add_feed(("%s called a skiff at %s" % [h.pname, x["name"]]) if mine else ("Someone called a skiff at %s" % x["name"]))
 	if m.hud and m.player and not m.player.out:
@@ -492,9 +490,9 @@ func _open_hatch(x: Dictionary, h: Hunter) -> void:
 	m.fx.burst(x["pos"] + Vector3(0, 0.3, 0), ExitModels.HATCH, 12, 2.5, 0.5, -3.0)
 	if m.player and not m.player.out and m.hud and m.player.flat_dist(x["pos"]) < 30.0:
 		if h == m.player:
-			m.hud.toast("RIFT KEY TURNED  ·  THE HATCH OPENS IN %dS" % int(HATCH_UNLOCK_T), ExitModels.HATCH)
+			m.hud.toast("HATCH OPENS IN %dS" % int(HATCH_UNLOCK_T), ExitModels.HATCH)
 		elif h.team != m.player.team:
-			m.hud.toast_small("%s is opening a rift hatch nearby" % h.pname, ExitModels.HATCH)
+			m.hud.toast_small("Rival opening a hatch nearby", ExitModels.HATCH)
 
 func _set_hatch_open(x: Dictionary, open: bool) -> void:
 	var n: Node3D = x["node"]
@@ -558,9 +556,6 @@ func _start(x: Dictionary, h: Hunter) -> void:
 	x["steal"] = 0.0
 	x["started_at"] = m.time
 	x["draining"] = false
-	var n: Node3D = x["node"]
-	n.get_node("Beam").visible = true
-	(n.get_node("Sparks") as CPUParticles3D).emitting = true
 	m.sfx("warn", x["pos"], 0.0, 0.9)
 	m.sfx("zap", x["pos"], -2.0, 0.7)
 	m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.6)
@@ -612,17 +607,6 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			else:
 				x["steal"] = 0.0
 			_waves(x, dt)
-			var ch := n.get_node("Charge") as MeshInstance3D
-			(ch.material_override as ShaderMaterial).set_shader_parameter("arc", float(x["prog"]))
-			var cr := n.get_node("Mast/Crystal") as Node3D
-			cr.rotation.y += dt * (1.0 + 6.0 * float(x["prog"]))
-			# the mast's crystal burns with the charge, and pulses dim while it drains
-			var glow := 0.25 + 1.1 * float(x["prog"])
-			if x["draining"]: glow *= 0.45 + 0.35 * sin(m.time * 7.0)
-			_crystal_glow(n, glow)
-			(n.get_node("Beam") as Node3D).visible = not x["draining"] or sin(m.time * 7.0) > -0.3
-			var zm := (n.get_node("Zone") as MeshInstance3D).material_override as ShaderMaterial
-			zm.set_shader_parameter("color", Color(Color("ff7a5a") if x["contested"] else ExitModels.UPLINK, 0.35 + 0.15 * sin(m.time * 6.0)))
 			if float(x["prog"]) >= 1.0:
 				_open_lift(x)
 		"open":
@@ -635,17 +619,11 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				x["state"] = "spent"
 				x["t"] = UPLINK_CD
 				n.get_node("Lift").visible = false
-				n.get_node("Beam").visible = false
-				(n.get_node("Sparks") as CPUParticles3D).emitting = false
-				((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
 				m.sfx("thump", p, -6.0, 0.8)
 		"fizzling":
 			# a few hard flickers, a sputter each, then dark
 			x["t"] = float(x["t"]) - dt
 			var k := FIZZLE_T - float(x["t"])
-			var on := fmod(k, 0.45) < 0.2
-			(n.get_node("Beam") as Node3D).visible = on
-			_crystal_glow(n, 1.6 if on else 0.05)
 			if int(k / 0.45) != int((k - dt) / 0.45):
 				m.sfx("zap", x["pos"], -3.0, 0.6 + 0.1 * int(k / 0.45))
 				m.fx.ring(x["pos"], OUTPOST_R, ExitModels.UPLINK, 0.3)
@@ -653,17 +631,12 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 				x["state"] = "spent"
 				x["t"] = FIZZLE_CD
 				x["team"] = -1
-				n.get_node("Beam").visible = false
-				(n.get_node("Sparks") as CPUParticles3D).emitting = false
-				_crystal_glow(n, 0.25)
 				m.sfx("thump", x["pos"], -4.0, 0.6)
 		"spent":
 			x["t"] = float(x["t"]) - dt
 			if float(x["t"]) <= 0.0:
 				x["state"] = "idle"; x["team"] = -1; x["prog"] = 0.0
-	var zr := (n.get_node("Zone") as MeshInstance3D)
-	if x["state"] != "charging":
-		(zr.material_override as ShaderMaterial).set_shader_parameter("color", Color(ExitModels.UPLINK, 0.35 if x["state"] in ["idle", "open"] else 0.12))
+	_show_outpost(x, n)
 
 ## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
 func _fizzle(x: Dictionary) -> void:
@@ -681,14 +654,25 @@ func _fizzle(x: Dictionary) -> void:
 		if m.hud and was == m.player.team:
 			m.hud.toast("The uplink shut off: nobody held the yard. Start it again to charge it", ExitModels.UPLINK)
 
-func _crystal_glow(n: Node3D, g: float) -> void:
-	var cr := n.get_node_or_null("Mast/Crystal")
-	if cr == null:
-		return
-	for ch in cr.get_children():
-		if ch is MeshInstance3D and (ch as MeshInstance3D).material_override is ShaderMaterial:
-			((ch as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("glow", g)
-			return      # (the crystal's parts share one material)
+## The outpost's look for its state (OutpostLook): lit with the charge, the banner in the holder's colour,
+## the yard's edge only while you stand in it or it is contested.
+func _show_outpost(x: Dictionary, n: Node3D) -> void:
+	var lit := OutpostLook.lit_of(x)
+	if x["state"] == "fizzling":
+		lit = 1.0 if fmod(FIZZLE_T - float(x["t"]), 0.45) < 0.2 else 0.0
+	elif x.get("draining", false) and x["state"] == "charging":
+		lit *= 0.45 + 0.35 * sin(m.time * 7.0)
+	var raised := OutpostLook.held(x)
+	var col: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if raised else OutpostLook.NEUTRAL
+	var key := [snappedf(lit, 0.01), raised, col]
+	if key != x.get("look"):
+		x["look"] = key
+		OutpostLook.apply(n, lit, col, 1.0 if raised else 0.0)
+	if raised:
+		OutpostLook.sway(n, m.time)
+	var near: bool = m.player != null and in_yard(x, m.player)
+	var charging: bool = x["state"] == "charging"
+	OutpostLook.rings(n, near or x["contested"], x["contested"], charging, float(x["prog"]))
 
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
@@ -700,7 +684,6 @@ func _open_lift(x: Dictionary) -> void:
 	m.sfx("portal", x["pos"], 0.0, 0.8)
 	m.fx.burst(x["pos"] + Vector3(0, 1.0, 0), ExitModels.UPLINK, 34, 6.0, 0.8, -3.0)
 	m.fx.ring(x["pos"], LIFT_R + 0.4, ExitModels.UPLINK, 0.6)
-	m.shake(0.2, x["pos"])
 	if not x.get("tut", false):
 		m.ping(x["pos"], ExitModels.UPLINK)
 		if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
@@ -755,7 +738,7 @@ func _waves(x: Dictionary, dt: float) -> void:
 	if spawned > 0:
 		m.sfx("thump", focus, -4.0, 0.8)
 		if m.player and not m.player.out and m.player.flat_dist(focus) < 24.0 and m.hud:
-			m.hud.toast_small("Monsters are coming at the %s!" % ("dock" if x["kind"] == "dock" else "outpost"), Color("ff9a6a"))
+			m.hud.toast_small("Monsters incoming!", Color("ff9a6a"))
 
 func _wave_spot(focus: Vector3, ii: int) -> Vector3:
 	var W := m.world
@@ -792,7 +775,7 @@ func on_last_team() -> void:
 		if x["kind"] == "dock" and x["state"] == "called" and float(x["t"]) > RUSH_CALL_T:
 			x["t"] = RUSH_CALL_T
 	if m.player and not m.player.out and not m.player.extracted and m.hud:
-		m.hud.toast_small("Last squad standing: skiffs come faster, uplinks charge faster", Color("8fe3c8"))
+		m.hud.toast_small("Last squad: exits speed up", Color("8fe3c8"))
 
 ## The admin menu's "exits ready now".
 func admin_ready() -> void:
@@ -950,23 +933,6 @@ func bot_contest(h: Hunter, reach: float) -> Array:
 ## A Rift Key dropped as loot (vaults, bosses, elite monsters).
 func drop_key(at: Vector3) -> void:
 	m.drop("key", at + Vector3(0, 0.6, 0), 1)
-
-## The market stall's daily limit: how many keys you can still buy today.
-static func keys_left_today() -> int:
-	var today := Time.get_date_string_from_system()
-	var kb: Dictionary = Save.d.get("key_buys", {})
-	if String(kb.get("date", "")) != today:
-		return KEYS_PER_DAY
-	return maxi(0, KEYS_PER_DAY - int(kb.get("n", 0)))
-
-static func buy_key() -> void:
-	var today := Time.get_date_string_from_system()
-	var kb: Dictionary = Save.d.get("key_buys", {})
-	if String(kb.get("date", "")) != today:
-		kb = {"date": today, "n": 0}
-	kb["n"] = int(kb.get("n", 0)) + 1
-	Save.d["key_buys"] = kb
-	Save.add_item("rift_key", 1)
 
 # ------------------------------------------------------------------ screenshots
 ## Test hook (--exit-demo=<mode>): sets up one exit in action next to the player for a screenshot.

@@ -1,0 +1,188 @@
+{
+	"id": "rimewright",
+	"title": "Snowglide",
+	"base_name": "Neve",
+	"gender": "female",
+	"personality": "The star show-skater of the winter canal festival. The night the ice broke she skated the festival crowd to safety, and the frost took her.\nShe glides on the skates that saved them and fights with a candy-cane spear from the festival.",
+	"role": "Rimewright",
+	"weight": "light",
+	"body": {
+		"size": 1.014,
+		"bulk": 1.0,
+		"hit_r": 0.38,
+		"head": 0.6,
+		"legs": 2.04,
+		"torso": 0.96,
+		"shoulder": 0.84,
+		"neck": -0.04
+	},
+	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
+	"color": "#5fd6c4",
+	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
+	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
+	"card": {
+		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
+		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
+		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
+		"rmb": "Ice Spear: pushed out to the cursor, it hits and slows where it lands, then bursts 1.8s later.",
+		"e": "Rink Wall: an ice wall slides toward the cursor, widening and shoving foes; E again freezes it.",
+		"dash": "Skate: hold the dash key to skate where you move; your darts fly straight and thick.",
+		"passive": "Hoarfrost: hits Chill; 8 darts on one foe, or knocking a Chilled foe, Shatters them.",
+		"weapons": {
+			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
+		},
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a 7.2m slowing rink; it cracks open at 3.5s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+	},
+	"signature": "hoar_fan",
+	"resource": {
+		"id": "chill",
+		"name": "Chill",
+		"max": 8,
+		"kind": "on_targets",
+		"dur": 4.0,
+		"col": "#9af0e6"
+	},
+	"passive": {
+		"name": "Hoarfrost",
+		"desc": "Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.",
+		"splinter_dmg": 37.0,
+		"splinter_r": 3.0,
+		"splinter_delay": 0.4,
+		"fan_splinter": 60.0,
+		"fan_hits": 8,
+		"chill_t": 4.0
+	},
+	"dash": {
+		"id": "rinkrun",
+		"name": "Skate",
+		"icon": "dash",
+		"col": "#bff7ef",
+		"cd": 13.0,
+		"speed": 11.5,
+		"max_t": 1.6,
+		"refund": 0.6,
+		"min_t": 0.2,
+		"rink_t": 0.0,
+		"desc": "Hold the dash key to skate at 11.5 m/s where you move, for up to 1.6s, carving curves with the move keys; you carry on over ledges. Let go and you stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.",
+		"steer": 3.6,
+		"ice_gap": 0.2,
+		"ice_look": 2.0,
+		"ice_len": 3.6,
+		"ice_width": 1.6,
+		"ice_time": 5.0,
+		"ice_col": "#bff0ff",
+		"ramp": 0.2,
+		"air_fall": 1.5,
+		"stop": 0.15
+	},
+	"rmb": {
+		"delivery": "projectile",
+		"name": "Ice Spear",
+		"short": "Spear",
+		"icon": "binding",
+		"col": "#8fe8d8",
+		"cooldown": 10.2,
+		"charges": 2,
+		"hold": 0.2,
+		"lance": {
+			"speed": 18.0,
+			"range": 12.0,
+			"hit_r": 0.5,
+			"dmg": 18.0,
+			"impact_r": 1.2,
+			"zone_r": 2.2,
+			"zone_slow": 0.35,
+			"delay": 1.8,
+			"burst_r": 2.7,
+			"burst_dmg": 60.0,
+			"r3_dmg_k": 1.45,
+			"encase_t": 1.5
+		},
+		"variants": {
+			"tap": "Hold to see the landing ring at the cursor (up to 12m) as the spear forms between your palms; let go and you push it out. The spear drives out to the cursor (the further, the longer it takes) and lands there (or on a foe in the way): 18 damage and a short slow to foes within 1.2m, and a 2.2m slow zone (35% slower, Chill) for 1.8s, then it detonates: 60 damage in 2.7m and a brief encasing slow. 2 charges."
+		},
+		"sockets": {
+			"hit": "add",
+			"ctrl": "add",
+			"ctrl_cap": "soft",
+			"mod": "add"
+		}
+	},
+	"e": {
+		"delivery": "wall",
+		"name": "Rink Wall",
+		"short": "Rink",
+		"icon": "dome",
+		"col": "#9af0e6",
+		"cooldown": 17.0,
+		"hp": 70.0,
+		"slide": 4.5,
+		"time": 4.5,
+		"push": 5.0,
+		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
+		"sockets": {
+			"guard": "add",
+			"util": "add"
+		},
+		"tell": 0.2,
+		"reach": 1.8,
+		"length": 1.8,
+		"length_max": 4.5,
+		"travel": 16.2,
+		"travel_min": 4.5,
+		"grow_t": 3.6,
+		"frozen_t": 6.0
+	},
+	"order": [
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin",
+		"sec",
+		"dash",
+		"kin",
+		"gear"
+	],
+	"rank3": {
+		"sec": "the spear's detonation hits 45% harder",
+		"dash": "a Skate over the Abyss lays ice underfoot that holds for 5s",
+		"kin": "the wall is 40 points tougher"
+	},
+	"rank2": {
+		"sec": "Rank 2: cooldown 10.2s -> 9.2s, damage +15%.",
+		"dash": "Rank 2: recharge 13s -> 11s.",
+		"kin": "Rank 2: cooldown 17s -> 15.3s, wall strength +15%."
+	},
+	"rank_next": {
+		"sec": "Rank 3: cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder.",
+		"dash": "Rank 3: recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s.",
+		"kin": "Rank 3: cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength."
+	},
+	"tells": {
+		"half": "a frost glow on foes that grows with each dart",
+		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
+		"dash_spent": "skate blades dark, dash pip dark"
+	},
+	"x": {
+		"name": "Rimelock",
+		"short": "Rime",
+		"icon": "quake",
+		"col": "#7fd8ff",
+		"unlock": 6,
+		"cooldown": 80.0,
+		"radius": 7.2,
+		"snap_t": 0.2,
+		"carry_t": 0.8,
+		"hold": 3.5,
+		"late": 0.75,
+		"late_k": 0.67,
+		"dmg": 40.0,
+		"stun": 0.75,
+		"slow_base": 0.15,
+		"slow_per_s": 0.12,
+		"slow_max": 0.55,
+		"desc": "Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+	}
+}

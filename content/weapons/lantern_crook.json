@@ -1,0 +1,23 @@
+{
+	"id": "lantern_crook",
+	"name": "Ember Cast",
+	"classes": [
+		"medium"
+	],
+	"primary": {
+		"dmg": 8.0,
+		"rate": 0.4,
+		"speed": 30,
+		"kb": 1.0,
+		"spread": 0.0,
+		"range": 12.0,
+		"size": 0.22,
+		"color": "#ffbf5e",
+		"sfx": "tend_ember",
+		"fire_slow": 1.0,
+		"desc": "Nothing held: she pushes an ember out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor. Embers Kindle what they hit (up to 5); hold fire for a second and the next one flies 40% further.",
+		"kick": 0.06,
+		"aim": "max"
+	},
+	"utility": ""
+}

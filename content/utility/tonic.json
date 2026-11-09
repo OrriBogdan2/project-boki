@@ -1,0 +1,17 @@
+{
+ "id": "tonic",
+ "name": "Tonic",
+ "short": "Tonic",
+ "icon": "tonic",
+ "col": "8ff0a0",
+ "use": "drink",
+ "cd": 0.0,
+ "max": 5,
+ "bring": [
+  3,
+  4,
+  5
+ ],
+ "price": 30,
+ "desc": "Drink to heal 40% of your health. You are open while you drink."
+}

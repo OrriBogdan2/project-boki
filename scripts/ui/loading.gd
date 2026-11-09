@@ -11,7 +11,7 @@ const TIPS := [
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
-	"C (or middle mouse) throws your Boki. It stuns whatever it hits, and pressing it again calls it back.",
+	"Your Boki key (or middle mouse) sends your Boki out. It stuns what it hits; press again to call it back.",
 	"Left and right click both belong to your weapon: every weapon has its own right-click ability. Try them in Training.",
 	"You only see what's in front of you. Rivals behind you or past a wall stay hidden, and so do you.",
 	"Tall grass hides you from anyone outside it. Shooting gives you away for a moment.",
@@ -19,25 +19,38 @@ const TIPS := [
 	"Get knocked into a wall and you're stunned. Do it to them first.",
 	"Shots go exactly where you aim. Fast guns sway in the same small pattern every time, and firing slows your step.",
 	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
-	"Crates and barrels break when you shoot or dash through them. Some hide a better weapon.",
+	"One hit breaks a crate, pot or barrel. A red powder keg lights a fuse, then blows: get clear.",
 	"Weapons you find out here are stronger than your own, but only for this expedition.",
 	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
-	"Fight alongside your Boki to fill the bond meter, then R calls its bond ultimate.",
-	"E is your Boki's ability, and every Boki has a different one. Q fires the active glove you found out here.",
+	"Fight alongside your Boki to fill the bond meter, then your Fuse key calls its bond ultimate.",
+	"Every Boki has a different ability, and it uses it by itself. Q fires the active glove you found out here.",
 	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
 	"In a squad, B bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
 	"Gloves drop from chests, vaults and bosses. One active glove (Q) and one passive glove at a time; a new one replaces the old.",
-	"Go down for good and the Boki you brought are left behind. Old Pell's Ransom House sells back the ones nobody claims.",
+	"Go down for good and the Boki you brought are left behind. Old Pell's Black Market sells back the ones nobody claims.",
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
-	"Wild Boki with a ring under them can be tamed. Daze them first, then win them over.",
+	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to mantle onto it.",
+	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
 	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
-	"A Warden's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
+	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
 	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
+]
+## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
+const LORE := [
+	"Everyone born since the Sundering is born without a face. We call ourselves the Empty.",
+	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
+	"The Tyrant never aged, and never forgot the hoard. Under the Crown, it was always the Wyrm.",
+	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
+	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
+	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
+	"Skyfolk, beasts and humans all lost their faces alike. The sky doesn't ask who you were.",
+	"One wish waits in the Wyrmheart: remake the world, or rule it. Every Hunter wants it. So does the Wyrm.",
+	"Not every Mask has a face. Some are a compass, a jar, a pair of skates, and they remember just as much.",
+	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
@@ -55,11 +68,15 @@ var sub := ""
 var mode_line := ""
 var raid := ""           # the raid condition this expedition rolled ("" when it doesn't roll one)
 var tip := ""
+var lore := ""
+var map_name := ""       # the map this expedition is on ("" when unknown)
+var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
 var islands: Array = []  # [x (0..1), y (0..1), size, depth, seed]
 var stars: Array = []
 var sky_tex: GradientTexture2D
 var shade_tex: GradientTexture2D
 var puff: GradientTexture2D
+var _glass_at := {}      # fade step -> the tip card's glass box
 var stage_label := "Building the map"
 var spin_draws := 0      # frames the spinner has drawn (--load-check: one per frame means it never stalled)
 
@@ -86,11 +103,20 @@ func setup(opts: Dictionary) -> void:
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
 		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
-		mode_line = "%s  •  %d squads  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], teams]
+		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
+		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
+		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
+		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
+		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
+		if opts.get("rolling", false):
+			map_id = WideLayout.MAP
+		map_name = String(World.load_layout(map_id).get("name", ""))
+		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
 	tip = tips[randi() % tips.size()]
+	lore = LORE[randi() % LORE.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
 		islands.append([float(i) / 9.0 + r.randf_range(-0.04, 0.04), r.randf_range(0.14, 0.62), r.randf_range(0.7, 1.3), r.randf_range(0.2, 1.0), r.randi()])
@@ -134,6 +160,14 @@ func finish() -> void:
 	while hold > 0.0 and is_inside_tree():
 		hold -= get_process_delta_time()
 		await get_tree().process_frame
+	# gone before the map shows: fading this out over the planning map blended the two for half a
+	# second, so the screen's ink sweeps over first, this goes, and the ink sweeps off the map
+	var sf: ScreenFade = Game.main.get("fade") if Game.main else null
+	if sf and is_inside_tree() and not sf.covered:
+		await sf.cover(0.22)
+		queue_free()
+		sf.reveal(0.4)
+		return
 	leaving = true
 
 ## Names the stage under the spinner (a key of STAGES).
@@ -174,7 +208,9 @@ func _draw() -> void:
 	# text
 	var cx := sz.x * 0.5
 	var base := sz.y * 0.47
-	var kick := "EXPEDITION" if mode_line != "" else "GETTING READY"
+	var kick := "GETTING READY"
+	if mode_line != "":
+		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
 	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
 	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
 	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
@@ -188,24 +224,44 @@ func _draw() -> void:
 	# progress
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
-	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines), tw_, 40.0 + lines)
+	var lore_h := UI.body.get_multiline_string_size(lore, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 14, 3).y + 12.0
+	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines + lore_h), tw_, 40.0 + lines + lore_h)
 	var bw := minf(480.0, sz.x - 80.0)
 	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
-	var track := StyleBoxFlat.new(); track.bg_color = Color(1, 1, 1, a * 0.12); track.set_corner_radius_all(3)
-	c.draw_style_box(track, br)
-	if prog > 0.01:
-		var fill := StyleBoxFlat.new(); fill.bg_color = Color(UI.ACCENT, a); fill.set_corner_radius_all(3)
-		fill.shadow_color = Color(UI.ACCENT, a * 0.45); fill.shadow_size = 6
-		c.draw_style_box(fill, Rect2(br.position, Vector2(maxf(6.0, bw * prog), br.size.y)))
+	var af := snappedf(a, 0.1)
+	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
 	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
 	_text(Vector2(br.position.x + 22.0, br.position.y - 10), stage_label + "…", UI.semi, 13, Color(UI.INK, a * 0.8), 0, HORIZONTAL_ALIGNMENT_LEFT)
 	_text(Vector2(br.end.x, br.position.y - 10), "%d%%" % int(prog * 100.0), UI.semi, 13, Color(UI.INK, a * 0.55), 0, HORIZONTAL_ALIGNMENT_RIGHT)
 	# the tip, on a glass card with a small accent tag
-	var glass := StyleBoxFlat.new(); glass.bg_color = Color(0.04, 0.045, 0.08, a * 0.72); glass.set_corner_radius_all(14)
-	glass.border_color = Color(1, 1, 1, a * 0.07); glass.set_border_width_all(1)
-	c.draw_style_box(glass, card)
+	c.draw_style_box(_glass(af), card)
 	_text(Vector2(cx, card.position.y + 22), "TIP", UI.caps, 11, Color(UI.ACCENT, a), 2)
 	_wrap(Vector2(cx, card.position.y + 26), tip, 15, tw_ - 40.0, Color(UI.INK, a * 0.85))
+	_wrap(Vector2(cx, card.position.y + 30.0 + lines), lore, 14, tw_ - 40.0, Color(UI.TEAL, a * 0.75))
+	_squad_row(Vector2(cx, sz.y * 0.1), a)
+
+## Your squad's portraits and names across the top: who you are dropping with.
+func _squad_row(p: Vector2, a: float) -> void:
+	if party.is_empty():
+		return
+	var px := 72.0
+	var gap := 22.0
+	var x := p.x - (party.size() * px + (party.size() - 1) * gap) * 0.5
+	_text(Vector2(p.x, p.y - 14.0), "YOUR SQUAD", UI.caps, 12, Color(UI.GOLD, a), 2)
+	for m in party:
+		var ak: String = m["arch"]
+		var r := Rect2(x, p.y, px, px)
+		Portraits.draw(c, r, ak, null, Color(Arch.color(ak) if Arch.exists(ak) else UI.MUTED, a))
+		_text(Vector2(x + px * 0.5, p.y + px + 20.0), String(m["name"]), UI.semi, 13, Color(UI.INK, a * 0.9))
+		_text(Vector2(x + px * 0.5, p.y + px + 36.0), Arch.label(ak), UI.body, 12, Color(UI.MUTED, a * 0.9))
+		x += px + gap
+
+## The tip's glass card at a fade step (cached: drawn every frame while loading).
+func _glass(alpha: float) -> UiFrame:
+	if not _glass_at.has(alpha):
+		var g := UI.frame(Color(0.05, 0.045, 0.07, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
+		_glass_at[alpha] = g
+	return _glass_at[alpha]
 
 ## A ring with a turning arc that grows and shrinks as it goes round: moves every frame, so a
 ## stalled frame shows at once.

@@ -1,0 +1,133 @@
+{
+	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`starters`, picked on the first-Relic screen, free at the first portal) and plays the tutorial as Vex. After its first finished expedition the player picks one of `second_picks` as the second Relic; the other two open through their own challenges, like Lace. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
+	"starters": ["gunslinger"],
+	"starter_picks": 1,
+	"second_picks": ["juggernaut", "ashwick", "tender"],
+	"hold_s": 1.6,
+	"tiers": {
+		"easy": "about 1-2 expeditions",
+		"medium": "a handful of expeditions",
+		"hard": "real effort, once other Hunters are open"
+	},
+	"reward_kinds": {
+		"glider": "Glider",
+		"skin": "Skin",
+		"colourway": "Colourway",
+		"emote": "Emote",
+		"title": "Title",
+		"banner": "Banner",
+		"trail": "Trail"
+	},
+	"stats": {
+		"extracts": "expeditions made it out of",
+		"close_out": "escapes after being knocked down",
+		"best_haul": "most items carried out of one expedition",
+		"knocks": "hunters knocked down",
+		"revives": "teammates revived",
+		"caught": "wild Boki brought home",
+		"mobs": "monsters defeated",
+		"staggers": "monsters staggered with abilities",
+		"slams": "enemies knocked into walls",
+		"rings": "air rings flown through",
+		"chests": "chests opened",
+		"stuns": "enemies stunned",
+		"roots": "enemies rooted",
+		"slows": "enemies slowed",
+		"burns": "enemies set burning",
+		"multi3": "abilities that hit 3 enemies at once",
+		"far_hits": "hits from 12 m or more",
+		"air_hits": "hits landed in the air",
+		"kin_hits": "hits by your Boki",
+		"merged_knocks": "knocks while fused",
+		"lowhp_knocks": "knocks under half health"
+	},
+	"unlock": {
+		"juggernaut": {"tier": "easy", "stat": "slams", "target": 3, "text": "Knock 3 enemies into walls"},
+		"archer": {"tier": "easy", "stat": "stuns", "target": 4, "text": "Stun 4 enemies"},
+		"ashwick": {"tier": "easy", "stat": "multi3", "target": 1, "text": "Hit 3 enemies at once with one ability"},
+		"thief": {"tier": "medium", "stat": "air_hits", "target": 12, "text": "Land 12 hits while in the air"},
+		"bulwark": {"tier": "medium", "stat": "lowhp_knocks", "target": 2, "text": "Knock down 2 hunters while under half health"},
+		"mage": {"tier": "medium", "stat": "staggers", "target": 6, "text": "Stagger 6 monsters with abilities"},
+		"dredge": {"tier": "medium", "stat": "best_haul", "target": 8, "text": "Make it out carrying 8 items"},
+		"rimewright": {"tier": "medium", "stat": "slows", "target": 20, "text": "Slow 20 enemies"},
+		"tender": {"tier": "hard", "after": 6, "stat": "revives", "target": 4, "text": "Revive 4 teammates"},
+		"dolm": {"tier": "hard", "after": 6, "stat": "multi3", "target": 5, "text": "Hit 3 enemies at once with one ability, 5 times"},
+		"ostra": {"tier": "hard", "after": 8, "stat": "merged_knocks", "target": 3, "text": "Knock down 3 hunters while fused with your Boki"}
+	},
+	"mastery": {
+		"juggernaut": [
+			{"stat": "slams", "target": 10, "text": "Knock 10 enemies into walls", "reward": {"kind": "colourway", "id": "forge_red", "name": "Forge Red"}},
+			{"stat": "merged_knocks", "target": 2, "text": "Knock down 2 hunters while fused", "reward": {"kind": "emote", "id": "chest_thump", "name": "Chest Thump"}},
+			{"stat": "chests", "target": 8, "text": "Open 8 chests", "reward": {"kind": "banner", "id": "broken_chain", "name": "Broken Chain"}},
+			{"stat": "close_out", "target": 1, "text": "Make it out after being knocked down", "reward": {"kind": "title", "id": "unbowed", "name": "the Unbowed"}}
+		],
+		"gunslinger": [
+			{"stat": "far_hits", "target": 30, "text": "Land 30 hits from 12 m or more", "reward": {"kind": "colourway", "id": "dust_rider", "name": "Dust Rider"}},
+			{"stat": "revives", "target": 2, "text": "Revive 2 teammates", "reward": {"kind": "emote", "id": "hat_tip", "name": "Hat Tip"}},
+			{"stat": "rings", "target": 10, "text": "Fly through 10 air rings", "reward": {"kind": "trail", "id": "spent_brass", "name": "Spent Brass"}},
+			{"stat": "extracts", "target": 3, "text": "Make it out of 3 expeditions", "reward": {"kind": "title", "id": "long_shot", "name": "Long Shot"}}
+		],
+		"archer": [
+			{"stat": "stuns", "target": 12, "text": "Stun 12 enemies", "reward": {"kind": "colourway", "id": "fletcher_green", "name": "Fletcher Green"}},
+			{"stat": "kin_hits", "target": 40, "text": "Your Boki lands 40 hits", "reward": {"kind": "emote", "id": "quiver_spin", "name": "Quiver Spin"}},
+			{"stat": "rings", "target": 8, "text": "Fly through 8 air rings", "reward": {"kind": "glider", "id": "paper_crane", "name": "Paper Crane"}},
+			{"stat": "close_out", "target": 1, "text": "Make it out after being knocked down", "reward": {"kind": "title", "id": "last_arrow", "name": "Last Arrow"}}
+		],
+		"ashwick": [
+			{"stat": "burns", "target": 25, "text": "Set 25 enemies burning", "reward": {"kind": "colourway", "id": "coal_cinder", "name": "Coal and Cinder"}},
+			{"stat": "multi3", "target": 3, "text": "Hit 3 enemies at once with one ability, 3 times", "reward": {"kind": "trail", "id": "ash_drift", "name": "Ash Drift"}},
+			{"stat": "chests", "target": 6, "text": "Open 6 chests", "reward": {"kind": "banner", "id": "lantern_flame", "name": "Lantern Flame"}},
+			{"stat": "caught", "target": 1, "text": "Scan a wild Boki and bring it home", "reward": {"kind": "glider", "id": "ember_leaf", "name": "Ember Leaf"}}
+		],
+		"thief": [
+			{"stat": "air_hits", "target": 25, "text": "Land 25 hits while in the air", "reward": {"kind": "colourway", "id": "midnight_silk", "name": "Midnight Silk"}},
+			{"stat": "stuns", "target": 6, "text": "Stun 6 enemies", "reward": {"kind": "emote", "id": "twirl", "name": "Twirl"}},
+			{"stat": "best_haul", "target": 6, "text": "Make it out carrying 6 items", "reward": {"kind": "title", "id": "light_fingers", "name": "Light Fingers"}},
+			{"stat": "merged_knocks", "target": 1, "text": "Knock down a hunter while fused", "reward": {"kind": "glider", "id": "dusk_moth", "name": "Dusk Moth"}}
+		],
+		"bulwark": [
+			{"stat": "revives", "target": 3, "text": "Revive 3 teammates", "reward": {"kind": "colourway", "id": "oathsteel", "name": "Oathsteel"}},
+			{"stat": "slams", "target": 8, "text": "Knock 8 enemies into walls", "reward": {"kind": "emote", "id": "shield_rap", "name": "Shield Rap"}},
+			{"stat": "close_out", "target": 1, "text": "Make it out after being knocked down", "reward": {"kind": "title", "id": "still_standing", "name": "Still Standing"}},
+			{"stat": "chests", "target": 6, "text": "Open 6 chests", "reward": {"kind": "banner", "id": "iron_oath", "name": "Iron Oath"}}
+		],
+		"mage": [
+			{"stat": "staggers", "target": 10, "text": "Stagger 10 monsters with abilities", "reward": {"kind": "colourway", "id": "storm_violet", "name": "Storm Violet"}},
+			{"stat": "air_hits", "target": 15, "text": "Land 15 hits while in the air", "reward": {"kind": "trail", "id": "static", "name": "Static"}},
+			{"stat": "rings", "target": 12, "text": "Fly through 12 air rings", "reward": {"kind": "banner", "id": "thunderhead", "name": "Thunderhead"}},
+			{"stat": "kin_hits", "target": 50, "text": "Your Boki lands 50 hits", "reward": {"kind": "title", "id": "live_wire", "name": "Live Wire"}}
+		],
+		"dredge": [
+			{"stat": "best_haul", "target": 10, "text": "Make it out carrying 10 items", "reward": {"kind": "glider", "id": "patchwork", "name": "Patchwork Wing"}},
+			{"stat": "stuns", "target": 10, "text": "Stun 10 enemies", "reward": {"kind": "colourway", "id": "rust_brine", "name": "Rust and Brine"}},
+			{"stat": "chests", "target": 10, "text": "Open 10 chests", "reward": {"kind": "title", "id": "salvager", "name": "Salvager"}},
+			{"stat": "caught", "target": 2, "text": "Bring 2 wild Boki home", "reward": {"kind": "emote", "id": "heave_ho", "name": "Heave Ho"}}
+		],
+		"rimewright": [
+			{"stat": "slows", "target": 40, "text": "Slow 40 enemies", "reward": {"kind": "colourway", "id": "hoarfrost", "name": "Hoarfrost"}},
+			{"stat": "rings", "target": 10, "text": "Fly through 10 air rings", "reward": {"kind": "glider", "id": "frost_kite", "name": "Frost Kite"}},
+			{"stat": "revives", "target": 2, "text": "Revive 2 teammates", "reward": {"kind": "emote", "id": "snow_angel", "name": "Snow Angel"}},
+			{"stat": "extracts", "target": 3, "text": "Make it out of 3 expeditions", "reward": {"kind": "title", "id": "rinkmaster", "name": "Rinkmaster"}}
+		],
+		"tender": [
+			{"stat": "revives", "target": 5, "text": "Revive 5 teammates", "reward": {"kind": "skin", "id": "moonbeam", "name": "Moonbeam"}},
+			{"stat": "roots", "target": 10, "text": "Root 10 enemies", "reward": {"kind": "emote", "id": "big_hug", "name": "Big Hug"}},
+			{"stat": "caught", "target": 3, "text": "Bring 3 wild Boki home", "reward": {"kind": "glider", "id": "puff_wings", "name": "Puffball Wings"}},
+			{"stat": "extracts", "target": 5, "text": "Make it out of 5 expeditions", "reward": {"kind": "title", "id": "wisp_keeper", "name": "Wisp Keeper"}},
+			{"stat": "chests", "target": 8, "text": "Open 8 chests", "reward": {"kind": "banner", "id": "moon_lantern", "name": "Moon Lantern"}}
+		],
+		"dolm": [
+			{"stat": "multi3", "target": 5, "text": "Hit 3 enemies at once with one ability, 5 times", "reward": {"kind": "skin", "id": "slate_moss", "name": "Slate and Moss"}},
+			{"stat": "slams", "target": 12, "text": "Knock 12 enemies into walls", "reward": {"kind": "emote", "id": "ground_pound", "name": "Ground Pound"}},
+			{"stat": "chests", "target": 10, "text": "Open 10 chests", "reward": {"kind": "glider", "id": "slate_kite", "name": "Slate Kite"}},
+			{"stat": "close_out", "target": 2, "text": "Make it out after being knocked down, twice", "reward": {"kind": "title", "id": "bedrock", "name": "Bedrock"}}
+		],
+		"ostra": [
+			{"stat": "merged_knocks", "target": 4, "text": "Knock down 4 hunters while fused", "reward": {"kind": "skin", "id": "void_bloom", "name": "Void Bloom"}},
+			{"stat": "stuns", "target": 15, "text": "Stun 15 enemies", "reward": {"kind": "trail", "id": "lantern_motes", "name": "Lantern Motes"}},
+			{"stat": "best_haul", "target": 8, "text": "Make it out carrying 8 items", "reward": {"kind": "title", "id": "swapkeeper", "name": "Swapkeeper"}},
+			{"stat": "rings", "target": 15, "text": "Fly through 15 air rings", "reward": {"kind": "glider", "id": "lantern_moth", "name": "Lantern Moth"}},
+			{"stat": "revives", "target": 3, "text": "Revive 3 teammates", "reward": {"kind": "banner", "id": "tidelight", "name": "Tidelight"}}
+		]
+	}
+}

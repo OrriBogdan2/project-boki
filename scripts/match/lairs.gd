@@ -22,7 +22,7 @@ extends RefCounted
 ## The fight is loud: everyone within ALERT_R hears the boss roar, gets a ping with the boss's icon on
 ## the minimap and the full map, sees a shaft of light over the lair, and the seal's clock floats over
 ## the gate for anyone outside to read. So a squad outside has a choice: camp the gate, or move on.
-## The kill doesn't open the gate straight away. It stays shut for VICTORY_T (15 s) unless someone
+## The kill doesn't open the gate straight away. It stays shut for VICTORY_T (20 s) unless someone
 ## inside pulls the lever by the gate; meanwhile an updraft blows at the back of the lair that only
 ## those who fought can ride, up over the wall and away on the glider from a side the campers aren't
 ## watching. It dies down when the gate opens. Everyone near hears the boss fall, so campers know the
@@ -41,9 +41,10 @@ const GRACE_T := 0.3           # the press that starts the dial doesn't count as
 const GUARD_CAP := 6           # guards a lair can have out at once
 const RUNE_HOLD := 2.2
 const EGG_PING_T := 8.0        # the dropped egg shows on everyone's minimap this long
+const EGG_APART := 4.5         # a boss's Rare Egg lands this far from its loot pile, on a spot of its own
 const CARRY_PING_T := 5.0      # ... and so does whoever picks it up
 const LOCK_T := 90.0           # the longest a fight can keep you sealed in
-const VICTORY_T := 15.0        # after the kill the gate stays shut this long unless the lever is pulled
+const VICTORY_T := 20.0        # after the kill the gate stays shut this long unless the lever is pulled (so campers at the gate wait it out)
 const LEVER_R := 1.7           # reach to pull the gate lever
 const ALERT_R := 150.0         # everyone this close hears a lair fight start (and its boss fall)
 const UP_R := 1.5              # the escape updraft's radius
@@ -553,7 +554,6 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 	m.sfx("boom", L["gate_c"], 0.0, 0.5)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 40, 6.0, 0.7, 4.0, 1.4)
 	m.fx.ring(L["c"], float(L["half"]) + 1.0, color_of(L), 0.8)
-	m.shake(0.4, L["gate_c"])
 	var how_s: String = {"dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
 	m.add_feed("%s %s %s" % [by.pname if by else "Someone", how_s, L["name"]])
 	if m.player and not m.player.out:
@@ -575,7 +575,7 @@ func wake(L: Dictionary, by: Ent) -> void:
 	lbl.text = "%s\n%s" % [L["name"], b.md["name"]]
 	m.sfx("horn", L["c"], 4.0, 0.55)
 	m.sfx("v_warden", L["c"], 6.0, 0.45)
-	m.shake(0.6, L["c"])
+	Shake.incoming_big(m, L["c"], 0.6)
 	m.fx.burst(b.pos + Vector3(0, 2.0, 0), color_of(L), 50, 7.0, 0.8, 0.0, 1.6)
 	m.add_feed("%s has woken in %s" % [b.md["name"], L["name"]])
 	lock_in(L)
@@ -673,36 +673,37 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	L["cleared_by"] = killer.pname if killer else ""
 	# everyone's Boki who fought it cheers (and remembers it)
 	for hh in m.hunters:
-		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "fainted":
+		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "downed":
 			hh.kin.comp.on_boss_kill(String(b.md.get("name", "the boss")), b.pos)
 	(L["nodes"]["label"] as Label3D).text = "%s\nCleared" % L["name"]
 	if L.get("locked", false):
 		_victory(L, b)      # the gate stays shut a moment: the lever, the updraft, or wait it out
 	else:
 		unlock(L)
-	# a small pile, all of it worth having (an Epic or Legendary weapon its killer can use, a strong
-	# glove, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
+	# a small pile, all of it worth having (one Epic or Legendary piece of gear, a Brand upgrade for
+	# its killer's weapon, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
-	var to_mid := Vector2(float(L["c"].x) - at.x, float(L["c"].z) - at.z)
-	var egg_dir := to_mid.normalized() if to_mid.length() > 1.0 else Vector2(-L["out"].y, L["out"].x)
-	var egg_at := _floor_spot(L, at + Vector3(egg_dir.x, 0, egg_dir.y) * 3.6, 1.8)
-	if Vector2(egg_at.x - at.x, egg_at.z - at.z).length() < 2.4:
-		egg_at = _floor_spot(L, at - Vector3(egg_dir.x, 0, egg_dir.y) * 3.6, 1.8)
-	var sp := String(b.md.get("egg", ""))
-	if Data.KIN.has(sp):
-		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
-	var cls := String(killer.cls) if killer else String(Data.CLASSES.keys()[m.rng.randi() % Data.CLASSES.size()])
-	var keys: Array = Data.CLASSES[cls]["weapons"] if Data.CLASSES.has(cls) else Data.weapon_ids()
-	if killer and String(killer.arch) != "" and not Arch.weapons(String(killer.arch)).is_empty():
-		keys = Arch.weapons(String(killer.arch))     # an archetype can only hold its own family: drop one it can use
-	var wit := m.found_weapon(at, String(keys[m.rng.randi() % keys.size()]), 4 if m.rng.randf() < 0.3 else 3)
-	# (1.5 m either side: at 0.9 their names ran into each other)
-	m.spawn_weapon(String(wit["wid"]), int(wit["rar"]), at + Vector3(-1.5, 0, 0.4), "", true, -1, wit)
-	m.spawn_gear(Gear.roll(m.rng), 4 if m.rng.randf() < 0.3 else 3, at + Vector3(1.5, 0, 0.4))
+	# (1.6 m out: at 0.9 their names ran into each other)
+	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
 		m.exits.drop_key(at + Vector3(0, 0, 1.1))
+	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
+	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
+	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)
+		if inside(L, wp["pos"], 0.0): pile_at.append(wp["pos"])
+	var egg_at := at
+	var best := -1.0
+	for k in 12:
+		var a := TAU * float(k) / 12.0
+		var q := _floor_spot(L, at + Vector3(cos(a), 0, sin(a)) * EGG_APART, 1.8)
+		var near := 1e9
+		for pp in pile_at: near = minf(near, Vector2(q.x - pp.x, q.z - pp.z).length())
+		if near > best: best = near; egg_at = q
+	var sp := String(b.md.get("egg", ""))
+	if Data.KIN.has(sp):
+		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
 	# XP for everyone who fought it: the most for the killer's squad
 	for h in m.hunters:
 		if h.out or h.extracted or not inside(L, h.pos, 4.0):
@@ -711,7 +712,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
-		m.offer_perks(killer, "boss")
+		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:
 		if is_instance_valid(a) and not a.dead: a.camp = a.pos
@@ -820,6 +821,27 @@ func _set_updraft(L: Dictionary, on: bool) -> void:
 		m.sfx("glide", L["up"], 4.0, 0.6)
 		m.fx.burst(L["up"] + Vector3(0, 0.6, 0), Color(1, 1, 1), 26, 6.0, 0.6, 6.0, 1.0, Vector3.UP, 20.0)
 
+## The column of light is 12 m tall and stands at the back of the lair, right where the camera looks
+## over it at anyone who has just landed beyond the back wall: it washed the whole view out in a white
+## haze. Hidden from your view while you're outside the lair on its far side (the side the updraft
+## throws you to), shown again as soon as you're back in or round the front. Purely visual.
+func _updraft_view(L: Dictionary) -> void:
+	var vn: Node3D = L["nodes"].get("vent")
+	if not is_instance_valid(vn) or m.player == null or m.cam == null:
+		return
+	var air: Node3D = vn.get_node("Air")
+	var p: Hunter = m.player
+	var u: Vector3 = L["up"]
+	var behind := false
+	if not inside(L, p.pos, 0.0) and not (p.auto_glide and (L["flown"] as Array).has(p)):
+		# from the camera, the column sits between you and the lens: you're further from the camera
+		# than the column is (along the camera's look on the ground) and not far off to its side
+		var fwd := -m.cam.global_basis.z
+		var f2 := Vector2(fwd.x, fwd.z).normalized()
+		var rel := Vector2(p.pos.x - u.x, p.pos.z - u.z)
+		behind = rel.dot(f2) > 0.0 and absf(rel.cross(f2)) < float(L["half"]) + 4.0 and rel.length() < float(L["half"]) * 2.0 + 10.0
+	air.visible = not behind
+
 ## Out of the column the updraft's glide carries you on to the landing spot beyond the wall and sets
 ## you down there; steer (or take the glide key) and you fly yourself instead.
 func _tick_flyers(L: Dictionary) -> void:
@@ -861,6 +883,7 @@ func _tick_updraft(L: Dictionary, dt: float) -> void:
 	var u: Vector3 = L["up"]
 	var land: Vector3 = L["up_land"]
 	var top := u.y + UP_TOP
+	_updraft_view(L)
 	for h in m.hunters:
 		if h.out or h.extracted or h.remote or h.riding or h.dropping or h.downed:
 			continue
@@ -1396,9 +1419,10 @@ func bot_pickups() -> void:
 				break
 
 # ------------------------------------------------------------------ test hooks
-## --lair-demo=puzzle|fight|egg|sealed|victory|outside: a scene set up for a screenshot ("sealed": just
+## --lair-demo=puzzle|fight|egg|sealed|victory|updraft|outside: a scene set up for a screenshot ("sealed": just
 ## inside the gate after it has shut behind you; "victory": the boss just fallen, the gate still shut,
-## you by the lever with the updraft blowing at the back; "outside": a rival squad sealed in with the
+## you by the lever with the updraft blowing at the back; "updraft": the same, then you step into the
+## updraft and ride it out over the back wall (LAIRDEMO lines time the ride); "outside": a rival squad sealed in with the
 ## boss and you outside its gate, the alert's beam over the lair and the seal's clock over the gate;
 ## "outside_map": the same with the full map open on the alert).
 func demo(mode: String) -> void:
@@ -1423,14 +1447,24 @@ func demo(mode: String) -> void:
 					P.teleport(Vector3(back.x, m.world.ground_at(back.x, back.z), back.z))
 				for o in m.hunters:
 					if o != P and o.team == P.team: o.hp = o.max_hp
-		if mode == "victory":
+		if mode in ["victory", "updraft"]:
 			var b: Boss = boss_of(L)
 			if b and not b.dead and L.get("locked", false):
 				b.hurt(b.max_hp * 3.0, null, {"src": "test"})      # (no killer: no perk choice over the shot)
-			m.cam.zoom = 1.9; m.cam.zoom_to = 1.9      # (the match eases the camera back to 1 every frame)
+			if mode == "victory":
+				m.cam.zoom = 1.9; m.cam.zoom_to = 1.9      # (the match eases the camera back to 1 every frame)
 			if L.get("victory", false):
 				L["victory_at"] = m.time - 2.2      # (hold the clock for the shot)
 				P.hp = P.max_hp
+				if mode == "updraft" and L.get("up_on", false) and not m.has_meta("updraft_demo"):
+					# step into the escape updraft and ride it out (--shot-times= for the whole ride)
+					m.set_meta("updraft_demo", m.time)
+					var u: Vector3 = L["up"]
+					P.teleport(Vector3(u.x, m.world.ground_at(u.x, u.z), u.z))
+					print("LAIRDEMO into the updraft at %.1f" % m.time)
+				if mode == "updraft" and m.has_meta("updraft_demo") and P.grounded and not inside(L, P.pos, 0.0) and not m.has_meta("updraft_landed"):
+					m.set_meta("updraft_landed", m.time)
+					print("LAIRDEMO landed outside at %.1f (%.1f s after stepping in)" % [m.time, m.time - float(m.get_meta("updraft_demo"))])
 		if mode in ["outside", "outside_map"]:
 			if mode == "outside_map" and m.hud and not m.hud.map_open() and L.get("locked", false) and m.time - float(L.get("alert_at", m.time)) > 0.8:
 				m.hud.open_map()
@@ -1476,7 +1510,7 @@ func demo(mode: String) -> void:
 			var b: Boss = boss_of(L)
 			if mode == "egg" and b:
 				b.hurt(b.max_hp * 2.0, P, {"src": "test"})
-		"victory":
+		"victory", "updraft":
 			open(L, P, "dial")
 			L["gate_k"] = 0.999
 			var out: Vector3 = Vector3(L["out"].x, 0, L["out"].y)
@@ -1488,7 +1522,8 @@ func demo(mode: String) -> void:
 					var q: Vector3 = L["up"] + out * 2.2 + side * 1.2
 					o.teleport(Vector3(q.x, m.world.ground_at(q.x, q.z), q.z))
 					o.ctrl = "idle"
-			m.cam.zoom_to = 2.0; m.cam.zoom = 2.0
+			if mode == "victory":
+				m.cam.zoom_to = 2.0; m.cam.zoom = 2.0
 			m.cam.snap(P.pos)
 			wake(L, P)
 		"outside", "outside_map":

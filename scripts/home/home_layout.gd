@@ -47,6 +47,8 @@ const CATALOG := {
 	"path_wood": {"name": "Boardwalk", "cat": "Paths", "gems": 2, "brush": "path", "col": "8a6242"},
 	"path_clear": {"name": "Grass (clear)", "cat": "Paths", "gems": 0, "brush": "clear"},
 	"clear_wild": {"name": "Clear the wild", "cat": "Island", "gems": 3, "brush": "wild"},
+	"river": {"name": "River", "cat": "Paths", "gems": 2, "brush": "water", "block": true,
+		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
 	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
@@ -94,7 +96,7 @@ const CATALOG := {
 	"house": {"name": "House", "cat": "Buildings", "gems": 90, "size": [5, 3], "block": true, "fixture": "house", "max": 1, "door": true,
 		"desc": "Your home. Go inside to rest and decorate; Boki nap here too. Its door needs open ground."},
 	"crop_patch": {"name": "Crop patch", "cat": "Buildings", "gems": 30, "size": [5, 4], "fixture": "farm", "max": 0,
-		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch."},
+		"desc": "Four plots of tilled soil to sow and water. Buying more plots at the market makes room for another patch. Put it within 2 tiles of water and it waters itself."},
 	"cook_pot": {"name": "Cooking pot", "cat": "Buildings", "gems": 20, "block": true, "fixture": "pot", "max": 1,
 		"desc": "Cook what you grow into treats for your Boki."},
 	"market_stall": {"name": "Market stall", "cat": "Buildings", "gems": 30, "size": [3, 2], "block": true, "fixture": "stall", "max": 1,
@@ -112,11 +114,11 @@ const CATALOG := {
 const FIXTURES := {"house": "house", "farm": "crop_patch", "pot": "cook_pot", "stall": "market_stall", "nook": "nesting_nook",
 	"burrow": "boki_burrow", "yard": "training_post", "graves": "graveyard"}
 ## What a farm-start island begins with: the portal, wild meadow and gems for a house and the essentials
-## (house 90 + crop patch 30 + cooking pot 20 = 140, the market stall 30 more, and a few to spare).
+## (house 90 + crop patch 30 + cooking pot 20 = 140, and some to spare; the market stall comes with the island).
 const FS_GEMS := 200
 ## The landing by the portal, kept clear on a farm-start island: you arrive here.
 const LANDING := Vector3(38.5, 0, 35.5)
-const CATS := ["Buildings", "Work", "Fences", "Paths", "Garden", "Lights", "Furniture", "Statues", "Island"]
+const CATS := ["Buildings", "Work", "Fences", "Paths", "Garden", "Lights", "Furniture", "Statues", "Upgrades", "Island"]
 const COLOURS := ["e0607e", "f2c84a", "5ab0f0", "8fd16a", "b48cf2", "f3eee2"]
 
 ## The farm's lamps and flower beds start out as decorations, so they can be moved or put away too.
@@ -141,6 +143,7 @@ static func new_fs(d: Dictionary, seed := -1) -> Dictionary:
 		seed = r.randi_range(1, 2147483646)
 	L["seed"] = seed
 	L["fs"] = 1
+	L["fb"] = 1               # the farm-building pass: unlocks, construction sites, upgrades (FarmUnlocks, FarmSites)
 	L["made"] = true          # no "Make it home" suggestions: you choose where everything goes
 	L["sk"] = fs_scale(seed)
 	d["layout"] = L
@@ -159,7 +162,7 @@ static func fixtures(d: Dictionary, fx: String) -> Array:
 	var id := String(FIXTURES.get(fx, ""))
 	var out: Array = []
 	for e in of(d).get("deco", []):
-		if String(e.get("id", "")) == id: out.append(e)
+		if String(e.get("id", "")) == id and not FarmSites.is_site(e): out.append(e)
 	out.sort_custom(func(a, b): return int(a["u"]) < int(b["u"]))
 	return out
 
@@ -222,6 +225,7 @@ static func ensure(d: Dictionary) -> Dictionary:
 			e["x"] = int(e.get("x", 0)); e["z"] = int(e.get("z", 0)); e["r"] = int(e.get("r", 0)) % 4
 			if not e.has("u"): e["u"] = _next_uid(L)
 			e["u"] = int(e["u"])
+			FarmSites.clean(e)
 			keep.append(e)
 	L["deco"] = keep
 	for b in (L["b"] as Dictionary).keys():
@@ -321,7 +325,7 @@ static func stations(d: Dictionary, el := "") -> Array:
 	var out: Array = []
 	for e in of(d).get("deco", []):
 		var c: Dictionary = CATALOG.get(String(e.get("id", "")), {})
-		if c.has("work") and (el == "" or String(c["work"]) == el):
+		if c.has("work") and (el == "" or String(c["work"]) == el) and not FarmSites.is_site(e):
 			out.append({"e": e, "id": String(e["id"]), "el": String(c["work"])})
 	return out
 
@@ -338,9 +342,138 @@ static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
 		defs.append([k, Data.ISLES[k]["c"], Data.ISLES[k]["r"]])
-	defs.append_array(HomeTraining.defs())      # the Training Grounds, which every home has
 	world.make_islands(SEED, W, H, defs)
 	grow_main(world, level, seed, sk)
+	var spans := {}
+	# a farm-start island's ponds and cliffs (wild_fs) can't take a bridge's foot or its sign
+	var bad := {}
+	if sk > 0.0:
+		var wt := wild_fs(world, seed, sk, {})
+		for i in wt:
+			if String(wt[i]) in ["water", "cliff"]: bad[i] = true
+	for k in Data.ISLES:
+		spans[k] = bridge_span(world, k, bad)
+	world.set_meta("isle_bridges", spans)
+
+## (feelfix) Where the bridge to isle k goes on this world: {"rect": [x0, z0, x1, z1], "sign":
+## Vector2}. The main island's outline differs per seed, so the span is found from the real edges:
+## along the isle's usual axis (Data.ISLES[k]["bridge"]), the two-tile-wide strip with the shortest
+## run of open sky that starts on the isle's edge and ends on the main island's edge, both ends at
+## ground level, nothing else in between. The sign (where you build it) stands on the main island
+## beside the bridge's foot. Falls back to the fixed rect if no strip fits.
+static func bridge_span(world: World, k: String, bad := {}) -> Dictionary:
+	var rc: Array = Data.ISLES[k]["bridge"]
+	var fallback := {"rect": rc, "sign": Data.ISLES[k]["sign"]}
+	var ii := -1
+	for i in world.islands.size():
+		if String(world.islands[i]["id"]) == k: ii = i
+	if ii < 0:
+		return fallback
+	var horiz: bool = rc[2] - rc[0] > rc[3] - rc[1]
+	var ic: Vector2 = Data.ISLES[k]["c"]
+	var mid: float = (rc[1] + rc[3]) * 0.5 if horiz else (rc[0] + rc[2]) * 0.5
+	# which way the main island lies from the isle, along the bridge
+	var dir: float = signf(((rc[0] + rc[2]) * 0.5 - ic.x) if horiz else ((rc[1] + rc[3]) * 0.5 - ic.y))
+	if dir == 0.0: dir = 1.0
+	var ic_a := int(floor(ic.x if horiz else ic.y))
+	var limit := world.w if horiz else world.h
+	var at := func(a: int, b: int) -> int:     # tile index at (along a, across b)
+		var x := a if horiz else b; var z := b if horiz else a
+		return world.idx(x, z) if world.inb(x, z) else -1
+	var level_ok := func(a: int, b: int) -> bool:
+		var x := (a if horiz else b); var z := (b if horiz else a)
+		if not world.inb(x, z) or bad.has(world.idx(x, z)): return false
+		return absf(world.ground_at(x + 0.5, z + 0.5)) < 0.3
+	var cands: Array = []
+	for off in range(-8, 9):
+		var b0 := int(floor(mid)) + off
+		var a_start := -1; var a_end := -1; var good := true
+		for b in [b0, b0 + 1]:
+			# from the isle's centre walk toward the main island: isle ground, then sky, then main ground
+			var a := ic_a; var last_isle := -1; var first_main := -1
+			while a >= 0 and a < limit:
+				var i: int = at.call(a, b)
+				if i < 0: break
+				if world.island[i] == ii and world.kind[i] != World.T_VOID:
+					last_isle = a
+				elif world.kind[i] != World.T_VOID:
+					var nx: int = at.call(a + int(dir), b)
+					if world.island[i] == 0 and last_isle >= 0 and nx >= 0 and world.kind[nx] == World.T_VOID:
+						a += int(dir)      # (a one-tile spur: carry on past it)
+						continue
+					if world.island[i] == 0 and last_isle >= 0: first_main = a
+					break
+				elif last_isle >= 0 and absf(a - last_isle) > 24:
+					break
+				a += int(dir)
+			if last_isle < 0 or first_main < 0 or not level_ok.call(last_isle, b) or not level_ok.call(first_main, b) or not level_ok.call(first_main + int(dir), b):
+				good = false; break
+			var s0 := last_isle + int(dir); var s1 := first_main - int(dir)
+			a_start = s0 if a_start < 0 else (maxi(a_start, s0) if dir > 0 else mini(a_start, s0))
+			a_end = s1 if a_end < 0 else (mini(a_end, s1) if dir > 0 else maxi(a_end, s1))
+		if not good: continue
+		# both columns must be open sky over the whole span (the shorter column's ends are trimmed
+		# by the longer one's land, so check the union run is all sky or the two islands)
+		var lo := mini(a_start, a_end); var hi := maxi(a_start, a_end)
+		if (hi - lo) < 0 or (dir > 0 and a_start > a_end) or (dir < 0 and a_start < a_end):
+			continue
+		var clean := true
+		for b in [b0, b0 + 1]:
+			for a in range(lo, hi + 1):
+				var i: int = at.call(a, b)
+				if i < 0 or (world.kind[i] != World.T_VOID and world.island[i] != 0 and world.island[i] != ii): clean = false
+		if not clean: continue
+		cands.append({"b0": b0, "lo": lo, "hi": hi, "score": float(hi - lo) + absf(off) * 0.35})
+	cands.sort_custom(func(p, q): return float(p["score"]) < float(q["score"]))
+	for cd in cands:
+		# span the gap from isle edge to main edge (the land tiles at either end are left as they are)
+		var lo2: int = cd["lo"]; var hi2: int = cd["hi"]
+		var b0b: int = cd["b0"]
+		# extend to cover any sky the shorter column still has next to the land
+		while true:
+			var grow := false
+			for b in [b0b, b0b + 1]:
+				var i: int = at.call(lo2 - 1, b)
+				if i >= 0 and world.kind[i] == World.T_VOID: grow = true
+			if not grow: break
+			lo2 -= 1
+		while true:
+			var grow := false
+			for b in [b0b, b0b + 1]:
+				var i: int = at.call(hi2 + 1, b)
+				if i >= 0 and world.kind[i] == World.T_VOID: grow = true
+			if not grow: break
+			hi2 += 1
+		var foot := (hi2 + 1) if dir > 0 else (lo2 - 1)
+		var head := (lo2 - 1) if dir > 0 else (hi2 + 1)
+		# both ends land on the right island at ground level, in both columns
+		var ends_ok := true
+		for b in [b0b, b0b + 1]:
+			var fi: int = at.call(foot, b); var hi_: int = at.call(head, b)
+			if fi < 0 or hi_ < 0 or world.island[fi] != 0 or world.kind[fi] == World.T_VOID or world.island[hi_] != ii or world.kind[hi_] == World.T_VOID:
+				ends_ok = false
+			elif not level_ok.call(foot, b) or not level_ok.call(head, b) or not level_ok.call(foot + int(dir), b):
+				ends_ok = false
+		if not ends_ok: continue
+		var rect: Array = [lo2, b0b, hi2, b0b + 1] if horiz else [b0b, lo2, b0b + 1, hi2]
+		# the sign: on the main island, a step back from the bridge's foot, to one side
+		var sign := Vector2.INF
+		for cand in [[foot + int(dir), b0b - 1], [foot + int(dir), b0b + 2], [foot, b0b - 1], [foot, b0b + 2], [foot + 2 * int(dir), b0b - 1], [foot + 2 * int(dir), b0b + 2]]:
+			var i: int = at.call(cand[0], cand[1])
+			if i >= 0 and world.island[i] == 0 and world.kind[i] == World.T_GROUND and level_ok.call(cand[0], cand[1]):
+				var along := float(cand[0]) + 0.5; var across := float(cand[1]) + (0.6 if cand[1] < b0b else 0.4)
+				sign = Vector2(along, across) if horiz else Vector2(across, along)
+				break
+		if sign == Vector2.INF: continue
+		return {"rect": rect, "sign": sign}
+	return fallback
+
+## The bridge to isle k on this home world (bridge_span, worked out when the world was made).
+static func isle_bridge(world: World, k: String) -> Dictionary:
+	if world and world.has_meta("isle_bridges"):
+		var sp: Dictionary = world.get_meta("isle_bridges")
+		if sp.has(k): return sp[k]
+	return {"rect": Data.ISLES[k]["bridge"], "sign": Data.ISLES[k]["sign"]}
 
 ## The meadow's outline. seed 0 is the classic island; any other seed gives its own shape: the
 ## meadow's size wobbles, its edge noise differs and one to three headlands bulge out of it.
@@ -419,7 +552,7 @@ static func expand_gain(level: int, seed := 0, sk := 0.0) -> int:
 ## Every farm-start island has about this much land before any expansion (the classic island's
 ## meadow is about the same), whatever its shape.
 const FS_LAND := 1250
-## Land kept for every bridge to land on (the isles', the Training Grounds'): a small rise of
+## Land kept for every bridge to land on (the isles'): a small rise of
 ## ground always meets each one, whatever the island's shape.
 const FS_FEET := [[Vector2(62.5, 29.5), Vector2(3.4, 3.0)], [Vector2(34.5, 45.5), Vector2(3.4, 3.2)], [Vector2(28.5, 25.5), Vector2(3.0, 3.0)],
 	[Vector2(26.0, 30.5), Vector2(3.0, 3.0)], [Vector2(44.5, 24.5), Vector2(3.0, 3.0)], [Vector2(39.5, 45.0), Vector2(3.0, 3.0)]]

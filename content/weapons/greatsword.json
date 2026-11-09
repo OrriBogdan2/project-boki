@@ -15,8 +15,6 @@
   "rate": 0.5,
   "combo_reset": 0.9,
   "speed": 40,
-  "mag": 1,
-  "reload": 0.1,
   "kb": 3.2,
   "spread": 0.0,
   "range": 3.4,
@@ -29,7 +27,7 @@
   "charged_kb": 8.0,
   "size": 0.25,
   "color": "#ffb070",
-  "sfx": "cleave",
+  "sfx": "juggernaut_blade_hiss",
   "desc": "A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far.",
   "kick": 0.1
  },

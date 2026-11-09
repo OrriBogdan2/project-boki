@@ -1,0 +1,24 @@
+{
+	"id": "rubble_fists",
+	"name": "Rubble Fists",
+	"classes": ["medium"],
+	"hero_only": true,
+	"primary": {
+		"melee": true,
+		"dmg": 9.0,
+		"rate": 0.6,
+		"speed": 24,
+		"kb": 1.5,
+		"spread": 0.0,
+		"range": 11.0,
+		"arc": 120.0,
+		"charge_time": 1.0,
+		"size": 0.3,
+		"color": "#d9a35b",
+		"sfx": "thump",
+		"fire_slow": 0.85,
+		"desc": "Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying.",
+		"kick": 0.1
+	},
+	"utility": ""
+}

@@ -1,0 +1,38 @@
+{
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"kit_owns": [],
+	"dash": {
+		"ground": {
+			"lmb": {"mode": "fire", "carry": true, "source": "Footage tip 'Punch to Extend Dash/RMB': a punch during Landslide goes off and carries her on. Ours: the boulder or punch goes off mid-hop and the hop's arc carries on (a punch's step pushes him a little further); every hop of a Rock Hop chain counts as the dash."},
+			"rmb": {"mode": "fire", "carry": true, "source": "Footage tip 'Dash -> RMB Dunk Combo' (0965-1010): Landslide shoves the foe out, then she leap-slams onto it. Ours: the charge starts mid-hop; let go in the air and the slam lands where the hop does, which ends the chain there."},
+			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground; nothing on casting it mid-Landslide. Ours: held to the end of the chain, then raised from there."},
+			"x": {"mode": "fire", "source": "Not in the data or footage. Tetraform is placed at the cursor, not at her, so the aim starts mid-hop; the ridge rises on release."},
+			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
+		},
+		"air": {
+			"lmb": {"mode": "fire", "source": "Not in the data or footage (the source shows no air dash). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "fire", "source": "Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam."},
+			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash)."},
+			"x": {"mode": "fire", "source": "Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash."},
+			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-dash like any glove."}
+		}
+	},
+	"into_dash": {
+		"lmb": {"mode": "fire", "source": "Not in the data or footage. Shift during the punch's wind-up hops at once; the hold carries on and the punch goes on release."},
+		"rmb": {"mode": "fire", "source": "Footage: jumping while charging leaps her forward with the circle; Shift during the charge does the same with Rock Hop (the circle comes along, the charge carries on)."},
+		"e": {"mode": "fire", "source": "Not in the data or footage. The rocks are already placed during the 0.2s flash; Shift hops at once and they rise anyway."},
+		"x": {"mode": "fire", "source": "Not in the data or footage. Shift while aiming the ridge hops at once; the aim carries on."}
+	},
+	"hold": {
+		"lmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		},
+		"rmb": {
+			"ground": {"mode": "keep"},
+			"air": {"mode": "keep"},
+			"jump": {"mode": "keep"}
+		}
+	}
+}

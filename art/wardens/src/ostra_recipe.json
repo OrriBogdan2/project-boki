@@ -1,0 +1,20 @@
+{
+ "doc": "Ostra (ostra): RECIPE_95 spec (docs/art/wardens/RECIPE_95.md). Steps 2-4 ran before the recipe (stage 1, art/wardens/ostra/IMPORT.md): this spec drives fit, shots and checks. python3 tools/meshy/recipe.py art/wardens/src/ostra_recipe.json <steps>",
+ "name": "ostra",
+ "arch": "ostra",
+ "tag": "b18",
+ "raw": "~/meshy/ostra",
+ "art": {
+  "ref": "origin/ext/imagegen",
+  "turnaround": "docs/art/gen/wardens_r2/ostra_turnaround.webp",
+  "side": "docs/art/gen/wardens_r2/ostra_side.webp",
+  "portrait": "docs/art/gen/wardens_r2/ostra_portrait.webp",
+  "face": "docs/art/gen/wardens_r2/ostra_mask_sheet.webp",
+  "head_sheet": "docs/art/gen/wardens_r2/ostra_head_sheet.webp",
+  "cap_halo": "docs/art/gen/wardens_r2/ostra_cap_halo_sheet.webp",
+  "front_float": "docs/art/gen/wardens_r2/ostra_front_float.webp"
+ },
+ "bake": "art/wardens/src/ostra_bake.json",
+ "fit": "art/wardens/src/ostra_fit.json",
+ "combo_check": "--ostra-combo-check"
+}

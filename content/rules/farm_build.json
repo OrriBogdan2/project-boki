@@ -1,0 +1,58 @@
+{
+	"desc": "The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that you hammer (hold interact) and your Boki help build; the materials are spent a quarter at a time as the work goes; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is work swings (one hammer beat of yours is 0.8 s, one swing of a Boki is about 3 s at building skill 1).",
+	"points": {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0},
+	"points_doc": "Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm.",
+	"levels": [0, 6, 16, 30, 48, 70],
+	"levels_doc": "Points needed for farm level 1..6 (index 0 is level 1).",
+	"milestones": {
+		"first_run": {"name": "First expedition", "stat": "matches", "n": 1, "text": "Go on your first expedition"},
+		"first_extract": {"name": "First extraction", "stat": "extracts", "n": 1, "text": "Make it out of an expedition once"},
+		"first_boss": {"name": "First boss", "stat": "bosses", "n": 1, "text": "Defeat a boss in a lair"},
+		"scan3": {"name": "Three scanned", "stat": "caught", "n": 3, "text": "Scan and bring home 3 wild Boki"}
+	},
+	"water": {"reach": 2, "tip": "Within 2 tiles of water, a crop patch waters itself.", "doc": "A crop patch whose footprint is within reach tiles of water (a pond, a painted river or the wild water) tends its own plots (FarmWater)."},
+	"lots": {"board": {"wood": 6, "stone": 4}},
+	"lots_doc": "Wood and stone a building LOT costs on a farm under the building pass, instead of its gem price in Data.BUILDINGS (the Challenge House: Hob draws it up after the first expedition).",
+	"starter": ["crop_patch", "cook_pot"],
+	"starter_doc": "Placed at once, no site. The house is not here: it goes up as a site you and your Boki build (build.house): 10 wood and 6 stone, spent as it goes up.",
+	"start_doc": "What Hob offers from the first minute is every item with no entry in unlock: house, crop_patch, cook_pot, ranch_pen, fence, path_dirt, flowers (and the feeder in storage). Everything in unlock opens by farm level or milestone and is then drawn up when you talk to Hob (scripts/home/farm_builder.gd).",
+	"unlock": {
+		"path_clear": {"level": 2}, "picket": {"level": 2}, "path_stone": {"level": 2}, "bush": {"level": 2}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2},
+		"market_stall": {"level": 3}, "boki_burrow": {"level": 3}, "training_post": {"level": 3}, "tree": {"level": 3}, "lantern": {"level": 3}, "bench": {"level": 3}, "kin_bed": {"level": 3}, "hearth_oven": {"level": 3}, "workbench": {"level": 3}, "nesting_nook": {"level": 3},
+		"seed_garden": {"level": 4}, "workshop": {"level": 4}, "graveyard": {"level": 4}, "stone_wall": {"level": 4}, "hedge": {"level": 4}, "path_wood": {"level": 4}, "pine": {"level": 4}, "lamp_post": {"level": 4}, "rug": {"level": 4}, "cottage": {"level": 4},
+		"kiln": {"level": 5}, "spark_mill": {"level": 5}, "infirmary": {"level": 5}, "cold_store": {"level": 5}, "water": {"level": 5}, "rug_long": {"level": 5}, "banner": {"level": 5}, "pillar": {"level": 5},
+		"blossom_tree": {"milestone": "scan3"}, "kin_statue": {"milestone": "scan3"}, "fountain": {"milestone": "first_boss"}, "armory": {"milestone": "first_extract"}, "board": {"milestone": "first_run"}, "shrine": {"milestone": "first_boss"}
+	},
+	"cradles": {"6": 4, "7": 5, "8": 6},
+	"cradles_doc": "Incubator cradle number -> farm level that lets you buy it.",
+	"build": {
+		"house": {"wood": 10, "stone": 6, "labour": 12},
+		"market_stall": {"gems": 10, "wood": 6, "fibre": 4, "labour": 4},
+		"nesting_nook": {"gems": 15, "wood": 10, "fibre": 6, "labour": 6},
+		"boki_burrow": {"gems": 12, "wood": 8, "stone": 5, "fibre": 4, "labour": 6},
+		"training_post": {"gems": 10, "wood": 8, "stone": 2, "labour": 4},
+		"graveyard": {"gems": 8, "stone": 10, "fibre": 2, "labour": 5},
+		"job_board": {"gems": 5, "wood": 4, "labour": 3},
+		"lumber_camp": {"gems": 8, "wood": 4, "stone": 2, "labour": 4},
+		"quarry": {"gems": 8, "wood": 4, "stone": 2, "labour": 4},
+		"storage_chest": {"gems": 5, "wood": 5, "fibre": 2, "labour": 3},
+		"hearth_oven": {"gems": 12, "wood": 6, "stone": 6, "labour": 5},
+		"workbench": {"gems": 10, "wood": 8, "fibre": 2, "labour": 5},
+		"spark_mill": {"gems": 16, "wood": 8, "stone": 6, "coals": 1, "labour": 7},
+		"cold_store": {"gems": 14, "wood": 4, "stone": 8, "fibre": 3, "labour": 6},
+		"ranch_pen": {"gems": 12, "wood": 10, "fibre": 6, "labour": 6},
+		"infirmary": {"gems": 14, "wood": 6, "stone": 6, "fibre": 4, "labour": 6},
+		"seed_garden": {"gems": 8, "wood": 4, "fibre": 4, "labour": 4},
+		"kiln": {"gems": 10, "stone": 8, "wood": 2, "labour": 5}
+	},
+	"upgrade": {
+		"2": {"gems": 20, "wood": 8, "stone": 6, "fibre": 4, "labour": 6, "level": 3},
+		"3": {"gems": 45, "wood": 14, "stone": 12, "coals": 2, "fibre": 8, "labour": 10, "level": 5}
+	},
+	"upgrade_doc": "Cost to reach tier 2 and tier 3. 'level' is the farm level it needs. Work stations work 25% / 50% faster at L2 / L3.",
+	"tier_speed": [1.0, 1.25, 1.5],
+	"tier_names": ["", "Sturdy", "Fine"],
+	"upgradable": ["house", "crop_patch", "cook_pot", "market_stall", "nesting_nook", "boki_burrow", "training_post", "graveyard", "job_board", "lumber_camp", "quarry", "storage_chest", "hearth_oven", "workbench", "spark_mill", "cold_store", "ranch_pen", "infirmary", "seed_garden", "kiln"],
+	"house_upgrade": {"2": {"gems": 40, "wood": 10, "stone": 6, "fibre": 6, "labour": 8, "level": 3}, "3": {"gems": 80, "wood": 18, "stone": 14, "coals": 2, "fibre": 10, "labour": 12, "level": 5}},
+	"crew_slots": 2
+}

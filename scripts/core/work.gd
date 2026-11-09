@@ -343,7 +343,7 @@ static func catch_up(now := -1.0) -> Array:
 				Save.add_item("coals", n)
 				what = "%d Ember Coal%s (from %d wood)" % [n, "" if n == 1 else "s", n * int(cfg["wood"])]
 		count(String(cfg["out"]), n)
-		lines.append("%s at the %s: %s" % [" and ".join(who), HomeLayout.CATALOG[id]["name"], what])
+		lines.append("+%s from the %s (%s worked it)" % [what, HomeLayout.CATALOG[id]["name"], " and ".join(who)])
 	return lines
 
 ## A common seed (never the rare ones), picked from k.

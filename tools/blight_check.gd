@@ -222,7 +222,10 @@ func _noise_and_fights(main: Node) -> void:
 	print("BLIGHT fleeing an early Skitter: it gave up after %.1fs (target %s, %.1f tiles), the hunter lost %.0f" % [t, str(runner.tgt), runner.flat_dist(P), hp0 - P.hp - P.armor])
 	ok(runner.tgt == null or runner.flat_dist(P) > 8.0, "a level-1 hunter can outrun an early Skitter")
 	ok(hp0 - P.hp - P.armor < P.max_hp * 0.3, "... without losing much")
-	# idle ones far from everyone burrow away
+	# idle ones far from everyone burrow away (if the chase above ended with the Skitter off an edge,
+	# a fresh one stands in: this tests the burrowing, not where the chase went)
+	if runner.dead:
+		runner = B.spawn("bl_skitter", _open_spot(m, P.pos + Vector3(2.5, 0, 0), 3.0), l)
 	runner.tgt = null; runner.st = "idle"; runner.heard = Vector3.INF
 	runner.idle_t = 25.0
 	P.teleport(_open_spot(m, P.pos + Vector3(0, 0, 0)))
@@ -234,6 +237,8 @@ func _noise_and_fights(main: Node) -> void:
 		ok(true, "(burrow: the spots are too close on this map, skipped)")
 	else:
 		B._despawn_tick()
+		if not runner.gone:
+			print("BLIGHT burrow dead=%s gone=%s far_spot %s " % [runner.dead, runner.gone, str(far_spot)] + ": runner at %s st %s heard %s idle %.1f, hunters %s" % [str(runner.pos), runner.st, str(runner.heard), runner.idle_t, str(m.hunters.filter(func(o): return not o.out).map(func(o): return snappedf(o.flat_dist(runner), 0.1)))])
 		ok(runner.dead and runner.gone, "an idle Skitter far from everyone burrows away")
 	# the network: a Blight's snapshot carries its light, alert and strength, and builds a Blight
 	var wd := B.spawn("bl_warden", _open_spot(m, base + Vector3(-6, 0, 0), 4.0), 0.5)

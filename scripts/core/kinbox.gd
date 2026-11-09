@@ -263,9 +263,13 @@ static func dup_on_farm(rec: Dictionary) -> bool:
 		if r != rec and String(r["species"]) == String(rec["species"]): return true
 	return false
 
+## Is there a Boki Burrow to send repeats to? (a farm-start island has none until you build it)
+static func burrow_built() -> bool:
+	return not HomeLayout.fs(Save.d) or not HomeLayout.fixtures(Save.d, "burrow").is_empty()
+
 ## Where a new kin goes (caught, hatched, bought): call it once the kin is on the roster.
 ## The farm if there's room, but a repeat of a species already on the farm goes to the box unless
-## it shimmers or is mutated. Returns "farm" or "box".
+## it shimmers or is mutated (or there is no Burrow yet). Returns "farm" or "box".
 static func route_new(rec: Dictionary) -> String:
 	ensure()
 	rec["got_t"] = Time.get_unix_time_from_system()
@@ -273,7 +277,7 @@ static func route_new(rec: Dictionary) -> String:
 	if (Save.d["roster"] as Array).size() <= 1 or pinned(rec) != "":
 		rec["went"] = "farm"
 		return "farm"
-	var dup := dup_on_farm(rec) and not Mutations.special(rec)
+	var dup := dup_on_farm(rec) and not Mutations.special(rec) and burrow_built()
 	if not dup and farm().size() <= farm_cap():
 		rec["went"] = "farm"
 		return "farm"

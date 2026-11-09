@@ -33,7 +33,27 @@ static func crowd_at(m: Match, h: Hunter, p: Vector3, r: float) -> int:
 static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
-const URGENT_GOALS := ["revive", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+## Goals a bot holds its ground for: it never bases away to a teammate from these.
+const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
+const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+
+## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
+## decides every FAR_EVERY sim steps (20 Hz) instead of every step, with the skipped time added in; its
+## last inputs carry on in between. A big match has most of its bots roaming far away: item 94, script
+## time grew with the Hunter count. (Fights and revives stay every step: at 20 Hz they turned in place.)
+const FAR_M := 45.0            # m from the local player
+const FAR_EVERY := 3           # sim steps per decision when that far
+
+func tick(m: Match, h: Hunter, dt: float) -> void:
+	var a := h.ai
+	var acc := float(a.get("far_dt", 0.0)) + dt
+	var me := m.player
+	var busy: bool = a.get("tgt") != null or String(a.get("goal_kind", "")) in URGENT_GOALS
+	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and acc < dt * FAR_EVERY - dt * 0.5:
+		a["far_dt"] = acc
+		return
+	a["far_dt"] = 0.0
+	think(m, h, acc)
 
 func think(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
@@ -84,7 +104,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["cross_t"] = float(a.get("cross_t", 12.0)) - dt
 		if (h.grounded and m.world.island_of(h.pos.x, h.pos.z) == int(L["to"])) or float(a["cross_t"]) <= 0.0:
 			a.erase("cross"); a.erase("cross_t")
-		elif not h.grounded and a.get("cross_go", false) and not (m.world.is_void(h.pos.x, h.pos.z) and h.pos.y < land.y - 1.2 and h.vel.y < 0.0):
+		# (gives up only well under the landing: dipping under the far lip is normal on a climb, the glider's
+		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
+		elif not h.grounded and a.get("cross_go", false) and not (m.world.is_void(h.pos.x, h.pos.z) and h.pos.y < land.y - 4.0 and h.vel.y < 0.0):
 			inp["move"] = tol.normalized()
 			# over the landing: fold the glider and drop onto it
 			inp["glide"] = tol.length() > 1.6 or m.world.is_void(h.pos.x, h.pos.z)
@@ -176,22 +198,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				a["nolos_t"] = 0.0
 				a["ignore"] = {"e": tgt, "until": m.time + 4.0}
 				a["tgt"] = null
-		# kin
-		var k: Kin = h.kin
 		var abil := float(df.get("abil", 0.7))
-		if k and a["throw_cd"] <= 0.0 and randf() > abil:
-			a["throw_cd"] = randf_range(1.5, 3.5)       # easier bots hold their kin back more
-		elif k and a["throw_cd"] <= 0.0:
-			if k.state == "shoulder" and d < 8.0 and (tgt is Hunter or (tgt is Mob and tgt.mkind == "brute") or randf() < 0.3):
-				k.throw_to(Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z))
-				a["throw_cd"] = randf_range(4, 8)
-			elif k.state == "active" and k.runner.is_ready("k1") and k.flat_dist(tgt) < 6.0 and randf() < 0.5:
-				h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
-				h.inp["kin_ab" if h.ak else "sig"] = true
-				a["throw_cd"] = randf_range(1, 3)
-			elif k.state == "active" and (k.hp < k.max_hp * 0.3 or k.flat_dist(h) > 11.0):
-				k.recall()
-				a["throw_cd"] = 2.0
+		BotKin.fight(m, h, tgt, d, abil)       # throw, C, recall
 		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
 		if String(a.get("goal_kind", "")) == "yard" and a["goal"] != Vector3.INF and h.flat_dist(a["goal"]) > 2.4:
 			move = (_path_dir(m, h, a["goal"]) + move * 0.3).normalized()
@@ -211,27 +219,23 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
 		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
 			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
+			if MergeKit.is_live(h):
+				MergeKit.bot_use(h)       # merged: the ultimate when foes are in range or the window is closing (its hero kit plays as usual below)
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
+				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
 				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
 					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
 					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
 					inp["dash"] = false; inp["sec"] = false; inp["ult"] = false
 					h.ak.bot_hold["dash"] = 0.0; h.ak.bot_hold["rmb"] = 0.0
-				_use_kin_ab(m, h, tgt)
+				BotKin.merge(h, tgt, d)
 			else:
 				_use_sig(m, h, tgt)
 				_use_sec(m, h, tgt)
-			# the active glove (Q) when its moment comes (hook in range, wall when shot at...)
-			if h.gear_cd[0] <= 0.0 and not (h.gear[0] as Dictionary).is_empty() and Gear.active(String(h.gear[0]["id"])) and randf() < 0.3 + abil * 0.6:
-				var gdf := Gear.def_of(String(h.gear[0]["id"]))
-				var ga := ability_aim(m, h, gdf, tgt)
-				if ga == Vector3.INF and gdf.bot.is_empty() and randf() < abil * 0.3:
-					ga = tgt.pos        # an old glove with no hints: now and then, at the target
-				if ga != Vector3.INF:
-					h.inp["aim"] = ga
-					inp["gear1"] = true
+			# both gloves (Q and V), each when its moment comes (hook in range, wall when shot at...)
+			Gloves.bot_use(h, tgt, abil, inp, func(gdf, t): return ability_aim(m, h, gdf, t))
 	else:
 		a["tgt"] = null
 		var goal: Vector3 = a["goal"]
@@ -252,17 +256,16 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				inp["aim"] = Vector3(h.pos.x + ah.x * 3.0, h.pos.y + 0.9, h.pos.z + ah.y * 3.0)
 			inp["aim_y"] = h.pos.y
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
-				inp["interact"] = true
+				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
 			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
-		if h.kin and h.kin.state == "active" and h.kin.flat_dist(h) > 6.0:
-			h.kin.recall()
+		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
-		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair: basing away from a
-		# charging uplink left its yard empty to drain)
-		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 \
-				and not String(a.get("goal_kind", "")) in ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever"]:
+		# (not while holding a spot: an uplink's yard, a skiff's deck, a lair, a teammate's box or a
+		# beacon: basing away from a charging uplink left its yard empty to drain)
+		if h.base_t <= 0.0 and h.base_cd <= 0.0 and h.grounded and randf() < dt * 0.05 and not a.has("ping_goal") \
+				and not String(a.get("goal_kind", "")) in STAY_GOALS:
 			var mate := m.base_target(h)
 			if mate and h.flat_dist(mate) > 30.0:
 				h.start_base(mate)
@@ -271,12 +274,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# (heals fold the glider now, so a bot only drinks with ground under it, never over the void
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
-		if heal_ok and h.hp < h.max_hp * 0.45 and h.tonics > 0:
-			inp["tonic"] = true
-		elif heal_ok and h.armor < h.max_armor * 0.3 and h.armor_kits > 0:
-			inp["kit"] = true
+		if heal_ok:
+			BotBelt.think(m, h, a, inp)       # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
-		if h.kin and (h.kin as Kin).state == "fainted" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
+		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
 			inp["swap"] = true
 	# ---- reviving: walk to the downed squadmate and stand on them until they're up (shooting back
 	# from there if there's a clear shot). A rival right on top of us is fought, but from beside them
@@ -301,6 +302,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if dp < 1.8 and move.length() > 0.1:
 			move += -h.dir_to(pd["pos"]) * (1.8 - dp) * 1.5
 	a.erase("pad_at")
+	move = Breakables.bot_steer(m, h, move)
 	# (heading for a downed squadmate near an edge, only look as far as them)
 	var look := 1.2 if rv.is_empty() else clampf(h.flat_dist(rv["o"]) - 0.2, 0.4, 1.2)
 	if move.length() > 0.01:
@@ -316,6 +318,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var dd: Vector2 = a["detour_dir"]
 		if _safe(m, h, dd, 1.2):
 			move = dd
+	move = _brake_at_lip(m, h, move)
 	inp["move"] = move
 	if a.has("dash_dir"):
 		inp["move"] = a["dash_dir"]
@@ -365,6 +368,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 ## round several times a second. Shots and abilities still aim exactly where they were meant to.
 const AIM_TURN := 5.0          # rad/s with nothing to fight
 const AIM_TURN_FIGHT := 9.0    # rad/s with a target, between shots
+const AIM_NEAR := 1.5          # m: an aim point this close says nothing about a way to face: hold the facing
 func _ease_aim(h: Hunter, dt: float) -> void:
 	var a := h.ai
 	var inp := h.inp
@@ -373,14 +377,15 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	if dv.length() < 0.05:
 		return
 	var want := atan2(dv.y, dv.x)
-	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) \
+	var acting: bool = inp.get("fire", false) or inp.get("sig", false) or inp.get("sec", false) or inp.get("gear1", false) or inp.get("gear2", false) \
 		or inp.get("ult", false) or inp.get("dash", false) or inp.get("interact", false)
 	if acting:
 		return
 	# (from where the bot is facing now: Hunter.face points along (-sin, -cos))
 	var cur := atan2(-cos(h.face), -sin(h.face))
 	var rate := AIM_TURN_FIGHT if a.get("tgt") != null else AIM_TURN
-	cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
+	if dv.length() >= AIM_NEAR:
+		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
 	var L := maxf(dv.length(), 1.0)
 	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)
 
@@ -507,6 +512,19 @@ func _nearest_ground(m: Match, h: Hunter) -> Vector2:
 				break
 	return best
 
+## Stopping (no keys) a Hunter coasts ~0.4 m on SUPERVIVE's walking stop (item 150). A bot that stops
+## at a rim (a revive, a loot spot, the end of a path) and would coast over a drop or the void counter-
+## steers instead, which brakes at the full turn rate, as a player would.
+func _brake_at_lip(m: Match, h: Hunter, move: Vector2) -> Vector2:
+	var hv := Vector2(h.vel.x, h.vel.z)
+	if move.length() > 0.01 or not h.grounded or hv.length() < 0.5:
+		return move
+	var d := hv.normalized()
+	var p := Vector2(h.pos.x, h.pos.z) + d * (h.r + 0.45)
+	if m.world.is_void(p.x, p.y) or m.world.ground_at(p.x, p.y) < h.pos.y - World.STEP:
+		return -d * 0.05
+	return move
+
 func _safe(m: Match, h: Hunter, d: Vector2, dist: float) -> bool:
 	for k in [0.5, 1.0]:
 		var p: Vector2 = Vector2(h.pos.x, h.pos.z) + d * dist * k
@@ -526,17 +544,6 @@ func _crawl(m: Match, h: Hunter) -> void:
 	if mv.length() > 0 and not _safe(m, h, mv, 1.0):
 		mv = Vector2.ZERO
 	h.inp["move"] = mv
-
-## C with an archetype: the kin's own ability (it hops out, casts and hops back) when it fits.
-func _use_kin_ab(_m: Match, h: Hunter, tgt: Ent) -> void:
-	var k: Kin = h.kin
-	if k == null or not k.ready_to_fight() or tgt == null or not k.runner.is_ready("k1"):
-		return
-	var def := k.runner.def_of("k1")
-	var reach := def.cast_range if def.cast_range > 0.0 else 7.0
-	if h.flat_dist(tgt) < reach + 1.0 and randf() < 0.35:
-		h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
-		h.inp["kin_ab"] = true
 
 ## Right click: the weapon's utility, used when a target is in reach.
 func _use_sec(m: Match, h: Hunter, tgt: Ent) -> void:
@@ -659,19 +666,21 @@ func _choose(m: Match, h: Hunter) -> void:
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
-		if not provoked and fresh(m, o):
+		if (not provoked and fresh(m, o)) or m.demo_shielded(o):
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
+		var bounty: bool = m.rolling != null and o.has_meta("bounty")
+		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
 			continue
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
-		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03
+		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
 		if s > bs: bs = s; best = o
 	if best == null:
 		for mb in m.mobs:
-			if mb.dead or mb == ign_e: continue
+			if mb.dead or mb == ign_e or (mb is Shrubling and (mb as Shrubling).ss == "disguised"): continue
 			# a sleeping boss can't be hurt; an awake one is worth walking up to
 			if mb is Boss and (mb as Boss).dormant: continue
 			var d := h.flat_dist(mb)
@@ -700,11 +709,14 @@ func _choose(m: Match, h: Hunter) -> void:
 	if best:
 		return
 	# no fight: pick a goal
-	var time_left := m.length - m.time
+	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
 		if o != h and o.team == h.team and o.downed and not o.out:
 			goal = o.pos; gk = "revive"; break
+	if goal == Vector3.INF:
+		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
+		if goal != Vector3.INF: gk = "boki"
 	# a dead teammate: their deathbox while the soul's there, else a revive beacon
 	if goal == Vector3.INF:
 		for b in m.boxes:
@@ -745,6 +757,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		for b in m.boxes:
 			if not b["empty"] and h.flat_dist(b["pos"]) < 14.0 + (GOAL_KEEP if b["pos"] == cur else 0.0) and not (b["owner"].team == h.team and Life.soul_here(m, b)):
 				goal = b["pos"]; gk = "box"; break
+	# a perk orb we want lying close by: walk into it
+	if goal == Vector3.INF:
+		var og := PerkOrbs.bot_goal(m, h, cur)
+		if og != Vector3.INF:
+			goal = og; gk = "orb"
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]
@@ -759,6 +776,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var pp: Vector3 = pg["pos"]
 		if m.time < float(pg["until"]) and h.flat_dist(pp) > 3.5 and not m.world.is_void(pp.x, pp.z):
 			goal = pp; gk = "ping"
+			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
@@ -768,7 +786,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		# fire in the first minute; it used to cancel every lair plan right away, though the exits
 		# don't act on it until 30% in, so the bot just wandered.)
 		var egg_home: bool = h.pack.any(func(it): return Loot.is_rare_egg(it))
-		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and m.time > m.length * 0.3)
+		var lair_leave: bool = time_left < 170.0 or egg_home or (a.get("leave", false) and Rolling.bot_past(m, h, 0.3))
 		var lg: Array = m.lairs.bot_goal(h, lair_leave)
 		if not lg.is_empty():
 			goal = lg[0]; gk = String(lg[1])
@@ -777,7 +795,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not a.get("leave", false) and randf() < 0.0015:
 			a["leave"] = true
 		# (not in the first stretch of the match: everyone heading straight home empties the map)
-		var leaving: bool = time_left < 170.0 or (m.time > m.length * 0.3 and (h.gems > 40 or a.get("leave", false)))
+		var leaving: bool = time_left < 170.0 or (Rolling.bot_past(m, h, 0.3) and (h.gems > 40 or a.get("leave", false)))
 		var g: Array = m.exits.bot_goal(h, leaving)
 		if not g.is_empty() and _banned(m, a, g[0]) and String(g[1]) in ["dock", "uplink"]:
 			g = []
@@ -789,12 +807,17 @@ func _choose(m: Match, h: Hunter) -> void:
 			goal = g[0]; gk = String(g[1])
 	if goal == Vector3.INF:
 		for k in m.kins:
-			if k.state == "dazed" and not k.dead and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
+			if KinLoss.scannable_by(h, k) and Capture.room(h) and h.flat_dist(k) < 14.0 + (GOAL_KEEP if k.pos.distance_to(cur) < 2.0 else 0.0):
 				goal = k.pos; gk = "catch"; break
 	if goal == Vector3.INF:
-		var bd := 18.0
+		var kg := BotKeys.goal(m, h, cur)      # no key yet: fight for one first
+		if not kg.is_empty():
+			goal = kg[0]
+			gk = String(kg[1])
+	if goal == Vector3.INF:
+		var bd := BotKeys.chest_range(h)       # a key in hand: now a chest
 		for c in m.chests:
-			if c["open"]: continue
+			if not BotKeys.chest_open_for(h, c): continue
 			var d := h.flat_dist(c["pos"]) - (GOAL_KEEP if c["pos"] == cur else 0.0)
 			if d < bd: bd = d; goal = c["pos"]; gk = "chest"
 	if goal == Vector3.INF:
@@ -915,6 +938,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 	var to := Vector2(goal.x, goal.z)
 	if _clear_line(m, from, to):
 		h.ai.erase("wp")
+		h.ai.erase("nopath")
 		return h.dir_to(goal)
 	var gt := Vector2i(int(floor(goal.x)), int(floor(goal.z)))
 	var wp: Dictionary = h.ai.get("wp", {})
@@ -923,7 +947,11 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
+		# no way there on foot: walking straight at it had the bot shuffle at a rim (or step off a
+		# terrace and climb back) until the 14 s give-up. Give up on it after a moment instead.
+		_no_path(m, h)
 		return h.dir_to(goal)
+	h.ai.erase("nopath")
 	# aim for the furthest waypoint we can walk straight to
 	var pick: Vector2 = path[0]
 	for i in range(path.size() - 1, -1, -1):
@@ -934,6 +962,22 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		path.pop_front()
 	var d := pick - from
 	return d.normalized() if d.length() > 0.05 else h.dir_to(goal)
+
+const NO_PATH_GIVE_UP := 1.5     # seconds without a walkable path before a goal is banned for now
+
+func _no_path(m: Match, h: Hunter) -> void:
+	var a: Dictionary = h.ai
+	var g: Vector3 = a.get("goal", Vector3.INF)
+	if g == Vector3.INF or String(a.get("goal_kind", "")) in URGENT_GOALS:
+		return
+	var np: Array = a.get("nopath", [])
+	if np.is_empty() or np[0] != g:
+		a["nopath"] = [g, m.time]      # (per goal: a new one gets its own moment)
+	elif m.time - float(np[1]) > NO_PATH_GIVE_UP:
+		var bans: Dictionary = a.get("banned", {})
+		bans[g] = m.time + 20.0
+		a["banned"] = bans
+		a.erase("nopath")
 
 func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a

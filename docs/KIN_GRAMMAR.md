@@ -64,7 +64,7 @@ files (one per kind of mistake) and should always print errors. Phase 3 builds t
   step, medium roll, heavy shoulder charge); the kin adds a **dodge rider** to it.
 - The kin gives **1 player-cast active (E)**, optionally **1 auto active** it casts itself when it's
   out (driven by its personality and the ability's cue), and the **merge** (bond ultimate, R).
-- Throw/recall, the shared bond meter, player-kin combos (`content/combos`), personality-driven kin
+- Sic / Call back and the order wheel, the shared bond meter, player-kin combos (`content/combos`), personality-driven kin
   AI (KinTactics), run levels and slot ranks (`Hunter.slot_lv`) all stay. Ranks grow an ability's numbers
   through a core table per part (today's `Effects` rank table), never through data.
 
@@ -136,7 +136,7 @@ has two damage effects, so presets live on parts.)
 | `id`, `name` | yes | |
 | `animals` | yes | the 1 or 2 real animals it's based on |
 | `theme` | | cosmetic (what used to be its element "type") |
-| `flavor` | | reveal card / Kindex line |
+| `flavor` | | reveal card / Field Book line |
 | `colors` | yes | `body`, `belly`, `glow`, optional `wing` (hex) |
 | `look` | yes | `body` `ears` `tail` `feet` `aura`: core model builder ids (`LOOK`) |
 | `body` | yes | `size` (small, medium, large), `reach`, `mass`, `gait` (`hop_rate`, `hop_height`, `pace`) |
@@ -167,7 +167,6 @@ The merge is the bond ultimate: hunter and kin fight as one for a short time.
 |---|---|---|
 | `id`, `name`, `flavor`, `theme` | id, name | |
 | `duration` | yes | 4-10 s at kin level and bond 1 |
-| `grow_duration`, `grow_strength` | | up to +3 s and +25% at full kin level and bond (the core curve decides in between) |
 | `passives` | yes | owner stats with merge caps: movement, defence, offence, senses |
 | `on_shot` | | riders on every shot: `effects` (damage, slow, push, mark only; never stun or root), `splash` (m), `chain` (extra foes) |
 | `on_start`, `on_end` | | stages |
@@ -245,8 +244,8 @@ exist and stay within bounds.
   perch or mount) or merged, it lends you the ability and you perform it (85% power carried, full
   power merged). `from: owner` always happens on its hunter. A carried kin never acts on its own.
 - **Who decides.** `KinTactics.cue_aim` reads an ability's `cue`. The auto active is the kin's own and
-  it uses it whenever its cue fits (for every hunter). The E is auto-cast only for bots, or for you if
-  you turn on "kin_auto" in Settings. Bots press E from the cue too (`Bot._use_sig`). Event triggers
+  it uses it whenever its cue fits (for every hunter). The ordered ability is auto-cast only for bots;
+  yours fires when you order it. Bots press E from the cue too (`Bot._use_sig`). Event triggers
   fire from the match: `on_hit` (every n-th melee hit), `on_throw`, `on_recall`, `on_bond_full`,
   `on_low_hp` (once per dip).
 
@@ -287,7 +286,7 @@ Throws (`throw.effects` ride on the core throw hit), dodge riders (`on_pass`, `o
 
 Settled defaults: diminishing returns cover hunter-ability and glove crowd control too, not just
 kin; you can merge with a mount while gliding (it curls up on your back until you land);
-`kin_auto` is off by default, so your kin only casts its auto ability on its own.
+Your kin only casts its auto ability on its own; its ordered ability waits for you.
 
 IVs (`Care.iv_mult`) multiply a kin's final hp, damage and speed after its budget points, level
 growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of the merge meter
@@ -310,12 +309,16 @@ arcs; instant damage riders proc at most once a second per target.
 ### The merge (`KinMerge`)
 
 The bond ultimate. The ult slot opens at run level 6 (`Hunter.ULT_AT`); the first time it opens, the
-bond meter fills, once a run. R starts it: for `duration + grow_duration x g` seconds (g from kin
-level and trust, 0..1; +30% at rank 2) the merge's passives, shot riders, pulses and merged
-abilities are on, all scaled by `1 + grow_strength x g`. A mount kin grows giant under you (the
-approved "giant merge only for mount kin"); any other kin fuses onto you as armor. It ends when
-time runs out, early if you're knocked or you throw the kin (throwing still works and ends it),
-then 3 s (`MERGE_SPENT_TIME`) before it can go again, and the meter starts from empty.
+bond meter fills, once a run. R starts it: a ~0.7 s transformation (invulnerable), then `duration`
+seconds in the Boki's form. There are no tiers: the duration and strength are the same for everyone
+(docs/decisions/0003-merge-forms.md); only the weight class sets a baseline. The three first forms
+(`content/merge_forms/<merge id>.json`: Heavy Star, Stormwing, Prism Shell) replace LMB / RMB / E with
+a form kit and give a SHELL on top of your health; the other six Boki keep the stat merge (passives,
+shot riders, pulses below) until their forms land (docs/DEBT.md). A mount kin grows giant under you,
+any other fuses on. It ends when time runs out, when R is pressed again (the form's ultimate, then
+you separate), or when the shell breaks; then a short cooldown before it can go again.
+
+> **Superseded by docs/decisions/0001:** R is the Merge for every class (a form by the Boki's type and power tier from `content/rules/merge_forms.json`, kit-agnostic ability changes, a leap-merge from out, a weak surge with no Boki). The paragraph below describes the old Bonded R, which runs only with `class_ults` on.
 
 **With archetypes (docs/ARCHETYPES.md §5, option C, built):** R is the archetype's ultimate. When the
 bond meter is full the next R is *Bonded*: the ult casts with its own tell, its kin sockets run at
@@ -697,8 +700,6 @@ s seconds, m/s, hp, deg degrees, x a fraction or multiplier.
 | parameter | min | max | default | unit | what |
 |---|---|---|---|---|---|
 | duration | 4 | 10 | 6 | s | how long the merge lasts at bond and level 1 |
-| grow_duration | 0 | 3 | 1 | s | extra time at full kin level and bond |
-| grow_strength | 0 | 0.25 | 0.1 | x | extra strength at full kin level and bond |
 
 ### Merge pulse
 

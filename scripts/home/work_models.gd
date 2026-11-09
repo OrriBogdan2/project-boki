@@ -229,7 +229,7 @@ static func fixture(id: String, e: Dictionary, rng: RandomNumberGenerator) -> No
 		"cook_pot":
 			n.add_child(Models.cauldron())
 		"market_stall":
-			n.add_child(Models.stall())
+			n.add_child(StallModels.build(FarmSites.tier(e)))
 		"nesting_nook":
 			var nook := Models.nesting_nook()
 			nook.position = Vector3(0.9, 0, 0)

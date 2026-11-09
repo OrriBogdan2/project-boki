@@ -67,9 +67,11 @@ What made the menus feel blocky, samey and hard to get through:
 2. **Three type sizes.** `T_TITLE` 30 (Lilita One) for the panel title, `T_HEAD` 19 (Lilita One) for
    card and item names, `T_BODY` 15 (Rubik) for everything you read, `T_SMALL` 13 for secondary
    lines. Section eyebrows are `section()` (12, bold, spaced caps).
-3. **Fewer boxes.** Panels are soft sheets (radius 20, hairline edge, long shadow, a faint light from
-   the top). Cards inside them have no border unless they are *selected*. Group with spacing and
-   eyebrows before reaching for a card.
+3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`): a soft drop shadow
+   and a tight contact shadow, a dark rim, the fill, light falling from the top with a lit bevel line,
+   and a shade along the bottom. Wells and tracks are the same frame reversed (`UiFrame.sunk`).
+   Radii come from `R_PANEL` 18, `R_CARD` 12, `R_CTRL` 10, `R_SMALL` 6, `R_PILL`. Cards have no
+   outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (filled accent, dark text): the one thing the screen is for,
    at most one per screen, usually in the footer. `button()` (outline): normal actions.
    `ghost()` (text only): rare or small actions. `danger()` (red outline) for things that can't be
@@ -86,8 +88,10 @@ What made the menus feel blocky, samey and hard to get through:
    tab you used, and the current choice highlighted.
 9. **Confirm only what can't be undone** (delete a save, leave a match, sell or salvage an Epic or
    Legendary, reset all settings). Everything else happens immediately.
-10. **Motion is short.** Buttons lift 3% on hover and sink to 97% on press (70-110 ms). Panels fade and
-    rise in (140-220 ms). Modals blur the screen behind them (160 ms). Nothing bounces.
+10. **Motion is short, and nothing grows.** Hover lights a button or card, never makes it bigger.
+    Raised buttons stand on a darker lip and sink onto it when pressed, the label moving with the face,
+    so the button's size never changes. Panels fade and rise in (140-220 ms), toasts drop in (240 ms).
+    Modals blur the screen behind them (160 ms). Nothing bounces.
 11. **Icons next to labels** where they help scanning (hub, pause menu, footers, empty states), drawn
     with `draw_icon` so they stay crisp at any size.
 12. **Keyboard and pad.** Every panel has something focused; arrows, Enter and Esc work; focus rings
@@ -104,11 +108,15 @@ What made the menus feel blocky, samey and hard to get through:
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 
-Everything is static. Set `root.theme = UI.theme()` on the root Control of a screen once.
+Everything is static. The Theme is built by `UiTheme` (`scripts/ui/ui_theme.gd`) and `UI.install()`
+(called once by Game) merges it into the engine's default theme, so every Control, popup and tooltip
+gets the look. Screens never set a theme themselves; `--uipolish-check` fails if one does, or if a
+script outside the style module builds its own `StyleBoxFlat`.
 
 ### Colours and sizes
-`INK MUTED FAINT BG SURFACE CARD WELL LINE ACCENT ACCENT_HI GOOD BAD GOLD TEAL INFO DARK_INK`,
-`T_TITLE T_HEAD T_BODY T_SMALL T_CAPS`, `GAP GAP_BIG PAD`, `rarity_col(r)`. Fonts: `UI.big` (Lilita
+`INK MUTED FAINT BG SURFACE CARD RAISED RIM WELL LINE ACCENT ACCENT_HI GOOD BAD GOLD TEAL INFO DARK_INK`,
+`R_PANEL R_CARD R_CTRL R_SMALL R_PILL`, `T_TITLE T_HEAD T_BODY T_SMALL T_CAPS`, `GAP GAP_BIG PAD`,
+`rarity_col(r)`. The in-match HUD's `HudStyle` uses the same INK and MUTED and the same two fonts. Fonts: `UI.big` (Lilita
 One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 
 ### Text
@@ -128,7 +136,14 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
   `SegOn`, `Tile`, `TileOn`, `MenuItem`, `MenuMain`.
 
 ### Containers and pieces
-- `card(col=CARD, pad=14, rad=12)` - a raised card (shadow and top light when opaque).
+- `card(col=CARD, pad=14, rad=R_CARD)` - a raised card (shadow and top light when opaque).
+- `frame(bg, rad, edge, edge_w, pad_h, pad_v, lit)` - a `UiFrame` for a control that styles itself
+  (a tile, a chip, a colour swatch). Never build a `StyleBoxFlat` in a screen.
+- `badge(icon, col, px=44, rad=R_PILL)` - a tinted round (or rounded) badge with an icon.
+- `toast(host, text, col=GOLD, y=100)` - a one-line note in the host's message lane (`MsgLane`):
+  stacked at the top centre, repeats merged, a few at a time.
+- `draw_bar(canvas_item, rect, frac, col, track, rad)`, `bar_box(col, rad)` - cached bars for things
+  drawn every frame.
 - `set_card_border(card, col, w)` - only for the selected or the warning card.
 - `tile_card(on, cb, pad=12, col=ACCENT)` - a selectable card (hover, focus, click, Enter); add your
   content to it. For tiers, skins, items.
@@ -138,7 +153,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `tag(text, col)` - a small coloured caps tag (Partner, Equipped, Kin at risk).
 - `tabs(names, cur, cb(name), counts={}, minw=0)` - a segmented control.
 - `empty_state(icon, head, sub)` - what an empty list shows.
-- `bar(frac, col, w, h)`, `keycap(key, size)`, `key_hints([[key, what], ...])`, `spacer(h)`,
+- `bar(frac, col, w, h)` (a Control using `draw_bar`), `keycap(key, size)`, `key_hints([[key, what], ...])`, `spacer(h)`,
   `fill()`, `vbox(sep)`, `hbox(sep)`.
 - `draw_icon(canvas_item, id, at, half_size, col)` and `IconDot.new(id, col, px)` - any `Icons` id
   plus the menu's own: close, back, next, check, plus, lock, gear, home, bag, shop, portal, hammer,
@@ -163,8 +178,8 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   on a sub-page the X becomes a back arrow before the title).
 - Prefer `scroll = true` for panels whose content is mostly cards or previews (it only scrolls when
   the window is too short); the paged body suits lists of rows.
-- `confirm(host, head, text, yes_text, on_yes, dangerous=true)` - a small modal over `host` with
-  Cancel and a danger (or primary) button; Esc cancels it.
+- `confirm(host, head, text, yes_text, on_yes, dangerous=true)` - a small modal over `host` with a
+  warning badge, Cancel and a danger (or primary) button; Esc cancels it.
 - `backdrop()` + `show_backdrop(rect, on)` - the blurred, dimmed layer behind modals
   (`shaders/ui_backdrop.gdshader`).
 - `pop_in(control, delay)` - the open animation. `focus_first(control)` - focus the first button.
