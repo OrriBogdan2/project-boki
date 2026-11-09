@@ -95,3 +95,11 @@ Still differs (KIT_PARITY, docs/heroes/ostra.md):
 - R: tell 1.0, 3.5 s, pull 12, cd 70 match; about a 1 s cast lock (owner). Dash: 1.8 s lob, drift 30%, swaps foes and allies: match. Floating passive `[?]`. The 40% slow on swapped foes is not built (no data).
 By eye (footage 50 to 480 next to the reel): the source's Black Hole is a deep violet whirlpool with a dark core and bright violet rim that grows when empowered; ours is a flat teal disc with a dark blue rim that lingers through the dash and glide parts, so it reads as a puddle rather than a vortex pulling in. The Unstable Anomaly bomb is a dark blue sphere in the source; the Swap lob is a small projectile with a purple trail. Our orbs are small purple dots with little trail.
 
+## Neve the Snowglider (`rimewright`, source Claire / Celeste): [rimewright.mp4](rimewright.mp4)
+Still differs (KIT_PARITY gap 16, docs/heroes/rimewright.md):
+- LMB: darts fly straight while skating (the source's are semi-homing; owner said homing, still an open fix, gap 16). Four plain plus three large darts.
+- RMB: push-like emerge of the spear (owner); the source spear and delayed blast; 2 charges, cd 10.2 vs 12.
+- Passive: the Chill 15% slow is ours (gap 19). E: slide and grow, cd 17 vs 20. Dash: 11.5 m/s for 1.6 s (source 10 to 11), early-release refund .6 (owner), cd 13 in the data. R: hold 3.5, carry .8 (owner), cd 80: match.
+- Body 1.15 matches (1.1 to 1.15).
+By eye (footage 50 to 392 next to the reel): the source's Ice Crash is a violent burst of long blue shards with a bright light column and a wide ring; in the reel it is a large flat pale-blue disc with a swirl, so it has the size but not the shard burst or column. The source's Ice Wall is a bright crystal cluster with a red aim line; ours is a thin pale strip. The dart is a long blue bolt in the source and a short pale bolt here.
+
