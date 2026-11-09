@@ -1,6 +1,7 @@
 {
 	"id": "kestrike",
 	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/kestrike.json.",
+	"sex_forms": true,
 	"size": {
 		"cm": 32,
 		"kg": 2.5,

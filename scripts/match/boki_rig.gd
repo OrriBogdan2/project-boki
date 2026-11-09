@@ -189,10 +189,12 @@ static func work_clip(k: Dictionary) -> String:
 		return ""
 	return String(WORK_KINDS.get(String(job["kind"]), "tend"))
 
-## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
+## Adds the model and its driver under `flex`; `c` is KinModels' material set plus the Boki's "rec" (its sex
+## look). Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := (load(PATH % [kin_id, kin_id]) as PackedScene).instantiate() as Node3D
+	var path: String = BokiSex.model_path(kin_id, c.get("rec", {}), PATH % [kin_id, kin_id])
+	var model_root := (load(path) as PackedScene).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()

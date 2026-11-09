@@ -12,6 +12,7 @@
 		"glow": "#ff7ab8",
 		"wing": "#ffd36a"
 	},
+	"sex_forms": true,
 	"size": {
 		"cm": 32,
 		"kg": 1.4,

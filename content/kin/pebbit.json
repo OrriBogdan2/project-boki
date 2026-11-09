@@ -11,6 +11,7 @@
 		"belly": "#f2d9a0",
 		"glow": "#ff6a4a"
 	},
+	"sex_forms": true,
 	"size": {
 		"cm": 30,
 		"kg": 7.5,
