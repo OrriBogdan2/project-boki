@@ -27373,5 +27373,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/chandelapi_card2_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "eclipsowl_card2_w32",
+    "name": "Eclipsowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card2_w32",
+    "name": "Forgebrock (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card2_w32",
+    "name": "Forgebrock (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/forgebrock_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card2_w32",
+    "name": "Forgebrock (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card2_w32",
+    "name": "Gongrowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card2_w32",
+    "name": "Galleotter (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card2_w32",
+    "name": "Forgebrock (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/forgebrock_card2_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card2_w32",
+    "name": "Galleotter (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/galleotter_card2_w32_3.jpg",
+    "ok": true
   }
 ]
