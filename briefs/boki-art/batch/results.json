@@ -26981,5 +26981,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_nymphane_n_w32_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reelacine_n_w32",
+    "name": "Reelacine (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reelacine_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine_n_w32",
+    "name": "Reelacine (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reelacine_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine_n_w32",
+    "name": "Reelacine (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reelacine_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra_n_w32",
+    "name": "Sarcobra (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra_n_w32",
+    "name": "Sarcobra (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra_n_w32",
+    "name": "Sarcobra (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse_w32",
+    "name": "Sundormouse (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_n_w32",
+    "name": "Tootle (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tootle_n_w32_1.jpg",
+    "ok": true
   }
 ]
