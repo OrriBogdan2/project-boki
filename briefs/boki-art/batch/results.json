@@ -25896,5 +25896,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_amanitusk_v2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_arcestrel_v2",
+    "name": "Arcestrel (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_amanitusk_v2",
+    "name": "Amanitusk (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_amanitusk_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_amanitusk_v2",
+    "name": "Amanitusk (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_amanitusk_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_amanitusk_v2",
+    "name": "Amanitusk (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_amanitusk_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_v2",
+    "name": "Flarmink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_flarmink_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_v2",
+    "name": "Briarlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_flarmink_v2",
+    "name": "Flarmink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_flarmink_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_briarlynx_v2",
+    "name": "Briarlynx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_briarlynx_v2_4.jpg",
+    "ok": true
   }
 ]
