@@ -8,6 +8,7 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -33,6 +34,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_hit_targets()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -125,6 +127,21 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## 7. Each target class has its own short layer (Juice plays HitClass.SOUND[class] under the weapon's hit).
+func _hit_targets() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/targets.json"))
+	var sounds: Dictionary = set_d.get("sounds", {}) if set_d is Dictionary else {}
+	var names := HitClass.SOUND.values()
+	var missing := names.filter(func(n): return not sounds.has(n) or not Sfx.ensure(n))
+	var all := names.size() == HitClass.WALL + 1 and missing.is_empty()
+	ok(all, "hit targets: all %d classes have a sound (missing %s)" % [names.size(), missing])
+	var long := []
+	for n in names:
+		for t in _takes(n):
+			if _data(t).size() / 2 > 0.25 * 44100:
+				long.append(t.get_file())
+	ok(long.is_empty(), "hit targets: every take is under 0.25 s, a layer not a hit (long: %s)" % [long])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
