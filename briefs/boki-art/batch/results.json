@@ -37208,5 +37208,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_effigoon_c3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_mortarfly_a3",
+    "name": "Mortarfly (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a3",
+    "name": "Mortarfly (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a3",
+    "name": "Mortarfly (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a3",
+    "name": "Mortarfly (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a4",
+    "name": "Mortarfly (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a4",
+    "name": "Mortarfly (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a4",
+    "name": "Mortarfly (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_a5",
+    "name": "Mortarfly (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_a5_2.jpg",
+    "ok": true
   }
 ]
