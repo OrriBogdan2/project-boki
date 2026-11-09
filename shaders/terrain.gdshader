@@ -38,6 +38,11 @@ float hgt(vec2 p) {
 	return (t.r * 32.0 - 1.0) * 0.8 + t.g * 0.7;
 }
 
+// 1 over the abyss, 0 over any ground, blending across the tile edge: the height texture is (level + 1) / 32, 0 only for no ground.
+float void_at(vec2 p) {
+	return 1.0 - clamp(texture(height_tex, p / map_size).r * 32.0, 0.0, 1.0);
+}
+
 // How much higher ground and blockers crowd around this spot (0 open .. 1 tucked in a corner).
 float contact(vec3 p) {
 	float occ = 0.0;
@@ -184,7 +189,8 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 	float drop = 0.0;
 	for (int i = 0; i < 4; i++) {
 		float a = float(i) * 1.5708;
-		drop = max(drop, clamp((wpos.y - hgt(wpos.xz + vec2(cos(a), sin(a)) * 0.42)) * 1.5, 0.0, 1.0));
+		vec2 q = wpos.xz + vec2(cos(a), sin(a)) * 0.42;
+		drop = max(drop, clamp((wpos.y - hgt(q)) * 1.5, 0.0, 1.0) * (1.0 - void_at(q) * depth_k));
 	}
 	c *= 1.0 + drop * (0.16 + 0.05 * paint2);
 	c = mix(c, c + vec3(0.04, 0.035, 0.015), drop * paint2);
@@ -221,21 +227,40 @@ vec3 rock(vec3 c) {
 	return c;
 }
 
-// Height cues: a cliff face is bright at its lip and dark at its foot (the darker, the longer the
-// drop), and the ground's own lip is lit where it ends in a drop, so ledges and depth read from above.
+// Height cues, so a step can be read before it is taken (walking off is always allowed). A drop to lower
+// ground is a terrace: a warm lit lip, the face dark toward its foot. A drop into the abyss is cold: a thin
+// cold rim on the lip and a violet haze thickening down the face. Both are in the material (no particles,
+// no ring, which would read as gameplay), so they survive the low presets.
 vec3 depth_cues(vec3 c, float up, int st) {
-	if (st == 4) { return c; }
+	if (st == 4) {
+		// just under an island's lip a cold haze, thinning out as the rock drops away
+		float below = clamp((hgt(wpos.xz) - wpos.y) / 4.0, 0.0, 1.0);
+		return mix(c, vec3(0.4, 0.36, 0.68), (1.0 - below) * 0.45 * depth_k);
+	}
 	if (up < 0.5) {
 		float drop = hgt(wpos.xz - wnorm.xz * 0.4) - wpos.y;
 		float t = clamp(drop / 3.2, 0.0, 1.0);
-		return mix(c, c * mix(vec3(1.18, 1.14, 1.08), vec3(0.3, 0.32, 0.48), t), depth_k);
+		float v = void_at(wpos.xz + normalize(wnorm.xz + vec2(1e-4)) * 0.5);
+		vec3 terrace = c * mix(vec3(1.22, 1.14, 1.02), vec3(0.3, 0.32, 0.48), t);
+		vec3 abyss = mix(c * vec3(1.0, 1.1, 1.3), vec3(0.34, 0.3, 0.58), smoothstep(0.05, 0.9, t) * 0.7);
+		return mix(c, mix(terrace, abyss, v), depth_k);
 	}
+	// the lip: eight taps around the point, averaged so it follows the traced rim, not the tile grid
 	float lip = 0.0;
-	for (int i = 0; i < 4; i++) {
-		float a = float(i) * 1.570796;
-		lip = max(lip, clamp((wpos.y - hgt(wpos.xz + vec2(cos(a), sin(a)) * 0.6)) * 1.2, 0.0, 1.0));
+	float near_void = 0.0;
+	for (int i = 0; i < 8; i++) {
+		float a = float(i) * 0.785398;
+		vec2 q = wpos.xz + vec2(cos(a), sin(a)) * 0.55;
+		lip += smoothstep(0.4, 0.75, wpos.y - hgt(q));   // a step (0.8 m), not a ramp's gentle fall
+		near_void = max(near_void, void_at(q));
 	}
-	return c * (1.0 + 0.5 * lip * depth_k);
+	lip = smoothstep(0.2, 0.45, lip / 8.0);
+	float abyss_k = smoothstep(0.15, 0.5, near_void);   // any abyss within reach makes the lip an abyss rim
+	float lip_t = lip * (1.0 - abyss_k);
+	float lip_v = lip * abyss_k;
+	c = mix(c, c * vec3(1.1, 1.02, 0.74) + vec3(0.08, 0.05, 0.0), lip_t * 0.5 * depth_k);
+	vec3 cold = c * vec3(0.75, 0.95, 1.3) + vec3(0.02, 0.06, 0.14);
+	return mix(c, cold, lip_v * 0.85 * depth_k);
 }
 
 void fragment() {
