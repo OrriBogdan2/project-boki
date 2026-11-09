@@ -34142,5 +34142,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_chandelotl_d4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_chandelotl_d5",
+    "name": "Chandelotl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d8",
+    "name": "Chandelotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d8_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d8",
+    "name": "Chandelotl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d8_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d5",
+    "name": "Chandelotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d9",
+    "name": "Chandelotl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d9_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d4",
+    "name": "Chandelotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d6",
+    "name": "Chandelotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelotl_d6",
+    "name": "Chandelotl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelotl_d6_3.jpg",
+    "ok": true
   }
 ]
