@@ -69,12 +69,15 @@ static func line(rec: Dictionary, pond: bool) -> String:
 
 ## Every frame: shows the most urgent wants, hides the rest, and plays the happy answer.
 static func update(home: Node, dt: float, now: float) -> void:
+	if FarmUnlocks.base_mode():
+		KinMood.update(home, dt, now)
+		return
 	var cands: Array = []
 	for k in home.kins:
 		var rec: Dictionary = k["rec"]
 		var w := Care.want(rec) if home.visit.is_empty() else ""
 		_relief(home, k, w)
-		if w != "" and _free_to_show(k):
+		if w != "" and free_to_show(k):
 			cands.append(k)
 	cands.sort_custom(func(a, b): return urgency(a["rec"]) > urgency(b["rec"]))
 	var shown: Array = []
@@ -84,7 +87,7 @@ static func update(home: Node, dt: float, now: float) -> void:
 	for k in home.kins:
 		_pose(home, k, shown.has(k), dt, now)
 
-static func _free_to_show(k: Dictionary) -> bool:
+static func free_to_show(k: Dictionary) -> bool:
 	if k.has("indoors") or k.has("fetch") or k.has("bath") or k.get("busy", false):
 		return false
 	for busy_for in ["nap_t", "say_t", "hold_t"]:
@@ -145,26 +148,26 @@ static func bubble() -> Node3D:
 	Models.part(root, Models.sphere(0.22, 14), white, Vector3.ZERO, Vector3(1.15, 0.95, 0.5))
 	Models.part(root, Models.sphere(0.06, 8), white, Vector3(-0.17, -0.24, 0))
 	Models.part(root, Models.sphere(0.035, 6), white, Vector3(-0.25, -0.34, 0))
-	_bowl(root)
-	_zzz(root)
+	bowl(root)
+	zzz(root)
 	_bath(root)
-	_ball(root)
-	_heart(root)
+	ball(root)
+	heart(root)
 	return root
 
-static func _node(root: Node3D, nm: String) -> Node3D:
+static func icon_node(root: Node3D, nm: String) -> Node3D:
 	var n := Node3D.new()
 	n.name = nm
 	root.add_child(n)
 	return n
 
-static func _bowl(root: Node3D) -> void:
-	var n := _node(root, "bowl")
+static func bowl(root: Node3D) -> void:
+	var n := icon_node(root, "bowl")
 	Models.part(n, Models.cyl(0.11, 0.07, 0.07, 12), Models.toon(Color("c9604a"), false), Vector3(0, -0.06, -0.1))
 	for x in [-0.05, 0.0, 0.05]:
 		Models.part(n, Models.sphere(0.04, 6), Models.toon(Color("c8a26a"), false, 0.2), Vector3(x, 0.0, -0.1))
 
-static func _zzz(root: Node3D) -> void:
+static func zzz(root: Node3D) -> void:
 	var lbl := Label3D.new()
 	lbl.name = "zzz"
 	lbl.text = "Zzz"
@@ -178,20 +181,20 @@ static func _zzz(root: Node3D) -> void:
 	root.add_child(lbl)
 
 static func _bath(root: Node3D) -> void:
-	var n := _node(root, "bath")
+	var n := icon_node(root, "bath")
 	var blue := Models.toon(Color("5ab8f0"), false, 0.4)
 	Models.part(n, Models.sphere(0.07, 10), blue, Vector3(0, -0.03, -0.1), Vector3(1, 1.25, 1))
 	Models.part(n, Models.cyl(0.0, 0.05, 0.08, 8), blue, Vector3(0, 0.08, -0.1))
 	for b in [Vector3(-0.1, 0.06, -0.1), Vector3(0.1, 0.0, -0.1)]:
 		Models.part(n, Models.sphere(0.03, 6), Models.toon(Color("e8f6ff"), false, 0.3), b)
 
-static func _ball(root: Node3D) -> void:
-	var n := _node(root, "ball")
+static func ball(root: Node3D) -> void:
+	var n := icon_node(root, "ball")
 	Models.part(n, Models.sphere(0.09, 10), Models.toon(Color("ff6a5a"), false, 0.2), Vector3(0, 0, -0.1))
 	Models.part(n, Models.cyl(0.091, 0.091, 0.025, 12), Models.toon(Color("f6f2ea"), false), Vector3(0, 0, -0.1),
 		Vector3.ONE, Vector3(0, 0, 0.5))
 
-static func _heart(root: Node3D) -> void:
+static func heart(root: Node3D) -> void:
 	var lbl := Label3D.new()
 	lbl.name = "heart"
 	lbl.text = "♥"

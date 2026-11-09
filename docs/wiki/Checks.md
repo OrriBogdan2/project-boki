@@ -53,6 +53,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
 | `--revive-check` | A bot squadmate reaches a downed player and finishes the revive in time, round walls and edges |
 | `--base-check` | Basing to a teammate: a clean channel arrives weakened; a hit interrupts it |
+| `--mood-bubble-check` | The Boki base mood bubble (base_mode): each of six feelings shows its icon, no numbers, fades after 3 s, returns on hover or when you walk near |
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
