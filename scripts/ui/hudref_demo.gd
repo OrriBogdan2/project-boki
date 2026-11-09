@@ -127,7 +127,7 @@ static func _busy(m, P: Hunter) -> void:
 		if h != P and h.team == P.team:
 			m.knock(h, m.hunters.filter(func(x): return x.team != P.team)[0], {})
 			break
-	m.hud.level_up(8, {})
+	m.hud.level_up(8)
 	m.hud.tip("Hold %s to scan  ·  4s, rivals hear it" % Settings.key_cap("interact"))
 	m.hud.toast("Bramble Isle", Color("f2c84a"))
 	for i in 3:

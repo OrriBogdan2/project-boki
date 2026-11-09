@@ -84,8 +84,8 @@ Gloves and boots stay; the V glove slot starts empty. A one-time farm notice lis
 
 **Perk orbs (ext/perkorbs, note 0006).** Chests, shrines and bosses drop perk orbs you walk into (no
 1/2/3 prompt); bosses drop a fan of three that fades for you only; bots walk to orbs; orbs sync like
-wpicks; the old kit passives (field_kit, magpie, satchel, spyglass, tinker_roll) become perks; a
-fixed per-hero weapon path on even levels.
+wpicks; the old kit passives (field_kit, magpie, satchel, spyglass, tinker_roll) become perks. (A fixed
+per-hero weapon path on even levels shipped with it and was retired again, see 0006.)
 
 **Keys and cover (ext/keys-cover, note 0007).** One chest type opened by keys; key carriers per region
 with a seeded stream; the bush mimic; hiding cover on The Hollow Crown by biome.

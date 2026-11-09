@@ -534,16 +534,6 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | empty_f | {"gait": {"knee": 0.14, "lean": 0.02, "width": 0.07}, "leg": "r", "pose": {"spine": -0.04, "tilt": 0.12, "twist": 0.08, "hip": 0.07, "knee": 0.0, "free_leg": [0.2, 0.3], "head": [0.04, 0.1, -0.1], "arm_l": [0.04, 0.06, 0.02]}, "idle": {"breath": 2.2, "breath_amp": 0.9, "shift": 8.0, "fidget": {"every": 7.0, "dur": 1.4, "wave": 1, "head": [0.0, 0.3, 0.0], "body": [0.0, 0.08, 0.04]}}} |
 | empty_m | {"gait": {"knee": 0.18, "lean": 0.04, "width": 0.12}, "leg": "l", "pose": {"spine": 0.04, "tilt": 0.02, "twist": 0.04, "hip": 0.02, "knee": 0.04, "spread": 0.05, "free_leg": [0.06, 0.08], "head": [0.02, 0.0, 0.0], "arm_l": [0.0, 0.0, 0.0]}, "idle": {"breath": 2.0, "breath_amp": 1.0, "shift": 10.0, "fidget": {"every": 8.0, "dur": 1.4, "wave": 1, "head": [0.0, -0.3, 0.0], "body": [0.04, 0.0, 0.0]}}} |
 
-## weapon_path (`content/rules/weapon_path.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | The fixed weapon path (scripts/match/weapon_path.gd): on every even level (2, 4, 6, 8, 10) a hunter's signature weapon takes the next step on its hero's path, with no choice to make. Each step is a plain weapon upgrade id from Data.PERKS (WeaponUps: hotload = damage, deepmag = magazine (only Vex: no other hero weapon has ammo), quickfeed = fire rate, longreach = range). One entry per hero in Arch.ORDER. Brands are not on the path: they come from perk orbs. If an orb already maxed a step, the next open plain upgrade is taken instead. default is for a hunter with no hero. |
-| default | ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"] |
-| paths | {"thief": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "archer": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "mage": ["hotload", "hotload", "quickfeed", "longreach", "hotload"], "gunslinger": ["quickfeed", "hotload", "deepmag", "hotload", "longreach"], "juggernaut": ["hotload", "longreach", "hotload", "quickfeed", "hotload"], "bulwark": ["hotload", "quickfeed", "longreach", "hotload", "quickfeed"], "dredge": ["hotload", "hotload", "hotload", "quickfeed", "longreach"], "ashwick": ["hotload", "longreach", "hotload", "hotload", "quickfeed"], "tender": ["quickfeed", "hotload", "hotload", "longreach", "hotload"], "rimewright": ["hotload", "longreach", "quickfeed", "hotload", "longreach"], "dolm": ["hotload", "quickfeed", "hotload", "longreach", "quickfeed"], "ostra": ["hotload", "longreach", "hotload", "quickfeed", "hotload"]} |
-
 ## wisp_looks (`content/rules/wisp_looks.json`)
 
 

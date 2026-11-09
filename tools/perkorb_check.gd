@@ -2,8 +2,7 @@ extends RefCounted
 ## --perkorb-check: perks are found as orbs, never chosen from a prompt. No perk prompt exists;
 ## chests, shrines and bosses drop orbs (1 / 1-2 / a fan of 3) that lean the way the design says;
 ## taking one of a boss's fan fades the rest for you only (another hunter can still take them);
-## orbs sync over Net; the old kit passives are in the pool; every hero in Arch.ORDER gets its fixed
-## weapon step on every even level; bots walk to orbs and take them. Prints PERKORB PASS/FAIL.
+## orbs sync over Net; the old kit passives are in the pool; bots walk to orbs and take them. Prints PERKORB PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -24,7 +23,6 @@ func run(main_node: Node) -> void:
 	await _drops()
 	await _fan()
 	await _sync()
-	await _paths()
 	await _bots()
 	print("PERKORB DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -248,70 +246,6 @@ func _sync() -> void:
 	Net.out_events.clear()
 	a.queue_free()
 	b.queue_free()
-
-# ------------------------------------------------------------------ 6. the fixed weapon path
-func _paths() -> void:
-	var paths: Dictionary = WeaponPath.rules()["paths"]
-	ok("a weapon path for every hero in Arch.ORDER", Arch.ORDER.all(func(a): return paths.has(a) and (paths[a] as Array).size() == 5), str(paths.keys().size()))
-	for arch in Arch.ORDER:
-		var m := await _start(String(arch), 21)
-		var P: Hunter = m.player
-		var steps: Array = paths[arch]
-		P.perks.clear()
-		WeaponUps.apply(P)
-		var d0 := float(P.wpn["dmg"])
-		var odd_ok := true
-		var got: Array = []
-		var pop_ok := true
-		var grow_ok := true
-		var grow_info := ""
-		var base_hp := float(P.cdat["hp"])
-		for lvl in range(2, 11):
-			var before := P.perks.size()
-			var hp0: float = P.max_hp
-			var ap0 := LevelGrowth.ap(P)
-			m.hud.msgs.clear()
-			P.gain_xp(float(Hunter.XP_TO[lvl - 1]) - P.xp + 0.5)
-			var want := 0.06 if lvl <= 6 else 0.03
-			var wap := 0.05 if lvl <= 6 else 0.025
-			if absf((P.max_hp - hp0) - base_hp * want) > 0.05 or absf((LevelGrowth.ap(P) - ap0) - wap) > 0.0001:
-				grow_ok = false; grow_info += "L%d hp+%.2f ap+%.3f " % [lvl, P.max_hp - hp0, LevelGrowth.ap(P) - ap0]
-			var gained := P.perks.size() - before
-			if lvl % 2 == 0:
-				if gained != 1: odd_ok = false
-				else: got.append(P.perks[P.perks.size() - 1])
-				var step_name := String(Data.PERKS[String(P.perks[P.perks.size() - 1])]["name"])
-				if str(m.hud.msgs.texts()) != str(["LEVEL %d  ·  %s" % [lvl, step_name]]): pop_ok = false
-			else:
-				if gained != 0: odd_ok = false
-				if m.hud.lvl_pop <= 0.0: pop_ok = false
-				if str(m.hud.msgs.texts()) != str(["LEVEL %d  ·  +1 skill point" % lvl]): pop_ok = false
-		ok("%s: levels 2, 4, 6, 8, 10 each apply their path step, odd levels none" % arch, odd_ok and got == steps, "%s vs %s" % [str(got), str(steps)])
-		ok("%s: the level-up line names the weapon step on even levels, the skill point on odd ones" % arch, pop_ok)
-		ok("%s: each level adds 6%% health and 5%% ability power (2-6), half that at 7-10" % arch, grow_ok, grow_info)
-		ok("%s: by level 10 that is +42%% health and +35%% ability power" % arch, is_equal_approx(P.max_hp - P.get_meta("growth_hp", 0.0), P.max_hp - base_hp * 0.42) and is_equal_approx(LevelGrowth.ap(P), 1.35), "ap %.3f" % LevelGrowth.ap(P))
-		ok("%s: the signature weapon stays and is stronger or faster" % arch, P.wid == Arch.signature(String(arch)) and (float(P.wpn["dmg"]) > d0 or steps.has("quickfeed") or steps.has("longreach")))
-		ok("%s: skill points still come one a level" % arch, P.lvl == 10 and P.skill_pts == 10, "lvl %d pts %d" % [P.lvl, P.skill_pts])
-		m.queue_free()
-	# ability power reaches ability damage, and the growth survives a class change
-	var m3 := await _start("gunslinger", 23)
-	var A: Hunter = m3.player
-	var p1: float = A.ak.power("sec") if A.ak else 1.0
-	A.gain_xp(float(Hunter.XP_TO[5]) - A.xp + 0.5)      # to level 6
-	var p6: float = A.ak.power("sec") if A.ak else 1.0
-	ok("ability power makes abilities hit harder (level 6: +25%)", A.ak != null and absf(p6 / p1 - 1.25) < 0.001, "%.3f" % (p6 / maxf(p1, 0.001)))
-	ok("the level badge tooltip shows the growth totals", LevelGrowth.tip(A).contains("+30% max health") and LevelGrowth.tip(A).contains("+25% ability power"), LevelGrowth.tip(A))
-	A.reclass(A.cls, A.arch)
-	ok("a class change keeps the levels' health", absf(A.max_hp - (float(A.cdat["hp"]) * 1.30 + A.kin_hp_added)) < 0.5, "%.1f" % A.max_hp)
-	m3.queue_free()
-	# a step an orb already maxed falls to the next open plain upgrade
-	var m2 := await _start("gunslinger", 22)
-	var G: Hunter = m2.player
-	for i in 4: G.add_perk("hotload")
-	G.add_perk("quickfeed"); G.add_perk("quickfeed"); G.add_perk("quickfeed")
-	var info := WeaponPath.on_level(G, 4)      # the path says hotload here, which is maxed
-	ok("a maxed step is swapped for another open upgrade", not info.is_empty() and info["perk"] != "hotload" and G.perk_n(info["perk"]) >= 1, str(info.get("perk", "")))
-	m2.queue_free()
 
 # ------------------------------------------------------------------ 7. bots
 func _bots() -> void:

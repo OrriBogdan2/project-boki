@@ -2868,16 +2868,13 @@ func gain_xp(x: float) -> void:
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1
 		skill_pts += 1
-		var wstep := {}
-		if lvl % 2 == 0 and m and not remote:
-			wstep = WeaponPath.on_level(self, lvl)      # every other level: the next step of this hero's fixed weapon path
 		if m and not remote: LevelGrowth.apply(self)      # every level: a little more health and ability power, quietly
 		# a gold ring pulse on the hunter that everyone nearby sees
 		if m and m.fx and visible and not unseen:
 			m.fx.ring(pos, 2.0, Color("ffd27a"), 0.4)
 			m.fx.burst(pos + Vector3(0, 1.2, 0), Color("ffd27a"), 12, 2.5, 0.5, -2.0)
 		if is_local() and m and m.hud:
-			m.hud.level_up(lvl, wstep)
+			m.hud.level_up(lvl)
 			# the level-up chime: its own rising bell run over a warm swell (tools/gen_sfx_ui.py)
 			m.sfx("level_up", null, -2.0, 1.0)
 			if kin is Kin: BokiChatter.say(m, kin, "level_up")
