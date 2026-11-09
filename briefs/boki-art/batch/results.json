@@ -25469,5 +25469,68 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_seaglass_ray_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_seaglass_slug",
+    "name": "Sea-glass Boki (slug)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_seaglass_slug_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blotlet",
+    "name": "Blotlet (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_blotlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blotlet",
+    "name": "Blotlet (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_blotlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sloggoth",
+    "name": "Sloggoth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sloggoth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blotlet",
+    "name": "Blotlet (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_blotlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blotlet",
+    "name": "Blotlet (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_blotlet_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrink_n",
+    "name": "Umbrink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_umbrink_n_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sloggoth",
+    "name": "Sloggoth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sloggoth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sloggoth",
+    "name": "Sloggoth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_sloggoth_1.jpg",
+    "ok": true
   }
 ]
