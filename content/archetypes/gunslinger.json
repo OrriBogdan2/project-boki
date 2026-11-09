@@ -6,7 +6,7 @@
 	"personality": "A foundry kid who swept brass casings off Malgrave's war-foundry floors. A siege engine took her arm in the Hollowing, and the gatling she bolted to her shoulder is her right arm now.\nThe Skylands' most famous gun-for-hire, she keeps a tally mark for every bounty she cashed. Her loyalty is technically for sale, but she sticks with the crew.",
 	"weight": "medium",
 	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
-	"color": "#ff9a5c",
+	"color": "#b8f03c",
 	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
@@ -31,7 +31,7 @@
 		"vamp": 0.06,
 		"wait": 3.5,
 		"rattle_k": 0.9,
-		"col": "#ff9a5c"
+		"col": "#d8ff7a"
 	},
 	"passive": {
 		"name": "Hot Streak",
@@ -41,7 +41,7 @@
 		"id": "slipstep",
 		"name": "Slipstep",
 		"icon": "dash",
-		"col": "#ffc89a",
+		"col": "#e6ffb0",
 		"cd": 8.5,
 		"charges": 1,
 		"tap_t": 0.18,
@@ -59,7 +59,7 @@
 		"name": "Burr Charge",
 		"short": "Burr",
 		"icon": "skypierce",
-		"col": "#ffb36a",
+		"col": "#c8f560",
 		"cooldown": 6.5,
 		"charges": 1,
 		"burr": {
@@ -92,7 +92,7 @@
 		"name": "Longneedle",
 		"short": "Needle",
 		"icon": "haymaker",
-		"col": "#ffe0a0",
+		"col": "#eaffa8",
 		"cooldown": 11.5,
 		"charge": 0.6,
 		"self_slow": 1.0,
@@ -110,14 +110,13 @@
 			"ctrl_cap": "soft",
 			"guard": "add"
 		},
-		"linger": 0.75,
 		"recoil": 6.0
 	},
 	"x": {
 		"name": "Cinderfall",
 		"short": "Fall",
 		"icon": "earthshatter",
-		"col": "#ff7a3c",
+		"col": "#b8f03c",
 		"cooldown": 42.0,
 		"range": 14.0,
 		"radius": 3.4,

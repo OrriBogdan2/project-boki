@@ -6,7 +6,7 @@ extends Node3D
 ## nothing washes out on bright ground. Kinds:
 ##   arc      a jagged lightning ribbon between two points (Sparkle's bolts, the Surge streak, orb zaps)
 ##   crackle  a burst of short arcs out of one point (the fingertip on every finger bolt)
-##   ride     a look riding on a match shot until it ends, then its impact (the finger bolt, the rifle round)
+##   ride     a look riding on a match shot until it ends, then its impact (the finger bolt)
 ##   smear    a fading hot-headed streak (the grenade's flight)
 ##   pillar   a column of light that narrows over its life (the drag disc's countdown, the refund column)
 ##   ring     an expanding ring with spark needles (arrivals, shock rings, the slide's start ring)
@@ -407,14 +407,10 @@ static func _shown_under(node: Node3D, model: Node3D) -> bool:
 
 # ------------------------------------------------------------------ riders
 ## A look riding on a match shot (the dictionary in m.shots) until it ends; then on_end(at, hit) runs.
-## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail).
+## kind names the look for the caller; every rider draws as a jagged arc ribbon.
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, width := 0.3,
 		on_end := Callable()) -> void:
-	var n: Node3D
-	if kind == "tracer":
-		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
-	else:
-		n = _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
+	var n := _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
 	_look(n, col, col2)
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):

@@ -1,0 +1,78 @@
+{
+	"palette": {
+		"main": "#b8f03c", "hot": "#eaffa8", "white": "#fbffe6", "deep": "#4f8a12", "char": "#1c2a0e",
+		"smoke": "#d4dcc4", "soot": "#8a947e", "brass": "#d8b860"
+	},
+	"anchors": {
+		"muzzle": {"nodes": ["weapon_muzzle"], "body": [0.0, 1.1, 0.9]},
+		"drum": {"nodes": ["anchor_drum"], "gun": [0.0, 0.05, 0.1], "body": [0.15, 1.05, 0.3]}
+	},
+	"moves": {
+		"shot": {"net": false, "fx": [
+			{"p": "flare", "size": 0.6, "size_k": -0.6, "grow": 1.4, "life": 0.1, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "n": 6, "way": "fwd", "lift": 0.0, "speed": 9.0, "spread": 0.25, "drag": 2.0, "life": 0.14,
+				"size": 0.05, "size_k": -0.6, "stretch": 0.04, "c": "hot", "c2": "white", "c3": "main"},
+			{"p": "smoke", "n": 2, "way": "fwd", "speed": 1.2, "spread": 0.5, "grav": -1.0, "life": 0.45, "size": 0.16,
+				"c": "smoke", "c3": "soot", "near": true}
+		]},
+		"shot_trail": {"net": false, "fx": [
+			{"p": "ribbon", "size": 0.34, "size_k": -0.6, "life": 2.0, "tail": 0.09, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "size": 0.14, "size_k": -0.6, "life": 2.0, "tail": 0.06, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"shot_hit": {"net": false, "fx": [
+			{"p": "flare", "size": 0.55, "size_k": -0.6, "grow": 1.3, "life": 0.1, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "n": 5, "speed": 5.0, "spread": 0.7, "grav": 6.0, "drag": 1.5, "life": 0.25, "size": 0.05,
+				"size_k": -0.6, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"reload": {"net": false, "sfx": [{"n": "vn_cock", "db": -6.0, "at": "h"}], "fx": [
+			{"p": "coin", "at": "drum", "n": 5, "way": "up", "speed": 2.6, "spread": 0.7, "grav": 9.0, "life": 0.55,
+				"size": 0.05, "c": "brass", "c2": "white", "c3": "soot"},
+			{"p": "star", "at": "muzzle", "n": 3, "speed": 0.4, "spread": 1.0, "life": 0.25, "size": 0.09,
+				"c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"e_charge": {"fx": [
+			{"p": "ember", "at": "muzzle", "n": 18, "shape": "gather", "radius": 0.8, "speed": 2.8, "life": 0.22,
+				"size": 0.06, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "star", "at": "muzzle", "n": 4, "speed": 0.2, "spread": 1.0, "life": 0.14, "size": 0.16,
+				"c": "hot", "c2": "white", "c3": "main"}
+		]},
+		"e_fire": {"sfx": [{"n": "vn_ion_fire", "db": 1.0, "at": "h"}], "fx": [
+			{"p": "bolt", "size": "r", "size_x": 1.4, "len": "len", "life": 0.5, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "bolt", "size": "r", "size_x": 0.5, "len": "len", "life": 0.34, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "flare", "size": 1.4, "grow": 1.5, "life": 0.16, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "shape": "line", "way": "along", "len": "len", "n": 32, "speed": 1.6, "spread": 0.8,
+				"drag": 2.0, "life": 0.5, "size": 0.06, "stretch": 0.03, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "smoke", "at": "h", "y": 0.3, "n": 4, "shape": "disc", "radius": 0.5, "speed": 1.4, "spread": 0.5,
+				"grav": -1.0, "life": 0.8, "size": 0.26, "c": "smoke", "c3": "soot", "near": true}
+		]},
+		"e_hit": {"net": false, "fx": [
+			{"p": "flare", "size": 1.0, "grow": 1.3, "life": 0.14, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "n": 14, "way": "fwd", "speed": 5.0, "spread": 0.6, "grav": 4.0, "drag": 1.2, "life": 0.35,
+				"size": 0.06, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"x_cast": {"sfx": [{"n": "vn_nuke_fire", "db": -1.0, "at": "h"}, {"n": "vn_nuke_fall", "db": -2.0}], "fx": [
+			{"p": "flare", "at": "h", "y": 2.4, "size": 1.3, "grow": 1.4, "life": 0.16, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ember", "at": "h", "y": 2.4, "n": 14, "way": "up", "speed": 30.0, "spread": 0.04, "life": 0.4,
+				"size": 0.12, "stretch": 0.06, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"x_shell": {"net": false, "fx": [
+			{"p": "ribbon", "size": 0.9, "life": 2.0, "tail": 0.16, "c": "deep", "c2": "main", "c3": "char"},
+			{"p": "ribbon", "size": 0.38, "life": 2.0, "tail": 0.1, "c": "main", "c2": "white", "c3": "deep"}
+		]},
+		"x_impact": {"sfx": [{"n": "vn_nuke_boom", "db": 1.0}, {"n": "vn_nuke_burn", "db": -6.0}], "fx": [
+			{"p": "flare", "y": 1.0, "size": 3.6, "grow": 1.3, "life": 0.22, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "skirt", "size": "r", "from": 0.3, "tall": 1.6, "life": 0.5, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "size": "r", "life": 2.2, "c": "main", "c2": "hot", "c3": "char"},
+			{"p": "ember", "y": 0.5, "n": 40, "way": "up", "speed": 9.0, "spread": 0.7, "grav": 6.0, "drag": 1.0,
+				"life": 0.9, "size": 0.09, "stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "chunk", "y": 0.3, "n": 12, "way": "up", "speed": 7.0, "spread": 0.6, "grav": 14.0, "life": 0.9,
+				"size": 0.12, "c": "soot", "c2": "deep", "c3": "char"},
+			{"p": "smoke", "y": 0.6, "n": 9, "shape": "disc", "radius": "r", "radius_x": 0.5, "speed": 1.6,
+				"spread": 0.6, "grav": -1.2, "life": 1.6, "size": 0.5, "c": "smoke", "c3": "soot", "near": true}
+		]},
+		"x_lick": {"net": false, "fx": [
+			{"p": "ember", "n": 3, "way": "up", "speed": 3.5, "spread": 0.4, "grav": -2.0, "life": 0.5, "size": 0.07,
+				"stretch": 0.04, "c": "main", "c2": "hot", "c3": "deep"}
+		]}
+	}
+}
