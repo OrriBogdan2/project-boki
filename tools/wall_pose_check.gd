@@ -11,7 +11,7 @@ const FRAMES := 24             # steps from the event the case watches (0.4 s: t
 
 const SHOT_EVERY := 2          # steps between two frames of a strip
 const SHOT_PX := 360           # px: a frame's side
-const CAM_SIDE := 3.2          # m along the wall the camera stands
+const CAM_SIDE := 4.5          # m along the wall the camera stands
 const CAM_UP := 1.1            # m above the feet
 var shots := ""
 var main_node: Node
@@ -37,6 +37,8 @@ func run(main: Node) -> void:
 		if m.hud:
 			m.hud.visible = false
 	var wl: Dictionary = _carve(5, 1)[0]
+	if shots != "":
+		_stand_in(wl)
 	for id in Arch.ids():
 		var look := PlayerLook.neutral()
 		var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", look, id)
@@ -124,6 +126,19 @@ func _case(id: String, kind: String, wl: Dictionary, sync: Node, contact: int) -
 func _frame(dt: float) -> void:
 	h.render(dt, 1.0)
 	h.model.get_node("Warden/Sync").call("_process", dt)
+
+## The carved wall drawn (the terrain mesh was built before _carve raised it): a stone block over its cells.
+func _stand_in(wl: Dictionary) -> void:
+	var tall := float(wl["top"]) - float(wl["low"])
+	var box := BoxMesh.new()
+	box.size = Vector3(3.0, tall, 5.0)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color("7d7468")
+	box.material = mat
+	var mi := MeshInstance3D.new()
+	mi.mesh = box
+	m.add_child(mi)
+	mi.global_position = Vector3(float(wl["x0"]) + 2.5, float(wl["low"]) + tall * 0.5, float(wl["z0"]) + 0.5)
 
 func _shot(face: Vector3, out: Vector3, nm: String) -> void:
 	var along := out.cross(Vector3.UP)
