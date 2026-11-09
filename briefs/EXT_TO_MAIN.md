@@ -4426,3 +4426,5 @@ ART bubblisk 8.67 briefs/boki-art/turnarounds/Bubblisk.jpg kind=turnaround panel
 ART nettlynx 8.5 briefs/boki-art/turnarounds/Nettlynx.jpg kind=turnaround panel=8.3/8.6/8.6
 ART oarlet 8.47 briefs/boki-art/evolutions/Oarlet.jpg kind=turnaround panel=8.6/8.5/8.3
 ART tinbrock 8.47 briefs/boki-art/evolutions/Tinbrock.jpg kind=turnaround panel=8.4/8.5/8.5
+
+READY ext/warden-bob-damp-rebased 92882bf31 (supersedes ext/warden-bob-damp ba31e5ef6; job 20261109-060200-a4, w2). Merged origin/main d255acbee: clean, no conflicts (only Net.VERSION and release.yml came in); one style fix, wrapped a long doc line in tools/anim_shots.gd for the style ratchet. Intent unchanged: WardenGait loco.bob damps hip bob at a run. Checks: --import ok, --anim-audit FAIL 0 (all 12), --check 0 failures, health --strict OK.
