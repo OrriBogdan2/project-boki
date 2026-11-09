@@ -62,16 +62,23 @@ func _rig() -> void:
 		_play(a, verb, func(an: HunterAnim, _t: float):
 			var h := _hands(an)
 			seen["act"] = seen["act"] or an.act_kind == verb
-			seen["lo"] = minf(seen["lo"], h[1].y); seen["hi"] = maxf(seen["hi"], h[1].y)
-			seen["fwd_l"] = minf(seen["fwd_l"], h[0].z - rest[0].z); seen["fwd_r"] = minf(seen["fwd_r"], h[1].z - rest[1].z)
+			seen["lo"] = minf(seen["lo"], h[1].y)
+			seen["hi"] = maxf(seen["hi"], h[1].y)
+			seen["fwd_l"] = minf(seen["fwd_l"], h[0].z - rest[0].z)
+			seen["fwd_r"] = minf(seen["fwd_r"], h[1].z - rest[1].z)
 			seen["back_r"] = maxf(seen["back_r"], h[1].z - rest[1].z)
 			seen["up"] = maxf(seen["up"], minf(h[0].y, h[1].y) - rest[1].y))
 		ok(seen["act"], "%s: the body takes the move" % verb)
+				var bob: float = seen["hi"] - seen["lo"]
 		match verb:
-			"feed": ok(seen["fwd_l"] < -LIFT and seen["fwd_r"] < -LIFT, "feed: both hands held out in front (%.2f, %.2f)" % [seen["fwd_l"], seen["fwd_r"]])
-			"pat": ok(seen["hi"] - seen["lo"] > 0.05 and seen["fwd_r"] < -LIFT, "pat: the right hand reaches out and bobs (%.2f)" % (seen["hi"] - seen["lo"]))
-			"toss": ok(seen["back_r"] > 0.1 and seen["fwd_r"] < -LIFT, "toss: the hand goes back (%.2f) then through (%.2f)" % [seen["back_r"], seen["fwd_r"]])
-			"cheer": ok(seen["up"] > LIFT, "cheer: both hands above where they rest (+%.2f)" % seen["up"])
+			"feed":
+				ok(seen["fwd_l"] < -LIFT and seen["fwd_r"] < -LIFT, "feed: both hands held out in front")
+			"pat":
+				ok(bob > 0.05 and seen["fwd_r"] < -LIFT, "pat: the right hand reaches out and bobs (%.2f)" % bob)
+			"toss":
+				ok(seen["back_r"] > 0.1 and seen["fwd_r"] < -LIFT, "toss: the hand goes back then through")
+			"cheer":
+				ok(seen["up"] > LIFT, "cheer: both hands above where they rest (+%.2f)" % seen["up"])
 		for i in SETTLE * 2:
 			a.update(1.0 / FPS, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "holster": true})
 		ok(a.act_kind == "" and _hands(a)[1].distance_to(rest[1]) < 0.08, "%s: ends and the body stands again" % verb)
