@@ -322,7 +322,7 @@ func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
 	var k := 0.4
 	while k <= reach:
 		var q := f.pos + Vector3(dir.x, 0, dir.y) * k
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > g0 + 0.8:
+		if Verbs.is_wall_at(m.world, q.x, q.z, g0):
 			return true
 		k += 0.3
 	return false

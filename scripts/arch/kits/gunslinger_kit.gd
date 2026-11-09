@@ -454,7 +454,7 @@ func _tick_burrs(dt: float) -> void:
 			_direct_hit(b, victim, flat)
 			continue
 		var ledge: bool = m.world.ground_at(flat.x, flat.z) > float(b["g0"]) + 0.6
-		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge
+		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge or not Verbs.barrier_at(m.verbs.walls, flat, 0.15, h.team).is_empty()
 		if walled:
 			_stick(b, p, true)
 		elif dist >= float(b["range"]):
@@ -634,6 +634,9 @@ func _fire_needle() -> void:
 	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
+	var wall := Verbs.barrier_ahead(m.verbs.walls, a, d, L, float(ed["width"]), h.team)
+	if not wall.is_empty():
+		L = float(wall["d"])           # through terrain, not through a placed barrier (as the Abyssal Hand)
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
 	# an ember body, a hot core, a bronze shimmer down its edges; the ember muzzle orb and its flare
@@ -646,6 +649,8 @@ func _fire_needle() -> void:
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
+	if not wall.is_empty():
+		m.verbs.absorb(wall["w"], dmg0)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)

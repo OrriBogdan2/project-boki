@@ -11,6 +11,10 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	var barrier = load("res://tools/barrier_rule_check.gd").new()
+	await barrier.rules(main, "rock")
+	n += barrier.n
+	fails += barrier.fails
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "dolm")
 	ok("item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; holds go through every move",

@@ -19,6 +19,8 @@ var decoys: Array = []    # {pos, team, t, node, owner}
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
+const PIN_R := 0.3          # m: the body radius asked when a body is knocked toward a placed barrier
+const BEAM_STEP := 0.4     # m: how finely a beam is walked for the first barrier in its way
 const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 
 func _init(match_node: Node) -> void:
@@ -111,6 +113,38 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float) -> 
 		if p.distance_to(c) < r * 0.8 + float(w["th"]):
 			return float(w["y"]) + top
 	return 0.0
+
+## The one rule for what a placed barrier stops: the first wall of another team's (or any team's, if it blocks
+## "all") that a thing of radius r at p is touching, within the wall's height. Shots, thrown things and
+## beams all ask it, so a terrain-piercer (the Abyssal Hand, the Longneedle) is still stopped by one.
+static func barrier_at(list: Array, p: Vector3, r: float, team: int) -> Dictionary:
+	var p2 := Vector2(p.x, p.z)
+	for w in list:
+		if w["block"] != "all" and int(w["team"]) == team:
+			continue
+		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
+			continue
+		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
+		if p2.distance_to(c) <= float(w["th"]) + r:
+			return w
+	return {}
+
+## Along a line of `reach` m from `from` (a thing of radius r): {w, d} for the first barrier in the way, or {}.
+static func barrier_ahead(list: Array, from: Vector3, d: Vector2, reach: float, r: float, team: int) -> Dictionary:
+	if list.is_empty():
+		return {}
+	var k := 0.0
+	while k <= reach:
+		var w := barrier_at(list, from + Vector3(d.x, 0, d.y) * k, r, team)
+		if not w.is_empty():
+			return {"w": w, "d": k}
+		k += BEAM_STEP
+	return {}
+
+## Is there something a body at (x, z) feet-height y can be knocked or pinned against: a block, a ledge face or a
+## movement-blocking placed barrier (a rock, a Rink Wall)? Every "into a wall" stun asks this.
+static func is_wall_at(w: World, x: float, z: float, y: float) -> bool:
+	return w.is_block(x, z) or w.ground_at(x, z) > y + 0.8 or wall_blocks(w.dyn_walls, x, z, PIN_R, y) > 0.0
 
 # ------------------------------------------------------------------ reflect windows
 ## A reflect window; returns it so a held one (a form dash's mirror, MergeAugment) can refresh and end it.
@@ -310,15 +344,9 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 	if walls.is_empty() and mirrors.is_empty():
 		return ""
 	var x: Dictionary = s["x"]
-	var p2 := Vector2(p.x, p.z)
-	for w in walls:
-		if w["block"] != "all" and int(w["team"]) == int(s["team"]):
-			continue
-		if p.y < float(w["y"]) - 0.3 or p.y > float(w["y"]) + float(w.get("top", WALL_H)) + 0.3:
-			continue
-		var c := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
-		if p2.distance_to(c) > float(w["th"]) + float(s["r"]):
-			continue
+	var w := barrier_at(walls, p, float(s["r"]), int(s["team"]))
+	if not w.is_empty():
+		var c := Geometry2D.get_closest_point_to_segment(Vector2(p.x, p.z), w["a"], w["b"])
 		if w["reflect"] and not x.get("melee", false) and not x.get("reflected", false):
 			var ab: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
 			var nrm := Vector2(-ab.y, ab.x).normalized()

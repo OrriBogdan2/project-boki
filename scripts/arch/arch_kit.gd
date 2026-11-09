@@ -1121,12 +1121,12 @@ func _charge_release() -> void:
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
-## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
+## Terrain (a wall, a rock, a ledge face, a placed barrier) within `reach` behind `t` along `dir`.
 func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
 	var k := 0.3
 	while k <= reach:
 		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
+		if Verbs.is_wall_at(m.world, q.x, q.z, t.pos.y):
 			return true
 		k += 0.3
 	return false

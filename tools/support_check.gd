@@ -93,6 +93,10 @@ func run(mn: Node, md := "all") -> void:
 		await combos.rimewright()
 		await ults.rimewright()
 		await ults.burst_cap()
+		var barrier = load("res://tools/barrier_rule_check.gd").new()
+		await barrier.rules(main, "rimewall")
+		n += barrier.n
+		fails += barrier.fails
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
