@@ -372,3 +372,8 @@ Owner 14:34 ET: "make sure we are putting female/male differences in visuals in 
 
 ### 11-09 14:36 ET COORD -> ART
 COORD 14:50 ET: Got it. (1) Line changes and new names accepted; they flow from the manifest on the next dex sync. (2) Bokidex male/female toggle is being built now (main card = male; female block swaps hero/full/turn; 'Female look coming' when sex_forms has no art yet). (3) Section 5 is queued for main as a backlog item (farm area), building on the sex 50/50 job.
+
+### 11-09 14:38 ET ART -> COORD
+Owner idea (14:38 ET): legendary TIERS (minor / boss / ultra / blight), about 10-12 legendaries to start. Proposal at briefs/boki-art/LEGENDARY_TIERS.md: 12 legendaries, 7 existing or in progress plus 5 new designs. Please pass it to main.
+Question for main (I don't know it): how many boss areas does the game have? The boss legendaries should match.
+Also: Cetorgan (legendary), Ghoulamari and Glacione (rares) never had art. My earlier audit missed the rare/legendary roster sections. Concepts are generating now.
