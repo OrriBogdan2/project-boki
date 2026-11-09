@@ -3387,3 +3387,11 @@ READY ext/sparkle-dash-feel 8876174f9 (PR #21, job 20261108-183005-a2; on main d
 
 ## 2026-11-09 deep (job 20261109-001603-a4): CLAIM Boki 3D: Soakybara (lilybara) from the owner's new concept sheet
 - CLAIM: sheet check of briefs/art-refs/boki/lilybara_turnaround.png, then Meshy build through tools/art1 + tools/meshy/meshy_task.py on the shared quadruped/mount rig, standard clip set, Boki checks, GPU turntable vs sheet. Branch ext/boki3d-lilybara from origin/main.
+
+## 2026-11-09 feel (job 20261108-233954-a3, w2): READY `ext/expedition-fps-1108-r2` @ d821569da (owner 11-08 expedition FPS, follow-up of ext/expedition-fps-1108 62ad7d14f; merge this one, it contains the other)
+- Profiled the 30-Hunter bench with the GDScript profiler, then cut the per-step call and allocation costs it ranked: World.ground_at/is_block/occupy/los read the tile by hand (3300 tiny calls a frame), Hunter and Boki countdowns tick by direct access (new HunterTimers; was set()/get() by name), kit cooldowns iterate without keys(), bots skip the interact scans until they press interact and check the belt every 0.1 s (tuning.json perf bot_belt_s), foes_of and Kin.hittable without per-call arrays. Behaviour unchanged; new --hotpath-check compares the fast World paths with the plain code on 3000 random points (0 differ).
+- Numbers (w2 CPU, 30 Hunters, match script ms, before/after run in parallel): 39.2 -> 36.8 avg, 63.2 -> 59.8 p99 in one pair; the second pair was within the ±2 ms noise of this shared box. Honest read: a 1-6% CPU saving. Targets (8.3 / 16.7 ms) not met; what is left is structural (per-Hunter sim, Boki sim, GL draw calls and CPU particles on the Mac), listed with next steps in answer.md and docs/PERF.md.
+- GPU: no worker ran (Mac down, queue 53 deep). Queued for later: fps-r2-10x3 20261109-000147-24846, fps-r2-3x2 20261109-000203-11837.
+- Checks on w2 (fresh save): hotpath, bot-sanity, teammate, wallmove, boki-moves, anim-lod, perf-overlay 0 failures; kinbox 2 failures, same as main. health --strict OK.
+- tuning.json: also created by ext/islands-deeper-1108 ("islands") and ext/lace-playtest-1108; different sections, trivial union.
+- No PR (no gh on w2): https://github.com/OrriBogdan2/project-boki/pull/new/ext/expedition-fps-1108-r2. Not merged.
