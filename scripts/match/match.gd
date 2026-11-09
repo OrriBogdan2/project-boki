@@ -2191,8 +2191,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
+	KnockCredit.note(self, credit, target)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
-		(credit as Hunter).ak.note_hit(target)
 		(credit as Hunter).ak.on_deal(target, d, o)
 	if target is Hunter and (target as Hunter).ak and not target.remote:
 		(target as Hunter).ak.on_take(by, d, o)
@@ -2256,6 +2256,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 				BokiChatter.say(self, player.kin, "kill")
 	else:
 		add_feed("%s went down" % HeroTitle.of_hunter(h))
+	KnockCredit.settle(self, h, credit)      # the knocker's and the assisters' kits
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")

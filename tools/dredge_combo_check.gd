@@ -798,6 +798,7 @@ func _all() -> void:
 	# --- Salvage: knocks stack, +2.5% health each, a knock heals, losing one when downed
 	reset.call()
 	P.slot_lv["kin"] = 1
+	K.add_stack(-int(K.res))      # (the knock of an earlier step is Salvage too: count from none)
 	var mh0 := P.max_hp
 	P.hp = P.max_hp * 0.5
 	K.on_knock(T, true)
