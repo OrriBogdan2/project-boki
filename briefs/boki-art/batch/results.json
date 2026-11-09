@@ -65625,8 +65625,29 @@
   {
     "id": "ta_anvilbrock_r4",
     "name": "Anvilbrock",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_3.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gq",
+    "name": "Cetorgan (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_4.jpg",
     "ok": true
   },
   {
@@ -65639,71 +65660,15 @@
   {
     "id": "c_parrywhal_gp",
     "name": "Parrywhal (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gp",
-    "name": "Cetorgan (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_4.jpg",
     "ok": true
   },
   {
-    "id": "c_pickadactyl_gp",
-    "name": "Pickadactyl (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_tiltster_gp",
-    "name": "Tiltster (concept)",
+    "id": "ta_anvilbrock_r4",
+    "name": "Anvilbrock",
     "run": 3,
-    "file": "briefs/boki-art/batch/out/c_tiltster_gp_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gp",
-    "name": "Cetorgan (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_pagoguana_gp",
-    "name": "Pagoguana (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gp",
-    "name": "Cetorgan (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_pickadactyl_gp",
-    "name": "Pickadactyl (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gq",
-    "name": "Cetorgan (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_parrywhal_gp",
-    "name": "Parrywhal (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_1.jpg",
+    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_3.jpg",
     "ok": true
   },
   {
@@ -65716,8 +65681,29 @@
   {
     "id": "c_pagoguana_gp",
     "name": "Pagoguana (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagoguana_gp",
+    "name": "Pagoguana (concept)",
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_pagoguana_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pickadactyl_gp",
+    "name": "Pickadactyl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_4.jpg",
     "ok": true
   },
   {
@@ -65735,17 +65721,17 @@
     "ok": true
   },
   {
-    "id": "c_parrywhal_gp",
-    "name": "Parrywhal (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_4.jpg",
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_1.jpg",
     "ok": true
   },
   {
-    "id": "c_tiltster_gp",
-    "name": "Tiltster (concept)",
+    "id": "c_pagoguana_gp",
+    "name": "Pagoguana (concept)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/c_tiltster_gp_1.jpg",
+    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_1.jpg",
     "ok": true
   },
   {
@@ -65756,6 +65742,48 @@
     "ok": true
   },
   {
+    "id": "c_pickadactyl_gp",
+    "name": "Pickadactyl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gq",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_2.jpg",
+    "ok": true
+  },
+  {
     "id": "c_parrywhal_gp",
     "name": "Parrywhal (concept)",
     "run": 3,
@@ -65763,31 +65791,10 @@
     "ok": true
   },
   {
-    "id": "ta_anvilbrock_r4",
-    "name": "Anvilbrock",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/ta_anvilbrock_r4_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_cetorgan_gq",
-    "name": "Cetorgan (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_pagoguana_gp",
-    "name": "Pagoguana (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_pagoguana_gp_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_tiltster_gp",
-    "name": "Tiltster (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_tiltster_gp_4.jpg",
+    "id": "c_ghoulamari_gp",
+    "name": "Ghoulamari (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_2.jpg",
     "ok": true
   },
   {
@@ -65798,10 +65805,10 @@
     "ok": true
   },
   {
-    "id": "c_ghoulamari_gq",
+    "id": "c_ghoulamari_gp",
     "name": "Ghoulamari (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_1.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_4.jpg",
     "ok": true
   },
   {
@@ -65819,17 +65826,10 @@
     "ok": true
   },
   {
-    "id": "c_ghoulamari_gp",
+    "id": "c_ghoulamari_gq",
     "name": "Ghoulamari (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_ghoulamari_gp",
-    "name": "Ghoulamari (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gp_4.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_1.jpg",
     "ok": true
   },
   {
@@ -65840,45 +65840,10 @@
     "ok": true
   },
   {
-    "id": "c_ghoulamari_gq",
-    "name": "Ghoulamari (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_glacione_gq",
-    "name": "Glacione (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_glacione_gq_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_ghoulamari_gq",
-    "name": "Ghoulamari (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_glacione_gp",
-    "name": "Glacione (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_glacione_gp_1.jpg",
-    "ok": true
-  },
-  {
     "id": "c_glacione_gp",
     "name": "Glacione (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_glacione_gp_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_glacione_gp",
-    "name": "Glacione (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_glacione_gp_4.jpg",
     "ok": true
   },
   {
@@ -65891,22 +65856,43 @@
   {
     "id": "c_glacione_gp",
     "name": "Glacione (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_glacione_gp_2.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glacione_gp_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_gp",
+    "name": "Glacione (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ghoulamari_gq",
+    "name": "Ghoulamari (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_3.jpg",
     "ok": true
   },
   {
     "id": "c_glacione_gq",
     "name": "Glacione (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_glacione_gq_4.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glacione_gq_1.jpg",
     "ok": true
   },
   {
-    "id": "c_druzemole_n2",
-    "name": "Druzemole (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n2_1.jpg",
+    "id": "c_ghoulamari_gq",
+    "name": "Ghoulamari (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ghoulamari_gq_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glacione_gp",
+    "name": "Glacione (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glacione_gp_2.jpg",
     "ok": true
   },
   {
@@ -65917,24 +65903,17 @@
     "ok": true
   },
   {
-    "id": "c_druzemole_n1",
-    "name": "Druzemole (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n1_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_druzemole_n1",
-    "name": "Druzemole (concept)",
+    "id": "c_glacione_gq",
+    "name": "Glacione (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n1_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_glacione_gq_4.jpg",
     "ok": true
   },
   {
-    "id": "c_druzemole_n2",
+    "id": "c_druzemole_n1",
     "name": "Druzemole (concept)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n2_2.jpg",
+    "file": "briefs/boki-art/batch/out/c_druzemole_n1_2.jpg",
     "ok": true
   },
   {
@@ -65947,8 +65926,8 @@
   {
     "id": "c_druzemole_n1",
     "name": "Druzemole (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n1_2.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n1_4.jpg",
     "ok": true
   },
   {
@@ -65959,10 +65938,24 @@
     "ok": true
   },
   {
-    "id": "c_druzemole_n3",
+    "id": "c_druzemole_n2",
+    "name": "Druzemole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_n1",
+    "name": "Druzemole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_n2",
     "name": "Druzemole (concept)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/c_druzemole_n3_2.jpg",
+    "file": "briefs/boki-art/batch/out/c_druzemole_n2_2.jpg",
     "ok": true
   },
   {
@@ -65970,13 +65963,6 @@
     "name": "Druzemole (concept)",
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_druzemole_n2_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_minor_n1",
-    "name": "New minor legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_2.jpg",
     "ok": true
   },
   {
@@ -65989,8 +65975,15 @@
   {
     "id": "c_leg_minor_n1",
     "name": "New minor legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_1.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_druzemole_n3",
+    "name": "Druzemole (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_druzemole_n3_2.jpg",
     "ok": true
   },
   {
@@ -65998,6 +65991,13 @@
     "name": "Druzemole (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_druzemole_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n1",
+    "name": "New minor legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n1_1.jpg",
     "ok": true
   },
   {
@@ -66015,24 +66015,17 @@
     "ok": true
   },
   {
-    "id": "c_leg_minor_n2",
-    "name": "New minor legendary (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_minor_n2",
-    "name": "New minor legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_1.jpg",
-    "ok": true
-  },
-  {
     "id": "c_leg_minor_n1",
     "name": "New minor legendary (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_leg_minor_n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n2",
+    "name": "New minor legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_2.jpg",
     "ok": true
   },
   {
@@ -66052,8 +66045,15 @@
   {
     "id": "c_leg_minor_n2",
     "name": "New minor legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_2.jpg",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n2",
+    "name": "New minor legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n2_1.jpg",
     "ok": true
   },
   {
@@ -66066,15 +66066,8 @@
   {
     "id": "c_leg_boss_n1",
     "name": "New boss legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n1_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_minor_n3",
-    "name": "New minor legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n3_4.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n1_2.jpg",
     "ok": true
   },
   {
@@ -66082,6 +66075,20 @@
     "name": "New boss legendary (concept)",
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_leg_boss_n2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n3",
+    "name": "New minor legendary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_minor_n3",
+    "name": "New minor legendary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_leg_minor_n3_4.jpg",
     "ok": true
   },
   {
@@ -66094,8 +66101,15 @@
   {
     "id": "c_leg_boss_n1",
     "name": "New boss legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n1_2.jpg",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_boss_n2",
+    "name": "New boss legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n2_1.jpg",
     "ok": true
   },
   {
@@ -66108,29 +66122,8 @@
   {
     "id": "c_leg_boss_n2",
     "name": "New boss legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n2_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_minor_n3",
-    "name": "New minor legendary (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_leg_minor_n3_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_boss_n2",
-    "name": "New boss legendary (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_leg_boss_n2_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_boss_n2",
-    "name": "New boss legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n2_4.jpg",
     "ok": true
   },
   {
@@ -66138,27 +66131,6 @@
     "name": "New boss legendary (concept)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_leg_boss_n3_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_boss_n3",
-    "name": "New boss legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n3_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_ultra_n1",
-    "name": "New ultra legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_ultra_n1_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_boss_n3",
-    "name": "New boss legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_boss_n3_4.jpg",
     "ok": true
   },
   {
@@ -66176,17 +66148,45 @@
     "ok": true
   },
   {
-    "id": "c_leg_ultra_n3",
-    "name": "New ultra legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_ultra_n3_1.jpg",
+    "id": "c_leg_boss_n3",
+    "name": "New boss legendary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n3_4.jpg",
     "ok": true
   },
   {
     "id": "c_leg_ultra_n1",
     "name": "New ultra legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_ultra_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_boss_n3",
+    "name": "New boss legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_boss_n2",
+    "name": "New boss legendary (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_ultra_n1_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_boss_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_ultra_n3",
+    "name": "New ultra legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_ultra_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_ultra_n3",
+    "name": "New ultra legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_ultra_n3_1.jpg",
     "ok": true
   },
   {
@@ -66197,10 +66197,10 @@
     "ok": true
   },
   {
-    "id": "c_leg_ultra_n2",
+    "id": "c_leg_ultra_n1",
     "name": "New ultra legendary (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_ultra_n2_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_ultra_n1_4.jpg",
     "ok": true
   },
   {
@@ -66208,13 +66208,6 @@
     "name": "New ultra legendary (concept)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_leg_ultra_n2_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_ultra_n3",
-    "name": "New ultra legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_ultra_n3_2.jpg",
     "ok": true
   },
   {
@@ -66227,15 +66220,22 @@
   {
     "id": "c_leg_ultra_n2",
     "name": "New ultra legendary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_leg_ultra_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_ultra_n2",
+    "name": "New ultra legendary (concept)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_leg_ultra_n2_3.jpg",
     "ok": true
   },
   {
-    "id": "c_leg_ultra_n3",
-    "name": "New ultra legendary (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_leg_ultra_n3_3.jpg",
+    "id": "c_leg_blight1_n1",
+    "name": "New blight legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_2.jpg",
     "ok": true
   },
   {
@@ -66248,36 +66248,8 @@
   {
     "id": "c_leg_blight1_n1",
     "name": "New blight legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight1_n1",
-    "name": "New blight legendary (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight1_n1",
-    "name": "New blight legendary (concept)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight1_n1",
-    "name": "New blight legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight1_n2",
-    "name": "New blight legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n2_1.jpg",
     "ok": true
   },
   {
@@ -66288,24 +66260,31 @@
     "ok": true
   },
   {
-    "id": "c_leg_blight1_n3",
-    "name": "New blight legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n3_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight1_n3",
+    "id": "c_leg_blight1_n2",
     "name": "New blight legendary (concept)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n3_1.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n2_1.jpg",
     "ok": true
   },
   {
-    "id": "c_leg_blight1_n3",
+    "id": "c_leg_ultra_n3",
+    "name": "New ultra legendary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_leg_ultra_n3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight1_n1",
     "name": "New blight legendary (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n3_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight1_n1",
+    "name": "New blight legendary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n1_3.jpg",
     "ok": true
   },
   {
@@ -66316,24 +66295,10 @@
     "ok": true
   },
   {
-    "id": "c_leg_blight2_n1",
-    "name": "New blight legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n1_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight2_n1",
-    "name": "New blight legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n1_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight1_n2",
+    "id": "c_leg_blight1_n3",
     "name": "New blight legendary (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_blight1_n2_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n3_4.jpg",
     "ok": true
   },
   {
@@ -66344,10 +66309,38 @@
     "ok": true
   },
   {
-    "id": "c_leg_blight2_n3",
+    "id": "c_leg_blight1_n3",
+    "name": "New blight legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight2_n1",
+    "name": "New blight legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight1_n3",
     "name": "New blight legendary (concept)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n3_1.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight1_n2",
+    "name": "New blight legendary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_leg_blight1_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight2_n1",
+    "name": "New blight legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n1_1.jpg",
     "ok": true
   },
   {
@@ -66358,10 +66351,31 @@
     "ok": true
   },
   {
-    "id": "c_leg_blight2_n2",
+    "id": "c_leg_blight2_n1",
     "name": "New blight legendary (concept)",
     "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n2_4.jpg",
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight2_n3",
+    "name": "New blight legendary (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight2_n2",
+    "name": "New blight legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight2_n3",
+    "name": "New blight legendary (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n3_1.jpg",
     "ok": true
   },
   {
@@ -66379,59 +66393,10 @@
     "ok": true
   },
   {
-    "id": "c_leg_blight2_n1",
-    "name": "New blight legendary (concept)",
-    "run": 4,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n1_4.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight2_n2",
-    "name": "New blight legendary (concept)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n2_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight2_n3",
-    "name": "New blight legendary (concept)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n3_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "soakybara_card104",
-    "name": "Soakybara (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/soakybara_card104_2.jpg",
-    "ok": true
-  },
-  {
     "id": "arcestrel_card104",
     "name": "Arcestrel (hero card)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/arcestrel_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "soakybara_card104",
-    "name": "Soakybara (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/soakybara_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "soakybara_card104",
-    "name": "Soakybara (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/soakybara_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "c_leg_blight2_n3",
-    "name": "New blight legendary (concept)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/c_leg_blight2_n3_3.jpg",
     "ok": true
   },
   {
@@ -66456,17 +66421,45 @@
     "ok": true
   },
   {
-    "id": "glazolm_card104",
-    "name": "Glazolm (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/glazolm_card104_1.jpg",
+    "id": "c_leg_blight2_n3",
+    "name": "New blight legendary (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n3_3.jpg",
     "ok": true
   },
   {
-    "id": "geysirbara_card104",
-    "name": "Geysirbara (hero card)",
+    "id": "soakybara_card104",
+    "name": "Soakybara (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/soakybara_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_leg_blight2_n2",
+    "name": "New blight legendary (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_leg_blight2_n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "soakybara_card104",
+    "name": "Soakybara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/soakybara_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "soakybara_card104",
+    "name": "Soakybara (hero card)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/geysirbara_card104_2.jpg",
+    "file": "briefs/boki-art/batch/out/soakybara_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glazolm_card104",
+    "name": "Glazolm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glazolm_card104_2.jpg",
     "ok": true
   },
   {
@@ -66486,13 +66479,6 @@
   {
     "id": "geysirbara_card104",
     "name": "Geysirbara (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/geysirbara_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "geysirbara_card104",
-    "name": "Geysirbara (hero card)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/geysirbara_card104_1.jpg",
     "ok": true
@@ -66505,10 +66491,31 @@
     "ok": true
   },
   {
+    "id": "geysirbara_card104",
+    "name": "Geysirbara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_card104",
+    "name": "Geysirbara (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geysirbara_card104_3.jpg",
+    "ok": true
+  },
+  {
     "id": "glazolm_card104",
     "name": "Glazolm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glazolm_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "slog_card104",
+    "name": "Slog (hero card)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/glazolm_card104_2.jpg",
+    "file": "briefs/boki-art/batch/out/slog_card104_2.jpg",
     "ok": true
   },
   {
@@ -66526,24 +66533,10 @@
     "ok": true
   },
   {
-    "id": "anchorhorn_card104",
-    "name": "Anchorhorn (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/anchorhorn_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "slog_card104",
-    "name": "Slog (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/slog_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "crofthorn_card104",
-    "name": "Crofthorn (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/crofthorn_card104_2.jpg",
+    "id": "glazolm_card104",
+    "name": "Glazolm (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glazolm_card104_3.jpg",
     "ok": true
   },
   {
@@ -66554,13 +66547,6 @@
     "ok": true
   },
   {
-    "id": "glazolm_card104",
-    "name": "Glazolm (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/glazolm_card104_3.jpg",
-    "ok": true
-  },
-  {
     "id": "crofthorn_card104",
     "name": "Crofthorn (hero card)",
     "run": 1,
@@ -66568,31 +66554,24 @@
     "ok": true
   },
   {
-    "id": "spanglin_card104",
-    "name": "Spanglin (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/spanglin_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "tinbrock_card104",
-    "name": "Tinbrock (hero card)",
+    "id": "crofthorn_card104",
+    "name": "Crofthorn (hero card)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/tinbrock_card104_2.jpg",
+    "file": "briefs/boki-art/batch/out/crofthorn_card104_2.jpg",
     "ok": true
   },
   {
     "id": "anchorhorn_card104",
     "name": "Anchorhorn (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/anchorhorn_card104_2.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorhorn_card104_1.jpg",
     "ok": true
   },
   {
-    "id": "tinbrock_card104",
-    "name": "Tinbrock (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/tinbrock_card104_1.jpg",
+    "id": "spanglin_card104",
+    "name": "Spanglin (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/spanglin_card104_3.jpg",
     "ok": true
   },
   {
@@ -66605,15 +66584,8 @@
   {
     "id": "anchorhorn_card104",
     "name": "Anchorhorn (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/anchorhorn_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "tinbrock_card104",
-    "name": "Tinbrock (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/tinbrock_card104_3.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorhorn_card104_2.jpg",
     "ok": true
   },
   {
@@ -66624,17 +66596,31 @@
     "ok": true
   },
   {
-    "id": "shinobant_card104",
-    "name": "Shinobant (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/shinobant_card104_1.jpg",
+    "id": "anchorhorn_card104",
+    "name": "Anchorhorn (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/anchorhorn_card104_3.jpg",
     "ok": true
   },
   {
-    "id": "shinobant_card104",
-    "name": "Shinobant (hero card)",
+    "id": "tinbrock_card104",
+    "name": "Tinbrock (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tinbrock_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_card104",
+    "name": "Tinbrock (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tinbrock_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tinbrock_card104",
+    "name": "Tinbrock (hero card)",
     "run": 3,
-    "file": "briefs/boki-art/batch/out/shinobant_card104_3.jpg",
+    "file": "briefs/boki-art/batch/out/tinbrock_card104_3.jpg",
     "ok": true
   },
   {
@@ -66645,10 +66631,10 @@
     "ok": true
   },
   {
-    "id": "reapant_card104",
-    "name": "Reapant (hero card)",
+    "id": "shinobant_card104",
+    "name": "Shinobant (hero card)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/reapant_card104_1.jpg",
+    "file": "briefs/boki-art/batch/out/shinobant_card104_1.jpg",
     "ok": true
   },
   {
@@ -66666,10 +66652,10 @@
     "ok": true
   },
   {
-    "id": "harvantis_card104",
-    "name": "Harvantis (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/harvantis_card104_1.jpg",
+    "id": "shinobant_card104",
+    "name": "Shinobant (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/shinobant_card104_3.jpg",
     "ok": true
   },
   {
@@ -66680,10 +66666,24 @@
     "ok": true
   },
   {
-    "id": "lurklet_card104",
-    "name": "Lurklet (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/lurklet_card104_2.jpg",
+    "id": "reapant_card104",
+    "name": "Reapant (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reapant_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "harvantis_card104",
+    "name": "Harvantis (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/harvantis_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bulwartoad_card104",
+    "name": "Bulwartoad (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bulwartoad_card104_3.jpg",
     "ok": true
   },
   {
@@ -66691,13 +66691,6 @@
     "name": "Harvantis (hero card)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/harvantis_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "lurklet_card104",
-    "name": "Lurklet (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/lurklet_card104_1.jpg",
     "ok": true
   },
   {
@@ -66715,13 +66708,6 @@
     "ok": true
   },
   {
-    "id": "barostorm_card104",
-    "name": "Barostorm (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/barostorm_card104_1.jpg",
-    "ok": true
-  },
-  {
     "id": "lurklet_card104",
     "name": "Lurklet (hero card)",
     "run": 3,
@@ -66729,45 +66715,24 @@
     "ok": true
   },
   {
-    "id": "bulwartoad_card104",
-    "name": "Bulwartoad (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/bulwartoad_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "barostorm_card104",
-    "name": "Barostorm (hero card)",
+    "id": "lurklet_card104",
+    "name": "Lurklet (hero card)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/barostorm_card104_2.jpg",
+    "file": "briefs/boki-art/batch/out/lurklet_card104_2.jpg",
     "ok": true
   },
   {
-    "id": "bonsolith_card104",
-    "name": "Bonsolith (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/bonsolith_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "quivertoad_card104",
-    "name": "Quivertoad (hero card)",
+    "id": "lurklet_card104",
+    "name": "Lurklet (hero card)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/quivertoad_card104_1.jpg",
+    "file": "briefs/boki-art/batch/out/lurklet_card104_1.jpg",
     "ok": true
   },
   {
     "id": "barostorm_card104",
     "name": "Barostorm (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/barostorm_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "bonsolith_card104",
-    "name": "Bonsolith (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/bonsolith_card104_3.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barostorm_card104_1.jpg",
     "ok": true
   },
   {
@@ -66775,6 +66740,13 @@
     "name": "Quivertoad (hero card)",
     "run": 2,
     "file": "briefs/boki-art/batch/out/quivertoad_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bonsolith_card104",
+    "name": "Bonsolith (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bonsolith_card104_2.jpg",
     "ok": true
   },
   {
@@ -66792,17 +66764,45 @@
     "ok": true
   },
   {
-    "id": "mumblet_card104",
-    "name": "Mumblet (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/mumblet_card104_1.jpg",
+    "id": "barostorm_card104",
+    "name": "Barostorm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barostorm_card104_2.jpg",
     "ok": true
   },
   {
-    "id": "narfoil_card104",
-    "name": "Narfoil (hero card)",
+    "id": "barostorm_card104",
+    "name": "Barostorm (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/barostorm_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "chiptero_card104",
+    "name": "Chiptero (hero card)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/narfoil_card104_1.jpg",
+    "file": "briefs/boki-art/batch/out/chiptero_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "quivertoad_card104",
+    "name": "Quivertoad (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/quivertoad_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bonsolith_card104",
+    "name": "Bonsolith (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bonsolith_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mumblet_card104",
+    "name": "Mumblet (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mumblet_card104_3.jpg",
     "ok": true
   },
   {
@@ -66815,29 +66815,8 @@
   {
     "id": "mumblet_card104",
     "name": "Mumblet (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/mumblet_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "chiptero_card104",
-    "name": "Chiptero (hero card)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/chiptero_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "narfoil_card104",
-    "name": "Narfoil (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/narfoil_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "chiptero_card104",
-    "name": "Chiptero (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/chiptero_card104_2.jpg",
+    "file": "briefs/boki-art/batch/out/mumblet_card104_1.jpg",
     "ok": true
   },
   {
@@ -66848,17 +66827,24 @@
     "ok": true
   },
   {
-    "id": "pagodito_card104",
-    "name": "Pagodito (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/pagodito_card104_1.jpg",
+    "id": "chiptero_card104",
+    "name": "Chiptero (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chiptero_card104_2.jpg",
     "ok": true
   },
   {
-    "id": "pinster_card104",
-    "name": "Pinster (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/pinster_card104_3.jpg",
+    "id": "narfoil_card104",
+    "name": "Narfoil (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/narfoil_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "narfoil_card104",
+    "name": "Narfoil (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/narfoil_card104_2.jpg",
     "ok": true
   },
   {
@@ -66869,24 +66855,10 @@
     "ok": true
   },
   {
-    "id": "pavonazar_card104",
-    "name": "Pavonazar (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/pavonazar_card104_1.jpg",
-    "ok": true
-  },
-  {
     "id": "pagodito_card104",
     "name": "Pagodito (hero card)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/pagodito_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "pagodito_card104",
-    "name": "Pagodito (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/pagodito_card104_2.jpg",
     "ok": true
   },
   {
@@ -66897,6 +66869,13 @@
     "ok": true
   },
   {
+    "id": "pavonazar_card104",
+    "name": "Pavonazar (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pavonazar_card104_1.jpg",
+    "ok": true
+  },
+  {
     "id": "narfoil_card104",
     "name": "Narfoil (hero card)",
     "run": 3,
@@ -66904,10 +66883,24 @@
     "ok": true
   },
   {
-    "id": "pocketpus_card104",
-    "name": "Pocketpus (hero card)",
+    "id": "pinster_card104",
+    "name": "Pinster (hero card)",
     "run": 3,
-    "file": "briefs/boki-art/batch/out/pocketpus_card104_3.jpg",
+    "file": "briefs/boki-art/batch/out/pinster_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pagodito_card104",
+    "name": "Pagodito (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pagodito_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bullpole_card104",
+    "name": "Bullpole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bullpole_card104_1.jpg",
     "ok": true
   },
   {
@@ -66918,10 +66911,38 @@
     "ok": true
   },
   {
+    "id": "pocketpus_card104",
+    "name": "Pocketpus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pocketpus_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pagodito_card104",
+    "name": "Pagodito (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pagodito_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pocketpus_card104",
+    "name": "Pocketpus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pocketpus_card104_2.jpg",
+    "ok": true
+  },
+  {
     "id": "pavonazar_card104",
     "name": "Pavonazar (hero card)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/pavonazar_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pocketpus_card104",
+    "name": "Pocketpus (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pocketpus_card104_3.jpg",
     "ok": true
   },
   {
@@ -66934,50 +66955,8 @@
   {
     "id": "bullpole_card104",
     "name": "Bullpole (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/bullpole_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "bullpole_card104",
-    "name": "Bullpole (hero card)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/bullpole_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "pocketpus_card104",
-    "name": "Pocketpus (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/pocketpus_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "pocketpus_card104",
-    "name": "Pocketpus (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/pocketpus_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "gambitfin_card104",
-    "name": "Gambitfin (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/gambitfin_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "scoopsy_card104",
-    "name": "Scoopsy (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/scoopsy_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "hourachnid_card104",
-    "name": "Hourachnid (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/hourachnid_card104_2.jpg",
     "ok": true
   },
   {
@@ -66997,15 +66976,29 @@
   {
     "id": "scoopsy_card104",
     "name": "Scoopsy (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/scoopsy_card104_3.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scoopsy_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gambitfin_card104",
+    "name": "Gambitfin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gambitfin_card104_1.jpg",
     "ok": true
   },
   {
     "id": "scoopsy_card104",
     "name": "Scoopsy (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/scoopsy_card104_2.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scoopsy_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scoopsy_card104",
+    "name": "Scoopsy (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scoopsy_card104_3.jpg",
     "ok": true
   },
   {
@@ -67016,6 +67009,13 @@
     "ok": true
   },
   {
+    "id": "hourachnid_card104",
+    "name": "Hourachnid (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hourachnid_card104_2.jpg",
+    "ok": true
+  },
+  {
     "id": "rosedart_card104",
     "name": "Rosedart (hero card)",
     "run": 1,
@@ -67023,17 +67023,10 @@
     "ok": true
   },
   {
-    "id": "rosedart_card104",
-    "name": "Rosedart (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/rosedart_card104_2.jpg",
-    "ok": true
-  },
-  {
     "id": "fanpire_card104",
     "name": "Fanpire (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/fanpire_card104_3.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fanpire_card104_2.jpg",
     "ok": true
   },
   {
@@ -67051,17 +67044,24 @@
     "ok": true
   },
   {
+    "id": "fanpire_card104",
+    "name": "Fanpire (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fanpire_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rosedart_card104",
+    "name": "Rosedart (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rosedart_card104_2.jpg",
+    "ok": true
+  },
+  {
     "id": "rosedart_card104",
     "name": "Rosedart (hero card)",
     "run": 3,
     "file": "briefs/boki-art/batch/out/rosedart_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "fanpire_card104",
-    "name": "Fanpire (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/fanpire_card104_2.jpg",
     "ok": true
   },
   {
@@ -67072,6 +67072,13 @@
     "ok": true
   },
   {
+    "id": "meteorab_card104",
+    "name": "Meteorab (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/meteorab_card104_1.jpg",
+    "ok": true
+  },
+  {
     "id": "scarabit_card104",
     "name": "Scarabit (hero card)",
     "run": 3,
@@ -67079,24 +67086,10 @@
     "ok": true
   },
   {
-    "id": "scarabit_card104",
-    "name": "Scarabit (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/scarabit_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "meteorab_card104",
-    "name": "Meteorab (hero card)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/meteorab_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "meteorab_card104",
-    "name": "Meteorab (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/meteorab_card104_1.jpg",
+    "id": "chainipede_card104",
+    "name": "Chainipede (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chainipede_card104_3.jpg",
     "ok": true
   },
   {
@@ -67107,10 +67100,10 @@
     "ok": true
   },
   {
-    "id": "chainipede_card104",
-    "name": "Chainipede (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/chainipede_card104_3.jpg",
+    "id": "meteorab_card104",
+    "name": "Meteorab (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/meteorab_card104_2.jpg",
     "ok": true
   },
   {
@@ -67128,10 +67121,24 @@
     "ok": true
   },
   {
-    "id": "murmurling_f_card104",
-    "name": "Murmurling female (hero card)",
+    "id": "scarabit_card104",
+    "name": "Scarabit (hero card)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/murmurling_f_card104_2.jpg",
+    "file": "briefs/boki-art/batch/out/scarabit_card104_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_f_card104",
+    "name": "Eclipsowl female (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_f_card104",
+    "name": "Eclipsowl female (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_3.jpg",
     "ok": true
   },
   {
@@ -67151,8 +67158,8 @@
   {
     "id": "eclipsowl_f_card104",
     "name": "Eclipsowl female (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_3.jpg",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_2.jpg",
     "ok": true
   },
   {
@@ -67163,17 +67170,10 @@
     "ok": true
   },
   {
-    "id": "eclipsowl_f_card104",
-    "name": "Eclipsowl female (hero card)",
+    "id": "murmurling_f_card104",
+    "name": "Murmurling female (hero card)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "eclipsowl_f_card104",
-    "name": "Eclipsowl female (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/eclipsowl_f_card104_1.jpg",
+    "file": "briefs/boki-art/batch/out/murmurling_f_card104_2.jpg",
     "ok": true
   },
   {
@@ -67181,20 +67181,6 @@
     "name": "Furnacowary female (hero card)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/furnacowary_f_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "anvilbrock_card104",
-    "name": "Anvilbrock (hero card recolour)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/anvilbrock_card104_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "sandwidow_f_card104",
-    "name": "Sandwidow female (hero card)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/sandwidow_f_card104_1.jpg",
     "ok": true
   },
   {
@@ -67207,22 +67193,15 @@
   {
     "id": "sandwidow_f_card104",
     "name": "Sandwidow female (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/sandwidow_f_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "murmuron_f_card104",
-    "name": "Murmuron female (hero card)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/murmuron_f_card104_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "murmuron_f_card104",
-    "name": "Murmuron female (hero card)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/murmuron_f_card104_1.jpg",
+    "file": "briefs/boki-art/batch/out/sandwidow_f_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_card104",
+    "name": "Murmurling female (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/murmurling_f_card104_3.jpg",
     "ok": true
   },
   {
@@ -67233,6 +67212,34 @@
     "ok": true
   },
   {
+    "id": "murmuron_f_card104",
+    "name": "Murmuron female (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/murmuron_f_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sandwidow_f_card104",
+    "name": "Sandwidow female (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sandwidow_f_card104_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmuron_f_card104",
+    "name": "Murmuron female (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmuron_f_card104_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "anvilbrock_card104",
+    "name": "Anvilbrock (hero card recolour)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anvilbrock_card104_1.jpg",
+    "ok": true
+  },
+  {
     "id": "anvilbrock_card104",
     "name": "Anvilbrock (hero card recolour)",
     "run": 2,
@@ -67240,10 +67247,10 @@
     "ok": true
   },
   {
-    "id": "murmurling_f_card104",
-    "name": "Murmurling female (hero card)",
+    "id": "anvilbrock_card104",
+    "name": "Anvilbrock (hero card recolour)",
     "run": 3,
-    "file": "briefs/boki-art/batch/out/murmurling_f_card104_3.jpg",
+    "file": "briefs/boki-art/batch/out/anvilbrock_card104_3.jpg",
     "ok": true
   },
   {
@@ -67256,29 +67263,15 @@
   {
     "id": "forgebrock_card104",
     "name": "Forgebrock (hero card recolour)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/forgebrock_card104_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "forgebrock_card104",
-    "name": "Forgebrock (hero card recolour)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/forgebrock_card104_1.jpg",
     "ok": true
   },
   {
-    "id": "glintmole_card105",
-    "name": "Glintmole (hero card, new pose)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/glintmole_card105_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "anvilbrock_card104",
-    "name": "Anvilbrock (hero card recolour)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/anvilbrock_card104_3.jpg",
+    "id": "forgebrock_card104",
+    "name": "Forgebrock (hero card recolour)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_card104_2.jpg",
     "ok": true
   },
   {
@@ -67296,24 +67289,10 @@
     "ok": true
   },
   {
-    "id": "rattlebub_card105",
-    "name": "Rattlebub (hero card, new pose)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/rattlebub_card105_1.jpg",
-    "ok": true
-  },
-  {
-    "id": "geodemole_card105",
-    "name": "Geodemole (hero card, new pose)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/geodemole_card105_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "druzemole_card105",
-    "name": "Druzemole (hero card, new pose)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/druzemole_card105_2.jpg",
+    "id": "glintmole_card105",
+    "name": "Glintmole (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glintmole_card105_3.jpg",
     "ok": true
   },
   {
@@ -67324,17 +67303,24 @@
     "ok": true
   },
   {
-    "id": "druzemole_card105",
-    "name": "Druzemole (hero card, new pose)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/druzemole_card105_1.jpg",
+    "id": "geodemole_card105",
+    "name": "Geodemole (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_card105_2.jpg",
     "ok": true
   },
   {
-    "id": "geodemole_card105",
-    "name": "Geodemole (hero card, new pose)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/geodemole_card105_3.jpg",
+    "id": "rattlebub_card105",
+    "name": "Rattlebub (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rattlebub_card105_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole_card105",
+    "name": "Druzemole (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/druzemole_card105_2.jpg",
     "ok": true
   },
   {
@@ -67352,17 +67338,17 @@
     "ok": true
   },
   {
-    "id": "gravadillo_card105",
-    "name": "Gravadillo (hero card, new pose)",
+    "id": "druzemole_card105",
+    "name": "Druzemole (hero card, new pose)",
     "run": 1,
-    "file": "briefs/boki-art/batch/out/gravadillo_card105_1.jpg",
+    "file": "briefs/boki-art/batch/out/druzemole_card105_1.jpg",
     "ok": true
   },
   {
-    "id": "gravadillo_card105",
-    "name": "Gravadillo (hero card, new pose)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/gravadillo_card105_2.jpg",
+    "id": "geodemole_card105",
+    "name": "Geodemole (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_card105_3.jpg",
     "ok": true
   },
   {
@@ -67373,38 +67359,10 @@
     "ok": true
   },
   {
-    "id": "maracoil_card105",
-    "name": "Maracoil (hero card, new pose)",
+    "id": "gravadillo_card105",
+    "name": "Gravadillo (hero card, new pose)",
     "run": 2,
-    "file": "briefs/boki-art/batch/out/maracoil_card105_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "maracoil_card105",
-    "name": "Maracoil (hero card, new pose)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/maracoil_card105_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "gravitank_card105",
-    "name": "Gravitank (hero card, new pose)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/gravitank_card105_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "rattlebub_card105",
-    "name": "Rattlebub (hero card, new pose)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/rattlebub_card105_3.jpg",
-    "ok": true
-  },
-  {
-    "id": "embrook_card105",
-    "name": "Embrook (hero card, new pose)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/embrook_card105_3.jpg",
+    "file": "briefs/boki-art/batch/out/gravadillo_card105_2.jpg",
     "ok": true
   },
   {
@@ -67417,8 +67375,36 @@
   {
     "id": "maracoil_card105",
     "name": "Maracoil (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/maracoil_card105_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "maracoil_card105",
+    "name": "Maracoil (hero card, new pose)",
     "run": 1,
     "file": "briefs/boki-art/batch/out/maracoil_card105_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rattlebub_card105",
+    "name": "Rattlebub (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rattlebub_card105_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "maracoil_card105",
+    "name": "Maracoil (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/maracoil_card105_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravadillo_card105",
+    "name": "Gravadillo (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gravadillo_card105_1.jpg",
     "ok": true
   },
   {
@@ -67429,24 +67415,10 @@
     "ok": true
   },
   {
-    "id": "embrook_card105",
-    "name": "Embrook (hero card, new pose)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/embrook_card105_1.jpg",
-    "ok": true
-  },
-  {
     "id": "forgebrock_card105",
     "name": "Forgebrock (hero card, new pose)",
-    "run": 2,
-    "file": "briefs/boki-art/batch/out/forgebrock_card105_2.jpg",
-    "ok": true
-  },
-  {
-    "id": "gravitank_card105",
-    "name": "Gravitank (hero card, new pose)",
-    "run": 3,
-    "file": "briefs/boki-art/batch/out/gravitank_card105_3.jpg",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_card105_1.jpg",
     "ok": true
   },
   {
@@ -67457,17 +67429,45 @@
     "ok": true
   },
   {
-    "id": "forgebrock_card105",
-    "name": "Forgebrock (hero card, new pose)",
-    "run": 1,
-    "file": "briefs/boki-art/batch/out/forgebrock_card105_1.jpg",
+    "id": "gravitank_card105",
+    "name": "Gravitank (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gravitank_card105_2.jpg",
     "ok": true
   },
   {
-    "id": "frigatee_card105",
-    "name": "Frigatee (hero card, new pose)",
+    "id": "forgebrock_card105",
+    "name": "Forgebrock (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_card105_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_card105",
+    "name": "Embrook (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/embrook_card105_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravitank_card105",
+    "name": "Gravitank (hero card, new pose)",
     "run": 3,
-    "file": "briefs/boki-art/batch/out/frigatee_card105_3.jpg",
+    "file": "briefs/boki-art/batch/out/gravitank_card105_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook_card105",
+    "name": "Embrook (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/embrook_card105_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "scopeleon_card105",
+    "name": "Scopeleon (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scopeleon_card105_2.jpg",
     "ok": true
   }
 ]
