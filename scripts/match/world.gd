@@ -1315,13 +1315,6 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 	for r in roots:
 		(r as Node).free()
 
-## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
-static func _thin(items: Array, keep: float, seed_i: int) -> Array:
-	if keep >= 0.999:
-		return items
-	var r := RandomNumberGenerator.new(); r.seed = seed_i
-	return items.filter(func(_it): return r.randf() < keep)
-
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16, far := "") -> void:
 	if shadows:
@@ -1334,8 +1327,10 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 			return
 	var cls := FarRanges.class_of(label, chunk, far)
 	var vis_end := FarRanges.end_of(cls)
-	if cls == "small":
-		items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
+	if cls == "small" or cls == "bush":
+		# clutter thinned per preset (Clutter.KEEP); 32-tile batches: a quarter of the draws
+		items = Clutter.thin(items, Clutter.keep(cls), hash(label) + rng.seed)
+		chunk = maxi(chunk, 32)
 	elif cls in FarRanges.BIG_CLASSES:
 		# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
 		# crystal shards and thin ledges vanish in the simplified versions
