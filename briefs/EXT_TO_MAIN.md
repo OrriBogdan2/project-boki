@@ -5759,3 +5759,21 @@ READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
 READY ext/home-verbs-anim c8bf505c3 (home player moves)
 READY ext/<branch> <sha> (<what>)
+| Hunter | LMB | RMB | E | R | DASH | Q |
+|---|---|---|---|---|---|---|
+| gunslinger | 291→28 | 25→62 | 28→30 | 33→33 | 69→32 | 33→35 |
+| juggernaut | 38→47 | 28→36 | 28→38 | 25→36 | 26→38 | 28→37 |
+| ashwick | 29→30 | 28→32 | 31→33 | 222→30 | 25→26 | 25→31 |
+| tender | 266→30 | 26→33 | 33→30 | 44→41 | 53→43 | 56→48 |
+| dolm | 26→26 | 38→40 | 49→38 | 43→60 | 35→28 | 31→23 |
+| archer | 30→27 | 26→30 | 31→36 | 35→33 | 249→31 | 34→31 |
+| dredge | 27→30 | 214→31 | 32→34 | 25→33 | 31→30 | 28→28 |
+| rimewright | 32→26 | 28→27 | 39→30 | 42→36 | 32→28 | 35→38 |
+| mage | 82→30 | 45→37 | 32→41 | 35→30 | 35→27 | 27→25 |
+| bulwark | 27→27 | 31→25 | 33→33 | 32→28 | 36→40 | 37→29 |
+| thief | 33→27 | 31→28 | 34→32 | 40→41 | 46→36 | 31→28 |
+| ostra | 28→25 | 30→27 | 27→33 | 30→75 | 36→28 | 39→34 |
+- Worst first-cast frame 291 ms -> 75 ms (Ostra R after: 0 pipelines, 2 nodes, pod noise; her before was 30). Headless rpc1 (final tree): 72 slots, 0 failures except an Archer burst while the disk was at 0 bytes free; Archer alone after: 0 failures.
+- --perf-bench (4090): before job 20261109-134333-07812 (rp2-1, main): match wall avg 43.7 p99 73.6 ms, script avg 21.12 p99 43.76; after job 20261109-163545-08575 (rp1-0, e159ff82c): wall 46.2 / 77.9, script 22.03 / 49.44. Different pods, within noise: no bench claim either way (the bench never casts a kit's first ability at a fixed time).
+- health.py --strict OK, gen_wiki.py --check OK (47 unchanged). Diff vs main: 19 files +257/-8.
+- NOT done / open: Gunslinger RMB (8 pipelines, 15 Hunter-made shot meshes) and Mage RMB (6 pipelines) still compile on some pods (0 on rp2-0): Hunter-made round meshes, shader side. Per-cast nodes still made every cast (Dolm cracks ~57, Tender/Rimewright Q looks) are DEBT (FxPool, ext/perf-fight-pools). Only the local Hunter's echoes are copied at load. rpc1's disk hit 100% at ~16:36 (not this job's files).
