@@ -19141,5 +19141,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_glaciammoth_e_w30_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_grammite_r_w30",
+    "name": "Grammite (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_grammite_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub_e_w30",
+    "name": "Gravigrub (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_e_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub_e_w30",
+    "name": "Gravigrub (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_e_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth_e_w30",
+    "name": "Glaciammoth (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_e_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gravigrub_e_w30",
+    "name": "Gravigrub (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gravigrub_e_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_r_w30",
+    "name": "Grammite (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grammite_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_r_w30",
+    "name": "Hydrangor (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_hydrangor_r_w30",
+    "name": "Hydrangor (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_hydrangor_r_w30_2.jpg",
+    "ok": true
   }
 ]
