@@ -71088,5 +71088,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/rd_chuggamus_v2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_tiltster_v2",
+    "name": "Tiltster (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_v2",
+    "name": "Tiltster (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_v2",
+    "name": "Tiltster (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_siegephant_v2",
+    "name": "Siegephant (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_siegephant_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_canvastross_v2",
+    "name": "Canvastross (redesign concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_canvastross_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_canvastross_v2",
+    "name": "Canvastross (redesign concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_canvastross_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_canvastross_v2",
+    "name": "Canvastross (redesign concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_canvastross_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_canvastross_v2",
+    "name": "Canvastross (redesign concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd_canvastross_v2_4.jpg",
+    "ok": true
   }
 ]
