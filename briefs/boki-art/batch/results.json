@@ -45069,5 +45069,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_effigoon_g2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_effigoon_g2",
+    "name": "Effigoon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_y2",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_y2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_y1",
+    "name": "Cisternmander (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_y1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_y1",
+    "name": "Cisternmander (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_y1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_y1",
+    "name": "Cisternmander (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_y1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_effigoon_g2",
+    "name": "Effigoon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_effigoon_g2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cisternmander_y1",
+    "name": "Cisternmander (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cisternmander_y1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h4",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h4_3.jpg",
+    "ok": true
   }
 ]
