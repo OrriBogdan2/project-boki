@@ -75,6 +75,54 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | X | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
 | Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
 
+## Parity verify, Nov 9
+
+Vex on origin/main d255acbee against the Vex block of docs/KIT_PARITY.md, this page, briefs/hero-ref/venator.md,
+briefs/supervive-data/supervive_kits.md (Ghost) and briefs/DECISIONS.md (owner notes win). Verdicts: **match**,
+**differ (owner)** (an owner note or item overrides the source), **regressed** (was right, now wrong), **open**
+(not built, or the source is silent). Paths `K` = scripts/arch/kits/gunslinger_kit.gd, `J` = content/archetypes/gunslinger.json,
+`W` = content/weapons/quill_rifle.json, `F` = content/dash_flow/gunslinger.json. Held by the owner and kept: no reload key
+and no manual reload, RMB is a side toss, Coin Blast and Palm Lance, green-fire colour. Branches in flight for Vex
+(ext/vex-coin-palm-1108, ext/vex-greenfire-1108, ext/vex-dash-parity, ext/vex-e-turn, ext/anim-time-vex, ext/vfx-vex)
+change K, J, W, F and the checks, so no kit or data row was edited here; the two regressions have a fix recipe below.
+
+| Row | Source / owner | Main | Verdict |
+|---|---|---|---|
+| LMB cadence, 30-round drum, refill when idle | 30 rounds, rapid refill when not firing [D]; 0.12 s string [F] | rate 0.12, mag 30, refill 40/s after 0.35 s: W:9-21, K:226-246 | match |
+| LMB first 10 rounds stronger, Dazed +90% | first 10 rounds extra; +39 on 51 [D]; ~1.9x [F] | sustain 0.5 over 10: W:18-19, hunter.gd:1618; Dazed K:160-167 (no decay) | match |
+| LMB no reload key, no manual reload (hold) | owner: ammo refills the source's way | W has no `reload`, so `start_reload` returns (hunter.gd:1661); run dry = dead until full, K:230-232; assert venator_parity_check.gd:199 | match |
+| LMB fires while the Longneedle charges | source silent (braced, still, no rounds in 0164-0189) | `can_shoot` not overridden, so 2 rounds leave in 0.2 s of the charge (probe) | open (source silent; owner call) |
+| LMB aim, legs, no slow | direction only, max range, legs walk, no slow [F] | W:25-26, assert venator_parity_check.gd:91 | match |
+| RMB input | hold shows a lane, release throws [F] | tap from the cannon's launcher, no lane (owner items sync89, 112): K:355-381 | differ (owner) |
+| RMB animation (hold: side toss) | owner: a side toss | main has the launcher recoil kick, no toss pose (`gunslinger_rmb`, vex.json kmoves); the toss ships with Coin Blast | open (ext/vex-coin-palm-1108) |
+| RMB name and look (hold: Coin Blast) | owner 11-07/08: coin flicked from the palm | still Burr Charge, a bronze spiked ball: J:58, K:407-422 | open (ext/vex-coin-palm-1108) |
+| RMB hit, daze, blast | sticks, ~0.8-1.0 s fuse, Daze ~1.2 s, 165-243 [D,F]; first-foe blast | direct hit 22 + Dazed 1.4 s, no fuse (owner rule 1103): K:496-510; wall or ground stick, fuse 0.9 s, J:68 | differ (owner) |
+| RMB wall cone | ~100 deg, ~3.5 bh back at the thrower, knock toward her [F] | 6 m, 100 deg, shove biased to her: J:69-70, K:544-558 | match |
+| RMB wall slam | knocked into a wall: Dazed longer and Stunned [D] | stun 0.7 s, Dazed +0.6 s: K:559-565 | match |
+| RMB cooldown | 9 s [D], 5.4 s [F] | 6.5 s: J:62 | differ (owner pacing); default 1.0x not applied (gap 10) |
+| E cast, pierce, recoil | 0.6 s standing; beam pierces terrain; recoil ~0.5 bh [D,F] | charge 0.6, no terrain test, recoil 6: J:96, K:569-577, 632-660 | match |
+| E -20% cooldown on a hunter, +20% vs Dazed | [D] | K:656-676 (rank 3: 30% per hunter) | match |
+| E width | beam ~0.5 bh [F] | 1.8 m wide, owner item 68: J:99 | differ (owner) |
+| E origin and name (hold: Palm Lance) | owner: from the open palm, green-fire emitter | rifle barrel, `_muzzle` K:617; named Longneedle J:91 | open (ext/vex-coin-palm-1108) |
+| E facing in the cast | owner cap on the turn | uncapped | open (ext/vex-e-turn) |
+| R Cinderfall | zone at cursor, delay ~1.6 s, 3 s fire + Slow [D,F] | delay 1.6, 3 s, slow 30%, on R (`cast_ult`; JSON slot `x`; the old X rows below are the pre-R key): J:125, gunslinger_ult.gd:39 | match |
+| R cooldown | 55 s [D], 37.5 s [F] | 42 s: J:120 | differ (owner pacing); gap 10 |
+| Dash press and hold | press short, hold longer on a longer cooldown; movement direction; fires through [D,F] | tap 4.8 m, hold 7 m at +0.4 charge, shoots through: J:45-52, K:248-352 | match |
+| Dash cooldown | 11.5 s [D], 7.5 s [F] | 8.5 s: J:45 | differ (owner pacing); gap 10 |
+| Dash reset on a knock | a knock resets Combat Slide [D,F] | first knock of a Hunter: K:180-182 | match |
+| Passive Combat Rush | +6% omnivamp 3.5 s on an ability hit [D] | flat 6%, 3.5 s, one level: J:31-32, K:169-178 | match |
+| Passive: second knock of the same Hunter | each knock resets the slide | `knocked` is never cleared (K:42, 176, 181): after a revive, the next knock of that Hunter does nothing; also the first hit on a Hunter an ally already downed resets it. Probe: first true, second false | **regressed** |
+| Cancels | stun or a down ends a cast | Longneedle ends on down, stun, hex (K:597) and on a merge (K:579); held slide ends on stun or root (K:346); Cinderfall has no hold | match |
+| Dash-flow, LMB rows | fires through any dash [F] | ground `fire`, sourced footage (F:5); air `fire` (F:12, source silent, owner item 51) | match (ground); differ (owner) (air) |
+| Dash-flow, RMB/E/R/Q rows and into_dash | source silent | all `fire` (owner item 51): F:6-10, F:19-25; `--dash-flow-check` ok | differ (owner) |
+| Clips | every move has a pose | 8 kmoves on `vex.glb` (36 clips), `--warden-clips-check` 0 fail; the Cinderfall shot timing is ext/anim-time-vex | match on coverage; timing open |
+| Ability colour (hold: green fire) | owner 11-07 | ember orange: J:61, K:15-19, J:11 glow is green | open (ext/vex-greenfire-1108) |
+
+Not fixed: the two **regressed/open** rows with a real fix, kept off K because six Vex branches rewrite it.
+1. Second knock: drop `knocked` and move the reset into `ArchKit.on_knock(t, mine)` (arch_kit.gd:808-813: the 5 s "hit it last" credit, already used by other kits); assert a second knock after a revive.
+2. LMB during the charge: add `can_shoot()` returning `needle.is_empty()` only if the owner wants the cast to lock the rifle; the footage never shows a round in the cast.
+Ideas (not built): cut the "reload" click sample from Longneedle's wind-up and Slipstep (arch_kit.gd:997, feel.gd:235; it is a sound name, not a reload).
+
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
