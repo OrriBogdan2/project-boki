@@ -16,7 +16,7 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   - **clip speed**: the feet's backward speed at rate 1 (`foot_mps`), against the move speed.
   - **bob**, **steps/s** (cadence), loop seams and first-pose gaps (`pop`, in body heights) of idle to walk, walk to run.
   - Attack rows (two per Hunter): the largest one-frame hand jump and the free arm's travel (body heights), and the
-    share of frames with an arm raised 60 degrees or more and sideways (T-pose).
+    share of frames with an arm raised 60 degrees or more and sideways (T-pose), all read from the hips.
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
@@ -164,7 +164,7 @@ posts scroll at the move speed).
 
 **Sable (`thief`)**
 1. Feet slid 60 % of the run speed, 73 % at a walk (now 17 %, 39 %); both arms paced their legs (counter -0.96, fixed to +0.82).
-2. vault_r flings the free arm 2.6 body heights and holds an arm sideways for 58 %.
+2. vault_r flung the free arm 2.6 body heights and held an arm sideways for 58 % (fixed: free arm, `vault_r` left and `vault_l` right; the free arm hangs and the other pistol arm keeps the star: free arm 0.0 body heights and 0 % sideways, any arm 17 %). The attack rows now read the arms from the hips (a whole-body flip no longer counts as arm travel): from the hips the old clip's free arm moved 1.45 body heights. Before/after (top/bottom, 8 frames, `--close`): ![sable vault_r](anim_audit/thief_vault.jpg)
 3. Idle to walk first-pose gap 0.20.
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
@@ -176,7 +176,7 @@ Split into backlog items per Hunter (role build):
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
+- Arm use in attacks: `ostra`, `mage` hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.

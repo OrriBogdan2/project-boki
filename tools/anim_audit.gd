@@ -106,6 +106,9 @@ func _gate(id: String, top: Dictionary) -> void:
 func _read(sk: Skeleton3D) -> Dictionary:
 	var out := {}
 	var xf := sk.global_transform
+	var hips := WardenSkeleton.find(sk, "hips")
+	var spun := sk.get_bone_global_pose(hips).basis * sk.get_bone_global_rest(hips).basis.inverse()
+	out["turn"] = (xf.basis * spun).orthonormalized()
 	for b in ["hips", "head", "hand.L", "hand.R", "upper_arm.L", "upper_arm.R", "forearm.L", "forearm.R"]:
 		out[b] = xf * sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
 	for side in ["L", "R"]:
@@ -259,6 +262,8 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 
 func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
 	var fr := _clip_frames(sync, clips, sk, clip, 24)
+	for p in fr:
+		_turn_with_hips(p)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
 	var out_side := {"L": 0, "R": 0}
@@ -280,6 +285,14 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
+
+## The arm bones as seen from the hips, so a cartwheel's whole-body turn is not counted as the arm flinging.
+func _turn_with_hips(p: Dictionary) -> void:
+	var inv: Basis = (p["turn"] as Basis).inverse()
+	for k in p:
+		if p[k] is Vector3 and k != "hips":
+			p[k] = inv * ((p[k] as Vector3) - (p["hips"] as Vector3))
+	p["hips"] = Vector3.ZERO
 
 func _t_posed(p: Dictionary, side: String) -> bool:
 	var d: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
