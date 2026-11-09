@@ -70388,5 +70388,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/style_hydrangor_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "style_cindermaw_a",
+    "name": "Cindermaw (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_cindermaw_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_siegephant_a",
+    "name": "Siegephant (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_siegephant_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_hydrangor_a",
+    "name": "Hydrangor (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_hydrangor_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_aurostag_a",
+    "name": "Aurostag (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_aurostag_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_aurostag_a",
+    "name": "Aurostag (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_aurostag_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_cindermaw_a",
+    "name": "Cindermaw (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_cindermaw_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_sarcobra_a",
+    "name": "Sarcobra (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_sarcobra_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_siegephant_a",
+    "name": "Siegephant (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_siegephant_a_2.jpg",
+    "ok": true
   }
 ]
