@@ -44565,5 +44565,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_briarlynx_p86_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_bastionpet_p86",
+    "name": "Bastionpet",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bastionpet_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_p86",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mortarfly_p86",
+    "name": "Mortarfly",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_mortarfly_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bastionpet_p86",
+    "name": "Bastionpet",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bastionpet_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_p86",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_thistlynx_p86",
+    "name": "Thistlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_thistlynx_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthollow_p86",
+    "name": "Crofthollow",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_p86",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_p86_2.jpg",
+    "ok": true
   }
 ]
