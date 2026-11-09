@@ -2697,7 +2697,7 @@ func _open_kitchen() -> void:
 						_toast("%s is still full from the last one. Try again tomorrow" % ak["name"])
 						return
 					ak["starfruit_day"] = today
-					ak["level"] = int(ak["level"]) + 1
+					Evo.level_up(ak)
 					var out := {}
 					Game._evolve(ak, out)
 					Save.remember(ak, "fed", "ate a Starfruit and grew stronger", 2.0)

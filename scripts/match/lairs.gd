@@ -712,6 +712,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
+		if b.md.has("ink"): killer.add_stat("ink_" + String(b.md["ink"]))
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:
