@@ -295,6 +295,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	if bool(s.get("stun", false)) and st.has("stun"):
+		return {"clip": st["stun"], "t": -1.0}       # (over any move: a stunned body can't be mid-cast)
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
@@ -326,8 +328,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
-	if bool(s.get("stun", false)) and st.has("stun"):
-		return {"clip": st["stun"], "t": -1.0}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}

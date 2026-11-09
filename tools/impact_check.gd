@@ -7,7 +7,8 @@ extends RefCounted
 ##   2. the hit flash reaches the model's materials on the next frame;
 ##   3. while the body is frozen its pose holds (the strike frame), then it plays on;
 ##   4. chip hits don't replay the hit clip (a rifle stream would look stun-locked); a staggering hit plays it;
-##   5. a knockback shows the hit pose for as long as the shove slides the body.
+##   5. a knockback shows the hit pose for as long as the shove slides the body;
+##   6. a stun shows the stun clip, even over a move the kit was playing.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -161,6 +162,20 @@ func _hero(main: Node, hero: String) -> void:
 			slid += 1
 			if _hit_shown(c): posed += 1
 	ok(slid > 0 and posed >= slid - 2, "%s: a knockback shows the hit pose while it slides (%d of %d frames)" % [hero, posed, slid])
+	_settle(m, hs, 30)
+	# 6. stunned mid-move: the stun clip wins
+	var moves: Array = (c.d.get("kmoves", {}) as Dictionary).keys()
+	var stun_clip := String(c.d.get("states", {}).get("stun", ""))
+	var stunned := 0
+	if not moves.is_empty():
+		V.ak.play(String(moves[0]))
+		_frame(m, hs)
+		V.hurt(1.0, A, {"src": "primary", "stun": 0.6})
+		for i in 20:
+			_frame(m, hs)
+			if c.cur == stun_clip and c.act_w > 0.5: stunned += 1
+	ok(moves.is_empty() or stunned >= 10, "%s: stunned in its %s move, the stun clip shows (%d of 20 frames)" % [
+			hero, moves[0] if moves.size() > 0 else "-", stunned])
 	print("IMPACT %s chip %.3f s, heavy %.3f s, flash %.2f, pose held %s, chip clip %s, heavy clip %s, knock pose %d/%d" % [
 			hero, chip_t, heavy_t, flash, held, shown_chip, shown_heavy, posed, slid])
 	m.queue_free()
