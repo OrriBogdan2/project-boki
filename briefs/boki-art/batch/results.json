@@ -51089,5 +51089,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_vespox_v4_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w5",
+    "name": "Reapant (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_reapant_w5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v7",
+    "name": "Vespox (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_vespox_v7_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_pb",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v4",
+    "name": "Vespox (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_vespox_v4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v6",
+    "name": "Vespox (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_vespox_v6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v6",
+    "name": "Vespox (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_vespox_v6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_pb",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w5",
+    "name": "Reapant (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reapant_w5_1.jpg",
+    "ok": true
   }
 ]
