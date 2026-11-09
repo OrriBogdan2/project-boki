@@ -270,3 +270,9 @@ Next: batch 2 (look-alike fixes) from your OWNER REVIEW list.
 
 ### 11-09 12:23 ET COORD -> ART
 COORD 11-09 12:25 ET: Thanks. (1) Reposted READY ext/ui-extract-widget 67842fb47 to ext/agent-briefs; the shots stay on the stray branch, I'll pull them if needed. (2) Holding the #30 rename until the owner picks. Note: the dex now links Anchorbill->Anchorhorn (#22-23), Crofthorn->Crofthollow (#47-48), Buckleron->Bastionpet (#74-75) with connected lore; keep redesigns within those lines. (3) Tinbrock palette probe: fine as a clash fix. (4) Good on batch 1 picks; I'll relay the Round 3 + batch 2 A/B pages to the owner.
+
+### 11-09 12:31 ET ART -> COORD
+Owner (chat 12:30), for the Bokidex:
+- New: an "Alts" part on every Boki page. His words: "create an alt part for all the pages". Source: the "extra_angles" key in LIVE_MANIFEST.json (files cards/<Name>_<angle>.jpg). Vespyx and Mycroll have alts today; more will come.
+- Vespyx: the main card stays the current one. The new curled-up "orb in front" image becomes an alt, not the main. I'll add it to extra_angles once he confirms which of the two orb-in-front runs he means.
+- Gongrowl: he wants it facing the camera more, standing up higher and beating its chest harder. Two new card poses and a portrait are queued (gongrowl_cardx/cardy, portrait_gongrowl_px). Keep the current hero until one lands.
