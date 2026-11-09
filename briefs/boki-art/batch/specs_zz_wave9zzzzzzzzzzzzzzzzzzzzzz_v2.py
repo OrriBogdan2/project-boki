@@ -111,8 +111,8 @@ for _n,_st,_ar,_dk,_fu,_sh,_po,_co,_ct,_fx in _PILOT:
 
 # 17:32 ET 11-09: redesign round 1 kept the old build on 11 of 21 (the card as image 1 holds its construction, as with re-poses).
 # Round 2 for those: the SHEET as image 1 for identity, and only what to draw (no list of objects to avoid; naming them adds them).
-def _RD2(n,body,runs=4):
-    SPECS.append({'id':'rd2_'+n.lower()+'_v2','name':n+' (redesign concept, round 2)','refs':[_LM[n]['sheet']],'runs':runs,'aspect':'1:1','size':'2K',
+def _RD2(n,body,runs=4,tag=''):
+    SPECS.append({'id':'rd2_'+n.lower()+tag+'_v2','name':n+' (redesign concept, round 2)','refs':[_LM[n]['sheet']],'runs':runs,'aspect':'1:1','size':'2K',
       'prompt':("Single character illustration of one Boki (a stylised, cute but slightly dangerous creature-collector monster): "+n+", a redesign of the creature shown from four sides in image 1. "
         "Keep from image 1: the same animal, the same colours, the same eyes and face, the same life stage and size, and the same rendering style. Draw the creature once, not four times. "
         "New design: "+body+" Every part of it grows out of its own body with a thick fused base, as if it was born that way. "
@@ -140,3 +140,5 @@ for _n,_st,_ar,_dk,_fu,_sh,_po,_co,_ct,_fx in _PILOT:
     if _n in ('Coolatee','Glassolotl'):
         SPECS.append({'id':'v2a2_'+_n.lower(),'name':_n+' (V2 pilot, route A + one-creature lock)','refs':[_C+_n+'.jpg',SRV2%_ar],'runs':3,'aspect':'1:1','size':'2K',
                       'prompt':RS_CARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx).replace("Change ONLY how it is drawn. ","Change ONLY how it is drawn. "+_ONE)})
+# Domeleon round 2 still carries a shell and telescope on its back: round 3, the dome moves to the head.
+_RD2('Domeleon',"a chameleon gripping with its four feet, body low. Its back and sides are plain bare navy skin with pale crescent-moon spots, low and smooth, with nothing on them. On its HEAD grows a tall rounded bronze casque, like a real chameleon's helmet-shaped head crest, shaped like an observatory dome with one slit line across it. One eye is set in a short bronze tube like a little telescope, the other is a normal round eye. Its tail curls into a bronze spiral.",tag="r3")
