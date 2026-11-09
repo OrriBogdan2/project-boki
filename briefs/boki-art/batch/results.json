@@ -43641,5 +43641,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_selenwhale_p83_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_tidalisk_p83",
+    "name": "Tidalisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_tidalisk_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_tidalisk_p83",
+    "name": "Tidalisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_tidalisk_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_umbrathere_p83",
+    "name": "Umbrathere",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_umbrathere_p83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_umbrathere_p83",
+    "name": "Umbrathere",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_umbrathere_p83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "canvastross_card83",
+    "name": "Canvastross (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_card83_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "canvastross_card83",
+    "name": "Canvastross (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/canvastross_card83_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "canvastross_card83",
+    "name": "Canvastross (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/canvastross_card83_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamspire_card83",
+    "name": "Gloamspire (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gloamspire_card83_3.jpg",
+    "ok": true
   }
 ]
