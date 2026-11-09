@@ -281,6 +281,7 @@ func set_arch(a: String, w := "") -> void:
 	if not Arch.exists(a):
 		return
 	P.reclass(Arch.weight(a), a, w)
+	Match._trim_shadows(P)      # (the match's one pass over small parts ran before this model existed)
 	P.unlock_all()
 	_apply_ult()
 	for i in Gloves.SLOTS:

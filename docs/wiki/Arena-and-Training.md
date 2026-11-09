@@ -35,6 +35,15 @@ Signs on posts name each area and each piece of the lane.
   an edge and float back up.
 - A downed player or bot is back up after a beat.
 
+## Hunters here are the match's Hunters
+
+The Training Area is a `Match` started with `Match.arena_opts`, and picking a Hunter in its loadout is
+`Arena.set_arch` (a `Hunter.reclass` and the match's pass over small shadow casters). There is no second spawn
+path. `--hunter-parity-check` (in the suite) builds every Hunter in a real match and in the Training Area, started as
+them and swapped in place, with no save, a fresh one and after the title screen, and fails on any difference in
+model file, kit script, node tree, bone scales or mesh surfaces (shader, uniforms, visibility range, shadows).
+`--training-area-shots` (GPU) screenshots every Hunter here, front and back. See [Checks](Checks.md).
+
 ## The duel room
 
 You against one sparring bot on an empty island. Pick its Hunter, weapon, glove, difficulty and behaviour (fight,

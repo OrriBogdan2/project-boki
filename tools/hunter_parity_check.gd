@@ -5,9 +5,12 @@ extends RefCounted
 ## swapped in place from another Hunter (the title screen's route: you start as the default and pick in the
 ## loadout). Each must load the same model file (WardenGlb.path, and the .glb really dressed, not the
 ## procedural fallback), the same kit script (ArchKit), the same node tree (auto names stripped, hidden flags
-## kept) and the same skeleton bone scales (a bone scaled to nothing hides what is skinned to it: the sun on
-## pauldron.L). Run with no save (the title screen before a profile) and with a fresh one, and again after the
-## title screen has built its own Hunters.
+## kept), the same skeleton bone scales (a bone scaled to nothing hides what is skinned to it: the sun on
+## pauldron.L) and the same surfaces: per mesh surface the override material's shader, its uniforms (albedo, glow,
+## use_tex, the texture's presence) and the mesh's visibility range and shadow setting, so a surface drawn with the
+## wrong shader, tinted away or culled by distance (Meeko's cloth-sun, skin-cloud and eyes-mood_* surfaces) fails
+## even when the node tree agrees. Run with no save (the title screen before a profile) and with a fresh one, and
+## again after the title screen has built its own Hunters.
 
 const BASE := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 var fails := 0
@@ -22,6 +25,40 @@ func _tree(n: Node, pre := "") -> Array:
 		out.append_array(_tree(c, pre + String(c.name) + "/"))
 	return out
 
+func _mat(m: Material) -> String:
+	if m == null:
+		return "none"
+	if not m is ShaderMaterial:
+		return m.get_class() + ":" + m.resource_path
+	var sm := m as ShaderMaterial
+	var parts: Array = [sm.shader.resource_path if sm.shader else "noshader"]
+	for u in sm.shader.get_shader_uniform_list() if sm.shader else []:
+		var v = sm.get_shader_parameter(u["name"])
+		if v is Texture:
+			v = "tex:" + ((v as Texture).resource_path if (v as Texture).resource_path != "" else "runtime")
+		elif v is float:
+			v = snappedf(v, 0.01)
+		elif v is Color or v is Vector3 or v is Vector4:
+			v = str(v)
+		parts.append("%s=%s" % [u["name"], str(v)])
+	return ",".join(parts)
+
+## Every mesh surface's look, keyed by node path (engine-named merges skipped as in _tree) and surface index.
+func _surfaces(md: Node3D) -> Dictionary:
+	var out := {}
+	for mi in md.find_children("*", "MeshInstance3D", true, false):
+		var path := String(md.get_path_to(mi))
+		if path.contains("@") or path.begins_with("_") or path.contains("/_"):
+			continue
+		var gi := mi as GeometryInstance3D
+		out[path] = "vis=%s range=%s shadow=%d" % [str(gi.visible), str(snappedf(gi.visibility_range_end, 0.1)),
+			gi.cast_shadow]
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in (mesh.get_surface_count() if mesh else 0):
+			var m := (mi as MeshInstance3D).get_surface_override_material(si)
+			out["%s#%d" % [path, si]] = _mat(m if m else (mesh.surface_get_material(si)))
+	return out
+
 func _sig(P: Hunter) -> Dictionary:
 	var md: Node3D = P.model
 	var bones := {}
@@ -32,7 +69,7 @@ func _sig(P: Hunter) -> Dictionary:
 			bones[sk.get_bone_name(i)] = snappedf(minf(s.x, minf(s.y, s.z)), 0.05)
 	var kit := (P.ak.get_script() as Script).resource_path if P.ak else ""
 	return {"glb": bool(md.get_meta("glb", false)), "path": WardenGlb.path(P.arch), "kit": kit,
-		"cls": P.cls, "wid": P.wid, "tree": _tree(md), "bones": bones}
+		"cls": P.cls, "wid": P.wid, "tree": _tree(md), "bones": bones, "surfaces": _surfaces(md)}
 
 func _build(main: Node, o: Dictionary, swap_to := "") -> Dictionary:
 	var m := Match.new()
@@ -64,6 +101,14 @@ func _cmp(a: String, what: String, ref: Dictionary, got: Dictionary) -> void:
 			var g = got["bones"].get(b)
 			print("FAIL hunter_parity %s %s: bone %s scale %s vs match %s" % [a, what, b, str(g), str(ref["bones"][b])])
 			break
+	var shown := 0
+	for k in ref["surfaces"]:
+		var g = got["surfaces"].get(k, "missing")
+		if g != ref["surfaces"][k] and shown < 3:
+			fails += 1
+			shown += 1
+			print("FAIL hunter_parity %s %s: surface %s is %s vs match %s"
+				% [a, what, k, str(g), str(ref["surfaces"][k])])
 
 func run(main: Node) -> void:
 	Save.no_write = true
