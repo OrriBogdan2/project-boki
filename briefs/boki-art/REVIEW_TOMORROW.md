@@ -1,6 +1,9 @@
 # Owner review queue (made while you slept)
 Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alternatives here. Each row: what is live now, and the other options with their file paths (batch/out/). Swap any by saying "use X for Y".
 
+
+**FIRST THING (needs your OK): the Bokidex artifact is at its 512-file limit.** Replacing existing images still works, but brand-new Boki (Lodestaff's turn, Voltalon's new turn and anything new) can't be added until the coordinator prunes stale or superseded files. Pruning is irreversible, so it is waiting for you. Reply "ok prune old Bokidex files" to the coordinator.
+
 | Boki | Live / queued pick | Why unsure | Alternatives |
 |---|---|---|---|
 | Chandelapi | f3_1 (8.6) queued | You asked if it was really the final form; f3 is still a candelabra okapi-serpent | f1 7.2, f2 7.1; earlier m2_2 (p79) |
