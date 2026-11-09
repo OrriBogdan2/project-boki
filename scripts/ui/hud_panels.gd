@@ -44,19 +44,22 @@ func _draw_panels() -> void:
 	var p: Hunter = m.player
 	if not (m.tut and m.tut.intro):
 		var sz := size
-		hud._draw_top(sz)
+		var b: HudBudget = hud.budget
+		b.update(m)
+		hud.feed_top = 18.0
+		if b.on("stats"): hud._draw_top(sz)
 		if p and m.lairs:
 			hud._draw_boss_bar(sz, p)        # (these two push the feed down: before it)
 			hud._draw_lair_victory(sz, p)
-		hud._draw_feed(sz)
-		hud._draw_minimap(sz)
+		if b.on("feed"): hud._draw_feed(sz)
+		hud._draw_minimap(sz)      # the objective and the timer (core groups)
 		if p and not p.out and not p.extracted:
 			HudVitals.draw(hud, sz, p)
 			hud._draw_abilities(sz, p)
 			hud._draw_weapon(sz, p)
-			GearPanel.draw(hud, sz, p)
-			hud._draw_kin_card(sz, p)
-			hud._draw_squad(sz, p)
-			hud._draw_perks(sz, p)
+			if b.on("gear"): GearPanel.draw(hud, sz, p)
+			if b.on("kin"): hud._draw_kin_card(sz, p)
+			if b.on("squad"): hud._draw_squad(sz, p)
+			if b.on("perks"): hud._draw_perks(sz, p)
 	hud.c = main_canvas
 	used_us += Time.get_ticks_usec() - t0

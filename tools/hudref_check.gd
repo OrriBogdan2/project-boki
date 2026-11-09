@@ -183,6 +183,7 @@ func _check_keys(P: Hunter) -> void:
 		"throw": "throw", "base": "base", "gear0": "gear1", "gear1": "gear2"}
 	P.lvl = 1
 	HudSlot.shown_keys.clear()
+	Input.action_press("scores")      # Tab shows every group (HudBudget): the belt, gloves and Boki box too
 	await hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await main.get_tree().process_frame
 	var x_key := String(HudSlot.shown_keys.get("x", ""))
@@ -208,6 +209,7 @@ func _check_keys(P: Hunter) -> void:
 	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
 		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
 	P.ak.cd["x"] = 0.0
+	Input.action_release("scores")
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:

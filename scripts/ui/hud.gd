@@ -24,7 +24,7 @@ func map_region(tiles: Rect2) -> Rect2:
 	var t := map_tex()
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
-var kit_t0 := 0.0
+var budget := HudBudget.new()      # which groups are up (new players get four, the rest when they matter)
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -1282,8 +1282,11 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 ## Bottom right, as in Supervive: your consumables and kin throw as small slots with counts, your
 ## loot counter, and the weapon card with ammo underneath.
 func _draw_weapon(sz: Vector2, p: Hunter) -> void:
-	var w := 270.0
-	var r := Rect2(Vector2(sz.x - w - 18, sz.y - 18 - 62), Vector2(w, 62))
+	var r := Rect2(Vector2(sz.x - 270.0 - 18, sz.y - 18 - 62), Vector2(270, 62))
+	if budget.on("weapon"): _weapon_card(r, p)
+	_weapon_row(r, p)
+
+func _weapon_card(r: Rect2, p: Hunter) -> void:
 	var rc: Color = Loot.ELEMENTS[p.welem]["col"] if p.welem != "" else Color("e6dccb")
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
@@ -1295,8 +1298,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	if p.welem != "":
 		# the element's colour: what it does to whatever you hit is in the hover
 		var ec: Color = Loot.ELEMENTS[p.welem]["col"]
-		c.draw_circle(r.position + Vector2(w - 16, 18), 5.0, ec)
-		c.draw_arc(r.position + Vector2(w - 16, 18), 8.0, 0, TAU, 20, Color(ec, 0.5), 2.0)
+		c.draw_circle(r.position + Vector2(r.size.x - 16, 18), 5.0, ec)
+		c.draw_arc(r.position + Vector2(r.size.x - 16, 18), 8.0, 0, TAU, 20, Color(ec, 0.5), 2.0)
 	var mag := int(p.wpn["mag"])
 	var ammo_col := INK if p.ammo > mag * 0.25 else HP_LOW
 	if p.wpn.get("melee", false):
@@ -1315,22 +1318,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		_text(r.position + Vector2(78, 52), str(p.ammo), 28, ammo_col, big)
 		var aw := big.get_string_size(str(p.ammo), HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x
 		_text(r.position + Vector2(84 + aw, 52), "/ %d" % mag, 14, MUTED, big)
-	# the row of small slots above the weapon card
-	var s := 44.0; var gap := 8.0
-	var y := r.position.y - s - 22.0
-	var x := r.end.x - s
-	var k: Kin = p.kin
-	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
-	x = BeltHud.draw(self, p, x, y)
-	GripHud.draw(self, p, r)
-	# C: throw / recall your kin
-	if k:
-		var kc: Color = Data.KIN[k.species]["color"]
-		var out_now: bool = k.state in ["active", "flying", "returning"]
-		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
-		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
-		x -= s + gap
 	# what you're carrying home, as a counter
+	var s := 44.0
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])
 	# (inside the weapon card on the right: the slot row above is full with the four-slot belt)
@@ -1349,6 +1338,23 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		_text(Vector2(px + 20, cy + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
 		var pw := big.get_string_size("%d/%d" % [p.pack.size(), p.pack_cap], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 		hover_spots.append([Rect2(Vector2(px, cy + s - 22), Vector2(24 + pw, 24)), "pack"])
+
+func _weapon_row(r: Rect2, p: Hunter) -> void:
+	# the row of small slots above the weapon card
+	var s := 44.0; var gap := 8.0
+	var y := r.position.y - s - 22.0
+	var x := r.end.x - s
+	var k: Kin = p.kin
+	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
+	if budget.on("belt"): x = BeltHud.draw(self, p, x, y)
+	if budget.on("grip"): GripHud.draw(self, p, r)
+	# C: throw / recall your kin
+	if k and budget.on("kin"):
+		var kc: Color = Data.KIN[k.species]["color"]
+		var out_now: bool = k.state in ["active", "flying", "returning"]
+		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
+		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
+		x -= s + gap
 
 ## Your squadmates down the left side.
 ## A teammate's state, for the squad frames, markers and arrows: [label, colour, where to point,
@@ -1787,15 +1793,9 @@ func _draw_squad_pings(p: Hunter) -> void:
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
 	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden:
 		return
-	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
-	var t := m.time - kit_t0
-	if p.dropping or p.riding:
-		# shown once you land, not over the drop map
-		kit_t0 = m.time
-		return
-	if t > show_t:
-		return
-	var a := clampf(show_t - t, 0.0, 1.0)
+	if p.dropping or p.riding or not budget.on("kit"):
+		return      # (expeditions: held Tab only; training keeps it up)
+	var a := 1.0
 	var lines: Array = []
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner and p.ak == null else null
 	if util:
