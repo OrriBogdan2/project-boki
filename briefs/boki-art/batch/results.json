@@ -44509,5 +44509,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_glassolotl_f1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_rimefang_r86",
+    "name": "Rimefang",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_rimefang_r86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_briarlynx_p86",
+    "name": "Briarlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_briarlynx_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_anchorhorn_p86",
+    "name": "Anchorhorn",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_anchorhorn_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_thistlynx_p86",
+    "name": "Thistlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_thistlynx_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_anchorhorn_p86",
+    "name": "Anchorhorn",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_anchorhorn_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_p86",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_p86",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_briarlynx_p86",
+    "name": "Briarlynx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_briarlynx_p86_1.jpg",
+    "ok": true
   }
 ]
