@@ -20926,5 +20926,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/stance_glintmole_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_glintmole",
+    "name": "Glintmole (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_glintmole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_oarlet",
+    "name": "Oarlet (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_oarlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_oarlet",
+    "name": "Oarlet (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_oarlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_glintmole",
+    "name": "Glintmole (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_glintmole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_oarlet",
+    "name": "Oarlet (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_oarlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_galleotter",
+    "name": "Galleotter (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_skateron",
+    "name": "Skateron (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_skateron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_galleotter",
+    "name": "Galleotter (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_galleotter_2.jpg",
+    "ok": true
   }
 ]
