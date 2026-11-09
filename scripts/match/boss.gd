@@ -357,7 +357,7 @@ func _atk_slam() -> void:
 		stag_open = maxf(stag_open, w + 0.15)
 	_at(w, func():
 		blast(at, float(md["slam_r"]), float(md["dmg"]), 9.0, 5.0)
-		m.sfx("k_gravity", at, 2.0, 0.6)
+		m.sfx("k_rock", at, 2.0, 0.6)
 		_wave(at, 9.5, 7.5)
 		if phase >= 1: m.later(0.45, func(): if not dead: _wave(at, 10.5, 8.5))
 		if phase >= 2: m.later(0.9, func(): if not dead: _wave(at, 11.0, 9.5)))
@@ -453,7 +453,7 @@ func _atk_fissure() -> void:
 			m.fx.burst(q + Vector3(0, 0.3, 0), Color("ffb04a"), 10, 5.0, 0.5, 8.0, 1.2)
 			m.fx.dust(q, 6)
 		Shake.incoming_big(m, a, 0.5)
-		m.sfx("k_gravity", a, 0.0, 0.5))
+		m.sfx("k_rock", a, 0.0, 0.5))
 
 # ---- Stormcoil
 func _atk_dash() -> void:
@@ -623,7 +623,7 @@ func _atk_burrow() -> void:
 	_at(0.4, func():
 		buried = true
 		m.fx.dust(pos, 20)
-		m.sfx("k_gravity", pos, 0.0, 0.7))
+		m.sfx("k_rock", pos, 0.0, 0.7))
 	var mark := {"at": pos}
 	_at(0.5, func():
 		var to := clamp_in(tgt.pos if tgt else centre(), 1.0)

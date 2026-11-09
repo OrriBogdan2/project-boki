@@ -8,6 +8,7 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -33,8 +34,21 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_boki_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _boki_cues() -> void:
+	var missing := []
+	for id in KinLib.kin_ids():
+		var cue := KinLib.cue_of(String(KinLib.species(id).get("type", "")))
+		if _takes(cue).is_empty() and not missing.has(cue):
+			missing.append(cue)
+	ok(missing.is_empty(), "every Boki type has a cast cue file %s" % str(missing))
+	var types := {}
+	for theme in KinLib.TYPE_OF_THEME:
+		types[KinLib.TYPE_OF_THEME[theme]] = true
+	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
