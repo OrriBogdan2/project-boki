@@ -16,6 +16,8 @@ static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
 static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
+static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
+static var mantle_pull: float = _phys["mantle_pull"]
 static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
 static var mantle_launch_min: float = _phys["mantle_launch_min"]
 static var dive_vy: float = _phys["dive_vy"]
@@ -99,6 +101,27 @@ static func fall_cap(h: Hunter) -> float:
 		return fall_max
 	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
 	return lerpf(fall_max, abyss_fall_max, k)
+
+## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within Hunter.MANTLE_REACH it's the
+## source's suction: gravity as in any jump, plus mantle_pull while you rise slower than mantle_vy_cap, so a
+## jump's momentum carries you over and a slow arrival is lifted at the cap. Deeper (the abyss catch, ours) you
+## rise as if thrown to clear the lip at the cap, never faster than `deep_max`. `k` scales the rise (downed).
+static func rise_vy(vy: float, left: float, k: float, deep_max: float, dt: float) -> float:
+	var cap := mantle_vy_cap * k
+	if left > Hunter.MANTLE_REACH:
+		return minf(sqrt(cap * cap + 2.0 * Hunter.H_GRAV * left), deep_max * k)
+	vy -= Hunter.H_GRAV * dt
+	if vy < cap:
+		vy = minf(vy + mantle_pull * dt, cap)
+	return vy
+
+## The longest a rise from `depth` metres under a lip takes under rise_vy (s): thrown up to the suction band,
+## then the band at the cap from a standstill.
+static func rise_time(depth: float) -> float:
+	var band := minf(depth, Hunter.MANTLE_REACH)
+	var c2 := mantle_vy_cap * mantle_vy_cap
+	var deep := (sqrt(c2 + 2.0 * Hunter.H_GRAV * depth) - sqrt(c2 + 2.0 * Hunter.H_GRAV * band)) / Hunter.H_GRAV
+	return deep + band / mantle_vy_cap
 
 ## Speed onto a ledge you climb (m/s), from a hunter's run speed.
 static func mantle_launch(run_speed: float) -> float:

@@ -1555,7 +1555,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < SPEED * 0.6: hv += n * (SPEED * 0.6 - hv.dot(n))
 			pvel = Vector3(hv.x, 0, hv.y)
 	else:
-		pvy = clampf(left * 14.0, Hunter.LRISE_MIN, Hunter.LRISE_SPEED)
+		pvy = HunterMove.rise_vy(pvy, left, 1.0, Hunter.LRISE_SPEED, d)
 	return true
 
 ## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.

@@ -93,7 +93,8 @@ const T := {
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
 	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
-	"ledge_rise_t":            ["<=", 0.35, "s", "[footage] touching ground above you floats you up fast (~0.8s from a full second deep); here a 1.6m wall from a jump"],
+	"ledge_rise_t":            ["<=", 0.45, "s", "[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
+	"ledge_rise_vy_max":       ["<=", 7.0, "m/s", "[game data] suction cap 2.5 m/s: a rise never outruns the jump"],
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
 	"ledge_fling_early_m":     [">=", 0.0, "m", "a jump as the rise starts: a weak fling (distance onto the top, reference)"],
 	"ledge_fling_timed_m":     [">=", 1.5, "m", "[est] a jump in the window near the top: a real fling onto the top"],
@@ -921,6 +922,7 @@ func _ledge() -> void:
 		_reset(Vector3(wl["at"].x, wl["low"], wl["at"].y))
 		var rising := 0; var t_rise := -1.0; var peak := -1e9; var lip_at := Vector2.INF; var jumped := false
 		var win_steps := 0
+		var vy_max := 0.0
 		for i in 150:
 			P.inp["move"] = n
 			var jump := i == 2
@@ -933,14 +935,16 @@ func _ledge() -> void:
 			m.step(DT)
 			P.inp["jump"] = false
 			if rising > 0 and t_rise < 0.0 and P.pos.y >= top: t_rise = rising * DT
+			if P.call("mantling"): vy_max = maxf(vy_max, P.vel.y)
 			if rising > 0 and not P.call("mantling"):
 				peak = maxf(peak, P.pos.y)
 				if lip_at == Vector2.INF: lip_at = Vector2(P.pos.x, P.pos.z)
 			if rising > 0 and P.grounded and not P.call("mantling"):
 				break
-		out[mode] = {"t": t_rise, "peak": peak - top, "dist": (Vector2(P.pos.x, P.pos.z) - lip_at).dot(n) if lip_at != Vector2.INF else 0.0, "win": win_steps * DT}
+		out[mode] = {"t": t_rise, "peak": peak - top, "dist": (Vector2(P.pos.x, P.pos.z) - lip_at).dot(n) if lip_at != Vector2.INF else 0.0, "vy": vy_max, "win": win_steps * DT}
 	rec("ledge_rise_t", out["none"]["t"] if out["none"]["t"] > 0.0 else 9.0)
 	rec("ledge_rise_peak_m", out["none"]["peak"])
+	rec("ledge_rise_vy_max", out["none"]["vy"])
 	rec("ledge_fling_early_m", out["early"]["dist"])
 	rec("ledge_fling_timed_m", out["timed"]["dist"])
 	rec("ledge_fling_timed_up_m", out["timed"]["peak"])
