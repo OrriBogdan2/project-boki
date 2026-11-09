@@ -4496,3 +4496,23 @@ READY ext/boki-net-roundtrip 3a4766dbb (boki system check: net snapshot round tr
 READY ext/audio-ult-telegraphs c5a6d4ac2 (ult audio telegraphs)
 READY ext/dash-curve-fit d2adc51b8 (fitted dash speed curves for Ghost/Brall/Myth from hero-ref 1/15 s tracks, rms 1-4.5%, in dash_feel.json 'curve' via ArchKit.travel curved + HunterMove.dash_k; Felix [?] unchanged; decision 0025; move-feel 0, dash-frames 0, gunslinger 98/0, juggernaut 183/0, archer 159/0, ashwick 119/0, dancer 126/0, health --strict OK, gen_wiki --check OK. MERGE NOTE: ext/movement-unify's tuning.json dash_ease archer {speed 0.7, ease 0.25} would stack on Myth's curve: set its ease to 0 when both land)
 READY ext/hit-feedback-pass d6b86ff8d (hit feedback, item 96.4: own hit sound per Hunter weapon via HeroSfx.hit_sound + tools/gen_sfx_hits.py, empowered-hit number/thud/tier-3 hold for Lace pin, Kael slam, Albert charged swing, Sable empowered bolt, Grimble point-blank; your Boki and hits on you a size down; docs/HUD.md table; hero/gunslinger/dancer/juggernaut/rimewright combo, archetype, sfx-set, --hit-feedback-check all 0 fail, health --strict OK, gen_wiki --check OK)
+
+## 01:45 ET 11-09 — art session: round 31 group s22 (cards + portraits)
+Hero cards (main images) and Pokédex portraits at >= 8.3 are live. New Seamwyrm biting portrait (owner 01:15) and reshaped Zippelith portrait replace the old ones.
+ART nettlynx 8.4 briefs/boki-art/cards/Nettlynx.jpg kind=card panel=8.4/8.4/8.4
+ART pipewurm 8.37 briefs/boki-art/cards/Pipewurm.jpg kind=card panel=8.4/8.4/8.3
+ART polyshroom 8.43 briefs/boki-art/cards/Polyshroom.jpg kind=card panel=8.3/8.5/8.5
+ART bathilus 8.37 briefs/boki-art/portraits/light/Bathilus.jpg kind=portrait panel=8.3/8.4/8.4
+ART cubbat 8.3 briefs/boki-art/portraits/light/Cubbat.jpg kind=portrait panel=8.4/8.2/8.3
+ART gilabacus 8.4 briefs/boki-art/portraits/light/Gilabacus.jpg kind=portrait panel=8.4/8.4/8.4
+ART olmlet 8.3 briefs/boki-art/portraits/light/Olmlet.jpg kind=portrait panel=8.4/8.3/8.2
+ART pawnfry 8.3 briefs/boki-art/portraits/light/Pawnfry.jpg kind=portrait panel=8.4/8.3/8.2
+ART polyshroom 8.3 briefs/boki-art/portraits/light/Polyshroom.jpg kind=portrait panel=8.4/8.3/8.2
+ART proofhop 8.4 briefs/boki-art/portraits/light/Proofhop.jpg kind=portrait panel=8.4/8.4/8.4
+ART seamwyrm 8.37 briefs/boki-art/portraits/light/Seamwyrm.jpg kind=portrait panel=8.5/8.2/8.4
+ART zippelith 8.4 briefs/boki-art/portraits/light/Zippelith.jpg kind=portrait panel=8.4/8.4/8.4
+ART rimeshrew 8.3 briefs/boki-art/cards/Rimeshrew.jpg kind=card panel=8.5/8.4/8.0
+ART ringrove 8.5 briefs/boki-art/cards/Ringrove.jpg kind=card panel=8.5/8.5/8.5
+ART soakybara 8.33 briefs/boki-art/cards/Soakybara.jpg kind=card panel=8.3/8.3/8.4
+ART thrumbird 8.37 briefs/boki-art/cards/Thrumbird.jpg kind=card panel=8.3/8.3/8.5
+ART zephyrak 8.4 briefs/boki-art/cards/Zephyrak.jpg kind=card panel=8.3/8.4/8.5

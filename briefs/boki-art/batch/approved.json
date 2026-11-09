@@ -587,6 +587,46 @@
    "id": "ribbonwyrm_card",
    "pick": 1,
    "grade": 8.3
+  },
+  {
+   "id": "nettlynx_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "pipewurm_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "polyshroom_card2",
+   "pick": 1,
+   "grade": 8.43
+  },
+  {
+   "id": "rimeshrew_card2",
+   "pick": 1,
+   "grade": 8.3
+  },
+  {
+   "id": "ringrove_card2",
+   "pick": 1,
+   "grade": 8.5
+  },
+  {
+   "id": "soakybara_card2",
+   "pick": 2,
+   "grade": 8.33
+  },
+  {
+   "id": "thrumbird_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "zephyrak_card2",
+   "pick": 2,
+   "grade": 8.4
   }
  ],
  "rerolled": [
@@ -1011,6 +1051,42 @@
   {
    "id": "portrait_knotwyrm_pe_w29",
    "grade": 8.53
+  },
+  {
+   "id": "portrait_bathilus",
+   "grade": 8.37
+  },
+  {
+   "id": "portrait_cubbat",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_gilabacus",
+   "grade": 8.4
+  },
+  {
+   "id": "portrait_olmlet",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_pawnfry",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_polyshroom",
+   "grade": 8.3
+  },
+  {
+   "id": "portrait_proofhop",
+   "grade": 8.4
+  },
+  {
+   "id": "portrait_seamwyrm_bite",
+   "grade": 8.37
+  },
+  {
+   "id": "portrait_zippelith_fix",
+   "grade": 8.4
   }
  ],
  "retired": [
