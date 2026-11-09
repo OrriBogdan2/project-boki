@@ -163,6 +163,7 @@ func _heart_ring(at: Vector3) -> Node3D:
 func _sparks(root: Node3D, col: Color, at: Vector3, r: float, kind: String) -> void:
 	var p := CPUParticles3D.new()
 	p.amount = 22; p.lifetime = 3.0; p.preprocess = 3.0
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = r
 	p.direction = Vector3.UP; p.spread = 30.0
 	p.gravity = Vector3(0, 0.6 if kind == "embers" else (-0.4 if kind == "snow" else 0.1), 0)

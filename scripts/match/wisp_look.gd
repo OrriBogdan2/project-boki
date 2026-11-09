@@ -125,6 +125,7 @@ static func _particles(node_name: String, spec: Dictionary, team_col: Color, amb
 	p.name = node_name
 	p.amount = int(spec["amount"])
 	p.lifetime = float(spec["life"])
+	ParticleCount.tune(p)
 	p.local_coords = ambient
 	p.emitting = ambient
 	p.explosiveness = 0.0

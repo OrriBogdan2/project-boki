@@ -1999,6 +1999,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	pt.name = "Aura"
 	pt.amount = 7
 	pt.lifetime = 1.1
+	ParticleCount.tune(pt)
 	pt.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 	pt.emission_sphere_radius = 0.38
 	pt.position = Vector3(0, 0.4, 0)
@@ -3390,6 +3391,7 @@ static func waterfall(width: float, height: float) -> Node3D:
 	root.add_child(mi)
 	var p := CPUParticles3D.new()
 	p.amount = 24; p.lifetime = 2.0; p.preprocess = 2.0
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(width * 0.4, 0.3, 0.3)
 	p.direction = Vector3(0, 1, 0); p.spread = 60.0; p.initial_velocity_min = 0.3; p.initial_velocity_max = 0.8
 	p.gravity = Vector3(0, -0.2, 0)

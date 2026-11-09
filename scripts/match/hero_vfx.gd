@@ -566,7 +566,7 @@ func _aim_emitter(p: GPUParticles3D, kind: String, layer: Dictionary, h: Hunter,
 	var room := maxi(0, MAX_LIVE - live_n)
 	var n := mini(mini(int(want), int(AMOUNT[kind])), room)
 	p.amount_ratio = float(n) / float(AMOUNT[kind])
-	p.lifetime = _num(layer, "life", o, 0.5)
+	p.lifetime = _num(layer, "life", o, 0.5) * float(Settings.q("fx_life"))
 	return n
 
 func _way(layer: Dictionary, dir: Vector2) -> Vector3:

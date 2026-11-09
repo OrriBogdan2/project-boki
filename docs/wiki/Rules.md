@@ -476,6 +476,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## tuning (`content/rules/tuning.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The one shared tuning file for movement, feel and performance numbers (owner 11-08). perf: expedition frame-time budget knobs (docs/PERF.md). |
+| perf | {"bot_replan_s": 0.1, "boki_retarget_s": 0.2, "actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0}, "anim_far_every": 2, "anim_off_every": 10} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

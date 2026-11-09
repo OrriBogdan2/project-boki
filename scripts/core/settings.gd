@@ -44,23 +44,23 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
-##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   (x)  ·  fx_life: particle lifetime (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540, "lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true, "fx_life": 0.5},
 	"low": {"name": "Low", "msaa": 0, "shadows": false, "px": 720, "lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.7, "splits": 1, "atlas": 2048, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true, "fx_life": 0.7},
 	"medium": {"name": "Medium", "msaa": 2, "shadows": true, "px": 1080, "lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.8, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true, "fx_life": 1.0},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0, "lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true, "fx_life": 1.0},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0, "lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false, "fx_life": 1.0},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 

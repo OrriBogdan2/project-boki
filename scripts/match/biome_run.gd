@@ -223,6 +223,7 @@ func _decorate_mob(mb: Mob, R: Dictionary, muts: Array) -> void:
 		if k in ["armored", "swift"]: continue
 		var p := CPUParticles3D.new()
 		p.amount = 10; p.lifetime = 1.0; p.preprocess = 1.0
+		ParticleCount.tune(p)
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = 0.6
 		p.direction = Vector3.UP; p.spread = 30.0; p.initial_velocity_min = 0.4; p.initial_velocity_max = 1.2
 		p.gravity = Vector3.ZERO
@@ -579,7 +580,8 @@ func decorate() -> void:
 		var c: Vector2 = w.islands[ii]["c"]
 		var r := float(w.islands[ii]["r"]) * 1.1
 		var p := CPUParticles3D.new()
-		p.amount = maxi(6, int(clampf(r * 4.0, 20, 70) * float(Settings.q("fx")))); p.lifetime = 5.0; p.preprocess = 5.0
+		p.amount = int(clampf(r * 4.0, 20, 70)); p.lifetime = 5.0; p.preprocess = 5.0
+		ParticleCount.tune(p)
 		p.visibility_range_end = 110.0 * float(Settings.q("draw"))
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; p.emission_box_extents = Vector3(r, 2.5, r)
 		p.mesh = Models.sphere(0.06, 4)

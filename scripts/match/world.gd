@@ -1581,6 +1581,7 @@ static func updraft_visual(r: float, y0: float, y1: float, tint := Color(1.0, 0.
 	root.add_child(col)
 	var p := CPUParticles3D.new()
 	p.amount = 18; p.lifetime = 1.6; p.preprocess = 1.6
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE; p.emission_sphere_radius = r * 0.8
 	p.direction = Vector3.UP; p.spread = 8.0; p.initial_velocity_min = 5.0; p.initial_velocity_max = 8.0
 	p.gravity = Vector3.ZERO

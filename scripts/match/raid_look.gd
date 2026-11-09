@@ -266,12 +266,11 @@ static func storm_fx(cond: String) -> Node3D:
 		return null
 	var root := Node3D.new()
 	root.name = "RaidFx"
-	var lite := Settings.lite()
 	if cond == "ash":
-		root.add_child(_streak(Color(0.66, 0.6, 0.55, 0.6), 340 if not lite else 140, 0.085, 1.6, false))
-		root.add_child(_streak(Color(1.0, 0.55, 0.22, 0.9), 26 if not lite else 12, 0.035, 2.2, true))
+		root.add_child(_streak(Color(0.66, 0.6, 0.55, 0.6), 340, 0.085, 1.6, false))
+		root.add_child(_streak(Color(1.0, 0.55, 0.22, 0.9), 26, 0.035, 2.2, true))
 	else:
-		root.add_child(_puffs(Color(0.72, 0.75, 0.8, 0.12), 34 if not lite else 16))
+		root.add_child(_puffs(Color(0.72, 0.75, 0.8, 0.12), 34))
 	return root
 
 static func _streak(col: Color, n: int, size: float, life: float, glow: bool) -> CPUParticles3D:
@@ -279,6 +278,7 @@ static func _streak(col: Color, n: int, size: float, life: float, glow: bool) ->
 	p.amount = n
 	p.lifetime = life
 	p.preprocess = life
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	p.emission_box_extents = Vector3(22.0, 5.0, 16.0)
 	p.direction = Vector3(1.0, -0.15, 0.35)
@@ -314,6 +314,7 @@ static func _puffs(col: Color, n: int) -> CPUParticles3D:
 	p.amount = n
 	p.lifetime = 9.0
 	p.preprocess = 9.0
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	p.emission_box_extents = Vector3(24.0, 1.5, 18.0)
 	p.direction = Vector3(1.0, 0.0, 0.2)

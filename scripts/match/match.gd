@@ -1591,6 +1591,7 @@ func _element_motes(n: Node3D, col: Color, unique: bool) -> void:
 	var p := CPUParticles3D.new()
 	p.amount = 18 if unique else 10
 	p.lifetime = 1.2
+	ParticleCount.tune(p)
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 	p.emission_sphere_radius = 0.45
 	p.direction = Vector3.UP; p.spread = 25.0

@@ -132,7 +132,7 @@ func spark(at: Vector3, dir: Vector3, col: Color, amount := 8, speed := 9.0, spr
 	var na := maxi(2, int(round(amount * clampf(particles / PARTICLES, 0.4, 1.0))))
 	if p.amount != na: p.amount = na
 	p.color = col
-	p.lifetime = life
+	p.lifetime = life * float(Settings.q("fx_life"))
 	p.direction = dir.normalized() if dir.length() > 0.01 else Vector3.UP
 	p.spread = spread
 	p.initial_velocity_min = speed * 0.45
@@ -223,7 +223,7 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	var na := maxi(3, int(round(amount * particles)))
 	if p.amount != na: p.amount = na      # (resizing reallocates its buffers: only when it changes)
 	p.color = col
-	p.lifetime = life
+	p.lifetime = life * float(Settings.q("fx_life"))
 	p.initial_velocity_min = speed * 0.5
 	p.initial_velocity_max = speed
 	p.gravity = Vector3(0, -grav, 0)

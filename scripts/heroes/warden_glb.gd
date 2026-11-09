@@ -269,6 +269,7 @@ static func _smoke(root: Node3D, own: Dictionary) -> void:
 	p.name = "Smoke"
 	p.amount = int(sm.get("amount", 16))
 	p.lifetime = float(sm.get("life", 1.4))
+	ParticleCount.tune(p)
 	p.local_coords = false
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	# (along the blade only: the weapon's box past its grip end, `from` of its length)
