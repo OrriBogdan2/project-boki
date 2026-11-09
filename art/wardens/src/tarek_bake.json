@@ -1,14 +1,14 @@
 {
- "high": "~/meshy/tarek_m/run3/glb.glb",
- "out": "~/meshy/tarek_m/bake/low.glb",
- "blend": "~/meshy/tarek_m/bake/bake.blend",
+ "high": "~/meshy/tarek_v2/runA/glb.glb",
+ "out": "~/meshy/tarek_v2/bake/low.glb",
+ "blend": "~/meshy/tarek_v2/bake/bake.blend",
  "tris": 30000,
  "tex": 4096,
  "head": {
   "centre": [
    0,
-   -0.05,
-   0.68
+   0.02,
+   0.76
   ],
   "r": 0.22
  },
