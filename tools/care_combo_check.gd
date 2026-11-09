@@ -836,10 +836,11 @@ func tender() -> void:
 	var clips: WardenClips = sync.get("clips") if sync else null
 	var lib: AnimationLibrary = clips.lib if clips else null
 	var aim_clip: Animation = lib.get_animation("seed_aim") if lib and lib.has_animation("seed_aim") else null
+	var fit = clips.d["kmoves"]["mm_seed_aim"].get("fit") if clips else null
 	ok(
-			"mm RMB: Pip's hand-keyed stretch-and-gather is exactly as long as the wind-up",
-			aim_clip != null and absf(aim_clip.length - wind) <= 0.04,
-			"clip %.2f wind %.2f" % [aim_clip.length if aim_clip else -1.0, wind])
+			"mm RMB: Pip's hand-keyed stretch-and-gather is played over exactly the wind-up (kmove fit)",
+			aim_clip != null and fit != null and absf(float(fit) - wind) <= 0.04,
+			"clip %.2f fit %s wind %.2f" % [aim_clip.length if aim_clip else -1.0, fit, wind])
 	ok(
 			"mm RMB: no circle under her during the wind-up (item 23)",
 			not K.lk().live.any(func(b): return String(b["fx"]) == "flare"))

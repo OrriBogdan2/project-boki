@@ -304,6 +304,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		alt_t = tt
 		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
 		var length := lib.get_animation(clip).length
+		if mv.has("fit"):
+			tt *= length / float(mv["fit"])      # "fit": the clip plays over this many seconds
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)

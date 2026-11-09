@@ -195,7 +195,7 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if def.is_empty():
 			continue
 		var end_t := float(def["keys"][-1][0])
-		var length := clips.lib.get_animation(String(moves[km]["clip"])).length
+		var length := float(moves[km].get("fit", clips.lib.get_animation(String(moves[km]["clip"])).length))
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off
