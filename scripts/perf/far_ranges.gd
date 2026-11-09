@@ -32,6 +32,12 @@ static func class_of(label: String, chunk: int, hint := "") -> String:
 		return "small"
 	return "rock"
 
+## The "far" hint of a flora batch of this kind (pillars count as boulders).
+static func hint(kind: String) -> String:
+	if kind == "pillar":
+		return "rock"
+	return kind if kind in BIG_CLASSES else ""
+
 ## The draw distance in metres for a class (0 = unlimited).
 static func end_of(cls: String) -> float:
 	var k := float(Settings.q("draw"))
@@ -74,7 +80,8 @@ static func _lods(m: Mesh) -> Array:
 	if tris >= MIN_LOD_TRIS and am.get_blend_shape_count() == 0:
 		var im := ImporterMesh.new()
 		for si in am.get_surface_count():
-			im.add_surface(am.surface_get_primitive_type(si), am.surface_get_arrays(si), [], {}, am.surface_get_material(si), am.surface_get_name(si))
+			im.add_surface(am.surface_get_primitive_type(si), am.surface_get_arrays(si), [], {},
+				am.surface_get_material(si), am.surface_get_name(si))
 		if im.get_method_argument_count("generate_lods") >= 3:
 			im.call("generate_lods", 25.0, 60.0, [])
 		else:
@@ -96,7 +103,8 @@ static func _coarsest(im: ImporterMesh, am: ArrayMesh) -> Mesh:
 
 ## Cliff batch: the detailed MultiMesh gets `near` as its range, and the coarse copies of the same
 ## instances (items = [transform, colour]) are added in FAR_CHUNK blocks from there outward.
-## Returns `near`, the range for the detailed batches, or 0 when the mesh has no far version (they keep the class range).
+## Returns `near`, the range for the detailed batches, or 0 when the mesh has no far version
+## (they keep the class range).
 static func add_far_cliffs(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String) -> float:
 	var row := _row()
 	var cm := coarse(mesh)
@@ -110,12 +118,16 @@ static func add_far_cliffs(parent: Node3D, items: Array, mesh: Mesh, mat: Materi
 		by[key].append(it)
 	for key in by:
 		var list: Array = by[key]
-		var mm := MultiMesh.new(); mm.transform_format = MultiMesh.TRANSFORM_3D; mm.use_colors = true; mm.mesh = cm
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = cm
 		mm.instance_count = list.size()
 		for k in list.size():
 			mm.set_instance_transform(k, list[k][0])
 			mm.set_instance_color(k, list[k][1])
-		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
+		var mi := MultiMeshInstance3D.new()
+		mi.multimesh = mm
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.visibility_range_begin = float(row["near"])

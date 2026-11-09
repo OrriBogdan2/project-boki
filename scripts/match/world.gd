@@ -1923,7 +1923,7 @@ func _flora_prop(groups: Dictionary, what: String, i: int, p: Vector3, r: Random
 	elif not groups.has(key):
 		var big := kind in ["tree", "rock", "pillar"]
 		groups[key] = {"mesh": am, "mat": Flora.material(kind, kind in ["rock", "pillar", "crystal"]), "items": [], "label": "%s_%s_%d" % [kind, style, v],
-			"shadows": big, "chunk": 32 if small else 16, "far": kind if kind in FarRanges.BIG_CLASSES else ("rock" if kind == "pillar" else "")}
+			"shadows": big, "chunk": 32 if small else 16, "far": FarRanges.hint(kind)}
 	_last_item = [tr, col]
 	_last_top = (tr.basis * Vector3(0, am.get_aabb().end.y, 0)).y
 	groups[key]["items"].append(_last_item)

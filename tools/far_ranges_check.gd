@@ -56,8 +56,9 @@ func _preset(p: String, shots: String) -> void:
 		for i in 4:
 			await main.get_tree().process_frame
 		var rs := RenderingServer
-		print("PERF farview %s %s: draws %d, tris %.0fk" % [p, view,
-			rs.get_rendering_info(rs.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME), rs.get_rendering_info(rs.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME) / 1000.0])
+		var draws: int = rs.get_rendering_info(rs.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
+		var tris: int = rs.get_rendering_info(rs.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
+		print("PERF farview %s %s: draws %d, tris %.0fk" % [p, view, draws, tris / 1000.0])
 		if shots != "":
 			sv.get_texture().get_image().save_png("%s/%s_%s.png" % [shots, p, view])
 	main.get_viewport().disable_3d = false
@@ -96,10 +97,11 @@ func _asserts(p: String, w: Node) -> void:
 					break
 	ok(wrong_begin == 0, "%s: every far cliff batch begins at the near range (%.0f m)" % [p, row["near"]])
 	ok(heavy == 0, "%s: every far cliff mesh is lighter than its detailed mesh" % p)
-	ok(seen["rock"] > 0 and seen["cliff"] > 0, "%s has rock (%d) and cliff (%d) batches" % [p, seen["rock"], seen["cliff"]])
+	ok(seen["rock"] > 0 and seen["cliff"] > 0, "%s has rock and cliff batches (%s)" % [p, seen])
 	ok(far_n > 0, "%s has %d far cliff batches" % [p, far_n])
 	for cls in ["tree", "rock"]:
-		ok(limited[cls] == (0 if unlimited else seen[cls]), "%s: %d of %d %s batches have a range" % [p, limited[cls], seen[cls], cls])
+		var want: int = 0 if unlimited else seen[cls]
+		ok(limited[cls] == want, "%s: %d of %d %s batches have a range" % [p, limited[cls], seen[cls], cls])
 	ok(wrong_end == 0, "%s: a cliff batch with a far version ends at the near range" % p)
 	ok(unlimited or limited["cliff"] == seen["cliff"], "%s: every cliff batch has a range" % p)
 
