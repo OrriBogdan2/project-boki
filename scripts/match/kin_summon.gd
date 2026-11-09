@@ -4,21 +4,21 @@ extends RefCounted
 ## With Boki riding as wisps (KinWisp) the Summon key bursts the wisp into the full Boki for its species'
 ## window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
 ## never ends the window; being knocked down does: it turns straight back into a wisp with a longer cooldown.
-## At the end it shrinks back into the wisp, which stays dim until the cooldown is over. Summon again while
+## The burst out of the wisp and the fold back in are BokiWispPop (soft light only: no explosion, ring or disc).
+## At the end it folds back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
-const BURST_S := 0.3      # s: the bloom from wisp to full size
-const SHRINK_S := 0.35    # s: the shrink back into the wisp
-const BURST_FROM := 0.3   # its size at the start of the bloom and the end of the shrink (x its own)
+const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
+const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 
 var k: Kin
 var dur := 10.0       # s: this species' window
 var cd_base := 60.0   # s: this species' cooldown
 var left := 0.0       # s of the window left (0: a wisp, or shrinking)
 var shrink := 0.0     # s of the shrink back left
-var grow := 0.0       # s of the bloom left (drawing only)
+var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
 
@@ -84,7 +84,6 @@ func end() -> void:
 func knocked() -> bool:
 	if not out():
 		return false
-	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
 	KinCommand.say(k.owner_h, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
 	_back(cd_base * float(rules()["knocked_cd_mult"]))
 	return true
@@ -92,7 +91,6 @@ func knocked() -> bool:
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
 	cd = maxf(0.0, cd - dt)
-	grow = maxf(0.0, grow - dt)
 	var o := k.owner_h
 	if left > 0.0:
 		left -= dt
@@ -110,16 +108,48 @@ func tick(dt: float) -> void:
 		else:
 			_back(cd_base)
 
-## The bloom (into the Boki) or the puff (back into the wisp), on every game (KinWisp.set_wisp).
+## The burst (into the Boki) or the fold (back into the wisp), on every game (KinWisp.set_wisp). A fold already
+## playing through the shrink carries on; one that never shrank (knocked down, or a late snapshot) folds from here.
 func popped(to_wisp: bool) -> void:
-	var glow: Color = k.sp.get("glow", k.sp["color"])
-	if to_wisp:
-		k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), glow, 8, 2.0)
-	else:
-		k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), glow, 18, 3.5)
-		grow = BURST_S
-		k.m.fx.ring(k.pos, 1.4, Color(glow, 0.8), 0.3)
+	if not to_wisp:
+		_pop(true, false)
 		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+	elif _folding:
+		_drop_pop()
+	else:
+		_pop(false, true)
+	_folding = false
+
+## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
+## now. stowing: the kin is about to move to the shoulder itself (KinSummon._back), so the pop sits on it.
+func _pop(burst: bool, stowing: bool) -> void:
+	_drop_pop()
+	var o := k.owner_h
+	if o == null or k.model == null:
+		return
+	var pop := BokiWispPop.new(k.species, k.rec)
+	pop.name = POP
+	var shoulder := o.pos + Vector3(0, 1.5, 0) - k.pos
+	pop.position = Vector3.ZERO if stowing else shoulder
+	pop.stand = -shoulder
+	pop.rotation.y = k.model.rotation.y
+	pop.finished.connect(_popped)
+	k.add_child(pop)
+	k.model.visible = false
+	pop.play(burst)
+
+## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
+func _popped(burst: bool) -> void:
+	if burst or k.wisp:
+		_drop_pop()
+
+func _drop_pop() -> void:
+	var pop := k.get_node_or_null(POP)
+	if pop:
+		k.remove_child(pop)
+		pop.queue_free()
+	if k.model:
+		k.model.visible = true
 
 func _back(cool: float) -> void:
 	left = 0.0
@@ -131,13 +161,14 @@ func _back(cool: float) -> void:
 	k.stow()
 	k.scale = Vector3.ONE
 
-## Its size through the bloom and the shrink, and the wisp dim while it rests.
+## The fold starts with the shrink (here, so other games start it from the snapshot too), and the wisp is dim
+## while it rests.
 func render() -> void:
-	var f := 1.0
-	if grow > 0.0:
-		f = lerpf(1.0, BURST_FROM, grow / BURST_S)
-	elif shrink > 0.0:
-		f = lerpf(BURST_FROM, 1.0, shrink / SHRINK_S)
-	k.scale = Vector3.ONE * f
+	if shrink > 0.0 and not k.wisp and not _folding:
+		_folding = true
+		_pop(false, false)
+	elif _folding and shrink <= 0.0 and not k.wisp:
+		_folding = false          # left behind mid-fold: it stays the walking Boki
+		_drop_pop()
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)
