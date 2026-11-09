@@ -36,6 +36,7 @@ static var glide_coast := 0.0
 static var glide_catch := 0.0
 static var glide_max := 0.0
 static var carry_drag := 0.0
+static var dash_jump_keep := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -65,6 +66,7 @@ static func load_tuning() -> bool:
 	glide_catch = g["catch"]
 	glide_max = g["max"]
 	carry_drag = T["glide_carry"]["carry_drag"]
+	dash_jump_keep = T["dash"]["jump_keep"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
@@ -91,6 +93,11 @@ static func dash_k(arch: String, u: float) -> float:
 
 static func dash_time_k(arch: String) -> float:
 	return 1.0 / float(T["dash_ease"].get(arch, {}).get("speed", 1.0))
+
+## A dash's velocity with `left` of its `total` s to go: `v` (its direction x its flat speed) through the hunter's
+## ease. The farm avatar and a match hunter both dash through this, so a Shift feels the same everywhere.
+static func dash_hv(v: Vector2, arch: String, left: float, total: float) -> Vector2:
+	return v * dash_k(arch, 1.0 - left / maxf(total, left))
 
 ## Momentum-preserving ground acceleration: under the wanted speed, move toward it; over it (a dash, a pad, a
 ## knock) bleed the extra at `over` while still steering, and steering back against it brakes properly.

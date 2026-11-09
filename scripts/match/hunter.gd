@@ -806,8 +806,8 @@ func do_jump() -> void:
 			_open_glider()
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
-		# jump out of a dash: the dash ends and you keep about half its speed into the jump
-		var keep := roll_dir * roll_speed * DASH_JUMP_CARRY
+		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
+		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
@@ -1032,7 +1032,6 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
 const DASH_BUFFER := 0.18
-const DASH_JUMP_CARRY := 0.55
 
 func do_dash() -> void:
 	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
@@ -2085,7 +2084,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = roll_dir * roll_speed * Loco.dash_k(arch, 1.0 - roll_t / maxf(roll_total, roll_t))     # eased per hunter (tuning.json)
+		hv = Loco.dash_hv(roll_dir * roll_speed, arch, roll_t, roll_total)     # eased per hunter (tuning.json)
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():

@@ -443,6 +443,9 @@ func _hold(m: Match, slot: String, move: String) -> String:
 		return "n/a: it went off by itself before the release"
 	var in_air := not hunter.grounded
 	var speed := Vector2(hunter.vel.x, hunter.vel.z).length()
+	# aim ahead again: the move carried the hunter past the first aim point, and a release that steps toward the aim
+	# (a punch) would then throw them backward, which W's counter-steer brakes (Loco.air_step), not a "stop"
+	hunter.inp["aim"] = hunter.pos + Vector3(0, 0.9, -6)
 	_hold_key(slot, false)
 	for i in 12:
 		m.step(Match.DT)
