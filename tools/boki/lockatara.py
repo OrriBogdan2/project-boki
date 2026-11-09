@@ -156,7 +156,8 @@ IRIS_DEEP = hexc("6a3a08")
 STONE = hexc("8a8478")
 STONE_LIGHT = hexc("b8b2a4")
 STONE_DARK = hexc("5a564e")
-GAMMA = 1.55           # Meshy's coat is washed out against the sheet: deeper and more saturated
+GAMMA = 1.2            # Meshy's coat is washed out against the sheet: a little deeper
+TINT = np.array([0.85, 1.0, 0.8])    # and yellower than its olive green; the gold runes keep their colour
 
 
 def in_shackle(q):
@@ -172,6 +173,7 @@ def paint_body(q, nn):
     col = np.clip(body().colour(q), 0, 1) ** GAMMA
     lum = col @ np.array([0.3, 0.55, 0.15])
     gold = sat((col[:, 0] - col[:, 2] - 0.3) / 0.1) * sat((lum - 0.3) / 0.1)
+    col = mixc(col * TINT, col, gold)
     iron = in_shackle(q) * (1 - gold)
     col = mixc(col, (lum[:, None] * 0.85 + 0.02) * IRON / (IRON @ np.array([0.3, 0.55, 0.15])), 0.75 * iron)
     gone = np.zeros(len(q))
