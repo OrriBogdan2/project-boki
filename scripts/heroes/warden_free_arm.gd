@@ -13,10 +13,10 @@ var pose := {}               # side -> [[bone index, idle rotation]]
 var w := 0.0
 var side := ""
 
-func _init(sk: Skeleton3D, lib: AnimationLibrary, idle: String, free: Dictionary) -> void:
+func _init(sk: Skeleton3D, lib: AnimationLibrary, idle: String, loose: Dictionary) -> void:
 	skel = sk
-	clips = free
-	if free.is_empty() or not lib.has_animation(idle):
+	clips = loose
+	if loose.is_empty() or not lib.has_animation(idle):
 		clips = {}
 		return
 	var a := lib.get_animation(idle)

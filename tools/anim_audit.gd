@@ -274,10 +274,11 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 		if _t_posed(fr[i], "L") or _t_posed(fr[i], "R"):
 			out_frames += 1
 	var weapon := "R" if path["R"] >= path["L"] else "L"
-	var free: String = "L" if weapon == "R" else "R"
+	var loose: String = "L" if weapon == "R" else "R"
 	var length := clips.lib.get_animation(clip).length
-	return {"length": length, "weapon_hand": weapon, "t_free": float(out_side[free]) / fr.size(), "weapon_travel": path[weapon] / hgt,
-			"free_travel": path[free] / hgt, "t_pose": float(out_frames) / fr.size(),
+	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
+			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
+			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
 
 func _t_posed(p: Dictionary, side: String) -> bool:
