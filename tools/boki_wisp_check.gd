@@ -80,7 +80,8 @@ const HUNTER_R := 0.48          # m: a Hunter's hit circle (r 0.4 + Match.HIT_SL
 const AIM_LENS := [1.5, 4.0, 12.0]
 const SWEEP_STEP := 3           # deg between aims in the 360 sweep
 const SWING_STEPS := 8          # wisp positions along one swing
-const DIMMED := BokiWispClear.MIN_ALPHA + 0.001   # an alpha that counts as dimmed right down
+const OVER_LINE := BokiWispClear.MIN_ALPHA + 0.001      # an alpha that counts as dimmed right down
+const OVER_PLATE := BokiWispClear.PLATE_ALPHA + 0.001   # ...over a plate or the cursor
 const AIM_PRIORITY := 2         # AimDraw's material: telegraphs draw after anything below this
 const SHOULDER_Y := 1.45        # m over the feet (the wisp prototype's)
 
@@ -119,7 +120,7 @@ func _clear_sweep() -> void:
 							worst[key] = minf(worst[key], BokiWispClear.rect_gap(view, at, rects[key]))
 						if BokiWispClear.rect_gap(view, at, rects["plate"]) < 0.0:
 							over_plate += 1
-							faded += 1 if BokiWispClear.alpha(view, at, line, [rects["plate"]]) <= DIMMED else 0
+							faded += 1 if BokiWispClear.alpha(view, at, line, [rects["plate"]]) <= OVER_PLATE else 0
 	w.free()
 	print("BOKIWISP clear worst gaps (px, below 0 = overlap): ", worst)
 	print("BOKIWISP clear over a plate %d times, dimmed %d" % [over_plate, faded])
@@ -135,11 +136,11 @@ func _clear_rules() -> void:
 	var line := BokiWispClear.aim_line(view, feet, Vector2.RIGHT, 8.0)
 	var no_rects: Array[Rect2] = []
 	var covering := Vector3(4, 0.4, 0)               # on the line (which lies on the ground)
-	ok(BokiWispClear.alpha(view, covering, line, no_rects) <= DIMMED, "over the aim line it is dimmed")
+	ok(BokiWispClear.alpha(view, covering, line, no_rects) <= OVER_LINE, "over the aim line it is dimmed")
 	var clear := Vector3(4, 0.4, -6)
 	ok(is_equal_approx(BokiWispClear.alpha(view, clear, line, no_rects), 1.0), "in the clear it is full")
 	var plates: Array[Rect2] = [BokiWispClear.plate_rect(view, Vector3(0, 0, -6))]
-	ok(BokiWispClear.alpha(view, Vector3(0, 2.2, -6), line, plates) <= DIMMED, "over a teammate's plate it is dimmed")
+	ok(BokiWispClear.alpha(view, Vector3(0, 2.2, -6), line, plates) <= OVER_PLATE, "over a teammate's plate: dimmed")
 	var w := BokiWispLook.build(String(Data.KIN.keys()[0]), {})
 	var trail := w.get_node("Trail") as CPUParticles3D
 	BokiWispClear.apply(w, 0.5, true, true)

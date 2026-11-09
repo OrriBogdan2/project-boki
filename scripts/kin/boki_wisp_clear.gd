@@ -10,11 +10,13 @@ const ORBIT_R := 0.95           # m from the Hunter's middle
 const REAR := 1.75              # rad off the aim where its arc is centred (100 deg: beside it, a little behind)
 const SWING := 0.3              # rad it swings either side of that: the orbit is an arc, never a full lap
 const SWING_HZ := 0.35          # swings per second
+const MAX_DROP := 0.5           # m it may sink below shoulder height to clear its Hunter's plate
 const SIDE_STICKY := 12.0       # px a side must win by before the wisp crosses to it
 const REACH := 0.3              # m from the wisp's middle to its ears, hop and trail's edge
 const LINE_HALF := 0.15         # m: half the width of the aim line
 const FADE_BAND := 24.0         # px over which it fades in as it leaves an obstacle
-const MIN_ALPHA := 0.2          # how faint it gets right over one
+const MIN_ALPHA := 0.2          # how faint it gets right over the aim line
+const PLATE_ALPHA := 0.5        # ...and over a plate, the cursor or your hit circle (those draw over it anyway)
 const FIRE_TRAIL := 0.4         # fraction of the trail's life while its Hunter fires: sparkles out of the way
 const TRAIL_RANGE := 14.0       # m from you: further wisps shed no sparkles
 const TRAIL_WISPS := 10         # wisps that may shed sparkles at once: BokiWispLook's budget of 300
@@ -39,7 +41,8 @@ class View extends RefCounted:
 		return focal / -(inv * p).z
 
 ## Where the wisp rides: an arc behind its Hunter relative to the aim (aim is flat, x/z), on the side whose
-## whole arc is furthest from the aim line on screen. Keeps its side in the wisp's meta.
+## whole arc is furthest from the aim line on screen, sinking a little to stay under its Hunter's plate. Keeps
+## its side in the wisp's meta.
 static func place(view: View, feet: Vector3, y: float, aim: Vector2, line_len: float, wisp: Node3D,
 		t: float) -> Vector3:
 	var side := float(wisp.get_meta("side", 1.0))
@@ -49,15 +52,17 @@ static func place(view: View, feet: Vector3, y: float, aim: Vector2, line_len: f
 		side = -side
 		wisp.set_meta("side", side)
 	var swing := SWING * sin(TAU * (t * SWING_HZ + float(wisp.get_meta("phase", 0.0))))
-	return _at(feet, y, aim, side, swing)
+	return _below_plate(view, feet, _at(feet, y, aim, side, swing))
 
-## Its alpha: full in the clear, MIN_ALPHA over the aim line (a screen segment [a, b]) or any rect (a plate,
-## the cursor, your hit circle).
+## Its alpha: full in the clear, MIN_ALPHA over the aim line (a screen segment [a, b]), PLATE_ALPHA over any
+## rect (a plate, the cursor, your hit circle).
 static func alpha(view: View, wisp_at: Vector3, line: PackedVector2Array, rects: Array[Rect2]) -> float:
-	var gap := line_gap(view, wisp_at, line)
+	var rect_gap_min := INF
 	for r in rects:
-		gap = minf(gap, rect_gap(view, wisp_at, r))
-	return lerpf(MIN_ALPHA, 1.0, clampf(gap / FADE_BAND, 0.0, 1.0))
+		rect_gap_min = minf(rect_gap_min, rect_gap(view, wisp_at, r))
+	var over_line := lerpf(MIN_ALPHA, 1.0, clampf(line_gap(view, wisp_at, line) / FADE_BAND, 0.0, 1.0))
+	var over_rect := lerpf(PLATE_ALPHA, 1.0, clampf(rect_gap_min / FADE_BAND, 0.0, 1.0))
+	return minf(over_line, over_rect)
 
 ## px between the wisp's edge (its reach) and the aim line's edge: below 0 they overlap.
 static func line_gap(view: View, wisp_at: Vector3, line: PackedVector2Array) -> float:
@@ -102,6 +107,16 @@ static func plate_rect(view: View, feet: Vector3) -> Rect2:
 	var w := HudStyle.PLATE_W + HudStyle.PLATE_PAD * 2.0
 	var h := HudStyle.PLATE_HP_H + HudStyle.PLATE_AR_H + HudStyle.PLATE_PAD * 2.0 + 1.0
 	return Rect2(top.x - w * 0.5, top.y - PLATE_ABOVE, w, h + PLATE_ABOVE)
+
+## The spot lowered, by up to MAX_DROP, until it is under its Hunter's plate on screen (or past it).
+static func _below_plate(view: View, feet: Vector3, at: Vector3) -> Vector3:
+	var plate := plate_rect(view, feet)
+	var p := view.px(at)
+	var reach := REACH * view.per_m(at)
+	if p.x + reach < plate.position.x or p.x - reach > plate.end.x or p.y + reach < plate.position.y:
+		return at
+	var px_per_m := view.px(at - Vector3.UP).y - p.y
+	return at - Vector3.UP * clampf((plate.end.y + reach - p.y) / px_per_m, 0.0, MAX_DROP)
 
 ## The wisp's spot at an angle off the aim: side is +1 or -1, swing the offset on the arc.
 static func _at(feet: Vector3, y: float, aim: Vector2, side: float, swing: float) -> Vector3:
