@@ -40785,5 +40785,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_effigoon_p79_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_glaciatee_p79",
+    "name": "Glaciatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glaciatee_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_p79",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_thunderstrich_p79",
+    "name": "Thunderstrich",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_thunderstrich_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pyrraven_p79",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pyrraven_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_terrasloth_p79",
+    "name": "Terrasloth",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_terrasloth_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glaciatee_p79",
+    "name": "Glaciatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glaciatee_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_mortarfly_p79",
+    "name": "Mortarfly",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_mortarfly_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gravitank_p79",
+    "name": "Gravitank",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gravitank_p79_1.jpg",
+    "ok": true
   }
 ]
