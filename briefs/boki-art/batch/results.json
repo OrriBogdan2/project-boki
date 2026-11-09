@@ -68365,5 +68365,47 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_chainipede_r4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_meteorab_r4",
+    "name": "Meteorab (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_meteorab_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_meteorab_r4",
+    "name": "Meteorab (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_meteorab_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_fanpire_r4",
+    "name": "Fanpire (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_fanpire_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_fanpire_r4",
+    "name": "Fanpire (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_fanpire_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scarabit_r4",
+    "name": "Scarabit (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_scarabit_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gambitfin_r4",
+    "name": "Gambitfin (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gambitfin_r4_3.jpg",
+    "ok": true
   }
 ]
