@@ -24321,5 +24321,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_tootle_n_4.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_prismander_a",
+    "name": "Prismander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_a",
+    "name": "Prismander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prismander_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a",
+    "name": "Glassolotl (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_female",
+    "name": "Prismander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prismander_female_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a",
+    "name": "Glassolotl (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismander_female",
+    "name": "Prismander",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prismander_female_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a",
+    "name": "Glassolotl (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glassolotl_a",
+    "name": "Glassolotl (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glassolotl_a_3.jpg",
+    "ok": true
   }
 ]
