@@ -33939,5 +33939,12 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/glassolotl_card4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "glassolotl_card4",
+    "name": "Glassolotl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glassolotl_card4_3.jpg",
+    "ok": true
   }
 ]
