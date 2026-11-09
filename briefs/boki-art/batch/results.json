@@ -71844,5 +71844,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2b_sarcobra_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2a_aurostag",
+    "name": "Aurostag (V2 pilot, route A: card + anchor)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_sarcobra",
+    "name": "Sarcobra (V2 pilot, route B: sheet + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2b_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_sarcobra",
+    "name": "Sarcobra (V2 pilot, route B: sheet + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2b_sarcobra_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_aurostag",
+    "name": "Aurostag (V2 pilot, route A: card + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_aurostag",
+    "name": "Aurostag (V2 pilot, route A: card + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_aurostag_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_aurostag",
+    "name": "Aurostag (V2 pilot, route B: sheet + anchor)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2b_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_aurostag",
+    "name": "Aurostag (V2 pilot, route B: sheet + anchor)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2b_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2b_aurostag",
+    "name": "Aurostag (V2 pilot, route B: sheet + anchor)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2b_aurostag_3.jpg",
+    "ok": true
   }
 ]
