@@ -125,7 +125,7 @@ def grown_parts():
 
 
 # ---------------------------------------------------------------- coat
-HIDE = hexc("7e7a80")       # the sheet's mauve grey kept near neutral: the game shader saturates it to mauve
+HIDE = hexc("88798a")       # the sheet's mauve grey kept near neutral: the game shader saturates it to mauve
 LILAC = hexc("4a3644")      # brows
 LID = HIDE
 INK = hexc("1c1218")
@@ -152,7 +152,7 @@ def grade(col):
     hot = sat((r - g) / 0.25 - 1) * sat((r - 0.55) / 0.15)          # bright red cracks
     brass = sat((g / np.maximum(r, 1e-3) - 0.68) / 0.05) * sat((g - b - 0.03) / 0.05) * sat((lum - 0.4) / 0.08)
     hide = sat((r - g) / 0.04) * sat((0.75 - r) / 0.1) * (1 - hot) * (1 - brass)
-    out = mixc(col, np.clip(HIDE[None] * (lum / (HIDE @ LUM))[:, None] * 1.02, 0, 1), hide)
+    out = mixc(col, np.clip(HIDE[None] * (lum / (HIDE @ LUM))[:, None] * 1.2, 0, 1), hide)
     gold = np.stack([r, np.maximum(g, 0.84 * r), 0.55 * r], 1)
     out = mixc(out, np.clip(gold, 0, 1), brass)
     orange = np.stack([np.maximum(r, 0.9), np.maximum(g, 0.5 * np.maximum(r, 0.9)), b * 0.5], 1)
