@@ -1,7 +1,7 @@
 extends Node3D
 ## The first thing a new player sees after the prologue: one short card, then making yourself (one of the
 ## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
-## comes out; then your first Mask drifts to you (MaskMoment) and you head into the tutorial together.
+## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
 ## The three starter eggs plus a mystery one. Names, tempers and blurbs come from each species'
 ## "egg" block in content/kin/<id>.json, so every egg is named for its element (Venom Egg, ...).
@@ -372,7 +372,7 @@ func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
 
-## After making yourself: the eggs. (Your first Mask comes after you name your Boki: MaskMoment.)
+## After making yourself: the eggs. (Your first Relic comes after you name your Boki: MaskMoment.)
 func _after_create() -> void:
 	stage = "pick"
 	title.text = "Choose your first Boki"
@@ -743,7 +743,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 		return
 	_head_out(tutorial)
 
-## Your first Mask, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
+## Your first Relic, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
 func _mask_moment(then: Callable) -> void:
 	stage = "mask"
 	_clear_bottom()
