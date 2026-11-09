@@ -346,8 +346,8 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
-		if cam.is_position_behind(h.position) or (h.riding and m.player and h.team != m.player.team):
-			continue        # (aboard the skyship only your squad gets plates: the rest stack into a smear)
+		if cam.is_position_behind(h.position) or HudPlate.hidden(m.player, h):
+			continue
 		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
 		if not sp.is_finite():
 			continue

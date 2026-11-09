@@ -2,8 +2,9 @@ extends RefCounted
 ## --demo-quick-check: Settings > Demo's quick starts and recording mode's frame pacing.
 ## Recording mode caps frames at Record.REC_FPS with v-sync and gives the player's cap back when off.
 ## Each quick start (DemoQuick) is up within READY_S with no tutorial: the expedition has every seat
-## filled, its bots in showcase Hunters and every kit open; the farm's Boki are evolved and its Goals card
-## steps aside while recording; the hatch opens on the creator.
+## filled, its bots in showcase Hunters, every kit open and no foe plates stacked over the drop while
+## recording; the farm's Boki are evolved and its Goals card steps aside while recording; the hatch
+## opens on the creator.
 ## Neither the real save file nor Save.d is touched: the title screen gives the real one back.
 ## With --shots-dir=<dir> (a real GPU run) each path also saves screenshots and logs its frame times:
 ##   jobq submit --needs gpu -- godot -- --demo-quick-check --record --shots-dir=/tmp/dq
@@ -63,6 +64,8 @@ func _path(id: String) -> void:
 		if _up(id, scr):
 			break
 	var secs := (Time.get_ticks_msec() - t0) / 1000.0
+	if id == "expedition":
+		_build_steps()
 	ok("%s: ready in under %.0f s" % [id, READY_S], _up(id, scr) and secs < READY_S, "%.1f s" % secs)
 	ok("%s: a made-up save, never written" % id, Save.no_write)
 	if not _up(id, scr):
@@ -74,6 +77,15 @@ func _path(id: String) -> void:
 	await _shot(id, "a")
 	await _watch(id, scr)
 	await _shot(id, "b")
+
+## Where the expedition's load went: its costliest build steps (PerfLog marks, ms), as --perf-bench lists them.
+func _build_steps() -> void:
+	var steps := {}
+	for mk in PerfLog.marks:
+		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
+	var top := steps.keys()
+	top.sort_custom(func(a, b): return steps[a] > steps[b])
+	print("DEMOQ build (ms): " + ", ".join(top.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 
 func _up(id: String, scr: Node) -> bool:
 	if not is_instance_valid(scr) or not scr.is_inside_tree():
@@ -98,6 +110,16 @@ func _expedition(m: Match) -> void:
 	ok("expedition: you as %s" % DemoQuick.YOU, String(m.player.arch) == DemoQuick.YOU, String(m.player.arch))
 	var shut: Array = m.hunters.filter(func(h): return int(h.slot_lv["ult"]) < 1 or int(h.slot_lv["sec"]) < 1)
 	ok("expedition: every kit open (no padlocks)", shut.is_empty(), "%d locked" % shut.size())
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
+	var was_drop := foe.dropping
+	var was_rec := Record.level
+	foe.dropping = true
+	Record.set_level(1)
+	var off_rec := HudPlate.hidden(m.player, foe)
+	Record.set_level(0)
+	ok("expedition: no foe plates over the drop while recording", off_rec and not HudPlate.hidden(m.player, foe))
+	foe.dropping = was_drop
+	Record.set_level(was_rec)
 
 func _farm(h: Node) -> void:
 	var tut: Dictionary = Save.d["tutorial"]
