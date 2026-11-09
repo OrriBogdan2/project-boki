@@ -41401,5 +41401,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_glaciatee_p79_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_terrasloth_p79",
+    "name": "Terrasloth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_terrasloth_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciatee_p79",
+    "name": "Glaciatee (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glaciatee_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrasloth_p79",
+    "name": "Terrasloth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_terrasloth_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glaciatee_p79",
+    "name": "Glaciatee (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glaciatee_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrasloth_p79",
+    "name": "Terrasloth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_terrasloth_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_p79",
+    "name": "Lunowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_p79",
+    "name": "Ringrove (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_p79",
+    "name": "Lunowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_p79_3.jpg",
+    "ok": true
   }
 ]
