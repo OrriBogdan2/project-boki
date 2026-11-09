@@ -111,15 +111,20 @@ func _expedition(m: Match) -> void:
 	var shut: Array = m.hunters.filter(func(h): return int(h.slot_lv["ult"]) < 1 or int(h.slot_lv["sec"]) < 1)
 	ok("expedition: every kit open (no padlocks)", shut.is_empty(), "%d locked" % shut.size())
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var was_drop := foe.dropping
-	var was_rec := Record.level
-	foe.dropping = true
+	var was := [foe.riding, foe.dropping, Record.level]
+	foe.dropping = false
+	foe.riding = true
 	Record.set_level(1)
-	var off_rec := HudPlate.hidden(m.player, foe)
+	var aboard := HudPlate.hidden(m.player, foe)
+	foe.riding = false
+	foe.dropping = true
+	var gliding := HudPlate.hidden(m.player, foe)
 	Record.set_level(0)
-	ok("expedition: no foe plates over the drop while recording", off_rec and not HudPlate.hidden(m.player, foe))
-	foe.dropping = was_drop
-	Record.set_level(was_rec)
+	var live := HudPlate.hidden(m.player, foe)
+	ok("expedition: no foe plates over the drop while recording", aboard and gliding and not live)
+	foe.riding = was[0]
+	foe.dropping = was[1]
+	Record.set_level(was[2])
 
 func _farm(h: Node) -> void:
 	var tut: Dictionary = Save.d["tutorial"]

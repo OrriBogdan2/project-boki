@@ -33,10 +33,11 @@ var shown := {}
 static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
-## No plate while recording over a foe still gliding in from the skyship: they jump together, so their
-## plates stack into one smear under the ship (the live game keeps them: where foes land matters).
+## No plate while recording over a foe still aboard the skyship or gliding in from it: they ride and
+## jump together, so their plates stack into one smear at the ship (the live game keeps them: where
+## foes land matters).
 static func hidden(viewer: Hunter, h: Hunter) -> bool:
-	return h.dropping and Record.clean() and viewer != null and h.team != viewer.team
+	return (h.riding or h.dropping) and Record.clean() and viewer != null and h.team != viewer.team
 
 ## Advances the clock (Hud._process) and forgets hunters not drawn for a while.
 func tick(dt: float) -> void:
