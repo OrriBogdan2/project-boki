@@ -67,7 +67,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
-| `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
+| `rimewright` | 93 → 87 | 90 → 82 | 0.4 → 0.8 | -0.39 → +0.97 | 1 | 1.7 |
 | `tender` | 76 → 39 | 62 → 17 | 1.8 → 3.9 | -0.82 → +0.39 | 5 | 6.7 |
 | `thief` | 73 → 39 | 60 → 17 | 1.8 → 4.3 | -0.96 → +0.82 | 5 | 4.2 |
 
@@ -140,8 +140,8 @@ posts scroll at the move speed).
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
 
 **Neve (`rimewright`)**
-1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Unchanged: needs a new gait clip.
-2. Arms barely move in a gait (reach 0.14 and 0.01).
+1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Runtime stride 1.6 to 2.4 now takes it to 0.8 m/s (slide 82 %). A skater's glide never plants a foot, so the slide gate stays off for her: the real fix is a re-keyed push-and-glide clip.
+2. Arms barely moved in a gait (reach 0.14 and 0.01). The free left arm now counter-swings (counter +0.97); the right hand holds the spear and stays.
 3. Nothing else is wrong: loop seams and the idle gap (0.06) are clean.
 
 ![rimewright walk and run, before and after](anim_audit/rimewright.jpg)
@@ -165,7 +165,7 @@ posts scroll at the move speed).
 Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
-- `rimewright`: a gait clip with a real stride (skate now).
+- `rimewright`: a re-keyed push-and-glide gait in tools/art1/claire_clips.py (`gait`): needs Blender and the claire source blend, which only hetzner has. Then re-run `--anim-audit` and re-tune her `stride` and `foot_mps` (now a runtime stopgap).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
