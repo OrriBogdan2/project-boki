@@ -20149,5 +20149,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/relic_neve_w30_1.jpg",
     "ok": true
+  },
+  {
+    "id": "relic_lace_w30",
+    "name": "Relic: Lace",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/relic_lace_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w30",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w30",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w30",
+    "name": "Rimink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rimink_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_neve_w30",
+    "name": "Relic: Neve",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_neve_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_neve_w30",
+    "name": "Relic: Neve",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_neve_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barrelmander_card",
+    "name": "Barrelmander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barrelmander_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokat_card",
+    "name": "Barokat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokat_card_2.jpg",
+    "ok": true
   }
 ]
