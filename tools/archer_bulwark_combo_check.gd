@@ -338,6 +338,41 @@ func _archer_combos() -> void:
 		"cremations %d" % (K.cremations - cr0)
 	)
 	step(m, 3.5)
+	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
+	fresh(T)
+	fresh(T2)
+	K.cd["e"] = 0.0
+	P.teleport(home)
+	aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
+	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
+	var t2_team := T2.team
+	T2.team = P.team
+	for w in [T, T2]:
+		w.downed = true
+		w.hp = 0.0
+		w.down_hp = float(Data.MATCH["down_hp"])
+	var hp_foe := T.hp
+	P.ak.use_e()
+	step(m, 1.6)
+	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
+	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
+	ok(
+		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
+		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
+		"rival %.1f ally %.1f" % [drained, bled]
+	)
+	ok(
+		"pin E: the wall does not slow, burn or damage a Wisp",
+		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
+		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
+	)
+	for w in [T, T2]:
+		w.downed = false
+		w.hp = w.max_hp
+		w.down_hp = 0.0
+	T2.team = t2_team
+	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
 	K.ch_rmb = 1.0

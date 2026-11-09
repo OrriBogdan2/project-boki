@@ -215,6 +215,9 @@ func rmb_hold_tick(t: float) -> void:
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
+## [est] down_hp a rival Wisp loses per point of Hail Wall tick damage. The source drain is unknown; this is the
+## same multiplier a stomp puts on the bleed (Life.R stomp_mult), so a wall tick (5) takes 12.5 of the 100 pool.
+const WISP_DRAIN_K := 2.5
 const HEAVY_GOLD := Color("ff4a3a")      # (named for its old colour: red now)
 
 ## The Heavy Shot held: a thick red bar out of the bow that
@@ -398,6 +401,9 @@ func _tick_rain(dt: float) -> void:
 	for f in inside:
 		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
+	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
+		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
+			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

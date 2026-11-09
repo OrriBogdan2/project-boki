@@ -115,6 +115,8 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
+			if opts.get("src", "") == "wisp":
+				return 0.0     # a Wisp drain is no hit: no flash, no damage credit (the owner's game drains down_hp)
 			flash_t = 0.12
 			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
