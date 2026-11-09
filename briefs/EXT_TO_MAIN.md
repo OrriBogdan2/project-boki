@@ -4927,3 +4927,8 @@ READY ext/perf-fight-pools 907d1f4e4 (pooled fight nodes)
 
 ## 2026-11-09 (job 20261109-074619-a4, deep, rpc1): Boki quirks
 READY ext/boki-quirks a56585dc3 (Bokidex quirks-v1 in game: content/rules/boki_quirks.json + BokiQuirks; Field Book page shows Quirk and Sexes. Keys are Bokidex ids = display name lower-cased; all 50 game species match. Real behaviour: hatch sex roll keeps female share (Hivara/Mossgrade all female, Marchleaf/Lodestick 95%, Buckleron born male; others unchanged coin flip; existing Boki keep their sex); Rimeshrew food need drains x2; rain joy +/- for Effigeetle, Frigatee (sulk), Mycroll, Barrelmander (perk up); Kestrike/Barokat warn once before each rain (new rain_soon lines; Home pre-rolls the next weather turn in rain_next). Not modelled: no-sex/both-sex/egg-temperature notes. Checks: --boki-quirks-check 0 fail (21), --unique-check 0, --boki-lines-check 0, health --strict OK; full suite not run (usage))
+
+## 03:10 ET 11-09 — OWNER PICKED Glassolotl v3 (rock candy with crystal gills/tail). Sheet, card and Dex portrait replaced (previous rock-candy sheet kept as evolutions/Glassolotl_old_rc1.jpg).
+ART glassolotl 10 briefs/boki-art/evolutions/Glassolotl.jpg kind=turnaround status=approved
+ART glassolotl 10 briefs/boki-art/cards/Glassolotl.jpg kind=card
+ART glassolotl 10 briefs/boki-art/portraits/light/Glassolotl.jpg kind=portrait
