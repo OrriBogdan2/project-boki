@@ -2224,5 +2224,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/dragonkite_2.png",
     "ok": true
+  },
+  {
+    "id": "kindlewren",
+    "name": "Kindlewren",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kindlewren_1.png",
+    "ok": true
+  },
+  {
+    "id": "prowyak",
+    "name": "Prowyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prowyak_1.png",
+    "ok": true
+  },
+  {
+    "id": "glintmole",
+    "name": "Glintmole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glintmole_2.png",
+    "ok": true
+  },
+  {
+    "id": "kindlewren",
+    "name": "Kindlewren",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kindlewren_2.png",
+    "ok": true
+  },
+  {
+    "id": "frigatee",
+    "name": "Frigatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_1.png",
+    "ok": true
+  },
+  {
+    "id": "frigatee",
+    "name": "Frigatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_2.png",
+    "ok": true
+  },
+  {
+    "id": "prowyak",
+    "name": "Prowyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prowyak_2.png",
+    "ok": true
+  },
+  {
+    "id": "boltstrich",
+    "name": "Boltstrich",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/boltstrich_1.png",
+    "ok": true
   }
 ]
