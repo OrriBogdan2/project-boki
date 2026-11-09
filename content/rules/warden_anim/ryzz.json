@@ -14,6 +14,7 @@
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
+	"free_arm": {"rmb": "L"},
 	"kmoves": {
 		"mage_lmb_l": {"clip": "lmb_l", "upper": true}, "mage_lmb_r": {"clip": "lmb_r", "upper": true},
 		"mage_rmb_hold": {"clip": "rmb_hold", "hold_from": 0.12, "upper": true}, "mage_rmb": {"clip": "rmb", "upper": true},
