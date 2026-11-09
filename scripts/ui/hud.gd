@@ -1911,7 +1911,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 
 func _draw_crosshair(p: Hunter) -> void:
-	var mp := c.get_local_mouse_position()
+	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
 	ret.draw(c, p, mp, m.time)
 	if p.ak and p.ak.has_meter():
 		# the payoff is armed (DEADEYE, FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc

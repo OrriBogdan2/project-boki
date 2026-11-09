@@ -70,6 +70,7 @@ func _reticles() -> void:
 func _hunters() -> void:
 	Settings.reset_all()
 	Settings.set_v("tips", false)
+	_pin_reticle()
 	var strip_w := CROP.x * 3 * 4
 	for id in Arch.ids():
 		m.arena.set_arch(String(id), Arch.signature(String(id)))
@@ -118,11 +119,21 @@ func _level_spot(at: Vector3, offsets: Array) -> Vector3:
 			return p
 	return at + offsets[0]
 
-## Where the HUD drew the reticle, in image pixels: the HUD canvas's own mouse position (a real window
-## on a desktop worker may not take the warp), through the canvas transform, scaled to the image size.
+## Pins the HUD reticle at AT (a desktop worker's real cursor may not take the warp, and wherever it sits
+## the HUD would draw there, under whatever panel covers it). Older HUDs without the pin keep the mouse.
+func _pin_reticle() -> void:
+	if "ret" in m.hud and "pin" in m.hud.ret:
+		var at := main.get_viewport().get_visible_rect().size * AT
+		m.hud.ret.pin = m.hud.c.get_global_transform_with_canvas().affine_inverse() * at
+
+## Where the HUD drew the reticle, in image pixels (the pin or the HUD canvas's mouse, through the canvas
+## transform, scaled to the image size).
 func _cursor_px(img: Image) -> Vector2i:
 	var vp := main.get_viewport()
-	var at: Vector2 = m.hud.c.get_global_transform_with_canvas() * m.hud.c.get_local_mouse_position()
+	var local: Vector2 = m.hud.c.get_local_mouse_position()
+	if "ret" in m.hud and "pin" in m.hud.ret and m.hud.ret.pin != Vector2.INF:
+		local = m.hud.ret.pin
+	var at: Vector2 = m.hud.c.get_global_transform_with_canvas() * local
 	var px := at * Vector2(img.get_size()) / vp.get_visible_rect().size
 	var half := Vector2(CROP / 2)
 	return Vector2i(px.clamp(half, Vector2(img.get_size()) - half))

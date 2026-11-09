@@ -9,6 +9,7 @@ extends RefCounted
 var hit_t := 0.0               # s left of the hit confirm
 var hit_crit := false
 var hit_armor := false
+var pin := Vector2.INF        # review tools: draw here (HUD canvas px) instead of at the mouse
 var _full := false             # the charge arc was full last frame
 var _flare_at := -99.0         # when it last reached full (m.time)
 
