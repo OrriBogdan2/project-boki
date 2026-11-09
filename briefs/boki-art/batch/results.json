@@ -70108,5 +70108,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_klaxada_r5_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_glacione_r5",
+    "name": "Glacione",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glacione_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glacione_r5",
+    "name": "Glacione (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_glacione_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glacione_r5",
+    "name": "Glacione (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glacione_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glacione_r5",
+    "name": "Glacione (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_glacione_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glacione_r5",
+    "name": "Glacione",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glacione_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glacione_card108",
+    "name": "Glacione (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glacione_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glacione_card108",
+    "name": "Glacione (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glacione_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glacione_card108",
+    "name": "Glacione (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glacione_card108_2.jpg",
+    "ok": true
   }
 ]
