@@ -7,6 +7,7 @@ extends RefCounted
 ##   3. the Goals tracker: at most 5 rows, none of the tutorial, sorted, hidden when empty
 ##   4. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
+##   5. base_mode: the four-step base tutorial (meet, feed and the lean, toy, head out or stay), its Skip
 ## Never touches the real save.
 
 var bad := 0
@@ -55,6 +56,7 @@ func run(m: Node, mode := "") -> void:
 	await _world()
 	await _farm2()
 	await _base_mode()
+	await _base_tutorial()
 	print("FTUT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -83,6 +85,82 @@ func _base_mode() -> void:
 	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
 	rules["base_mode"] = false
 	home.hb.toggle()
+	home.queue_free()
+	await main.get_tree().process_frame
+
+# ------------------------------------------------------------------ 6. the base tutorial (GARDEN.md section 8)
+func _base_tutorial() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	Save.d = _new_save()
+	HomeLayout.ensure(Save.d)
+	_stats()
+	ok(FarmTutorial.steps().size() == 12 and not FarmTutorial.skippable() and FarmTutorial.current() == "hob",
+			"base_mode off: the twelve old steps, no Skip, Hob first (untouched)")
+	rules["base_mode"] = true
+	var ids: Array = FarmTutorial.steps().map(func(st): return String(st["id"]))
+	ok(ids == ["meet", "eat", "toy", "out"] and FarmTutorial.skippable(),
+			"base_mode on: four steps and a Skip: %s" % str(ids))
+	var one_line := true
+	for st in FarmTutorial.steps():
+		for t in (st["hints"] as Dictionary).values():
+			one_line = one_line and not String(t).contains("\n")
+		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
+	ok(one_line, "one banner line per step, no leftover tokens")
+	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
+	FarmTutorial.event("play")
+	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
+	FarmTutorial.event("meet")
+	var eat_hint := FarmTutorial.hint_text("eat")
+	ok(FarmTutorial.current() == "eat" and eat_hint.contains(Care.food_name("emberberry")),
+			"met: feed it, the hint names the food")
+	var rec: Dictionary = Save.d["roster"][0]
+	Evo.eat(rec, "kibble")
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "eat", "a plain meal leans nothing, so the step waits")
+	ok(Evo.eat(rec, "emberberry") == "fire", "the starter food leans the Boki fire")
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "toy" and FarmTutorial.stage("toy") == "place", "its colour leaned, the toy is next")
+	var lay := HomeLayout.of(Save.d)
+	(lay["deco"] as Array).append({"u": HomeLayout._next_uid(lay), "id": "toy_ball", "x": 40, "z": 30, "r": 0})
+	ok(FarmTutorial.stage("toy") == "watch" and FarmTutorial.world_text("toy") != "",
+			"a toy down: watch it play, marked")
+	FarmTutorial.event("play")
+	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 3, "a Boki at play finishes the toy step")
+	var g := int(Save.d["gems"])
+	FarmTutorial.event("stay")
+	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
+	await _base_world()
+	rules["base_mode"] = false
+
+func _berries() -> int:
+	return int(Save.d["items"].get("emberberry", 0))
+
+## In a real Home: meeting, feeding through the home's own path, and Skip.
+func _base_world() -> void:
+	var home = await _home(1)
+	var guide: FarmGuide = home.guide
+	var k: Dictionary = home.kins[0]
+	home.ppos = k["node"].position + Vector3(8, 0, 0)
+	ok(FarmTutorial.current() == "meet" and not guide._near_boki(), "in the base: far from your Boki is not meeting it")
+	home.ppos = k["node"].position + Vector3(1, 0, 0)
+	guide._poll()
+	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
+	home._after_feed(k, "emberberry", {"hate": false, "full": false, "ok": true, "love": false, "new": false})
+	guide._poll()
+	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
+	var gems0 := int(Save.d["gems"])
+	home.guide.skip()
+	var toys: Array = home.toys.toys()
+	ok(toys.size() == 1 and not FarmTutorial.active(), "Skip puts a toy down and ends it")
+	ok(_berries() == 3 and int(Save.d["gems"]) == gems0, "Skip leaves the food in hand and costs nothing")
+	home.queue_free()
+	await main.get_tree().process_frame
+	# skip from the very start of a base farm: toy and food both appear
+	home = await _home(1)
+	home.guide.skip()
+	ok(home.toys.toys().size() == 1 and _berries() == 3 and FarmHob.house_entry().is_empty(),
+			"Skip at the start: a toy placed, food in hand, no house site")
 	home.queue_free()
 	await main.get_tree().process_frame
 
