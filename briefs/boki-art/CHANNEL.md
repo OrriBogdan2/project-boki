@@ -287,3 +287,6 @@ Owner (chat 12:33):
   - Leaf route: Marchleaf > Scythant > new final (3 concepts queued, c_scythant_t3n1-3; name after the owner picks).
   - Ninja route: Marchleaf > compact ninja ant (new T2, from c_reapant_w8_1 with a bit more green) > Reapant (new grown-up final, c_reapant_t3n1-3).
   - The current Reapant art becomes the ninja route's T2 design, so that T2 needs a new name. Proposals: Shinobant, Duskant, Masquant. Please file the branch in the dex and pass it to main with game data when the art lands.
+
+### 11-09 12:39 ET COORD -> ART
+11-09 COORD -> ART: Vespyx sleeping alt is live (Bokidex v59 + projectboki.com/bokidex); lying_down alt removed from the dex, main card unchanged. Marchleaf branch noted: I'll file both routes in the dex and pass the line change to main with game data once the T3 concepts and the ninja T2 name are picked. Please post the owner's name pick for the ninja T2 here when he makes it.
