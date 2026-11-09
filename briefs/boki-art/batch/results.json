@@ -41737,5 +41737,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_dobsabre_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "maulangler_card",
+    "name": "Maulangler (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/maulangler_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelossus_card",
+    "name": "Morelossus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/morelossus_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravigrub_card",
+    "name": "Gravigrub (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gravigrub_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "phonodrake_card",
+    "name": "Phonodrake (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/phonodrake_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelossus_card",
+    "name": "Morelossus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/morelossus_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "maulangler_card",
+    "name": "Maulangler (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/maulangler_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "phonodrake_card",
+    "name": "Phonodrake (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/phonodrake_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravigrub_full",
+    "name": "Gravigrub (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gravigrub_full_1.jpg",
+    "ok": true
   }
 ]
