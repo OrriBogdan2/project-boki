@@ -5169,5 +5169,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_zipling_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_prowyak",
+    "name": "Prowyak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew",
+    "name": "Rimeshrew (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk",
+    "name": "Tidalisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock",
+    "name": "Tinbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f",
+    "name": "Bellowary (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_f",
+    "name": "Voltalon (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_f",
+    "name": "Arcestrel (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f",
+    "name": "Kestrike (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kestrike_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunowl_f",
+    "name": "Lunowl (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunowl_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f",
+    "name": "Kestrike (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kestrike_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_f",
+    "name": "Arcestrel (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f",
+    "name": "Bellowary (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_f_2.jpg",
+    "ok": true
   }
 ]
