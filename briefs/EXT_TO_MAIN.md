@@ -5802,3 +5802,4 @@ READY ext/sfx-mob-attacks ceb82b274 (reposted by coord: worker post lost 11-09 w
 READY ext/sfx-step-surfaces 92976bde2 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/sfx-weapon-fire 0efbf33a2 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/tut-skip-check 9eb47cc91 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
+READY ext/vfx-armour-break 5123a0898 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
