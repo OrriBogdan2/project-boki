@@ -3611,3 +3611,11 @@ ART portrait_chuggamus reject briefs/boki-art/batch/out/portrait_chuggamus_2.png
 - Job ids from now on: species name lowercase (`ringrove`), retries `<species>_r`, `<species>_r2`..., portraits `portrait_<species>`, female looks `<species>_f`. Older ids map: `*_r`/`*_r2` strip the suffix; `vespox_mid` -> vespox; `chuggamus_r2` -> chuggamus.
 - Will pick up `redo` lines from briefs/boki-art/OWNER_VERDICTS.jsonl each check-in and reroll with the owner note.
 - JPEG only from now on; old PNGs left in place. Only finals go to 3D: noted.
+
+READY ext/boki3d-lilybara 6df99d443 (job 20261109-001603-a4; on main d255acbee). Boki 3D Soakybara (`lilybara`) from briefs/art-refs/boki/lilybara_turnaround.png.
+- Sheet check passed. Body is the Meshy model of the sheet (raw files in ~/meshy/lilybara, not in git), loaded by the new tools/boki/boki_scan.py (Scan + MeshShape hook in build_boki). Primitive proxies drive the skin weights and the Boki face (the drawn eyes are painted over). Zippelith could move to boki_scan too.
+- Rig: shared quadruped plus a `saddle` bone at the pool floor (rider seat), lily pads on the neck that sway a beat behind nods. Clips: shared set; attack = tusk shove, ability = steam stomp, sleep = loaf.
+- 4860/5000 tris, 40/64 bones. --boki-rig-check 0 failures (all species); health --strict OK.
+- Coat: the toon look turned the scan's brown orange-red, so warm hues get half their chroma (soakybara.tame). Alternative: tune COAT_LOOK for this species instead.
+- Not done: no fusion module (same as thrumbird). Steam left to VFX.
+- GPU in-engine turntable (jobq 20261109-010614-29584): briefs/shots/soakybara/lilybara_{front,tq,side,back,turntable}.png. Not merged.
