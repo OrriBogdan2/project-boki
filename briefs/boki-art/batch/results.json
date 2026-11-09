@@ -26701,5 +26701,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_cetorgan_e_w32_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bladypus_w32",
+    "name": "Bladypus (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus_w32",
+    "name": "Bladypus (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus_w32",
+    "name": "Bladypus (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bladypus_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e_w32",
+    "name": "Cetorgan (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_n_w32",
+    "name": "Clinkpede (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_n_w32",
+    "name": "Clinkpede (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_w32",
+    "name": "Chimelop (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chimelop_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_clinkpede_n_w32",
+    "name": "Clinkpede (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_clinkpede_n_w32_3.jpg",
+    "ok": true
   }
 ]
