@@ -5443,3 +5443,4 @@ READY ext/boki-wisp-proto 6309f6250 (Boki wisp prototype)
 - Real GPU --perf-bench --bench-hunters=30 (RTX 4090, medium, forward_plus; NOTE two different hosts rp1-1 vs rp2-0, script-bound so mostly comparable): walking 102.9 ms avg / p99 239.1, script 67.6 ms, kins step 13.28 ms/frame, draws 940, tris 400k, nodes 13080 (job 20261109-102823-19609); wisps 88.2 ms / p99 160.6, script 54.2 ms, kins step 1.01 ms/frame, draws 828, tris 290k, nodes 12041 (job 20261109-102833-30889). Open: summon/steal/ult (WISP_DESIGN_OPEN.md); the kin's own ability and merge are off while a wisp (alternative: keep them castable).
 READY ext/lace-hawk-sense f67042371 (Lace Hawk Sense parity)
 READY ext/parity-jump-pads a2715040e (jump pad and updraft parity)
+READY ext/side-cue-telegraphs 11f0ce0bf (side cue on telegraphs)
