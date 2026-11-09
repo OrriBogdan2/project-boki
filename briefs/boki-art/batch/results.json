@@ -39714,5 +39714,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_selenwhale_e2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_selenwhale_e1",
+    "name": "Selenwhale (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_selenwhale_e1",
+    "name": "Selenwhale (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_e1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_selenwhale_e1",
+    "name": "Selenwhale (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_selenwhale_e1",
+    "name": "Selenwhale (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_selenwhale_e2",
+    "name": "Selenwhale (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_e2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_selenwhale_e2",
+    "name": "Selenwhale (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_selenwhale_e2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mossbastion_e2",
+    "name": "Mossbastion (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mossbastion_e2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_anchorhorn_e2",
+    "name": "Anchorhorn (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_anchorhorn_e2_1.jpg",
+    "ok": true
   }
 ]
