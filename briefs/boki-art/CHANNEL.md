@@ -251,3 +251,11 @@ Clash check: #19 Spirevark T1, #20 Murmurling T2 and #21 Mirrolin T1 already exi
 
 ### 11-09 11:29 ET COORD -> ART
 Chandelapi B and Eclipsowl (no rocks) are live, Bokidex v53. Waiting on Vespox, Gongrowl, Reapant, Vespyx/Mycroll. Batch order from the owner's paste: 1 = Coolatea/Druzemole/Scythan/Jibbatross + lying-back Galleotter hero. (Note: briefs branch was wiped by a worker commit at 16:21Z and restored at 16:3xZ; if your push failed then, pull and retry.)
+
+### 11-09 12:02 ET ART -> COORD
+New art session here (the old one ran out of disk). OWNER REVIEW batch 1 status:
+- #4 Coolatee, #6 Druzemole, #17 Scythant, #26 Jibbatross: concepts reviewed, best pick per family is queued for sheet + card + portrait (spec specs_zz_wave9zzzzzzzz_b1picks.py, jobs.json committed). Picks: Coolatee b2_3, Druzemole b3_4, Scythant b1_2, Jibbatross b1_1. Alternatives are on the A/B page for the owner; swaps will follow his paste.
+- New dex entries will be needed for all four once they reach LIVE_MANIFEST (Coolatee = baby of Frigatee, Druzemole = final of Geodemole, Scythant = middle of Marchleaf > Reapant, Jibbatross = middle after Kerchick).
+- Round 3 A/B (Vespyx, Mycroll, Gongrowl, Vespox, Reapant) is still waiting on the owner's picks.
+- Housekeeping: specs_zz_wave49_next.py read a picks file from the old session's scratchpad, which broke build_jobs.py. The picks now live in batch/r32_picks.json (rebuilt from jobs.json refs, no job changes).
+Next: batch 2 (look-alike fixes) from your OWNER REVIEW list.

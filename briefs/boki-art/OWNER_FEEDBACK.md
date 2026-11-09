@@ -81,3 +81,7 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 64 | Eclipsowl: agree with the chosen one | Card 2 (live wings, fierce face, no rock) + sheet + portrait are live | DONE |
 | 65 | Vespox: push the jagged frill (v6) | Sheet + card + portrait from v6_1 | GENERATING |
 | 66 | Reapant: mid-stride is cool but too human; less tall, closer up, more Boki-like | 3 compact versions of w7 | GENERATING |
+
+## 11:05 ET 11-09: OWNER REVIEW of the Bokidex (via coordinator), batch 1
+| 67 | #4/#6/#17/#26: designs we don't have yet (Coolatee, Druzemole, Scythant, Jibbatross) | 3 directions each; picks Coolatee b2_3, Druzemole b3_4, Scythant b1_2, Jibbatross b1_1 -> sheet + card + portrait; alternatives on the A/B page | GENERATING |
+| 68 | #28 Galleotter: lying-back otter-in-a-galley, not the sea serpent | Card + portrait back on the galley design, hero rebuilt (11:23 ET) | DONE |

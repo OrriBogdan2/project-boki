@@ -1,4 +1,4 @@
-# 12:10 ET 11-09 OWNER REVIEW batch 1 picks (art review of c_<name>_b1-b3). Best concept -> sheet + card + portrait.
+# 12:00 ET 11-09 OWNER REVIEW batch 1 picks (art review of c_<name>_b1-b3). Best concept -> sheet + card + portrait.
 # The owner sees every direction on the A/B page and can swap ("use X for Y"); these go ahead meanwhile (rule: push the best pick).
 # Coolatee  b2_3 (cream giggling seal pup, green eyes like Frigatee)        alts b2_4 (cooler lid + latch), b1_2
 # Druzemole b3_4 (geode-shell dome mole titan, crystal crown, planted)      alts b2_3 (crystal-ridge maw), b2_4; b1 = Geodemole copy, b3_2 person-like
