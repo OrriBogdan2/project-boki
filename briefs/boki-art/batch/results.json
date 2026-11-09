@@ -24153,5 +24153,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_sarcobra_n_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_torpecone_n",
+    "name": "Torpecone (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_torpecone_n_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_n",
+    "name": "Torpecone (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_torpecone_n_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth_n",
+    "name": "Glaciammoth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_n",
+    "name": "Torpecone (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_torpecone_n_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_n",
+    "name": "Grammite (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_grammite_n_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth_n",
+    "name": "Glaciammoth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_n",
+    "name": "Grammite (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_grammite_n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_grammite_n",
+    "name": "Grammite (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_grammite_n_3.jpg",
+    "ok": true
   }
 ]
