@@ -140,6 +140,8 @@ static func event(what: String) -> void:
 static func detect() -> void:
 	if not active():
 		return
+	for t in ["axe", "pickaxe"]:      # (a save from before 11-08, mid-tutorial: the steps no longer hand them out)
+		HomeGather.give_tool(t)
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))
 	var stone := int(cost.get("stone", 0))

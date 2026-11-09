@@ -13,7 +13,6 @@ extends RefCounted
 ## be on screen. On the first arrival he waves and calls you over without moving the camera.
 
 const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
-const TALK_ZOOM := 1.05        # the home camera's zoom while you talk, a little closer (Home.HOME_ZOOM after)
 const FACE_K := 0.3            # how far the camera's focus moves from you toward him while you talk
 const SHOW_FAR_M := 9.0        # m from the talk framing past which a "show" is off screen and the camera drifts to it
 const SHOW_PAN_K := 0.5        # how far toward that far "show" it drifts (half way: it stays in view)
@@ -52,8 +51,7 @@ func start() -> void:
 	var ids := FarmBuilder.draw_up()
 	FarmTutorial.event("hob")
 	Save.save_game()
-	h.panel_open = TALK
-	h.cam.zoom_to = TALK_ZOOM
+	h.panel_open = TALK      # (the camera keeps your zoom: no zoom in or out per talk)
 	_screen_clear(false)
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
@@ -127,7 +125,6 @@ func _after_beat(id: String) -> void:
 	var h = hob.h
 	if h.panel_open == TALK:
 		h.panel_open = ""
-	h.cam.zoom_to = h.HOME_ZOOM
 	_screen_clear(true)
 	h._refresh_top()
 
@@ -160,7 +157,6 @@ func _closed() -> void:
 	show_t = -1.0
 	if h.panel_open == TALK:
 		h.panel_open = ""
-	h.cam.zoom_to = h.HOME_ZOOM
 	_screen_clear(true)
 	if h.guide:
 		h.guide.refresh()

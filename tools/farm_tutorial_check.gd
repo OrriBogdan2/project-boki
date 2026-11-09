@@ -49,6 +49,9 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
+		if String(a).begins_with("--hob-cam-strip"):      # (=<dir> for frames; bare: the numbers only)
+			await load("res://tools/hob_cam_strip.gd").new().run(m, String(a).substr(16))
+			return
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -133,9 +136,14 @@ func _tutorial_rules() -> void:
 	var L := HomeLayout.ensure(Save.d)
 	_stats()
 	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "a new farm starts with Hob calling you over")
-	FarmTutorial.event("hob")
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe") and FarmTutorial.step_def("axe").is_empty(),
 			"a new farm starts with the axe and the pickaxe in hand: no step hands them over")
+	var old_tools: Array = Save.d["tools"]
+	Save.d["tools"] = []      # (a save from before 11-08, mid-tutorial, without its tools)
+	FarmTutorial.detect()
+	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "an older save mid-tutorial gets both tools too")
+	Save.d["tools"] = old_tools
+	FarmTutorial.event("hob")
 	ok(FarmTutorial.did("hob") and FarmTutorial.current() == "chop", "talking to him moves it on to chopping")
 	ok(not FarmTutorial.available("house") and not FarmTutorial.available("expedition"),
 			"the house waits for the wood, the last step for all")

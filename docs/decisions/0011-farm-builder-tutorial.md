@@ -23,6 +23,7 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 ## Consequences
 - Save v8: a save with a Boki skips the tutorial (`tutorial.ft.done`, `day1_done`) and keeps every blueprint it could already build (`layout.hob.legacy`, resolved on first look). `Progress` first-day code and the interior checklist are gone. Net.VERSION unchanged.
 - Checks: `--farm-tutorial-check` (new), `--farmbuild` updated (locked entries are now hidden, the house is a site). Screenshots: `--farm-hob-shots=<dir>`.
+- **Hob's talk camera** (owner, 11-08: too much camera movement): the talk keeps your zoom (no zoom in or out per talk or per step) and only leans the focus a little toward him, eased in and out by the camera's own follow; it drifts part way to a "show" only when that is too far to be on screen (HobTalk.SHOW_FAR_M). Measured with `--hob-cam-strip[=<dir>]` (zoom and focus every 0.25 s, frames with a renderer): before, the zoom swung 0.80-1.20 four times through the first talk and the focus jumped up to 9.8 m; after, zoom 1.20 throughout and the focus stays within 1.8 m of you.
 - Main wiring left: none beyond the few lines already in home.gd.
 
 ## Round 3: Hob in person and the second Mask (items 87, 89; owner, Nov 4)
