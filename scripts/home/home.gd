@@ -1034,13 +1034,14 @@ func _process(delta: float) -> void:
 			elif Input.is_action_just_pressed("talk"): _open_chat(interact["k"]["rec"])
 			elif Input.is_action_just_pressed("details"): _open_kin(interact["k"]["rec"])
 
-# ---- moving at home: walk, jump, dash (Shift, your class's dodge) and glide (hold Space in the air).
+# ---- moving at home: walk, jump, dash (Shift, your class's dodge) and glide (press Space again in the air).
 # py is your feet's height (terraces are 0.8 each). Off the edge you can glide over to another isle;
 # drop into the sky and the wind sets you back down where you last stood.
 var gliding := false
-var glide_hold := 0.0
+var loco := Loco.machine()       # the avatar's locomotion state, the same machine a match hunter has
 var dash_t := 0.0
-var dash_v := Vector2.ZERO
+var dash_v := Vector2.ZERO      # the dash's direction x its flat speed (Loco.dash_hv eases it)
+var dash_total := 0.0
 var dash_charges := 2.0
 var ex_cd := 0.0               # the long dash (Shift in the air, or with the short ones spent), as in a match
 var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's own (DashSlot)
@@ -1145,7 +1146,8 @@ func start_dash(dir: Vector2, speed: float, time: float) -> void:
 	if dir.length() < 0.1:
 		dir = Vector2(-sin(pface), -cos(pface))
 	dash_v = dir.normalized() * speed
-	dash_t = time
+	dash_t = time * Loco.dash_time_k(String(Save.d.get("arch", "")))      # a slowed dash keeps its distance
+	dash_total = dash_t
 	gliding = false
 	Sfx.play("whoosh", null, -6.0, 0.1, 1.2)
 	if fx: fx.dust(ppos, 6)
@@ -1186,13 +1188,21 @@ func _move_player(d: float) -> void:
 			dash_slot.deny()
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
+	# the match hunter's movement (Loco, HunterMove) at this hero's run speed and accel: it feels the same here
+	var row := HunterMove.of(String(Save.d.get("arch", "")))
+	var run := float(row["speed"]) * water.speed_mul(wdep, air)
 	if dash_t > 0.0:
 		dash_t -= d
-		hv = dash_v
-		if dash_t <= 0.0: hv = HunterMove.dash_exit(dash_v, SPEED)
+		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")), dash_t, dash_total)
+		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
+	elif gliding:
+		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
+	elif air:
+		hv = Loco.air_step(hv, mv, run, d)
+	elif mv.length() > 0.001:
+		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, Hunter.GROUND_OVERSPEED, d)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
-		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
+		hv = HunterMove.brake(hv, run, 1.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos
@@ -1226,17 +1236,20 @@ func _move_player(d: float) -> void:
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
-	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
+	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
-		glide_hold = 0.0
+		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
+			dash_t = 0.0
+			pvel *= Loco.dash_jump_keep
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
-		glide_hold = glide_hold + d if holding else 0.0
-		if not gliding and dash_t <= 0.0 and ((jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide") or (lfl.is_empty() and holding and glide_hold > Hunter.GLIDE_ENGAGE and pvy < 2.0)):
+		var press := (jump_now and lfl.is_empty()) or Input.is_action_just_pressed("glide")
+		if not gliding and press and loco.go(Loco.S.GLIDING):
+			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
@@ -1249,7 +1262,7 @@ func _move_player(d: float) -> void:
 			# (the match's lift: Hunter.abyss_lift_vy). The farm never had it: you only sank
 			pvy = Hunter.abyss_lift_vy(pvy, _abyss_lip() - py, d)
 		elif gliding and pvy <= 0.0:
-			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Hunter.GLIDE_CATCH * d)
+			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Loco.glide_catch * d)
 		else:
 			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
 		py += pvy * d
@@ -1269,6 +1282,10 @@ func _move_player(d: float) -> void:
 		gliding = false
 		if gh > World.VOID + 1.0 and world.kind[world.idx(int(floor(ppos.x)), int(floor(ppos.z)))] == World.T_GROUND:
 			safe_at = ppos
+	var st := Loco.S.DASHING if dash_t > 0.0 else (Loco.S.GLIDING if gliding else (Loco.S.AIRBORNE if air else Loco.S.GROUNDED))
+	loco.go(Loco.S.MANTLING if not lfl.is_empty() else st)
+	loco.tick(d)
+	Loco.report(loco, hv, pvy if air else 0.0, Hunter.GLIDE_SPEED if gliding else run)
 	_glider_look()
 	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
@@ -1529,7 +1546,6 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
 		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
-		glide_hold = 0.0
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:
