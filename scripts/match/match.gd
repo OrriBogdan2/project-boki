@@ -123,7 +123,6 @@ var _finish_now := false
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
-var _bot_names: Array = []
 func sess_time() -> float: return sess_t0 + time     # the session clock: seconds since the session began (the match clock unless you joined a rolling session part-way)
 func sess_len() -> float: return Rolling.SESSION if rolling else length     # the whole session (a rolling session: Rolling.SESSION)
 func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session (negative if before you joined)
@@ -1103,8 +1102,10 @@ func _spawn_hunters() -> void:
 		spots = world.spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
-	var names: Array = Data.BOT_NAMES.duplicate(); names.shuffle()
-	_bot_names = names
+	var taken: Array = [Save.d.get("name", "Hunter")]
+	for r in (opts["net"]["roster"] if net_on else []): taken.append(String(r["name"]))
+	for mt in opts.get("mates", []): taken.append(String(mt["name"]))
+	var names := Names.bot_pool(taken)       # one tag per bot, never the same twice in a match
 	if net_on:
 		_spawn_net_hunters(spots, names)
 		return
@@ -1179,6 +1180,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 	if not held.is_empty():
 		bname = String(held["holder"])
 		brec = (held["rec"] as Dictionary).duplicate(true)
+		names.erase(bname)
 	var cls := Arch.weight(String(bk.get("arch", "")))
 	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
 	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
@@ -2247,7 +2249,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [HeroTitle.of_hunter(credit), HeroTitle.of_hunter(h)])
+		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
@@ -2255,7 +2257,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
-		add_feed("%s went down" % HeroTitle.of_hunter(h))
+		add_feed("%s went down" % h.pname)
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
@@ -2370,7 +2372,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
-	add_feed(out_text(HeroTitle.of_hunter(h), why))
+	add_feed(out_text(h.pname, why))
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
