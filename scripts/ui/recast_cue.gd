@@ -37,11 +37,13 @@ static func draw(H, p: Hunter) -> void:
 		HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, col)
 	span = maxf(span, left) if left != INF else 1.0
 	var pulse := 0.5 + 0.5 * sin(float(H.m.time) * PULSE_HZ)
-	H._rounded(r.grow(2.0 + pulse * 3.0), Color(col, 0.08 + 0.12 * pulse), HudStyle.SLOT_RAD + 2, Color(col, 0.55 + 0.45 * pulse), 3)
+	var glow := Color(col, 0.55 + 0.45 * pulse)
+	H._rounded(r.grow(2.0 + pulse * 3.0), Color(col, 0.08 + 0.12 * pulse), HudStyle.SLOT_RAD + 2, glow, 3)
 	var ring := r.size.x * 0.5 + RING_GAP
 	var frac := 1.0 if left == INF else clampf(left / maxf(span, 0.01), 0.0, 1.0)
 	c.draw_arc(r.get_center(), ring, 0.0, TAU, 48, HudStyle.SHADE_EDGE, RING_W + 2.0, true)
-	c.draw_arc(r.get_center(), ring, -PI / 2, -PI / 2 + TAU * frac, 48, col.lerp(Color.WHITE, 0.25 * pulse), RING_W, true)
+	var ring_col := col.lerp(Color.WHITE, 0.25 * pulse)
+	c.draw_arc(r.get_center(), ring, -PI / 2, -PI / 2 + TAU * frac, 48, ring_col, RING_W, true)
 	shown = "%s AGAIN" % key
 	var tp := Vector2(r.get_center().x, r.position.y - TEXT_RISE)
 	HudStyle.ctext(c, tp, shown, TEXT_SIZE, col.lerp(Color.WHITE, 0.35 + 0.3 * pulse), 6)

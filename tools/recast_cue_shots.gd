@@ -1,8 +1,13 @@
 extends RefCounted
 ## --recast-cue-shots --shots-dir=<dir>: the "<KEY> AGAIN" cue (scripts/ui/recast_cue.gd) in a live match HUD for three
-## Hunters: Thief (E), Cinder (X), Albert (the hammer, LMB). One bottom-left HUD crop each. Needs a renderer (jobq --needs gpu).
+## Hunters: Thief (E), Cinder (X), Albert (the hammer, LMB). One bottom-left HUD crop each.
+## Needs a renderer (jobq --needs gpu).
 
-const SHOTS := [["thief", "thief_e", "Shadow Knife stuck: E AGAIN on the E slot"], ["ashwick", "ashwick_x", "Flue Flight: X AGAIN, ring shrinking with the flight"], ["bulwark", "bulwark_lmb", "Hammer out: LMB AGAIN on a tile over the RMB slot"]]
+const SHOTS := [
+	["thief", "thief_e", "Shadow Knife stuck: E AGAIN on the E slot"],
+	["ashwick", "ashwick_x", "Flue Flight: X AGAIN, ring shrinking with the flight"],
+	["bulwark", "bulwark_lmb", "Hammer out: LMB AGAIN on a tile over the RMB slot"],
+]
 const CROP := Rect2i(0, 520, 760, 200)      # px of the viewport round the ability bar
 
 var main: Node
@@ -32,9 +37,11 @@ func _shot(arch: String, file: String) -> void:
 	var P: Hunter = m.player
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
-	P.lvl = 6; P.slot_lv["ult"] = 1
+	P.lvl = 6
+	P.slot_lv["ult"] = 1
 	var K: ArchKit = P.ak
-	P.inp["aim"] = P.pos + Vector3(8, 0.9, 0); P.inp["aim_y"] = P.pos.y
+	P.inp["aim"] = P.pos + Vector3(8, 0.9, 0)
+	P.inp["aim_y"] = P.pos.y
 	match arch:
 		"thief": K.use_e()
 		"ashwick":

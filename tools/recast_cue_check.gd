@@ -8,9 +8,9 @@ var fails := 0
 var n := 0
 var ak = null
 
-func ok(name: String, cond: bool, info := "") -> void:
+func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
-	print("RECASTCHECK %-50s %s  %s" % [name, "PASS" if cond else "FAIL", info])
+	print("RECASTCHECK %-50s %s  %s" % [label, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
 
 func run(main_node: Node) -> void:
@@ -24,7 +24,8 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 ## Opens the window with `open` (a Callable on the kit), waits `wait` s, then asserts open on `slot`; `close` ends it.
-func _cycle(arch: String, label: String, slot: String, open: Callable, wait: float, close: Callable, wait2 := 0.3) -> void:
+func _cycle(arch: String, label: String, slot: String, open: Callable, wait: float,
+		close: Callable, wait2 := 0.3) -> void:
 	var r: Array = ak.setup(arch, 8.0, "", false)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
