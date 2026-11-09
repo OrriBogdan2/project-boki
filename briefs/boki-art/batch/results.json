@@ -20702,5 +20702,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stance_ringrove_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_sporcupine",
+    "name": "Sporcupine (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_sporcupine_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_ringrove",
+    "name": "Ringrove (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_ringrove_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_vespyx",
+    "name": "Vespyx (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_vespyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_glaivyx",
+    "name": "Glaivyx (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_glaivyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_vespyx",
+    "name": "Vespyx (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_vespyx",
+    "name": "Vespyx (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_vespyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_glaivyx",
+    "name": "Glaivyx (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_glaivyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_glaivyx",
+    "name": "Glaivyx (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_glaivyx_3.jpg",
+    "ok": true
   }
 ]
