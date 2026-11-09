@@ -154,7 +154,9 @@ func _sheet(main: Node) -> void:
 				rig._face_step(1.0 / 60.0)
 				await main.get_tree().process_frame
 			var tile := Rect2i(0, 0, SHEET_PX, SHEET_PX)
-			sheet.blit_rect(vp.get_texture().get_image(), tile, Vector2i(col, row) * SHEET_PX)
+			var shot := vp.get_texture().get_image()
+			shot.convert(Image.FORMAT_RGBA8)
+			sheet.blit_rect(shot, tile, Vector2i(col, row) * SHEET_PX)
 		k.queue_free()
 	sheet.save_png("%s/states.png" % out)
 	print("BOKISTATE sheet: %s columns %s; rows %s" % [out, str(names), str(Rig.SPECIES_LIST)])
