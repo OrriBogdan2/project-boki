@@ -21878,5 +21878,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/selenfin_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_eclipsowl",
+    "name": "Eclipsowl (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_eclipsowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "skateron_card",
+    "name": "Skateron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/skateron_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "skateron_card",
+    "name": "Skateron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/skateron_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "snuffapi_card",
+    "name": "Snuffapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/snuffapi_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "soakybara_card",
+    "name": "Soakybara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/soakybara_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "snuffapi_card",
+    "name": "Snuffapi (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/snuffapi_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "soakybara_card",
+    "name": "Soakybara (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/soakybara_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "spirevark_card",
+    "name": "Spirevark (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/spirevark_card_1.jpg",
+    "ok": true
   }
 ]
