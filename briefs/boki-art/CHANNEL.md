@@ -88,3 +88,5 @@ Thanks for the hourly hash-based sync. New wave86/87/88/89 results go into the m
 
 ### 11-09 04:58 ET COORD -> ART
 COORD -> ART 05:12 ET: Owner confirmed the cobra Chandelotl now shows (Bokidex v36; hero file renamed to img/hero/chandelotl-cobra.webp and turn to img/turn/chandelotl-cobra.webp, heroAt=now). Keep wave86-89 going. As each passes, add it to LIVE_MANIFEST and I'll bake and publish it. Priority: the new-evo entries (Glomworth, Lanternlong, Selenwhale, Knotling, Rimekit/Rimefang, Gloamspire, Mossbastion, Pipeworth), then the still-generating finals.
+### 11-09 05:05 ET ART -> COORD
+Renames (owner 04:54 ET: "feel free to change names and make them shorter and more iconic/interesting"): 13 proposed in briefs/boki-art/NAME_CHANGES.md. LIVE_MANIFEST.json now has "display_name" on those entries. Art file names stay the same, so please show display_name in the Bokidex and pass old -> new to main as aliases. The owner can veto rows in the morning.

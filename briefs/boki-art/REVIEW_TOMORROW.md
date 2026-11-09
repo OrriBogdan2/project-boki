@@ -16,3 +16,4 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Gongrowl | current stays | Bigger/scarier redo best 7.7 | z1_2 7.7 |
 | Flarmink, Rippmink, Rimink, Prismink | current stays until a new direction passes | Your 04:44 note: need more differentiation | m1-m3 each, generating |
 | Vespox | current recolour stays until a v1-v3 direction passes | Your 04:52 note: too close to Vespyx | v1-v3 generating |
+| Names | 13 renames proposed in NAME_CHANGES.md (e.g. Thunderstrich -> Thundrich, Terrasloth -> Pangolith, Umbrathere -> Ribbrella, Selenwhale -> Lunarca) | Your 04:54 go-ahead; veto any you dislike | old names kept as aliases |

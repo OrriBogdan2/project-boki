@@ -32,7 +32,8 @@
   "card": "briefs/boki-art/cards/Barrelmander.jpg",
   "portrait": "briefs/boki-art/portraits/light/Barrelmander.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Barrelmander.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Barrelmander.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Barrelmander.png",
+  "display_name": "Kegmander"
  },
  "Bathilus": {
   "sheet": "briefs/boki-art/turnarounds/Bathilus.jpg",
@@ -102,7 +103,8 @@
   "card": "briefs/boki-art/cards/Bucketmander.jpg",
   "portrait": "briefs/boki-art/portraits/light/Bucketmander.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Bucketmander.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Bucketmander.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Bucketmander.png",
+  "display_name": "Pailmander"
  },
  "Buckleron": {
   "sheet": "briefs/boki-art/turnarounds/Buckleron.jpg",
@@ -158,7 +160,8 @@
   "card": "briefs/boki-art/cards/Cisternmander.jpg",
   "portrait": "briefs/boki-art/portraits/light/Cisternmander.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Cisternmander.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Cisternmander.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Cisternmander.png",
+  "display_name": "Vatmander"
  },
  "Clinkpede": {
   "sheet": "briefs/boki-art/turnarounds/Clinkpede.jpg",
@@ -305,7 +308,8 @@
   "card": "briefs/boki-art/cards/Furnacowary.jpg",
   "portrait": null,
   "cutout": "briefs/boki-art/portraits/cutout_v2/Furnacowary.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Furnacowary.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Furnacowary.png",
+  "display_name": "Furnowary"
  },
  "Galleotter": {
   "sheet": "briefs/boki-art/evolutions/Galleotter.jpg",
@@ -444,7 +448,8 @@
   "card": "briefs/boki-art/cards/Gravitank.jpg",
   "portrait": "briefs/boki-art/portraits/light/Gravitank.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Gravitank.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Gravitank.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Gravitank.png",
+  "display_name": "Gravidon"
  },
  "Hatstag": {
   "sheet": "briefs/boki-art/turnarounds/Hatstag.jpg",
@@ -1025,7 +1030,8 @@
   "card": "briefs/boki-art/cards/Terrasloth.jpg",
   "portrait": "briefs/boki-art/portraits/light/Terrasloth.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Terrasloth.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Terrasloth.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Terrasloth.png",
+  "display_name": "Pangolith"
  },
  "Thistlynx": {
   "sheet": "briefs/boki-art/evolutions/Thistlynx.jpg",
@@ -1045,7 +1051,8 @@
   "card": "briefs/boki-art/cards/Thunderstrich.jpg",
   "portrait": "briefs/boki-art/portraits/light/Thunderstrich.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Thunderstrich.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Thunderstrich.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Thunderstrich.png",
+  "display_name": "Thundrich"
  },
  "Tidalisk": {
   "sheet": "briefs/boki-art/evolutions/Tidalisk.jpg",
@@ -1087,7 +1094,8 @@
   "card": "briefs/boki-art/cards/Umbrathere.jpg",
   "portrait": "briefs/boki-art/portraits/light/Umbrathere.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Umbrathere.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Umbrathere.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Umbrathere.png",
+  "display_name": "Ribbrella"
  },
  "Umbrink": {
   "sheet": "briefs/boki-art/turnarounds/Umbrink.jpg",
@@ -1178,7 +1186,8 @@
   "card": "briefs/boki-art/cards/Glomworth.jpg",
   "portrait": "briefs/boki-art/portraits/light/Glomworth.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Glomworth.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Glomworth.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Glomworth.png",
+  "display_name": "Glombulus"
  },
  "Knotling": {
   "sheet": "briefs/boki-art/turnarounds/Knotling.jpg",
@@ -1192,14 +1201,16 @@
   "card": "briefs/boki-art/cards/Lanternlong.jpg",
   "portrait": "briefs/boki-art/portraits/light/Lanternlong.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png",
+  "display_name": "Longlume"
  },
  "Mossbastion": {
   "sheet": "briefs/boki-art/turnarounds/Mossbastion.jpg",
   "card": "briefs/boki-art/cards/Mossbastion.jpg",
   "portrait": "briefs/boki-art/portraits/light/Mossbastion.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png",
+  "display_name": "Mosstodon"
  },
  "Rimefang": {
   "card": "briefs/boki-art/cards/Rimefang.jpg",
@@ -1219,6 +1230,7 @@
   "card": "briefs/boki-art/cards/Selenwhale.jpg",
   "portrait": "briefs/boki-art/portraits/light/Selenwhale.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Selenwhale.png",
+  "display_name": "Lunarca"
  }
 }
