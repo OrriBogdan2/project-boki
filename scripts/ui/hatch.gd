@@ -505,6 +505,7 @@ func _show_pick() -> void:
 		hr.add_child(tt)
 		hr.add_child(UI.section(d["temper"], ecol))
 		v.add_child(hr)
+		v.add_child(EggPreview.build(d["species"], mystery, get_tree()))
 		var dl := UI.label(d["desc"], 14, UI.MUTED)
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
