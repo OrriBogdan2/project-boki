@@ -149,7 +149,8 @@ func _string_fades(m: Match, P: Hunter, home: Vector3) -> void:
 		var node: Variant = (rec["sd"] as Dictionary).get("node")
 		var mine: Array = vfx.ribbons.filter(func(r: Dictionary) -> bool: return node != null and r["follow"] == node)
 		if not mine.is_empty():
-			(rec["w"] as Array).append(maxf(float(mine[-1]["width"]), float(mine[-2]["width"]) if mine.size() > 1 else 0.0))
+			var outer := float(mine[-2]["width"]) if mine.size() > 1 else 0.0
+			(rec["w"] as Array).append(maxf(float(mine[-1]["width"]), outer))
 			rec["sd"] = {}
 		if P.shot_n > int(rec["n"]):
 			rec["n"] = P.shot_n

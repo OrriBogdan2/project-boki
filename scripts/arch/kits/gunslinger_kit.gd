@@ -254,7 +254,8 @@ func _faded(sus_k: float) -> float:
 	var loss := float(h.wpn.get("sustain_loss", 0.0))
 	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
 
-## The decay of the round that is landing now (the hit's own sus_k is not passed on; the string moves a round or two at most).
+## The decay of the round landing now: the hit does not carry its round's sus_k, so this reads the string's
+## count (a round or two ahead at most).
 func _faded_now() -> float:
 	var rounds := float(h.wpn.get("sustain_rounds", 10))
 	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
