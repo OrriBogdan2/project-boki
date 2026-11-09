@@ -19925,5 +19925,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/howlop_e_w30_4.jpg",
     "ok": true
+  },
+  {
+    "id": "howlop_e_w30",
+    "name": "Howlop",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/howlop_e_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w30",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_r_w30",
+    "name": "Lanceron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanceron_r_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w30",
+    "name": "Jibbatross",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w30",
+    "name": "Jibbatross",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w30_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_r_w30",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanceron_r_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanceron_r_w30",
+    "name": "Lanceron",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanceron_r_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_e_w30",
+    "name": "Lanternmit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanternmit_e_w30_1.jpg",
+    "ok": true
   }
 ]
