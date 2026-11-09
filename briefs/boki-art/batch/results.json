@@ -27597,5 +27597,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/relic_kael_w32_2.jpg",
     "ok": true
+  },
+  {
+    "id": "relic_kael_w32",
+    "name": "Relic: Kael",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_kael_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w32",
+    "name": "Relic: Kael",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/relic_kael_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w32",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card2_w32",
+    "name": "Sporcupine (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w32",
+    "name": "Rimink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rimink_r_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w32",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card2_w32",
+    "name": "Sporcupine (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_card2_w32",
+    "name": "Sporcupine (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sporcupine_card2_w32_3.jpg",
+    "ok": true
   }
 ]
