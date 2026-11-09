@@ -67693,5 +67693,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/lodestaff_card105_2.jpg",
     "ok": true
+  },
+  {
+    "id": "blastopuff_card105",
+    "name": "Blastopuff (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/blastopuff_card105_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card105",
+    "name": "Blastopuff (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blastopuff_card105_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel_r4",
+    "name": "Arcestrel (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "loafhopper_card105",
+    "name": "Loafhopper (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/loafhopper_card105_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_r4",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_arcestrel_r4",
+    "name": "Arcestrel (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_arcestrel_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card105",
+    "name": "Blastopuff (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blastopuff_card105_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_r4",
+    "name": "Geysirbara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_r4_2.jpg",
+    "ok": true
   }
 ]
