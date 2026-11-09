@@ -26120,5 +26120,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stance2_galleotter_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance2_galleotter",
+    "name": "Galleotter (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_galleotter_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_latchling",
+    "name": "Latchling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_latchling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_latchling",
+    "name": "Latchling (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_latchling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_rimink",
+    "name": "Rimink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_rimink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_rimink",
+    "name": "Rimink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_rimink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_ringrove",
+    "name": "Ringrove (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_ringrove_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_rimink",
+    "name": "Rimink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_rimink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_ringrove",
+    "name": "Ringrove (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_ringrove_2.jpg",
+    "ok": true
   }
 ]
