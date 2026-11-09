@@ -373,7 +373,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Dragonkite.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Dragonkite.png",
   "hash": {
-   "sheet": "379e291ba6e3",
+   "sheet": "1a5236e9c039",
    "card": "62707b546576",
    "portrait": "120005c78af9",
    "hero": "de6e9d5999b9"
@@ -2293,9 +2293,9 @@
   "display_name": "Lunarca",
   "hash": {
    "sheet": "b4daba66f384",
-   "card": "f2c348a6b0a1",
-   "portrait": "20dfed1cffc6",
-   "hero": "3ec1f34cec47"
+   "card": "4bb363715771",
+   "portrait": "b02f0014368c",
+   "hero": "71336f2983e9"
   }
  },
  "Anchorhorn": {
