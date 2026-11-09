@@ -21,6 +21,7 @@ func run(main_node: Node) -> void:
 		await own.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await load("res://tools/prop_handoff_check.gd").new(self, ok).run("bulwark")
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()

@@ -219,3 +219,6 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## Thrown-prop hand-off
+`tools/prop_handoff_check.gd` (run inside the Albert, Grimble, Kael, Sable and Neve combo checks) samples every step of a real throw: the prop leaves the hand within 0.06 s of the clip's throw key, hand and air never show it twice, the hand is never empty with nothing flying (one step allowed), and it is back in the hand the step it stops flying. Grimble and Kael launch on the press (the source gives no wind-up), so their clips start at the throw key (`THROW_SKIP`); Albert (`THROW_WIND`) and Sable (0.12 s) launch on the key. Vex has no thrown coin in our kit (the coin is only a model bone on the left hand).

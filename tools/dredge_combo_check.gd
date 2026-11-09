@@ -26,6 +26,7 @@ func run(main_node: Node) -> void:
 	await _glide_wins()
 	await _parity_gun()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/prop_handoff_check.gd").new(ak, ok).run("dredge")
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
 			rows_bad == 0, "%d failures" % rows_bad)

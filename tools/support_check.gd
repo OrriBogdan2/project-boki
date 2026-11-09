@@ -91,6 +91,7 @@ func run(mn: Node, md := "all") -> void:
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await combos.rimewright()
+		await load("res://tools/prop_handoff_check.gd").new(self, ok).run("rimewright")
 		await ults.rimewright()
 		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])

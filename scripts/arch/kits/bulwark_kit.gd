@@ -560,6 +560,7 @@ func _tick_mace(dt: float) -> void:
 			if float(mace["t"]) >= THROW_WIND:
 				mace["st"] = "fly"
 				fx.in_hand(false)
+				fx.hammer_fly(p, mace["dir"], 16.0)       # (same step: no frame with an empty hand and no hammer)
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt

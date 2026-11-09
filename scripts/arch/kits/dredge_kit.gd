@@ -34,6 +34,7 @@ const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
+const THROW_SKIP := 0.12               # s: dr_throw starts at its punch-out key (0.14 s), the hook leaves on the press
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
@@ -302,6 +303,7 @@ func fire_rmb(c: Dictionary) -> void:
 	scoop = []
 	hook_hold = CastHold.hover_slow(h, float(rdf["fly_slow"]))
 	play("dr_throw")
+	anim_at -= THROW_SKIP
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})

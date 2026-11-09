@@ -18,6 +18,7 @@ const PREVIEW_MIN := 0.6            # m of swing before the predicted arc shows 
 const PREVIEW_DT := 0.03            # s per step of the predicted arc
 const PREVIEW_STEPS := 48           # steps at most (the longest pull is under 1.2 s)
 const PREVIEW_Y := 0.15             # m over his feet
+const THROW_SKIP := 0.14            # s: jug_chain starts at its fling key (0.16 s), the chain leaves on the press
 
 var k: JuggernautKit
 var state := "ready"                # ready | throwing | hooked | pulling | arriving
@@ -93,6 +94,7 @@ func _throw() -> void:
 	e_pressed_at = -9.0
 	if k.slam_w.is_empty() and k.lunge.is_empty():      # a heavy move keeps its own body (E goes on top of it)
 		k.play("jug_chain")
+		k.anim_at -= THROW_SKIP
 	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})

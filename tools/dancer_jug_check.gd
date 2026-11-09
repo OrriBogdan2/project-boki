@@ -18,8 +18,10 @@ func run(main_node: Node, who := "all") -> void:
 	A.main = main_node
 	if who in ["all", "thief"]:
 		await thief(A)
+		await load("res://tools/prop_handoff_check.gd").new(A, A.ok).run("thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(A)
+		await load("res://tools/prop_handoff_check.gd").new(A, A.ok).run("juggernaut")
 	await combos(A)
 	print("AKCHECK DONE, %d checks, failures: %d" % [A.n, A.fails])
 	main_node.get_tree().quit(1 if A.fails > 0 else 0)
