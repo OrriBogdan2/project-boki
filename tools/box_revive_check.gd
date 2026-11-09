@@ -46,8 +46,9 @@ func _roomy() -> Vector3:
 			for dz in range(-8, 9, 2):
 				if m.world.is_void(g.x + dx, g.z + dz) or absf(m.world.ground_at(g.x + dx, g.z + dz) - g.y) > 0.3:
 					flat = false
-				elif m.world.push_out_blocks(g.x + dx, g.z + dz, 0.6, g.y).distance_to(Vector2(g.x + dx, g.z + dz)) > 0.01:
-					flat = false        # a solid (a stall, a prop) in the way would shove the reviver off the box
+				else:        # a solid (a stall, a prop) in reach would shove the reviver off the box
+					var at := Vector2(g.x + dx, g.z + dz)
+					flat = flat and m.world.push_out_blocks(at.x, at.y, 0.6, g.y).distance_to(at) < 0.01
 		if flat and m.beacons.all(func(bc): return g.distance_to(bc["pos"]) > 12.0):
 			return g
 	return m.world.random_ground()
