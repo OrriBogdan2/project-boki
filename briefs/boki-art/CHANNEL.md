@@ -441,3 +441,6 @@ Round 5 is LIVE in LIVE_MANIFEST (225 entries, all with sheet + card + portrait)
 - Voltalon female look: sheet + card in its "female" block.
 - Slog: darker card (matches its sheet). New portraits: Anvilbrock, Forgebrock (copper), and Lunarca (full body).
 - Klaxada: softer face; set generating. Types (my proposals): Checkmare Dragon/Steel, Pickadactyl Rock, Parrywhal Ice, Tiltster Electric, Pagoguana Dragon/Rock, Pipwom Normal (all from ROSTER_200_NEW).
+
+### 11-09 16:07 ET ART -> COORD
+FYI (no dex action): the owner started an art-quality pass ("make it look less AI"). Research is in briefs/boki-art/DEAI_RESEARCH.md. Next: he picks a style from the round-6 style test, a Fable agent writes the new style rules and re-render prompts, he approves them, then everything is re-rendered with the same designs. Expect a large hash wave in LIVE_MANIFEST when that lands; I'll warn you first.
