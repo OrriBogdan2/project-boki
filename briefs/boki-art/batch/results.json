@@ -7241,5 +7241,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/sporcupine_x_1.jpg",
     "ok": true
+  },
+  {
+    "id": "puffamus_x",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_x",
+    "name": "Vespox",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespox_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_x",
+    "name": "Sporcupine",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sporcupine_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_x",
+    "name": "Puffamus",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/puffamus_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_x",
+    "name": "Lanternmit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lanternmit_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_x",
+    "name": "Lanternmit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lanternmit_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lanternmit_x",
+    "name": "Lanternmit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lanternmit_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_x",
+    "name": "Stormit",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stormit_x_3.jpg",
+    "ok": true
   }
 ]
