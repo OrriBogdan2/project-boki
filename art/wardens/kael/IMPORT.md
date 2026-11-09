@@ -20,9 +20,15 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   0.62 -> 0.48, neck -0.02 -> -0.012 put the rig's joints on the scan's (hip 0.52, shoulder 0.79, head pivot 0.87
   of his height); `size` 1.06 -> 0.97 keeps his height in the game (the owner's Nov 4 size).
 - **Fit** (kael_source): soft weights by distance to the bone segments, each bone moves its vertices onto the rig;
-  girth 1.07 (torso) and 1.1 (arms) for the sheet's broad build; decimated to 11k triangles.
+  girth 1.07 (torso) and 1.1 (arms) for the sheet's broad build; decimated by region (11-09 revamp): the face to
+  3.2k triangles, each fist to 1.1k, the rest to the remainder of 26.2k (23.4k in all).
 - **Finish** (kael_finish): the scan's colour baked onto the low mesh (one 2048 atlas, the scripted pieces on flat
   cells at its right edge). Slots by colour and by distance off the body (the shawl and scarf stand off the skin).
+  A 2048 tangent-space normal map (kael_normal, review copy; the glb embeds it) is baked from the dense scan (Cycles
+  selected-to-active, cage 0.005, ray 0.012), the flat cells flattened and tilts over 65° clamped
+  (paintkit.clean_normal), wired through a NormalMap node on every `-kael` material (not the cards).
+- **Revamp (11-09):** a fresh meshy-7.1 run at top settings (40 credits) lost the X-harness and smeared the veins,
+  so the earlier dense scan (961k) stays the source. Old vs new renders: docs/art/wardens/revamp/kael/.
 - **Curse:** on his RIGHT (sword) arm and hand and the chest. The scan draws it on the left, so kael_finish bakes the
   scan twice (once mirrored in x) and the arm, hand and chest skin take the mirrored bake: the veined arm and bare
   crimson hand land on the sword arm, the black glove on the left. The veins are a 2048 emission map (kael_emit),
@@ -44,6 +50,6 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   content/rules/warden_anim/kael.json (`fade` on jug_wave_wind, jug_lunge_wind). The clips were authored for
   kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which the game now runs. Checked by `--clip-check` (juggernaut in OWN_MODELS).
 - **Armature:** the contract's plus the spring chains of v1 (mane x5, hangcuff, hangwarchain); the anchors of v1
-  kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 12.6k triangles
-  in all (body 11.7k, sword 0.9k).
+  kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 25.0k triangles
+  in all (body 23.4k, sword 1.6k; was 12.6k).
 - `kael.glb.import`: `generate_lods=false` (LODs would eat the thin cards), `force_disable_compression=true`.

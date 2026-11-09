@@ -180,7 +180,9 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
+- **At most 26k triangles per Warden, weapon included** (owner 11-09: ~25k with a 2048² tangent-space normal map baked
+  from the dense scan, the face, hands and weapon protected in the decimation; was 15k, owner item 94;
+  `--warden-glb-check` holds it). A Meshy
   bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
   triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
   LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses.

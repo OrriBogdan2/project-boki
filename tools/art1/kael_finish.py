@@ -14,7 +14,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 import kael_pieces as K
 from meshkit import smooth
-from paintkit import hexc
+from paintkit import hexc, clean_normal
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
@@ -35,6 +35,7 @@ TORSO_R = (0.2, 0.135)               # m, the torso's skin ellipse (x, y) round 
 SASH_OUT = 0.018                     # m, the sash tails off the trousers' front
 HEM_DROP = 0.045                     # m, the torn hem's tongues past the shawl's edge
 BELT_UP = 0.12                       # m above the hips bone: the belt's top
+NRM_CAGE, NRM_RAY = 0.005, 0.012     # m: the normal bake cage's extrusion, its ray's reach (detail pilot, Vex)
 rig = json.load(open(RIG))
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
@@ -146,6 +147,25 @@ bpy.context.view_layer.update()
 bpy.ops.object.bake(type="EMIT", use_clear=True, margin=8)
 COL_MIR = np.array(atlas.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
 print("baked")
+src.scale.x = 1
+bpy.context.view_layer.update()
+
+# ---- the normal map: the scan's dense surface (under Meshy's normal texture) on the low mesh; the flat cells stay flat
+for mt in src.data.materials:
+    nt = mt.node_tree
+    surface = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL").inputs["Surface"]
+    nt.links.new(next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED").outputs[0], surface)
+nrm_bake = bpy.data.images.new("bake_normal", ATLAS, ATLAS)
+nrm_bake.colorspace_settings.name = "Non-Color"
+for mt in me.materials:
+    mt.node_tree.nodes.active.image = nrm_bake
+sc.cycles.samples = 16
+sc.render.bake.cage_extrusion, sc.render.bake.max_ray_distance = NRM_CAGE, NRM_RAY
+sc.render.bake.normal_space = "TANGENT"
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=12)
+NRM = np.array(nrm_bake.pixels[:], np.float32).reshape(ATLAS, ATLAS, 4)[..., :3].copy()
+NRM[:, int(UNIQ_W * ATLAS):] = (0.5, 0.5, 1.0)
+print("normal baked, wrong hits flattened %.4f" % clean_normal(NRM))
 
 # ---- per face: its paint, its slot
 fuv = np.zeros((len(me.polygons), 2))
@@ -256,6 +276,8 @@ def save(img_name, arr, path, fmt="JPEG"):
 
 atlas_i = save("atlas", COL, os.path.join(WORK, "atlas.jpg"))
 emit_i = save("emit", np.repeat(EMIT[..., None], 3, -1), os.path.join(WORK, "emit.jpg"))
+normal_i = save("normal", NRM, os.path.join(WORK, "normal.png"), "PNG")      # lossless: JPEG bends a normal ~4 degrees
+normal_i.colorspace_settings.name = "Non-Color"
 
 
 # ---- the alpha cards: the shawl's torn hem (one card per rim edge, hanging), the sash tails
@@ -387,6 +409,12 @@ for mt in me.materials:
     pb.inputs["Roughness"].default_value = 0.7
     if mt.name == "card-kael":
         nt.links.new(t.outputs["Alpha"], pb.inputs["Alpha"])
+    elif mt.name.endswith("-kael"):
+        n_ = nt.nodes.new("ShaderNodeTexImage")
+        n_.image = normal_i
+        bump = nt.nodes.new("ShaderNodeNormalMap")
+        nt.links.new(n_.outputs[0], bump.inputs["Color"])
+        nt.links.new(bump.outputs[0], pb.inputs["Normal"])
     if mt.name == "skin-kael":
         e = nt.nodes.new("ShaderNodeTexImage")
         e.image = emit_i

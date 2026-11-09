@@ -15,7 +15,9 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
-LOW_TRIS = 11000
+LOW_TRIS = 26200                 # the scan's triangles at most (the 11-09 revamp: ~25k with the sword; the face and fists land under their caps)
+FACE_TRIS = 3200                 # of them on the face (its own decimation, so the face keeps its density)
+HAND_TRIS = 1100                 # each: the fists
 SOLE = -0.950                   # the scan's sole (z)
 # Scan joints (flipped to face +Y, his right +X, z from the sole), measured on grid_front / grid_right.
 S_J = {"neck": (0, 0.0, 1.60), "pelvis": (0, 0.0, 1.01), "crown": (0, 0.0, 1.83), "shoulder.R": (0.27, 0.0, 1.45),
@@ -144,13 +146,40 @@ bm.from_mesh(low.data)
 bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0006)
 bm.to_mesh(low.data)
 bm.free()
-now = sum(len(p.vertices) - 2 for p in low.data.polygons)
-m = low.modifiers.new("d", "DECIMATE")
-m.ratio = min(1.0, LOW_TRIS / max(now, 1))
-m.use_collapse_triangulate = True
 bpy.ops.object.select_all(action="DESELECT")
 low.select_set(True)
 bpy.context.view_layer.objects.active = low
-bpy.ops.object.modifier_apply(modifier=m.name)
+HN = T["neck"]
+
+
+def decimate(pick, target):
+    """Edit-mode decimate of the faces pick() marks: the selection's border stays, so the regions keep meeting (hem_source)."""
+    bpy.ops.object.mode_set(mode="OBJECT")
+    co_ = np.zeros(len(low.data.vertices) * 3)
+    low.data.vertices.foreach_get("co", co_)
+    co_ = co_.reshape(-1, 3)
+    sel = pick(np.array([co_[list(p.vertices)].mean(0) for p in low.data.polygons]))
+    low.data.polygons.foreach_set("select", sel.tolist())
+    low.data.edges.foreach_set("select", [False] * len(low.data.edges))
+    low.data.vertices.foreach_set("select", [False] * len(low.data.vertices))
+    low.data.update()
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_mode(type="FACE")
+    bpy.ops.mesh.decimate(ratio=min(1.0, target / max(int(sel.sum()), 1)))
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def is_face(c):
+    return (np.abs(c[:, 0]) < 0.1) & (c[:, 1] > 0.0) & (c[:, 2] > HN[2]) & (c[:, 2] < HN[2] + 0.24)
+
+
+def is_hand(c, sd):
+    return np.linalg.norm(c - (T["wrist." + sd] + np.array([0, 0, -0.08])), axis=1) < 0.1
+
+
+decimate(is_face, FACE_TRIS)
+for sd in "RL":
+    decimate(lambda c: is_hand(c, sd), HAND_TRIS)
+decimate(lambda c: ~is_face(c) & ~is_hand(c, "R") & ~is_hand(c, "L"), LOW_TRIS - FACE_TRIS - 2 * HAND_TRIS)
 print("Low tris", sum(len(p.vertices) - 2 for p in low.data.polygons))
 bpy.ops.wm.save_as_mainfile(filepath=OUT)
