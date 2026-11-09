@@ -70,3 +70,8 @@ A local OpenCV inpaint plus smoothing removed the leftover nose on the third hea
 
 ## Splash v5: "The Leap", shocked (owner, Nov 8, 05:03 ET)
 `grimble_v2_splash.jpg`: the same dive, now with a big shocked and panicked face (bulging eye behind the loupe, dropped jaw with the gold tooth, sweat drops, flailing gauntlet, loot spilling). The bandits and cliff are softly out of focus, so he is the focus. Nano Banana Pro, one fresh generation (ref: the previous Leap splash). Saved raw; a gentle vignette and sharpen pass made no visible improvement. The previous grinning version is `explorations/grimble_v2_splash_leap_grin.jpg`.
+
+## Turnaround and splash replaced (Nov 9, owner)
+- `grimble_v2_turnaround.jpg`: the owner's new sheet, "correct nose" (front, side, back, 3/4). Flat, nearly smooth face, three-lens brass loupe, bone-hook arm with purple sludge, hoard pack with lanterns and bells. This is the canon face now; match it.
+- `grimble_v2_splash.jpg`: the owner's new splash. Grimble leaps off a cliff edge, the sludge arm stretching into the bone hook that bursts out of a treasure chest, coins and gems flying, two thieves knocked flat behind him.
+- The old versions are in `explorations/prev/*_pre1109.jpg`.
