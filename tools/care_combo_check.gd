@@ -1118,9 +1118,12 @@ func _dashes_cute() -> void:
 	var air_t := P.roll_t
 	var glide_cd := P.ex_cd
 	var air_move := K.anim_id
+	# the distance at the glide's end (0.95 s), not after it: what the hunter carries out of it is air control's
 	var peak := {"v": 0.0}
-	step(m, air_t + 0.05, func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed))
+	var track := func(): peak["v"] = maxf(float(peak["v"]), P.roll_speed)
+	step(m, air_t, track)
 	var air_d := P.pos.x - a0.x
+	step(m, 0.05, track)
 	ok(
 			"mm dashes: the air glide is Elluna's: 13.3 m over 0.95 s, peaking 16.5-22 m/s",
 			absf(air_d - 13.3) < 0.7 and absf(air_t - 0.95) < 0.03 and float(peak["v"]) >= 16.5
