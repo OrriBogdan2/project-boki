@@ -1876,5 +1876,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/anchorbill_2.png",
     "ok": true
+  },
+  {
+    "id": "buckleron",
+    "name": "Buckleron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_1.png",
+    "ok": true
+  },
+  {
+    "id": "crofthorn",
+    "name": "Crofthorn",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/crofthorn_2.png",
+    "ok": true
+  },
+  {
+    "id": "crofthorn",
+    "name": "Crofthorn",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/crofthorn_1.png",
+    "ok": true
+  },
+  {
+    "id": "spirevark",
+    "name": "Spirevark",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/spirevark_1.png",
+    "ok": true
+  },
+  {
+    "id": "gravadillo",
+    "name": "Gravadillo",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gravadillo_1.png",
+    "ok": true
+  },
+  {
+    "id": "spirevark",
+    "name": "Spirevark",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/spirevark_2.png",
+    "ok": true
+  },
+  {
+    "id": "buckleron",
+    "name": "Buckleron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_2.png",
+    "ok": true
+  },
+  {
+    "id": "gravadillo",
+    "name": "Gravadillo",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gravadillo_2.png",
+    "ok": true
   }
 ]
