@@ -17020,5 +17020,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/geysirbara_r2_w29_1.jpg",
     "ok": true
+  },
+  {
+    "id": "buckleron_r2_w29",
+    "name": "Buckleron",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w29",
+    "name": "Buckleron",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_r2_w29",
+    "name": "Buckleron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_r2_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_r2_w29",
+    "name": "Geysirbara",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geysirbara_r2_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "geysirbara_r2_w29",
+    "name": "Geysirbara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geysirbara_r2_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f_e_w29",
+    "name": "Kestrike (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kestrike_f_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f_e_w29",
+    "name": "Kestrike (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kestrike_f_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kestrike_f_e_w29",
+    "name": "Kestrike (female)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/kestrike_f_e_w29_3.jpg",
+    "ok": true
   }
 ]
