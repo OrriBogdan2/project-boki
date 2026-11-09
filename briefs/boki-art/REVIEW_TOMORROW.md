@@ -39,3 +39,4 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Galleotter | q1_4 sea-serpent otter whose body is a galley with sail + oars (8.5) queued | Big surprise final; the old one was a cute otter on a boat | q2_2 8.2 (burly standing otter with sail fin); old card |
 | Chandelapi | q1_1 regal okapi stag with a simple 3-candle antler crown (7.5) queued, under the bar | Fixes your "busy, should be majestic" note; the live one is the okapi-serpent | q2_2 7.4; live okapi-serpent; earlier m2_2 |
 | Reapant | fresh ninja-ant concepts w1-w3 (indigo/plum/black) generating | q1/q2 copied the old green leafy look | live card stays until one passes |
+| Line audit | 29 lines flagged against your rules (LINE_AUDIT.md); the 8 worst same-body finals are being redesigned (wave97) | My judgement of what breaks your rules | per-line directions in LINE_AUDIT.md |

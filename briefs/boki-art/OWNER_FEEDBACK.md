@@ -53,3 +53,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 40 | Vespyx lying / Mycroll tipped (04:53) | Passed (8.6). Saved as extra angles beside the main cards (manifest "extra_angles") | DONE |
 | 41 | Overnight second round for "not there yet" families | wave94: Gongrowl bigger/scarier (q1-q2), Reapant taller ninja with new colours (q1-q2), Galleotter (q1-q2), Chandelapi majestic and uncluttered (q1-q2); Tinbrock portrait gap | GENERATING |
 | 42 | New evolutions picked (wave95) | Lodestick e1, Moatpole e2, Moundlet e1, Murmuron e2, Spanglin e1 -> sheet+card+portrait; alternatives in REVIEW_TOMORROW | GENERATING |
+| 43 | Overnight line audit vs owner rules | 29 lines flagged (LINE_AUDIT.md); 8 worst same-body finals redesigned first (wave97 x1-x2) | GENERATING |
