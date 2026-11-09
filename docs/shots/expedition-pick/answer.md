@@ -2,7 +2,7 @@
 
 Before/after at 1920x1080 and 2560x1440, fresh save (Vex open, 11 locked) and all Hunters open.
 Files: `before_<h>_<fresh|all>.jpg`, `after_<h>_<fresh|all>.jpg`. Rendered with `--expedition-shots=<dir>`
-(local xvfb/opengl3: the GPU queue was 16 deep and stalled; a `jobq --needs gpu` job was also submitted).
+Real GPU (jobq --needs gpu): before 20261109-020855-16120 / -021204-04602 (ext/ui-void-masks-2), after 20261109-021304-08779 / -021317-19340.
 
 | item | status | what I tested |
 |---|---|---|
