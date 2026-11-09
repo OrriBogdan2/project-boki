@@ -6954,5 +6954,75 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_chandelotl_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_r",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_r",
+    "name": "Dragonkite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_r",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_geysirbara_r",
+    "name": "Geysirbara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_geysirbara_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_r",
+    "name": "Forgebrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frothisk_r",
+    "name": "Frothisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frothisk_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_galleotter_r",
+    "name": "Galleotter (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_galleotter_r",
+    "name": "Galleotter (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_galleotter_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock_r",
+    "name": "Forgebrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frothisk_r",
+    "name": "Frothisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frothisk_r_2.jpg",
+    "ok": true
   }
 ]
