@@ -26757,5 +26757,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_clinkpede_n_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaciammoth_n_w32",
+    "name": "Glaciammoth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_n_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chimelop_w32",
+    "name": "Chimelop (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chimelop_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth_n_w32",
+    "name": "Glaciammoth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_n_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w32",
+    "name": "Glazolm (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w32",
+    "name": "Glazolm (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth_n_w32",
+    "name": "Glaciammoth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_n_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w32",
+    "name": "Glazolm (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glazolm_w32",
+    "name": "Glazolm (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glazolm_w32_1.jpg",
+    "ok": true
   }
 ]
