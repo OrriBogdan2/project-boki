@@ -1,4 +1,4 @@
-"""ART-1 Sable, stage C: join, unwrap, paint, skin, export. The recipe is claire_finish.py / kael_finish.py.
+"""ART-1 Sable v2, stage C: join, unwrap, paint, skin, export. The recipe is claire_finish.py / kael_finish.py.
 Run: blender -b --factory-startup --python tools/art1/sable_finish.py -- <source.blend> <rig.json> <out.glb>"""
 import sys, os, json, math
 import bpy, bmesh
@@ -11,20 +11,31 @@ sys.path.insert(0, os.path.join(HERE, "..", "blender"))
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
 import meshkit as M, sable_pieces as K, sable_paint as P
 from meshkit import smooth, Piece
-from kael_paint import hexc, mix
+from paintkit import hexc, mix
 import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
 ATLAS = 2048
 MATS = ["skin-face", "cloth-coat", "leather-dark", "metal-silver", "hair-braid", "fur-feather", "card-wing", "glow-rune"]     # S1's limit: <= 8
-SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 0.9, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "wing": 1.3, "tail": 0.7, "lining": 0.35,
+SCALE = {"lid": 2.0, "finger": 1.0, "thumb": 1.0, "palm": 1.0, "antenna": 1.2, "braid": 0.8, "tuft": 0.7, "tie": 0.5, "hairback": 0.6, "wing": 1.3, "tail": 0.7, "lining": 0.35, "curl": 0.5,
          "barrel": 1.6, "stock": 1.1, "rod": 0.4, "cap": 0.6, "lock": 1.2, "cock": 0.8, "frizzen": 0.8, "guard": 0.5, "mouth": 1.0, "crystal": 0.8, "runeA": 5.0, "runeB": 5.0, "runeC": 5.0,
-         "key": 0.8, "keyring": 0.6, "keyshaft": 0.8, "keybit": 0.6, "bolaA": 0.9, "bolaB": 0.9, "cordA": 0.3, "cordB": 0.3, "gemchain": 0.4, "gemframe": 0.8, "gemstone": 1.4, "Low": 1.0}
+         "keyring": 0.6, "keyshaft": 0.8, "keybit": 0.6, "bell": 0.8, "bellcord": 0.3, "pommel": 0.5, "hilt": 0.8, "sheath": 0.8, "blade": 1.4, "swag": 0.4, "stud": 0.3, "gemframe": 0.8, "gemstone": 1.4, "Low": 1.0}
 FACE_K = 8.0                # texel density on the face against the body
 
 bpy.ops.wm.open_mainfile(filepath=SRC)
 src, low = bpy.data.objects["Src"], bpy.data.objects["Low"]
+# the mouth's crease smoothed out: decimating the scan's stitched mouth left folded slivers, the paint draws the mouth
+_lv, _ln = low.data.vertices, {}
+for e_ in low.data.edges:
+    _ln.setdefault(e_.vertices[0], []).append(e_.vertices[1])
+    _ln.setdefault(e_.vertices[1], []).append(e_.vertices[0])
+_lq = [v.index for v in _lv if abs(v.co.x - K.FACE_X) < 0.05 and abs(v.co.z - K.MOUTH[2] + 0.002) < 0.024 and v.co.y > 0.03]
+for _ in range(10):
+    _lc = {i: sum((_lv[j].co for j in _ln[i]), Vector()) / len(_ln[i]) for i in _lq}
+    for i in _lq:
+        _lv[i].co = _lv[i].co.lerp(_lc[i], 0.7)
+print("mouth smoothed", len(_lq))
 
 # ---- the scan as a surface
 sm = src.data
@@ -116,7 +127,7 @@ def lid_piece(s):
 
 ant = [K.antenna(1.0), K.antenna(-1.0)]
 br = K.braid()
-ties = [K.braid_tie(br, 0.085, "tieA", 0.047), K.braid_tie(br, 0.965, "tieB", 0.036)]
+ties = [K.braid_tie(br, 0.42, "tieA", 0.03), K.braid_tie(br, 0.965, "tieB", 0.027)]
 tuft = K.braid_tuft(br)
 top_z, r0 = float(src.get("hem_z", 0.8)), (float(src.get("hem_rx", 0.165)), float(src.get("hem_ry", 0.128)))
 hip_cy = float(src.get("hem_cy", -0.012))
@@ -126,14 +137,45 @@ lids = [lid_piece(1.0), lid_piece(-1.0)]
 hR, hL = K.hand("R"), K.hand("L")
 pR, pL = K.pistol("R"), K.pistol("L")
 BZ, BY = float(src.get("belt_z", K.BELT_Z)), float(src.get("belt_y", 0.115))
-TOP_K = (0.05, BY + 0.012, BZ)
-TOP_B = (0.128, BY - 0.04, BZ - 0.005)
-TOP_G = (-0.118, BY - 0.03, BZ - 0.005)
+TOP_K = (0.085, BY + 0.012, BZ - 0.02)
 ks = K.keys(TOP_K)
-bl = K.bola(TOP_B)
-gm, GEM_C = K.gem(TOP_G)
-np_ = K.nape()
-pieces = ant + [br, tuft, np_] + ties + [t for pr in tails for t in pr] + wings + lids + hR + hL + pR + pL + ks + bl + gm
+
+
+def front_y(x, z):
+    """The scan's front surface at (x, z)."""
+    h = tree.ray_cast(Vector((x, 0.5, z)), Vector((0, -1, 0)), 1.0)
+    return h[0].y if h[0] is not None else 0.1
+
+
+gm, GEM_C = K.gem(front_y(0.0, 1.213))
+# the chains lie on the skin, rigid to the torso with the coat's edges they link
+chains = []
+for i, (sx, sz, sag) in enumerate(K.SWAGS):
+    pts = []
+    for t in np.linspace(-1, 1, 7):
+        x_, z_ = sx * t, sag + (sz - sag) * t * t
+        pts.append(np.array([x_, front_y(x_, z_) + 0.006, z_]))
+    chains.append(K.swag("swag%d" % i, pts))
+    for sg in (1.0, -1.0):
+        c_ = pts[0] * [-sg, 1, 1]
+        chains.append(K.sweep("stud%d%s" % (i, "R" if sg > 0 else "L"), "metal-silver", [c_ + [0, -0.004, 0], c_ + [0, 0.004, 0], c_ + [0, 0.007, 0]], K.SEC6, np.array([0.011, 0.01, 0.001]), side_hint=np.array([1.0, 0, 0])))
+for sg in (1.0, -1.0):
+    a_ = np.array([sg * K.COLLAR_STUD[0], 0, K.COLLAR_STUD[1]])
+    b_ = GEM_C + [sg * 0.003, 0, 0.04]
+    pts = [a_ * (1 - t) + b_ * t for t in np.linspace(0, 1, 4)]
+    pts = [q + [0, front_y(q[0], q[2]) + 0.006 - q[1], 0] for q in pts]
+    chains.append(K.swag("swagV" + ("R" if sg > 0 else "L"), pts, 0.0034))
+# the curled trim at the top of the split (the turnaround's back view)
+curls = []
+for sg in (1.0, -1.0):
+    z_ = top_z + 0.025
+    ys_ = [(tree.ray_cast(Vector((sg * x_, -0.5, z_ + dz)), Vector((0, 1, 0)), 1.0)[0] or Vector((0, -0.13, 0))).y - 0.005 for x_, dz in ((0.0, -0.05), (0.008, 0.0), (0.035, 0.016), (0.06, 0.0))]
+    curls.append(K.sweep("curl" + ("R" if sg > 0 else "L"), "cloth-coat", K.catmull([np.array((sg * x_, y_, z_ + dz)) for (x_, dz), y_ in zip(((0.0, -0.05), (0.008, 0.0), (0.035, 0.016), (0.06, 0.0)), ys_)], 7), K.SEC4, np.full(7, 0.0075), side_hint=np.array([0, 1.0, 0])))
+hair_b = K.hairback()
+knives = K.knife(1.0, 0) + K.knife(1.0, 1) + K.knife(-1.0, 0) + K.knife(-1.0, 1)
+pieces = ant + [br, tuft, hair_b] + ties + [t for pr in tails for t in pr] + wings + lids + hR + hL + pR + pL + ks + gm + chains + curls + knives
+for q in gm + chains + curls:
+    q.rigid("hips")
 
 def chain_w(p, pts, names, tip_free=True):
     """Weights along a polyline of chain joints, blended between neighbours; the last bone (the tip) has no skin."""
@@ -179,12 +221,12 @@ for sg, p_, sd in ((1.0, wings[0], "R"), (-1.0, wings[1], "L")):
     nm = ["spring_wing%s_%d" % (sd, i) for i in range(len(pts))]
     wing_chain[sd] = (nm, pts)
     chain_w(p_, pts, nm)
-# the coat tails: two chains a panel, the vertices blended across the columns and along the rows; the front's middle follows its thigh a little
+# the coat panels: two chains a panel, the vertices blended across the columns and along the rows; the top on the hips with the jacket, the front's middle following its thigh a little
 tail_chain = {}
 for sg, (o_, i_), sd in ((1.0, tails[0], "R"), (-1.0, tails[1], "L")):
     G = o_.grid
     ptf, ptb = K.tail_chain(G, 0.2), K.tail_chain(G, 0.8)
-    nf_, nb_ = ["spring_scarftail_coat%sf_%d" % (sd, i) for i in range(4)], ["spring_scarftail_coat%sb_%d" % (sd, i) for i in range(4)]
+    nf_, nb_ = ["spring_scarftail_coat%sf_%d" % (sd, i) for i in range(3)], ["spring_scarftail_coat%sb_%d" % (sd, i) for i in range(3)]
     tail_chain[sd] = ((nf_, ptf), (nb_, ptb))
     for q in (o_, i_):
         n = len(q.v)
@@ -193,26 +235,23 @@ for sg, (o_, i_), sd in ((1.0, tails[0], "R"), (-1.0, tails[1], "L")):
         def add(b, arr):
             w[b] = w.get(b, np.zeros(n)) + arr
         kb = smooth(0.2, 0.8, q.colf)
-        rr = np.clip(q.rowf, 0, 1) * 2.999
+        rr = np.clip(q.rowf, 0, 1) * 1.999
         k0 = np.floor(rr).astype(int)
         fr = rr - k0
         thigh = 0.42 * np.sin(np.clip(q.rowf * 1.25, 0, 1) * np.pi) * (1 - kb) * smooth(0.0, 0.25, q.rowf)
         root = smooth(0.12, 0.0, q.rowf)
         rest = 1 - thigh - root
-        for j in range(3):
+        for j in range(2):
             lo = (k0 == j).astype(float)
             for nm_, k_ in ((nf_, 1 - kb), (nb_, kb)):
                 add(nm_[j], rest * k_ * lo * (1 - fr))
-                if j < 2:
-                    add(nm_[j + 1], rest * k_ * lo * fr)
-                else:
-                    add(nm_[2], rest * k_ * lo * fr)
-        add("root", root)
+                add(nm_[1], rest * k_ * lo * fr)
+        add("hips", root)
         add("thigh." + sd, thigh)
         q.w = w
 # the hangers
 hang = {}
-for nm, top, drop, ps in (("keys", TOP_K, 0.12, ks), ("bola", TOP_B, 0.2, bl), ("gem", TOP_G, 0.2, gm)):
+for nm, top, drop, ps in (("keys", TOP_K, 0.12, ks),):
     pts = K.hang_path(top, drop)
     names_ = ["spring_hang%s_%d" % (nm, i) for i in range(len(pts))]
     hang[nm] = (names_, pts)
@@ -222,7 +261,7 @@ for nm, top, drop, ps in (("keys", TOP_K, 0.12, ks), ("bola", TOP_B, 0.2, bl), (
 
 for p_ in pieces:
     n_ = p_.name
-    if n_.startswith(("antenna", "wing", "tail", "lining", "gemstone", "crystal", "rune")):
+    if n_.startswith(("antenna", "wing", "tail", "lining", "gemstone", "crystal", "rune", "hairback")):
         continue                       # (built wound; two faced)
     if n_.startswith("lid"):
         p_.orient(tuple(p_.c))
@@ -482,6 +521,9 @@ flat_ = PID != 0
 # (a steep texel is a ray that hit the wrong side: straps' undersides, the collar's inside)
 nk_ = smooth(0.62, 0.86, NM[..., 2] * 2.0 - 1.0)[..., None] * 0.75
 nk_[flat_] = 0.0
+# the scan's stitched mouth is in the bake too: flat there, the paint draws the mouth
+mq_ = smooth(0.055, 0.045, np.abs(POS[..., 0] - K.FACE_X)) * smooth(0.03, 0.022, np.abs(POS[..., 2] - K.MOUTH[2] + 0.002)) * (POS[..., 1] > 0.03) * (PID == 0)
+nk_ = nk_ * (1 - mq_[..., None])
 NM[..., :3] = NM[..., :3] * nk_ + np.array([0.5, 0.5, 1.0], np.float32) * (1 - nk_)
 nm_img = bpy.data.images.new("sable_normal", ATLAS, ATLAS)         # a file like the atlas: the clips stage reopens the .blend
 nm_img.colorspace_settings.name = "Non-Color"
@@ -499,9 +541,10 @@ for k_, i in enumerate(low_faces):
     r_, g_, b_ = fcol[k_]
     lum = (r_ + g_ + b_) / 3
     z_ = fc[k_][2]
-    if z_ > K.NECK_Z - 0.09 and lum > 0.62:
-        m = "hair-braid" if z_ > K.NECK_Z + 0.02 and lum > 0.76 else "skin-face"
-    elif z_ > K.NECK_Z - 0.16 and lum > 0.27:
+    sat_ = (max(r_, g_, b_) - min(r_, g_, b_)) / max(max(r_, g_, b_), 0.01)
+    if z_ > K.NECK_Z - 0.03 and lum > 0.62:
+        m = "hair-braid" if z_ > K.NECK_Z + 0.04 and lum > 0.72 else "skin-face"
+    elif lum > 0.27 and sat_ < 0.26 and (z_ > K.NECK_Z - 0.02 or (z_ > 0.93 and abs(fc[k_][0]) < 0.1 and fc[k_][1] > 0.02)):      # the face, neck and the bare plunge
         m = "skin-face"
     else:
         m = "cloth-coat"
@@ -514,17 +557,8 @@ col = sample_scan(pp)
 print("scan paint", col.mean(0))
 OUTC = np.zeros((ATLAS, ATLAS, 3), np.float32)
 OUTC[ys, xs] = P.scan_grade(np.clip(col, 0, 1), pp, AO[ys, xs].astype(np.float64))
-dm = np.hypot(pp[:, 0] - K.MARK_OFF[0], pp[:, 2] - K.MARK_OFF[2]) + 9.0 * (pp[:, 1] < 0.02)      # (across the cheek: its depth doesn't matter)
-near = np.median(OUTC[ys, xs][(dm > 0.016) & (dm < 0.024)], axis=0)
-ek_ = smooth(0.018, 0.009, dm)
-OUTC[ys, xs] = mix(OUTC[ys, xs].astype(np.float64), near, ek_)
-# the face pass: the master's close-up projected on the face, the coat's lacing on her back
-cc_ = OUTC[ys, xs].astype(np.float64)
-nn_ = NOR[ys, xs].astype(np.float64)
-fa_, fm_ = P.face_art(cc_, pp, nn_)
-cc_ = mix(cc_, fa_, fm_)
-cc_ = P.lacing(cc_, pp)
-OUTC[ys, xs] = cc_
+# the face pass
+OUTC[ys, xs] = P.face_fix(OUTC[ys, xs].astype(np.float64), pp)
 
 
 def paint(pred, fn):
@@ -542,22 +576,25 @@ paint(lambda n: n.startswith(("finger", "thumb")), free(P.skin))
 for a_ in ant:
     paint(lambda n, nm=a_.name: n == nm, lambda p, n, ao, q=a_: P.feather(p, n, ao, q.path))
 paint(lambda n: n == "braid", lambda p, n, ao: P.braid(p, n, ao, br.path))
-paint(lambda n: n in ("tuft", "nape"), P.tuft)
-paint(lambda n: n.startswith("tie"), P.silver)
+paint(lambda n: n == "tuft", P.tuft)
+paint(lambda n: n == "hairback", P.hairback)
+paint(lambda n: n.startswith("tie"), P.tie)
+paint(lambda n: n.startswith("curl"), lambda p, n, ao: P.lining(p, n, np.ones(len(p))))
+paint(lambda n: n.startswith("sheath"), free(P.glove))
+paint(lambda n: n.startswith("hilt"), free(P.wrap))
+paint(lambda n: n.startswith("blade"), free(P.blade))
 for q_ in tails:
     paint(lambda n, nm=q_[0].name: n == nm, lambda p, n, ao, g=q_[0].grid: P.coat_outer(p, n, ao, g))
     paint(lambda n, nm=q_[1].name: n == nm, lambda p, n, ao: P.lining(p, n, ao))
 for w_ in wings:
-    paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across, q.s))
-paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(lambda p, n, ao: P.pistol_art(p, n, ao, P.silver_engraved)))
-paint(lambda n: n.startswith("stock"), free(lambda p, n, ao: P.pistol_art(p, n, ao, P.wood)))
+    paint(lambda n, nm=w_.name: n == nm, lambda p, n, ao, q=w_: P.wing(p, n, ao, q.root, q.along, q.across))
+paint(lambda n: n.startswith(("barrel", "rod", "lock", "cock", "frizzen", "guard", "cap")), free(P.silver_engraved))
+paint(lambda n: n.startswith("stock"), free(P.wood))
 paint(lambda n: n.startswith("mouth"), P.mouth_glow)
 paint(lambda n: n.startswith("rune"), P.runes)
 paint(lambda n: n.startswith("crystal") or n == "gemstone", P.crystal)
-paint(lambda n: n.startswith(("keyring", "keyshaft", "keybit", "gemchain", "gemframe")), P.silver)
-paint(lambda n: n.startswith("bola"), P.bola)
-paint(lambda n: n.startswith("cord"), P.glove)
-skin_c = sample_scan([K.EYE + [0.03, 0.0, -0.035]])[0] * 1.03
+paint(lambda n: n.startswith(("keyring", "keyshaft", "keybit", "bell", "swag", "stud", "gemframe", "pommel")), P.silver)
+skin_c = np.array(OUTC[ys, xs][np.argmin(np.abs(pp - (K.EYE + [0.03, 0.0, -0.035])).sum(1))], dtype=np.float64)    # the graded skin under the eye
 for q, sg in ((lids[0], 1.0), (lids[1], -1.0)):
     def liner(p_, qq=q):
         ca, sa = math.cos(-LID_A), math.sin(-LID_A)
@@ -645,9 +682,9 @@ for s, side in ((1.0, "R"), (-1.0, "L")):
     bone("foot." + side, "shin." + side, hd, hd + [0, 0.12, 0])
 for sd in "RL":
     spring(*ant_chain[sd], "head")
-    spring(*wing_chain[sd], "root")
+    spring(*wing_chain[sd], "hips")
     for nm_, pts in tail_chain[sd]:
-        spring(nm_, pts, "root")
+        spring(nm_, pts, "hips")
 spring(braid_nm, braid_pts, "head")
 for nm_, pts in hang.values():
     spring(nm_, pts, "root")
@@ -671,8 +708,8 @@ A = {"anchor_head_top": ("head", (0, 0.0, K.NECK_Z + 0.34)), "anchor_chest": ("h
      "anchor_pan_r": ("hand.R", tuple(pr_(0.007, BV + 0.05, 0.016))), "anchor_pan_l": ("hand.L", tuple(pl_(0.007, BV + 0.05, 0.016))),
      "anchor_hand_r": ("hand.R", tuple(K.grip("R"))), "anchor_hand_l": ("hand.L", tuple(K.grip("L"))),
      "anchor_eye_r": ("head", tuple(K.eye_c(1.0))), "anchor_eye_l": ("head", tuple(K.eye_c(-1.0))),
-     "anchor_gem": (hang["gem"][0][1], tuple(GEM_C)), "anchor_bola": (hang["bola"][0][1], tuple(np.asarray(TOP_B) + [0, 0, -0.21])),
-     "anchor_wing_r": ("root", tuple(wings[0].root)), "anchor_wing_l": ("root", tuple(wings[1].root))}
+     "anchor_gem": ("hips", tuple(GEM_C)), "anchor_bola": ("hips", tuple(K.KNIFE_TOP * [-1, 1, 1])),
+     "anchor_wing_r": ("hips", tuple(np.array(K.wing_points(1.0)[0]))), "anchor_wing_l": ("hips", tuple(np.array(K.wing_points(-1.0)[0])))}
 for nm, (bn, at) in A.items():
     e = bpy.data.objects.new(nm, None)
     bpy.context.scene.collection.objects.link(e)

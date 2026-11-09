@@ -28,7 +28,7 @@ No source hero's pose or attitude is copied.
 | 1 | Kael the Unbroken (`juggernaut`) | No clips at all: a procedural mannequin frozen in an A-stance |
 | 2 | Mossy the Barnacle Knight (`bulwark`) | Loop pop; 1.6 s stance; a shield wall hides the warm giant; the shield snaps up in 0.5 s |
 | 3 | Tenzo the Stone Seer (`dolm`) | 0.8 s stance: a 2.5 Hz hip jitter; the feet slide in the hand-off |
-| 4 | Cinder the Flame Queen (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
+| 4 | Cinder the Ashen Kiss (`ashwick`) | Arm locked straight out for the whole idle; built on the flamethrower the owner removed |
 | 5 | Sparkle the Storm Chaser (`mage`) | "Never quite still" stands frozen for 5 s; the gum pops |
 | 6 | Motley the Void Jester (`ostra`) | Finger pop of 11 to 16 deg at every loop; T-pose arms; the stance has no body keys |
 | 7 | Meeko the Dawnfox (`tender`) | Idle and stance built on the lantern that DECISIONS dropped |
@@ -136,7 +136,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Breath in the shoulders; no bounce faster than 1 Hz.
 - **Seam / length:** remove `dolm:stance` from `STAND_OPEN`.
 
-### 4. Cinder the Flame Queen (`ashwick`, art `cinder`)
+### 4. Cinder the Ashen Kiss (`ashwick`, art `cinder`)
 
 - **Source:** DECISIONS (Nov 7): "no weapons, fire from her hands", obsidian outfit, living-fire hair, a flame-tipped
   tail. The archetype ("salamander-folk alchemist... goggles") is stale.
@@ -165,9 +165,11 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   - Breath: a new leaf `x_breath` under hips (scale, 2 breaths a loop, a quicker in-breath), skinned to the rib cage by
     a smooth share of the hips weight; `extra_bones` in warden_anim/cinder.json.
   - Every curve is whole cycles of the loop or a bump that is zero at the seam: `--clip-check` seam 0.0x the limit.
-  - Left open: the magma cracks' brightening (a material, not a clip), the tail's sweep (its spring chain hangs off
-    `root`, so it follows the hips but can't be keyed), and the right fist still draws the old gun (palm up, the
-    barrel angled at the ground) until the v2 body.
+  - Left open: the tail's sweep (its spring chain hangs off `root`, so it follows the hips but can't be keyed). The
+    magma cracks' brightening is now PipStars.pulse (v2 model). The v2 body (empty hands, no fins) is rebased in
+    (ext/idle-ashwick-rebased): both hands are placed by free turns (`RH`/`LH` palm normal + fingers, read by
+    cinder_clips.py `CastSolver`) instead of the old gun fist; the hair flicker/toss (`fin`) is gone with the fins.
+    Frames on the v2 body: [idle f008](idle/cinder_after_v2_idle_f008.png), [stance f003](idle/cinder_after_v2_stance_f003.png).
   - Strips (front, f000 to f012 every 1 s, idle then stance): [before](idle/cinder_before.png),
     [after](idle/cinder_after.png).
 

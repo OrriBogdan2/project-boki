@@ -1,9 +1,10 @@
 """ART-1 Cinder's animation set (hand-keyed as targets, solved by posekit). Times match the kit: the kmove tables in
 scripts/match/kmoves_pair.gd and content/archetypes/ashwick.json (lmb spool 0.2, flight 1.8 s). Personality: she is having the best
 day of her life. Hips first, up on her toes, loose and quick; every blast is a treat; she laughs with her whole body.
-The long gun is carried like a spear: one fist on the wrap, the off hand on the chamber when it matters.
+Her hands are empty: fire comes from the right palm (LMB, RMB), so G is that palm's centre and LP the left wrist; "cast"/"castl" turn a hand
+from hanging along the arm to palm out, fingers up; "RH"/"LH" (palm normal, fingers) turn a hand freely (the idle and stance).
 The idle and stance (docs/art/IDLE_AUDIT.md) are authored with empty hands, fire from her hands (DECISIONS Nov 7: no weapons): she is
-not mad, just certain, and pleased with herself. The model still carries the flamethrower in the right fist until the v2 body.
+not mad, just certain, and pleased with herself.
 Run: blender -b --python tools/art1/cinder_clips.py -- <cinder.blend> <out.glb> [clip,clip]"""
 import sys, os, math
 import bpy
@@ -15,24 +16,16 @@ from posekit import Clip, FnClip, Solver, bake, ang_dir as D, at, eul, FPS, fram
 import cinder_pieces as K
 import crouchkit
 
-UP = (0, 0, 1)
 A_Z = K.ANKLE_Z
 
 
-def be(a, e, edge=UP):
-    """the gun toward ang_dir(a, e), its top toward `edge`."""
-    return (D(a, e), edge)
-
-
-FWD = be(0, 4)
 READY = {
     "pel": (0.022, 0.0, -0.034), "prt": (0.04, -0.14, 0.09), "tor": (0.05, 0.2, -0.1), "hed": (-0.04, -0.12, 0.12),
-    "G": (0.215, 0.13, 0.84), "BE": be(6, 6), "Lw": 0.0, "LP": (-0.235, 0.0, 0.875),
+    "G": (0.3, 0.07, 0.82), "LP": (-0.285, 0.04, 0.87), "cast": 0.3, "castl": 0.2,
     "FL": (-0.085, 0.05, A_Z), "FR": (0.135, -0.05, A_Z), "FLy": 0.32, "FRy": -0.34, "FLp": 0.0, "FRp": 0.0,
-    "brow": -0.25, "lid": 0.08, "fing": 0.3, "skirt": 0.0, "jaw": 0.05, "fin": 0.0, "jet": 0.0,
+    "brow": -0.25, "lid": 0.08, "fing": 0.25, "fistl": 0.0, "skirt": 0.0, "jaw": 0.05, "jet": 0.0,
 }
-SHOULDERED = {"G": (0.20, 0.10, 1.32), "BE": be(-164, 50, (0.35, 0.2, 0.9)), "Lw": 0.0}
-HOSE_HIP = {"G": (0.1, 0.3, 0.87), "BE": be(1, 2), "Lw": 1.0}
+OFFERED = {"G": (0.29, 0.16, 1.12), "cast": 1.0}          # the right hand up beside her, palm out: a flame she's showing off
 
 
 def C(name, dur, keys, loop=False, base=READY):
@@ -44,11 +37,9 @@ END = {k: READY[k] for k in READY}
 
 TAU = 2 * math.pi
 H_HIPS = Vector(tuple(K.J("hips")))
-H_HAND_R = Vector(tuple(K.J("hand.R")))
 PIV = Vector((0.0, 0.0, K.HIPS_Z + 0.03))
-GRIP_OFF = Vector(tuple(K.GRIP_AT)) - H_HAND_R
-REST_R = frame_of(tuple(K.GUN_B), tuple(K.GUN_E))
-LAG_CHEST, LAG_HEAD, LAG_HAND, LAG_HAIR = 4 / 180, 8 / 180, 10 / 180, 14 / 180   # of the 6 s loop: 4, 8, 10, 14 frames
+PALM_OFF = 0.058     # the wrist to the palm's centre along the fingers (the rest hand: the palm 0.058 below the joint)
+LAG_CHEST, LAG_HEAD, LAG_HAND = 4 / 180, 8 / 180, 10 / 180   # of the 6 s loop: 4, 8, 10 frames
 # the idle's feet, the stance's too: weight on the left leg, the free right foot a little forward and up on its ball
 FEET = {"FL": (-0.09, 0.0, A_Z), "FR": (0.13, 0.07, A_Z + 0.025), "FLy": 0.25, "FRy": -0.22, "FLp": 0.0, "FRp": 0.3}
 
@@ -89,10 +80,13 @@ def on_chest(ch, at, fingers, palm):
 
 
 def right_hand(p, w, fingers, palm):
-    """the empty right hand: fingers and palm normal -> the Solver's grip point and frame (the fist's rest: fingers down, palm in)."""
-    edge = fingers.cross(palm)
-    q_hand = frame_of(fingers, edge) @ REST_R.inverted()
-    p["G"], p["BE"] = tuple(w + q_hand @ GRIP_OFF), (tuple(fingers), tuple(edge))
+    """the empty right hand: world wrist, fingers and palm normal -> G (the palm's centre) and the free hand turn RH."""
+    p["G"], p["RH"] = tuple(w + fingers * PALM_OFF), (tuple(palm), tuple(fingers))
+
+
+def left_hand(p, w, fingers, palm):
+    """the empty left hand: LP is its wrist; LH the free turn (palm normal, fingers)."""
+    p["LP"], p["LH"] = tuple(w), (tuple(palm), tuple(fingers))
 
 
 def turn(v, axis, a):
@@ -127,7 +121,6 @@ def idle(u):
     p = dict(READY)
     p.update(FEET)
     p.update(idle_body(u))
-    p["Lw"] = 0.0
     fid = window(u, 0.40, 0.48, 0.63, 0.72)
     look = ss((u - 0.48) / 0.13)
     ch = chest(idle_body(u - LAG_HAND))
@@ -147,7 +140,7 @@ def idle(u):
     lf = Vector(blend((0.7, -0.15, 0.6), lf, fid))
     lp = Vector(blend((0.0, -1.0, 0.0), lp, fid))
     w, lf, lp = on_chest(ch, at, lf, lp)
-    p["LP"], p["LF"] = tuple(w), (tuple(lf), tuple(lp))
+    left_hand(p, w, lf, lp)
     p["fing"] = 0.12 + 0.18 * (bump(u, 0.13, 0.025) + bump(u, 0.19, 0.025)) - 0.12 * fid + 0.1 * fid * look
     # the face: heavy-lidded and pleased with herself; the smile is for the flame. Blinks at 0.18 and 0.9
     smile = window(u - 0.04, 0.46, 0.52, 0.64, 0.74)
@@ -155,8 +148,6 @@ def idle(u):
     p["lid"] = 0.2 + 0.1 * smile
     p["lid"] += (1.0 - p["lid"]) * max(bump(u, 0.18, 0.016), bump(u, 0.9, 0.016))
     p["jaw"] = 0.03 + 0.09 * smile
-    # the living-fire hair: a flicker, and a toss 14 frames behind the head's turn
-    p["fin"] = 0.12 + 0.08 * math.sin(TAU * 3 * u) + 0.3 * window(u - LAG_HAIR, 0.40, 0.48, 0.63, 0.72)
     p["breath"] = breath(u)
     return p
 
@@ -180,24 +171,22 @@ def stance(u):
     h = (sh(u) + 1) / 2
     p["FRp"] = 0.3 * (1 - h)
     p["FR"] = (0.13, 0.07, A_Z + 0.025 * (1 - h))
-    p["Lw"] = 0.0
     ch = chest(body(u - LAG_HAND))
     fl = 0.12 * math.sin(TAU * 2 * u)
     rf = turn(Vector((0.05, 1.0, -0.4)).normalized(), (0, 0, 1), 0.05 * math.sin(TAU * 2 * u + 1))
     w, rf, rp = on_chest(ch, (0.2, 0.17, 0.14), rf, turn((0, 0, 1), rf, fl))
     right_hand(p, w, rf, rp)
     w, lf, lp = on_chest(ch, (-0.2, 0.17, 0.14 + 0.005 * math.sin(TAU * 2 * u + 2)), (-0.1, 1.0, 0.05), turn((0, 0, 1), (-0.1, 1.0, 0.05), -fl))
-    p["LP"], p["LF"] = tuple(w), (tuple(lf), tuple(lp))
+    left_hand(p, w, lf, lp)
     p["fing"] = 0.35 + 0.12 * math.sin(TAU * 2 * u + 0.8)
     p["brow"], p["jaw"] = -0.3, 0.06
     p["lid"] = 0.18 + 0.82 * bump(u, 0.45, 0.016)
-    p["fin"] = 0.25 + 0.1 * math.sin(TAU * 3 * u)
     p["breath"] = breath(u)
     return p
 
 
 def gait(speed_k, heading, stride, share, lift):
-    """speed_k 0 walk .. 1 run. heading (deg, + left of facing). The walk leads with the hips; the run leans in, up on her toes, the gun low in one fist."""
+    """speed_k 0 walk .. 1 run. heading (deg, + left of facing). The walk leads with the hips; the run leans in, up on her toes, her arms pumping."""
     d = Vector((-math.sin(math.radians(heading)), math.cos(math.radians(heading)), 0))
     back = max(0.0, -d.y)
     fwd = max(0.0, d.y)
@@ -234,14 +223,11 @@ def gait(speed_k, heading, stride, share, lift):
         p["tor"] = (lean * 0.75 + 0.02 * s2, -0.3 * c1 * (0.7 - 0.2 * speed_k), 0.08 * c1)
         p["hed"] = (-lean * 1.1 - 0.02, 0.14 * c1 + 0.04, -0.05 * c1)
         w = speed_k
-        low = (0.235, -0.04, 0.84 - 0.008 * s2)
-        rd = READY["G"]
-        p["G"] = (rd[0] + (low[0] - rd[0]) * w, rd[1] + (low[1] - rd[1]) * w + 0.05 * c1 * (1 - w), low[2] + 0.04 * max(0, -c1) * w)
-        p["BE"] = frame_of(tuple(Vector(D(6, 6)).lerp(Vector(D(8, -24 + 5 * s2)), w)), UP)
-        lr = READY["LP"]
-        pump = (-0.235, 0.14 - 0.26 * c1, 0.86 + 0.14 * max(0, c1))
-        off = (lr[0], lr[1] + 0.05 * c1, lr[2])
-        p["LP"] = tuple(off[i] + (pump[i] - off[i]) * min(1.0, 0.25 + w) for i in range(3))
+        for key, sx, ph, k0 in (("G", 1.0, -c1, READY["G"]), ("LP", -1.0, c1, READY["LP"])):
+            pump = (sx * 0.27, 0.14 - 0.26 * ph, 0.84 + 0.14 * max(0, ph))
+            off = (k0[0], k0[1] + 0.05 * ph, k0[2])
+            p[key] = tuple(off[i] + (pump[i] - off[i]) * min(1.0, 0.25 + w) for i in range(3))
+        p["cast"], p["castl"] = READY["cast"] * (1 - w), READY["castl"] * (1 - w)
         p["fing"] = 0.5 * w + 0.3 * (1 - w)
         p["skirt"] = 0.2 * c1 * (0.5 + 0.5 * w)
         p["brow"], p["lid"], p["jaw"] = -0.3, 0.1, 0.05 + 0.2 * w
@@ -249,18 +235,18 @@ def gait(speed_k, heading, stride, share, lift):
     return fn
 
 
-# ---- the crouch (item 143): a giggling coil. Up on her toes, the long gun low at the hip in both hands, hunting something to set on fire.
+# ---- the crouch (item 143): a giggling coil. Up on her toes, both hands low and open before her, hunting something to set on fire.
 PILOT = dict(READY, **{
     "pel": (0.03, -0.04, -0.31), "prt": (0.40, -0.14, 0.05), "tor": (0.34, 0.18, -0.05), "hed": (-0.66, -0.10, 0.12),
-    "G": (0.16, 0.46, 0.60), "BE": be(3, 2), "Lw": 1.0,
+    "G": (0.21, 0.36, 0.78), "LP": (-0.2, 0.3, 0.8), "cast": 0.55, "castl": 0.55,
     "FL": (-0.12, 0.24, A_Z + 0.03), "FR": (0.17, -0.22, A_Z + 0.06), "FLy": 0.3, "FRy": -0.5, "FLp": 0.25, "FRp": 0.55,
-    "brow": -0.3, "lid": 0.0, "jaw": 0.22, "fing": 0.7,
+    "brow": -0.3, "lid": 0.0, "jaw": 0.22, "fing": 0.15,
 })
 CREEP = {"ankle": A_Z, "foot": 0.10, "width": 0.13, "stride": 0.31, "lift": 0.05, "toe": 0.28, "share": 0.6, "sway": 0.035, "bob": 0.016, "twist": 0.11, "T": 0.58, "toe_out": -0.22}
 
 
 def crouch_set():
-    return crouchkit.quick(C, END, PILOT, CREEP, hands=("G",), scan=0.36)
+    return crouchkit.quick(C, END, PILOT, CREEP, hands=("G", "LP"), scan=0.36)
 
 
 def clips():
@@ -270,89 +256,88 @@ def clips():
         T = 2 * stride / (share * sp)
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stride * (0.8 if tag in "lr" else 1.0), share, lift)))
-    # LMB: the pilot's 0.2 s: the gun drops across her hip, off hand on the chamber, feet set; then the roar throws her back a step and she leans in,
-    # teeth bared, the gun bucking
-    braced = {"pel": (0.0, 0.03, -0.075), "prt": (0.04, -0.14, 0.0), "tor": (0.34, -0.3, 0.0), "hed": (-0.26, 0.42, 0.0), "brow": 0.55, "lid": 0.12, "jaw": 0.55, "fin": 0.6, "fing": 1.0,
-              "G": HOSE_HIP["G"], "BE": HOSE_HIP["BE"], "Lw": 1.0, "FL": (-0.11, 0.17, A_Z), "FR": (0.15, -0.17, A_Z), "FLy": 0.1, "FRy": -0.55}
-    kick = dict(braced, G=(0.1, 0.22, 0.92), BE=be(1, 13), tor=(0.08, -0.26, 0.0), pel=(0.0, -0.035, -0.06), jaw=0.8, fin=1.0)
-    set_ = dict(braced, G=(0.12, 0.24, 0.85), BE=be(2, 0), jaw=0.2, fin=0.3)
-    buck = dict(braced, G=(0.1, 0.285, 0.875), BE=be(0, 4), tor=(0.31, -0.3, 0.0))
+    # LMB: the pilot's 0.2 s: the arm snaps out, palm first, feet set; then the roar throws her back a step and she leans in, teeth bared, the arm shaking
+    braced = {"pel": (0.0, 0.03, -0.075), "prt": (0.04, -0.14, 0.0), "tor": (0.2, -0.3, 0.0), "hed": (-0.18, 0.42, 0.0), "brow": 0.55, "lid": 0.12, "jaw": 0.55, "fing": 0.05,
+              "G": (0.16, 0.44, 1.2), "LP": (-0.28, -0.06, 0.98), "cast": 1.0, "castl": 0.5, "FL": (-0.11, 0.17, A_Z), "FR": (0.15, -0.17, A_Z), "FLy": 0.1, "FRy": -0.55}
+    kick = dict(braced, G=(0.17, 0.36, 1.22), tor=(0.06, -0.26, 0.0), pel=(0.0, -0.035, -0.06), jaw=0.8)
+    set_ = dict(braced, G=(0.2, 0.26, 1.08), jaw=0.2)
+    buck = dict(braced, G=(0.16, 0.42, 1.21), tor=(0.17, -0.3, 0.0))
     out.append(C("lance", 0.465, [(0.0, END), (0.1, set_), (0.2, kick, "out"), (0.34, braced), (0.4025, buck, "lin"), (0.465, braced, "lin")]))
-    fist = dict(braced, Lw=0.0, LP=(-0.14, 0.08, 1.74), fing=1.0, tor=(0.0, -0.16, -0.08), hed=(-0.36, 0.3, 0.0), jaw=1.0, brow=-0.6, lid=0.3, BE=be(1, 16), G=(0.13, 0.2, 0.92))
+    fist = dict(braced, LP=(-0.14, 0.08, 1.68), fistl=1.0, tor=(0.0, -0.16, -0.08), hed=(-0.36, 0.3, 0.0), jaw=1.0, brow=-0.6, lid=0.3, G=(0.16, 0.5, 1.26))
     out.append(C("lance_stoke", 0.625, [(0.0, braced), (0.1, fist, "out"), (0.22, dict(fist, tor=(-0.08, 0.0, -0.05))), (0.5, braced), (0.5625, buck, "lin"), (0.625, braced, "lin")]))
-    out.append(C("lance_end", 0.3, [(0.0, braced), (0.08, dict(braced, G=(0.14, 0.15, 0.95), BE=be(3, 24), jaw=0.3, tor=(0.1, -0.14, 0)), "out"), (0.3, END)]))
-    # RMB: up to the shoulder, one eye shut along the barrel; the shot kicks; a little shimmy of delight
-    aim = dict(braced, G=(0.1, 0.13, 1.1), BE=be(0, 1), hed=(0.06, 0.36, 0.2), tor=(0.14, -0.34, 0), brow=0.7, lid=0.18, jaw=0.08, fin=0.2)
-    out.append(C("aim", 0.3, [(0.0, END), (0.12, aim), (0.3, dict(aim, G=(0.1, 0.135, 1.102)))]))
-    sh0 = dict(aim, G=(0.1, 0.03, 1.15), BE=be(0, 16), tor=(-0.1, -0.3, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, fin=1.0, brow=-0.4)
-    out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.1, 0.07, 1.13), BE=be(0, 10)), "out"), (0.3, dict(aim, Lw=0.4, jaw=0.5, tor=(0.1, -0.2, 0.05))), (0.48, END)]))
-    # Shift, Soot Ram: head first, horns of her own making: crouched, then flat out behind her own forehead, gun flung back, teeth first; the hit stops her dead and she bounces
-    cr = {"pel": (0, -0.06, -0.2), "prt": (0.35, 0, 0), "tor": (0.35, 0, 0), "hed": (-0.3, 0, 0), "G": (0.25, -0.1, 0.76), "BE": be(-150, -5), "LP": (-0.24, -0.12, 0.74), "brow": 0.8, "lid": 0.1, "jaw": 0.2, "fin": 0.6, "fing": 1.0,
+    out.append(C("lance_end", 0.3, [(0.0, braced), (0.08, dict(braced, G=(0.2, 0.28, 1.04), jaw=0.3, tor=(0.1, -0.14, 0), cast=0.6), "out"), (0.3, END)]))
+    # RMB: the palm up to eye level, sighting along her arm, one eye shut; the shot kicks it high; a little shimmy of delight
+    aim = dict(braced, G=(0.12, 0.44, 1.28), hed=(0.04, 0.36, 0.2), tor=(0.1, -0.34, 0), brow=0.7, lid=0.18, jaw=0.08)
+    out.append(C("aim", 0.3, [(0.0, END), (0.12, aim), (0.3, dict(aim, G=(0.12, 0.445, 1.282)))]))
+    sh0 = dict(aim, G=(0.12, 0.34, 1.38), tor=(-0.1, -0.3, 0), hed=(-0.1, 0.3, 0.1), jaw=0.9, lid=0.08, brow=-0.4)
+    out.append(C("shot", 0.48, [(0.0, aim), (0.06, sh0, "out"), (0.14, dict(sh0, G=(0.12, 0.38, 1.34)), "out"), (0.3, dict(aim, jaw=0.5, tor=(0.1, -0.2, 0.05))), (0.48, END)]))
+    # Shift, Soot Ram: head first, horns of her own making: crouched, then flat out behind her own forehead, arms flung back, teeth first; the hit stops her dead and she bounces
+    cr = {"pel": (0, -0.06, -0.2), "prt": (0.35, 0, 0), "tor": (0.35, 0, 0), "hed": (-0.3, 0, 0), "G": (0.25, -0.1, 0.76), "LP": (-0.24, -0.12, 0.74), "brow": 0.8, "lid": 0.1, "jaw": 0.2, "fing": 1.0,
           "FL": (-0.11, 0.14, A_Z), "FR": (0.12, -0.18, A_Z), "FRp": 0.5}
-    ram = {"pel": (0, 0.2, -0.26), "prt": (0.95, 0, 0), "tor": (0.32, 0, 0), "hed": (-0.75, 0, 0), "G": (0.3, -0.42, 0.74), "BE": be(-172, 16, (0.2, 0, 0.9)), "LP": (-0.3, -0.42, 0.76), "jaw": 0.7, "fin": 1.0, "brow": 0.9,
+    ram = {"pel": (0, 0.2, -0.26), "prt": (0.95, 0, 0), "tor": (0.32, 0, 0), "hed": (-0.75, 0, 0), "G": (0.3, -0.42, 0.74), "LP": (-0.3, -0.42, 0.76), "jaw": 0.7, "brow": 0.9,
            "FL": (-0.1, 0.12, A_Z + 0.24), "FR": (0.12, -0.6, A_Z + 0.2), "FLp": 0.3, "FRp": 1.1, "FRy": -0.1, "skirt": -0.5}
     hit = dict(ram, pel=(0, 0.04, -0.2), prt=(0.34, 0, 0), tor=(-0.06, 0, 0), hed=(-0.36, 0.1, 0.1), G=(0.28, -0.05, 0.92), LP=(-0.3, 0.02, 1.0), jaw=1.0, FL=(-0.14, 0.2, A_Z), FR=(0.14, -0.2, A_Z + 0.02), FRp=0.2, skirt=0.3)
     out.append(C("leap", 0.55, [(0.0, END), (0.06, cr, "out"), (0.3, ram, "lin"), (0.36, hit, "out"), (0.42, dict(hit, pel=(0, 0.0, -0.13))), (0.55, END)]))
     # Shift in the air: a ball, one forward roll on the poof, then spread out on the launch, whooping
-    ball = {"pel": (0, 0, 0.02), "prt": (-0.5, 0, 0), "tor": (0.5, 0, 0), "hed": (0.3, 0, 0), "G": (0.2, 0.14, 0.92), "BE": be(-165, 20), "LP": (-0.2, 0.16, 0.86), "FL": (-0.1, 0.16, 0.42), "FR": (0.12, 0.14, 0.44), "FLp": 1.0, "FRp": 1.0, "jaw": 0.5, "fin": 1.0}
+    ball = {"pel": (0, 0, 0.02), "prt": (-0.5, 0, 0), "tor": (0.5, 0, 0), "hed": (0.3, 0, 0), "G": (0.2, 0.14, 0.92), "LP": (-0.2, 0.16, 0.86), "FL": (-0.1, 0.16, 0.42), "FR": (0.12, 0.14, 0.44), "FLp": 1.0, "FRp": 1.0, "jaw": 0.5, }
     roll = dict(ball, prt=(-3.0, 0, 0))
-    spread = {"pel": (0, 0, 0.0), "prt": (-6.283 + 0.35, 0, 0), "tor": (-0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (0.36, 0.02, 1.03), "BE": be(-30, 22), "LP": (-0.42, 0.02, 1.08), "FL": (-0.24, -0.1, 0.32), "FR": (0.24, -0.16, 0.36), "FLp": 0.7, "FRp": 0.7, "jaw": 0.9, "fin": 1.0, "lid": 0.05, "brow": -0.7}
+    spread = {"pel": (0, 0, 0.0), "prt": (-6.283 + 0.35, 0, 0), "tor": (-0.1, 0, 0), "hed": (-0.1, 0, 0), "G": (0.36, 0.02, 1.03), "LP": (-0.42, 0.02, 1.08), "FL": (-0.24, -0.1, 0.32), "FR": (0.24, -0.16, 0.36), "FLp": 0.7, "FRp": 0.7, "jaw": 0.9, "lid": 0.05, "brow": -0.7}
     out.append(C("hop", 0.7, [(0.0, {"pel": (0, 0, -0.08), "FL": (-0.1, 0.1, 0.25), "FR": (0.12, 0.1, 0.26)}), (0.05, ball, "out"), (0.17, roll), (0.25, spread), (0.5, dict(spread, prt=(-6.283 + 0.45, 0, 0))), (0.7, dict(END, prt=(-6.283 + 0.04, -0.14, 0.09)))]))
     # E, Furnace Cloak (0.24): tuck for a blink, then everything flung wide, chest out, up on her toes, a shriek of joy
-    tuck = {"pel": (0, 0, -0.1), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.16, 0.16, 0.96), "BE": be(-10, 50), "LP": (-0.14, 0.14, 0.95), "fing": 1.0, "fin": 0.3, "lid": 0.5, "jaw": 0.05}
-    wide = {"pel": (0, 0, 0.03), "prt": (-0.12, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.4, 0, 0), "G": (0.42, 0.06, 1.12), "BE": be(-60, 42), "LP": (-0.44, 0.06, 1.14), "fing": 0.0, "fin": 1.0, "jaw": 1.0, "lid": 0.05, "brow": -0.8,
+    tuck = {"pel": (0, 0, -0.1), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (0.05, 0, 0), "G": (0.16, 0.16, 0.96), "LP": (-0.14, 0.14, 0.95), "fing": 1.0, "lid": 0.5, "jaw": 0.05}
+    wide = {"pel": (0, 0, 0.03), "prt": (-0.12, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.4, 0, 0), "G": (0.42, 0.06, 1.12), "LP": (-0.44, 0.06, 1.14), "cast": 1.0, "castl": 1.0, "fing": 0.0, "jaw": 1.0, "lid": 0.05, "brow": -0.8,
             "FLp": 0.5, "FRp": 0.5, "FL": (-0.15, 0.05, A_Z + 0.045), "FR": (0.17, -0.05, A_Z + 0.045), "skirt": 0.3}
     out.append(C("cloak", 0.24, [(0.0, tuck), (0.06, wide), (0.13, dict(wide, pel=(0, 0, 0.0), LP=(-0.42, 0.03, 1.11))), (0.24, END)]))
-    # a Flashover or a knock: the fist punches up, the gun goes with it, a bounce on her heels, cackling
-    pu = {"pel": (0, 0, -0.01), "tor": (-0.26, 0.15, 0.1), "hed": (-0.4, -0.2, 0.1), "G": (0.3, 0.1, 1.3), "BE": be(-10, 58), "LP": (-0.14, 0.08, 1.76), "fing": 1.0, "fin": 1.0, "jaw": 1.0, "lid": 0.32, "brow": -0.7}
+    # a Flashover or a knock: the left fist punches up, a bounce on her heels, cackling
+    pu = {"pel": (0, 0, -0.01), "tor": (-0.26, 0.15, 0.1), "hed": (-0.4, -0.2, 0.1), "G": (0.3, 0.1, 1.2), "LP": (-0.14, 0.08, 1.76), "cast": 1.0, "fistl": 1.0, "jaw": 1.0, "lid": 0.32, "brow": -0.7}
     out.append(C("stoke", 0.5, [(0.0, END), (0.1, pu, "out"), (0.22, dict(pu, pel=(0, 0, -0.09), LP=(-0.14, 0.08, 1.68))), (0.5, END)]))
-    # X, Flue Flight: down into a crouch as the ring bursts, then up on the two jets: gun stowed along her back, leaning into it with her arms back, legs trailing, howling
-    up0 = {"pel": (0, 0, -0.14), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.2, 0, 0), "G": (0.22, -0.05, 0.86), "BE": be(-170, 20), "LP": (-0.22, -0.06, 0.84), "FL": (-0.11, 0.08, A_Z), "FR": (0.12, -0.08, A_Z), "jet": 0.6, "fin": 0.8, "jaw": 0.3}
-    fly = {"pel": (0, 0.0, 0.0), "prt": (0.62, 0, 0.0), "tor": (-0.05, 0, 0.0), "hed": (-0.6, 0, 0.0), "G": (0.25, -0.2, 0.98), "BE": be(-176, 42, (0.5, 0.1, 0.8)), "LP": (-0.29, -0.2, 0.96), "FL": (-0.12, -0.14, 0.38), "FR": (0.13, -0.3, 0.52),
-           "FLp": 0.8, "FRp": 1.1, "jet": 1.0, "jaw": 0.9, "fin": 1.0, "brow": -0.6, "lid": 0.05, "skirt": -0.7, "fing": 0.8}
+    # X, Flue Flight: down into a crouch as the ring bursts, then up on the two heel jets: leaning into it with her arms back, legs trailing, howling
+    up0 = {"pel": (0, 0, -0.14), "prt": (0.3, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.2, 0, 0), "G": (0.22, -0.05, 0.86), "LP": (-0.22, -0.06, 0.84), "FL": (-0.11, 0.08, A_Z), "FR": (0.12, -0.08, A_Z), "jet": 0.6, "jaw": 0.3}
+    fly = {"pel": (0, 0.0, 0.0), "prt": (0.62, 0, 0.0), "tor": (-0.05, 0, 0.0), "hed": (-0.6, 0, 0.0), "G": (0.25, -0.2, 0.98), "LP": (-0.29, -0.2, 0.96), "FL": (-0.12, -0.14, 0.38), "FR": (0.13, -0.3, 0.52),
+           "FLp": 0.8, "FRp": 1.1, "jet": 1.0, "jaw": 0.9, "brow": -0.6, "lid": 0.05, "skirt": -0.7, "fing": 0.8}
     f2 = dict(fly, prt=(0.56, 0, 0.05), FL=(-0.12, -0.2, 0.44), FR=(0.13, -0.24, 0.47), pel=(0, 0, 0.02), jet=0.88)
     f3 = dict(fly, prt=(0.66, 0, -0.05), jet=1.0)
     out.append(C("jet", 1.0, [(0.0, END), (0.08, up0, "out"), (0.22, fly, "out"), (0.45, f2), (0.72, f3), (1.0, fly)]))
     fl0 = dict(fly, pel=(0, 0, 0.1), jet=0.4, prt=(0.2, 0, 0), FL=(-0.12, 0.06, 0.34), FR=(0.13, -0.02, 0.36))
-    sq = {"pel": (0, 0.0, -0.2), "prt": (0.32, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.28, 0, 0), "G": (0.25, 0.04, 0.72), "BE": be(-10, -8), "LP": (-0.28, 0.1, 0.8), "FL": (-0.12, 0.1, A_Z), "FR": (0.13, -0.08, A_Z), "jet": 0.0, "jaw": 0.4, "fin": 0.4}
+    sq = {"pel": (0, 0.0, -0.2), "prt": (0.32, 0, 0), "tor": (0.3, 0, 0), "hed": (-0.28, 0, 0), "G": (0.25, 0.04, 0.72), "LP": (-0.28, 0.1, 0.8), "FL": (-0.12, 0.1, A_Z), "FR": (0.13, -0.08, A_Z), "jet": 0.0, "jaw": 0.4, }
     out.append(C("jet_land", 0.36, [(0.0, fl0), (0.08, sq, "out"), (0.2, dict(sq, pel=(0, 0, -0.08))), (0.36, END)]))
     # air
-    out.append(C("jump", 0.45, [(0.0, {"pel": (0, 0, -0.1), "prt": (0.2, 0, 0)}), (0.07, {"pel": (0, 0, 0.02), "prt": (-0.05, 0, 0), "tor": (-0.12, 0.1, 0), "FL": (-0.09, 0.2, 0.34), "FR": (0.12, -0.1, 0.2), "FLp": -0.4, "FRp": 0.5, "LP": (-0.3, 0.12, 1.1), "fin": 0.6, "jaw": 0.3}, "out"),
-                                (0.3, {"FL": (-0.09, 0.14, 0.38), "FR": (0.12, 0.0, 0.3)}), (0.45, {"FL": (-0.09, 0.1, 0.32), "FR": (0.12, -0.02, 0.28), "fin": 0.2})]))
+    out.append(C("jump", 0.45, [(0.0, {"pel": (0, 0, -0.1), "prt": (0.2, 0, 0)}), (0.07, {"pel": (0, 0, 0.02), "prt": (-0.05, 0, 0), "tor": (-0.12, 0.1, 0), "FL": (-0.09, 0.2, 0.34), "FR": (0.12, -0.1, 0.2), "FLp": -0.4, "FRp": 0.5, "LP": (-0.3, 0.12, 1.1), "jaw": 0.3}, "out"),
+                                (0.3, {"FL": (-0.09, 0.14, 0.38), "FR": (0.12, 0.0, 0.3)}), (0.45, {"FL": (-0.09, 0.1, 0.32), "FR": (0.12, -0.02, 0.28), })]))
     ri = {"pel": (0, 0, 0.02), "prt": (-0.04, 0, 0), "tor": (-0.08, 0.1, 0), "FL": (-0.09, 0.14, 0.36), "FR": (0.12, -0.02, 0.28), "FLp": -0.3, "FRp": 0.5, "LP": (-0.3, 0.1, 1.06), "jaw": 0.2}
     out.append(C("rise", 0.4, [(0.0, ri), (0.2, dict(ri, FL=(-0.09, 0.15, 0.38))), (0.4, ri)]))
-    fa = {"pel": (0, 0, 0.03), "prt": (0.08, 0, 0), "tor": (-0.08, 0, 0), "hed": (0.06, 0, 0), "G": (0.3, 0.1, 0.96), "BE": be(10, 20), "LP": (-0.36, 0.06, 1.04), "FL": (-0.11, 0.12, 0.25), "FR": (0.13, -0.08, 0.31), "FLp": 0.3, "FRp": 0.4, "fing": 0.1, "skirt": 0.35, "jaw": 0.2}
+    fa = {"pel": (0, 0, 0.03), "prt": (0.08, 0, 0), "tor": (-0.08, 0, 0), "hed": (0.06, 0, 0), "G": (0.3, 0.1, 0.96), "LP": (-0.36, 0.06, 1.04), "FL": (-0.11, 0.12, 0.25), "FR": (0.13, -0.08, 0.31), "FLp": 0.3, "FRp": 0.4, "fing": 0.1, "skirt": 0.35, "jaw": 0.2}
     out.append(C("fall", 0.6, [(0.0, fa), (0.3, dict(fa, FL=(-0.11, 0.09, 0.27), FR=(0.13, -0.05, 0.28), LP=(-0.36, 0.06, 1.08))), (0.6, fa)]))
     l2 = {"pel": (0, 0.02, -0.2), "prt": (0.3, 0, 0), "tor": (0.26, 0, 0), "hed": (-0.26, 0, 0), "G": (0.28, 0.08, 0.72), "LP": (-0.3, 0.06, 0.74), "FL": (-0.12, 0.08, A_Z), "FR": (0.13, -0.08, A_Z), "fing": 0.5}
     out.append(C("land", 0.4, [(0.0, dict(l2, pel=(0, 0, -0.04))), (0.08, l2, "out"), (0.4, END)]))
     sg = (K.SH - 0.02, -0.06, K.SHOULDER_Z + 0.36)
-    gl = {"pel": (0, 0, 0.0), "prt": (0.12, 0, 0), "tor": (-0.02, 0, 0), "hed": (-0.08, 0, 0), "G": sg, "BE": be(-176, -35, (0, 0.5, 0.8)), "LP": (-sg[0], sg[1], sg[2] - 0.06), "FL": (-0.1, 0.0, 0.2), "FR": (0.12, -0.2, 0.26), "FLp": 0.4, "FRp": 0.5, "fing": 1.0, "skirt": -0.2, "jaw": 0.3, "fin": 0.3}
+    gl = {"pel": (0, 0, 0.0), "prt": (0.12, 0, 0), "tor": (-0.02, 0, 0), "hed": (-0.08, 0, 0), "G": sg, "LP": (-sg[0], sg[1], sg[2] - 0.06), "FL": (-0.1, 0.0, 0.2), "FR": (0.12, -0.2, 0.26), "FLp": 0.4, "FRp": 0.5, "fing": 1.0, "skirt": -0.2, "jaw": 0.3, }
     out.append(C("glide", 1.6, [(0.0, gl), (0.8, dict(gl, pel=(0.01, 0, 0.012), FR=(0.12, -0.23, 0.27), FL=(-0.1, 0.03, 0.19))), (1.6, gl)]))
     # hits: she's light on her feet, it throws her; a flash of real outrage
-    hf = {"pel": (0, -0.08, -0.08), "prt": (-0.16, 0.08, 0.06), "tor": (-0.34, -0.22, 0.14), "hed": (0.3, 0.3, 0.12), "brow": 1.0, "lid": 0.5, "jaw": 0.55, "fin": 1.0, "G": (0.34, 0.02, 0.86), "BE": be(26, 18), "LP": (-0.3, 0.1, 1.0), "FR": (0.15, -0.16, A_Z), "skirt": -0.3}
+    hf = {"pel": (0, -0.08, -0.08), "prt": (-0.16, 0.08, 0.06), "tor": (-0.34, -0.22, 0.14), "hed": (0.3, 0.3, 0.12), "brow": 1.0, "lid": 0.5, "jaw": 0.55, "G": (0.34, 0.02, 0.86), "LP": (-0.3, 0.1, 1.0), "FR": (0.15, -0.16, A_Z), "skirt": -0.3}
     out.append(C("hit_f", 0.42, [(0.0, END), (0.06, hf, "out"), (0.42, END)]))
     hb = dict(hf, pel=(0, 0.08, -0.09), prt=(0.32, -0.08, -0.05), tor=(0.46, 0.2, -0.1), hed=(-0.55, -0.2, 0), G=(0.3, 0.28, 0.78), LP=(-0.3, 0.2, 0.86), FR=(0.13, -0.05, A_Z), FL=(-0.09, 0.18, A_Z), skirt=0.3)
     out.append(C("hit_b", 0.42, [(0.0, END), (0.06, hb, "out"), (0.42, END)]))
-    s1 = {"pel": (0.02, -0.02, -0.12), "prt": (0.14, 0.1, 0.1), "tor": (0.26, 0.1, 0.16), "hed": (0.46, 0.3, 0.3), "G": (0.3, 0.06, 0.66), "BE": be(14, -40), "LP": (-0.28, 0.08, 0.72), "lid": 0.62, "brow": -1.0, "jaw": 0.6, "fing": 0.1}
+    s1 = {"pel": (0.02, -0.02, -0.12), "prt": (0.14, 0.1, 0.1), "tor": (0.26, 0.1, 0.16), "hed": (0.46, 0.3, 0.3), "G": (0.3, 0.06, 0.66), "LP": (-0.28, 0.08, 0.72), "lid": 0.62, "brow": -1.0, "jaw": 0.6, "fing": 0.1}
     s2 = dict(s1, pel=(-0.02, -0.02, -0.12), prt=(0.14, -0.1, -0.1), tor=(0.26, -0.1, -0.16), hed=(0.46, -0.3, -0.3))
     out.append(C("stun", 1.2, [(0.0, s1), (0.6, s2), (1.2, s1)]))
-    # downed: sat down hard on one hip, propped on her off hand, the gun across her lap, the tail limp, still furious
-    dn = {"pel": (0.05, -0.08, -0.56), "prt": (-0.12, 0.2, -0.18), "tor": (0.42, 0.15, 0.2), "hed": (0.1, 0.1, 0.15), "G": (0.24, 0.3, 0.46), "BE": be(52, -16), "LP": (-0.32, -0.16, 0.13), "FL": (-0.2, 0.5, 0.1), "FR": (0.2, 0.26, 0.1), "FLp": -0.7, "FRp": 0.2, "FRy": -0.5, "FLy": 0.4,
+    # downed: sat down hard on one hip, propped on her off hand, the tail limp, still furious
+    dn = {"pel": (0.05, -0.08, -0.56), "prt": (-0.12, 0.2, -0.18), "tor": (0.42, 0.15, 0.2), "hed": (0.1, 0.1, 0.15), "G": (0.24, 0.3, 0.46), "LP": (-0.32, -0.16, 0.13), "FL": (-0.2, 0.5, 0.1), "FR": (0.2, 0.26, 0.1), "FLp": -0.7, "FRp": 0.2, "FRy": -0.5, "FLy": 0.4,
           "brow": 0.9, "lid": 0.4, "fing": 0.1, "jaw": 0.15, "skirt": 0.5}
     out.append(C("downed", 2.4, [(0.0, dn), (1.2, dict(dn, tor=(0.46, 0.15, 0.2), pel=(0.05, -0.08, -0.57), hed=(0.15, 0.1, 0.15))), (2.4, dn)]))
     out.append(C("revive", 1.6, [(0.0, dn), (0.5, dict(dn, tor=(0.3, 0.1, 0.1), hed=(-0.2, 0, 0), lid=0.1, brow=-0.3, jaw=0.5)),
-                                 (0.95, {"pel": (0, 0.0, -0.26), "prt": (0.34, 0, 0), "tor": (0.34, 0, 0), "hed": (-0.4, 0, 0), "FL": (-0.12, 0.2, A_Z), "FR": (0.14, -0.14, A_Z), "FLp": 0, "FRp": 0.2, "G": (0.26, 0.2, 0.7), "BE": be(10, -10), "LP": (-0.28, 0.16, 0.56), "lid": 0.1}), (1.6, END)]))
-    # death: a last laugh dies in her throat; she staggers back, her knees go, she falls on her side and the gun rolls from her hand
-    dead = {"pel": (0.05, -0.1, -0.66), "prt": (0.18, 0.2, 1.3), "tor": (0.2, 0.2, 0.2), "hed": (0.2, 0.3, 0.3), "G": (0.62, 0.44, 0.08), "BE": be(40, 2, (0.8, 0, 0.5)), "LP": (-0.25, 0.32, 0.16), "FL": (0.3, 0.36, 0.1), "FR": (0.42, 0.1, 0.1), "FLp": 0.4, "FRp": 0.4, "lid": 1.0, "brow": -0.4, "fing": 0.0, "jaw": 0.3, "fin": 0.0, "skirt": 0.3}
+                                 (0.95, {"pel": (0, 0.0, -0.26), "prt": (0.34, 0, 0), "tor": (0.34, 0, 0), "hed": (-0.4, 0, 0), "FL": (-0.12, 0.2, A_Z), "FR": (0.14, -0.14, A_Z), "FLp": 0, "FRp": 0.2, "G": (0.26, 0.2, 0.7), "LP": (-0.28, 0.16, 0.56), "lid": 0.1}), (1.6, END)]))
+    # death: a last laugh dies in her throat; she staggers back, her knees go, she falls on her side and her hand falls open
+    dead = {"pel": (0.05, -0.1, -0.66), "prt": (0.18, 0.2, 1.3), "tor": (0.2, 0.2, 0.2), "hed": (0.2, 0.3, 0.3), "G": (0.62, 0.44, 0.08), "LP": (-0.25, 0.32, 0.16), "FL": (0.3, 0.36, 0.1), "FR": (0.42, 0.1, 0.1), "FLp": 0.4, "FRp": 0.4, "lid": 1.0, "brow": -0.4, "fing": 0.0, "jaw": 0.3, "skirt": 0.3}
     out.append(C("death", 1.5, [(0.0, END), (0.18, {"pel": (0, -0.08, -0.06), "prt": (-0.2, 0, 0), "tor": (-0.3, 0, 0), "hed": (-0.5, 0, 0), "lid": 0.1, "brow": -1, "jaw": 0.8, "G": (0.34, 0.1, 0.78)}, "out"),
-                                (0.6, {"pel": (0.02, -0.04, -0.38), "prt": (0.3, 0.1, 0.4), "tor": (0.4, 0.1, 0.1), "hed": (0.4, 0.2, 0.2), "G": (0.46, 0.34, 0.42), "BE": be(30, -30), "LP": (-0.3, 0.24, 0.48), "FL": (-0.14, 0.12, A_Z), "FR": (0.2, 0.14, A_Z), "lid": 0.6, "jaw": 0.4}),
+                                (0.6, {"pel": (0.02, -0.04, -0.38), "prt": (0.3, 0.1, 0.4), "tor": (0.4, 0.1, 0.1), "hed": (0.4, 0.2, 0.2), "G": (0.46, 0.34, 0.42), "LP": (-0.3, 0.24, 0.48), "FL": (-0.14, 0.12, A_Z), "FR": (0.2, 0.14, A_Z), "lid": 0.6, "jaw": 0.4}),
                                 (1.05, dead, "in"), (1.25, dict(dead, pel=(0.05, -0.1, -0.645)), "out"), (1.5, dead)]))
     # Fusion: both hands up as the fire takes her, a deep breath in, then flung out
-    fu0 = {"pel": (0, 0, -0.14), "prt": (0.2, 0, 0), "tor": (0.3, 0, 0), "hed": (0.1, 0, 0), "G": (0.1, 0.17, 1.02), "BE": be(30, 70), "LP": (-0.12, 0.17, 1.04), "lid": 0.7, "fin": 0.2, "jaw": 0.0}
-    fu1 = {"pel": (0, 0, 0.0), "prt": (-0.14, 0, 0), "tor": (-0.32, 0, 0), "hed": (-0.5, 0, 0), "G": (0.48, 0.05, 1.3), "BE": be(-60, 55), "LP": (-0.48, 0.05, 1.32), "lid": 0.05, "fin": 1.0, "jaw": 1.0, "brow": -0.7, "fing": 0.0, "jet": 0.8}
+    fu0 = {"pel": (0, 0, -0.14), "prt": (0.2, 0, 0), "tor": (0.3, 0, 0), "hed": (0.1, 0, 0), "G": (0.1, 0.17, 1.02), "LP": (-0.12, 0.17, 1.04), "lid": 0.7, "jaw": 0.0}
+    fu1 = {"pel": (0, 0, 0.0), "prt": (-0.14, 0, 0), "tor": (-0.32, 0, 0), "hed": (-0.5, 0, 0), "G": (0.48, 0.05, 1.3), "LP": (-0.48, 0.05, 1.32), "cast": 1.0, "castl": 1.0, "lid": 0.05, "jaw": 1.0, "brow": -0.7, "fing": 0.0, "jet": 0.8}
     out.append(C("fusion", 0.8, [(0.0, END), (0.18, fu0), (0.3, dict(fu0, pel=(0, -0.02, -0.2))), (0.45, fu1, "out"), (0.58, dict(fu1, pel=(0, 0, -0.02))), (0.8, END)]))
-    # the emote: gun on the shoulder, head thrown back, one long cackle she can't stop, shoulders shaking, the free hand on her belly
-    em = dict(SHOULDERED, pel=(0.04, 0, -0.03), prt=(-0.06, -0.2, 0.12), tor=(-0.14, 0.28, -0.12), hed=(-0.5, -0.1, 0.1), LP=(-0.12, 0.17, 0.98), jaw=1.0, fin=1.0, brow=-0.8, lid=0.72, fing=0.4, FL=(-0.075, 0.09, A_Z), FR=(0.155, -0.07, A_Z), FLy=0.42, FRy=-0.5)
+    # the emote: a flame held up, head thrown back, one long cackle she can't stop, shoulders shaking, the free hand on her belly
+    em = dict(OFFERED, pel=(0.04, 0, -0.03), prt=(-0.06, -0.2, 0.12), tor=(-0.14, 0.28, -0.12), hed=(-0.5, -0.1, 0.1), LP=(-0.12, 0.17, 0.98), jaw=1.0, brow=-0.8, lid=0.72, fing=0.4, FL=(-0.075, 0.09, A_Z), FR=(0.155, -0.07, A_Z), FLy=0.42, FRy=-0.5)
     shake = []
     t = 0.45
     i = 0
@@ -369,14 +354,13 @@ def extras(P):
     if not P:
         return {}
     o = {}
-    b, l, f_ = P.get("brow", 0.0), P.get("lid", 0.1), P.get("fin", 0.0)
-    for s, side in ((1.0, "R"), (-1.0, "L")):
+    b, l = P.get("brow", 0.0), P.get("lid", 0.1)
+    f = P.get("fing", 0.1)
+    for s, side, c in ((1.0, "R", f), (-1.0, "L", max(f, P.get("fistl", 0.0)))):
         o["brow." + side] = (Quaternion((0, 1, 0), -s * 0.22 * b), Vector((0, -0.0055 * b, 0)))
         o["lid." + side] = (Quaternion((1, 0, 0), LID_SIGN * 1.3 * l), None)
-        o["fin." + side] = (Quaternion((0, 0, 1), s * 0.55 * f_), None)
-    f = max(P.get("fing", 0.1), P.get("Lw", 0.0))
-    o["fingers.L"] = (Quaternion((1, 0, 0), -0.9 * f), None)
-    o["thumb.L"] = (Quaternion((1, 0, 0), -0.4 * f), None)
+        o["fingers." + side] = (Quaternion((1, 0, 0), 0.9 * c), None)
+        o["thumb." + side] = (Quaternion((1, 0, 0), 0.4 * c), None)
     # the apron rides over the leading thigh
     lead = max(P["FL"][1], P["FR"][1], 0.0) * 1.15 + 0.5 * max(P["FL"][2] - A_Z, P["FR"][2] - A_Z, 0.0)
     o["skirt"] = (Quaternion((1, 0, 0), SKIRT_SIGN * (0.35 * P.get("skirt", 0.0) + min(lead, 0.6))), None)
@@ -429,8 +413,32 @@ LID_SIGN, SKIRT_SIGN, JAW_SIGN = 1.0, 1.0, -1.0
 JET_BONES = ("jet.0", "jet.1")
 
 
+class CastSolver(Solver):
+    """Her empty hands: each hangs along its arm, or by "cast"/"castl" turns palm out, fingers up. The base solver's sword hand is the right palm; the left is set after it."""
+    RELAXED = {"R": ("G", 1.0), "L": ("LP", -1.0)}
+
+    def hand_q(self, side, P, c):
+        key, sx = self.RELAXED[side]
+        free = P.get(side + "H")        # (palm normal, fingers): the idle's own hands; palm normal out of the palm (rest: toward the body), edge = sx * fingers x normal
+        if free:
+            n, fg = Vector(free[0]), Vector(free[1])
+            return frame_of(tuple(n), tuple(sx * fg.cross(n))) @ frame_of((-sx, 0, 0), (0, 1, 0)).inverted()
+        f = (Vector(P[key]) - self.H0["upper_arm." + side]).normalized()
+        k = max(f.y, 0.0)
+        edge = Vector((-sx * k, 1.0 - k, 0.0)).normalized()
+        relaxed = frame_of(tuple(edge.cross(f).normalized() * sx), tuple(edge))
+        cast = frame_of(D(0, 4), (-sx * 0.9, 0.0, 0.45))
+        return relaxed.slerp(cast, c) @ frame_of((-sx, 0, 0), (0, 1, 0)).inverted()
+
+    def solve(self, P):
+        P = dict(P, BE=self.hand_q("R", P, P.get("cast", 0.0)) @ self.rest_frame)
+        Q, at_ = super().solve(P)
+        Q["hand.L"] = self.hand_q("L", P, P.get("castl", 0.0))
+        return Q, at_
+
+
 def bake_jets(arm, clip, act):
-    """The stacks' flames stretch with "jet": a scale track on their own bones (variant bones keep their scale under the clips)."""
+    """The heels' flames stretch with "jet", and all but vanish at rest: a scale track on their own bones (variant bones keep their scale under the clips)."""
     arm.animation_data.action = act
     n = max(2, int(round(clip.dur * FPS)) + 1)
     pbs = arm.pose.bones
@@ -438,8 +446,8 @@ def bake_jets(arm, clip, act):
         t = clip.dur * f / (n - 1)
         j = clip.sample(t).get("jet", 0.0)
         for i, nm in enumerate(JET_BONES):
-            w = 1.0 + j * 0.65
-            ln = 1.0 + j * (2.6 + 0.5 * math.sin(t * 37.0 + i * 2.0))
+            w = 0.25 + j * 1.1
+            ln = 0.06 + j * (3.0 + 0.5 * math.sin(t * 37.0 + i * 2.0))
             pbs[nm].scale = (w, ln, w)
             pbs[nm].keyframe_insert("scale", frame=f)
     arm.animation_data.action = None
@@ -454,11 +462,11 @@ if __name__ == "__main__":
             im.filepath = alt
             im.reload()
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
-    rig = {"grip_rest": tuple(K.GRIP_AT), "blade_rest": tuple(K.GUN_B), "edge_rest": tuple(K.GUN_E), "pelvis": K.HIPS_Z + 0.03, "hilt_l": -K.FORE,
+    rig = {"grip_rest": tuple(bpy.context.scene["palm"]), "blade_rest": tuple(K.GUN_B), "edge_rest": tuple(K.GUN_E), "pelvis": K.HIPS_Z + 0.03, "hilt_l": -K.FORE,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.005, 0.0, K.HAND_Z - 0.05)}}
     bpy.context.scene.render.fps = FPS
     add_breath(arm)
-    sol = Solver(arm, rig)
+    sol = CastSolver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     names = []
     wanted = a[2].split(",") if len(a) > 2 and a[2] else None
