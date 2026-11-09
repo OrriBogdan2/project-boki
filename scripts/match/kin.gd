@@ -970,6 +970,7 @@ func _sim_revive(dt: float) -> void:
 	owner_h.revive += dt / Life.R["kin_revive_time"] * speedup
 	if owner_h.revive >= 1.0:
 		m.revive_hunter(owner_h, self)
+		owner_h.add_stat("kin_saves")
 		note("revived", "pulled you back up when you were down", 4.0)
 		revive_wait = 0.0
 		_hop_on()

@@ -7,6 +7,9 @@ extends Node
 ##   far_hits        a hit from FAR_HIT_M or more
 ##   air_hits        a hit while you are off the ground
 ##   kin_hits        a hit by your Boki
+##   kin_damage      the damage your Boki's hits did
+##   kin_healing     the health your Boki's heals gave you (see kin_heal)
+##   kin_saves       your Boki pulled you back up when you were down (Kin._sim_revive)
 ##   merged_knocks   a knock while merged with your Boki
 ##   lowhp_knocks    a knock while under half health
 ## A Boki's statuses count for its hunter. Added as a child of the match (Match.start).
@@ -65,12 +68,13 @@ func _on_status(target: Node, status: String, by: Node, _duration: float) -> voi
 	_status_seen[key] = m.time
 	h.add_stat(String(STATUS_STATS[status]))
 
-func _on_hit(attacker: Node, target: Node, _amount: float, tags: Array) -> void:
+func _on_hit(attacker: Node, target: Node, amount: float, tags: Array) -> void:
 	var h := credit_of(attacker)
 	if h == null or not is_enemy(h, target):
 		return
 	if attacker is Kin:
 		h.add_stat("kin_hits")
+		h.add_stat("kin_damage", roundi(amount))
 	else:
 		if not h.grounded:
 			h.add_stat("air_hits")
@@ -80,6 +84,14 @@ func _on_hit(attacker: Node, target: Node, _amount: float, tags: Array) -> void:
 			_count_cast(h, target, tags)
 	if target is Hunter:
 		_watch_knock.call_deferred(h, target as Hunter, (target as Hunter).downed)
+
+## A heal from a Boki's ability: heals the target and, if it is the Boki's own hunter, counts the health gained.
+static func kin_heal(cx: Dictionary, target: Node, amount: float) -> void:
+	var owner_h := cx.get("owner") as Hunter
+	var before := owner_h.hp if owner_h else 0.0
+	Effects._heal(target, amount)
+	if owner_h and target == owner_h and cx.get("kin") is Kin:
+		owner_h.add_stat("kin_healing", roundi(owner_h.hp - before))
 
 ## Groups one hunter's ability hits with the same tags inside MULTI_WINDOW_S as one cast.
 func _count_cast(h: Hunter, target: Node, tags: Array) -> void:

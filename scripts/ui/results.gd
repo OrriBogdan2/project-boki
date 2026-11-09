@@ -10,6 +10,8 @@ func show_result(r: Dictionary) -> void:
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
 	s["kin_say"] = String(r.get("kin_say", ""))     # what your Boki said as the run ended
+	if s.has("kin"):
+		s["kin_line"] = ResultsKinRow.line(r, s)
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	_stage(r, s)
 	var won: bool = r.get("extracted", false)
@@ -234,6 +236,7 @@ func _kin_card(s: Dictionary) -> Control:
 	top.add_child(lvl)
 	var td: float = s.get("trust_delta", 0.0)
 	var mood := "trusts you more" if td > 0.5 else ("trusts you less" if td < -0.5 else "feels the same about you")
+	kv.add_child(ResultsKinRow.row(s, get_tree()))
 	var trow := UI.hbox(10); kv.add_child(trow)
 	var tl := UI.label("Trust", 13, UI.MUTED); tl.custom_minimum_size.x = 46; trow.add_child(tl)
 	var now := clampf(float(k["trust"]) / 100.0, 0.0, 1.0)

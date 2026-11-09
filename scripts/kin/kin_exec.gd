@@ -893,9 +893,9 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 			if float(pr["over"]) > 0.0:
 				var n := maxi(1, int(round(float(pr["over"]) / 0.5)))
 				for i in n:
-					m.later(0.5 * (i + 1), func(): if is_instance_valid(t) and not t.dead: Effects._heal(t, amt / float(n)))
+					m.later(0.5 * (i + 1), func(): if is_instance_valid(t) and not t.dead: HunterFeats.kin_heal(cx, t, amt / float(n)))
 			else:
-				Effects._heal(t, amt)
+				HunterFeats.kin_heal(cx, t, amt)
 			m.fx.burst(t.pos + Vector3(0, 1.0, 0), col, 12, 2.5, 0.5, -3.0)
 		"cleanse":
 			t.slow_t = 0.0; t.root_t = 0.0; t.stun_t = 0.0; t.burn_t = 0.0; t.slow_k = 0.0
