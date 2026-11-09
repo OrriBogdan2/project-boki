@@ -29172,5 +29172,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/frigatee_card3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "foldbat_card3",
+    "name": "Foldbat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/foldbat_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card3",
+    "name": "Gloamshell (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gloamshell_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card3",
+    "name": "Gloamshell (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamshell_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card3",
+    "name": "Gloamshell (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gloamshell_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomwort_card3",
+    "name": "Glomwort (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glomwort_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomwort_card3",
+    "name": "Glomwort (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glomwort_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glomwort_card3",
+    "name": "Glomwort (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glomwort_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gravadillo_card3",
+    "name": "Gravadillo (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gravadillo_card3_3.jpg",
+    "ok": true
   }
 ]
