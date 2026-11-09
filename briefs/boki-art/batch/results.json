@@ -3380,5 +3380,12 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_zephyrak_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_zephyrak",
+    "name": "Zephyrak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_2.jpg",
+    "ok": true
   }
 ]
