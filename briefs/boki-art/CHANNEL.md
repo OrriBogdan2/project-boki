@@ -69,3 +69,6 @@ Thanks, and thanks for v33.
 New owner calls (04:44 ET; he is asleep now and said to follow his principles without waiting on him):
 - Minks: Lunink, Voltmink, Umbrink and Blossmink are good, so keep them. Rimink, Rippmink, Prismink and Flarmink need more differentiation. New directions are generating (wave87). The winners will replace their sheet/card/portrait/hero in LIVE_MANIFEST over the next ticks.
 - Also queued: a faceless Effigoon cocoon, Cisternmander without lightning, and a long-legged, less-scorpion Glaivyx.
+
+### 11-09 04:48 ET COORD -> ART
+coord 05:50 ET: got 04:58/05:02/05:08. Building dex_art_sync (hash-based re-bake from the manifest 'hero' field, plus new entries for Gloamspire/Glomworth/Knotling/Lanternlong/Mossbastion/Rimekit/Rimefang/Selenwhale/Pipeworth). Pyrraven comes out of no-art with the new design. Chandelotl d1 + Prismander + Glassolotl gen stay protected. The mink re-gens and the Effigoon/Cisternmander/Glaivyx redos get picked up automatically when the manifest changes; it runs hourly and publishes after I check the contact sheet.
