@@ -901,16 +901,13 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: a word over the hunter, a ring, the ready ping (the owner's slot pings
-## too); everyone online gets the ring.
+## The payoff becoming armed: a word over the hunter, the body glow, the ready ping (the owner's slot pings too).
 func armed_fx(word: String, slot := "sec") -> void:
 	var rc := res_col()
 	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
-	m.fx.ring(h.pos, 1.5, rc, 0.3)
-	m.fx.burst(h.pos + Vector3(0, 1.3, 0), rc, 14, 3.0, 0.4, -2.0, 1.0)
+	m.fx.body_glow(h.pos, rc)
 	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
-	net_ring(h.pos, 1.5, rc)
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
@@ -1094,15 +1091,14 @@ func _tick_charge(dt: float) -> void:
 		charge_fulls += 1
 		_charge_full_tick(col)
 
-## Fully charged: a bright ping, a flash at the hand, a ring; everyone online gets the ring.
+## Fully charged: a bright ping, a flash at the hand and the body glow.
 func _charge_full_tick(col: Color) -> void:
 	var v: Array = CHARGE_VOICE.get(id, ["click", 0.8, 1.8])
 	m.sfx("ab_ready", h.pos, -3.0 if h.is_local() else -7.0, float(v[2]) * 0.6)
 	m.sfx(String(v[0]), h.pos, -4.0, float(v[2]) * 1.15)
 	var d := h.aim_dir()
 	m.fx.flash(h.pos + Vector3(d.x * 0.6, 1.05, d.y * 0.6), col.lightened(0.4), 0.9, 0.08)
-	m.fx.ring(h.pos, 1.5, Color(col, 0.95), 0.22)
-	net_ring(h.pos, 1.5, col)
+	m.fx.body_glow(h.pos, col)
 
 ## Let go: the ring and glow go, and the release punches in proportion to the charge.
 func _charge_release() -> void:

@@ -3547,8 +3547,6 @@ func _play_evolutions() -> void:
 	var tw := create_tween()
 	tw.tween_interval(0.4)
 	tw.tween_property(n, "rotation:y", n.rotation.y + TAU * (3.0 if big else 1.0), 1.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	for i in 6:
-		get_tree().create_timer(0.4 + i * 0.22).timeout.connect(func(): fx.burst(at + Vector3(0, 0.5, 0), tint, 6, 2.0, 0.4, -2.0))
 	tw.tween_callback(func():
 		# swap in the grown model
 		if not is_instance_valid(n):
@@ -3568,8 +3566,7 @@ func _play_evolutions() -> void:
 		k["node"] = nn
 		k["busy"] = false
 		k["t"] = 3.0
-		fx.burst(at + Vector3(0, 0.5, 0), tint, 36, 5.0, 0.8, 4.0, 1.3)
-		fx.ring(at, 3.0, Color(tint, 0.9), 0.5)
+		fx.body_glow(at, tint)
 		Sfx.play("unlock")
 		Sfx.play("kin_happy")
 		_emote(k, "★")
