@@ -43,6 +43,11 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   renamed bones are dropped, the game's spring chains drive them; dash ends at kit 113's 0.42 s keys). Config:
   content/rules/warden_anim/kael.json (`fade` on jug_wave_wind, jug_lunge_wind). The clips were authored for
   kit 113 (levelled lunge, side-swing wave, upright meteor, 0.42 s dash), which the game now runs. Checked by `--clip-check` (juggernaut in OWN_MODELS).
+  The idle (6 s) and stance (8 s) are the docs/art/IDLE_AUDIT.md rework: baked alone (`kael_clips.py <blend> <glb> idle,stance`)
+  and retargeted in over the other 47 (a partial source replaces only its clips). The retarget also adds the `x_breath`
+  leaf under hips (kael.json `extra_bones`) and moves the chest band's hips weights onto it, so the idle's 3 % breath
+  scale lifts the rib cage (`kael_retarget.py` BREATH_*). It prints the sword point at the idle's first frame: keep it
+  within a few cm of the ground (REST_G in kael_clips.py sets the hand).
 - **Armature:** the contract's plus the spring chains of v1 (mane x5, hangcuff, hangwarchain); the anchors of v1
   kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 12.6k triangles
   in all (body 11.7k, sword 0.9k).
