@@ -6240,5 +6240,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_lanceron_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_prismink_r",
+    "name": "Prismink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prismink_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm_r",
+    "name": "Seamwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blossmink_r",
+    "name": "Blossmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_blossmink_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skidlet_r",
+    "name": "Skidlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skidlet_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_x",
+    "name": "Buckleron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_x",
+    "name": "Lockatara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockatara_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_x",
+    "name": "Buckleron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_x",
+    "name": "Voltmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltmink_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk_x",
+    "name": "Tidalisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_x",
+    "name": "Frothisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frothisk_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_x",
+    "name": "Lockatara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lockatara_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk_x",
+    "name": "Frothisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frothisk_x_1.jpg",
+    "ok": true
   }
 ]
