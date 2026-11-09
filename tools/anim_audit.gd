@@ -22,6 +22,8 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const MAX_FREE := 0.1        # a move with data "free_arm" keeps that arm out for at most this share of the clip
+const MAX_STRIKE_MOVE := 0.005  # m: the free_arm layer may move the casting hand at its strike frame this little
+const SAME_AS_IDLE := 0.26   # rad (15 deg): an elbow this close to the idle's is the idle's own hold, not the move's
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
@@ -80,15 +82,15 @@ func _hero(main: Node, id: String) -> void:
 	var weapon := ""
 	row["attacks"] = {}
 	for nm in ATTACKS[id]:
-		row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt)
+		row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt, rest)
 		if weapon == "":
 			weapon = row["attacks"][nm]["weapon_hand"]
 	row["weapon_hand"] = weapon
-	for nm in row["attacks"]:
-		if clips.d.get("free_arm", {}).has(nm) and row["attacks"][nm]["t_free"] > MAX_FREE:
-			print("FAIL %s %s: the free arm stands out for %d%% of the clip (limit %d%%)" % [id, nm,
-					round(100.0 * row["attacks"][nm]["t_free"]), round(100.0 * MAX_FREE)])
-			bad += 1
+	for nm in clips.d.get("free_arm", {}):
+		if not row["attacks"].has(nm):
+			row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt, rest)
+		var spec: Variant = clips.d["free_arm"][nm]
+		_gate_free(id, String(nm), row["attacks"][nm], _aim_hold(clips, String(nm)), spec is Dictionary)
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
@@ -97,6 +99,29 @@ func _hero(main: Node, id: String) -> void:
 	if not id in NO_LEGS:
 		_gate(id, top)
 	m.free()
+
+## A move with data "free_arm": the loose arm hangs, the casting hand's strike pose is the clip's own, and the casting
+## arm does not stand out after its strike (its wind-up may: that is the throw; an aim hold is all wind-up). That last
+## fails only where the data lets the casting arm go too ({side: seconds}); elsewhere it is a NOTE (a backlog item).
+func _gate_free(id: String, nm: String, atk: Dictionary, aim: bool, releases: bool) -> void:
+	if atk["t_free"] > MAX_FREE:
+		print("FAIL %s %s: the free arm stands out for %d%% of the clip (limit %d%%)" % [id, nm,
+				round(100.0 * atk["t_free"]), round(100.0 * MAX_FREE)])
+		bad += 1
+	if atk["strike_moved"] > MAX_STRIKE_MOVE:
+		print("FAIL %s %s: the casting hand is %.0f mm off its strike pose" % [id, nm, 1000.0 * atk["strike_moved"]])
+		bad += 1
+	if atk["t_recover"] > 0.0 and not aim:
+		print("%s %s %s: the casting arm stands out for %d%% of the clip after its strike" % [
+				"FAIL" if releases else "NOTE", id, nm, round(100.0 * atk["t_recover"])])
+		bad += int(releases)
+
+## A clip some move holds while aiming (data "hold_from"): a draw-back, its throw is another clip.
+func _aim_hold(clips: WardenClips, nm: String) -> bool:
+	for k in clips.d.get("kmoves", {}).values():
+		if k is Dictionary and String(k.get("clip", "")) == nm and k.has("hold_from"):
+			return true
+	return false
 
 func _gate(id: String, top: Dictionary) -> void:
 	var share: float = top["slide"] / SPEEDS[2]
@@ -263,7 +288,7 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 			best = i
 	return float(best) / (fr.size() - 1)
 
-func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
+func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float, rest: Dictionary) -> Dictionary:
 	var fr := _clip_frames(sync, clips, sk, clip, 24)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
@@ -282,11 +307,42 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 	var weapon := "R" if path["R"] >= path["L"] else "L"
 	var loose: String = "L" if weapon == "R" else "R"
 	var length := clips.lib.get_animation(clip).length
-	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
+	var out := {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
+	out.merge(_strike(sync, clips, sk, clip, fr, weapon, rest))
+	return out
+
+## The strike frame is where the casting hand moves fastest in the clip as authored (free_arm off). Reports how far the
+## layer moves that hand there, the strike's time, and the share of frames after it where the casting arm stands out
+## (not counting its idle's own hold, which the clip blends back to).
+func _strike(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, fr: Array, weapon: String,
+		rest: Dictionary) -> Dictionary:
+	var keep := clips.free_arm.clips
+	clips.free_arm.clips = {}
+	var raw := _clip_frames(sync, clips, sk, clip, fr.size())
+	clips.free_arm.clips = keep
+	var hand := "hand." + weapon
+	var strike := 0
+	var fastest := -1.0
+	for i in range(1, raw.size()):
+		var step := ((raw[i][hand] as Vector3) - (raw[i - 1][hand] as Vector3)).length()
+		if step > fastest:
+			fastest = step
+			strike = i
+	var idle_elbow := _elbow(rest, weapon)
+	var after := 0
+	for i in range(strike + 1, fr.size()):
+		if _t_posed(fr[i], weapon) and _elbow(fr[i], weapon).angle_to(idle_elbow) > SAME_AS_IDLE:
+			after += 1
+	return {"strike_t": clips.lib.get_animation(clip).length * strike / (fr.size() - 1),
+			"strike_moved": ((fr[strike][hand] as Vector3) - (raw[strike][hand] as Vector3)).length(),
+			"t_recover": float(after) / fr.size()}
+
+func _elbow(p: Dictionary, side: String) -> Vector3:
+	return (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
 
 func _t_posed(p: Dictionary, side: String) -> bool:
-	var d: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)
+	var d := _elbow(p, side)
 	return d.angle_to(Vector3.DOWN) > T_ELEV and absf(d.x) > SIDEWAYS * absf(d.z)

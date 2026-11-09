@@ -59,9 +59,16 @@ hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs 
 clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `ostra`.
 Motley holds his fan arm out in his own idle (a T-pose by the audit's measure), so his data adds `"free_pose": "stun"`: the loose arm eases
 to the hang of that clip instead. A value `{"L": 0.0, "R": 0.1}` lets each arm go from that clip time, so a weapon arm hangs again after
-its strike key: his snap lets the left arm go at once and the right at 0.1 s (strike key 0.067 s, its pose untouched).
+its strike key: his snap keeps both palms through the shove (the source's release beat) and lets both go at 0.1 s, the
+full orb lets its casting arm go at 0.2 s and the Trade lob at 0.22 s, so the arm hangs on the recovery instead of holding its
+elbow out.
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
-(either arm); `t_pose` stays up where the weapon arm itself reaches out.
+(either arm); `t_pose` stays up where the weapon arm itself reaches out. It measures every clip a Hunter's data names in
+`free_arm`, not only the two shown in the strips, and gates three things: the free arm out for at most 10 % of the clip; the
+casting hand within 5 mm of the clip's own pose at its strike frame (where that hand moves fastest, the layer off); and, for
+a clip whose data lets the casting arm go (`{side: seconds}`), no frame after the strike with that arm out (an elbow within
+15 degrees of the idle's own hold does not count, nor does an aim hold, data `hold_from`, which is all wind-up). Elsewhere a
+casting arm out after its strike prints a NOTE: `dredge` throw (63 %) and `tender` shot_r (42 %) for now.
 
 ## Per Hunter, before to after
 
@@ -146,7 +153,7 @@ posts scroll at the move speed).
 
 **Motley (`ostra`)**
 1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
-2. orb held an arm sideways for 100 % of the clip, snap for 75 % and flung the free arm 1.64 body heights. Fixed: orb orb_l orb_hot seed swap swap_aim and snap use `free_arm`; `--anim-audit` now shows orb 100 -> 0 % and snap 75 -> 0 % T-pose, the casting hand's pose at its strike key identical. Left: orb_hot's casting arm on its recovery (25 %), swap's (58 %), and the both-handed moves (snap_wind, swap_air, well, pop, arrive, empower, fuse), which spread both arms on purpose.
+2. orb held an arm sideways for 100 % of the clip, snap for 75 % and flung the free arm 1.64 body heights. Fixed: orb orb_l orb_hot seed swap swap_aim and snap use `free_arm`; `--anim-audit` now shows orb 100 -> 0 % and snap 75 -> 4 % T-pose (one frame: the coil it starts from, held in snap_wind), the casting hand's pose at its strike frame identical. orb_hot 25 -> 4 % and swap 58 -> 8 %: their recovery frames are 0 %, what is left is the wind-up (one and two frames). orb_l 17 % is his idle's own fan arm at the clip's two ends; seed 8 % and swap_aim 17 % are wind-ups. Left: the both-handed moves (snap_wind, swap_air, well, pop, arrive, empower, fuse), which spread both arms on purpose.
 3. No arm swing (reach 0.03).
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
@@ -176,7 +183,9 @@ posts scroll at the move speed).
 
 Split into backlog items per Hunter (role build):
 
-- `ostra`: legs that step (hover now). The attack arm is done (free_arm); orb_hot and swap recovery arms are not.
+- `ostra`: legs that step (hover now). The attack arms are done (free_arm, recovery included).
+- `dredge` throw and `tender` shot_r: the casting arm stands out after its strike (63 %, 42 %; audit NOTE): a release time
+  in their `free_arm` like Motley's.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `ostra` done: free arm); `bulwark`
