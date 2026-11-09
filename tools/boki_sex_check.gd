@@ -7,8 +7,10 @@ extends RefCounted
 ##   4. the card shows the icon, and a female Boki builds on the base model while no female art exists
 
 const N := 2000
-const SEX_FORMS := ["cindle", "puddlet", "burrlet", "zapple", "pebbit", "wisplet", "kestrike", "murmurling"]
-const NO_FORMS := ["gibbelle", "hoarheron", "cindowary"]
+## Owner 11-08 20:20 (one special rule per line): Bellowary, Gongibbon, Kestrike, Lunowl and Murmurling lines only;
+## the branching starter lines (Vespyx, Prismander, Mycroll), Echolop and the rest get none.
+const SEX_FORMS := ["cindowary", "gibbelle", "kestrike", "wisplet", "murmurling"]
+const NO_FORMS := ["cindle", "puddlet", "burrlet", "zapple", "pebbit", "hoarheron"]
 
 var fails := 0
 var n := 0
@@ -92,7 +94,7 @@ func _looks() -> void:
 	var got: String = BokiSex.model_path("kestrike", female, base)
 	var expect := want if ResourceLoader.exists(want) else base
 	ok(got == expect, "a female Boki wears the female model only if its art exists", got)
-	var plain: String = BokiSex.model_path("gibbelle", _of_sex("gibbelle", "f"), "x")
+	var plain: String = BokiSex.model_path("cindle", _of_sex("cindle", "f"), "x")
 	ok(plain == "x", "a species without female looks keeps its one model")
 	var bare: String = BokiSex.model_path("kestrike", {"species": "kestrike"}, base)
 	ok(bare == base, "a bare look-only record wears the base model")

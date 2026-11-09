@@ -150,5 +150,6 @@ an XL Vespyx in a match, their rings showing the hitbox). `--normalize-size` set
 ## Sex
 Every Boki is male or female, 50/50: `Unique.sex` hashes the seed, so hatches, breeding, wild and captured Boki, and old saves
 (v2 -> v3 migration, `Unique.ensure_sex`) all agree. The Boki card, hatch reveal and Field Book page show a small ♀ / ♂ icon.
-Only species with `"sex_forms": true` in `content/kin/<id>.json` have a separate female look
+Only species with `"sex_forms": true` in `content/kin/<id>.json` have a separate female look: the Bellowary, Gongibbon,
+Kestrike, Lunowl and Murmurling lines (owner 11-08 20:20; the branching starter lines and Echolop get none)
 (`art/kin/<id>/<id>_f.glb`, routed by `BokiSex`); until that art exists they wear the base model. Check: `--boki-sex-check`.
