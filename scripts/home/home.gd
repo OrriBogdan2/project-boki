@@ -3372,7 +3372,12 @@ func _open_expedition() -> void:
 		right.add_child(tc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
+	var solo := ExpMode.is_solo()
+	var mtabs := UI.tabs(["Solo", "Trios"], "Solo" if solo else "Trios", func(nm): Save.d["exp_mode"] = "solo" if nm == "Solo" else "trio"; _open_expedition(), {}, 96)
+	for tb in mtabs.get_child(0).get_children():
+		tb.tooltip_text = ExpMode.TEXT["solo" if String(tb.get_meta("tab")) == "Solo" else "trio"]
+	right.add_child(mtabs)
+	right.add_child(UI.label(ExpMode.TEXT["solo" if solo else "trio"], UI.T_SMALL, UI.MUTED))
 	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
 	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
 	var rolling_on: bool = Save.d.get("exp_rolling", false)
@@ -3511,7 +3516,7 @@ func _start_match() -> void:
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
 	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
+	var o := ExpMode.opts()
 	o["total"] = Data.MATCH_PLAYERS
 	if Save.d.get("exp_rolling", false):
 		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)

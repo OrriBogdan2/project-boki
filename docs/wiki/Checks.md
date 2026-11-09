@@ -48,6 +48,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
+| `--solo-drop-check` | The expedition panel's Solo / Trios pick: trios by default, the options each pick starts with, the counts a match builds (solo 20 teams of 1, trios 7 of 3), 19 rivals and no allies solo, rolling sessions sized for either, and a solo match running 30 s |
 | `--extract-check` | Every way out: skiff (waves, rival boarding), rift hatch (keys, losing and looting a key), uplink (stalls, completes, the lift) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
