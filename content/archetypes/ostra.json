@@ -9,6 +9,7 @@
 	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
 	"card": {
+		"role_word": "Controller",
 		"role": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"loop": "Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up.",
 		"lmb": "Tether Lantern: quick orbs to full range through walls; the longer you wait between shots, the bigger and harder the next one, and a full orb slows.",
