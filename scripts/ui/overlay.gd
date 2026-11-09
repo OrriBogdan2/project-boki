@@ -62,7 +62,7 @@ func admin_allowed() -> bool:
 func _input(event: InputEvent) -> void:
 	if listening != "":
 		if event is InputEventKey and event.pressed and not event.echo:
-			if (event as InputEventKey).physical_keycode == KEY_ESCAPE:
+			if (event as InputEventKey).physical_keycode == KEY_ESCAPE:     # fixed: Esc cancels a rebind
 				listening = ""
 				_show_settings()
 			else:

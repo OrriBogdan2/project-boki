@@ -2222,7 +2222,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
-	if panel_open == HomeClasses.TITLE and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
+	if panel_open == HomeClasses.TITLE and event.is_action_pressed("kit_card") and has_meta("hero_hover"):
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
 		return
@@ -2239,8 +2239,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hecon.cancel_carry()
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open != "" and not Overlay.is_open() and event is InputEventKey and event.pressed and not event.echo \
-			and (event.physical_keycode == KEY_ENTER or event.physical_keycode == KEY_KP_ENTER) and not (get_viewport().gui_get_focus_owner() is LineEdit):
+	if panel_open != "" and not Overlay.is_open() and event.is_action_pressed("confirm") and not (get_viewport().gui_get_focus_owner() is LineEdit):
 		if UI.press_primary(panel_host):
 			get_viewport().set_input_as_handled()
 			return

@@ -87,7 +87,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if picker_page == "kit": PracticeHero.open(self)
 			else: PracticeHero.close(self)
 			get_viewport().set_input_as_handled()
-		elif event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and hover_arch != "":
+		elif event.is_action_pressed("kit_card") and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

@@ -3802,7 +3802,7 @@ func _gather_input() -> void:
 			continue
 		if slot_of.has(a[0]) and player and Input.is_action_just_pressed(a[0]) and not paused:
 			var sl: String = slot_of[a[0]]
-			if Input.is_key_pressed(KEY_ALT) and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
+			if Input.is_action_pressed("level_mod") and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
 				player.level_slot(sl)       # Alt + key: put a point into it
 				continue
 			if int(player.slot_lv[sl]) == 0:

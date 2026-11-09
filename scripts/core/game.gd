@@ -101,6 +101,12 @@ func _setup_input() -> void:
 	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
+	_key("undo", [KEY_Z])                     # build mode: undo the last piece (with Ctrl)
+	_key("keep_placing", [KEY_SHIFT])         # build mode: hold while placing to keep placing more
+	_key("level_mod", [KEY_ALT])              # in a match: hold with a slot key to put a skill point in it
+	_key("kit_card", [KEY_K])                 # Hunters screen / practice: the hovered hunter's full kit card
+	_key("confirm", [KEY_ENTER, KEY_KP_ENTER]) # press the open panel's main button
+	_key("push_to_talk", [KEY_V])             # pre-match: hold to talk to the squad
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo

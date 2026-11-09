@@ -395,7 +395,7 @@ func _update_keys() -> void:
 		_light(room.nodes[room.blocker] if not ghost_ok and room.blocker >= 0 else null)
 		state.merge({"held": true, "item": name_text, "can_rotate": true, "can_store": true,
 			"ok": ghost_ok, "reason": room.why})
-		text = "%s: click to put it down  ·  Hold Shift to place more" % name_text
+		text = "%s: click to put it down  ·  Hold %s to place more" % [name_text, Settings.key_cap("keep_placing")]
 		if not ghost_ok:
 			text = "%s: %s" % [name_text, room.why]
 	keys.show_state(state)
@@ -417,10 +417,10 @@ func input(event: InputEvent) -> bool:
 		return true
 	if event is InputEventKey and event.pressed and not event.echo:
 		var key := event as InputEventKey
-		if key.physical_keycode == KEY_Z and (key.ctrl_pressed or key.meta_pressed):
+		if event.is_action_pressed("undo") and (key.ctrl_pressed or key.meta_pressed):
 			undo_last()
 			return true
-		if event.is_action_pressed("store") or key.physical_keycode == KEY_BACKSPACE:
+		if event.is_action_pressed("store"):
 			_store_key()
 			return true
 	if event.is_action_pressed("rotate"):
@@ -447,7 +447,7 @@ func _click(mb: InputEventMouseButton) -> bool:
 	if mb.button_index != MOUSE_BUTTON_LEFT:
 		return false
 	if not held.is_empty():
-		click_place(Input.is_key_pressed(KEY_SHIFT))
+		click_place(Input.is_action_pressed("keep_placing"))
 		return true
 	var index := _piece_under_mouse()
 	if index < 0:

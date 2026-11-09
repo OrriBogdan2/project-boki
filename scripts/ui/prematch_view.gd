@@ -109,10 +109,10 @@ func _tick_label() -> void:
 	timer_label.add_theme_color_override("font_color", UI.BAD if pm.left <= 10.0 else UI.INK)
 
 func _unhandled_key_input(e: InputEvent) -> void:
-	if e is InputEventKey and e.physical_keycode == KEY_V and not e.echo and not chat_in.has_focus():
+	if e is InputEventKey and e.is_action("push_to_talk") and not e.echo and not chat_in.has_focus():
 		_talk(e.pressed)
 
-## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
+## Push-to-talk: the button (hold) or the push_to_talk key. The transport is VoiceChat's; none ships yet.
 func _talk(on: bool) -> void:
 	voice.set_talking(on)
 	var label := "Speaking..." if on else "Hold to talk (V)"

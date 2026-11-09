@@ -97,6 +97,12 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
+| Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
+| Shift | Hold to keep placing (build mode) | `keep_placing` | yes |
+| Alt | Hold with a slot key to level it | `level_mod` | yes |
+| K | Hunter kit card (hover a hunter) | `kit_card` | yes |
+| Enter / Kp | Press the open panel's main button | `confirm` | yes |
+| V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | Z | Separate from the drop | `separate` | yes |
