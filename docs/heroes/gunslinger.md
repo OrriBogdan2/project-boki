@@ -120,6 +120,22 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
 | The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
 
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/venator.md) | Verdict |
+|---|---|---|---|---|
+| LMB | held, firing | 1.0 (quill_rifle `fire_slow` 1.0) | walks while firing, no visible slow (0007-0023) | match |
+| LMB | after a shot | 1.0 | strafes and backpedals between bursts | match |
+| RMB | Burr Charge, press to throw | 1.0 | ~0.2 s commit, "he can walk" | match |
+| Shift | Slipstep (tap, held) | n/a | a slide | n/a |
+| E | Longneedle, 0.6 s charge | 0.0 (`e.self_slow` 1.0) | stands still through the 0.6 s cast bar | match |
+| E | after the beam | 1.0 | a 0.5 bh recoil shove, then the walk isn't measured | [?] |
+| X | Cinderfall, tap | 1.0 | free to move, takes a jump pad as it falls (f103) | match |
+
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
 - RMB is a tap fired from the arm-cannon's top launcher (owner item 112: no hold, no throw): on the press, ground or air, no lane first. It leaves from `launcher_fire` on the new model, above the gun's muzzle otherwise; the flash waits 0.1 s for `launcher_muzzle`.

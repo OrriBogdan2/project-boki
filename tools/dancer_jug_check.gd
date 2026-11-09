@@ -572,6 +572,10 @@ func juggernaut(a) -> void:
 			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
 			and not K.lunge_full,
 			"k %.2f anim %s" % [k_mid, K.anim_id])
+	# the footage walks the charge at 85-95 px/s against 113-124 on a plain run (hero-ref juggernaut.md)
+	A.ok("juggernaut RMB hold: he walks at 75% while the Lunge charges",
+			absf(K.pace() - 0.75) < 0.01 and absf(float(K.rmb_def()["lunge"]["hold_move"]) - 0.75) < 0.001,
+			"pace %.2f" % K.pace())
 	P.do_jump()
 	m.step(A.DT)
 	A.ok("juggernaut RMB hold: you can jump while holding", P.vel.y > 0.5 and K.rmb_down, "vy %.1f" % P.vel.y)

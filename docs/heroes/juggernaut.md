@@ -43,7 +43,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal | Duration is ours |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
 | RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
-| RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you can jump while charging; release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
+| RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you walk at 75% (the footage slows here) and can jump while charging; release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
 | RMB air, Meteor Drop | in the air | A purple disc under the cursor (5m at most) shows while it's ready. Press: a 0.2s hang (blade hauled overhead, knees tucked, one turn) sliding over a marker everyone sees (the 2.6m disc and the 1.2m stun core), a straight vertical slam down onto it with flame streaks (0.22 to 0.4s; owner 113.6), then the landing: a crouch onto the knees, cracks in the ground, a shock ring at the stun's edge, dust and debris, a shake and a deep boom; 18, slow 40%; the core +50% and stunned 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | As the source; press to impact 0.52s (the footage's apex to impact is ~0.55s) |
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
@@ -229,6 +229,24 @@ ultimate (now the X cooldown).
 - Rampage: a 0.07 s dip (planted), then 4.5 m in 0.17 s, then a short low recovery (owner 113.8)
   (keys end at 0.9 s). Its after-images are his own orange flame streaks.
 - The Enraged look is embers and dark drips on his body; no ground disc or light under him.
+
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/juggernaut.md) | Verdict |
+|---|---|---|---|---|
+| LMB | tap swings | 1.0 (greatsword, melee) | keeps walking while swinging | match |
+| LMB | held past 0.22 s, Searing Wave charge | 0.55 | a 0.6-1.0 s charge arc; the walk isn't measured | [?] |
+| RMB | tap, Finishing Slam 0.6 s wind-up | 0.6 | 0.6 s wind-up, blade cocked low; the walk isn't measured | [?] |
+| RMB | held, Lunge charging | **0.75** (`rmb.lunge.hold_move`; was 1.0) | 85-95 px/s against 113-124 on plain runs (0178-0181, 0198-0208) | CHANGED |
+| RMB | air, Meteor Drop | 0 airborne; 0 for 0.2 s after landing, then 0.3 to 1.0 by 0.5 s | the landing walk isn't measured | [?] |
+| Shift | Rampage | n/a | a dash | n/a |
+| E | Warchain hooked | 1.0 | walks ~2.5 s with the tether attached (0305-0317) | match |
+| X | Gilded Riposte guard and strike | 0.0 | planted through the guard (f33-f38) | match |
+| X | Riposte recovery | 0.5 | ~0.35 s low recovery, blade dragging; the walk isn't measured | [?] |
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
 

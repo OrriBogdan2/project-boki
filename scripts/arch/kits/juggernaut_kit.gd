@@ -213,6 +213,7 @@ func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
 	if meteor.running(): return meteor.move_k()
 	if not slam_w.is_empty(): return 0.6
+	if lunge_charging(): return float(rmb_def()["lunge"]["hold_move"])     # the source walks slower while it charges
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
@@ -548,10 +549,15 @@ func rmb_auto_t() -> float:
 
 ## Holding past the tap: the Lunge's crouched wind-up pose (held while you charge). Hooked, the lane runs
 ## down the chain instead: letting go is a Chain Lunge along it.
+## The Lunge is charging: RMB held past the tap on the ground, not in a Warchain.
+func lunge_charging() -> bool:
+	var air_or_chain: bool = rmb_ctx.get("air", false) or rmb_ctx.get("e", false)
+	return rmb_down and rmb_t > float(rmb_def()["hold"]) and not air_or_chain
+
 func rmb_hold_tick(t: float) -> void:
-	var sd := rmb_def()
-	if t <= float(sd["hold"]) or rmb_ctx.get("air", false) or rmb_ctx.get("e", false):
+	if not lunge_charging():
 		return
+	var sd := rmb_def()
 	# the Lunge charging: a lane grows ahead of you with a fill, magenta and flashing at full; the cursor ring
 	# fills; a rising whine on the way in, a ping at full
 	var k := lunge_k(t)
