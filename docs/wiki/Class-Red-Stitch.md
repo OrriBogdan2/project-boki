@@ -101,6 +101,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 16s -> 13s, damage +20%. | cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge. |
 | Dash (Shift) | recharge 9.5s -> 8.5s per charge. | recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 13s, damage +30%. | cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider. |
+| R (ultimate) | Starpiercer cooldown 60s -> 55s, damage 18 -> 19.8, last-shot damage 25 -> 27.5. The Merge lasts 30% longer. | Starpiercer cooldown 60s -> 50s, damage 18 -> 21.6, last-shot damage 25 -> 30. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 

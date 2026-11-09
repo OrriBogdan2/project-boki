@@ -236,7 +236,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).has("x"): continue      # every hero ult on X ranks with R (0022)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)

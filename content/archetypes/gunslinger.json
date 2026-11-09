@@ -115,7 +115,7 @@
 		"linger": 0.75,
 		"recoil": 6.0
 	},
-	"x": {
+	"x": {"per_rank": {"dmg": [4.8, 4.8], "tick_dmg": [0.6, 0.6], "cooldown": [-4, -4]}, 
 		"name": "Cinderfall",
 		"short": "Fall",
 		"icon": "earthshatter",
@@ -148,8 +148,8 @@
 	"rank_cd": {"sec": [1, 0.8333, 0.6667], "dash": [1, 0.8696, 0.7391], "kin": [1, 1, 1]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1.2, 1.4]},
 	"rank3": {"sec": "resets when you knock a hunter", "dash": "a burst of speed for 2s when a slide ends", "kin": "every hunter hit takes 30% off the cooldown"},
-	"rank2": {"sec": "Rank 2: cooldown 6.5s -> 5.4s.", "dash": "Rank 2: recharge 8.5s -> 7.4s.", "kin": "Rank 2: damage +20%."},
-	"rank_next": {"sec": "Rank 3: cooldown 6.5s -> 4.3s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
+	"rank2": {"ult": "Rank 2: Cinderfall cooldown 42s -> 38s, damage 24 -> 28.8, fire damage 3 -> 3.6. The Merge lasts 30% longer.", "sec": "Rank 2: cooldown 6.5s -> 5.4s.", "dash": "Rank 2: recharge 8.5s -> 7.4s.", "kin": "Rank 2: damage +20%."},
+	"rank_next": {"ult": "Rank 3: Cinderfall cooldown 42s -> 34s, damage 24 -> 33.6, fire damage 3 -> 4.2.", "sec": "Rank 3: cooldown 6.5s -> 4.3s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
 	"tells": {
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",

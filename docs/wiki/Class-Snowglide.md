@@ -96,6 +96,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10.2s -> 9.2s, damage +15%. | cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder. |
 | Dash (Shift) | recharge 13s -> 11s. | recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
 | E | cooldown 17s -> 15.3s, wall strength +15%. | cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength. |
+| R (ultimate) | Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Merge lasts 30% longer. | Rimelock cooldown 80s -> 60s, damage 40 -> 56. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

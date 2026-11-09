@@ -89,6 +89,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.7s, damage +50%; a second charge. |
 | Dash (Shift) | recharge 9s -> 8.25s per charge. | recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s. |
 | E | cooldown 10.5s -> 8.9s, damage and shield +25%. | cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%). |
+| R (ultimate) | Flue Flight cooldown 36s -> 24s. The Merge lasts 30% longer. | Flue Flight cooldown 36s -> 24s, trail damage 4.5 -> 5.62. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 
