@@ -33596,5 +33596,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_lensling_full_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_lensling_full",
+    "name": "Lensling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lensling_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_loafhopper_full",
+    "name": "Loafhopper (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_loafhopper_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lurklet_full",
+    "name": "Lurklet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lurklet_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lurklet_full",
+    "name": "Lurklet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lurklet_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_loafhopper_full",
+    "name": "Loafhopper (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_loafhopper_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_loafhopper_full",
+    "name": "Loafhopper (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_loafhopper_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lensling_full",
+    "name": "Lensling (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lensling_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lurklet_full",
+    "name": "Lurklet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_lurklet_full_3.jpg",
+    "ok": true
   }
 ]
