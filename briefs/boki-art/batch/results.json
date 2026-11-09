@@ -52041,5 +52041,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_jibbatross_b3_4.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_coolatee_pb",
+    "name": "Coolatee (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_coolatee_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_coolatee_pb",
+    "name": "Coolatee (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_coolatee_pb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_druzemole_pb",
+    "name": "Druzemole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_druzemole_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_coolatee_pb",
+    "name": "Coolatee (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_coolatee_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_druzemole_pb",
+    "name": "Druzemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_druzemole_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_cardb",
+    "name": "Jibbatross (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/jibbatross_cardb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole_cardb",
+    "name": "Druzemole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/druzemole_cardb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee_cardb",
+    "name": "Coolatee (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/coolatee_cardb_1.jpg",
+    "ok": true
   }
 ]
