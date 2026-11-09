@@ -10,7 +10,7 @@ extends RefCounted
 ## Prints BLIGHTEDGE with the preset. <dir>/captions.txt: "file: caption".
 
 const DT := 1.0 / 60.0
-const LOW_PITCH := 0.38        # rad: the camera for the 60 m shot
+const LOW_PITCH := 0.12        # rad: the camera for the 60 m shot, nearly level so the wall is in frame
 
 var main: Node
 var m: Match
@@ -28,10 +28,11 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	var d := Vector2(spot.x - m.heart.site.x, spot.z - m.heart.site.z).length()
+	var play_pitch := m.cam.pitch
 	await _view("wall_60m", d + 60.0, LOW_PITCH, "The wall 60 m away from the spot, seen from a low camera")
-	await _view("wall_edge", d + 5.0, m.cam.pitch, "The wall 5 m off, the play camera")
+	await _view("wall_edge", d + 5.0, play_pitch, "The wall 5 m off, the play camera")
 	m.heart.hit_t = 1.0e9
-	await _view("in_blight", d - 5.0, m.cam.pitch, "5 m out in the Blight: tint, the line, the red pulse of a hit")
+	await _view("in_blight", d - 5.0, play_pitch, "5 m out in the Blight: tint, the line, the red pulse of a hit")
 	_crop_take("minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the ring, the dashed next ring, the Heart")
 	m.heart.hit_t = -99.0
 	m.hud.full_map.open(true)
