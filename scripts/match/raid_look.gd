@@ -266,7 +266,7 @@ static func storm_fx(cond: String) -> Node3D:
 		return null
 	var root := Node3D.new()
 	root.name = "RaidFx"
-	var lite := Settings.quality() == "low"
+	var lite := Settings.lite()
 	if cond == "ash":
 		root.add_child(_streak(Color(0.66, 0.6, 0.55, 0.6), 340 if not lite else 140, 0.085, 1.6, false))
 		root.add_child(_streak(Color(1.0, 0.55, 0.22, 0.9), 26 if not lite else 12, 0.035, 2.2, true))
