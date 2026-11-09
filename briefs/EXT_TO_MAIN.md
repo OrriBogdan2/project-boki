@@ -5574,3 +5574,4 @@ READY ext/tutorial-idle-check 19a355ea6 (--tutorial-idle-check: 10 s of doing no
 | crop.patch | 0.1 s | kept |
 | buy.stall | 0.1 s | kept |
 | sell.stall | 0.1 s | kept |
+READY ext/ui-loot-panel 1121df7ce (box loot window: rarity-coloured names, better/worse arrows with what you wear, Take best key via key_cap; row builder moved out of hud.gd; take/swap are clicks, no per-row key added; walking while open already works; docs/HUD.md + before/after shots in docs/ui_loot_panel; --loot-full-check 0, --hudref-check 0, health --strict OK, gen_wiki --check OK; shots software-rendered, GPU jobs 20261109-120157-28987 and -120208-32629 queued)
