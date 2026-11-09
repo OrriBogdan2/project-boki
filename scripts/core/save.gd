@@ -79,6 +79,7 @@ func fresh() -> Dictionary:
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
+		"game_board": {},     # base_mode minigame results (BaseBoard); older saves start empty
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
