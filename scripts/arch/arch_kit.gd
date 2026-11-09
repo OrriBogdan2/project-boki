@@ -255,6 +255,9 @@ func spend_rmb(silent := false) -> bool:
 	CombatBus.ability_used.emit(h, id + "_rmb", "secondary")
 	return true
 
+## True while the RMB's own wind-up runs (the press already took: the throw comes by itself). Kits with one override.
+func rmb_winding() -> bool: return false
+
 func rmb_ready() -> bool:
 	return ch_rmb >= 1.0
 

@@ -788,7 +788,7 @@ func tender() -> void:
 			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
-	# --- Burrseed (item 118): a press, a fixed wind-up, the throw by itself on the aim of that moment
+	# --- Burrseed (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
 	K.kind.clear()
 	T.hp = T.max_hp
 	T.root_t = 0.0
@@ -798,13 +798,13 @@ func tender() -> void:
 	var n0: int = _mine(m, P).size()
 	var wind := float(K.rmb_def()["windup"])
 	ok(
-			"mm RMB: not a hold (no hold data), the wind-up is about 1 s, its clip as long",
-			not K.rmb_def().has("hold") and wind >= 0.9 and wind <= 1.0
+			"mm RMB: not a hold (no hold data), a quick wind-up (0.3-0.4 s, item 23), its clip as long",
+			not K.rmb_def().has("hold") and wind >= 0.3 and wind <= 0.4
 			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
 			and not bool(HunterAnim.km_def("mm_seed_aim").get("hold", false)))
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
-	step(m, 0.3)
+	step(m, 0.12)
 	var lane: Dictionary = AimKit.entry(P, "rmb")
 	ok(
 			"mm RMB: winding up, a short dotted lane, the coiled pose, half speed",
@@ -816,12 +816,15 @@ func tender() -> void:
 			"%s len %.1f %s k %.2f" % [
 				String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id, K.move_k()])
 	ok("mm RMB: nothing leaves during the wind-up", _mine(m, P).size() == n0 and K.ch_rmb >= 1.0)
+	ok(
+			"mm RMB: no circle under her during the wind-up (item 23)",
+			not K.lk().live.any(func(b): return String(b["fx"]) == "flare"))
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
-	step(m, 0.3)
+	step(m, 0.12)
 	ok("mm RMB: letting go early does not throw or cancel", K.seed_aim and _mine(m, P).size() == n0)
-	var tt := 0.6
+	var tt := 0.24
 	while _mine(m, P).size() == n0 and tt < 1.5:
 		if tt >= wind - 0.1:
 			sc.aim_at(P, T.pos)

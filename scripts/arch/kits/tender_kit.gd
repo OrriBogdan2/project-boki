@@ -328,11 +328,12 @@ func _tick_glide(dt: float) -> void:
 		h.vel.y = maxf(h.vel.y, -float(air.get("float_fall", 1.2)))
 
 # ------------------------------------------------------------------ RMB: Burrseed
-## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
-## (`wind_move`), a short dotted lane follows the aim and a ring glows round her. The seed then
+## Owner items 118 and 23 (11-08): a press starts a short fixed wind-up (`windup`, Darkside Binding's quick
+## cast) that nothing extends: she slows (`wind_move`) and a short dotted lane follows the aim. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
 ## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0
+func rmb_winding() -> bool: return seed_aim
 
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
@@ -345,8 +346,6 @@ func fire_rmb(c: Dictionary) -> void:
 	seed_wind = float(rmb_def()["windup"])
 	play("mm_seed_aim")
 	m.sfx("tend_seed_aim", h.pos, -6.0, 1.0)
-	lk().burst("flare", h.pos,
-			{"col": Color("9a6aff"), "rim": Color("ffd27a"), "r": 1.4, "dur": seed_wind, "pattern": 3.0})
 	_seed_lane()
 
 func _seed_lane() -> void:

@@ -476,6 +476,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## tuning (`content/rules/tuning.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section). |
+| meeko | {"_note": "Meeko's sun and moon (PipOrbit, owner item 24): metres on the class-neutral model (they scale with her), Hz = turns or cycles a second, rate in 1/s. They circle lift_m above her hips at radius_m, sun and moon on opposite sides; on the side in front of her or toward the camera they sink clear_dip_m and swing clear_push_m wider. lag_rate: how fast they catch up when she moves (trail = speed / rate), never more than lag_max_m behind. A cast (any of her moves starting) speeds the orbit and spin by the cast_*_k factors, pops them cast_pop_m out and flares the glow by cast_flare, all fading over cast_s. glow: a soft ball glow_r_m round each, alpha glow_a pulsing by +-pulse at pulse_hz.", "lift_m": 0.54, "radius_m": 0.46, "orbit_hz": 0.07, "bob_m": 0.03, "bob_hz": 0.45, "spin_hz": 0.12, "tilt_rad": 0.18, "lag_rate": 14.0, "lag_max_m": 0.35, "clear_dip_m": 0.14, "clear_push_m": 0.1, "cast_s": 0.6, "cast_orbit_k": 6.0, "cast_spin_k": 8.0, "cast_pop_m": 0.08, "cast_flare": 0.6, "glow_r_m": 0.2, "glow_a": 0.35, "pulse": 0.35, "pulse_hz": 0.6, "sun_glow": "ffb84a", "moon_glow": "9cc4ff", "moon_r_m": 0.105, "moon_depth": 0.8, "moon_col": "dfe8f6", "crater_col": "aab6d4", "moon_face_k": 0.55} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 
