@@ -627,6 +627,71 @@
    "id": "zephyrak_card2",
    "pick": 2,
    "grade": 8.4
+  },
+  {
+   "id": "anvilbrock_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "bubblisk_card2",
+   "pick": 1,
+   "grade": 8.63
+  },
+  {
+   "id": "cubbat_card2",
+   "pick": 1,
+   "grade": 8.4
+  },
+  {
+   "id": "echolop_card2",
+   "pick": 2,
+   "grade": 8.43
+  },
+  {
+   "id": "effigeetle_card2",
+   "pick": 2,
+   "grade": 8.4
+  },
+  {
+   "id": "glintmole_card2",
+   "pick": 1,
+   "grade": 8.53
+  },
+  {
+   "id": "kestrike_card2",
+   "pick": 1,
+   "grade": 8.47
+  },
+  {
+   "id": "lanterloris_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "marchleaf_card2",
+   "pick": 1,
+   "grade": 8.33
+  },
+  {
+   "id": "mossgrade_card2",
+   "pick": 1,
+   "grade": 8.37
+  },
+  {
+   "id": "tinbrock_card2",
+   "pick": 2,
+   "grade": 8.47
+  },
+  {
+   "id": "umbrink_card2",
+   "pick": 2,
+   "grade": 8.43
+  },
+  {
+   "id": "wyrmink_card2",
+   "pick": 1,
+   "grade": 8.6
   }
  ],
  "rerolled": [

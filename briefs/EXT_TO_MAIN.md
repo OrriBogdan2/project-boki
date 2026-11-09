@@ -4516,3 +4516,18 @@ ART ringrove 8.5 briefs/boki-art/cards/Ringrove.jpg kind=card panel=8.5/8.5/8.5
 ART soakybara 8.33 briefs/boki-art/cards/Soakybara.jpg kind=card panel=8.3/8.3/8.4
 ART thrumbird 8.37 briefs/boki-art/cards/Thrumbird.jpg kind=card panel=8.3/8.3/8.5
 ART zephyrak 8.4 briefs/boki-art/cards/Zephyrak.jpg kind=card panel=8.3/8.4/8.5
+
+## 01:50 ET 11-09 — art session: round 31 group s21 (hero cards)
+ART anvilbrock 8.4 briefs/boki-art/cards/Anvilbrock.jpg kind=card panel=8.2/8.5/8.5
+ART bubblisk 8.63 briefs/boki-art/cards/Bubblisk.jpg kind=card panel=8.6/8.6/8.7
+ART cubbat 8.4 briefs/boki-art/cards/Cubbat.jpg kind=card panel=8.3/8.5/8.4
+ART echolop 8.43 briefs/boki-art/cards/Echolop.jpg kind=card panel=8.4/8.3/8.6
+ART effigeetle 8.4 briefs/boki-art/cards/Effigeetle.jpg kind=card panel=8.4/8.1/8.7
+ART glintmole 8.53 briefs/boki-art/cards/Glintmole.jpg kind=card panel=8.5/8.5/8.6
+ART kestrike 8.47 briefs/boki-art/cards/Kestrike.jpg kind=card panel=8.4/8.4/8.6
+ART lanterloris 8.37 briefs/boki-art/cards/Lanterloris.jpg kind=card panel=8.4/8.4/8.3
+ART marchleaf 8.33 briefs/boki-art/cards/Marchleaf.jpg kind=card panel=8.3/8.3/8.4
+ART mossgrade 8.37 briefs/boki-art/cards/Mossgrade.jpg kind=card panel=8.3/8.5/8.3
+ART tinbrock 8.47 briefs/boki-art/cards/Tinbrock.jpg kind=card panel=8.6/8.4/8.4
+ART umbrink 8.43 briefs/boki-art/cards/Umbrink.jpg kind=card panel=8.5/8.2/8.6
+ART wyrmink 8.6 briefs/boki-art/cards/Wyrmink.jpg kind=card panel=8.6/8.6/8.6
