@@ -10188,5 +10188,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/mothlet_r3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mothlet_r3",
+    "name": "Mothlet",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mothlet_r3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_e",
+    "name": "Rippmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rippmink_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_e",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rippmink_e",
+    "name": "Rippmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rippmink_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_e",
+    "name": "Puffamus",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/puffamus_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_e",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_r_1.jpg",
+    "ok": true
   }
 ]
