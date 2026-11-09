@@ -25798,5 +25798,103 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stance2_chandelapi_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance2_boltstrich",
+    "name": "Boltstrich (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_boltstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_bellowary",
+    "name": "Bellowary (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_bellowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_chandelapi",
+    "name": "Chandelapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_chandelapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_flarmink",
+    "name": "Flarmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_flarmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_flarmink",
+    "name": "Flarmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_flarmink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_flarmink",
+    "name": "Flarmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_flarmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blossmink_v2",
+    "name": "Blossmink (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_blossmink_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blossmink_v2",
+    "name": "Blossmink (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_blossmink_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_arcestrel_v2",
+    "name": "Arcestrel (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blossmink_v2",
+    "name": "Blossmink (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_blossmink_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blossmink_v2",
+    "name": "Blossmink (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_blossmink_v2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_arcestrel_v2",
+    "name": "Arcestrel (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_arcestrel_v2",
+    "name": "Arcestrel (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_arcestrel_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_amanitusk_v2",
+    "name": "Amanitusk (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_amanitusk_v2_1.jpg",
+    "ok": true
   }
 ]
