@@ -216,8 +216,8 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "dash")
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
-			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
-				"tag": "no key · always on" if String(rd.get("kind", "")) == "none" else "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
+			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", d["passive"].get("col", "#ffffff")))),
+				"tag": "no key · always on" if String(rd.get("kind", "none")) == "none" else "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
 			var tl: Dictionary = d.get("tells", {})
 			out["detail"] = [["", String(d["passive"]["desc"])]]
 			if tl.has("half"):

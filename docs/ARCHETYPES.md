@@ -94,7 +94,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
-| Bulwark | **Guard** | blocking | defence meter |
+| Bulwark | none (Crushed stun on a wall knock) | n/a | n/a |
 
   The Gunslinger's is the lightest. If playtests show six resources is too much to read, cut that one first.
 
@@ -664,14 +664,7 @@ shape and the banner**.
 The shield's HP is 160, regenerating 20/s after 2s lowered. If it breaks, it's locked out for 3s. It
 has no cooldown; it's HP-gated.
 
-**Passive: Guard.** Damage blocked by your shield, your walls or your Interpose guard becomes Guard
-(1 per 2 HP blocked, max 100). It decays 5/s out of combat. It's spent by:
-- an empowered Bash (50);
-- the Interpose ally-leap shield (20 for its +15 shield);
-- Bastion (all of it: +1s per 50).
-
-**Tells:** shield runes light in three steps (33, 66, 100); the crest glows at 100. HUD: a Guard bar
-on the shield icon.
+**Passive: Crushed.** Any knock of his that drives a foe into a wall or another foe stuns it 0.5s (owner decision 2026-11-07: the Guard meter was invented and is cut; there is no resource and no Guard HUD).
 
 **RMB: Shield**:
 
@@ -681,7 +674,6 @@ on the shield icon.
 | tap | **Bash** (6s): a 2.5m, 90° cone, 10 damage, push 8. Stun 0.8 into a wall |
 | airborne / gliding | **Shield Surf**: hold to block from the front while gliding (frontal hits can't spike you); glider heat builds 25% faster while it's up |
 | during E (inside the Banner's radius) | the shield is +1.5m wider (it covers allies), and a Bash heals allies behind you 8 |
-| Guard 50+ | the Bash becomes **Shield Slam** (spends 50): push 12 and stun 0.6 even without a wall. A 0.3s shield flare is the tell |
 
 **E: Rally Banner** (18s, utility): plant a banner totem up to 7m away for 6s (60 HP, 4m radius).
 Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
@@ -694,13 +686,12 @@ Allies inside get a shield of 6 per second (max 24). Foes inside are slowed 0.2.
   - On start, foes inside are pushed out (12).
   - Allies inside regenerate 8/s.
   - Bodies can still walk in.
-  - It spends all Guard for +1s per 50.
 - **Counterplay:** walk in and fight up close, or reposition and wait it out.
 
-**Dash: Interpose** (DASHES §3.2): a braced step, or a leap to an ally. Both build and spend Guard.
+**Dash: Interpose** (DASHES §3.2): a braced step, or a leap to an ally.
 
-**Loop:** block → Guard → Interpose to an ally in trouble → Banner over the fight → Shield Slam
-whoever dives → Bastion when the squad is collapsing (bigger with more Guard).
+**Loop:** block → Interpose to an ally in trouble → Banner over the fight → Bash
+whoever dives → Bastion when the squad is collapsing.
 
 **Level-up order:** 1 RMB · 2 Dash · 3 E · 4 RMB · 5 E · 6 R · 7 RMB · 8 Dash · 9 R · 10 Q.
 
@@ -711,8 +702,7 @@ whoever dives → Bastion when the squad is collapsing (bigger with more Guard).
 | E | the Banner's radius is 5m |
 | R rank 2 | the dome is 5.5m |
 
-**Counterplay:** flank the frontal shield. Glowing runes mean a Shield Slam is ready, so stay off the
-front. Break the Banner (60 HP). Melee inside Bastion.
+**Counterplay:** flank the frontal shield. Break the Banner (60 HP). Melee inside Bastion.
 
 **Kin modifiers:**
 
@@ -969,7 +959,7 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
   check 50 -> 41.
 - Bots: a full cylinder taps a Called Shot within 9m; otherwise the Rail from range.
 
-### Bulwark: Block -> Guard -> Crushed (rebuilt on an Oath-style shield-tank baseline)
+### Bulwark: Block -> Crushed (rebuilt on an Oath-style shield-tank baseline)
 
 Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
 close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
@@ -978,17 +968,16 @@ above is superseded by this:
 | Slot | What it does |
 |---|---|
 | LMB (Tower Shield & Mace) | **tap: throw the mace** 9m (16, passes through foes); it lies where it lands for 6s and shows foes within 4.5m of it to your team; tap again and it comes back to you, hitting on the way (10). **Hold: Crushing Blow**, 14 -> 34 damage and knock 4 -> 12 over 1.25s (full: stun 0.4); its wind-down carries you forward 3-8 m/s, so a jump out of it rolls into a glide. (`ArchKit.lmb_override`: the kit runs this weapon's attack; the minigun Bulwark fires normally) |
-| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). Guard 50+: **Shield Slam** (0.3s flare tell, 18, push 12, stun 0.6, spends 50) |
+| RMB | **hold: raise the shield** (160 HP, regenerates 20/s after 2s down, broken = 3s lockout, you walk at 60%); **tap, or let go after a block: Bash** (2.6m cone, 12, push 9; you step into it). (Owner 2026-11-07: the Guard meter and Shield Slam were cut; the kit is the source's.) |
 | Dash | **Whirl**: a 3.6m spinning dash, foes along it knocked aside (6, push 7). **Shield up: Shield Charge**: 4.2m behind the shield, invulnerable for its length, 10 and push 11 |
-| Passive | **Guard**: blocked damage becomes Guard (1 per 2). **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
+| Passive | **Crushed** (the payoff): a Bash, Shield Charge or full Crushing Blow that knocks a foe into terrain or another foe (within 1.5m behind them) stuns it 0.8 (+8 damage, T4), stuns the foe it hit 0.5, and heals you 14 |
 | E | **Mending Ground**: marks ground up to 7m away, or where the mace lies; 1s later it bursts: allies inside heal 26, your shield mends 60, foes inside are slowed |
-| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each). All Guard goes in: +1 pulse per 50 |
+| R | (removed in the accuracy pass, see docs/heroes/bulwark.md) **Fissure** (0.5s unstoppable fuse): a crack runs 14m forward at 40 m/s (walls, rocks and rises stop it): 8 and stun 0.6 to everyone it passes; 0.35s later the line erupts in 3 pulses 0.3s apart (9 + slow 0.45 each) |
 
-- Loop: raise the shield into their fire (Guard) -> Shield Charge or Slam them into a wall or into
+- Loop: raise the shield into their fire -> Shield Charge them into a wall or into
   their teammate -> Crushed (stun, heal) -> a full Crushing Blow or the Fissure on the stunned.
   Throw the mace to scout a corner, then Mending Ground on it.
-- Tells: three rune pips over the helm (33/66/100 Guard); at 50 a gold crest light, the raised
-  shield burns gold, "SLAM READY" / "SHIELD SLAM READY". Payoff: "CRUSHED", `pay_slam`, T4.
+- Tells: none for a resource (he has none). Payoff: "CRUSHED", `pay_slam`, T4.
 - Bots: shield toward whoever is shooting, Bash up close, Shield Charge / Whirl in from 1.5-4.5m,
   Mending Ground when hurt or the shield is low, Fissure at 11m; LMB throws from range and winds
   up Crushing Blows up close.

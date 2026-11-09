@@ -260,8 +260,6 @@ uniform float power = 1.0;
 uniform float hit = 0.0;
 // 0 whole .. 1 nearly broken
 uniform float hurt = 0.0;
-// a Shield Slam is armed: it burns hotter
-uniform float armed = 0.0;
 """ + _LAYER_UNIFORMS + """
 void fragment() {
 	vec2 uv = UV;
@@ -274,11 +272,11 @@ void fragment() {
 	float sigil = max(head, haft);
 	float sweep = exp(-pow((uv.x - fract(TIME * 0.45)) * 9.0, 2.0)) * 0.2;
 	float crack = hurt * smoothstep(0.93, 1.0, abs(sin(uv.x * 23.0 + sin(uv.y * 17.0) * 2.0)));
-	float a = (0.68 + ribs + rim * 0.5 + sigil * 0.45 + sweep + crack * 0.4 + hit * 0.45 + armed * 0.1) * power;
+	float a = (0.68 + ribs + rim * 0.5 + sigil * 0.45 + sweep + crack * 0.4 + hit * 0.45) * power;
 	vec3 col = mix(color.rgb, vec3(0.72, 0.48, 0.1), ribs * 2.5);
 	col = mix(col, vec3(1.0, 0.97, 0.82), rim * 0.6 + hit * 0.6 + sweep);
 	col = mix(col, vec3(1.0, 0.55, 0.08), sigil * 0.9);
-	col = mix(col, vec3(1.0, 0.42, 0.12), armed * 0.3 + crack * 0.6);
+	col = mix(col, vec3(1.0, 0.42, 0.12), crack * 0.6);
 """ + _TAIL
 		# the screen tint while Spirit Walk carries you through something: a dark blue wash, darker at the edges
 		"tint":

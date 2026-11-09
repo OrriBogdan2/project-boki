@@ -12,8 +12,8 @@ extends RefCounted
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
 ##   archer      a rooted dummy: the aim line and crosshairs over it
 ##   hero_<id>_<move>   Sparkle (mage) and Vex (gunslinger) moments, see scripts/arch/hero_demo.gd
-##   bulwark     the shield raised and burning gold, Guard pips full (Shield Slam armed)
-##   crushed     the same, then letting go: a Shield Slam into the pillar, Crushed
+##   bulwark     the shield raised
+##   crushed     the same, then Shift: the Shield Charge into the pillar, Crushed
 ##   e_<a> / r_<a> / rmb_<a>   any archetype's E, R or RMB on the still dummy (--e-recast: press E again)
 ##   card / card_<archetype>   the kit card (K); card_detail: the RMB detail page
 ##   menu        the loadout panel (L)
@@ -75,9 +75,7 @@ const ANIM_DEMO := {
 	"bul_ult_slam": ["bulwark", "tower_shield", [0.86, 0.91, 1.2, 1.5, 1.8]],
 	"bul_guard": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.7, 0.9, 1.2]],
 	"bul_crush": ["bulwark", "tower_shield", [0.5, 0.58, 0.64, 0.72, 0.85, 1.05]],
-	"bul_slamshield": ["bulwark", "tower_shield", [0.5, 0.62, 0.76, 0.84, 0.95, 1.2]],
 	"bul_break": ["bulwark", "tower_shield", [0.5, 0.54, 0.58, 0.68, 0.85, 1.1]],
-	"bul_armed": ["bulwark", "tower_shield", [0.5, 0.55, 0.6, 0.68, 0.76, 0.86]],
 	"bul_lumber": ["bulwark", "tower_shield", [0.5, 0.56, 0.62, 0.72, 0.85, 1.05]],
 }
 
@@ -342,8 +340,9 @@ static func tick(A: Arena, dt: float) -> void:
 			if _at(t, dt, 0.25): # raise the shield
 				P.ak.bot_hold["rmb"] = 0.95 if w == "crushed" else 3.0
 				P.ak.press_rmb()
-			# (blocked fire becomes Guard)
-			if t > 0.3 and t < 1.2: P.ak.add_guard(dt * 70.0)
+			if w == "crushed" and _at(t, dt, 0.7):
+				P.dashes = P.max_dashes()
+				P.do_dash()
 			if w == "bulwark":
 				at_t = 1.6
 			else:
@@ -416,7 +415,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 		DJDemo.trigger(P, D, mv, t, dt)          # Sable and Juggernaut (scripts/arch/dj_demo.gd)
 		return
 	match mv:
-		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "bul_guard", "bul_crush", "bul_slamshield", "bul_break", "bul_armed", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
+		"arc_draw", "arc_loose", "arc_heavy_wind", "arc_heavy", "arc_hail", "pin_roll", "arc_super", "arc_tap", "arc_perfect", "arc_over", "arc_over_loose", "pin_walk", "pin_flick", "bul_guard", "bul_crush", "bul_break", "bul_lumber", "bul_throw", "bul_recall", "bul_smash_wind", "bul_smash", "bul_whirl", "bul_charge", "bul_short", "bul_mend":
 			_anim_hero(A, P, mv, t, dt)
 		"pin_ult_cast", "pin_ult_nock", "pin_ult_loose", "pin_ult_final", "bul_ult_wind", "bul_ult_slam":
 			_anim_ult(P, mv, t, dt)
@@ -428,8 +427,7 @@ static func _anim_trigger(A: Arena, P: Hunter, D: Hunter, mv: String, t: float, 
 static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> void:
 	var K: ArchKit = P.ak
 	var fire := false
-	if mv != "bul_slamshield":
-		K.res = 0.0            # no Guard tell in the strips (the Shield Slam needs its Guard)
+	K.res = 0.0            # no meter tell in the strips
 	# dashes go across the screen, clear of the dummy ahead (a strip used to end inside its model)
 	if mv in ["pin_roll", "pin_walk", "pin_flick", "bul_lumber", "bul_whirl", "bul_short"]:
 		P.inp["move"] = Vector2(0, 1)
@@ -495,7 +493,7 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				P.dashes = 0.0
 				P.ex_cd = 0.0
 				P.do_dash()
-		"bul_crush", "bul_break", "bul_armed": if _at(t, dt, 0.5): K.play(mv)
+		"bul_crush", "bul_break": if _at(t, dt, 0.5): K.play(mv)
 		"bul_guard":
 			P.inp["sec_hold"] = t > 0.45
 			if _at(t, dt, 0.5):
@@ -503,16 +501,6 @@ static func _anim_hero(A: Arena, P: Hunter, mv: String, t: float, dt: float) -> 
 				K.cd["rmb"] = 0.0
 				K.set("lock_t", 0.0)
 				K.press_rmb()
-		"bul_slamshield":
-			K.res = maxf(K.res, 60.0)
-			if _at(t, dt, 0.3):
-				K.ch_rmb = 1.0
-				K.cd["rmb"] = 0.0
-				K.bot_hold["rmb"] = 3.0
-				K.press_rmb()
-			if _at(t, dt, 0.7):
-				P.dashes = P.max_dashes()
-				P.do_dash()
 	P.inp["fire"] = fire
 
 ## The X ultimates' strips: Starpiercer cast at 0.5 (its beams from a press at 0.5 after a cast at 0.3, the
