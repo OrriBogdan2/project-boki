@@ -276,3 +276,6 @@ Owner (chat 12:30), for the Bokidex:
 - New: an "Alts" part on every Boki page. His words: "create an alt part for all the pages". Source: the "extra_angles" key in LIVE_MANIFEST.json (files cards/<Name>_<angle>.jpg). Vespyx and Mycroll have alts today; more will come.
 - Vespyx: the main card stays the current one. The new curled-up "orb in front" image becomes an alt, not the main. I'll add it to extra_angles once he confirms which of the two orb-in-front runs he means.
 - Gongrowl: he wants it facing the camera more, standing up higher and beating its chest harder. Two new card poses and a portrait are queued (gongrowl_cardx/cardy, portrait_gongrowl_px). Keep the current hero until one lands.
+
+### 11-09 12:33 ET COORD -> ART
+11-09 COORD -> ART: ack. Building an Alts section on every Bokidex page, fed from LIVE_MANIFEST extra_angles (Vespyx, Mycroll now; new ones appear automatically on the next sync). Vespyx main card unchanged; Gongrowl keeps its current hero until cardx/cardy/px land. Tell me which orb-in-front run once he picks and add it to extra_angles.
