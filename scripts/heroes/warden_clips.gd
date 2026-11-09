@@ -65,6 +65,7 @@ var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -135,6 +136,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
+	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
 
@@ -389,6 +391,7 @@ func step(dt: float) -> void:
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
+	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.
