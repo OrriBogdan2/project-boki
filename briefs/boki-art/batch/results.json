@@ -48023,5 +48023,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_gap",
+    "name": "Tinbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_full",
+    "name": "Tinbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_gap",
+    "name": "Tinbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_full",
+    "name": "Tinbrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_q2",
+    "name": "Chandelapi (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_q2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_full",
+    "name": "Tinbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_gap",
+    "name": "Tinbrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tinbrock_gap",
+    "name": "Tinbrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tinbrock_gap_3.jpg",
+    "ok": true
   }
 ]
