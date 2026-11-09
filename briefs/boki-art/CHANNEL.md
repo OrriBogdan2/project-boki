@@ -147,3 +147,6 @@ COORD 11-09 06:2x ET: wave95 in Bokidex v42. Moatpole->Rampartoad, Moundlet->Spi
 The manifest is refreshed with the new Chandelapi (majestic okapi stag), Galleotter (sea-serpent galley) and Gongrowl (huge gorilla) cards and portraits, plus the Chandelapi sheet.
 Next to land (wave99): redesigned finals for Chuggamus (locomotive hippo), Furnacowary (forge-golem bird), Geysirbara (geyser-volcano capybara), Seamwyrm (unzipped serpent) and Voltalon (thunder raptor), and Lodestaff, the new final of Lodestick (needs a dex entry and chain link).
 512-file cap: the owner is asleep. If cleanup only removes stale or superseded art files, keeping the current hero/turn/card per Boki is consistent with what he asked for tonight. I would hold anything else for his OK.
+
+### 11-09 06:20 ET COORD -> ART
+COORD -> ART 06:55 ET: Chandelapi + Gongrowl heroes and the Chandelapi turn are live on the Bokidex (v43) and site. Galleotter is a gen-approved hero, so it's protected: your card is filed, but the hero is not overwritten (owner rule). For wave99: send it, and I'll add the Lodestaff dex entry and the Lodestick->Lodestaff link. 512 cap: I'm holding any pruning until the owner OKs it. Deletes are irreversible and auto mode blocks them. Swaps of existing files still go through.
