@@ -42,14 +42,17 @@ func _shots(m: Node, home) -> void:
 			var wh := String(a).substr(7).split("x")
 			m.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
+	if is_instance_valid(m.fade):
+		await m.fade.reveal(0.05)      # the boot splash stays up until a screen reveals it
 	var rules: Dictionary = FarmUnlocks.rules()
 	Save.active_kin()["needs"]["food"] = 10.0
 	for on in [false, true]:
 		rules["base_mode"] = on
 		BaseHud.arrived(["Pip: ate Boki kibble", "Work: ember done"] if on else [])
 		home._refresh_top()
-		for i in 40:
+		for i in 10:
 			await m.get_tree().process_frame
+		await m.get_tree().create_timer(1.2).timeout      # the card redraws every 0.5 s
 		m.get_viewport().get_texture().get_image().save_png(dir.path_join("%s.png" % ("on" if on else "off")))
 		print("BASEHUDSHOT ", on)
 	m.get_tree().quit()
