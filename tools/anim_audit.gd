@@ -102,7 +102,8 @@ func _hero(main: Node, id: String) -> void:
 	m.free()
 
 ## How far each held prop's anchor wanders from its hand bone over the idle and the attacks (body heights).
-func _held(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: String, hgt: float, idle: String) -> Dictionary:
+func _held(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: String, hgt: float,
+		idle: String) -> Dictionary:
 	var out := {}
 	for an in HELD.get(id, {}):
 		var node := WardenGlb.anchor(m, an)

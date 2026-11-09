@@ -304,3 +304,14 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   each rock event carries its own direction, so the arc needs no new Net field (Net.VERSION unchanged).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).
+
+## v2 re-audit (Nov 9: models-v2 merged after the Nov 8 audit)
+Re-measured on the v2 rig (`--anim-audit`, `--anim-shots --close` on the GPU, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/dolm.jpg`, walk and run, v1 model). After: rows idle, walk, run, attack 1, attack 2, 8 frames each on the v2 model:
+
+![dolm v2 strips](../art/anim_audit/v2_dolm.jpg)
+
+- Gait: run slide 18 % (walk 25 %), arms against the legs +0.72, hip bob 4.2 cm, idle to walk gap 0.24: the Nov 8 numbers survive the retarget.
+- Free arm: `lmb_punch` 1.31 body heights of free-hand travel, one-frame hand jump 0.67, T-pose 33 %; `lmb_throw` 1.53, jump 0.40, T-pose 25 %. Same as Nov 8; the fix is `ext/anim-hand-tenzo-rebased` (data `free_arm`, re-timed hand path).
+- Stone arm: the fist anchors (`anchor_fist_L/R`) sit 0.03 body heights from the hands and the right gauntlet 0.11 from the forearm; none drift (0.000) over the idle and both attacks.
+- Result: no v2 regression; no clip or map edits needed.
+- Timing: the Tenzo rows (`tools/warden_clips_check.gd` `_tenzo` on `ext/anim-time-tenzo`, merged into a scratch branch with the v2 glb): `--warden-clips-check` 0 failures, `--dolm-combo-check` 171 checks, 0 failures.

@@ -22,7 +22,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+  are listed below as open. A held prop (Neve's spear, Sparkle's coils, Sable's pistols, Tenzo's stone fists: `HELD`
+  in tools/anim_audit.gd) that wanders more than 0.03 body heights from its hand over the idle and the attacks fails too.
 
 ## What is wrong with all of them
 

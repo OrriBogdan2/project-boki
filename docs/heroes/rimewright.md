@@ -155,3 +155,14 @@ Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|sk
 - The wall is the shared `Verbs.add_wall` (blocking, the touch shove); the kit grows it, slides it, carries foes on its face and draws it.
 - Dash flow (item 32): the skate is her dash for `DashFlow` (`in_dash()`); `content/dash_flow/rimewright.json` says LMB fires from it as beams (`variant: beam`, read by `fires_in_dash` and the dart throw), RMB/E/Q/X fire, in the air too (item 62); the statue's slide out of a skate counts as the skate going on, so skate -> X is a "fire" with carry (item 64).
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## v2 re-audit (Nov 9: models-v2 merged after the Nov 8 audit)
+Re-measured on the v2 rig (`--anim-audit`, `--anim-shots --close` on the GPU, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/rimewright.jpg`, walk and run, v1 model). After: rows idle, walk, run, attack 1, attack 2, 8 frames each on the v2 model:
+
+![rimewright v2 strips](../art/anim_audit/v2_rimewright.jpg)
+
+- Gait: still a skate, not a regression. Clip foot speed 0.44 of 4.65 m/s (slide 90 % at a run, 93 % at a walk), arms against the legs -0.39, hip bob 1.4 cm, loop seams 0.002 body heights or less, idle to walk gap 0.06: every number equals the Nov 8 reading. The push and glide gait is `ext/rimewright-skate-rebased` (not in main yet).
+- Free arm: `dart_r` 0.00 body heights of free-hand travel, `dart_heavy` 0.47; T-pose share 0 % in both; largest one-frame hand jump 0.04 and 0.08.
+- Spear on the hand: the blade root sits 0.55 body heights and the tip 0.78 from `hand.R`, and neither moved (drift 0.000) over the idle and both darts, so the spear rides the hand rigidly. The skates (`anchor_skate_l/r`) are children of the foot bones.
+- Result: no v2 regression; no clip or map edits needed.
+- Timing: the "Animation timing" rows (`tools/rimewright_anim_check.gd` on `ext/anim-time-neve`, merged into a scratch branch with the v2 glb) read 106 checks, 0 failures in `--rimewright-combo-check`; `--clip-live-claire-check` 0 failures.

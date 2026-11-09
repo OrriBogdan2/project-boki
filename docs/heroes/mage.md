@@ -153,3 +153,14 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
   Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).
+
+## v2 re-audit (Nov 9: models-v2 merged after the Nov 8 audit)
+Re-measured on the v2 rig (`--anim-audit`, `--anim-shots --close` on the GPU, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/mage.jpg`, walk and run, v1 model). After: rows idle, walk, run, attack 1, attack 2, 8 frames each on the v2 model:
+
+![mage v2 strips](../art/anim_audit/v2_mage.jpg)
+
+- Gait: run slide 9 % (walk 19 %), arms against the legs +0.89, hip bob 7.1 cm, idle to walk first-pose gap 0.27: the Nov 8 numbers survive the retarget.
+- Free arm: `lmb_l` 0.01 body heights of free-hand travel; `rmb` (the Storm Rod cast) still flings the free hand 0.76 and holds an arm sideways for 62 % of the clip (0.29 for `lmb_l`). Same as Nov 8; the fix is `ext/anim-arm-sparkle` (data `free_arm`).
+- Props: the coils `anchor_gun_L/R` sit 0.08 body heights from the hands and do not drift (0.000). The four rods are on the hips and do not move in any clip (0.000). The gum bubble (bone `gum` on the head, its own prop) stays 0.10 body heights from the head, drift 0.023 over the `gum` clip. The runtime Storm Rod placed at `anim.hand_r` was not re-measured against the v2 glb hand.
+- Result: no v2 regression; no clip or map edits needed.
+- Timing: `tools/mage_anim_time_check.gd` (on `ext/anim-time-sparkle`, merged into a scratch branch with the v2 glb) in `--mage-combo-check`: 136 checks, 0 failures; lmb_l blends in 0.12 s and hits on its frame, rmb hits on 0.35 s and 1.03 s with the clip.

@@ -221,3 +221,14 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+## v2 re-audit (Nov 9: models-v2 merged after the Nov 8 audit)
+Re-measured on the v2 rig (`--anim-audit`, `--anim-shots --close` on the GPU, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/thief.jpg`, walk and run, v1 model). After: rows idle, walk, run, attack 1, attack 2, 8 frames each on the v2 model:
+
+![thief v2 strips](../art/anim_audit/v2_thief.jpg)
+
+- Gait: run slide 17 % (walk 39 %), arms against the legs +0.82, hip bob 5.0 cm, idle to walk gap 0.20: the Nov 8 numbers survive the retarget.
+- Free arm: `lmb_r` 0.52 body heights of free-hand travel, T-pose 4 %; `vault_r` still flings the free hand 2.62 and holds an arm sideways for 58 %. Same as Nov 8; the fix is `ext/anim-arm-sable`.
+- Pistols and moth parts: `anchor_blade_root` (right) and `anchor_blade_root_l` sit 0.06 body heights from their hands and do not drift (0.000), so the pistols ride rigidly. The v2 moth wings are three-joint chains (`spring_wingR/L_0..2`, v1 had four) and the feather-plume antennae two joints each: `--clip-live-sable-check` indexed a fourth joint that no longer exists and read 2.67 rad of twist through the flips. The check now reads the real chain; the wings bend 0.17 rad at worst (gate 1.0).
+- Result: no v2 regression in the clips; one stale check fixed.
+- Timing: `tools/dancer_timing_check.gd` (on `ext/anim-time-sable-rebased`, merged into a scratch branch with the v2 glb) in `--dancer-combo-check`: 132 checks, 0 failures.
