@@ -68407,5 +68407,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_gambitfin_r4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_f_r5",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_f_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card106",
+    "name": "Lunarca / Selenwhale (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/selenwhale_card106_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card106",
+    "name": "Lunarca / Selenwhale (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/selenwhale_card106_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card106",
+    "name": "Lunarca / Selenwhale (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/selenwhale_card106_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_eclipsowl_f_r5",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_eclipsowl_f_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "selenwhale_card106",
+    "name": "Lunarca / Selenwhale (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/selenwhale_card106_1.jpg",
+    "ok": true
   }
 ]
