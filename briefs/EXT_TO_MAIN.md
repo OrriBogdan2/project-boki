@@ -3474,3 +3474,14 @@ crest on the head, as in the BOKI_50_DESIGNS text); if that one is wanted, re-ru
 `tools/boki/meshy_body.py` is shared: on merge with caecilith's branch, zippelith's inline copy should use it. Not
 done: fusion parts, rider poses and a shared BIPED-L mount rig (no code for them yet). Leather reads redder under
 the in-game warm light than on the sheet.
+
+## 2026-11-09 deep (job 20261108-231231-a1): READY map-perf-1108 (expedition map slice)
+READY ext/map-perf-1108 f4209d74c (2 commits on main d255acbee; touches world.gd (net -5 lines), check_registry, main.gd 1 line; new scripts/match/clutter.gd, tools/clutter_check.gd). No settings.gd edits, so it merges cleanly with perf-expedition-1108 (its very_low preset is already in Clutter.KEEP).
+- Ground clutter thinned per preset (Clutter.KEEP, replaces world.gd _thin): small grass/flowers/pebbles keep 0.6/0.4/0.2/0.08 (high/medium/low/very low), tall grass (cover) 1.0/0.8/0.6/0.5. Trees, boulders, pillars and cliff rocks are never thinned. Clutter batches use 32-tile chunks. Loose rocks below the map cast no shadows.
+- Whole-map scatter (art-view, hollowcrown), before -> after: high 654 batches / 22437 inst / 1.43M tris -> 437 / 15324 / 1.19M; medium 650 / 17139 / 1.25M -> 400 / 10872 / 1.01M (-37% inst); low 565 / 11720 / 1.06M -> 374 / 6569 / 0.84M (-44% inst).
+- Same 3 spots (crown/lark/frostgate, 1600x900, rp1-1), draws, before -> after: high 454/363/436 -> 446/356/427; medium 365/316/348 -> 356/305/334; low 278/269/277 -> 269/264/269. On-screen tris are about the same, because clutter is cheap and the scene is dominated by walls and chests.
+- --perf-bench (60 s, rp1-1, 640x360), before -> after: medium avg 44.5 -> 47.2 ms, p99 79.9 -> 78.3, 1% low 2.1 -> 2.0 fps, draws 746 -> 807, tris 366k -> 338k; low avg 45.3 -> 41.5, p99 79.0 -> 79.8, 1% low 2.2 -> 2.3, draws 794 -> 771, tris 277k -> 230k. The match is script-bound (~22 ms script, ~85 ms process), so these numbers are noise-level here. Rendering is not the bottleneck.
+- Shots: briefs/shots/map-perf-1108/{before,after}_{high,medium,low}_{crown,lark,frostgate}.jpg. At medium the grass tufts are slightly sparser and cover, walls and chests are unchanged.
+- Fix: --art-view screenshots on main were the boot-splash logo (the fade covered them); main.gd now skips the fade for --art-view like --shot.
+- Checks: new --clutter-check 0 failures (headless, local), health.py --strict OK.
+- Not done, with reasons: chests are already merged per material (PropSculpt._finish); the leftover chest draws are Lid/Lock/Beacon, which animate. Occlusion culling was not added: the top-down camera over floating islands has almost no occluders. Lightmaps were not added: the map is built at runtime and ambient comes from the environment. SDFGI/SSR/SSIL/VoxelGI are not used anywhere, and volumetric fog is already off below high. Tree LODs and visibility ranges already existed on main.
