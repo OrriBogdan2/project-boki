@@ -31419,5 +31419,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_thistlynx_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_thunderstrich_full",
+    "name": "Thunderstrich (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thunderstrich_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_full",
+    "name": "Tidalisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_full",
+    "name": "Tidalisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thunderstrich_full",
+    "name": "Thunderstrich (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_thunderstrich_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltmink_full",
+    "name": "Voltmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_voltmink_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thunderstrich_full",
+    "name": "Thunderstrich (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thunderstrich_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tidalisk_full",
+    "name": "Tidalisk (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tidalisk_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltmink_full",
+    "name": "Voltmink (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_voltmink_full_3.jpg",
+    "ok": true
   }
 ]
