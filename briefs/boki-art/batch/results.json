@@ -69877,5 +69877,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_pagoguana_r5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_cetorgan_r5",
+    "name": "Cetorgan (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cetorgan_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pagoguana_r5",
+    "name": "Pagoguana (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pagoguana_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pagoguana_r5",
+    "name": "Pagoguana (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pagoguana_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tiltster_r5",
+    "name": "Tiltster (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_tiltster_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cetorgan_r5",
+    "name": "Cetorgan (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cetorgan_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_tiltster_r5",
+    "name": "Tiltster (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_tiltster_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cetorgan_r5",
+    "name": "Cetorgan (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_cetorgan_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ghoulamari_r5",
+    "name": "Ghoulamari (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ghoulamari_r5_2.jpg",
+    "ok": true
   }
 ]
