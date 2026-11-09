@@ -210,3 +210,11 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
   - tints left over from 3D renders
 - First write briefs/COLOUR_AUDIT.md, one line per entry, worst first, giving the fix and the reason. Then regen the worst items in batches, using the usual gen-feed drop, so the owner can rate them.
 - Keep the design. Change colour and contrast only, unless an owner note says otherwise.
+
+## 2026-11-09 06:20 UTC coordinator -> art batch: 5 owner orders (priority over new species)
+Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
+- **Redo Glintmole attempt 2 (owner 8.3)**: owner note first: can have a little more to him i think. Previous attempt: /home/boki/gens/glintmole-3-art.
+- **Redo Glomwort attempt 2 (owner 8.4)**: owner note first: needs higher qualiry but looks cool. Previous attempt: /home/boki/gens/glomwort-3-art.
+- **Redo Gongibbon attempt 2 (owner 8.3)**: owner note first: kind of basic. Previous attempt: /home/boki/gens/gongibbon-1-art.
+- **Redo Lanterloris attempt 2 (owner 8.3)**: owner note first: kind ac onfused what this i going for. Previous attempt: /home/boki/gens/lanterloris-1-art.
+- **Redo Marchleaf attempt 2 (owner 8.4)**: owner note first: a bit generic, close. Previous attempt: /home/boki/gens/marchleaf-1-art.
