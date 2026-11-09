@@ -11,7 +11,7 @@ func _fades_on() -> bool:
 		return false
 	if _has_arg("--show-fade"):
 		return true
-	return not (_has_arg("--shot=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
+	return not (_has_arg("--shot=") or _has_arg("--art-view=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
 	if "--relay" in OS.get_cmdline_user_args():
