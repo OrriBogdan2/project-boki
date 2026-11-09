@@ -36,6 +36,7 @@ const ECHO_CAP := 10           # after-images per hunter at most (each copies th
 const KEEP := 0.12             # s a marker or a trail stays without a refresh
 const MARK_RAISE := 1.0        # m the marker rides up the screen past the HP bar
 const NO_EDGE := Color(0, 0, 0, 0)
+const WARM_T := 0.05           # s each look of the loading screen's rehearsal (prewarm) stays up
 
 var m: Node
 var pools := {}                # kind -> Array of nodes made for it
@@ -62,6 +63,29 @@ static func of(match_node: Node) -> VVFx:
 	match_node.add_child(n)
 	match_node.set_meta("vv_fx", n)
 	return n
+
+## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every kind played for a blink at
+## `at`, so the first cast makes no node, mesh or material mid-fight and warm_up's scan draws them all. The local
+## Hunter's after-images are copied now too (ECHO_CAP of them, a dash leaves 7): the first dash built 391 meshes.
+## mark_pips: the Static marker's pip count (it is built for one count), 0 for a kit with no marker.
+func prewarm(at: Vector3, who: Hunter, mark_pips := 0) -> void:
+	var b := at + Vector3.RIGHT
+	var w := Color.WHITE
+	arc(at, b, w, w, 0.5, WARM_T)
+	beam(at, b, w, w, 0.9, WARM_T)
+	smear(at, b, w, w, 0.3, WARM_T)
+	pillar(at, w, w, 6.0, 0.9, WARM_T)
+	ring(at, 1.0, w, w, WARM_T)
+	disc(at, 1.0, w, w, WARM_T)
+	star(at, w, w, 0.4, WARM_T)
+	swirl(who, w, w, WARM_T)
+	shackle(who, w, w, WARM_T)
+	_play(_take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER))), "tracer", WARM_T)
+	if mark_pips > 0:
+		marker("warm", who, 1, mark_pips, w, w, 2.0)
+		unmark("warm")
+	if who.is_local():
+		for i in ECHO_CAP: echo(who, w, WARM_T)
 
 # ------------------------------------------------------------------ pool
 func _mat(mode: int, bb := false) -> ShaderMaterial:

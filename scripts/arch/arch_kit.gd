@@ -281,6 +281,11 @@ func use_e() -> void:
 	else:
 		h._ab_feedback("k1", "deny")
 
+## The loading screen's rehearsal of this kit's own effect library (Match.warm_up): its pools filled with one of
+## every look at `at`, so the first cast makes nothing mid-fight (--first-cast-check). Kits with a library override it.
+func warm_fx(_at: Vector3) -> void:
+	pass
+
 ## X: the hero's own ultimate. No hero has one yet; a kit that does overrides both. Returns true when it went off.
 func cast_ult() -> bool:
 	return false

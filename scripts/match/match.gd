@@ -206,6 +206,8 @@ func _progress(label: String) -> void:
 ## drop first shows it. The last frames double as the
 ## auto-quality benchmark (Settings.note_benchmark). progress(frac 0..1) as it goes.
 func warm_up(progress := Callable()) -> void:
+	for h: Hunter in hunters.filter(func(x): return x.ak != null):
+		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	if DisplayServer.get_name() == "headless" or cam == null or world == null:
 		return
 	PerfLog.skip()

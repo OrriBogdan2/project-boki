@@ -37,6 +37,7 @@ const M_DOT := 12
 const M_SMOKE := 13
 const POOL_CAP := 24           # nodes per kind at most; past it the oldest is taken back
 const KEEP := 0.1              # s an immediate-style look stays without a refresh
+const WARM_T := 0.05           # s each look of the loading screen's rehearsal (prewarm) stays up
 const FLAME_CAP := 32          # hose puffs drawn at most (the kit keeps about 15)
 const HANG_T := 0.3            # s a scattergun slug hangs as a dot at its stop line
 ## a Broadside slug's look (LDFx.volley): its dot (half width, m), the soft halo round it, the smear
@@ -82,6 +83,31 @@ static func of(match_node: Node) -> LDFx:
 	match_node.add_child(n)
 	match_node.set_meta("ld_fx", n)
 	return n
+
+## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every pooled kind played for a
+## blink at `at`, so the first cast makes no node, mesh or material mid-fight and warm_up's scan draws them all
+## (Dredge's first Abyssal Hand built 13 and compiled 6 pipelines in one frame). crescents: the arc widths (deg)
+## the kit sweeps, one pooled mesh each.
+func prewarm(at: Vector3, crescents: Array) -> void:
+	var w := Color.WHITE
+	var b := at + Vector3.RIGHT
+	sunburst(at, 1.0, w, w, WARM_T)
+	sunburst(at, 1.0, w, w, WARM_T, true)
+	scorch(at, 1.0, WARM_T)
+	wave(at, 1.0, w, WARM_T)
+	orb(at, w, w, 0.6, WARM_T)
+	dot(at, w, 0.16, WARM_T)
+	puff(at, M_ORB, w, w, 1.0, WARM_T)
+	wisp(at, w, w, 1.0, WARM_T)
+	lava(at, b, 1.0, WARM_T)
+	volley(at, b, w, w, WARM_T, WARM_T)
+	anchor_drop(at, 0.0)["t"] = 1e3          # (planted and over: it hides on the next frame)
+	for deg in crescents:
+		crescent(at, Vector2.UP, float(deg), 1.0, w, w, WARM_T)
+	# (not the skull or the shot riders: their colours are baked in when built, so they're built in play)
+	for kind in ["swirl", "chain", "pip", "spiral", "pilot", "glow", "anchor", "hook"]:
+		place("warm_" + kind, kind, at, w, w)
+		unplace("warm_" + kind)
 
 func _mat(mode: int, col: Color, col2: Color, bb := false) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()

@@ -28,7 +28,9 @@ func run(main: Node) -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Save.no_write = true
 	var d := Save.fresh()
-	var k := Save.new_kin("zapple", "Pip"); d["roster"].append(k); d["active"] = k["uid"]
+	var k := Save.new_kin("zapple", "Pip")
+	d["roster"].append(k)
+	d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["classes"] = ClassUnlock.legacy()
 	Save.d = d
@@ -59,11 +61,14 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 	m.set_process(false)
 	var P: Hunter = m.player
 	P.unlock_all()
-	P.lvl = 6; P.slot_lv["ult"] = 1
+	P.lvl = 6
+	P.slot_lv["ult"] = 1
 	if P.ak: P.ak.cd_off = true
 	if glove != "": P.gear[0] = {"id": glove, "rar": 1}
-	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, P.pos + Vector3(TARGET_DIST, 0, 0), {"arch": "none"})
-	T.max_hp = 1e6; T.hp = T.max_hp
+	var at := P.pos + Vector3(TARGET_DIST, 0, 0)
+	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, at, {"arch": "none"})
+	T.max_hp = 1e6
+	T.hp = T.max_hp
 	for i in 15:      # the yard keeps 4 dummies up, one every 2 s: all of them before measuring
 		if m.mobs.filter(func(x): return not x.dead).size() >= 4: break
 		await _frames(m, P, T, SETTLE * 2, "")
@@ -124,8 +129,9 @@ func _went(m: Match) -> String:
 func _frames(m: Match, P: Hunter, T: Hunter, n: int, slot: String) -> Array:
 	var out: Array = []
 	for i in n:
-		for mb in m.mobs: mb.hp = mb.max_hp      # (the yard's dummies don't hit back; one that died would respawn mid-window)
-		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = T.pos.y
+		for mb in m.mobs: mb.hp = mb.max_hp      # (the yard's dummies don't hit back; a dead one respawns)
+		P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+		P.inp["aim_y"] = T.pos.y
 		P.dashes = P.max_dashes()
 		P.gear_cd[0] = 0.0
 		_press(P, slot, i)
@@ -137,8 +143,8 @@ func _frames(m: Match, P: Hunter, T: Hunter, n: int, slot: String) -> Array:
 		T.hp = T.max_hp
 	return out
 
-## The keys of a slot as Match._gather_input sets them (R as HunterKeys takes it): LMB held 6 frames (charged shots fire on
-## release), RMB held 2, the rest pressed once.
+## The keys of a slot as Match._gather_input sets them (R as HunterKeys takes it): LMB held 6 frames
+## (charged shots fire on release), RMB held 2, the rest pressed once.
 func _press(P: Hunter, slot: String, i: int) -> void:
 	P.inp["fire"] = slot == "lmb" and i < 6
 	P.inp["sec_hold"] = slot == "rmb" and i < 2

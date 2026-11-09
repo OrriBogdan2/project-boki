@@ -81,6 +81,9 @@ func _setup() -> void:
 	fx = LDFx.of(m)
 	broadside = DredgeBlast.new(self)
 
+func warm_fx(at: Vector3) -> void:
+	fx.prewarm(at, [float(e_def()["angle"]), float(broadside.xd()["fan_deg"])])
+
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
 func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""

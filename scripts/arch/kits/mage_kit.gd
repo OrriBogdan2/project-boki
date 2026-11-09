@@ -71,6 +71,9 @@ func on_knock(_t: Hunter, mine: bool) -> void:
 func fx() -> VVFx:
 	return VVFx.of(m)
 
+func warm_fx(at: Vector3) -> void:
+	fx().prewarm(at, h, int(res_def()["max"]))
+
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
 
