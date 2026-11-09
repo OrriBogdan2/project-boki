@@ -47722,5 +47722,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_flarmink_r93_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_crofthollow_r93",
+    "name": "Crofthollow",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_r93_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_r93",
+    "name": "Eclipsowl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_r93_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_flarmink_r93",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_flarmink_r93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glassolotl_p93",
+    "name": "Glassolotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glassolotl_p93_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glassolotl_card93",
+    "name": "Glassolotl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glassolotl_card93_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl_r93",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_r93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthollow_r93",
+    "name": "Crofthollow",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_r93_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glassolotl_p93",
+    "name": "Glassolotl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glassolotl_p93_2.jpg",
+    "ok": true
   }
 ]
