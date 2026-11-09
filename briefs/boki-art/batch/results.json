@@ -50095,5 +50095,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/umbrathere_card100_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_dreadnoyak_pz",
+    "name": "Dreadnoyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_dreadnoyak_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_skateron_pz",
+    "name": "Skateron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_skateron_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_reapant_pz",
+    "name": "Reapant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_reapant_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_voltalon_rz",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_voltalon_rz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_skateron_pz",
+    "name": "Skateron",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_skateron_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_stormit_pz",
+    "name": "Stormit",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_stormit_pz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanternmit_pz",
+    "name": "Lanternmit",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lanternmit_pz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vaultara_pz",
+    "name": "Vaultara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_vaultara_pz_1.jpg",
+    "ok": true
   }
 ]
