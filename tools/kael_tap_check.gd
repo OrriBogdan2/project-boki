@@ -46,6 +46,20 @@ func run(main_node: Node, _who := "") -> void:
 	A.step(m, 1.0)
 	A.ok("kael RMB aim follows the cursor live during E (90 deg off the throw)", A.dmg(T) >= 20.0,
 			"took %.0f" % A.dmg(T))
+	# 180 deg off the throw (behind him): the strike goes there too
+	K.warchain.snap("")
+	A.fresh(T)
+	T.teleport(home + Vector3(-2.5, 0, 0))
+	K.cd["rmb"] = 0.0
+	K.cd["e"] = 0.0
+	A.aim_at(P, home + Vector3(6.0, 0, 0))
+	A.tap(m, P)
+	A.step(m, 0.1)
+	P.ak.use_e()
+	A.aim_at(P, T.pos)
+	A.step(m, 1.0)
+	A.ok("kael RMB aim follows the cursor live during E (180 deg, behind him)", A.dmg(T) >= 20.0,
+			"took %.0f" % A.dmg(T))
 	# the ult keeps momentum
 	K.warchain.snap("")
 	P.teleport(home)
@@ -61,6 +75,13 @@ func run(main_node: Node, _who := "") -> void:
 	P.vel = Vector3(0, 3.0, 4.0)
 	K.riposte.start()
 	A.ok("kael ult adds a vertical bonus on upward speed", absf(P.vel.y - (3.0 + float(tn["ult_up_bonus_mps"]))) < 0.05,
+			"vy %.2f" % P.vel.y)
+	K.riposte.drop()
+	P.vel = Vector3(0, 3.0, 4.0)
+	P.lfloat = {"t": 0.0}      # (mid-mantle: a ledge rise is running)
+	K.riposte.start()
+	A.step(m, 0.05)
+	A.ok("kael ult mid-mantle: the ledge rise hands over, the bonus stays", P.lfloat.is_empty() and P.vel.y > 3.0,
 			"vy %.2f" % P.vel.y)
 	K.riposte.drop()
 	# tether: a Lunge aimed away past the length breaks it; sideways within range keeps it

@@ -70,6 +70,7 @@ func _keep_momentum() -> void:
 	h.vel.z = carry.y
 	if h.vel.y >= float(tn["ult_up_min_mps"]):
 		h.vel.y += float(tn["ult_up_bonus_mps"])
+		h.lfloat = {}               # mid-mantle: the ledge rise rewrites vel.y each tick; the boost takes over
 		st["rising"] = true
 	vel_after = h.vel
 

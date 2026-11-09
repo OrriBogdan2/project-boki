@@ -88,6 +88,7 @@ const CHECKS := {
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
 	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],      # Kael tap strike, live aim, tether, ult momentum
+	"--kael-tap-clip": ["res://tools/kael_tap_clip.gd", "kael_tap_clip", null],      # Kael tap/hold/ult clips (GPU)
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
