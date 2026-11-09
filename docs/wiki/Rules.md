@@ -472,6 +472,8 @@ The Dash, the first Boki-vs-Boki race (scripts/home/base_race.gd, briefs/design/
 | cheer_boost | {"great": 0.3, "good": 0.15, "miss": 0.0} |
 | _cheer_boost | pace bonus for cheer_s after a press, by how well it was timed (the Training post drill's grades) |
 | cheer_s | 2 |
+| first_wide | 2 |
+| _first_wide | your first Dash only: how much wider the first cheer's gold and good bands are (and glow), so a new player lands it |
 | cheer_window_s | 1.8 |
 | _cheer_window_s | how long the cheer bar waits for a press before it counts as a miss |
 | win_joy | 15 |

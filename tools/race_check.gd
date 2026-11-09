@@ -2,7 +2,8 @@ extends RefCounted
 ## --race-check: the Dash (scripts/home/base_race.gd). 20 headless races of 3 Boki with mixed stats,
 ## leans and moods: the favourite (lowest expected lap time) wins at least 60%. Also: a lean speeds
 ## up its own stretch only, mood matters, good cheers beat missed ones, and settling a race moves
-## joy, trust, gems, memories and (where a record has them) bonds. Never touches the real save.
+## joy, trust, gems, memories and (where a record has them) bonds. The save's first race has a double-wide
+## first window and Great / Early / Late words; after it the Dash is normal. Never touches the real save.
 
 const RACES := 20
 const FAVOURITE_MIN := 0.6      # share of races the favourite must win
@@ -87,5 +88,32 @@ func run(m: Node) -> void:
 	ok(float(rival["bonds"].get(win["uid"], 0.0)) < 0.0, "a loser with bonds leans rival toward the winner")
 	ok(not f.has("bonds"), "a record without bonds isn't given any")
 	ok(String(res["memory"]) != "", "the card has a memory line: %s" % res["memory"])
+	# ---------------------------------------------------------------- 5. the first race
+	Save.d["tutorial"].erase(BaseRace.RACED)
+	ok(BaseRace.first_race(), "a fresh save's next Dash is its first")
+	var first := BaseRace.new_run([a, b], 5)
+	ok(first["first"], "the run is marked first")
+	first["mark"] = 1
+	var wide := BaseRace.window_scale(first)
+	ok(is_equal_approx(wide, 2.0), "the first mark's window is twice as wide (x%.1f)" % wide)
+	first["mark"] = 2
+	ok(is_equal_approx(BaseRace.window_scale(first), 1.0), "the second mark is the normal window")
+	var bar := {"m": 0.5 + TimingDrill.GREAT * 1.5, "dir": 1.0, "speed": 1.1, "zone": 0.5}
+	ok(TimingDrill.grade(bar) == "good", "off by 1.5 greats is only good on a normal bar")
+	bar["wide"] = wide
+	ok(TimingDrill.grade(bar) == "great", "the same press is great on the wide first bar")
+	ok(TimingDrill.verdict(bar) == "Great", "and the word is Great")
+	bar["wide"] = 1.0
+	ok(TimingDrill.verdict(bar) == "Late", "past the gold while moving on is Late")
+	bar["m"] = 0.5 - TimingDrill.GREAT * 1.5
+	ok(TimingDrill.verdict(bar) == "Early", "before the gold is Early")
+	bar["dir"] = -1.0
+	ok(TimingDrill.verdict(bar) == "Late", "on the way back it flips: the same spot is Late")
+	var sim1 := BaseRace.sim([a, b], 5)
+	BaseRace.settle(sim1)
+	ok(not BaseRace.first_race(), "after a race is settled the next one is the normal game")
+	var again := BaseRace.new_run([a, b], 6)
+	again["mark"] = 1
+	ok(not again["first"] and is_equal_approx(BaseRace.window_scale(again), 1.0), "and its first window is normal")
 	print("RACE CHECK DONE, failures: ", bad)
 	m.get_tree().quit(1 if bad > 0 else 0)

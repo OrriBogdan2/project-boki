@@ -17,6 +17,9 @@ const CLIMB_H := 0.7                        # top of the climb (metres); the gap
 const HOP_H := 0.8                          # extra height of the jump over the gap (metres)
 const CARD_S := 6.0                         # how long the result card stays up (seconds)
 const MAX_RUNNERS := 4
+const RACED := "dash_raced"                 # Save.d["tutorial"] flag: a Dash has been run on this save
+const HINT := "dash_hint"                   # Save.d["tutorial"] flag: the first-race card was shown
+const WORD_S := 1.2                         # how long the Great / Early / Late word floats (seconds)
 
 static var _rules := {}
 static var _course: Array = []              # stretches with "a", "b" (Vector2), "len", "start"
@@ -31,6 +34,7 @@ var bar: Control = null
 var bar_draw: Control = null
 var card: Control = null
 var card_t := 0.0
+var glow: MeshInstance3D = null             # the first race's glowing first mark, until the bar opens
 
 func _init(home) -> void:
 	h = home
@@ -99,6 +103,14 @@ static func expected_time(rec: Dictionary) -> float:
 	return t
 
 # ------------------------------------------------------------------ one race, as data
+## Is this the save's first Dash? It gets the card, a wider first window and a word on each press.
+static func first_race() -> bool:
+	return not bool(Save.d["tutorial"].get(RACED, false))
+
+## The bar's window scale for the mark just reached (the mark counter is already one on).
+static func window_scale(rn: Dictionary) -> float:
+	return float(rules()["first_wide"]) if rn["first"] and int(rn["mark"]) == 1 else 1.0
+
 ## A fresh race: runner 0 is the Boki you cheer for.
 static func new_run(recs: Array, seed_n: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
@@ -108,7 +120,7 @@ static func new_run(recs: Array, seed_n: int) -> Dictionary:
 		Care.ensure(recs[i])
 		runners.append({"rec": recs[i], "d": 0.0, "wob": 0.0, "wob_t": 0.0, "boost": 0.0, "boost_t": 0.0,
 			"lane": float(i) - (recs.size() - 1) * 0.5, "done": -1.0})
-	return {"rng": rng, "t": 0.0, "runners": runners, "order": [], "mark": 0}
+	return {"rng": rng, "t": 0.0, "runners": runners, "order": [], "mark": 0, "first": first_race()}
 
 ## Moves the race on by dt. Returns the cheer mark the backed Boki just reached, or -1.
 static func step(rn: Dictionary, dt: float) -> int:
@@ -159,6 +171,7 @@ static func sim(recs: Array, seed_n: int, cheers: Array = []) -> Dictionary:
 ## rivalry nudged where rec["bonds"] exists, gems for you. Returns what the result card shows.
 static func settle(rn: Dictionary) -> Dictionary:
 	var r := rules()
+	Save.d["tutorial"][RACED] = true
 	var order: Array = rn["order"]
 	var win: Dictionary = order[0]
 	var backed: Dictionary = rn["runners"][0]["rec"]
@@ -212,7 +225,13 @@ func start() -> void:
 		recs.append(k["rec"])
 	run = new_run(recs, randi())
 	_place_runners()
-	h._toast("Cheer %s on: press %s at each of the three marks" % [recs[0]["name"], Settings.key_cap("interact")])
+	if run["first"] and not bool(Save.d["tutorial"].get(HINT, false)):
+		Save.d["tutorial"][HINT] = true
+		_show_tip("Press %s when your Boki reaches a glowing mark" % Settings.key_cap("interact"))
+	else:
+		h._toast("Cheer %s on: press %s at each of the three marks" % [recs[0]["name"], Settings.key_cap("interact")])
+	if run["first"]:
+		_light_first_mark()
 	Sfx.play("whoosh", null, -8.0)
 
 func _can_run(k: Dictionary) -> bool:
@@ -226,7 +245,7 @@ func input(event: InputEvent) -> bool:
 	if not event.is_action_pressed("interact"):
 		return false
 	if not drill.is_empty():
-		_cheer_hit(TimingDrill.grade(drill))
+		_cheer_hit(TimingDrill.grade(drill), TimingDrill.verdict(drill))
 	elif card != null:
 		_close_card()
 	return true
@@ -246,7 +265,9 @@ func tick(d: float) -> void:
 		drill["t"] = float(drill["t"]) - d
 		bar_draw.queue_redraw()
 		if float(drill["t"]) <= 0.0:
-			_cheer_hit("miss")
+			_cheer_hit("miss", "Late")
+	if is_instance_valid(glow):
+		glow.scale = Vector3.ONE * (1.0 + 0.15 * sin(Time.get_ticks_msec() * 0.008))
 	if step(run, d) >= 0:
 		_open_bar()
 	_place_runners()
@@ -280,7 +301,10 @@ static func _course_pos(dist: float, lane: float) -> Vector3:
 	return Vector3(p.x, y, p.y)
 
 func _open_bar() -> void:
-	drill = {"m": 0.0, "dir": 1.0, "speed": 1.1, "zone": randf_range(0.3, 0.7), "t": float(rules()["cheer_window_s"])}
+	drill = {"m": 0.0, "dir": 1.0, "speed": 1.1, "zone": randf_range(0.3, 0.7), "t": float(rules()["cheer_window_s"]),
+		"wide": window_scale(run)}
+	if is_instance_valid(glow):
+		glow.queue_free()
 	var b := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
 	b.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	b.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -303,8 +327,10 @@ func _draw_bar() -> void:
 	if not drill.is_empty():
 		TimingDrill.draw(bar_draw, drill)
 
-func _cheer_hit(grade: String) -> void:
+func _cheer_hit(grade: String, word: String) -> void:
 	cheer(run, grade)
+	if run["first"]:
+		_float_word(word, grade)
 	h._emote(kins_in[0], {"great": "★", "good": "♪", "miss": "?"}[grade], true)
 	if grade != "miss":
 		Sfx.play("jump", (kins_in[0]["node"] as Node3D).position, -8.0)
@@ -315,8 +341,10 @@ func _cheer_hit(grade: String) -> void:
 
 func _finish() -> void:
 	if not drill.is_empty():
-		_cheer_hit("miss")
+		_cheer_hit("miss", "Late")
 	var res := settle(run)
+	if is_instance_valid(glow):
+		glow.queue_free()
 	for k in kins_in:
 		k["busy"] = false
 		k["t"] = 2.0
@@ -329,6 +357,41 @@ func _finish() -> void:
 	_show_card(res)
 	run = {}
 	kins_in = []
+
+## The word over your Boki where the press landed (first race only).
+func _float_word(word: String, grade: String) -> void:
+	var t := Label3D.new()
+	t.text = word
+	t.font = UI.big
+	t.font_size = 56
+	t.pixel_size = 0.01
+	t.outline_size = 12
+	t.modulate = UI.GOLD if grade == "great" else UI.INK
+	t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	t.no_depth_test = true
+	t.position = (kins_in[0]["node"] as Node3D).position + Vector3(0, 1.7, 0)
+	h.add_child(t)
+	var tw := t.create_tween().set_parallel()
+	tw.tween_property(t, "position:y", t.position.y + 0.6, WORD_S)
+	tw.tween_property(t, "modulate:a", 0.0, WORD_S)
+	tw.chain().tween_callback(t.queue_free)
+
+## A glowing disc on the ground where the first cheer comes up.
+func _light_first_mark() -> void:
+	var at := _course_pos(float(rules()["cheer_marks"][0]) * loop_len(), 0.0)
+	glow = Models.part(node, Models.cyl(0.55, 0.55, 0.04), Models.glow_mat(UI.GOLD), at + Vector3(0, 0.06, 0))
+
+func _show_tip(text: String) -> void:
+	_close_card()
+	var c := UI.card(Color(0.06, 0.07, 0.1, 0.94), 14, 12)
+	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.offset_top = 70
+	c.add_child(UI.label(text, 16, UI.GOLD))
+	h.root_ui.add_child(c)
+	UI.pop_in(c)
+	card = c
+	card_t = CARD_S
 
 func _show_card(res: Dictionary) -> void:
 	_close_card()
