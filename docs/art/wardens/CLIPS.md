@@ -17,8 +17,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
-  and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
-  swing of its own side's leg. No key: the clip plays as keyed.
+  and move speed over the foot speed of the blend as it stands sets the clip rate (up to 1.4; on a stop it falls to 0, so the
+  legs hold their stride, and standing the leg bones settle into the idle at 3/s); `arm_swing` {"L": gain, "R": gain} puts
+  that arm on the opposite swing of its own side's leg. `blend_rate` (1/s, default 12) is how fast the blend follows a
+  start, `stop_rate` (1/s, default 8) how fast it falls back on a stop (docs/art/ANIM_QUALITY_AUDIT.md). No key: the clip
+  plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.

@@ -182,8 +182,8 @@ and fails a Hunter above 0.045 body heights. Rates: `dredge` 5.5, `ashwick` 6.5,
 `gunslinger` 9, `mage` 10 (one frame 0.082 to 0.039 on `dredge`, the worst). The slower blend is about 0.2 s longer to
 settle on the worst two. Slide at a run and the counter-swing stayed inside the gate.
 
-Strips: `--anim-shots` has a `start` strip (idle to a run, first 0.27 s at 30 fps). Rows are before, after
-(`anim_audit/start_<id>.jpg`).
+Strips: these rows were the old `start` strip (idle to a run set at once, first 0.27 s at 30 fps; now `start_run`, see
+below). Rows are before, after (`anim_audit/start_<id>.jpg`).
 
 ![dredge start, before and after](anim_audit/start_dredge.jpg)
 ![ashwick start, before and after](anim_audit/start_ashwick.jpg)
@@ -191,3 +191,53 @@ Strips: `--anim-shots` has a `start` strip (idle to a run, first 0.27 s at 30 fp
 ![archer start, before and after](anim_audit/start_archer.jpg)
 ![gunslinger start, before and after](anim_audit/start_gunslinger.jpg)
 ![mage start, before and after](anim_audit/start_mage.jpg)
+
+## Stop and start after the source brake (Nov 9)
+
+KIT_PARITY 2-4 (docs/decisions/0020) stops a let-go from a run in about 0.17 s and 0.3 m. The loco blend was tuned for
+the old stop: the walk and run clips kept cycling at rate 1 (`spd` under 0.25 m/s fell back to rate 1) while the blend
+went back to the idle, so the legs ran on the spot and the planted foot was dragged. The refs have no stop frames;
+hero-ref/juggernaut.md times the start in 2 frames (about 0.07 s) and says the stop is the same, so at 5 fps the source
+is in its idle by the next frame.
+
+The fix (WardenClips, WardenGait; the brake is unchanged):
+- The clip rate is the body speed over the foot speed of the blend as it stands (`WardenGait.follow`, no 0.6 floor), so
+  on a let-go the legs slow with the body and hold their stride: the short stop pose.
+- `loco.stop_rate` (1/s, default 8, 80 % by 0.2 s) is how fast the blend falls back to the idle, apart from
+  `blend_rate` for a start; 5 for Vex, Ryzz, Kael, Breaker, Cinder and Grimble, whose stride is furthest from their
+  idle. The crouch walk falls back the same way.
+- Standing, the leg bones ease into the idle at 3/s (`WardenGait.SETTLE_RATE`), so the planted feet shift into the stance
+  instead of sliding there in a frame or two.
+
+Measure (`--anim-audit` TURNS, gate in `--clip-check`): the gait's planted-foot slide (as for the run, % of the speed)
+over the 0.4 s after the press or let-go, with the speed from the game's own brake and acceleration, averaged over 8
+let-gos spread through one stride. `--clip-check` fails a stop over MAX_SLIDE 25 %, or over the gait's own steady
+slide when that is more (most walks and crouch walks slide over 25 % steady). `--anim-audit` numbers (ostra and rimewright
+have no legs to measure):
+
+| Hunter | stop run | stop walk | stop crouch | start run | steady run |
+|---|---|---|---|---|---|
+| gunslinger | 39% → 21% | 34% → 15% | 53% → 21% | 45% → 42% | 22% |
+| juggernaut | 50% → 18% | 38% → 28% | 59% → 16% | 57% → 44% | 12% |
+| ashwick | 46% → 25% | 46% → 16% | 55% → 19% | 67% → 55% | 12% |
+| tender | 14% → 10% | 15% → 9% | 21% → 13% | 42% → 48% | 9% |
+| dolm | 37% → 21% | 24% → 13% | 62% → 22% | 60% → 58% | 20% |
+| archer | 29% → 26% | 27% → 22% | 43% → 21% | 51% → 53% | 14% |
+| dredge | 54% → 24% | 45% → 21% | 62% → 19% | 51% → 44% | 11% |
+| rimewright | 28% → 24% | 23% → 26% | 38% → 23% | 58% → 62% | 94% |
+| mage | 38% → 20% | 23% → 17% | 40% → 15% | 43% → 59% | 14% |
+| bulwark | 38% → 15% | 23% → 19% | 82% → 18% | 53% → 41% | 29% |
+| thief | 30% → 20% | 19% → 15% | 72% → 19% | 58% → 57% | 17% |
+| ostra | 23% → 23% | 14% → 14% | 15% → 15% | 87% → 87% | 100% |
+
+Open (docs/DEBT.md): starts. A press is at run speed in about 0.09 s; the idle's feet stand together and the run's
+stride has them apart, and that pose gap reads as 40-60 % slide whatever the blend rate (an instant switch is no
+better). A keyed start step, or seeking the loops to their passing pose as the blend leaves the idle, would close it.
+The measure also moves about ±5 % with what played before it.
+
+Strips: `--anim-shots` now has `start_` and `stop_` `run`, `walk`, `crouch` (15 fps from the frame before the press or
+let-go). Sheets `anim_audit/stop_<id>.jpg`, rows: run before, after, walk before, after, crouch before, after
+(jobq 20261109-093943-24552 before, 20261109-093951-20554 after; two GPU workers, so the light differs).
+
+![juggernaut stops, before and after](anim_audit/stop_juggernaut.jpg)
+![dredge stops, before and after](anim_audit/stop_dredge.jpg)
