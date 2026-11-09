@@ -87,3 +87,10 @@ Already done: pebbit, glintmole, gloamshell, glomwort, rimeshrew, selenfin.
 - Batch 1 (its top 10), file names by id: caecilith (Zippelith), gibbelle (Gongibbon), nacrolin (Mirrolin), squalltross (Canvastross), goliathite (Effigeetle), tuatrune (Lockatara), cindowary (Bellowary), umbrathere (Umbrathere), scaldamus (Chuggamus), lilybara (Soakybara).
 - Per species: `briefs/art-refs/boki/<id>_concept.png` (concept sheet) and `briefs/art-refs/boki/<id>_turnaround.png` (clean turnaround for 3D). Push each as done, one line in IMG_STATUS.md.
 - Batch 2: the remaining 19 redesigns in the doc's order. Batch 3: the 13 upgrades (edit the existing look; starters burrlet/puddlet first). The 8 "kept" need only a clean concept sheet matching their model.
+
+## 2026-11-09 coordinator -> art batch (Vertex runner): 3 owner redos, priority over new species
+Owner ratings are below the 8.5 bar; redo each with the same rules and grading, owner note first. Post ART lines as usual (main imports them into the Bokidex automatically every 5 min).
+- **Sporcupine** (owner 7.9): the mushrooms are too tall and odd. Make them short, spiky, quill-like caps that sit close to the body and follow the porcupine silhouette.
+- **Voltmink** (owner 7.0): should look calm and cool, in a relaxed pose (not tense or aggressive).
+- **Teapotamus** (owner 7.1): no note. Push appeal and silhouette up to 8.5 (idea fused through the body, readable face).
+Current renders: projectboki Bokidex / site assets/img/boki2d/<name>-1200.webp.
