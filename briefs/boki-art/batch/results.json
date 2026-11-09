@@ -64361,5 +64361,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_terrasloth_t2n3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n2",
+    "name": "Pangolith final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n1",
+    "name": "Pangolith final (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n2",
+    "name": "Pangolith final (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n2",
+    "name": "Pangolith final (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n2",
+    "name": "Pangolith final (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n1",
+    "name": "Pangolith final (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t2n1",
+    "name": "Pangolith final (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t2n1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_cardx",
+    "name": "Gongrowl (hero card, chest beat)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/gongrowl_cardx_4.jpg",
+    "ok": true
   }
 ]
