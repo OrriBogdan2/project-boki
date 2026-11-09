@@ -32924,5 +32924,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_maulangler_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_domeleon",
+    "name": "Domeleon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_domeleon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_domeleon",
+    "name": "Domeleon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_domeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_domeleon",
+    "name": "Domeleon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_domeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_domeleon",
+    "name": "Domeleon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_domeleon_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maulangler",
+    "name": "Maulangler (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_maulangler_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_phonodrake",
+    "name": "Phonodrake (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_phonodrake_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maulangler",
+    "name": "Maulangler (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_maulangler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maulangler",
+    "name": "Maulangler (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_maulangler_4.jpg",
+    "ok": true
   }
 ]
