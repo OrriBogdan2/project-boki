@@ -85,7 +85,8 @@ func _time(m: Match, P: Hunter, K: GunslingerKit, move: String, secs: float, eve
 
 ## The clip on the upper-body channel (a move with "upper": the legs keep walking under it).
 func _upper(c: WardenClips) -> String:
-	return ((c.tree.tree_root as AnimationNodeBlendTree).get_node("anim_u") as AnimationNodeAnimation).animation
+	var live := "anim_u" + "ab"[c.chan_u]     # two crossfaded channels: read the live one
+	return ((c.tree.tree_root as AnimationNodeBlendTree).get_node(live) as AnimationNodeAnimation).animation
 
 ## Walks forward from `from` s after the press and reads, at `until`, how the body is shared: the full-body
 ## channel (the clip's legs) against the upper one (the legs walking) and her ground speed.
