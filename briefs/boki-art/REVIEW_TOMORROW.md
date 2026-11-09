@@ -12,7 +12,7 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Reapant | p79 n4_2 stays live | Taller ninja redos t1-t3 scored low | t3_1 7.6, t1_2 7.4 |
 | Galleotter | none queued | Best 7.8, below the bar | g1_4 7.8, g2_2 7.8 |
 | Scythant | none queued | Best 7.8, below the bar | n3_4 7.8, n2_3 7.5 |
-| Glassolotl | v3 stays live | New face/pose redo f1-f3 best 7.7 | f2_3 7.7, f1_1 7.6 |
+| Glassolotl | v3 stays live until g1-g3 passes | Owner 04:52 again: different face AND angle/pose from Prismander; f1-f3 kept the same view | g1-g3 generating (side leap, rearing, top-down swim); f2_3 7.7 |
 | Gongrowl | current stays | Bigger/scarier redo best 7.7 | z1_2 7.7 |
 | Flarmink, Rippmink, Rimink, Prismink | current stays until a new direction passes | Your 04:44 note: need more differentiation | m1-m3 each, generating |
 | Vespox | current recolour stays until a v1-v3 direction passes | Your 04:52 note: too close to Vespyx | v1-v3 generating |
