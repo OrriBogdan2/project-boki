@@ -5597,3 +5597,4 @@ READY ext/recast-hud-cue 1fd9f80fb (recast cue: ArchKit.recast_left/recast_slot 
 READY ext/sfx-boki-types feedefebb (Boki type cast cues)
 READY ext/levelup-vfx 394fa3fee (level-up cue)
 READY ext/hit-spark-targets d3032241c (hit sparks by target)
+READY ext/garden-journal a9369b3d6 (journal and away card)
