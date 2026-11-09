@@ -26,3 +26,17 @@ Hero live in `tools/art1/` (Kael is the pilot).
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+
+## Strike reach (`--strike-reach-check`, also run by `--clip-check`)
+A keyed strike carries `"strike": [point, reach, rule]` on its `kmoves` entry: the point that lands (`tip` = the skinned
+weapon's `weapon_muzzle`, a bone, `fist` = the lower hand, `front` = the body's leading point), the kit's reach as a path
+into the archetype data (`lmb/reach`; `ram` = hit_r + the Soot Ram's touch) and the rule: `edge` (a cut, ring or strip: the
+point's furthest reach lands within 15% of the area's edge), `ground` (a slam: where it lands lowest it is inside the area
+ahead), `start` (a punch that starts a lane), `throw` (the hand leads at the release). The kits' reaches are the source's
+in metres (PARITY FIRST); the fix for a short strike is the clip or the weapon, never the reach. Strikes known short at
+the owner's heights sit in the check's `OPEN` table with the reason and a docs/DEBT.md line: Kael's cuts and cleave (his
+arm folds and the sword is the splash's 0.61 of his height: straight out he reaches 2.6 m of the 3.1 m cut) and Albert's
+whirl (3.2 m straight out, 3.5 m ring). Albert's smash was fixed in the clip with no Blender
+(`tools/art1/glb_bone_turn.py`: a bone turned about a model-frame axis over a window of the clip): his arm pitched up 36
+degrees at the impact, so the hammer head lands 2.45 m out on the ground instead of 1.7 m out and 0.6 m under it
+(`--strike-reach-check --reach-trace` prints the head's path frame by frame; before/after strips still to render on a GPU).

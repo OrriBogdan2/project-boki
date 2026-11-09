@@ -50,11 +50,9 @@
 	},
 	"kmoves": {
 		"jug_slash_r": {
-			"clip": "slash_r"
-		},
+			"clip": "slash_r", "strike": ["tip", "lmb/reach", "edge"]},
 		"jug_slash_l": {
-			"clip": "slash_l"
-		},
+			"clip": "slash_l", "strike": ["tip", "lmb/reach", "edge"]},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
 			"hold_from": 0.5,
@@ -64,8 +62,7 @@
 			"clip": "wave"
 		},
 		"jug_slam": {
-			"clip": "slam"
-		},
+			"clip": "slam", "strike": ["tip", "rmb/slam/radius", "ground"]},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
 			"hold_from": 0.45,
@@ -113,8 +110,7 @@
 			"hold_from": 0.2
 		},
 		"jug_riposte": {
-			"clip": "riposte"
-		},
+			"clip": "riposte", "strike": ["tip", "x/len", "edge"]},
 		"jug_roar": {
 			"clip": "roar",
 			"upper": true

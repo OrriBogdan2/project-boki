@@ -75,15 +75,13 @@
 		},
 		"dr_anchor": {
 			"clip": "anchor",
-			"upper": "moving"
-		},
+			"upper": "moving", "strike": ["fist", "e/radius", "ground"]},
 		"dr_dive": {
 			"clip": "dive",
 			"hold_from": 0.12
 		},
 		"dr_quake": {
-			"clip": "quake"
-		},
+			"clip": "quake", "strike": ["fist", "e/quake_r", "ground"]},
 		"dr_lunge": {
 			"clip": "lunge"
 		},

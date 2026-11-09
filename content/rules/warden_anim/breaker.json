@@ -75,8 +75,7 @@
 			"hold_from": 0.2
 		},
 		"bul_smash": {
-			"clip": "lmb_slam"
-		},
+			"clip": "lmb_slam", "strike": ["tip", "lmb/smash_reach", "edge"]},
 		"bul_launch": {
 			"clip": "lmb_launch"
 		},
@@ -94,8 +93,7 @@
 			"upper": true
 		},
 		"bul_whirl": {
-			"clip": "shift_whirl"
-		},
+			"clip": "shift_whirl", "strike": ["tip", "dash/whirl", "edge"]},
 		"bul_charge": {
 			"clip": "shift_charge"
 		},

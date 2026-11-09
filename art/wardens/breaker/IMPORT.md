@@ -21,3 +21,4 @@ breaker_weapons (shape only). The menu splash and portrait (art/portraits/bulwar
 - **Weapon (76b):** mesh `hammer` skinned to `x_weapon`; `anchor_hammer_head`, `weapon_muzzle`, `anchor_hammer_grip`, `weapon_thrown` on it. The hold
   whirl seeks from the kit's angle (WardenClips.PHASE). Mirrored from the art: hammer in the right hand, shield in the left (the rig's sides).
 - **Mood and fish:** scripts/heroes/warden_mood.gd + shaders/warden_mood.gdshader, data in warden_anim/breaker.json "mood". Fish on spring_hangfish_*, cosmetic.
+- **Smash arm (11-09, no Blender):** after the bake, `lmb_slam` has the upper arm pitched up so the hammer head lands on the ground 2.45 m out, not 0.6 m under it (`--strike-reach-check`): `python3 tools/art1/glb_bone_turn.py art/wardens/breaker/breaker.glb lmb_slam upper_arm.R 0.91,0,-0.42 36 0.0:0.067:0.2:0.3`, then `godot --headless --import`.

@@ -3,8 +3,10 @@ extends RefCounted
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each strike's weapon tip
+## or fist lands on the kit's hit area (tools/strike_reach_check.gd). Never touches the save.
 
+const StrikeReach := preload("res://tools/strike_reach_check.gd")
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
@@ -108,6 +110,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	var reach := StrikeReach.new()
+	await reach.hero(id, m, sync, dd, holder.get_tree())
+	bad += reach.bad
 	m.free()
 
 func _named(dd: Dictionary) -> Array:

@@ -53,8 +53,7 @@
 			"hold_from": 0.24
 		},
 		"breah_punch": {
-			"clip": "lmb_punch"
-		},
+			"clip": "lmb_punch", "strike": ["hand.R", "lmb/punch/len", "start"]},
 		"breah_crouch": {
 			"clip": "rmb_gather",
 			"hold_from": 0.16
@@ -64,8 +63,7 @@
 			"hold_from": 0.3
 		},
 		"breah_slam": {
-			"clip": "rmb_slam"
-		},
+			"clip": "rmb_slam", "strike": ["fist", "rmb/slam/reach", "ground"]},
 		"breah_dive": {
 			"clip": "rmb_dive",
 			"hold_from": 0.3
