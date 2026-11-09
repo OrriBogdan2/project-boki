@@ -17,7 +17,7 @@
 		"lw_stoke_lance": {"clip": "lance_stoke", "hold_from": 0.5, "upper": "moving"},
 		"as_lance_end": {"clip": "lance_end", "upper": "moving"},
 		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving"}, "as_shot": {"clip": "shot", "upper": "moving"},
-		"as_leap": {"clip": "leap", "heading": true}, "lw_hop": {"clip": "hop"},
+		"as_leap": {"clip": "leap", "heading": true, "rate": 1.15}, "lw_hop": {"clip": "hop"},
 		"as_cloak": {"clip": "cloak"}, "lw_stoke": {"clip": "stoke", "upper": true},
 		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land"},
 		"lw_jump": {"clip": "jump"},

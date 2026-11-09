@@ -85,7 +85,8 @@
 			"clip": "quake"
 		},
 		"dr_lunge": {
-			"clip": "lunge"
+			"clip": "lunge",
+			"rate": 1.1
 		},
 		"dr_pounce": {
 			"clip": "pounce"

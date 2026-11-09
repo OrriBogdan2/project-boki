@@ -296,7 +296,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
+		# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it)
+		var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0))
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
