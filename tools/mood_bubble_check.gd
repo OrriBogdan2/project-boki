@@ -50,7 +50,7 @@ func _garden() -> void:
 	if main.fade:
 		main.fade.reveal(0.05)
 	home.day_t = 0.5
-	var centre: Vector3 = home.ppos + Vector3(0, 0, 5.0)
+	var centre: Vector3 = home.ppos + Vector3(-1.5, 0, 5.0)
 	for i in 6:
 		var k: Dictionary = home.kins[i]
 		var at := centre + Vector3((i - 2.5) * 1.7, 0, 0)
@@ -139,8 +139,10 @@ func _shots() -> void:
 	home.player.position = mid + Vector3(0, 0, -5.0)
 	home.ppos = home.player.position
 	home.cam.snap(mid)
-	await _hold(1.0)
+	await _hold(2.0)
 	await _save("garden_1_six_moods.png")
+	home.player.position = mid + Vector3(0, 0, -1.2)      # the camera follows the player: stand by the row
+	home.ppos = home.player.position
 	home.cam.zoom_to = 0.55
 	home.cam.zoom = 0.55
 	home.cam.snap(mid)
@@ -148,6 +150,8 @@ func _shots() -> void:
 	await _save("garden_2_close.png")
 	home.cam.zoom_to = 1.0
 	home.cam.zoom = 1.0
+	home.player.position = mid + Vector3(0, 0, -5.0)
+	home.ppos = home.player.position
 	home.cam.snap(mid)
 	await _hold(4.0)
 	await _save("garden_3_faded.png")
