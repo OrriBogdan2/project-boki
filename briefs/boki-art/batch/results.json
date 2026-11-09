@@ -8893,5 +8893,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_nymphane_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_puffuse",
+    "name": "Puffuse (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_puffuse_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nymphane",
+    "name": "Nymphane (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_nymphane_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat",
+    "name": "Foldbat (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_foldbat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_puffuse",
+    "name": "Puffuse (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_puffuse_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole",
+    "name": "Bullpole (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_bullpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chiptero",
+    "name": "Chiptero (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chiptero_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole",
+    "name": "Bullpole (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullpole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil",
+    "name": "Narfoil (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_narfoil_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rattlebub",
+    "name": "Rattlebub (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rattlebub_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rattlebub",
+    "name": "Rattlebub (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rattlebub_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_narfoil",
+    "name": "Narfoil (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_narfoil_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullpole",
+    "name": "Bullpole (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bullpole_2.jpg",
+    "ok": true
   }
 ]
