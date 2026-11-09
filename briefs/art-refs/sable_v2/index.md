@@ -97,3 +97,8 @@ The flying shot read as a random flip, so the owner wanted a nimble, stealthy ro
 - `sable_v2_splash_alt_upside_down.jpg`: she hangs upside down over the table, lifting the gem.
 - `sable_v2_splash_alt_dodge.jpg`: the combat alternate. A sword sweeps under her, the orc grabs at air, a dagger flies past, and she snatches the gem while firing back.
 All four: Nano Banana Pro, fresh generation, saved raw (no touch-up). A sharpen and colour pass was tried but made them crunchier, so the raws were kept. The previous flying splash is `explorations/sable_v2_splash_flying_old.jpg`.
+
+## LOCKED Nov 9 (owner)
+- `sable_v2_splash.jpg` = the tavern rope-swing splash with the near-black open eye (matches the portrait). The grey-eye take is in `explorations/sable_v2_splash_greyeye_1109.jpg`.
+- `sable_v2_portrait.jpg` = the portrait with swirl eyespots on all four wings (matches the splash wings and her dagger). The take without upper eyespots is in `explorations/sable_v2_portrait_noeyespot_1109.jpg`.
+- Previous files are kept as `*_prev_1108.jpg`. The owner's files arrived at 2000 px; if he has higher-res originals, swap them in at the same names.
