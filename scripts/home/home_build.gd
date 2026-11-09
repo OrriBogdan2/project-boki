@@ -420,6 +420,8 @@ func _make_base(e: Dictionary) -> Node3D:
 	var rng := RandomNumberGenerator.new(); rng.seed = int(e.get("u", 1)) * 7919 + 13
 	var col := Color(String(e.get("c", HomeLayout.COLOURS[0])))
 	var n: Node3D = null
+	if HomeLayout.CATALOG.get(id, {}).has("toy"):
+		return FarmModels.toy(id)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):
@@ -1946,7 +1948,7 @@ func _open_ui() -> void:
 func _tabs() -> Array:
 	var out: Array = []
 	if FarmUnlocks.base_mode():
-		return ["Buildings", "Garden", "Island"]
+		return ["Buildings", "Base", "Garden", "Island"]
 	for ct in HomeLayout.CATS:
 		if FarmBuilder.tab_shown(self, ct):
 			out.append(ct)
