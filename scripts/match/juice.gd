@@ -39,8 +39,8 @@ static func _credit(by: Ent) -> Ent:
 		return (by as Kin).owner_h
 	return by
 
-## Every hit that lands (Match.on_damage): an impact flash at the point it struck, sparks out the
-## far side, more of everything the harder it hit; crits flash gold, armor sheds blue shards. Hits
+## Every hit that lands (Match.on_damage): the look for what it struck (HitClass: armour chips, a body
+## flash, a Boki puff, monster sparks), more of it the harder it hit; crits flash gold. Hits
 ## that involve you are full size, other fights nearby are smaller, far ones draw nothing.
 static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: bool, armor: bool) -> void:
 	if m == null or m.fx == null or target == null:
@@ -64,7 +64,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	var col := HURT_COL if target == p else HIT_COL
 	var ability := o.has("ab") and src != "kin"
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
-	m.fx.impact(at, dir, col, power, crit, armor)
+	var cls := HitClass.of(target, armor)
+	HitClass.draw(m.fx, cls, at, dir, HitClass.tint(target, cls, col), power, crit)
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
@@ -81,9 +82,13 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
 
-## A shot you fired stopped by a wall or terrain (Match._shot_end): the dull thud of it.
+## A shot stopped by a wall or terrain (Match._shot_end): a puff of dust where it struck, and the
+## dull thud of it if you fired.
 static func wall(m: Match, at: Vector3, by: Ent) -> void:
-	if _credit(by) == m.player:
+	var p: Hunter = m.player
+	if m.fx != null and (p == null or p.pos.distance_to(at) <= FAR):
+		HitClass.draw(m.fx, HitClass.WALL, at, Vector3.UP, Color.WHITE, 1.0, false)
+	if _credit(by) == p:
 		m.sfx(HitClass.SOUND[HitClass.WALL], at, TARGET_DB)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
