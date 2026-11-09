@@ -2395,7 +2395,7 @@ func _refresh_top() -> void:
 		top_chips.add_child(_top_chip("paw", String(ak.get("name", "")), kc, "Your partner: the Boki that comes on expeditions with you"))
 	top_chips.add_child(_top_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems: spend them on buildings, seeds and treats"))
 	TopChips.add_to(top_chips)
-	if treat != "":
+	if treat != "" and not FarmUnlocks.base_mode():
 		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))
 
 ## One number on the top bar: an icon, the value, and a tooltip saying what it is.
@@ -4009,6 +4009,7 @@ func _setup_care() -> void:
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
 	# what Boki assigned to stations made while you were away (Work.catch_up)
 	var away_lines: Array = Work.catch_up() + CareJournal.arrival()
+	BaseHud.arrived(away_lines)
 	if not away_lines.is_empty():
 		_show_when_free(away_lines)      # the one "While you were away" card (the work and the journal)
 	Care.dex_sync()
