@@ -47,7 +47,7 @@ const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (ne
 const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind

@@ -165,7 +165,7 @@ func _page(name: String, title_txt: String, width := 620.0, scroll := false) -> 
 	page = name
 	if not was_open:
 		UI.show_backdrop(dim, true)
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if not was_open and Game.main:
 		var s = Game.main.screen_node()
 		if s and s.has_method("on_menu_opened"):
@@ -331,6 +331,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
 	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
+	_toggle(v, "Keep cursor in window", "cursor_confine", "In a fight the cursor stays inside the window")
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [

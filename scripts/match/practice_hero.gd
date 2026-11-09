@@ -33,7 +33,7 @@ static func close(p: Practice) -> void:
 	p.picker_page = ""
 	p.hover_arch = ""
 	p.m.paused = false
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
 
 ## Plays `ak`: saved as your expedition pick, and your hunter here turns into it.
 static func pick(p: Practice, ak: String) -> void:
@@ -70,7 +70,7 @@ static func _show(p: Practice, title: String, width: float, on_close: Callable, 
 	p.picker.layer = 40
 	p.m.add_child(p.picker)
 	p.m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	p.picker.add_child(root)

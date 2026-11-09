@@ -263,7 +263,7 @@ func attach_keys() -> void:
 
 func open_menu() -> void:
 	m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	menu_layer = CanvasLayer.new()
 	menu_layer.layer = 40
 	m.add_child(menu_layer)
@@ -332,4 +332,4 @@ func close_menu() -> void:
 		menu_layer.queue_free()
 		menu_layer = null
 	m.paused = false
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
