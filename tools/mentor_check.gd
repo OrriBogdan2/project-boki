@@ -129,6 +129,7 @@ func _base(elder: Dictionary, young: Dictionary, mate: Dictionary) -> void:
 	ok(not mk.is_empty(), "the mentor is out on the farm")
 	var in_state := 0
 	var near := 0
+	var arrived := -1      # the frame it first reached the Shrine: it strolls there at its slow pace first
 	var frames := 0
 	var top := 0.0
 	var t := 0.0
@@ -139,10 +140,15 @@ func _base(elder: Dictionary, young: Dictionary, mate: Dictionary) -> void:
 		var fsm: Fsm = mk["life"]
 		in_state += 1 if fsm.is_in(BaseLife.S.MENTOR) or fsm.is_in(BaseLife.S.NAP) else 0
 		var from_shrine := Vector2(mk["pos"].x - shrine.x, mk["pos"].z - shrine.z).length()
-		near += 1 if from_shrine < 4.0 + float(home.life.R["mentor_radius"]) else 0
+		var close := from_shrine < 4.0 + float(home.life.R["mentor_radius"])
+		if close and arrived < 0: arrived = frames
+		near += 1 if close and arrived >= 0 else 0
 		top = maxf(top, Vector2(mk["vel"].x, mk["vel"].z).length())
 	ok(in_state >= frames * 0.9, "the mentor is in its Mentor (or Nap) state (%d of %d frames)" % [in_state, frames])
-	ok(near >= frames * 0.8, "it stays near the Soul Shrine (%d of %d frames)" % [near, frames])
+	ok(arrived >= 0 and arrived <= frames * 0.5,
+			"it walks to the Soul Shrine first (frame %d of %d)" % [arrived, frames])
+	var there := frames - maxi(arrived, 0)
+	ok(near >= there * 0.8, "then it stays near the Soul Shrine (%d of %d frames)" % [near, there])
 	ok(top <= 2.4 * Mentor.PACE * SPEED_SLACK, "it never hurries (top %.2f m/s)" % top)
 	home.day_t = 0.0
 	var asleep := 0

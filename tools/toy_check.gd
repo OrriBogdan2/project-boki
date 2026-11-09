@@ -103,7 +103,9 @@ func run(m: Node) -> void:
 		var shared: bool = now.size() >= 2 and now[0]["play"]["u"] == now[1]["play"]["u"]
 		if first_t >= 0.0 and second_t < 0.0 and shared:
 			second_t = i * 0.05
-		posed = posed or (now.size() >= 1 and now[0]["node"].get_node("Body").rotation != Vector3.ZERO)
+		if now.size() >= 1:      # a plain body tilts, a rigged one plays the clip; both name the pose
+			var pn: Node3D = now[0]["node"]
+			posed = posed or pn.get_node("Body").rotation != Vector3.ZERO or String(pn.get_meta("pose", "")) != ""
 		if i % 200 == 0: await main.get_tree().process_frame
 		if second_t >= 0.0 and i * 0.05 > second_t + 15.0: break
 	ok(first_t >= 0.0 and first_t <= 60.0, "a Boki walked to a toy and played within 60 s (%.1f s)" % first_t)
