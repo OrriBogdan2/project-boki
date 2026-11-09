@@ -1006,6 +1006,114 @@
 				]
 			}
 		},
+		"look_toy": {
+			"direct": true,
+			"feel": "excited",
+			"word": "Ooh",
+			"acts": [
+				"(pats it twice)",
+				"(circles the new thing)",
+				"(nudges it, then hops)",
+				"(sniffs it, then grins)"
+			],
+			"lines": {
+				"_": [
+					"Mine first, what is it?",
+					"Ooh, I'll try it!",
+					"A new thing!",
+					"Let me see!",
+					"Is it for us?",
+					"Move over, my turn!",
+					"So shiny and new!",
+					"I found it first!",
+					"Look, look, look!",
+					"Can we keep it?",
+					"Wow, so cool!",
+					"Me first, me first!"
+				]
+			}
+		},
+		"look_rare": {
+			"direct": true,
+			"feel": "excited",
+			"word": "Wow",
+			"acts": [
+				"(stares wide-eyed)",
+				"(tiptoes closer)",
+				"(gasps softly)",
+				"(circles the glowing egg)"
+			],
+			"lines": {
+				"_": [
+					"Look how it shines!",
+					"A rare one!",
+					"So special!",
+					"Welcome, shiny newcomer!",
+					"Wow, it's glowing!",
+					"What a lucky day!",
+					"Can I hold it?",
+					"Everyone, come see!",
+					"It sparkles so much!",
+					"Never seen one like it!",
+					"Hello in there!",
+					"This one is special."
+				]
+			}
+		},
+		"look_loot": {
+			"direct": true,
+			"feel": "happy",
+			"word": "Yay",
+			"acts": [
+				"(bounces over)",
+				"(peeks into your bag)",
+				"(sniffs the loot)",
+				"(circles you, grinning)"
+			],
+			"lines": {
+				"_": [
+					"You're back, show me!",
+					"Ooh, what did you find?",
+					"Did you win?",
+					"Show us the loot!",
+					"Welcome back, hunter!",
+					"Anything for me?",
+					"Look at all that!",
+					"We missed you!",
+					"Was it scary out there?",
+					"You made it home!",
+					"Tell us everything!",
+					"So much stuff!"
+				]
+			}
+		},
+		"look_shy": {
+			"direct": true,
+			"feel": "question",
+			"word": "Um",
+			"acts": [
+				"(peeks from behind)",
+				"(hangs back, curious)",
+				"(hides behind a rock)",
+				"(watches from afar)"
+			],
+			"lines": {
+				"_": [
+					"Um, is it safe?",
+					"I'll just watch.",
+					"You first, I'll wait.",
+					"It looks big.",
+					"Maybe later?",
+					"I can see from here.",
+					"Hello from over here!",
+					"Is it friendly?",
+					"I'm not going closer.",
+					"Tell me if it bites.",
+					"Looks fine from here.",
+					"I'll stay right here."
+				]
+			}
+		},
 		"hatched": {
 			"direct": true,
 			"feel": "excited",
