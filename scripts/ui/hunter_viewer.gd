@@ -337,10 +337,11 @@ func tick(dt: float) -> void:
 		s["cast_slot"] = "ult"
 		s["cast"] = 0.05
 	anim.update(dt, s)
-	# powering up: the Hunter's light builds and the body thrums; the burst pops it
+	# powering up: the Hunter's light builds and the body rises and sways slowly (no fast thrum: the owner
+	# read it as shake, 11-08); the sway scales with Screen shake, 0 holds it still; the burst pops it
 	glow.light_energy = 6.0 * power_k + (5.0 * maxf(0.0, 1.0 - burst_t / 0.6) if burst_t >= 0.0 else 0.0)
-	var shake := 0.018 * power_k * power_k * float(Settings.get_v("screen_shake"))   # 0 holds it still
-	model.position = Vector3(sin(spin_t * 61.0) * shake, 0.04 * power_k, cos(spin_t * 47.0) * shake)
+	var sway := 0.012 * power_k * power_k * float(Settings.get_v("screen_shake"))
+	model.position = Vector3(sin(spin_t * 1.3) * sway, 0.04 * power_k, cos(spin_t * 0.9) * sway)
 	if burst_t >= 0.0:
 		burst_t += dt
 		var k := clampf(burst_t / 0.45, 0.0, 1.0)
