@@ -5,7 +5,7 @@ extends RefCounted
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes.
+## once and reused until it changes. SpawnPlan's sight checks are spread over frames.
 
 var main: Node
 var fails := 0
@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	_mob_naps()
 	_far_bots()
 	_shadows()
+	_spawn_sight()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -34,6 +35,27 @@ func _step(secs: float) -> void:
 	while t < secs:
 		m.step(Match.DT)
 		t += Match.DT
+
+## SpawnPlan looks at a slice of its spots each frame, each spot again within REVISIT_S, and a squad
+## standing on one still learns it in that time.
+func _spawn_sight() -> void:
+	var sp := m.spawn_plan
+	ok(sp != null and sp.cands.size() > 4, "setup: a spawn plan with spots")
+	if sp == null or sp.cands.size() <= 4:
+		return
+	var n := sp.cands.size()
+	var c: Dictionary = sp.cands[n / 2]
+	(c["known"] as Dictionary).erase(m.player.team)
+	m.player.teleport(c["pos"])
+	var at := sp._next
+	sp.tick(Match.DT)
+	var per := posmod(sp._next - at, n)
+	ok(per <= ceili(n * Match.DT / SpawnPlan.REVISIT_S), "one frame looks at %d of %d spots" % [per, n])
+	var t := Match.DT
+	while not (c["known"] as Dictionary).has(m.player.team) and t < SpawnPlan.REVISIT_S + 0.1:
+		sp.tick(Match.DT)
+		t += Match.DT
+	ok((c["known"] as Dictionary).has(m.player.team), "the spot underfoot is known within %.2f s" % t)
 
 func _mob_naps() -> void:
 	var mb: Mob = null
