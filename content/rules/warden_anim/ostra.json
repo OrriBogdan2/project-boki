@@ -18,7 +18,6 @@
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"ostra_orb": {"clip": "orb", "alt": "orb_l", "upper": true}, "ostra_orb_hot": {"clip": "orb_hot", "upper": true},
-		"ostra_flurry": {"clip": "flurry", "upper": true},
 		"ostra_snap_wind": {"clip": "snap_wind", "hold_from": 0.3}, "ostra_snap": {"clip": "snap"},
 		"ostra_swap_aim": {"clip": "swap_aim", "hold_from": 0.16}, "ostra_swap": {"clip": "swap"},
 		"ostra_swap_air": {"clip": "swap_air", "hold_from": 0.47}, "ostra_arrive": {"clip": "arrive"},
