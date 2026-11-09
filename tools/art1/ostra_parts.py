@@ -11,6 +11,13 @@ EL_Z, WR_Z = 1.046, 0.811       # elbow, wrist
 HEAD_Z = 1.442
 HIPS_Z = 0.756
 SKIRT_Z = 0.826
+NECK = np.array((0.0, 0.0, 1.44))
+HEAD_K = 0.87       # v2 sheet: the head and hat 0.87 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
+
+
+def headpt(p):
+    """a point modelled at v1's head size, scaled about the neck to v2's"""
+    return NECK + (np.asarray(p, float) - NECK) * HEAD_K
 
 
 class Part:
@@ -120,17 +127,17 @@ def bone_blend(z, joints):
 
 
 # ---------------------------------------------------------------------------- the box
-BOX_W, BOX_B, BOX_T = 0.205, 0.02, 0.35        # half width, bottom, top
+BOX_W, BOX_B, BOX_T = 0.2, 0.02, 0.4           # half width, bottom, top (v2 sheet: about a cube)
 SPRING_TOP = 0.79
 
 
 def box():
-    """the music box: walls with an inset panel per suit, its open mouth; each wall on its own patch (front spade, his left diamond, back club,
-    his right heart)"""
+    """the music box: walls with an inset panel per suit, its open mouth; each wall on its own patch (v2 sheet: spade front and back,
+    diamond on either side)"""
     out = []
     w, b, t = BOX_W, BOX_B, BOX_T
     # a wall: outward face (y = +w seen from the front) as a 2 x 2 frame, turned about z
-    for i, (key, turn) in enumerate((("wall_s", 0), ("wall_d", 90), ("wall_c", 180), ("wall_h", 270))):
+    for i, (key, turn) in enumerate((("wall_s", 0), ("wall_d", 90), ("wall_sb", 180), ("wall_db", 270))):
         c, sn = np.cos(np.radians(turn)), np.sin(np.radians(turn))
         P = np.zeros((3, 3, 3))
         for r, z in enumerate((t, (t + b) * 0.5, b)):
@@ -207,21 +214,7 @@ def lid():
     return out, (0, hy, hz)
 
 
-def crank():
-    """the crank, on his right side only: an axle out of the heart, an arm, a knob. Its bone turns about the axle"""
-    x0 = BOX_W + 0.012
-    c = np.array((x0, 0.0, 0.2))
-    out = []
-    p = np.array((c, c + (0.03, 0, 0), c + (0.06, 0, 0)))
-    V, F, ST = grid(tube(p, np.array((0.03, 0.016, 0.016)), 6), closed=True)
-    out.append(Part("crank0", "metal", V, F, ST, rigid("x_crank", len(V)), "brass", (64, 64)))
-    p = np.array((c + (0.06, 0, 0), c + (0.066, 0, -0.06), c + (0.066, 0.015, -0.115)))
-    V, F, ST = grid(tube(p, np.array((0.016, 0.013, 0.013)), 5), closed=True)
-    out.append(Part("crank1", "metal", V, F, ST, rigid("x_crank", len(V)), "brass", (64, 64)))
-    p = np.array((c + (0.066, 0.015, -0.115), c + (0.095, 0.015, -0.115), c + (0.135, 0.015, -0.115)))
-    V, F, ST = grid(tube(p, np.array((0.012, 0.022, 0.02)), 6), closed=True)
-    out.append(Part("crank2", "metal", V, F, ST, rigid("x_crank", len(V)), "knob", (64, 64)))
-    return out, c
+CRANK_AXLE = np.array((BOX_W + 0.012, 0.0, 0.2))     # x_crank's pivot; v2 has no crank mesh, the bone stays for the clips
 
 
 def spring():
@@ -244,7 +237,7 @@ def smoke_wrap():
     t = np.linspace(0, 1, n)
     ang = t * 2 * np.pi * 2.4 + 0.8
     r = 0.16 - 0.03 * t
-    path = np.stack((np.cos(ang) * r, np.sin(ang) * r, 0.36 + 0.34 * t), axis=1)
+    path = np.stack((np.cos(ang) * r, np.sin(ang) * r, BOX_T + 0.01 + 0.29 * t), axis=1)
     V, F, ST = grid(tube(path, 0.035 * np.sin(t * np.pi) ** 0.6 + 0.003, 6), closed=True)
     return Part("smokewrap", "void-wisp", V, F, ST, rigid("x_smoke", len(V)), "wisp", (256, 512))
 
@@ -291,7 +284,7 @@ def lining(P):
     return Part("lining", "void-body", V, F, ST, rigid("hips", len(V)), "lining", (64, 64))
 
 
-TAILS = ((33, 0.52, 0.72), (92, 0.60, 0.74), (152, 0.55, 0.72), (-152, 0.55, 0.72), (-92, 0.60, 0.74), (-33, 0.52, 0.72))
+TAILS = ((33, 0.50, 0.62), (92, 0.58, 0.66), (152, 0.52, 0.63), (-152, 0.52, 0.63), (-92, 0.58, 0.66), (-33, 0.50, 0.62))
 
 
 def tails():
@@ -414,7 +407,7 @@ def face_point(u, v):
     z = v * hh
     y = 0.112 - 0.03 * (1 - u * u) * (1 - v * v)
     c, s_ = np.cos(FACE_TILT), np.sin(FACE_TILT)
-    return np.stack((x, HEAD_C[1] + y * c - z * s_, HEAD_C[2] + z * c + y * s_ - 0.03), axis=-1)
+    return headpt(np.stack((x, HEAD_C[1] + y * c - z * s_, HEAD_C[2] + z * c + y * s_ - 0.03), axis=-1))
 
 
 def face():
@@ -447,8 +440,8 @@ def face():
 
 def hood():
     """the cap's skull: a bag from the oval round the face to the back of the head"""
-    C = HEAD_C
-    R = np.array((0.15, 0.17, 0.215))
+    C = headpt(HEAD_C)
+    R = np.array((0.15, 0.17, 0.215)) * HEAD_K
     n = 44
     loop = []
     for k in range(n):
@@ -485,9 +478,9 @@ def horn(side):
     n = "R" if side > 0 else "L"
     pts = np.array(((0.05, -0.05, 1.78), (0.115, -0.06, 1.865), (0.2, -0.07, 1.885), (0.275, -0.07, 1.82), (0.32, -0.06, 1.72), (0.338, -0.05, 1.61), (0.34, -0.045, 1.56)))
     pts[:, 0] *= side
-    path = resample(pts, 22)
+    path = resample(headpt(pts), 22)
     t = np.linspace(0, 1, 22)
-    rd = rmp(t, [0, 0.15, 0.35, 0.6, 0.85, 1.0], [0.095, 0.105, 0.092, 0.066, 0.03, 0.012])
+    rd = rmp(t, [0, 0.15, 0.35, 0.6, 0.85, 1.0], [0.095, 0.105, 0.092, 0.066, 0.03, 0.012]) * HEAD_K
     V, F, ST = grid(tube(path, rd, 14, lambda a, tt: 1 + 0.08 * np.cos(2 * a) * (1 - tt)), closed=True)
     return Part("horn" + n, "cloth", V, F, ST, chain_w("spring_horn%s" % n, np.repeat(t, 14), 3, 0.35, "head"), "horn" + n, (320, 120)), path
 
@@ -500,6 +493,9 @@ def chain_w(prefix, t, bones, start, parent):
     W[parent] = np.clip(1 - k * 3.5, 0, 1).astype(np.float32)
     tot = sum(W.values())
     return {b: w / np.maximum(tot, 1e-6) for b, w in W.items()}
+
+
+RUFF_K = 0.85       # v2 sheet: the ruff a little narrower than v1's, with the smaller head
 
 
 def ruff():
@@ -516,12 +512,12 @@ def ruff():
         wall = M.sm(0.75, 0.95, q)
         ph = a * pleats + 2.2 * (h / 0.058) * wall      # (the folds snake down the wall)
         scal = 1 + (0.03 * q ** 2 + 0.05 * wall) * np.cos(ph)
-        P[i, :, 0] = np.sin(a) * rr * scal * 1.04
-        P[i, :, 1] = np.cos(a) * rr * scal * 0.96
+        P[i, :, 0] = np.sin(a) * rr * scal * 1.04 * RUFF_K
+        P[i, :, 1] = np.cos(a) * rr * scal * 0.96 * RUFF_K
         P[i, :, 2] = 1.435 + h * (1 + 0.22 * np.sin(a * pleats) * q ** 3) - 0.16 * P[i, :, 1]
     V, F, ST = grid(P, closed=True)
     r = np.hypot(V[:, 0], V[:, 1])
-    k = M.sm(0.15, 0.07, r) * 0.4
+    k = M.sm(0.15 * RUFF_K, 0.07, r) * 0.4
     return Part("ruff", "cloth-ruff", V, F, ST, {"hips": 1 - k, "head": k}, "ruff", (560, 140))
 
 
@@ -553,9 +549,8 @@ def collar():
 def buttons():
     out = []
     for i, z in enumerate((1.2, 1.13, 1.06)):
-        for x in (-0.042, 0.042):
-            y = 0.094 - (1.2 - z) * 0.12
-            out.append(ball("btn%d%d" % (i, x > 0), (x, y, z), 0.015, "hips", 3, 5))
+        y = 0.094 - (1.2 - z) * 0.12
+        out.append(ball("btn%d" % i, (0.0, y, z), 0.017, "hips", 3, 5))
     return out
 
 
@@ -568,8 +563,9 @@ def wisp():
     out = []
     path = resample(WISP_PATH, 30)
     t = np.linspace(0, 1, 30)
-    rd = rmp(t, [0, 0.14, 0.4, 0.7, 1.0], [0.15, 0.085, 0.085, 0.085, 0.08])
-    tw = lambda a, tt: 1 + 0.2 * np.cos(4 * a + tt * 11.0) + 0.1 * np.cos(3 * a - tt * 7.0)
+    rd = rmp(t, [0, 0.14, 0.4, 0.7, 1.0], [0.16, 0.11, 0.115, 0.105, 0.09])
+    # (v2 sheet: a broad flat ribbon of smoke, not a round tube)
+    tw = lambda a, tt: (1 + 0.35 * np.cos(2 * a + tt * 4.0)) * (1 + 0.16 * np.cos(4 * a + tt * 11.0) + 0.08 * np.cos(3 * a - tt * 7.0))
     V, F, ST = grid(tube(path, rd, 14, tw), closed=True)
     # (v = 1 down at the box: hero_void's soft fade pours it into the mouth)
     ST = [[(s, 1.0 - tv) for s, tv in c] for c in ST]

@@ -1,8 +1,8 @@
 extends RefCounted
 ## --clip-live-grimble: Grimble's clips through the real match code, as --clip-live-check does for Kael.
-## The hook's throw and reel play their clips and it leaves his wrist meanwhile (one hook on screen, 76b), then
-## comes back; the dash is the junk ball; shots leave the blunderbuss; a hit spills coins; a knock-out plays the
-## death clip. Never touches the save.
+## The hook's throw and reel play their clips and the model's bone hook shrinks into his wrist meanwhile, the
+## stretched arm growing from there (one hook on screen, 76b), then comes back; the dash is the junk ball; shots
+## leave the blunderbuss; a hit spills coins; a knock-out plays the death clip. Never touches the save.
 
 const DT := 1.0 / 60.0
 const MUZZLE_OFF := 0.08       # m: the Gun's Muzzle off the visible muzzle
@@ -50,14 +50,19 @@ func run(main: Node) -> void:
 	K.press_rmb()
 	var seen := {}
 	var gone := false
+	var root_off := 0.0     # m, the stretched arm's root off his wrist while the hook is out (most)
+	var rig := WardenGlb.skeleton(P.model.get_node("Warden"))
 	for f in 200:
 		_frame(m, P)
 		seen[_clips(P).cur] = true
 		if K.flying or not K.pull.is_empty():
 			gone = gone or _bone_scale(P, "hook") < 0.01
+			var wrist := rig.global_transform * rig.get_bone_global_pose(rig.find_bone("hook")).origin
+			root_off = maxf(root_off, K._hand().distance_to(wrist))
 	print("LIVE clips seen: ", seen.keys())
 	ok(seen.has("throw") and seen.has("reel"), "the throw and the reel play their clips")
 	ok(gone, "the hook leaves his wrist while it flies and reels")
+	ok(root_off < 0.05, "the stretched arm grows from his wrist, not off a hidden hook (%.2fm)" % root_off)
 	for f in 40:
 		_frame(m, P)
 	ok(_bone_scale(P, "hook") > 0.9, "the hook is back on his wrist after (%.2f)" % _bone_scale(P, "hook"))
