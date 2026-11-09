@@ -89,9 +89,10 @@ func scan() -> void:
 	for r in Save.d["roster"]:
 		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
 	_plot_jobs()
-	_wild_jobs()
-	_station_jobs()
-	_haul_jobs()
+	if not FarmUnlocks.base_mode():
+		_wild_jobs()
+		_station_jobs()
+		_haul_jobs()
 	_mend_jobs()
 	_warm_jobs()
 	FarmSites.scan(self)
