@@ -7,6 +7,7 @@ extends "res://tools/combo51_shots.gd"
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
+## --reel-parity plays one fixed set for any Hunter, with the key on screen (tools/vfx_reel/parity.gd).
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
@@ -20,10 +21,14 @@ const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
 const FRAME_W := 960                      # px wide, each --reel-frames frame
 
 var only := ""
+var parity := false            # --reel-parity: tools/vfx_reel/parity.gd's set for any Hunter
 var frame_dir := ""            # --reel-frames: where each drawn frame goes
 var crop_px := SHEET_CROP
 var crop_zoom := 1.0
 var frames := 0
+var frame_every := 1           # steps per saved frame
+var frame_w := FRAME_W
+var ticks := 0
 
 ## The parts this reel plays (a Hero's own script overrides it).
 func parts() -> Array:
@@ -42,7 +47,9 @@ func run(main_node: Node) -> void:
 			only = arg.substr(12)
 		if arg == "--reel-frames":
 			frame_dir = "frames"
-	var own := "res://tools/vfx_reel/%s.gd" % who
+		if arg == "--reel-parity":
+			parity = true
+	var own := "res://tools/vfx_reel/%s.gd" % ("parity" if parity else who)
 	if get_script().resource_path != own and ResourceLoader.exists(own):
 		await load(own).new().run(main_node)
 		return
@@ -63,10 +70,13 @@ func run(main_node: Node) -> void:
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
 		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
 		P.ak.set("enraged_t", 0.0)
-		await Callable(self, "_%s_%s" % [who, part] if HERO_PARTS.has(who) else "_part_" + part).call()
+		await Callable(self, _part_func(part)).call()
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
+func _part_func(part: String) -> String:
+	return "_%s_%s" % [who, part] if HERO_PARTS.has(who) else "_part_" + part
 
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
@@ -74,7 +84,9 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 	var step := each
 	if frame_dir != "":
 		step = func(t: float) -> void:
-			_save_frame()
+			ticks += 1
+			if ticks % frame_every == 0:
+				_save_frame()
 			if each.is_valid():
 				each.call(t)
 	await super._go(secs, step, marks, lead)
@@ -82,7 +94,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 ## (--reel-frames) the frame last drawn, scaled down to FRAME_W
 func _save_frame() -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.resize(frame_w, frame_w * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
 	frames += 1
 
