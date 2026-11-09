@@ -1,0 +1,25 @@
+{
+ "id": "frost",
+ "name": "Ice Bridge Glove",
+ "short": "Bridge",
+ "verb": "terrain",
+ "cd": 18,
+ "col": "9ae8ff",
+ "stats": {
+  "cdr": 0.04
+ },
+ "icon": "platform",
+ "desc": "Freeze a 10m ice bridge toward the cursor across the abyss for 7s. Cross gaps, chase, escape, but it melts.",
+ "bot": {
+  "when": "gap"
+ },
+ "effects": [
+  {
+   "type": "bridge",
+   "length": 10,
+   "width": 1.5,
+   "time": 7,
+   "color": "bff0ff"
+  }
+ ]
+}

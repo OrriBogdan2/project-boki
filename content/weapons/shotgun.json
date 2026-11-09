@@ -1,0 +1,32 @@
+{
+	"id": "shotgun",
+	"name": "Shotgun",
+	"classes": [
+		"heavy"
+	],
+	"primary": {
+		"dmg": 4.0,
+		"pellets": 7,
+		"fan_deg": 60.0,
+		"rate": 1.0,
+		"speed": 18,
+		"decel": 30.0,
+		"mag": 6,
+		"reload": 1.8,
+		"kb": 2.2,
+		"spread": 0.0,
+		"range": 5.0,
+		"size": 0.15,
+		"color": "#ffd9f2",
+		"sfx": "shotgun",
+		"pellet_floor": 0.457,
+		"bloom_deg": 8.0,
+		"bloom_max_deg": 24.0,
+		"bloom_recover": 30.0,
+		"bloom_dash_reset": true,
+		"desc": "Seven slugs that slow and stop at 5m. One slug landing still hurts. Spread grows with each shot; dashing resets it.",
+		"kick": 0.16,
+		"push": 2.6
+	},
+	"utility": "breach"
+}

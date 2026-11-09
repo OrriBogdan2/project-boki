@@ -1,0 +1,40 @@
+# Round 24 (23:30 ET): concept panel groups 1-2. Bathilus PASS (8.6/8.2/8.7) -> turnaround + next stage. Others: edits or new looks.
+CO='briefs/boki-art/batch/out/'
+def CE(name,run,instr):
+    SPECS.append({'id':'c_'+name.lower()+'_e','name':name+' (concept edit)','refs':[CO+'c_'+name.lower()+'_'+str(run)+'.jpg'],'runs':4,'aspect':'1:1',
+      'prompt':"Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: "+instr})
+def CN(name,newlook,extra_avoid=''):
+    d=dict(ROSTER200[name]); d['look']=newlook
+    if extra_avoid: d['avoid']=d['avoid']+', '+extra_avoid
+    ROSTER200[name+'_r']=d; CQ(name+'_r'); SPECS[-1]['id']='c_'+name.lower()+'_r'; SPECS[-1]['name']=name+' (concept r)'
+    if 'Spore' in _TYPES.get(name,''): SPECS[-1]['prompt']+=SPORE_NOTE
+# PASS
+TA('Bathilus',CO+'c_bathilus_2.jpg')
+CQ('Torpecone',CO+'c_bathilus_2.jpg')
+# edits
+CE('Grainspin',1,"make the abdomen a single round glass bulb half full of gold sand that joins the body seamlessly at a soft sandstone-textured waist (no second bulb, no hourglass neck), and give the legs sandstone texture with rocky tips.")
+CE('Narfoil',2,"make the tusk a short, straight, smooth fencing-foil blade with a frosted button tip, make the bell-guard frosted ice growing out of the skin at the tusk base with no clean edge, and add frost tips to the flippers and tail.")
+CE('Pinster',2,"make the cheeks themselves domed pinball bumpers growing out of the fur (striped red-and-white mushroom-bumper caps with a yellow rim, no separate metal ring), and make the back stripes pinball lane arrows instead of a lightning bolt.")
+CE('Reelacine',1,"remove the film band at the neck so the film is only printed into the hide as the stripes, make the head bigger and more stylised with a wider jaw and chunkier sprocket holes, and make the spool tail stiffer and thicker.")
+CE('Tootle',3,"remove the trumpet from its mouth; instead fold the brass-sheened neck frill forward into a trumpet bell around the snout, with only a short mouthpiece grown from its lips, and make the tail a plain grooved cone with no rings.")
+CE('Bullpole',1,"replace the human-looking pursed lips with a small wide tadpole pucker, and make the dart-flight fins crisper with straight edges and a toxic green sheen.")
+CE('Foldbat',2,"fold the wings fully shut into a narrow closed-fan stick along each side, recolour to black lacquer with cream rib tips and a red accent instead of plum, and make the ears a little smaller.")
+CE('Glaciammoth',1,"make it more colossal and stylised: a heavier raised head, one forefoot forward in a legendary stance, huge sweeping fossil-ivory tusks, longer frosted locks, larger clear permafrost plates with relics deep inside and a faint glow on the runes.")
+CE('Lensling',1,"remove the brass rings from its wrists, ankles and tail tip (brass-tinted toe scales instead), and blend the brass lens tube into the eye socket with skin folds so it clearly replaces one eye.")
+CE('Nymphane',1,"make the legs shorter and chunkier, replace the human-looking teeth with insect mask-jaw hooks, and make the hinged glass-plated mask jaw folded under the chin bigger and clearer.")
+CE('Pocketpus',1,"remove the panel seams so the red lacquer is its skin (one smooth rounded handle body with rivet spots), show a visible folded-blade seam along the bill, and make the ankle spurs glossy venom-green and clearly grown.")
+CE('Puffuse',3,"keep only one fuse tail, put the spark lines inside the seams as glowing cracks (no floating bolts), add short stubby iron puffer spines between the rivets and a pale yellow belly so it reads as a pufferfish.")
+CE('Sarcobra',1,"widen the sarcophagus lid into the flared hood itself (the hood skin becomes the lid edge, no gap above the head), lengthen the fangs, and keep the violet smoke to faint wisps at the hood edges.")
+# new looks
+CN('Chiptero',"A chunky chibi pterosaur hatchling with an oversized head, its body built from a few big glossy conchoidal flint flakes with clean ridged knapping scars and sharp white chip edges, one sharp flint-edge beak, a blunt pick-head crest, short folded wings and a round baby body, waddling on all fours.")
+CN('Fawngus',"A stylised big-headed fawn on all fours whose white spots swell into a few rounded wooden peg knobs like a coat rack, each topped with a single small teal mushroom cap with purple-black gill lines underneath, short peg nubs on its head where antlers will grow; a curious, shy face.","tears, crying, a sad face, a realistic deer, a mushroom garden on its back")
+CN('Gilabacus',"A heavy, low, slow Gila monster with raised bony ridges running along its spine from nose to tail only, each ridge carrying a row of coral-and-black beads like an abacus rod (nothing wraps around the body or legs), a pastel pink fairy sheen on the beads, a smug half-lidded smile and one neat glossy venom bead on its lip.","hoops, bands or rings around the body, legs or tail, drool")
+CN('Hydrangor',"A grand, tall three-headed hydra on powerful legs whose heads ARE hydrangea blooms: the petal clusters form each skull and mane and the dragon jaw opens out of the flower (one sleepy, one snarling, one curious), long arched necks, gold horns, petal-scale body, big leaf-plate spines and a heavy regal tail.","flower wigs, petals sitting on top of lizard heads, a small cute body")
+CN('Malletary',"A stylised big-headed secretary bird with a severe hooded face whose scaly shins thicken and flow straight into blocky iron hammer-head feet made from its own toes and heel (no handles), gold runes etched into the leg scales, in a stomping pose.","handles, held hammers, gold bands or rings on the legs, a realistic bird")
+CN('Pagodito',"A squat baby iguana with a clearly lizard head, a long snout and a dewlap, its body covered in terracotta roof-tile scales, and one small curled pagoda eave rising only from the head and neck spines as its crest, with a grumpy droopy-lidded old-man face.","a roof on its back, a building, a hat, two heads, a toad")
+CN('Proofhop',"A round katydid nymph made of soft dough: long jointed hopping hind legs, leaf-shaped wing buds, stubby antennae, a glossy rounded dough body with a floury scored loaf crust split along its back with teal yeast spores puffing out, a few clean bubble dimples, and a sleepy-happy smile.","warts, lumps, a potato or rock, pickles")
+CN('Clinkpede',"A SHORT stubby centipede made of exactly eight fat chunky chain links that are its body segments (no tube inside), a big round steel-link head about a third of its size tilted curiously, beady eyes, small green fangs, chunky toothed legs and glossy green venom beads under each link.","a long loose chain, a worm wrapped in chain")
+CN('Grammite',"A chunky, short dobsonfly larva with an oversized head, two clearly blade-shaped curved bronze dagger jaws with a fuller groove and a guard-like ridge at the base, big mean-but-funny eyes, fluffy amber gill tufts as tassels down its sides, and no rings around its segments.","a realistic hellgrammite, bands around the segments")
+CN('Morelkin',"A round chibi tapir calf whose cream baby stripes ARE flat rows of tiny button-mushroom caps pressed flush into the hide (nothing sticking up), whose wiggly snout tip is honeycomb-pitted morel flesh puffing teal spores, with a sleepy smile and stubby legs.","mushrooms sticking up from the back or ears, a garden on its back, a realistic tapir")
+CN('Pavonazar',"A stylised, plump glass peacock walking low with a smaller body and bigger head, its body glossy cobalt glass with a teal sheen, its train made of fewer, larger domed evil-eye glass beads set in glass feather panes, some half-blinking with eyelids, three bead stalks as a crest, and a cold, heavy-lidded slow-blink stare.","a realistic peacock, feather eye-spots")
+PRIORITY=PRIORITY+['ta_bathilus','c_torpecone']+[s['id'] for s in SPECS if s['id'].startswith('c_') and (s['id'].endswith('_e') or s['id'].endswith('_r'))]

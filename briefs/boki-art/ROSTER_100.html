@@ -1,0 +1,158 @@
+<title>Boki Roster 100</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: a field guide. Summary strip of type counts, then families as rows, each stage a step left to right. */
+:root{
+  --bg:#eef0f4; --paper:#ffffff; --ink:#22242c; --muted:#666b7a; --line:#d8dbe4; --accent:#3f6fd8;
+  --new:#e8f5ec; --newink:#1f7a43; --locked:#eaf0fd; --lockink:#2d55b0; --todo:#fdf3e4; --todoink:#9a5b00;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif; --body:"Nunito Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16171d; --paper:#1f2129; --ink:#eceef4; --muted:#9aa0b2; --line:#30333f; --accent:#7ea2ff;
+  --new:#173324; --newink:#7fdca4; --locked:#1c2747; --lockink:#a9c1ff; --todo:#3a2c14; --todoink:#f2c27a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16171d; --paper:#1f2129; --ink:#eceef4; --muted:#9aa0b2; --line:#30333f; --accent:#7ea2ff;
+  --new:#173324; --newink:#7fdca4; --locked:#1c2747; --lockink:#a9c1ff; --todo:#3a2c14; --todoink:#f2c27a; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:70ch}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 14px;display:flex;gap:8px;align-items:baseline}
+.stat b{font-family:var(--display);font-size:1.4rem;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.85rem}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters .lab{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.chip{--c:#888;border:1.5px solid var(--c);color:var(--ink);background:transparent;border-radius:999px;padding:3px 10px;font:600 .82rem var(--body);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip i{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block}
+.chip[aria-pressed="true"]{background:var(--c);color:#fff}
+.chip[aria-pressed="true"] i{background:#fff}
+.chip small{font-variant-numeric:tabular-nums;opacity:.75}
+.chip:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:14px;height:14px;border-radius:4px;display:inline-block;border:1.5px solid var(--muted)}
+.group h2{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:6px 0 10px;display:flex;gap:10px;align-items:baseline}
+.group h2 small{font-family:var(--body);font-weight:600;color:var(--muted);font-size:.85rem}
+.fams{display:flex;flex-direction:column;gap:10px}
+.fam{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.step{display:flex;align-items:center;gap:8px;min-width:0}
+.arrow{color:var(--muted);font-weight:700}
+.split{display:flex;flex-direction:column;gap:8px}
+.mon{border-radius:9px;padding:8px 11px;min-width:0;width:220px;max-width:100%;display:flex;flex-direction:column;gap:4px}
+.mon.new{background:var(--new)} .mon.locked{background:var(--locked)} .mon.todo{background:var(--todo)}
+.mon .top{display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.mon .nm{font-family:var(--display);font-weight:600;font-size:1.02rem}
+.mon .tag{font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;font-weight:700;white-space:nowrap}
+.mon.new .tag{color:var(--newink)} .mon.locked .tag{color:var(--lockink)} .mon.todo .tag{color:var(--todoink)}
+.mon .types{display:flex;gap:4px;flex-wrap:wrap}
+.t{--c:#888;background:var(--c);color:#fff;font-size:.7rem;font-weight:700;border-radius:4px;padding:1px 6px}
+.mon .what{font-size:.84rem;color:var(--muted)}
+.mon .path{font-size:.72rem;font-weight:700;color:var(--ink);opacity:.7}
+.empty{color:var(--muted);padding:12px}
+@media (max-width:560px){.mon{width:100%}.step{width:100%;flex-wrap:wrap}.arrow{transform:rotate(90deg)}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Boki Roster 100</h1>
+    <p class="sub">The 50 species in the game today, plus the new forms from this pass. Each Boki has one or two types. Lines run 1 to 3 stages, and some final forms split by the path the Boki was raised on (fierce, steadfast, curious or swift). Every Boki also comes in a male and a female look.</p>
+  </header>
+  <div class="stats" id="stats"></div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--locked)"></i>Art locked</span>
+    <span><i class="sw" style="background:var(--todo)"></i>In the game, art still to do or redo</span>
+    <span><i class="sw" style="background:var(--new)"></i>New in this pass</span>
+  </div>
+  <div class="filters" id="filters"><span class="lab">Filter by type</span></div>
+  <main id="list"></main>
+</div>
+
+<script>
+const TYPES={Fire:"#e0622b",Grass:"#3f9d4a",Electric:"#d4a514",Ice:"#4fb3d6",Poison:"#9a4fc0",Bug:"#8c9b1f",Flying:"#6b8fe6",Rock:"#9a7b55",Dark:"#4b3f6b",Fairy:"#c46bb0",Crystal:"#e07aa6",Psychic:"#6d7787",Steel:"#b8473e",Water:"#2f7fd0",Dragon:"#5a47c9",Normal:"#9b9184",Spore:"#2f9c8f",Sound:"#c27b3a"};
+const NEWT=["Water","Dragon","Normal"];
+// status: L = art locked, T = in game, art to do or redo, N = new form
+const m=(n,t,s,w,p)=>({n,t,s,w,p});
+const G=[
+ {g:"Starters",note:"Ermink is the mystery egg: it evolves nine ways, one per Ink",f:[
+  [m("Ermink",["Normal"],"L","Stoat whose tail is a calligraphy brush, cream coat like a blank page"),[m("Flarmink",["Fire"],"N","Flame-brush tail, fiery brushstroke coat","Ember Ink"),m("Rippmink",["Water"],"N","Otter-sleek, wave strokes, webbed paws","Tide Ink"),m("Blossmink",["Grass"],"N","Leaf-bristle brush, painted petals and vines","Bloom Ink"),m("Voltmink",["Electric"],"N","Wire-bristle brush, zig-zag lightning strokes","Storm Ink"),m("Rimink",["Ice"],"N","Icicle brush, frost-lace strokes, long and sleek","Frost Ink"),m("Umbrink",["Dark"],"N","Soaked jet-black, smoking brush","Shadow Ink"),m("Lunink",["Fairy"],"N","Silver ink, crescent strokes, moth-feather ears","Lunar Ink"),m("Prismink",["Crystal"],"N","Rainbow ink that splits light","Prism Ink"),m("Wyrmink",["Dragon"],"N","Long, serpentine ink-dragon stoat","Wyrm Ink")]],
+  [m("Mycroll",["Spore"],"L","Hedgehog with mint toadstools"),m("Sporcupine",["Spore"],"L","Porcupine whose quills are mushroom stalks"),[m("Amanitusk",["Spore","Poison"],"N","Boar-sized, toxic red caps as spear quills, stem tusks","Fierce"),m("Ringrove",["Spore","Grass"],"N","Huge calm elder, a fairy ring grove on its back, shelf-fungus armour","Steadfast")]],
+  [m("Vespyx",["Poison"],"L","Fox with scorpion tail and pincers (website art)"),m("Vespox",["Poison"],"L","Leaner fox, bigger pincers, longer sting tail. Male locked, female redo out"),[m("Glaivyx",["Poison","Steel"],"N","Armoured bruiser, sting grown into a scythe blade","Fierce"),m("Lashyx",["Poison","Dark"],"N","Sleek speedster, whip tail with three stings","Swift")]],
+  [m("Prismander",["Crystal"],"T","Axolotl, crystal gills"),m("Glassolotl",["Crystal"],"N","Glass-bodied axolotl, prism gills"),[m("Chandelotl",["Crystal","Fairy"],"N","Gills become a crystal chandelier crown","Curious"),m("Geodelotl",["Crystal","Rock"],"N","Heavy geode hide, crystal tail club","Steadfast")]]
+ ]},
+ {g:"Three-stage lines",f:[
+  [m("Teapotamus",["Fire"],"L","Hippo calf, copper teakettle body, spout tail"),m("Puffamus",["Fire"],"L","Young hippo, potbelly-stove body"),m("Chuggamus",["Fire","Steel"],"L","Hippo steam locomotive")],
+  [m("Kerchick",["Flying"],"L","Albatross chick, handkerchief wings"),m("Jibbatross",["Flying"],"N","Young albatross, jib-sail wings, hook tips"),m("Canvastross",["Flying","Water"],"L","Albatross with ship-sail wings, harpoon tips")],
+  [m("Skidlet",["Ice"],"N","Fluffy heron chick wobbling on tiny skate blades"),m("Skateron",["Ice","Flying"],"L","Heron on skate-blade feet (style pass later)"),m("Lanceron",["Ice","Flying"],"N","Ice-armoured heron, beak an ice lance, blade feathers")],
+  [m("Zipling",["Dark"],"N","Tiny worm with a little zipper seam"),m("Zippelith",["Dark"],"L","Worm with a zipper down its back"),m("Seamwyrm",["Dark","Dragon"],"N","Great dragon-worm, zipper splits open as its jaws")],
+  [m("Glintmole",["Rock"],"T","Star-nosed mole with a quartz geode"),m("Geodemole",["Rock"],"N","Bigger mole, cracked-geode back"),m("Druzemole",["Rock","Crystal"],"N","Giant, amethyst cavern for a back, crystal digging claws")],
+  [m("Kindlewren",["Fire"],"T","Wren with an ember coal"),m("Embrook",["Fire"],"N","Rook with a coal-bed back and cinder wings"),m("Pyrraven",["Fire","Flying"],"N","Huge raven with smouldering coal-bed wings")]
+ ]},
+ {g:"New-type lines",note:"Water and Dragon (Normal comes from Hatchet)",f:[
+  [m("Oarlet",["Water"],"N","Otter pup, tail a little paddle"),m("Oarter",["Water"],"N","Otter with oar-blade tail and oar spines"),m("Galleotter",["Water","Steel"],"N","War-galley otter: oar spines down its sides, ram brow")],
+  [m("Kitlet",["Dragon"],"N","Tiny serpent with paper-kite fins"),m("Ribbonwyrm",["Dragon","Flying"],"N","Long kite-tail dragon, ribbon streamers"),m("Dragonkite",["Dragon","Flying"],"N","Majestic sky dragon, kite-frame wings, crossbar spine")]
+ ]},
+ {g:"Big Boki: baby form, then a bigger final",f:[
+  [m("Bellowlet",["Fire"],"N","Cassowary chick, tiny squeezebox chest"),m("Bellowary",["Fire","Normal"],"L","Cassowary with forge-bellows chest, spur blades"),m("Furnacowary",["Fire","Steel"],"N","Towering forge-bird, blast-furnace chest")],
+  [m("Dribbara",["Water"],"N","Capybara pup, a puddle cupped on its back"),m("Soakybara",["Water"],"L","Capybara with stone hot-spring back"),m("Geysirbara",["Grass","Water"],"N","Massive capybara, erupting geyser pool and moss terraces")],
+  [m("Parasolth",["Dark"],"N","Baby sloth, folded bone-rib arms like a closed umbrella"),m("Umbrathere",["Dark","Flying"],"L","Sloth whose arm bones are umbrella ribs")],
+  [m("Kayak",["Ice"],"N","Yak calf whose head is a kayak bow"),m("Prowyak",["Ice"],"T","Yak with an icebreaker prow"),m("Dreadnoyak",["Ice","Steel"],"N","Colossal icebreaker yak, ice-armour hull")],
+  [m("Coolatee",["Ice"],"N","Manatee calf, little cooler-box body"),m("Frigatee",["Ice"],"T","Manatee with an antique icebox"),m("Glaciatee",["Ice"],"N","Huge manatee, walk-in ice-vault body")],
+  [m("Fizzlet",["Electric"],"N","Ostrich chick puffed with static fuzz"),m("Boltstrich",["Electric"],"T","Ostrich with thunderhead and copper coil"),m("Thunderstrich",["Electric","Flying"],"N","Coil-necked storm ostrich crackling with lightning")],
+  [m("Wickapi",["Dark","Fire"],"N","Okapi fawn with one candle wick"),m("Snuffapi",["Dark","Fire"],"T","Okapi with brass candelabra"),m("Chandelapi",["Dark","Fire"],"N","Tall okapi crowned with a great candle chandelier")],
+  [m("Bucketmander",["Water"],"N","Salamander larva in a bucket shell"),m("Barrelmander",["Water"],"T","Giant salamander with rain-barrel body"),m("Cisternmander",["Electric","Water"],"N","Giant salamander with a water-tower body")]
+ ]},
+ {g:"Small Boki: grown and final forms",f:[
+  [m("Tinbrock",["Fire"],"N","Badger cub with a tin-cup snout and a hot stripe"),m("Anvilbrock",["Fire"],"T","Honey badger forged like an anvil (redo out)"),m("Forgebrock",["Fire","Steel"],"N","Bigger forge badger, hammer-head paws, furnace chest")],
+  [m("Bubblisk",["Crystal","Water"],"L","Baby soap-bubble basilisk, blowing a bubble"),m("Frothisk",["Crystal","Water"],"N","Sleek water-runner, foam frill, bubble-wand tail blade"),m("Tidalisk",["Crystal","Water"],"N","Sleek wave-runner, crest of breaking foam")],
+  [m("Kestrike",["Electric"],"T","Kestrel with copper lightning rod"),m("Arcestrel",["Electric"],"N","Falcon with lightning-rod crest and coil talons"),m("Voltalon",["Electric"],"N","Thunder falcon, coil talons, lightning crown")],
+  [m("Marchleaf",["Bug"],"T","Leafcutter ant with a leaf"),m("Scythant",["Bug"],"N","Soldier ant, leaf-blade mandibles"),m("Reapant",["Bug","Grass"],"N","Queen ant, twin scythe mandibles")],
+  [m("Nettlynx",["Poison","Grass"],"T","Lynx kitten with stinging nettle"),m("Thistlynx",["Poison","Grass"],"N","Grown lynx, thistle mane, barbed ear tufts"),m("Briarlynx",["Poison","Grass"],"N","Great lynx, briar mane, thorn-whip tail")],
+  [m("Thrumbird",["Sound"],"T","Hummingbird with tuning-fork beak"),m("Lyrewing",["Sound","Flying"],"N","Lyrebird whose tail is a harp of strings")],
+  [m("Mothlet",["Fairy"],"N","Fluffy owlet with tiny moth wings"),m("Lunowl",["Fairy","Flying"],"T","Owl with luna-moth wings"),m("Eclipsowl",["Fairy","Dark"],"N","Great owl, eclipse-ring facial disc, moth cloak wings")],
+  [m("Echolop",["Sound"],"T","Hare with bat ears"),[m("Howlop",["Sound","Dark"],"N","Predator bat-hare, sonic fangs","Fierce"),m("Chimelop",["Sound","Fairy"],"N","Graceful hare, chime-bell ears","Curious")]],
+  [m("Gongibbon",["Sound"],"L","Calm gibbon with a bronze gong chest"),m("Gongrowl",["Sound","Steel"],"L","Roaring gibbon with a gong crest grown from its skull")],
+  [m("Latchling",["Steel"],"N","Tiny tuatara with a little latch crest"),m("Lockatara",["Steel"],"L","Tuatara with padlock shackle"),m("Vaultara",["Steel"],"N","Huge tuatara with a vault-door shell")]
+ ]},
+ {g:"Rare branching line",note:"Jarmit moves into a new container per Ink",f:[
+  [m("Jarmit",["Water"],"L","Hermit crab living in a glass jar"),[m("Lanternmit",["Water","Fire"],"N","Moves into an oil lantern","Ember Ink"),m("Stormit",["Water","Electric"],"N","Moves into a coil-wrapped storm bottle","Storm Ink"),m("Terrarimit",["Water","Grass"],"N","Moves into a mossy terrarium","Bloom Ink")]]
+ ]},
+ {g:"Single-stage",note:"rares and complete designs",f:[
+  [m("Cairnback",["Steel","Rock"],"T","Tortoise and ibex (rare)")],[m("Hivara",["Bug","Steel"],"T","Honeybee and mantis (rare)")],[m("Zephyrak",["Flying","Dragon"],"T","Moray eel and swift (rare)")],
+  [m("Effigeetle",["Rock","Bug"],"L","Goliath beetle with a marble-face shell")],[m("Barokat",["Electric","Normal"],"L","Meerkat with barometer belly")],[m("Mirrolin",["Crystal","Psychic"],"L","Pangolin with mirror tiles")],
+  [m("Rampartoad",["Rock","Water"],"T","Cane toad with castle rampart")],[m("Anchorbill",["Psychic","Water"],"T","Hornbill with ship's anchor")],[m("Crofthorn",["Grass","Normal"],"T","Highland cow with cottage garden")],
+  [m("Buckleron",["Rock","Water"],"T","Giant limpet with riveted shield")],[m("Spirevark",["Bug","Rock"],"T","Aardvark with termite spire")],[m("Gravadillo",["Psychic","Bug"],"T","Armadillo and rhino beetle")],
+  [m("Murmurling",["Bug","Sound"],"T","Starling with pan-pipes")],[m("Lodestick",["Psychic","Dark"],"T","Stick insect with lodestone")],[m("Glomwort",["Spore","Poison"],"T","Slime mold puffball")],
+  [m("Pipewurm",["Poison"],"T","Velvet worm with piping bag")],[m("Knotwyrm",["Spore","Dragon"],"T","Slow worm with knotted rope")],[m("Gloamshell",["Dark","Fairy"],"T","Snail with smoked obsidian shell")],
+  [m("Mossgrade",["Grass","Steel"],"T","Tardigrade with cushion moss")],[m("Selenfin",["Fairy","Water"],"T","Hatchetfish with moonstone")],[m("Lanterloris",["Fairy","Fire"],"T","Slow loris with paper lantern")],
+  [m("Terrasloth",["Grass","Crystal"],"T","Sloth with glass greenhouse")],[m("Rimeshrew",["Ice"],"T","Shrew dusted with hoarfrost")]
+ ]}
+];
+const all=[];G.forEach(g=>g.f.forEach(f=>f.forEach(x=>(Array.isArray(x)?x:[x]).forEach(y=>all.push(y)))));
+const tag={L:"Art locked",T:"Art to do",N:"New"};const _p=1,cls={L:"locked",T:"todo",N:"new"};
+let sel=null;
+function card(x){const d=document.createElement("div");d.className="mon "+cls[x.s];
+ d.innerHTML=`<div class="top"><span class="nm">${x.n}</span><span class="tag">${tag[x.s]}</span></div><div class="types">${x.t.map(t=>`<span class="t" style="--c:${TYPES[t]}">${t}</span>`).join("")}</div><div class="what">${x.w}</div>${x.p?`<div class="path">${/Ink$/.test(x.p)?"Evolves with "+x.p:x.p+" path"}</div>`:""}`;return d}
+function render(){const L=document.getElementById("list");L.innerHTML="";
+ G.forEach(g=>{const fams=g.f.filter(f=>!sel||f.flat().some(y=>y.t.includes(sel)));if(!fams.length)return;
+  const s=document.createElement("section");s.className="group";
+  const n=fams.flat(2).length;
+  s.innerHTML=`<h2>${g.g}<small>${fams.length} lines · ${n} Boki${g.note?" · "+g.note:""}</small></h2>`;
+  const box=document.createElement("div");box.className="fams";
+  fams.forEach(f=>{const row=document.createElement("div");row.className="fam";
+   f.forEach((x,i)=>{const st=document.createElement("div");st.className="step";
+    if(i>0){const a=document.createElement("span");a.className="arrow";a.textContent="→";st.appendChild(a)}
+    if(Array.isArray(x)){const sp=document.createElement("div");sp.className="split";x.forEach(y=>sp.appendChild(card(y)));st.appendChild(sp)}else st.appendChild(card(x));
+    row.appendChild(st)});box.appendChild(row)});
+  s.appendChild(box);L.appendChild(s)});
+ if(!L.children.length)L.innerHTML='<p class="empty">No Boki with this type yet.</p>'}
+const cnt={};all.forEach(x=>x.t.forEach(t=>cnt[t]=(cnt[t]||0)+1));
+const F=document.getElementById("filters");
+Object.keys(TYPES).forEach(t=>{const b=document.createElement("button");b.className="chip";b.style.setProperty("--c",TYPES[t]);b.setAttribute("aria-pressed","false");b.id="f-"+t;
+ b.innerHTML=`<i></i>${t}${NEWT.includes(t)?" (new)":""} <small>${cnt[t]||0}</small>`;
+ b.onclick=()=>{sel=sel===t?null:t;F.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",String(c.id==="f-"+sel)));render()};F.appendChild(b)});
+const by=s=>all.filter(x=>x.s===s).length,dual=all.filter(x=>x.t.length===2).length;
+document.getElementById("stats").innerHTML=[[all.length,"Boki"],[by("L"),"art locked"],[by("T"),"in game, art to do"],[by("N"),"new forms"],[dual,"dual-type"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+render();
+</script>
