@@ -5414,5 +5414,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_echolop_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_ermink",
+    "name": "Ermink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ermink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_flarmink",
+    "name": "Flarmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_flarmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich",
+    "name": "Boltstrich (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_echolop",
+    "name": "Echolop (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_echolop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kerchick",
+    "name": "Kerchick (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongibbon",
+    "name": "Gongibbon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongibbon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike",
+    "name": "Kestrike (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl",
+    "name": "Gongrowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kitlet",
+    "name": "Kitlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl",
+    "name": "Gongrowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit",
+    "name": "Jarmit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jarmit",
+    "name": "Jarmit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_jarmit_1.jpg",
+    "ok": true
   }
 ]
