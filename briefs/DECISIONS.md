@@ -476,3 +476,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - The roster starts with the game's 3 rare/boss kin: Cairnback, Hivara and Zephyrak. Two more will be designed (2D first, through the art pipeline). Each map lists 1-3 eligible legendaries so every map can roll one.
 - In the Bokidex, legendaries always sit at the very end.
 - Tuning knob: `legendary_spawn_chance` per map (default 0.20). Alternative considered: a per-legendary chance of about 5%, which gives about 23% for any of 5. Rejected because one per-map roll is easier to tune and reason about.
+
+## 2026-11-09 owner: Ermink is renamed **Minkee**
+- Owner: "i think ermink should be called minkee". Display name everywhere (game UI, lore, Bokidex, art prompts, gen names) is now **Minkee**.
+- Internal id stays `ermink` (files, gens, dex id) so nothing breaks; the evolutions (Flarmink, Rippmink, Blossmink, Voltmink, Rimink, Umbrink, Lunink, Prismink, Wyrmink) keep their names.
+- New art: name it 'Minkee' in gen-feed drops (alias minkee -> ermink exists). Any new code/data that adds this creature uses the name Minkee.

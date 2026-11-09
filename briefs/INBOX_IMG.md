@@ -227,3 +227,6 @@ Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules a
 ## 2026-11-09 07:22 UTC coordinator -> art batch: 1 owner orders (priority over new species)
 Owner rated these below the 8.5 bar or asked for 2D of a 3D design. Same rules and grading as the originals, owner note first. Post ART lines as usual (imported into the Bokidex automatically).
 - **Redo Vespyx attempt 2 (owner: style match + cute pose)**: owner note first: -. Previous attempt: 
+
+## 2026-11-09 coordinator: Ermink -> Minkee (owner)
+Rename only: call the mystery-egg base creature **Minkee** in all new prompts, sheets and gen-feed drops (`--name 'Minkee'`). Design unchanged; id stays `ermink`. See DECISIONS.md.
