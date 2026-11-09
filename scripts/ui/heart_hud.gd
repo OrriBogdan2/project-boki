@@ -62,8 +62,8 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
 	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
-	var line := "IN THE BLIGHT  ·  -%d HP a second  ·  get inside the ring" % int(per_s)
-	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.84), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
+	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
+	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.8), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m

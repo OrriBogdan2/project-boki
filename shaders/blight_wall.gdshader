@@ -14,9 +14,9 @@ void vertex() {
 }
 void fragment() {
 	float up = clamp((h - ground) / (1.0 - ground), 0.0, 1.0);
-	float body = (1.0 - up) * (1.0 - up) * smoothstep(0.0, ground, h);
+	float body = (1.0 - smoothstep(0.3, 1.0, up)) * smoothstep(0.0, ground, h);
 	float foot = exp(-pow((h - ground) * 16.0, 2.0));
-	float a = 0.55 * body + 0.55 * foot;
+	float a = 0.6 * body + 0.5 * foot;
 	if (rich > 0.5) {
 		float u = UV.x * ring_m;
 		a *= 0.7 + 0.3 * sin(u * 0.35 + TIME * 0.7 + h * 9.0) * sin(u * 0.11 - TIME * 0.45);
