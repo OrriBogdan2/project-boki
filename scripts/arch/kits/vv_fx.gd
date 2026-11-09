@@ -253,10 +253,11 @@ func ring(at: Vector3, r: float, col: Color, col2: Color, dur := 0.35) -> void:
 	_play(n, "ring", dur)
 
 ## A dark filled disc on the ground, radius r: a jagged crackling rim in `rim`, veins of col2 inside.
+## `hollow` drops the dark fill and the veins for a glowing centre: a big range ring, not a dome.
 ## Returns the node, so a long one can be ended early with cut().
-func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE) -> Node3D:
+func disc(at: Vector3, r: float, col: Color, col2: Color, dur := 0.5, rim := NO_EDGE, hollow := false) -> Node3D:
 	var n := _take("disc", func(): return _mi(_quad_mesh(), _mat(M_DISC)))
-	_look(n, col, col2, rim)
+	_look(n, col, col2, rim).set_shader_parameter("hollow", 1.0 if hollow else 0.0)
 	n.global_position = at + Vector3(0, 0.08, 0)
 	n.scale = Vector3(r, 1.0, r)
 	_play(n, "disc", dur)

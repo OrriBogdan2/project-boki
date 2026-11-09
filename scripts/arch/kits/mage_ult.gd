@@ -3,7 +3,7 @@ extends RefCounted
 ## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
-## launches straight up and hangs there invulnerable while a pink range ring and its dark interior show round
+## launches straight up and hangs there invulnerable while a pink range ring with a glowing centre shows round
 ## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
 ## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
 ## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink lightning
@@ -188,7 +188,7 @@ func _take_off() -> void:
 	var top := from + Vector3(0, float(data()["height"]), 0)
 	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
-	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
+	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK, true)
 	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
@@ -234,8 +234,8 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The range ring with its gold rim (everyone sees where she can come down), the dark inside, and the gold
-## crown at the cursor (her own).
+## The range ring (everyone sees where she can come down) and the crown at the cursor (her own), as big as
+## the strike's hit area.
 func _aim_tick() -> void:
 	var h := kit.h
 	var from: Vector3 = leap["from"]
@@ -243,7 +243,7 @@ func _aim_tick() -> void:
 	leap["land"] = land_point()
 	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
 	AimKit.circle(h, "x_ring", ring)
-	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
+	var crown := {"at": leap["land"], "r": float(data()["radius"]), "ticks": true, "star": true}
 	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 

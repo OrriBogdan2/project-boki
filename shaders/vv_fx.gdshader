@@ -6,7 +6,7 @@ shader_type spatial;
 //   0 ARC     a ribbon along UV.x (0 head, 1 tail): a jagged lightning core that re-strikes, a tinted halo
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: an expanding ring with radial spark needles (arrival bursts, shock rings)
-//   3 DISC    a flat quad: a dark filled disc, a jagged crackling rim and lightning veins (placed areas)
+//   3 DISC    a flat quad: a dark filled disc (hollow: a glowing centre), a crackling rim and veins
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
 //   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds)
 //   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
@@ -20,6 +20,7 @@ uniform vec4 color3 : source_color = vec4(0.0, 0.0, 0.0, 0.0);
 uniform float life = 0.0;
 uniform float seed = 0.0;
 uniform float strength = 1.0;
+uniform float hollow = 0.0;   // DISC: 0 a dark fill, 1 only the rim and a glowing centre
 uniform bool billboard = false;
 
 float hash(float x) { return fract(sin(x * 127.1 + seed * 311.7) * 43758.5453); }
@@ -83,8 +84,9 @@ void fragment() {
 		float veins = (1.0 - smoothstep(0.0, 0.05, abs(spoke - 0.5))) * inside * smoothstep(0.15, 0.6, r);
 		veins *= step(0.45, vnoise(ang * 3.0 + tick * 0.7));
 		body = mix(color.rgb, color3.rgb, rim * color3.a);
-		body_a = max(inside * 0.7, rim) * k;
-		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7) * k;
+		float centre = (1.0 - smoothstep(0.0, 0.12, r)) + 0.3 * (1.0 - smoothstep(0.0, 0.3, r));
+		body_a = max(inside * 0.7 * (1.0 - hollow), rim) * k;
+		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7 * (1.0 - hollow) + centre * hollow) * k;
 	} else if (mode == 4) {
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);
