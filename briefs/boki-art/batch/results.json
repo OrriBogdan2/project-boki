@@ -39994,5 +39994,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_rimefang_f1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_knotling_k1",
+    "name": "Knotling (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_knotling_k1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimefang_f2",
+    "name": "Rimefang (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rimefang_f2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimefang_f2",
+    "name": "Rimefang (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rimefang_f2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimefang_f2",
+    "name": "Rimefang (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rimefang_f2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rimefang_f2",
+    "name": "Rimefang (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rimefang_f2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_knotling_k1",
+    "name": "Knotling (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_knotling_k1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_knotling_k1",
+    "name": "Knotling (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_knotling_k1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_knotling_k3",
+    "name": "Knotling (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_knotling_k3_1.jpg",
+    "ok": true
   }
 ]
