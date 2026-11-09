@@ -178,7 +178,6 @@ func _ready_up(m: Match) -> void:
 	hunter.dashes = hunter.max_dashes()
 	hunter.ex_cd = 0.0
 	hunter.fire_cd = 0.0
-	hunter.reload_t = 0.0
 	hunter.ammo = maxi(hunter.ammo, int(hunter.wpn.get("mag", 0)))
 	hunter.inp["move"] = Vector2.ZERO
 	hunter.inp["fire"] = false

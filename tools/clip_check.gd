@@ -93,7 +93,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	var which := ""
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		# (an emptied Mag draws nothing: HunterAnim still shows it for the reload's motion)
+		# an emptied Mag draws nothing
 		if (mi as MeshInstance3D).is_visible_in_tree() and (mi as MeshInstance3D).mesh != null:
 			shown += 1
 			which += " " + String(gun.get_path_to(mi))

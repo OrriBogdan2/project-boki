@@ -65,7 +65,6 @@ func pin() -> void:
 
 func ready_bow(P: Hunter) -> void:
 	P.fire_cd = 0.0
-	P.reload_t = 0.0
 	P.draw_t = -1.0
 
 ## No aim shape of Lace's is a V, in any hold.

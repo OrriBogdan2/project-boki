@@ -195,7 +195,6 @@ static func bark(rec: Dictionary, cat: String) -> String:
 		"exit", "collapse": feel = "excited"; word = "Home"
 		"low_hp": feel = "sad"; word = "Hurt"
 		"tonic": feel = "love"; word = "Drink"
-		"cover": feel = "angry"; word = "Mine"
 		"goad": feel = "excited"; word = "Go"
 		"yelp": feel = "scared"; word = "Ow"
 		"relief": feel = "love"; word = "Up"

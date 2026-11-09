@@ -33,7 +33,7 @@ const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds 
 
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
-	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
+	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0,
 		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "rifle", "color": Color("d9ff66"), "size": 0.12},
 }
 
@@ -122,7 +122,7 @@ const PERKS := {
 	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
 	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
-	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
+	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds in the drum.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},
 	"longreach": {"name": "Long Reach", "desc": "12% more range (and reach, for blades).", "icon": "gust", "col": Color("9fe8ff"), "max": 2, "wup": {"range": 0.12}},
 	"brand_fire": {"name": "Ember Brand", "desc": "Your hits burn: 5 damage a second for 3s.", "icon": "fireball", "col": Color("ff8a3a"), "max": 1, "wup": {"brand": "fire"}},

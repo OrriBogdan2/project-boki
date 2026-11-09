@@ -762,7 +762,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		_race_hair(hair_n, rid, int(lk["hair"]), m_hair, hair_c, skin_c, cov in ["hood", "helm"])
 	_race_parts(torso, rid, m_skin, m_hair, m_dark, skin_c, hair_c, hero_col)
 	var gear := Node3D.new(); gear.name = "Gear"; torso.add_child(gear)
-	# the arms and the gun move together from the shoulders ("Aim"), for recoil, reloads and poses
+	# the arms and the gun move together from the shoulders ("Aim"), for recoil and poses
 	var aim := Node3D.new(); aim.name = "Aim"; aim.position = Vector3(0, 0.5, 0.0); torso.add_child(aim)
 	var gun := Node3D.new(); gun.name = "Gun"; gun.position = Vector3(0.22, -0.18, -0.18); aim.add_child(gun)
 	# arms: they hang from the shoulders with an elbow and a hand on joints of their own, so HunterAnim

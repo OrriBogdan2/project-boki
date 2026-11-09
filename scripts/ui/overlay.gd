@@ -355,7 +355,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 		_group(v, "Other")
 		for a in rest:
 			_bind_row(v, String(a[0]), String(a[1]))
-	_note(v, "Esc always opens the menu. Your gun also reloads by itself when you stop shooting.")
+	_note(v, "Esc always opens the menu.")
 
 func _tab_camera(v: VBoxContainer) -> void:
 	_group(v, "View")

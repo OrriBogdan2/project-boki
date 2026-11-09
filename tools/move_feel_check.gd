@@ -151,7 +151,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	P.pad = {}; P.grap = {}; P.grap_cd = 0.0; P.roll_t = 0.0; P.knock_t = 0.0; P.fly_t = 0.0
 	P.gliding = false; P.glide_fuel = 1.0; P.glide_cd = 0.0; P.dropping = false; P.diving = false
 	P.stun_t = 0.0; P.root_t = 0.0; P.kb_t = -9.0; P.mantle_cd = 0.0; P.shot_down = false; P.air_t = 0.0
-	P.coyote = 0.0; P.jump_buf = 0.0; P.reload_t = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
+	P.coyote = 0.0; P.jump_buf = 0.0; P.ammo = int(P.wpn["mag"]); P.idle_fire = 0.0
 	P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.dash_buf = 0.0; P.drink_t = 0.0; P.kit_t = 0.0
 	P.squash = 0.0; P.hp = P.max_hp
 	P.drop_follow = null

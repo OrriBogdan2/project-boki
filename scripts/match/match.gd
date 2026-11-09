@@ -2125,7 +2125,7 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if k.owner_h == player:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: s = "kin_unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover"]: s = "kin_alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm"]: s = "kin_alert"
 		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx("kin_alert", k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling something out
@@ -2229,7 +2229,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.hp = 0.0
 	h.revive = 0.0
 	h.cloak_t = 0.0
-	h.reload_t = 0.0
 	h.grap = {}
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
@@ -5552,7 +5551,6 @@ func _flags(h: Hunter) -> int:
 	if h.roll_t > 0.0: f |= 16
 	if h.grounded: f |= 32
 	if h.fortify_t > 0.0: f |= 64
-	if h.reload_t > 0.0: f |= 128
 	if h.gliding: f |= 256
 	if h.dropping: f |= 512
 	if h.riding: f |= 1024

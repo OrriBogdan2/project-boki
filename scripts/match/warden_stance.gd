@@ -147,12 +147,12 @@ func tick(dt: float, a: HunterAnim, s: Dictionary) -> void:
 	breath_k = lerpf(1.0, _breath_amp, _w)
 	_tick_carry(dt, a, s)
 
-## The signature carry's weight: off at once when they fire, reload, drink or fidget with the weapon.
+## The signature carry's weight: off at once when they fire, drink or fidget with the weapon.
 func _tick_carry(dt: float, a: HunterAnim, s: Dictionary) -> void:
 	if not _has_carry:
 		return
 	var firing := float(s.get("fired", 99.0)) < AIM_HOLD or float(s.get("charge", 0.0)) > 0.0 or a.aim_k > 0.5
-	var busy := float(s.get("reload", -1.0)) >= 0.0 or a.fidget in ["weapon", "stretch"] or a.drink_k > 0.0
+	var busy := a.fidget in ["weapon", "stretch"] or a.drink_k > 0.0
 	var want := 0.0 if firing or busy else 1.0
 	var rate := RELEASE if want < _carry_k else float(_blend.get("rate", 7.0))
 	_carry_k = want if a.snap else lerpf(_carry_k, want, 1.0 - exp(-rate * dt))

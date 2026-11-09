@@ -92,7 +92,6 @@ var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": fa
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
 var ammo := 12
-var reload_t := 0.0
 var fire_cd := 0.0
 var dashes := 2.0
 var roll_t := 0.0
@@ -346,8 +345,7 @@ func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 	WeaponUps.apply(self)
 	_kit_from_weapon()
 	wbloom = 0.0; warm_t = 0.0; spin = 0.0; spun_t = 0.0; sus_n = 0; mel_hold = 0.0; strike_at_end = {}
-	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); reload_t = 0.0; fire_cd = 0.25
-	if ammo <= 0 and not remote: start_reload()
+	ammo = int(wpn["mag"]) if with_ammo < 0 else mini(with_ammo, int(wpn["mag"])); fire_cd = 0.25
 	var gun: Node3D = model.find_child("Gun", true, false) if model and rebuild else null
 	if gun:
 		for ch in gun.get_children():
@@ -1221,11 +1219,6 @@ func dash_with(e: Dictionary) -> void:
 		# Light: for the whole step shots fly straight through you
 		phase_t = maxf(phase_t, roll_t + float(e["phase"]) * 0.3)
 		inv_t = maxf(inv_t, roll_t + 0.02)
-	if float(e.get("reload", 0.0)) > 0.0 and not wpn.get("melee", false):
-		# Medium: the roll slips rounds into the magazine
-		var mag := int(wpn["mag"])
-		ammo = mini(mag, ammo + int(ceil(mag * float(e["reload"]))))
-		if ammo >= mag: reload_t = 0.0
 	match String(e.get("trail", "")):
 		"ghost":
 			for i in 3:
@@ -1279,9 +1272,9 @@ func can_fire() -> bool:
 		return false
 	if ak and not ak.can_shoot():
 		return false
-	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or reload_t > 0.0 or downed or stun_t > 0.0):
+	if ak and roll_t > 0.0 and ak.fires_in_dash() and not (drink_t > 0.0 or downed or stun_t > 0.0):
 		return true          # shooting from a held slide
-	return not (drink_t > 0.0 or reload_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
+	return not (drink_t > 0.0 or roll_t > 0.0 or downed or out or stun_t > 0.0 or grap.size() > 0 or gliding or charge.size() > 0)
 
 const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]
 var shot_n := 0
@@ -1346,7 +1339,6 @@ func trigger(dt: float) -> void:
 		else:
 			spin = maxf(0.0, spin - dt / 0.5)
 			spun_t = 0.0
-			if held and ammo <= 0: start_reload()
 		return
 	if held:
 		fire()
@@ -1368,8 +1360,6 @@ func _trigger_bow(held: bool, dt: float) -> void:
 		return
 	if held and can_draw and (draw_t >= 0.0 or fire_cd <= 0.0):
 		_draw_step(dt)
-	elif held and ammo <= 0:
-		start_reload()
 
 func _draw_step(dt: float) -> void:
 	var top := float((wpn["draw"][-1] as Array)[0])
@@ -1421,7 +1411,6 @@ func fire() -> void:
 		_swing()
 		return
 	if ammo <= 0:
-		start_reload()
 		return
 	if cloak_t > 0.0:
 		cloak_t = 0.0
@@ -1448,8 +1437,6 @@ func _release() -> void:
 	burst_t = float(wpn.get("burst_gap", 0.07))
 	_emit_shot()
 	Oomph.on_fire(self)
-	if ammo <= 0 and burst_left <= 0:
-		start_reload()
 
 func _tick_weapon(dt: float) -> void:
 	if warm_t > 0.0:
@@ -1462,7 +1449,7 @@ func _tick_weapon(dt: float) -> void:
 	# per-shot bloom recovers once you've stopped firing for a beat
 	if wbloom > 0.0 and idle_fire > float(wpn["rate"]) + 0.2:
 		wbloom = maxf(0.0, wbloom - float(wpn.get("bloom_recover", 20.0)) * dt)
-	if idle_fire > 0.35 or reload_t > 0.0:
+	if idle_fire > 0.35:
 		sus_n = 0
 	if not strike_at_end.is_empty():
 		if roll_t > 0.0 and not downed and stun_t <= 0.0:
@@ -1493,8 +1480,6 @@ func _tick_burst(dt: float) -> void:
 	muzzle_t = 0.05
 	_emit_shot()
 	Oomph.on_fire(self)
-	if ammo <= 0 and burst_left <= 0:
-		start_reload()
 
 ## Melee: a wedge in front of you, a short step into it, and a combo whose last hit lands hardest.
 ## Swing again within the combo window to keep it going. Hold to charge a heavier attack instead.
@@ -1656,12 +1641,6 @@ func _emit_shot() -> void:
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
 	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
-
-func start_reload() -> void:
-	if reload_t > 0.0 or ammo >= int(wpn["mag"]) or downed or wpn.get("melee", false) or not wpn.has("reload"):
-		return
-	reload_t = float(wpn["reload"]) * (1.0 - owner_stat("reload") - gear_stat("reload")) * (0.7 if perk_n("quickhands") > 0 else 1.0)
-	m.sfx("reload", pos, -8.0)
 
 func use_signature() -> void:
 	use_kin_ability("k1")
@@ -1957,10 +1936,6 @@ func sim(dt: float) -> void:
 	if shield_t > 0.0:
 		shield_t -= dt
 		if shield_t <= 0.0: shield = 0.0
-	if reload_t > 0.0:
-		reload_t -= dt
-		if reload_t <= 0.0:
-			ammo = wpn["mag"]
 	if dashes < max_dashes():
 		dashes = minf(max_dashes(), dashes + dt / dash_regen())
 	_refresh_kin_stats()
@@ -1993,10 +1968,7 @@ func sim(dt: float) -> void:
 		Bond.passive(self, dt)
 	swap_cd = maxf(0.0, swap_cd - dt)
 	KinMerge.tick(self, dt)
-	# reload by itself once you stop shooting for a moment
 	idle_fire += dt
-	if idle_fire > 1.3 and ammo < int(wpn["mag"]) and reload_t <= 0.0 and not inp["fire"]:
-		start_reload()
 	if downed:
 		# your other kin comes out of the satchel to pick you up if the active one can't
 		if kin and (kin as Kin).state == "downed" and kin2 and (kin2 as Kin).hp > 0.0:
@@ -2162,7 +2134,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
@@ -3130,7 +3102,6 @@ func _anim_state(stretch: float) -> void:
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
 	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
-	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
 	s["drink"] = (1.0 - drink_t / DRINK_TIME) if drink_t > 0.0 else -1.0
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)

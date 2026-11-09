@@ -75,19 +75,17 @@ func _lance_combos() -> void:
 	ak.step(m, 1.0)
 	var em3: int = K.hose.emitted
 	var slowest := 9.0
-	var reloaded := false
 	var tf := 0.0
 	while tf < 10.0:
 		keep_fire.call()
 		m.step(ak.DT)
 		tf += ak.DT
 		if tf > 0.5: slowest = minf(slowest, K.move_k())
-		reloaded = reloaded or P.reload_t > 0.0
 	var late: int = K.hose.emitted
 	m.step(ak.DT)
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
-			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
-			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+			K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
+			"puffs %d, move_k %.2f" % [late - em3, slowest])
 	P.inp["fire"] = false
 	await ak.done(m)
 
@@ -220,8 +218,8 @@ func _all() -> void:
 	P.inp["fire"] = false
 	ak.step(m, 0.6, func(): ak.aim_at(P, T.pos))      # turned back to the dummy before the next part
 	var ft0: int = int(roar["ticks"])
-	ok("lance: no fuel or reload, held 9s it still burns (no ammo count)",
-			K.flame_ticks > ft0 and P.reload_t == 0.0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
+	ok("lance: no fuel, held 9s it still burns (no ammo count)",
+			K.flame_ticks > ft0 and not P.wpn.get("ammo", true), "ticks +%d" % (K.flame_ticks - ft0))
 	# --- the hose: the pilot first, then a stream that reaches its full length past a close cursor
 	reset.call()
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))

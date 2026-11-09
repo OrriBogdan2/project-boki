@@ -780,7 +780,6 @@ func tender() -> void:
 	step(m, 1.3)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	step(m, 0.05)
 	P.inp["fire"] = false

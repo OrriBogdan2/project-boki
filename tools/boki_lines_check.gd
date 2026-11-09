@@ -75,7 +75,7 @@ func _data() -> void:
 ## callers still pass these names, so each must have lines here before the old banks go.
 const OLD_NAMES := ["throw", "refuse", "hesitate", "ignore", "scared", "revive", "revive_low", "callout", "wild",
 	"kill", "owner_down", "caught", "extract", "behind", "hunter", "sniper", "pack", "boss", "egg", "loot", "exit",
-	"collapse", "low_hp", "tonic", "cover", "goad", "yelp", "relief", "boss_kill", "comfort", "back_carried_out",
+	"collapse", "low_hp", "tonic", "goad", "yelp", "relief", "boss_kill", "comfort", "back_carried_out",
 	"back_boss_kill", "back_revived", "back_stood_over", "back_comforted", "back_knock_together", "back_escaped"]
 
 func _coverage() -> void:

@@ -33,7 +33,7 @@ To add lines, add them to the trigger's list. `--boki-lines-check` fails a line 
 | Farm | `back_<kind>` (carried_out, boss_kill, revived, stood_over, comforted, knock_together, escaped) | the first time you walk up after an expedition, by how it went (`rec.recall`) |
 | Match | `kill`, `owner_down`, `caught`, `extract`, `comfort` (the results screen), `storm` (the islands start falling), `loot` (you open a chest) | `BokiChatter.say` from `match.gd` and `chest_loot.gd` |
 | Match | `ability` (its own ability), `level_up` | `BokiChatter.say` from `hunter.gd` |
-| Match | `throw`, `refuse`, `hesitate`, `ignore`, `scared`, `revive`, `revive_low`, `wild`, `behind`, `hunter`, `sniper`, `pack`, `boss`, `exit`, `tonic`, `cover`, `goad`, `hurt`, `revived`, `boss_kill` | `Kin.bark` and `KinCompanion` callouts, through `KinVoice` (see below) |
+| Match | `throw`, `refuse`, `hesitate`, `ignore`, `scared`, `revive`, `revive_low`, `wild`, `behind`, `hunter`, `sniper`, `pack`, `boss`, `exit`, `tonic`, `goad`, `hurt`, `revived`, `boss_kill` | `Kin.bark` and `KinCompanion` callouts, through `KinVoice` (see below) |
 
 `FarmChatter` looks around every 2.5 s: one idle Boki near you may speak about what's going on beside it (a crop, its job, the weather, the time, a need, a friend close by). `Home._say` still keeps it to one voice at a time.
 

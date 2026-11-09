@@ -63,7 +63,6 @@ const CALL := {
 	"low_hp": {"loyal": ["You're hurt... please drink something.", "Stay behind me, you're bleeding."], "timid": ["You're hurt! Let's hide and heal!", "Please be okay..."],
 		"bold": ["You look rough. Patch up, I'll hold them.", "Heal up, partner. I've got this."], "_": ["You're hurt! Heal up!", "Careful, you're low!"]},
 	"tonic": {"_": ["I found this for you! Drink it!", "Here, a tonic! I sniffed it out.", "Take it. You need it more than me."]},
-	"cover": {"bold": ["Reload! I've got them!", "Go on, reload. I'm right here."], "_": ["I'll cover you!", "Reload, I'll watch them!"]},
 	"goad": {"_": ["They're almost done! Finish it!", "One more hit!", "Don't let them get away!"]},
 	"yelp": {"timid": ["Eek! Are you okay?!", "Ow ow ow! Watch out!"], "_": ["Hey! Are you okay?", "That one hurt!", "Ouch! Careful!"]},
 	"relief": {"_": ["You're up! Don't scare me like that.", "Phew. Stay with me.", "There you are."]},
@@ -79,7 +78,7 @@ const CALL_ACT := {
 	"pack": "(bristles at the monsters ahead)", "boss": "(ears flat, staring at the big fight)", "egg": "(bounces and points at a glowing egg)",
 	"loot": "(points its nose at something shiny)", "wild": "(perks up at a wild Boki)", "exit": "(trots toward the way out, looking back)",
 	"collapse": "(tugs you toward the way out)", "low_hp": "(nudges your hand, worried)", "tonic": "(drops a tonic at your feet)",
-	"cover": "(plants itself in front of you)", "goad": "(bounces, egging you on)", "yelp": "(flinches with you)",
+	"goad": "(bounces, egging you on)", "yelp": "(flinches with you)",
 	"relief": "(nuzzles you hard)", "boss_kill": "(bounces in happy circles)", "comfort": "(presses against your leg)",
 	"extract": "(bounces in happy circles by the way home)",
 }

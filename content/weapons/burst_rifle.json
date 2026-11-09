@@ -10,8 +10,6 @@
 		"burst": 3,
 		"burst_gap": 0.09,
 		"speed": 64,
-		"mag": 27,
-		"reload": 1.5,
 		"kb": 1.4,
 		"spread": 0.026,
 		"range": 10.5,

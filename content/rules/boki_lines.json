@@ -1789,36 +1789,6 @@
 				]
 			}
 		},
-		"cover": {
-			"feel": "angry",
-			"word": "Mine",
-			"acts": [
-				"(plants itself in front)",
-				"(stands guard)",
-				"(snarls at them)",
-				"(spreads out wide)"
-			],
-			"lines": {
-				"_": [
-					"I've got them!",
-					"I'll cover you!",
-					"I'm right here.",
-					"Go, I'll watch them!",
-					"Nobody gets past me!",
-					"Behind me!",
-					"I'll hold them off!",
-					"Stay back, I've got this!",
-					"Shield's up!",
-					"Covering you!",
-					"Take a breath, I'm here.",
-					"My turn to fight!"
-				],
-				"titan": [
-					"Hide behind my shell!",
-					"I'm a wall."
-				]
-			}
-		},
 		"goad": {
 			"feel": "excited",
 			"word": "Go",

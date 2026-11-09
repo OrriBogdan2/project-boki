@@ -63,7 +63,6 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
@@ -170,7 +169,6 @@ func _archer_combos() -> void:
 	var od0 := K.draw.overdraws
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
@@ -198,7 +196,6 @@ func _archer_combos() -> void:
 	)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
@@ -273,7 +270,6 @@ func _archer_combos() -> void:
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -552,7 +548,6 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
-	P.reload_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	aim_at(P, T.pos)

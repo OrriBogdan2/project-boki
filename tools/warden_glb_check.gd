@@ -538,7 +538,7 @@ func _weapon(a: String) -> void:
 			func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi))
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	var own_mag := mag != null and mag.has_meta("glb")      # (the loader moved the .glb's weapon_mag here)
-	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty (the reload moves nothing)
+	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty
 	var mag_ok := mag != null and (mag.mesh != null and mag in shown if own_mag else mag.mesh == null)
 	var stray := shown.filter(func(mi): return mi != mag)
 	var left := str(stray.map(func(mi): return mi.name))

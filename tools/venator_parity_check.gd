@@ -176,15 +176,14 @@ func _dash_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.anim = null                    # (the rest of the check runs unposed, as a headless step does)
 	C.ac.step(m, 0.5)
 
-## Run dry with the trigger held: there is no reload (none starts, by hand or by itself), nothing fires while the
+## Run dry with the trigger held: there is no reload, nothing fires while the
 ## drum refills, the count climbs back (the HUD shows it), and once full the held string picks up again.
 func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 	P.fire_cd = 0.0
-	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG, "reload": 0.0}
+	var run := {"t": 0.0, "dry_at": -1.0, "back_at": -1.0, "shots_dry": 0, "s": P.shot_n, "low": MAG}
 	C.ac.step(m, 6.0, func():
 		C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
 		P.inp["fire"] = true
-		run["reload"] = maxf(float(run["reload"]), P.reload_t)
 		if float(run["dry_at"]) < 0.0 and P.ammo <= 0:
 			run["dry_at"] = run["t"]
 			run["s"] = P.shot_n
@@ -194,13 +193,11 @@ func _dry(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 				run["low"] = P.ammo
 		run["t"] = float(run["t"]) + C.DT)
 	P.inp["fire"] = false
-	P.start_reload()
 	var gap := float(run["back_at"]) - float(run["dry_at"])
 	C.ok("Vex parity LMB: run dry, no reload; the trigger is dead until the drum refills (about 1.1s), then fires",
-			float(run["dry_at"]) > 0.0 and gap > 0.9 and gap < REFILL_DRY and float(run["reload"]) == 0.0
-			and P.reload_t == 0.0 and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
-			"dry at %.2f, firing again %.2f s later with %d rounds; reload %.2f" % [run["dry_at"], gap, run["low"],
-					run["reload"]])
+			float(run["dry_at"]) > 0.0 and gap > 0.9 and gap < REFILL_DRY
+			and int(run["low"]) >= MAG - 1 and P.wpn.get("ammo", true),
+			"dry at %.2f, firing again %.2f s later with %d rounds" % [run["dry_at"], gap, run["low"]])
 	C.ac.step(m, 1.5)
 
 ## The firing brackets: two arcs either side of her while she fires (your screen only), gone soon after.

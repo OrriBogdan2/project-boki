@@ -769,7 +769,6 @@ func _reset(hero: String) -> void:
 	P.dashes = P.max_dashes()
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	P.inp["fire"] = false
 	P.inp["sec_hold"] = false
 	P.inp["move"] = Vector2.ZERO

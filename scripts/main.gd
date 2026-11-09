@@ -1536,11 +1536,6 @@ func _ability_check() -> void:
 	m.spawn_shot(T, P.pos + Vector3(1.0, 0.95, 0), Vector2(-30, 0), 20.0, 0.3, 0.15, Color.RED, {})
 	_ac_run(m, 0.25)
 	_ac("light phase: shots pass", P.phase_t >= 0.0 and P.hp >= php2, "hp %.0f -> %.0f" % [php2, P.hp])
-	# Medium: the roll reloads
-	ready.call("medium", home2, Vector2(1, 0))
-	P.ammo = 0
-	P.do_dash()
-	_ac("medium roll reloads", P.ammo > 0, "ammo %d" % P.ammo)
 	# Heavy: the charge bowls the target back
 	ready.call("heavy", T.pos + Vector3(-2.2, 0, 0), Vector2(1, 0))
 	var tx := T.pos.x
