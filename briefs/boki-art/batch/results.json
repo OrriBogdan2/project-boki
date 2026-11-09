@@ -46805,5 +46805,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gramofrill_gap_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_gramofrill_gap",
+    "name": "Gramofrill (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_gramofrill_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hatstag_gap",
+    "name": "Hatstag (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hatstag_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gramofrill_gap",
+    "name": "Gramofrill (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gramofrill_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_howlop_gap",
+    "name": "Howlop (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_howlop_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hatstag_gap",
+    "name": "Hatstag (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hatstag_gap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_grammite_gap",
+    "name": "Grammite (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_grammite_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hatstag_gap",
+    "name": "Hatstag (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_hatstag_gap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_howlop_gap",
+    "name": "Howlop (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_howlop_gap_2.jpg",
+    "ok": true
   }
 ]
