@@ -3,7 +3,8 @@ extends RefCounted
 ## The arm a move does not use hangs relaxed (docs/art/ANIM_QUALITY_AUDIT.md: T-poses). Data "free_arm": {clip: "L"|"R"}
 ## names the arm that stays loose while that clip plays; {clip: {"L": 0.0, "R": 0.1}} lets each arm go from that clip
 ## time (seconds), so a weapon arm hangs again after its strike key. Upper arm, forearm and hand ease to their rotation
-## in the idle clip (or the clip the data "free_pose" names, when the idle holds the arm out) over whatever the clips key.
+## in the idle clip (or in the clip the data "free_pose" names, when the idle holds the arm out) over whatever the clips
+## key.
 
 const BONES := ["upper_arm.", "forearm.", "hand."]
 const RATE := 10.0           # 1/s: the arm eases to the loose pose and back

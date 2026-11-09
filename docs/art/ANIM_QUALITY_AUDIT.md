@@ -56,7 +56,10 @@ body (not in the air, a crouch, or a move that owns the body):
 Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
 clip plays, its upper arm, forearm and hand ease (10/s) to their idle rotation over whatever the clip keys, so the free arm
 hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs are not re-baked (no Blender on this worker; the
-clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `ostra`.
+Motley holds his fan arm out in his own idle (a T-pose by the audit's measure), so his data adds `"free_pose": "stun"`: the loose arm eases
+to the hang of that clip instead. A value `{"L": 0.0, "R": 0.1}` lets each arm go from that clip time, so a weapon arm hangs again after
+its strike key: his snap lets the left arm go at once and the right at 0.1 s (strike key 0.067 s, its pose untouched).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
 
@@ -143,7 +146,7 @@ posts scroll at the move speed).
 
 **Motley (`ostra`)**
 1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
-2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights.
+2. orb held an arm sideways for 100 % of the clip, snap for 75 % and flung the free arm 1.64 body heights. Fixed: orb orb_l orb_hot seed swap swap_aim and snap use `free_arm`; `--anim-audit` now shows orb 100 -> 0 % and snap 75 -> 0 % T-pose, the casting hand's pose at its strike key identical. Left: orb_hot's casting arm on its recovery (25 %), swap's (58 %), and the both-handed moves (snap_wind, swap_air, well, pop, arrive, empower, fuse), which spread both arms on purpose.
 3. No arm swing (reach 0.03).
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
@@ -173,10 +176,10 @@ posts scroll at the move speed).
 
 Split into backlog items per Hunter (role build):
 
-- `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
+- `ostra`: legs that step (hover now). The attack arm is done (free_arm); orb_hot and swap recovery arms are not.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
+- Arm use in attacks: `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `ostra` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
