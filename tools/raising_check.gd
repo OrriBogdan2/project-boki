@@ -29,6 +29,9 @@ func _next_day(rec: Dictionary) -> void:
 	for kind in rec.get("care_day", {}):
 		rec["care_day"][kind] = float(rec["care_day"][kind]) - day - 1.0
 
+func _memories(rec: Dictionary, kind: String) -> int:
+	return (rec["memory"] as Array).filter(func(e): return e["kind"] == kind).size()
+
 func _old_save_stamps() -> void:
 	var rec := Save.new_kin("puddlet")
 	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
@@ -51,21 +54,24 @@ func run(m: Node) -> void:
 	ok(t1 > t0, "petting builds trust (%.1f -> %.1f)" % [t0, t1])
 	k["pet_ok"] = 0.0
 	home._pet_kin(k)
-	ok(is_equal_approx(float(rec["trust"]), t1), "petting again the same farm day adds no trust (%.1f)" % float(rec["trust"]))
-	var pets: int = (rec["memory"] as Array).filter(func(e): return e["kind"] == "petted").size()
+	ok(is_equal_approx(float(rec["trust"]), t1),
+		"petting again the same farm day adds no trust (%.1f)" % float(rec["trust"]))
+	var pets := _memories(rec, "petted")
 	_next_day(rec)
 	home._pet_kin(k)
-	var pets2: int = (rec["memory"] as Array).filter(func(e): return e["kind"] == "petted").size()
-	ok(float(rec["trust"]) > t1, "the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"]))
+	var pets2 := _memories(rec, "petted")
+	ok(float(rec["trust"]) > t1,
+		"the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"]))
 	ok(pets == 1 and pets2 == 1, "the same care before the next expedition is one memory (%d, %d)" % [pets, pets2])
 	# a week of farm days with the usual care and no expeditions: it grows Close
 	for day in 7:
 		_next_day(rec)
 		home._pet_kin(k)
 		Care.care_day(rec, "talked")
-		if Care.care_day(rec, "played"): Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
+		if Care.care_day(rec, "played"):
+			Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
 	ok(int(Save.d["matches"]) == 0 and Care.bond_index(rec) >= 2,
-		"a week of farm days of care with no expedition reaches %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])])
+		"a week of farm days of care, no expedition: %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])])
 	home.queue_free()
 	print("RAISING DONE, failures: %d" % bad)
 	main.get_tree().quit()

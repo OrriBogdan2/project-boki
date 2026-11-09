@@ -512,7 +512,8 @@ func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> 
 	var mem: Array = k["memory"]
 	var m := int(d.get("matches", 0))
 	# the same care again since the last expedition stays one memory (the trust still counts)
-	var again := mem.slice(-6).any(func(e): return int(e.get("m", -1)) == m and String(e.get("kind", "")) == kind and String(e.get("text", "")) == text)
+	var again := mem.slice(-6).any(func(e):
+		return int(e.get("m", -1)) == m and String(e.get("kind", "")) == kind and String(e.get("text", "")) == text)
 	if not again:
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
