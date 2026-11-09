@@ -41513,5 +41513,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_pyrraven_p79_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_p79",
+    "name": "Pyrraven (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pyrraven_p79",
+    "name": "Pyrraven (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pyrraven_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thunderstrich_p79",
+    "name": "Thunderstrich (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thunderstrich_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thunderstrich_p79",
+    "name": "Thunderstrich (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thunderstrich_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mortarfly_p79",
+    "name": "Mortarfly (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mortarfly_p79_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thunderstrich_p79",
+    "name": "Thunderstrich (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_thunderstrich_p79_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mortarfly_p79",
+    "name": "Mortarfly (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mortarfly_p79_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gravitank_p79",
+    "name": "Gravitank (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gravitank_p79_1.jpg",
+    "ok": true
   }
 ]
