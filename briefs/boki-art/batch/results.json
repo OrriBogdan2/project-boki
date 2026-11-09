@@ -24853,5 +24853,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/canvastross_card2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "canvastross_card2",
+    "name": "Canvastross (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/canvastross_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card2",
+    "name": "Chuggamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chuggamus_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_card2",
+    "name": "Buckleron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/buckleron_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cubbat_card2",
+    "name": "Cubbat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cubbat_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_card2",
+    "name": "Echolop (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/echolop_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card2",
+    "name": "Chuggamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chuggamus_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cubbat_card2",
+    "name": "Cubbat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cubbat_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_card2",
+    "name": "Echolop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/echolop_card2_1.jpg",
+    "ok": true
   }
 ]
