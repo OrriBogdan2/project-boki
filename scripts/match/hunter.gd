@@ -12,7 +12,8 @@ const GLIDE_CATCH := 60.0        # the canopy brakes a terminal fall to its sink
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
-const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
+const JUMP_BUFFER := 0.12        # s: a jump pressed this long before you land goes off as you land (source silent)
+const COYOTE := 0.12             # s: a jump still fires this long after walking off a ledge (source has no walk-off)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
 const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
@@ -2375,7 +2376,7 @@ func _physics(dt: float) -> void:
 	if grounded and g < pos.y - 0.05:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
-		coyote = 0.12
+		coyote = COYOTE
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt

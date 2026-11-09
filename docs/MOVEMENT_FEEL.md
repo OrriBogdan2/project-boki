@@ -35,7 +35,10 @@ Nothing here comes from SUPERVIVE's files.
   - Glide turn rate.
   - Drop dive speed.
   - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump is already the glide input, so **no variable jump height** was added.
-  - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
+  - Coyote time or buffer values. The game files name JumpCooldown and AirJumpPressDuration but their values are
+    in the encrypted code, bCanWalkOffLedges is false there (no walk-off, so no coyote window to copy), and the
+    reference footage is 5 fps (0.2 s a frame, coarser than either window). Ours stay: `Hunter.COYOTE` 0.12 s and
+    `Hunter.JUMP_BUFFER` 0.12 s (7 steps each), checked by the four jump-forgiveness rows below.
 
 ## Targets and results
 
@@ -58,8 +61,10 @@ Nothing here comes from SUPERVIVE's files.
 | air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
 | dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
-| coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
-| jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
+| coyote_frames (latest press after walking off a rim) | 7 | 7 | >= 7 | `Hunter.COYOTE` 0.12s; source has no walk-off |
+| jump_buffer_frames (earliest press before landing) | 6 | 7 | >= 7 | `Hunter.JUMP_BUFFER` 0.12s; source silent |
+| jump_buffer_dash_frames (the press lands inside an air dash that ends 4 steps before the landing) | n/a | 7 | >= 7 | the same buffer, held across the dash end |
+| dash_jump_eaten (ground-dash frames whose jump press does not jump) | n/a | 0 | <= 0 | a press on any frame jumps out of the dash |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
 | glide_open_hold_s (Space held from the jump) | 0.150s | 0.117s | <= 0.12s | tap/hold split |

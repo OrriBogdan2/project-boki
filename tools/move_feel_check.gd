@@ -40,8 +40,10 @@ const T := {
 	"air_reverse_dv":          ["~", [0.5, 1.1], "m/s", "[game data] AirControl 0.015: a jump keeps its run-up"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
-	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
-	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
+	"coyote_frames":           [">=", 7.0, "frames", "Hunter.COYOTE 0.12s: latest press after a walk-off (none in the source)"],
+	"jump_buffer_frames":      [">=", 7.0, "frames", "Hunter.JUMP_BUFFER 0.12s: earliest press before landing (source silent)"],
+	"jump_buffer_dash_frames": [">=", 7.0, "frames", "the same window across the end of an air dash that lands"],
+	"dash_jump_eaten":         ["<=", 0.0, "frames", "a jump pressed on any frame of a ground dash fires that step"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -323,11 +325,66 @@ func _jump() -> void:
 		if jumped and not P.gliding: bb = k
 		else: break
 	rec("jump_buffer_frames", bb)
+	_dash_jump_windows(land_f)
 	# free fall for 1s from rest
 	_reset(flat + Vector3(0, 30.0, 0), false)
 	var y0 := P.pos.y
 	_steps(60)
 	rec("freefall_1s_depth", y0 - P.pos.y)
+
+## Jump presses around a dash: during a ground dash (every frame must jump out of it) and before landing
+## with an air dash still running (the landing buffer must hold the press).
+func _dash_jump_windows(land_f: int) -> void:
+	_reset(flat)
+	P.inp["move"] = Vector2.RIGHT
+	P.inp["dash"] = true
+	m.step(DT)
+	_clear_inp()
+	var dash_f := int(ceil(P.roll_t / DT))
+	var eaten := 0
+	for k in range(1, dash_f + 2):
+		_reset(flat)
+		P.inp["move"] = Vector2.RIGHT
+		P.inp["dash"] = true
+		m.step(DT)
+		_clear_inp()
+		_steps(k - 1)
+		P.inp["jump"] = true
+		m.step(DT)
+		if P.vel.y <= 1.0: eaten += 1
+	rec("dash_jump_eaten", eaten)
+	# an air dash a hair off the ground: it holds its height, ends, and the body drops the last bit (about
+	# 5 frames), so presses 6-7 frames before the landing land inside the dash
+	var hover := Vector3(0, 0.05, 0)
+	var land2 := 0
+	var dash_ran := 0
+	for i in 120:
+		if i == 0:
+			_reset(flat + hover, false)
+			P.inp["move"] = Vector2.RIGHT
+			P.inp["dash"] = true
+		m.step(DT)
+		_clear_inp()
+		if P.roll_t > 0.0: dash_ran += 1
+		if P.grounded:
+			land2 = i + 1
+			break
+	var bb := -1 if dash_ran == 0 else 0
+	for k in range(1, 16):
+		if dash_ran == 0: break
+		var jumped := false
+		for i in land2 + 4:
+			if i == 0:
+				_reset(flat + hover, false)
+				P.inp["move"] = Vector2.RIGHT
+				P.inp["dash"] = true
+			P.inp["jump"] = (i + 1) == land2 - k
+			m.step(DT)
+			P.inp["dash"] = false
+			if i + 1 >= land2 and P.vel.y > 1.0: jumped = true
+		if jumped and not P.gliding: bb = k
+		else: break
+	rec("jump_buffer_dash_frames", bb)
 
 ## A running jump: let go at take-off (how far the run-up carries), or reverse the keys (how long the
 ## turn takes in the air).
