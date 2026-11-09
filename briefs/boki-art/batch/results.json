@@ -22802,5 +22802,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_maracoil_w31_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_maracoil_w31",
+    "name": "Maracoil (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil_w31",
+    "name": "Maracoil (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maracoil_w31",
+    "name": "Maracoil (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_maracoil_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole_w31",
+    "name": "Bullpole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole_w31",
+    "name": "Bullpole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bullpole_w31",
+    "name": "Bullpole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_bullpole_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glacione_w31",
+    "name": "Glacione",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glacione_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glacione_w31",
+    "name": "Glacione",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glacione_w31_2.jpg",
+    "ok": true
   }
 ]
