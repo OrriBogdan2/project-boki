@@ -31,8 +31,8 @@ static func _sparks(c: Color, amount: int, radius: float, up: float, name_s: Str
 
 ## The dock: a plank pier for the skiff to settle on (local -Z points out over the abyss), mooring
 ## posts with lanterns, and set back from it the horn beacon you call the skiff from.
-## Named children: Beacon/Lamp (lights up when called), Beacon/Flare (the tall column everyone sees),
-## Berth (the deck ring), Sparks.
+## Named children: Beacon/Lamp (lights up when called), Signal and Zone (ExitSignal: the sky beam everyone
+## sees and the deck ring), Sparks.
 static func dock(beacon_off: Vector3) -> Node3D:
 	var root := Node3D.new()
 	var wood := Models.toon(Color("8a6040")); var dark := Models.toon(Color("5a3c28")); var rope := Models.toon(Color("d8c49a"))
@@ -59,10 +59,8 @@ static func dock(beacon_off: Vector3) -> Node3D:
 		Models.part(root, Models.cyl(0.035, 0.035, 4.6, 6), rope, Vector3(sx, 0.85, -0.1), Vector3.ONE, Vector3(PI / 2, 0, 0))
 		var lamp := Models.part(root, Models.sphere(0.16, 10), Models.toon(DOCK, false, 1.2), Vector3(sx, 1.32, -2.4))
 		lamp.name = "Lantern%s" % ("L" if sx < 0 else "R")
-	# the berth ring the skiff's deck covers: board inside it
-	var berth := MeshInstance3D.new(); berth.name = "Berth"; berth.mesh = Models.flat_quad(4.6)
-	berth.material_override = Models.ring_mat(Color(DOCK, 0.45), 0.04); berth.position.y = 0.13
-	root.add_child(berth)
+	# the zone the skiff's deck covers (board inside it) and the sky beam: ExitSignal
+	ExitSignal.attach(root, DOCK, Exits.DECK_R * 2.0)
 	# the horn beacon: a stone foot, a tall post, a brass horn and a signal lamp on top
 	var b := Node3D.new(); b.name = "Beacon"; b.position = beacon_off; root.add_child(b)
 	var stone := Models.toon(Color("7d7f8a"))
@@ -77,8 +75,6 @@ static func dock(beacon_off: Vector3) -> Node3D:
 	lever.name = "Lever"
 	var lamp2 := Models.part(b, Models.sphere(0.24, 12), Models.toon(Color("6a5a40"), true, 0.0), Vector3(0, 2.85, 0))
 	lamp2.name = "Lamp"
-	var flare := _beam(DOCK, 46.0, 0.35, 0.7, 0.26); flare.name = "Flare"; flare.visible = false
-	b.add_child(flare)
 	var ring := MeshInstance3D.new(); ring.name = "Ring"; ring.mesh = Models.flat_quad(2.4)
 	ring.material_override = Models.ring_mat(Color(DOCK, 0.7), 0.08); ring.position.y = 0.32
 	b.add_child(ring)
@@ -147,7 +143,7 @@ static func skiff() -> Node3D:
 	return root
 
 ## A rift hatch: a heavy rune-ringed stone collar set into the ground with an iron lid and a key slot.
-## Named children: Lid (slides aside when opened), Rift (the swirling way down), Runes, Sparks.
+## Named children: Lid (slides aside when opened), Rift (the swirling way down), Runes, Sparks, Signal and Zone.
 static func hatch() -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("6f6a7c")); var iron := Models.toon(Color("4a4858")); var rim := Models.toon(Color("8c86a0"))
@@ -189,6 +185,7 @@ static func hatch() -> Node3D:
 				Models.part(lid, Models.sphere(0.03, 6), rv, Vector3(x, 0.37, k))
 	var hole := Models.part(lid, Models.box(0.14, 0.05, 0.26), Models.toon(HATCH, false, 0.9), Vector3(0, 0.35, 0))
 	hole.name = "Keyhole"
+	ExitSignal.attach(root, HATCH, Exits.HATCH_R * 2.0)
 	root.add_child(_sparks(HATCH, 26, 0.7, 3.0, "Sparks"))
 	Flora.paint_set_piece(root)
 	root.add_child(Models.icon_badge("hatch", 1.5))
@@ -199,7 +196,7 @@ static func hatch() -> Node3D:
 ## (OutpostLook): the crystal and the pylon lamps fill with the charge, the banner climbs the mast in the
 ## holder's team colour. The lift is the column of light that opens when the uplink is complete.
 ## Named children: Mast/Crystal, Banner/Cloth, Lamp0..3, Charge (a ring that fills, shown only while it
-## matters), Zone (the yard's edge, shown only while it matters), Lift (the open way out).
+## matters), Zone and Signal (ExitSignal: the yard's edge and the sky beam), Lift (the open way out).
 static func uplink() -> Node3D:
 	var root := Node3D.new()
 	var stone := Models.toon(Color("8a8f9c")); var dark := Models.toon(Color("4a4e5c")); var brass := Models.toon(Color("e0b84a"), true, 0.25)
@@ -240,18 +237,14 @@ static func uplink() -> Node3D:
 		var lamp_at := Vector3(cos(a) * 1.9, 1.38, sin(a) * 1.9)
 		var lamp_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
 		Models.part(root, Models.box(0.3, 0.1, 0.3), lamp_mat, lamp_at, Vector3.ONE, Vector3(0, -a, 0), "Lamp%d" % i)
-	var charge := MeshInstance3D.new(); charge.name = "Charge"; charge.mesh = Models.flat_quad(5.2)
+	var charge := MeshInstance3D.new(); charge.name = "Charge"; charge.mesh = Models.flat_quad(Exits.OUTPOST_R * 2.0 - 0.6)
 	var chm := Models.ring_mat(Color(UPLINK.lightened(0.3), 0.95), 0.08)
 	chm.set_shader_parameter("arc", 0.0)
 	charge.material_override = chm
 	charge.position.y = 0.08
 	charge.visible = false
 	root.add_child(charge)
-	var zone := MeshInstance3D.new(); zone.name = "Zone"; zone.mesh = Models.flat_quad(5.2)
-	zone.material_override = Models.ring_mat(Color(UPLINK, 0.35), 0.035)
-	zone.position.y = 0.07
-	zone.visible = false
-	root.add_child(zone)
+	ExitSignal.attach(root, UPLINK, Exits.OUTPOST_R * 2.0)
 	var lift := Node3D.new(); lift.name = "Lift"; lift.visible = false; root.add_child(lift)
 	var pad := MeshInstance3D.new(); pad.mesh = Models.flat_quad(3.6)
 	var lpm := Models.ring_mat(Color(UPLINK.lightened(0.2), 0.9), 0.1)

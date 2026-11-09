@@ -2069,7 +2069,7 @@ func _extract_check() -> void:
 	var pings_before := m.pings.size()
 	run.call(m, 2.5, func(): P.inp["interact"] = true)
 	P.inp["interact"] = false
-	var flare: bool = (d["node"] as Node3D).get_node("Beacon/Flare").visible
+	var flare: bool = ExitSignal.phase(d, -1) == ExitSignal.ACTIVE and (d["node"] as Node3D).get_node("Signal").scale.y >= 1.0
 	print("EXCHECK skiff: state=%s after holding %.1fs, arrives in %.0fs; loud: map pings +%d, flare=%s" % [d["state"], m.time - t0, float(d["t"]), m.pings.size() - pings_before, flare])
 	if d["state"] != "called" or m.pings.size() <= pings_before or not flare: ok = false; print("EXCHECK FAIL skiff not called (or not loud)")
 	# the waves come in: hold everyone where they are (a brute could knock the idle test hunters
