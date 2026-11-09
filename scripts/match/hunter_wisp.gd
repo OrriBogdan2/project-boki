@@ -41,7 +41,7 @@ static func hides(h: Hunter) -> bool:
 	return String(_state(h)["mode"]) == ON
 
 ## How far the hero is through its fall (0 up .. 1 down; the rise runs it back), -1 when it plays neither.
-## HunterAnim's state "fall": the Hero's clips seek their hit clip to it.
+## HunterAnim's state "fall": the Hero's clips seek the collapse of their death clip to it.
 static func fall_k(h: Hunter) -> float:
 	var st := _state(h)
 	var look: Dictionary = st["look"]

@@ -3121,8 +3121,7 @@ func _anim_state(stretch: float) -> void:
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
 	s["crouch"] = crouch_k
-	s["downed"] = false      # downed shows as a Wisp (HunterWisp); the fall and rise play the hit clip
-	s["fall"] = HunterWisp.fall_k(self)
+	s["fall"] = HunterWisp.fall_k(self)      # downed shows as a Wisp (HunterWisp); fall and rise play the death clip
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
