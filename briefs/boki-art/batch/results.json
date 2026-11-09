@@ -18147,5 +18147,89 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w29",
+    "name": "Rimeshrew (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w29",
+    "name": "Rimeshrew (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prowyak_pe_w29",
+    "name": "Prowyak (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prowyak_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w29",
+    "name": "Rimeshrew (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2_w29",
+    "name": "Soakybara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe_w29",
+    "name": "Ringrove (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2_w29",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pe_w29",
+    "name": "Skateron (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_soakybara_p2_w29",
+    "name": "Soakybara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_soakybara_p2_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skateron_pe_w29",
+    "name": "Skateron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skateron_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_pe_w29",
+    "name": "Ringrove (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_teapotamus_p_w29",
+    "name": "Teapotamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_p_w29_2.jpg",
+    "ok": true
   }
 ]
