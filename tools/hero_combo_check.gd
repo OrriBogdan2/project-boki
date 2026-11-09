@@ -267,7 +267,8 @@ func _mage() -> void:
 	ac.step(m, 0.9)
 	var kb := T.pos.x - x0
 	ok("Storm Rod: damage + Static on the first foe", ac.dmg(T) >= 25.0 and K.spark_n(T) >= 1, "took %.0f" % ac.dmg(T))
-	ok("Storm Rod: knocked about 1 body height on open ground", kb > 0.8 and kb < 3.0, "%.2f m" % kb)
+	ok("Storm Rod: a standard-mass foe is knocked about 1.8 m (source)",
+			absf(kb - 1.8) < 0.3, "%.2f m" % kb)
 	ok("Storm Rod: an orb at the impact the moment it hits",
 			orb_fast and _flat(K.motes[0]["pos"], home + Vector3(5, 0, 0)) < 2.5)
 	var rod_k1 := K.rod_rank_k()
@@ -455,6 +456,8 @@ func _mage() -> void:
 	_dash(m, P, 0.45, func(): if K.run_t > 0.0 and P.phase_t <= 0.0: ok("small: Wirerun ignores projectiles while it runs", false))
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
+	var words: Array = m.fx.nums.map(func(n): return n["node"].text)
+	ok("Wirerun: the INVULNERABLE word shows on the run (source)", "INVULNERABLE" in words)
 	ac.step(m, 0.6)
 	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
 			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,
