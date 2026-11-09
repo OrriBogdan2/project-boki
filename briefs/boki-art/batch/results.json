@@ -35948,5 +35948,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_hatstag_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_medushroom_full",
+    "name": "Medushroom (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_medushroom_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hatstag_full",
+    "name": "Hatstag (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hatstag_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_medushroom_full",
+    "name": "Medushroom (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_medushroom_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kintsuwyrm_full",
+    "name": "Kintsuwyrm (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kintsuwyrm_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kintsuwyrm_full",
+    "name": "Kintsuwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kintsuwyrm_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kintsuwyrm_full",
+    "name": "Kintsuwyrm (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_kintsuwyrm_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hatstag_full",
+    "name": "Hatstag (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hatstag_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sandwidow_full",
+    "name": "Sandwidow (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_sandwidow_full_3.jpg",
+    "ok": true
   }
 ]
