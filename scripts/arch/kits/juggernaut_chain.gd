@@ -422,7 +422,6 @@ func _jump_out() -> void:
 	var spd := pull_speed * float(ed["jump_carry"])
 	h.vel.x = dir.x * spd
 	h.vel.z = dir.y * spd
-	h.glide_handoff(dir, spd)
 	k.play("jug_reel")
 
 func _stop(how: String, arrived: bool) -> void:
