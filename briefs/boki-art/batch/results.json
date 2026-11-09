@@ -31643,5 +31643,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stance3_skateron_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_glintmole",
+    "name": "Glintmole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_glintmole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_skateron",
+    "name": "Skateron (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_skateron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_glintmole",
+    "name": "Glintmole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_glintmole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_glintmole",
+    "name": "Glintmole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_glintmole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_kitlet",
+    "name": "Kitlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_kitlet",
+    "name": "Kitlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_kitlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_kitlet",
+    "name": "Kitlet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_kitlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_frigatee",
+    "name": "Frigatee (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_frigatee_3.jpg",
+    "ok": true
   }
 ]
