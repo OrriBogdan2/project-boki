@@ -15,6 +15,9 @@ const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
 const POST_COUNT := 14
 const DT := 1.0 / 30.0
+const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
+
+var close := false
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -30,7 +33,6 @@ func run(main: Node) -> void:
 	var out := ""
 	var ids: Array = Arch.ORDER.duplicate()
 	var frames := 8
-	var close := false
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
@@ -87,6 +89,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
+	if close:
+		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
@@ -95,6 +99,14 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	for i in 2:
 		await _keyed(model, sync, clips, dir.path_join("atk%d" % (i + 1)), String(atk[i]), frames)
 	model.queue_free()
+
+## The side view at the Hunter's own scale: the head's height over CLOSE_REF_H scales the camera out and up.
+func _close_cam(sk: Skeleton3D) -> void:
+	var head := sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin.y
+	head *= sk.global_transform.basis.get_scale().y
+	var k := maxf(head / CLOSE_REF_H, 1.0)
+	cam.position = Vector3(0, 1.0 * k, 12.0 * k)
+	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
 func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
