@@ -5616,3 +5616,4 @@ READY ext/sable-v2-art d8d2fce70 (owner-locked Sable v2 portrait + splash in gam
 READY ext/art1-clip-port 0494c83a6 (hit-reaction keys ported into tools/art1 breaker_anims, hem, claire, sable, ryzz clip scripts, same keys and timing as REACT_AUDIT; re-bake UNVERIFIED, no blender on PATH, py_compile ok; DEBT lists other runtime/glb-only clip patches; STACKED on READY ext/anim-react-audit 807d9386e, merge it first; script merges clean with ext/anim-hand-albert, ext/anim-arm-sable, ext/idle-*-rebased, only the glbs conflict as they already do with react-audit; --react-audit 12 FAIL 0, --clip-check 0, health --strict OK, gen_wiki --check 47 unchanged)
 READY ext/hit-spark-targets e07148de3 (hit sparks by target)
 READY ext/ui-death-recap 82d663574 (death recap and spectate)
+READY ext/sfx-warnings-boki 83bb59a92 (low-HP, countdown, Blight and Boki sounds)
