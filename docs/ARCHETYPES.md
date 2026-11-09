@@ -1229,3 +1229,10 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+
+## Recast buffer and EXPIRED (owner, Nov 8)
+
+Presses on a recast slot (E again, X again) are kept for 0.15s and fire when the window opens (RecastBuffer,
+`scripts/arch/recast_buffer.gd`, called from `ArchKit.use_e` and `HeroUlt.press`); a fresh cast drops a kept press. A window
+that closes unused flashes EXPIRED on its icon for 0.6s (`RecastExpired`). Both numbers: `content/rules/tuning.json`.
+DashFlow keeps its own `BUFFER_S`. Check: `--recast-buffer-check`.

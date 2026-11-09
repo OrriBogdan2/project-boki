@@ -86,6 +86,10 @@ func recast() -> bool:
 			return true
 	return false
 
+## Is a second press taken (the climb queues it, the hang slams)?
+func recastable() -> bool:
+	return [CROUCH, RISE, AIR].has(phase())
+
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
 	if leap.is_empty():

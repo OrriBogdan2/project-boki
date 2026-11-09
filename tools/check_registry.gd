@@ -17,6 +17,7 @@ const CHECKS := {
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
+	"--recast-buffer-check": ["res://tools/recast_buffer_check.gd", "recast_buffer_check", null],      # DECISIONS 2026-11-08
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
 	"--dolm-combo-check": ["res://tools/breah_combo_check.gd", "hero_pair_check", null],
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],

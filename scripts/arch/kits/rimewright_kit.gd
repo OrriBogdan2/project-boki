@@ -857,6 +857,10 @@ func ult_running() -> bool:
 	return not rime.is_empty()
 
 
+func ult_recastable() -> bool:
+	return not rime.is_empty()
+
+
 func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
 func has_ult() -> bool: return true
 

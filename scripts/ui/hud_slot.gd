@@ -90,6 +90,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		H._rounded(rect.grow(2.0 + k * 8.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col, 1.0 - k), 3)
 	if sfx_d.get("kind", "") == "reset":
 		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
+	RecastExpired.draw(H, id, rect)
 
 ## A locked slot: the dimmed icon under a padlock and the key cap; "UNLOCK" in gold when a point can open it
 ## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.

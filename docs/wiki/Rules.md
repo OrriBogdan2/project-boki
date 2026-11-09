@@ -476,6 +476,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## tuning (`content/rules/tuning.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| recast_buffer_s | 0.15 |
+| recast_expired_s | 0.6 |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

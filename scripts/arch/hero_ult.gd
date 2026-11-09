@@ -9,15 +9,22 @@ static var _casts := 0            # cast ids are "<hero>_<n>", one per cast, uni
 
 ## The X press after main's level gate: a recast while it runs (ult_recast), else nothing while busy, merged or
 ## cooling down, else `start` (the kit's own cast). True when the press did something; main denies on false.
+## A press that finds no recast window is kept for RecastBuffer (it fires if the window opens within the buffer).
 static func press(k: ArchKit, start: Callable) -> bool:
 	if k.x_def().is_empty():
 		return false
 	if k.ult_running():
-		return k.ult_recast()
+		if k.ult_recast():
+			k.rb.took_x()
+			return true
+		k.rb.early("x")
+		return false
 	if k.busy() or KinMerge.active(k.h) or float(k.cd["x"]) > 0.0:
+		k.rb.early("x")
 		return false
 	if not bool(start.call()):
 		return false
+	k.rb.cast("x")
 	_casts += 1
 	k.cd["x"] = cooldown(k)
 	k.st["ult_cast"] = "%s_%d" % [k.id, _casts]

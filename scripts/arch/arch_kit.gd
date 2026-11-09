@@ -34,6 +34,7 @@ var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
+var rb: RecastBuffer           # recast presses kept 0.15s and the EXPIRED flash (content/rules/tuning.json)
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
 
 static func make(hunter: Hunter, arch_id: String) -> ArchKit:
@@ -58,6 +59,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k.d = Arch.def(arch_id)
 	k.ch_rmb = float(k.rmb_def().get("charges", 1))
 	k.flow = DashFlow.new(k)
+	k.rb = RecastBuffer.new(k)
 	k._setup()
 	return k
 
@@ -116,6 +118,8 @@ func cast_r() -> bool: return false
 func r_recast() -> bool: return false                # R pressed while it runs (Last Round release)
 ## X pressed while the hero ultimate runs (HeroUlt.press; true = handled, e.g. an early landing).
 func ult_recast() -> bool: return false
+## Is the hero ultimate's recast window open (RecastBuffer keeps a press until it is, flashes EXPIRED when it closes unused)?
+func ult_recastable() -> bool: return false
 ## Is the hero ultimate under way (HeroUlt.press turns a press into ult_recast then)?
 func ult_running() -> bool: return false
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
@@ -181,10 +185,13 @@ func tick(dt: float) -> void:
 				_release_rmb()
 		else:
 			_release_rmb()
+	rb.tick(dt)
 	if e_t > 0.0:
 		e_t -= dt
 		if e_t <= 0.0:
 			e_t = 0.0
+			if e_recastable():
+				rb.expire_e()
 			_e_end()
 	if r_t > 0.0:
 		r_t -= dt
@@ -270,9 +277,11 @@ func use_e() -> void:
 	if e_t > 0.0 and e_recast():
 		return
 	if float(cd["e"]) > 0.0:
+		rb.early("k1")
 		h._ab_feedback("k1", "deny")
 		return
 	if cast_e():
+		rb.cast("k1")
 		cd["e"] = float(e_def().get("cooldown", 14.0)) * cd_k("kin")
 		h.used["k1"] = int(h.used.get("k1", 0)) + 1
 		h._ab_feedback("k1", "cast")
