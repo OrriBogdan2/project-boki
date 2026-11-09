@@ -2732,5 +2732,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/forgebrock_2.png",
     "ok": true
+  },
+  {
+    "id": "tidalisk",
+    "name": "Tidalisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidalisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling",
+    "name": "Murmurling (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling",
+    "name": "Murmurling (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet",
+    "name": "Oarlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk",
+    "name": "Frothisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frothisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frothisk",
+    "name": "Frothisk",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frothisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidalisk",
+    "name": "Tidalisk",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidalisk_1.jpg",
+    "ok": true
   }
 ]
