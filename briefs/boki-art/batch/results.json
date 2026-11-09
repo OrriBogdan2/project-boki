@@ -68813,5 +68813,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/morelossus_card107_1.jpg",
     "ok": true
+  },
+  {
+    "id": "blastopuff_card107",
+    "name": "Blastopuff (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/blastopuff_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestaff_card107",
+    "name": "Lodestaff (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestaff_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card107",
+    "name": "Blastopuff (hero card, new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/blastopuff_card107_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelossus_card107",
+    "name": "Morelossus (hero card, new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/morelossus_card107_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_card107",
+    "name": "Howlop (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/howlop_card107_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestaff_card107",
+    "name": "Lodestaff (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lodestaff_card107_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "blastopuff_card107",
+    "name": "Blastopuff (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/blastopuff_card107_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "morelossus_card107",
+    "name": "Morelossus (hero card, new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/morelossus_card107_3.jpg",
+    "ok": true
   }
 ]
