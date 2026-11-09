@@ -36564,5 +36564,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_ringrove_r3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_ringrove_r4",
+    "name": "Ringrove (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r4",
+    "name": "Ringrove (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r4",
+    "name": "Ringrove (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r4",
+    "name": "Ringrove (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r5",
+    "name": "Ringrove (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r5",
+    "name": "Ringrove (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_r5",
+    "name": "Ringrove (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ringrove_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g9",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g9_1.jpg",
+    "ok": true
   }
 ]
