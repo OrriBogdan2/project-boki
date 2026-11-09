@@ -84,6 +84,12 @@ func ground_at(x: float, z: float) -> float:
 func is_void(x: float, z: float) -> bool:
 	return ground_at(x, z) <= VOID + 1.0
 
+## The tile under a point: T_GROUND, T_BLOCK or T_VOID (off the map counts as the void).
+func tile_kind(x: float, z: float) -> int:
+	var ix := int(floor(x))
+	var iz := int(floor(z))
+	return kind[idx(ix, iz)] if inb(ix, iz) else T_VOID
+
 func is_block(x: float, z: float) -> bool:
 	var ix := int(floor(x)); var iz := int(floor(z))
 	return inb(ix, iz) and kind[idx(ix, iz)] == T_BLOCK
@@ -229,16 +235,34 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 			break
 	return p
 
-## Line of sight at height y between two points (rocks and higher ground block it).
+## Line of sight at height y between two points (rocks and higher ground block it). A sample every
+## 0.4 m, each read straight off the grid and a tile read once however many samples land on it (its
+## ground is one height, stairs aside): can_see, Bot.can_hit and the kits ask this hundreds of times
+## a step in a ten-squad brawl, and the three lookups a sample were a quarter of the step.
 func los(a: Vector3, b: Vector3, y: float) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1
+	var last := -1
 	for i in range(1, n):
 		var t := float(i) / n
 		var px := a.x + d.x * t; var pz := a.z + d.y * t
-		if is_block(px, pz) and ground_at(px, pz) + BLOCK_H > y:
-			return false
-		if ground_at(px, pz) > y + 0.2:
+		var ix := int(floor(px))
+		var iz := int(floor(pz))
+		if ix < 0 or iz < 0 or ix >= w or iz >= h:
+			continue                    # off the map is the void: nothing there to block
+		var ci := iz * w + ix
+		var k := kind[ci]
+		if k == T_VOID:
+			continue
+		var g := 0.0
+		if stairs.has(ci):
+			g = ground_at(px, pz)        # a flight rises across its tile: this spot's height
+		elif ci == last:
+			continue
+		else:
+			g = level[ci] * LEVEL
+		last = ci
+		if (k == T_BLOCK and g + BLOCK_H > y) or g > y + 0.2:
 			return false
 	for wl in dyn_walls:
 		if not Verbs.blocks_sight(wl): continue
