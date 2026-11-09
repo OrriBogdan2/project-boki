@@ -15123,5 +15123,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_grainspin_e_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lensling_e_w28",
+    "name": "Lensling (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lensling_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lensling_e_w28",
+    "name": "Lensling (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lensling_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lensling_e_w28",
+    "name": "Lensling (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lensling_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_e_w28",
+    "name": "Mumblet (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_e_w28",
+    "name": "Mumblet (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_e_w28",
+    "name": "Mumblet (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pagodito_r_w28",
+    "name": "Pagodito (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pagodito_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mumblet_e_w28",
+    "name": "Mumblet (concept edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mumblet_e_w28_4.jpg",
+    "ok": true
   }
 ]
