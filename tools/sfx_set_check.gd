@@ -6,6 +6,8 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
+##   7. mobs and bosses: every kind that attacks has its own mob_<kind>_atk and _hit, each boss its _tell,
+##      and no sound played by mob.gd or boss.gd is a Boki cue (k_*), so a Boki rename cannot silence them
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
@@ -61,6 +63,8 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "mob":
+		_check_mobs(sounds)
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -98,6 +102,24 @@ func _kit_names(arch: String, extra: Array) -> void:
 			if not Sfx.ensure(sname) and not silent.has(sname):
 				silent.append(sname)
 	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
+
+## 7. Mob and boss attack sounds are their own (mob_*, boss_*), not borrowed Boki cues.
+func _check_mobs(sounds: Dictionary) -> void:
+	var gaps := []
+	for kind in Data.MOBS:
+		if kind.begins_with("bl_") or Data.BOSSES.has(kind) or Data.MOBS[kind]["attack"] == "none": continue
+		for part in ["atk", "hit"]:
+			if not sounds.has("mob_%s_%s" % [kind, part]): gaps.append("mob_%s_%s" % [kind, part])
+	for kind in Data.BOSSES:
+		if not sounds.has("boss_%s_tell" % kind): gaps.append("boss_%s_tell" % kind)
+	ok(gaps.is_empty(), "every attacking mob has a cue and impact, every boss a wind-up tell (missing %s)" % [gaps])
+	var re := RegEx.create_from_string("sfx\\(\"([a-z0-9_]+)\"[,)]")
+	var borrowed := []
+	for f in ["mob.gd", "boss.gd"]:
+		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/" + f)):
+			var sname := hit.get_string(1)
+			if sname.begins_with("k_") or not Sfx.ensure(sname): borrowed.append(sname)
+	ok(borrowed.is_empty(), "mob.gd and boss.gd play no k_ cue and only sounds that exist (%s)" % [borrowed])
 
 ## 6. Heavy sounds that carry, and held sounds that loop.
 func _reach_and_loops(group: String, d: Dictionary) -> void:

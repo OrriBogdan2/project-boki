@@ -3392,6 +3392,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if e == null:
 		fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return
+	if x.has("snd"): sfx(x["snd"], at, -4.0)      # a mob's own landing sound (mob.gd)
 	var by: Ent = s["by"]
 	var dmg: float = s["dmg"]
 	if x.has("swing"):
