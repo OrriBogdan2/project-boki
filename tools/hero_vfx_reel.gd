@@ -54,6 +54,7 @@ func run(main_node: Node) -> void:
 		frame_dir = dir.path_join(frame_dir)
 		DirAccess.make_dir_recursive_absolute(frame_dir)
 	await _setup()
+	HeroVfx.of(m).fixed_dt = DT     # the looks age with the stepped match, not the (slow, saving) frames
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3

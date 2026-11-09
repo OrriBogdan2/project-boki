@@ -257,13 +257,13 @@ float fist_d(vec2 f) {
 // Lying over the area, seen from above: in the wind-up it hangs high (drawn bigger, its shadow under it on the
 // ground darkening), on the strike it drops onto its shadow, flattens, flashes, then crumbles to scrap.
 vec4 fist(vec2 uv) {
-	vec2 p = vec2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0);                         // +y back toward him
+	vec2 p = vec2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0);                         // +y back toward him (PlaneMesh v runs along +z, his aim)
 	float fall = slam ? smoothstep(0.0, 0.12, life) : 0.0;
 	float high = slam ? 1.0 - fall * fall : 0.75 + 0.25 * life;                 // 1: raised, 0: on the ground
 	float hit = slam ? smoothstep(0.1, 0.13, life) * (1.0 - smoothstep(0.13, 0.32, life)) : 0.0;
 	vec2 squash = vec2(1.0 + 0.08 * hit, 1.0 + 0.04 * hit);                    // spreads as it lands
 	float drop = slam ? smoothstep(0.5, 1.0, life) : 0.0;                       // crumbling
-	vec2 f = p / (0.78 * (1.0 + 0.45 * high) * squash);
+	vec2 f = p / (0.78 * (1.0 + 0.2 * high) * squash);
 	float bit = fbm3(f * 7.0 + seed);                                           // which bits of scrap are there
 	f += vec2(bit - 0.5, bit - 0.4) * drop * 0.2;                               // the scrap scatters as it falls apart
 	vec2 fg = fingers_d(f);
@@ -273,22 +273,26 @@ vec4 fist(vec2 uv) {
 	float built = slam ? 1.0 - drop : smoothstep(0.0, 0.6, life);
 	float shown = smoothstep(bit - 0.06, bit + 0.02, built * 1.12);
 	float arm_fade = 1.0 - smoothstep(0.5, 0.95, f.y);                          // the arm runs back into him
-	float body = (1.0 - smoothstep(-0.012, 0.012, d)) * shown * arm_fade * (slam ? 1.0 : 0.9);
+	float body = (1.0 - smoothstep(-0.012, 0.012, d)) * shown * arm_fade;
 	float edge = 1.0 - smoothstep(0.0, 0.035, -d);                              // dark outline against the ground
 	float seam = (1.0 - smoothstep(0.0, 0.018, abs(fg.y))) * step(-0.4, f.y) * step(f.y, 0.02);
 	seam = max(seam, (1.0 - smoothstep(0.0, 0.02, abs(thumb))) * step(fg.x, 0.02));
 	seam = max(seam, (1.0 - smoothstep(0.0, 0.02, abs(f.y - 0.3))) * step(arm, 0.0));   // the cuff band
-	float plates = smoothstep(0.0, 0.1, cracks(f * 5.0 + seed));
-	float tone = h21(floor(f * 5.0 + seed));                                    // each plate its own metal
+	float plates = smoothstep(0.0, 0.06, cracks(f * 4.0 + seed));
+	float tone = h21(floor(f * 7.0 + seed));                                    // each plate its own metal
 	float rivet = 1.0 - smoothstep(0.025, 0.045, length(fract(f * 5.0 + 0.5) - 0.5));
-	float shade = 0.65 + 0.35 * smoothstep(0.3, -0.3, d * 4.0 + f.x * 0.5);    // rounded, lit from one side
-	vec3 metal = mix(col3.rgb * 1.6, col.rgb * 0.62, 0.3 + 0.5 * tone) * shade * (0.55 + 0.45 * plates);
-	float knuckle = 1.0 - smoothstep(-0.36, -0.15, f.y);                        // the striking face
-	float glow = slam ? max(hit * 1.4, 0.3 * (1.0 - fall)) : 0.2 + 0.4 * life;
-	vec3 c = metal + col.rgb * rivet * 0.3 + col2.rgb * knuckle * glow * 0.6;
-	c = mix(c, col3.rgb * 0.5, max(edge, seam) * 0.85);
+	float pillow = fg.x < 0.0 && f.y < -0.04 ? smoothstep(0.0, 0.07, -fg.x) : smoothstep(0.0, 0.12, -d);
+	float shade = (0.5 + 0.5 * pillow) * (0.85 + 0.15 * f.x);                   // each finger rounded, lit from one side
+	vec3 metal = mix(col3.rgb * 1.5, col.rgb * 0.55, 0.1 + 0.35 * tone) * shade * (0.7 + 0.3 * plates);
+	float knuckle = 1.0 - smoothstep(-0.4, -0.3, f.y);                          // the striking edge
+	float fingers = 1.0 - smoothstep(-0.3, -0.12, f.y);                         // the whole striking face
+	float glow = slam ? 0.3 * (1.0 - fall) : 0.2 + 0.4 * life;
+	vec3 c = metal + col.rgb * rivet * 0.3 + col2.rgb * (knuckle * glow + fingers * hit) * 0.6;
+	float trim = (1.0 - smoothstep(0.03, 0.06, -d)) * (1.0 - edge);           // a gold rim just inside the outline
+	c = mix(c, col.rgb * 0.95, trim * 0.8);
+	c = mix(c, col3.rgb * 0.35, max(edge * 0.8, seam * 0.8));
 	float sd = fist_d(p / 0.78);                                                // its shadow, on the ground
-	float dark = slam ? (1.0 - fall) * 0.5 + hit * 0.3 - drop * 0.3 : 0.15 + 0.35 * smoothstep(0.0, 0.8, life);
+	float dark = slam ? (1.0 - fall) * 0.35 + hit * 0.2 - drop * 0.3 : 0.1 + 0.25 * smoothstep(0.0, 0.8, life);
 	float shadow = (1.0 - smoothstep(-0.04, 0.1, sd)) * (1.0 - smoothstep(0.4, 0.9, p.y / 0.78)) * max(dark, 0.0);
 	return vec4(c * body, body + shadow * (1.0 - body));
 }

@@ -43,6 +43,7 @@ var pools := {}                # kind -> nodes made for it
 var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
+var fixed_dt := 0.0            # s each frame ages the looks by, when > 0 (the reels, stepping the match by a fixed DT)
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
 var live_n := 0                # GPU particles alive (asked for) now
 var made := 0                  # nodes made so far (tests: it stops growing once warm)
@@ -723,7 +724,8 @@ func _model_has(h: Hunter, node_name: String) -> bool:
 	return node_name != "" and h.model != null and WardenGlb.anchor(h.model, node_name) != null
 
 # ------------------------------------------------------------------ the running looks
-func _process(delta: float) -> void:
+func _process(frame_dt: float) -> void:
+	var delta := fixed_dt if fixed_dt > 0.0 else frame_dt
 	_tick_holds()
 	for i in range(live.size() - 1, -1, -1):
 		var e: Dictionary = live[i]

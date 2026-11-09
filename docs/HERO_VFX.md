@@ -4,7 +4,7 @@ A Hero's ability looks and sounds are data: `content/vfx/<arch>.json`, played by
 (`scripts/match/hero_vfx.gd`, one pooled node per match). A Hero needs a data file, a line per
 moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file against its kit, plus the shared runtime). Tuning a
 palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every move side by side (no Hero: one of every
-layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
+layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command; the reel sets `HeroVfx.fixed_dt` to its step, so a jobq GPU run, where engine flags such as `--fixed-fps` never reach Godot, still ages the looks with the match); a Hero's
 scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
 
 ## From a kit

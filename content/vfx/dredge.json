@@ -2,7 +2,7 @@
   "palette": {"main": "ffc832", "hot": "fff0b0", "char": "3a2408"},
   "anchors": {},
   "moves": {
-    "anchor_wind": {"fx": [{"p": "fist", "size": "r", "size_x": 3.0, "life": 0.38}]},
-    "anchor_slam": {"fx": [{"p": "fist", "size": "r", "size_x": 3.0, "life": 0.7, "slam": true}]}
+    "anchor_wind": {"fx": [{"p": "fist", "size": "r", "size_x": 3.0, "life": 0.38, "c3": "3a3f48"}]},
+    "anchor_slam": {"fx": [{"p": "fist", "size": "r", "size_x": 3.0, "life": 0.7, "slam": true, "c3": "3a3f48"}]}
   }
 }
