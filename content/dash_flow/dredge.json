@@ -25,5 +25,13 @@
 	},
 	"into_jump": {
 		"rmb": {"mode": "lock", "reason": "Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).", "source": "Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout."}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open."},
+		"e": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open. Primal Slam dunks over the Abyss (supervive_kits.md:60). Ours: the smash folds the glider."},
+		"x": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dredge.md shows Kingpin cast or pressed with the glider open. The source's Brute Dash (Air) is its own slot (supervive_kits.md:58-59); ours: Shift in a glide is that air dash, it folds the glider and hands its speed back."}
 	}
 }

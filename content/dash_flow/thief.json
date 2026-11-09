@@ -22,5 +22,13 @@
 		"e": {"mode": "fire", "source": "Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to."},
 		"x": {"mode": "fire", "source": "Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open."},
+		"e": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open."},
+		"x": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/dancer.md shows Shiv cast or pressed with the glider open. The source has air dashes (supervive_kits.md:10-11, :58-59); ours: Shift in a glide is the air dash and hands its speed back to the glider."}
 	}
 }

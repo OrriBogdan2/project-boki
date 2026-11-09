@@ -99,5 +99,13 @@
 			"reason": "The source plants him through the guard: no jump until the counter has struck.",
 			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
 		}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "fold", "source": "Data (supervive_kits.md:22,25): RMB while airborne is Obsidian Slam, its own Air Slam slot; footage 0251-0300 (hero-ref/juggernaut.md:75) shows it from a jump. [?] whether an open glider counts as airborne; the owner's rule (briefs/DECISIONS.md: the source decides, the glider never blocks a slam) casts it. Ours: the Meteor Drop folds the glider."},
+		"e": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open."},
+		"x": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/juggernaut.md shows Brall cast or pressed with the glider open. The source has air dashes (supervive_kits.md:10-11, :58-59); ours: Shift in a glide is the air dash and hands its speed back to the glider."}
 	}
 }

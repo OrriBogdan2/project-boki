@@ -662,6 +662,8 @@ def gen_controls():
 # ------------------------------------------------------------------ dash -> ability rows
 DASH_SLOTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)"), ("q", "Q glove")]
 DASH_MODE = {"fire": "fires mid-dash", "buffer": "buffered to the dash's end", "cancel": "cancels the dash"}
+GLIDE_SLOTS = DASH_SLOTS + [("dash", "Shift dash")]
+GLIDE_MODE = {"cast": "casts, the glider stays open", "fold": "casts, the glider folds", "refuse": "refused while the glider is open"}
 INTO_DASH_MODE = {"fire": "the dash goes, the ability keeps running", "buffer": "the dash waits for the ability",
                   "cancel": "the dash cancels its wind-up or recovery", "lock": "the dash is refused while it runs"}
 
@@ -713,9 +715,13 @@ def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
     rows = []
+    glide_rows = []
     for aid in ARCH_ORDER:
         f = flows.get(aid, {})
         hero = ARCH.get(aid, {}).get("name", aid)
+        for slot, label in GLIDE_SLOTS:
+            row = f.get("glide", {}).get(slot, {})
+            glide_rows.append([hero, label, row.get("source", ""), GLIDE_MODE.get(row.get("mode"), "")])
         for kind in ("ground", "air"):
             given = f.get("dash", {}).get(kind, {})
             for slot, label in DASH_SLOTS:
@@ -736,6 +742,12 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
+    body += ("\n## From the glider\n\nA press while the glider is open (`glide` rows in `content/dash_flow/<hero>.json`, "
+             "owner rule in briefs/DECISIONS.md: the source decides, the glider never blocks a slam; `--glide-cast-check` "
+             "presses every row). R is the hero's own ultimate (the X tile). A row marked [?] is one nothing in the "
+             "source settles: the data (briefs/supervive-data/) states no rule for an open glider and no footage frame "
+             "(briefs/hero-ref/, ext/hero-ref-footage) shows a cast with it open.\n\n")
+    body += table(["Hero", "Slot", "Source", "Ours"], glide_rows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

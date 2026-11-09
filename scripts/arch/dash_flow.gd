@@ -158,8 +158,9 @@ func _route_jump(fire_pressed: bool) -> void:
 		if h.inp.get(key, false) and _press_mid_jump(slot):
 			h.inp[key] = false
 
+## A glide is not a hop: its presses fire (the jump rows hold a press for a jump's landing, not a glide's).
 func _press_mid_jump(slot: String) -> bool:
-	if kit.h.grounded or String(jump_row_of(kit.id, slot)["mode"]) != "buffer":
+	if kit.h.grounded or kit.h.gliding or String(jump_row_of(kit.id, slot)["mode"]) != "buffer":
 		return false
 	landing[slot] = true
 	return true

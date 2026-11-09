@@ -75,5 +75,13 @@
 			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once",
 			"source": "Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
 		}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/ostra.md shows Void cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/ostra.md shows Void cast or pressed with the glider open."},
+		"e": {"mode": "cast", "source": "[?] Data (supervive_kits.md:116) plants the Anomaly 'at the cursor' and names no ground-only rule (Tetra's Rockwave is the one that does); nothing shows a glide. Ours: it plants on the ground below the cursor from a glide."},
+		"x": {"mode": "cast", "source": "[?] Data (supervive_kits.md:117): Singularity is a vortex at the cursor with no ground-only rule; nothing shows a glide. Ours: it opens on the ground below the cursor from a glide."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/ostra.md shows Void cast or pressed with the glider open. Ours: her Swap is a lob that keeps her height (content/archetypes/ostra.json), so the glider stays."}
 	}
 }

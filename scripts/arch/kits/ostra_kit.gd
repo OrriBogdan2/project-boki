@@ -505,9 +505,10 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 # ------------------------------------------------------------------ E: Brimseed
 func cast_e() -> bool:
 	var ed := e_def()
-	var pw := HeroZones.walk(m, h.pos, aim(), float(ed["reach"]))
+	var from := HeroZones.footing(m, h)
+	var pw := HeroZones.walk(m, from, aim(), float(ed["reach"]))
 	var p: Vector3 = pw["pos"]
-	if not pw["ok"] or not HeroZones.fits(m, p, h.pos.y, false):
+	if not pw["ok"] or not HeroZones.fits(m, p, from.y, false):
 		seed_denied += 1
 		if h.is_local() and m.hud: m.hud.toast_small("No ground to plant on", col_of(ed))
 		return false
