@@ -373,6 +373,18 @@ func _dredge_hook() -> void:
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
 	await _go(GAP)
 
+## Grimble's E at the dummy: the giant scrap fist forms raised over the cone through the 0.38 s wind-up, then
+## smashes down on the strike frame and crumbles.
+func _dredge_e() -> void:
+	await _reset(5.0)
+	var cast := func(t: float):
+		P.inp["sig"] = _at(t, 0.1)
+		_aim(T.pos)
+	await _go(2.0, cast, _sheet("e",
+			"E, Anchor Drop: the scrap fist forms over the cone in the wind-up, smashes down on the strike, crumbles",
+			[0.15, 0.25, 0.35, 0.45, 0.5, 0.53, 0.6, 0.75, 1.0]), 2.5)
+	await _go(GAP)
+
 func _archer_miss() -> void:
 	await _reset(8.0)
 	var off := home + Vector3(5.5, 0, -2.5)
