@@ -51033,5 +51033,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/selenwhale_cardw_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reapant_w5",
+    "name": "Reapant (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reapant_w5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v5",
+    "name": "Vespox (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_vespox_v5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w5",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v6",
+    "name": "Vespox (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_vespox_v6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v6",
+    "name": "Vespox (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_vespox_v6_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v4",
+    "name": "Vespox (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_vespox_v4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reapant_w6",
+    "name": "Reapant (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_reapant_w6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vespox_v4",
+    "name": "Vespox (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_vespox_v4_4.jpg",
+    "ok": true
   }
 ]
