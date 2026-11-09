@@ -35,7 +35,7 @@ func run(main_node: Node) -> void:
 	await _view("in_blight", d - 5.0, play_pitch, "5 m out in the Blight: tint, the line, the red pulse of a hit")
 	_crop_take("minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the ring, the dashed next ring, the Heart")
 	m.heart.hit_t = -99.0
-	m.hud.full_map.open(true)
+	m.hud.full_map.open()
 	m.time = 0.0 - m.sess_t0
 	await _go(0.3)
 	_take("full_map", "The drop map before the tide starts: the first ring, dashed")
