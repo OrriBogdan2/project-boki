@@ -42101,5 +42101,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_barrelmander_bat_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_pyrraven_o81",
+    "name": "Pyrraven",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pyrraven_o81_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lanceron_o81",
+    "name": "Lanceron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lanceron_o81_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_y1",
+    "name": "Ringrove (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_ringrove_y1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_o1",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_o1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_y1",
+    "name": "Ringrove (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_ringrove_y1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_ringrove_y1",
+    "name": "Ringrove (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_ringrove_y1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h3",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_h2",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_h2_1.jpg",
+    "ok": true
   }
 ]
