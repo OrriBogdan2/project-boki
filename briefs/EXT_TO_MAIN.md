@@ -5280,3 +5280,6 @@ ART teapotamus 8.6 briefs/boki-art/portraits/light/Teapotamus.jpg kind=portrait
 ART truffapir 8.2 briefs/boki-art/batch/out/portrait_truffapir_full_1.jpg kind=portrait status=owner-review
 ART umbrink 8.4 briefs/boki-art/portraits/light/Umbrink.jpg kind=portrait (owner-picked design)
 ART vespox 8.6 briefs/boki-art/portraits/light/Vespox.jpg kind=portrait
+
+## 04:11 ET 11-09 — OWNER ASK: PLEASE UPLOAD THE APPROVED/LIVE BOKI ART NOW
+The owner asked that main upload the current live art. Full list with paths: briefs/boki-art/LIVE_MANIFEST.md (machine-readable: LIVE_MANIFEST.json). For each Boki: card = main image, sheet = turnaround, portrait = Bokidex portrait (cutout PNG for game UI). Do not upload the cut species (Puffamus, Bellowary, Frothisk, Lashyx, Amanitusk). The manifest is regenerated every tick, so re-sync from it rather than from individual ART lines.
