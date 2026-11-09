@@ -3,7 +3,7 @@ extends RefCounted
 ## The takedown reset: a hunter who gets credit for knocking or killing an ENEMY hunter has their dash
 ## (Shift) back at once, every charge and the long-dash cooldown, and heals a little. Mobs and bosses
 ## don't count. Match.knock, eliminate and _lose_life call takedown(); the hero-specific resets (a
-## Ryzz blowout, a Vex vault, a knife in a foe) call cue() so every "dash is back" gives the same
+## Sparkle blowout, a Vex vault, a knife in a foe) call cue() so every "dash is back" gives the same
 ## feedback to the one who got it: the reset sound (Sfx.play_reset_cue) and a pop on the HUD's Shift icon.
 
 const HEAL := 0.05          # of max health, per takedown (a knock and the kill that follows each give it)

@@ -7,7 +7,7 @@ extends RefCounted
 ## charges. ArchKit runs one hunter's kit; this file is the data side: lookups, weapon families,
 ## and the kin's infusion (how a kin's typing fills an archetype ability's sockets, ARCHETYPES §4).
 
-const ORDER := ["thief", "archer", "mage", "gunslinger", "juggernaut", "bulwark", "dredge", "ashwick", "tender", "rimewright", "dolm", "ostra"]
+const ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]   # canonical Hunter order (display order everywhere): Vex, Kael, Cinder, Meeko, Tenzo, Lace, Grimble, Neve, Motley, Mossy, Sparkle, Sable
 const DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 static func def(id: String) -> Dictionary:
@@ -36,8 +36,17 @@ static func exists(id: String) -> bool:
 static func weight(id: String) -> String:
 	return String(def(id).get("weight", ""))
 
-static func name_of(id: String) -> String:
-	return String(def(id).get("title", id.capitalize()))
+## The stored title without "the" ("Unbroken"); for ids, file names and the one place that adds "the".
+static func bare_title(id: String) -> String:
+	return String(def(id).get("title", id.capitalize())).trim_prefix("The ")
+
+## A title shown on its own, the one display helper: "The Hired Gun" at the start of a line, with
+## mid=true "the Hired Gun" inside a sentence. Names with the title go through HeroTitle.label.
+static func name_of(id: String, mid := false) -> String:
+	var t := bare_title(id)
+	if not def(id).has("title"):
+		return t
+	return ("the " if mid else "The ") + t
 
 ## The Hunter's display name, or "Hunter" for a body with no Hunter kit (dummies, old saves).
 static func label(id: String) -> String:
@@ -143,15 +152,15 @@ const CTRL_PREF := {
 
 static var _inf_cache := {}
 
-## The kin's infusion: {hit, ctrl: [PartSpec...], guard, util, mod: [PartSpec...], move}. An
-## explicit KinSpec "infusion" wins; otherwise it's derived from the kin's active, its dodge rider
-## and its throw (§4.2), so a community kin maps automatically.
+## The kin's infusion: {hit, ctrl: [PartSpec...], guard, util, mod: [PartSpec...]}. An explicit
+## KinSpec "infusion" wins; otherwise it's derived from the kin's active and its throw (§4.2), so a
+## community kin maps automatically. (Dodge riders no longer count: dashes are the hero's own.)
 static func infusion(ks: KinSpec) -> Dictionary:
 	if ks == null:
 		return {}
 	if _inf_cache.has(ks.id):
 		return _inf_cache[ks.id]
-	var out := {"hit": null, "ctrl": [], "guard": null, "util": null, "mod": [], "move": "", "src": ks.id}
+	var out := {"hit": null, "ctrl": [], "guard": null, "util": null, "mod": [], "src": ks.id}
 	var effs: Array = []
 	var mods: Array = []
 	var ab := KinLib.ability(ks.active)
@@ -159,12 +168,7 @@ static func infusion(ks: KinSpec) -> Dictionary:
 		for st in ab.all_stages():
 			effs.append_array(st.effects)
 			mods.append_array(st.modifiers)
-	effs.append_array(ks.dodge_rider.get("on_pass", []))
-	for key in ["on_start", "on_end"]:
-		for st in ks.dodge_rider.get(key, []):
-			effs.append_array((st as StageSpec).effects)
 	effs.append_array(ks.throw_effects)
-	mods.append_array(ks.dodge_rider.get("modifiers", []))
 	for e0 in effs:
 		var e: PartSpec = e0
 		match e.category():
@@ -183,7 +187,6 @@ static func infusion(ks: KinSpec) -> Dictionary:
 		if (md as PartSpec).type in ["delay", "spike"]:
 			continue
 		if not (out["mod"] as Array).any(func(x): return (x as PartSpec).type == (md as PartSpec).type): (out["mod"] as Array).append(md)
-	out["move"] = String(ks.dodge_rider.get("as", ""))
 	# an explicit infusion block replaces whatever it names
 	for key in ks.infusion:
 		out[key] = ks.infusion[key]

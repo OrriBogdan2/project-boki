@@ -19,7 +19,7 @@ const FOOT_K := 0.55           # share of the body radius that must be over the 
 const RISE_V := 8.5            # m/s: the caster's lift up her own rock's face
 const SETTLE := 0.85           # m under the top where the lift eases off, so it ends at the top instead of throwing you
 const SETTLE_OVER := 0.2       # m: how far past the top it carries you
-const CARRY_K := 0.9          # share of her run speed kept pressing into the face while she rises
+const CARRY_K := 1.0          # share of her run speed kept as she rises (air control is near nil)
 const ON_TOP := 0.05           # m: feet this close to the top count as standing on it
 
 ## The hunter whose move step is asking World.occupy (set and cleared around it by Hunter); null for any
