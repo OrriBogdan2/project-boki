@@ -34,3 +34,6 @@ One Boki 2D style anchored on style_refs/boki_style_ref_2d.png. For hero cards (
 ## Ermink family (owner 23:22)
 - Ermink is the small base form; all nine Ink forms must read clearly BIGGER and more grown-up than Ermink (about twice its size, longer, stronger build).
 - Every Ink form needs its own distinct pose and silhouette: Flarmink racing streak, Rippmink diving wave, Blossmink low lounging log, Voltmink loose lanky stride, Prismink low crouch, Rimink tall prowl, Lunink gliding flight, Umbrink ink pool, Wyrmink coiling in the air. Two Ink forms in similar poses = the later one fails.
+
+## Blush (STYLE_CANON 11-09 supersedes the old rule)
+- Soft pink cheek blush is part of the canon house style at every stage. Do NOT fail or mark down blush on middle or final forms.
