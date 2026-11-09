@@ -1994,8 +1994,9 @@ func local_player() -> Hunter:
 	return player
 
 ## Where the mouse points, at the right height: on a foe under the cursor at that foe's height,
-## otherwise on the ground under the cursor. Aiming on your own height made shots at someone a
-## terrace above (or below) drift sideways past them, because the camera looks down at an angle.
+## otherwise on the first ground the cursor's ray meets (AimMode.ray_ground; your own height over the
+## abyss). Aiming on your own height made shots at someone a terrace above (or below) drift sideways past
+## them, because the camera looks down at an angle.
 func _mouse_aim(mp: Vector2) -> Vector3:
 	var base_y := player.pos.y + 0.95
 	var best: Ent = null
@@ -2014,15 +2015,11 @@ func _mouse_aim(mp: Vector2) -> Vector3:
 		var q := cam.screen_on_plane(mp, best.hit_y() + 0.95)
 		aim_y = best.hit_y()
 		return Vector3(q.x, base_y, q.z)
-	aim_y = player.pos.y
-	var p := cam.screen_on_plane(mp, base_y)
-	for _i in 2:
-		var g := world.ground_at(p.x, p.z)
-		if g <= World.VOID + 1.0 or absf(g - player.pos.y) > World.LEVEL * 3.0:
-			break
-		p = cam.screen_on_plane(mp, g + 0.95)
-		aim_y = g
-	return Vector3(p.x, base_y, p.z)
+	var g := AimMode.ray_ground(world, [cam.project_ray_origin(mp), cam.project_ray_normal(mp)], player.pos.y)
+	aim_y = g.y if g != Vector3.INF else player.pos.y
+	if g == Vector3.INF:
+		g = cam.screen_on_plane(mp, base_y)
+	return Vector3(g.x, base_y, g.z)
 
 ## How much grip the ground has here (ice patches in a frost region make it slippery).
 func ground_grip(p: Vector3) -> float:

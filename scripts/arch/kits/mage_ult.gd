@@ -16,10 +16,6 @@ const FALL := "fall"
 const AFTER := "after"
 const AIRBORNE := [RISE, AIR, FALL]
 const STEP_BACK := 0.5           # m: how finely the landing spot backs off a wall or a gap toward the take-off
-const RAY_STEP := 0.25           # m along the cursor's ray
-const RAY_FINE := 8              # the last step, cut this many times
-const RAY_ABOVE := 12.0          # m: the ray is walked from this far above the take-off...
-const RAY_BELOW := 12.0          # ... to this far below it
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
 const DUST := Color("c9b48a")
 
@@ -194,31 +190,22 @@ func _take_off() -> void:
 	_untouchable(0.2)
 
 # ------------------------------------------------------------------ aiming the landing
-## The ground under the cursor: its ray walked down to the first ground it meets. Hanging 5 m up, inp["aim"] (the
-## ray cut at her own height) is metres away from it. Without a ray (a bot, a remote hunter) the aim point is the spot.
+## The ground under the cursor (AimMode.ray_ground). Hanging 5 m up, inp["aim"] (cut where the ray meets
+## the ground near her own height) can be metres away from it. Without a ray (a bot, a remote hunter) the aim point
+## is the spot; over the abyss, the plane she took off from (land_point backs off to ground).
 func cursor_spot() -> Vector3:
 	var ray = kit.h.inp.get("aim_ray")
 	if not (ray is Array) or (ray as Array).size() != 2:
 		return kit.aim()
+	var from: Vector3 = leap["from"]
+	var g := AimMode.ray_ground(kit.m.world, ray, from.y)
+	if g != Vector3.INF:
+		return g
 	var o: Vector3 = ray[0]
 	var d: Vector3 = ray[1]
 	if d.y > -0.01:
 		return kit.aim()
-	var low: float = (leap["from"] as Vector3).y - RAY_BELOW
-	var t := maxf(0.0, (((leap["from"] as Vector3).y + RAY_ABOVE) - o.y) / d.y)
-	var end := (low - o.y) / d.y
-	while t < end:
-		var p := o + d * t
-		if p.y <= kit.m.world.ground_at(p.x, p.z):
-			# (back up the last step in small ones, for the exact spot)
-			for i in RAY_FINE:
-				var q := o + d * (t - RAY_STEP * float(i) / RAY_FINE)
-				if q.y > kit.m.world.ground_at(q.x, q.z):
-					return o + d * (t - RAY_STEP * float(i - 1) / RAY_FINE)
-			return p
-		t += RAY_STEP
-	# over the abyss: the plane she took off from (land_point backs off to ground)
-	return o + d * (((leap["from"] as Vector3).y - o.y) / d.y)
+	return o + d * ((from.y - o.y) / d.y)
 
 ## Where she would come down: the cursor clamped inside the ring, backed off toward the take-off spot until it
 ## is standable ground (never a wall, never the abyss).
