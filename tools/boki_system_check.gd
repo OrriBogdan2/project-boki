@@ -395,16 +395,17 @@ func _care() -> void:
 	for s in Care.STATS: rec["stats"][s] = 9999
 	ok(CareLink.mult(rec) <= cap + 0.0001, "stats far over the level cap stay in the cap")
 	for s in Care.STATS: rec["stats"][s] = 0
-	var base := {}
 	P.kin.state = "shoulder"
+	P.kin.cmd = "return"
+	P.kin.settle = 1.0
+	P.kin.ks.carry_passives = [{"stat": "damage", "amount": 0.05, "category": "offence"}]
+	for s in Care.STATS: rec["stats"][s] = 0
 	P._refresh_kin_stats()
-	base = P._kst.duplicate()
+	var base := P.owner_stat("damage")
 	for s in Care.STATS: rec["stats"][s] = Care.stat_cap(rec)
 	P._refresh_kin_stats()
-	var inside := true
-	for st in P._kst:
-		if float(P._kst[st]) > float(base.get(st, 0.0)) * cap + 0.0001: inside = false
-	ok(inside, "a maxed Boki's passives stay in the cap (%s -> %s)" % [base, P._kst])
+	var maxed := P.owner_stat("damage")
+	ok(is_equal_approx(base, 0.05) and maxed > base and maxed <= base * cap + 0.0001, "a maxed Boki's carry passive stays in the cap (%.4f -> %.4f)" % [base, maxed])
 	var ln := CareLink.line(rec)
 	ok(ln.contains("Trust") and ln.contains("Power"), "one line: stats, element, trust: %s" % ln)
 
