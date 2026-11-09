@@ -5,6 +5,7 @@
  "verb": "blink-strike",
  "cd": 12,
  "col": "c9a0ff",
+ "cast_sfx": "glove_blink_cast",
  "stats": {
   "speed": 0.03
  },
@@ -27,6 +28,8 @@
   },
   {
    "type": "area",
+   "sfx": "glove_blink_hit",
+   "pitch": 1.0,
    "at": "self",
    "radius": 1.8,
    "dmg": 14,

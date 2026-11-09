@@ -5,6 +5,7 @@
  "verb": "wall",
  "cd": 18,
  "col": "d6c4a8",
+ "cast_sfx": "glove_barrier_cast",
  "stats": {
   "armor": 6
  },

@@ -307,7 +307,8 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var r := float(e.get("radius", 2.0))
 			m.fx.ring(at, r, col, 0.3)
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
-			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
+			var boom_pitch := float(e.get("pitch", 1.3 - minf(0.5, r * 0.1)))
+			m.sfx(String(e.get("sfx", "boom")), at, -3.0 if r > 2.0 else -7.0, boom_pitch)
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
@@ -497,7 +498,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				(mover as Hunter).glide_cd = 0.0
 			elif mover is Kin:
 				(mover as Kin).start_leap(dest, {"time": tt, "height": 0.6}, ctx)
-			m.sfx("whoosh", mover.pos, -2.0, 1.4)
+			m.sfx(String(e.get("sfx", "whoosh")), mover.pos, -2.0, float(e.get("pitch", 1.4)))
 		"swap":
 			var who: Node = owner_of(caster) if String(e.get("who", "self")) == "owner" else caster
 			var tgt = ctx.get("target", null)
@@ -664,7 +665,7 @@ static func _yank(e: Dictionary, caster: Node, ctx: Dictionary, m: Node) -> void
 			v.hurt(maxf(0.1, float(e.get("dmg", 0.0)) * _power(caster, ctx)), caster, o)
 		m.fx.word(v.pos + Vector3(0, 2.0, 0), "HOOKED", col, false)
 	if not victims.is_empty():
-		m.sfx("grab", anchor.pos, -1.0, 1.1)
+		m.sfx(String(e.get("sfx", "grab")), anchor.pos, -1.0, float(e.get("pitch", 1.1)))
 
 ## A line of eruptions running out along the aim, one after another (a fissure). Each foe is hit once.
 static func _fissure(e: Dictionary, caster: Node, ctx: Dictionary, m: Node, pw: float, col: Color) -> void:

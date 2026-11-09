@@ -5,6 +5,7 @@
  "verb": "launch",
  "cd": 16,
  "col": "ff7a4a",
+ "cast_sfx": "glove_rocket_cast",
  "stats": {
   "heat": 0.1
  },

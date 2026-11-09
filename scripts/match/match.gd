@@ -1650,7 +1650,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
+	sfx(Loot.pickup_sfx({"id": wp["gear"]}), h.pos)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:
 		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
@@ -1685,13 +1685,15 @@ func use_gear(h: Hunter, slot: int) -> void:
 	var gd: Dictionary = Gear.ALL[gid]
 	h.gear_cd[slot] = Gear.cd_of(gid, int(g.get("rar", 1)))      # gloves never rank: the rarity is their only strength
 	var col: Color = gd["col"]
+	var cast := String(gd.get("cast_sfx", "skill"))      # a glove's own cast sound ("" when its effect plays it)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	if h == player:
 		h._ab_feedback("gear%d" % slot, "cast")
 	if gd.has("effects"):
 		# newer gloves are built from the same effect blocks as abilities, scaled by rarity
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
-		sfx("skill", h.pos, -4.0, 1.0)
+		if cast != "":
+			sfx(cast, h.pos, -4.0)
 		return
 	match gid:
 		"gust_fan":
@@ -1739,7 +1741,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.5)
 			fx.burst(h.pos + Vector3(0, 0.2, 0), col, 26, 6.0, 0.5, -1.0, 1.2, Vector3.DOWN, 30.0)
-			sfx("glide", h.pos, 0.0, 0.7)
+			sfx(cast, h.pos)
 		"skyhook":
 			# hook a point toward the cursor and swing up to it: onto a ledge above you if there is
 			# one there, otherwise straight up into the air
@@ -3088,7 +3090,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 				sfx("unlock", null, -6.0, 1.2)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
 	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
+		sfx(Loot.orb_sfx(String(p["kind"])), null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
 			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
 

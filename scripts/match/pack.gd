@@ -72,7 +72,7 @@ static func stash(m, h, wp: Dictionary) -> bool:
 		_off_ground(m, wp)
 		h.pack.append(it)
 		_told(m, h, "%s  ·  in your pack (%d/%d)" % [Loot.name_of(it), h.pack.size(), h.pack_cap], Loot.col_of(it))
-		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
+		m.sfx(HeroSfx.of(h, "pickup", Loot.pickup_sfx(it)), h.pos, -2.0)
 		return true
 	if h == m.player and m.hud:
 		m.hud.open_swap(wp)
@@ -101,7 +101,7 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 	h.pack.append(it)
 	spawn_item(m, out, _near(h))
 	_told(m, h, "Dropped %s for %s" % [Loot.name_of(out), Loot.name_of(it)], Loot.col_of(it))
-	m.sfx("pickup", h.pos, -2.0, 0.95)
+	m.sfx(Loot.pickup_sfx(it), h.pos, -2.0)
 
 ## Puts a piece of gear on; returns the one it replaced as an item ({} if the slot was empty).
 static func _wear(m, h, it: Dictionary) -> Dictionary:
@@ -113,7 +113,7 @@ static func _wear(m, h, it: Dictionary) -> Dictionary:
 	h.refresh_gear()
 	if h == m.player and m.hud:
 		m.hud.toast("%s  ·  %s" % [Loot.name_of(it), Gear.stat_text(String(it["id"]), int(it["rar"]))], Gear.ALL[it["id"]]["col"])
-	m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, 0.0, 0.9)
+	m.sfx(HeroSfx.of(h, "pickup", Loot.pickup_sfx(it)), h.pos)
 	if old.is_empty():
 		return {}
 	return Loot.gear(String(old["id"]), int(old["rar"]))

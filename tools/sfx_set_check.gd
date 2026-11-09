@@ -8,6 +8,7 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. pickups and gloves: each pickup kind plays its own cue; every sound a glove names exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -33,6 +34,8 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_pickups()
+	_gloves()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -133,6 +136,46 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## 7. A pickup plays the cue for its kind (armour, weapon or glove, valuable, ground orbs).
+func _pickups() -> void:
+	var got := [Loot.pickup_sfx({"t": "gear", "id": "vest"}), Loot.pickup_sfx({"t": "gear", "id": "blink"}),
+		Loot.pickup_sfx({"t": "val", "id": "old_coin"}), Loot.orb_sfx("gem"), Loot.orb_sfx("ckey"),
+		Loot.orb_sfx("tonic")]
+	var want := ["pickup_armor", "pickup_arms", "pickup_gem", "pickup_gem", "pickup_key", "pickup_supply"]
+	ok(got == want, "pickups: a cue per kind (%s)" % [got])
+	var silent := (Loot.PICKUP_SFX.values() as Array).filter(func(n): return not Sfx.ensure(n))
+	ok(silent.is_empty() and Loot.PICKUP_SFX.size() == 5, "pickups: every cue exists (silent: %s)" % [silent])
+
+## 7. The sounds a glove names exist, and Blink, Barrier, Hook and Rocket each have their own cast.
+func _gloves() -> void:
+	var silent := []
+	var own := []
+	for gid in Gear.ALL:
+		var gd: Dictionary = Gear.ALL[gid]
+		var names := _sfx_names(gd.get("effects", []))
+		names.append(String(gd.get("cast_sfx", "")))
+		for sname in names:
+			if sname != "" and not Sfx.ensure(sname) and not silent.has(sname):
+				silent.append(sname)
+		if names.any(func(n): return n.begins_with("glove_")):
+			own.append(gid)
+	own.sort()
+	ok(silent.is_empty(), "gloves: every sound they name exists (silent: %s)" % [silent])
+	ok(own == ["barrier", "blink", "grapple", "rocket"], "gloves: own sounds on four of them (%s)" % [own])
+
+## Every "sfx" value in a list of effect blocks, including nested on_hit / on_wall / on_end lists.
+func _sfx_names(effects: Array) -> Array:
+	var out := []
+	for e in effects:
+		if not e is Dictionary:
+			continue
+		if e.has("sfx"):
+			out.append(String(e["sfx"]))
+		for k in e:
+			if e[k] is Array:
+				out.append_array(_sfx_names(e[k]))
+	return out
 
 func _takes(sname: String) -> Array:
 	var out := []

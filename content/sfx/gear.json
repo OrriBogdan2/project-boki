@@ -1,0 +1,20 @@
+{
+ "group": "gear",
+ "name": "Pickups and gloves",
+ "script": "tools/gen_sfx_gear.py",
+ "sounds": {
+  "pickup_armor": "ui",
+  "pickup_arms": "ui",
+  "pickup_supply": "ui",
+  "pickup_gem": "ui",
+  "pickup_key": "ui",
+  "glove_blink_cast": "cast",
+  "glove_blink_hit": "impact",
+  "glove_barrier_cast": "cast",
+  "glove_hook_cast": "cast",
+  "glove_hook_hit": "impact",
+  "glove_rocket_cast": "cast"
+ },
+ "signature": [],
+ "replaces": []
+}

@@ -5,6 +5,7 @@
  "verb": "hook",
  "cd": 12,
  "col": "e8c06a",
+ "cast_sfx": "",
  "stats": {
   "speed": 0.03
  },
@@ -25,11 +26,12 @@
    "rope": true,
    "deco": "hook",
    "color": "e8c06a",
-   "sfx": "throw",
-   "pitch": 0.8,
+   "sfx": "glove_hook_cast",
    "on_hit": [
     {
      "type": "yank",
+     "sfx": "glove_hook_hit",
+     "pitch": 1.0,
      "gap": 1.3,
      "stun": 0.3,
      "color": "e8c06a"
@@ -38,6 +40,8 @@
    "on_wall": [
     {
      "type": "zip",
+     "sfx": "glove_hook_hit",
+     "pitch": 1.0,
      "color": "e8c06a"
     }
    ]

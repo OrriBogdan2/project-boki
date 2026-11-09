@@ -39,6 +39,22 @@ static func rare_egg(sp: String, boss := "") -> Dictionary:
 static func is_rare_egg(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and String(it.get("id", "")) == "rare_egg"
 
+## The cue for picking something up, by kind (tools/gen_sfx_gear.py): armour, weapon or glove, supply, gem or gold, key.
+const PICKUP_SFX := {
+	"armor": "pickup_armor", "arms": "pickup_arms", "supply": "pickup_supply", "gem": "pickup_gem", "key": "pickup_key",
+}
+const ORB_KIND := {"gem": "gem", "key": "key", "ckey": "key"}      # a ground orb's kind -> PICKUP_SFX (rest: supply)
+
+## The pickup cue for an item in the pack or on the ground: a valuable, a glove or a piece of armour.
+static func pickup_sfx(it: Dictionary) -> String:
+	if String(it.get("t", "")) == "val":
+		return PICKUP_SFX["gem"]
+	return PICKUP_SFX["arms" if Gear.is_glove(String(it.get("id", ""))) else "armor"]
+
+## The pickup cue for a ground orb (gem, key, seed, tonic, armour kit...).
+static func orb_sfx(kind: String) -> String:
+	return PICKUP_SFX[ORB_KIND.get(kind, "supply")]
+
 ## What a piece of gear is worth by rarity (Common..Legendary).
 const GEAR_VALUE := [3, 8, 18, 36, 70]
 
