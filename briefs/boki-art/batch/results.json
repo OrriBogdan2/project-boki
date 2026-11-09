@@ -13107,5 +13107,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/relic_cinder_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "relic_kael_w28",
+    "name": "Relic: Kael",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_kael_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w28",
+    "name": "Relic: Kael",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_kael_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_kael_w28",
+    "name": "Relic: Kael",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_kael_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sparkle_w28",
+    "name": "Relic: Sparkle",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_sparkle_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sparkle_w28",
+    "name": "Relic: Sparkle",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_sparkle_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sparkle_w28",
+    "name": "Relic: Sparkle",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_sparkle_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r_w28",
+    "name": "Scythant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/scythant_r_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_sparkle_w28",
+    "name": "Relic: Sparkle",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/relic_sparkle_w28_4.jpg",
+    "ok": true
   }
 ]
