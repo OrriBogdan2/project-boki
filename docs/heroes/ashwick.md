@@ -99,6 +99,24 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 | Passive knock heal and ram charge | LOW | (c) | wiki-only (no tooltip line); kept, flagged as ours in "Assumptions" |
 | Dash -> ability rows | MED | (a) | the hose keeps its hold through the ram (item 51, 15ca4857); the ground dash -> LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
+## Footage gaps, Nov 9 re-check
+The 12 ranked gaps of briefs/hero-ref/linwick.md section 4 (on ext/agent-briefs), checked on main d255acbee. None is open,
+so nothing was built. In flight means extra polish on an unmerged branch; the row itself is already closed.
+| # | Gap | Status | Where |
+|---|---|---|---|
+| 1 | the stream lags like a hose, narrow to wide | closed | `ashwick_hose.gd` (b1aa67fe3); "lance: a sweep bends the stream", "lance: narrow at the nozzle ..." |
+| 2 | the ram stops on the first foe | closed | b1aa67fe3, 90c71388b; "ram: stops on the first foe and shoves it hard" |
+| 3 | dash identity: flame skull, head first | closed; in flight | flame skull and `as_leap` (b1aa67fe3), "ram: the flame skull wraps his front"; ext/anim-time-cinder adds the squash on the hit frame |
+| 4 | two burn stages, stream bonus on a burning foe, stage tell | closed; in flight | pips 1690a4072, +25% / +40% 90c71388b, "burn stage: ..." and "lance: +25% ..." rows; ext/combo-marks-b adds a ComboMark tag |
+| 5 | Cinder Shot lane and range | closed lane and fizzle; owner override range | lane and fizzle "cinder: holding shows the aim lane ...", "cinder: a miss ... fizzles"; always 14 m: OWNER_REVIEW_1103 item 19 (8aa49aa5b) |
+| 6 | Furnace Cloak timing tell | owner override telegraph; closed swirl | instant, no 0.2 s ring: OWNER_REVIEW_1103 item 11; the swirling shield is drawn while it holds ("cloak: the swirling fire shield shows while it holds") |
+| 7 | two dash charges chain within 0.4 s | closed | "ram: toward the cursor, two charges chain" (1690a4072) |
+| 8 | the ult's lava carpet | closed | the X ult Flue Flight, 1.8 m carpet for 5.2 s (48bc68c20, owner item 20); `--ashwick-ult-check` "ult payoff: ..." |
+| 9 | bolt impact ember spray | closed | `content/vfx/ashwick.json` `shot_hit`: red flash, 26 embers living 0.6 s, scorch (e5befbab3) |
+| 10 | cyan pilot flame | closed | "lance: the cyan pilot shows, no fire for the first 0.2s" (1690a4072) |
+| 11 | fuel | closed | no fuel, as in the source (f2478ab45); "lance audit: 10 s of roaring with no fuel ..." |
+| 12 | self-slow while flaming | closed | full walk while firing, 0.6 for 0.35 s after release (f2478ab45); "lance audit: ... at his full walk", "lance: letting go stops the fire at once" (`move_k` < 1 after) |
+
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
 carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows the owner's data (more damage, speed and a shield).
