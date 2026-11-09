@@ -7171,5 +7171,75 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_parasolth_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_parasolth_r",
+    "name": "Parasolth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_r",
+    "name": "Rimeshrew (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_x",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_x",
+    "name": "Vespox",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/vespox_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_x",
+    "name": "Arcestrel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_x",
+    "name": "Arcestrel",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/arcestrel_x_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_x",
+    "name": "Sporcupine",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_x",
+    "name": "Arcestrel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespox_x",
+    "name": "Vespox",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespox_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_x",
+    "name": "Sporcupine",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_x_1.jpg",
+    "ok": true
   }
 ]
