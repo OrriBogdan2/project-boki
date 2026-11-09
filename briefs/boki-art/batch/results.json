@@ -10300,5 +10300,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/scythant_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "scythant_r",
+    "name": "Scythant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/scythant_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "reapant_r",
+    "name": "Reapant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/reapant_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "scythant_r",
+    "name": "Scythant",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/scythant_r_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth_p",
+    "name": "Parasolth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_parasolth_p",
+    "name": "Parasolth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_parasolth_p_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ribbonwyrm_p",
+    "name": "Ribbonwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_ribbonwyrm_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skidlet_p",
+    "name": "Skidlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_skidlet_p_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skidlet_p",
+    "name": "Skidlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skidlet_p_2.jpg",
+    "ok": true
   }
 ]
