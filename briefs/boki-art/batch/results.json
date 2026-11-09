@@ -45293,5 +45293,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/mortarfly_card86_1.jpg",
     "ok": true
+  },
+  {
+    "id": "eclipsowl_card86",
+    "name": "Eclipsowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mortarfly_card86",
+    "name": "Mortarfly (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mortarfly_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card86",
+    "name": "Eclipsowl (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "crofthollow_card86",
+    "name": "Crofthollow (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/crofthollow_card86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card86",
+    "name": "Eclipsowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mortarfly_card86",
+    "name": "Mortarfly (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mortarfly_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "crofthollow_card86",
+    "name": "Crofthollow (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/crofthollow_card86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ringrove_card86",
+    "name": "Ringrove (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ringrove_card86_2.jpg",
+    "ok": true
   }
 ]
