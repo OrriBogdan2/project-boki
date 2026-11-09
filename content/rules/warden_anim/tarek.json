@@ -80,7 +80,9 @@
 			"clip": "dash_land"
 		},
 		"breah_exdash": {
-			"clip": "dash_air"
+			"clip": "dash_air",
+			"heading": true,
+			"turn_max": 3.2
 		},
 		"breah_raise": {
 			"clip": "e_row"

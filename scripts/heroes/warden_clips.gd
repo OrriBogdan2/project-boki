@@ -318,7 +318,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
+				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
+				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -383,19 +384,22 @@ func step(dt: float) -> void:
 		_crouch(s, dt)
 	tree.advance(dt)
 	var legs := bool(want.get("legs_heading", false))
-	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
+	_turn_to_heading(s, want, legs, dt)
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
-## his velocity on top of the clip, so the clip's lean follows it.
+## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
+## plays moving backwards turns all the way round); "heading_off" turns it that much further (a sideways cartwheel
+## travelling forward turns its side to the way he goes).
 ## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
 ## and the arm on the aim keep their pose.
-func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> void:
+func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var goal := 0.0
-	if on and Vector2(vel.x, vel.z).length() > HEADING_MIN:
-		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)), -PI, PI)
-		goal = clampf(goal, -LEGS_MAX, LEGS_MAX) if legs_only else clampf(goal, -HEADING_MAX, HEADING_MAX)
+	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
+		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
+		var most := LEGS_MAX if legs_only else float(want.get("turn_max", HEADING_MAX))
+		goal = clampf(goal, -most, most)
 	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
 	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
 	if absf(head_turn) < 0.002:
