@@ -16292,5 +16292,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_bullpole_e_w29_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_fawngus_r_w29",
+    "name": "Fawngus (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_fawngus_r_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fawngus_r_w29",
+    "name": "Fawngus (concept r)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_fawngus_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e_w29",
+    "name": "Cetorgan (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_e_w29",
+    "name": "Cetorgan (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat_e_w29",
+    "name": "Foldbat (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_foldbat_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat_e_w29",
+    "name": "Foldbat (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_foldbat_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_foldbat_e_w29",
+    "name": "Foldbat (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_foldbat_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaciammoth_e_w29",
+    "name": "Glaciammoth (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaciammoth_e_w29_1.jpg",
+    "ok": true
   }
 ]
