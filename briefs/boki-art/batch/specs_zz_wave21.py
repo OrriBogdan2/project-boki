@@ -1,5 +1,5 @@
 # Round 21 (23:05 ET): panel group 8. Near misses: Seamwyrm 8.47, Rippmink 8.43 (just under the 8.5 average) -> edits; Puffamus 8.0 edit.
-XE('seamwyrm_e','Seamwyrm','seamwyrm_x_2.jpg',"recolour the body to Zippelith's glossy black with a violet inner glow (keep the gold zipper teeth), replace the third view with a true side view, and remove the floor line.")
+XE('seamwyrm_e2','Seamwyrm','seamwyrm_x_2.jpg',"keep its navy, gold and teal colours (do not make it black or purple), replace the third view with a true side view, and remove the floor line.")
 XE('rippmink_e','Rippmink','rippmink_x_2.jpg',"give it Ermink's cream-white face and chest mask with ink-black ear tips, enlarge the head slightly, add a brush-bristle tip inside the wave-curl tail, and redraw the back view so the spine fin, all four legs and the tail base read clearly.")
 XE('puffamus_e','Puffamus','puffamus_x_2.jpg',"give the face a bigger, cheeky, smug hippo expression above the grate (heavy brows, glowing eyes, ember teeth along the grate), keep the boxy stove body, and remove the ground shadows.")
 V('rimink_r','Rimink',E+'Ermink.jpg','final',
@@ -14,4 +14,4 @@ V('reapant_r','Reapant',T+'Marchleaf.jpg','final',
 V('scythant_r','Scythant',T+'Marchleaf.jpg','mid',
  "A wide, low, tank-like soldier ant with a huge square armoured head of layered bark plates as big as its body, giant scythe-leaf mandibles wider than its body held low and forward, short thick legs, a small squat abdomen and no wings."+ONE+F,
  "fierce compound eyes and an open-jawed threat","leaf green and dark brown, with a lime accent","thin legs, the fern-curl antennae and pose of image 1, carrying a leaf",'swarm','tough')
-PRIORITY=PRIORITY+['seamwyrm_e','rippmink_e','puffamus_e','rimink_r','pyrraven_r2','reapant_r','scythant_r']
+PRIORITY=PRIORITY+['seamwyrm_e2','rippmink_e','puffamus_e','rimink_r','pyrraven_r2','reapant_r','scythant_r']

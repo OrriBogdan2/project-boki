@@ -368,6 +368,17 @@
    "pick": 3,
    "grade": 8.8,
    "note": "turnaround of the owner-approved Vespyx 2D shot; matches it closely -> turnarounds/Vespyx.jpg"
+  },
+  {
+   "id": "wyrmink_x",
+   "pick": 1,
+   "grade": 8.6,
+   "panel": {
+    "A": 8.6,
+    "B": 8.8,
+    "C": 8.4
+   },
+   "note": "fundamental redesign: coiling ink-brushstroke dragon -> evolutions/Wyrmink.jpg"
   }
  ],
  "rerolled": [

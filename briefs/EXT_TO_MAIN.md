@@ -4047,3 +4047,12 @@ ART scythant reject briefs/boki-art/batch/out/scythant_1.jpg grade=6.9
 ART vespyx 8.8 briefs/boki-art/turnarounds/Vespyx.jpg kind=sheet (from the owner-approved 2D shot)
 
 READY ext/heartspark-rebased 2a2a5d005 (supersedes ext/heartspark 3e359d1fc; worker 20261109-031809-a1). origin/main d255acbee merged in; one conflict, scripts/core/net.gd VERSION line: main 0.24.3 vs branch 0.25.0 -> Net.VERSION 0.25.1 (main keeps its 0.25.0 pre-match-lobby note in the comment; renumber if another branch lands first, ext/map-2x-flat wants 0.26.0). Decision doc renumbered 0019-heartspark -> 0023-heartspark (0019 is taken by downed-wisp and prematch-lobby; refs updated in heart.json, heart.gd, heart_hud.gd, heart_check.gd, check_registry.gd). Checks: --import 0 script errors, --check 0 failures, --heart-check HEART DONE failures 0, --blight-check failures 0, health.py --strict HEALTH OK. Not re-run: --heart-demo screenshots (originals still apply); online path with peers untested; bots still ignore the Heart.)
+ART wyrmink 8.6 briefs/boki-art/evolutions/Wyrmink.jpg panel=8.6/8.8/8.4
+ART thistlynx reject briefs/boki-art/batch/out/thistlynx_1.jpg grade=7.2
+ART thunderstrich_r reject briefs/boki-art/batch/out/thunderstrich_r_2.jpg grade=7.5
+ART tidalisk_x reject briefs/boki-art/batch/out/tidalisk_x_2.jpg grade=7.8
+ART tinbrock_x reject briefs/boki-art/batch/out/tinbrock_x_3.jpg grade=8.1
+ART umbrink_x reject briefs/boki-art/batch/out/umbrink_x_1.jpg grade=7.7
+ART vespox_x reject briefs/boki-art/batch/out/vespox_x_3.jpg grade=6.6
+ART voltalon_x reject briefs/boki-art/batch/out/voltalon_x_1.jpg grade=7.2
+ART wickapi_r reject briefs/boki-art/batch/out/wickapi_r_2.jpg grade=7.8
