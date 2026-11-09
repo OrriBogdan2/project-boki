@@ -6,7 +6,7 @@ extends RefCounted
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past the dash's end while the hunter can't act
+const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's (or a cast lock's) end while the hunter can't act
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
@@ -85,9 +85,12 @@ func route(dt: float) -> void:
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
 	if not dashing:
+		_hold_through_lock(fire_pressed)
 		_release(dt)
 		_route_jump(fire_pressed)
 		return
+	if _hold_through_lock(fire_pressed):
+		return                 # a locked move that dashes (Kael's cleave): the lock decides, not the dash rows
 	if fire_pressed:
 		_press("lmb")          # a held LMB is left alone: holding it through the dash fires at the end anyway
 	for slot in KEY_OF:
@@ -142,6 +145,22 @@ func _dash_set_off_in_air() -> bool:
 	if _was_dashing:
 		return air
 	return not kit.h.grounded
+
+## Presses made while the kit's own cast lock holds the body (Motley's Nightwell, Sparkle's flight, Kael's guard) wait
+## as a dash's do: one made within BUFFER_S of the lock's end goes when it ends, an earlier one gets its deny cue then.
+## X stays with the ult's own recast. True while a lock holds.
+func _hold_through_lock(fire_pressed: bool) -> bool:
+	if not kit.busy() or kit.disabled():
+		return false
+	var h := kit.h
+	if fire_pressed:
+		held["lmb"] = 0.0
+	for slot in KEY_OF:
+		var key: String = KEY_OF[slot]
+		if h.inp.get(key, false):
+			held[slot] = 0.0
+			h.inp[key] = false
+	return true
 
 ## Presses made mid-jump: a slot whose jump row says "buffer" is held for the landing.
 func _route_jump(fire_pressed: bool) -> void:

@@ -7,6 +7,10 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 
 The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot with no hold row keeps through every move.
 
+Ability into ability combines (both go) for every hero, except while a kit's own cast lock holds the body (Kael's Riposte guard and cleave, Sparkle's flight, Motley's Nightwell cast): a press made within the buffer of the lock's end goes when it ends, an earlier one is dropped with its deny cue (`--dash-flow-check`).
+
+Buffer windows (the source publishes none [?]): a press held past a dash's or a cast lock's end, 0.15 s (`DashFlow.BUFFER_S`, owner item 32's default); a jump pressed before landing, 0.12 s (`Hunter.JUMP_BUFFER`); Shift pressed during another movement, 0.18 s (`Hunter.DASH_BUFFER`); Kael's presses during a heavy move, 0.12 s (`JuggernautKit.BUFFER`, owner: about 0.1 s).
+
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
 | gunslinger | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |

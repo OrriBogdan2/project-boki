@@ -213,6 +213,11 @@ func aim_lock() -> Vector2: return Vector2.ZERO
 func no_glide() -> bool: return false
 
 func busy() -> bool:
+	return disabled()
+
+## The body can't act at all (down, stunned, riding...). busy() beyond this is the kit's own cast lock, which
+## DashFlow buffers presses through.
+func disabled() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router

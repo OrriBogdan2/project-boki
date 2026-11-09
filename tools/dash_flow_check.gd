@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
 	for hero in _heroes():
 		await check_hero(main, hero)
+		await _lock(main, hero)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
@@ -237,6 +238,59 @@ func _trial(m: Match, slot: String, in_air: bool, late: bool) -> String:
 			wait_s = float(i - ended) * Match.DT
 			return "fire" if dashing else "buffer"
 	return "lost"
+
+## A kit's own cast lock (its ult holding the body: busy() while not disabled()): an E or RMB pressed LOCK_LATE before
+## the lock ends goes off once it ends, never inside it; one pressed at the lock's start is dropped. Heroes whose ult
+## holds no lock are skipped.
+const LOCK_LATE := 0.1          # s before the lock's end: inside DashFlow.BUFFER_S
+func _lock(main: Node, hero: String) -> void:
+	var m := _match(main, hero)
+	var k := hunter.ak
+	var lock_n := _lock_steps(m)
+	if lock_n <= 0:
+		print("DASHFLOW skip %s: its ult holds no cast lock" % hero)
+	for slot in ["e", "rmb"]:
+		if lock_n <= 0 or not _goes_idle(m, slot, false):
+			continue
+		for late in [true, false]:
+			_lock_steps(m, 0)
+			var at := lock_n - int(LOCK_LATE / Match.DT) if late else 2
+			_steps(m, at - 1)
+			var before := _snap()
+			_press(slot)
+			var inside := false
+			var went := -1
+			for i in lock_n - at + int(0.4 / Match.DT):
+				m.step(Match.DT)
+				if not _went_off(before, slot):
+					continue
+				inside = k.busy()
+				went = i
+				break
+			var what := "%s: %s pressed %.2fs before its ult's %.2fs lock ends" % [hero, slot, (lock_n - at) * Match.DT, lock_n * Match.DT]
+			if late:
+				ok(went >= 0 and not inside, "%s goes off once it ends (%s)" % [what, "inside the lock" if inside else "after %d steps" % went])
+			elif lock_n * Match.DT > DashFlow.BUFFER_S + 0.1:
+				ok(went < 0, "%s is dropped, not held for the whole lock" % what)
+	m.queue_free()
+	await main.get_tree().process_frame
+
+## Casts the ult and counts the steps its lock holds the kit (0: no lock). With `count` 0 it only starts the lock.
+func _lock_steps(m: Match, count := 1) -> int:
+	_ready_up(m)
+	var k := hunter.ak
+	HunterKeys.ult_pressed(hunter)
+	var n := 0
+	while n < 20 and not (k.busy() and not k.disabled()):
+		m.step(Match.DT)
+		n += 1
+	if not (k.busy() and not k.disabled()) or count == 0:
+		return 0
+	n = 0
+	while k.busy() and not k.disabled() and n < 600:
+		m.step(Match.DT)
+		n += 1
+	return n
 
 func _lift() -> void:
 	hunter.pos += Vector3(0, 7, 0)

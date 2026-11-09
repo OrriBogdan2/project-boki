@@ -734,7 +734,14 @@ def gen_dash_flow():
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
             "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
-            "with no hold row keeps through every move.\n\n")
+            "with no hold row keeps through every move.\n\n"
+            "Ability into ability combines (both go) for every hero, except while a kit's own cast lock holds the body "
+            "(Kael's Riposte guard and cleave, Sparkle's flight, Motley's Nightwell cast): a press made within the buffer "
+            "of the lock's end goes when it ends, an earlier one is dropped with its deny cue (`--dash-flow-check`).\n\n"
+            "Buffer windows (the source publishes none [?]): a press held past a dash's or a cast lock's end, "
+            "0.15 s (`DashFlow.BUFFER_S`, owner item 32's default); a jump pressed before landing, 0.12 s "
+            "(`Hunter.JUMP_BUFFER`); Shift pressed during another movement, 0.18 s (`Hunter.DASH_BUFFER`); Kael's presses "
+            "during a heavy move, 0.12 s (`JuggernautKit.BUFFER`, owner: about 0.1 s).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
