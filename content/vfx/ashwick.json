@@ -106,7 +106,6 @@
 			{"p": "flare", "at": "chest", "size": 1.0, "life": 0.2, "c": "main", "c2": "white", "c3": "red"}
 		]},
 		"ram": {"fx": [
-			{"p": "flare", "at": "chest", "fwd": -0.4, "size": 1.2, "grow": 1.4, "life": 0.18, "c": "main", "c2": "hot", "c3": "red"},
 			{"p": "smoke", "y": 0.6, "n": 6, "way": "back", "speed": 2.5, "spread": 0.4, "grav": -1.0, "life": 0.8,
 				"size": 0.28, "c": "smoke", "c3": "soot", "near": true}
 		]},
@@ -127,8 +126,7 @@
 			{"p": "smoke", "y": 0.9, "fwd": -0.5, "n": 12, "way": "back", "speed": 3.5, "spread": 0.45, "drag": 2.0,
 				"grav": -0.6, "life": 0.9, "size": 0.39, "c": "smoke", "c3": "soot"},
 			{"p": "ember", "y": 0.9, "fwd": -0.4, "n": 18, "way": "back", "speed": 6.0, "spread": 0.35, "drag": 2.0,
-				"life": 0.45, "size": 0.12, "c": "main", "c2": "hot", "c3": "red"},
-			{"p": "flare", "y": 0.9, "fwd": -0.6, "size": 1.2, "grow": 1.4, "life": 0.18, "c": "main", "c2": "hot", "c3": "red"}
+				"life": 0.45, "size": 0.12, "c": "main", "c2": "hot", "c3": "red"}
 		]},
 		"cloak": {"fx": [
 			{"p": "flare", "at": "chest", "size": 2.2, "grow": 1.2, "life": 0.22, "c": "main", "c2": "white", "c3": "red"},

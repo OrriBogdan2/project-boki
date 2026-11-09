@@ -769,7 +769,7 @@ func _fly_mote(mt: Dictionary, dt: float) -> void:
 			_grab_mote(mt)
 
 ## An orb in her hands (Skycall pulled it in) or under her Wirerun: the dash is back at once, with the
-## usual reset cue (the chime and the Shift icon) and a flash on her. It adds Static to nobody.
+## usual reset cue (the chime and the Shift icon). It adds Static to nobody.
 func _grab_mote(mt: Dictionary) -> void:
 	orb_bursts += 1
 	var was_spent := h.dashes < h.max_dashes()
@@ -777,8 +777,6 @@ func _grab_mote(mt: Dictionary) -> void:
 	h.dash_buf = 0.0
 	if was_spent:
 		grant_reset()
-		m.fx.flash(h.position + Vector3(0, 1.0, 0), PINK, 2.4, 0.16)
-		m.fx.flash(h.position + Vector3(0, 1.6, 0), TEAL, 0.9, 0.08)
 		DashReset.cue(h, "orb")
 	_free_mote(mt, false)
 

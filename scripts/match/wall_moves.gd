@@ -32,6 +32,7 @@ const BOUNCE_KNOCK_QUIET := 0.6  # s after a knockback in which the wall slam ru
 const BOUNCE_STEER := 25.0      # m/s^2 your keys steer the rebound for BOUNCE_WINDOW
 const BOUNCE_WINDOW := 0.25     # s to steer before ordinary air control returns
 const BOUNCE_DUST := 3          # dust puffs
+const KICK_DUST := 4            # dust puffs
 const FX_OFFSET := 0.3          # m the spark sits in front of the wall face
 const FX_HEIGHT := 0.8          # m above the feet
 
@@ -66,7 +67,7 @@ func try_kick(h: Hunter) -> bool:
 	var pitch := randf_range(KICK_PITCH_MIN, KICK_PITCH_MAX)
 	scuff(h.m, h.pos, pitch)
 	h.m.net_fx(["whop", Match._r(h.pos.x), Match._r(h.pos.y), Match._r(h.pos.z), snappedf(pitch, 0.01)])
-	h.m.fx.burst(_fx_at(h), Color("e6dccb"), 8, 2.5, 0.3)
+	h.m.fx.dust(_fx_at(h), KICK_DUST)
 	return true
 
 ## The hop's sound: a footstep on stone, at `pitch`. Played in every game (Match "fx" "whop").
@@ -108,7 +109,6 @@ func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 		_rebound = out
 		_rebound_speed = out.length()
 	h.m.sfx("land", h.pos, BOUNCE_VOL, BOUNCE_PITCH)
-	h.m.fx.burst(_fx_at(h), Color("ffe9b0"), 8, 3.0, 0.25, 4.0, 0.8)
 	h.m.fx.dust(h.pos, BOUNCE_DUST)
 
 ## While the rebound window lasts your keys steer it. Called every step after the ordinary air control.

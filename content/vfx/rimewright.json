@@ -59,7 +59,6 @@
 		"skate_stop": {"fx": [
 			{"p": "shard", "y": 0.15, "n": 22, "way": "fwd", "lift": 0.7, "speed": 5.0, "spread": 0.5, "grav": 6.0,
 				"life": 0.5, "size": 0.1, "c": "main", "c2": "hot"},
-			{"p": "scorch", "fwd": 0.4, "size": 0.9, "life": 1.8, "c": "frost", "c2": "hot", "c3": "deep"},
 			{"p": "smoke", "y": 0.2, "n": 6, "way": "fwd", "speed": 1.5, "spread": 0.6, "grav": -0.3, "life": 1.0,
 				"size": 0.55, "c": "smoke", "c3": "mist", "near": true}
 		]},
