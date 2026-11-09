@@ -5,7 +5,8 @@ extends RefCounted
 ## height instead of walking beside them. It is carried by order the whole time, so its carry passives are
 ## always on; it takes no orders, throws or hits, and its AI (KinTactics, KinCompanion, the walking state
 ## machine) does not tick. When it is left behind (its hunter goes out in a risky match) it turns back into
-## the walking Boki and the old rules run. Summon, steal and the ult wait on WISP_DESIGN_OPEN.md.
+## the walking Boki and the old rules run. The summon out of the wisp: KinSummon. Steal and the ult wait on
+## WISP_DESIGN_OPEN.md.
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45      # m above the hunter's feet when their rig has no shoulder bone
@@ -33,6 +34,8 @@ static func set_wisp(k: Kin, on: bool) -> void:
 	if k.model:
 		k.remove_child(k.model)       # (out of the tree now, so the new model keeps its name; set_model frees it)
 	k.set_model(look(k))
+	if k.summon:
+		k.summon.popped(on)
 
 ## The step of a wisp's body. True when it handled it (the caller skips the walking state machine and the AI).
 static func ride(k: Kin) -> bool:
@@ -53,6 +56,8 @@ static func ride(k: Kin) -> bool:
 
 ## Its look on screen: orbiting its hunter at shoulder height, facing along the orbit, hopping. True when it drew.
 static func render(k: Kin) -> bool:
+	if k.summon:
+		k.summon.render()
 	var o := k.owner_h
 	if not k.wisp or k.state != "shoulder" or o == null or o.model == null:
 		return false

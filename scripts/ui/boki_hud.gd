@@ -98,6 +98,30 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
 	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
+## The summon timer round the Boki box (KinSummon) while Boki ride as wisps. Out: a ring in its glow colour
+## drains with the seconds left. Resting: a grey ring refills, with the seconds. Ready: a soft pulse and the
+## Summon key. The seconds or key sit in a badge on the box's top-left corner (the rank badge has the right).
+const SUMMON_GROW := 7.0     # px: the summon ring sits outside the bond ring
+static func summon_ring(H, p: Hunter, r: Rect2) -> void:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k) or k.summon == null or not (k.wisp or k.summon.out()):
+		return
+	var s := k.summon
+	var col: Color = k.sp.get("glow", k.sp["color"])
+	var rr := r.grow(SUMMON_GROW)
+	var at := r.position + Vector2(2, -2)
+	if s.out():
+		_ring(H, rr, s.left / s.dur, col, 3.0)
+		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
+		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.left), 13, col, H.big)
+	elif s.cd > 0.0:
+		_ring(H, rr, 1.0 - s.cd / maxf(0.1, s.cd_full), Color(HudStyle.MUTED, 0.8), 2.0)
+		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
+		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.cd), 12, HudStyle.MUTED, H.big)
+	else:
+		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * sin(float(H.m.time) * 4.0)), 2.0)
+		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
+
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if frac <= 0.0:
