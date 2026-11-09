@@ -30313,5 +30313,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_blastopuff_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_rosedart",
+    "name": "Rosedart (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_rosedart_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blastopuff",
+    "name": "Blastopuff (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_blastopuff_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rosedart",
+    "name": "Rosedart (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_rosedart_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blastopuff",
+    "name": "Blastopuff (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_blastopuff_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_blastopuff",
+    "name": "Blastopuff (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_blastopuff_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rosedart",
+    "name": "Rosedart (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_rosedart_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_medushroom",
+    "name": "Medushroom (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_medushroom_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_rosedart",
+    "name": "Rosedart (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_rosedart_4.jpg",
+    "ok": true
   }
 ]
