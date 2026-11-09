@@ -75,6 +75,10 @@ func cast() -> bool:
 	kit.net_ring(from, float(data()["range"]), MageKit.PINK)
 	return true
 
+## s of the hang left (X brings her down; at 0 she comes down by herself), 0 when she is not up there.
+func recast_left() -> float:
+	return maxf(0.0, float(data()["hover"]) - float(leap["t"])) if phase() == AIR else 0.0
+
 ## A second press while she hangs brings her down; pressed during the climb it waits for the hang.
 func recast() -> bool:
 	match phase():

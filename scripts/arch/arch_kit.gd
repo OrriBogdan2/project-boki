@@ -718,6 +718,10 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 func e_recastable() -> bool: return false
+## The open recast (RecastCue's "<KEY> AGAIN"): s left in it, 0 when none open, INF when it has no time limit.
+## Kits whose recast is not E's override both; recast_slot() is the HUD slot id: k1 (E), x, dash, sec or primary.
+func recast_left() -> float: return e_t if e_t > 0.0 and e_recastable() else 0.0
+func recast_slot() -> String: return "k1"
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start

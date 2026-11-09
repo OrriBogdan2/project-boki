@@ -261,6 +261,15 @@ func _start_ult() -> bool:
 	_drop_holds()
 	return ult.cast()
 
+## The hammer is out and not yet on its way back: LMB calls it (lie_t 0 = it lies there for good).
+func recast_left() -> float:
+	if mace.is_empty() or String(mace["st"]) == "back":
+		return 0.0
+	var lie := float(lmb_def().get("lie_t", 0.0))
+	return INF if lie <= 0.0 else maxf(0.0, lie - float(mace["t"]))
+
+func recast_slot() -> String: return "primary"
+
 func ult_running() -> bool:
 	return ult.phase != ""
 

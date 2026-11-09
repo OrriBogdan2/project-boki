@@ -53,6 +53,7 @@
 		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage)."
 	},
 	"lmb": {
+		"icon": "slam", "col": "#ffd98a",
 		"tap": 0.2,
 		"full": 1.25,
 		"spin_turns": [2.5, 4.0],

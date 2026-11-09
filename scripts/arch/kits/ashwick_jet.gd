@@ -81,6 +81,10 @@ func start() -> bool:
 	_liftoff_fx()
 	return true
 
+## s of the flight left (X lands early), 0 when not flying.
+func left() -> float:
+	return maxf(0.0, float(flight["t"])) if running() else 0.0
+
 ## X while flying: land now.
 func recast() -> bool:
 	if not running():

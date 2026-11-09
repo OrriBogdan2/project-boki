@@ -50,6 +50,10 @@ func left() -> float:
 		"skid": return maxf(0.0, float(st["left"]))
 	return 0.0
 
+## Hops the chain can still make.
+func hops_left() -> int:
+	return int(dd()["hops"]) - int(st["n"])
+
 func drop() -> void:
 	st = {}
 	AimKit.hide(h, "leap")

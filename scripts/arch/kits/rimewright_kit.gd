@@ -857,6 +857,16 @@ func ult_running() -> bool:
 	return not rime.is_empty()
 
 
+## Rimelock is open until it cracks (X ends it early or late); else the Rink Wall's slide (E).
+func recast_left() -> float:
+	if rime.is_empty():
+		return super.recast_left()
+	return maxf(0.0, float(x_def()["hold"]) - float(rime["t"]))
+
+
+func recast_slot() -> String: return "x" if not rime.is_empty() else "k1"
+
+
 func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
 func has_ult() -> bool: return true
 

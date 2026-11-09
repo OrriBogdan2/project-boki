@@ -575,6 +575,10 @@ func fires_in_dash() -> bool:
 func aims_in_dash() -> bool:
 	return not hop.chaining() and super.aims_in_dash()
 
+## The next hop is open while the chain has a hop to give (Shift again).
+func recast_left() -> float: return hop.left() if hop.chaining() and hop.hops_left() > 0 else 0.0
+func recast_slot() -> String: return "dash"
+
 ## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:
 	return hop.left() if hop.chaining() else super.dash_left()
