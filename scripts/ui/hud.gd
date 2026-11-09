@@ -2155,8 +2155,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	if id == "r":
 		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
 	if id == "sec":
-		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(p.ak.res_col(), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 

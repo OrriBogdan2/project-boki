@@ -91,10 +91,6 @@
 			"clip": "guard_break",
 			"upper": true
 		},
-		"bul_armed": {
-			"clip": "guard_armed",
-			"upper": true
-		},
 		"bul_whirl": {
 			"clip": "shift_whirl",
 			"fade": 0.04
@@ -111,9 +107,6 @@
 		"bul_crush": {
 			"clip": "crush",
 			"upper": true
-		},
-		"bul_slamshield": {
-			"clip": "shield_slam"
 		},
 		"bul_mend": {
 			"clip": "e_mend",
@@ -190,12 +183,10 @@
 			"bul_guard": "determined",
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
-			"bul_slamshield": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",
-			"bul_break": "sad",
-			"bul_armed": "happy"
+			"bul_break": "sad"
 		}
 	},
 	"offset_bones": [

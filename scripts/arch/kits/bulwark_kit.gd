@@ -12,9 +12,8 @@ extends ArchKit
 ## - RMB: hold to raise his aegis (its own HP, regenerates); letting go only lowers it.
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
-## - Passive, Guard: damage the aegis blocks becomes Guard; at 50 the Shield Charge ends in a Shield Slam.
-##   Payoff, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
-##   Charge, Slam) that drives a foe into a wall stuns them (T4, pay_slam).
+## - Passive, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
+##   Charge) that drives a foe into a wall stuns them (T4, pay_slam). No resource.
 ## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
@@ -29,10 +28,9 @@ var mace := {}                 # the thrown mace: {} in hand, else {st: fly|grou
 var lmb_t := -1.0              # how long the attack key has been held with the mace in hand (-1: not)
 var lmb_was := false
 var bot_smash_t := 0.0
-var knock_until := 0.0         # a knock that can Crush is landing (blow, spin, charge, slam) until this time
+var knock_until := 0.0         # a knock that can Crush is landing (blow, spin, charge) until this time
 var crushed_at := {}           # foe id -> last Crush (one per 0.6s each)
 var crushes := 0               # Crushes landed (tests, demo)
-var crest: Node3D = null       # the gold crest light while a Shield Slam is armed
 var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
@@ -45,7 +43,6 @@ var slam_k := 0.0
 var spins := 0                 # (checks) 360 Smash spin hits
 var kickstarts := 0             # (checks) downed teammates Mending Ground started reviving
 var ticks_healed := 0           # (checks) heals the zone's ticks gave
-var shield_slams := 0           # (checks) Shield Slams the Shield Charge ended in
 var throw_at := -9.0           # when the hammer last left his hand (the recall lockout)
 var hold_blocked := false      # the Crushing Blow was cut short: the button must come up before it can start again
 var pushed_at := {}            # foe id -> when the aegis last pushed it (one push per "push_gap")
@@ -92,27 +89,7 @@ func cd_k(slot: String) -> float:
 func heal_k() -> float:
 	return 1.0 + 0.25 * float(rank("kin") - 1)
 
-func full_ready() -> bool:
-	return res >= float(res_def().get("slam", 50.0))
-
-func res_text() -> String:
-	return "SLAM" if full_ready() else "%d" % int(res)
-
-func ready_label() -> String:
-	return "SHIELD SLAM READY" if full_ready() else ""
-
-func add_guard(v: float) -> void:
-	var was := res
-	add_res(v)
-	touch_res()
-	for step in [33.0, 66.0, 100.0]:
-		if was < step and res >= step:
-			if anim_id == "": play("bul_armed")
-	if was < float(res_def().get("slam", 50.0)) and full_ready():
-		armed_fx("SLAM READY", "sec")
-
-func on_block(dmg: float, by) -> void:
-	add_guard(dmg * float(res_def().get("per_hp", 0.5)))
+func on_block(_dmg: float, by) -> void:
 	if not wall.is_empty() or front_t > 0.0:
 		var d := h.aim_dir()
 		if by is Node3D and is_instance_valid(by):
@@ -122,8 +99,6 @@ func on_block(dmg: float, by) -> void:
 		m.sfx("bjorn_block", h.pos, -5.0)
 
 func _tick(dt: float) -> void:
-	if res_wait <= 0.0:
-		add_res(-float(res_def().get("decay", 5.0)) * dt)
 	lock_t = maxf(0.0, lock_t - dt)
 	front_t = maxf(0.0, front_t - dt)
 	var sd: Dictionary = rmb_def()["shield"]
@@ -144,8 +119,8 @@ func _tick(dt: float) -> void:
 			wall["t"] = 99.0
 			if h.gliding:
 				h.glide_fuel = maxf(0.0, h.glide_fuel - dt / h.glide_max * (float(rmb_def()["surf_heat"]) - 1.0))
-			# his aegis over the wall (armed: it burns hotter), cracking as it weakens
-			fx.aegis_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0), full_ready())
+			# his aegis over the wall, cracking as it weakens
+			fx.aegis_show(wall, 1.0 - clampf(float(wall["hp"]) / maxf(1.0, shield_max()), 0.0, 1.0))
 			_shield_push()
 	else:
 		fx.aegis_hide()
@@ -163,10 +138,6 @@ func _tick(dt: float) -> void:
 		h.dash_buf = Hunter.DASH_BUFFER
 	if not mend.is_empty():
 		_tick_mend(dt)
-	# Guard: three rune pips over the helm (33 / 66 / 100), a gold crest light when a Slam is armed
-	self_pips(3, int(res / 33.0 + 0.01), full_ready(), dt)
-	_tick_crest()
-	net_pulse(dt, full_ready())
 
 # ------------------------------------------------------------------ the raised aegis pushes back
 ## The aegis's contact reach past its own thickness (m): a foe pressed against it is in range.
@@ -215,18 +186,6 @@ func _shove(f: Ent, dir: Vector2, dist: float, speed: float) -> void:
 	push["unroll"] = true          # a hunter dashing into it is stopped
 	m.displace.tow(f, null, push)
 
-func _tick_crest() -> void:
-	if crest == null or not is_instance_valid(crest):
-		crest = own_node()
-		var lt := OmniLight3D.new()
-		lt.light_color = res_col()
-		lt.omni_range = 3.2
-		lt.light_energy = 2.0
-		crest.add_child(lt)
-	crest.visible = full_ready() and tells_visible()
-	if crest.visible:
-		crest.global_position = h.position + Vector3(0, 2.3 * float(h.cdat.get("scale", 1.0)), 0)
-
 func move_k() -> float:
 	var k := 1.0
 	if not wall.is_empty() and h.grounded:
@@ -264,10 +223,10 @@ func _start_ult() -> bool:
 func ult_running() -> bool:
 	return ult.phase != ""
 
-## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
+## The Shield Charge's front guard: hits from the front 140° are blocked.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
-		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		m.verbs.absorb(wall, dmg)          # it takes the hit as it does a shot
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
@@ -309,16 +268,16 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not terrain_behind(t, dir, float(d["passive"]["crush_reach"])):
 		return
 	crushed_at[t.get_instance_id()] = m.time
-	var rd := res_def()
+	var pd: Dictionary = d["passive"]
 	var tgt := t
 	m.later(0.02, func():
 		if not is_instance_valid(h) or not is_instance_valid(tgt) or tgt.dead: return
 		crushes += 1
-		var crush_dmg := float(rd.get("crush_dmg", 8.0)) * power("sec")
-		var crush_stun := float(rd.get("crush_stun", 0.8))
+		var crush_dmg := float(pd["crush_dmg"]) * power("sec")
+		var crush_stun := float(pd["crush_stun"])
 		tgt.hurt(crush_dmg, h, {"src": "abil", "ab": "utility", "tags": ["utility", "crushed"], "payoff": true,
 			"stun": crush_stun, "dr": true})
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
@@ -653,7 +612,7 @@ func press_rmb() -> void:
 		return
 	rmb_down = true
 	rmb_t = 0.0
-	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
+	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e()}
 	cancel_hold()
 
 func rmb_hold_tick(t: float) -> void:
@@ -705,21 +664,6 @@ func fire_rmb(c: Dictionary) -> void:
 	_lower()
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
-## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
-func _shield_slam() -> void:
-	var sl: Dictionary = rmb_def()["slam"]
-	var dv := h.aim_dir()
-	shield_slams += 1
-	play("bul_slamshield")
-	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"])},
-		{"type": "push", "strength": float(sl["push"]), "from": "caster"},
-		{"type": "stun", "duration": float(sl["stun"])}]
-	knock_until = m.time + 0.2
-	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
-	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
-	fx.bash(h.pos, dv, float(sl["radius"]), true)
-	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
-
 func fire_ok_rmb() -> bool:
 	return lock_t <= 0.0
 
@@ -747,8 +691,7 @@ func on_dash(use_ex: bool) -> bool:
 		_raise()          # Shift while the aegis is still rising: it is up now, the bash goes
 	if not wall.is_empty():
 		# Shield Charge (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
-		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
-		# Guard it ends in a Shield Slam
+		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
@@ -756,10 +699,6 @@ func on_dash(use_ex: bool) -> bool:
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
 		front_t = t_felt + 0.15
 		knock_until = m.time + t_felt + 0.1
-		if full_ready():
-			res -= float(res_def().get("slam", 50.0))
-			m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, t_felt)
-			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)

@@ -28,30 +28,20 @@
 		"rmb": "Hold to raise your aegis and block shots from the front. With it up, Shift is a Shield Charge on its own cooldown.",
 		"e": "A green light comes down on your hammer (or on you), then a healing zone round it ticks and ends in a burst.",
 		"dash": "360 Smash: a short dash that ends in one spinning hit around you; with the aegis up, a Shield Charge (its own 6s cooldown).",
-		"passive": "Blocking builds Guard (50 turns your Shield Charge into a Shield Slam); knocking a foe into a wall or another foe stuns it.",
+		"passive": "Knocking a foe into a wall or another foe stuns it.",
 		"x": "Faultline (level 6): plant, slam, and the ground erupts down a long lane, throwing every foe on it up.",
 		"weapons": {
 			"tower_shield": "Tap to throw the hammer to the cursor and tap again to call it back; hold to spin it, let go to slam forward; let go as it flashes and the slam launches you."
 		}
 	},
 	"signature": "tower_shield",
-	"resource": {
-		"id": "guard",
-		"name": "Guard",
-		"max": 100,
-		"kind": "meter",
-		"per_hp": 0.5,
-		"decay": 5.0,
-		"wait": 3.0,
-		"slam": 50.0,
+	"passive": {
+		"name": "Crushed",
+		"desc": "Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 1.0s (8 damage).",
+		"col": "#fff1b8",
 		"crush_reach": 1.5,
 		"crush_stun": 1.0,
-		"crush_dmg": 8.0,
-		"col": "#fff1b8"
-	},
-	"passive": {
-		"name": "Guard",
-		"desc": "Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage)."
+		"crush_dmg": 8.0
 	},
 	"lmb": {
 		"tap": 0.2,
@@ -134,19 +124,11 @@
 			"push_gap": 0.6,
 			"push_speed": 14.0
 		},
-		"slam": {
-			"radius": 2.6,
-			"angle": 100.0,
-			"push": 12.0,
-			"stun": 0.6,
-			"dmg": 18.0
-		},
 		"surf_heat": 1.25,
 		"variants": {
 			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
-			"air": "Shield Surf: hold to block from the front while gliding.",
-			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."
+			"air": "Shield Surf: hold to block from the front while gliding."
 		},
 		"sockets": {
 			"hit": "add",
@@ -224,8 +206,6 @@
 	"rank2": {"sec": "Rank 2: shield HP +25% (160 -> 200).", "dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.", "kin": "Rank 2: healing +25% (burst 18 -> 22)."},
 	"rank_next": {"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.", "kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.", "dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further."},
 	"tells": {
-		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
-		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",
 		"dash_spent": "dash pips dark"
 	}
 }
