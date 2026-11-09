@@ -1,4 +1,4 @@
-"""Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
+"""Copies named clips from one .glb into another, leaving everything else in the target unchanged (the replaced clips' data is dropped), so a clip set can go on any later build of the model
 with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
 import json
@@ -27,6 +27,45 @@ def write(path, j, bin_):
         f.write(js)
         f.write(struct.pack("<I4s", len(bin_), b"BIN\0"))
         f.write(bin_)
+
+
+def accessor_refs(j):
+    """Every place that names an accessor: (dict, key) pairs."""
+    out = []
+    for m in j.get("meshes", []):
+        for pr in m["primitives"]:
+            out += [(pr["attributes"], k) for k in pr["attributes"]] + ([(pr, "indices")] if "indices" in pr else [])
+            out += [(t, k) for t in pr.get("targets", []) for k in t]
+    out += [(s, "inverseBindMatrices") for s in j.get("skins", []) if "inverseBindMatrices" in s]
+    out += [(s, k) for a in j.get("animations", []) for s in a["samplers"] for k in ("input", "output")]
+    return out
+
+
+def prune(j, bin_):
+    """Drops the accessors and buffer views nothing names any more (a replaced clip's), packing the bytes that stay."""
+    refs = accessor_refs(j)
+    keep_ac = sorted({d[k] for d, k in refs})
+    ac_at = {old: new for new, old in enumerate(keep_ac)}
+    for d, k in refs:
+        d[k] = ac_at[d[k]]
+    j["accessors"] = [j["accessors"][i] for i in keep_ac]
+    users = j["accessors"] + [im for im in j.get("images", []) if "bufferView" in im]
+    keep_bv = sorted({u["bufferView"] for u in users})
+    bv_at = {old: new for new, old in enumerate(keep_bv)}
+    for u in users:
+        u["bufferView"] = bv_at[u["bufferView"]]
+    out = bytearray()
+    views = []
+    for i in keep_bv:
+        bv = dict(j["bufferViews"][i])
+        off0 = bv.get("byteOffset", 0)
+        out.extend(b"\0" * (-len(out) % 4))
+        bv["byteOffset"] = len(out)
+        out.extend(bin_[off0:off0 + bv["byteLength"]])
+        views.append(bv)
+    j["bufferViews"] = views
+    j["buffers"][0]["byteLength"] = len(out) + (-len(out) % 4)
+    return out
 
 
 def add(tj, tb, sj, sb, wanted):
@@ -75,5 +114,5 @@ if __name__ == "__main__":
     tj, tb = read(target)
     sj, sb = read(source)
     done = add(tj, tb, sj, sb, lambda n: any(n == k or n.startswith(k) for k in keys))
-    write(out, tj, tb)
+    write(out, tj, prune(tj, tb))
     print("added", len(done), done)
