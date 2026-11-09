@@ -6,11 +6,13 @@ extends "res://tools/clip_shots.gd"
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
 ## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
 ## forced). --react instead strips how he takes a hit (docs/art/REACT_AUDIT.md): hit_f and hit_b as the game hands
-## them off (f000 the hit frame, then one frame per DT), and the stun loop, the fall loop and the landing, keyed.
+## them off (f000 the hit frame, then one frame per DT; hit_run: the same while running), knock_b and knock_f (the
+## lean of a knock in the air), and the stun loop, the fall loop and the landing, keyed.
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
+const KNOCK_MPS := 9.0     # m/s: a hard knock (the lean is full at 8)
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
 const SIDE_YAW := -PI / 2.0     # facing screen right
@@ -109,16 +111,20 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 func _react(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
 	var st: Dictionary = clips.d["states"]
 	var behind := Vector2(sin(SIDE_YAW), cos(SIDE_YAW))     # hit_dir runs from the attacker to him (hunter.gd)
-	await _hit(model, sync, dir.path_join("hit_f"), behind, frames)
-	await _hit(model, sync, dir.path_join("hit_b"), -behind, frames)
+	var ahead := Vector3(-behind.x, 0.0, -behind.y)
+	await _hit(model, sync, dir.path_join("hit_f"), behind, frames, Vector3.ZERO)
+	await _hit(model, sync, dir.path_join("hit_b"), -behind, frames, Vector3.ZERO)
+	await _hit(model, sync, dir.path_join("hit_run"), behind, frames, ahead * RUN_MPS)
 	await _keyed(model, sync, clips, dir.path_join("stun"), String(st["stun"]), frames)
+	await _knock(model, sync, dir.path_join("knock_b"), -ahead * KNOCK_MPS, frames)
+	await _knock(model, sync, dir.path_join("knock_f"), ahead * KNOCK_MPS, frames)
 	await _keyed(model, sync, clips, dir.path_join("fall"), String(clips.d["air"]["fall"]), frames)
 	await _keyed(model, sync, clips, dir.path_join("land"), String(clips.d["land"]["clip"]), frames)
 
 ## The game's own hit hand-off while he stands: hit_t counts up from the hit, a frame every DT.
-func _hit(model: Node3D, sync: Node, dir: String, hit_dir: Vector2, frames: int) -> void:
+func _hit(model: Node3D, sync: Node, dir: String, hit_dir: Vector2, frames: int, vel: Vector3) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
-	var s := {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": true}
+	var s := {"vel": vel, "face": SIDE_YAW, "grounded": true}
 	model.set_meta(WardenClips.STATE, s)
 	for k in int(WARM_S / DT):
 		sync.call("_process", DT)
@@ -126,6 +132,17 @@ func _hit(model: Node3D, sync: Node, dir: String, hit_dir: Vector2, frames: int)
 		s["hit_t"] = i * DT
 		s["hit_dir"] = hit_dir
 		model.set_meta(WardenClips.STATE, s)
+		sync.call("_process", DT)
+		await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
+
+## A knock in the air, 0.5 s after the hit (the flinch is over, the lean is on): a frame every DT.
+func _knock(model: Node3D, sync: Node, dir: String, vel: Vector3, frames: int) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	model.set_meta(WardenClips.STATE, {"vel": vel, "face": SIDE_YAW, "grounded": false, "hit_t": 0.5})
+	for k in int(WARM_S / DT):
+		sync.call("_process", DT)
+	for i in frames:
 		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})

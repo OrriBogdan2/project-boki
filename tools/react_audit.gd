@@ -11,6 +11,8 @@ const READ_T := 0.1          # s: a hit must read by then (DECISIONS: getting hi
 const MIN_READ := 0.03       # share of the Hunter's height a point has moved at READ_T
 const MIN_SQUASH := 0.02     # share of height the hips drop in the first READ_T of the landing
 const MAX_SEAM := 0.02       # share of height between a loop's last and first frame
+const MIN_STUN := 0.08       # share of height the stun loop moves: a stunned Hunter must read as stunned, not idle
+const MIN_LEAN := 0.04       # share of height the head moves with a knock (head against hips, along the knock)
 const MAX_GRIP := 0.03       # m the weapon bone may leave its hand
 const SETTLED := 0.25        # the flinch is over when it is back under this share of its peak
 ## The settle time a body of each weight should show (s): light snaps back, heavy carries the hit, medium between.
@@ -38,13 +40,8 @@ func run(main: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _react(main: Node, id: String) -> void:
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
-	m.set_meta("anim_seed", 1)
-	holder.add_child(m)
-	for k in 5:
-		await main.get_tree().process_frame
+	var m := await _model(main, id)
 	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var st: Dictionary = clips.d["states"]
@@ -56,10 +53,13 @@ func _react(main: Node, id: String) -> void:
 	var idle_hips: float = (_pose_at(sync, clips, sk, String(clips.d["loco"]["idle"]), 0.0)["hips"] as Vector3).y
 	row["hit_f"] = _hit(m, sync, sk, Vector2(0, 1), float(hd["dur"]), hgt)
 	row["hit_b"] = _hit(m, sync, sk, Vector2(0, -1), float(hd["dur"]), hgt)
+	row["over_run"] = await _over(main, id, {"vel": Vector3(0, 0, -4.6)}, hgt)
+	row["over_cast"] = await _over(main, id, _cast_state(clips), hgt)
 	row["stun"] = _loop(sync, clips, sk, String(st["stun"]), hgt)
 	row["fall"] = _loop(sync, clips, sk, String(clips.d["air"]["fall"]), hgt)
 	row["land"] = _land(sync, clips, sk, String(clips.d["land"]["clip"]), hgt, idle_hips)
 	row["grip_m"] = grip["worst"]
+	row["knock"] = _knock(m, sync, sk, hgt)
 	var t_pose := ""
 	for k in ["hit_f", "hit_b", "stun", "fall", "land"]:
 		if row[k]["t_pose"] > 0.0:
@@ -71,11 +71,76 @@ func _react(main: Node, id: String) -> void:
 	print("REACT %-10s %-6s hit_f read %.3f peak %.3f at %.2fs settles %.2fs away %.3f" % [
 			id, row["weight"], f["read"], f["peak"], f["peak_t"], f["settle_t"], f["away"]],
 			" | hit_b read %.3f settles %.2fs away %.3f" % [b["read"], b["settle_t"], b["away"]],
+			" | over run %.3f cast %.3f | lean f/b/l/r %.3f %.3f %.3f %.3f" % [row["over_run"], row["over_cast"],
+			row["knock"][0], row["knock"][1], row["knock"][2], row["knock"][3]],
 			" | stun seam %.3f move %.3f | fall seam %.3f | land squash %.3f | grip %.3f m | T-pose %s" % [
 			row["stun"]["seam"], row["stun"]["move"], row["fall"]["seam"], row["land"]["squash"], row["grip_m"],
 			row["t_pose"] if row["t_pose"] != "" else "none"])
 	_gate(id, row)
 	m.free()
+
+## The knocks: [name, the way he is sent in the world (he faces -Z, so +Z is back)].
+const KNOCKS := [["back", Vector3(0, 0, 9)], ["forward", Vector3(0, 0, -9)], ["left", Vector3(-9, 0, 0)],
+		["right", Vector3(9, 0, 0)]]
+
+func _model(main: Node, id: String) -> Node3D:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	m.set_meta("anim_seed", 1)
+	holder.add_child(m)
+	for k in 5:
+		await main.get_tree().process_frame
+	m.get_node("Warden/Sync").set_process(false)
+	return m
+
+## Standing, in the middle of the Hunter's first move that keeps the legs going (else its first move).
+func _cast_state(clips: WardenClips) -> Dictionary:
+	var moves: Dictionary = clips.d["kmoves"]
+	var pick := String(moves.keys()[0])
+	for k in moves:
+		if moves[k].has("upper"):
+			pick = String(k)
+			break
+	return {"kmove": pick, "kmove_t": 0.2}
+
+## A hit over a run or a cast: how far the body is from the same moment without the hit, 0.1 s in (share of height).
+## Two fresh models, so both runs walk the same cycle.
+func _over(main: Node, id: String, base: Dictionary, hgt: float) -> float:
+	var poses: Array = []
+	for hit in [false, true]:
+		var m := await _model(main, id)
+		var sync := m.get_node("Warden/Sync")
+		var sk := WardenGlb.skeleton(m.get_node("Warden"))
+		var s := {"face": 0.0, "grounded": true}
+		s.merge(base)
+		for k in int(WARM_S / DT):
+			m.set_meta(WardenClips.STATE, s)
+			sync.call("_process", DT)
+		var p := {}
+		for k in int(READ_T / DT) + 1:
+			s["hit_t"] = k * DT if hit else 99.0
+			s["hit_dir"] = Vector2(0, 1)
+			m.set_meta(WardenClips.STATE, s)
+			p = _frame(sync, sk, DT)
+		poses.append(p)
+		m.free()
+	return _dist(poses[1], poses[0]) / hgt
+
+## A knock in each of four directions: the head against the hips, along the way he is sent, against the same fall
+## without the lean (the hit is older than KNOCK_WINDOW). Share of height.
+func _knock(m: Node3D, sync: Node, sk: Skeleton3D, hgt: float) -> Array:
+	var out: Array = []
+	for kn in KNOCKS:
+		var way: Vector3 = (kn[1] as Vector3).normalized()
+		var lean: Array = []
+		for hit_t in [99.0, 0.5]:
+			m.set_meta(WardenClips.STATE, {"vel": kn[1], "face": 0.0, "grounded": false, "hit_t": hit_t})
+			var p := {}
+			for k in int(0.6 / DT):
+				p = _frame(sync, sk, DT)
+			lean.append(((p["head"] as Vector3) - (p["hips"] as Vector3)).dot(way) / hgt)
+		out.append(lean[1] - lean[0])
+	m.set_meta(WardenClips.STATE, {})
+	return out
 
 var grip := {}
 var t_frames := 0
@@ -89,6 +154,15 @@ func _gate(id: String, row: Dictionary) -> void:
 				"moved %.3f of his height at %.1f s (min %.3f)" % [h["read"], READ_T, MIN_READ])
 		_want(id, side + " weight", h["settle_t"] >= band[0] and h["settle_t"] <= band[1],
 				"a %s body settles in %.2f s (wanted %.2f to %.2f)" % [row["weight"], h["settle_t"], band[0], band[1]])
+	for k in ["over_run", "over_cast"]:
+		_want(id, k + " reads", row[k] >= MIN_READ, "a hit %s moved %.3f of his height at %.1f s (min %.3f)" % [
+				k.substr(5), row[k], READ_T, MIN_READ])
+	var lean: Array = row["knock"]
+	for i in 4:
+		_want(id, "knock lean " + KNOCKS[i][0], lean[i] >= MIN_LEAN,
+				"the head goes %.3f of his height with a knock %s (min %.3f)" % [lean[i], KNOCKS[i][0], MIN_LEAN])
+	_want(id, "stun moves", row["stun"]["move"] >= MIN_STUN,
+			"the stun loop moves %.3f of his height (min %.3f)" % [row["stun"]["move"], MIN_STUN])
 	for loop in ["stun", "fall"]:
 		var seam: float = row[loop]["seam"]
 		_want(id, loop + " seam", seam <= MAX_SEAM, "%.3f of his height (max %.3f)" % [seam, MAX_SEAM])

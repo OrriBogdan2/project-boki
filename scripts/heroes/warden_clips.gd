@@ -9,8 +9,8 @@ extends RefCounted
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
-## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
-## next without a pop (item 32).
+## (Blend2: moves that own the body) > react (Add2 on the same bones: a hit's flinch, over whatever plays). The
+## action itself is two seekable channels crossfaded, so one move hands to the next without a pop (item 32).
 ##
 ## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
 ## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
@@ -34,6 +34,11 @@ const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
+const KNOCK_WINDOW := 0.6    # s after a hit that a body moving faster than he can run is a knock
+const KNOCK_FAST := 1.4      # x run speed: faster than this on the ground (or any speed in the air) is a knock
+const KNOCK_SPEED := 8.0     # m/s: the knock that leans him the whole KNOCK_LEAN
+const KNOCK_LEAN := 0.5      # rad: how far the hips tip the body toward where the blow sends it
+const KNOCK_RATE := 14.0     # 1/s: how fast the lean follows
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -59,7 +64,6 @@ var stance_w := 0.0
 var was_air := false
 var air_t := 0.0
 var land_t := 99.0
-var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
@@ -78,6 +82,7 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var knock_lean := Vector2.ZERO  # the knock's lean in his own frame (x right, y back), 0..1 of KNOCK_LEAN
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -126,6 +131,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
+	_make_flinches()
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -137,6 +143,38 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	_setup_out()
 	return true
+
+## Each hit clip as a delta from its own last pose ("<clip>_add", rotations only): what the flinch adds over a pose.
+func _make_flinches() -> void:
+	var hd: Dictionary = (d.get("states", {}) as Dictionary).get("hit", {})
+	for k in ["front", "back"]:
+		if not hd.has(k):
+			continue
+		var a := lib.get_animation(String(hd[k])).duplicate() as Animation
+		for i in range(a.get_track_count() - 1, -1, -1):
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D:
+				a.remove_track(i)
+				continue
+			var last := a.track_get_key_count(i) - 1
+			var bi := skel.find_bone(String(a.track_get_path(i).get_concatenated_subnames()))
+			var bind_q := skel.get_bone_rest(bi).basis.get_rotation_quaternion() if bi >= 0 else Quaternion.IDENTITY
+			var last_inv := (a.track_get_key_value(i, last) as Quaternion).inverse()
+			for j in last + 1:
+				a.track_set_key_value(i, j, bind_q * last_inv * (a.track_get_key_value(i, j) as Quaternion))
+		lib.add_animation(String(hd[k]) + "_add", a)
+
+## A hit lays its flinch over whatever is playing (a run, a cast, the stun): the delta clip, by hit_t.
+func _flinch(s: Dictionary, proc: bool) -> void:
+	var hd: Dictionary = (d.get("states", {}) as Dictionary).get("hit", {})
+	var hit := float(s.get("hit_t", 99.0))
+	var on := not hd.is_empty() and not proc and hit < float(hd["dur"]) and not bool(s.get("dead", false))
+	if on:
+		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
+		var face := float(s.get("face", 0.0))
+		var side := "front" if dir.dot(Vector2(sin(face), cos(face))) >= 0.0 else "back"
+		_node("anim_h").animation = String(hd[side]) + "_add"
+		_p("seek_h/seek_request", hit)
+	_p("react/add_amount", 1.0 if on else 0.0)
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
 ## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
@@ -245,7 +283,17 @@ func _build() -> AnimationNodeBlendTree:
 	t.add_node("full", AnimationNodeBlend2.new())
 	t.connect_node("full", 0, "upper")
 	t.connect_node("full", 1, "act")
-	t.connect_node("output", 0, "full")
+	var react := AnimationNodeAdd2.new()
+	react.filter_enabled = true
+	for b in d.get("upper", []):
+		react.set_filter_path(_track(String(b)), true)
+	t.add_node("react", react)
+	t.add_node("anim_h", _anim(String(lc["idle"])))
+	t.add_node("seek_h", AnimationNodeTimeSeek.new())
+	t.connect_node("seek_h", 0, "anim_h")
+	t.connect_node("react", 0, "full")
+	t.connect_node("react", 1, "seek_h")
+	t.connect_node("output", 0, "react")
 	return t
 
 ## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
@@ -334,12 +382,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var ld: Dictionary = d.get("land", {})
 	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
 		return {"clip": ld["clip"], "t": land_t}
-	var hit := float(s.get("hit_t", 99.0))
-	var hd: Dictionary = st.get("hit", {})
-	if hit < float(hd.get("dur", 0.0)):
-		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
-		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
 
 func step(dt: float) -> void:
@@ -380,6 +422,7 @@ func step(dt: float) -> void:
 	_p("act/blend_amount", xf)
 	_p("upper/blend_amount", up_w)
 	_p("full/blend_amount", act_w)
+	_flinch(s, proc)
 	_loco(s, dt)
 	if d.has("crouch"):
 		_crouch(s, dt)
@@ -388,6 +431,7 @@ func step(dt: float) -> void:
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
+	_lean_into_knock(s, proc, dt)
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
@@ -411,6 +455,28 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 	if legs_only or legs_was:
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+
+## A knock tips the hips so the head goes with the blow and the feet trail: back from a hit on the front, forward from
+## one behind, over to the side from a hit on the flank. The knock is read off the state (no flag): a hit not long ago
+## and a body moving faster than he runs, or in the air.
+func _lean_into_knock(s: Dictionary, proc: bool, dt: float) -> void:
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var flat := Vector2(vel.x, vel.z)
+	var fast := flat.length() > KNOCK_FAST * float((d["loco"] as Dictionary).get("run_speed", 4.6)) \
+			or (not bool(s.get("grounded", true)) and flat.length() > STILL)
+	var knocked := fast and not proc and float(s.get("hit_t", 99.0)) < KNOCK_WINDOW
+	var face := float(s.get("face", 0.0))
+	var goal := Vector2.ZERO
+	if knocked:
+		goal = Vector2(flat.dot(Vector2(cos(face), -sin(face))), flat.dot(Vector2(sin(face), cos(face)))) / KNOCK_SPEED
+		goal = goal.limit_length(1.0)
+	knock_lean = knock_lean.lerp(goal, 1.0 - exp(-dt * KNOCK_RATE))
+	if knock_lean.length() < 0.01:
+		return
+	var toward := Vector3(knock_lean.x, 0.0, knock_lean.y)
+	var hb := WardenSkeleton.find(skel, "hips")
+	var tip := Quaternion(Vector3.UP.cross(toward).normalized(), KNOCK_LEAN * toward.length())
+	skel.set_bone_pose_rotation(hb, tip * skel.get_bone_pose_rotation(hb))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
