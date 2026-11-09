@@ -5498,5 +5498,68 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_jarmit_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_kerchick",
+    "name": "Kerchick (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kerchick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mirrolin",
+    "name": "Mirrolin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mirrolin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kestrike",
+    "name": "Kestrike (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kestrike_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunink",
+    "name": "Lunink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lashyx",
+    "name": "Lashyx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lashyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara",
+    "name": "Lockatara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lockatara",
+    "name": "Lockatara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunink",
+    "name": "Lunink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lashyx",
+    "name": "Lashyx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lashyx_2.jpg",
+    "ok": true
   }
 ]
