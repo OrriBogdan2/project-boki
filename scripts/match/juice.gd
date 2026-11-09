@@ -111,6 +111,7 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
+		KnockCallout.say(m, "knock", h)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -123,6 +124,7 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
 	if credit == m.player and h != m.player:
 		m.sfx("kill", null, -3.0)
+		KnockCallout.say(m, "out", h)
 		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
 
 ## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
