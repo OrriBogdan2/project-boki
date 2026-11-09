@@ -5253,5 +5253,82 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/bellowary_f_2.jpg",
     "ok": true
+  },
+  {
+    "id": "lunowl_f",
+    "name": "Lunowl (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunowl_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_f",
+    "name": "Eclipsowl (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_f",
+    "name": "Voltalon (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barrelmander",
+    "name": "Barrelmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat",
+    "name": "Barokat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_f",
+    "name": "Gongibbon (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongibbon_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich",
+    "name": "Boltstrich (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barrelmander",
+    "name": "Barrelmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barrelmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_f",
+    "name": "Gongrowl (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongibbon_f",
+    "name": "Gongibbon (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongibbon_f_1.jpg",
+    "ok": true
   }
 ]
