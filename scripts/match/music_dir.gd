@@ -21,9 +21,10 @@ func start(m: Match) -> void:
 	Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 
 ## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
-## glide over it), the creak and grit of the old ruins among their walls, and now and then a
-## creature calling from somewhere out of sight.
+## glide over it), the creak and grit of the old ruins among their walls, the meadow, rock and shore
+## beds and the weather (AmbBeds), and now and then a creature calling from somewhere out of sight.
 var amb_t := 0.0
+var beds := AmbBeds.new()
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
 const CALLS := ["v_warden", "v_brute", "v_sentinel", "v_spitter"]
@@ -48,6 +49,7 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	if w.is_void(p.pos.x, p.pos.z) or p.gliding or p.dropping: abyss = 1.0
 	Sfx.amb_layer("abyss", abyss)
 	Sfx.amb_layer("ruins", clampf(float(walls) / 6.0, 0.0, 1.0))
+	beds.tick(m, p)
 	call_t -= 0.25
 	if call_t <= 0.0:
 		call_t = rng.randf_range(16.0, 34.0)
