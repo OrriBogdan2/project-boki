@@ -93,17 +93,22 @@ func _self_shake(m: Match, hero: String) -> void:
 func _own_boki(main: Node) -> void:
 	var m: Match = flow._match(main, Arch.ORDER[0])
 	var h: Hunter = flow.hunter
-	var rec := Save.new_kin("cindle"); rec["trust"] = 95.0
+	var rec := Save.new_kin("cindle")
+	rec["trust"] = 95.0
 	var k: Kin = h.kin if h.kin else m.give_kin(h, rec)
 	_steps(m, 30)
 	k.teleport(h.pos + Vector3(2, 0, 0))
 	var before := _shake_of(m)
 	KinStrike.land(k, {})
 	_steps(m, 30)
-	ok(_shake_of(m) - before <= 0.0, "your Boki's landing strike puts %.3f s of shake on your camera" % (_shake_of(m) - before))
-	m.cam.shake_left = 0.0; m.cam.shake_amp = 0.0       # (an undrained shake would hide the next one: max, not sum)
+	var got := _shake_of(m) - before
+	ok(got <= 0.0, "your Boki's landing strike puts %.3f s of shake on your camera" % got)
+	# (an undrained shake would hide the next one: max, not sum)
+	m.cam.shake_left = 0.0
+	m.cam.shake_amp = 0.0
 	before = _shake_of(m)
-	h.ult = 1.0; h.slot_lv["ult"] = 1
+	h.ult = 1.0
+	h.slot_lv["ult"] = 1
 	var fused := KinMerge.press(h)
 	_steps(m, 120)
 	ok(fused and not h.merge_st.is_empty(), "the Fuse went off (merge %s)" % str(not h.merge_st.is_empty()))

@@ -516,6 +516,15 @@ Rules:
 - Cap: 110ms in any 0.5s per player.
 - The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
   of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
+- **One owner (impact pass, 2026-11-09).** `Feel.hitstop` alone sets a body's hold (`Ent.freeze_t`); Ent.hurt and
+  Oomph no longer write it. Offline, every whole-game freeze (`Match.freeze_frame`: a tier hit, an armor break, a
+  parry, a Boki strike) charges the same cap (`Feel.spend`).
+- **The strike frame holds.** While a body is frozen every bone holds (clips, hair, cloth: `WardenGlb` skips the
+  frame), and `WardenClips` plays the held time back 50% faster so a move stays on the kit's clock (`Ent.held_s`).
+- **Reactions.** The hit clip (`hit_f`/`hit_b`, all 12) plays only for a staggering hit (Oomph's "big": >= 12% of
+  max health, heavy, payoff or a stun); chip hits flash and shiver. A knockback holds the hit pose while the body
+  slides; a stun shows the stun clip over any move. The source's own hit-stop, flash and reaction timings are
+  unpublished [?] (docs/SUPERVIVE_DATA.md), so these tiers stay ours. `--impact-check` asserts all of it per Hunter.
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 

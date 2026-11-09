@@ -267,9 +267,11 @@ func _lock(main: Node, hero: String) -> void:
 				inside = k.busy()
 				went = i
 				break
-			var what := "%s: %s pressed %.2fs before its ult's %.2fs lock ends" % [hero, slot, (lock_n - at) * Match.DT, lock_n * Match.DT]
+			var what := "%s: %s pressed %.2fs before its ult's %.2fs lock ends" % [
+					hero, slot, (lock_n - at) * Match.DT, lock_n * Match.DT]
 			if late:
-				ok(went >= 0 and not inside, "%s goes off once it ends (%s)" % [what, "inside the lock" if inside else "after %d steps" % went])
+				var when := "inside the lock" if inside else "after %d steps" % went
+				ok(went >= 0 and not inside, "%s goes off once it ends (%s)" % [what, when])
 			elif lock_n * Match.DT > DashFlow.BUFFER_S + 0.1:
 				ok(went < 0, "%s is dropped, not held for the whole lock" % what)
 	m.queue_free()

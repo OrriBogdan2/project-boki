@@ -72,7 +72,8 @@ func _flash_of(h: Hunter) -> float:
 ## Flat ground round the player (the victim stands 6 m off it, the hitter 9 m past that); returns the centre.
 func _flat(m: Match, P: Hunter) -> Vector3:
 	var w: World = m.world
-	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
+	var hx := int(floor(P.pos.x))
+	var hz := int(floor(P.pos.z))
 	var hi: int = w.idx(hx, hz)
 	var lv: int = int(w.level[hi]) if w.kind[hi] != World.T_VOID else 0
 	for dz in range(-4, 16):
@@ -82,9 +83,13 @@ func _flat(m: Match, P: Hunter) -> Vector3:
 			w.kind[i] = World.T_GROUND
 			w.level[i] = lv
 			w.island[i] = w.island[hi]
-			w.stairs.erase(i); w.walls.erase(i); w.props.erase(i); w.bush.erase(i)
+			w.stairs.erase(i)
+			w.walls.erase(i)
+			w.props.erase(i)
+			w.bush.erase(i)
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
-	P.teleport(home); P.vel = Vector3.ZERO
+	P.teleport(home)
+	P.vel = Vector3.ZERO
 	return home
 
 ## Three 0.07 s freezes a few steps apart (each drained before the next, as the running game does): the first in
@@ -98,14 +103,16 @@ func _cap(m: Match) -> void:
 		m.step(DT)
 	var total := float(got[0]) + float(got[1]) + float(got[2])
 	ok(is_equal_approx(float(got[0]), 0.07) and total <= Feel.HS_CAP + 0.0001,
-			"three 0.07 s freezes inside %.1f s hold %.3f s in all (cap %.2f): %s" % [Feel.HS_WINDOW, total, Feel.HS_CAP, str(got)])
+			"three 0.07 s freezes inside %.1f s hold %.3f s in all (cap %.2f): %s" % [
+					Feel.HS_WINDOW, total, Feel.HS_CAP, str(got)])
 	m.hitstop = 0.0
 
 ## The player's own LMB on the hitter, parked 1.8 m in front: what it freezes (the game's freeze for the player,
 ## the struck body's own hold).
 func _strike(m: Match, P: Hunter, A: Hunter, hero: String) -> void:
 	var a_at := A.pos
-	A.teleport(P.pos + Vector3(0, 0, -1.8)); A.vel = Vector3.ZERO
+	A.teleport(P.pos + Vector3(0, 0, -1.8))
+	A.vel = Vector3.ZERO
 	A.hp = A.max_hp
 	P.inp["aim"] = A.pos + Vector3(0, 0.9, 0)
 	var top_p := 0.0
@@ -119,10 +126,13 @@ func _strike(m: Match, P: Hunter, A: Hunter, hero: String) -> void:
 		top_a = maxf(top_a, A.freeze_t)
 	P.inp["fire"] = false
 	var melee := bool(P.wpn.get("melee", false))
-	var what := "%s's LMB (%s): hit %s, you hold %.3f s, the target %.3f s" % [hero, "melee" if melee else "ranged", A.hp < hp0, top_p, top_a]
-	ok(A.hp < hp0 and top_a > 0.0 and (melee or top_p <= 0.0), "%s (the struck body always holds; a ranged hit never holds you)" % what)
+	var what := "%s's LMB (%s): hit %s, you hold %.3f s, the target %.3f s" % [
+			hero, "melee" if melee else "ranged", A.hp < hp0, top_p, top_a]
+	ok(A.hp < hp0 and top_a > 0.0 and (melee or top_p <= 0.0),
+			"%s (the struck body always holds; a ranged hit never holds you)" % what)
 	m.hitstop = 0.0
-	A.teleport(a_at); A.hp = A.max_hp
+	A.teleport(a_at)
+	A.hp = A.max_hp
 	_settle(m, [A], 30)
 
 func _settle(m: Match, hs: Array, n: int) -> void:
@@ -143,7 +153,8 @@ func _hero(main: Node, hero: String) -> void:
 			{"arch": hero, "weapon": Arch.signature(hero)})
 	var A: Hunter = m.make_hunter("A", 7, "medium", "Hitter", "idle", {}, at + Vector3(9, 0, 0), {"arch": "none"})
 	for x in [V, A]:
-		x.armor = 0.0; x.max_armor = 0.0
+		x.armor = 0.0
+		x.max_armor = 0.0
 	var hs := [V, A]
 	_settle(m, hs, 30)
 	if hero == Arch.ORDER[0]:
@@ -159,7 +170,8 @@ func _hero(main: Node, hero: String) -> void:
 	V.hp = mh
 	V.hurt(mh * CHIP, A, {"src": "primary"})
 	var chip_t := V.freeze_t
-	ok(absf(chip_t - float(Feel.HITSTOP[1][1])) < 0.002, "%s: a chip hit holds the body %.3f s (Feel T1 %.3f)" % [hero, chip_t, Feel.HITSTOP[1][1]])
+	ok(absf(chip_t - float(Feel.HITSTOP[1][1])) < 0.002,
+			"%s: a chip hit holds the body %.3f s (Feel T1 %.3f)" % [hero, chip_t, Feel.HITSTOP[1][1]])
 	ok(A.freeze_t <= 0.0, "%s: a ranged attacker never freezes (%.3f s)" % [hero, A.freeze_t])
 	var shown_chip := false
 	var flash := 0.0
@@ -169,7 +181,8 @@ func _hero(main: Node, hero: String) -> void:
 		shown_chip = shown_chip or _hit_shown(c)
 	ok(flash > 0.5, "%s: the hit flash reaches the model (%.2f)" % [hero, flash])
 	V.hurt(mh * CHIP, A, {"src": "primary"})
-	ok(absf(V.freeze_t - float(Feel.HITSTOP[1][1]) / 3.0) < 0.002, "%s: a repeat inside %.2f s holds a third (%.3f s)" % [hero, Feel.HS_MULTI, V.freeze_t])
+	ok(absf(V.freeze_t - float(Feel.HITSTOP[1][1]) / 3.0) < 0.002,
+			"%s: a repeat inside %.2f s holds a third (%.3f s)" % [hero, Feel.HS_MULTI, V.freeze_t])
 	for i in 12:
 		_frame(m, hs)
 		shown_chip = shown_chip or _hit_shown(c)
@@ -181,7 +194,8 @@ func _hero(main: Node, hero: String) -> void:
 	_frame(m, hs)
 	V.hurt(mh * HEAVY, A, {"src": "primary"})
 	var heavy_t := V.freeze_t
-	ok(absf(heavy_t - float(Feel.HITSTOP[3][1])) < 0.002, "%s: a heavy hit holds the body %.3f s (Feel T3 %.3f)" % [hero, heavy_t, Feel.HITSTOP[3][1]])
+	ok(absf(heavy_t - float(Feel.HITSTOP[3][1])) < 0.002,
+			"%s: a heavy hit holds the body %.3f s (Feel T3 %.3f)" % [hero, heavy_t, Feel.HITSTOP[3][1]])
 	_frame(m, hs)
 	var p0 := _pose(c)
 	_frame(m, hs)
@@ -204,7 +218,8 @@ func _hero(main: Node, hero: String) -> void:
 		if V.knock_t > 0.0 and V.freeze_t <= 0.0:      # (the hit-stop holds the frame the shove landed on)
 			slid += 1
 			if _hit_shown(c): posed += 1
-	ok(slid > 0 and posed >= slid - 2, "%s: a knockback shows the hit pose while it slides (%d of %d frames)" % [hero, posed, slid])
+	ok(slid > 0 and posed >= slid - 2,
+			"%s: a knockback shows the hit pose while it slides (%d of %d frames)" % [hero, posed, slid])
 	_settle(m, hs, 30)
 	_strike(m, P, A, hero)
 	# 6. stunned mid-move: the stun clip wins
@@ -220,7 +235,7 @@ func _hero(main: Node, hero: String) -> void:
 			if c.cur == stun_clip and c.act_w > 0.5: stunned += 1
 	ok(moves.is_empty() or stunned >= 10, "%s: stunned in its %s move, the stun clip shows (%d of 20 frames)" % [
 			hero, moves[0] if moves.size() > 0 else "-", stunned])
-	print("IMPACT %s chip %.3f s, heavy %.3f s, flash %.2f, pose held %s, chip clip %s, heavy clip %s, knock pose %d/%d" % [
+	print("IMPACT %s chip %.3f s, heavy %.3f s, flash %.2f, pose held %s, chip clip %s, heavy clip %s, knock %d/%d" % [
 			hero, chip_t, heavy_t, flash, held, shown_chip, shown_heavy, posed, slid])
 	m.queue_free()
 	await main.get_tree().process_frame

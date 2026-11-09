@@ -6,7 +6,8 @@ extends RefCounted
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's (or a cast lock's) end while the hunter can't act
+## s: a held press waits at most this long past a dash's (or a cast lock's) end while the hunter can't act
+const BUFFER_S := 0.15
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
