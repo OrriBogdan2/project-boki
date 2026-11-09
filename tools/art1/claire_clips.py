@@ -265,9 +265,9 @@ def clips():
 
     # hit reacts: a flinch and a worried look, the spear pulled in; never a stagger
     fl = {"pel": (0, -0.04, -0.06), "prt": (-0.14, 0, 0), "tor": (-0.18, 0.1, 0), "hed": (0.14, 0.2, 0.05), "brow": -0.9, "lid": 0.5, "smile": -0.6, "LP": (-0.12, 0.2, 1.24), "LH": (-0.8, 0, 0.3), "fing": 0.6, "G": (0.24, 0.12, 1.08), "skirt": -0.3}
-    out.append(C("hit_f", 0.42, [(0.0, END), (0.07, fl, "out"), (0.2, dict(fl, pel=(0, -0.02, -0.04))), (0.42, END)]))
+    out.append(C("hit_f", 0.42, [(0.0, END), (0.07, fl, "out"), (0.133, dict(fl, pel=(0, -0.02, -0.04))), (0.24, END), (0.42, END)]))
     fb = dict(fl, pel=(0, 0.04, -0.06), prt=(0.2, 0, 0), tor=(0.14, -0.1, 0), hed=(-0.16, -0.2, 0.05), skirt=0.3)
-    out.append(C("hit_b", 0.42, [(0.0, END), (0.07, fb, "out"), (0.2, dict(fb, pel=(0, 0.02, -0.04))), (0.42, END)]))
+    out.append(C("hit_b", 0.42, [(0.0, END), (0.07, fb, "out"), (0.133, dict(fb, pel=(0, 0.02, -0.04))), (0.24, END), (0.42, END)]))
     daz = {"pel": (0.0, 0, -0.1), "prt": (0.06, 0, 0.05), "tor": (0.12, 0, -0.1), "hed": (0.3, 0, -0.14), "LP": (-0.28, 0.1, 0.96), "fing": 0.0, "lid": 0.55, "brow": -0.8, "smile": -0.3, "G": (0.28, 0.14, 0.98)}
     out.append(C("stun", 1.2, [(0.0, daz), (0.6, dict(daz, hed=(0.3, 0, 0.14), tor=(0.12, 0, 0.1), prt=(0.06, 0, -0.05))), (1.2, daz)]))
 
