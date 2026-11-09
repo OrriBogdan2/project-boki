@@ -256,6 +256,19 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | gems_toast | Hob gives you %d gems to buy seeds |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |
 
+## first_match_guide (`content/rules/first_match_guide.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. squad_range: metres at which another squad counts as close. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]. In the text %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %s the Boki's name. |
+| matches | 2 |
+| gap | 1.5 |
+| squad_range | 45 |
+| close_at | 0.4 |
+| lines | [["land", "Pick a landing spot: steer your glide to an island", 20.0], ["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["squad", "Another squad is close: fight them, or slip away quietly", 12.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0]] |
+
 ## gear (`content/rules/gear.json`)
 
 
