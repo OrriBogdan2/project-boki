@@ -27485,5 +27485,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/lashyx_card2_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "lashyx_card2_w32",
+    "name": "Lashyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lashyx_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card2_w32",
+    "name": "Lashyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lashyx_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card2_w32",
+    "name": "Lashyx (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/lashyx_card2_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w32",
+    "name": "Lockatara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w32",
+    "name": "Lockatara",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w32",
+    "name": "Murmurling (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockatara_r_w32",
+    "name": "Lockatara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockatara_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_f_e_w32",
+    "name": "Murmurling (female)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_f_e_w32_2.jpg",
+    "ok": true
   }
 ]
