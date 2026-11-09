@@ -1820,5 +1820,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/cairnback_2.png",
     "ok": true
+  },
+  {
+    "id": "hivara",
+    "name": "Hivara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hivara_1.png",
+    "ok": true
+  },
+  {
+    "id": "hivara",
+    "name": "Hivara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hivara_2.png",
+    "ok": true
+  },
+  {
+    "id": "zephyrak",
+    "name": "Zephyrak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zephyrak_1.png",
+    "ok": true
+  },
+  {
+    "id": "rampartoad",
+    "name": "Rampartoad",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rampartoad_2.png",
+    "ok": true
+  },
+  {
+    "id": "rampartoad",
+    "name": "Rampartoad",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rampartoad_1.png",
+    "ok": true
+  },
+  {
+    "id": "anchorbill",
+    "name": "Anchorbill",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/anchorbill_1.png",
+    "ok": true
+  },
+  {
+    "id": "zephyrak",
+    "name": "Zephyrak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/zephyrak_2.png",
+    "ok": true
+  },
+  {
+    "id": "anchorbill",
+    "name": "Anchorbill",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/anchorbill_2.png",
+    "ok": true
   }
 ]
