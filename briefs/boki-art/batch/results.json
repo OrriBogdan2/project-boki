@@ -34506,5 +34506,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_teapotamus_t1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_barokat_b3",
+    "name": "Barokat (body redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_barokat_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_b3",
+    "name": "Barokat (body redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_barokat_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_b3",
+    "name": "Barokat (body redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_barokat_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_barokat_b3",
+    "name": "Barokat (body redo)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_barokat_b3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nettlynx_la",
+    "name": "Nettlynx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_nettlynx_la_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nettlynx_la",
+    "name": "Nettlynx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_nettlynx_la_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nettlynx_la",
+    "name": "Nettlynx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_nettlynx_la_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_nettlynx_lb",
+    "name": "Nettlynx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_nettlynx_lb_1.jpg",
+    "ok": true
   }
 ]
