@@ -7465,5 +7465,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/flarmink_x_1.jpg",
     "ok": true
+  },
+  {
+    "id": "flarmink_x",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_x",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_x",
+    "name": "Rimink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rimink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_x",
+    "name": "Lunink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lunink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_x",
+    "name": "Umbrink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrink_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lunink_x",
+    "name": "Lunink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lunink_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_x",
+    "name": "Umbrink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrink_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wyrmink_x",
+    "name": "Wyrmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wyrmink_x_1.jpg",
+    "ok": true
   }
 ]
