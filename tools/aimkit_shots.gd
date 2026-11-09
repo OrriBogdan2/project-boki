@@ -174,21 +174,19 @@ func _tiers() -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
-## A lip across the camera's view: rows z..z+2 on level lv, rows z-2..z-1 on lv + k, 3 tiles wide, plain
-## ground. Returns [x, z, lv], or [] when the map has none.
+## A lip across the camera's view: rows z..z+2 on level lv, row z-1 on lv + k, plain ground.
+## Returns [x, z, lv], or [] when the map has none.
 func _lip(k: int) -> Array:
 	var W = m.world
 	for z in range(8, W.h - 8):
 		for x in range(6, W.w - 6):
 			var lv: int = int(W.level[W.idx(x, z)])
 			var good := true
-			for dz in range(-2, 3):
-				for dx in range(-1, 2):
-					var i: int = W.idx(x + dx, z + dz)
-					var want := lv if dz >= 0 else lv + k
-					if W.kind[i] != World.T_GROUND or int(W.level[i]) != want or W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i):
-						good = false; break
-				if not good: break
+			for dz in range(-1, 3):
+				var i: int = W.idx(x, z + dz)
+				var want := lv if dz >= 0 else lv + k
+				if W.kind[i] != World.T_GROUND or int(W.level[i]) != want or W.stairs.has(i) or W.walls.has(i) or W.props.has(i) or W.bridge.has(i):
+					good = false; break
 			if good: return [x, z, lv]
 	return []
 
