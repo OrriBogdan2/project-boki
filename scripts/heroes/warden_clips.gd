@@ -183,7 +183,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun", "downed"]
+	return nm in ["fall", "glide", "stun"]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
