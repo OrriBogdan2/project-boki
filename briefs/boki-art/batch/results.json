@@ -10559,5 +10559,96 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/wickapi_r2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "wickapi_r2",
+    "name": "Wickapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wickapi_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll_light",
+    "name": "Mycroll (portrait, light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespyx_light",
+    "name": "Vespyx (portrait, light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vespyx_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_mycroll_light",
+    "name": "Mycroll (portrait, light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_mycroll_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vespyx_light",
+    "name": "Vespyx (portrait, light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vespyx_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_pe",
+    "name": "Boltstrich (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe",
+    "name": "Canvastross (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_pe",
+    "name": "Boltstrich (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback_pe",
+    "name": "Cairnback (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_pe_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe",
+    "name": "Crofthorn (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_canvastross_pe",
+    "name": "Canvastross (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_canvastross_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe",
+    "name": "Barokat (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_crofthorn_pe",
+    "name": "Crofthorn (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_crofthorn_pe_2.jpg",
+    "ok": true
   }
 ]
