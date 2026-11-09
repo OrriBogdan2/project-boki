@@ -16,7 +16,10 @@ const PULL_TIP := 0.02         # and at the tip (loose: it swings and lags)
 const STREAM_SPEED := 7.0      # m/s at which the rest shape lies out furthest behind (a skate's glide)
 const STREAM_MAX := 0.8        # the most it lifts toward level (a cloth end never stands out stiff)
 const SPEED_RATE := 8.0        # 1/s: how fast the measured speed follows the body's (it smooths net jitter)
-const BODY_R := 0.24           # m: tails stay this far out from the body's axis (her back, skirt and puff tail)
+const BODY_R := 0.24           # m: tails stay this far out from the body's axis at her skirt and puff tail
+const BODY_R_TOP := 0.12       # m: and at her shoulders (they lie on her back there)
+const SKIRT_TOP := 0.95        # m up (model space) where the skirt's flare starts
+const BACK_TOP := 1.2          # m up where her back is narrowest under the wrap
 const FLOOR_UP := 0.05         # m a tail stays over her feet
 const RIPPLE := 0.04           # m a tip wanders at rest
 const RIPPLE_HZ := 0.3         # its slow sway
@@ -211,13 +214,16 @@ func _move(w: Wearer, tail: Tail, root: Vector3, dt: float) -> void:
 	tail.prev[0] = root
 	var seg := float(w.cfg.get("len", 0.8)) / float(POINTS - 1)
 	var axis := w.h.model.global_position
+	var body_k := w.h.model.global_basis.get_scale().y
 	for i in range(1, POINTS):
 		var d := tail.pts[i] - tail.pts[i - 1]
 		var p := tail.pts[i - 1] + (d.normalized() * seg if d.length() > 1e-5 else want[i] - want[i - 1])
 		var flat := Vector2(p.x - axis.x, p.z - axis.z)
-		if flat.length() < BODY_R:
+		var up := (p.y - axis.y) / body_k
+		var r := lerpf(BODY_R, BODY_R_TOP, smoothstep(SKIRT_TOP, BACK_TOP, up)) * body_k
+		if flat.length() < r:
 			var out := flat.normalized() if flat.length() > 1e-4 else Vector2(tail.side, 0.0)
-			p = Vector3(axis.x + out.x * BODY_R, p.y, axis.z + out.y * BODY_R)
+			p = Vector3(axis.x + out.x * r, p.y, axis.z + out.y * r)
 		p.y = maxf(p.y, axis.y + FLOOR_UP)
 		tail.pts[i] = p
 
