@@ -3461,3 +3461,16 @@ GPU rp1-1, stress 40 s at 1920x1080, before -> after:
 The GPU runs are still bound by the match script and process (~33 / ~90 ms), not rendering. Next: Hunter.sim and WardenClips.step.
 Checks: --anim-lod-check (extended: shadows, Boki rig gate, KinPace), --boki-moves-check, --boki-rig-check, --kin-loss-check all at 0 fails; health --strict OK.
 Open: the bench keeps only 11-20 of 30 Boki out (throw_to from the shoulder fails while the owner moves). No gate baseline was added for the stress key. Overlaps: tuning.json "perf" keys renamed from a2's hero_anim_* to actor_far_m/anim_*_every. Not done (alternative): a separate simple material at distance; dropping the ink pass and the shadow was cheaper and keeps medium/high close.
+
+## 2026-11-09 deep (job 20261109-001531-a4): READY Boki 3D: Bellowary (cindowary)
+Branch `ext/boki-cindowary-v2` (6394577a9). Body from a Meshy model of the owner's sheet (raw files in
+`~/meshy/cindowary/run1`, Meshy task 01a1bdab, not in git) on the Boki rig: 3600 body tris (under the 5000 budget with
+props), 2k atlas, 13 standard clips (attack = Stinger Dash wheeze + spur kick, ability = Gale Lance gust from the
+nozzle), `saddle` bone behind the neck for the BIPED-L rider, `bellows` pumps by scale. `--boki-rig-check` 0 failures,
+`health.py --strict` OK. Turntable (GPU job 20261109-003204-12261):
+`/home/boki/meshy/cindowary/turntable/bellowary_{front,tq,side,back}.png`.
+Notes: built from the latest sheet (04eb5144b, chest bellows + brass nozzle beak). The alternative is 7e91f47b5 (bellows
+crest on the head, as in the BOKI_50_DESIGNS text); if that one is wanted, re-run Meshy on it. New
+`tools/boki/meshy_body.py` is shared: on merge with caecilith's branch, zippelith's inline copy should use it. Not
+done: fusion parts, rider poses and a shared BIPED-L mount rig (no code for them yet). Leather reads redder under
+the in-game warm light than on the sheet.
