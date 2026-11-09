@@ -21710,5 +21710,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/nettlynx_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "mycroll_card",
+    "name": "Mycroll (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mycroll_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "nettlynx_card",
+    "name": "Nettlynx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nettlynx_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "olmlet_card",
+    "name": "Olmlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/olmlet_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "olmlet_card",
+    "name": "Olmlet (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/olmlet_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pawnfry_card",
+    "name": "Pawnfry (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pawnfry_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pawnfry_card",
+    "name": "Pawnfry (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pawnfry_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipewurm_card",
+    "name": "Pipewurm (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pipewurm_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pipewurm_card",
+    "name": "Pipewurm (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pipewurm_card_1.jpg",
+    "ok": true
   }
 ]
