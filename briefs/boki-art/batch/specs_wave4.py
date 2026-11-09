@@ -13,7 +13,7 @@ B('glassolotl_r2','Glassolotl',"A sleek, long young axolotl, much longer and lea
  "narrow, confident eyes with rainbow sparkles and a sly grin","clear glass and pale pink, with a rainbow accent","a chubby baby axolotl, standing upright, wings",'prism','sleek')
 B('lanterloris_r','Lanterloris',"A small slow loris creeping along on all four limbs, body horizontal, whose round belly is a glowing paper lantern with thin bamboo ribs showing through its fur, warm light shining out, and a little lantern tassel for a tail.",
  "huge, round, sleepy eyes and a gentle, shy smile","warm cream and paper red, with a golden glow accent","standing or sitting upright, a held lantern, a string",'lunar','cute')
-X('lodestick_r2','Lodestick',T+'Lodestick.jpg' if False else 'briefs/boki-art/batch/out/lodestick_r_2.png',
+X('lodestick_r2','Lodestick','briefs/boki-art/batch/out/lodestick_r_2.png',
  "turn the stick insect so its long body is horizontal and low to the ground in every view, walking on six long splayed legs like a real stick insect, its antennae pointing forward.")
 V('mothlet_r','Mothlet',T+'Lunowl.jpg','baby',"A tiny, perfectly round ball of lavender owlet down, half the size of image 1, with huge eyes, two tiny stubby moth wings and short fuzzy antennae, and only a faint moon-face mark."+DIFF,
  "huge, round, sleepy gold eyes and a tiny curious beak","lavender grey and pale mint, with a moonlight-gold accent","looking like image 1, a realistic owl",'lunar','cute')
@@ -52,7 +52,8 @@ V('bellowlet','Bellowlet',T+'Bellowary.jpg','baby',"A tiny, round cassowary chic
 V('furnacowary','Furnacowary',T+'Bellowary.jpg','final',"A towering forge bird whose chest is a roaring blast-furnace door, a tall chimney crest blasting smoke and sparks, molten cracks down its neck, and huge glowing bronze spur blades."+DIFF,"blazing orange eyes and a fierce, hot-tempered glare","soot black and bright blue, with a molten-orange accent","straps, a saddle, a rider",'ember','majestic')
 
 # ---- female looks (edit jobs from the approved male sheet) ----
-for _sp,_dir in [('sporcupine',E),('amanitusk',E),('geodelotl',E),('chandelotl',E),('bellowary',T),('kestrike',T),('arcestrel',E),('voltalon',E),('lunowl',T),('eclipsowl',E),('murmurling',T),('gongibbon',T),('gongrowl',E),('glaivyx',E),('lashyx',E)]:
+HOLD_FEMALE=True  # owner rethinking male/female looks (20:15); jobs held
+for _sp,_dir in ([] if HOLD_FEMALE else [('sporcupine',E),('amanitusk',E),('geodelotl',E),('chandelotl',E),('bellowary',T),('kestrike',T),('arcestrel',E),('voltalon',E),('lunowl',T),('eclipsowl',E),('murmurling',T),('gongibbon',T),('gongrowl',E),('glaivyx',E),('lashyx',E)]):
     X(_sp+'_f',_sp.capitalize()+' (female)',_dir+_sp.capitalize()+'.jpg',FEM)
 
 # ---- portraits for round-4 passes ----
