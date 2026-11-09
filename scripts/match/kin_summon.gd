@@ -21,12 +21,14 @@ var shrink := 0.0     # s of the shrink back left
 var grow := 0.0       # s of the bloom left (drawing only)
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var hit_k := 1.0      # x its damage while out: this species' place in the summon band (Ent.hurt)
 
 func _init(kin: Kin) -> void:
 	k = kin
 	var t := times(kin.ks)
 	dur = t.x
 	cd_base = t.y
+	hit_k = damage_k(kin.species)
 
 static func rules() -> Dictionary:
 	return Content.rules("boki_summon")
@@ -38,6 +40,19 @@ static func times(ks: KinSpec) -> Vector2:
 		var row: Dictionary = rules()["table"].get(String(ks.ai.get("role", "")), {})
 		cell = row.get(ks.size, cell)
 	return Vector2(float(cell[0]), float(cell[1]))
+
+## x a species' damage while summoned, from the rules' dmg_k (1 when unlisted): what puts it at its place in the
+## band of a Hunter's LMB (tools/summon_band_check.gd).
+static func damage_k(id: String) -> float:
+	return float(rules()["dmg_k"].get(id, 1.0))
+
+## x the damage of a hit `by` deals: its summon's hit_k while the window runs, else 1. Only on the Boki's own
+## game: a hit that comes in over the net was weighted where it was dealt.
+static func out_k(by: Ent) -> float:
+	if not is_instance_valid(by):
+		return 1.0
+	var k := by as Kin
+	return k.summon.hit_k if k and not k.remote and k.summon and k.summon.left > 0.0 else 1.0
 
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
