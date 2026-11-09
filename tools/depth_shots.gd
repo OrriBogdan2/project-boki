@@ -5,6 +5,8 @@ extends RefCounted
 ##   depth_a_edge   standing a metre from a cliff edge over the abyss
 ##   depth_b_step   at the top of a terrace step, a hunter on the lower tier
 ##   depth_c_low    the same step from below, looking up at a hunter on the upper tier
+## --edge-read adds (instead) five edges on the Hollow Crown, 3 abyss and 2 terrace lips, spread over the map and
+## taken from the match camera with the hunter on the lip tile: edge_1..3_abyss, edge_4..5_terrace.
 
 const DT := 1.0 / 60.0
 const SETTLE := 0.5     # s of match time before each capture
@@ -23,6 +25,11 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	var w := m.world
+	if "--edge-read" in OS.get_cmdline_user_args():
+		await _edge_read()
+		print("DEPTHSHOTS in %s" % dir)
+		main.get_tree().quit(0)
+		return
 	var edge := _find(func(x, z, d): return w.kind[w.idx(x + d.x, z + d.y)] == World.T_VOID)
 	var step := _find(func(x, z, d): return _step_to(w, x, z, d) >= 2)
 	await _shoot("depth_a_edge", edge[0], edge[1], edge[2])
@@ -40,15 +47,34 @@ func _step_to(w: World, x: int, z: int, d: Vector2i) -> int:
 ## First roomy ground tile (scanning from the middle out) with a neighbour that passes `test`:
 ## [tile, direction to the neighbour, tile the other hunter stands on].
 func _find(test: Callable) -> Array:
+	var found := _find_spread(test, 1, 0)
 	var w := m.world
+	return found[0] if not found.is_empty() else [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1), Vector2i(w.w / 2, w.h / 2 - 3)]
+
+## Up to `count` such tiles, each at least `apart` tiles from the ones before it.
+func _find_spread(test: Callable, count: int, apart: int) -> Array:
+	var w := m.world
+	var out: Array = []
 	for r in range(0, w.w / 2 - 3):
 		for z in range(w.h / 2 - r, w.h / 2 + r + 1):
 			for x in range(w.w / 2 - r, w.w / 2 + r + 1):
 				if w.kind[w.idx(x, z)] != World.T_GROUND or not w.roomy(x, z): continue
+				if out.any(func(o): return Vector2(o[0]).distance_to(Vector2(x, z)) < apart): continue
 				for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
 					if w.inb(x + d.x, z + d.y) and test.call(x, z, d):
-						return [Vector2i(x, z), d, Vector2i(x, z) - d * 3]
-	return [Vector2i(w.w / 2, w.h / 2), Vector2i(0, 1), Vector2i(w.w / 2, w.h / 2 - 3)]
+						out.append([Vector2i(x, z), d, Vector2i(x, z) - d * 3])
+						break
+				if out.size() >= count: return out
+	return out
+
+func _edge_read() -> void:
+	var w := m.world
+	var abyss := _find_spread(func(x, z, d): return w.kind[w.idx(x + d.x, z + d.y)] == World.T_VOID, 3, 24)
+	var lips := _find_spread(func(x, z, d): return _step_to(w, x, z, d) >= 1, 2, 24)
+	for i in abyss.size():
+		await _shoot("edge_%d_abyss" % (i + 1), abyss[i][0], abyss[i][1], abyss[i][2])
+	for i in lips.size():
+		await _shoot("edge_%d_terrace" % (i + 4), lips[i][0], lips[i][1], lips[i][2])
 
 func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i) -> void:
 	var w := m.world
