@@ -28045,5 +28045,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/murmurling_card2_w32_1.jpg",
     "ok": true
+  },
+  {
+    "id": "murmurling_card2_w32",
+    "name": "Murmurling (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/murmurling_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "murmurling_card2_w32",
+    "name": "Murmurling (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/murmurling_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_card2_w32",
+    "name": "Dragonkite (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dragonkite_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_card2_w32",
+    "name": "Dragonkite (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/dragonkite_card2_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_card2_w32",
+    "name": "Dragonkite (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dragonkite_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_card2_w32",
+    "name": "Flarmink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dragonkite_card2_w32",
+    "name": "Dragonkite (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/dragonkite_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_card2_w32",
+    "name": "Flarmink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_card2_w32_2.jpg",
+    "ok": true
   }
 ]
