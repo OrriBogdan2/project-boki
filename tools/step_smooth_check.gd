@@ -119,6 +119,10 @@ func _shots(main: Node, tiers: Array) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).get_slice("=", 1)
 	DirAccess.make_dir_recursive_absolute(dir)
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)       # the boot splash stays up when a tool starts the match by hand
+	if m.hud:
+		m.hud.visible = false
 	for hero in HEROES:
 		P.set_arch(hero)
 		_start_at(tiers[0])
