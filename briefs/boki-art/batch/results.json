@@ -28500,5 +28500,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_puffamus_stance_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_latchling_stance",
+    "name": "Latchling",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_latchling_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prowyak_stance",
+    "name": "Prowyak",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prowyak_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lockatara_stance",
+    "name": "Lockatara",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_lockatara_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_puffamus_stance",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_puffamus_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_stance",
+    "name": "Ringrove",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_ringrove_stance",
+    "name": "Ringrove",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_ringrove_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_soakybara_stance",
+    "name": "Soakybara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_soakybara_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_snuffapi_stance",
+    "name": "Snuffapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_snuffapi_stance_2.jpg",
+    "ok": true
   }
 ]
