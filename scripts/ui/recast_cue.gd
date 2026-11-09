@@ -7,7 +7,7 @@ extends RefCounted
 
 const RING_GAP := 8.0          # px from the slot edge to the timer ring
 const RING_W := 4.0            # px: the timer ring's width
-const TEXT_RISE := 26.0        # px from the slot's top edge up to the AGAIN text's baseline
+const TEXT_RISE := 36.0        # px from the slot's top edge up to the AGAIN text's baseline
 const TEXT_SIZE := 20
 const PULSE_HZ := 9.0          # rad/s of the pulse
 const TILE_RISE := 14.0        # px: the gap between the RMB slot and the floating LMB tile
@@ -45,8 +45,10 @@ static func draw(H, p: Hunter) -> void:
 	var ring_col := col.lerp(Color.WHITE, 0.25 * pulse)
 	c.draw_arc(r.get_center(), ring, -PI / 2, -PI / 2 + TAU * frac, 48, ring_col, RING_W, true)
 	shown = "%s AGAIN" % key
+	var tw := HudStyle.BIG.get_string_size(shown, HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_SIZE).x + 16.0
 	var tp := Vector2(r.get_center().x, r.position.y - TEXT_RISE)
-	HudStyle.ctext(c, tp, shown, TEXT_SIZE, col.lerp(Color.WHITE, 0.35 + 0.3 * pulse), 6)
+	H._rounded(Rect2(tp + Vector2(-tw * 0.5, -TEXT_SIZE - 2.0), Vector2(tw, TEXT_SIZE + 8.0)), HudStyle.KEY_BG, 7, glow, 2)
+	HudStyle.ctext(c, tp, shown, TEXT_SIZE, col.lerp(Color.WHITE, 0.35 + 0.3 * pulse), 3)
 
 ## The slot's screen rect, as the bar placed it (hover_spots); "primary" has no slot, so a tile floats over RMB's.
 static func _rect(H, slot: String) -> Rect2:
