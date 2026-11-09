@@ -48492,5 +48492,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_reapant_w1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lodestaff_e2",
+    "name": "Lodestaff (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gongrowl_p96",
+    "name": "Gongrowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gongrowl_p96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e1",
+    "name": "Lodestaff (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e2",
+    "name": "Lodestaff (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e1",
+    "name": "Lodestaff (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e2",
+    "name": "Lodestaff (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e2",
+    "name": "Lodestaff (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestaff_e1",
+    "name": "Lodestaff (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lodestaff_e1_1.jpg",
+    "ok": true
   }
 ]
