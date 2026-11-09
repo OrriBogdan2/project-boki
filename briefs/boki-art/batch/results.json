@@ -15515,5 +15515,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_gloamshell_pe_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_hivara_pe_w28",
+    "name": "Hivara (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_pe_w28",
+    "name": "Hivara (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara_pe_w28",
+    "name": "Hivara (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_pe_w28",
+    "name": "Kindlewren (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_pe_w28",
+    "name": "Kindlewren (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_kindlewren_pe_w28",
+    "name": "Kindlewren (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_kindlewren_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_pe_w28",
+    "name": "Lunowl (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_pe_w28",
+    "name": "Lunowl (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_pe_w28_2.jpg",
+    "ok": true
   }
 ]
