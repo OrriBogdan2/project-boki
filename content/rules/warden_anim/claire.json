@@ -9,7 +9,7 @@
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
 		"walk_speed": 2.2, "run_speed": 4.6
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.13},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
