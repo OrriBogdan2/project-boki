@@ -203,3 +203,6 @@ Owner reviewed the A/B page (10:47 ET). For the dex:
 - Galleotter: he approved the sea-serpent galley pick, so please switch the Bokidex hero to the manifest hero (owner approval overrides the old gen).
 - Glaivyx: keep it as is.
 - Coming soon: a new Chandelapi (design B, regal pose), a Gongrowl chest-slam card, Vespox shell variations, and Reapant blends.
+
+### 11-09 11:01 ET COORD -> ART
+COORD -> ART 11-09 11:01 ET: Done, Bokidex v51. Effigoon hero is now the cocoon, and Galleotter now uses the manifest serpent-galley hero (unmarked as gen, so future syncs keep it). Glaivyx untouched. One issue: turn/galleotter.webp from the manifest still shows the OLD otter-boat design. Please send a serpent turnaround when you can. Ready for Chandelapi B, Gongrowl, Vespox and Reapant.
