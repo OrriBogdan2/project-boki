@@ -54,6 +54,8 @@ const STONES_RANGE := 12.0     # m: how far the seeing-stones watch a foe
 const STONES_EVERY := 0.2      # s between picks
 var stones_t := 0.0
 
+const WARM_ROCKS := 16         # spare rocks built at match load: a rank-3 Stone Row (6), a Basalt Spine (9) and the hop's, all up at once
+
 func rock_def() -> Dictionary: return d.get("rock", {})
 func slam_def() -> Dictionary: return rmb_def()["slam"]
 
@@ -61,6 +63,13 @@ func _setup() -> void:
 	slam = BreahSlam.new(self)
 	spine = BreahSpine.new(self)
 	hop = BreahHop.new(self)
+
+## The loading screen's rehearsal: her spare rocks and her KitLooks bodies built into the pools, so the first Row,
+## Slam or launch builds nothing mid-fight (--first-cast-check: a Row built 57 meshes, a Slam 38, in one frame).
+func warm_fx(_at: Vector3) -> void:
+	RockLook.prewarm(m, WARM_ROCKS)
+	KitLooks.of(m).prewarm({"mote": 3, "rock": 1, "dashrock": 1, "boulder": 1, "footrock": 1, "burst": 1, "crater": 1,
+		"shard": 11, "crown": 1})
 
 # ------------------------------------------------------------------ X: Basalt Spine (BreahSpine)
 func cast_ult() -> bool: return HeroUlt.press(self, spine.start)

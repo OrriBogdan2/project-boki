@@ -61,6 +61,11 @@ func _setup() -> void:
 	well = OstraWell.new(self)
 
 # ------------------------------------------------------------------ X: Nightwell (OstraWell)
+## The loading screen's rehearsal: one of each of his KitLooks bodies in the pools (two sigils: the Trade's ends).
+func warm_fx(_at: Vector3) -> void:
+	KitLooks.of(m).prewarm({"aura": 1, "mote": 1, "star": 1, "sigil": 2, "dark": 1, "column": 1, "orb": 1, "spear": 1,
+		"crown": 1, "well_dome": 1})
+
 func cast_ult() -> bool: return HeroUlt.press(self, well.start)
 func has_ult() -> bool: return true
 func ult_running() -> bool: return well.running()

@@ -94,12 +94,11 @@ static func rock(
 		by, at, dir, {"length": len_, "hp": hp, "time": time_, "block": "enemy", "move": true, "color": "#c98d4a"}, 1.0
 	)
 	var old: Node3D = w["node"]
-	var n := RockLook.make()
+	var n := RockLook.take(m)
 	var tall := top / ROCK_TOP
 	if tall < 1.0:
 		RockLook.upright(n)
 	n.scale = Vector3(len_ / 1.15, tall, 1.0)
-	m.add_child(n)
 	RockLook.cool(n)
 	w["node"] = n
 	w["rock"] = true
@@ -140,7 +139,7 @@ static func rock_in_reach(base_y: float, y: float) -> bool:
 static func remove_rock(m: Node, w: Dictionary, send := true) -> void:
 	m.verbs.walls.erase(w)
 	if is_instance_valid(w.get("node")):
-		(w["node"] as Node3D).queue_free()
+		RockLook.park(w["node"] as Node3D)
 	if send:
 		tx(m, ["zone", "rockgo", String(w.get("rid", ""))])
 

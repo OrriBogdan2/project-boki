@@ -325,6 +325,13 @@ func _give(kind: String, n: Node3D) -> void:
 func pooled(kind: String) -> int:
 	return (pools.get(kind, []) as Array).size()
 
+## The loading screen's rehearsal (ArchKit.warm_fx): kind -> how many of it a cast takes at once, built into the
+## pools, so the first slam or sigil builds nothing mid-fight (Tarek's first Slam built 38 meshes in one frame).
+func prewarm(kinds: Dictionary) -> void:
+	for kind in kinds:
+		for i in int(kinds[kind]) - pooled(String(kind)):
+			_give(String(kind), _build(String(kind)))
+
 # ------------------------------------------------------------------ shot skins
 ## Dresses a Match shot in a skin (the shot dictionary spawn_shot just appended). The shared sphere goes
 ## back to Match's pool at once, so it can't be drawn under ours.
