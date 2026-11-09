@@ -75,6 +75,15 @@ func cast() -> bool:
 	kit.net_ring(from, float(data()["range"]), MageKit.PINK)
 	return true
 
+## RecastCue: X again during the hang brings her down at the marker (she comes down by herself when it ends).
+func window() -> Dictionary:
+	if phase() != AIR:
+		return {}
+	var xd := data()
+	var t := float(leap["t"])
+	var hover := float(xd["hover"])
+	return RecastCue.window("x", hover - t, hover, leap["land"], t >= float(xd["min_air"]), true)
+
 ## A second press while she hangs brings her down; pressed during the climb it waits for the hang.
 func recast() -> bool:
 	match phase():

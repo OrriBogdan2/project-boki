@@ -343,6 +343,7 @@ func _draw_world_labels() -> void:
 	_draw_lair_labels()
 	_draw_truce_marks()
 	_draw_wisp_rings()
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
@@ -1203,6 +1204,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x += s + gap
 	var di := p.slot_info("dash")
 	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
+	RecastCue.slot(self, p, "dash", Rect2(Vector2(x, y), Vector2(s, s)))
 	if di.get("full", false):
 		# the payoff lives on the dash (the Thief's Primed shot into 3 Marks): the same gold dot
 		c.draw_circle(Vector2(x, y) + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
@@ -1214,7 +1216,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	if ei.get("full", false):
 		# the payoff lives on E (the Mage's Flashpoint): the same gold dot as the right click's
 		c.draw_circle(er.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
-	if float(ei.get("up", 0.0)) > 0.0:
+	if not RecastCue.slot(self, p, "e", er) and float(ei.get("up", 0.0)) > 0.0:
 		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
 	# X: the hero's own ultimate (the Merge sits on the right: GripHud)
@@ -1289,6 +1291,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
+	RecastCue.slot(self, p, "lmb", Rect2(r.position + Vector2(14, 8), Vector2(52, 52)))      # the recall (Bulwark)
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
 	var wn := String(p.wpn["name"]).to_upper()
