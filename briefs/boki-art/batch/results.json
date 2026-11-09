@@ -46077,5 +46077,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_flarmink_p88_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_rimefang_gap",
+    "name": "Rimefang",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_rimefang_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_effigoon_p88",
+    "name": "Effigoon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_effigoon_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glaivyx_p88",
+    "name": "Glaivyx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glaivyx_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_galleotter_gap",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_galleotter_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prismink_p88",
+    "name": "Prismink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_prismink_p88_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_cisternmander_p88",
+    "name": "Cisternmander",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_cisternmander_p88_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthollow_gap",
+    "name": "Crofthollow",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_gap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthollow_gap",
+    "name": "Crofthollow",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_gap_1.jpg",
+    "ok": true
   }
 ]
