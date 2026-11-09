@@ -167,7 +167,7 @@ const FACES := {
 }
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
-	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
+	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "lunge": "angry", "cast": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
@@ -197,6 +197,7 @@ var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
 var _pulse := 0
+var _lunging := false
 var _shot_left := 0.0
 var _shot := ""
 var _asleep := false
@@ -273,6 +274,7 @@ func _ready() -> void:
 	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+	BokiSwing.add_clips(player)
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
@@ -347,9 +349,11 @@ func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
 	if p != _pulse:
 		_pulse = p
-		_start_shot("ability")
-	if String(root.get_meta("kstate", "")) == "attack":
-		_start_shot("attack")
+		_start_shot("cast")
+	var lunging := String(root.get_meta("kstate", "")) == "attack"
+	if lunging and not _lunging:
+		_start_shot("lunge")
+	_lunging = lunging
 	_shot_left -= dt
 	var asleep := String(root.get_meta("kstate", "")) == "sleep"
 	if asleep != _asleep:

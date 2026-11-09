@@ -2,6 +2,8 @@ extends RefCounted
 ## --boki-rig-shots --shots-dir=<dir> [--species=cindle] [--px=512]: the review sheets of a rigged Boki, in the engine.
 ## <dir>/turntable.png, faces.png, coats.png, anim_<clip>.png (a strip of each clip), match.png (match camera),
 ## farm.png and farm_close.png (farm camera) and frames/<clip>/NNN.png for the GIFs (tools/boki/review_gifs.sh).
+## --anims-only --species=a,b,c --clips=cast,lunge: only the clip strips, one folder per species, and strip_<clip>.png
+## stacking them (one row each).
 ## Needs a renderer.
 
 const YAWS := 8
@@ -35,6 +37,7 @@ var out := ""
 var species := "cindle"
 var px := 512
 var clips: Array = CLIPS
+var anims_only := false
 
 func run(m: Node) -> void:
 	main = m
@@ -43,9 +46,15 @@ func run(m: Node) -> void:
 		if a.begins_with("--species="): species = a.substr(10)
 		if a.begins_with("--px="): px = int(a.substr(5))
 		if a.begins_with("--clips="): clips = Array(a.substr(8).split(","))
+		if a == "--anims-only": anims_only = true
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
+	if anims_only:
+		await _strips(species.split(","))
+		print("BOKI_RIG_SHOTS_DONE")
+		main.get_tree().quit()
+		return
 	await _turntable()
 	await _faces()
 	await _coats()
@@ -276,6 +285,21 @@ func _anims() -> void:
 	for c in clips:
 		await _clip(vp, rig, String(c))
 	vp.queue_free()
+
+## The clip strips of several species, each in its own folder, then one sheet per clip with a row per species.
+func _strips(ids: PackedStringArray) -> void:
+	var base := out
+	for id in ids:
+		species = id
+		out = base.path_join(id)
+		DirAccess.make_dir_recursive_absolute(out)
+		await _anims()
+	for c in clips:
+		var sheet := Image.create(px * STRIP, px * ids.size(), false, Image.FORMAT_RGBA8)
+		for i in ids.size():
+			var row := Image.load_from_file(base.path_join(ids[i]).path_join("anim_%s.png" % c))
+			sheet.blit_rect(row, Rect2i(0, 0, px * STRIP, px), Vector2i(0, i * px))
+		sheet.save_png(base.path_join("strip_%s.png" % c))
 
 func _clip(vp: SubViewport, rig: BokiRig, c: String) -> void:
 	rig.set_clip(c, 0.0)
