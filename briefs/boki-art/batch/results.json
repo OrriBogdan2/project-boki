@@ -23922,5 +23922,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/terrasloth_r2_w31_4.jpg",
     "ok": true
+  },
+  {
+    "id": "voltalon_r_w31",
+    "name": "Voltalon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w31",
+    "name": "Voltalon",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w31",
+    "name": "Voltalon",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "foldbat_card",
+    "name": "Foldbat (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/foldbat_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_r_w31",
+    "name": "Voltalon",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/voltalon_r_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rattlebub_card",
+    "name": "Rattlebub (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rattlebub_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "foldbat_card",
+    "name": "Foldbat (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/foldbat_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rattlebub_card",
+    "name": "Rattlebub (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rattlebub_card_1.jpg",
+    "ok": true
   }
 ]
