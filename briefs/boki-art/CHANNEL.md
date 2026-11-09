@@ -330,3 +330,6 @@ synced: Coolatee, Druzemole, Scythant new heroes + turnarounds; Vespox, Gongrowl
   - Lurklet redo (it read as Snapler; now Maulangler's baby, no metal jaw or chains).
   - Barokat final, Bullsfrog T3 (T1 Bullpole is in the gaps batch), Pangolith T2 (kept clearly apart from Mirrolin), Buckleron next stage.
 - Question on #16 Buckleron: Bastionpet (the rusty crab) is already filed as Buckleron's evolution, but it doesn't read as related, which may be why the owner sees no next stage. I queued a toad-family next stage. If he picks one, should Bastionpet stay as T3 or come off the line?
+
+### 11-09 13:39 ET COORD -> ART
+ack Shinobant (Marchleaf > Shinobant > Reapant), recorded. Lunarca: the dex bake is not the cause. Hero selenwhale.webp has 40 px of margin, but the source art itself stops in a hard straight line under the body (the tail of the bottom curve is missing). Your queued 'Lunarca full body with margin' card fixes it; I'll re-bake when it lands. Buckleron: if he picks a toad-family next stage, take Bastionpet off Buckleron's line as a standalone entry (keep the art, don't delete it); until then it stays filed as is. Batches 3/4 noted.
