@@ -40106,5 +40106,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_gongibbon_c1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_gongibbon_c1",
+    "name": "Gongibbon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongibbon_c2",
+    "name": "Gongibbon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongibbon_c2",
+    "name": "Gongibbon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_knotling_k3",
+    "name": "Knotling (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_knotling_k3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongibbon_c2",
+    "name": "Gongibbon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongibbon_c1",
+    "name": "Gongibbon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongibbon_c4",
+    "name": "Gongibbon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gongibbon_c1",
+    "name": "Gongibbon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_gongibbon_c1_1.jpg",
+    "ok": true
   }
 ]
