@@ -27,3 +27,9 @@ for _k,_b in enumerate([
       'prompt':("Creature-collector monster concept art for a fantasy action game. Image 1 and image 2 are two versions of this creature: blend them, keeping image 1's insect body and colours and image 2's cooler, more upright ninja attitude. Image 3 is the style reference only. "
         "ONE creature only, full body, three-quarter view, centred with about 8 percent margin, plain flat pale grey background, no shadow, no text, no effects. "
         +CORE+LESSONS+desc(_b+" One clear idea, few parts.",'narrow, glowing eyes and a silent stare','deep plum and black, with a crimson accent','clothing, held weapons, green, leaves, a human face','swarm','majestic'))})
+# 10:50 ET owner: Eclipsowl pick needs the wings from the live card. Live card has the wings but a soft blushing face;
+# the concept has the fiercer face. Combine: live card body + wings, concept face, no rock base.
+_e=[_C+'Eclipsowl.jpg',_O+'c_eclipsowl_d2_2.jpg']
+SPECS.append({'id':'eclipsowl_cardb','name':'Eclipsowl (hero card)','refs':_e+[SRA],'runs':4,'aspect':'1:1','size':'2K','prompt':CARD('Eclipsowl','final','planted on all four clawed feet with its big dark feathered wings half spread (exactly the wings from image 1), the fierce narrow-eyed face from image 2 with no blush, crescent horn, glowing crescent markings, no rock or ground base. Same design otherwise')})
+P('eclipsowl_pb','Eclipsowl',_C+'Eclipsowl.jpg','planted with dark wings half spread, fierce narrow eyes, no blush')
+TA('Eclipsowl',_C+'Eclipsowl.jpg'); SPECS[-1]['id']='ta_eclipsowl_pb'

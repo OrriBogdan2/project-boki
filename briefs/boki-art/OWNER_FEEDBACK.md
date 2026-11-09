@@ -71,3 +71,4 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 56 | Vespox: wants variations with more on the shell; unsure about the extra eyes on the shell | 4 variations (spiked crown, venom-sac jewels, jagged frill: all without shell eyes; one with eyes + back plates) | GENERATING |
 | 57 | Reapant: a bit cooler and more humanoid, between the two | 3 blends of w4 (insect) and w2 (upright ninja) | GENERATING |
 | 58 | All other A picks approved (Moatpole, Spanglin, Moundlet, Cisternmander, Glassolotl, Ringrove, Murmuron, Seamwyrm, Prismink, Galleotter, Chuggamus, Rimink, Lodestaff, Eclipsowl, Rippmink) | Kept | DONE |
+| 59 | 10:50 ET: Eclipsowl pick needs the live card's wings | New card/portrait/sheet: live body + wings, the concept's fiercer face, no rock base | GENERATING |
