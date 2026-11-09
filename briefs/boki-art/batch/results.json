@@ -27261,5 +27261,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/flarmink_e_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "glaciatee_r_w32",
+    "name": "Glaciatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r_w32",
+    "name": "Galleotter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r_w32",
+    "name": "Galleotter",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w32",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r_w32",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_r_w32",
+    "name": "Galleotter",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/galleotter_r_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r_w32",
+    "name": "Glaciatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee_r_w32",
+    "name": "Glaciatee",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/glaciatee_r_w32_3.jpg",
+    "ok": true
   }
 ]
