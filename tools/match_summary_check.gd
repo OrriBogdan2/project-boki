@@ -114,6 +114,7 @@ func run(main: Node) -> void:
 	main.get_tree().quit()
 
 func _shot(main: Node, path: String) -> void:
+	main.fade.reveal(0.05)     # the boot splash stays up when a tool starts a screen by hand
 	for i in 120:
 		await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(path)
