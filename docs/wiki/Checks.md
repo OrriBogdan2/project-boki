@@ -62,7 +62,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
-| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent, unstable mixes |
+| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent, unstable mixes, the preview card's species and lean against 20 hatched babies |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |
 | `--economy-check` | Full backpack swaps, smart loot, extracting fills the armory, feeders feed (also while away), starving to a grave, the Soul Shrine |

@@ -4759,7 +4759,7 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 	dv.add_child(IvView.heading())
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
-	NookRules.preview(dv, a, b)
+	dv.add_child(NookPreview.card(a, b, get_tree()))
 	var br := UI.hbox(8)
 	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
 	dv.add_child(br)
@@ -4856,7 +4856,7 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair": pa["lean"] = {"ember": 6.0, "storm": 2.0}; nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)
