@@ -64,3 +64,8 @@ for _slot,_tier,_dirs in _NEWLEG:
           'prompt':("Creature-collector monster concept art for a fantasy action game. Image 1 is the style reference only (soft hand-painted shading, clean thin dark outline, big glossy eyes); never copy its creatures. "
             "ONE creature only, full body, gentle three-quarter view with the head turned toward the viewer, centred with about 8 percent margin, plain flat pale grey background, no shadow, no ground, no text, no effects. "
             +CORE+LESSONS+_LEG[_tier]+_b+" One clear idea, few parts. It must not look like any existing Boki.")})
+# Lunarca: selenwhale_card101 still ran off the bottom (tall pose). Horizontal swim fits the square.
+SPECS.append({'id':'selenwhale_card106','name':'Lunarca / Selenwhale (hero card)','refs':[_C+'Selenwhale.jpg',SRA],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':CARD('Selenwhale','final','swimming HORIZONTALLY from left to right through the air, its whole long body level across the image, drawn small so the cratered head on the right and both tail flukes on the left are fully inside the frame, flippers visible')+" Nothing may touch or be cut off at any edge. The body must not run off the bottom of the image."})
+# Eclipsowl female sheet came back as two rows of four (both runs).
+TA('Eclipsowl','briefs/boki-art/batch/out/c_eclipsowl_f_n_4.jpg'); SPECS[-1]['id']='ta_eclipsowl_f_r5'; SPECS[-1]['prompt']+=' Exactly ONE single row of four views side by side, never two rows, never eight views. Plain background only, no ground.'

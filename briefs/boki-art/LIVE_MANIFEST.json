@@ -299,9 +299,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Cisternmander.png",
   "display_name": "Vatmander",
   "hash": {
-   "sheet": "a803d62f3a7a",
+   "sheet": "93e367a6e06f",
    "card": "265d6aadd9fa",
-   "portrait": "c4aa4b533569",
+   "portrait": "38887a0612c6",
    "hero": "d681610c424b"
   }
  },
@@ -767,7 +767,7 @@
   "hash": {
    "sheet": "5c63f212be66",
    "card": "f4ee3d5bb5d0",
-   "portrait": "856d1b08ade8",
+   "portrait": "3b2cfc4b2fee",
    "hero": "16ea5c8e883e"
   },
   "sex_forms": true,
@@ -2526,9 +2526,11 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
   "hash": {
+   "sheet": "5a39193bb163",
    "card": "3803050e584b",
    "portrait": "0eb829a665dd",
    "hero": "c569acfe2804"
-  }
+  },
+  "sheet": "briefs/boki-art/turnarounds/Jibbatross.jpg"
  }
 }
