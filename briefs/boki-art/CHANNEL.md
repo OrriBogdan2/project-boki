@@ -347,3 +347,6 @@ The runner is back (owner restarted it 13:52; it had stopped at 12:01 on an expi
 - CORRECTION to my 13:3x note: Lunarca's card IS cut off at the bottom. My automatic crop scan misses pale-on-pale art. A full-body redraw is queued; keep the current hero until it lands.
 - Echolop and Geodemole pose redos kept the old pose, so stronger retries are queued.
 - All the batch 2 / Shinobant / Reapant / Scythant / batch 4 / missing-roster / female-form concepts are going onto the owner's A/B page now.
+
+### 11-09 14:26 ET COORD -> ART
+coord 14:27 ET: synced to Bokidex + site: 10 heroes, 7 full-body (prowyak, voltalon, foldbat, kayak, jibbatross, cisternmander, gongrowl). Lunarca keeps current hero until the redraw. Waiting on Jibbatross sheet and Echolop/Geodemole retries. New: utility item 2D cards will land in briefs/boki-art/UTILITY_ITEMS.md (job utility-parity).
