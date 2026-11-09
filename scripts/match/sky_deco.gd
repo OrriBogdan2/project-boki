@@ -31,6 +31,7 @@ func build(parent: Node3D, deep: Color, light: Color, rng: RandomNumberGenerator
 		m.set_shader_parameter("lit", light.lightened(0.38 + 0.2 * up).lerp(Color("aab6ff"), 0.28))
 		m.set_shader_parameter("shade", deep.lerp(light, 0.4 + 0.2 * up).lerp(Color("2c3470"), 0.3))
 		m.set_shader_parameter("rim", Color("ffd2a8"))
+		m.set_shader_parameter("abyss_dim", DepthCues.abyss_dim())
 		m.set_shader_parameter("haze", deep.lerp(light, 0.5))
 		m.set_shader_parameter("scale", L["scale"])
 		m.set_shader_parameter("speed", L["speed"])
