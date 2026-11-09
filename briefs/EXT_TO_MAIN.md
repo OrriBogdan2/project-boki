@@ -3741,3 +3741,16 @@ ART lanterloris_r 8.5 briefs/boki-art/batch/out/lanterloris_r_2.jpg
 
 ## 2026-11-09 feel (job 20261109-013750-a4): CLAIM Boki 3D: Umbrathere (umbrathere) from the owner's new concept sheet
 - CLAIM (escalation of 20261109-003637-a4): re-check briefs/art-refs/boki/umbrathere_turnaround.png (latest intake 04eb5144b, the task named 7e91f47b5), then build on ext/boki3d-umbrathere if it passes.
+
+## 2026-11-09 deep (job 20261109-003626-a1): READY update ext/reticle-style-1108 (PR #25)
+Escalation of job 20261108-201507-a1. Branch now at dd53dee36. The earlier GPU strips were unusable (rp1-* workers
+render all-white for this tool; on the PC the desktop cursor ignored the warp, so the crop missed the reticle and the
+practice bar's hover/swap card covered it). Fixes: `ReticleHud.pin` (one wiring line in hud.gd, tools only) pins the
+reticle; the shot tool crops at the drawn reticle, holds hit/bloom states up to the capture, hides the practice bar and
+waits out the swap card. GPU strips, all 12 hunters (rest | bloom | hit | crit), pinned to pc-MRROBOTO:
+before (main + shot tool) jobq 20261109-013115-05643, after 20261109-013111-19674; copies in
+/home/boki/cj/20261109-003626-a1/shots/reticle-1108/{before,after}. Before: white chunky X hit marker, no hunter colour.
+After: hunter-coloured dot and arcs, thin short ticks off the ring on a hit, gold ticks plus a ring pulse on a crit.
+Checks: --reticle-check 0 failures, --aimkit-check 55/0, health.py --strict OK. Still open: --title-check 8 fails are
+from main's ui_theme.gd (untouched here); tuning.json add/add with ext/movement-unify, keep both (disjoint keys).
+Note: rp1-0/rp1-1 return white frames for viewport-capture tools; pin such jobs with --only pc-MRROBOTO.
