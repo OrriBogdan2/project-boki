@@ -131,3 +131,29 @@ Rows: hit_f, hit_b (the game's hand-off, 1/30 s a frame), stun, fall, land (keye
 ![Mossy](react_audit/bulwark.jpg)
 ![Sable](react_audit/thief.jpg)
 ![Motley](react_audit/ostra.jpg)
+
+## Part 2 (ext/anim-react-2): the flinch over a run or a cast, the knock's lean, a stun that reads
+
+Part 1 fixed how the clips are keyed. The rest of the Hunters failed on how the clips are played (warden_clips.gd), so
+this part changes the layer and checks all twelve.
+
+- **The flinch is an additive over whatever plays.** The hit clip used to be a pick of its own: it lost to every kit move
+  (a hit while casting showed nothing) and, while running, replaced the arms and torso. Now each hit clip is turned at
+  load into a delta from its own last pose (`hit_f_add`, rotations only) and an Add2 layer (`react`, the same upper
+  bones as the upper-body blend) plays it by `hit_t` over the tree's output: a run keeps running, a cast keeps casting,
+  the stun loop keeps looping, and the body still jolts. The clips and their timing are unchanged: dolm `hit_f` reads
+  0.155 -> 0.160 at 0.1 s, Kael 0.234 -> 0.228. Gate: `over_run` and `over_cast`, how far the body is from the same
+  moment with no hit, 0.1 s in (bar 0.03). Over a cast it was 0 before for every Hunter (the kit move won the pick).
+- **A knock leans where it sends him.** There is no knock flag in the state (hunter.gd is frozen), so a knock is read
+  off it: a hit less than 0.6 s ago and a body faster than 1.4 x his run speed, or in the air. The hips tip the body
+  (0.5 rad at 8 m/s, eased at 14 /s) so the head goes with the blow and the feet trail: back from a hit on the front,
+  forward from one behind, over to the side from a flank hit; any other direction is the vector between. Gate: `knock
+  lean`, the head against the hips along the knock, back / forward / left / right, same fall without the lean
+  (bar 0.04 of height; 0.18 to 0.32 measured). Stun and knock numbers are untouched; this is pose only.
+- **Seven stun loops barely moved** (0.041 to 0.069 of the Hunter's height: Vex, Tenzo, Motley, Lace, Neve, Sable,
+  Sparkle, against 0.11 to 0.22 for the rest). `glb_react.py scale` took their travel up 1.7x to 2.4x (all bones; the
+  loop stays closed): 0.10 to 0.12. Gate: `stun moves`, bar 0.08. Motley's seam went 0.008 -> 0.020 (the bar), so his
+  factor stayed at 2.1.
+
+`--react-audit` after: 12 Hunters, FAIL 0 (rows now also carry `over_run`, `over_cast`, `knock`). Not done: the clip
+scripts in tools/art1 still hold the old stun keys, a Blender rebuild must re-apply the seven (docs/DEBT.md).
