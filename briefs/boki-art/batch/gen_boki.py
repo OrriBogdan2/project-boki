@@ -22,7 +22,7 @@ def main():
     ap.add_argument("--push", action="store_true", help="git commit and push the new images")
     ap.add_argument("--only", default="", help="comma-separated job ids")
     ap.add_argument("--size", default=None, help="override size, e.g. 2K")
-    ap.add_argument("--parallel", type=int, default=8, help="images generated at the same time")
+    ap.add_argument("--parallel", type=int, default=12, help="images generated at the same time")
     ap.add_argument("--watch", action="store_true", help="keep running: pull new jobs every minute, generate, push")
     a = ap.parse_args()
     if not os.environ.get("GEMINI_API_KEY"):
@@ -97,7 +97,7 @@ def main():
                     print("\nSTOPPING: the API key was rejected. Set it again with: export GEMINI_API_KEY=\"your key\"", flush=True)
                     os._exit(2)
                 print(f"   {job['id']} run {run} attempt {attempt+1} failed: {entry['error']}", flush=True)
-                time.sleep(10 * (attempt + 1))
+                time.sleep((60 if ("429" in str(e) or "RESOURCE_EXHAUSTED" in str(e)) else 10) * (attempt + 1))
         with lock:
             results.append(entry)
             RESULTS.write_text(json.dumps(results, indent=2))

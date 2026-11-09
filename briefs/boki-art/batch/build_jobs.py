@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 SR='briefs/boki-art/style_refs/boki_style_ref_v2.png'
+SR3='briefs/boki-art/style_refs/boki_style_ref_v3.jpg'
+STYLE2="Image 2 is a style guide only: match the finish, line weight, shading and colour treatment of the creatures in image 2 exactly, but never copy their designs, faces or colours. "
 T='briefs/boki-art/turnarounds/'; E='briefs/boki-art/evolutions/'
 ELEM={
 'ember':'ember, shown clearly by glowing orange-red ember cracks and a few rising sparks',
@@ -41,15 +43,16 @@ def evo(rel,d):
 def desc(body,face,cols,avoid,el,arch):
     return f"{body} Face: {face}. Main colours: {cols}. Avoid: {avoid}. Element: {ELEM[el]}. Archetype: {ARCH[arch]}."
 SPECS=[]
-def B(i,n,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[SR],'prompt':base(desc(body,face,cols,avoid,el,arch))})
+def B(i,n,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[SR,SR3],'prompt':base(STYLE2+desc(body,face,cols,avoid,el,arch))})
+def U(i,n,ref): SPECS.append({'id':i+'_4k','name':n,'refs':[ref],'runs':1,'size':'4K','prompt':"Re-render image 1 at full quality: keep it exactly the same, the same creature, design, colours, every detail, the same views in the same layout and the same plain background. Only increase the sharpness and finish. Do not change, add or remove anything."})
 def X(i,n,ref,instr,runs=2): SPECS.append({'id':i,'name':n,'refs':[ref],'runs':runs,'prompt':"Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: "+instr+" Do not add anything else."})
-def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch))})
+def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref,SR3],'prompt':evo(rel,STYLE2+desc(body,face,cols,avoid,el,arch)),'runs':3 if rel in ('baby','mid') else 2})
 import glob
 for _f in sorted(glob.glob(str(HERE/'specs_*.py'))): exec(open(_f).read())
 jobs=json.loads((HERE/'jobs.json').read_text()) if (HERE/'jobs.json').exists() else []
 have={j['id'] for j in jobs}
 for s in SPECS:
     if s['id'] in have: continue
-    s.setdefault('runs',2); s.setdefault('aspect','16:9'); s.setdefault('size','4K'); jobs.append(s)
+    s.setdefault('runs',2); s.setdefault('aspect','16:9'); s.setdefault('size','2K'); jobs.append(s)
 (HERE/'jobs.json').write_text(json.dumps(jobs,indent=2))
 print(len(jobs),'jobs')
