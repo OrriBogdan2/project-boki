@@ -6,6 +6,7 @@ extends RefCounted
 ## state() is the data (checked in --extract-check); draw() puts it inside the safe area.
 
 const SAFE := Vector2(0.04, 0.04)     # of the screen kept clear on each side and edge
+const PROMPT_CLEAR := 262.0           # px from the bottom edge that the interact prompt (and its bar) fills
 const BOX_W := 330.0                  # px at 1080p, scaled with screen height
 const ROW_H := 20.0                   # px per text row at 1080p
 const FAR := Color(0.75, 0.78, 0.85)  # the arrow and distance
@@ -52,12 +53,13 @@ static func covers_prompt(m: Match, it: Dictionary) -> bool:
 static func safe_rect(sz: Vector2) -> Rect2:
 	return Rect2(sz * SAFE, sz * (Vector2.ONE - SAFE * 2.0))
 
-## Where the box sits: top centre, below the clock row, kept inside the safe area.
+## Where the box sits: bottom centre, just above the interact prompt (the top is the message lane), inside the
+## safe area.
 static func box_rect(sz: Vector2, rows: int) -> Rect2:
 	var k := _scale(sz)
 	var box := Vector2(BOX_W, ROW_H * (rows + 1) + 14.0) * k
 	var safe := safe_rect(sz)
-	var at := Vector2(sz.x * 0.5 - box.x * 0.5, sz.y * 0.13)
+	var at := Vector2(sz.x * 0.5 - box.x * 0.5, sz.y - PROMPT_CLEAR - box.y)
 	at = at.clamp(safe.position, safe.end - box)
 	return Rect2(at, box)
 
