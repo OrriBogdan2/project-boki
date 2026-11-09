@@ -205,6 +205,7 @@ func press_rmb() -> void:
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
+	play("arc_heavy_wind")          # the draw shows on the press (--input-latency-check); its clip runs on the hold's clock
 
 func rmb_hold_tick(t: float) -> void:
 	if t > float(rmb_def()["hold"]) and not pin_aim:
@@ -267,6 +268,8 @@ func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
 	if not c.get("hold", false):
+		if anim_id == "arc_heavy_wind":
+			anim_id = ""
 		return                     # a tap before the draw starts looses nothing and costs nothing
 	if not spend_rmb(): return
 	var pd: Dictionary = rmb_def()["pin"]

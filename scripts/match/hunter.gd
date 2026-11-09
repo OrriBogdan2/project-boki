@@ -3146,6 +3146,8 @@ func _anim_state(stretch: float) -> void:
 	if ak and ak.anim_id != "":
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
 		s["kmove_t"] = m.time - ak.anim_at
+	else:
+		s.erase("kmove")                       # a move the kit cleared ends (kept, it froze on its last frame)
 	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
