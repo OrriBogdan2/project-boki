@@ -22,3 +22,6 @@ The style block now reads:
 
 ## Style ref v2 (Nov 8, 15:10 ET)
 `boki_style_ref_v2.png` shows three keepers on the pale grey sheet background: Mycroll (cute), Lockatara (tough, grumpy, titan) and Chuggamus (tough, steampunk, ember). It replaces boki_style_ref_2d.png as image 1. Why: the website crops have a dark background, which is the likely cause of the dark floor and ghost reflections in about a third of the results, and both are the same cute small archetype, which pulled every face toward big chibi eyes. The new ref shows range within one style.
+
+## Nov 9 update: ONE style (owner)
+`boki_style_ref_2d.png` is the only style anchor again. v2 and v3 above are retired (kept for history only). See `../STYLE_CANON.md`.
