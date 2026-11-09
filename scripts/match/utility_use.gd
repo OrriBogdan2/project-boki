@@ -42,14 +42,14 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h._fold_for_action()
 			h.drink_t = Hunter.DRINK_TIME
 			h.vuln_fx_t = 0.0
-			m.sfx("pickup", h.pos, -6.0, 0.7)
+			m.sfx("use_tonic", h.pos, -4.0)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"repair":
 			h._fold_for_action()
 			h.kit_t = Hunter.KIT_TIME
 			h.vuln_fx_t = 0.0
-			m.sfx("build", h.pos, -6.0, 1.3)
+			m.sfx("use_armor_kit", h.pos, -4.0)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"mend":

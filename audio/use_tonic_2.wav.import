@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://bwyxu7h2wkbrs"
-path="res://.godot/imported/pickup_arms.wav-46fd7046de9a127859eb1d54b4ee224e.sample"
+uid="uid://cxmjwbn1u1010"
+path="res://.godot/imported/use_tonic_2.wav-fd1f62a394fd19d35301cbdf081b1459.sample"
 
 [deps]
 
-source_file="res://audio/pickup_arms.wav"
-dest_files=["res://.godot/imported/pickup_arms.wav-46fd7046de9a127859eb1d54b4ee224e.sample"]
+source_file="res://audio/use_tonic_2.wav"
+dest_files=["res://.godot/imported/use_tonic_2.wav-fd1f62a394fd19d35301cbdf081b1459.sample"]
 
 [params]
 

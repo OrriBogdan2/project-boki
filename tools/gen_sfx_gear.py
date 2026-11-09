@@ -1,8 +1,6 @@
-"""Pickup and glove sounds (docs/AUDIO.md). Run from tools/: python3 gen_sfx_gear.py
+"""Glove sounds (docs/AUDIO.md). Run from tools/: python3 gen_sfx_gear.py
+Pickup cues are tools/gen_sfx_pickups.py (PickupSfx).
 
-Pickups, one short cue per kind of thing (PickupSfx): armour = a dull plate clank, weapon or glove = a
-steel snick, supply (tonic, armour kit, seed, belt item) = a glass clink and cork pop, gem or gold = a
-rising bright chime, key = two ringing falling metal notes.
 Gloves, own sounds for four of them: Blink (a pitch-dropping pop out and a bright swish in), Barrier
 (stone rising out of the ground), Hook (a rope whip, then a hard grab), Rocket (ignition then a roar).
 """
@@ -20,46 +18,6 @@ def jit(i, spread=0.02):
 
 def room(x, amt=0.5):
     return S.reflections(x, ((0.017, 0.18 * amt, 2600), (0.037, 0.12 * amt, 1800), (0.061, 0.07 * amt, 1200)))
-
-
-# ---------------------------------------------------------------- pickups
-def pickup_armor(i):
-    j = jit(i)
-    plate = S.fm(210 * j, 1.47, 2.2, 0.28, 0.07) * 0.8
-    thud = S.kick(120 * j, 60, 0.12, 0.03, 0.05) * 0.9
-    scrape = bpf(noise(0.05), 900, 3200) * env(N(0.05), 0.002, 0.012) * 0.3
-    return lpf(room(mix(plate, thud, scrape), 0.4), 3800)
-
-
-def pickup_arms(i):
-    j = jit(i)
-    snick = S.click(0.006, 2800, 8000, 0.002) * 0.9
-    slide = bpf(noise(0.11), 2500 * j, 7500) * env(N(0.11), 0.01, 0.04) * np.linspace(0.3, 1.0, N(0.11)) * 0.5
-    lock = at(S.fm(1250 * j, 2.3, 1.2, 0.12, 0.03) * 0.55, 0.075)
-    return room(mix(snick, slide, lock), 0.3)
-
-
-def pickup_supply(i):
-    j = jit(i)
-    clink = S.chime(1750 * j, 0.22, 0.08, ((1.0, 1.0), (2.4, 0.35))) * 0.7
-    pop = at(S.sweep(300 * j, 640 * j, 0.07) * env(N(0.07), 0.003, 0.025), 0.07) * 0.8
-    return lpf(room(mix(clink, pop), 0.4), 5200)
-
-
-def pickup_gem(i):
-    j = jit(i, 0.015)
-    notes = [at(S.chime(f * j, 0.45, 0.16, ((1.0, 1.0), (2.76, 0.3), (5.4, 0.12))), 0.05 * k)
-             for k, f in enumerate((1320, 1760, 2349))]
-    glint = at(S.chime(3520 * j, 0.5, 0.18, ((1.0, 1.0),)) * 0.35, 0.15)
-    return room(mix(*notes, glint), 0.5)
-
-
-def pickup_key(i):
-    j = jit(i)
-    hi = S.fm(1480 * j, 3.1, 1.8, 0.4, 0.12)
-    lo = at(S.fm(990 * j, 3.1, 1.6, 0.4, 0.14), 0.09)
-    jingle = at(S.rattle(0.12, 70, 3000, 7500, 0.4, 0.04), 0.01) * 0.35
-    return room(mix(hi, lo, jingle), 0.4)
 
 
 # ---------------------------------------------------------------- gloves
@@ -113,9 +71,6 @@ def rocket_cast(i):
 
 
 def main():
-    for name, fn in (('pickup_armor', pickup_armor), ('pickup_arms', pickup_arms), ('pickup_supply', pickup_supply),
-                     ('pickup_gem', pickup_gem), ('pickup_key', pickup_key)):
-        S.takes_cat(name, fn, 3, 'ui')
     S.takes_cat('glove_blink_cast', blink_cast, 2, 'cast')
     S.takes_cat('glove_blink_hit', blink_hit, 2, 'impact')
     S.takes_cat('glove_barrier_cast', barrier_cast, 2, 'cast')

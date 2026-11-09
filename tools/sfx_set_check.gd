@@ -8,7 +8,7 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
-##   7. pickups and gloves: each pickup kind plays its own cue; every sound a glove names exists
+##   7. pickups (content/rules/pickup_sfx.json): a sound per category; every sound a glove names exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -137,15 +137,31 @@ func _fallback() -> void:
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
 
-## 7. A pickup plays the cue for its kind (armour, weapon or glove, valuable, ground orbs).
+## 7. Pickups by item category (content/rules/pickup_sfx.json): every category, gear kind, treasure, belt
+## item and ground kind maps to a sound that exists, and the key cue is kept.
 func _pickups() -> void:
-	var got := [Loot.pickup_sfx({"t": "gear", "id": "vest"}), Loot.pickup_sfx({"t": "gear", "id": "blink"}),
-		Loot.pickup_sfx({"t": "val", "id": "old_coin"}), Loot.orb_sfx("gem"), Loot.orb_sfx("ckey"),
-		Loot.orb_sfx("tonic")]
-	var want := ["pickup_armor", "pickup_arms", "pickup_gem", "pickup_gem", "pickup_key", "pickup_supply"]
-	ok(got == want, "pickups: a cue per kind (%s)" % [got])
-	var silent := (Loot.PICKUP_SFX.values() as Array).filter(func(n): return not Sfx.ensure(n))
-	ok(silent.is_empty() and Loot.PICKUP_SFX.size() == 5, "pickups: every cue exists (silent: %s)" % [silent])
+	var r: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PickupSfx.RULES))
+	var cats: Dictionary = r["cues"]
+	var cues := cats.values()
+	for c in (r["gear_kind"] as Array) + [r["valuable"], r["belt"]] + (r["kinds"] as Dictionary).values():
+		ok(cats.has(c), "pickup category %s has a cue" % c)
+	var kinds := Gear.SLOT_NAMES.size()
+	ok((r["gear_kind"] as Array).size() == kinds, "a pickup category for each of the %d gear kinds" % kinds)
+	var silent := cues.filter(func(s): return not Sfx.ensure(String(s)))
+	ok(silent.is_empty(), "every pickup category has its sound file (missing %s)" % [silent])
+	ok(Sfx.ensure("key_get"), "the key cue key_get is kept")
+	var wrong := []
+	for gid in Gear.ALL:
+		if not cues.has(PickupSfx.of_gear(String(gid))):
+			wrong.append(gid)
+	for vid in Loot.VALUABLES:
+		if not cues.has(PickupSfx.of(Loot.valuable(String(vid)))):
+			wrong.append(vid)
+	for iid in UtilityBelt.ALL:
+		if not cues.has(PickupSfx.of_kind(String(iid))):
+			wrong.append(iid)
+	ok(wrong.is_empty(), "every gear piece, treasure and belt item has a cue (%s)" % [wrong])
+	ok(Sfx.ensure("use_tonic") and Sfx.ensure("use_armor_kit"), "tonic drink and armour-kit repair have own sounds")
 
 ## 7. The sounds a glove names exist, and Blink, Barrier, Hook and Rocket each have their own cast.
 func _gloves() -> void:
