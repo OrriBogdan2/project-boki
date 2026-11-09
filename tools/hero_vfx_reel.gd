@@ -12,7 +12,7 @@ extends "res://tools/combo51_shots.gd"
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["hook"]}
+	"dredge": ["lmb", "hook"]}
 const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
@@ -47,7 +47,7 @@ func run(main_node: Node) -> void:
 		await load(own).new().run(main_node)
 		return
 	hero_name = String(who)
-	if who == "archer":
+	if who in ["archer", "dredge"]:
 		crop_px = WIDE_CROP
 	DirAccess.make_dir_recursive_absolute(dir)
 	if frame_dir != "":
@@ -346,6 +346,19 @@ func _archer_lmb() -> void:
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
 			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+	await _go(GAP)
+
+## Grimble's LMB, one volley past the dummy's side: the muzzle flash, the slugs in flight, the outer ones
+## hitting the dummy, the rest hanging at their stop line.
+func _dredge_lmb() -> void:
+	await _reset(4.0, 0.3)
+	var mid := home + Vector3(3.6, 0.9, 1.4)
+	var shoot := func(t: float):
+		P.inp["fire"] = t < DT * 2.0
+		_aim(home + Vector3(6.3, 0, 1.6))
+	await _go(1.3, shoot, _sheet("lmb",
+			"LMB, one volley: the muzzle flash, the seven slugs and their tracers, hits on the dummy, the rest hanging",
+			[0.02, 0.06, 0.12, 0.2, 0.28, 0.38, 0.5, 0.65, 0.85], func() -> Vector3: return mid), 3.0)
 	await _go(GAP)
 
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
