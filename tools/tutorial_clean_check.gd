@@ -3,7 +3,7 @@ extends RefCounted
 ## is the one the tutorial places, and no crates, pots, shrines, wild kin or mobs are out; the world
 ## makes no spots for them. Then a scripted run of the whole course: the scripted chest opens and the
 ## course never brings any wild kin or extra chest or breakable. And the tutorial's cooldowns run four times
-## quicker, while a training match's do not.
+## quicker, while a real match's and a training match's do not.
 
 var bad := 0
 var main: Node
@@ -23,12 +23,15 @@ func run(mn: Node) -> void:
 	var tut_cd := _cd_after(m, 1.0)
 	ok(tut_cd < 6.5, "tutorial: a 10 s air-dash cooldown has %.1f s left after 1 s" % tut_cd)
 	_run_course(m)
-	var real := Match.new()
-	main.add_child(real)
-	real.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
-	real.set_process(false)
-	var real_cd := _cd_after(real, 1.0)
-	ok(real_cd > 8.9, "training: the same cooldown has %.1f s left after 1 s" % real_cd)
+	for kind in ["real", "training"]:
+		var other := Match.new()
+		main.add_child(other)
+		var o := {"training": kind == "training", "no_drop": true, "teams": 1, "squad": 1, "tier": 0}
+		other.start(o)
+		other.set_process(false)
+		var cd := _cd_after(other, 1.0)
+		ok(cd > 8.9, "%s match: the same cooldown has %.1f s left after 1 s" % [kind, cd])
+		other.queue_free()
 	print("TUTCLEAN DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
