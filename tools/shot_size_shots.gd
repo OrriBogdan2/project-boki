@@ -74,7 +74,8 @@ func _hero(hero: String, P: Hunter, home: Vector3, out: String, res: int) -> voi
 	P.vel = Vector3.ZERO
 	for i in 30:
 		m.step(DT)      # the new kit settles (its cooldowns and holds start clean)
-	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, home + Vector3(AIM_AT, 0, 0), {"arch": "none"})
+	var at := home + Vector3(AIM_AT, 0, 0)
+	var T: Hunter = m.make_hunter("T", 5, "medium", "Target", "idle", {}, at, {"arch": "none"})
 	T.max_hp = 10000.0
 	T.hp = T.max_hp
 	var found := {}
