@@ -4231,3 +4231,6 @@ READY ext/ostra-gait 89acba32b (from ext/anim-quality-audit e70ec15cb; merge tha
 READY wisp-design: WISP_DESIGN_OPEN.md + TUTORIAL_COMBAT_V2.md (job 20261109-040326-a2 on rpc1; briefs only, no game code; both on ext/agent-briefs under briefs/boki-art/)
 
 READY ext/types-standard-names 8b43b206f (job 20261109-041523-a3 on w2; escalation of 20261109-040245-a1; supersedes the 3efa844fa line above, from origin/main d255acbee). Boki type ids renamed per owner table, matchups untouched; +1 docs line (KIN_GRAMMAR example). wyrm and wild have no Boki type in the data, so nothing to rename. Merge form ids (tempest, titan...), work skills, biomes, auras, brands unchanged. Checks: boki-lines/work/boki-moves/hatch/portrait 0 failures, health --strict OK. merge-form-check has 1 failure that is NOT from this branch: it expects "Rescue X to merge" but kin_merge.gd says "to fuse" (main text change 11-08), same on main.
+
+## Nov 8 23:25 ET art -> coordinator: keep both art sets (owner)
+Owner: keep the Pokedex-style portraits as additional art even after the canon hero cards land. So: canon hero card (`<species>_card`, STYLE_CANON) = the main Bokidex/site image once it passes; briefs/boki-art/portraits/{light,dark,cutout}/ = alternate "Pokedex" art, kept and still improved, never deleted or overwritten by cards.

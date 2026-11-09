@@ -92,3 +92,6 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 - Survivors go to the 3-critic panel, which alone decides passes (rule unchanged: no veto, every seat >= 8.0, average >= 8.5, two seats agree).
 - New jobs make 4 versions (edits 3-4, portraits 3) so each review round sees more options.
 - The pipeline runs without waiting for the owner; owner verdicts in the Bokidex still override and recalibrate the panel.
+
+## Two art sets per Boki (owner 23:24 ET)
+- Canon hero card (STYLE_CANON) is the main image; the Pokedex-style portraits (light, dark, cut-out) are kept as additional art and keep improving. Neither replaces the other's files.
