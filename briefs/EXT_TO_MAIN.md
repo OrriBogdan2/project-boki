@@ -4493,3 +4493,4 @@ READY ext/sable-dagger-barriers aea633f67 (Sable's Farstep dagger sticks to any 
 
 READY ext/ui-sfx-set 8661028ec (SFX: one UiSfx helper for hover/press/back/error; new synth cues ui_capture, ui_extract_start, ui_extract_fail. Listen for: Boki scan finishing (rising triad + sparkle), skiff called / hatch unlocking / uplink started (rising open notes), uplink shutting off (falling muted trio), extraction success (extract_ok unchanged); menus: hover tick, Back/Close falling pair, refusals ui_deny. sfx-set-check, match-audio, uipolish, boki-system, --check all 0 fail)
 READY ext/boki-net-roundtrip 3a4766dbb (boki system check: net snapshot round trip for Boki out/downed/carried/fused plus kcmd events; no Net change, no lost fields)
+READY ext/audio-ult-telegraphs c5a6d4ac2 (ult audio telegraphs)
