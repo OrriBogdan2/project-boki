@@ -11,6 +11,28 @@
     "size": "2K"
   },
   {
+    "id": "portrait_vespyx_light",
+    "name": "Vespyx (portrait, light)",
+    "refs": [
+      "briefs/boki-art/style_refs/vespyx_2d_ref.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same, the same pose, design, colours, lighting on the creature and every detail. Only change the background: replace the dark background and dark glow with a plain flat very light grey background, with no shadow and no vignette. Keep the creature centred and filling about 85 percent of the square, nothing cut off.",
+    "size": "2K"
+  },
+  {
+    "id": "portrait_mycroll_light",
+    "name": "Mycroll (portrait, light)",
+    "refs": [
+      "briefs/boki-art/style_refs/mycroll_2d_ref.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the creature exactly the same, the same pose, design, colours, lighting on the creature and every detail. Only change the background: replace the dark background and dark glow with a plain flat very light grey background, with no shadow and no vignette. Keep the creature centred and filling about 85 percent of the square, nothing cut off.",
+    "size": "2K"
+  },
+  {
     "id": "sporcupine_r",
     "name": "Sporcupine (owner redo)",
     "refs": [
