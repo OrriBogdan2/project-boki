@@ -122,6 +122,15 @@ Asserted in `--tender-combo-check` ("mm dashes: Elluna's cooldowns ...", "mm das
 | Ground skip, then the air glide: Elluna's distances and timings, each its own move, no ring or burst | `on_dash`, `_start_glide`, `own_dash_trail`, `dodge_anim`, KMovesCare `mm_skip` / `mm_float` | "mm dashes: the ground hop is Elluna's ..."; "... the air glide is Elluna's ..."; "... 3-4x the hop's distance and about 5x its time"; "mm dashes: each plays its own move, never the shared roll"; "mm dashes: each move covers its dash and settles soon after (ground 0.16-0.25 s)"; "mm dashes: no other kit plays her dash moves"; "mm dashes: no ring or burst on her hop or glide (two tiny dust puffs, soft motes)" |
 | Hearthlight runs out: the last heal blooms, no blast | `_hearth_end`, `_bloom` | "mm E: the light's last heal blooms (heals, no ring, blast or shake; a quiet chime)" |
 | A merge start ends Hearth Call (no pull, no bond; `hearth_call`) | `_drop_holds`, `ArchKit.drop_holds` | "mm merge: drop_holds ends Hearth Call" |
+| Any damage or stun on Meeko drops the carry and sets the 4s pickup lock, whatever the source | `on_take` (every hit through `Ent.hurt`, and the burn tick in `Ent.tick`), `_tick_carry` (stun, root, Hex) | `--bearer-drop-check` |
+
+## Bearer drops: what was traced (`--bearer-drop-check`)
+Source (Elluna passive): damage or stun drops the carried teammate, then a 4s lockout. Meeko carries a downed teammate; each of the other 11 Hunters hits her with LMB, RMB, E, R and dash; then a mob (Skitter), a Boki's hit, a hazard hit with no attacker and a burn. The check asserts that whatever lands damage or a stun has dropped the carry on that frame with the lock set (at least 3.8s of 4).
+- Every slot that lands damage or a stun dropped the carry (all 11 Hunters). Slots that land nothing on a lone target (shields, buffs, self-casts: Cinder R, Dolm E, Rimewright dash, Bulwark RMB and E, Thief E) are not asserted.
+- Bypass found and fixed: the burn tick (Cinder's Ablaze and the Molten and Toxic mob mutations) lowered `hp` directly, never reaching `on_take`, so a burning Meeko kept carrying. The tick now calls `on_take` with the tick's damage.
+- Ours also drops on root and Hex (the source lists damage and stun): kept as built, ours-only, for the owner to keep or cut.
+- Not traced because it does not exist here: a damaging tide ring. The match's closing ring is an abyss timer that eliminates, never hurts.
+- Run checks with a temp `XDG_DATA_HOME`: the shared dev settings have `mod_mode` on (god mode), which turns every hit on the local Hunter into 0 and fails `--tender-combo-check`'s "a hit drops them" for that reason alone.
 
 ## Animation moves
 The moves live in `scripts/match/kmoves_care.gd` (`KMovesCare.MOVES`, read by `HunterAnim.km_sample`). The kit plays them with `play()` for abilities, or `play_soft()` for procs (it waits for the current move to finish). She holds nothing (HunterAnim hold `palm`), so both hands are free and every move keys them (`fl` / `fr`).
@@ -165,4 +174,4 @@ Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer
 - Merge-start hold fields: `seed_aim` and `rmb_down` (the Burrseed aim), the carry (set down, unbroken), and `hearth_call` (the X channel).
 - X: the shared ult base `HeroUlt` (`scripts/arch/hero_ult.gd`, byte-identical across the six ult branches) plugs into main's X path: `HunterKeys.ult_pressed` (the `hunter_ult` key, the level gate) calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_call)` (the cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/tender.json`. A downed online teammate rides home on the existing "carry" event and stands up through "rev".
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. The carry uses the existing "carry" event; heals and revives reuse "heal" and "rev". The Burrseed area and the thrown disc are local looks; remote players see the existing Net rings.
-- Checks: `--support-check` (all), `--tender-combo-check` (support + combos, `tools/care_combo_check.gd`).
+- Checks: `--support-check` (all), `--tender-combo-check` (support + combos, `tools/care_combo_check.gd`), `--bearer-drop-check` (`tools/bearer_drop_check.gd`).

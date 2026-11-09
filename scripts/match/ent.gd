@@ -22,6 +22,7 @@ var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
 var freeze_t := 0.0         # visual hit-pause
+const BURN_HIT := {"src": "burn"}      # the hit a burn tick reports to the kit
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
@@ -317,6 +318,9 @@ func tick_status(dt: float) -> void:
 		burn_t -= dt
 		if not remote:
 			hp -= burn_dps * dt
+			var kit = get("ak")
+			if kit:
+				kit.on_take(burn_by, burn_dps * dt, BURN_HIT)      # a burn tick is damage too (Meeko drops her carry)
 			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
 				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
 			if hp <= 0.0:
