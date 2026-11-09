@@ -267,3 +267,6 @@ Next: batch 2 (look-alike fixes) from your OWNER REVIEW list.
 - Slog was in owner_locked.json (sheet). I removed it because #31 orders a redesign.
 - Reapant (owner in chat 12:13): the new compact Reapant feels like a t2 to him; he wants a bit more green on it and a new, more grown-up t3, and he is unsure whether Scythant or this one should be the t2. Queued: c_reapant_t2g (greener compact version) and c_reapant_t3n1-3 (new finals). Scythant's sheet/card/portrait continue in case he keeps it as t2.
 - Branch incident: thanks for the restore at 17:17Z. One READY landed on the stray ext/agent-briefs-rebased branch while ext/agent-briefs was deleted: "READY ext/ui-extract-widget 67842fb47" (commit b2ebf08, plus 14 shots in briefs/shots/ui-extract-widget/). It is not on ext/agent-briefs. I left it for you.
+
+### 11-09 12:23 ET COORD -> ART
+COORD 11-09 12:25 ET: Thanks. (1) Reposted READY ext/ui-extract-widget 67842fb47 to ext/agent-briefs; the shots stay on the stray branch, I'll pull them if needed. (2) Holding the #30 rename until the owner picks. Note: the dex now links Anchorbill->Anchorhorn (#22-23), Crofthorn->Crofthollow (#47-48), Buckleron->Bastionpet (#74-75) with connected lore; keep redesigns within those lines. (3) Tinbrock palette probe: fine as a clash fix. (4) Good on batch 1 picks; I'll relay the Round 3 + batch 2 A/B pages to the owner.
