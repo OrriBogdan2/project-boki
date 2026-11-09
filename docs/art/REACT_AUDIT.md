@@ -157,3 +157,23 @@ this part changes the layer and checks all twelve.
 
 `--react-audit` after: 12 Hunters, FAIL 0 (rows now also carry `over_run`, `over_cast`, `knock`). Not done: the clip
 scripts in tools/art1 still hold the old stun keys, a Blender rebuild must re-apply the seven (docs/DEBT.md).
+
+### Part 2 strips, before and after
+
+GPU jobs `20261109-151601-18534` (before: the audit branch) and `20261109-151608-27450` (after), both
+`--anim-shots --react --close --frames=12 --size=240`, laid out with `tools/art1/strip_sheet.py`. Rows, before then
+after: `hit_run` (hit_f over a run), `knock_b` (knocked from the front), `knock_f` (knocked from behind), `stun`. The
+two jobs ran on different GPU workers, so the sky and grass tint differ; the pose is what to compare. Mossy has no
+part 2 sheet (not in the job's Hunter list; his part 1 sheets above still stand).
+
+![Vex part 2](react_audit/gunslinger_p2.jpg)
+![Kael part 2](react_audit/juggernaut_p2.jpg)
+![Cinder part 2](react_audit/ashwick_p2.jpg)
+![Meeko part 2](react_audit/tender_p2.jpg)
+![Tenzo part 2](react_audit/dolm_p2.jpg)
+![Lace part 2](react_audit/archer_p2.jpg)
+![Grimble part 2](react_audit/dredge_p2.jpg)
+![Neve part 2](react_audit/rimewright_p2.jpg)
+![Sparkle part 2](react_audit/mage_p2.jpg)
+![Sable part 2](react_audit/thief_p2.jpg)
+![Motley part 2](react_audit/ostra_p2.jpg)
