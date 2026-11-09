@@ -1,7 +1,7 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
 	"springs": {
-		"spring_mane": {"pull": [0.16, 0.05], "damp": 0.7, "limit": 0.8, "limit_in": 0.0}
+		"spring_mane": {"pull": [0.3, 0.12], "damp": 0.72, "limit": 0.6, "limit_in": 0.0}
 	},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"

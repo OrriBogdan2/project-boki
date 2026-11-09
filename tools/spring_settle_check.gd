@@ -4,7 +4,8 @@ extends RefCounted
 ## (no clips, no wind), the model moved as the hunter moves. Per chain: the tip's swing past its final place
 ## (peak), the time until it stays within SETTLE_TOL of it, how many times it swings through, and how far a
 ## joint comes in toward the body's axis past its own rest and its root's (a clip through the body). Fails a
-## chain that never settles, swings on, freezes on a dash stop or cuts into the body. Never touches the save.
+## chain that never settles, swings on, freezes on a dash stop or cuts into the body. Also reported: how far the
+## tip ends off its standing place (on the turn: how far it streams behind a run). Never touches the save.
 
 const DT := 1.0 / 60.0
 const STAND_F := 27          # the frame (0.45 s, standing settled) the body distances are taken at
@@ -28,7 +29,7 @@ const OPEN := [
 	"ryzz land pigR",
 	"sable dash braid",
 	"claire turn scarftail_braid",
-	"cinder dash scarftail_hairc", "cinder land scarftail_hairc",
+	"cinder land scarftail_hairc",
 	"pip dash tail", "pip dash capeback", "pip land capeback", "pip turn tail",
 ]
 ## each scenario: when the event happens and how long it is watched after it (s)
@@ -130,13 +131,29 @@ func _audit(a: String, sc: String) -> void:
 		var cut := clip[c] > CLIP_MAX and not bool(chains[c]["hang"])
 		var good := float(r["settle"]) <= SETTLE_MAX and int(r["swings"]) <= SWINGS_MAX and not cut and not still
 		var tag := "%s %s %s" % [WardenGlb.ART[a], sc, chain]
-		var line := "%s: peak %.3f m, settles in %.2f s, %d swings, overshoot %.0f%%, into the body %.3f m" \
-				% [tag, r["peak"], r["settle"], r["swings"], 100.0 * float(r["over"]), clip[c]]
+		var trail := ((tips[c] as Array).back() as Vector3).distance_to(_rest_tip(sk, chains[c], m))
+		var line := "%s: peak %.3f m, settles in %.2f s, %d swings, overshoot %.0f%%, into the body %.3f m, trails %.3f m" \
+				% [tag, r["peak"], r["settle"], r["swings"], 100.0 * float(r["over"]), clip[c], trail]
 		if tag in OPEN:
 			ok(not good, "(open) " + line + ("" if not good else ": passes now, take it off OPEN"))
 		else:
 			ok(good, line)
 	m.free()
+
+## Where a chain's tip sits at rest riding its parent, in model space (a hanging chain: its own length straight down).
+static func _rest_tip(sk: Skeleton3D, ch: Dictionary, m: Node3D) -> Vector3:
+	var ids: Array = ch["ids"]
+	var par := sk.get_bone_parent(int(ids[0]))
+	var base := sk.get_bone_global_pose(par) * sk.get_bone_global_rest(par).affine_inverse()
+	var inv := m.global_transform.affine_inverse() * sk.global_transform
+	var root := inv * (base * sk.get_bone_global_rest(int(ids[0]))).origin
+	var tip := inv * (base * sk.get_bone_global_rest(int(ids[ids.size() - 1]))).origin
+	if not bool(ch["hang"]):
+		return tip
+	var ln := 0.0
+	for j in range(1, ids.size()):
+		ln += sk.get_bone_global_rest(int(ids[j])).origin.distance_to(sk.get_bone_global_rest(int(ids[j - 1])).origin)
+	return root + (inv.basis.inverse() * Vector3.DOWN).normalized() * ln
 
 ## The body's axis in model space: hips to head, on toward the crown.
 static func _axis(sk: Skeleton3D, inv: Transform3D) -> Array:
