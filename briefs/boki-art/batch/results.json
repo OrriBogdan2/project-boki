@@ -69765,5 +69765,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_pipwom_r5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_druzemole_r5",
+    "name": "Druzemole (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_druzemole_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipwom_r5",
+    "name": "Pipwom (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pipwom_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipwom_r5",
+    "name": "Pipwom (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipwom_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_druzemole_r5",
+    "name": "Druzemole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_druzemole_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_druzemole_r5",
+    "name": "Druzemole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_druzemole_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_checkmare_r5",
+    "name": "Checkmare (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_checkmare_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_checkmare_r5",
+    "name": "Checkmare (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_checkmare_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pickadactyl_r5",
+    "name": "Pickadactyl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pickadactyl_r5_1.jpg",
+    "ok": true
   }
 ]
