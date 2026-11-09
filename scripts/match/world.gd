@@ -1315,45 +1315,6 @@ func _merge_static(parent: Node3D, roots: Array, label: String) -> void:
 	for r in roots:
 		(r as Node).free()
 
-## How far from the camera (m) each kind of scatter draws, at High (Settings q("draw") scales it):
-## grass, flowers, pebbles and undergrowth fade out of the high drop and skyship views, where they'd
-## be a few pixels each; tall grass (cover you can hide in) reaches further; trees, boulders and
-## pillars always draw (their far versions are cheaper level-of-detail meshes instead).
-const DRAW_SMALL := 130.0
-const DRAW_BUSH := 160.0
-const DRAW_BIG_LOW := 230.0     # Low and Medium only: trees and boulders past this are dropped
-
-func _scatter_class(label: String, chunk: int) -> String:
-	if label.begins_with("Bushes"):
-		return "bush"
-	if label.begins_with("Grass") or label.begins_with("Flowers") or label.begins_with("Pebbles") or chunk >= 32:
-		return "small"
-	return "big"
-
-## Big scatter meshes get level-of-detail versions (fewer triangles far away), made once per mesh.
-static var _lod_cache := {}
-static func with_lods(m: Mesh) -> Mesh:
-	if not (m is ArrayMesh) or "--no-lod" in OS.get_cmdline_user_args():
-		return m
-	if _lod_cache.has(m):
-		return _lod_cache[m]
-	var am := m as ArrayMesh
-	var out: Mesh = m
-	var tris := 0
-	for si in am.get_surface_count():
-		tris += am.surface_get_array_index_len(si) / 3
-	if tris >= 240 and am.get_blend_shape_count() == 0:
-		var im := ImporterMesh.new()
-		for si in am.get_surface_count():
-			im.add_surface(am.surface_get_primitive_type(si), am.surface_get_arrays(si), [], {}, am.surface_get_material(si), am.surface_get_name(si))
-		if im.get_method_argument_count("generate_lods") >= 3:
-			im.call("generate_lods", 25.0, 60.0, [])
-		else:
-			im.call("generate_lods", 25.0, [])
-		out = im.get_mesh()
-	_lod_cache[m] = out
-	return out
-
 ## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
 static func _thin(items: Array, keep: float, seed_i: int) -> Array:
 	if keep >= 0.999:
@@ -1362,31 +1323,29 @@ static func _thin(items: Array, keep: float, seed_i: int) -> Array:
 	return items.filter(func(_it): return r.randf() < keep)
 
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
-func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
+func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16, far := "") -> void:
 	if shadows:
 		# rocks and trees under the caster size go in batches of their own that don't cast (item 94)
 		var parts := ShadowPolicy.split_instances(items, mesh)
 		if not (parts[1] as Array).is_empty():
-			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk)
+			await _chunked(parent, parts[1], mesh, mat, label + "_small", false, chunk, far)
 		items = parts[0]
 		if items.is_empty():
 			return
-	var cls := _scatter_class(label, chunk)
-	var draw_k := float(Settings.q("draw"))
-	var vis_end := 0.0
-	match cls:
-		"small":
-			vis_end = DRAW_SMALL * draw_k
-			items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
-		"bush": vis_end = DRAW_BUSH * draw_k
-		"big":
-			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
-			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
-			# crystal shards and thin ledges vanish in the simplified versions
-			if label.begins_with("tree"): mesh = with_lods(mesh)
-			# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
-			# mean far fewer draws (and shadow draws) for a few more off-screen instances
-			chunk = maxi(chunk, 32)
+	var cls := FarRanges.class_of(label, chunk, far)
+	var vis_end := FarRanges.end_of(cls)
+	if cls == "small":
+		items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
+	elif cls in FarRanges.BIG_CLASSES:
+		# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
+		# crystal shards and thin ledges vanish in the simplified versions
+		if label.begins_with("tree"): mesh = FarRanges.with_lods(mesh)
+		# trees and boulders come in many styles and shapes, each its own batch: bigger chunks
+		# mean far fewer draws (and shadow draws) for a few more off-screen instances
+		chunk = maxi(chunk, 32)
+		if cls == "cliff":
+			var near := FarRanges.add_far_cliffs(parent, items, mesh, mat, label)
+			if near > 0.0: vis_end = near
 	var by := {}
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
@@ -1404,9 +1363,7 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 		var mi := MultiMeshInstance3D.new(); mi.multimesh = mm
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		if vis_end > 0.0:
-			mi.visibility_range_end = vis_end
-			mi.visibility_range_end_margin = 8.0
+		FarRanges.limit(mi, vis_end)
 		mi.name = "%s_%d_%d" % [label, key.x, key.y]
 		parent.add_child(mi)
 
@@ -1636,7 +1593,7 @@ func _decorate() -> void:
 	await _stage("world.scatter_plan")
 	for key in packed:
 		var g: Dictionary = packed[key]
-		await _chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)))
+		await _chunked(deco, g["items"], g["mesh"], g["mat"], String(g["label"]), bool(g["shadows"]), int(g.get("chunk", 16)), String(g.get("far", "")))
 	await _stage("world.scatter_batches")
 	# stone walls: coursed ruin masonry following each run (see ruin_walls.gd)
 	if not walls.is_empty():
@@ -1956,10 +1913,17 @@ func _flora_prop(groups: Dictionary, what: String, i: int, p: Vector3, r: Random
 		var fcols := [Color("ffffff"), Color("ffb0d8"), Color("fff0a0"), Color("c8b8ff"), Color("ffc890"), Color("a8e0ff")]
 		col = fcols[r.randi_range(0, fcols.size() - 1)]
 	var key := "flora/%s/%s/%d" % [kind, style, v]
-	if not groups.has(key):
-		var big := kind in ["tree", "rock", "pillar"] and what != "cliff"
-		groups[key] = {"mesh": am, "mat": Flora.material(kind, kind in ["rock", "pillar", "crystal"] and what != "cliff"), "items": [], "label": "%s_%s_%d" % [kind, style, v],
-			"shadows": big, "chunk": 32 if small else 16}
+	if what == "cliff":
+		# its own batch (it gets a far version), looking like the boulder batch it used to share
+		var shared: Dictionary = groups.get(key, {})
+		key += "/cliff"
+		if not groups.has(key):
+			groups[key] = {"mesh": am, "mat": shared.get("mat", Flora.material(kind, false)), "items": [], "label": "cliff_%s_%d" % [style, v],
+				"shadows": shared.get("shadows", false), "chunk": 16, "far": "cliff"}
+	elif not groups.has(key):
+		var big := kind in ["tree", "rock", "pillar"]
+		groups[key] = {"mesh": am, "mat": Flora.material(kind, kind in ["rock", "pillar", "crystal"]), "items": [], "label": "%s_%s_%d" % [kind, style, v],
+			"shadows": big, "chunk": 32 if small else 16, "far": kind if kind in FarRanges.BIG_CLASSES else ("rock" if kind == "pillar" else "")}
 	_last_item = [tr, col]
 	_last_top = (tr.basis * Vector3(0, am.get_aabb().end.y, 0)).y
 	groups[key]["items"].append(_last_item)
@@ -2011,7 +1975,8 @@ func _pack_prop_variant(groups: Dictionary, what: String, i: int, p: Vector3, r:
 	var key := String(v["m"]) + str(cfg)
 	if not groups.has(key):
 		groups[key] = {"mesh": am, "mat": Assets.material(Assets.pack_of(String(v["m"])), cfg), "items": [],
-			"label": String(v["m"]).get_file(), "shadows": not what in ["pebble", "cliff", "under"]}
+			"label": String(v["m"]).get_file(), "shadows": not what in ["pebble", "cliff", "under"],
+			"far": {"tree": "tree", "rock": "rock", "ruin": "rock", "cliff": "cliff"}.get(what, "")}
 	_last_item = [tr, col]
 	_last_top = (tr.basis * Vector3(0, ab.size.y, 0)).y
 	groups[key]["items"].append(_last_item)
