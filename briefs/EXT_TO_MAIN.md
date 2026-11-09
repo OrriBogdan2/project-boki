@@ -5748,3 +5748,4 @@ READY ext/vfx-sable-encore 5e9ea1d07 (strips rendered and checked by eye: before
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
+READY ext/ui-boki-box-summon b5c1b6fa1 (SUPERSEDES the dcf23f6df line: Boki box summon UI: ring drains while SUMMONED / fills while RESTING, Settings.key_cap summon key cap, READY flash once, STOLEN tag, one chip only; fix: --boki-box-check reveals the boot fade so its shots show the HUD (the dcf23f6df GPU shots were the splash); STACKED on ext/wisp-summon bbfbf5d9b, merge that first; --boki-box-check PASS 10 rows, --wisp-check, --kinbox-check, --layout-check 0 fail, health --strict OK, gen_wiki --check 47 unchanged; GPU HUD shots viewed: jobq 20261109-162503-05433 5 states 1280x720, all read right)
