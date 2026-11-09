@@ -5,6 +5,8 @@ extends RefCounted
 ## (needs a renderer, so run it through jobq on a GPU) it also writes the review shots there.
 ## Never touches the real save.
 
+const READY_FRAMES := 600      # a renderer builds the farm over several frames
+
 var bad := 0
 var main: Node
 var shots_dir := ""
@@ -44,6 +46,10 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_new_save()
 	var home = await main._hb_home()
+	for i in READY_FRAMES:
+		if home.cam != null and home.kins.size() >= 2:
+			break
+		await _frames(1)
 	var photo: HomePhoto = home.photo
 	var yaw0: float = home.cam.yaw_to
 	ok(InputMap.has_action("photo") and Settings.ACTIONS.any(func(row): return row[0] == "photo"),
