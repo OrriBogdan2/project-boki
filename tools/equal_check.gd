@@ -215,8 +215,8 @@ func _belt() -> void:
 	P.inp["util1"] = true
 	m.step(Match.DT)
 	ok(P.drink_t > 0.0, "key 1 starts a drink")
-	for i in int((Hunter.DRINK_TIME + 0.3) / Match.DT): m.step(Match.DT)
-	ok(P.tonics == 2 and P.hp > P.max_hp * 0.85,
+	for i in int((UtilityUse.channel("tonic", "time") + 0.3) / Match.DT): m.step(Match.DT)
+	ok(P.tonics == 2 and P.hp > P.max_hp * 0.5 + 40.0,
 			"a finished drink spends one tonic and heals (%d left, hp %.0f/%.0f)" % [P.tonics, P.hp, P.max_hp])
 	P.inp["util2"] = true
 	m.step(Match.DT)
@@ -227,7 +227,7 @@ func _belt() -> void:
 	P.inv_t = 99.0
 	P.inp["util2"] = true
 	m.step(Match.DT)
-	for i in int((Hunter.KIT_TIME + 0.3) / Match.DT): m.step(Match.DT)
+	for i in int((UtilityUse.channel("armor_kit", "time") + 0.3) / Match.DT): m.step(Match.DT)
 	ok(P.armor_kits == 1 and P.armor >= P.max_armor - 0.5, "a finished repair spends one kit and fills armor")
 	P.hp = P.max_hp
 	P.inp["util1"] = true
