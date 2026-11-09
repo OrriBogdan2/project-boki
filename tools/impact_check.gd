@@ -9,6 +9,7 @@ extends RefCounted
 ##   4. chip hits don't replay the hit clip (a rifle stream would look stun-locked); a staggering hit plays it;
 ##   5. a knockback shows the hit pose for as long as the shove slides the body;
 ##   6. a stun shows the stun clip, even over a move the kit was playing;
+##   6b. the player's own LMB from 1.8 m: the struck body holds; a ranged weapon never holds its shooter;
 ##   7. offline, every freeze of the whole game (a hit's, an armor break's, a parry's...) shares the player's cap:
 ##      at most Feel.HS_CAP in any Feel.HS_WINDOW.
 ## Never touches the save.
@@ -100,6 +101,30 @@ func _cap(m: Match) -> void:
 			"three 0.07 s freezes inside %.1f s hold %.3f s in all (cap %.2f): %s" % [Feel.HS_WINDOW, total, Feel.HS_CAP, str(got)])
 	m.hitstop = 0.0
 
+## The player's own LMB on the hitter, parked 1.8 m in front: what it freezes (the game's freeze for the player,
+## the struck body's own hold).
+func _strike(m: Match, P: Hunter, A: Hunter, hero: String) -> void:
+	var a_at := A.pos
+	A.teleport(P.pos + Vector3(0, 0, -1.8)); A.vel = Vector3.ZERO
+	A.hp = A.max_hp
+	P.inp["aim"] = A.pos + Vector3(0, 0.9, 0)
+	var top_p := 0.0
+	var top_a := 0.0
+	var hp0 := A.hp
+	for i in 50:
+		P.inp["fire"] = i < 30
+		m.hitstop = 0.0
+		m.step(DT)
+		top_p = maxf(top_p, m.hitstop)
+		top_a = maxf(top_a, A.freeze_t)
+	P.inp["fire"] = false
+	var melee := bool(P.wpn.get("melee", false))
+	var what := "%s's LMB (%s): hit %s, you hold %.3f s, the target %.3f s" % [hero, "melee" if melee else "ranged", A.hp < hp0, top_p, top_a]
+	ok(A.hp < hp0 and top_a > 0.0 and (melee or top_p <= 0.0), "%s (the struck body always holds; a ranged hit never holds you)" % what)
+	m.hitstop = 0.0
+	A.teleport(a_at); A.hp = A.max_hp
+	_settle(m, [A], 30)
+
 func _settle(m: Match, hs: Array, n: int) -> void:
 	for i in n:
 		_frame(m, hs)
@@ -181,6 +206,7 @@ func _hero(main: Node, hero: String) -> void:
 			if _hit_shown(c): posed += 1
 	ok(slid > 0 and posed >= slid - 2, "%s: a knockback shows the hit pose while it slides (%d of %d frames)" % [hero, posed, slid])
 	_settle(m, hs, 30)
+	_strike(m, P, A, hero)
 	# 6. stunned mid-move: the stun clip wins
 	var moves: Array = (c.d.get("kmoves", {}) as Dictionary).keys()
 	var stun_clip := String(c.d.get("states", {}).get("stun", ""))

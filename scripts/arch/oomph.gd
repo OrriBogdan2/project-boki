@@ -2,7 +2,7 @@ class_name Oomph
 extends RefCounted
 ## Combat weight (the gameplay side of "oomph"): what a shot does to the shooter (a push
 ## back on heavy weapons; never a camera kick), what a hit does to the body it lands on (a flinch scaled by the hit, a
-## short stagger on big hits, a hit-shake while it's frozen), and how visible a shot is (a glowing
+## short stagger slow and the hit clip on big hits), and how visible a shot is (a glowing
 ## bolt with a halo and a tracer that stretches with speed). How hits look and sound beyond that
 ## (impact sparks, sound design) belongs to Juice; the numbers and these reactions live here, in
 ## separate functions, so the two never step on each other.
@@ -46,9 +46,6 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 		var h := target as Hunter
 		h.hit_k = clampf(0.8 + frac * 9.0, 0.8, HEAVY_FLINCH) if not big else HEAVY_FLINCH
 		if big: h.react_at = m.time       # only a staggering hit plays the hit clip; chip hits flash and shiver
-		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
-		if by and is_instance_valid(by):
-			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
 		# (hunters and their Boki stagger you; monsters' hits never do, so PvE lethality is unchanged)
 		var pvp: bool = by != null and is_instance_valid(by) and not (by is Mob) and String(o.get("src", "")) != "mob"
 		if big and pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
@@ -56,15 +53,8 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 			# states, fortify_t, shrug it off)
 			h.slow_k = maxf(h.slow_k, STAGGER_SLOW) if h.slow_t > 0.0 else STAGGER_SLOW
 			h.slow_t = maxf(h.slow_t, STAGGER_T)
-			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
-
-## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
-## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
-static func render_hit(h: Hunter, delta: float) -> void:
-	h.hit_shake = maxf(0.0, h.hit_shake - delta * 1.4)
-	h.stagger_t = maxf(0.0, h.stagger_t - delta)
 
 # ------------------------------------------------------------------ how a shot looks
 ## The colour, size and halo of a shot as the local player sees it. What can hurt you stays the

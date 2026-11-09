@@ -135,9 +135,6 @@ var box_t := 0.0               # holding interact at a deathbox
 var box_rev_at := -9.0         # last time we were channelling a deathbox revive (BoxRevive)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
-var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
-var hit_from := Vector2.ZERO   # which way the last hit pushed
-var stagger_t := 0.0           # staggered by a big hit (Oomph)
 var react_at := -9.0           # last staggering hit (Oomph): the hit clip plays from it
 var extracted := false
 var extract_prog := 0.0
@@ -3329,7 +3326,6 @@ func render(delta: float, alpha: float) -> void:
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
-	Oomph.render_hit(self, delta)
 	Hex.tick(self, delta)
 	if (drink_t > 0.0 or kit_t > 0.0 or box_reviving()) and visible and see:
 		vuln_fx_t -= delta
