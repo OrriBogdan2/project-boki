@@ -580,9 +580,22 @@ func juggernaut(a) -> void:
 	var winding := not K.slam_w.is_empty()
 	A.step(m, 0.3)
 	var lane: Dictionary = AimKit.entry(P, "slam")
-	A.ok("juggernaut RMB tap: the strike lane shows through the wind-up (everyone sees it)",
-			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and absf(float(lane.get("len", 0.0)) - 4.0) < 0.1,
-			str(lane.get("len", -1)))
+	var sl: Dictionary = K.rmb_def()["slam"]
+	var mv: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))["moves"]
+	var lm: Dictionary = K.d["lmb"]
+	A.ok("juggernaut move art: slash arc %.0f, slam cone %.0f, true sizes" % [lm["arc"], sl["angle"]],
+			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
+			and is_equal_approx(float(mv["slam_hit"]["fx"][0]["arc"]), float(sl["angle"]))
+			and is_equal_approx(float(mv["slam_hit"]["fx"][1]["arc"]), float(sl["angle"]))
+			and not mv["slash"]["fx"][0].has("size_x") and not mv["drop_hit"]["fx"][0].has("size_x")
+			and not mv["drop_hit"]["fx"][1].has("size_x")
+			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
+			"")
+	A.ok("juggernaut RMB tap: strike cone drawn = hit (%.1f m, %.0f deg)" % [sl["radius"], sl["angle"]],
+			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "cone"
+			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
+			and is_equal_approx(float(lane.get("deg", 0.0)), float(sl["angle"])),
+			str(lane))
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
@@ -621,6 +634,9 @@ func juggernaut(a) -> void:
 			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
 			and not K.lunge_full,
 			"k %.2f anim %s" % [k_mid, K.anim_id])
+	A.ok("juggernaut RMB hold: lane = contact width (body + %.1f m a side), drawn = hit" % K.LUNGE_REACH,
+			is_equal_approx(float(ln.get("width", 0.0)), 2.0 * (P.r + K.LUNGE_REACH))
+			and is_equal_approx(K.lunge_w(), 2.0 * (P.r + K.LUNGE_REACH)), "%.2f" % float(ln.get("width", 0.0)))
 	P.do_jump()
 	m.step(A.DT)
 	A.ok("juggernaut RMB hold: you can jump while holding", P.vel.y > 0.5 and K.rmb_down, "vy %.1f" % P.vel.y)
@@ -660,8 +676,15 @@ func juggernaut(a) -> void:
 			AimKit.shown(P, "drop_aim")
 			and Vector2(float(AimKit.entry(P, "drop_aim")["at"].x) - T.pos.x,
 					float(AimKit.entry(P, "drop_aim")["at"].y) - T.pos.z).length() < 0.6)
+	var da: Dictionary = K.meteor.data()
+	A.ok("juggernaut air: the aim disc is the damage radius %.1f, drawn = hit" % da["radius"],
+			is_equal_approx(float(AimKit.entry(P, "drop_aim").get("r", 0.0)), float(da["radius"])))
 	P.ak.press_rmb()
+	var dd: Dictionary = K.meteor.data()
 	var disc := AimKit.shown(P, "drop") and bool(AimKit.entry(P, "drop").get("all", false))
+	A.ok("juggernaut RMB air: landing disc %.1f m, stun core %.1f m, drawn = hit" % [dd["radius"], dd["core"]],
+			is_equal_approx(float(AimKit.entry(P, "drop").get("r", 0.0)), float(dd["radius"]))
+			and is_equal_approx(float(AimKit.entry(P, "drop_core").get("r", 0.0)), float(dd["core"])))
 	A.step(m, 1.1)
 	var off := Vector2(K.meteor.last_drop.x - T.pos.x, K.meteor.last_drop.z - T.pos.z).length()
 	A.ok("juggernaut RMB air: Meteor Drop lands at the cursor (disc everyone sees)",
