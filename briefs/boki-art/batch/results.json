@@ -16684,5 +16684,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_tootle_e_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_tootle_e_w29",
+    "name": "Tootle (concept edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w29",
+    "name": "Torpecone (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w29",
+    "name": "Torpecone (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w29",
+    "name": "Torpecone (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w29",
+    "name": "Torpecone (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pavonazar",
+    "name": "Pavonazar",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pavonazar",
+    "name": "Pavonazar",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pavonazar_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_gilabacus",
+    "name": "Gilabacus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_gilabacus_1.jpg",
+    "ok": true
   }
 ]
