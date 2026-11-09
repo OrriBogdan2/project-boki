@@ -50,5 +50,5 @@ Female sheets for Bellowary and Gongibbon are on hold until their redos are lock
 
 
 ## Batch mode (owner, Nov 8 19:40)
-Hyper-critical grading: the bar is 9.0, not 8.5. Owner wants a very low reject rate at review, so reroll freely (up to 4 tries per Boki, then flag). Do not stop between batches; owner checks in periodically. Boards go out every 10 approved.
+Hyper-critical grading, but the bar is 8.5 (owner, 19:56: wants a steady stream to review, ideally 2 good images a minute). Owner wants a very low reject rate at review, so reroll freely (up to 4 tries per Boki, then flag). Do not stop between batches; owner checks in periodically. Boards go out every 10 approved.
 Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/vest/hat look, a copy of its parent (babies, middles), a final form not clearly bigger than its middle, realistic animal plus prop, missing signature part, blush on non-babies.

@@ -159,6 +159,36 @@
       "id": "zephyrak",
       "pick": 1,
       "grade": 9.0
+    },
+    {
+      "id": "boltstrich",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "passes at the 8.5 bar"
+    },
+    {
+      "id": "echolop",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "passes at the 8.5 bar"
+    },
+    {
+      "id": "snuffapi",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "passes at the 8.5 bar"
+    },
+    {
+      "id": "spirevark",
+      "pick": 1,
+      "grade": 8.5,
+      "note": "passes at the 8.5 bar"
+    },
+    {
+      "id": "barrelmander",
+      "pick": 2,
+      "grade": 8.5,
+      "note": "passes at the 8.5 bar"
     }
   ],
   "rerolled": [
@@ -204,24 +234,12 @@
       "why": "copy of Kestrike"
     },
     {
-      "id": "barrelmander",
-      "why": "sits inside a barrel"
-    },
-    {
-      "id": "boltstrich",
-      "why": "realistic ostrich head, one run failed"
-    },
-    {
       "id": "buckleron",
       "why": "weak face, shield reads as worn"
     },
     {
       "id": "dragonkite",
       "why": "not a final form, copy of Kitlet"
-    },
-    {
-      "id": "echolop",
-      "why": "upright / generic"
     },
     {
       "id": "gravadillo",
@@ -254,14 +272,6 @@
     {
       "id": "rimeshrew",
       "why": "sits up, rat-like"
-    },
-    {
-      "id": "snuffapi",
-      "why": "reads as deer with candles"
-    },
-    {
-      "id": "spirevark",
-      "why": "upright"
     },
     {
       "id": "vespox_f",
