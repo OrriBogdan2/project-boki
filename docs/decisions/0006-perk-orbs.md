@@ -1,4 +1,4 @@
-# 0006: Perks as orbs on the ground, and a fixed weapon path on level-ups
+# 0006: Perks as orbs on the ground (the level-up weapon path was retired)
 
 - **Status:** accepted (owner design, 09:45 ET "ext/equal FINAL SPEC", part B of the split described in 0005)
 - **Date:** 2026-11-02
@@ -19,7 +19,7 @@ Perks were chosen from a "Pick a perk: 1/2/3" prompt after a chest, shrine, boss
 - **Old kit passives** field_kit, magpie, satchel, spyglass and tinker_roll are perks now with the same numbers (the kit gear files stay until agent A removes them from gear). Magpie's gem bonus used to be a stat nothing read; `PerkOrbs.gem_mult` makes it work, with Scavenger.
 - **Net.** `odrop` (id, perk, fan, x, y, z) when orbs spawn and `otake` (id, taker) when one is taken; the other game spawns or removes it and records the fan. Two games taking the same orb in the same instant both get it (same as ground pickups). Net 0.14.0 to 0.15.2 (the split gives A 0.15.1, B 0.15.2, C 0.15.3; the main session reconciles).
 - **Bots** walk to the orb they want most within 16 m (`PerkOrbs.bot_goal`, goal kind "orb", before chests), never take two from one fan, and skip perks they have maxed.
-- **Level-ups.** Skill points and ability ranks are unchanged. On every even level a hero's signature weapon takes the next step of its path (`WeaponPath`, `content/rules/weapon_path.json`: five WeaponUps steps for each hero in `Arch.ORDER`). A step an orb already maxed becomes the next open plain upgrade. A line in the message lane (`Hud.level_up`, `MsgLane`) names the level and what improved. Brands and extra stacks are only in the orb pool.
+- **Level-ups.** Skill points and ability ranks are unchanged. *(Retired 2026-11-09, ext/level-growth-parity: the even-level weapon path (`WeaponPath`, `weapon_path.json`) is gone, per the 2026-11-05 decision "no random weapon stat bonuses on level-up". A level now gives one skill point, a gold wash, the badge pop and the quiet `LevelGrowth` health and ability power the source also gives; weapon upgrades come only from orbs and tunings.)* The lane line (`Hud.level_up`, `MsgLane`) names the level and the skill point.
 
 ## Consequences
 - Removed: `offer_perks`, `choose_perk`, `perk_offer`, `perk_queue`, the 1-3 perk keys and the prompt cards. Keys 1, 2 and 3 are free for the utility belt.
@@ -93,8 +93,7 @@ Research only, nothing built. The owner corrected the memory above: the random c
 
 **Does it fit us?** Partly. Our power in a match already grows on three tracks:
 - perk orbs (random, found)
-- the fixed weapon path on even levels
-- quiet level growth
+- quiet level growth (the even-level weapon path was retired)
 
 Gloves are deliberately flat: the owner asked that they never rank up with skill points (11:40 ET). A shard tier-up would be a fourth track, and on gloves it would change that rule. It wouldn't use skill points, but gloves would grow in the match.
 
