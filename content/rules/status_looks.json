@@ -19,7 +19,7 @@
 			"why": "Sparkle's Static: teal bolts with a pink core jumping across the body"},
 		"antiheal": {"look": "streaks", "col": "#ff3df0", "dark": "#3a0a30", "y": 0.0, "size": 1.0, "pace": 1.0,
 			"why": "Anti-Heal (Kael's Warchain, Sable's Encore): magenta streaks draining up out of the body"},
-		"sick": {"look": "wisps", "col": "#d8d0e8", "dark": "#4a4458", "y": 0.0, "size": 1.0, "pace": 1.0,
-			"why": "resurrection sickness: a faint grey ring at the feet and pale wisps sinking round the body"}
+		"sick": {"look": "wisps", "col": "#f0ecff", "dark": "#4a4458", "y": 0.0, "size": 1.0, "pace": 1.0,
+			"why": "resurrection sickness: a pale ring at the feet and pale wisps sinking round the body"}
 	}
 }

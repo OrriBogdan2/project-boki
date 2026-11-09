@@ -185,7 +185,7 @@ static func _mesh(key: String) -> Mesh:
 	match key:
 		"star":
 			var b := BoxMesh.new()
-			b.size = Vector3(0.2, 0.2, 0.07)
+			b.size = Vector3(0.26, 0.26, 0.08)
 			mesh = b
 		"disc":
 			mesh = _tube(0.42, 0.0, 0.02)
@@ -194,7 +194,7 @@ static func _mesh(key: String) -> Mesh:
 			p.size = Vector3(0.12, 0.34, 0.12) if key == "crystal" else Vector3(0.16, 0.5, 0.16)
 			mesh = p
 		"thorn":
-			mesh = _tube(0.0, 0.07, 0.75)
+			mesh = _tube(0.0, 0.1, 0.95)
 		"ring", "ring_wide", "ring_thin":
 			var t := TorusMesh.new()
 			var r := {"ring": [0.32, 0.4], "ring_wide": [0.5, 0.62], "ring_thin": [0.36, 0.41]}[key] as Array
@@ -204,9 +204,9 @@ static func _mesh(key: String) -> Mesh:
 			t.ring_segments = 6
 			mesh = t
 		"tongue":
-			mesh = _tube(0.0, 0.13, 0.62)
+			mesh = _tube(0.0, 0.17, 0.9)
 		"core":
-			mesh = _tube(0.0, 0.07, 0.4)
+			mesh = _tube(0.0, 0.1, 0.55)
 		"shell":
 			var s := SphereMesh.new()
 			s.radius = 0.5
@@ -220,12 +220,12 @@ static func _mesh(key: String) -> Mesh:
 			mesh = _zigzag(0.03)
 		"streak":
 			var bx := BoxMesh.new()
-			bx.size = Vector3(0.07, 0.55, 0.07)
+			bx.size = Vector3(0.11, 0.75, 0.11)
 			mesh = bx
 		"wisp":
 			var w := SphereMesh.new()
-			w.radius = 0.09
-			w.height = 0.18
+			w.radius = 0.15
+			w.height = 0.3
 			w.radial_segments = 8
 			w.rings = 4
 			mesh = w
@@ -262,7 +262,7 @@ static func _zigzag(w: float) -> ArrayMesh:
 func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Material) -> void:
 	match look:
 		"stars":
-			Models.part(b, _mesh("disc"), dark, Vector3(0, -0.06, 0), Vector3(1, 1, 1), Vector3.ZERO, "Back")
+			Models.part(b, _mesh("disc"), _mat_a(dark, 0.55), Vector3(0, -0.06, 0), Vector3.ONE, Vector3.ZERO, "Back")
 			for i in 4:
 				var a := TAU * i / 4.0
 				Models.part(b, _mesh("star"), col, Vector3(cos(a) * 0.4, 0, sin(a) * 0.4), Vector3.ONE,
@@ -272,9 +272,9 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 			for i in 5:
 				var a2 := TAU * i / 5.0
 				Models.part(b.get_node("Ring"), _mesh("crystal"), col, Vector3(cos(a2) * 0.4, 0.05, sin(a2) * 0.4),
-					Vector3.ONE * 2.2, Vector3(0, -a2, 0))
+					Vector3.ONE * 1.5, Vector3(0, -a2, 0))
 		"stakes":
-			Models.part(b, _mesh("ring_wide"), dark, Vector3(0, 0.03, 0), Vector3(1, 0.4, 1), Vector3.ZERO, "Ring")
+			Models.part(b, _mesh("ring_wide"), col, Vector3(0, 0.03, 0), Vector3(1, 0.4, 1), Vector3.ZERO, "Ring")
 			for i in 5:
 				var a3 := TAU * i / 5.0
 				var thorn := Models.part(b, _mesh("thorn"), col, Vector3(cos(a3) * 0.5, 0.3, sin(a3) * 0.5))
@@ -298,7 +298,7 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 		"flames":
 			for i in 6:
 				var a5 := TAU * i / 6.0
-				var at := Vector3(cos(a5) * 0.3, 0.3 + 0.32 * (i % 3), sin(a5) * 0.3)
+				var at := Vector3(cos(a5) * 0.32, 0.45 + 0.4 * (i % 3), sin(a5) * 0.32)
 				var t := Models.part(b, _mesh("tongue"), col, at, Vector3.ONE, Vector3.ZERO, "P%d" % i)
 				Models.part(t, _mesh("core"), hot, Vector3(0, -0.08, 0))
 		"arcs":
@@ -310,8 +310,8 @@ func _build(b: Node3D, look: String, col: Material, dark: Material, hot: Materia
 			for i in 6:
 				Models.part(b, _mesh("streak"), col, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "P%d" % i)
 		"wisps":
-			Models.part(b, _mesh("ring_wide"), _mat_a(dark, 0.6), Vector3(0, 0.03, 0), Vector3(0.8, 0.3, 0.8))
-			for i in 3:
+			Models.part(b, _mesh("ring_wide"), _mat_a(col, 0.5), Vector3(0, 0.03, 0), Vector3(0.8, 0.3, 0.8))
+			for i in 4:
 				Models.part(b, _mesh("wisp"), col, Vector3.ZERO, Vector3.ONE, Vector3.ZERO, "P%d" % i)
 	for c in b.find_children("*", "MeshInstance3D", true, false):
 		(c as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -365,7 +365,7 @@ func _pose(n: Node3D, look: String, t: float) -> void:
 				p4.position = Vector3(cos(a) * 0.38, 0.4 + 2.0 * u2, sin(a) * 0.38)
 				p4.scale = Vector3.ONE * (1.0 - u2 * 0.8)
 		"wisps":
-			for i in 3:
-				var u3 := fposmod(t * 0.35 + i / 3.0, 1.0)
-				var a2 := TAU * i / 3.0 + t * 0.8
+			for i in 4:
+				var u3 := fposmod(t * 0.35 + i / 4.0, 1.0)
+				var a2 := TAU * i / 4.0 + t * 0.8
 				(b.get_node("P%d" % i) as Node3D).position = Vector3(cos(a2) * 0.45, 1.9 - 1.7 * u3, sin(a2) * 0.45)
