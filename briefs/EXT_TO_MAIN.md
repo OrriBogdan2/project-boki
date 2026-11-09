@@ -5803,3 +5803,4 @@ READY ext/sfx-step-surfaces 92976bde2 (reposted by coord: worker post lost 11-09
 READY ext/sfx-weapon-fire 0efbf33a2 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/tut-skip-check 9eb47cc91 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
 READY ext/vfx-armour-break 5123a0898 (reposted by coord: worker post lost 11-09 when ready-post was mis-installed)
+READY ext/tut-pick-in-action 6d89d78b7 (second-Relic pick: the Relic in focus loops its LMB, signature ability and dash on the training dummy (AbilityClip reel in HobOffer, signature slots in farm_builder.json), plain role lines 'Up close, hits hard' / 'Burns an area' / 'Keeps your squad alive'; --hob-check 0 fail (reel asserted), --class-unlock-check 145/0, health --strict OK, gen_wiki --check OK; shots docs/shots/pick_reel_*.png)
