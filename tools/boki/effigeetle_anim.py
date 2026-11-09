@@ -44,7 +44,7 @@ def cases(p, up, out=None):
     """The wing cases lift at the back and swing apart from the nose seam; `up` 1 is open for flight."""
     out = up if out is None else out
     for sd, sx in SIDES:
-        add(p, "case." + sd, rx=0.75 * up, rz=-sx * 0.5 * out)
+        add(p, "case." + sd, rx=-0.9 * up, rz=-sx * 0.5 * out)
 
 
 def wings(p, t, rate=8):
