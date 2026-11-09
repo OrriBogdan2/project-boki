@@ -37,3 +37,10 @@ One Boki 2D style anchored on style_refs/boki_style_ref_2d.png. For hero cards (
 
 ## Blush (STYLE_CANON 11-09 supersedes the old rule)
 - Soft pink cheek blush is part of the canon house style at every stage. Do NOT fail or mark down blush on middle or final forms.
+
+## Line stance variety (owner 00:28 ET 11-09, crucial across the board)
+Every stage of a line must stand differently so the line reads at a glance side by side (briefs/boki-art/lines/<Line>.jpg).
+Ladder: baby = round, compact, sitting or bouncing; middle = in motion (low prowl, stride, dash, glide or coil); final = big and
+planted (rearing, looming, towering or braced wide). Branch finals must also differ from each other. For any evolution, form,
+turnaround or card: same stance/pose family as another stage of its line (e.g. all on four legs with the tail curled up the same
+way) = cap at 7.9 and say "same stance as <stage>" in worst.

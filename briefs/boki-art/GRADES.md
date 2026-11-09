@@ -100,3 +100,8 @@ Auto-fail at batch stage: anything upright or person-like, any strap/belt/band/v
 - Pass (auto-approve): unchanged (no veto, every seat >= 8.0, average >= 8.5, two seats agree).
 - Owner review: no veto and three-seat average >= 8.3 -> posted to the Bokidex with status=owner-review; the owner decides. A fix round still runs in the background.
 - Queue order: new-species concepts and turnarounds first, then evolution and other sheets, then portrait touch-ups (specs_zzz_order.py).
+
+## Line stance variety (owner 00:28 ET 11-09)
+Every stage of a line must stand differently (baby = round sit/bounce, middle = in motion, final = big planted stance; branch
+finals differ from each other). Same stance as another stage = capped at 7.9. Prompts now carry the ladder (REL in build_jobs.py),
+turnarounds keep the concept's stance instead of a neutral stand, and existing lines are audited and re-posed stage by stage.

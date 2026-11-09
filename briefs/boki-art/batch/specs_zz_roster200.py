@@ -23,7 +23,7 @@ def CQ(name,parent_concept=None,runs=4):
     d=ROSTER200[name]
     refs=[SR]+([parent_concept] if parent_concept else [])
     fam=(" Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, "
-         "but give this form a fundamentally new body plan, silhouette and pose.") if parent_concept else ""
+         "but give this form a fundamentally new body plan, silhouette and pose, and a clearly different stance from image 2 (owner rule: every stage of a line stands differently).") if parent_concept else ""
     SPECS.append({'id':'c_'+name.lower(),'name':name+' (concept)','refs':refs,'runs':runs,'aspect':'1:1',
       'prompt':CONCEPT_CORE+LESSONS+"Concept: "+d['concept']+" Look: "+d['look']+" Face: "+d['face']+". Colours: "+d['cols']+
                ". Archetype: "+d['arch']+". Avoid: "+d['avoid']+fam})
@@ -32,7 +32,7 @@ def TA(name,concept_path):
     SPECS.append({'id':'ta_'+name.lower(),'name':name,'refs':[concept_path],'runs':2,'aspect':'16:9',
       'prompt':("Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and "
                 "every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: "
-                "front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, "
+                "front, three-quarter, side and back, the same size, all four views in the same signature stance and pose as image 1 (keep its stance, do not change it to a neutral standing pose), "
                 "plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.")})
 SPORE_NOTE=(' If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent '
  '(purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.')
