@@ -4433,3 +4433,4 @@ ART starcap 8.33 briefs/boki-art/batch/out/c_starcap_4.jpg kind=concept status=o
 ART narfoil 8.47 briefs/boki-art/batch/out/ta_narfoil_2.jpg kind=turnaround status=owner-review panel=8.6/8.4/8.4
 ART coolatee_r_w30 8.33 briefs/boki-art/batch/out/coolatee_r_w30_3.jpg kind=turnaround status=owner-review panel=8.3/8.4/8.3
 Round 31 queued (52 fixes; stance redos regenerate). Items already in the owner's queue are no longer re-fixed unless he comments.
+READY ext/types-standard-names-rebased 8b43b206f (job 20261109-060408-a4 on rpc1; supersedes ext/types-standard-names). origin/main is still d255acbee, the branch base, and moon_mark.json does not exist on main or the branch, so merging origin/main was a no-op with no conflicts; the branch is identical to 8b43b206f. Checks: --check 0 failures, health --strict OK.
