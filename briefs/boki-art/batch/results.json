@@ -68925,5 +68925,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_ghoulamari_r5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_cetorgan_r5",
+    "name": "Cetorgan",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_cetorgan_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pagoguana_r5",
+    "name": "Pagoguana",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pagoguana_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_parrywhal_r5",
+    "name": "Parrywhal",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_parrywhal_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_checkmare_r5",
+    "name": "Checkmare",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_checkmare_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_wayshell_r5",
+    "name": "Wayshell",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_wayshell_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_wayshell_r5",
+    "name": "Wayshell",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_wayshell_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pagoguana_r5",
+    "name": "Pagoguana",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_pagoguana_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_siegephant_r5",
+    "name": "Siegephant",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_siegephant_r5_1.jpg",
+    "ok": true
   }
 ]
