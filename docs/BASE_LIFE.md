@@ -21,3 +21,9 @@ check: `--base-life-check`.
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
 - Toys: placed layout items whose id is in `toys` (today only the Training post; GARDEN.md 9.3 adds more).
+- Trait drift (GARDEN.md 3, lever 3; `scripts/home/base_drift.gd`, `content/rules/base_drift.json`, check
+  `--trait-drift-check`): when the farm's day clock wraps, `BaseLife.step` calls `BaseDrift.day`. Each Boki's four
+  traits close `step` of the gap to the average of its friends (bond at or above `friend_at`; rivals and strangers
+  do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
+  migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
+  `CareJournal.note`).

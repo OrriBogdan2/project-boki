@@ -37,6 +37,7 @@ var toys: Array = []       # Vector3: where the placed toys stand
 var night := false
 var _acc := 0.0
 var _toy_t := 0.0
+var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 
 func _init(home) -> void:
@@ -90,6 +91,9 @@ func step(d: float) -> void:
 		_toy_t = 0.0
 		find_toys()
 	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
+	if h.day_t < _day_t:
+		BaseDrift.day(h.kins.map(func(k): return k["rec"]))
+	_day_t = h.day_t
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one
 	for k in h.kins:

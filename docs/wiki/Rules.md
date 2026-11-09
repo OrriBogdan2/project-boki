@@ -43,6 +43,23 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## base_drift (`content/rules/base_drift.json`)
+
+Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with farm_build.json base_mode on, once per in-game day at home each Boki's four traits (0..1) move a small step toward the average of its friends (base life bonds at or above base_life friend_at). Rivals do not pull.
+
+| Setting | Value |
+|---|---|
+| step | 0.03 |
+| step_doc | share of the gap between a Boki's trait and its friends' average that closes each in-game day. |
+| week_days | 7 |
+| week_days_doc | in-game days in a drift week; the cap below resets when a Boki's week ends. |
+| week_cap | 0.12 |
+| week_cap_doc | most a single trait may move (either way, summed) in one drift week, in trait units (0..1). |
+| bands | [0.33, 0.67] |
+| bands_doc | trait values at which a trait changes band (low, middle, high); crossing one writes a journal line. |
+| words | {"bravery": ["braver", "shyer"], "loyalty": ["more loyal", "more independent"], "temper": ["hotter-tempered", "calmer"], "curiosity": ["more curious", "more settled"]} |
+| words_doc | per trait: [line when it rises, line when it falls], written as 'is getting <word>' in the Boki's journal. |
+
 ## base_life (`content/rules/base_life.json`)
 
 Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json base_mode on, every farm Boki runs one state machine (Roam, Eat, Nap, Play, PlayWith, Watch, React) and keeps rec['bonds'] = {uid: -1..1}. Times are seconds, distances metres (tiles), bond changes are per event unless they say per second.
