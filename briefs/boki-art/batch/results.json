@@ -37544,5 +37544,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_terrasloth_t5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_terrasloth_t4",
+    "name": "Terrasloth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t5",
+    "name": "Terrasloth (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t5",
+    "name": "Terrasloth (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_terrasloth_t5",
+    "name": "Terrasloth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_terrasloth_t5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d1",
+    "name": "Pyrraven (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d1",
+    "name": "Pyrraven (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d1",
+    "name": "Pyrraven (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pyrraven_d2",
+    "name": "Pyrraven (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pyrraven_d2_3.jpg",
+    "ok": true
   }
 ]
