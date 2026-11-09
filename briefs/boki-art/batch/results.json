@@ -49766,5 +49766,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/furnacowary_card99_3.jpg",
     "ok": true
+  },
+  {
+    "id": "voltalon_card99",
+    "name": "Voltalon (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/voltalon_card99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestaff_card99",
+    "name": "Lodestaff (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lodestaff_card99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestaff_card99",
+    "name": "Lodestaff (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestaff_card99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_card99",
+    "name": "Voltalon (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltalon_card99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_card99",
+    "name": "Seamwyrm (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/seamwyrm_card99_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestaff_card99",
+    "name": "Lodestaff (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestaff_card99_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltalon_card99",
+    "name": "Voltalon (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltalon_card99_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chuggamus_p99",
+    "name": "Chuggamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chuggamus_p99_2.jpg",
+    "ok": true
   }
 ]
