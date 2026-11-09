@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const MTIME := preload("res://tools/mage_anim_time_check.gd")        # Sparkle's move timing against the footage frames
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -27,6 +28,7 @@ func run(main_node: Node, who: String) -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
 		await _growth()
 		await ults.mage()
+		MTIME.new(self).run()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
