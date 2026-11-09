@@ -1,5 +1,17 @@
 [
   {
+    "id": "ta_vespox_recolor",
+    "name": "Vespox (recolour)",
+    "refs": [
+      "briefs/boki-art/evolutions/Vespox.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Recolour image 1 to match the colour scheme of image 2 exactly, and change nothing else: same creature, design, pose, every part, layout, outline and background. Use image 2's palette: deep plum-purple fur (not lilac or pale violet), a soft light lilac-cream chest and muzzle like image 2, dark plum-brown glossy segmented tail and chitin plates like image 2's tail, the same lime-green eyes and lime venom. Same soft hand-painted style."
+  },
+  {
     "id": "c_glaivyx_g1",
     "name": "Glaivyx (concept)",
     "refs": [
@@ -4332,6 +4344,18 @@
     "aspect": "1:1",
     "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Ink forms: always clearly bigger and more grown-up than Ermink, each in its own distinct pose (racing, diving, lounging, striding, crouching, prowling, gliding, pooling, coiling). Concept: a lamb whose curly fleece is tide-worn sea-glass pebbles. Look: A fluffy baby lamb on short stubby legs, its whole curly fleece made of round frosted sea-glass pebbles of different sizes, little rounded sea-glass hooves and ear tips. Face: big, sleepy-happy eyes and a soft little smile.. Colours: frosted seafoam green and pale aqua, with a cobalt blue pebble accent.. Archetype: cute. Avoid: an axolotl, sharp crystals, shells, sand, a bottle.",
     "size": "2K"
+  },
+  {
+    "id": "vespox_card7",
+    "name": "Vespox (recolour)",
+    "refs": [
+      "briefs/boki-art/cards/Vespox.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Recolour image 1 to match the colour scheme of image 2 exactly, and change nothing else: same creature, design, pose, every part, layout, outline and background. Use image 2's palette: deep plum-purple fur (not lilac or pale violet), a soft light lilac-cream chest and muzzle like image 2, dark plum-brown glossy segmented tail and chitin plates like image 2's tail, the same lime-green eyes and lime venom. Same soft hand-painted style."
   },
   {
     "id": "barokat_card6",
@@ -11478,6 +11502,18 @@
     "runs": 2,
     "aspect": "16:9",
     "size": "2K"
+  },
+  {
+    "id": "portrait_vespox_recolor",
+    "name": "Vespox (portrait recolour)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Vespox.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Recolour image 1 to match the colour scheme of image 2 exactly, and change nothing else: same creature, design, pose, every part, layout, outline and background. Use image 2's palette: deep plum-purple fur (not lilac or pale violet), a soft light lilac-cream chest and muzzle like image 2, dark plum-brown glossy segmented tail and chitin plates like image 2's tail, the same lime-green eyes and lime venom. Same soft hand-painted style."
   },
   {
     "id": "portrait_barokat_b3",

@@ -25,4 +25,5 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 19 | No Boki named after heroes | Rule in GAME_RULES_NOV8.md; Sable etc. renamed by main | DONE (rule) |
 | 20 | Drop-in splash: skydiving characters; keep Sable as OG image | Logged in STATUS.md | LATER (after Boki) |
 | 22 | Starters: cut the two branch finals | Lashyx + Amanitusk cut; new single finals (Glaivyx 8 dirs, Mycroll final 6 all-new dirs); main asked to update rules/data | GENERATING |
+| 23 | Vespox colours should match the line | Unlocked; recolour edits of sheet, card, portrait to Vespyx plum palette | GENERATING |
 | 21 | 66 Bokidex items marked "redo" | Each has a newer attempt or is in this list; re-check every tick | ONGOING |
