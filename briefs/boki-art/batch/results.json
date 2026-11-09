@@ -6604,5 +6604,110 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gloamshell_r_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_r",
+    "name": "Marchleaf (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf_r",
+    "name": "Marchleaf (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_r",
+    "name": "Rampartoad (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_r",
+    "name": "Nettlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rampartoad_r",
+    "name": "Rampartoad (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rampartoad_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrarimit_r",
+    "name": "Terrarimit (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_terrarimit_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_r",
+    "name": "Nettlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thrumbird_r",
+    "name": "Thrumbird (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrarimit_r",
+    "name": "Terrarimit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_terrarimit_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thrumbird_r",
+    "name": "Thrumbird (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thrumbird_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vaultara_r",
+    "name": "Vaultara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltalon_r",
+    "name": "Voltalon (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltalon_r",
+    "name": "Voltalon (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_voltalon_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_vaultara_r",
+    "name": "Vaultara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_vaultara_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_zephyrak_r",
+    "name": "Zephyrak (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_zephyrak_r_2.jpg",
+    "ok": true
   }
 ]
