@@ -9,7 +9,7 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 5, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -41,7 +41,6 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
 ##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
 ##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
-##   ·  unlit: no lighting at all
 ##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
@@ -49,27 +48,27 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
-		"scale": 0.5, "fxaa": false, "unlit": true,
+		"scale": 0.5, "fxaa": false,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
 		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
-		"scale": 0.77, "fxaa": true, "unlit": false,
+		"scale": 0.77, "fxaa": true,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
 		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
-		"scale": 1.0, "fxaa": true, "unlit": false,
+		"scale": 1.0, "fxaa": true,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
 		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false, "unlit": false,
+		"scale": 1.0, "fxaa": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
 		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false, "unlit": false,
+		"scale": 1.0, "fxaa": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
 		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
@@ -83,6 +82,12 @@ func quality() -> String:
 		return qv
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
+
+## MSAA off by default (performance pass 11-08): Medium's old 2x becomes FXAA; a hand-set 4x stays.
+func _video_v5() -> void:
+	if int(v.get("video_v", 4)) < 5:
+		if int(v.get("msaa", 0)) == 2 and quality() == "medium": v["msaa"] = 0
+		v["video_v"] = 5
 
 ## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
@@ -200,6 +205,7 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	_video_v5()
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
@@ -421,7 +427,6 @@ func _apply_quality() -> void:
 	var root := get_tree().root
 	_apply_render_scale()
 	root.mesh_lod_threshold = float(Q["lod"])
-	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):
