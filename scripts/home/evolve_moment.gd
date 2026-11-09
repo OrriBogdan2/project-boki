@@ -44,9 +44,15 @@ static func watchers_of(kins: Array, except: Dictionary, at: Vector3) -> Array:
 
 ## Plays the moment: `fresh` (the new model, already built) replaces `old` at `old`'s place under `host`.
 ## `done` runs when it ends; the watchers are freed again by the caller then.
-static func play(host_: Node3D, fx_: Fx, old_: Node3D, fresh_: Node3D, col_: Color, watchers_: Array, done: Callable) -> EvolveMoment:
+static func play(host_: Node3D, fx_: Fx, old_: Node3D, fresh_: Node3D, col_: Color, watchers_: Array,
+		done: Callable) -> EvolveMoment:
 	var m := EvolveMoment.new()
-	m.host = host_; m.fx = fx_; m.old = old_; m.fresh = fresh_; m.col = col_; m.watchers = watchers_
+	m.host = host_
+	m.fx = fx_
+	m.old = old_
+	m.fresh = fresh_
+	m.col = col_
+	m.watchers = watchers_
 	m.start()
 	var tw := host_.create_tween()
 	tw.tween_method(m.step, 0.0, LENGTH, LENGTH)
