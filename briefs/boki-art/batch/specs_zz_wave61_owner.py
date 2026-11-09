@@ -10,3 +10,11 @@ for _n,_id,_src,_stg,_pose in (('Barokat','b3','c_barokat_b3_1','mid','a round, 
     P(_l+'_'+_id,_n,_O+_src+'.jpg',_pose); _P61.append('portrait_'+_l+'_'+_id)
 # (b2 pick jobs already ran; they are skipped at review instead of promoted)
 PRIORITY=_P61+PRIORITY
+# Owner 03:30: Umbrink alt (u2) confirmed -> u3 pick jobs are skipped at review. Barokat: another character already has a rain
+# cloud, so swap Barokat's little rain cloud for soft wispy cloud puffs swirling around his head like a fluffy halo.
+SPECS.append({'id':'c_barokat_cloud','name':'Barokat (cloud halo edit)','refs':[_O+'c_barokat_b3_1.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+ 'prompt':("Edit image 1 and keep everything about this creature exactly the same (face, body, colours, brass horn ears, barometer belly dial,"
+  " lightning-rod tail, pose, style, background) except one change: remove the small grey rain cloud and raindrops above its head, and instead"
+  " give it soft, wispy white cloud puffs that swirl loosely around its head and shoulders like a fluffy halo of cloud, drifting and curling,"
+  " light and airy, partly see-through, with no rain. Keep the cloud close around the head, not a separate cloud floating above.")})
+PRIORITY=['c_barokat_cloud']+PRIORITY

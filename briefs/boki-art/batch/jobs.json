@@ -1,5 +1,16 @@
 [
   {
+    "id": "c_barokat_cloud",
+    "name": "Barokat (cloud halo edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_barokat_b3_1.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1 and keep everything about this creature exactly the same (face, body, colours, brass horn ears, barometer belly dial, lightning-rod tail, pose, style, background) except one change: remove the small grey rain cloud and raindrops above its head, and instead give it soft, wispy white cloud puffs that swirl loosely around its head and shoulders like a fluffy halo of cloud, drifting and curling, light and airy, partly see-through, with no rain. Keep the cloud close around the head, not a separate cloud floating above."
+  },
+  {
     "id": "ta_barokat_b3",
     "name": "Barokat",
     "refs": [
