@@ -19,6 +19,8 @@ const CHECKS := {
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
 	"--dolm-combo-check": ["res://tools/breah_combo_check.gd", "hero_pair_check", null],
+	"--recast-marker-check": ["res://tools/recast_marker_check.gd", "recast_marker_check", "check"],
+	"--recast-marker-shots": ["res://tools/recast_marker_check.gd", "recast_marker_check", "shots"],      # --shots-dir=<dir>
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],

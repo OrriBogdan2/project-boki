@@ -782,6 +782,9 @@ func in_e() -> bool:
 func e_recastable() -> bool:
 	return not knife.is_empty()
 
+func recast_at() -> Vector3:
+	return ground(knife["pos"]) if not knife.is_empty() else Vector3.INF
+
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(0.12, func():               # spun into a side-arm throw, released on the key pose

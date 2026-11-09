@@ -106,6 +106,12 @@ static func circle(h: Hunter, id: String, p := {}) -> void:
 	e["core"] = float(p.get("core", -1.0))
 	_put(h, id, e)
 
+## Just the rim of a circle, no fill (a marker that must not read as an area). p: at, r (1.35), lw
+static func ring(h: Hunter, id: String, p := {}) -> void:
+	var e := _base(h, "ring", p)
+	_disc(h, e, p)
+	_put(h, id, e)
+
 ## A circle with a growing inner sweet-spot ring: core grows core0 -> core1 with k (0.5 -> 1 bh).
 ## p: as circle (r defaults to 2.5 bh = 4.5 m) plus k, core0 (0.9), core1 (1.8)
 static func sweet(h: Hunter, id: String, p := {}) -> void:

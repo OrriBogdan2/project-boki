@@ -195,6 +195,8 @@ func tick(dt: float) -> void:
 	_tick_knocks()
 	_tick(dt)
 	_tells(dt)
+	if h.is_local():
+		RecastMarker.sync(self)
 	_tick_charge(dt)
 
 func held(which: String) -> bool:
@@ -718,6 +720,11 @@ func slot_info(slot: String) -> Dictionary:
 	return out
 
 func e_recastable() -> bool: return false
+## The world marker of an open recast (RecastMarker, caster only): where the thing you will trigger sits
+## (Vector3.INF = no recast open), the action whose key it shows, and the seconds the window has left (< 0 = no limit).
+func recast_at() -> Vector3: return Vector3.INF
+func recast_key() -> String: return "signature"
+func recast_left() -> float: return e_t
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start

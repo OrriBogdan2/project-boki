@@ -67,6 +67,9 @@ Common params (every shape):
 Directions are flat `Vector2(x, z)`, the same as `h.aim_dir()`. Points are `Vector3`. Every shape sits
 on the ground under its anchor and follows terraces and stairs, but never climbs a wall or drops into a pit.
 
+### Ring: just the rim
+`AimKit.ring(h, id, {"at": p, "r": 0.9, "col": c})` draws a circle's rim with no fill, for a marker that must not read as an area (RecastMarker).
+
 ### Lane: fixed, growing, narrowing
 ```gdscript
 # Vex RMB: a fixed lane with an arrow tip, out past the cursor

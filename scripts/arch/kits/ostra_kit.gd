@@ -74,6 +74,7 @@ func can_shoot() -> bool: return not well.locked and super.can_shoot()
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
+func recast_at() -> Vector3: return seed["pos"] if not seed.is_empty() else Vector3.INF
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()

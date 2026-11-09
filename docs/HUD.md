@@ -39,3 +39,7 @@ drawn, the downed plate and status words show, cooldown text appears).
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) left of the box: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
+
+## Recast marker
+
+While a recast is open, `RecastMarker` (scripts/ui/recast_marker.gd) puts a thin ground ring (`AimKit.ring`, the rim only, no fill) in the Hunter's colour on the thing the second press triggers, with its key over it. Only the caster sees it. It fades over the last 0.5 s of the window and costs one draw call (the key; the ring is pooled AimKit geometry). A kit opts in with `recast_at()` (`Vector3.INF` = none open), `recast_key()` (the action whose key shows, default `signature`) and `recast_left()` (default `e_t`; < 0 = no time limit). Done for Motley's seed, Meeko's Hearthlight, Albert's thrown hammer (attack key) and Sable's dagger. Check: `--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
