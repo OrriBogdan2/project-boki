@@ -72180,5 +72180,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/rd2_forgebrock_v2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rd2_chuggamus_v2",
+    "name": "Chuggamus (redesign concept, round 2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd2_chuggamus_v2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_chuggamus_v2",
+    "name": "Chuggamus (redesign concept, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd2_chuggamus_v2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_chuggamus_v2",
+    "name": "Chuggamus (redesign concept, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd2_chuggamus_v2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd2_forgebrock_v2",
+    "name": "Forgebrock (redesign concept, round 2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rd2_forgebrock_v2_4.jpg",
+    "ok": true
   }
 ]
