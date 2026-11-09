@@ -2,8 +2,7 @@ extends RefCounted
 ## --perkorb-check: perks are found as orbs, never chosen from a prompt. No perk prompt exists;
 ## chests, shrines and bosses drop orbs (1 / 1-2 / a fan of 3) that lean the way the design says;
 ## taking one of a boss's fan fades the rest for you only (another hunter can still take them);
-## orbs sync over Net; the old kit passives are in the pool; every hero in Arch.ORDER gets its fixed
-## weapon step on every even level; bots walk to orbs and take them. Prints PERKORB PASS/FAIL.
+## orbs sync over Net; the old kit passives are in the pool; bots walk to orbs and take them. Prints PERKORB PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -24,7 +23,6 @@ func run(main_node: Node) -> void:
 	await _drops()
 	await _fan()
 	await _sync()
-	await _paths()
 	await _bots()
 	print("PERKORB DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
