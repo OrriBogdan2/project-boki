@@ -69597,5 +69597,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/style_chandelotl_c_1.jpg",
     "ok": true
+  },
+  {
+    "id": "style_chandelotl_a",
+    "name": "Chandelotl (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_chandelotl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_gongrowl_a",
+    "name": "Gongrowl (style test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_gongrowl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_chandelotl_a",
+    "name": "Chandelotl (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_chandelotl_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_chandelotl_b",
+    "name": "Chandelotl (style test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/style_chandelotl_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_chandelotl_b",
+    "name": "Chandelotl (style test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_chandelotl_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_gongrowl_a",
+    "name": "Gongrowl (style test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_gongrowl_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_chandelotl_c",
+    "name": "Chandelotl (style test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_chandelotl_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "style_gongrowl_b",
+    "name": "Gongrowl (style test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/style_gongrowl_b_2.jpg",
+    "ok": true
   }
 ]
