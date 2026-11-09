@@ -65747,5 +65747,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_pickadactyl_gp_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_tiltster_gp",
+    "name": "Tiltster (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tiltster_gp_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gq",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gq_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_cetorgan_gp",
+    "name": "Cetorgan (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_cetorgan_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal_gp",
+    "name": "Parrywhal (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_gp_3.jpg",
+    "ok": true
   }
 ]
