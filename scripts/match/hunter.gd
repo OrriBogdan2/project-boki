@@ -1013,10 +1013,10 @@ var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "
 const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
-	if downed or stun_t > 0.0 or root_t > 0.0 or out or Hex.active(self):
+	if downed or out:
 		return
-	if KitStatus.grounded(self) and not DredgeKit.reeling(self):
-		# Grounded (a Thief's Bola): no dash, jump or glide (a reeling Dredge still barges)
+	# stunned, rooted, hexed or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
+	if stun_t > 0.0 or root_t > 0.0 or Hex.active(self) or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
 		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
@@ -1710,16 +1710,16 @@ func use_ultimate() -> void:
 	if why != "" and is_local() and m.hud:
 		m.hud.toast_small(why, Color("a2a8bb"))
 
-## Tells the HUD a button press landed ("cast": the slot pops) or didn't ("deny": it shakes red
-## with a soft buzz), so a press on cooldown never just silently does nothing.
+## Tells the HUD a button press landed ("cast": the slot pops) or didn't ("deny": PressDeny's red pulse
+## and tick), so a press on cooldown never just silently does nothing.
 func _ab_feedback(slot: String, kind: String) -> void:
 	if not is_local() or m.hud == null or not m.hud.has_method("ability_feedback"):
 		return
-	m.hud.ability_feedback(slot, kind)
 	if kind == "deny":
-		m.sfx("warn", null, -16.0, 1.6)
-	else:
-		m.sfx("skill", null, -9.0, 1.15)
+		PressDeny.raise(m.hud, slot)
+		return
+	m.hud.ability_feedback(slot, kind)
+	m.sfx("skill", null, -9.0, 1.15)
 
 ## X: swap which of your two kin is out. The benched one rests in your satchel.
 func swap_kin(force := false) -> void:
