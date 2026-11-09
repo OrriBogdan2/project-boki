@@ -119,8 +119,8 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight while skating | match; skate tracking owner question (gap 16) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
 | Q | none | glove | ours |
-| E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, cd 17 | match; 0.85x cd |
-| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 (owner), cd 80 | match |
+| E | Wall pushes, recast freezes, 20 s [D] | Slide, grow, freeze, 200 HP (~50 own darts), cd 17 | match; 0.85x cd |
+| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Hold 3.5, carry .8 x1.05 speed (owner), rink 4 bh +15% (owner), body as ice, cd 80 | match; +15% radius, +5% slide (owner 11-08) |
 | Dash | Hold, release stops, 13 s [D] | 11.5 m/s (F 10-11), 1.6 s, early-release refund .6 (owner) | match; refund owner |
 | Passive | Chill 4 s, shatter on knock [D] | Chill + 15% slow (ours) | differ: slow ours |
 | Anim | Footage poses | 19 moves, all on `claire.glb` (49) | match on coverage |
@@ -135,7 +135,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Q | none | glove | ours |
 | E | Bomb grows, reactivate, up to 3.5x [D] | Grows 6.5 s, dmg_max_k 3.0, fizzles 10 s (ours) | differ: 3x vs 3.5x, fizzle ours |
 | R | Vortex stun + pull, 70 s [D] | Tell 1.0, 3.5 s, pull 12, cd 70 | match; ~1 s lock (owner) |
-| Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift 30%, moves foes and allies (counters both) | match |
+| Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift 35% (owner 11-08 +17%; source gives no drift), moves foes and allies (counters both) | match |
 | Passive | Damage Empowers; floats [D] | Swollen variants | match; floating `[?]` |
 | Anim | Footage poses | 14 moves, all on `ostra.glb` (45) | match on coverage |
 

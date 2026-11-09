@@ -13,6 +13,8 @@ func run(main_node: Node) -> void:
 	ult.main = main_node
 	var own = load("res://tools/pin_bjorn_owner_check.gd").new()
 	own.main = main_node
+	var tall = load("res://tools/tall_climb_check.gd").new()
+	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
 	var feel = load("res://tools/albert_feel_check.gd").new()
@@ -21,6 +23,7 @@ func run(main_node: Node) -> void:
 		await _archer_combos()
 		await ult.pin()
 		await own.pin()
+		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
@@ -28,8 +31,8 @@ func run(main_node: Node) -> void:
 		await own.bjorn()
 		await launch.bjorn()
 		await feel.albert()
-	n += ult.n + own.n + launch.n + feel.n
-	fails += ult.fails + own.fails + launch.fails + feel.fails
+	n += ult.n + own.n + launch.n + tall.n + feel.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + feel.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -378,7 +381,30 @@ func _archer_combos() -> void:
 		) < 0.01,
 		"cds %s reaches %s" % [str(cds), str(reaches)]
 	)
+	# upgrade parity (docs/heroes/archer.md): damage and the other two slots
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
 	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	var p1 := K.power("sec")
+	var pk1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([
+			K.power("sec") / p1, K.power("kin") / pk1,
+			K.dash_def()["cd"] * K.dash_k(), K.e_def()["cooldown"] * K.cd_k("kin"),
+		])
+	ok("upgrade parity: Heavy Shot damage +20% / +40%", near.call(up[1][0], 1.2) and near.call(up[2][0], 1.4), str(up))
+	ok("upgrade parity: Spirit Walk recharge 9.5 -> 8.5 -> 7.5",
+			near.call(up[0][2], 9.5) and near.call(up[1][2], 8.5) and near.call(up[2][2], 7.5), str(up))
+	ok("upgrade parity: Hail Wall cooldown 15 -> 13 -> 9 and damage +30% / +60%",
+			near.call(up[1][3], 13.0) and near.call(up[2][3], 9.0)
+			and near.call(up[1][1], 1.3) and near.call(up[2][1], 1.6), str(up))
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
 	# Hail Wall, then a hold-only RMB: the old tap-snare root is gone
 	K.cd["e"] = 0.0
 	step(m, 5.0)
@@ -477,6 +503,46 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
+	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
+	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
+	var wx := int(home.x) - 4
+	var wl: PackedByteArray = W.level
+	for dz in range(-2, 3):
+		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv + 2
+	W.level = wl
+	step(m, 0.5)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	step(m, 1.5, func(): P.inp["move"] = Vector2(-1, 0))
+	var plain_x := P.pos.x
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	K.res = 80.0
+	P.inp["move"] = Vector2(-1, 0)
+	P.do_dash()
+	var in1 := K.spirit.passed
+	step(m, 1.1, func(): P.inp["move"] = Vector2(-1, 0))
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"combo pin: Spirit Walk passes a raised terrace wall that stops a plain walk",
+		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and absf(P.pos.y - home.y) < 0.1,
+		"plain x %.1f, spirit x %.1f y %+.2f (wall %d..%d) inside %d"
+			% [plain_x, P.pos.x, P.pos.y - home.y, wx - 1, wx + 1, K.spirit.passed - in1]
+	)
+	# ending inside the terrace puts her back on her side, at the floor she left
+	P.teleport(Vector3(wx + 0.5, home.y, home.z))
+	step(m, 0.05)
+	var sn1 := K.spirit.snap_backs
+	K.spirit.end("time")
+	ok(
+		"combo pin: Spirit Walk ending inside a terrace = back to the entry",
+		K.spirit.snap_backs == sn1 + 1 and absf(P.pos.y - home.y) < 0.1
+			and W.ground_at(P.pos.x, P.pos.z) <= home.y + 0.1,
+		"x %.1f y %+.2f entry %s" % [P.pos.x, P.pos.y - home.y, K.spirit.entry]
+	)
+	for dz in range(-2, 3):
+		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv
+	W.level = wl
 	# damage ends it
 	P.teleport(home)
 	P.dashes = P.max_dashes()
@@ -571,6 +637,9 @@ func _archer_combos() -> void:
 		P.draw_t < 0.0 and dmg(T) == hurt0 and P.ammo == ammo0,
 		"draw_t %.2f took %.0f ammo %d -> %d" % [P.draw_t, dmg(T) - hurt0, ammo0, P.ammo]
 	)
+	fresh(T)
+	fresh(T2)
+	air_dash_is_ground(m, P, home)
 	await done(m)
 	var r2 := setup("archer", 7.0, "", true)
 	m = r2[0]
@@ -665,6 +734,8 @@ func _bulwark_combos() -> void:
 	var home: Vector3 = r[4]
 	var lv: int = r[5]
 	var K: BulwarkKit = P.ak
+	air_dash_is_ground(m, P, home)
+	step(m, 0.8)
 	_wall_at(m, home, lv, 3)
 	var reset := func():
 		P.teleport(home)
@@ -905,6 +976,24 @@ func _bulwark_combos() -> void:
 		P.dashes >= dashes_held - 0.01 and K.spins == spins_before,
 		"dashes %.2f -> %.2f" % [dashes_held, P.dashes]
 	)
+	# Shift in the 0.1 s the aegis takes to rise (the press and the Shift together): the bash, not the Spin Dash
+	step(m, 1.0)
+	reset.call()
+	var win_dashes := P.dashes
+	var win_spins := K.spins
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	P.do_dash()
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
+	P.inp["sec_hold"] = false
+	step(m, 0.2)
+	var win_cd := float(K.cd["rmb"])
+	ok(
+		"combo bulwark: shield + Shift pressed together = the Shield Charge, no Spin Dash charge spent",
+		K.st.get("last_dash") == "charge" and K.spins == win_spins and P.dashes > win_dashes - 0.1
+		and absf(win_cd - 6.0) < 0.7,
+		"dash %s spins %d dashes %.2f cd %.1f" % [str(K.st.get("last_dash")), K.spins - win_spins, P.dashes, win_cd]
+	)
 	# ranks (data: Shield Bash and Spin Dash -1.5 s a rank; the shield +25% HP, then faster repair): cooldown 6, 4.5, 3
 	var cds: Array = []
 	var shields: Array = []
@@ -958,6 +1047,28 @@ func _bulwark_combos() -> void:
 		K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
 		"charges %.1f cd %.1f" % [K.ch_rmb, float(K.cd["rmb"])]
 	)
+	# the refund gives the dash-reset cue; a miss (dashing away) and rank 1 (a hit) refund nothing
+	var cues: Array = []
+	var on_cue := func(_h, src): cues.append(src)
+	CombatBus.dash_reset_cue.connect(on_cue)
+	for refund_case in [["rank 3 hit", 3, 1.0, true], ["rank 3 miss", 3, -1.0, false], ["rank 1 hit", 1, 1.0, false]]:
+		step(m, 1.0)
+		reset.call()
+		P.slot_lv["dash"] = int(refund_case[1])
+		K.ch_rmb = 0.0
+		K.cd["rmb"] = 4.0
+		cues.clear()
+		P.inp["move"] = Vector2(float(refund_case[2]), 0)
+		P.do_dash()
+		step(m, 0.4)
+		P.inp["move"] = Vector2.ZERO
+		var refunded: bool = K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0
+		ok(
+			"combo bulwark: dash refund, %s: refunded %s, cue %s" % [refund_case[0], refund_case[3], refund_case[3]],
+			refunded == refund_case[3] and (cues == ["dash_hit"]) == refund_case[3],
+			"charges %.1f cd %.1f cues %s" % [K.ch_rmb, float(K.cd["rmb"]), cues]
+		)
+	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
 	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
 	step(m, 1.0)
@@ -1058,6 +1169,25 @@ func _bulwark_combos() -> void:
 		) < 0.01 and absf(heals[2] - 1.5) < 0.01,
 		"cds %s heals %s" % [str(ecds), str(heals)]
 	)
+	# upgrade parity (docs/heroes/bulwark.md): Spin Dash recharge -1.5 s a rank;
+	# the source gives none of the three slots a damage step
+	var recharge: Array = []
+	var pw: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		P.slot_lv["kin"] = rk
+		recharge.append(K.dash_def()["cd"] * K.dash_k())
+		pw.append([K.power("sec"), K.power("dash"), K.power("kin")])
+	ok(
+		"upgrade parity: Spin Dash recharge 8 / 6.5 / 5 s, no damage step on any slot",
+		absf(recharge[0] - 8.0) < 0.01 and absf(recharge[1] - 6.5) < 0.01
+		and absf(recharge[2] - 5.0) < 0.01 and absf(pw[2][0] - pw[0][0]) < 0.001
+		and absf(pw[2][1] - pw[0][1]) < 0.001 and absf(pw[2][2] - pw[0][2]) < 0.001,
+		"recharge %s power %s" % [str(recharge), str(pw)]
+	)
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	# small mechanics (wiki): a broken aegis isn't repaired by it; a downed teammate inside starts coming back
 	K.cd["e"] = 0.0

@@ -39,5 +39,5 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
   locked ability spends a point on it. Your ultimate opens at level 6. See [Classes](Classes.md).
 - **The Meadow is safe for Boki.** The Dusk Isles and the Hollow put the Boki you bring at risk; the
   game warns you. See [Boki](Boki.md#losing-a-boki).
-- **The training area** (from the Expedition menu) has a checklist for every button.
+- **The Training Grounds** (from the Expedition menu) has a checklist for every button.
 - Every key can be rebound in Settings > Controls. See [Controls](Controls.md).

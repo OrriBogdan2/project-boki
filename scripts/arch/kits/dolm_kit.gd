@@ -12,9 +12,8 @@ extends ArchKit
 ## KitLooks.
 
 const ROCK_PAY := "ROCKFALL"
-const STONE := Color("d9a35b")
-const MOLTEN := Color("ff7a2a")
-const LANE_COL := Color("f4ead8")       # the punch lane: pale stone white, as bright as an aim reticle
+const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
+const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
@@ -126,8 +125,8 @@ func launch(w: Dictionary, dir: Vector2, src: String) -> void:
 	var mid := rock_mid(w)
 	HeroZones.remove_rock(m, w)
 	m.sfx("dolm_rock_crunch", mid, -4.0, randf_range(0.92, 1.08))      # torn out of the ground
-	m.fx.burst(mid + Vector3(0, 0.6, 0), Color("d9b27a"), 14, 5.0, 0.4, 6.0, 1.1)
-	m.fx.spark(mid + Vector3(0, 0.4, 0), Vector3(dir.x, 0.6, dir.y), MOLTEN, 10, 7.0, 35.0, 0.3, 6.0, 1.2)
+	m.fx.burst(mid + Vector3(0, 0.6, 0), Color("8f9cb8"), 14, 5.0, 0.4, 6.0, 1.1)
+	m.fx.spark(mid + Vector3(0, 0.4, 0), Vector3(dir.x, 0.6, dir.y), COBALT, 10, 7.0, 35.0, 0.3, 6.0, 1.2)
 	_fire_rock(mid + Vector3(0, 0.9, 0), dir, float(rd["dmg"]) * power("kin"), src, "rock", float(rd["range"]))
 	if w.has("ult"):
 		m.shots[-1]["x"]["ult"] = int(w["ult"])
@@ -137,7 +136,7 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 	var rd := rock_def()
 	var spd := float(rd["speed"])
 	m.spawn_shot(
-		h, start, dir * spd, dmg, rng / spd, 0.45, Color("ff8a3c"),
+		h, start, dir * spd, dmg, rng / spd, 0.45, Color("3a7cff"),
 		{
 			"kb": float(rd["kb"]) if src != "dash" else float(dash_def()["kb"]), "tracer": 0.3, "src": "abil",
 			"ab": "rock", "kx": func(s, at, e, why): _rock_end(s, at, e, why, src)
@@ -155,13 +154,13 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		return
 	x["burst_done"] = true
 	var blast := float(rd["blast"])
-	m.fx.ring(at, blast, Color("ff5a2a"), 0.3)
-	m.fx.ring(at, blast * 0.55, Color("ffd08a"), 0.18)
-	m.fx.burst(at + Vector3(0, 0.4, 0), Color(1.0, 0.5, 0.15, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
+	m.fx.ring(at, blast, Color("3a7cff"), 0.3)
+	m.fx.ring(at, blast * 0.55, Color("d8ecff"), 0.18)
+	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.23, 0.49, 1.0, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
 	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
-	m.fx.flash(at + Vector3(0, 0.6, 0), Color("ff9a3c"), 0.7, 0.08)
+	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
 	m.sfx("br_burst", at, -3.0, 1.0)
-	net_ring(at, blast, Color("ff5a2a"))
+	net_ring(at, blast, Color("3a7cff"))
 	var slow_t := float(rd["slow_t"]) if src != "dash" else float(dash_def()["slow_t"])
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
@@ -175,7 +174,7 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		x["slow_k"] = float(rd["slow_k"])
 		if e is Hunter:
 			launch_pay += 1
-			payoff_fx(e.pos, ROCK_PAY, Color("ffb36a"), "pay_rockfall", h.dir_to(e), e)
+			payoff_fx(e.pos, ROCK_PAY, Color("9ad0ff"), "pay_rockfall", h.dir_to(e), e)
 	for f in foes_in(at, blast):
 		if f == e: continue
 		var f_dmg := splash_dmg * _repeat_k(f)
@@ -214,7 +213,7 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
 	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
-		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("ffd24a"), 0.28)      # the Molten Guard ring
+		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("d8ecff"), 0.28)      # the Molten Guard ring
 	if dive:
 		_tick_dive()
 	hop.tick(dt)
@@ -268,7 +267,7 @@ func _tick_sight(dt: float) -> void:
 			var pd: Dictionary = d["passive"]
 			AimKit.cone(
 				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("f3e6c8")}
+				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
 			)
 			sight_t -= dt
 			if sight_t <= 0.0:
@@ -305,8 +304,8 @@ func stonesight() -> int:
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
-		m.fx.ring(o.pos, 0.9, Color("ff6a3a"), 0.55)
-		m.fx.ring(o.pos, 0.5, Color("ffd08a"), 0.4)
+		m.fx.ring(o.pos, 0.9, Color("3a7cff"), 0.55)
+		m.fx.ring(o.pos, 0.5, Color("d8ecff"), 0.4)
 		n += 1
 	if n > 0:
 		play("breah_sense")
@@ -363,7 +362,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
-			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, MOLTEN.lerp(Color("ffc23a"), k))
+			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
 		if lmb_t < float(ld["tap"]): _boulder()
@@ -383,10 +382,10 @@ func _punch_tele(k: float) -> void:
 		h, "punch",
 		{
 			"len": float(pd["len"]), "width": float(pd["width"]), "chevrons": 3, "k": k, "fill": k, "col": LANE_COL,
-			"col_full": Color("ffd08a")
+			"col_full": Color("d8ecff")
 		}
 	)
-	AimKit.charge(h, k, {"col": MOLTEN})
+	AimKit.charge(h, k, {"col": COBALT})
 
 func _boulder() -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
@@ -401,12 +400,12 @@ func _boulder() -> void:
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var rng := AimMode.dist(h, float(bd["range"]), AimMode.MAX)
 	m.spawn_shot(
-		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("ff9a3c"),
+		h, start, dir * spd, float(bd["dmg"]) * m.dmg_mult(h), rng / spd, float(bd["size"]), Color("9ad0ff"),
 		{"kb": float(bd["kb"]), "tracer": 0.4, "kx": func(s, at, e, _why): _boulder_end(s, at, e)}
 	)
 	KitLooks.of(m).skin(m.shots[-1], "boulder")
 	m.sfx("br_throw", h.pos, -3.0, 1.0)
-	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), MOLTEN, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
+	m.fx.spark(start, Vector3(dir.x, 0.2, dir.y), COBALT, 6, 5.0, 25.0, 0.18, 2.0, 0.8)
 	Juice.shot(h, start, dir)
 
 ## The boulder bursts where it ends: a small fireball with a red ring on the ground, splashing the
@@ -414,9 +413,9 @@ func _boulder() -> void:
 func _boulder_end(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	var g := AimMode.ground(m, at)
-	m.fx.ring(g, float(bd["splash"]), Color("ff3a2a"), 0.28)
-	m.fx.burst(at, Color(1.0, 0.5, 0.15, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
-	m.fx.flash(at, Color("ff9a3c"), 0.5, 0.06)
+	m.fx.ring(g, float(bd["splash"]), Color("3a7cff"), 0.28)
+	m.fx.burst(at, Color(0.23, 0.49, 1.0, 0.9), 12, 4.0, 0.3, 4.0, 1.1)
+	m.fx.flash(at, Color("9ad0ff"), 0.5, 0.06)
 	m.sfx("br_boulder_hit", at, -4.0, 1.0)
 	for f in foes_in(at, float(bd["splash"])):
 		if f == e: continue
@@ -442,9 +441,9 @@ func _punch(k: float) -> void:
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
 	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
-	m.fx.burst(fp, Color("e8c07a"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
-	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), MOLTEN, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
-	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, MOLTEN, k > 0.6)
+	m.fx.burst(fp, Color("8f9cb8"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
+	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), COBALT, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
+	m.fx.slash(h.pos + Vector3(0, 1.0, 0), atan2(dir.y, dir.x), 0.5, float(pd["len"]) * 0.8, COBALT, k > 0.6)
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)
 	last_sweep = swept.size()
@@ -474,7 +473,7 @@ func _punch(k: float) -> void:
 			wall_stuns += 1
 			if not (f is Hunter):
 				f.hurt(2.0, h, {"src": "abil", "ab": "lmb", "stun": float(pd["wall_stun"])})
-			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("ffb36a"), false)
+			m.fx.word(f.pos + Vector3(0, 2.0, 0), "WALLED", Color("9ad0ff"), false)
 			KitLooks.of(m).crown(f, float(pd["wall_stun"]))
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
@@ -483,11 +482,11 @@ func _punch(k: float) -> void:
 ## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	var fwd := Vector3(dir.x, 0.25, dir.y)
-	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.62, 0.47, 0.32, 0.95), 0.3)
-	m.fx.burst(at + Vector3(0, 0.5, 0), Color(1.0, 0.45, 0.1, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
-	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.66, 0.52, 0.38, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
-	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("ffb347"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
-	m.fx.flash(at + Vector3(0, 0.7, 0), Color("ff8a2c"), 0.5 + 0.3 * k, 0.07)
+	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
+	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
+	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
+	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
+	m.fx.flash(at + Vector3(0, 0.7, 0), Color("9ad0ff"), 0.5 + 0.3 * k, 0.07)
 
 ## Every rock of her team the punch reaches, nearest first: the ones in the lane, then any lined up
 ## further along the aim with no gap wider than `sweep_gap` (punching along a Stone Row sweeps it).
@@ -535,11 +534,17 @@ func extra_dashes() -> float:
 
 ## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
+## RecastCue: Shift again chains the next hop (a press in the air waits for the rock).
+func recast_window() -> Dictionary:
+	if not hop.chaining() or int(hop.st["n"]) >= int(hop.dd()["hops"]):
+		return {}
+	return RecastCue.window("dash", hop.left(), maxf(hop.left(), float(hop.dd()["window"])), h.pos)
+
 func on_dash(use_ex: bool) -> bool:
 	if hop.chaining():
 		hop.press()
 		return true
-	if use_ex:
+	if use_ex and h.dashes < 1.0:          # a charge in the air is the same Rock Hop (item 183)
 		if not spend_dash(true): return true
 		play("breah_exdash")
 		travel(
@@ -584,8 +589,8 @@ func dodge_anim() -> String:
 	return "kit"
 
 func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.62, 0.48, 0.34, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
-	m.fx.burst(h.pos + Vector3(0, 0.9, 0), MOLTEN, 1, 1.5, 0.3, 2.0, 0.8)
+	m.fx.burst(h.pos + Vector3(0, 0.5, 0), Color(0.56, 0.61, 0.72, 0.8), 3, 1.2, 0.4, -1.0, 1.6)
+	m.fx.burst(h.pos + Vector3(0, 0.9, 0), COBALT, 1, 1.5, 0.3, 2.0, 0.8)
 	return true
 
 # ------------------------------------------------------------------ RMB: Quakefall (BreahSlam)
@@ -614,7 +619,7 @@ func guard_stack() -> void:
 	shield_at = m.time
 	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
 	h.shield_t = float(gd["t"])
-	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("ffd24a"), 0.35)
+	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 
 # ------------------------------------------------------------------ E: Stone Row
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an
@@ -659,9 +664,9 @@ func cast_e() -> bool:
 	for j in spots.size():
 		var p: Vector3 = spots[j][0]
 		AimKit.circle(
-			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("ff4a1f"), "all": true, "dur": tell}
+			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("3a7cff"), "all": true, "dur": tell}
 		)
-		m.fx.spark(p + Vector3(0, 0.1, 0), Vector3.UP, MOLTEN, 4, 3.0, 40.0, 0.2, 2.0, 0.8)
+		m.fx.spark(p + Vector3(0, 0.1, 0), Vector3.UP, COBALT, 4, 3.0, 40.0, 0.2, 2.0, 0.8)
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
@@ -673,7 +678,7 @@ func cast_e() -> bool:
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
-	m.fx.burst(p + Vector3(0, 0.2, 0), MOLTEN, 8, 4.0, 0.3, 8.0, 1.0)
+	m.fx.burst(p + Vector3(0, 0.2, 0), COBALT, 8, 4.0, 0.3, 8.0, 1.0)
 
 func _raise_feel() -> void:
 	if not is_instance_valid(h):

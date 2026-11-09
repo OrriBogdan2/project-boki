@@ -20,6 +20,11 @@ const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charg
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
+const TRADE_COL := Color("c65cff")         # the Trade's violet (his end, the lob; the dash slot's col)
+const TRADE_EDGE := Color("ff3fd0")        # its magenta edge (the landing end; the UI's Void & Masks neon)
+const SMOKE := Color(0.118, 0.078, 0.188, 0.85)   # the void smoke round the Trade (the UI's #1e1430)
+const TRADE_LOOK_K := 1.3     # the Trade's lantern, motes and flashes, times their old size (visual only:
+                              # the circle's rings and sigils stay at dash.radius, the real catch)
 
 var swollen_t := 0.0
 var last_shot_t := -99.0
@@ -74,6 +79,13 @@ func can_shoot() -> bool: return not well.locked and super.can_shoot()
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
 func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
+## RecastCue: the seed is the marker; "WAIT" through the 0.3s minimum (a press there is buffered).
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = seed["pos"]
+		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
+	return w
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()
@@ -181,7 +193,11 @@ func _tick_weapon() -> void:
 		var col := GLOW_COL.lerp(GLOW_FULL_COL, charge)
 		# (on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the match
 		# camera drew it as a disc at his feet)
-		KitLooks.of(m).hold_on("os_charge", "mote", h, hand_pos(true), lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
+		var hand := hand_pos(true)
+		KitLooks.of(m).hold_on("os_charge", "mote", h, hand, lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
+		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: magenta motes and smoke drawn into his hand
+			m.fx.burst(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
+			m.fx.burst(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
 ## fire stays plain orbs), then a straight build to 1 at lmb.idle.
@@ -212,25 +228,28 @@ func _set_charge(k: float) -> void:
 	orb_wpn["speed"] = float(base_wpn["speed"]) * lerpf(1.0, float(ld["prime_speed"]), k)
 	orb_wpn["size"] = float(base_wpn["size"]) * orb_size_k(k)
 	orb_wpn["color"] = Color(base_wpn["color"]).lerp(ORB_FULL_COL, k)
+	orb_wpn["sfx"] = "os_orb_hot" if k >= KitLooks.ORB_HELD_K else String(base_wpn["sfx"])   # its release sound
 	charge = k
 
 ## The orb's size at charge k, as a share of the plain orb's.
 func orb_size_k(k: float) -> float:
 	return 1.0 + float(lmb_def()["size_k"]) * k
 
-## The orb just left at the charge it was fired with; a full one has its own flick, sound and flash.
+## The shot just left at the charge it was fired with: the quick shard, or from KitLooks.ORB_HELD_K the void
+## orb with its own flick and puff (its release sound is the weapon's, set by _set_charge).
 func _orb_fired() -> void:
 	last_shot_t = m.time
 	last_orb_c = charge
 	last_orb_r = float(h.wpn["size"])
 	KitLooks.of(m).release("os_charge")
 	KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge))
-	var full := charge >= 1.0
-	play("ostra_orb_hot" if full else "ostra_orb")
-	if full:
+	var held_orb := charge >= KitLooks.ORB_HELD_K
+	play("ostra_orb_hot" if held_orb else "ostra_orb")
+	if charge >= 1.0:
 		settled_shots += 1
-		m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
-		m.fx.burst(_hand(), Color(0.8, 0.6, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
+	if held_orb:
+		m.fx.burst(_hand(), Color(TRADE_EDGE, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
+		m.fx.burst(_hand(), SMOKE, 6, 1.5, 0.4, -1.0, 1.6)
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:
@@ -275,7 +294,7 @@ func _tick_swap_aim(dt: float) -> void:
 	var dd := dash_def()
 	if (held("dash") and swap_aim < float(dd["aim_max"])) and not h.downed and h.stun_t <= 0.0:
 		var spot := swap_spot()
-		AimKit.swap(h, "swap", {"b": spot, "r": float(dd["radius"]), "col": TEAL})
+		AimKit.swap(h, "swap", {"b": spot, "r": float(dd["radius"]), "col": TRADE_COL})
 		return
 	swap_aim = -1.0
 	if h.downed or h.stun_t > 0.0:
@@ -293,10 +312,11 @@ func _swap_cast() -> void:
 	}
 	swap_peak = 0.0
 	play(swap_move())
-	m.fx.ring(h.pos, float(dd["radius"]), TEAL, 0.35)
-	m.fx.ring(land, float(dd["radius"]), VOID_COL, 0.35)
+	m.fx.ring(h.pos, float(dd["radius"]), TRADE_COL, 0.35)
+	m.fx.ring(land, float(dd["radius"]), TRADE_EDGE, 0.35)
+	m.fx.burst(h.pos + Vector3(0, 0.4, 0), SMOKE, 12, 1.6, 0.7, -1.5, 2.0 * TRADE_LOOK_K)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
-	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
+	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), TRADE_EDGE)
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
 
 ## His dash moves: the underhand lob from the ground, the overhead sling and streaming drift in the air.
@@ -329,12 +349,16 @@ func _tick_swap(dt: float) -> void:
 	var lift := sin(u * PI) * float(dd["lob"])
 	swap_peak = maxf(swap_peak, lift)
 	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
-	KitLooks.of(m).hold_on("os_star", "star", h, p, 1.0)
-	m.fx.burst(p, Color(0.5, 0.3, 1.0, 0.75), 1, 0.8, 0.35, 0.0, 1.1)
+	KitLooks.of(m).hold_on("os_star", "star", h, p, TRADE_LOOK_K)
+	# a violet trail and dark void wisps off the lantern, and wisps curling off his hem while he hovers
+	m.fx.burst(p, Color(TRADE_COL, 0.8), 1, 0.8, 0.35, 0.0, 1.1 * TRADE_LOOK_K)
+	m.fx.burst(p, SMOKE, 1, 0.6, 0.6, -1.0, 1.6 * TRADE_LOOK_K)
+	m.fx.burst(from + Vector3(0, 0.3, 0), SMOKE, 1, 0.9, 0.6, -2.0, 1.4 * TRADE_LOOK_K)
 	var r := float(dd["radius"])
-	AimKit.swap(h, "swap_fly", {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TEAL, "col2": VOID_COL})
-	KitLooks.of(m).sigil("os_sigil_from", h, AimMode.ground(m, from), r, u, TEAL)
-	KitLooks.of(m).sigil("os_sigil_to", h, land, r, u, VOID_COL)
+	var ends := {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TRADE_COL, "col2": TRADE_EDGE}
+	AimKit.swap(h, "swap_fly", ends)
+	KitLooks.of(m).sigil("os_sigil_from", h, AimMode.ground(m, from), r, u, TRADE_COL)
+	KitLooks.of(m).sigil("os_sigil_to", h, land, r, u, TRADE_EDGE)
 	if h.downed or h.out or h.stun_t > 0.0:
 		_swap_end(false)
 		return
@@ -375,7 +399,7 @@ func _swap_end(go: bool) -> void:
 	if not go:
 		return
 	swaps += 1
-	_fold_in(from, TEAL)
+	_fold_in(from, TRADE_COL)
 	_trade_bodies(land, from, float(dd["radius"]))
 	_arrive(land, from, from_void)
 	if rank("dash") >= 3:
@@ -430,15 +454,16 @@ func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	h.vel.y = 0.0
 	if arrive_y - gy > 0.05: h.grounded = false
 	play("ostra_arrive")
-	_fold_in(land, VOID_COL)
-	m.fx.flash(land + Vector3(0, 1.0, 0), Color("b06bff"), 0.9, 0.08)
+	_fold_in(land, TRADE_EDGE)
+	m.fx.flash(land + Vector3(0, 1.0, 0), TRADE_EDGE, 0.9 * TRADE_LOOK_K, 0.08)
 	m.sfx("os_swap", land, -2.0, 1.0)
-	net_ring(land, 1.6, TEAL)
+	net_ring(land, 1.6 * TRADE_LOOK_K, TRADE_EDGE)
 
-## Both ends of a Trade fold in on themselves (motes drawn inward, no ring or blast: the dash rule).
+## Both ends of a Trade fold in on themselves (motes and void smoke drawn inward, no ring or blast: the
+## dash rule).
 func _fold_in(at: Vector3, col: Color) -> void:
-	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 20, -6.0, 0.3, 0.0, 1.3)
-	m.fx.burst(at + Vector3(0, 1.0, 0), Color(0.08, 0.02, 0.14, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
+	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 26, -6.0 * TRADE_LOOK_K, 0.3, 0.0, 1.3 * TRADE_LOOK_K)
+	m.fx.burst(at + Vector3(0, 1.0, 0), SMOKE, 12, -3.0 * TRADE_LOOK_K, 0.3, 0.0, 2.2 * TRADE_LOOK_K)
 
 # ------------------------------------------------------------------ RMB: Shard Snap
 func fire_rmb(c: Dictionary) -> void:
@@ -578,6 +603,7 @@ func e_recast() -> bool:
 		return false
 	if float(seed["t"]) < float(e_def()["min_recast"]):
 		early_pops += 1
+		buffer_recast("e")
 		return true
 	_pop(true)
 	e_t = 0.0

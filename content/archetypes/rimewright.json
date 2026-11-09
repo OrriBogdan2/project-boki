@@ -17,7 +17,7 @@
 		"neck": -0.04
 	},
 	"model_glow": {"core": "#d9f7ff", "edge": "#7fd2ff", "strength": 2.2},
-	"color": "#5fd6c4",
+	"color": "#8ae6ff",
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 	"card": {
@@ -115,11 +115,11 @@
 		"icon": "dome",
 		"col": "#9af0e6",
 		"cooldown": 17.0,
-		"hp": 70.0,
+		"hp": 200.0,
 		"slide": 4.5,
 		"time": 4.5,
 		"push": 5.0,
-		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
+		"desc": "A 0.2s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor (4.5 to 16.2m), widening from 1.8m to 4.5m, stopping enemy shots (200 HP) and shoving foes it touches. It stands 4.5s in all. Press E again while it slides to freeze it in place for 6s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -172,9 +172,10 @@
 		"col": "#7fd8ff",
 		"unlock": 6,
 		"cooldown": 80.0,
-		"radius": 7.2,
+		"radius": 8.3,
 		"snap_t": 0.2,
 		"carry_t": 0.8,
+		"carry_k": 1.05,
 		"hold": 3.5,
 		"late": 0.75,
 		"late_k": 0.67,
@@ -183,6 +184,6 @@
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: you are sealed in a frost shell, a frozen statue: invulnerable and rooted, your facing locked as you cast, and a 7.2m (4 body heights) rink snaps out round you. Cast from a skate, the statue slides on along your skate (about 6m at full speed, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an 8.3m rink snaps out round you. Cast from a skate, the statue slides on along your skate (5% faster than the skate, about 6.3m, easing to a stop over 0.8s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay (15% up to 55%). Its cracks glow brighter as it builds; at 3.5s it cracks open: 40 damage and a 0.75s ice-block stun to every foe in the rink you can see. Recast in the last 0.75s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

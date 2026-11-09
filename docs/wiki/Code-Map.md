@@ -22,7 +22,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `bridge.gd` | Web build only: talks to the page (Claude-written Boki lines, the room, shared storage) |
 | `social.gd` | Shared things: island snapshots, gifts, guilds, the town market (web build) |
 | `care.gd` | Raising: needs, likes, natures, trained stats, bond ranks, life stages, IVs, breeding |
-| `evo.gd` | Evolution by affinity, forms every 4 levels, body parts |
+| `evo.gd` | Evolution by species line (level, Ink, trade; content/rules/evolve.json), level cap, art gate, body parts |
 | `unique.gd` | Inborn rolls that make each Boki itself (size, coat, eyes, voice...) |
 | `mutations.gd`, `shiny.gd` | Rare mutations and shimmers: odds, inheritance, looks, perks |
 | `kin_speak.gd` | How young Boki talk, from their name only up to full sentences |

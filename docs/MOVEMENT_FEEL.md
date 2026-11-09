@@ -34,7 +34,7 @@ Nothing here comes from SUPERVIVE's files.
   - Jump height or arc.
   - Glide turn rate.
   - Drop dive speed.
-  - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump is already the glide input, so **no variable jump height** was added.
+  - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump keeps the glider open, so **no variable jump height** was added.
   - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
 
 ## Targets and results
@@ -62,7 +62,7 @@ Nothing here comes from SUPERVIVE's files.
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
-| glide_open_hold_s (Space held from the jump) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
+| glide_open_hold_s (scripted input only: a player's Space held from the jump never opens it, glide_press_only) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
 | glide_open_button_frames (glide button) | 6 | 1 | <= 1 | no tap ambiguity |
 | glide_catch_t (terminal fall to sink rate) | 0.383s | 0.150s | <= 0.2s | opens "instantly" |
 | glide_speed | 6.5 m/s | 5.0 m/s | 4.5–5.5 | [game data] MaxGlide 500 uu/s (item 163: ours was "too fast and controllable") |
@@ -90,11 +90,11 @@ Nothing here comes from SUPERVIVE's files.
 | abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 18.5m | >= 15m | |
 | abyss_fall_t / abyss_fall_vy_deep (step off the lip) | n/a | 1.93s / 10.0 m/s | >= 1.8s / 10–10.8 | [game data] AbyssFallSlow 12 to 10 m/s |
 | abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.58m | >= 1.5m | owner: bouncy |
-| glide_high_sink / glide_swoop_speed (gliding above 8.5m) | 1.4 / 6.5 m/s | 3.5 / 11.75 m/s | 3.3–3.6 / >= 10.5 | [game data] GlideDownwardForce, swoop 2.5x |
+| glide_high_sink / glide_swoop_speed (gliding above 8.5m) | 1.4 / 6.5 m/s | 3.5 / <= cruise | 3.3–3.6 / <= 5.3 | [game data] GlideDownwardForce; the drop adds no speed (owner 11-08) |
 | dive_vy / dive_vy_t (hold Ctrl under the glider) | n/a | 32.5 m/s / 0.75s | 32–32.5 / 0.6–0.9s | [game data] GlideDiveZTargetSpeed -3250 uu/s, ZForceMax 350,000 / Mass 100 |
 | dive_steer_ratio (the keys in the dive vs under the glider) | n/a | 0.25x | 0.2–0.3 | [game data] GlideDiveXYForceMultiplier |
 | dive_cancel_h / dive_timeout_s | n/a | 3.27m / 9.98s | 2.9–3.5 / 9.9–10.1 | [game data] GlideDiveCancelDistance 350 uu, GlideDiveTimeout 10 s |
-| dive_swoop_speed (let go of Ctrl high up) | n/a | 15.0 m/s | 12–15 | [game data] swoop 2.5x, capped at GLIDE_MAX |
+| dive_swoop_speed (let go of Ctrl high up) | n/a | <= cruise | <= 6 | owner 11-08: pulling out of a dive adds no speed |
 | abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.67 / 0.99 | <= 0.02 / >= 0.6 / >= 0.95 | owner: "really dark/red when going low" |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
@@ -150,10 +150,8 @@ Other checks:
   - For 0.6s after you let go you keep the glide's speed and steering.
   - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats at 0.4x a level glide (was 1x; lowered with the shorter glider so feathering still beats holding). Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
   - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
-- **Dash into glide** (`glide_handoff(dir, speed)`, `_take_glide_handoff()`):
-  - The Shift dash's end and a jump out of a dash register the burst. If the glider opens within 0.3s, heading within about 70° of the burst, it starts at 60% of the burst's speed (max 14 m/s). That speed bleeds off slowly.
-  - The burst reads clearly: a loud whoosh, a burst of air, a dense streak trail with afterimages while you stay well above cruise, and a brief camera pull-back (`CamRig.pull_back`).
-  - **Archetype dashes:** call `glide_handoff(dir, speed)` as the dash ends.
+- **Jump out of a dash** (`Loco.dash_jump_keep`, tuning.json `dash.jump_keep`, 0.75): the dash ends and the jump carries 75% of its speed, the rest is air drag's; the farm does the same (it used to keep the whole dash, the match 55%: a one-step 45% stop). A Shift's speed is `Loco.dash_hv` in both places (the per-hunter ease too).
+- **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
 - **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
@@ -217,9 +215,10 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 
 - **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s (the data's 7.5 would let jump + mantle top four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
 - **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).
-- **Air control** (`HunterMove.air_steer`): keys steer at 0.3x your ground acceleration and carried speed bleeds at 0.375/s. The data's 0.015 felt like dropped input top-down. A ledge rise keeps the old crisp air steering.
-- **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s, and 2.5x the drop past its usual sink becomes glide speed, fading over 1.5s.
+- **Air control** (`Loco.air_step`, owner 11-08: the data's low AirControl is overruled): WASD adds 32 m/s^2 onto what you carry, 2.5x that against your drift (a 5 m/s backward drift turns forward in ~0.07 s), never past your run speed along the keys; speed above it (dash, knock) bleeds at 2/s. The farm uses the same step. Numbers in content/rules/tuning.json `air`.
+- **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s. The drop never becomes speed (owner 11-08 item 8).
 - **Mantle**: topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s). The no-jump pop is 2.6 m/s (was 3.2; lower gravity floated it twice as long).
+- **Holding Space never opens the glider** (owner 11-08, said twice). With a player's keys (`inp.glide_press_only`, set in `Match`) the glider opens only from a fresh press in the air: a second Space press (`Hunter.do_jump`) or the glide button's press, or a pad/updraft auto-glide. `_glide_armed` stays true while that press is held, so a heal fold, a dash or a knock re-opens it; letting go or landing clears it. Space held from the jump, or while LMB/RMB/abilities are used, never opens it. Scripted input (bots, checks, demos) keeps the old hold-to-open (`GLIDE_ENGAGE`). Home islands follow the same rule. Measured by `--glide-hold-check`. The earlier tap/hold split only added the second-press route next to the hold route and then shortened the hold wait (0.15 -> 0.1 s), so it never went away.
 - **Glider at any heat, softer deep lift** (owner item 63): the glide input opens the glider at every heat, overheated or not (no heat floor, no lockout after an overheated one closes); overheated it burns you and lifts at half strength. The deepest lift is 30% softer (climb cap 26 -> 18.2 m/s; speed per metre of depth 1.7 -> 1.1) at the same heat cost. Measured by `--glider-heat-check`.
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.

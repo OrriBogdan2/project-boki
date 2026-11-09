@@ -12,8 +12,8 @@ extends "res://tools/combo51_shots.gd"
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["hook"]}
-const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
+	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
+const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -63,7 +63,8 @@ func run(main_node: Node) -> void:
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
 		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
 		P.ak.set("enraged_t", 0.0)
-		await Callable(self, "_%s_%s" % [who, part] if HERO_PARTS.has(who) else "_part_" + part).call()
+		var own_part := "_%s_%s" % [who, part]
+		await Callable(self, own_part if has_method(own_part) else "_part_" + part).call()
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
@@ -112,6 +113,14 @@ func _part_lmb() -> void:
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
 	await _go(2.1, shoot, _sheet("lmb", "LMB at the dummy", [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]), 1.5)
+	await _go(GAP)
+
+func _part_hold() -> void:
+	await _reset(3.3)
+	var hold := func(t: float):
+		P.inp["fire"] = t > 0.1 and t < 1.5
+		_aim(T.pos)
+	await _go(2.2, hold, _sheet("hold", "LMB held at the dummy", [0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.55, 1.7, 2.0]), 1.5)
 	await _go(GAP)
 
 func _part_rmb() -> void:
@@ -283,7 +292,7 @@ func _juggernaut_r() -> void:
 	await _go(2.7, ult, _sheet("r",
 			"X, Gilded Riposte: the gold guard, a blocked hit, the cleave up through the strip, the "
 			+ "gold scorch and embers",
-			[0.2, 0.42, 0.6, 0.77, 0.84, 0.92, 1.05, 1.5, 2.5]), 1.5)
+			[0.2, 0.42, 0.77, 0.86, 0.89, 0.93, 0.98, 1.1, 2.0]), 1.5)
 	await _go(GAP)
 
 func _juggernaut_rage() -> void:
@@ -345,7 +354,7 @@ func _archer_lmb() -> void:
 		_aim(T.pos)
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
-			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+			+ "orchid thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
 	await _go(GAP)
 
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.
@@ -368,7 +377,8 @@ func _archer_miss() -> void:
 		P.inp["fire"] = fmod(t, 0.9) < 0.04 and t < 1.9
 		_aim(off + Vector3(0, 0, 1.6 * floor(t / 0.9)))
 	await _go(4.6, shots, _sheet("miss",
-			"Missed needles stay stuck in the ground with their red threads attached, 4 s, swaying, then they run out",
+			"Missed needles stay stuck in the ground with their orchid threads attached, 4 s, swaying, "
+			+ "then they run out",
 			[0.1, 0.3, 0.6, 1.2, 2.0, 2.8, 3.6, 4.2, 4.5], func() -> Vector3: return off), 3.0)
 	await _go(GAP)
 
@@ -393,7 +403,7 @@ func _archer_heavy() -> void:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
 	await _go(3.0, heavy, _sheet("heavy",
-			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big red needle (HEAVY_SCALE) with "
+			"RMB Heavy Shot: the bar (AimKit) and thread gathering, the big orchid needle (HEAVY_SCALE) with "
 			+ "its thick thread, the shove, the seam it leaves",
 			[0.6, 1.2, 1.33, 1.38, 1.44, 1.52, 1.7, 2.2, 2.9]), 3.0)
 	await _go(GAP)
@@ -421,7 +431,7 @@ func _archer_e() -> void:
 			K.cast_e()
 		_aim(T.pos)
 	await _go(5.4, hail, _sheet("e",
-			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, the red "
+			"E Hail Wall: the volley up, needles raining on the arc, silver sparks where they land, the orchid "
 			+ "thread stitched post to post", [0.2, 0.42, 0.6, 1.0, 2.0, 3.0, 4.0, 4.7, 5.2],
 			func() -> Vector3: return T.position + Vector3(0, 0.9, 0)), 3.0)
 	await _go(GAP)

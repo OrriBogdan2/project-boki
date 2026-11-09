@@ -240,9 +240,49 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: knocking a hunter with it resets it; the bond counts the knock (0.7)",
 			T.downed and U.resets == 1 and float(K.cd["x"]) <= 0.0 and absf(knock_paid - 0.7) < 0.001,
 			"cd %.1f bond %.2f" % [float(K.cd["x"]), knock_paid])
+	# the reset is for taking a hunter down: a hunter already down takes nothing from it, a plain hit resets nothing
+	A.step(m, 0.5)
+	A.fresh(T)
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	T.downed = true
+	T.hp = 0.0
+	T.down_hp = 500.0
+	K.cd["x"] = 0.0
+	var resets0 := U.resets
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: a hunter already knocked takes nothing, no kill, the cooldown keeps running",
+			U.last_dealt == 0.0 and U.resets == resets0 and float(K.cd["x"]) > 1.0,
+			"dealt %.0f resets %d cd %.1f" % [U.last_dealt, U.resets - resets0, float(K.cd["x"])])
+	A.step(m, 0.5)
+	A.fresh(T)
+	T.downed = false
+	T.teleport(home + Vector3(2.6, 0, 0))
+	P.teleport(home)
+	A.aim_at(P, T.pos)
+	K.cd["x"] = 0.0
+	HunterKeys.ult_pressed(P)
+	A.step(m, 0.9)
+	A.ok("juggernaut X small mechanic: a hit that leaves the hunter up resets nothing",
+			not T.downed and U.resets == resets0 and float(K.cd["x"]) > 1.0, "resets %d cd %.1f" % [U.resets - resets0,
+					float(K.cd["x"])])
 	A.ok("juggernaut X: its moves are keyed (guard, cleave)", ["jug_guard", "jug_riposte"]
 			.all(func(mv): return not HunterAnim.km_sample(mv, 0.05).is_empty()))
+	_cleave_fits(U.data())
 	await A.done(m)
+
+## The cleave's crescent is the strip's leading edge: its tip at the strip's end, as wide as the strip (+20% at most).
+func _cleave_fits(d: Dictionary) -> void:
+	var sweep: Dictionary = HeroVfx.data("juggernaut")["moves"]["riposte_land"]["fx"][0]
+	var ln := float(d["len"])
+	var radius := float(sweep["size_x"]) * ln
+	var tip := float(sweep["fwd_x"]) * ln + radius
+	var half := radius * sin(deg_to_rad(float(sweep["arc"])) * 0.5)
+	var w := float(d["width"])
+	A.ok("juggernaut X: the cleave's crescent fits its strip", absf(tip - ln) < 0.1 and half >= w * 0.5
+			and half <= w * 0.6, "tip %.2f / %.1f, half-width %.2f / %.2f" % [tip, ln, half, w * 0.5])
 
 # ------------------------------------------------------------------ combos, merge holds, the burst cap
 func combos(a) -> void:

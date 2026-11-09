@@ -2,6 +2,17 @@
 
 Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Oath, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
+shared damage step is gone (the source gives none of these slots any). The ultimate takes no upgrade in our kit (the
+source's R: +20% damage, -5s, twice), so it is not changed. Rank 3 also sends both dashes 1m further (ours, not the source's; kept).
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Brightshield | +25% max-HP scaling; faster repair and regen; +25% | shield 200 / 240, regen 30, wait 1.4s, lock 2s at 3; damage +15% / +30% | same shield and repair numbers; no damage step |
+| Shift Spin Dash / Shield Bash | -1.5s both x2; tier IV: a dash hit refunds Shield Bash | recharge 6.8s / 5.6s (shared -15%); Shield Charge 4.5s / 3s; refund at 3 | recharge 6.5s / 5s; Shield Charge 4.5s / 3s; refund at 3; no damage step |
+| E Mending Ground | +25% heal; -4s; +25% heal | heal +25% / +50%, cooldown 12s / 8s, damage +15% / +30% | heal +25% / +50%, cooldown 12s / 8s; no damage step |
+
 ## Research summary
 Sources (gameplay only; notes in our own words, nothing of the source ships):
 - The hero sheet `briefs/hero-ref/bjorn.md`, written from 5 fps gameplay footage (one frame = 0.2 s). Its ranked gap list drove this pass.
@@ -43,7 +54,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | RMB: rises after 0.2 s | MED | (a) | 0.1 s (e625aa8e); `bjorn parity RMB: the aegis is up 0.1 s into the hold` |
 | RMB: does it block front melee? | MED | (b) | Yes now: any hit from a foe in its 140 degree arc lands on the aegis (its HP, Guard), as the data's "blocks all damage from the front"; damage over time and blows from behind still land. `bjorn audit: the raised aegis takes a melee blow from the front`, `a blow from behind still lands on him` |
 | Shield Charge: whole-body invulnerable | LOW | (c) | Data: "shield briefly Invulnerable" during the bash; the shield is in front of the body for the whole dash, so the whole-body window is the same in practice. Kept |
-| Shift: cooldown 9 vs data 8 | LOW | (b) | `dash.cd` 8 (ranks 6.8 / 5.6) |
+| Shift: cooldown 9 vs data 8 | LOW | (b) | `dash.cd` 8 (ranks 6.5 / 5) |
 | Shift: start burst | MED | (b) | Removed (DECISIONS: no bursts on dashes); the gameplay spin ring (2.2 m, its true hit radius) stays |
 | Air dash (lumber): gold bursts | MED | (b) | Removed; the dust stays |
 | Shield Charge: armed ring on the dash | MED | (b) | Removed (a ring on a dash); the armed flash stays |
@@ -65,7 +76,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | RMB | hold | Up 0.1 s into the hold, following the cursor at once. His aegis: a curved wall of riveted, forged gold plates (4.2 m chord, 1.7 m tall) with ribs, a rim and a hammer boss that rises out of the ground in a puff of dust; sparks and a flash on each block, darkening as it weakens, crumbling into chunks and SHIELD BROKEN when it breaks (locked 3 s). A foe that meets it is pushed back 2 m (once per 0.6 s each; a dashing one is stopped), shown by a pulsing double chevron in front of it that flashes on a push. LMB with it up is the boop: the aegis draws back, snaps out 0.7 m and settles (0.3 s, `bul_boop`), shoving foes within 1.3 m in front of it back 2.8 m with a pop and a clank, no damage, 0.55 s cooldown (`rmb.shield.boop`) | Curved pale gold slab, sparks, a break burst | Matches, our own look; the boop is ours (owner 11-09) |
 | RMB | tap / release | Nothing: letting go only lowers the aegis. The Bash is the Shield Charge on Shift | Shield Bash only with Shift while shielding | Data: the bash lives in one place |
 | Shift | tap | 360 Smash: a hard fixed 3.5 m dash (~20 m/s, 0.17 s, the sheet's run-up), sliding on through one full spin hit around him (2.2 m, 24 = 2x the throw, push 7) with a red-gold swirl ring that lunges him on 1.6 m on top of the dash's carry (`lmb.lunge.spin_d`) | Short fixed dash, one 360 spin on arrival (350 = 2x the throw) | Matches; cooldown 8 s (data; the card showed 9.2) |
-| Shift | aegis up | Shield Charge (the Bash): 4.2 m, invulnerable, 10, push 11, Crushed on a wall. Its own 6 s cooldown on the RMB slot (no dash charge spent; on cooldown the Shift does nothing); at 50 Guard it ends in a Shield Slam (cone 2.6 m, 18, push 12, stun 0.6, spends 50) | Shield Bash (6 s, Brightshield + Shift), shield briefly invulnerable | Data: own cooldown. Slam carried over from the old RMB bash |
+| Shift | aegis up (or RMB held, in the 0.1 s it takes to rise) | Shield Charge (the Bash): 4.2 m, invulnerable, 10, push 11, Crushed on a wall. Its own 6 s cooldown on the RMB slot (no dash charge spent, never the Spin Dash; on cooldown the Shift does nothing; a Shift in the rise raises the aegis and goes; in the air, riding Shield Surf, it is the same bash); at 50 Guard it ends in a Shield Slam (cone 2.6 m, 18, push 12, stun 0.6, spends 50) | Shield Bash (6 s, Brightshield + Shift), shield briefly invulnerable | Data: own cooldown. Slam carried over from the old RMB bash |
 | Shift / jump | LMB held | Owner #51: the swing keeps charging through a jump and a Shift dash (on the ground the dash is the short plain one, no spin, on a full charge; in the air the lumber) and swings where he lets go: in the air with no step, keeping his speed; in a dash riding it; in the window a perfect launch from there. Out of the dash he eases back into the wind-up pose at the charge reached. A mantle (owner #30), glide, knock, stun or another ability ends the hold, and the button must come up before it can start again; a jump or Shift in the swing's step or the launch goes at once | Wiki (Spin Dash): Shift while charging ends the Hammer Smash in a short dash without the spin | Owner #51 keeps the charge (supersedes #30's dash cancel) |
 | Shift | in a dash / planted | A press in the dash: LMB waits for its end (a tap throws or recalls, held it winds up), RMB, E and Q go mid-dash, X ends the dash and plants him. Shift while planted for Faultline goes when the plant ends. Every pair: [dash_interactions.md](dash_interactions.md) (content/dash_flow/bulwark.json) | Not in the data or footage beyond the Shield Bash and the short dash out of a Hammer Smash | Our picks, nothing dropped |
 | Shift | long dash | In the air or out of charges: a lumbering shoulder shove (`bul_lumber`), shoving foes aside | (base dash) | Our per-hero base dash variant |
@@ -123,7 +134,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Ult: planted for the wind-up and slam, the lane shown first | sheet | confirms (f25-f31) | built | `bjorn ult cast: planted`, `bjorn ult telegraph` |
 | Ult: a crack stays about 10 s | sheet | confirms (f43-f71) | built: slows 20% | `bjorn ult small: the scar ...` |
 | Ult: interrupted by a stun in the wind-up | ours | - | built | `bjorn ult small: a stun in the wind-up interrupts it` |
-| Dash hits refund Shield Bash (rank 4) | in-game data | - | built at rank 3 (our last rank): a 360 Smash that hits refunds the Shield Charge | `combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge` |
+| Dash hits refund Shield Bash (rank 4) | in-game data | - | built at rank 3 (our last rank): a 360 Smash that hits refunds the Shield Charge, with the dash-reset cue (sound and Shift pop) when a charge or cooldown was spent | `combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge`, `combo bulwark: dash refund, rank 3 miss / rank 1 hit` |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -138,7 +149,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Dash refund | missing | rank 3: a 360 Smash that hits a foe refunds the Shield Charge | the data's fourth upgrade lands on our last rank |
 | Shield upgrades | rank 3 +60 HP | rank 2 +25% HP (200), rank 3 +50% HP (240), regen 20 -> 30 per second, the post-break lock 3 -> 2 s, the wait 2 -> 1.4 s | +25% per rank from the data; the repair numbers are ours (the data says "faster") |
 
-Rank paths that do not fit our system: the Spin Dash's own cooldown still uses the shared -15% a rank (9 -> 7.65 -> 6.3 s, the data's -1.5 s a rank would be 7.5 -> 6) because the dash recharge is shared code (Hunter.dash_regen); the data's four tiers fold into our three (III and IV share our rank 3); the shared +15% damage a rank applies to the Crush and Slam where the data names no damage upgrade; the data's -1.5 s Shield Bash is on the dash rank here, as the data lists it under the Shift upgrades. Skipped: R (Abyssalbreaker) is the Faultline on X, untouched; the Guard meter stays as our own loop (the data has no such meter, but the Shield Slam payoff depends on it).
+Rank paths that do not fit our system: the data's four tiers fold into our three (III and IV share our rank 3); the upgrade table at the top lists the numbers per rank.
 
 ## Scaling
 Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Slam 18; Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.

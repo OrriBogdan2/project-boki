@@ -9,9 +9,9 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 28,
 "nested_ternary": 2,
-"semicolon": 6
+"semicolon": 9
 },
 "scripts/arch/feel.gd": {
 "long_line": 10,
@@ -32,8 +32,9 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 11,
-"semicolon": 1
+"long_line": 12,
+"semicolon": 1,
+"shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
 "long_line": 10,
@@ -390,7 +391,7 @@
 "scripts/main.gd": {
 "long_line": 387,
 "nested_ternary": 7,
-"semicolon": 405,
+"semicolon": 407,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -553,10 +554,10 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 33,
-"long_line": 91,
-"nested_ternary": 18,
-"semicolon": 49,
+"history_comment": 38,
+"long_line": 95,
+"nested_ternary": 19,
+"semicolon": 53,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -951,16 +952,16 @@
 "semicolon": 7
 },
 "tools/airheal_check.gd": {
-"long_line": 1,
+"long_line": 2,
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 19
+"semicolon": 20
 },
 "tools/archetype_check.gd": {
-"long_line": 64,
-"semicolon": 66,
+"long_line": 65,
+"semicolon": 71,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -995,6 +996,9 @@
 },
 "tools/check.gd": {
 "semicolon": 1
+},
+"tools/check_registry.gd": {
+"long_line": 1
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
@@ -1071,7 +1075,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 8,
+"long_line": 7,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {
@@ -1113,7 +1117,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 30,
+"long_line": 32,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {

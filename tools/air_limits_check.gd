@@ -159,7 +159,7 @@ func _hold(m: Match, home: Vector3, arch: String, slot: String) -> void:
 			arch, slot, t, h.gliding, h.grounded, h.ak.anim_id])
 	if h.gliding:
 		var now := Vector2(h.vel.x, h.vel.z).length()
-		ok(now >= minf(before, Hunter.GLIDE_BOOST_MAX) * KEEP,
+		ok(now >= before * KEEP,
 			"%s %s: the glide keeps the move's speed (%.1f -> %.1f m/s)" % [arch, slot, before, now])
 	_clear(h)
 	h.teleport(home)

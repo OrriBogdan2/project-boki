@@ -5,6 +5,11 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
+## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
+const RELEASE_BEAT := {
+	"mm_shot_r": 0.08, "mm_shot_l": 0.08, "mm_shot_emp": 0.14, "mm_seed": 0.07, "mm_hearth": 0.18, "mm_call": 0.1}
+const BEAT_TOL := 0.05          # s: how near the kit's effect frame the beat sits (a source frame is 0.2 s)
+const SRC_WIND := 0.07          # s: the source's cast wind before the hand releases (footage 716.3 s, 30 fps)
 
 var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 
@@ -366,6 +371,14 @@ func _statue_locks() -> void:
 
 ## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
 ## skates straight out at speed instead of stopping.
+## The held Rink Wall look's slab, or null when no wall look is up.
+func _wall_slab(K: RimewrightKit) -> MeshInstance3D:
+	var e: Dictionary = K.lk().held.get("wall", {})
+	if e.is_empty() or not is_instance_valid(e["n"]):
+		return null
+	return (e["n"] as Node3D).get_node_or_null("Slab") as MeshInstance3D
+
+
 func _rime_glide_skate() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)
 	var m: Match = r[0]
@@ -591,25 +604,66 @@ func _late_homing() -> void:
 	step(m, 1.0 / 60.0)
 	P.inp["dash"] = false
 	var beams0: int = K.stats["beams"]
-	for i in 36:
+	var launch := {}                  # beam sid -> heading it left with
+	var beam_turn := 0.0              # deg the most-turned skating beam bent off that heading
+	for i in 76:
 		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0))
-		P.inp["fire"] = true
+		P.inp["fire"] = i < 36
 		step(m, 1.0 / 60.0)
+		for b in _mine(m, P):
+			var v: Vector2 = b["vel"]
+			launch[b["sid"]] = launch.get(b["sid"], v)
+			beam_turn = maxf(beam_turn, rad_to_deg(absf((launch[b["sid"]] as Vector2).angle_to(v))))
 	P.inp["fire"] = false
 	P.inp["dash_down"] = false
-	step(m, 0.4)
 	var shot := int(K.stats["beams"]) - beams0
 	ok(
-			"tm Shift: skating, beams aimed 1.5 m off a foe still home in late and hit it",
-			shot >= 3 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
-			"%d beams, %.0f damage" % [shot, hp0 - T.hp])
+			"tm Shift: skating, beams aimed 1.5 m off a foe home in late (bend over 5 deg) and hit it",
+			shot >= 3 and beam_turn > 5.0 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
+			"%d beams, bent %.1f deg, %.0f damage" % [shot, beam_turn, hp0 - T.hp])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.8)
 	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
 	ok(
 			"tm Shift: her ice trail lasts a few seconds (plates still down 2 s after the skate), skate cd 13 s (data)",
 			slabs >= 3 and absf(P.dash_regen() - 13.0) < 0.01, "%d plates, cd %.1f s" % [slabs, P.dash_regen()])
+	var dart_dmg := float(P.wpn["dmg"])
 	await _free(m)
+	var caught := await _skate_past_dummy(Vector3(3.0, 0, -5.0), Vector3(3.0, 0, 0), true)
+	ok(
+			"tm Shift: skating past a dummy that walks on, beams aimed 1.5 m off it curve onto it late",
+			caught >= dart_dmg * 3.0, "%.0f damage" % caught)
+	var missed := await _skate_past_dummy(Vector3(4.0, 0, -12.0), Vector3.ZERO, false)
+	ok("tm Shift: a dummy far off the line of fire (12 m aside) is never hit: no hard lock", missed < 0.01,
+			"%.0f damage" % missed)
+
+## Skates +x firing at a dummy placed `at` from her and walking at `vel` (m/s); the cursor stays 1.5 m ahead of the
+## dummy when `track`, else dead ahead of her. Returns the damage the dummy took.
+func _skate_past_dummy(at: Vector3, vel: Vector3, track: bool) -> float:
+	var r: Array = sc.setup("rimewright", 30.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[3]
+	T.teleport(P.pos + at)
+	step(m, 0.05)
+	var hp0 := T.hp
+	P.dashes = 1.0
+	P.inp["move"] = Vector2(1, 0)
+	P.inp["dash"] = true
+	P.inp["dash_down"] = true
+	step(m, 1.0 / 60.0)
+	P.inp["dash"] = false
+	for i in 36:
+		T.teleport(T.pos + vel / 60.0)
+		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0) if track else P.pos + Vector3(8.0, 0, 0))
+		P.inp["fire"] = true
+		step(m, 1.0 / 60.0)
+	P.inp["fire"] = false
+	P.inp["dash_down"] = false
+	step(m, 0.4)
+	var dealt := hp0 - T.hp
+	await _free(m)
+	return dealt
 
 ## Owner 19:50: the further the spear goes, the longer it travels; it always starts at her, never at the target.
 func _spear_travel() -> void:
@@ -720,6 +774,20 @@ func _moon_shot_parity(m: Match, P: Hunter, K: TenderKit) -> void:
 	ok("mm LMB: each ember leaves at the cursor as it swings round her (within 8 deg)", worst < 8.0, "%.1f deg" % worst)
 	var unwind := absf(float(KMovesCare.MOVES["mm_shot_r"]["keys"][2][1]["y"]))
 	ok("mm LMB: the push unwinds the torso about 45 degrees (footage)", unwind >= 0.7, "%.2f rad" % unwind)
+	_release_beats()
+
+## The clip's release beat lands on the frame the kit's effect fires (every effect starts at its move's t 0), so the
+## hand and the ember, the seed, the plus and the thrust read as one frame, as in the source.
+func _release_beats() -> void:
+	var km: Dictionary = WardenClips.data("pip")["kmoves"]
+	var worst := 0.0
+	for id in RELEASE_BEAT:
+		worst = maxf(worst, absf(float(RELEASE_BEAT[id]) - float((km[id] as Dictionary).get("lead", 0.0))))
+	ok("mm clips: each release beat lands on the kit's effect frame (within %.2f s)" % BEAT_TOL,
+			worst <= BEAT_TOL, "%.3f s" % worst)
+	var wind := float(RELEASE_BEAT["mm_shot_r"]) - float((km["mm_shot_r"] as Dictionary)["lead"])
+	ok("mm LMB: the hand releases within the source's %.2f s wind of the ember" % SRC_WIND,
+			wind <= SRC_WIND, "%.3f s" % wind)
 
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
@@ -811,6 +879,7 @@ func tender() -> void:
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
 			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
+			and is_equal_approx(float(lane.get("width", 0.0)), 2.0 * float(K.rmb_def()["seed"]["hit_r"]))
 			and K.anim_id == "mm_seed_aim"
 			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
 			"%s len %.1f %s k %.2f" % [
@@ -850,6 +919,7 @@ func tender() -> void:
 			AimKit.shown(P, bid)
 			and bool(tele.get("all", false))
 			and absf(float(tele.get("r", 0.0)) - 2.2) < 0.05
+			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
 	var rooted_early := T.root_t > 0.0
@@ -1358,6 +1428,40 @@ func rimewright() -> void:
 	ok(
 			"tm passive: knocking a Chilled foe Shatters them after a beat",
 			T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s" % str(T.downed))
+	var want: float = float(K.d["passive"]["splinter_dmg"]) * K.power("passive")
+	ok(
+			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
+			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
+	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
+	K.chill.erase(T2.get_instance_id())
+	K.fan_hits.clear()
+	# off to the side, clear of the downed foe
+	var ahead := (T.pos - P.pos).normalized().rotated(Vector3.UP, PI / 2.0)
+	T2.teleport(P.pos + ahead * 5.0)
+	T2.hp = 1.0       # one dart fells them, so nothing has Chilled them first
+	step(m, 0.05)
+	var s2 := K.splinter_log
+	sc.aim_at(P, T2.pos)
+	P.inp["fire"] = true
+	step(m, 0.8)
+	P.inp["fire"] = false
+	step(m, 0.8)
+	ok(
+			"tm passive: knocking a foe that is not Chilled does not Shatter", T2.downed and K.splinter_log == s2,
+			"downed %s, shatters %d" % [str(T2.downed), K.splinter_log - s2])
+	# --- Chill lasts 4 s, and a new hit refreshes it to the full 4 s
+	T.downed = false
+	T.hp = T.max_hp
+	K.add_chill(T)
+	step(m, 3.0)
+	var lasts_3 := K.chilled(T)
+	K.add_chill(T)
+	step(m, 3.0)
+	var refreshed := K.chilled(T)
+	step(m, 1.2)
+	ok(
+			"tm passive: Chill lasts 4s and a new hit refreshes it",
+			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
@@ -1544,6 +1648,11 @@ func rimewright() -> void:
 			and K.lk().showing("wall")
 			and not (w0["node"] as Node3D).visible,
 			"at %.1f len %.1f" % [mid0.x - P.pos.x, float(w0.get("len", 0.0))])
+	var slab := _wall_slab(K)
+	ok(
+			"tm E: a solid ice slab spans the pillars, the barricade itself",
+			slab != null and slab.visible and absf(slab.scale.x - (float(w0.get("len", 0.0)) - 0.2)) < 0.3,
+			"slab %s" % ("none" if slab == null else str(slab.scale)))
 	var tx := T.pos.x
 	step(m, 1.4)
 	var w1: Dictionary = K.wall["w"]

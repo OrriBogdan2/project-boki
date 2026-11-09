@@ -17,6 +17,7 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
+var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -86,7 +87,7 @@ func charge_now() -> Array:
 func charge_orb() -> bool:
 	return false
 
-## Her dash after-image: green fletch streaks instead of the shared ghost.
+## Her dash after-image: orchid fletch streaks instead of the shared ghost.
 func dash_afterimage() -> bool:
 	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
 	return true
@@ -111,7 +112,7 @@ func draw_bonus(t: float) -> float:
 	return draw.bonus(t)
 
 ## Our shots the match just spawned get Hem's own look (PinFx): the bow's arrows by the kind PinDraw
-## loosed, the Heavy Shot's gold arrow.
+## loosed, the Heavy Shot's big orchid arrow.
 func _tag_shots() -> void:
 	for s in m.shots:
 		if s["by"] != h or (s["x"] as Dictionary).has("pin"):
@@ -143,7 +144,7 @@ func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():
 		spirit.end("hit")
 
-## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in a teal X-star.
+## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in an orchid X-star.
 func _arrow_hit(t: Ent) -> void:
 	fx.note_hit(t.pos)
 	var kind := ""
@@ -159,11 +160,11 @@ func _arrow_hit(t: Ent) -> void:
 
 # ------------------------------------------------------------------ dash: Spirit Walk
 func on_dash(use_ex: bool) -> bool:
-	var ex := use_ex and not h.gliding
+	var ex := use_ex and h.dashes < 1.0 and not h.gliding       # a charge in the air is the same Spirit Walk (item 183)
 	if not spend_dash(ex):
 		return true
 	if ex:
-		# the long dash (in the air, or out of charges): Hem's own flick and tumble with her fletch
+		# the long dash (out of charges): Hem's own flick and tumble with her fletch
 		# after-images (no bursts on a dash); 19 m/s, the base dash speed
 		travel(float(h.cdat.get("ex_dist", 4.2)), 0.22, {"invuln": 0.1, "trail": "roll"})
 		play("pin_flick")
@@ -188,13 +189,6 @@ func move_k() -> float:
 	return k
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
-## The Heavy Shot's cooldown drops by a flat "cd_per_rank" seconds a rank; the other slots keep the shared rule.
-func cd_k(slot: String) -> float:
-	if slot != "sec":
-		return super.cd_k(slot)
-	var cut := float(rmb_def().get("cd_per_rank", 3.0)) * float(rank("sec") - 1)
-	return 1.0 - cut / float(rmb_def()["cooldown"])
-
 ## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant.
 func press_rmb() -> void:
 	if busy():
@@ -208,23 +202,25 @@ func press_rmb() -> void:
 
 func rmb_hold_tick(t: float) -> void:
 	if t > float(rmb_def()["hold"]) and not pin_aim:
-		# the Heavy Shot's draw: the needle on the bow, a red bar growing from it (its own creak)
+		# the Heavy Shot's draw: the needle on the bow, an orchid bar growing from it (its own creak)
 		play("arc_heavy_wind")
 		anim_at = m.time - t          # on the hold's clock: the clip's full-draw key (1.1) lands with "full" (1.1)
 		pin_aim = true
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
-const HEAVY_GOLD := Color("ff4a3a")      # (named for its old colour: red now)
-
-## The Heavy Shot held: a thick red bar out of the bow that
-## grows to 2 body heights, the cursor ring filling (AimKit; own player).
+## The Heavy Shot held: a thick orchid bar out of the bow that
+## grows to 2 body heights, the cursor ring filling (AimKit; own player). Reaching full flashes the bow and
+## plays the taut-thread cue once.
 func _heavy_tele() -> void:
 	var hk := heavy_k()
 	AimKit.lane(h, "rmb_bar", {"len": 2.0 * AimKit.BH, "len0": 0.3, "k": hk, "width": 0.5, "fill": hk, "tip": true,
-		"col": HEAVY_GOLD, "col2": Color("fff0b0")})
-	AimKit.charge(h, hk, {"col": HEAVY_GOLD, "col2": Color("fff0b0")})
-	fx.bow_glint_at(draw.bow_at(), 1.0 if hk >= 0.99 else 0.0, HEAVY_GOLD)
+		"col": PinFx.THREAD, "col2": PinFx.PALE})
+	AimKit.charge(h, hk, {"col": PinFx.THREAD, "col2": PinFx.PALE})
+	fx.bow_glint_at(draw.bow_at(), 1.0 if hk >= 0.99 else 0.0, PinFx.THREAD)
+	if hk >= 0.99 and not heavy_full_cued:
+		heavy_full_cued = true
+		vfx("heavy_full")
 
 ## The Heavy Shot charges from the hold threshold to full.
 func rmb_charge_full() -> float:
@@ -245,7 +241,7 @@ func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"].get("max_hold", 3.0))
 
 ## A Boki merge ends every hold and channel of this kit with no shot: the bow draw (Hunter.draw_t, cleared by
-## MergeKit.drop_class_holds; its reticle here), the Heavy Shot's hold and its gold telegraph, and Spirit Walk
+## MergeKit.drop_class_holds; its reticle here), the Heavy Shot's hold and its orchid telegraph, and Spirit Walk
 ## (Hunter.spirit_t; ending inside something still puts her back where she entered).
 func _drop_holds() -> void:
 	rmb_down = false
@@ -259,7 +255,8 @@ func _drop_holds() -> void:
 
 func _drop_tele() -> void:
 	pin_aim = false
-	fx.bow_glint_at(Vector3.ZERO, 0.0, HEAVY_GOLD)
+	heavy_full_cued = false
+	fx.bow_glint_at(Vector3.ZERO, 0.0, PinFx.THREAD)
 	needle.put_away()
 	AimKit.hide(h, "rmb_bar")
 
@@ -286,7 +283,7 @@ func _pin(a: Vector3, k: float) -> void:
 	var dir := Vector2(a.x - h.pos.x, a.z - h.pos.z).normalized()
 	var extra := {"hit_extra": {"heavy": true}} if k >= 0.99 else {}
 	extra["on_foe"] = func(f: Ent, _c: Dictionary):
-		# the impact: a red-white burst, a white dust cloud as it's driven back, a white ring round it
+		# the impact: an orchid-white burst, a white dust cloud as it's driven back, a white ring round it
 		var at := f.pos + Vector3(0, 1.0, 0)
 		fx.note_hit(f.pos)
 		vfx("heavy_hit", f.pos, dir, {"k": k})
@@ -313,8 +310,9 @@ func _pin(a: Vector3, k: float) -> void:
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", h.pos, dir, {"k": k, "len": reach * (1.0 + 0.2 * k)})
-	# the release burst sits on the aim line at the bow, bigger than any bow cue, and a screen kick along the shot
-	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, HEAVY_GOLD, 0.08, 0.14, 1.0, 5.0)
+	# the release burst's pale fletch core sits on the aim line at the bow, bigger than any bow cue (heavy_go
+	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
+	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
 
 func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
@@ -350,10 +348,10 @@ func cast_e() -> bool:
 	for i in 5:
 		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(_arc_deg()) * 0.4
 		var dv := d.rotated(u)
-		# (cosmetic: small and green so the five don't stack into one white blob at the bow; PinFx.lob draws
+		# (cosmetic: small and orchid so the five don't stack into one white blob at the bow; PinFx.lob draws
 		# the arrows going up)
 		var lob_v := dv * maxf(4.0, radius / tell)
-		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.GREEN, {"lob": 3.5, "cos": true})
+		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true})
 	fx.lob(h.pos + Vector3(0, 1.6, 0), d)
 	vfx("hail_go", h.pos, d)
 	play("arc_hail")

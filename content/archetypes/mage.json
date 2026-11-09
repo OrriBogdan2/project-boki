@@ -8,7 +8,7 @@
 	"plate_offset": 2.2,
 	"body": {"size": 1.098, "chest": 1.0, "head": 0.74, "legs": 1.95, "neck": -0.05, "shoulder": 0.85, "build": 0.92, "hit_r": 0.4},
 	"model_glow": {"core": "#ff3fb4"},
-	"color": "#5fe3c8",
+	"color": "#ff5ab4",
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"card": {
@@ -99,8 +99,7 @@
 			"ctrl_cap": "soft",
 			"mod": "add"
 		},
-		"auto": 1.2,
-		"rank3_mult": 1.5
+		"auto": 1.2
 	},
 	"e": {
 		"delivery": "burst",
@@ -161,21 +160,11 @@
 		"dash",
 		"kin"
 	],
-	"rank3": {
-		"sec": "+50% damage",
-		"kin": "cooldown 3s shorter",
-		"dash": "the run's own hit deals double"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 8s -> 7.2s, damage +15%.",
-		"dash": "Rank 2: recharge 8s -> 7.2s.",
-		"kin": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 8s -> 6.4s, damage +30%; +50% damage on top.",
-		"kin": "Rank 3: cooldown 10.5s -> 5.4s (3s off), damage +30%.",
-		"dash": "Rank 3: recharge 8s -> 6.4s; the run's own hit deals double."
-	},
+	"rank_cd": {"sec": [1, 0.9, 0.8], "dash": [1, 0.9167, 0.8333], "kin": [1, 1, 0.75]},
+	"rank_dmg": {"sec": [1, 1.2, 1.9], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
+	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
+	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
+	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
 	"tells": {
 		"half": "a marker over every foe with Static: one pip per stack and the count, sparks on them that grow",
 		"full": "a Live foe: a sky bolt lands on them, four bright pips spin fast and gold sparks crackle",

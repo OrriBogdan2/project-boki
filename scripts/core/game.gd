@@ -82,7 +82,7 @@ func _setup_input() -> void:
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])
-	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
+	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
 	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
@@ -103,6 +103,7 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
+	_key("move_readout", [KEY_F7])            # the movement readout (speeds, state) for tuning
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:
@@ -211,7 +212,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
 	# the market turns over while you're out (offline), and what you found comes home
-	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)))
+	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)), null, ms)
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
@@ -264,9 +265,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 			hk["trust"] = clampf(float(hk["trust"]) + rest, 0.0, 100.0)
 		if Save.has_building("dojo"):
 			hk["xp"] = int(hk.get("xp", 0)) + 40
-			while int(hk["xp"]) >= 100 * int(hk["level"]):
+			while int(hk["level"]) < Evo.cap() and int(hk["xp"]) >= 100 * int(hk["level"]):
 				hk["xp"] = int(hk["xp"]) - 100 * int(hk["level"])
-				hk["level"] = int(hk["level"]) + 1
+				Evo.level_up(hk)
 				_evolve(hk, out)
 	# records for the trophy hall
 	var stt: Dictionary = d["stats"]
@@ -343,9 +344,9 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	if not lead: xp = int(xp * 0.7)
 	if treat == "treat_xp": xp = int(xp * 1.5)
 	k["xp"] = int(k.get("xp", 0)) + xp
-	while int(k["xp"]) >= 100 * int(k["level"]):
+	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= 100 * int(k["level"]):
 		k["xp"] = int(k["xp"]) - 100 * int(k["level"])
-		k["level"] = int(k["level"]) + 1
+		Evo.level_up(k)
 		out["levelup"] = true
 		_evolve(k, out)
 	if lead:
@@ -357,7 +358,7 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 	if ev.is_empty():
 		return
 	ev["text"] = Evo.describe(ev, k)
-	if ev["kind"] == "form": Care.dex_mark(k["species"], "form", String(ev["to"]))
+	if ev["kind"] == "form": Care.dex_mark(k["species"], "caught")      # it evolved into a new species
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []

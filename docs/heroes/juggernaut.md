@@ -21,6 +21,15 @@ docs/wiki/Inspirations.md.
 - **Not reproduced:** mana, climbing double-height walls, dodges building Rage, Volcanic Rebuke sending a
   knocked hunter straight to the deathbox, the turn lock after RMB into the dash.
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Brall, `Upg:` lines. Slots the source gives no cooldown or damage upgrade read 1.0 from `rank_cd` / `rank_dmg`.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Smash | +20% damage x2; Meteor Drop rests 2.4s less at IV | cooldown 1.8s / 1.6s, damage +15% / +30% on top of Smash +20% / +40%; drop 7.2s / 4.8s | cooldown 2s flat, Smash damage +20% / +40%; drop 7.2s / 4.8s |
+| Space Rampage | -1.6s recharge x2 (a 3rd charge), tier IV: a dodged shot feeds Rage | 8.8s / 7.3s (the old text said 9s -> 7.6s) | 8.8s / 6.4s; 3rd charge at 2, dodge feeds Rage at 3 |
+| E Warchain | -1.6s cooldown x2, tier IV: -3.2s more | 11.2s / 8.0s in play (the text said 9.5s -> 8.3s / 5.9s), damage +15% / +30% | 11.2s / 8.0s, damage unchanged (source has none) |
+
 ## Scaling
 
 Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam 52, Spin 54, Flame Step 18
@@ -275,7 +284,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
 | No jumping during the ult | wiki patch 08.21.2024 | yes (planted f33-f38) | Built: planted, no jump; asserted |
-| Knocking a hunter with the ult resets it | wiki R, in-game card | yes (ult f99-f101) | Built; asserted |
+| Killing a living enemy with the ult resets it (data: "Killing a living enemy with it resets its CD"; footage: reusable at once after the kill) | wiki R, in-game card | yes (ult f99-f101) | Built: the cleave's own hit takes a hunter down (our lethal hit is a knock, the source's kill): cooldown to 0 at once, no other window. A plain hit resets nothing; a hunter already down takes nothing from it; a monster or a wisp resets nothing. Shared path: `HeroUlt.landed` names the result, `HeroUlt.reset` clears the cooldown; asserted |
 | A sweet-spot Execution Slam knock resets the ult | wiki RMB | n/a | Built (within 2s of the sweet spot); asserted |
 | No reset from monsters or wisps | wiki patch 22.01.25 | n/a | Built: hunters only |
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
@@ -331,6 +340,28 @@ The projectile looks that ride a shot and the Warchain itself stay in scripts/ar
 
 Two of our names (Execution Slam, Scorching Spin) had matched the source hero's exactly; they are now the
 Finishing Slam and the Cinder Spin everywhere the player can read them (content, UI, fx words, wiki).
+
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/dancer_jug_check.gd` asserts drawn size = hit size, and that the move art in `content/vfx/juggernaut.json` carries no stretched size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Greatsword (LMB) | sweep arc 175 deg, reach 3.1 m | arc 175, reach 3.1 | everyone | wide slash | fixed: art was 104 deg and 0.86x reach |
+| Searing Wave (LMB hold) | lane growing to 14 m, 1.2 m wide; ring r 1.35 m on her | the wave 0.6 m radius | lane: her screen; ring: her screen | thin ring on the body while charging | lane ok; ring kept (source shows it), it is a charge meter, not an area |
+| Smash tap (RMB) | cone r 4.0 m, 70 deg through the wind-up | slam 4.0 m, 70 deg | everyone | short strike lane | fixed: was a 4 m lane; now the true cone (owner rule over the source's lane) |
+| Smash landing art | scorch + sweep, cone 70 deg | same | everyone | - | fixed: sweep was 74 deg |
+| Smash hold (RMB) lunge | lane growing 4.5-7.5 m, width = body + 0.6 m each side | contact test uses the same width | her screen | lane along the dash | fixed: was 1.3 m against a 2.06 m test; both now share `lunge_w()` |
+| Lunge art | scorch lane, width follows `lunge_w()` | same | everyone | - | fixed: was a fixed 1.3 m |
+| Meteor Drop aim (air) | disc r 2.6 m under the cursor | damage radius 2.6 m | her screen | landing marker | ok, asserted |
+| Meteor Drop marker | disc r 2.6 m filling, core ring 1.2 m | damage 2.6 m, stun core 1.2 m | everyone | magenta disc | ok, asserted |
+| Meteor Drop landing art | scorch r 2.6 m, skirt at the core, shock ring 1.2 m | same | everyone | ground crack + ring | fixed: scorch and skirt were 1.05x and 1.15x |
+| Warchain (E) | chain line to the target; steer reach 3.5 m | hook shot | everyone | chain | not an area; ok |
+| Rampage (dash) | none | along the dash | - | none | fixed: removed a cosmetic 1.1 m scorch lane |
+| Exec outline on wounded foes | red ring under the foe | marks who can be executed | her screen | red outline | kept, a marker not an area |
+| Gilded Riposte (X) guard | lane 3.6 m x 1.8 m, filling over 0.65 s | strip 3.6 x 1.8 from where he stood | everyone | strip ahead | ok |
+
+Decision: the Smash cone follows the owner's rule (true hit shape) where the source drew a short lane.
 
 ## Engine notes
 

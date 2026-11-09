@@ -20,13 +20,14 @@ func _fire_after(m: Match, P: Hunter, K: OstraKit, wait: float) -> Dictionary:
 	K.last_shot_t = m.time - wait
 	K._set_charge(K.wait_charge())
 	var k := K.charge
+	var sfx := String(P.wpn["sfx"])      # the release sound the shot will play
 	var shots0 := P.shot_n
 	P.fire_cd = 0.0
 	step(m, 0.05, func(): P.inp["fire"] = P.shot_n == shots0)
 	P.inp["fire"] = false
 	var mine: Array = m.shots.filter(func(s): return s["by"] == P)
 	var sd: Dictionary = mine[-1] if not mine.is_empty() else {}      # (point blank it has already hit)
-	return {"s": sd, "k": k, "skin": _skin_of(m, sd) if not sd.is_empty() else {}}
+	return {"s": sd, "k": k, "sfx": sfx, "skin": _skin_of(m, sd) if not sd.is_empty() else {}}
 
 func _skin_of(m: Match, sd: Dictionary) -> Dictionary:
 	for e in KitLooks.of(m).live:
@@ -53,11 +54,13 @@ func _charge_curve() -> void:
 		var f := _fire_after(m, P, K, w)
 		var sd: Dictionary = f["s"]
 		var skin: Dictionary = f["skin"]
-		var glass := ((skin["n"] as Node3D).get_node("Spin") as MeshInstance3D).material_override as ShaderMaterial
+		var sn := skin["n"] as Node3D
+		var glass := (sn.get_node("Orb/Glass") as MeshInstance3D).material_override as ShaderMaterial
 		var rim: Color = glass.get_shader_parameter("rim")
 		rows.append({
 			"wait": w, "k": f["k"], "dmg": sd["dmg"], "r": sd["r"], "speed": (sd["vel"] as Vector2).length(),
-			"scale": (skin["n"] as Node3D).scale.x, "bright": rim.get_luminance()
+			"scale": sn.scale.x, "bright": rim.get_luminance(), "orb": (sn.get_node("Orb") as Node3D).visible,
+			"shard": (sn.get_node("Shard") as Node3D).visible, "sfx": f["sfx"]
 		})
 		step(m, 0.05)
 	var at: Dictionary = {}
@@ -82,7 +85,20 @@ func _charge_curve() -> void:
 		float(at[1.4]["scale"]) / float(rows[0]["scale"]) >= 1.6 and float(at[1.4]["r"]) / float(rows[0]["r"]) >= 1.6,
 		"x%.2f" % (float(at[1.4]["r"]) / float(rows[0]["r"]))
 	)
+	var two_looks := rows.all(_two_looks_ok)
+	ok(
+		"owner 11-08: a quick shot is the violet shard, a charged one (k >= 0.5) the void orb, each with its sound",
+		two_looks and bool(rows[0]["shard"]) and bool(at[1.4]["orb"])
+	)
+	var full_x := float(at[1.4]["scale"]) / float(rows[0]["scale"])
+	ok("owner 11-08: the full void orb is drawn at least 1.8x a quick shot", full_x >= 1.8, "x%.2f" % full_x)
 	await done(m)
+
+## Owner 11-08: below ORB_HELD_K a row is the shard with os_orb, from it the void orb with os_orb_hot.
+func _two_looks_ok(q: Dictionary) -> bool:
+	var held_orb := float(q["k"]) >= KitLooks.ORB_HELD_K
+	var sound := "os_orb_hot" if held_orb else "os_orb"
+	return bool(q["orb"]) == held_orb and bool(q["shard"]) != held_orb and String(q["sfx"]) == sound
 
 ## Held, the fire rate never builds a charge: the stream stays plain orbs, so its damage is unchanged.
 func _held_fire() -> void:

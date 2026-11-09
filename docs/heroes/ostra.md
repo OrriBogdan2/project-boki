@@ -4,6 +4,17 @@ Internal note: the behaviour reference is the hero named in the Inspired-by tabl
 player-facing; every name, number and word in the shipped game is our own (renames: Swap -> Lantern Trade, Void Snap -> Shard
 Snap, Unstable Anomaly -> Brimseed, gravity orb -> Tether Lantern orb).
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Void, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared 10% / 15% / 15% steps are not used). Cooldown
+cuts are the source's seconds (our base cooldowns equal the source's tier-I ones). The ultimate takes no upgrade in our kit
+(the source's R: -5s, twice; our X has a fixed 70s), so it is not changed.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Shard Snap | +20% damage, -1.5s x2; tier IV: +50 speed on the cast, +100 on the impact | 9s / 8s, damage +15% / +30%; speed bursts at 3 | 8.5s / 7s, damage +20% / +40%; speed bursts at 3 |
+| Shift Lantern Trade | -1.5s x2; tier IV: allies entering the circle get a shield | 8.1s / 6.7s (shared -15%); shield at 3 | 8s / 6.5s; shield at 3; no damage step |
+| E Brimseed | +10% x2; tier IV: -2s and a damage-over-time on foes inside | 9s / 8s, damage +15% / +30%; burn at 3 | 10s / 8s, damage +10% / +20%; burn at 3 |
+
 ## Research summary
 - Sources: the reference sheet from footage (briefs/hero-ref/ostra.md, outside the repo), the wiki page
   (https://supervive.wiki.gg/wiki/Void) and the Steam patch-note text (Nov 2024 - Dec 2025).
@@ -48,9 +59,9 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 |---|---|---|---|---|---|
 | Reticle | always | a thin pale line with an arrowhead from him to the cursor | | | |
 | Passive Swell | builds | the pink sphere round him while Swollen | hits fill Swell (x10 on hunters); full = Swollen 9s: seed larger and quicker, Trade 1.25s, Snap +44% (data 399 vs 277); no knock heal (data pass); he floats, so ground hazards (lava, spore pods, puddles) do nothing to him, but a sky strike does | `ostra_empower` (a full turn in the air) | `os_empower` |
-| LMB Tether Lantern | tap or hold | the aim line; orbs fly their full range (`"aim": "max"`) through walls and terrain (`shot_x.pierce_terrain` on the weapon; placed walls and domes still stop them) | 9 dmg violet glass teardrop orbs (0.28m, 0.8m long, a 1.2m magenta tail) every 0.6s. The wait between shots charges the next one in a straight line, from plain at 0.6s (`lmb.charge_from`, the fire rate, so held fire stays plain orbs) to full at 1.4s (`lmb.idle`): damage up to +34%, speed up to x1.4, size (drawn and hit) up to +90% (item 117: at least 1.6x; 31 vs 58 px wide at the match camera), glass, core and impact bigger and brighter with the charge; a full orb also slows 10% for 1.5s. `charge_from` is the one value for the curve: at 0 a held orb is already x1.39, so full is only 1.37x it and item 117's 1.6x no longer holds against held fire. A violet glow at his hand grows with the charge, with a soft chime at full | `ostra_orb`, `ostra_orb_hot` | `os_orb`, `os_orb_hot`, `os_prime` |
+| LMB Tether Lantern | tap or hold | the aim line; orbs fly their full range (`"aim": "max"`) through walls and terrain (`shot_x.pierce_terrain` on the weapon; placed walls and domes still stop them) | 9 dmg shots every 0.6s, two looks (owner 11-08): below half charge (`KitLooks.ORB_HELD_K`, about 1.0s of wait) a small quick violet glass shard (a flat card, one violet mote of trail, a violet spark spray on impact); from half charge a void orb (dark glass with a magenta rim shell, a smoke tail and magenta motes, a smoke, mote, flash and ring impact), at least 1.8x the shard (x1.9 full). The wait between shots charges the next one in a straight line, from plain at 0.6s (`lmb.charge_from`, the fire rate, so held fire stays plain orbs) to full at 1.4s (`lmb.idle`): damage up to +34%, speed up to x1.4, size (drawn and hit) up to +90% (item 117: at least 1.6x; 31 vs 58 px wide at the match camera), glass, core and impact bigger and brighter with the charge; a full orb also slows 10% for 1.5s. `charge_from` is the one value for the curve: at 0 a held orb is already x1.39, so full is only 1.37x it and item 117's 1.6x no longer holds against held fire. A violet glow at his hand grows with the charge, with a soft chime at full; from half charge magenta motes and smoke are drawn into the hand (the tell). The void orb plays `os_orb_hot` (a heavier release with a low gulp and a glass chime) instead of `os_orb`; gameplay numbers are unchanged | `ostra_orb`, `ostra_orb_hot` (void orb) | `os_orb`, `os_orb_hot`, `os_prime` |
 | RMB Shard Snap | tap (1 charge) | holding RMB, or during the wind-up, the line becomes two rails the bundle's width (0.7m) | a 0.32s wind-up (an opaque black orb with a thin pale rim swelling at his hand as he coils back; he slows 25%), then on the release beat (both palms shoved out) one 2.7m bundle of dark violet crystal prisms with bright rims flies 29.5 m/s to 13m (0.44s at full range) and the damage lands on its impact: 9.5 dmg, stuns the first foe 0.8s up close to 1.8s at range, stars over its head and STUNNED, on anyone including the training dummy; a 0.15s recovery keeps him slowed (item 40: the data has no timing, so the whole cast is +40%, 0.54s -> 0.76s at full range, all in the wind-up and the flight; the footage's bundle crosses about 30 m/s) | `ostra_snap_wind` (hold), `ostra_snap` | `os_snap_wind`, `os_snap`, `os_snap_hit` |
-| Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (his ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (teal at him, violet at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark indigo star-orb lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail, 1.8s; meanwhile he drifts at 30% of run speed (`dash.fly_slow`, CastHold) at the height he cast at, even over the abyss (no fall); then he is there (both ends fold in on themselves, motes drawn inward with no ring or blast, and his appear-pop), keeping his height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where he is when it lands, each keeping its place in the circle (nobody is slowed: the data's Swap only swaps). A knock while it flies still shoves him (only his height is held). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap` (ground), `ostra_swap_air` (air), `ostra_arrive` | `os_swap_lob`, `os_swap` |
+| Shift Lantern Trade | hold to aim, release (a tap casts at once) | while held: both ends (his ring, the landing ring at the cursor and the link); in flight: both ends for everyone, each with a rune sigil (violet at him, magenta at the circle) whose ring lights segment by segment and whose hexagram brightens | a dark void lantern (dark glass, magenta rim, violet spikes, a pale mask face with slanted eyes and a grin; owner 11-08: purple and ominous, the UI's Void & Masks colours) lobbed high (over 4m up) to the cursor, or 12m along it if the cursor is further, with no ground, wall or abyss check on the target, with a violet trail and dark smoke wisps, 1.8s; the lantern, motes, smoke, flashes and arrival ring are drawn 1.3x (`TRADE_LOOK_K`, owner 11-08 +25-35%; visual only, the rings and sigils stay at the real 1.5m catch); meanwhile he drifts at 35% of run speed (`dash.fly_slow`, CastHold) at the height he cast at, even over the abyss (no fall); then he is there (both ends fold in on themselves, motes drawn inward with no ring or blast, and his appear-pop), keeping his height, and everyone in the 1.5m circle (foes, allies, Boki off the shoulder) goes to where he is when it lands, each keeping its place in the circle (nobody is slowed: the data's Swap only swaps). A knock while it flies still shoves him (only his height is held). It never travels by itself: a press in flight is ignored, a press with no charge is refused | `ostra_swap_aim` (hold), `ostra_swap` (ground), `ostra_swap_air` (air), `ostra_arrive` | `os_swap_lob` (a dash sound, owner 11-08: a low whoosh, void drone and reversed whisper under a glassy semitone sting), `os_swap` |
 | E Brimseed | tap, recast | at the cursor (9m), a ring everyone sees growing, dashed until full | a small violet mote drops onto the spot; a dark indigo glass drum with a violet swirl and a teal rim grows 6.5s to 3.2m; a light column rises from 68%; E again (from 0.3s) pops it: an implosion, 12.5 dmg up to 3.5x (COLLAPSE on a hunter at full); left alone it waits at full size for the recast, and fizzles harmlessly after 10s unpopped | `ostra_seed`, `ostra_pop` | `os_seed`, `ostra_music_box`, `os_pop` + `ostra_spring_boing` |
 | X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Motley is locked in the cast for the 1.0s dome (Void's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (Void acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
@@ -73,7 +84,7 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 | LMB charge | after not firing, the next orb is stronger (353 vs 263) [data]; binary since a patch (wiki) | continuous (owner item 60): plain at 0.6s to full at 1.4s, +34%, x1.4 speed, +90% size; full also slows | `item 60: ...`, `item 117: ...`, `charge: ...`, `slow: ...`, `held fire: ...`, `glow: ...`, `chime: ...` |
 | LMB spam penalty | "firing faster lowers projectile speed and damage" (card, footage) | none: the fixed 0.6s cadence can't be beaten, so there is nothing to penalise | (not built) |
 | RMB | a 0.2s black-orb wind-up, one crystal-spear cluster, stun 0.8-1.8s by distance [footage] | 0.32s wind-up (owner item 40: slower), one bundle, 0.8-1.8s | `item 40: ...`, `rmb: ...` |
-| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 30% (owner, item 75) | `item 17: ...`, `owner: ...` |
+| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 35% (owner, item 75; 11-08 +17%) | `item 17: ...`, `owner: ...` |
 | E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast (a 10s fizzle cap at full) | `combo: ...`, seed rows |
 | X | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
 
@@ -91,6 +102,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Spam penalty (footage card only) | LOW | (c) | not built: the fixed 0.6 s cadence can't be beaten, so there is nothing to penalise (parity table) |
 | Trade slows swapped foes 40% for 3 s (invented) | MED | (b) | 8e5c6340: removed; `dash: Trade trades places; the foe is only moved, not slowed ...` |
 | Shift hold-to-aim | LOW | (c) | kept: a tap behaves like the source; the hold shows both ends (owner Nov 2) |
+| Floating `[?]`: hover height, bob, foot-planting | LOW | (a) | the code hovered 0.15 m (half the source and this doc): now 0.3 m +-0.03 m; he has no foot to plant (Timing pass; `he floats about 0.3 m ...`, `he never plants a foot ...`) |
 | Shift radius 1.5 m | LOW | (c) | kept: the data has no number and the footage scale is about 2x uncertain |
 | Pronouns and the old lamplighter concept in his text | MED | (b) | 8e5c6340: fantasy, silhouette and tells rewritten for the Void Jester; he/him in this doc, the DashFlow rows, kit comments and check names |
 | Charged-orb ground ring (cosmetic) | LOW | (b) | 8e5c6340: removed (the hand glow stays) |
@@ -105,7 +117,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Swollen Snap / Trade | +44% / 1.25s | `combo: Swollen Snap hits 44% harder`, `combo: Swollen Trade is quicker` |
 | Wait, then fire | the longer the wait, the bigger and harder the orb; full, it slows; held fire stays plain | `item 60: ...`, `charge: ...`, `slow: ...`, `held fire: ...` |
 | Spam Shift | no travel, no second lob; no charge = refused | `owner: spamming Shift in flight never dashes`, `owner: with no charge Shift is refused` |
-| Trade in the air, over the abyss | he drifts at 30% speed at his height until it lands (a knock still shoves him), then arrives at that height | `item 17: ...` (drift at `dash.fly_slow`, constant height over the abyss, origin at resolve, knock), `far cast: ...` |
+| Trade in the air, over the abyss | he drifts at 35% speed at his height until it lands (a knock still shoves him), then arrives at that height | `item 17: ...` (drift at `dash.fly_slow`, constant height over the abyss, origin at resolve, knock), `far cast: ...` |
 | Trade into a crowd | a foe and an ally in the circle both end up at his origin, apart; a remote body is moved by its own game | `owner: two units in the circle ...`, `small: each keeps its place ...`, `net: a body another game owns ...` |
 | Merge start | Trade, its aim, the Snap wind-up and the prime drop; a placed Nightwell keeps going | `merge hold: ...`, `merge: a merge doesn't take the placed well down` |
 | Nightwell, then Seed on the middle, then pop | everyone caught sits stunned at the centre for the seed to grow on them | `ult open: ...`, `ult: the caught foe is drawn to the middle` |
@@ -123,13 +135,12 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 2074-hp hunter (level 15) -> 26 of 145.
 - Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass him by (`incoming`; the lightning rod's sky
   strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
-  cooldown is 10s -> 8s at rank 3 through the shared rank step (the data's -2s at rank IV).
+  cooldown is 10s -> 8s at rank 3 (the data's -2s at rank IV).
 - Kept, not in the data: the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
   data).
 - Not done: items in the swap circle (the data says "all
   units"; pickups are each game's own copies); an ice patch's slide still takes him (ground grip is not his to change).
-- Rank paths that do not fit: the data's Snap +20% damage at ranks 2 and 3, the seed's +10% each and the Trade's -1.5s twice go
-  through the shared rank step (+15%/+30% damage, -10%/-20% cooldown on RMB and E, -15%/-30% recharge on the dash).
+- Rank paths: see "Upgrade parity" (the shared rank step is gone for this hero).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
@@ -141,7 +152,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Snap stun grows with distance | wiki, card | yes | built 0.8-1.8s |
 | Swap swaps whoever is at the destination; they go to the origin | wiki | partly (0193 is ambiguous) | built, allies included ("any units") |
 | Swap travel 1.7s, 1.25s Empowered | wiki | yes (about 1.8s) | built |
-| Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 30% speed (item 75; was 20%; 25-35% band, no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
+| Over the abyss he hovers and keeps his previous momentum; Swap preserves momentum | wiki | no | changed by the owner's notes: he hovers (no momentum) while the lantern flies, drifting at 35% speed (item 75; was 20%, then 30%; owner 11-08 asked +15-25%, 35% keeps the earlier 25-35% band; no source value in the data) with his height held; the origin is where he is when it resolves (default; the source doesn't say), so the drift matters |
 | Level 4: allies (and wisps) entering the outgoing zone get a shield | wiki, patch Jan 2025 | no | built: allies beside him when he leaves or at the landing |
 | Anomaly grows 6.5s, up to 3.5x; recast to detonate | wiki | yes | built, recast from 0.3s (sheet) |
 | Empowered builds 10x faster on hunters; +30% Singularity size; knock heals | wiki | | built (Swollen); Swollen seed +30% size; the knock heal is removed (the owner's tooltip data has none) |
@@ -187,6 +198,29 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | E | `ostra_seed`, `ostra_pop` | `anim_os_seed`, `anim_os_pop` |
 | Passive proc | `ostra_empower` | `anim_os_empower` |
 | X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
+
+## Timing pass (`tools/ostra_anim_time_check.gd`, run inside `--ostra-combo-check`)
+Each keyed move played in a real match with the model rendered, read off the clips (s from the press). Source = briefs/hero-ref/ostra.md
+(5 fps: one footage frame is 0.2 s, so every source time is good to a frame). "Owns" = the move has the body (clip blend, WardenClips.FADE 0.1);
+"back" = the legs have the body again. Before = this branch's start (ext/anim-time-motley off origin/main), after = now.
+
+| Move | Source | Ours before | Ours after |
+|---|---|---|---|
+| LMB orb (`ostra_orb`) | one orb about every 0.6 s, a one-hand flick, the body barely moves | orb on the press frame, flick owns 0.12, back 0.50 (clip 0.30, upper body) | same |
+| LMB full orb (`ostra_orb_hot`) | a long blue-violet bolt, no extra pause read | orb on the press frame, owns 0.12, back 0.70 (clip 0.50) | same |
+| RMB wind-up to release (`ostra_snap_wind`) | black orb one frame, shards the next: 0.2-0.4 s | owns 0.10, released 0.33 (owner item 40: 0.32, longer than the source) | same (owner decision kept) |
+| Shift cast (`ostra_swap_aim`, `ostra_swap`) | cast 0158, teleport 0168: about 1.8 s | aim owns 0.10, lantern leaves on the key release (0.53), lands 1.80 s later, legs back 1.55 | same |
+| E seed (`ostra_seed`) | the orb drops in the cast's one frame (0352) | seed down 0.02, clip owns 0.10, palm key at 0.20, back 0.97 | same (inside the frame) |
+| E pop (`ostra_pop`) | a quick pop, 0.6-0.8 s after the recast | pops on the press frame, owns 0.10, back 0.77 | same |
+| Hover | about 0.3 m (0.25-0.35 m) up, "no bob readable"; the brief's build note: +-0.03 m at 0.6 Hz | 0.15 m +-0.015 m (a hand's width: HOVER_H 0.15; the doc said 0.3 and the code did not) | 0.30 m +-0.03 m (HOVER_H 0.3, HOVER_BOB 0.03): lowest bone 0.268-0.325 m up standing, 0.260-0.324 walking |
+
+Not timed (no source time beyond "a held cast"): `ostra_well*`, `ostra_empower`, `ostra_arrive`, `ostra_swap_air`.
+
+The clips were keyed to the kit's beats, so the only gap was the hover: the kit constant was half the source and the doc's own number. The check asserts the
+rows above (blend by 0.12 s, the beat inside its frame, the hand back by the clip's end + 0.2 s, the 1.8 s flight, the 0.3 m hover) and that he never plants a
+foot: the rig has thigh and shin bones but no foot, the robe covers them, and the lowest bone never drops under 0.2 m over the ground point, standing or walking.
+Suggestions, not built: a "firing faster lowers speed and damage" penalty (card text, still none: the 0.6 s cadence cannot be beaten); the unused `flurry` clip
+(`ostra_flurry`, nothing plays it); the footage's Snap flight speed reads about 30 h/s but the notes' "about 3 h" stun flight is ambiguous.
 
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in

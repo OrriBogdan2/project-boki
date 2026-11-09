@@ -5,7 +5,7 @@
 	"gender": "male",
 	"personality": "A ferryman who carried refugees across the ice the night of the Hollowing and sank his own ship so they could reach shore. The sea remade him: his hull became his armour, his brass diving helmet never comes off, and the ship's compass is set in his chest, with the sea's cyan light glowing between the hull planks.\nHe doesn't remember his old name, only the children's faces. The teddy bear belonged to the last child he saved.",
 	"weight": "heavy",
-	"color": "#8fd0ff",
+	"color": "#fff0b0",
 	"body": {
 		"size": 1.8, "bulk": 0.8,
 		"build": 1.4,
@@ -235,21 +235,11 @@
 		"dash",
 		"gear"
 	],
-	"rank3": {
-		"sec": "shield HP +50% in all and it repairs and regenerates faster",
-		"dash": "the 360 Smash refunds the Shield Charge when it hits",
-		"kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"
-	},
-	"rank2": {
-		"sec": "Rank 2: shield HP +25% (160 -> 200), damage +15%.",
-		"dash": "Rank 2: recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s.",
-		"kin": "Rank 2: healing +25% (burst 18 -> 22), damage +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
-		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
-		"dash": "Rank 3: recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
-	},
+	"rank_cd": {"dash": [1, 0.8125, 0.625]},
+	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1, 1]},
+	"rank3": {"sec": "shield HP +50% in all and it repairs and regenerates faster", "dash": "the 360 Smash refunds the Shield Charge when it hits", "kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"},
+	"rank2": {"sec": "Rank 2: shield HP +25% (160 -> 200).", "dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.", "kin": "Rank 2: healing +25% (burst 18 -> 22)."},
+	"rank_next": {"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.", "kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.", "dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further."},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",
 		"full": "a gold crest light and a hotter aegis; a 0.3s flare before a Slam",

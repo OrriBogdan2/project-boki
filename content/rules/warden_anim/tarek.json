@@ -7,7 +7,8 @@
 		"foot.R": "shin.R",
 		"jaw": "head",
 		"lip.L": "head",
-		"lip.R": "head"
+		"lip.R": "head",
+		"x_breath": "hips"
 	},
 	"blade": {
 		"root": "anchor_wrist_R",
@@ -30,7 +31,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 5.0
+		"run_speed": 5.0, "stride": [1.5, 1.2], "foot_mps": [1.51, 5.16], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {

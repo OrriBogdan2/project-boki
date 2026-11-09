@@ -743,7 +743,7 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 |---|---|
 | Rail Charge, Earthshatter, Tripwire Mine, Breach, Bulwark, Shadow Step | archetype RMB variants (above) |
 | Razor Disc, Leash Bolt, Riposte | retired as RMBs (the data stays and can return as gloves) |
-| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Swap) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
+| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Mark) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
 | `kin` slot | archetype E |
 
 ## 8. Open questions
@@ -1229,3 +1229,10 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+
+## Kit parity lock
+`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
+- Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
+- Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).

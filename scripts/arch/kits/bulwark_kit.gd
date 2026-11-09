@@ -381,6 +381,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		# (wiki patch 20.11.24: a recall can't come within 0.25 s of the throw)
 		if pressed and String(mace["st"]) != "back" and m.time - throw_at >= float(md.get("recall_lock", 0.25)):
 			_recall()
+		elif pressed and String(mace["st"]) != "back":
+			buffer_recast("lmb")            # inside the lockout: RecastCue's buffer recalls it as soon as it may
 		return true
 	var local := h.ctrl == "local"
 	if pressed and not local:
@@ -540,6 +542,24 @@ func _throw() -> void:
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
+
+## RecastCue: LMB again calls the hammer back (from the recall lockout on); the marker rides the hammer. Lying
+## on the ground it comes back by itself after lie_t (the ring runs down then).
+func recast_window() -> Dictionary:
+	if mace.is_empty() or String(mace["st"]) == "back":
+		return {}
+	var md := lmb_def()
+	var lie := float(md.get("lie_t", 0.0))
+	var total := lie if lie > 0.0 else 1.0
+	var left := total - float(mace["t"]) if lie > 0.0 and String(mace["st"]) == "ground" else total
+	var armed: bool = m.time - throw_at >= float(md.get("recall_lock", 0.25))
+	return RecastCue.window("lmb", left, total, mace["pos"], armed, true)
+
+func recast_now(slot_id: String) -> void:
+	if slot_id == "lmb" and not mace.is_empty() and String(mace["st"]) != "back":
+		_recall()
+	else:
+		super(slot_id)
 
 func _recall() -> void:
 	play("bul_recall")
@@ -758,9 +778,12 @@ func on_dash(use_ex: bool) -> bool:
 		play("bul_short")
 		m.sfx("bjorn_spin", h.pos, -6.0, 0.9)
 		return true
-	if not wall.is_empty() and h.grounded:
-		# Shield Charge (into_dash.rmb): behind the raised shield, on its own cooldown (the RMB
-		# slot's), invulnerable for its length, a heavier knock; with 50 Guard it ends in a Shield Slam
+	if wall.is_empty() and rmb_down and lock_t <= 0.0 and shield_hp > 5.0:
+		_raise()          # Shift while the aegis is still rising: it is up now, the bash goes
+	if not wall.is_empty():
+		# Shield Charge (into_dash.rmb): behind the raised shield, on the ground or riding it in the air (Shield
+		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
+		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
 		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
@@ -777,10 +800,11 @@ func on_dash(use_ex: bool) -> bool:
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "SHIELD CHARGE", col_of(dd), false)
 		m.sfx("bulwark_charge", h.pos, -2.0)
 		return true
+	use_ex = use_ex and h.dashes < 1.0         # a charge in the air is the same 360 Smash (item 183)
 	if not spend_dash(use_ex):
 		return true
 	if use_ex:
-		# the long dash (in the air, or out of charges): Breaker lumbers in shoulder first, shoving foes aside
+		# the long dash (out of charges): Breaker lumbers in shoulder first, shoving foes aside
 		var de := float(h.cdat.get("ex_dist", 4.2))
 		travel(de, de / float(dd.get("lumber_speed", 14.0)), {"invuln": 0.1, "shove": true, "shove_kb": 6.0, "shove_dmg": 0.0, "trail": "dust"})
 		st["last_dash"] = "lumber"
@@ -809,7 +833,9 @@ func _spin_hit(wd: Vector2) -> void:
 	spins += 1
 	knock_until = m.time + 0.25
 	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
-		ch_rmb = float(rmb_charges())          # rank 3: hitting foes with the dash refunds the Shield Charge
+		# rank 3: hitting foes with the dash refunds the Shield Charge (cue only when something was spent)
+		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
+		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
