@@ -501,6 +501,19 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## snack_patch (`content/rules/snack_patch.json`)
+
+The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed, shop or water chore.
+
+| Setting | Value |
+|---|---|
+| snacks | ["emberberry", "tidebloom", "sunroot", "puffcorn"] |
+| snacks_doc | Four Data.CROPS foods, one per lean element (lean.json foods): Fire, Water, Grass, Flying. Each one is yielded once per ripening. |
+| grow_secs | 480 |
+| grow_secs_doc | Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time. |
+| reach | 0.35 |
+| reach_doc | Tiles beyond the patch's edge from which your feet pick the snacks. |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

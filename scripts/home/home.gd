@@ -71,6 +71,7 @@ var burrow_r := 0
 var _fx_sig := ""
 var away_work: Array = []          # lines: what assigned Boki made while you were away
 var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool_work.gd)
+var hsp: SnackPatch = null           # the garden snack patch (snack_patch.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
 ## The island being shown: yours, or the one you're visiting.
@@ -159,6 +160,7 @@ func _ready() -> void:
 	await _slice()
 	hb = HomeBuild.new(self)
 	hg = HomeGather.new(self)
+	hsp = SnackPatch.new(self)
 	hw = HomeWork.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
@@ -1015,6 +1017,7 @@ func _process(delta: float) -> void:
 	_train_process(d)
 	if hb: hb.tick(d)
 	if hg: hg.tick(d)
+	if hsp: hsp.tick(d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
