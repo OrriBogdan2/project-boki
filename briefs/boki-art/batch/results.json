@@ -14059,5 +14059,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/relic_neve_w28_2.jpg",
     "ok": true
+  },
+  {
+    "id": "relic_neve_w28",
+    "name": "Relic: Neve",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_neve_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_neve_w28",
+    "name": "Relic: Neve",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_neve_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_tenzo_w28",
+    "name": "Relic: Tenzo",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/relic_tenzo_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_tenzo_w28",
+    "name": "Relic: Tenzo",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/relic_tenzo_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "relic_tenzo_w28",
+    "name": "Relic: Tenzo",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/relic_tenzo_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w28",
+    "name": "Seamwyrm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w28",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_e2_w28",
+    "name": "Seamwyrm",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/seamwyrm_e2_w28_3.jpg",
+    "ok": true
   }
 ]
