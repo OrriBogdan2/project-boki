@@ -58,6 +58,7 @@
 		"icon": "dash",
 		"col": "#bff7ef",
 		"cd": 13.0,
+		"long": false,
 		"speed": 11.5,
 		"max_t": 1.6,
 		"refund": 0.6,

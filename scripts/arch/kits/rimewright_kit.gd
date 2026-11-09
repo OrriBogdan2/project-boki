@@ -351,9 +351,6 @@ func fires_in_dash() -> bool:
 func aims_in_dash() -> bool:
 	return fires_in_dash() and bool(h.inp.get("fire", false))
 
-## No class long dash: Shift is only ever the skate (the HUD shows no long-dash segment for her).
-func has_long_dash() -> bool: return false
-
 ## Shift is the skate and nothing else, on the ground or in the air (item 62: pressed in the air, jumping,
 ## falling or gliding, it starts at once); with no charge it is refused.
 func on_dash(_use_ex: bool) -> bool:

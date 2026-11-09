@@ -152,9 +152,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if rank("dash") >= 3 and h.dashes < h.max_dashes():
 		h.dashes = minf(h.max_dashes(), h.dashes + float(dash_def()["cut"]) / maxf(0.5, h.dash_regen()))
 
-## A third barge charge: he chains several short, fast shoves in a row.
-func extra_dashes() -> float: return 1.0
-
 func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 

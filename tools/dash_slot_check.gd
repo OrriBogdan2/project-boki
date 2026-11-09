@@ -45,10 +45,24 @@ func run(main_node: Node) -> void:
 	ok(not ("stam" in hud.plates), "the overhead plates have no dash bar any more")
 	await _pips_and_timer(m, P, hid)
 	await _flash_and_tick(m, P, hid)
+	await _home_slot(P)
 	await _deny(m, P)
-	await _home_slot()
 	print("DASH SLOT CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The farm's dash numbers are the match Hunter's (DashRules): charges, recharge and the long dash's
+## cooldown agree for a hero with a third charge and a long dash (Grimble) and one with no long dash (Neve).
+func _farm_is_match_dash(home, P: Hunter) -> void:
+	for a in ["dredge", "rimewright"]:
+		Save.d["cls"] = Arch.weight(a)
+		Save.d["arch"] = a
+		P.reclass(Arch.weight(a), a, Arch.signature(a))
+		var dg: Dictionary = home._dodge()
+		var s := DashSlot.of_hunter(P)
+		ok(float(dg["charges"]) == P.max_dashes() and absf(float(dg["cd"]) - P.dash_regen()) < 0.001
+			and absf(float(dg["ex_cd"]) - float(s["air_max"])) < 0.001,
+			"%s: farm dash %s charges, %.2fs, air %.1fs = match %s, %.2fs, %.1fs" % [a, dg["charges"], dg["cd"],
+				dg["ex_cd"], P.max_dashes(), P.dash_regen(), s["air_max"]])
 
 ## 1 + 2: pips == charges for every archetype, the recharging pip and the countdown follow the timer.
 func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
@@ -134,7 +148,7 @@ func _deny(m: Match, P: Hunter) -> void:
 	await _frames()
 
 ## 5: the farm's slot is the same component fed by the farm's copy of the numbers; the old farm pips are gone.
-func _home_slot() -> void:
+func _home_slot(P: Hunter) -> void:
 	Save.d = Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
 	Save.d["roster"].append(k)
@@ -151,6 +165,7 @@ func _home_slot() -> void:
 		home.queue_free()
 		return
 	var hid: int = slot.get_instance_id()
+	_farm_is_match_dash(home, P)
 	var dg: Dictionary = home._dodge()
 	var cap := int(dg["charges"])
 	var regen := float(dg["cd"])

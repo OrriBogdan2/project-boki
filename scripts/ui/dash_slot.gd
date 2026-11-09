@@ -34,7 +34,7 @@ static func of_hunter(h: Hunter) -> Dictionary:
 
 ## How long the air dash takes to come back for this hunter (the kit's dash.air.cd, else its class data).
 static func air_cd_of(h: Hunter) -> float:
-	var cd: float = h.ak.long_dash_cd() if h.ak else float(h.cdat.get("ex_cd", Hunter.EX_DASH_CD))
+	var cd: float = h.ak.long_dash_cd() if h.ak else DashRules.air_cd({}, h.cdat)
 	return maxf(0.01, cd)
 
 ## The whole charges and the seconds until the next one, from a src.

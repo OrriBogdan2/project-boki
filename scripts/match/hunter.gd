@@ -371,12 +371,11 @@ func accent() -> Color:
 	return cdat.get("color", Color.WHITE) if not cdat.is_empty() else Color.WHITE
 
 func max_dashes() -> float:
-	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	return DashRules.class_charges(dodge_def, cdat) + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
-	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
+	var base := DashRules.regen(dodge_def, ak.dash_def() if ak else {})
 	return base * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
 
 ## Right click is always your weapon's ability, as left click is its attack.

@@ -122,7 +122,7 @@ func gate_inputs() -> void: pass                    # a kit drops the presses it
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
-func has_long_dash() -> bool: return true
+func has_long_dash() -> bool: return DashRules.has_air(dash_def())
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
@@ -441,8 +441,7 @@ func _bond_tell() -> void:
 # ------------------------------------------------------------------ dash helpers
 ## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
 func long_dash_cd() -> float:
-	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return DashRules.air_cd(dash_def(), h.cdat)
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
@@ -773,7 +772,7 @@ func shows_charge_ball() -> bool: return true
 ## The rig's dodge pose for this kit's dash right now ("" = the class's own: phase, roll or charge).
 func dodge_anim() -> String: return ""
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
-func extra_dashes() -> float: return 0.0
+func extra_dashes() -> float: return DashRules.extra(dash_def())
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass

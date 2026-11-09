@@ -1088,8 +1088,9 @@ var climb := {}                # (unused since the ledge float; kept for anythin
 var lfl := {}
 var _mv := Vector2.ZERO
 
-## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
-## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
+## Your hero's dash: charges, recharge and the long dash's cooldown come from DashRules (the very
+## numbers the match's Hunter uses at rank 1); only the dash's shape is the farm's own (the class
+## dodge's speed and time, the class's ex_dist and ex_time).
 ## The key hints sit centred at the bottom, and on a 1280-wide window
 ## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
 ## when it would overlap, centred in the room that's left.
@@ -1111,10 +1112,11 @@ func _dodge() -> Dictionary:
 	var ck := Data.class_of_save()
 	var dd := Content.class_dodge(ck)
 	var cdat: Dictionary = Data.CLASSES.get(ck, {})
-	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
-		"ex_cd": float(cdat.get("ex_cd", Hunter.EX_DASH_CD)), "ex_time": float(cdat.get("ex_time", Hunter.DASH_TIME * 1.45)), "ex_dist": float(cdat.get("ex_dist", 5.0))}
+	var shared := DashRules.of_hero(ck, String(Save.d.get("arch", "")))
+	var out := {"charges": shared["charges"], "cd": shared["regen"], "ex_cd": shared["air_cd"],
+		"speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
+		"ex_time": float(cdat.get("ex_time", Hunter.DASH_TIME * 1.45)), "ex_dist": float(cdat.get("ex_dist", 5.0))}
 	if dd:
-		out["charges"] = dd.charges; out["cd"] = dd.cooldown
 		for e in dd.effects:
 			if typeof(e) == TYPE_DICTIONARY and String(e.get("type", "")) == "dash":
 				out["speed"] = float(e.get("speed", out["speed"])); out["time"] = float(e.get("time", out["time"]))
@@ -1133,7 +1135,7 @@ func try_dash(mv: Vector2, air: bool) -> bool:
 		dash_charges -= 1.0
 		start_dash(dir, float(dg["speed"]), float(dg["time"]))
 		return true
-	if ex_cd > 0.0:
+	if ex_cd > 0.0 or float(dg["ex_cd"]) <= 0.0:    # on cooldown, or a kit with no long dash
 		return false
 	ex_cd = float(dg["ex_cd"])
 	var et := float(dg["ex_time"])
