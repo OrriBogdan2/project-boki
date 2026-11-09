@@ -82,6 +82,7 @@ const CHECKS := {
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
 	"--training-area-shots": ["res://tools/training_area_shots.gd", "training_area_shots", null],      # every Hunter in the Training Area + flyover (GPU)
+	"--practice-ranks-shot": ["res://tools/practice_ranks_shot.gd", "practice_ranks_shot", null],
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # all 12 Hunters in a row, true scale
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],

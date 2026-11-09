@@ -347,6 +347,27 @@ func _arena() -> void:
 	await main.get_tree().process_frame
 	printerr("ARENACHECK (next frame)")
 
+## The Esc menu's Practice page (PracticeRanks): Max all, Pick your max, Reset.
+func _practice_ranks(P: Hunter) -> void:
+	PracticeRanks.max_all(P)
+	var maxed := true
+	for s in Hunter.SLOTS:
+		maxed = maxed and int(P.slot_lv[s]) == int(Hunter.SLOT_MAX[s])
+	ok("practice ranks: Max all puts every slot at its max rank", maxed, str(P.slot_lv))
+	var cd_k := P.rank_cd_k("sec")
+	ok("practice ranks: max rank shortens the cooldown", is_equal_approx(cd_k, 0.8), str(cd_k))
+	PracticeRanks.pick_max(P, "dash")
+	ok(
+		"practice ranks: Pick your max maxes that slot only (ult stays open)",
+		int(P.slot_lv["dash"]) == 3 and int(P.slot_lv["sec"]) == 1 and int(P.slot_lv["kin"]) == 1
+			and int(P.slot_lv["ult"]) == 1, str(P.slot_lv)
+	)
+	PracticeRanks.reset(P)
+	var rank1 := true
+	for s in Hunter.SLOTS:
+		rank1 = rank1 and int(P.slot_lv[s]) == 1
+	ok("practice ranks: Reset restores rank 1 everywhere", rank1 and P.skill_pts == 0, str(P.slot_lv))
+
 func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
@@ -373,6 +394,7 @@ func _training() -> void:
 	var dsh := P.dashes
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
+	_practice_ranks(P)
 	m.queue_free()
 	await main.get_tree().process_frame
 
