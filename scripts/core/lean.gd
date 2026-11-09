@@ -58,10 +58,10 @@ static func card_line(rec: Dictionary) -> String:
 	var part := String(rules()["types"].get(key, {}).get("part", ""))
 	if not on() or part == "":
 		return ""
-	var name := String(face(key)["name"])
+	var type_name := String(face(key)["name"])
 	var has := (rec.get("muts", []) as Array).any(func(m): return m["id"] == part and m["aff"] == key)
 	if has:
-		return "%s meals grew %s" % [name, Evo.PART_NAMES[part]]
+		return "%s meals grew %s" % [type_name, Evo.PART_NAMES[part]]
 	if float(ln[1]) >= float(rules()["part_min"]):
-		return "Next form: %s meals grow %s" % [name, Evo.PART_NAMES[part]]
-	return "More %s meals grow %s at a form" % [name, Evo.PART_NAMES[part]]
+		return "Next form: %s meals grow %s" % [type_name, Evo.PART_NAMES[part]]
+	return "More %s meals grow %s at a form" % [type_name, Evo.PART_NAMES[part]]
