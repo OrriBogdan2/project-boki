@@ -52209,5 +52209,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_scythant_pb_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_druzemole_pb",
+    "name": "Druzemole (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_druzemole_pb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jibbatross_pb",
+    "name": "Jibbatross (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_jibbatross_pb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scythant_pb",
+    "name": "Scythant (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_scythant_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scythant_pb",
+    "name": "Scythant (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_scythant_pb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_druzemole_pb",
+    "name": "Druzemole (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_druzemole_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jibbatross_pb",
+    "name": "Jibbatross (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_jibbatross_pb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_jibbatross_pb",
+    "name": "Jibbatross (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_jibbatross_pb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_coolatee_pb",
+    "name": "Coolatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_coolatee_pb_2.jpg",
+    "ok": true
   }
 ]
