@@ -3493,3 +3493,15 @@ Branch `ext/boki3d-tuatrune` (4e956fc66, 5f73524d9), based on `ext/boki-caecilit
 - Checks: --boki-rig-check DONE failures 0 (4838 tris/5000, 39 bones/64); health --strict OK; GPU shots job 20261109-005346-19447 fails 0.
 - Renders: /home/boki/jobq/done/20261109-005346-19447/out/turntable.png, /home/boki/jobq/done/20261109-005346-19447/out/anim_ability.png, /home/boki/jobq/done/20261109-005346-19447/out/faces.png
 - Not done: no fusion parts (build_fusion), as with Zippelith; no data/Net changes.
+
+## 2026-11-09 deep (job 20261109-001543-a4): READY Boki 3D: Gongibbon (gibbelle) from the owner's new concept sheet
+Branch `ext/boki-gibbelle-v2` (1ebbe2a43, c157df91f), based on origin/main d255acbee.
+- Body: Meshy multi-image model of briefs/art-refs/boki/gibbelle_turnaround.png (task 01a1bdac, 40 credits, raw in ~/meshy/gibbelle/run1, not in git): navy fur, white face ring, gold brow band, patinated bronze chest gong, bronze knuckle beads, mallet tail. 4941 tris / 5000, body 3600; LODs 2.
+- Rig: shared four-limb skeleton, arms = fleg/fpaw (knuckle-walker), 5 tail bones to the mallet. Alternative not taken: a true biped rig. Tools carried in the mouth by the shared clips (alternative: a hand grip).
+- Own clips: knuckle_slam (attack), echo_chain (ability: sits up, gong forward, tail mallet swings over twice, body rings), doze (sleep); rest are SHARED.
+- Sheet vs BOKI_50: the sheet is the chest-gong gibbon, not the bell/clapper design; this follows the owner's 11-08 "Base Gongibbon = chest-gong gibbon". kin_v2 colours set from the sheet (body #3a4058, belly #e4e2ea, glow #ffc54a) so the iris reads amber, not sky blue. Flavor text (bell) left for the owner.
+- Build: `tools/boki/boki_meshy.py` + MeshShape hook in build_boki.py; a Meshy body's UV unwrap is smoothed first (MESHY_UV_SMOOTH 10), else smart_project shatters the fur bumps and Godot makes no LODs.
+- MERGE NOTE: `boki_meshy.py` is the same class as `meshy_body.py` on ext/boki-caecilith-v2 / boki3d-tuatrune (same API). On merge keep `meshy_body.py`, switch gongibbon.py's import to it, delete boki_meshy.py, keep this branch's MESHY_UV_SMOOTH unwrap.
+- Checks: --boki-rig-check DONE failures 0 (gibbelle PASS, LODs 2); health --strict OK; GPU shots job 20261109-005531-19047 rc 0.
+- Renders: /home/boki/cj/20261109-001543-a4/shots/gibbelle_front.png, /home/boki/cj/20261109-001543-a4/shots/gibbelle_tq.png, /home/boki/cj/20261109-001543-a4/shots/gibbelle_side.png, /home/boki/cj/20261109-001543-a4/shots/gibbelle_back.png, /home/boki/cj/20261109-001543-a4/shots/turntable.png, /home/boki/cj/20261109-001543-a4/shots/anim_ability.png, /home/boki/cj/20261109-001543-a4/shots/anim_attack.png, /home/boki/cj/20261109-001543-a4/shots/faces.png
+- Not done: echo_chain's mallet strike sits behind the body from the shot camera (reads as a chest puff + ring); no fusion parts; no Net/data changes beyond the colours.
