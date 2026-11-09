@@ -25133,5 +25133,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pawnfry_card2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "nettlynx_card2",
+    "name": "Nettlynx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nettlynx_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pawnfry_card2",
+    "name": "Pawnfry (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pawnfry_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "polyshroom_card2",
+    "name": "Polyshroom (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/polyshroom_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "prismander_card2",
+    "name": "Prismander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prismander_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "prismander_card2",
+    "name": "Prismander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prismander_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_card2",
+    "name": "Prowyak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/prowyak_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "polyshroom_card2",
+    "name": "Polyshroom (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/polyshroom_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "prowyak_card2",
+    "name": "Prowyak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/prowyak_card2_2.jpg",
+    "ok": true
   }
 ]
