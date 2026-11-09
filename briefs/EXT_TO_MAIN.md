@@ -5627,3 +5627,4 @@ READY ext/art1-clip-port 9b9d93216 (SUPERSEDES READY ext/art1-clip-port 0494c83a
 READY ext/boki-state-clips 6791e0ddc (Boki state coverage)
 READY ext/ui-minimap-declutter e59334cb2 (minimap declutter)
 READY ext/fps-feel cbdde0a86 (fps-independent movement)
+READY ext/duel-ring-online 2d6734699 (Training Grounds duel ring: Find a duel (online queue, searching + Cancel) and Fight a bot; no Fight a friend, no 1v1 invite exists. Built on ext/training-area-1108 + ext/servers, neither on main. Fixes: ring freed on open, matchmade duels skip the pre-match lobby (server/e2e duels never started), server null-player crash. arena 112/0, server-check 12/0, server-e2e 12/0, duel-queue live EU PASS (found 20 s, cancelled), health/wiki OK. EU server still 0.19.1: needs redeploy for real 0.24.3 duels)
