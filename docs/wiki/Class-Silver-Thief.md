@@ -73,7 +73,7 @@ What the in-game kit card (K) says.
 | Dash: Vault | Cartwheel a short way (much further from a jump). Your next shot is empowered, a gold glint in your throwing hand: a big shot that, if it lands, gives you the Vault back at once. |
 | RMB: Bola | A short wind-up, then a Bola down the lane: it grounds and slows the first foe and flies on. Catch a second and both are stunned. |
 | E: Shadow Knife | Throw a dagger to your cursor or into a foe. Press E again to blink to it. |
-| Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder and blighting from its edge. |
+| Hunter ultimate: Encore | A ring opens round you: for 2s blades fly at every foe in it, harder from its edge. |
 | Weapon: Arc Shots | Bolts from alternating hands every 0.45s. Each one lands at your cursor. |
 
 ### Abilities in full
@@ -89,7 +89,7 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4 each, 6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4 each, 6 from the outer band (past 4m). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 

@@ -88,7 +88,7 @@ What the in-game kit card (K) says.
 
 - *Hold:* Heavy Shot: hold to draw a great needle on the bow (full at 1.1s; you move at 38% speed while you hold) and let go to loose it: 16 -> 30 damage, push 6 -> 12, stops on the first foe; driven into a wall within 3m it hits again for about 5 times the shot (80 -> 148 with the charge) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 
-**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
+**Hail Wall (E, 15s cooldown).** Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and get Anti-Heal for 1s (healing barely takes; refreshed while they stay in). A Heavy Shot that knocks a burning foe Cremates them: +10.
 
 **Starpiercer (hunter ultimate, from level 6, 60s cooldown).** Tap: your next 3 bow shots within 6s need no draw. Each press nocks for 0.5s and looses a big arrow to 18m that pierces every foe, knocks back and strips 10 armor; the third hits harder and finishes a hunter it leaves under 12% health.
 

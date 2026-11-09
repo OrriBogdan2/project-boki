@@ -74,8 +74,8 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
   - tap: Finishing Slam: a 0.5s wind-up you aim freely (a warning shows over you), then a 3.2m cone: 26 and push 6; foes under 35% take +50%. Landing its sweet spot (the far tip, dead ahead) is a SWEET SPOT payoff; at rank 3 it also brings a 3m crash down on the foe (24, push 7, heals you 60% of the damage it deals; rests 12s, and a knock on anyone it hit within 2s makes it ready at once).
   - hold: Lunge: charge 0.3 -> full at 0.9s, then a 3 -> 7m dash attack into the first foe: 14 -> 22. Strike nothing and the cooldown doubles.
   - in the air: Meteor Drop: slam straight down, a 2.6m burst: 18 and slow 40% for 1.5s; the centre (1.2m) takes +50% and is stunned 0.8.
-  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, blights 4s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
-- **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage, blighted while tethered: healing barely takes) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
+  - with E: With the Warchain: tap while it pulls you for a Cinder Spin (2.6m, 18, Anti-Heal 5s); hold while it pulls you, or hold and then pull, for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); hold while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
+- **E: Warchain** (13s). Throw a chain 10m: it hooks the first foe (8 damage) or bites a wall, for 4s. Press E again to pull yourself to it. The cooldown starts when you pull or the chain breaks (a stun breaks it); you can't throw it while rooted or grounded.
 - Level-up order (bots too): Dash, RMB, E, RMB, Dash, R, RMB, E, R, Q
 
 ### Mossy (heavy)

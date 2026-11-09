@@ -36,7 +36,7 @@ static func effect(e: PartSpec, pw := 1.0) -> String:
 			match String(p["mode"]):
 				"reveal": t = "reveal %ss" % n(float(p["duration"]))
 				"vulnerable": t = "+%s damage taken %ss" % [pct(minf(float(p["amount"]), KinRules.VULN_MAX)), n(float(p["duration"]))]
-				"blight": t = "blight %ss (heals %s less)" % [n(float(p["duration"])), pct(float(p["amount"]))]
+				"blight": t = "Anti-Heal %ss (heals %s less)" % [n(float(p["duration"])), pct(float(p["amount"]))]
 		"buff":
 			match String(p["stat"]):
 				"crit": t = "your shots crit %ss" % n(float(p["duration"]))

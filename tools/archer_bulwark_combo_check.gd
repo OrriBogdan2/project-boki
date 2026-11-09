@@ -318,8 +318,9 @@ func _archer_combos() -> void:
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
 	step(m, 1.6)
 	ok(
-		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
+		"pin E: a foe on the arc 45 degrees off the aim burns with Anti-Heal (Rain of Arrows), one inside does not",
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and T.blight_t <= 1.0 and T2.blight_t <= 0.0 and dmg(T2) == 0.0
+			and K.fx.panels[0].visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
@@ -333,9 +334,9 @@ func _archer_combos() -> void:
 	m.step(DT)
 	step(m, 0.3)
 	ok(
-		"pin small: Heavy Shot into a foe burning in the Hail Wall = CREMATED",
-		K.cremations == cr0 + 1,
-		"cremations %d" % (K.cremations - cr0)
+		"pin small: Heavy Shot into a foe burning in the Hail Wall = CREMATED (no extra Anti-Heal)",
+		K.cremations == cr0 + 1 and T.blight_t <= 1.0,
+		"cremations %d blight %.1f" % [K.cremations - cr0, T.blight_t]
 	)
 	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing

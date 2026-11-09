@@ -112,7 +112,7 @@
 		"dmg": 5.0,
 		"slow": 0.35,
 		"blight": 1.0,
-		"desc": "Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.",
+		"desc": "Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and get Anti-Heal for 1s (healing barely takes; refreshed while they stay in). A Heavy Shot that knocks a burning foe Cremates them: +10.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",

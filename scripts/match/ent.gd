@@ -29,7 +29,7 @@ var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
 var guard_t := 0.0          # taking less damage for a moment (Rock Guard)
-var blight_t := 0.0         # venom's anti-heal: healing on this body is cut to 40% for a while
+var blight_t := 0.0         # Anti-Heal (s left): healing on this body is cut by blight_k
 var guard_k := 0.0
 var slow_k := 0.0           # how much speed the current slow takes away (0 = the body's usual slow)
 var blight_k := 0.6         # how much healing the current blight cuts

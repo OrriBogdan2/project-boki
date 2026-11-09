@@ -18,6 +18,7 @@ const BREAK_T := 0.45          # s of the armour-break crack
 const BURST_T := 1.1           # s of the knock burst over someone who just went down
 const LVL_POP_T := 0.7        # s of the pulse on a plate's level badge when that hunter levels up
 const PRUNE_T := 5.0           # s unseen before a hunter's plate state is dropped
+const ANTIHEAL_COL := Color("ff3df0")   # the Anti-Heal icon, the colour of its body look (status_looks.json)
 const PLATE_OFFSET := 2.35     # m over the feet where a plate sits unless the archetype sets its own
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen}
@@ -103,6 +104,7 @@ static func statuses(e: Ent) -> Array:
 	if e.root_t > 0.0: out.append(["binding", Color("8fe0a0"), "ROOTED", -1.0])
 	if e.slow_t > 0.0: out.append(["snare", Color("9ae8ff"), "SLOWED", -1.0])
 	if e.burn_t > 0.0: out.append(["fireball", Color("ff9a5a"), "BURNING", -1.0])
+	if e.blight_t > 0.0: out.append(["antiheal", ANTIHEAL_COL, "ANTI-HEAL", -1.0])
 	var hunter := e as Hunter
 	if hunter and hunter.weak_t > 0.0: out.append(["swap", Color("ffb36a"), "WEAKENED", hunter.weak_t])
 	if hunter and hunter.shield > 0.0: out.append(["brightshield", Color("d8ecff"), "", -1.0])

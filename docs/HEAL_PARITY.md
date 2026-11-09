@@ -48,18 +48,27 @@ Ours is the shared takedown reset (`DashReset.HEAL`, 5% of max health, dash back
 | Motley | 5% | 500 = 48.5% of 1030 | differ (owner call) | [W] Void |
 | Neve, Sparkle | 5% | not read | open | |
 
-## Anti-heal
+## Anti-Heal (ext/parity-antiheal)
 
-Ours: one rule for all (`Ent.blight_t`, healing and regen cut 60% while it lasts, `KitStatus` "blt"). The source gives the duration on its pages and no percentage anywhere.
+Ours: one rule for all (`Ent.blight_t`, healing and regen cut 60% while it lasts; `KitStatus` "blt", ids kept).
+Player-facing word: **Anti-Heal** (the closing circle keeps "the Blight"). One look everywhere: magenta streaks out
+of the body (`StatusLooks` "antiheal") and one ⊘-over-a-cross icon on the plate (`HudPlate.statuses`, `Icons`
+"antiheal"); remote bodies get the same look through the `kst` event. The source data ([D] supervive_kits.md)
+puts Anti-Heal on exactly four abilities and gives no strength anywhere.
 
-| Hunter, ability | Ours | Source | Verdict | Evidence |
+| Carrier (ours, source) | Source strength, duration | Ours | Verdict | Asserted in |
 |---|---|---|---|---|
-| Cinder E | 3 s | 3 s | match, asserted | [W] Felix |
-| Kael E spin (Scorching Spin) | 5 s (was 4) | 5 s | fixed, asserted | [W] Brall; `--kit-combo-check` |
-| Sable R outer ring | 6 s | 6 s | match | [W] Shiv; `rim_blight` |
-| Grimble R | 3 s a slug | "Anti-Heal" on each wave, no duration | open | [D], [W] Kingpin |
-| Lace E | 1 s, refreshed every 0.5 s in the wall; 2.5 s after a cremation | "applies Anti-Heal", no duration | open | [D], [W] Myth |
-| Percentage | 60% | not listed | open | |
+| Kael RMB during the Warchain pull: Cinder Spin (Brall, Scorching Spin) | not given; 5 s [W] | 60%, 5 s | match | `--juggernaut-combo-check` (5 s, 60%, one icon, one look) |
+| Cinder E: Furnace Cloak (Felix, Heat Shield) | not given; 3 s [W] | 60%, 3 s | match | `--ashwick-combo-check` |
+| Grimble X: Brass Broadside (Kingpin, Slugwave) | not given; not given | 60%, 3 s a slug | match (kept: no source number) | `--dredge-combo-check` (3 s at most) |
+| Lace E: Hail Wall (Myth, Rain of Arrows) | not given; not given | 60%, 1 s refreshed every 0.5 s inside | match (kept) | `--archer-combo-check` |
+| Lace: Cremation rider (+2.5 s) | none | removed | ours-only, removed | `--archer-combo-check` (no extra) |
+| Sable X: Encore outer band, 6 s (Shiv) | none in [D] (Shiv's R is Fusillade) | removed | ours-only, removed | `--dancer-combo-check` (no Anti-Heal) |
+| Kael E: Warchain tether | none (data puts it on the spin) | none (already) | match | `--juggernaut-combo-check` |
+
+Conflict noted, not built: the Shiv footage ([F] briefs/hero-ref/dancer.md, Death Blossom) shows a 6 s Anti-Heal on
+the outer band; the data outranks footage, so it is off. Boki skills that mark Anti-Heal (Vespyx Stinger Hook,
+Cindle; kin grammar `mark` mode "blight") are not hero carriers and stay; their text now says Anti-Heal.
 
 ## Fixed in this branch
 

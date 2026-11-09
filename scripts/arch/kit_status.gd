@@ -2,7 +2,9 @@ class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
 ##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; cords round the legs (StatusLooks)
-##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
+##   blt  Anti-Heal (the source's four: Kael's Cinder Spin, Cinder's Furnace Cloak, Grimble's Brass Broadside,
+##        Lace's Hail Wall; docs/HEAL_PARITY.md): healing on the body is cut; streaks out of the body
+##        (StatusLooks) and the plate's Anti-Heal icon
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
 ##        source's Daze is only a damage window); a crystal ring over the head (StatusLooks)
@@ -84,6 +86,8 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			_look(e, "slow", secs)
 			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 			m.fx.ring(e.pos, 1.0, Color("7fe0d0"), 0.3)
+		"blt":
+			_look(e, "antiheal", secs)
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)

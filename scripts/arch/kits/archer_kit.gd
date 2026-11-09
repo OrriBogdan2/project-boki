@@ -295,7 +295,6 @@ func _pin(a: Vector3, k: float) -> void:
 		if not rain.is_empty() and _in_rain(f):
 			cremations += 1
 			f.hurt(float(e_def().get("cremate", 10.0)) * power("kin"), h, {"src": "abil", "ab": "signature", "tags": ["signature", "cremate"]})
-			if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(e_def()["blight"]) + 1.5))
 			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
@@ -397,7 +396,7 @@ func _tick_rain(dt: float) -> void:
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}, {"type": "slow", "duration": 0.8, "strength": float(ed["slow"])}]})
 	for f in inside:
 		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
-		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
+		KitStatus.apply(f, "blt", float(ed["blight"]))
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

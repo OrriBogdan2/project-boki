@@ -834,6 +834,10 @@ func combos(a) -> void:
 	A.ok("combo jug: the spin's Anti-Heal lasts 5s (wiki: Scorching Spin) and cuts healing 60%",
 			T.blight_t > 4.5 and T.blight_t <= 5.0 and is_equal_approx(T.blight_k, 0.6),
 			"blight %.2f k %.2f" % [T.blight_t, T.blight_k])
+	Sfx.listener = P.pos      # (the body looks draw near the camera focus; no camera runs here)
+	var tags := HudPlate.statuses(T).map(func(s): return s[2])
+	A.ok("combo jug: Anti-Heal shows one icon on the plate and one body look (streaks)",
+			tags.count("ANTI-HEAL") == 1 and StatusLooks.of(m).showing(T, "antiheal"), str(tags))
 	# E, then RMB held and let go while attached: Chain Lunge along it
 	A.step(m, 1.0)
 	hook.call()

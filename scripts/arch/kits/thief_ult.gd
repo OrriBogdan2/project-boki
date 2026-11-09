@@ -4,8 +4,9 @@ extends RefCounted
 ## briefs/hero-ref/dancer.md "Ultimate (on X)"). A violet ring grows out from her over 0.4s (the short delay),
 ## then rides with her for 2s while she dances (thf_encore_dance, upper body over her walking legs) and on every
 ## beat a blade leaves one hand or the other at every foe inside it (0.2s apart, up to 10 each), the ring pulsing.
-## Blades from the outer band of the ring (past 75% of its radius) hit harder and blight (healing barely
-## takes) for 6s. She keeps moving, shooting and dashing; the cast gives her Vault back, and every blade
+## Blades from the outer band of the ring (past 75% of its radius) hit harder (no Anti-Heal: the source
+## puts it on four other abilities, docs/HEAL_PARITY.md). She keeps moving, shooting and dashing; the cast
+## gives her Vault back, and every blade
 ## refreshes her Marks. A blade landing on a rival hunter fills the bond meter (HeroUlt.landed: the best of
 ## the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
@@ -158,7 +159,7 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 		k.fx().ride(k.m.shots[-1], "blade", RIM_COL if rim else RING_COL, HIT_COL, 0.9, 0.22)
 	k.m.later(dist / BLADE_SPEED, func(): _hit(f, rim))
 
-## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
+## A blade arrives: its damage (more from the outer band), a red flash, Marks refreshed,
 ## and the bond for a rival hunter.
 func _hit(f: Ent, rim: bool) -> void:
 	var h := k.h
@@ -167,9 +168,6 @@ func _hit(f: Ent, rim: bool) -> void:
 	var d := data()
 	var dmg := float(d["dmg"]) + (float(d["rim_dmg"]) if rim else 0.0)
 	var o := {"src": "abil", "ab": "ult", "tags": ["encore"], "crit": rim}
-	if rim:
-		o["blight"] = float(d["rim_blight"])
-	var was_blighted := f.blight_t > 0.0
 	var dealt := f.hurt(dmg * k.power("x"), h, o)
 	if dealt <= 0.0:
 		return
@@ -177,9 +175,6 @@ func _hit(f: Ent, rim: bool) -> void:
 	if rim:
 		rim_blades += 1
 		k.fx().puff(f.pos + Vector3(0, 1.0, 0), RIM_COL, 0.8, 0.3, HIT_COL)
-		if not was_blighted:
-			# once, as the blight lands (above the damage numbers, so they don't overprint)
-			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
 	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
 	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()

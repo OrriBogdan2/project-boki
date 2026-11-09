@@ -87,8 +87,8 @@ func dancer(a) -> void:
 	A.ok("dancer X: 2s of blades, 10 at most on each foe; ends with a plain fade and the dance stops",
 			U.blades == 20 and not U.running() and not AimKit.shown(P, "ult") and K.anim_id != ThiefUlt.DANCE,
 			"blades %d" % U.blades)
-	A.ok("dancer X small mechanic: the outer band hits harder and blights 6s; the inside doesn't blight",
-			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
+	A.ok("dancer X small mechanic: the outer band hits harder; no Anti-Heal (the source's four carriers exclude Sable)",
+			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t <= 0.0 and T2.blight_t <= 0.0,
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
 	var total := float(d["dmg"]) * float(d["shots"])
 	A.ok("dancer X: the faster blades keep the old totals (40 inside, 60 from the outer band)", total == 40.0
@@ -205,7 +205,7 @@ func zedran(a) -> void:
 	A.step(m, 0.9)
 	A.ok("juggernaut X small mechanic: two hits blocked make the answer 40% harder",
 			absf(dealt_blocked / maxf(0.01, U.last_dealt) - 1.4) < 0.03, "%.1f vs %.1f" % [dealt_blocked, U.last_dealt])
-	# blighted, the heal barely takes
+	# under Anti-Heal, the heal barely takes
 	A.step(m, 0.4)
 	A.fresh(T)
 	T.teleport(home + Vector3(2.6, 0, 0))
@@ -215,7 +215,7 @@ func zedran(a) -> void:
 	K.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
 	A.step(m, 0.9)
-	A.ok("juggernaut X small mechanic: blighted, the heal barely takes",
+	A.ok("juggernaut X small mechanic: under Anti-Heal, the heal barely takes",
 			U.last_healed < 0.5 * 0.8 * U.last_dealt, "healed %.0f of %.0f" % [U.last_healed, U.last_dealt])
 	P.blight_t = 0.0
 	A.step(m, 0.4)
