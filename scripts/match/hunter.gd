@@ -2372,7 +2372,7 @@ func _physics(dt: float) -> void:
 	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
 	var g := ground()
-	if grounded and g < pos.y - 0.05:
+	if grounded and g < pos.y - World.STEP:     # down a slope or a step your feet stay on it; more is a fall
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12

@@ -1,11 +1,12 @@
 class_name HunterMove
 extends RefCounted
-## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit, air,
+## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the step, ground stop, dash exit, air,
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
+static var step: float = _phys["step"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]

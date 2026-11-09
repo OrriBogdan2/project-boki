@@ -5,7 +5,7 @@ extends Node3D
 
 const VOID := -1.0e9
 const LEVEL := 0.8      # height of one terrace
-const STEP := 0.32      # how high you can walk up without jumping
+static var STEP: float = HunterMove.step   # how high you walk up, or down, without a jump (hunter_move.json)
 const BLOCK_H := 3.0
 
 enum { T_VOID, T_GROUND, T_BLOCK }
