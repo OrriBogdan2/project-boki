@@ -14,6 +14,7 @@ var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
 const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const DIVE_POSE := preload("res://tools/glide_dive_pose_check.gd")
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -489,7 +490,7 @@ func _glide_dive_pose() -> void:
 		if start >= 0 and shown < 0 and bool(P.anim_s.get("dive_on", false)):
 			shown = i
 	ok(start >= 0 and shown >= 0 and (shown - start) * DT <= 0.1, "dive_pose_live: plunge at frame %d, pose state at %d" % [start, shown])
-	var pose := load("res://tools/glide_dive_pose_check.gd").new()
+	var pose := DIVE_POSE.new()
 	var res: Array = pose.run(m)
 	for line in res[1]:
 		print("MFEEL ", line)
