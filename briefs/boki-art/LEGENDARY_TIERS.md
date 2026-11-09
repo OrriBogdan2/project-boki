@@ -45,3 +45,12 @@ Reelacine, Malletary and Gilabacus stay ordinary rares (not legendary). That lea
 ## Status 11-09
 - "legendary_tier" is set in LIVE_MANIFEST for Glaciammoth (boss), Sarcobra (boss) and Hydrangor (ultra); the others get it when their art lands.
 - Concepts for the 5 new slots are queued (c_leg_minor/boss/ultra/blight1/blight2_n1-3), 3 directions each, for the owner's A/B pick.
+
+## Round 5 picks (owner 15:22 ET 11-09)
+| Tier | Boki | Status |
+|---|---|---|
+| Minor | Pavonazar, Ghoulamari, Wayshell (compass-shell tortoise, new) | sets generating; Glacione being redone ("looks weird") |
+| Boss | Glaciammoth, Sarcobra, Siegephant (siege-tower war elephant, new) | sets generating |
+| Ultra | Hydrangor, Cetorgan, Aurostag (aurora stag, new) | sets generating |
+| Blight | Cindermaw (furnace-ribbed hyena, new), Sphinxblight (vulture-sphinx, new) | sets generating |
+New names are proposals; the owner can rename them.

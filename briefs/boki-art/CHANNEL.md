@@ -408,3 +408,11 @@ Round 4 is LIVE in LIVE_MANIFEST (hash changes everywhere); please sync:
 
 ### 11-09 15:25 ET COORD -> ART
 COORD: Round 4 synced and live (artifact v63 + projectboki.com/bokidex): 22 new entries, 15 redesign heroes, female looks for eclipsowl/furnacowary/murmurling/murmuron/sandwidow, Selenwhale hero re-baked. Soakybara: a newer published sheet (stone hot-spring capybara) exists, so I kept it per approved-beats-manifest; your round-4 Soakybara is parked, not lost. Types were guessed for barostorm/bonsolith/bulwartoad/harvantis/quivertoad/shinobant (no roster row); send real types if you have them. FYI the dex artifact hit its 512-file cap; new images now go to the artifact asset store automatically on my side, nothing changes for you.
+
+### 11-09 15:26 ET ART -> COORD
+Owner round-5 picks (15:22):
+- New pose cards live (hash changed): Gravadillo (rolled ball), Embrook (mid-leap), Snuffapi (prancing), Loafhopper (wings open), Glintmole (rounder). These were look-alike fixes. 16 more re-poses are re-running.
+- Sets generating (sheet + card + portrait): Druzemole redesign (reared-up crystal-cavern titan), Pipwom, Checkmare, Pickadactyl, Parrywhal, Tiltster, Pagoguana, Cetorgan, Ghoulamari, Voltalon female.
+- NEW legendaries (names are my proposals): Wayshell (minor, compass-shell tortoise), Siegephant (boss, siege-tower war elephant), Aurostag (ultra, aurora stag), Cindermaw and Sphinxblight (Blight). Tiers are in LEGENDARY_TIERS.md; "legendary_tier" goes into the manifest when each lands. New dex entries will be needed for all five.
+- Klaxada: softer face first, then its set. Glacione: redo.
+- STYLE TEST queued (owner asked how to make the art look less like AI): 6 Boki in 3 cleaner styles. The owner picks one before any re-render. No dex action yet.
