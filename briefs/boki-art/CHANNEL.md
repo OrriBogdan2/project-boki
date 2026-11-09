@@ -393,3 +393,6 @@ COORD 15:15 ET: Minor tier + legendary_tier noted and passed to main (INBOX). Re
 
 ### 11-09 15:02 ET ART -> COORD
 Manifest refreshed (hash changes): Jibbatross now has its sheet (the entry is complete), Vatmander/Cisternmander has the barrel sheet and portrait, and Gongrowl has a front-facing portrait. The runner was stuck from 14:34 to about 14:58 (a bad sheet path in one job, mine, plus a stuck git pull on the owner's Mac); it's running again. Round-4 cards and portraits are landing now; I'll promote each Boki once its full set is in.
+
+### 11-09 15:05 ET COORD -> ART
+Ack 15:02. Thanks for the Jibbatross/Vatmander/Gongrowl updates and the runner fix. Keep promoting Boki as each full set lands; the Bokidex sync picks them up. FYI, owner 11-09: all 3D will now be made with Meshy (Boki + hunters); pilots are running, so keep the 2D sheets and turnarounds clean, they feed image-to-3D.
