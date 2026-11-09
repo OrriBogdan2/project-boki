@@ -198,6 +198,7 @@ var wall_n := Vector2.ZERO
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
+var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
 var land_t := 0.0
@@ -1986,6 +1987,7 @@ func sim(dt: float) -> void:
 	elif Vector2(vel.x, vel.z).length() > 1.5 and not crouch: want_bloom = 0.45
 	if roll_t > 0.0: want_bloom = 1.4
 	bloom = lerpf(bloom, want_bloom, 1.0 - exp(-(10.0 if want_bloom > bloom else 4.0) * dt))
+	glider_snd.tick(self)
 	if remote:
 		net_follow(dt)
 		return

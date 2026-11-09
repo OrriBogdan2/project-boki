@@ -500,6 +500,7 @@ func loop_stop(key: String) -> void:
 const HOLD_MS := 250
 func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
 	loop_start(key, sname, pos, vol_db)
+	loops[key]["vol"] = vol_db
 	loops[key]["held"] = Time.get_ticks_msec()
 	loop_set(key, pos, pitch)
 

@@ -1,0 +1,11 @@
+{
+ "group": "glider",
+ "name": "Glider",
+ "script": "tools/gen_sfx_glider.py",
+ "sounds": {
+  "glider_snap": "cast", "glider_wind": "loop", "glider_dive": "cast",
+  "glider_crackle": "fire", "glider_burn": "loop", "glider_fold": "dash"
+ },
+ "signature": [],
+ "loops": ["glider_wind", "glider_burn"]
+}
