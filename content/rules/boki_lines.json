@@ -2009,6 +2009,33 @@
 				]
 			}
 		},
+		"bond_up": {
+			"direct": true,
+			"feel": "love",
+			"word": "Yours",
+			"acts": [
+				"(hops into your arms)",
+				"(won't leave your side)",
+				"(nuzzles your chin)",
+				"(wiggles all over)"
+			],
+			"lines": {
+				"_": [
+					"You're my favourite.",
+					"I'm yours, you know.",
+					"We're a real team now.",
+					"I trust you.",
+					"Stay close, okay?",
+					"I like us a lot.",
+					"Best keeper ever.",
+					"Never leaving your side.",
+					"You always come back.",
+					"My heart goes warm.",
+					"You get me.",
+					"I'd follow you anywhere."
+				]
+			}
+		},
 		"ability": {
 			"feel": "excited",
 			"word": "Watch",

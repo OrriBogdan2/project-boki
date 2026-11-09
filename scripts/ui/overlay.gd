@@ -678,8 +678,7 @@ func open_inventory() -> void:
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
-					for af in Evo.AFF:
-						if Evo.AFF[af]["food"] == ck: Evo.add(ak, af, 6.0)
+					Evo.eat(ak, ck)
 					Save.remember(ak, "fed", "was fed a %s" % Data.CROPS[ck]["name"].to_lower(), 4.0)
 					Sfx.play("kin_happy")
 					Save.save_game()
