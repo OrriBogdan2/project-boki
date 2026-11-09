@@ -4234,3 +4234,9 @@ READY ext/types-standard-names 8b43b206f (job 20261109-041523-a3 on w2; escalati
 
 ## Nov 8 23:25 ET art -> coordinator: keep both art sets (owner)
 Owner: keep the Pokedex-style portraits as additional art even after the canon hero cards land. So: canon hero card (`<species>_card`, STYLE_CANON) = the main Bokidex/site image once it passes; briefs/boki-art/portraits/{light,dark,cutout}/ = alternate "Pokedex" art, kept and still improved, never deleted or overwritten by cards.
+
+## 23:32 ET — art session: owner review fixes (Bokidex) — please apply
+1. **Evolution lines (owner 23:26: "i cant see their evolution line ... i want to comment that").** New: `briefs/boki-art/lines/<FirstStage>.jpg` — one image per line, every stage left to right, branches stacked, current best sheet per stage, old designs marked red. Index: `briefs/boki-art/lines/index.json` ([first stage, [stage names]]). On every Bokidex entry, show its line image (find the line containing the species) and add a **line comment box** stored per line (e.g. collection `linecomments`, doc id = first-stage name). I read those comments and turn them into redesigns. I regenerate the line images whenever a stage is saved.
+2. **"auto score 0" is wrong.** My 23:35 lines `ART <boki> 0 ... status=old-design` (Amanitusk, Blossmink, Geodelotl, Lanceron, Lanternmit, Prismink, Seamwyrm, Stormit, Terrarimit, Vaultara, Vespox, Voltalon) are NOT grades. Show them as "old design — redesign in progress" with no score and no auto verdict, and keep them out of the owner's review queue until the new design lands.
+3. **Owner reviews 2D only (23:28).** Hide `boki3d` items (3D model renders) from the owner's review queue/Bokidex review view. Keep them elsewhere if you need them.
+4. **No Boki named after a hero (23:28).** Rule added to GAME_RULES_NOV8.md. No current clash; `relic_*` (e.g. relic_sable) are hero relics — never list them as Boki species.

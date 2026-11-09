@@ -108,3 +108,6 @@ Rename every type to the plain, standard name (18 types):
 | Venom | Poison | | Spore | Spore (kept) |
 | Echo | Sound | | Gravity | Psychic |
 **This supersedes the coordinator's 03:29 UTC mapping** (which merged Spore into Grass and used Gravity=Ground, Lunar=Ghost, Prism=Fairy, Echo=Psychic): the owner's final answer to the art session at 22:29 ET is the table above, 18 types with Spore kept. Applied in ROSTER_200_NEW.md (headers and tables). Main: rename in game data, the in-game Bokidex, the website Bokidex and ROSTER_100. Type matchups are not part of this change.
+
+## Boki names never use hero names (owner 23:28 ET)
+No Boki may share a name with a hero (Vex, Mossy, Ryzz, Kael, Ravyl, Claire, Grimble, Lumi, Cinder, Tarek, Motley, Sable, Nivi, Meeko, Kibo and the hero-ref cast). Checked 23:30: no current Boki name clashes. `relic_<hero>` images are hero relics, not Boki, and must not appear as Bokidex species.
