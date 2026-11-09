@@ -26463,5 +26463,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lyrewing_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "geodemole_card",
+    "name": "Geodemole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/geodemole_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_card",
+    "name": "Howlop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_card",
+    "name": "Howlop (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_card",
+    "name": "Oarter (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/oarter_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_card",
+    "name": "Pyrraven (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pyrraven_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "oarter_card",
+    "name": "Oarter (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/oarter_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven_card",
+    "name": "Pyrraven (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lyrewing_card",
+    "name": "Lyrewing (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lyrewing_card_2.jpg",
+    "ok": true
   }
 ]
