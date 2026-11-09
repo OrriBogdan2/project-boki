@@ -28444,5 +28444,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_galleotter_v2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_chandelapi_stance",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_chandelapi_stance",
+    "name": "Chandelapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_chandelapi_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_frigatee_stance",
+    "name": "Frigatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_frigatee_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_latchling_stance",
+    "name": "Latchling",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_latchling_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_frigatee_stance",
+    "name": "Frigatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_frigatee_stance_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_prowyak_stance",
+    "name": "Prowyak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_prowyak_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_lockatara_stance",
+    "name": "Lockatara",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_lockatara_stance_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_puffamus_stance",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_puffamus_stance_1.jpg",
+    "ok": true
   }
 ]
