@@ -16852,5 +16852,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_bladypus_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bladypus",
+    "name": "Bladypus (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bladypus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus",
+    "name": "Bladypus (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_bladypus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bladypus",
+    "name": "Bladypus (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bladypus_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_polyshroom",
+    "name": "Polyshroom",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_polyshroom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_polyshroom",
+    "name": "Polyshroom",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_polyshroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_starcap",
+    "name": "Starcap (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_starcap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_starcap",
+    "name": "Starcap (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_starcap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_starcap",
+    "name": "Starcap (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_starcap_2.jpg",
+    "ok": true
   }
 ]
