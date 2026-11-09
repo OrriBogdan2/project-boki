@@ -5,7 +5,8 @@ Extraction load in mind (10 trios, 30 Hunters, their Boki, monsters and VFX).
 
 ## Measuring
 - **`--perf-bench`** (`tools/perf_bench.gd`): a fixed busy expedition and then a farm run. Every frame is logged.
-  `--bench-teams=10 --bench-squad=3` is the 30-Hunter load. It prints wall avg, p99, the 1% low, the frames over
+  `--bench-teams=10 --bench-squad=3` is the 30-Hunter load. `--bench-stress` is the 60-actor load: 30 Hunters,
+  every Boki thrown out and kept out, no fight brought to you. It prints wall avg, p99, the 1% low, the frames over
   33 ms, the costliest step and visual sections, the heaviest meshes and the CPU particle emitters. Any frame over
   33 ms and 2x the 30 before it is printed with the step's costliest section and the nodes that entered the tree.
   The bench runs one sim step a frame, as play does. Until 11-08 it ran two, so older bench numbers overstate
@@ -24,9 +25,11 @@ Extraction load in mind (10 trios, 30 Hunters, their Boki, monsters and VFX).
 ## What runs less often far away
 | What | Rule | Knob |
 |---|---|---|
-| Hero rigs (`WardenGlb.Sync`, `AnimLod`) | off screen every 4th frame, past 48 m every 2nd, catching up on the skipped time | `tuning.json` perf `hero_anim_*`; off on Ultra |
+| Hero and Boki rigs (`WardenGlb.Sync`, `BokiRig`, `AnimLod.Gate`) | off screen (their `VisibleOnScreenNotifier3D`) every 10th frame, past `actor_far_m` (36/48/56 m on low/medium/high, 0 on very low) every 2nd, catching up on the skipped time | perf `actor_far_m`, `anim_far_every`, `anim_off_every`; off on Ultra |
+| Rig shadows and Boki ink outline | off screen or past `actor_far_m`: no shadow, and a Boki draws without its ink pass | as above |
+| Boki out of a fight (`KinPace`) | re-plans its walk at 10 Hz; far from you (past 45 m), calm, its whole sim runs at 10 Hz with the skipped time added in | `KinPace.THINK_S`, `FAR_EVERY`; off-line only |
 | Hunter, Boki and monster visuals (`Match._render_lod`) | beyond 34 m x zoom from the camera focus every 4th frame | Hunters: off on Ultra |
-| Bot decisions | past 45 m from you every 3rd step, each bot on its own step | `Bot.FAR_EVERY` |
+| Bot decisions | past 45 m from you every 3rd step, past 90 m every 6th, each bot on its own step | `Bot.FAR_EVERY`, `FAR2_EVERY` |
 | Bot route (`Bot._steer`) | the way to the goal is re-planned every 0.1 s, the heading every step | perf `bot_replan_s` |
 | Boki with nothing to fight | looks for a foe every 0.15-0.25 s | perf `boki_retarget_s` |
 

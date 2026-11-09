@@ -27,6 +27,9 @@ var target: Ent = null
 ## s between looks for a foe while it has none (tuning.json "perf"; a beat under a reaction time)
 static var RETARGET_S := float(Content.rules("tuning")["perf"]["boki_retarget_s"])
 var look_at_t := 0.0            # match time of its next look for a foe
+var pace_dt := 0.0              # sim time a far, calm Boki skipped (KinPace)
+var plan_t := -1.0              # match time of a calm Boki's last walk plan (KinPace)
+var idle_wish := Vector2.ZERO   # its last walk plan
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
 ## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
@@ -578,6 +581,9 @@ func sim(dt: float) -> void:
 	prev = pos
 	if dead:
 		return
+	dt = KinPace.step(self, dt)
+	if dt == 0.0:
+		return
 	if state == "away":
 		# your hunter is dead and waiting on a revive: the kin keeps out of sight until then
 		if owner_h: pos = owner_h.pos; prev = pos
@@ -852,7 +858,10 @@ func _sim_active(dt: float) -> void:
 			fire_trigger("on_hit", {"at": tp})
 	elif owner_h:
 		# no fight for it: back to your side like a teammate (or its guard spot); it hops onto you if you glide off
-		wish = KinFollow.idle(self, dt, spd)
+		var plan_dt := KinPace.plan_dt(self, dt)
+		if plan_dt > 0.0:
+			idle_wish = KinFollow.idle(self, plan_dt, spd)
+		wish = idle_wish
 		if state != "active":
 			return
 		if root_t > 0.0 or stun_t > 0.0:
