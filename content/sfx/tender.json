@@ -1,6 +1,6 @@
 {
  "group": "tender",
- "name": "Pip",
+ "name": "Meeko",
  "script": "tools/gen_sfx_pip.py",
  "sounds": {
   "tend_ember": "fire",

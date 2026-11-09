@@ -803,6 +803,11 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			var scr = L.new()
 			scr.setup(opts)
 			current = _layer(scr)
+		"prematch":
+			var Pv = load("res://scripts/ui/prematch_view.gd")
+			var pscr = Pv.new()
+			pscr.setup(opts)
+			current = _layer(pscr)
 		"title":
 			var Tt = load("res://scripts/ui/title.gd")
 			current = Tt.new()
@@ -1406,7 +1411,7 @@ func _ability_check() -> void:
 	P.inp["sec_hold"] = false
 	_ac_run(m, 0.3)
 	_ac("rail hold-to-charge", T.hp < T.max_hp - 25.0, "took %.0f" % (T.max_hp - T.hp))
-	# the same hold as an archetype (Ryzz's Coilshot): the shared wind-up fills, ticks full, punches out
+	# the same hold as an archetype (Sparkle's Coilshot): the shared wind-up fills, ticks full, punches out
 	P.reclass("light", "mage"); P.unlock_all()
 	_ac_run(m, 0.3)      # (the swap to a Light body settles on the ground first)
 	T.hp = T.max_hp
@@ -1497,78 +1502,36 @@ func _ability_check() -> void:
 		# (the kin itself lands in the crater, so the pull ends against its body)
 		_ac("gravity slam pulls + lifts", acc["top"] > 0.4 and float(mind["v"]) > 3.0, "rose %.2f, pulled at %.1fm/s toward the crater (kin %s)" % [acc["top"], mind["v"], gk.state])
 	m.queue_free(); await get_tree().process_frame
-	# 20. Dashes: class verbs and kin riders. Each starts grounded at the same spot, 3m short of the target.
+	# 20. Dashes: class verbs (no kin changes a dash: --boki-dash-check). Each starts grounded at the same spot, 3m short of the target.
 	r = _ac_setup(6.0); m = r[0]; P = r[1]; T = r[2]
 	var home2 := P.pos
-	var kref = P.kin
-	var ready := func(cls: String, sp: String, at: Vector3, mv: Vector2) -> void:
+	var ready := func(cls: String, at: Vector3, mv: Vector2) -> void:
 		P.teleport(at); P.vel = Vector3.ZERO
 		T.teleport(home2 + Vector3(6.0, 0, 0)); T.vel = Vector3.ZERO
 		T.burn_t = 0.0; T.blight_t = 0.0; T.slow_t = 0.0; T.stun_t = 0.0; T.root_t = 0.0; T.knock_t = 0.0
 		P.cls = cls; P.dodge_def = Content.class_dodge(cls)
-		P.kin = kref if sp != "" else null
-		if P.kin:
-			(P.kin as Kin).species = sp
-			(P.kin as Kin).ks = KinLib.kin(sp)
+		P.kin = null
 		_ac_run(m, 0.3)
 		P.dashes = P.max_dashes(); P.ex_cd = 0.0; P.roll_t = 0.0
 		P.inp["move"] = mv
 	# Light: phase step, a shot fired through you mid-step does nothing
-	ready.call("light", "", home2, Vector2(1, 0))
+	ready.call("light", home2, Vector2(1, 0))
 	var php2 := P.hp
 	P.do_dash()
 	m.spawn_shot(T, P.pos + Vector3(1.0, 0.95, 0), Vector2(-30, 0), 20.0, 0.3, 0.15, Color.RED, {})
 	_ac_run(m, 0.25)
 	_ac("light phase: shots pass", P.phase_t >= 0.0 and P.hp >= php2, "hp %.0f -> %.0f" % [php2, P.hp])
 	# Medium: the roll reloads
-	ready.call("medium", "", home2, Vector2(1, 0))
+	ready.call("medium", home2, Vector2(1, 0))
 	P.ammo = 0
 	P.do_dash()
 	_ac("medium roll reloads", P.ammo > 0, "ammo %d" % P.ammo)
 	# Heavy: the charge bowls the target back
-	ready.call("heavy", "", T.pos + Vector3(-2.2, 0, 0), Vector2(1, 0))
+	ready.call("heavy", T.pos + Vector3(-2.2, 0, 0), Vector2(1, 0))
 	var tx := T.pos.x
 	P.do_dash()
 	_ac_run(m, 0.5)
 	_ac("heavy charge knocks back", T.pos.x - tx > 1.0 and T.hp < T.max_hp, "target pushed %.1f, took %.0f" % [T.pos.x - tx, T.max_hp - T.hp])
-	if kref:
-		# lunar: no travel, an instant blink
-		ready.call("medium", "wisplet", home2, Vector2(1, 0))
-		var bp := P.pos
-		P.do_dash()
-		_ac("lunar dash blinks", P.roll_t <= 0.0 and P.flat_dist(bp) > 2.0, "moved %.1f instantly" % P.flat_dist(bp))
-		# venom: dash through the target poisons them
-		ready.call("medium", "cindle", T.pos + Vector3(-1.8, 0, 0), Vector2(1, 0))
-		T.burn_t = 0.0; T.blight_t = 0.0
-		P.do_dash()
-		_ac_run(m, 0.4)
-		_ac("venom dash poisons", T.burn_t > 0.0 or T.blight_t > 0.0, "burn %.1f blight %.1f" % [T.burn_t, T.blight_t])
-		# gravity: where you stop, foes nearby are tugged toward you
-		ready.call("medium", "pebbit", home2, Vector2(1, 0))
-		var tmin := {"x": T.pos.x, "v": 0.0, "px": 0.0}
-		P.do_dash()
-		_ac_run(m, 0.5, func():
-			tmin["x"] = minf(float(tmin["x"]), T.pos.x)
-			if -T.vel.x > float(tmin["v"]): tmin["v"] = -T.vel.x; tmin["px"] = P.pos.x - home2.x)
-		_ac("gravity dash tugs", float(tmin["v"]) > 3.0, "target pulled at %.1fm/s (you at %.1f), to x %.2f from %.2f; element %s" % [tmin["v"], tmin["px"], float(tmin["x"]) - home2.x, T.pos.x - home2.x, P.kin_element()])
-		# echo: a second, shorter dash a beat later
-		ready.call("medium", "zapple", home2 + Vector3(-4.0, 0, 0), Vector2(1, 0))
-		var e0 := P.pos.x
-		P.do_dash()
-		_ac_run(m, 0.2)
-		var e1 := P.pos.x
-		_ac_run(m, 0.5)
-		_ac("echo dash repeats", P.pos.x - e1 > 1.0, "first %.1fm, then +%.1fm" % [e1 - e0, P.pos.x - e1])
-		# spore: a slowing cloud where you started
-		ready.call("medium", "burrlet", home2, Vector2(-1, 0))
-		var nf := m.fields.list.size()
-		P.do_dash()
-		_ac("spore dash leaves cloud", m.fields.list.size() > nf, "")
-		# prism: a decoy where you started
-		ready.call("medium", "puddlet", home2, Vector2(-1, 0))
-		var nd := m.verbs.decoys.size()
-		P.do_dash()
-		_ac("prism dash leaves decoy", m.verbs.decoys.size() > nd, "")
 	m.queue_free(); await get_tree().process_frame
 	# 21. Every ability and active glove runs without errors (watch the log for SCRIPT ERROR)
 	r = _ac_setup(5.0); m = r[0]; P = r[1]; T = r[2]
@@ -1902,9 +1865,10 @@ func _grammar_runtime_check() -> void:
 	_grt("mount curls up while you glide", not P.mounted() and P.owner_stat("damage_reduction") == 0.0, "")
 	P.gliding = false
 	P._refresh_kin_stats()
+	var dashes0 := P.max_dashes()
 	k = _grt_kin(m, P, "wisplet")
 	P._refresh_kin_stats()
-	_grt("perch extends your glide", P.gear_stat("heat") >= 0.19 and P.max_dashes() >= 2.0, "glide +%.2f, dodges %.0f" % [P.gear_stat("heat"), P.max_dashes()])
+	_grt("perch extends your glide, never your dashes", P.gear_stat("heat") >= 0.19 and P.max_dashes() == dashes0, "glide +%.2f, dodges %.0f" % [P.gear_stat("heat"), P.max_dashes()])
 	k.throw_cd = 0.0
 	k.throw_to(T.pos)
 	if k.hesitate_t > 0.0: k._launch(T.pos)
@@ -2729,6 +2693,11 @@ func _boss_check() -> void:
 	run.call(13.0)      # (the boss settles back to sleep with nobody inside)
 	# 5. each boss: wakes when you walk in, phases at 66% and 33%, attacks, enrages, drops its egg
 	var egg_items: Array = []
+	for h in [P, C]:      # (a kin's own attacks and abilities would move the scripted hp thresholds; its species is random)
+		for k in [h.kin, h.kin2]:
+			if k != null:
+				k.dead = true
+				k.visible = false
 	for L in [F, E, H]:
 		for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
 		var b: Boss = L["boss_mob"]
@@ -2930,8 +2899,9 @@ func _boss_check() -> void:
 	var any_rare := false
 	for i in 60:
 		if Data.is_rare(String(m.bot_kin_record()["species"])): any_rare = true
-	ok.call(not any_rare and Data.common_kin().size() == 6 and Data.KIN.keys().filter(func(k): return Data.is_rare(k)).size() >= 2,
-		"rare species (%s) only come from eggs" % str(Data.KIN.keys().filter(func(k): return Data.is_rare(k))))
+	var rares: Array = Data.KIN.keys().filter(func(k): return Data.is_rare(k))
+	ok.call(not any_rare and Data.common_kin().size() + rares.size() == Data.KIN.size() and rares.size() >= 2,
+		"rare species (%s) only come from eggs" % str(rares))
 	m.queue_free()
 	# 10. a bot can work a dial
 	var m2 := Match.new()
@@ -3262,7 +3232,8 @@ func _bot_sanity() -> void:
 				if h.roll_t > float(s["roll"]) + 0.05:
 					s["dashes"] = int(s["dashes"]) + 1
 				s["roll"] = h.roll_t
-				if h.hit_marker() == "ring" and not h.gliding:
+				# (a ledge rise is a climb up a wall, not hanging in the air: it doesn't count)
+				if h.hit_marker() == "ring" and not h.gliding and h.lfloat.is_empty():
 					s["ring"] = float(s["ring"]) + Match.DT
 				s["t"] = float(s["t"]) + Match.DT
 				if float(s["t"]) >= WIN:

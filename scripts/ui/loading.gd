@@ -39,6 +39,19 @@ const TIPS := [
 	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
 	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
 ]
+## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
+const LORE := [
+	"Everyone born since the Sundering is born without a face. We call ourselves the Empty.",
+	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
+	"The Tyrant never aged, and never forgot the hoard. Under the Crown, it was always the Wyrm.",
+	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
+	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
+	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
+	"Skyfolk, beasts and humans all lost their faces alike. The sky doesn't ask who you were.",
+	"One wish waits in the Wyrmheart: remake the world, or rule it. Every Hunter wants it. So does the Wyrm.",
+	"Not every Mask has a face. Some are a compass, a jar, a pair of skates, and they remember just as much.",
+	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
+]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
@@ -55,6 +68,9 @@ var sub := ""
 var mode_line := ""
 var raid := ""           # the raid condition this expedition rolled ("" when it doesn't roll one)
 var tip := ""
+var lore := ""
+var map_name := ""       # the map this expedition is on ("" when unknown)
+var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
 var islands: Array = []  # [x (0..1), y (0..1), size, depth, seed]
 var stars: Array = []
 var sky_tex: GradientTexture2D
@@ -92,8 +108,12 @@ func setup(opts: Dictionary) -> void:
 		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
+		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
+		map_name = String(World.load_layout(map_id).get("name", ""))
+		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
 	tip = tips[randi() % tips.size()]
+	lore = LORE[randi() % LORE.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
 		islands.append([float(i) / 9.0 + r.randf_range(-0.04, 0.04), r.randf_range(0.14, 0.62), r.randf_range(0.7, 1.3), r.randf_range(0.2, 1.0), r.randi()])
@@ -185,7 +205,9 @@ func _draw() -> void:
 	# text
 	var cx := sz.x * 0.5
 	var base := sz.y * 0.47
-	var kick := "EXPEDITION" if mode_line != "" else "GETTING READY"
+	var kick := "GETTING READY"
+	if mode_line != "":
+		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
 	_text(Vector2(cx, base), kick, UI.caps, 15, Color(UI.GOLD, a), 3)
 	_text(Vector2(cx, base + 62), title, UI.big, 58, Color(UI.INK, a))
 	_wrap(Vector2(cx, base + 96), sub, 17, minf(620.0, sz.x - 60.0), Color(UI.MUTED, a))
@@ -199,7 +221,8 @@ func _draw() -> void:
 	# progress
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
-	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines), tw_, 40.0 + lines)
+	var lore_h := UI.body.get_multiline_string_size(lore, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 14, 3).y + 12.0
+	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines + lore_h), tw_, 40.0 + lines + lore_h)
 	var bw := minf(480.0, sz.x - 80.0)
 	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
 	var af := snappedf(a, 0.1)
@@ -211,6 +234,24 @@ func _draw() -> void:
 	c.draw_style_box(_glass(af), card)
 	_text(Vector2(cx, card.position.y + 22), "TIP", UI.caps, 11, Color(UI.ACCENT, a), 2)
 	_wrap(Vector2(cx, card.position.y + 26), tip, 15, tw_ - 40.0, Color(UI.INK, a * 0.85))
+	_wrap(Vector2(cx, card.position.y + 30.0 + lines), lore, 14, tw_ - 40.0, Color(UI.TEAL, a * 0.75))
+	_squad_row(Vector2(cx, sz.y * 0.1), a)
+
+## Your squad's portraits and names across the top: who you are dropping with.
+func _squad_row(p: Vector2, a: float) -> void:
+	if party.is_empty():
+		return
+	var px := 72.0
+	var gap := 22.0
+	var x := p.x - (party.size() * px + (party.size() - 1) * gap) * 0.5
+	_text(Vector2(p.x, p.y - 14.0), "YOUR SQUAD", UI.caps, 12, Color(UI.GOLD, a), 2)
+	for m in party:
+		var ak: String = m["arch"]
+		var r := Rect2(x, p.y, px, px)
+		Portraits.draw(c, r, ak, null, Color(Arch.color(ak) if Arch.exists(ak) else UI.MUTED, a))
+		_text(Vector2(x + px * 0.5, p.y + px + 20.0), String(m["name"]), UI.semi, 13, Color(UI.INK, a * 0.9))
+		_text(Vector2(x + px * 0.5, p.y + px + 36.0), Arch.label(ak), UI.body, 12, Color(UI.MUTED, a * 0.9))
+		x += px + gap
 
 ## The tip's glass card at a fade step (cached: drawn every frame while loading).
 func _glass(alpha: float) -> UiFrame:

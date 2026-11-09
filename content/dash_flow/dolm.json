@@ -10,7 +10,7 @@
 			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
 		},
 		"air": {
-			"lmb": {"mode": "buffer", "source": "Not in the data or footage (the source shows no air dash). The shared air dash can't fire the weapon; the press goes at its end."},
+			"lmb": {"mode": "fire", "source": "Not in the data or footage (the source shows no air dash). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
 			"rmb": {"mode": "fire", "source": "Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam."},
 			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash)."},
 			"x": {"mode": "fire", "source": "Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash."},
