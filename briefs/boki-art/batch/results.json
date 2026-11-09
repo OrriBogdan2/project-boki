@@ -68981,5 +68981,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_siegephant_r5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_checkmare_r5",
+    "name": "Checkmare",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_checkmare_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_pipwom_r5",
+    "name": "Pipwom",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_pipwom_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_tiltster_r5",
+    "name": "Tiltster",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_tiltster_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_druzemole_r5",
+    "name": "Druzemole",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_druzemole_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_parrywhal_r5",
+    "name": "Parrywhal",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_parrywhal_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_aurostag_r5",
+    "name": "Aurostag",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_aurostag_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_siegephant_r5",
+    "name": "Siegephant",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_siegephant_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_aurostag_r5",
+    "name": "Aurostag",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_aurostag_r5_1.jpg",
+    "ok": true
   }
 ]
