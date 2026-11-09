@@ -840,6 +840,8 @@ func do_jump() -> void:
 	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
 	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
+	if not near_ground:
+		DashGlide.cancel(self)
 	if not gliding and can_glide() and not near_ground:
 		_open_glider()
 		return
@@ -2547,6 +2549,8 @@ func _update_glide(dt: float) -> void:
 	# glide over the void to recover) must not fold the glider it's being carried on
 	var glide_press: bool = inp.get("glide", false) and not _auto_glide_held and ctrl != "bot"
 	_auto_glide_held = inp.get("glide", false)
+	if glide_press:
+		DashGlide.cancel(self)
 	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
 		auto_glide = false
 	# an overheated glider scorches you while it stays open

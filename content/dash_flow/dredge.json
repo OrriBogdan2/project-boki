@@ -25,5 +25,22 @@
 	},
 	"into_jump": {
 		"rmb": {"mode": "lock", "reason": "Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).", "source": "Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout."}
-	}
+	},
+	"glide": [
+		{
+			"pair": "air dash -> glide press",
+			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
+			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. Asserted in --airdash-glide-check."
+		},
+		{
+			"pair": "ability -> glide press",
+			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
+			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.37 s; RMB 0.68 s; E at once; X 2.08 s; Q at once (n/a: the press did not go off in the air in the check)."
+		},
+		{
+			"pair": "hold -> glide press",
+			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
+			"ours": "glide pressed 0.3 s into a hold: LMB 0.10 s; RMB 0.42 s; E at once; X 1.82 s; Q at once."
+		}
+	]
 }

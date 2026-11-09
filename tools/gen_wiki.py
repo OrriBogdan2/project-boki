@@ -729,12 +729,15 @@ def gen_dash_flow():
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
             rows.append([hero, "%s -> dash" % label, (row or {}).get("source", ""), ours])
         rows += _combo_rows(hero, f)
+        rows += [[hero, g["pair"], g["source"], g["ours"]] for g in f.get("glide", [])]
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
             "The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every "
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
-            "with no hold row keeps through every move.\n\n")
+            "with no hold row keeps through every move.\n\n"
+            "The glide rows (`glide` in the same file) say what a fresh glide press does after a dash, an ability and "
+            "during a hold; the numbers come from `--airdash-glide-check`.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))

@@ -22,5 +22,22 @@
 		"e": {"mode": "fire", "source": "Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is."},
 		"x": {"mode": "fire", "source": "Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
-	}
+	},
+	"glide": [
+		{
+			"pair": "air dash -> glide press",
+			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
+			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. Asserted in --airdash-glide-check."
+		},
+		{
+			"pair": "ability -> glide press",
+			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
+			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.55 s; RMB 0.48 s; E 1.05 s; X 0.57 s; Q at once (n/a: the press did not go off in the air in the check)."
+		},
+		{
+			"pair": "hold -> glide press",
+			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
+			"ours": "glide pressed 0.3 s into a hold: LMB shut while held; RMB 0.22 s; E 0.78 s; X 0.30 s; Q at once."
+		}
+	]
 }

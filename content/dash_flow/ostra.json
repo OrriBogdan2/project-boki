@@ -75,5 +75,22 @@
 			"reason": "owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once",
 			"source": "Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once."
 		}
-	}
+	},
+	"glide": [
+		{
+			"pair": "air dash -> glide press",
+			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
+			"ours": "a fresh press ends the dash that step and the glider opens the next, keeping the dash speed up to the handoff cap. He has no body dash in the air (the Void swap): the glider opens at once with no speed to carry. Asserted in --airdash-glide-check."
+		},
+		{
+			"pair": "ability -> glide press",
+			"source": "Not determinable: no source row for a glide pressed after this Hunter's abilities (data and footage silent). Kept: owner item 162b, no glider inside an ability's animation (docs/MOVEMENT_FEEL.md).",
+			"ours": "glide opens when the move's keys end, pressed after a tap: LMB 0.50 s; RMB at once; E n/a; X n/a; Q at once (n/a: the press did not go off in the air in the check)."
+		},
+		{
+			"pair": "hold -> glide press",
+			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
+			"ours": "glide pressed 0.3 s into a hold: LMB 0.23 s; RMB at once; E n/a; X n/a; Q at once."
+		}
+	]
 }
