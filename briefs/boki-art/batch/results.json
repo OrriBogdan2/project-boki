@@ -30803,5 +30803,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_pebblamb_full_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_chandelapi_full",
+    "name": "Chandelapi (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chandelapi_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_full",
+    "name": "Cisternmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_full",
+    "name": "Cisternmander (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cisternmander_full",
+    "name": "Cisternmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cisternmander_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_full",
+    "name": "Dragonkite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_full_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_full",
+    "name": "Dragonkite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_full_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite_full",
+    "name": "Dragonkite (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_full_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dribbara_full",
+    "name": "Dribbara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dribbara_full_2.jpg",
+    "ok": true
   }
 ]
