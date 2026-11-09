@@ -4738,3 +4738,31 @@ ART murmurling 8.2 briefs/boki-art/batch/out/murmurling_f_e_w32_1.jpg kind=turna
 ART scythant 8.0 briefs/boki-art/batch/out/scythant_r_w32_3.jpg kind=turnaround status=owner-review
 READY ext/cc-plate-timer eba4ad3d9 (CC timers on plates)
 READY ext/kael-chain-length b763a57c0 (docs only: the source gives no Warchain leash and only a throw floor of ~12.6 m (7 bh), so 13 m throw and 24 m tether_max stay, KIT_PARITY and juggernaut.md rows marked [?] with the evidence; no code change; merge after ext/kael-tap-ult-1108 only to keep doc rows tidy; juggernaut-combo-check 183/0, health --strict OK, gen_wiki --check OK)
+
+## 07:28Z — art session: hero cards batch (fast lane)
+ART barokat 8.4 briefs/boki-art/cards/Barokat.jpg kind=card
+ART bellowary 8.3 briefs/boki-art/cards/Bellowary.jpg kind=card
+ART boltstrich 8.5 briefs/boki-art/cards/Boltstrich.jpg kind=card
+ART buckleron 8.5 briefs/boki-art/cards/Buckleron.jpg kind=card
+ART canvastross 8.3 briefs/boki-art/cards/Canvastross.jpg kind=card
+ART chuggamus 8.5 briefs/boki-art/cards/Chuggamus.jpg kind=card
+ART foldbat 8.6 briefs/boki-art/cards/Foldbat.jpg kind=card
+ART frigatee 8.6 briefs/boki-art/cards/Frigatee.jpg kind=card
+ART gloamshell 8.4 briefs/boki-art/cards/Gloamshell.jpg kind=card
+ART teapotamus 8.5 briefs/boki-art/cards/Teapotamus.jpg kind=card
+ART terrarimit 8.6 briefs/boki-art/cards/Terrarimit.jpg kind=card
+ART tidalisk 8.4 briefs/boki-art/cards/Tidalisk.jpg kind=card
+ART vaultara 8.6 briefs/boki-art/cards/Vaultara.jpg kind=card
+ART voltalon 8.1 briefs/boki-art/cards/Voltalon.jpg kind=card
+ART glomwort 8.6 briefs/boki-art/cards/Glomwort.jpg kind=card
+ART gravadillo 8.0 briefs/boki-art/cards/Gravadillo.jpg kind=card
+ART hivara 8.4 briefs/boki-art/cards/Hivara.jpg kind=card
+ART lockatara 8.6 briefs/boki-art/cards/Lockatara.jpg kind=card
+ART murmurling 8.6 briefs/boki-art/cards/Murmurling.jpg kind=card
+ART pawnfry 8.1 briefs/boki-art/cards/Pawnfry.jpg kind=card
+ART prismander 8.7 briefs/boki-art/cards/Prismander.jpg kind=card
+ART prowyak 8.4 briefs/boki-art/cards/Prowyak.jpg kind=card
+ART rattlebub 8.7 briefs/boki-art/cards/Rattlebub.jpg kind=card
+ART selenfin 8.6 briefs/boki-art/cards/Selenfin.jpg kind=card
+ART skateron 8.4 briefs/boki-art/cards/Skateron.jpg kind=card
+ART snuffapi 8.3 briefs/boki-art/cards/Snuffapi.jpg kind=card
