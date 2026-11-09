@@ -40554,5 +40554,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_stance3_frothisk_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_lyrewing",
+    "name": "Lyrewing (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lyrewing_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f4",
+    "name": "Glomworth (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lyrewing",
+    "name": "Lyrewing (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_lyrewing_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_frothisk",
+    "name": "Frothisk (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_frothisk_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lyrewing",
+    "name": "Lyrewing (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_lyrewing_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glomwort_f4",
+    "name": "Glomworth (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glomwort_f4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lyrewing",
+    "name": "Lyrewing (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_lyrewing_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_lyrewing",
+    "name": "Lyrewing (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_lyrewing_3.jpg",
+    "ok": true
   }
 ]
