@@ -26323,5 +26323,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stance2_frigatee_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance2_puffamus",
+    "name": "Puffamus (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_puffamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_lockatara",
+    "name": "Lockatara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_lockatara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_lockatara",
+    "name": "Lockatara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_puffamus",
+    "name": "Puffamus (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_puffamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card",
+    "name": "Cisternmander (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cisternmander_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "dreadnoyak_card",
+    "name": "Dreadnoyak (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/dreadnoyak_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespyx_card3",
+    "name": "Vespyx (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/vespyx_card3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cisternmander_card",
+    "name": "Cisternmander (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cisternmander_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespyx_card3",
+    "name": "Vespyx (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/vespyx_card3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "mycroll_card3",
+    "name": "Mycroll (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mycroll_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "vespyx_card3",
+    "name": "Vespyx (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/vespyx_card3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mycroll_card3",
+    "name": "Mycroll (hero card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/mycroll_card3_4.jpg",
+    "ok": true
   }
 ]
