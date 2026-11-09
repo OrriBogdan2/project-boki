@@ -9,8 +9,10 @@ const DURATION := 90.0      # seconds the lobby runs
 const LOCK_HOLD := 1.0      # seconds "picks locked" shows before the match loads
 const CHAT_MAX := 140       # characters in one chat line
 ## Options that mark a match as something other than a real expedition: no lobby for those.
+## "matchmade": a dedicated match server already runs the match when its "start" arrives (OnlineSession).
 const NOT_EXPEDITION := [
 	"tutorial", "training", "practice", "arena", "duel", "sandbox", "autoplay", "probe", "spectate", "demo_match",
+	"matchmade",
 ]
 
 var opts: Dictionary

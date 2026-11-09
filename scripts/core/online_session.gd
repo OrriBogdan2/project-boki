@@ -176,7 +176,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 				my_team = int(r["team"])
 				_go_state("match", "")
 				Game.start_match({"net": data, "seed": int(data["seed"]), "teams": int(data["teams"]),
-					"squad": int(data["squad"]), "tier": int(data.get("tier", 0))})
+					"squad": int(data["squad"]), "tier": int(data.get("tier", 0)), "matchmade": true})
 				return
 	elif topic == "end":
 		var m := Game.main.current as Match if Game.main else null

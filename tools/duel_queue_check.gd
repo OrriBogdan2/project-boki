@@ -65,6 +65,6 @@ func _live_ticket(url: String) -> void:
 	ok(state == "ready", "the match is found (%s after %d s)" % [state, int(t)])
 	await mm.leave(url, ticket)
 	var after := await mm.poll(url, ticket)
-	var gone := typeof(after["json"]) == TYPE_DICTIONARY and after["json"].get("state") == "gone"
+	var gone: bool = typeof(after["json"]) == TYPE_DICTIONARY and after["json"].get("state") == "gone"
 	ok(gone, "cancelled: the ticket is gone")
 	mm.queue_free()
