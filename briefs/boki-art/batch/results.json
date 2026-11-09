@@ -20422,5 +20422,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/echolop_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_prismander_b",
+    "name": "Prismander (direction B)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_prismander_b_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "echolop_card",
+    "name": "Echolop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/echolop_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "effigeetle_card",
+    "name": "Effigeetle (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/effigeetle_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_prismander_a",
+    "name": "Prismander (direction A)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_prismander_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "effigeetle_card",
+    "name": "Effigeetle (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/effigeetle_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card",
+    "name": "Frigatee (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gilabacus_card",
+    "name": "Gilabacus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gilabacus_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glintmole_card",
+    "name": "Glintmole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glintmole_card_2.jpg",
+    "ok": true
   }
 ]
