@@ -5771,5 +5771,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_teapotamus_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_teapotamus",
+    "name": "Teapotamus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_teapotamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrink",
+    "name": "Umbrink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_umbrink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_umbrathere",
+    "name": "Umbrathere (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_umbrathere_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_voltmink",
+    "name": "Voltmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_voltmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dribbara",
+    "name": "Dribbara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dribbara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross",
+    "name": "Jibbatross",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/jibbatross_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross",
+    "name": "Jibbatross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/jibbatross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee",
+    "name": "Coolatee",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/coolatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee",
+    "name": "Coolatee",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/coolatee_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "coolatee",
+    "name": "Coolatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/coolatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glaciatee",
+    "name": "Glaciatee",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glaciatee_1.jpg",
+    "ok": true
   }
 ]
