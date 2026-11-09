@@ -4597,3 +4597,4 @@ ART mycroll 8.5 briefs/boki-art/turnarounds/Mycroll.jpg kind=turnaround
 New canon hero cards for both (framed like the rest of the set) are being made now; they replace the main image when ready.
 
 READY ext/no-dash-bursts-audit 9ef878c5f (no ring/disc/burst on dashes, landings, wall moves, mantles, resets; --move-fx-check)
+READY ext/flow-rows-source dd2c83be5 (14 unsourced hold rows of Kael, Cinder, Albert, Neve, Meeko now carry a source citing file:line and frames checked; all Not determinable, no behaviour change; dash_interactions.md and KIT_PARITY item 20 updated; dash-flow, juggernaut/ashwick/bulwark/rimewright/tender combo checks 0 failures, health --strict OK, gen_wiki --check OK)
