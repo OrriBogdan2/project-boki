@@ -27877,5 +27877,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/canvastross_card2_w32_4.jpg",
     "ok": true
+  },
+  {
+    "id": "chuggamus_card2_w32",
+    "name": "Chuggamus (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chuggamus_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card2_w32",
+    "name": "Chuggamus (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chuggamus_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card2_w32",
+    "name": "Frigatee (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/frigatee_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card2_w32",
+    "name": "Frigatee (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/frigatee_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "frigatee_card2_w32",
+    "name": "Frigatee (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/frigatee_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card2_w32",
+    "name": "Gloamshell (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gloamshell_card2_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chuggamus_card2_w32",
+    "name": "Chuggamus (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/chuggamus_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gloamshell_card2_w32",
+    "name": "Gloamshell (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gloamshell_card2_w32_2.jpg",
+    "ok": true
   }
 ]
