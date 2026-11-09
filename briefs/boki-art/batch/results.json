@@ -15795,5 +15795,75 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/vespox_r2_w28_3.jpg",
     "ok": true
+  },
+  {
+    "id": "lashyx_e_w28",
+    "name": "Lashyx",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lashyx_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_murmurling_pe_w28",
+    "name": "Murmurling (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_murmurling_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2b",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2a",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_oomphe",
+    "name": "Bellowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_oomphe_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2d",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2d_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_oomph",
+    "name": "Bellowary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_oomph_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2b",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2c",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_r2a",
+    "name": "Barokat (redo 2, owner 7.1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_r2a_1.jpg",
+    "ok": true
   }
 ]
