@@ -37026,5 +37026,19 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_stance3_cisternmander_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance3_cisternmander",
+    "name": "Cisternmander (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_cisternmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance3_cisternmander",
+    "name": "Cisternmander (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance3_cisternmander_2.jpg",
+    "ok": true
   }
 ]
