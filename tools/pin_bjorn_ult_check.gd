@@ -255,6 +255,23 @@ func bjorn() -> void:
 		AimKit.shown(P, "x0") and AimKit.shown(P, "x3") and bool(c0.get("all", false))
 			and absf(float(c0.get("len", 0.0)) - 4.0) < 0.01,
 		str(c0.keys()))
+	# source at level 15 (briefs/supervive-data/supervive_kits.md, Oath): throw 192, Spin Dash 364, R strike 31 + 396
+	var thr := float(K.d["lmb"]["throw_dmg"])
+	var strike_k := float(xd["strike_dmg"]) / thr
+	var erupt_k := float(xd["dmg"]) / thr
+	ok("bjorn parity: strike 31/192 and eruption 396/192 of the throw (one hit per foe)",
+		absf(strike_k - 31.0 / 192.0) < 0.03 and absf(erupt_k - 396.0 / 192.0) < 0.1,
+		"%.2f / %.2f" % [strike_k, erupt_k])
+	var lane_bh := float(xd["cells"]) * float(xd["cell_len"]) / 1.8
+	var wide_bh := float(xd["width"]) / 1.8
+	ok("bjorn parity: lane 2.5 x 8.9 bh at 1.8 m (sheet bjorn.md), slow heavier than the kits' 30%",
+		absf(lane_bh - 8.9) < 0.1 and absf(wide_bh - 2.5) < 0.01 and float(xd["slow"]) > 0.3,
+		"%.1f x %.1f bh slow %.2f" % [lane_bh, wide_bh, float(xd["slow"])])
+	var sd: Dictionary = K.dash_def()
+	ok("bjorn parity: Spin Dash 364/192 of the throw (2x), a push, its own 8 s",
+		absf(float(sd["whirl_dmg"]) / thr - 364.0 / 192.0) < 0.15 and float(sd["whirl_kb"]) > 0.0
+			and absf(float(sd["cd"]) - 8.0) < 0.01,
+		"%.2f push %.1f cd %.1f" % [float(sd["whirl_dmg"]) / thr, float(sd["whirl_kb"]), float(sd["cd"])])
 	ok("bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
 		"%.1f" % float(K.cd["x"]))
@@ -271,7 +288,7 @@ func bjorn() -> void:
 		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
 	step(m, 0.3)
 	var want := (float(xd["dmg"]) + float(xd["strike_dmg"])) * ap
-	ok("bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow)",
+	ok("bjorn ult payoff: each foe on the lane struck (stun) and thrown once (2 + 25, a heavy slow)",
 		hit_t and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
 		"took %.0f / %.0f (want %.0f) stunned %s" % [dmg(T), dmg(T2), want, hit_t])
 	ok("bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",

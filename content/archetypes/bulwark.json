@@ -177,9 +177,9 @@
 		"width": 4.5,
 		"lead": 0.2,
 		"cell_t": 0.15,
-		"strike_dmg": 4.0,
+		"strike_dmg": 2.0,
 		"strike_stun": 0.5,
-		"dmg": 18.0,
+		"dmg": 25.0,
 		"lift": 7.0,
 		"slow": 0.5,
 		"slow_t": 1.5,
@@ -187,7 +187,7 @@
 		"scar_w": 1.4,
 		"scar_slow": 0.2,
 		"refund": 8.0,
-		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
+		"desc": "Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (2, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (25, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
 	},
 	"order": [
 		"sec",
