@@ -39,3 +39,11 @@ Still differs (KIT_PARITY, docs/heroes/ashwick.md):
 - LMB hose, RMB bolt and the Ignite passive match.
 By eye (footage 25 to 285 next to the reel): the source's Jetpack leaves a wide, thick red-orange magma band behind her (about a body wide); ours is a thin orange lane, so the ult reads lighter. The source hose is a bright yellow-orange cone with a burning foe marker; ours reads the same shape. Flame Shield (E) in the source is a bubble on her with the pulled foes; check ours in the E part.
 
+## Mossy the Barnacle Knight (`bulwark`, source Bjorn / Oath): [bulwark.mp4](bulwark.mp4)
+Still differs (KIT_PARITY, docs/heroes/bulwark.md):
+- LMB: tap is a whirl, hold is a charged swing with carry 1.5 to 1.8 m and a perfect launch of 4 m (owner #30, #49); the source throws the hammer and recalls it. Cadence .48 vs .45 (gap 12); he walks at 55% while holding where the source stands.
+- Passive: the Guard meter and Shield Slam are ours, not in the source (gap 15, owner question open). Wall-knock Stun is built.
+- E: matches (zone round the hammer, burst); cd 12 / 8. R: stun .5 s, cd 40 vs 50 (0.8x). Dash (Whirl 3.5 m, cd 8) matches.
+- RMB shield routing (Shift = bash) not settled `[?]`. Dash to LMB buffers (gap 9).
+By eye (footage 45 to 560 next to the reel): the source's Earthshatter is a tall cyan-outlined rectangle with a lightning crack and a stun marker; ours lays a lane of dark rocks inside an orange box, so the fissure reads as boulders, not a glowing crack. The source's Barrier Shield is a flat gold plate in front of him; ours is a pale green bubble round him. Our Mossy is 1.5x a medium Hunter (owner) so he is larger than the source's Oath on screen.
+
