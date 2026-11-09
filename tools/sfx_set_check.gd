@@ -8,6 +8,8 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
+##      an unknown species falls back to the generic cues, and no two species share a happy take
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -61,6 +63,30 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "boki_voices":
+		_boki_voices(d["sounds"])
+
+## 7. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
+func _boki_voices(sounds: Dictionary) -> void:
+	var gaps := []
+	var same := []
+	var seen := {}
+	for sp in DirAccess.get_directories_at("res://art/kin"):
+		for mood in KinVoice.GENERIC_CUE:
+			var want := "bk_%s_%s" % [sp, mood]
+			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
+				gaps.append(want)
+		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
+		if seen.has(sig):
+			same.append("%s = %s" % [sp, seen[sig]])
+		seen[sig] = sp
+	var what := "boki_voices: %d species, 5 moods, 2 takes (gaps %s)" % [seen.size(), gaps]
+	ok(gaps.is_empty() and not seen.is_empty(), what)
+	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
+	var fell := []
+	for mood in KinVoice.GENERIC_CUE:
+		fell.append(KinVoice.cue("no_such_species", mood))
+	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]

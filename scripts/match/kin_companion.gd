@@ -409,6 +409,7 @@ func on_owner_hit(d: float, by: Ent) -> void:
 	if d >= o.max_hp * 0.12 and yelp_cd <= 0.0 and not o.downed:
 		yelp_cd = 7.0
 		history.append({"t": m.time, "cat": "yelp", "pri": 0})
+		m.sfx(KinVoice.cue(k.species, "hurt"), k.pos, -6.0, Unique.voice(k.rec))
 		var txt := KinVoice.callout(k, "yelp")
 		if txt != "":
 			m.kin_bark(k, txt, "yelp")

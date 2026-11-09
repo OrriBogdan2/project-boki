@@ -279,7 +279,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 		verdict = "hesitate"
 	if verdict == "refuse":
 		bark("refuse")
-		m.sfx("kin_unsure", owner_h.pos, -2.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -2.0, Unique.voice(rec))
 		note("refused", "refused to jump into a fight that looked too dangerous", -1.0)
 		pend_slot = ""; pend_skill = Vector3.INF
 		return
@@ -288,7 +288,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 		hesitate_to = p
 		if trust < 60.0 or not owner_h.is_local():
 			bark("hesitate")
-		m.sfx("kin_unsure", owner_h.pos, -4.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -4.0, Unique.voice(rec))
 		return
 	if from_shoulder:
 		_launch(p)
@@ -528,7 +528,7 @@ func land_pumped(secs: float) -> void:
 	rest_t = secs
 	m.fx.burst(pos + Vector3(0, 1.0, 0), sp["color"], 22, 4.0)
 	m.fx.ring(pos, 1.6, Color(sp["color"], 0.9), 0.35)
-	m.sfx("kin_happy", pos, -4.0, Unique.voice(rec))
+	m.sfx(KinVoice.cue(species, "sleepy"), pos, -4.0, Unique.voice(rec))
 	KinNet.event(m, "rest", self, owner_h.pos, "%.1f" % secs)
 	if owner_h.is_local():
 		KinCommand.say(owner_h, "%s is pumped: back in %ds" % [rec.get("name", "Your Boki"), int(ceil(secs))], sp["color"])
@@ -585,7 +585,7 @@ func sim(dt: float) -> void:
 		set(k, maxf(0.0, get(k) - dt))
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
-		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
+		m.sfx(KinVoice.cue(species, "happy"), owner_h.pos, -8.0, Unique.voice(rec))
 		KinCommand.say(owner_h, "%s is rested" % rec.get("name", "Your Boki"), sp["color"])
 	if shield_t > 0.0:
 		shield_t -= dt

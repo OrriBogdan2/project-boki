@@ -1,0 +1,30 @@
+{
+ "group": "boki_voices",
+ "name": "Boki species voices",
+ "script": "tools/gen_sfx_boki.py",
+ "sounds": {
+  "bk_burrlet_happy": "boki", "bk_burrlet_alert": "boki", "bk_burrlet_unsure": "boki", "bk_burrlet_sleepy": "boki", "bk_burrlet_hurt": "boki",
+  "bk_cairnback_happy": "boki", "bk_cairnback_alert": "boki", "bk_cairnback_unsure": "boki", "bk_cairnback_sleepy": "boki", "bk_cairnback_hurt": "boki",
+  "bk_cindle_happy": "boki", "bk_cindle_alert": "boki", "bk_cindle_unsure": "boki", "bk_cindle_sleepy": "boki", "bk_cindle_hurt": "boki",
+  "bk_glintmole_happy": "boki", "bk_glintmole_alert": "boki", "bk_glintmole_unsure": "boki", "bk_glintmole_sleepy": "boki", "bk_glintmole_hurt": "boki",
+  "bk_gloamshell_happy": "boki", "bk_gloamshell_alert": "boki", "bk_gloamshell_unsure": "boki", "bk_gloamshell_sleepy": "boki", "bk_gloamshell_hurt": "boki",
+  "bk_glomwort_happy": "boki", "bk_glomwort_alert": "boki", "bk_glomwort_unsure": "boki", "bk_glomwort_sleepy": "boki", "bk_glomwort_hurt": "boki",
+  "bk_hivara_happy": "boki", "bk_hivara_alert": "boki", "bk_hivara_unsure": "boki", "bk_hivara_sleepy": "boki", "bk_hivara_hurt": "boki",
+  "bk_kestrike_happy": "boki", "bk_kestrike_alert": "boki", "bk_kestrike_unsure": "boki", "bk_kestrike_sleepy": "boki", "bk_kestrike_hurt": "boki",
+  "bk_kindlewren_happy": "boki", "bk_kindlewren_alert": "boki", "bk_kindlewren_unsure": "boki", "bk_kindlewren_sleepy": "boki", "bk_kindlewren_hurt": "boki",
+  "bk_lodestick_happy": "boki", "bk_lodestick_alert": "boki", "bk_lodestick_unsure": "boki", "bk_lodestick_sleepy": "boki", "bk_lodestick_hurt": "boki",
+  "bk_marchleaf_happy": "boki", "bk_marchleaf_alert": "boki", "bk_marchleaf_unsure": "boki", "bk_marchleaf_sleepy": "boki", "bk_marchleaf_hurt": "boki",
+  "bk_mossgrade_happy": "boki", "bk_mossgrade_alert": "boki", "bk_mossgrade_unsure": "boki", "bk_mossgrade_sleepy": "boki", "bk_mossgrade_hurt": "boki",
+  "bk_nettlynx_happy": "boki", "bk_nettlynx_alert": "boki", "bk_nettlynx_unsure": "boki", "bk_nettlynx_sleepy": "boki", "bk_nettlynx_hurt": "boki",
+  "bk_pebbit_happy": "boki", "bk_pebbit_alert": "boki", "bk_pebbit_unsure": "boki", "bk_pebbit_sleepy": "boki", "bk_pebbit_hurt": "boki",
+  "bk_puddlet_happy": "boki", "bk_puddlet_alert": "boki", "bk_puddlet_unsure": "boki", "bk_puddlet_sleepy": "boki", "bk_puddlet_hurt": "boki",
+  "bk_rimeshrew_happy": "boki", "bk_rimeshrew_alert": "boki", "bk_rimeshrew_unsure": "boki", "bk_rimeshrew_sleepy": "boki", "bk_rimeshrew_hurt": "boki",
+  "bk_selenfin_happy": "boki", "bk_selenfin_alert": "boki", "bk_selenfin_unsure": "boki", "bk_selenfin_sleepy": "boki", "bk_selenfin_hurt": "boki",
+  "bk_thrumbird_happy": "boki", "bk_thrumbird_alert": "boki", "bk_thrumbird_unsure": "boki", "bk_thrumbird_sleepy": "boki", "bk_thrumbird_hurt": "boki",
+  "bk_wisplet_happy": "boki", "bk_wisplet_alert": "boki", "bk_wisplet_unsure": "boki", "bk_wisplet_sleepy": "boki", "bk_wisplet_hurt": "boki",
+  "bk_zapple_happy": "boki", "bk_zapple_alert": "boki", "bk_zapple_unsure": "boki", "bk_zapple_sleepy": "boki", "bk_zapple_hurt": "boki",
+  "bk_zephyrak_happy": "boki", "bk_zephyrak_alert": "boki", "bk_zephyrak_unsure": "boki", "bk_zephyrak_sleepy": "boki", "bk_zephyrak_hurt": "boki"
+ },
+ "signature": [],
+ "replaces": []
+}

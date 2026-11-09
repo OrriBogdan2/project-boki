@@ -135,7 +135,8 @@ static func order(h: Hunter, id: String) -> bool:
 		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "back on you", "follow": "at your side"}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
 		h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)
-		h.m.sfx("kin_alert" if id in ["guard", "chase"] else "kin_happy", k.pos, -8.0, Unique.voice(k.rec))
+		var mood := "alert" if id in ["guard", "chase"] else "happy"
+		h.m.sfx(KinVoice.cue(k.species, mood), k.pos, -8.0, Unique.voice(k.rec))
 	return ok
 
 static func target_name(e: Ent) -> String:
