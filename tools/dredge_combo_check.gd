@@ -519,6 +519,27 @@ func _all() -> void:
 	for dz in range(-1, 2):
 		W.kind[W.idx(hx + 4, hz + dz)] = World.T_GROUND
 	ak.step(m, 1.0)
+	# --- a placed wall stops the hook even though rocks and cliffs do not
+	reset.call()
+	var wall_def := {"length": 6.0, "hp": 500.0, "time": 10.0, "block": "all"}
+	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(3.0, 0, 0), Vector2(1, 0), wall_def, 1.0)
+	var g2: int = K.grapples
+	ak.tap(m, P)
+	ak.step(m, 0.5)
+	m.verbs._break_wall(wall)
+	ok(
+		"walls: a placed wall stops the hook (no grab)", K.grapples == g2 and K.pull.is_empty(),
+		"grapples +%d" % (K.grapples - g2)
+	)
+	ak.step(m, 0.5)
+	# --- cooldowns read the data's level 1 (supervive_kits.md: hand 18s, slam 12s, slugwave 36s)
+	ok(
+		"cooldowns: hand 18, anchor 12, broadside 36, windup 0.38, charge 1.1",
+		is_equal_approx(float(K.rmb_def()["cooldown"]), 18.0) and is_equal_approx(float(K.e_def()["cooldown"]), 12.0)
+		and is_equal_approx(float(K.x_def()["cooldown"]), 36.0) and is_equal_approx(float(K.e_def()["windup"]), 0.38)
+		and is_equal_approx(float(K.x_def()["charge"]), 1.1),
+		"%s %s %s" % [K.rmb_def()["cooldown"], K.e_def()["cooldown"], K.x_def()["cooldown"]]
+	)
 	# --- the reel has weight: walking sideways while reeling swings the body round you
 	reset.call()
 	ak.tap(m, P)
@@ -836,8 +857,8 @@ func _all() -> void:
 	ak.tap(m, P)
 	ak.step(m, 0.3)
 	ok(
-		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
-		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
+		"abyssal hand rank 3: a hit takes half the cooldown off (18s -> 14.4s -> 7.2s)",
+		float(K.cd["rmb"]) < 14.4 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0
 	K.on_deal(T, 3.0, {"src": "shot"})
