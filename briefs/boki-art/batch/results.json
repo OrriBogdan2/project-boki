@@ -19365,5 +19365,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_sarcobra_e_w30_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_sundormouse_w30",
+    "name": "Sundormouse (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w30",
+    "name": "Torpecone (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sundormouse_w30",
+    "name": "Sundormouse (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sundormouse_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w30",
+    "name": "Torpecone (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_narfoil",
+    "name": "Narfoil",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_narfoil_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_narfoil",
+    "name": "Narfoil",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_narfoil_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone_w30",
+    "name": "Torpecone (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_torpecone_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_parrywhal",
+    "name": "Parrywhal (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_parrywhal_3.jpg",
+    "ok": true
   }
 ]
