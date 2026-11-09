@@ -1378,13 +1378,6 @@ static func with_lods(m: Mesh) -> Mesh:
 	_lod_cache[m] = out
 	return out
 
-## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
-static func _thin(items: Array, keep: float, seed_i: int) -> Array:
-	if keep >= 0.999:
-		return items
-	var r := RandomNumberGenerator.new(); r.seed = seed_i
-	return items.filter(func(_it): return r.randf() < keep)
-
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
 	if shadows:
@@ -1399,10 +1392,11 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 	var draw_k := float(Settings.q("draw"))
 	var vis_end := 0.0
 	match cls:
-		"small":
-			vis_end = DRAW_SMALL * draw_k
-			items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
-		"bush": vis_end = DRAW_BUSH * draw_k
+		"small", "bush":
+			# clutter thinned per preset (Clutter.KEEP); 32-tile batches: a quarter of the draws
+			vis_end = (DRAW_SMALL if cls == "small" else DRAW_BUSH) * draw_k
+			items = Clutter.thin(items, Clutter.keep(cls), hash(label) + rng.seed)
+			chunk = maxi(chunk, 32)
 		"big":
 			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
 			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
