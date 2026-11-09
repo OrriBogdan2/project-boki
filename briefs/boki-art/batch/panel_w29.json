@@ -568,5 +568,475 @@
 "every run was Ermink recoloured and sitting upright with a worn ice collar; long low stoat on all fours, ruff grown as frozen bristles"
 ],
 "veto": []
+},
+{
+"id": "amanitusk_e_w28",
+"pick": 2,
+"avg": 7.73,
+"seats": [
+7.8,
+7.7,
+7.7
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 2, rebuild the snout and skull as overlapping amanita plates forming a blunt ram head with tusks grown from the gills, stylised cocky grin",
+"New prompt: stylised boar whose whole skull is layered amanita plates forming a battering ram, tusks grown from the gill rows, cocky grin, with no realistic pig snout",
+"EDIT: on run 2, rebuild the head as stylised layered amanita plates with tusks grown from the gills and a cocky grin, with no realistic snout."
+],
+"veto": []
+},
+{
+"id": "bellowlet_r_w28",
+"pick": 3,
+"avg": 8.13,
+"seats": [
+8.5,
+8.1,
+7.8
+],
+"decision": "edit",
+"fixes": [
+"Ship run 3.",
+"EDIT: on run 3, give the tail fan leather pleats between the brass ribs like real bellows and swap the chest glow for soot-dark ribbing to separate it from Kindlewren",
+"EDIT: on run 1, make the fan tail pleated feathers with brass-sheened tips grown from the rump."
+],
+"veto": []
+},
+{
+"id": "buckleron_r2_w28",
+"pick": 2,
+"avg": 7.3,
+"seats": [
+7.5,
+7.4,
+7.0
+],
+"decision": "new",
+"fixes": [
+"New prompt: flat wide limpet with one low cracked stone-iron cone grown from a thick plated foot, two short eye stalks with a grumpy face, no legs, no bands; four views in one row",
+"New prompt: a flat wide limpet cone of cracked stone and iron grown from a thick snail foot (no legs), long eye stalks, puffed stubborn mouth, four views in one row",
+"New prompt: wide flat limpet with a low cracked stone-iron dome grown from the body, a thick snail foot, eye stalks with a grumpy face, exactly four views in one row."
+],
+"veto": [
+"runs 3 and 4 have duplicate views (5-6 views); every run has turtle legs and a toad face (asked to avoid)",
+"helmet-like cone shell over the head; no clean single row in any run"
+]
+},
+{
+"id": "c_bullpole_e_w28",
+"pick": 2,
+"avg": 8.23,
+"seats": [
+8.3,
+8.2,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, simplify the lower face into a flat tadpole shape with no chin bulge",
+"EDIT: on run 2, simplify the face (bigger glossy eyes, less modelled cheeks) for a cleaner stylised look",
+"EDIT: on run 2, simplify the face to a flatter stylised tadpole face with bigger glossy eyes."
+],
+"veto": []
+},
+{
+"id": "c_cetorgan_e_w28",
+"pick": 1,
+"avg": 8.07,
+"seats": [
+8.0,
+8.1,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, enlarge the head and eye and shorten the body into a rounder stylised whale",
+"EDIT: on run 3, enlarge the head and eye by about 25 percent and shorten the body into a rounder, regal shape",
+"EDIT: on run 1, enlarge and round the head with a bigger calm eye and turn the throat pleats into a pipe row."
+],
+"veto": []
+},
+{
+"id": "c_clinkpede_r_w28",
+"pick": 4,
+"avg": 7.9,
+"seats": [
+7.8,
+7.9,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 4, remove the loop above the head so the head is one solid rounded link with the face, and make the links fatter and fewer (eight)",
+"New prompt: the body IS 6-8 fat welded links with nothing inside or under them, the head is the first link, filled and rounded into a face, with no open loop above it",
+"EDIT: on run 4, make each link a fat solid welded segment (no open holes) fused into the body, and make the head a rounded steel dome rather than an open loop."
+],
+"veto": []
+},
+{
+"id": "c_fawngus_r_w28",
+"pick": 1,
+"avg": 8.07,
+"seats": [
+8.1,
+8.0,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, make the head bigger and the body rounder and chunkier, and have the pegs swell out of the white spots rather than poke in",
+"EDIT: on run 1, make the head bigger and the legs shorter and rounder, and move two caps from the back onto the flank and shoulder pegs",
+"EDIT: on run 1, shorten the legs and enlarge the head for a toy-like fawn, and smooth the leg joints so there are no ring bands."
+],
+"veto": []
+},
+{
+"id": "c_foldbat_e_w28",
+"pick": 1,
+"avg": 7.6,
+"seats": [
+7.5,
+7.7,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, fold both fan wings fully shut into narrow lacquered sticks along the flanks with only the red tip showing",
+"EDIT: on run 1, fold both wings fully shut into narrow lacquered closed-fan sticks along the flanks, with only the red tips showing",
+"EDIT: on run 1, fold both wings fully shut into narrow closed-fan sticks along the flanks, with only the red tip showing."
+],
+"veto": []
+},
+{
+"id": "c_glaciammoth_e_w28",
+"pick": 2,
+"avg": 7.4,
+"seats": [
+7.3,
+7.4,
+7.5
+],
+"decision": "new",
+"fixes": [
+"New prompt: stylised colossal mammoth in a rearing heroic stance (head high, one forefoot raised), blocky simplified fur clumps, small ancient eyes, huge tusks, big clear permafrost plates",
+"New prompt, not an edit: colossal blocky stylised mammoth rearing its head with one forefoot forward on a rock, tusks twice as long sweeping up, with simple chunky fur clumps",
+"New prompt: colossal stylised mammoth rearing its head up, one forefoot forward, double-size sweeping ivory tusks, simple chunky fur clumps, big clear permafrost plates."
+],
+"veto": []
+},
+{
+"id": "c_glacione_r_w28",
+"pick": 3,
+"avg": 8.23,
+"seats": [
+8.2,
+8.2,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, sink the crescent inside the translucent body as a soft glowing organ seen through the skin",
+"EDIT: on run 3, make the crescent a soft pale glow seen through the translucent body, with no metal edge",
+"EDIT: on run 2, soften the crescent to a gentle pale organ inside the body with no glow spill."
+],
+"veto": []
+},
+{
+"id": "c_grammite_r_w28",
+"pick": 3,
+"avg": 7.73,
+"seats": [
+7.8,
+7.6,
+7.8
+],
+"decision": "new",
+"fixes": [
+"New prompt: chunky big-headed larva whose two mandibles are flat bronze dagger blades with a fuller groove and guard ridge, fused into the head plates with no collar",
+"New prompt: the mandibles taper straight out of the head plates as one bronze-edged chitin piece with no seam, ring, collar or socket at the base",
+"New prompt: stylised big-headed hellgrammite with comic mean eyes, two straight dagger-blade mandibles (fuller groove, guard ridge) grown from the head plates, chunky stub legs, amber gill tufts."
+],
+"veto": [
+"bronze rings/collars still around the base of the dagger jaws in every run (hard fix not landed)"
+]
+},
+{
+"id": "c_gravigrub_e_w28",
+"pick": 3,
+"avg": 8.0,
+"seats": [
+7.8,
+8.0,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, wrap the cream segments over the top and sides of the moon so only a cratered belly disc shows underneath",
+"EDIT: on run 3, run cream segments as soft lips over the moon's top and sides with a clean painted seam, so only the cratered underside shows",
+"Ship run 2."
+],
+"veto": []
+},
+{
+"id": "c_hydrangor_r_w28",
+"pick": 2,
+"avg": 7.87,
+"seats": [
+7.6,
+7.9,
+8.1
+],
+"decision": "new",
+"fixes": [
+"New prompt: heavy, long-bodied hydra with thick arched necks, each head a bloom whose petals form the skull shape with the jaw splitting the flower, no bare bone masks",
+"New prompt: a much heavier, low legendary hydra with thick arched necks, each head sculpted from packed florets with the jaw splitting the bloom, and big leaf-plate spines",
+"EDIT: on run 2, make the body and legs much heavier with thick arched necks and bigger leaf-plate spines."
+],
+"veto": []
+},
+{
+"id": "c_lurklet_e_w28",
+"pick": 1,
+"avg": 7.63,
+"seats": [
+7.5,
+7.8,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 1, restore a steel trap-jaw rim with serrated steel teeth grown out of the lips, blended into the black skin with no band",
+"EDIT: on run 1, put back flat steel trap-jaw teeth with sawtooth plates fused into the lip skin and a small coil-spring hinge growing at the jaw corner, with no band",
+"EDIT: on run 1, restore the steel bear-trap jaw edge as grey metallic teeth and lip fading into the black skin (no band line), and keep a small spring coil grown at the jaw hinge."
+],
+"veto": [
+"signature part missing: the steel trap jaw and spring were removed, not blended"
+]
+},
+{
+"id": "c_morelkin_r_w28",
+"pick": 3,
+"avg": 8.03,
+"seats": [
+8.0,
+8.2,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, rounder shorter-legged body, bigger head and bigger sleepy eyes, and bring back the cream calf stripes with the tiny caps in them",
+"EDIT: on run 3, set the tiny flush caps in clear horizontal stripe rows like a tapir calf's markings and flatten the ones on the back outline",
+"EDIT: on run 3, replace the scattered mushrooms with flush cream calf stripes made of tiny flat caps, and round out the body with shorter legs."
+],
+"veto": []
+},
+{
+"id": "c_narfoil_e_w28",
+"pick": 2,
+"avg": 8.13,
+"seats": [
+8.2,
+7.9,
+8.3
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, make the guard dome opaque frosted ice that swells out of the brow skin with no visible edge line",
+"EDIT: on run 3, blend the bell-guard dome into frosted brow skin with no hard rim edge, so it swells up out of the forehead",
+"EDIT: on run 2, blend the bell-guard dome into the brow skin with frosted ice at its base so it reads grown, not placed."
+],
+"veto": []
+},
+{
+"id": "c_nymphane_e_w28",
+"pick": 1,
+"avg": 8.07,
+"seats": [
+8.0,
+8.3,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 1, shorten the legs by a third and make them thick stubby segments",
+"EDIT: on run 1, shorten all six legs by a third and thicken them",
+"EDIT: on run 1, make the six legs short thick nubs and merge the eyes into the glass domes with no goggle rims."
+],
+"veto": []
+},
+{
+"id": "c_pinster_e_w28",
+"pick": 1,
+"avg": 8.17,
+"seats": [
+8.0,
+8.3,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, turn the tail into a stubby pinball-flipper paddle and add a bumper ring pattern to the cheek domes",
+"EDIT: on run 1, make the tail a short paddle-shaped flipper of the same fur with a pale tip",
+"EDIT: on run 1, turn the tail into a short flat pinball-flipper paddle and give the cheek domes a bumper ring top in the fur colour."
+],
+"veto": []
+},
+{
+"id": "c_rattlebub_e_w28",
+"pick": 3,
+"avg": 8.27,
+"seats": [
+8.4,
+8.2,
+8.2
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, widen the last tail segment so the gourd swells straight out of it with no narrowing",
+"EDIT: on run 1, widen the tail's last segment so it flows into the bulb with no narrowing",
+"EDIT: on run 2, thicken the last tail segments so they swell straight into the gourd with no narrow neck."
+],
+"veto": []
+},
+{
+"id": "c_reelacine_e_w28",
+"pick": 3,
+"avg": 7.3,
+"seats": [
+7.3,
+7.4,
+7.2
+],
+"decision": "new",
+"fixes": [
+"New prompt: chunky stylised big-headed thylacine with a sly grin, film strips printed in the hide stripes, and a tail that coils into a stiff reel made of its own striped hide",
+"New prompt: chunky stylised big-headed thylacine, short sturdy legs, film stripes in the hide, tail ends in a stiff reel disc of the same hide, with no smoke",
+"New prompt: chunky stylised big-headed thylacine with a sly closed grin, film stripes printed in the hide, tail curling into a thick reel disc of its own hide, no smoke."
+],
+"veto": []
+},
+{
+"id": "c_sarcobra_e_w28",
+"pick": 1,
+"avg": 7.73,
+"seats": [
+8.0,
+7.6,
+7.6
+],
+"decision": "new",
+"fixes": [
+"EDIT: run 2, flatten the lid top into the hood scales so no step shows above the eyes",
+"New prompt: the whole hood is the coffin lid, its rim the hood edge with the scarab relief carved flush into it, and lapis scales run along the neck with no band",
+"New prompt: the whole cobra hood is the coffin lid in profile, its edge the lid rim, hieroglyphs carved into the hood scales, no separate plate or mask."
+],
+"veto": []
+},
+{
+"id": "c_tootle_e_w28",
+"pick": 1,
+"avg": 7.53,
+"seats": [
+7.7,
+7.6,
+7.3
+],
+"decision": "new",
+"fixes": [
+"New prompt: the brass neck frill itself flares forward into one wide bell-shaped collar of skin around the head, with the face fully visible inside",
+"New prompt: the frill itself flares forward into a short brass bell framing the face from behind, with the eyes and mouth fully visible in front of it, and the tail is a plain grooved cone with no rings",
+"New prompt: the neck frill curls forward into one brass-sheened trumpet bell that frames the face (face visible at the bell's throat), no second snout, a plain grooved cone tail."
+],
+"veto": []
+},
+{
+"id": "c_torpecone_w28",
+"pick": 1,
+"avg": 7.2,
+"seats": [
+7.1,
+7.6,
+6.9
+],
+"decision": "new",
+"fixes": [
+"New prompt: Bathilus's big porthole eye set into the front of the riveted cone hull with a determined brow, arms swept into a tight hub, no propeller, no periscope pipe",
+"New prompt: a smooth riveted cone whose tip carries Bathilus's big round porthole eye and a determined little mouth, arms swept back into a tight bundle with no ring or blades, and a short horn bump instead of a pipe periscope",
+"New prompt: chubby cone-shelled torpedo nautiloid with Bathilus's big porthole eye in the nose, a determined cute face, arms swept back into a soft hub, short fins, no periscope or propeller."
+],
+"veto": [
+"realistic machine plus props: periscope and propeller hub read as a submarine"
+]
+},
+{
+"id": "geysirbara_r2_w28",
+"pick": 2,
+"avg": 8.07,
+"seats": [
+8.0,
+8.2,
+8.0
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 2, lay out exactly four views in one row and remove the steam puffs",
+"Relayout run 2 into four views in one row",
+"EDIT: on run 2, re-lay it out as four views in one row and remove the steam."
+],
+"veto": []
+},
+{
+"id": "kestrike_f_e_w28",
+"pick": 4,
+"avg": 7.97,
+"seats": [
+8.4,
+7.7,
+7.8
+],
+"decision": "edit",
+"fixes": [
+"Ship run 4.",
+"EDIT: on run 3, erase the arc line across the upper chest and keep only the spiral feather-veins",
+"EDIT: on run 4, delete the neck arc entirely and leave only a small flat copper spiral of feather-veins on the breast."
+],
+"veto": [
+"worn: the copper chest arc still reads as a necklace and pendant"
+]
+},
+{
+"id": "lockatara_r_w28",
+"pick": 3,
+"avg": 7.9,
+"seats": [
+8.0,
+7.8,
+7.9
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, make the shackle a low thick ridged arch grown from the shoulder blades, half its current height",
+"EDIT: on run 1, make the shackle lower and thicker with a bony ridged texture where it meets the shoulders",
+"EDIT: on run 3, make the shackle a low thick ridged arch grown from the shoulder blades and scale the views up."
+],
+"veto": []
+},
+{
+"id": "lyrewing_r_w28",
+"pick": 3,
+"avg": 8.13,
+"seats": [
+8.1,
+8.2,
+8.1
+],
+"decision": "edit",
+"fixes": [
+"EDIT: run 3, enlarge the head by about 25 percent with bigger Thrumbird eyes and a clearer proud smirk",
+"EDIT: on run 3, enlarge the head by about 30 percent with Thrumbird's big eyes and lower the neck into a curved display bow",
+"EDIT: on run 2, enlarge the head slightly with Thrumbird's eyes and a proud smirk."
+],
+"veto": []
 }
 ]

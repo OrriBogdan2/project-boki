@@ -4300,3 +4300,16 @@ ART prismander 8.53 briefs/boki-art/portraits/light/Prismander.jpg kind=portrait
 ART ribbonwyrm 8.37 briefs/boki-art/batch/out/portrait_ribbonwyrm_pe_w28_1.jpg kind=portrait status=owner-review panel=8.3/8.4/8.4
 ART zipling 8.4 briefs/boki-art/batch/out/portrait_zipling_p_w28_1.jpg kind=portrait status=owner-review panel=8.4/8.4/8.4
 ART skidlet 8.5 briefs/boki-art/cards/Skidlet.jpg kind=card panel=8.5/8.4/8.6
+
+## 00:22 ET 11-09 — art session: round 28 results, group s5 (new-species concepts + sheets)
+Pass: Pavonazar concept, Albert relic. Owner review: 6 concepts + Fizzlet sheet + Scoopsy turnaround. Turnarounds and next-stage concepts are already queued for these so the owner never blocks (reject in the Bokidex and I drop them).
+ART gilabacus 8.3 briefs/boki-art/batch/out/c_gilabacus_r_w28_1.jpg kind=concept status=owner-review panel=8.3/8.4/8.2
+ART olmlet 8.4 briefs/boki-art/batch/out/c_olmlet_r_w28_1.jpg kind=concept status=owner-review panel=8.4/8.5/8.3
+ART pavonazar 8.6 briefs/boki-art/concepts/Pavonazar.jpg kind=concept panel=8.6/8.6/8.6
+ART pawnfry 8.43 briefs/boki-art/batch/out/c_pawnfry_e_w28_1.jpg kind=concept status=owner-review panel=8.4/8.5/8.4
+ART pocketpus 8.3 briefs/boki-art/batch/out/c_pocketpus_e_w28_2.jpg kind=concept status=owner-review panel=8.3/8.3/8.3
+ART polyshroom 8.37 briefs/boki-art/batch/out/c_polyshroom_e_w28_3.jpg kind=concept status=owner-review panel=8.3/8.4/8.4
+ART proofhop 8.4 briefs/boki-art/batch/out/c_proofhop_r_w28_1.jpg kind=concept status=owner-review panel=8.4/8.5/8.3
+ART fizzlet 8.33 briefs/boki-art/batch/out/fizzlet_e2_w28_2.jpg kind=turnaround status=owner-review panel=8.3/8.3/8.4
+ART relic albert briefs/boki-art/relics/Albert.jpg grade 8.53/10
+ART scoopsy 8.43 briefs/boki-art/batch/out/ta_scoopsy_1.jpg kind=turnaround status=owner-review panel=8.3/8.5/8.5

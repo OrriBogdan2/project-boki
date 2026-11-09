@@ -412,6 +412,11 @@
    "id": "skidlet_card_w28",
    "pick": 2,
    "grade": 8.5
+  },
+  {
+   "id": "relic_albert_w28",
+   "pick": 2,
+   "grade": 8.53
   }
  ],
  "rerolled": [
@@ -1018,6 +1023,11 @@
    "pick": 2,
    "grade": 8.5,
    "panel": "8.6/8.4/8.5"
+  },
+  {
+   "id": "c_pavonazar_r_w28",
+   "pick": 1,
+   "grade": 8.6
   }
  ]
 }
