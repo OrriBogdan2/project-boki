@@ -5,6 +5,9 @@ extends RefCounted
 ##   3. the title has the entry with a save, and not without one
 ##   4. a save that has skipped the farm tutorial: the entry loads the home straight into the picker,
 ##      and the tutorial flags are exactly as they were
+##   6. the garden games for real (base_mode on, three Boki, the Training post): the picker lists all
+##      four; each pick starts that game (and it is put back); a whole Stump Shove bout ends on its
+##      card and the winner becomes the picker's best Boki
 ##   5. every game this base lists has a card (name, rule, result line) and a pick closes the picker
 ##      and starts it; a stand-in game proves the start path where the base has none
 ## Never touches the real save.
@@ -39,6 +42,7 @@ func run(m: Node) -> void:
 	_results()
 	await _title()
 	await _picker()
+	await _garden()
 	print("MINIGAMEHUB DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -124,3 +128,59 @@ func _picker() -> void:
 	ok(started and home.panel_open == "", "start: the picker closes and the game's use() runs")
 	stub.post.free()
 	fake.free()
+
+const STARTED := {"race": "run", "shove": "run", "volley": "run"}
+
+func _garden() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	var d := Save.fresh()
+	for i in 3:
+		var k := Save.new_kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i])
+		k["level"] = 5
+		Care.ensure(k)
+		k["needs"]["energy"] = 90.0
+		d["roster"].append(k)
+		if i == 0:
+			d["active"] = k["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true}
+	d["layout"] = HomeLayout.fresh()
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = true
+	var old: Node = main.screen_node()
+	main.show_screen("home", {"play_hub": true})
+	var home: Node = null
+	for f in SETTLE_FRAMES:
+		await main.get_tree().process_frame
+		home = main.screen_node()
+		if home != old and home != null and home.get("panel_open") == MinigameHub.TITLE:
+			break
+	ok(home != old and home.get("panel_open") == MinigameHub.TITLE, "garden: the picker opens on the base")
+	var games := MinigameHub.listed(home)
+	var ids: Array = games.map(func(g): return g["id"])
+	ok(ids == ["race", "shove", "seek", "volley"], "garden: all four games are listed (%s)" % [ids])
+	for g in games:
+		for k in home.kins:
+			k.erase("indoors")
+		MinigameHub.open(home)
+		MinigameHub.start(home, g)
+		var game: Object = g["game"]
+		var on: bool = game.state == BaseSeek.S.CARRY if g["id"] == "seek" else game.get(STARTED[g["id"]]) != null
+		ok(on and home.panel_open == "", "garden: picking %s starts it" % g["name"])
+		if g["id"] == "seek":
+			game.go(BaseSeek.S.IDLE)
+		elif on:
+			game._end(false)
+	var sh: Object = home.hshove
+	if sh != null:
+		for k in home.kins:
+			k.erase("indoors")
+			k["busy"] = false
+		sh.use()
+		var t := 0.0
+		while sh.run != null and t < float(BaseShove.rules()["max_s"]) + 5.0:
+			sh.tick(0.1)
+			t += 0.1
+		var best: String = MinigameHub.summary("shove")
+		ok(sh.run == null and best.begins_with("Best "), "garden: a finished bout reaches the picker (%s)" % best)
+	rules["base_mode"] = false
