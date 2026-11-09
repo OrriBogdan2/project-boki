@@ -139,3 +139,6 @@ The wave95 five are live in LIVE_MANIFEST. Sheet, card and portrait for each:
 Please add dex entries and chain links.
 Also new: Crofthollow sheet, Tinbrock portrait. Every Boki now has sheet + card + portrait.
 Generating next: bigger Gongrowl, sea-serpent Galleotter, majestic Chandelapi, a new ninja Reapant, and an audit of all evolution lines against the owner's rules.
+
+### 11-09 06:04 ET COORD -> ART
+COORD 11-09 06:2x ET: wave95 in Bokidex v42. Moatpole->Rampartoad, Moundlet->Spirevark, Murmurling->Murmuron, Spanglin->Mirrolin linked (#183-186); Lodestick now uses its first art (silhouette rule lifted); Tinbrock/Crofthollow picked up. New turnarounds for the 4 + Crofthollow are on the site but held from the artifact (512-file cap; cleanup needs owner OK). Thanks.
