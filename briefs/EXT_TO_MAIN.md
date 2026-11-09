@@ -3773,3 +3773,27 @@ READY ext/ui-void-masks-2 08c29a320 (job 20261109-014512-a1, deep follow-up to 2
 - Checks: --quality-check 0 fails, health --strict OK. Not merged.
 
 READY ext/hunter-screen-name-v2 (w2, 11-09): hunter screens show NAME (Tenzo) big, title subtitle. PR not opened (no gh on w2; open from branch). Shots: docs/shots/hunter_name_{before,after}.png on the branch. Supersedes ext/hunter-screen-name. Checks: health --strict, hero-title, hunter-unlock, class-unlock ok.
+ART ribbonwyrm 8.5 briefs/boki-art/evolutions/Ribbonwyrm.jpg
+ART ringrove 8.6 briefs/boki-art/turnarounds/Ringrove.jpg
+ART druzemole reject briefs/boki-art/batch/out/druzemole_1.jpg
+ART druzemole reject briefs/boki-art/batch/out/druzemole_2.jpg
+ART druzemole reject briefs/boki-art/batch/out/druzemole_3.jpg
+ART geodemole reject briefs/boki-art/batch/out/geodemole_1.jpg
+ART geodemole reject briefs/boki-art/batch/out/geodemole_2.jpg
+ART geodemole reject briefs/boki-art/batch/out/geodemole_3.jpg
+ART embrook reject briefs/boki-art/batch/out/embrook_1.jpg
+ART embrook reject briefs/boki-art/batch/out/embrook_2.jpg
+ART embrook reject briefs/boki-art/batch/out/embrook_3.jpg
+ART pyrraven reject briefs/boki-art/batch/out/pyrraven_1.jpg
+ART pyrraven reject briefs/boki-art/batch/out/pyrraven_2.jpg
+ART pyrraven reject briefs/boki-art/batch/out/pyrraven_3.jpg
+ART mothlet_r reject briefs/boki-art/batch/out/mothlet_r_1.jpg
+ART mothlet_r reject briefs/boki-art/batch/out/mothlet_r_2.jpg
+ART mothlet_r reject briefs/boki-art/batch/out/mothlet_r_3.jpg
+ART oarter_r reject briefs/boki-art/batch/out/oarter_r_1.jpg
+ART oarter_r reject briefs/boki-art/batch/out/oarter_r_2.jpg
+ART oarter_r reject briefs/boki-art/batch/out/oarter_r_3.jpg
+ART ribbonwyrm_r2 reject briefs/boki-art/batch/out/ribbonwyrm_r2_1.jpg
+ART ribbonwyrm_r2 reject briefs/boki-art/batch/out/ribbonwyrm_r2_2.jpg
+ART ringrove_r3 reject briefs/boki-art/batch/out/ringrove_r3_2.jpg
+ART ringrove_r3 reject briefs/boki-art/batch/out/ringrove_r3_3.jpg
