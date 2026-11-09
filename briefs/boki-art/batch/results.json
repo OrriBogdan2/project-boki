@@ -50935,5 +50935,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/ta_dragonkite_rx_3.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_dragonkite_rx",
+    "name": "Dragonkite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_dragonkite_rx_2.jpg",
+    "ok": true
   }
 ]
