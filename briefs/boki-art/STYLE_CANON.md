@@ -8,7 +8,7 @@ Soft hand-painted shading, a clean fairly thin dark outline (never thick cartoon
 ## View
 - Gentle three-quarter view: body turned about 25 to 35 degrees from the viewer, head turned slightly further toward the viewer so both eyes show.
 - Never straight-on front, never a pure side profile, never from above or below.
-- Calm neutral pose, all four feet (or both feet) on the floor, no action pose, no upright person-like stance, nothing held.
+- Characterful pose that shows personality (head tilt, playful lean, curious or cocky look, weight shift); feet on the floor, never stiff or straight-on (owner 11-09: straight + no personality = not good). No attack pose, no upright person-like stance, nothing held.
 
 ## Framing
 - One creature, full body, nothing cropped (tail, wings, horns and blades all inside the frame).
@@ -41,3 +41,6 @@ Soft hand-painted shading, a clean fairly thin dark outline (never thick cartoon
 
 ## How it is produced
 Hero card = one image per species: image 1 is that species' own design (identity), image 2 is the anchor (style). Builder `C()` in `batch/build_jobs.py`, ids `<species>_card`, inputs in `card_inputs/`. SAMPLE (6 species x 2 runs: vespyx, lunowl, skidlet, glaivyx, chandelotl, teapotamus) is queued; the rest wait for the owner's verdict on it. New `B()`/`V()` turnaround jobs now use the anchor as the style ref (existing ids are unchanged).
+
+## Glow (owner 11-09)
+- Every card gets its own glow: a soft radial glow behind the creature in that Boki's signature colour, so each one stands out (as on the site Boki wall). It is added when the card is composited, NOT generated, so the generated art stays on plain grey for a clean cutout.
