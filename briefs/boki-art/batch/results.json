@@ -22438,5 +22438,89 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gilabacus_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_cubbat",
+    "name": "Cubbat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_cubbat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cubbat",
+    "name": "Cubbat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cubbat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bathilus",
+    "name": "Bathilus (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bathilus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cubbat",
+    "name": "Cubbat (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_cubbat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_proofhop",
+    "name": "Proofhop (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_proofhop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_polyshroom",
+    "name": "Polyshroom (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_polyshroom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_olmlet",
+    "name": "Olmlet (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_olmlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pawnfry",
+    "name": "Pawnfry (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pawnfry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_proofhop",
+    "name": "Proofhop (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_proofhop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_polyshroom",
+    "name": "Polyshroom (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_polyshroom_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_polyshroom",
+    "name": "Polyshroom (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_polyshroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pawnfry",
+    "name": "Pawnfry (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pawnfry_1.jpg",
+    "ok": true
   }
 ]
