@@ -5,7 +5,7 @@
 	"gender": "male",
 	"personality": "Malgrave's undefeated arena champion, a slave chained to the arena floor for a hundred fights. In the hundredth he tore his shackle out of the wall, and the chain became his weapon.\nThe Blight burned white-hot cracks into his sword arm (the Blight Cinder distilled, so he doesn't fully trust her). A demon lives in his blade and in his mind and must be fed: he kills out of necessity, not joy. Grim, cold, never cocky; the scarf never comes off.",
 	"weight": "heavy",
-	"color": "#ff8a6a",
+	"color": "#ff3a2a",
 	"clip": {"lines": {"dash": "Charge through foes; the tip hits hardest.", "lmb": "Wide greatsword slashes.", "rmb": "A heavy slam. Hold to charge it.", "e": "Chain a foe or a wall, then haul yourself in.", "x": "Guard, then lunge into a healing cleave."}, "fx": {"x": "swing"}},
 	"plate_offset": 2.75,
 	"body": {"size": 1.004, "head": 0.48, "legs": 2.05, "neck": -0.012, "build": 0.95, "hit_r": 0.428},

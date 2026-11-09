@@ -21,7 +21,7 @@
 		"shoulder": 1.12,
 		"neck": -0.036
 	},
-	"color": "#ffc46a",
+	"color": "#5fdc6a",
 	"clip": {"lines": {"dash": "A quick hop, a long glide in the air.", "lmb": "Embers from both hands mark foes.", "rmb": "A seed that roots its target.", "e": "A healing ring for you and your team.", "x": "Tether a teammate and heal them as you go."}, "fx": {"e": "heal", "x": "tether"}},
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
