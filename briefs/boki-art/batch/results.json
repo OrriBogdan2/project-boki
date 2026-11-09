@@ -23642,5 +23642,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/glaciatee_r_w31_3.jpg",
     "ok": true
+  },
+  {
+    "id": "howlop_e_w31",
+    "name": "Howlop",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/howlop_e_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_e_w31",
+    "name": "Howlop",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/howlop_e_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_e_w31",
+    "name": "Howlop",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/howlop_e_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "howlop_e_w31",
+    "name": "Howlop",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/howlop_e_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w31",
+    "name": "Jibbatross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e_w31",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_e_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w31",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w31",
+    "name": "Jibbatross",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w31_3.jpg",
+    "ok": true
   }
 ]
