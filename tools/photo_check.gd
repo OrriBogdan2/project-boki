@@ -50,6 +50,10 @@ func run(m: Node) -> void:
 		if home.cam != null and home.kins.size() >= 2:
 			break
 		await _frames(1)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+	await _frames(30)
 	var photo: HomePhoto = home.photo
 	var yaw0: float = home.cam.yaw_to
 	ok(InputMap.has_action("photo") and Settings.ACTIONS.any(func(row): return row[0] == "photo"),
