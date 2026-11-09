@@ -1,156 +1,143 @@
 extends RefCounted
-## --crouch-check: every Hero whose clip file has "crouch" (item 143), through the game state (HunterAnim, WardenClips).
-## Held: the head comes down a good share of the height, the feet stay on the ground, one foot leads. Going down: a dip
-## below the hold and a settle, no pop. Sneaking: the feet step, the head rides level. Coming up: back on the idle, no
-## pop. Every Hero with clips must have a crouch, but for LATER, which still stand through one: with the data taken
-## away a Hero's clips stand, so nothing changes for those. A Hero with no feet (Motley on his spring) skips the rows
-## about them.
-## Never touches the save.
-
-const DT := 1.0 / 60.0
-const DROP := 0.14         # of the standing head height, at least
-const SINK := 0.03         # m: an ankle may go this far under its rest height off the ground's line
-const LEAD := 0.1          # m: the feet apart, front to back, held
-const POP := 0.12          # m: the head's most in one frame at 60 fps, down or up
-const BOB := 0.07          # m: the head's rise and fall over a sneak
-const STEP := 0.14         # m: how far a foot travels over a sneak
-const K := 8.0             # 1/s: Hunter.render's crouch rate
-const LATER := ["juggernaut"]    # Kael: landing after art1-integ
+## --crouch-check: the four things the tutorial's crouch line promises (content/rules/tutorial.json, detail
+## "crouch"), each measured on the real match step against the same Hunter standing: it walks slower, its
+## gun sways less, an idle monster notices it only closer in, and it sees further. These are owner rules
+## (the source has no crouch rule to match). Never touches the save.
+##
+## Prints one "CROUCH ok|FAIL <what>" line per promise and "CROUCH CHECK DONE, failures: N" at the end.
 
 var bad := 0
-var holder: Node3D
+var m: Match
+var P: Hunter
+const STRIP := 12          # tiles of flat open ground along +x for the walk and the monster
+const SHOTS := 8           # one full turn of Hunter.SWAY, so both runs meet its widest swing
 
 func ok(cond: bool, what: String) -> void:
 	print("CROUCH %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond:
-		bad += 1
+	if not cond: bad += 1
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	holder = Node3D.new()
-	main.add_child(holder)
-	var n := 0
-	for id in Arch.ids():
-		var art_name := WardenGlb.art(String(id))
-		var dd := WardenClips.data(art_name)
-		if dd.has("crouch"):
-			n += 1
-			await _hero(main, String(id), art_name)
-		elif not dd.is_empty():
-			ok(id in LATER, "%s: has clips and a crouch" % id)
-	ok(n > 0, "at least one Hero has a crouch (%d)" % n)
-	print("CROUCH_CHECK_DONE, failures: ", bad)
+	Save.d = Save.fresh()
+	m = Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
+	m.set_process(false)
+	for mb in m.mobs: mb.queue_free()
+	m.mobs.clear()
+	P = m.hunters[0]
+	for h in m.hunters:
+		h.ctrl = "idle"
+		for kk in [h.kin, h.kin2]:
+			if kk:
+				m.kins.erase(kk)
+				kk.queue_free()
+		h.kin = null
+		h.kin2 = null
+	var s := _strip()
+	ok(s != Vector3.INF, "found a flat open strip")
+	if s != Vector3.INF:
+		for h in m.hunters:
+			while h != P and h.pos.distance_to(s) < 30.0: h.teleport(m.world.random_ground())
+		_speed(s)
+		_sway(s)
+		_notice(s)
+	_sight()
+	print("CROUCH CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## World position of a bone on the model, feet at y 0.
-func _at(m: Node3D, sk: Skeleton3D, bone: String) -> Vector3:
-	return m.to_local(sk.to_global(sk.get_bone_global_pose(WardenSkeleton.find(sk, bone)).origin))
+## Puts P at `at`, standing or crouched, still, and lets the crouch take (it needs the ground under it).
+func _place(at: Vector3, crouched: bool) -> void:
+	P.teleport(at)
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+	P.inp["crouch"] = crouched
+	for i in 10: m.step(Match.DT)
+	P.reveal_t = 0.0
 
-func _tick(m: Node3D, a: HunterAnim, sync: Node, ck: float, vel := Vector3.ZERO) -> void:
-	a.update(DT, {"vel": vel, "face": 0.0, "grounded": true, "crouch": ck, "fired": 99.0})
-	sync.call("_process", DT)
+## A flat, open strip STRIP tiles long along +x (3 wide), no grass: its first tile's centre.
+func _strip() -> Vector3:
+	var w := m.world
+	for k in 6000:
+		var g := w.random_ground()
+		var good := true
+		for dx in STRIP:
+			for dz in [-1, 0, 1]:
+				var x: float = floorf(g.x) + dx + 0.5
+				var z: float = floorf(g.z) + dz + 0.5
+				if w.is_void(x, z) or w.is_block(x, z) or w.in_bush(x, z) or absf(w.ground_at(x, z) - g.y) > 0.05:
+					good = false
+		if good: return Vector3(floorf(g.x) + 0.5, g.y, floorf(g.z) + 0.5)
+	return Vector3.INF
 
-func _hero(main: Node, id: String, art_name: String) -> void:
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
-	m.set_meta("anim_seed", 1)
-	holder.add_child(m)
-	var a := HunterAnim.new(m)
-	for k in 3:
-		await main.get_tree().process_frame
-	var sync := m.get_node("Warden/Sync")
-	sync.set_process(false)
-	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	for k in 30:
-		_tick(m, a, sync, 0.0)
-	var stand: Vector3 = _at(m, sk, "head")
-	var feet := WardenSkeleton.find(sk, _foot(sk, "L")) >= 0
-	var rest_l: Vector3 = _at(m, sk, _foot(sk, "L")) if feet else Vector3.ZERO
-	var rest_r: Vector3 = _at(m, sk, _foot(sk, "R")) if feet else Vector3.ZERO
-	var ck := 0.0
-	var last := stand.y
-	var pop := 0.0
-	var low := INF
-	for k in 90:
-		ck = move_toward(ck, 1.0, DT * K)
-		_tick(m, a, sync, ck)
-		var y := _at(m, sk, "hips").y
-		var hy := _at(m, sk, "head").y
-		pop = maxf(pop, absf(hy - last))
-		last = hy
-		if k < 40:
-			low = minf(low, y)
-	var held: Vector3 = _at(m, sk, "head")
-	var hips := _at(m, sk, "hips").y
-	ok(stand.y - held.y >= stand.y * DROP, "%s: down from %.2f to %.2f m" % [id, stand.y, held.y])
-	ok(low < hips - 0.01, "%s: the dip goes %.3f m under the hold, then settles" % [id, hips - low])
-	ok(pop <= POP, "%s: no pop going down (%.3f m a frame)" % [id, pop])
-	if feet:
-		var fl := _at(m, sk, _foot(sk, "L"))
-		var fr := _at(m, sk, _foot(sk, "R"))
-		var floor_y := minf(rest_l.y, rest_r.y)
-		var sunk := minf(fl.y, fr.y)
-		ok(sunk >= floor_y - SINK, "%s: the feet stay on the ground (%.3f, standing %.3f)" % [id, sunk, floor_y])
-		ok(maxf(fl.y, fr.y) > floor_y + 0.01, "%s: a heel is up, on the ball of the foot" % id)
-		ok(absf(fl.z - fr.z) >= LEAD, "%s: one foot leads by %.2f m" % [id, absf(fl.z - fr.z)])
-	if bool(WardenClips.data(art_name).get("rig_root", false)):
-		var box_y := _at(m, sk, "root").y
-		ok(box_y >= 0.02, "%s: the root rides the Rig and stays off the ground (%.3f m)" % [id, box_y])
-	var v := Vector3(0, 0, -float(WardenClips.data(art_name)["crouch"].get("speed", 2.4)))
-	var hmin := INF
-	var hmax := -INF
-	var zmin := INF
-	var zmax := -INF
-	for k in 30:
-		_tick(m, a, sync, 1.0, v)
-	for k in 90:
-		_tick(m, a, sync, 1.0, v)
-		var h := _at(m, sk, "head").y
-		hmin = minf(hmin, h)
-		hmax = maxf(hmax, h)
-		if feet:
-			var z := _at(m, sk, _foot(sk, "L")).z
-			zmin = minf(zmin, z)
-			zmax = maxf(zmax, z)
-	if feet:
-		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
-	ok(hmax - hmin <= BOB, "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
-	for k in 30:
-		_tick(m, a, sync, 1.0)
-	last = _at(m, sk, "head").y
-	pop = 0.0
-	for k in 90:
-		ck = move_toward(ck, 0.0, DT * K)
-		_tick(m, a, sync, ck)
-		var hy := _at(m, sk, "head").y
-		pop = maxf(pop, absf(hy - last))
-		last = hy
-	ok(pop <= POP, "%s: no pop coming up (%.3f m a frame)" % [id, pop])
-	ok(absf(last - stand.y) <= 0.04, "%s: back up on the idle (%.2f m, stood %.2f)" % [id, last, stand.y])
-	m.free()
-	# with no data the clips stand through it
-	var dd: Dictionary = WardenClips.data(art_name)
-	if bool(dd.get("rig_root", false)):
-		return      # (his root rides the Rig, which the procedural crouch lowers: the body above it stays)
-	var keep: Dictionary = dd["crouch"]
-	dd.erase("crouch")
-	var m2 := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
-	m2.set_meta("anim_seed", 1)
-	holder.add_child(m2)
-	var a2 := HunterAnim.new(m2)
-	for k in 3:
-		await main.get_tree().process_frame
-	var sync2 := m2.get_node("Warden/Sync")
-	sync2.set_process(false)
-	var sk2 := WardenGlb.skeleton(m2.get_node("Warden"))
-	for k in 40:
-		_tick(m2, a2, sync2, 0.0)
-	var h0 := _at(m2, sk2, "head").y
-	for k in 40:
-		_tick(m2, a2, sync2, 1.0)
-	ok(absf(_at(m2, sk2, "head").y - h0) <= 0.03, "%s: with no crouch data the clips stand through it, as before" % id)
-	m2.free()
-	dd["crouch"] = keep
+## Slower: the run speed half a second into a walk along the strip.
+func _speed(s: Vector3) -> void:
+	var v := []
+	for crouched in [false, true]:
+		_place(s, crouched)
+		P.inp["move"] = Vector2(1, 0)
+		for i in 30: m.step(Match.DT)
+		v.append(Vector2(P.vel.x, P.vel.z).length())
+		P.inp["move"] = Vector2.ZERO
+	ok(v[1] > 0.5 and v[1] < v[0] * 0.75, "slower: walks %.2f m/s crouched, %.2f standing" % [v[1], v[0]])
 
-## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
-func _foot(sk: Skeleton3D, side: String) -> String:
-	return "foot." + side if WardenSkeleton.find(sk, "foot." + side) >= 0 else "x_foot." + side
+## Steadier aim: the widest a rifle's shots stray from the aim over one turn of its sway pattern.
+func _sway(s: Vector3) -> void:
+	P.equip("rifle")
+	var worst := []
+	for crouched in [false, true]:
+		_place(s, crouched)
+		var aim := Vector3(s.x + 8.0, s.y + 0.95, s.z)
+		P.inp["aim"] = aim
+		P.inp["aim_y"] = s.y
+		var dev := 0.0
+		for i in SHOTS:
+			P.ammo = 99
+			P.fire_cd = 0.0
+			P.warm_t = 0.0
+			P.wbloom = 0.0
+			m.shots.clear()
+			P.fire()
+			if m.shots.is_empty(): continue
+			var sv: Vector2 = m.shots[-1]["vel"]
+			dev = maxf(dev, absf(angle_difference(sv.angle(), P.aim_dir().angle())))
+			m.step(Match.DT)
+		m.shots.clear()
+		worst.append(rad_to_deg(dev))
+	var what := "steadier aim: sways %.2f deg crouched, %.2f standing" % [worst[1], worst[0]]
+	ok(worst[0] > 0.0 and worst[1] < worst[0] * 0.75, what)
+
+## Noticed less: an idle monster 6 m off picks a standing Hunter as its target and passes a crouched one.
+func _notice(s: Vector3) -> void:
+	var mb := m.spawn_mob(Data.MOBS.keys()[0], s + Vector3(6.0, 0, 0))
+	var picked := []
+	for crouched in [false, true]:
+		_place(s, crouched)
+		mb.st = "idle"
+		picked.append(mb._find_target() == P)
+	ok(picked[0] and not picked[1], "noticed less: an idle monster 6 m off notices standing %s, crouched %s" % picked)
+	m.mobs.erase(mb)
+	mb.queue_free()
+
+## Sees further: a spot just past a standing Hunter's sight, with a clear line and no grass, in its view cone.
+func _sight() -> void:
+	var w := m.world
+	var far := m.view_range() * 1.12
+	for k in 3000:
+		var g := w.random_ground()
+		var a := float(k % 24) * TAU / 24.0
+		var p := g + Vector3(cos(a), 0, sin(a)) * far
+		if w.is_void(p.x, p.z) or w.in_bush(p.x, p.z) or absf(w.ground_at(p.x, p.z) - g.y) > 0.05:
+			continue
+		p.y = g.y
+		if not w.los(g, p, g.y + 1.1):
+			continue
+		var seen := []
+		for crouched in [false, true]:
+			_place(g, crouched)
+			P.inp["aim"] = p
+			seen.append(m.sees(P.team, p))
+		var what := "sees further: a spot %.1f m off seen standing %s, crouched %s" % [far, seen[0], seen[1]]
+		ok(P.crouch and not seen[0] and seen[1], what)
+		return
+	ok(false, "sees further: found a clear line %.1f m long" % far)

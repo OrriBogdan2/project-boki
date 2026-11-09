@@ -81,7 +81,8 @@ const CHECKS := {
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # all 12 Hunters in a row, true scale
-	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
+	"--crouch-anim-check": ["res://tools/crouch_anim_check.gd", "crouch_anim_check", null],
+	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],      # the tutorial's four crouch promises
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki

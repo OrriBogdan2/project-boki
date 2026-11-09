@@ -554,10 +554,10 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 38,
-"long_line": 95,
-"nested_ternary": 19,
-"semicolon": 53,
+"history_comment": 33,
+"long_line": 91,
+"nested_ternary": 18,
+"semicolon": 49,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -659,7 +659,7 @@
 "scripts/match/mob.gd": {
 "long_line": 12,
 "nested_ternary": 1,
-"semicolon": 19
+"semicolon": 18
 },
 "scripts/match/mob_models.gd": {
 "long_line": 38,
@@ -996,9 +996,6 @@
 },
 "tools/check.gd": {
 "semicolon": 1
-},
-"tools/check_registry.gd": {
-"long_line": 1
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
