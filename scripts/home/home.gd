@@ -3645,19 +3645,12 @@ func _play_evolutions() -> void:
 	rec["pending_evo"] = []
 	Save.save_game()
 	var n: Node3D = k["node"]
-	# bring it next to you
-	var at := ppos + Vector3(1.6, 0, 0.6)
-	if world.is_void(at.x, at.z) or world.is_block(at.x, at.z):
-		at = ppos + Vector3(0, 0, 1.4)
-	k["pos"] = at
+	var at: Vector3 = n.position
 	k["goal"] = Vector3.INF
 	k["busy"] = true
-	n.position = at
-	cam.zoom_to = 0.55
 	var big := false
 	for e in evs:
 		if e["kind"] == "form": big = true
-	var tint: Color = Evo.AFF[evs[evs.size() - 1]["aff"]]["tint"]
 	Sfx.play("skill")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
@@ -3676,12 +3669,18 @@ func _play_evolutions() -> void:
 		Sfx.play("unlock")
 		Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"))
 		_emote(k, "★")
-		building_now = false
-		cam.zoom_to = HOME_ZOOM
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
-		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED)))
+		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED))
+	if seen:
+		EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
+	else:
+		nn.position = at
+		nn.rotation = n.rotation
+		add_child(nn)
+		n.queue_free()
+		end.call()
 
 ## Rebuilds a kin's model from its record in place (a new form, a meal's lean), keeping its labels.
 func _swap_kin_model(k: Dictionary) -> void:
