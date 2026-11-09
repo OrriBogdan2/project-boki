@@ -78,7 +78,8 @@ func _hero(main: Node, id: String) -> void:
 	row["pop"] = {"idle_walk": _first_pose_gap(sync, clips, sk, String(lc["idle"]), walk, hgt),
 			"walk_run": _first_pose_gap(sync, clips, sk, walk, run, hgt),
 			"contact_walk_run": _contact_gap(sync, clips, sk, walk, run)}
-	row["pop"]["idle_walk_step"] = row["pop"]["idle_walk"] * (1.0 - exp(-float(lc.get("blend_rate", WardenClips.LOCO_RATE)) / FPS))
+	var rate := float(lc.get("blend_rate", WardenClips.LOCO_RATE))
+	row["pop"]["idle_walk_step"] = row["pop"]["idle_walk"] * (1.0 - exp(-rate / FPS))
 	var weapon := ""
 	row["attacks"] = {}
 	for nm in ATTACKS[id]:

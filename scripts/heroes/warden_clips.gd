@@ -22,7 +22,7 @@ const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
-const LOCO_RATE := 12.0      # 1/s: how fast the walk and run blend follows the move; data "loco.blend_rate" slows it per Hunter
+const LOCO_RATE := 12.0      # 1/s: how fast the walk and run blend follows the move ("loco.blend_rate" per Hunter)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -430,7 +430,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * float(lc.get("blend_rate", LOCO_RATE))))
+	var blend := float(lc.get("blend_rate", LOCO_RATE))
+	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * blend))
 	_p("loco/blend_position", loco_pos)
 	var rate := gait.plan(spd, lc)
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
