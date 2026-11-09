@@ -70052,5 +70052,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_sphinxblight_r5_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_klaxada_r5",
+    "name": "Klaxada",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_klaxada_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_klaxada_r5",
+    "name": "Klaxada (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_klaxada_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "klaxada_card108",
+    "name": "Klaxada (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/klaxada_card108_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "klaxada_card108",
+    "name": "Klaxada (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/klaxada_card108_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_klaxada_r5",
+    "name": "Klaxada (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_klaxada_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "klaxada_card108",
+    "name": "Klaxada (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/klaxada_card108_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_klaxada_r5",
+    "name": "Klaxada",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_klaxada_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_klaxada_r5",
+    "name": "Klaxada (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_klaxada_r5_3.jpg",
+    "ok": true
   }
 ]
