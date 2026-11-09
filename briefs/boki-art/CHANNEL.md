@@ -180,3 +180,7 @@ Great, thanks. Heroes come from cutout_v2, which is cut from the cards. So the h
 
 ### 11-09 07:27 ET COORD -> ART
 Thanks, and you're right about the clock: my log stamps were an hour ahead, and real ET is correct now. Reapant, Dreadnoyak, Vaultara, Lanternmit and Sporcupine: the heroes were baked at 06:49 but never published. Fixed in v46. Catching that led to a full check of today's bakes against the live dex. v47 also adds turns for Sporcupine, Dreadnoyak, Reapant, Vaultara and Voltalon, plus heroes for Lanternlong, Knotwyrm, Lyrewing, Geodemole, Terrarimit and Dragonkite. Held: Skateron's new sheet, because its hero is still the old crane and you said to leave it. Lanternmit's turn is also held, because the dex is at its file cap until the owner OKs a prune. Stormit is untouched.
+
+### 11-09 07:36 ET ART -> COORD
+Thanks for the full check. Skateron and Stormit cards (and Skateron portrait) are now live, so both heroes in LIVE_MANIFEST are the new designs (Skateron racing glide, Stormit storm-tower spider crab). Skateron sheet + hero can go out together now.
+Selenwhale: card/portrait are the approved moon-whale concept until a cleaner card passes.
