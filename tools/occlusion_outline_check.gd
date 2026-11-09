@@ -1,7 +1,8 @@
 extends RefCounted
 ## --occlusion-outline-check: your side (you, your teammate, your Boki) wears the cover outline and a rival
 ## never does; Low takes it off again. --occlusion-outline-shots --shots-dir=<dir> (needs a GPU renderer):
-## on the Hollow Crown, you and a teammate stand behind a cliff and two trees with a rival
+## on the Hollow Crown, you and a teammate stand behind a cliff, two trees and a stone cover (ruin pillar,
+## wall or boulder) with a rival
 ## beside you, once with the outline (<cover>_on.png) and once without it (<cover>_off.png), cropped round the pair.
 
 const DT := 1.0 / 60.0
@@ -73,6 +74,9 @@ func _shots() -> void:
 	m.hud.visible = false
 	var covers := {"cliff": _cliff_spot(off), "tree": _prop_spot(off, m.world.tree_spots)}
 	covers["tree2"] = _prop_spot(off, m.world.tree_spots.slice(m.world.tree_spots.size() / 2))
+	var stone := _stone_spots()
+	if not stone.is_empty():
+		covers[stone[0]] = _prop_spot(off, stone[1])
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	var rival: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	for cover in covers:
@@ -135,6 +139,30 @@ func _prop_spot(off: Vector3, spots: Array) -> Vector3:
 		if g.distance_to((s as Vector3) + away) < 0.5 and absf(g.y - (s as Vector3).y) < 0.3:
 			return g
 	return m.world.random_ground()
+
+## A third, stone cover: ruin pillars if the map has any, else a wall run, else a hand-placed boulder.
+## [name, feet of those tiles] or [] when there are none.
+func _stone_spots() -> Array:
+	var w: World = m.world
+	var by := {"pillar": [], "wall": [], "boulder": []}
+	for i in w.kind.size():
+		if w.kind[i] != World.T_BLOCK:
+			continue
+		var x := i % w.w
+		var z := i / w.w
+		var foot := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
+		if w.props.get(i, "") == "ruin":
+			by["pillar"].append(foot)
+		elif w.walls.has(i):
+			by["wall"].append(foot)
+		elif w.props.get(i, "") == "rock":
+			by["boulder"].append(foot)
+	for k in by:
+		print("OCCLUSION %s tiles: %d" % [k, by[k].size()])
+	for k in ["pillar", "wall", "boulder"]:
+		if not by[k].is_empty():
+			return [k, by[k]]
+	return []
 
 func _go(secs: float) -> void:
 	var t := 0.0
