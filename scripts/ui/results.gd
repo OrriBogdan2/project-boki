@@ -247,6 +247,8 @@ func _kin_card(s: Dictionary) -> Control:
 	trow.add_child(bar_box)
 	var ml := UI.label("%s  (%+d)" % [mood, int(round(td))] if absf(td) >= 0.5 else mood, 14, UI.GOOD if td > 0.5 else (Color("ffb36a") if td < -0.5 else UI.MUTED))
 	trow.add_child(ml)
+	if String(s.get("trust_why", "")) != "":
+		kv.add_child(UI.label(String(s["trust_why"]), 14, UI.GOOD))
 	if String(s.get("kin_say", "")) != "":
 		var say := UI.label("\u201c%s\u201d" % String(s["kin_say"]), 16, UI.INK)
 		say.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

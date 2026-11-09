@@ -256,6 +256,22 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | gems_toast | Hob gives you %d gems to buy seeds |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |
 
+## garden_trust (`content/rules/garden_trust.json`)
+
+Trust from care at the base (Care.trust_up). Petting, its habit food and winning together each raise trust by a named amount, shown to the player as one plain line. Trust stays 0 to 100 and nothing here lowers it. A habit (rec.habit.food) is picked when a Boki hatches, from its element (the species theme).
+
+| Setting | Value |
+|---|---|
+| pet | 1 |
+| food | 2 |
+| win | 3 |
+| cooldown_h | 1 |
+| hour_s | 12.5 |
+| say | {"pet": "%s loved the scratches: trust up", "food": "%s loves %s: trust up", "win": "%s won with you: trust up"} |
+| default_food | kibble |
+| food_by_element | {"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap", "lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint", "spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"} |
+| _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
+
 ## gear (`content/rules/gear.json`)
 
 

@@ -329,7 +329,9 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 			break
 	if won:
 		k["wins"] = int(k.get("wins", 0)) + 1
-		Save.remember(k, "extracted", "made it out of the islands with you", 3.0)
+		Save.remember(k, "extracted", "made it out of the islands with you")
+		var why := Care.trust_up(k, "win", Time.get_unix_time_from_system())
+		if lead: out["trust_why"] = why
 		k["traits"]["bravery"] = clampf(float(k["traits"]["bravery"]) + 0.015, 0.05, 0.95)
 	else:
 		Save.remember(k, "lost", "lost a match with you (%s)" % _why(r.get("why", "")), -1.0)

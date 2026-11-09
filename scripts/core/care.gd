@@ -108,6 +108,7 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
+	give_habit(rec)
 
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
@@ -353,6 +354,43 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 	fed(rec)
 	out["hungry"] = was < 35.0
 	return out
+
+# ------------------------------------------------------------------ trust from care
+## Petting, its habit food and winning together raise trust (content/rules/garden_trust.json), each
+## with one plain line saying why. Trust stays 0 to 100 and nothing here lowers it.
+
+## The food its element leans to: a hated food gives way to its favourite, so the habit can be eaten.
+static func habit_food(rec: Dictionary) -> String:
+	var r := Content.rules("garden_trust")
+	var theme := String(Data.KIN.get(String(rec.get("species", "")), {}).get("theme", ""))
+	var food := String(r["food_by_element"].get(theme, r["default_food"]))
+	return String(rec["likes"]["food"]) if food == String(rec["likes"]["hates"]) else food
+
+## Picked once, when a Boki hatches (or an older record is first read).
+static func give_habit(rec: Dictionary) -> void:
+	if not rec.has("habit"):
+		rec["habit"] = {"food": habit_food(rec)}
+
+## Save migration: every Boki in an older save gets its habit.
+static func migrate_habits(data: Dictionary) -> void:
+	for rec in data.get("roster", []):
+		if typeof(rec) == TYPE_DICTIONARY and not rec.is_empty():
+			ensure(rec)
+
+## Raises trust for kind "pet", "food" or "win" by its named amount, once per cooldown per kind.
+## Returns the line to show, or "" when nothing changed (cooling down, or trust already full).
+static func trust_up(rec: Dictionary, kind: String, now_s: float, food := "") -> String:
+	var r := Content.rules("garden_trust")
+	var last: Dictionary = rec.get("care_t", {})
+	if now_s < float(last.get(kind, -1.0e9)) + float(r["cooldown_h"]) * float(r["hour_s"]):
+		return ""
+	var was := float(rec.get("trust", 0.0))
+	rec["trust"] = clampf(was + float(r[kind]), 0.0, 100.0)
+	if float(rec["trust"]) <= was:
+		return ""
+	last[kind] = now_s
+	rec["care_t"] = last
+	return String(r["say"][kind]) % ([rec["name"], food_name(food)] if kind == "food" else [rec["name"]])
 
 # ------------------------------------------------------------------ IVs
 ## A fresh set of IVs, each 0 to 31.
