@@ -5747,3 +5747,4 @@ READY ext/vfx-meeko-weight 9c4ad7800 (supersedes the e69ad4f92 line: R reel part
 READY ext/vfx-sable-encore 5e9ea1d07 (strips rendered and checked by eye: before jobq 20261109-162138-15336 (main: pale disc, start/mid crescents), after jobq 20261109-154110-22962 (thin ring on the hit edge, flip trail follows the spin with no burst, bolt/Encore streaks); out/thief_*.png in /home/boki/jobq/done/<id>/; supersedes the 'QUEUED' note above)
 READY ext/<branch> <sha> (<what>)
 READY ext/<branch> <sha> (<what>)
+READY ext/<branch> <sha> (<what>)
