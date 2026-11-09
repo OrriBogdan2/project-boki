@@ -2,8 +2,6 @@ extends RefCounted
 ## --prematch-shots --shots-dir=<dir>: the pre-match pick screen as a fresh save (four 'Start here' tags, Vex
 ## selected) and as a save with 3 matches (no tags), on a renderer (xvfb).
 
-const SPLASH_WAIT := 8.0      # seconds: the title splash covers the screen for the first moments
-
 func run(main: Node) -> void:
 	Save.no_write = true
 	var dir := "."
@@ -24,7 +22,8 @@ func _shot(main: Node, file: String) -> void:
 	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
 	view.setup({"teams": 10, "squad": 1, "tier": 0})
 	main.add_child(view)
-	await main.get_tree().create_timer(SPLASH_WAIT).timeout
+	await main.fade.reveal(0.01)       # the boot splash covers the screen until revealed
+	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(file)
 	view.set_process(false)
 	view.queue_free()
