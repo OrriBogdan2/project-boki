@@ -68,7 +68,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | RMB | Bolt + Slow, upgrades Ignite, 9 s [D] | Range 14, slow 30%, cd 7, +1 charge at rank 3 | match; 0.78x cd |
 | Q | none | glove | ours |
 | E | Spin pull, shield per foe, knock resets, 13 s; ~.2 s arm fling [D,F] | Instant, r 4.5, pull 14 m/s, cd 10.5; 10 dmg = 76.8/106 x 14 (supervive_kits.md:41,43) | differ (owner item 11); damage ratio match |
-| R | Fly forward, burning ground + Slow, 45 s [D] | 12.6 m/s, 1.8 s, trail 5.2 s, slow 30%, cd 36; carpet 31.6/s = 239.2/106 x 14 (supervive_kits.md:41,44) | match; 0.8x cd |
+| R | Fly forward, burning ground + Slow, 45 s [D] | 12.6 m/s, 1.8 s, trail 5.2 s, slow 30%, cd 36; carpet 4.5/s (source 239.2/106 x 14 = 31.6, supervive_kits.md:41,44) | owner: burst cap (SERVER_UPDATE6) holds the carpet at 4.5/s; 0.8x cd |
 | Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | Felt ground 2.9 m/.32 s (3.4/.28 ×feel), stops on foe, 2 charges; 20 dmg = 150.4/106 x 14 (supervive_kits.md:41,42). Air poof 8/.24 is scaled twice: 5.8 m/.32 s, not 6.8 m/.28 s | differ (gap 11) |
 | Passive | Ignite levels, bonus dmg [D] | Flashover 1/2, `ignite_bonus`, heal_knock .16 (wiki only) | match |
 | Anim | Footage poses | 12 moves, all on `cinder.glb` (41) | match on coverage |
