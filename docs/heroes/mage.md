@@ -146,7 +146,7 @@ Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it
 | Spear has a minimum cast time (0.33 to 0.4s) | [wiki](https://supervive.wiki.gg/wiki/Joule) patch notes 20.11.24, 05.03.25 | only 1.2s casts seen | yes: "Storm Rod's 0.33s minimum cast" |
 | Spear stuns on terrain or another target | [wiki](https://supervive.wiki.gg/wiki/Joule) (Voltaic Spear) | stun on a pillar | yes: wall and foe stuns |
 | Lightning Strike flings enemy orbs, which can then be stolen | [wiki](https://supervive.wiki.gg/wiki/Joule) (Lightning Strike) | orb flung (`0283`) | yes: "flings a rival's orb, now yours" |
-| Lightning Strike can launch Wisps | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (we have no wisps; Boki are not moved) |
+| Lightning Strike can launch Wisps | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | built: rival downed hunters in the circle slide with the strike (no Static, no Grounded); `--mage-combo-check`. Spec: docs/specs/DOWNED_ABILITIES.md |
 | Static Charged detonation restores mana | [wiki](https://supervive.wiki.gg/wiki/Joule) | not shown | not built (no mana) |
 | Eye of the Storm: invulnerable while in the air | [thebackdash hunter list](https://thebackdash.com) (pre-1.0 wording) | INVULNERABLE tag (f45) | yes: "invulnerable in the air" |
 | Eye of the Storm: landing spot at the cursor within a range ring, two presses | reference sheet (both casts) | ring f29, crown reticle f36 | yes: "clamped inside the ring", "the second press brings her down" |
