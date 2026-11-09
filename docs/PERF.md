@@ -64,9 +64,10 @@ The "before" Very Low and Low rows are 214 too high for the old build, whose ash
 |---|---|---|---|---|
 | High | 1684 | 1615 | 63.6 / 91.5 ms | 2.6 ms |
 | Low | 923 | 751 | 63.9 / 92.0 ms | 2.7 ms |
-| Very Low | n/a (job still queued) | 448 | 60.3 / 87.9 ms | 1.3 ms |
+| Very Low | 748 | 448 | 60.3 / 87.9 ms | 1.3 ms |
 
-The "before" High and Low runs landed on other machines (Apple M5, RTX 4070 SUPER, Compatibility renderer), so their
+The "before" Very Low run was on the same RTX 4090 (wall 57.5 / p99 82.4 ms, GPU 1.05 ms): no frame-time gain, the
+box is shared and the frame is CPU bound. The "before" High and Low runs landed on other machines (Apple M5, RTX 4070 SUPER, Compatibility renderer), so their
 frame times do not compare with the 4090's and are left out; particle counts do not depend on the GPU. High differs
 by sampling only (the code is unchanged for it). The frame is CPU bound (match script about 30 ms); the render GPU
 time is 1-3 ms, so particles at these counts are not what limits the frame. The point of the cut is the weak machines.
