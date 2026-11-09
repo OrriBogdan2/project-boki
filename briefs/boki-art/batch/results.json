@@ -13947,5 +13947,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_prismander_pe_w28_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_pe_w28",
+    "name": "Nettlynx (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismander_pe_w28",
+    "name": "Prismander (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismander_pe_w28",
+    "name": "Prismander (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_prismander_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w28",
+    "name": "Rimeshrew (portrait edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w28",
+    "name": "Rimeshrew (portrait edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_e_w28",
+    "name": "Puffamus",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/puffamus_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rimeshrew_pe_w28",
+    "name": "Rimeshrew (portrait edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rimeshrew_pe_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "puffamus_e_w28",
+    "name": "Puffamus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/puffamus_e_w28_2.jpg",
+    "ok": true
   }
 ]
