@@ -68505,5 +68505,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_selenwhale_r5_3.jpg",
     "ok": true
+  },
+  {
+    "id": "slog_card106",
+    "name": "Slog (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/slog_card106_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock_r5",
+    "name": "Anvilbrock (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_selenwhale_r5",
+    "name": "Selenwhale (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_selenwhale_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock_r5",
+    "name": "Anvilbrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_r5_1.jpg",
+    "ok": true
   }
 ]
