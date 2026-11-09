@@ -1,9 +1,8 @@
 # Round 9 (21:10 ET 11-08): owner note "hero shots look straight at the camera, needs to be more interesting".
 # P() now asks for a dynamic action hero shot, head turned, never looking at camera. Re-make every portrait already
 # generated with the old prompt as portrait_<species>_r (same ref and pose, new prompt); unmade ones just use the new prompt.
-import subprocess as _sp
-_made={l.split('/')[-1].rsplit('_',1)[0] for l in _sp.run(['git','ls-tree','--name-only','HEAD','briefs/boki-art/batch/out/'],capture_output=True,text=True).stdout.split()
-       if l.split('/')[-1].startswith('portrait_')}
+# Frozen at 21:22 ET: portraits made with the old prompts (later ones are graded against the new rule instead).
+_made=set(["portrait_amanitusk", "portrait_anchorbill", "portrait_anvilbrock", "portrait_arcestrel", "portrait_bellowary", "portrait_blossmink", "portrait_bubblisk", "portrait_buckleron", "portrait_cairnback", "portrait_canvastross", "portrait_chandelotl", "portrait_chuggamus", "portrait_crofthorn", "portrait_dragonkite", "portrait_eclipsowl", "portrait_forgebrock", "portrait_frothisk", "portrait_galleotter", "portrait_geodelotl", "portrait_geysirbara", "portrait_glintmole", "portrait_gloamshell", "portrait_glomwort", "portrait_gravadillo", "portrait_hivara", "portrait_kindlewren", "portrait_knotwyrm", "portrait_lanceron", "portrait_lanternmit", "portrait_latchling", "portrait_lunowl", "portrait_marchleaf", "portrait_mossgrade", "portrait_murmurling", "portrait_nettlynx", "portrait_oarlet", "portrait_parasolth", "portrait_pipewurm", "portrait_prismink", "portrait_prowyak", "portrait_rampartoad", "portrait_rimeshrew", "portrait_seamwyrm", "portrait_selenfin", "portrait_skidlet", "portrait_stormit", "portrait_terrarimit", "portrait_thrumbird", "portrait_tidalisk", "portrait_tinbrock", "portrait_vaultara", "portrait_vespox", "portrait_voltalon", "portrait_zephyrak", "portrait_zipling"])
 for _x in list(SPECS):
     if _x['id'] in _made and not _x['id'].endswith('_r'):
         _y=dict(_x); _y['id']=_x['id']+'_r'; SPECS.append(_y)
