@@ -3,8 +3,8 @@ extends RefCounted
 ## Breaker's perfect swing (docs/heroes/bulwark.md, "LMB hold"): let go of the Crushing Blow in the window
 ## right after it reaches full charge (lmb "perfect.window" s, flagged by the hammer's flash and a click)
 ## and the slam throws his whole weight forward: "perfect.dist" m over "perfect.time" s, feet off the ground
-## (bul_launch), then a skid as he lands. The launch rides the dash plumbing (Hunter.dash_with), so its end
-## hands its speed to the glider by the shared rules (Hunter.glide_handoff): carried off a drop he opens the
+## (bul_launch), then a skid as he lands. The launch rides the dash plumbing (Hunter.dash_with), so a glide
+## started from it carries its speed by the shared rules (Loco.glide_step): carried off a drop he opens the
 ## glider by himself, and glide or jump pressed during it jumps him out of it into a glide.
 
 ## m: a launch that ends this far over the ground below (or over the abyss) opens the glider by itself

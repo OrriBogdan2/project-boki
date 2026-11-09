@@ -313,8 +313,8 @@ func _slide_end() -> void:
 	if rank("dash") >= 3:
 		h.add_buff("move_speed", 0.25, 2.0)
 	var air := bool(slide.get("air", false))
-	if air:
-		h.vel.x *= 0.25          # an air slide stops short instead of carrying on
+	if air and not h.gliding:
+		h.vel.x *= 0.25          # an air slide stops short instead of carrying on (a glide press carries it, item 4)
 		h.vel.z *= 0.25
 	var kind := "slide" if bool(slide.get("held", false)) else "step"
 	st["last_dash"] = "air_slide" if air else kind
@@ -334,6 +334,9 @@ func _skid(t: float, dd: Dictionary) -> void:
 	h.roll_speed = lerpf(peak, run, t / dur)
 
 func _tick_slide(dt: float) -> void:
+	if h.gliding:
+		_slide_end()      # a glide press cancelled it (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dd := dash_def()
 	slide["t"] = float(slide["t"]) + dt
 	var t := float(slide["t"])
