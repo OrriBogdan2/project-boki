@@ -23306,5 +23306,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/stance_latchling_w31_3.jpg",
     "ok": true
+  },
+  {
+    "id": "stance_lockatara_w31",
+    "name": "Lockatara (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_lockatara_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lockatara_w31",
+    "name": "Lockatara (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_lockatara_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lockatara_w31",
+    "name": "Lockatara (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_lockatara_w31_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_prowyak_w31",
+    "name": "Prowyak (new stance)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stance_prowyak_w31_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_lockatara_w31",
+    "name": "Lockatara (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_lockatara_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_prowyak_w31",
+    "name": "Prowyak (new stance)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/stance_prowyak_w31_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_prowyak_w31",
+    "name": "Prowyak (new stance)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/stance_prowyak_w31_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "stance_prowyak_w31",
+    "name": "Prowyak (new stance)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stance_prowyak_w31_3.jpg",
+    "ok": true
   }
 ]
