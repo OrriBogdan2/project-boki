@@ -36228,5 +36228,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_barokat_cloud_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_glaivyx_g5",
+    "name": "Glaivyx (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g5",
+    "name": "Glaivyx (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_recolor",
+    "name": "Vespox (recolour)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ta_vespox_recolor_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_recolor",
+    "name": "Vespox (recolour)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_vespox_recolor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_recolor",
+    "name": "Vespox (recolour)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/ta_vespox_recolor_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g3",
+    "name": "Glaivyx (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_vespox_recolor",
+    "name": "Vespox (recolour)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_vespox_recolor_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_glaivyx_g3",
+    "name": "Glaivyx (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_glaivyx_g3_4.jpg",
+    "ok": true
   }
 ]
