@@ -103,8 +103,6 @@ const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 3.2        # m/s: from here it gallops
-const RUN_STRIDE := 2.9       # m/s the run clip covers at speed 1 (Vespyx: reach 1.3, pace 1.06)
-const WALK_STRIDE := 1.5
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -290,11 +288,18 @@ func _pick_clip(dt: float) -> void:
 	_shot_left -= dt
 	var want := _state_clip()
 	set_clip(want)
-	player.speed_scale = 1.0
-	if want == "run":
-		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
-	elif want == "walk" or want == "carry":
-		player.speed_scale = clampf(_speed / WALK_STRIDE, 0.6, 1.6)
+	player.speed_scale = play_scale(species, want, _speed)
+
+## How fast body clip `which` plays for a Boki moving at `speed` (m/s), so its feet stay put on the ground: the speed
+## over the clip's stride (m/s its feet cover at speed 1), kept between the gait's min and max. 1 for any other clip.
+## Numbers per species: content/rules/boki_gait.json.
+static func play_scale(kin_id: String, which: String, speed: float) -> float:
+	if which != "run" and which != "walk" and which != "carry":
+		return 1.0
+	var rows := Content.rules("boki_gait")
+	var gaits: Dictionary = rows["species"].get(kin_id, rows["default"])
+	var gait: Dictionary = gaits["run" if which == "run" else "walk"]
+	return clampf(speed / float(gait["stride"]), float(gait["min"]), float(gait["max"]))
 
 func _start_shot(which: String) -> void:
 	_shot = which

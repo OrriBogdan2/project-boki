@@ -1,0 +1,29 @@
+{
+	"_doc": "Playback speed of a rigged Boki's walk/carry and run clips (BokiRig.play_scale): scale = clamp(move speed / stride, min, max). stride is the m/s the clip's feet cover at speed 1; a species row (walk and run both) replaces the default.",
+	"default": {
+		"walk": {"stride": 1.5, "min": 0.6, "max": 1.6},
+		"run": {"stride": 2.9, "min": 0.7, "max": 1.6}
+	},
+	"species": {
+		"mossgrade": {
+			"walk": {"stride": 0.11, "min": 0.6, "max": 4.7},
+			"run": {"stride": 0.6, "min": 0.7, "max": 3.6}
+		},
+		"kestrike": {
+			"walk": {"stride": 0.25, "min": 0.6, "max": 2.6},
+			"run": {"stride": 0.41, "min": 0.7, "max": 2.7}
+		},
+		"wisplet": {
+			"walk": {"stride": 0.37, "min": 0.6, "max": 2.1},
+			"run": {"stride": 0.48, "min": 0.7, "max": 2.7}
+		},
+		"kindlewren": {
+			"walk": {"stride": 0.33, "min": 0.6, "max": 2.2},
+			"run": {"stride": 0.45, "min": 0.7, "max": 2.3}
+		},
+		"lodestick": {
+			"walk": {"stride": 0.23, "min": 0.6, "max": 3.6},
+			"run": {"stride": 0.6, "min": 0.7, "max": 2.7}
+		}
+	}
+}

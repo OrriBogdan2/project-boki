@@ -43,6 +43,16 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## boki_gait (`content/rules/boki_gait.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Playback speed of a rigged Boki's walk/carry and run clips (BokiRig.play_scale): scale = clamp(move speed / stride, min, max). stride is the m/s the clip's feet cover at speed 1; a species row (walk and run both) replaces the default. |
+| default | {"walk": {"stride": 1.5, "min": 0.6, "max": 1.6}, "run": {"stride": 2.9, "min": 0.7, "max": 1.6}} |
+| species | {"mossgrade": {"walk": {"stride": 0.11, "min": 0.6, "max": 4.7}, "run": {"stride": 0.6, "min": 0.7, "max": 3.6}}, "kestrike": {"walk": {"stride": 0.25, "min": 0.6, "max": 2.6}, "run": {"stride": 0.41, "min": 0.7, "max": 2.7}}, "wisplet": {"walk": {"stride": 0.37, "min": 0.6, "max": 2.1}, "run": {"stride": 0.48, "min": 0.7, "max": 2.7}}, "kindlewren": {"walk": {"stride": 0.33, "min": 0.6, "max": 2.2}, "run": {"stride": 0.45, "min": 0.7, "max": 2.3}}, "lodestick": {"walk": {"stride": 0.23, "min": 0.6, "max": 3.6}, "run": {"stride": 0.6, "min": 0.7, "max": 2.7}}} |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
