@@ -14,7 +14,8 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	var d := Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
-	d["roster"].append(k); d["active"] = k["uid"]
+	d["roster"].append(k)
+	d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	d["stats"] = {"extracts": 1}
 	Save.d = d
