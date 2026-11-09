@@ -5408,3 +5408,5 @@ READY ext/revive-source-numbers 6c27f4f57 (second source pass: no base revive/st
 
 READY ext/parity-status-stacking bafa3ff4c (status stacking rules)
 READY ext/parity-dot-ticks d211db733 (DoT tick parity)
+
+READY ext/parity-ally-effects a106b5f15 (ally interaction parity)
