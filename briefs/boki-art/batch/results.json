@@ -27429,5 +27429,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/galleotter_card2_w32_3.jpg",
     "ok": true
+  },
+  {
+    "id": "gongrowl_card2_w32",
+    "name": "Gongrowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card2_w32",
+    "name": "Galleotter (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_card2_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_card2_w32",
+    "name": "Gongrowl (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gongrowl_card2_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w32",
+    "name": "Jibbatross",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w32_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w32",
+    "name": "Jibbatross",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w32_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w32",
+    "name": "Jibbatross",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w32_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "jibbatross_r_w32",
+    "name": "Jibbatross",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/jibbatross_r_w32_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "lashyx_card2_w32",
+    "name": "Lashyx (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lashyx_card2_w32_3.jpg",
+    "ok": true
   }
 ]
