@@ -89,6 +89,9 @@ func _event(m: Match, hero: String, ev: String) -> void:
 	var h: Hunter = flow.hunter
 	flow._ready_up(m)
 	h.ak.res = 0.0
+	h.ak.fx_t = 99.0          # the resource tell glow (ArchKit._tells) is not movement: keep it out of the audit
+	for mb in m.mobs:
+		mb.dead = true            # a mob in a ram's way is a hit (a real impact), not movement
 	for o in m.hunters:
 		if o != h:
 			o.out = true          # out of the match: nobody fights, falls or shoots
