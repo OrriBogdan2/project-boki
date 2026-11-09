@@ -48604,5 +48604,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/chandelapi_card96_2.jpg",
     "ok": true
+  },
+  {
+    "id": "moatpole_card",
+    "name": "Moatpole (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/moatpole_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_card",
+    "name": "Lodestick (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestick_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_card96",
+    "name": "Galleotter (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/galleotter_card96_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_card",
+    "name": "Lodestick (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lodestick_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card96",
+    "name": "Chandelapi (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_card96_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_card96",
+    "name": "Chandelapi (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/chandelapi_card96_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "moatpole_card",
+    "name": "Moatpole (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/moatpole_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gongrowl_p96",
+    "name": "Gongrowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_gongrowl_p96_2.jpg",
+    "ok": true
   }
 ]
