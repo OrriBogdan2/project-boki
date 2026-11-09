@@ -2993,17 +2993,13 @@ func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
+	_worn.clear()
 	max_armor = round(base_armor * (1.0 + ARMOR_TIER_BONUS * float(armor_tier))) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 
 func gear_stat(k: String) -> float:
-	var t := 0.0
-	for g in gear:
-		if not g.is_empty():
-			t += float(Gear.ALL[g["id"]]["stats"].get(k, 0.0)) * Gear.mult(int(g["rar"]))
-	for pk in perks:
-		t += float((Data.PERKS.get(pk, {}).get("stats", {}) as Dictionary).get(k, 0.0))
+	var t := _worn_stat(k)
 	if kin != null and is_instance_valid(kin) and (k == "armor" or k == "sight"):
 		t += Mutations.owner_stat((kin as Kin).rec, k)      # a Crystal or Glowing kin helps its hunter
 	# your kin: its owner bonus points, carry passives, the merge and short ability buffs
@@ -3012,6 +3008,27 @@ func gear_stat(k: String) -> float:
 		"dmg": t = KinMerge.cap_damage(self, t, owner_stat("damage") + buff("damage"))
 		"heat", "glide_speed": t += owner_stat("glide")
 		"cdr": t += owner_stat("cooldown")
+	return t
+
+var _worn := {}              # stat key -> what the worn gear and the perks add, summed once a step
+var _worn_t := -1.0          # Match.time the sums above are from (gear_stat is asked ~14 times a step)
+
+## What the four gear slots and the perks add to a stat. Summed once a step (and again after
+## refresh_gear or a new perk): with ten squads these sums were a tenth of Hunter.sim.
+func _worn_stat(k: String) -> float:
+	var now: float = m.time if m else 0.0
+	if now != _worn_t:
+		_worn.clear()
+		_worn_t = now
+	if _worn.has(k):
+		return _worn[k]
+	var t := 0.0
+	for g in gear:
+		if not g.is_empty():
+			t += float(Gear.ALL[g["id"]]["stats"].get(k, 0.0)) * Gear.mult(int(g["rar"]))
+	for pk in perks:
+		t += float((Data.PERKS.get(pk, {}).get("stats", {}) as Dictionary).get(k, 0.0))
+	_worn[k] = t
 	return t
 
 ## Ground speed while you ride your mount (its carry.mount speed).
@@ -3033,6 +3050,7 @@ func add_perk(id: String) -> void:
 	if not Data.PERKS.has(id) or not perk_open(id):
 		return
 	perks.append(id)
+	_worn.clear()
 	match id:
 		"toughskin":
 			max_hp += 15.0; hp = minf(max_hp, hp + 15.0)
