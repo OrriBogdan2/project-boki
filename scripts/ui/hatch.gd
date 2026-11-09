@@ -760,7 +760,7 @@ func _mask_moment(then: Callable) -> void:
 
 func _head_out(tutorial: bool) -> void:
 	if tutorial:
-		Game.start_match({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+		Game.start_match(TutorialResume.opts())
 	else:
 		Save.d["tutorial"]["match"] = true
 		Save.save_game()

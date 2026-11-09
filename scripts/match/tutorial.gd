@@ -205,6 +205,11 @@ func _finish(sid: String) -> void:
 	if STOP_AFTER.has(sid):
 		last_stop = stop(STOP_AFTER[sid])
 	step += 1
+	var resumed := sid == "land" and TutorialResume.last_beat() != ""
+	if resumed:
+		step = TutorialResume.step_after(TutorialResume.last_beat())
+	else:
+		TutorialResume.remember(sid)
 	if step == 1:
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--tut-from="): step = int(a.substr(11))     # test: skip ahead after landing
@@ -214,7 +219,20 @@ func _finish(sid: String) -> void:
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
+	if resumed:
+		_restore()
 	_enter()
+
+## Carrying on from a saved beat: back at the last stop it left you at, with what the next one needs.
+func _restore() -> void:
+	for i in step:
+		if STOP_AFTER.has(String(steps()[i][0])):
+			last_stop = stop(STOP_AFTER[String(steps()[i][0])])
+	m.player.teleport(respawn())
+	if id() == "chest" and m.player.chest_keys == 0:
+		m.player.chest_keys = 1
+	if m.hud:
+		m.hud.toast("Back where you left off. Skip any time from the menu", MINT)
 
 func _enter() -> void:
 	var p := m.player
