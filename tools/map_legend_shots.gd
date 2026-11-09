@@ -25,7 +25,9 @@ func run(main: Node) -> void:
 		var img := main.get_viewport().get_texture().get_image()
 		img.save_png(dir.path_join("map_%d.png" % sz.y))
 		var r: Rect2 = MapLegend.panel(m.hud.full_map, MapLegend.present(m).size())
-		var crop := Rect2i(r.grow(8.0)).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+		var px := float(img.get_width()) / main.get_viewport().get_visible_rect().size.x      # UI scale
+		var rp := Rect2(r.position * px, r.size * px).grow(8.0)
+		var crop := Rect2i(rp).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 		img.get_region(crop).save_png(dir.path_join("key_%d.png" % sz.y))
 		print("MAPLEGENDSHOTS %dx%d: %s" % [img.get_width(), img.get_height(), ", ".join(MapLegend.present(m))])
 	main.get_tree().quit(0)
