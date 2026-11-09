@@ -1,7 +1,8 @@
 class_name DolmImpact
 extends RefCounted
 ## The weight of Tenzo's hits: one blue-white flash, a ground shock and a spray of chips, all sized by the
-## damage the hit deals. Laid on top of each hit's own fire and dust; Tenzo's ability colour is blue (DECISIONS 2026-11-08).
+## damage the hit deals. Laid on top of each hit's own fire and dust.
+## Tenzo's ability colour is blue (DECISIONS 2026-11-08).
 
 const BLUE := Color("4aa8ff")
 const CORE := Color("d8ecff")

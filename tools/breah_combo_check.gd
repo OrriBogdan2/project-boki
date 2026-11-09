@@ -888,23 +888,40 @@ func _blue_ring(m: Match, secs: float, act: Callable) -> float:
 				widest[0] = maxf(widest[0], float(e["r"])))
 	return widest[0]
 
+## A boulder thrown at the foe: the tap of the attack key.
+func _throw_boulder(m: Match, P: Hunter) -> void:
+	P.inp["fire"] = true
+	step(m, 0.1)
+	P.inp["fire"] = false
+
+## The punch held to full and let go.
+func _full_punch(m: Match, P: Hunter, K: DolmKit) -> void:
+	P.inp["fire"] = true
+	step(m, float(K.lmb_def()["full"]) + 0.1)
+	P.inp["fire"] = false
+
 ## Each hit of his lands with a blue ring sized by its damage: the boulder is the smallest, the full punch and
-## the full slam each throw a wider one.
+## the tap slam each throw a wider one.
 func _impact_weight(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	reset.call()
-	var boulder := _blue_ring(m, 0.8, func(): P.inp["fire"] = true; step(m, 0.1); P.inp["fire"] = false)
+	var boulder := _blue_ring(m, 0.8, func(): _throw_boulder(m, P))
 	reset.call()
 	T.teleport(home + Vector3(2.5, 0, 0))
 	aim_at(P, T.pos)
-	var punch := _blue_ring(m, 0.4, func(): P.inp["fire"] = true; step(m, float(K.lmb_def()["full"]) + 0.1); P.inp["fire"] = false)
+	var punch := _blue_ring(m, 0.4, func(): _full_punch(m, P, K))
 	reset.call()
 	T.teleport(home + Vector3(2.0, 0, 0))
 	aim_at(P, T.pos)
 	var slam := _blue_ring(m, 0.4, func(): tap(m, P))
-	ok("impact: the boulder, the full punch and the slam each land with a blue ring", boulder > 0.0 and punch > 0.0 and slam > 0.0,
-		"boulder %.1f punch %.1f slam %.1f" % [boulder, punch, slam])
-	ok("impact: the ring is wider for the heavier hit (boulder 9 dmg < punch 24, slam 14+)", boulder < punch and boulder < slam,
-		"boulder %.1f punch %.1f slam %.1f" % [boulder, punch, slam])
+	var info := "boulder %.1f punch %.1f slam %.1f" % [boulder, punch, slam]
+	ok(
+		"impact: the boulder, the full punch and the slam each land with a blue ring",
+		minf(boulder, minf(punch, slam)) > 0.0, info
+	)
+	ok(
+		"impact: the ring is wider for the heavier hit (boulder 9 dmg < punch 24, tap slam 14)",
+		boulder < punch and boulder < slam, info
+	)
 	reset.call()
 	var rise := _blue_ring(m, 0.9, func(): K.cast_e())
 	ok("impact: each rock of the Stone Row breaks the ground in a blue ring", rise > 0.0, "ring %.1f" % rise)
