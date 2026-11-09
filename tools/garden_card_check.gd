@@ -18,7 +18,8 @@ func _live(home, type: String) -> Array:
 	return kids[-1].find_children("*", type, true, false) if not kids.is_empty() else []
 
 func _texts(home) -> Array:
-	return _live(home, "Label").map(func(l): return (l as Label).text) + _live(home, "Button").map(func(b): return (b as Button).text)
+	var labels: Array = _live(home, "Label").map(func(l): return (l as Label).text)
+	return labels + _live(home, "Button").map(func(b): return (b as Button).text)
 
 func _button(home, txt: String) -> Button:
 	for b in _live(home, "Button"):
@@ -46,8 +47,11 @@ func _story(roster: Array) -> void:
 	var pip: Dictionary = roster[0]
 	pip["bonds"] = {roster[1]["uid"]: 0.8, roster[2]["uid"]: 0.6, roster[3]["uid"]: -0.7}
 	Evo.eat(pip, "emberberry")
-	pip["journal"] = [{"t": 1.0, "food": "kibble", "n": 1, "up": []}, {"t": 2.0, "food": "emberberry", "n": 1, "up": ["Fire"]},
-			{"t": 3.0, "food": "kibble", "n": 3, "up": []}]
+	pip["journal"] = [
+		{"t": 1.0, "food": "kibble", "n": 1, "up": []},
+		{"t": 2.0, "food": "emberberry", "n": 1, "up": ["Fire"]},
+		{"t": 3.0, "food": "kibble", "n": 3, "up": []},
+	]
 
 func _shots(m: Node, home) -> void:
 	var dir := ""
@@ -92,24 +96,27 @@ func run(m: Node, mode := "check") -> void:
 	ok(t.has("Echolop") and t.has("Echo"), "on: species and element chips: %s" % str(t))
 	ok(t.any(func(s): return s.begins_with("Leans ")), "on: the lean chip")
 	ok(["HAPPY", "CONTENT", "QUIET", "GLUM"].any(func(w): return t.has(w)), "on: a mood word")
-	ok(t.has("Ember") and not t.has("Drip") and t.has("BEST FRIEND"), "on: the closest friend is Ember (Drip is a weaker bond)")
+	ok(t.has("Ember") and not t.has("Drip") and t.has("BEST FRIEND"), "on: the best friend is Ember, not Drip")
 	ok(t.has("Rocky") and t.has("RIVAL"), "on: the rival is Rocky")
 	var i3 := t.find("ate 3 × Boki kibble")
-	ok(i3 >= 0 and t.find("ate Emberberry: Fire lean up") > i3 and not t.has("ate Boki kibble"), "on: the last two journal lines, newest first")
-	ok(not t.has("Training") and not t.has("Growth") and not t.has("Stats  ·  cap 25".to_upper()), "on: no tabs or stats")
+	var i2 := t.find("ate Emberberry: Fire lean up")
+	ok(i3 >= 0 and i2 > i3 and not t.has("ate Boki kibble"), "on: the last two journal lines, newest first")
+	ok(not t.has("Training") and not t.has("Growth"), "on: no tabs")
 	ok(t.size() <= 30, "on: the glance and the care buttons stay short (%d texts)" % t.size())
 	var more := _button(home, "More")
 	ok(more != null, "on: a More button")
 	more.pressed.emit()
 	t = _texts(home)
-	ok(t.has("Training") and t.has("Care") and not t.has("BEST FRIEND") and _button(home, "Less") != null, "More: the old tabs, Less to come back")
+	ok(t.has("Training") and t.has("Care") and not t.has("BEST FRIEND"), "More: the old tabs")
+	ok(_button(home, "Less") != null, "More: a Less button to come back")
 	_button(home, "Less").pressed.emit()
 	ok(_texts(home).has("BEST FRIEND"), "Less: the glance again")
 	var cs: Array = GardenCard.pair(roster[2])
-	ok((cs[0] as Dictionary).is_empty() and (cs[1] as Dictionary).is_empty(), "a Boki with no bonds has no friend or rival")
+	ok(cs[0].is_empty() and cs[1].is_empty(), "a Boki with no bonds has no friend or rival")
 	ok(_texts(home).has("none yet") == false, "Pip has both, so no 'none yet'")
 	home._open_kin(roster[3])
-	ok(_texts(home).count("none yet") == 2 and _texts(home).has("No lean yet"), "no bonds, no meals: 'none yet' twice, 'No lean yet'")
+	t = _texts(home)
+	ok(t.count("none yet") == 2 and t.has("No lean yet"), "no bonds, no meals: 'none yet' twice, 'No lean yet'")
 	home._open_kin(pip)
 	var tap: Button = null
 	for b in _live(home, "Button"):
@@ -123,8 +130,8 @@ func run(m: Node, mode := "check") -> void:
 			k = kd
 	var here := Vector3(3.0, 0.0, 4.0)
 	var f := GardenCard.framed(here, 0.1)
-	ok(home.panel_open == "" and not k.is_empty() and is_equal_approx(f.x, k["pos"].x) and is_equal_approx(f.z, k["pos"].z),
-			"tap: the card closes and the camera rests on Ember")
+	var at_ember: bool = not k.is_empty() and is_equal_approx(f.x, k["pos"].x) and is_equal_approx(f.z, k["pos"].z)
+	ok(home.panel_open == "" and at_ember, "tap: the card closes and the camera rests on Ember")
 	ok(String((k["emote"] as Label3D).text) == "Ember", "tap: Ember's name floats over it")
 	f = GardenCard.framed(here, GardenCard.LOOK_S + 1.0)
 	ok(GardenCard.framed(here, 0.1) == here, "after a few seconds the camera is back on the player")

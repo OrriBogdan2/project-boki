@@ -25,3 +25,7 @@ Checks: `--raising-check` (new, all of the above but neglect), `--economy-check`
   gives no XP source at home [?]; needs an owner call.
 - Not verified: whether other players' clients see the meal tint (it rides on the kin record;
   nothing was added to the Net sync shape, so Net.VERSION is unchanged).
+
+## The Boki card in base mode
+
+With base_mode on the card opens as one glance (`GardenCard`, scripts/home/garden_card.gd): portrait, name, species, element and lean chips, mood today, best friend and rival (tap a portrait: the card closes and the camera rests on that Boki for 3 s), and the last two journal lines. Stats, traits, growth and the role links are behind **More**. It only reads the record. `--garden-card-check` covers it.
