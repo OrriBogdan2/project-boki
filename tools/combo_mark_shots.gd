@@ -4,7 +4,7 @@ extends "res://tools/vv_shots.gd"
 ## live Arena match (the Sparkle/Vex shot rig, tools/vv_shots.gd: title fade lifted, camera driven). Needs a
 ## renderer (jobq submit --needs gpu).
 
-const PLATE_CROP := Vector2i(220, 150)   # px round the target's plate (scaled 2x)
+const PLATE_CROP := Vector2i(220, 190)   # px round the target's plate (scaled 2x)
 const ARCHES := ["thief", "gunslinger", "mage"]
 
 var tool: RefCounted
@@ -43,7 +43,7 @@ func _kit(arch: String) -> void:
 
 func _plate(file: String) -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	(strips[file] as Array).append(_crop(img, T.position + Vector3(0, 2.4, 0), PLATE_CROP, 2.0))
+	(strips[file] as Array).append(_crop(img, T.position + Vector3(0, 3.0, 0), PLATE_CROP, 2.0))
 
 ## Strip files go straight into the shots dir (no hero prefix).
 func _save_strip(file: String) -> void:

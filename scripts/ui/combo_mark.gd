@@ -31,6 +31,7 @@ static func draw(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -
 	var d: Dictionary = viewer.ak.combo_read(e)
 	if d.is_empty():
 		return
+	at.y -= float(d.get("lift", 0.0))     # a kit with its own marker in that spot (Sparkle's Static)
 	var col: Color = viewer.ak.res_col()
 	var hot := time - float(e.get_meta(PAY_KEY, -9.0)) < FLASH_TAG
 	var frac := clampf(float(d["left"]) / maxf(0.01, float(d["total"])), 0.0, 1.0)
