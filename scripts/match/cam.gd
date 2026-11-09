@@ -75,6 +75,13 @@ var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
 var cast_left := 0.0
 var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
 
+## The camera abyss zoom [game data names it; its size is ours]: under an island's lip over the abyss the view
+## pulls out with your depth (HunterMove.abyss_band of the slow-fall band, abyss_cam_zoom at its bottom), so
+## the rim you need to get back to stays on screen, and eases back as the lift returns you. Match sets
+## abyss_depth every frame (0 on land); on top of the match's own zoom, like a cast's wider view.
+var abyss_depth := 0.0        # m under the lip over the abyss
+var abyss_k := 0.0            # 0 = the usual view, 1 = the full pull-out
+
 var style_id := ""
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
@@ -149,6 +156,10 @@ func _tick_cast(delta: float) -> void:
 func cast_wide() -> float:
 	return 1.0 + cast_zoom * cast_k
 
+## The zoom the abyss adds right now.
+func abyss_wide() -> float:
+	return 1.0 + HunterMove.abyss_cam_zoom * abyss_k
+
 func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
 	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
@@ -199,6 +210,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
+	abyss_k = lerpf(abyss_k, HunterMove.abyss_band(abyss_depth), 1.0 - exp(-HunterMove.abyss_cam_ease * delta))
 	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
@@ -217,7 +229,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
-	var z := zoom * (1.0 + pull) * cast_wide()
+	var z := zoom * (1.0 + pull) * cast_wide() * abyss_wide()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)

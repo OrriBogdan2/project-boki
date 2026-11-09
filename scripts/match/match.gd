@@ -3640,6 +3640,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	cam.abyss_depth = 0.0            # only a live fall under a lip pulls the view out (set below)
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3685,6 +3686,7 @@ func _process(delta: float) -> void:
 			var alt := player_altitude()
 			if alt > 4.0:
 				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
+			cam.abyss_depth = player.lip_y - player.pos.y if player.below_lip else 0.0
 			cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
 		cam.follow(player.render_pos(alpha), delta, not player.dropping)

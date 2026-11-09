@@ -26,6 +26,8 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var abyss_cam_zoom: float = _phys["abyss_cam_zoom"]
+static var abyss_cam_ease: float = _phys["abyss_cam_ease"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -91,8 +93,12 @@ static func fall_cap(h: Hunter) -> float:
 		return h.ak.dive_speed()
 	if not h.below_lip:
 		return fall_max
-	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
-	return lerpf(fall_max, abyss_fall_max, k)
+	return lerpf(fall_max, abyss_fall_max, abyss_band(h.lip_y - h.pos.y))
+
+## How far into the abyss slow-fall band `depth` metres under the lip is: 0 at abyss_slow_from, 1 at
+## abyss_slow_to (the fall cap and the camera abyss zoom both follow it).
+static func abyss_band(depth: float) -> float:
+	return clampf((depth - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
 
 ## Speed onto a ledge you climb (m/s), from a hunter's run speed.
 static func mantle_launch(run_speed: float) -> float:
