@@ -4,24 +4,35 @@ Text blocks for `batch/build_jobs.py` and the specs. Rules: STYLE_CANON_V2.md. Q
 
 Three wording rules used throughout, all learned from the tests:
 - **"Shade" is on the body, "shadow" is on the floor.** Test c said "one soft shadow" and got floor shadows. The blocks never use "shadow" for body shading.
-- **Say what to draw, not what to leave out.** Naming an unwanted thing often adds it (owner taste notes). Plain cheeks are "the same flat colour as the face", not "no blush".
+- **Name finishes to avoid, never objects to avoid.** "No gradients, no gloss on fur" works (test a used it). Naming an unwanted object (wheels, straps, a band) often adds it (owner taste notes), so construction fixes are always written as what to draw.
 - **Colours and counts are written in words in every prompt.** Eye or body colour changed on 8 of the 26 Boki in the style-a tests.
 
 ## 1. Order of work
 1. **Hold list first** (section 7): about 20 Boki get a construction redesign and an owner OK before any style render.
 2. **Anchors** (section 6): six human-finished cards. Until they exist, use the interim anchors listed there.
 3. **Pilot**: 12 Boki, 2 per face template, mixed stages, at least 3 dark and 2 furry (suggested: Vespyx, Coolatee, Chandelotl, Glassolotl, Rimink, Glaivyx, Lockatara, Ringrove, Lurklet, Cindermaw, Sarcobra, Aurostag). Owner approves the pilot before the other 200.
-4. **Per Boki: card, then sheet, then portrait.** The card is made from the approved card. The sheet and portrait are made from their old versions plus the new V2 card, so each Boki's three assets agree. 3 runs each; pick by checklist.
+4. **Per Boki: card, then sheet, then portrait.** The card is made from the approved card (route A), or from the sheet if that returns a near-copy (route B, section 1b). The sheet and portrait are made from their old versions plus the new V2 card, so each Boki's three assets agree. 3 runs each; pick by checklist.
 5. **Post, every image**: cut out and re-lay on exact #E8E8EE (the model lands near 220, 218, 231), `recrop.py` to a fill of 0.84, then the QA strip.
 6. Heroes and cutouts are rebuilt from the V2 cards. Old files stay as `*_v1.jpg`.
 
 Per-Boki data the jobs need (one small table, built once by an agent reading each approved sheet, then spot-checked): `arch` (face template: cute, pretty, sleek, fast, tough, creepy, majestic; many Boki have none on record), `cols` (main colours and eye colour in words; most specs already have "Main colours"), `counts` (legs, wings, tails, heads, horns, and the count of the signature part), `dark` and `furry` flags, and `fix` (one sentence, only for small construction cleanups).
 
+## 1b. Answer to the 16:51 finding in the brief (which levers this uses, and why)
+The finding: the style-a prompt barely changes most cards, because image 1 is the only reference. I measured it on all 26 Boki tested (the QA strip's `soft` number, the share of creature pixels on a soft ramp): cards average 0.36, style-a runs average 0.21, and 40 of 52 runs reach 0.25 or lower. Four Boki never do (Glazolm, Arcestrel, Maulangler, Siegephant). So the wording did flatten the gradients. What it copied from image 1, and what the eye reads as "barely changed", is everything else: the line art, the amount of detail, where the shading sits, the highlights, blush and effects (Siegephant, Shinobant, Kitlet a_2, Glazolm, Arcestrel). I agree with the cause.
+
+| Lever | Used? | Why |
+|---|---|---|
+| 1. New flat-cel anchor as image 2 | **Yes, the main lever** | Section 6: six human-finished anchors, one per face template, so the style comes from a second image and not from wording alone |
+| 2. Image 1 for design only, the sheet instead of the card | **As the fallback (route B), not the default** | The approved poses live on the cards, and a sheet as image 1 changes the pose. The sheets are as glossy as the cards, so the swap does not remove the gloss: what it removes is the option of returning a near-copy. Route A (`RS_CARD`: card + anchor) keeps the pose. Route B (`RS_CARD_B`: sheet + anchor + pose in words) forces a redraw. Per Boki: 3 runs of A; if none passes checklist items 7 to 12, 3 runs of B; if B fails, human pass. The pilot runs both routes on all 12 to get real pass rates. `RS_CARD` also now tells the model to ignore how image 1 is painted |
+| 3. Explicit negatives | **Yes for finishes, no for objects** | One sentence of finish negatives in `RENDER_V2` (gradients, airbrush, gloss on fur, skin and scales, texture, sparkles, glow halos). Blush is stated both ways (plain cheeks, no blush), because it survived whenever the prompt did not mention it (Siegephant, Druzemole, Glazolm, Zipling). If the pilot shows the word adds blush, drop that half. Objects stay positive-only |
+| 4. Posterise and re-line in post | **No** | Tried here on three images (median-cut to 24 and 12 colours plus a mode filter). It drops accent colours (Siegephant's yellow eyes and ivory tusks turn grey, Zipling's purple zip turns grey), blotches dark fills and breaks Chandelotl's hood into patches. A version that works needs per-region flats built from the line art, which is a tool to build, not a switch. Post stays limited to the background fix and recrop |
+
 ## 2. Text blocks
 ```python
 RENDER_V2=("Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. "
  "Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. "
- "Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. ")
+ "Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. "
+ "No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. ")
 LINE_V2=("Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. "
  "Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. ")
 LINE_FINAL=LINE_V2.replace("the outer silhouette line is the heaviest,","the outer silhouette line is very heavy and bold,")  # finals and legendaries (5:2:1)
@@ -40,7 +51,7 @@ FACE_V2['fast']=FACE_V2['sleek']
 FACE_KEEP="Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. "
 def CHEEKS_V2(stage,arch):
     if stage=='baby' or (stage=='mid' and arch=='cute'): return "Cheeks: two small flat pink ovals with hard edges. "
-    return "Cheeks: plain, the same flat colour as the rest of the face. "
+    return "Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. "
 FRAME_V2=("Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. "
  "Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. ")
 def STYLE_V2(stage,arch,dark=False,furry=False):
@@ -55,9 +66,20 @@ SRV2='briefs/boki-art/style_refs/v2/anchor_%s.png'   # % face template; 'fast' u
 def RS_CARD(name,stage,arch,cols,counts,dark=False,furry=False,fix=''):
     return ("Redraw the creature in image 1 as one single character illustration: "+name+". "
      "Image 1 is the design and the pose: keep exactly the same creature, body plan, proportions, pose, view, facing direction, face, markings and signature parts. Add nothing, remove nothing, move nothing. "
+     "Ignore how image 1 is painted: its soft shading, gloss, highlights, glow and texture are not to be copied. "
      "Its colours must not change: "+cols+". Its parts, counted, must match image 1: "+counts+". "
      "Image 2 is the style guide only: match its line, flat shading, eye finish and amount of detail exactly, but never copy its creature, face, colours or pose. "
      "Change ONLY how it is drawn. "+STYLE_V2(stage,arch,dark,furry)
+     +(("One construction cleanup is allowed, and nothing else about the design changes: "+fix+" ") if fix else "")+FRAME_V2)
+```
+**Card, route B** (fallback when route A returns a near-copy). refs: `[<approved sheet>, SRV2 % arch]`, 1:1, 2K, 3 runs. `pose` is the card's pose string from its spec.
+```python
+def RS_CARD_B(name,stage,arch,cols,counts,pose,dark=False,furry=False,fix=''):
+    return ("Draw one single character illustration of "+name+", the creature shown from four sides in image 1. "
+     "Image 1 is the design only: keep exactly the same creature, body plan, proportions, face, markings and signature parts, with nothing added or removed. Ignore how image 1 is painted, and do not copy its layout: draw the creature once. "
+     "Its colours must not change: "+cols+". Its parts, counted: "+counts+". "
+     "Image 2 is the style guide only: match its line, flat shading, eye finish and amount of detail exactly, but never copy its creature, face, colours or pose. "
+     "Pose: "+pose+", in a three-quarter view with both eyes showing. "+STYLE_V2(stage,arch,dark,furry)
      +(("One construction cleanup is allowed, and nothing else about the design changes: "+fix+" ") if fix else "")+FRAME_V2)
 ```
 **Sheet.** refs: `[<old sheet>, <new V2 card>]`, 16:9, 2K, 2 runs. Sheets are flats (canon section 10).

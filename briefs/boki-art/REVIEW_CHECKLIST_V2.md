@@ -25,7 +25,7 @@ out.save(p.rsplit('.',1)[0]+'_qa.jpg',quality=85)
 
 | Number | Pass | What it means |
 |---|---|---|
-| `soft` | 0.25 or less (HARD above 0.30) | share of creature pixels on a soft ramp. Measured on round 6: the six current cards 0.30 to 0.42, tests a and c 0.11 to 0.24, test b 0.47 to 0.67. Calibrated on 36 images only, so re-check the threshold after the pilot. Cards and portraits only (sheets: run it on one cropped view) |
+| `soft` | above 0.30 = HARD fail; 0.25 or less = go on to item 7 | share of creature pixels on a soft ramp. Measured on the 26 Boki tested: current cards 0.20 to 0.52 (mean 0.36), style-a runs 0.11 to 0.30 (mean 0.21). It catches painterly and textured renders. It does not see slow gradients on big smooth shapes (the glossy Coolatee, Zipling and Hydrangor cards already score 0.25 or less), so a low number is not a pass: item 7 by eye decides. Cards and portraits only (sheets: run it on one cropped view) |
 | `bg` | each channel within 8 of 232, 232, 238 | the model does not hit the hex: every round-6 image came out near 220, 218, 231, a lilac tint. Fix in post (cut out, re-lay on #E8E8EE), not by re-rolling |
 | `fill` | 0.80 to 0.88 | 8% margin. Current cards run 0.92 to 0.95. Fix with `recrop.py`, not by re-rolling |
 

@@ -10,6 +10,7 @@ What round 7 showed. Style a holds up on simple, light or mid-value designs: `st
 - **The outline turns pure black in about 1 run in 8** (Spanglin a_2, Kitlet a_1, Zipling a_2, Hydrangor a_1, Maulangler a_1). Section 1.
 - **Blush, mist, steam, drips and inner glow survive** (Siegephant, Druzemole, Coolatee, Chuggamus, Quivertoad, Cindermaw's ribs). Sections 6 and 8.
 - **Busy or strapped designs barely change** (Siegephant, Shinobant, Chuggamus). A style pass cannot fix a design: see the hold list in RERENDER_PROMPTS.md section 7.
+- **The model copies the card's line, detail, highlights and shade placement**, because the card was its only reference. Gradients did flatten (measured), but the look stays close to the card. The fix is a second image, the new style anchor, not more wording: RERENDER_PROMPTS.md section 1b.
 
 ## The recipe in one line
 Flat fills, one hard shade shape per colour, a bold even line (heavier outside than inside) in a dark shade of the local colour, darks kept dark, shine only on truly glossy materials, detail in three zones, a face template per archetype, blush on babies only.
