@@ -4680,3 +4680,45 @@ ART selenfin 8.2 briefs/boki-art/cards/Selenfin.jpg kind=card
 ART skateron 8.5 briefs/boki-art/cards/Skateron.jpg kind=card
 ART snuffapi 8.4 briefs/boki-art/cards/Snuffapi.jpg kind=card
 ART umbrathere 8.5 briefs/boki-art/cards/Umbrathere.jpg kind=card
+
+## 07:25Z — art session: fast lane f2 f3 f5
+ART bladypus 7.8 briefs/boki-art/batch/out/c_bladypus_w32_3.jpg kind=concept status=owner-review
+ART bullsfrog 8.0 briefs/boki-art/batch/out/c_bullsfrog_w32_1.jpg kind=concept status=owner-review
+ART cetorgan 8.4 briefs/boki-art/batch/out/c_cetorgan_e_w32_2.jpg kind=concept status=owner-review
+ART chimelop 8.1 briefs/boki-art/batch/out/c_chimelop_w32_1.jpg kind=concept status=owner-review
+ART clinkpede 8.4 briefs/boki-art/batch/out/c_clinkpede_n_w32_1.jpg kind=concept status=owner-review
+ART glaciammoth 7.8 briefs/boki-art/batch/out/c_glaciammoth_n_w32_1.jpg kind=concept status=owner-review
+ART glazolm 8.3 briefs/boki-art/batch/out/c_glazolm_w32_2.jpg kind=concept status=owner-review
+ART grammite 8.4 briefs/boki-art/batch/out/c_grammite_n_w32_1.jpg kind=concept status=owner-review
+ART lockatara 8.6 briefs/boki-art/turnarounds/Lockatara.jpg kind=turnaround
+ART prowyak 8.6 briefs/boki-art/turnarounds/Prowyak.jpg kind=turnaround
+ART puffamus 8.6 briefs/boki-art/evolutions/Puffamus.jpg kind=turnaround
+ART ringrove 8.5 briefs/boki-art/turnarounds/Ringrove.jpg kind=turnaround
+ART snuffapi 8.5 briefs/boki-art/turnarounds/Snuffapi.jpg kind=turnaround
+ART soakybara 8.5 briefs/boki-art/turnarounds/Soakybara.jpg kind=turnaround
+ART sporcupine 8.5 briefs/boki-art/evolutions/Sporcupine.jpg kind=turnaround
+ART blossmink 7.8 briefs/boki-art/batch/out/blossmink_e_w32_2.jpg kind=turnaround status=owner-review
+ART hydrangor 8.5 briefs/boki-art/batch/out/c_hydrangor_n_w32_3.jpg kind=concept status=owner-review
+ART loafhopper 7.6 briefs/boki-art/batch/out/c_loafhopper_w32_1.jpg kind=concept status=owner-review
+ART malletary 8.2 briefs/boki-art/batch/out/c_malletary_n_w32_3.jpg kind=concept status=owner-review
+ART maracoil 8.5 briefs/boki-art/batch/out/c_maracoil_w32_2.jpg kind=concept status=owner-review
+ART morelkin 8.7 briefs/boki-art/batch/out/c_morelkin_n_w32_3.jpg kind=concept status=owner-review
+ART nymphane 8.3 briefs/boki-art/batch/out/c_nymphane_n_w32_3.jpg kind=concept status=owner-review
+ART reelacine 8.5 briefs/boki-art/batch/out/c_reelacine_n_w32_2.jpg kind=concept status=owner-review
+ART sarcobra 8.5 briefs/boki-art/batch/out/c_sarcobra_n_w32_3.jpg kind=concept status=owner-review
+ART sundormouse 7.9 briefs/boki-art/batch/out/c_sundormouse_w32_3.jpg kind=concept status=owner-review
+ART tootle 8.5 briefs/boki-art/batch/out/c_tootle_n_w32_1.jpg kind=concept status=owner-review
+ART torpecone 8.5 briefs/boki-art/batch/out/c_torpecone_n_w32_3.jpg kind=concept status=owner-review
+ART prismander 8.5 briefs/boki-art/turnarounds/Prismander.jpg kind=turnaround
+ART barokat 8.5 briefs/boki-art/cards/Barokat.jpg kind=card
+ART bellowary 8.3 briefs/boki-art/cards/Bellowary.jpg kind=card
+ART boltstrich 8.5 briefs/boki-art/cards/Boltstrich.jpg kind=card
+ART buckleron 8.5 briefs/boki-art/cards/Buckleron.jpg kind=card
+ART canvastross 8.3 briefs/boki-art/cards/Canvastross.jpg kind=card
+ART chuggamus 8.3 briefs/boki-art/cards/Chuggamus.jpg kind=card
+ART frigatee 8.5 briefs/boki-art/cards/Frigatee.jpg kind=card
+ART gloamshell 8.4 briefs/boki-art/cards/Gloamshell.jpg kind=card
+ART puffamus 8.5 briefs/boki-art/cards/Puffamus.jpg kind=card
+ART sporcupine 7.8 briefs/boki-art/batch/out/sporcupine_card2_w32_1.jpg kind=card status=owner-review
+ART terrarimit 7.9 briefs/boki-art/batch/out/terrarimit_e_w32_4.jpg kind=turnaround status=owner-review
+ART voltalon 7.8 briefs/boki-art/batch/out/voltalon_r_w32_2.jpg kind=turnaround status=owner-review
