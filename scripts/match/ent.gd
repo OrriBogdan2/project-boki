@@ -144,7 +144,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	flash_t = 0.12
+	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
