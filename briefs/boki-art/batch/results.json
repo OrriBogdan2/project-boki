@@ -16628,5 +16628,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_reelacine_e_w29_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_reelacine_e_w29",
+    "name": "Reelacine (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_reelacine_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine_e_w29",
+    "name": "Reelacine (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reelacine_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra_e_w29",
+    "name": "Sarcobra (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra_e_w29",
+    "name": "Sarcobra (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_e_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w29",
+    "name": "Tootle (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_sarcobra_e_w29",
+    "name": "Sarcobra (concept edit)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_sarcobra_e_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w29",
+    "name": "Tootle (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e_w29",
+    "name": "Tootle (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_w29_3.jpg",
+    "ok": true
   }
 ]
