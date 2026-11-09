@@ -47638,5 +47638,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_lodestick_e1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_lodestick_e2",
+    "name": "Lodestick (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_lodestick_e2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestick_e2",
+    "name": "Lodestick (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_lodestick_e2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestick_e2",
+    "name": "Lodestick (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_lodestick_e2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_lodestick_e2",
+    "name": "Lodestick (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_lodestick_e2_3.jpg",
+    "ok": true
   }
 ]
