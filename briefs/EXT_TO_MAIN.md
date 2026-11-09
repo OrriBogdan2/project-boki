@@ -3883,3 +3883,5 @@ READY ext/grimble-stretch-v2 ba158402c (supersedes READY ext/grimble-stretch d6e
 - GPU (match + close cams): before 20261109-021730-12404 (purple shards), after 20261109-025605-12965 (textured, no shards). health --strict OK.
 
 READY ext/anim-time-sable-rebased 990e28745 (supersedes ext/anim-time-sable 53f658240: same Sable timing change merged with origin/main d255acbee; one conflict in scripts/heroes/warden_clips.gd, main already had the per-move "fade" so main's lines kept plus one local fade for the upper channel; --dancer-combo-check 132/0, --check 0 failures, health --strict OK)
+
+READY ext/agent-briefs-rebased 347830615 (supersedes ext/agent-briefs af480ffa8, the TOWN_HUB.md READY: briefs/TOWN_HUB.md town square hub design doc only, low priority, no code; af480ffa8 merged with origin/main d255acbee with NO conflicts (main has no briefs/ files, so CAMERA_DEPTH.md and camera_depth/*.png came through unchanged); --check 0 failures, health --strict OK)
