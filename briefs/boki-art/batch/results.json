@@ -11280,5 +11280,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_grainspin_e_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_torpecone",
+    "name": "Torpecone (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_torpecone_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone",
+    "name": "Torpecone (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_torpecone_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_bathilus",
+    "name": "Bathilus",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_bathilus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_torpecone",
+    "name": "Torpecone (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_torpecone_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_e",
+    "name": "Pinster (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pinster_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_tootle_e",
+    "name": "Tootle (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_tootle_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_e",
+    "name": "Pinster (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pinster_e_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_reelacine_e",
+    "name": "Reelacine (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_reelacine_e_1.jpg",
+    "ok": true
   }
 ]
