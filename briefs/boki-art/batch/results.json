@@ -21934,5 +21934,96 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/spirevark_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "spirevark_card",
+    "name": "Spirevark (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/spirevark_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thrumbird_card",
+    "name": "Thrumbird (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thrumbird_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thrumbird_card",
+    "name": "Thrumbird (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/thrumbird_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card",
+    "name": "Umbrathere (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrathere_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrathere_card",
+    "name": "Umbrathere (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrathere_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w30",
+    "name": "Barokat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w30",
+    "name": "Barokat (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w30",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_pe_w30",
+    "name": "Bellowary (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_boltstrich_pe_w30",
+    "name": "Boltstrich (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_boltstrich_pe_w30_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_pe_w30",
+    "name": "Bellowary (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_pe_w30_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_pe_w30",
+    "name": "Bellowary (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_pe_w30_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "zephyrak_card",
+    "name": "Zephyrak (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/zephyrak_card_1.jpg",
+    "ok": true
   }
 ]
