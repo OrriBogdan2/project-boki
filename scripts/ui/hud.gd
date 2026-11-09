@@ -2912,7 +2912,7 @@ func _build_pack() -> void:
 	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
-	if loot_open == null:
+	if loot_open == null and not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
 	var hint := UI.para(LoadoutPanel.HINT, 12)
 	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0

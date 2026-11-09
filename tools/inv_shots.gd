@@ -2,7 +2,7 @@ extends RefCounted
 ## --inv-shots --shots-dir=<dir>: the in-match inventory at whatever resolution the window has (run
 ## under xvfb with a renderer, --resolution WxH). inv_pack: the backpack window with a full loadout;
 ## inv_loot: a deathbox with gear beside it; inv_tip: the compare tooltip on a hovered backpack piece
-## (only when the loadout window offers hover_demo). Files carry the viewport height in their name.
+## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the height.
 
 var main: Node
 var captions: Array = []
@@ -14,6 +14,9 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--shots-size="):
+			var wh := String(a).substr(13).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
@@ -28,9 +31,9 @@ func run(main_node: Node) -> void:
 	await _frames(8)
 	var tag := "%dp" % int(main.get_viewport().get_visible_rect().size.y)
 	await _shot("inv_pack_" + tag, "Backpack window with a full loadout")
-	var lp = m.hud.pack_panel
-	if lp.has_method("hover_demo"):
-		lp.call("hover_demo", "pack", 0)
+	var found: Array = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)
+	if not found.is_empty():
+		found[0].call("hover_demo", "pack", 0)
 		await _frames(8)
 		await _shot("inv_tip_" + tag, "Compare tooltip on a backpack piece: only the changed numbers")
 	m.hud.toggle_pack()

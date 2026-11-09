@@ -99,7 +99,7 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	for k in UtilityBelt.KEYS:
 		keys.append(Settings.key_cap(k))
 	ok(keys.all(func(k): return caps.has(k)), "every glove and utility slot shows its key: %s" % [keys])
-	ok(caps.has("Armor") and caps.has("Boots") and caps.has("Utility"), "the other slots are named")
+	ok(caps.has("Armor") and caps.has("Boots") and caps.has("Glove"), "the other slots are named")
 	var lp: LoadoutPanel = pc.find_children("*", "LoadoutPanel", true, false)[0]
 	lp.hover_demo("pack", 0)
 	await _frames(main, 2)

@@ -8,7 +8,7 @@ extends Node
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
-const TILE_H := 56.0
+const TILE_H := 48.0
 const BADGE := 30.0
 const HINT := "Point at a thing:  Enter wears or takes it off  ·  Delete drops it  ·  or drag it onto a slot"
 
@@ -33,12 +33,10 @@ static func fill(m: Match, pc: PanelContainer, v: VBoxContainer, on_change: Call
 	return lp._fill(v)
 
 func _fill(v: VBoxContainer) -> Array:
-	v.add_child(UI.label("Wearing", 12, MUTED, UI.caps))
 	var worn := UI.hbox(6)
 	for slot in Gear.SLOTS.size():
 		worn.add_child(_worn_tile(slot))
 	v.add_child(worn)
-	v.add_child(UI.label("Utility belt", 12, MUTED, UI.caps))
 	var belt := UI.hbox(6)
 	for k in UtilityBelt.SLOTS:
 		belt.add_child(_belt_tile(k))
@@ -65,7 +63,7 @@ func _worn_tile(slot: int) -> PanelContainer:
 		t = _tile(caption, title, "", MUTED, "empty")
 	else:
 		var it := Loot.gear(String(g["id"]), int(g["rar"]))
-		t = _tile(caption, title, Loot.icon_of(it), Loot.col_of(it), Loot.name_of(it))
+		t = _tile(caption, title, Loot.icon_of(it), Loot.col_of(it), String(Gear.ALL[it["id"]]["name"]))
 	t.set_drag_forwarding(_drag_worn.bind(slot, t), _can_drop_worn.bind(slot), _drop_worn.bind(slot))
 	_tip.attach(t, func(): return _lines("worn", slot), func(): _hover = {"kind": "worn", "i": slot},
 		func(): _hover = {})
@@ -77,10 +75,10 @@ func _belt_tile(k: int) -> PanelContainer:
 	var key := Settings.key_cap(UtilityBelt.KEYS[k])
 	var t: PanelContainer
 	if s.is_empty():
-		t = _tile(key, "Utility", "", MUTED, "empty")
+		t = _tile(key, "", "", MUTED, "empty")
 	else:
 		var id := String(s["id"])
-		t = _tile(key, "Utility", UtilityBelt.icon_of(id), UtilityBelt.col_of(id),
+		t = _tile(key, "", UtilityBelt.icon_of(id), UtilityBelt.col_of(id),
 			"%s x%d" % [UtilityBelt.name_of(id), int(s["n"])])
 	_tip.attach(t, func(): return BeltHud.tip(_p, k))
 	return t
@@ -103,17 +101,16 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	var head := UI.hbox(4)
 	if key != "":
 		head.add_child(_key_pill(key))
-	head.add_child(UI.label(slot_name, 11, MUTED, UI.caps))
-	v.add_child(head)
-	var line := UI.hbox(4)
+	var caption := UI.label(slot_name, 11, MUTED, UI.caps)
+	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(caption)
 	if icon != "":
-		line.add_child(Icons.Glyph.new(icon, col, 16.0))
+		head.add_child(Icons.Glyph.new(icon, col, 16.0))
+	v.add_child(head)
 	var nm := UI.label(item_name, 12, col if icon != "" else Color(MUTED, 0.7), UI.semi)
 	nm.clip_text = true
 	nm.custom_minimum_size.x = 10.0
-	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line.add_child(nm)
-	v.add_child(line)
+	v.add_child(nm)
 	return t
 
 func _key_pill(key: String) -> Control:
