@@ -504,6 +504,161 @@
     "size": "2K"
   },
   {
+    "id": "briarlynx_e",
+    "name": "Briarlynx",
+    "refs": [
+      "briefs/boki-art/batch/out/briarlynx_2.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: turn the vine sleeves on its legs into thorns growing out of the fur with tawny fur showing between them, grow the briar hide over the hind legs too, and give it large serrated briar-leaf lynx ears. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "chandelotl_e",
+    "name": "Chandelotl",
+    "refs": [
+      "briefs/boki-art/batch/out/chandelotl_x_1.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: lay it out as four views in one row (front, three-quarter, side, back) with a true back view, remove the rainbow trail effects, give the body a little more mass and the head a bigger, more characterful face with narrowed eyes and a sly grin, and push the pink and rainbow prism colours stronger. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "blossmink_e",
+    "name": "Blossmink",
+    "refs": [
+      "briefs/boki-art/batch/out/blossmink_x_1.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: put the front view on all four legs like the side view, give it Ermink's ivory-and-ink face mask and belly, grow the blossoms out of moss clusters instead of loose petals, and add black ink-tipped claws and a hint of fang. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "amanitusk_e",
+    "name": "Amanitusk",
+    "refs": [
+      "briefs/boki-art/batch/out/amanitusk_x_2.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: remove the faded duplicate legs and shadows under the feet, merge the caps into one forward-swept spear-wedge across the shoulders, and replace the realistic pig face with a stylised battering-ram head of overlapping fungal plates with big tusks and a cocky grin. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "arcestrel_e",
+    "name": "Arcestrel",
+    "refs": [
+      "briefs/boki-art/batch/out/arcestrel_x_3.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make the crest a clear forked copper rod, turn the wing tips into solid copper conductor fins with banded coil joints, run a copper rod down the tail spine, enlarge the head with big orange eyes and a fierce grin, and show its talons tucked under the body in every view. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "bellowlet_r",
+    "name": "Bellowlet",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowary.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A near-spherical fluffy soot-black chick, its head as big as its body, tiny stub legs barely showing, almost no neck, the bellows as glowing ember ribs in its round belly, a little nozzle beak puffing sparks and a small brass nub crest. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: big orange eyes and a cocky little grin. Main colours: soot black and brass, with an ember-orange accent. Avoid: long legs, a long neck, a box or harness on its chest. Element: ember, shown clearly by glowing orange-red ember cracks and a few rising sparks. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "bucketmander_r",
+    "name": "Bucketmander",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A tiny tadpole-like salamander larva with a soft round body and a big head, no back legs yet, feathery gills, only a few short wooden stave plates on its back, a stubby stave-tipped tail fin and a thumb-sized raincloud puff above its head. No full barrel and no hoops around the body or limbs. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: tiny beady eyes and a big lazy grin. Main colours: wood brown and slate grey, with a yellow accent. Avoid: a barrel body, hoops or bands, a bucket it sits in. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "buckleron_r2",
+    "name": "Buckleron",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/style_refs/boki_style_ref_v3.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game: an endearing but dangerous creature built from one clear idea, a real animal fused with an object so that the object is part of its body. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Do not copy image 1's creatures, faces or colours. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. Image 2 is a style guide only: match the finish, line weight, shading and colour treatment of the creatures in image 2 exactly, but never copy their designs, faces or colours. A flat, wide sea limpet whose low domed shield shell grows straight out of its body with no brim or lip, cracked stone and iron plates with rivets and barnacles flowing down onto a thick plated snail-like foot, one big boss spike as the shell's peak, and two long eye stalks with a stubborn little face at the front. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: grumpy round eyes on stalks and a puffed, stubborn mouth. Main colours: dark iron and sea grey, with a barnacle-white and sea-green accent. Avoid: a helmet, a brim, legs, a toad face. Element: stone, shown clearly by rough rock plates, cracks and pebbles. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "chandelapi_r2",
+    "name": "Chandelapi",
+    "refs": [
+      "briefs/boki-art/turnarounds/Snuffapi.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A gaunt, towering spectral okapi with a long, drooping swan-like neck, its front half solid and its rear half dissolving into drifting violet smoke so it floats on its front legs, its antlers and ribcage one twisted wrought-iron chandelier frame growing from its skull and chest with wax candles fused in and violet flames, wax-drip stripes on its legs. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: calm, glowing violet eyes and a wry, eerie smile. Main colours: deep brown and wrought-iron black, with a violet flame accent. Avoid: chains above its head, a hanging frame, ankle cuffs, a realistic okapi. Element: shadow, shown clearly by inky black edges that fade into smoke, with a violet glow. Archetype: majestic: big and upright, with crown-like features and calm power.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "chimelop_r2",
+    "name": "Chimelop",
+    "refs": [
+      "briefs/boki-art/turnarounds/Echolop.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A long-limbed silver hare twice the size of image 1, caught mid-leap in every view with its body stretched and arched in the air, its ears swept back as huge scalloped silver bell-mouth flares like wings, a flared bell-shaped tail, much longer hind legs and silver ripple patterns down its back. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: calm, proud violet eyes and a gentle smile. Main colours: pale lavender and silver, with a moonlight accent. Avoid: crouching like image 1, hanging bells, clappers, sitting up like a person. Element: echo, shown clearly by gold sound rings rippling out from its body. Archetype: pretty: graceful curves and an elegant shape.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "cisternmander_r2",
+    "name": "Cisternmander",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the final evolved form of the creature in image 1's family: much bigger, stronger and more impressive, clearly a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A huge, low, wide salamander three times the size of image 1, whose back is an open cistern basin full of storm water with lightning arcing across it, its flanks plated with wooden stave ribs fused into its body (no hoops on its limbs or belly), a heavy wide jaw with a prow-like snout ridge, storm-charged fin spines along its tail. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Shown on all four legs in every view, body horizontal like a real animal, never rearing or sitting up like a person. Face: tiny eyes and a wide, slow, toothy grin. Main colours: wood brown and slate grey, with an electric-yellow accent. Avoid: hoops or bands around the legs or belly, a bucket on its back, standing upright. Element: storm, shown clearly by crackling electric-yellow sparks and small lightning arcs. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "coolatee_r",
+    "name": "Coolatee",
+    "refs": [
+      "briefs/boki-art/turnarounds/Frigatee.jpg"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the baby first form that later grows up into the creature in image 1: the same species and family, keeping its face shape, eye colour, main colours and core idea so anyone can tell they are related, but clearly a baby: much smaller, rounder and softer, with a bigger head, bigger eyes and short stubby limbs, and its object in a smaller, simpler, earlier form. It must not be image 1 shrunk down: a different, simpler body shape of its own. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A tiny manatee calf curled up like a round bean, mostly head, with stubby little flippers and a small frosted lid-shell patch grown between its shoulders, no latch. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: big, sleepy, sweet eyes and a tiny whiskery smile. Main colours: cream and frost blue, with a brass accent. Avoid: other creatures, the latch plate of image 1, looking like image 1. Element: frost, shown clearly by translucent ice-blue crystals and a faint cold mist. Archetype: cute: round soft shapes, a big head and short limbs.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "anchorbill_r2",
+    "name": "Anchorbill",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "prompt": "Creature-collector monster design for a fantasy action game. This creature is the middle form of the creature in image 1's family, bigger and older, and clearly not yet a final form. It must be a fundamental transformation, like a real creature-collector evolution, never the same creature with extra parts added or recoloured: change its body plan and proportions (for example round to long, low to tall, four legs to serpentine, ground to winged, small head to big horned head), give it a new main silhouette and a new pose, and turn its object or idea into something new and more developed rather than more of the same pieces. Keep only the family resemblance: the face shape, eye colour and palette. Do not copy image 1's pose, and ignore image 1's background. A stylised animal, not a realistic one: simple bold shapes, a slightly oversized head, a strong iconic silhouette that reads even as a solid shadow, a memorable face with its own expression, and some bite: teeth, claws, spikes, or even real weapons grown out of its body as if it was born with them, never held or strapped on. The idea runs through the whole body: the object's material and shapes repeat across its limbs, back, tail and face, never one thing sitting on, hanging from or strapped to another. Clearly an animal: no clothes, no human posture, no standing upright like a person, nothing held. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Render it exactly like image 1: soft hand-painted shading with a clean, fairly thin dark outline, not thick cartoon outlines, not flat cel shading, not realistic. Turnaround sheet: exactly four views in one row at the same scale, all four the same size (front, three-quarter, side, back), flat even light, plain pale grey background, whole body in frame, no floor, no shadow, no reflection, no faded or duplicate copies, no text. A squat, wide, low ground hornbill crouched on heavy iron-plated talons, whose casque IS the iron shank of an anchor growing out of the skull with no band, rim, ring or crown, its bill tip splitting into the two curved anchor flukes, anchor-fluke shapes repeated on its wing tips and tail, ivory and teal plumage and small rocks floating around it. Exactly four views (front, three-quarter, side, back) in one clean row, one creature only, no ghost or faded copies, no shadows under the feet. Face: heavy-lidded, stern sea-blue eyes and a grim, immovable frown. Main colours: ivory white and teal, with a dark iron accent. Avoid: a helmet, a crown, a band around the head, a perching upright bird, black feathers. Element: gravity, shown clearly by small rocks floating around it and a faint dark purple warp. Archetype: tough: blocky, wide and heavy, with a low stance.",
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
+    "id": "bellowary_f2",
+    "name": "Bellowary (female)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowary.jpg"
+    ],
+    "runs": 3,
+    "prompt": "Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: make it the female form: keep the brass chimney crest but make it shorter and slimmer, flared like a fluted brass trumpet growing straight from the skull (no tiara, crown or filigree), give it a warmer, paler blue-and-orange neck and a softer tail glow, and keep the brass leg spurs. Do not add anything else.",
+    "aspect": "16:9",
+    "size": "2K"
+  },
+  {
     "id": "chuggamus_r2",
     "name": "Chuggamus",
     "refs": [

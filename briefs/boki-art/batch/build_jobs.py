@@ -47,7 +47,7 @@ SPECS=[]
 def B(i,n,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[SR,SR3],'prompt':base(STYLE2+desc(body,face,cols,avoid,el,arch))})
 def U(i,n,ref): SPECS.append({'id':i+'_4k','name':n,'refs':[ref],'runs':1,'size':'4K','prompt':"Re-render image 1 at full quality: keep it exactly the same, the same creature, design, colours, every detail, the same views in the same layout and the same plain background. Only increase the sharpness and finish. Do not change, add or remove anything."})
 def X(i,n,ref,instr,runs=2): SPECS.append({'id':i,'name':n,'refs':[ref],'runs':runs,'prompt':"Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: "+instr+" Do not add anything else."})
-def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref,SR3],'prompt':evo(rel,STYLE2+desc(body,face,cols,avoid,el,arch)),'runs':3 if rel in ('baby','mid') else 2})
+def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch)),'runs':3 if rel in ('baby','mid') else 2})
 import glob
 for _f in sorted(glob.glob(str(HERE/'specs_*.py'))): exec(open(_f).read())
 jobs=json.loads((HERE/'jobs.json').read_text()) if (HERE/'jobs.json').exists() else []
