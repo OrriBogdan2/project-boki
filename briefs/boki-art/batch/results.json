@@ -4917,5 +4917,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_chandelotl_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_dragonkite",
+    "name": "Dragonkite (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_dragonkite",
+    "name": "Dragonkite (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_dragonkite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl",
+    "name": "Eclipsowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frothisk",
+    "name": "Frothisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_frothisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock",
+    "name": "Forgebrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_eclipsowl",
+    "name": "Eclipsowl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_eclipsowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_frothisk",
+    "name": "Frothisk (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_frothisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_forgebrock",
+    "name": "Forgebrock (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_forgebrock_1.jpg",
+    "ok": true
   }
 ]
