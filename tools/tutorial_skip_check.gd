@@ -129,6 +129,7 @@ func _farm_save() -> Dictionary:
 
 func _home():
 	Save.d = _farm_save()
+	ClassUnlock.choose_starters([ClassUnlock.starters()[0]])      # (picked before the farm comes up)
 	HomeLayout.ensure(Save.d)
 	Save.d["stats"] = {"extracts": 0, "bosses": 0, "caught": 0, "harvested": 0, "hatched": 0, "fb_built": 0}
 	Save.d["extracts"] = 0
