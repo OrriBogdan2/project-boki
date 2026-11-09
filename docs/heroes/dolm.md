@@ -304,3 +304,18 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   each rock event carries its own direction, so the arc needs no new Net field (Net.VERSION unchanged).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB Quakefall, tap | none in the sheet | 0.2 s tap window, an instant slam just ahead; 1.0 | match (owner item 61) |
+| RMB, hold (charge) | charge 1.0-1.5 s: "she stood still except for jumps and punches" (3 casts); walking open question 3 | up to 0.45 s (item 61), 0.55 of a run, jump leaps, punch lunges | owner item 61 ("he can walk slowly"); the source's 1.0-1.5 s charge is overridden |
+| RMB, hop and slam | a short hop forward, then the two-fist smash | a 0.25 s hop (the move keys nudge the landing), slam on landing; free after | match |
+| E Stone Row | rocks up within one frame (0.25 s) after a red flash; she is not seen walking | a 0.2 s ground tell, instant rocks, no lock; 1.0 | match |
+| Facing | she faces the cursor | cursor throughout | match |

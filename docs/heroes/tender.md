@@ -166,3 +166,20 @@ Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer
 - X: the shared ult base `HeroUlt` (`scripts/arch/hero_ult.gd`, byte-identical across the six ult branches) plugs into main's X path: `HunterKeys.ult_pressed` (the `hunter_ult` key, the level gate) calls the kit's `cast_ult`, which returns `HeroUlt.press(self, _start_call)` (the cooldown in `cd["x"]`, the recast, a cast id); the kit also overrides `has_ult`, `ult_running`, `ult_recast`. Numbers are under `"x"` in `content/archetypes/tender.json`. A downed online teammate rides home on the existing "carry" event and stands up through "rev".
 - Net: unchanged (0.16.0, main's); the ult adds no sync shape. The carry uses the existing "carry" event; heals and revives reuse "heal" and "rev". The Burrseed area and the thrown disc are local looks; remote players see the existing Net rings.
 - Checks: `--support-check` (all), `--tender-combo-check` (support + combos, `tools/care_combo_check.gd`).
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB Burrseed, wind-up | hold to aim, a lane up about 1 s; walking unmeasured | a fixed 1.0 s at 0.5 (`wind_move`, owner item 118), a 6 m dotted lane; a stun, Hex or going down cancels | match (owner) |
+| RMB, throw and after | a cast flick, a bright flare; free | throws itself at the end, the aim sampled then; 1.0 | match (owner) |
+| E Hearthlight, summon | raised hand; the zone follows her | instant, zone follows 2.5 s; 1.0 | match |
+| E, recast throw | near-instant to the cursor | instant; 1.0 | match |
+| Facing | torso on the cursor, legs go the way she moves | cursor throughout | match |
+
+The half speed in the wind-up is inside the owner's item 118; no source frame measures it.

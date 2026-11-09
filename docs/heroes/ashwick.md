@@ -243,3 +243,21 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB Cinder Shot, aim | "Felix does not stop moving"; lane about 0.4 s | hold 0.15 s then a lane while held; 1.0 | match |
+| RMB, release | quick forward arm thrust | instant; 1.0 | match |
+| E Furnace Cloak, cast | arms flung wide about 0.2 s, then the blast; walking unmeasured | instant on the press (owner item 11), 0.24-0.25 s arms-out pose, no lock; 1.0 | match (owner) |
+| E, shield | the ring hugs him 2.5-3 s; he is free | free for 3 s | match |
+| Facing | faces the aim | cursor throughout | match |
+
+For comparison, not in this table's scope: the LMB's 0.6 for 0.35 s after release has no support in the footage (the sheet says
+"keep the wiki value"); it belongs to the LMB audit.

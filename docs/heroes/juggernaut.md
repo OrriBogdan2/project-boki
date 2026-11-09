@@ -347,3 +347,23 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB tap, Finishing Slam wind-up | 0.6 s cocked low; walking unmeasured | 0.6 s at 0.6 | listed, unchanged (no measure) |
+| RMB tap, strike and after | long low recovery on heavy moves (sheet, body language) | none locked; 1.0 | listed, unchanged (unmeasured) |
+| RMB hold, Lunge charge | runs slower: 85-95 px/s against 104 median and 113-124 plain runs (0178-0181, 0198-0208), about 0.8; can jump | **was 1.0, now 0.8** (`rmb.lunge.hold_move`); jump still allowed | **fixed**: `--juggernaut-combo-check` "walks at 0.8 of a run while charging" and "released ... back to full" |
+| RMB release, Lunge | about 5 m in about 0.2 s, then stops with a burst | 4.5-7.5 m dash (`lunge`), then 1.0 | match |
+| RMB air, Meteor Drop | hang, crash, about 0.5 s low recovery (412.0-413.9 s) | planted 0.2 s, then 0.3 rising to 1.0 over 0.5 s | match |
+| E Warchain, throw | skillshot; no lock seen | no lock; 1.0 | match |
+| E, hooked | the tether stays on while he walks (0305-0317) | stays on 5 s; free walk, jump, glide, dash | match |
+| Facing | upper body follows the cursor with the blade | cursor throughout; the Lunge flies along the aim at the release | match |
+
+The Slam wind-up and recovery are the only open rows; the sheet's frames (a red lane, no body motion read) do not settle them.

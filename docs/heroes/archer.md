@@ -206,3 +206,20 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB Heavy Shot, hold | same draw pose as the LMB draw, which "walks slowly" (0111-0116); no separate RMB measure | 0.38 of a run while held, up to 3 s (`rmb.pin.hold_move`); the LMB draw is 0.7 | owner item 114 ("she is slowed while holding RMB"); the number is ours, unmeasured |
+| RMB, release | one-frame snap, little recoil | loose at once; 1.0 | match |
+| E Hail Wall, cast | instant, bow raised high; no stop seen | a 0.35 s lob tell, no lock; 1.0 | match |
+| E, rain | she walks on | the wall stands 4.4 s and she is free | match |
+| Facing | body turned side-on to the cursor while drawing | cursor throughout | match |
+
+Open: the source's RMB hold speed. If a clip ever measures it, `pin.hold_move` is the one number to move.

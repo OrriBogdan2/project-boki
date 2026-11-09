@@ -156,3 +156,21 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB Burr Charge, aim | held lane, he walks; no slow seen | a tap fires at once; no hold, no lane (owner item 112); 1.0 | match (owner) |
+| RMB, throw and after | about 0.2 s overhand, "he can walk" | no wind-up, no recovery lock; 1.0 | match |
+| E Longneedle, wind-up | 0.6 s cast bar standing still | 0.6 s (+0.03 s beat) at `self_slow` 1.0 = rooted; the line follows the cursor | match |
+| E, fire and recovery | about 0.5 bh recoil shove back, then free | `recoil` 6 shove (`h.impulse`), free the same step; 1.0 | match |
+| Facing | upper body on the cursor while casting | cursor throughout, also in the wind-up | match |
+
+Nothing to fix: both slots already follow the sheet. Asserted since the parity pass in `--gunslinger-combo-check`
+(`Vex parity E: ...`, `Vex audit: ...`).

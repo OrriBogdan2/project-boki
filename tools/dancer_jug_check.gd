@@ -572,6 +572,8 @@ func juggernaut(a) -> void:
 			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
 			and not K.lunge_full,
 			"k %.2f anim %s" % [k_mid, K.anim_id])
+	A.ok("juggernaut RMB hold: walks at 0.8 of a run while charging (source: the hold stretches run slower)",
+			is_equal_approx(K.move_k(), 0.8), "move_k %.2f" % K.move_k())
 	P.do_jump()
 	m.step(A.DT)
 	A.ok("juggernaut RMB hold: you can jump while holding", P.vel.y > 0.5 and K.rmb_down, "vy %.1f" % P.vel.y)
@@ -583,6 +585,8 @@ func juggernaut(a) -> void:
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
 	A.step(m, 0.5)
+	A.ok("juggernaut RMB hold: released, the walk is back to full",
+			is_equal_approx(K.move_k(), 1.0), "move_k %.2f" % K.move_k())
 	A.ok("juggernaut RMB hold: release flings you forward into them",
 			K.last_variant == "hold" and A.dmg(T) >= 18.0 and P.flat_dist(home) > 3.5,
 			"took %.0f moved %.1f" % [A.dmg(T), P.flat_dist(home)])

@@ -213,7 +213,13 @@ func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
 	if meteor.running(): return meteor.move_k()
 	if not slam_w.is_empty(): return 0.6
+	if lunge_charging(): return float(rmb_def()["lunge"]["hold_move"])
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
+
+## The Lunge's hold, on the ground and out of the pull: the source's Heavy Attack hold walks at about 0.8 of a run.
+func lunge_charging() -> bool:
+	var past_tap := rmb_down and rmb_t > float(rmb_def()["hold"])
+	return past_tap and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false)
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
 ## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
