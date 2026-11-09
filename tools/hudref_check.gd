@@ -159,6 +159,29 @@ func run(main_node: Node) -> void:
 	P.arch = ""
 	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
 	P.arch = arch_was
+	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)
+	await hud.panels.draw
+	ok(mates.size() >= 1 and mates.all(func(x): return TeamBoki.shown.has(x.nid)),
+		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
+	if mates.size() >= 1:
+		var mate: Hunter = mates[0]
+		mate.downed = false        # (the demo downs one rival)
+		mate.kin.hp = mate.kin.max_hp * 0.5
+		await hud.panels.draw
+		ok(absf(float(TeamBoki.shown[mate.nid]["frac"]) - 0.5) < 0.05 and TeamBoki.shown[mate.nid]["state"] == "",
+			"a half-health Boki's icon shows half a bar, untinted (%s)" % str(TeamBoki.shown[mate.nid]))
+		mate.kin.state = "downed"      # (the kin's own update would stand it up again before a draw)
+		ok(TeamBoki.state_of(mate, mate.kin) == "down", "a downed Boki's icon is tinted down")
+		mate.kin.state = "active"
+		mate.kin.rest_t = 5.0
+		await hud.panels.draw
+		ok(TeamBoki.shown[mate.nid]["state"] == "rest", "a resting Boki's icon is tinted resting")
+		mate.kin.rest_t = 0.0
+		mate.downed = true
+		await hud.panels.draw
+		ok(TeamBoki.shown[mate.nid]["state"] == "wisp", "a Boki whose owner is a wisp is tinted wisp")
+		mate.downed = false
 	# ---------------------------------------------------------------- 5. cooldown text
 	P.slot_lv["kin"] = 1
 	P.ak.cd["e"] = 6.4

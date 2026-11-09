@@ -79,6 +79,7 @@ const CHECKS := {
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
+	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],      # --shots-dir=<dir> [--size=WxH] (GPU)
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],      # --shots-dir=<dir> (GPU)
