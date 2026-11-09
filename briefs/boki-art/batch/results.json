@@ -35612,5 +35612,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_chandelotl_pick_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_chandelotl_pick",
+    "name": "Chandelotl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pick",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelotl_pick",
+    "name": "Chandelotl (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "truffapir_card3",
+    "name": "Truffapir (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/truffapir_card3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pick",
+    "name": "Barokat (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx_pick",
+    "name": "Nettlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pick",
+    "name": "Barokat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_sporcupine_pick",
+    "name": "Sporcupine (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_sporcupine_pick_1.jpg",
+    "ok": true
   }
 ]
