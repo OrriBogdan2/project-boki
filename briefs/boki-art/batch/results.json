@@ -6156,5 +6156,89 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_murmurling_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_bubblisk_r",
+    "name": "Bubblisk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_bubblisk_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_oarlet_r",
+    "name": "Oarlet (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_oarlet_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_amanitusk_r",
+    "name": "Amanitusk (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_amanitusk_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lunowl_r",
+    "name": "Lunowl (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lunowl_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_anvilbrock_r",
+    "name": "Anvilbrock (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_anvilbrock_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_cairnback_r",
+    "name": "Cairnback (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_cairnback_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_seamwyrm_r",
+    "name": "Seamwyrm (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_seamwyrm_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron_r",
+    "name": "Lanceron (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_r_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_skidlet_r",
+    "name": "Skidlet (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_skidlet_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_blossmink_r",
+    "name": "Blossmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_blossmink_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_prismink_r",
+    "name": "Prismink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_prismink_r_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_lanceron_r",
+    "name": "Lanceron (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_lanceron_r_2.jpg",
+    "ok": true
   }
 ]
