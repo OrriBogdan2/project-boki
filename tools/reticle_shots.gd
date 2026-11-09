@@ -78,6 +78,7 @@ func _hunters() -> void:
 		for pn in m.hud.ui_extra:      # (the practice bar: its tooltips and its hide-the-reticle hover follow
 			if pn is Control:          # a desktop worker's real cursor, wherever that rests)
 				pn.visible = false
+		await main.get_tree().create_timer(2.5).timeout      # (the swap's kit card fades out first)
 		var tiles := []
 		for st in ["rest", "bloom", "hit", "crit"]:
 			# (the state is held every frame up to the shot: a 0.14 s flash or a decaying bloom would be gone
