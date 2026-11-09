@@ -48142,5 +48142,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_crofthollow_r95_2.jpg",
     "ok": true
+  },
+  {
+    "id": "moatpole_card95",
+    "name": "Moatpole (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/moatpole_card95_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_crofthollow_r95",
+    "name": "Crofthollow",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_crofthollow_r95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_card95",
+    "name": "Lodestick (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/lodestick_card95_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "moundlet_card95",
+    "name": "Moundlet (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/moundlet_card95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "lodestick_card95",
+    "name": "Lodestick (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lodestick_card95_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_murmuron_p95",
+    "name": "Murmuron",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_murmuron_p95_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_spanglin_p95",
+    "name": "Spanglin",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_spanglin_p95_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_moatpole_p95",
+    "name": "Moatpole",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_moatpole_p95_1.jpg",
+    "ok": true
   }
 ]
