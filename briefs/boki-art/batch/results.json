@@ -7409,5 +7409,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/seamwyrm_x_1.jpg",
     "ok": true
+  },
+  {
+    "id": "galleotter_x",
+    "name": "Galleotter",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/galleotter_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "seamwyrm_x",
+    "name": "Seamwyrm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/seamwyrm_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "galleotter_x",
+    "name": "Galleotter",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/galleotter_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_x",
+    "name": "Eclipsowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eclipsowl_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_x",
+    "name": "Eclipsowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_x",
+    "name": "Gongrowl",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gongrowl_x_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gongrowl_x",
+    "name": "Gongrowl",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gongrowl_x_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_x",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_x_1.jpg",
+    "ok": true
   }
 ]
