@@ -29,6 +29,8 @@ Extraction load in mind (10 trios, 30 Hunters, their Boki, monsters and VFX).
 | Bot decisions | past 45 m from you every 3rd step, each bot on its own step | `Bot.FAR_EVERY` |
 | Bot route (`Bot._steer`) | the way to the goal is re-planned every 0.1 s, the heading every step | perf `bot_replan_s` |
 | Boki with nothing to fight | looks for a foe every 0.15-0.25 s | perf `boki_retarget_s` |
+| Bot belt (`BeltKeys.tick`) | a bot looks for a blocked key every 0.1 s, each bot on its own step; you every step | perf `bot_belt_s` |
+| Bot interact (`Match._update_interact`) | a bot that isn't pressing interact skips the box, item, chest, shrine and lair scans | - |
 
 Numbers live in `content/rules/tuning.json` ("perf"), the one shared tuning file. Visual trades are behind the
 quality preset (`Settings.QUALITY` `anim_lod`): Ultra keeps everything at full rate.
@@ -38,3 +40,8 @@ quality preset (`Settings.QUALITY` `anim_lod`): Ultra keeps everything at full r
   and only for a candidate that would win.
 - No new arrays or dictionaries per call in per-step code (`World.occupy` uses a const ring).
 - Stagger periodic work by entity id so it does not all land on one frame.
+- A tiny function called thousands of times a frame costs more in calls than in work. `World.ground_at`,
+  `is_block`, `occupy`'s ring and `los` read the tile by hand; `HunterTimers` and `Kin.sim` count their
+  timers down by direct access, not `set()`/`get()` by name. `--hotpath-check` keeps the fast paths equal
+  to the plain code on random points.
+- No `keys()`, string formats or array literals in per-step loops (consts, or iterate the dictionary).

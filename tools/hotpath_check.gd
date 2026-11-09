@@ -42,7 +42,8 @@ func run(main_node: Node) -> void:
 	h.coyote = 0.1
 	h.phase_t = 0.0
 	HunterTimers.tick(h, 0.25)
-	ok(is_equal_approx(h.sig_cd, 0.75) and h.coyote == 0.0 and h.phase_t == 0.0, "HunterTimers: counts down and stops at zero")
+	var ticked := is_equal_approx(h.sig_cd, 0.75) and h.coyote == 0.0 and h.phase_t == 0.0
+	ok(ticked, "HunterTimers: counts down and stops at zero")
 	print("HOTPATH DONE %d failures" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
