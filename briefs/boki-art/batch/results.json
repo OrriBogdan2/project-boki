@@ -48870,5 +48870,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/c_voltalon_x1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x2",
+    "name": "Dreadnoyak (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x1",
+    "name": "Dreadnoyak (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x1",
+    "name": "Vaultara (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x2",
+    "name": "Vaultara (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_vaultara_x1",
+    "name": "Vaultara (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_vaultara_x1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x2",
+    "name": "Dreadnoyak (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x1",
+    "name": "Dreadnoyak (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_dreadnoyak_x2",
+    "name": "Dreadnoyak (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_dreadnoyak_x2_4.jpg",
+    "ok": true
   }
 ]
