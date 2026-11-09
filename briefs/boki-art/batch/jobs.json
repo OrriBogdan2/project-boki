@@ -2106,6 +2106,138 @@
     "size": "2K"
   },
   {
+    "id": "stance_ermink",
+    "name": "Ermink (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Ermink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits curled low on its haunches, forepaws tucked together, head tilted up, ink-tipped tail wrapped around its feet. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_flarmink",
+    "name": "Flarmink (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Flarmink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Rears high on hind legs mid-lunge, forepaws clawing the air, back arched, flame tail flung straight up behind like a torch. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_rippmink",
+    "name": "Rippmink (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rippmink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Braced wide on all fours with chest low and head thrust forward, wave tail cresting up and over its back like a breaking wave. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_voltmink",
+    "name": "Voltmink (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Voltmink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Side-on bristling arch: all four legs stiff and wide, back humped high with fur on end, head low snarling, tail pointed straight up crackling. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_rimink",
+    "name": "Rimink (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rimink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Proud looming stance on a raised forepaw: one front leg lifted, chest out, head held high, ice tail swept high behind. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_lunink",
+    "name": "Lunink (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lunink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Long arched stretch: forelegs extended forward and planted, hindquarters high, head raised toward the sky, tail curled into a crescent overhead. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_mycroll",
+    "name": "Mycroll (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Mycroll.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits plopped on its rump like a ball, little forepaws on its belly, head tilted, mushroom caps upright. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_sporcupine",
+    "name": "Sporcupine (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Sporcupine.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Low waddling stride: one forepaw forward, body slung low, head pushed ahead, mushroom quills swept back. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_ringrove",
+    "name": "Ringrove (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Ringrove.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Looming: front legs planted on a raised rock, neck stretched high, head lifted, mushroom grove on its shell tilting skyward. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_vespyx",
+    "name": "Vespyx (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Vespyx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits upright on its haunches, front paws together, ears perked, segmented tail curled forward over its head so the slime orb dangles in front. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_glaivyx",
+    "name": "Glaivyx (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glaivyx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Rears up on hind legs, blade-forelimbs raised wide overhead, head thrown back, stinger tail lashing forward past its side. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_lashyx",
+    "name": "Lashyx (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Lashyx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Braced wide and low, forelegs splayed with claws dug in, head lowered snarling, whip tail cocked high and forward over the head mid-strike. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
     "id": "sporcupine_r",
     "name": "Sporcupine (owner redo)",
     "refs": [
@@ -4890,6 +5022,402 @@
     "runs": 3,
     "aspect": "16:9",
     "prompt": "Edit image 1: keep the same creature, design, colours and style, exactly four views (front, three-quarter, side, back) in ONE clean row on a plain flat pale grey background, no shadows, no ghost copies. Make all of these changes: melt the ruff into frosted fur bristles that flow back along the shoulders and give the face Ermink's big cheeky eyes and grin Also: run 3, turn the ruff into frosted fur tufts that harden into short ice bristles along the shoulders, with no continuous ring around the neck Also: turn the ice ruff into frosted fur bristles that grow out of the neck fur, with no collar edge.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_teapotamus",
+    "name": "Teapotamus (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Teapotamus.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits on its round rump with stubby forelegs forward, head tipped up, spout tail steaming. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_puffamus",
+    "name": "Puffamus (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Puffamus.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Mid-trot stride: one foreleg and opposite hind leg lifted, head pushed forward, chimney puffing a trailing plume. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_chuggamus",
+    "name": "Chuggamus (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Chuggamus.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Braced wide like a locomotive: legs splayed, head lowered with tusks forward, stack belching a tall column of steam. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_kerchick",
+    "name": "Kerchick (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Kerchick.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Plopped belly-down like a nesting chick, feet tucked under, sail-wings resting at its sides, head tilted up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_skidlet",
+    "name": "Skidlet (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Skidlet.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Squats down on its belly with skate feet poking out in front, wings folded, head bobbing up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_skateron",
+    "name": "Skateron (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Skateron.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Gliding skate stride: body horizontal, neck stretched forward, one leg pushing back, wings swept back. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_zippelith",
+    "name": "Zippelith (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Zippelith.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Inching forward low: body arched in an inchworm hump, head low and forward, zipper seam visible along the arched back. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_glintmole",
+    "name": "Glintmole (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Glintmole.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits plump on its rump with big claws resting on its belly, snout star tilted up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_oarlet",
+    "name": "Oarlet (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Oarlet.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits up on its haunches, forepaws together on its chest, oar tail flat on the ground in front. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_galleotter",
+    "name": "Galleotter (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Galleotter.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Rears up on hind legs and tail like a tripod, forepaws raised, oar fins spread wide, head roaring. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_kitlet",
+    "name": "Kitlet (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Kitlet.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Tucked into a bobbing ball, wings folded close, tail curled around its body, head peeking up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_bellowary",
+    "name": "Bellowary (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bellowary.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Long striding run: body horizontal, neck forward, one leg pushing back, smoke trailing. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_dribbara",
+    "name": "Dribbara (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Dribbara.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits on its rump like a resting capybara, forelegs straight, head tilted up, pond on its back. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_soakybara",
+    "name": "Soakybara (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Soakybara.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Wading stride: one foreleg lifted mid-step, head low and forward, back pool sloshing. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_geysirbara",
+    "name": "Geysirbara (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Geysirbara.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Braced wide with forelegs splayed, head raised bellowing, geyser blasting straight up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_umbrathere",
+    "name": "Umbrathere (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Umbrathere.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Looming crouch on all fours on hooked knuckle-claws, long arms planted wide, wing membranes stretched up like an open umbrella, head low. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_prowyak",
+    "name": "Prowyak (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Prowyak.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Charging trot: forelegs reaching, body low, prow head pushed forward like a ship's bow. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_frigatee",
+    "name": "Frigatee (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Frigatee.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Gliding swim: body arched in a curve, fore-flippers swept back, tail flukes lifted. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_boltstrich",
+    "name": "Boltstrich (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Boltstrich.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Full sprint stride: one leg extended, body horizontal, neck stretched forward, lightning trailing. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_snuffapi",
+    "name": "Snuffapi (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Snuffapi.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Mid-stride walk: one foreleg lifted, head low and forward, smoke trailing from its candles. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_chandelapi",
+    "name": "Chandelapi (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Chandelapi.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Rears up on hind legs, forelegs tucked, head high, candelabra antlers blazing. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_barrelmander",
+    "name": "Barrelmander (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Barrelmander.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Low waddle stride: legs mid-step, body slung low, head forward, storm cloud trailing. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_tinbrock",
+    "name": "Tinbrock (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Tinbrock.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits on its rump like a badger cub, forepaws resting on belly, head tilted up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_anvilbrock",
+    "name": "Anvilbrock (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Anvilbrock.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Low trundling charge: legs mid-stride, head down, anvil leading. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_forgebrock",
+    "name": "Forgebrock (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Forgebrock.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Rears up on hind legs bear-like, forepaws raised, stacks belching, chest furnace glowing. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_bubblisk",
+    "name": "Bubblisk (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Bubblisk.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits on its haunches, forelegs straight, curled tail wrapped around its feet. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_frothisk",
+    "name": "Frothisk (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Frothisk.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Low scurrying dash: body flat to the ground, legs splayed mid-stride, tail streaming behind. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_arcestrel",
+    "name": "Arcestrel (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Arcestrel.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Stooping dive: wings swept back, talons forward, head down. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_nettlynx",
+    "name": "Nettlynx (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Nettlynx.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits on its haunches, tail wrapped around its paws, ears perked. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_lunowl",
+    "name": "Lunowl (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lunowl.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Gliding with moth wings spread, body tilted forward, talons tucked. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_eclipsowl",
+    "name": "Eclipsowl (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Eclipsowl.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Looming mantle: wings spread wide high, standing on talons, ear tufts raised. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_echolop",
+    "name": "Echolop (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Echolop.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Sits upright on haunches, ears up, wings folded. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_gongibbon",
+    "name": "Gongibbon (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Gongibbon.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Squats sitting with knees up, hands drumming on chest gong, mallet tail curled over. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_latchling",
+    "name": "Latchling (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Latchling.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Mid-hop bounce, legs tucked, key tail flicked up. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_lockatara",
+    "name": "Lockatara (new stance)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lockatara.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Low crawling stride, one foreleg forward, body low, shackle forward. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "stance_jarmit",
+    "name": "Jarmit (new stance)",
+    "refs": [
+      "briefs/boki-art/evolutions/Jarmit.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face, eyes and every detail, nothing added or removed, in the same soft hand-painted style with a clean, fairly thin dark outline. Only its stance changes: Tucked into jar, only eyes and claws peeking, sitting low. Exactly four views of it in this same new stance in one clean row: front, three-quarter, side and back, the same size, plain flat pale grey background, no text, no shadows, no floor, no ghost or faded copies, nothing else in the image.",
     "size": "2K"
   },
   {
