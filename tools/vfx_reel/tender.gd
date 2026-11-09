@@ -52,11 +52,15 @@ func _part_e() -> void:
 func _part_r() -> void:
 	await _reset(4.0)
 	P.hp = P.max_hp * 0.5
+	var ally: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, P.pos, {"arch": "none"})
+	ally.teleport(P.pos + Vector3(6.0, 0, 1.5))
 	var cast := func(t: float):
 		if _at(t, 0.1):
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
-		_aim(P.pos)
-	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the lantern's flare, the heals rising as stars",
-		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7]), 1.0)
+		_aim(ally.pos)
+	await _go(2.8, cast, _sheet("r", "R, Hearth Call: the arc of light to the ally, the heals rising as stars",
+		[0.15, 0.3, 0.5, 0.8, 1.1, 1.5, 1.9, 2.3, 2.7], func(): return (P.pos + ally.pos) * 0.5), 1.0)
+	ally.queue_free()
+	m.hunters.erase(ally)
 	await _go(GAP)
