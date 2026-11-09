@@ -385,6 +385,7 @@ func _kit_from_weapon() -> void:
 		return
 	var wd := Content.weapon(wid)
 	if ak:
+		wpn["sfx"] = String(ak.lmb_def().get("sfx", wpn["sfx"]))      # a Hunter's own shot over a shared gun's (Dredge)
 		runner.set_slot("utility", null)      # right click is the archetype's
 		return
 	runner.set_slot("utility", Content.ability(wd.utility) if wd and wd.utility != "" else null)

@@ -34,7 +34,7 @@ const NO_AMMO_MAG := 999         # rounds a weapon with no ammo nominally holds 
 ## Fallback only: every real weapon lives in content/weapons.
 const WEAPONS := {
 	"rifle": {"name": "Rifle", "dmg": 3.87, "rate": 0.08, "speed": 110.0, "mag": 30, "reload": 1.8,
-		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "rifle", "color": Color("d9ff66"), "size": 0.12},
+		"kb": 0.8, "spread": 0.035, "range": 9.5, "sfx": "gun_rifle", "color": Color("d9ff66"), "size": 0.12},
 }
 
 ## Rarity tiers, Common to Legendary: the names and colours gear is sold, shown and sorted by

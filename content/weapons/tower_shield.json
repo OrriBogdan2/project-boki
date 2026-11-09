@@ -24,7 +24,7 @@
 		"charged_kb": 8.0,
 		"size": 0.24,
 		"color": "#d8e8ff",
-		"sfx": "cleave",
+		"sfx": "bjorn_bash",
 		"desc": "Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis.",
 		"kick": 0.09
 	},

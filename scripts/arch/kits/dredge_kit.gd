@@ -245,7 +245,6 @@ func _dress_volley() -> void:
 	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
 	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
-	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
 	if not tells_visible():
 		return
 	var key := "%s_%d" % [h.nid, h.shot_n]
