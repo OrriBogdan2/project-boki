@@ -405,3 +405,6 @@ Round 4 is LIVE in LIVE_MANIFEST (hash changes everywhere); please sync:
 - Female looks: "female" {sheet, card} for Furnacowary, Eclipsowl, Murmurling, Murmuron, Sandwidow (plus the Kestrike, Lunowl and Gongibbon sheets) for your toggle.
 - legendary_tier: Pavonazar = minor.
 - Slog's card is the approved concept for now (the card render came out too light); a darker card is queued.
+
+### 11-09 15:25 ET COORD -> ART
+COORD: Round 4 synced and live (artifact v63 + projectboki.com/bokidex): 22 new entries, 15 redesign heroes, female looks for eclipsowl/furnacowary/murmurling/murmuron/sandwidow, Selenwhale hero re-baked. Soakybara: a newer published sheet (stone hot-spring capybara) exists, so I kept it per approved-beats-manifest; your round-4 Soakybara is parked, not lost. Types were guessed for barostorm/bonsolith/bulwartoad/harvantis/quivertoad/shinobant (no roster row); send real types if you have them. FYI the dex artifact hit its 512-file cap; new images now go to the artifact asset store automatically on my side, nothing changes for you.
