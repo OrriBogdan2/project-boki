@@ -50,8 +50,12 @@ func run(main: Node) -> void:
 	if variant == "proc" and clips:
 		clips.force = {"proc": true}
 	cam.fov = fov
-	cam.position = Vector3(0, CAM_Y + 0.3, 5.5)
-	cam.look_at(Vector3(0, CAM_Y, 0))
+	# (framed on what is shown: a big Hunter, Albert's barrel, steps the camera back so the stomp foot stays in shot)
+	var box := _shown_box(model)
+	var cy := maxf(CAM_Y, box.get_center().y) if box.size.y > 0.0 else CAM_Y
+	var dist := maxf(5.5, box.size.y * 1.35 / tan(deg_to_rad(fov) * 0.5) * 0.5)
+	cam.position = Vector3(0, cy + 0.3, dist)
+	cam.look_at(Vector3(0, cy, 0))
 	var cycle: float = Life.R["stomp_cycle"]
 	var lens := {"stomp": cycle * 3.0, "revive": 2.0, "drink": Hunter.DRINK_TIME}
 	for st in lens:
@@ -102,3 +106,16 @@ func _stage(main: Node) -> Node3D:
 	holder.add_child(cam)
 	cam.make_current()
 	return holder
+
+## The world box of the meshes shown under n (zero size: none).
+func _shown_box(n: Node) -> AABB:
+	var box := AABB()
+	var any := false
+	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if not m.is_visible_in_tree() or m.mesh == null:
+			continue
+		var b := m.global_transform * m.get_aabb()
+		box = b if not any else box.merge(b)
+		any = true
+	return box
