@@ -57,7 +57,11 @@ line in the side colour, thickest with the shield full and thinning in four step
 flashes the shell with a few sparks on the side it came from (`ShieldFx.absorb`; no ground ring); the hit that breaks
 it holds the body flash and sheds shards in the side colour, the armour's break language without the armour's blue.
 Kits keep their own cast VFX (Cinder's Furnace Cloak swirl is hers); the shell is shared. Check: `--shield-check`.
-Reel: `--hero-vfx-reel --reel-only=shield`.
+Reel: `--hero-vfx-reel --reel-only=shield --reel-hero=bulwark` (the default hero has no shield part).
+Source (hero-ref `linwick.md` Flame Shield 0186, `breah.md` slam shield 0260-0264): a shielded hero shows a
+ring hugging the body (about 0.8 bh), yellow-orange or yellow. We keep the colour team-safe (side colour, not
+yellow) and draw it as the outline shell rather than a floating ring, so it costs no extra draw call and never
+reads as a ground area. If the shell is too faint at the match camera, the next step is a thin waist-height band.
 
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
