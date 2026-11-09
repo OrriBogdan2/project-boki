@@ -45629,5 +45629,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/portrait_thistlynx_p86_3.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_r86",
+    "name": "Pipeworth (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_r86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_r86",
+    "name": "Pipeworth (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_r86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thistlynx_p86",
+    "name": "Thistlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_thistlynx_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_pipeworth_r86",
+    "name": "Pipeworth (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_pipeworth_r86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_p86",
+    "name": "Ringrove (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_p86_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_ringrove_p86",
+    "name": "Ringrove (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_ringrove_p86_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_thistlynx_p86",
+    "name": "Thistlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_thistlynx_p86_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chandelotl_p86",
+    "name": "Chandelotl (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_chandelotl_p86_3.jpg",
+    "ok": true
   }
 ]
