@@ -2449,6 +2449,7 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 		var old_sc := _panel_scroll()
 		if old_sc: keep_scroll = old_sc.scroll_vertical
 	_close_panel()
+	get_viewport().gui_release_focus()      # a clicked build tile kept the focus and took Enter from the panel
 	var pb := UI.scroll_panel(title_txt, width, _close_panel, "Close", scroll)
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
@@ -3469,15 +3470,8 @@ func _start_training() -> void:
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
-	var weak := hecon.refuse_reason()
-	if weak != "":
-		var wv := _new_panel("Too hungry to go", 560)
-		var wl := UI.label(weak, 15, UI.INK); wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		wv.add_child(wl)
-		var wr := UI.hbox(10)
-		wr.add_child(UI.primary("Feed it", func(): _open_feed(Save.active_kin()), 160))
-		wr.add_child(UI.button("Back", _open_expedition, 140))
-		wv.add_child(wr)
+	if hecon.partner_too_weak():
+		_new_panel("Too hungry to go", 560).add_child(HungerGate.new(self, _confirm_start, _open_expedition))
 		return
 	var td: Dictionary = Data.TIERS[exp_tier]
 	if not KinLoss.at_risk(exp_tier):

@@ -5,5 +5,17 @@
 	"glide": {"turn": 420.0, "turn_fast": 0.45, "brake": 36.0, "brake_deg": 115.0, "drag": 2.0, "drag_steer": 1.4, "coast": 1.4, "catch": 60.0, "max": 15.0},
 	"glide_carry": {"carry_drag": 3.0, "default": 12.0, "archer": 9.0},
 	"dash": {"jump_keep": 0.75},
-	"dash_speed": {"archer": 0.7}
+	"dash_speed": {"archer": 0.7},
+	"farm_spotlight": {
+		"_note": "The modal placing spotlight (house, trough): FarmSpotlight.",
+		"dim": 0.72,
+		"soft_px": 60.0,
+		"pulse_hz": 1.2,
+		"ramp_s": 0.2,
+		"fade_s": 0.2
+	},
+	"hunger_gate": {
+		"_note": "The 'too hungry to go' panel: HungerGate.",
+		"poll_s": 0.4
+	}
 }

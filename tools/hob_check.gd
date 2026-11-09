@@ -153,7 +153,11 @@ func _offer() -> void:
 	home._sync_fixtures()
 	FarmTutorial.detect()
 	await _frames(3)
-	ok(hob.chat.offer_due() and hob.node.mark.visible, "with the house down he has a '!' for you")
+	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "house down, tutorial running: no Relic yet")
+	for st in FarmTutorial.steps():
+		FarmTutorial.mark(String(st["id"]))
+	await _frames(3)
+	ok(FarmTutorial.state()["done"] and hob.chat.offer_due() and hob.node.mark.visible, "all steps done: a '!'")
 	hob.node.position = hob.pos
 	_stand_by(hob.node.position)
 	hob.talk()
@@ -215,7 +219,11 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	ok(home.guide.tracker.visible and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
+	# every step was ticked off above, so there may be no goal line or card left: when there is one it is shown again
+	var g: FarmGuide = home.guide
+	var card_ok := not is_instance_valid(g.tracker) or g.tracker.visible
+	var line_ok := not is_instance_valid(g.hint_box) or g.hint_box.visible
+	ok(card_ok and line_ok and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:
