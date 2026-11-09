@@ -49,6 +49,9 @@ Nothing here comes from SUPERVIVE's files.
 | ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
+| face_turn90_{stand,run,fire,glide}_t (body onto a 90-degree cursor flick) | 0.225s (within 1 degree) | 0.017–0.033s | <= 0.034s | [footage] Felix 1-2 frames at 60 fps; Ghost, Myth, Brall "at once" (see Facing) |
+| face_turn180_{stand,run,fire,glide}_t (a 180-degree flick) | 0.26s | 0.033s | <= 0.034s | [footage] the same |
+| face_run_legs_deg (legs toward travel, running square to the cursor) | 65.9 | 65.9 | >= 45 | [footage] Ghost, Myth: the legs follow the travel direction |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
 | jump_input_frames | 1 | 1 | <= 1 | |
 | jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
@@ -126,6 +129,24 @@ Other checks:
   - Movefeel (and `stuckfix`):
     - Expedition island: 31 of 31 laps clean, 853 of 853 walk-aways leave at once, 851 walk-pasts with 0.0000m pull.
     - Training map: all 20 clusters clean.
+
+## Facing: how the body turns onto the cursor (ext/feel-facing-turn, Nov 9 2026)
+
+PARITY FIRST (briefs/DECISIONS.md 2026-11-07). Read from the four slice Wardens' footage sheets on `origin/ext/agent-briefs` (briefs/hero-ref: venator.md for Vex/Ghost, juggernaut.md for Kael/Brall, pin.md for Lace/Myth, linwick.md for Cinder/Felix; 5 fps, so anything under 0.2 s reads as "at once"; the Felix sheet also has a 60 fps read). Design note: docs/decisions/0022-facing-turn.md.
+
+| Warden (source) | Turn to the cursor | Legs while running | Casts that lock facing, and for how long |
+|---|---|---|---|
+| Vex (Ghost) | "at once"; the rifle is always up, the upper body aims while the legs run (0067-0072) | follow the travel direction; strafing and backpedalling while firing are normal (0007-0023) | none in the footage. E (Ion Cannon) is a 0.6 s braced stand, body still; the grenade is a 0.2 s overhand with the legs still walking; the slide keeps the upper body on the cursor (0150-0151). The E aim cap (lock at the press, 90 deg/s) is the owner's, items 144/144b, on ext/vex-e-turn |
+| Kael (Brall) | "quick"; the upper body follows the cursor with the blade | hunched run, the sword leads; legs along the travel | none. The X guard is planted 0.6 s (f33-f38) but the strike goes where the cursor is at release; the charge lane grows forward from him and the release dash follows it; the Quick Dash lays the body flat along its path |
+| Lace (Myth) | "snaps" to the cursor | follow the travel direction; drawing, she walks slowly side-on to the cursor (0111-0116) | none: the draw holds one locked side-on *pose* while "the hunter turns to the cursor throughout"; the roll dives the body along the roll (0.1-0.15 s) |
+| Cinder (Felix) | on the spot within 1-2 frames at 60 fps; stands square facing the aim while firing (223-227 s) | upright, compact run; no legs note | none. The bash is a head-first lunge along the dash (0.33 s); the jetpack flight follows the cursor at a capped turn rate, so the body turns with the flight, not the cursor |
+
+What it fixed in ours (all four Wardens share `Hunter.face`):
+
+- **Turn rate.** `face` eased onto the cursor at 20/s: a 90-degree flick settled (within 1 degree) in 0.225 s and a 180 in 0.26 s, in every state. Now `Hunter.FACE_TURN` turns it at 5400 deg/s: 90 degrees in one 60 Hz step, 180 in two. Standing, running, firing on the run and gliding all measure 0.017–0.033 s.
+- **Legs keep the move direction.** Already so: `HunterAnim.legs_yaw` turns the legs toward the travel direction (up to 66 degrees, or backpedalling past 112 degrees) while the body holds the cursor. Asserted now (`face_run_legs_deg`). The feet-shuffle when turning on the spot (`HunterAnim.lag`) is ours and stays.
+- **Per-state rules, unchanged because they match the footage:** a dash turns the body along the dash unless the kit aims through it (`ArchKit.aims_in_dash`: Vex's slide yes, Kael's dash, Lace's roll and Cinder's bash and jetpack no); a kit freezes the facing only through `face_locked()` (Claire's statue) or `aim_lock()` (Motley's well, Vex's E on ext/vex-e-turn). None of the four slice kits locks facing in the footage, and none of ours does, so no kit changed.
+- The four sheets show the body on the cursor in every state, firing or not. A "runs face the move direction when not firing" rule has no source in them, so it was not built.
 
 ## What changed (all in clearly marked `(movefeel)` blocks)
 
