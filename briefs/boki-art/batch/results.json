@@ -30089,5 +30089,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_sundormouse_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_scopeleon",
+    "name": "Scopeleon (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_scopeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scopeleon",
+    "name": "Scopeleon (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_scopeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scopeleon",
+    "name": "Scopeleon (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_scopeleon_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_scopeleon",
+    "name": "Scopeleon (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_scopeleon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_snapler",
+    "name": "Snapler (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_snapler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_snapler",
+    "name": "Snapler (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_snapler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_snapler",
+    "name": "Snapler (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_snapler_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_gramofrill",
+    "name": "Gramofrill (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_gramofrill_2.jpg",
+    "ok": true
   }
 ]
