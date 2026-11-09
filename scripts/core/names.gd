@@ -244,5 +244,11 @@ const BOT := [
 ## The bot tags in random order, minus `taken` (the players' own names), to deal one per bot in a match.
 static func bot_pool(taken: Array) -> Array:
 	var pool: Array = BOT.filter(func(n): return not taken.has(n))
-	pool.shuffle()
+	# its own generator: dealing names takes one draw from the global stream, so the pool's size never
+	# shifts the randomness the match runs on (bots, drops, wild Boki)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = randi()
+	for i in range(pool.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var swap = pool[i]; pool[i] = pool[j]; pool[j] = swap
 	return pool
