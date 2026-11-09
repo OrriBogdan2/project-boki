@@ -16131,5 +16131,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/chandelapi_r2_w29_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rimink_r_w29",
+    "name": "Rimink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rimink_r_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rimink_r_w29",
+    "name": "Rimink",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/rimink_r_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "chandelapi_r2_w29",
+    "name": "Chandelapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/chandelapi_r2_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w29",
+    "name": "Barokat (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w29_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w29",
+    "name": "Barokat (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w29_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w29",
+    "name": "Barokat (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w29_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_barokat_pe_w29",
+    "name": "Barokat (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_barokat_pe_w29_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_bellowary_pe_w29",
+    "name": "Bellowary (portrait)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/portrait_bellowary_pe_w29_4.jpg",
+    "ok": true
   }
 ]
