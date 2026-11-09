@@ -50375,5 +50375,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stormit_cardz_2.jpg",
     "ok": true
+  },
+  {
+    "id": "stormit_cardz",
+    "name": "Stormit (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/stormit_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "skateron_cardz",
+    "name": "Skateron (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/skateron_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_cardz",
+    "name": "Terrarimit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/terrarimit_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_cardz",
+    "name": "Sporcupine (hero card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sporcupine_cardz_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_cardz",
+    "name": "Sporcupine (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "stormit_cardz",
+    "name": "Stormit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/stormit_cardz_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_cardz",
+    "name": "Sporcupine (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_cardz_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "terrarimit_cardz",
+    "name": "Terrarimit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrarimit_cardz_2.jpg",
+    "ok": true
   }
 ]
