@@ -11,7 +11,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
     ~/meshy/grimble_v2/build.sh source                   # grimble_source.py -> grimble_art1.py -> grimble_clips.py; INSTALL=1 copies the glb here
 
 - **Art:** briefs/art-refs/grimble_v2/ (ext/agent-briefs): grimble_v2_turnaround.jpg (FINAL) and grimble_v2_master_sheet.jpg; index.md's
-  "Canon notes for 3D and animation" win. No nose or nostrils; a three-lens brass loupe over his right eye; the left eye a smug squint.
+  "Canon notes for 3D and animation" win, except the face: the owner's 11-09 turnaround gives him a short flat snub nose with two
+  nostrils. A three-lens brass loupe over his right eye; the left eye a smug squint.
 - **Scan fit (grimble_source.py):** the limbs keep the scan's spread and lean and take the rig's joint heights (moved onto the rig's narrow
   arms and wide hips, the hook hung through his right leg). Past a bone's ends the scan keeps its own scale, so the hook and the gauntlet
   keep their shape. The hunch stays: the head and neck keep the scan's lean ahead of the hips, and all of the head rides `head`.
@@ -20,7 +21,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   anchor_claw and anchor_hook_tip sit on its tip: the kit's abyssal arm reaches out from there. While the kit's arm is stretched out, bone `hook` shrinks away (`hide_while_chain`): the kit draws the hook at the arm's end, so anchor_claw
   collapses to the wrist and the stretched arm grows from there; it is back when the arm snaps back.
 - **Left hand:** the scan's gauntlet, rigid on hand.L; fingers.L, fingers2.L and thumb.L stay for the clips, unweighted. anchor_fist on its knuckles.
-- **Face (grimble_paint.scan_face):** the scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
+- **Face (grimble_paint.scan_face):** the snub nose is sculpted (grimble_sculpt nose(), rigid on `head`, painted with the face's
+  own scan skin and two dark nostrils, grimble_paint.nose). The scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
   the gold tooth, purple gums. The loupe is scripted (sculpt monocle(), three glowing lens discs, the gold chain on spring_hangmono).
 - **Veins:** found on the atlas by contrast (more purple than the skin round them) and painted VEIN_KEY; warden_look's skin paint_glow keys
   on that colour, so they glow. Bone spurs are the scan's. The sludge drips and puddles are not geometry.
