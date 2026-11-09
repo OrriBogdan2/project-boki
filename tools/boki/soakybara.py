@@ -132,10 +132,22 @@ STONE_C = hexc("4a4752")
 LILY = hexc("ffa0d0")
 
 
+COAT_SAT = 0.5           # the hero toon look pushes warm browns to orange-red: halve the scan's chroma first
+COAT_DIM = 0.88
+
+
+def tame(col):
+    """The scan's colour with its chroma cut where it is warm (the fur), so the coat reads as the sheet's brown in the
+    game; the green pads, the turquoise water and the pink lilies keep theirs."""
+    lum = (col @ np.array([0.299, 0.587, 0.114]))[:, None]
+    fur = (sat((col[:, 0] - col[:, 2]) / 0.12) * sat((col[:, 0] - col[:, 1]) / 0.08))[:, None]
+    return np.clip(col + ((lum + (col - lum) * COAT_SAT) * COAT_DIM - col) * fur, 0, 1)
+
+
 def paint_body(q, nn):
     sc = scan()
-    col = sc.colour(q)
-    coat = sc.colour(CHEEK[None])[0]
+    col = tame(sc.colour(q))
+    coat = tame(sc.colour(CHEEK[None]))[0]
     gone = np.zeros(len(q))
     for c in PAINTED_EYES:
         gone = np.maximum(gone, sat((0.042 - np.linalg.norm((q - c) * v3(1.4, 1.1, 1.0), axis=1)) / 0.012))
