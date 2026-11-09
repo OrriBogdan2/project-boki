@@ -251,5 +251,5 @@ static func give_food() -> void:
 	st["gift"] = true
 	var meal := food()
 	for k in meal:
-		var shelf: Dictionary = Save.d["crops"] if Data.CROPS.has(k) else Save.d["items"]      # a crop is fed from the crop shelf
+		var shelf: Dictionary = Save.d["crops"] if Data.CROPS.has(k) else Save.d["items"]
 		shelf[k] = int(shelf.get(k, 0)) + int(meal[k])

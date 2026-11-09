@@ -197,7 +197,8 @@ func _intro(dt: float) -> void:
 		var tut: Dictionary = Save.d["tutorial"]
 		var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
 		var met := bool(FarmBuilder.state().get("met", false))
-		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active():
+		var base_first: bool = FarmUnlocks.base_mode()      # the base's first lead is your Boki, not Hob
+		if met or base_first or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active():
 			return
 		tut["hob_intro"] = true
 		intro_t = 0.0

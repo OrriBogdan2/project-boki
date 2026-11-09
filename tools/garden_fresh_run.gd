@@ -13,8 +13,8 @@ const WINDOW_S := 8.0      # seconds with nothing telling the player what to do 
 const SAMPLE_S := 0.5      # seconds between screen samples
 const MAX_GROUPS := 5      # most groups one panel may show
 ## Words a new player has not met; each needs its explaining phrase on the same screen the first time it shows.
-const JARGON := {"lean": "colour", "Relic": "", "Garden": "", "Island": "", "portal": "", "expedition": "", "extract": "",
-		"Stay": "", "nature": "", "trust": "", "bond": "", "Partner": "", "farmhand": "", "type": ""}
+const JARGON := {"lean": "colour", "Relic": "", "Garden": "", "Island": "", "portal": "", "expedition": "",
+		"extract": "", "Stay": "", "nature": "", "trust": "", "bond": "", "Partner": "", "farmhand": "", "type": ""}
 
 var bad := 0
 var main: Node
@@ -72,8 +72,8 @@ func guidance() -> Dictionary:
 	var on_screen: bool = false
 	for l in tt["labels"]:
 		on_screen = on_screen or (tut != "" and String(l).contains(tut.substr(0, 20)))
-	return {"card": card_next, "tutorial": tut, "tutorial_on_screen": on_screen, "marker": marker_text(), "cue": boki_cue(),
-			"panel": String(home.panel_open)}
+	return {"card": card_next, "tutorial": tut, "tutorial_on_screen": on_screen, "marker": marker_text(),
+			"cue": boki_cue(), "panel": String(home.panel_open)}
 
 func jargon_check(step: String) -> void:
 	var tt := texts()
@@ -83,7 +83,9 @@ func jargon_check(step: String) -> void:
 		if re.search(all) != null and not seen.has(w):
 			seen[w] = step
 			var why := String(JARGON[w])
-			note("JARGON '%s' first on screen at step %s%s" % [w, step, "" if why == "" or all.contains(why) else " (no '%s' beside it)" % why])
+			var unexplained: bool = why != "" and not all.contains(why)
+			var beside := " (no '%s' beside it)" % why if unexplained else ""
+			note("JARGON '%s' first on screen at step %s%s" % [w, step, beside])
 
 ## Panel groups: the direct visible children of the busiest container in the open panel.
 func groups() -> int:
@@ -102,9 +104,11 @@ func groups() -> int:
 func log_step(step: String) -> void:
 	var g := guidance()
 	var tt := texts()
-	note("STEP %s | tutorial line: %s | on screen: %s | base card next: %s | marker: %s | Boki: %s | panel: %s (%d groups)" % [step,
-			g["tutorial"], g["tutorial_on_screen"], g["card"], g["marker"], g["cue"], g["panel"], groups()])
-	note("TEXTS %s | BUTTONS %s | items %s" % [str(tt["labels"].slice(-16)), str(tt["buttons"].slice(0, 12)), str(Save.d["items"])])
+	note("STEP %s | tutorial line: %s | on screen: %s | base card next: %s | marker: %s | Boki: %s" % [step,
+			g["tutorial"], g["tutorial_on_screen"], g["card"], g["marker"], g["cue"]])
+	note("PANEL %s: %s (%d groups)" % [step, g["panel"], groups()])
+	note("TEXTS %s | BUTTONS %s | items %s" % [str(tt["labels"].slice(-16)), str(tt["buttons"].slice(0, 12)),
+			str(Save.d["items"])])
 	jargon_check(step)
 	await shot(step)
 
@@ -185,13 +189,16 @@ func play() -> void:
 	var rec := Save.active_kin()
 	var k: Dictionary = home._kin_entry(rec)
 	await log_step("arrive")
-	ok(String(home.panel_open) == "Welcome home" and press("Let's go"), "arrive: a Welcome card with one button; the player presses it")
+	ok(String(home.panel_open) == "Welcome home" and press("Let's go"), "arrive: a Welcome card, one button, pressed")
 	await idle("welcome-closed", 10.0)
 	await log_step("welcome-closed")
 	var intro_key := "intro_base" if FarmUnlocks.base_mode() else "intro"
-	note("HOB intro (talk, first time): %s" % str(Content.rules("farm_builder")["talk"][intro_key].map(func(l): return l["text"])))
-	note("HOB call-over camera swing at arrival: %s" % hob_swung)
-	ok(FarmTutorial.current() in ["meet", "eat"] and guidance()["marker"] != "", "after the card: the first thing to do is marked in the world")
+	var intro: Array = Content.rules("farm_builder")["talk"][intro_key]
+	note("HOB intro (talk, first time): %s" % str(intro.map(func(l): return l["text"])))
+	await idle("hob-quiet", 4.0)
+	ok(not hob_swung, "Hob does not pull the camera over while the first step is your Boki")
+	var first_step: bool = FarmTutorial.current() in ["meet", "eat"]
+	ok(first_step and guidance()["marker"] != "", "after the card: the first step is marked")
 	# 1 meet: the marker says "Your Boki", the line says walk up
 	home.ppos = (k["node"] as Node3D).position + Vector3(1.0, 0, 0)
 	home.guide._poll()
