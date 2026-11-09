@@ -544,7 +544,7 @@ func on_dash(use_ex: bool) -> bool:
 	if hop.chaining():
 		hop.press()
 		return true
-	if use_ex:
+	if use_ex and h.dashes < 1.0:          # a charge in the air is the same Rock Hop (item 183)
 		if not spend_dash(true): return true
 		play("breah_exdash")
 		travel(
