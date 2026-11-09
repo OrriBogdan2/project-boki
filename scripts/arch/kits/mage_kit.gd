@@ -83,6 +83,18 @@ func ult_running() -> bool:
 func ult_recast() -> bool:
 	return ult.recast()
 
+func recast_window() -> Dictionary: return ult.window()
+
+## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var rd := res_def()
+	for key in sparks:
+		var sp: Dictionary = sparks[key]
+		if is_instance_valid(sp["e"]):
+			var n := int(sp["n"])
+			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
+
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
