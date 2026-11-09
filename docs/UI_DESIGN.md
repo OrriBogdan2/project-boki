@@ -96,6 +96,10 @@ What made the menus feel blocky, samey and hard to get through:
     with `draw_icon` so they stay crisp at any size.
 12. **Keyboard and pad.** Every panel has something focused; arrows, Enter and Esc work; focus rings
     show for keyboard and pad only (`gui/common/show_focus_state_on_pointer_event=false`).
+13. **Advanced options sit behind More** (decision 2026-11-08, `briefs/UI_DECLUTTER_PLAN.md`). The title shows
+    Continue, Play with friends, Settings, More..., Quit (More opens Practice, Demo match, Save files); the
+    expedition footer shows one More (Training area, Duel room, Play online). `UI.fold_more` wires the toggle.
+    "Arena" is a reserved name: no menu uses it.
 
 ## 3. Home flow
 
