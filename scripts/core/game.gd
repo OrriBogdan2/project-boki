@@ -102,6 +102,7 @@ func _setup_input() -> void:
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
+	_key("photo", [KEY_F8])                   # at home: photo mode (HomePhoto)
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 

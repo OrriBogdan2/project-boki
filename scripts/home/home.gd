@@ -9,6 +9,7 @@ var world: World
 ## reveal until then.
 var building := false
 var cam: CamRig
+var photo := HomePhoto.new()      # photo mode: free camera, caption, PNG
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
@@ -1019,14 +1020,15 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
-	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
-	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
+	photo.tick(self, d)
+	var focus := photo.focus if photo.active else Vector3(ppos.x, minf(py, 0.0), ppos.z)
+	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty() and not photo.active)
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
 	if hb and hb.active:
 		return
-	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not interact.is_empty():
+	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not photo.active and not interact.is_empty():
 		if Input.is_action_just_pressed("interact"):
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
@@ -1159,7 +1161,7 @@ func _move_player(d: float) -> void:
 		_climb_step(d)
 		return
 	var mv := Vector2.ZERO
-	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
+	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() and not photo.active
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
@@ -2193,6 +2195,13 @@ func open_job_board(tab := "") -> void:
 	WorkView.open(self)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if photo.input(self, event):
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("photo") and visit.is_empty() and panel_open == "" and not (hb and hb.active):
+		photo.toggle(self)
+		get_viewport().set_input_as_handled()
+		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
 			get_viewport().set_input_as_handled()
