@@ -259,16 +259,15 @@ func dive_speed() -> float:
 		return 0.0
 	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 
-## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
-## it through walls and fog.
+## Tremor Sense: sneaking shows a narrow cone ahead that widens and lengthens the longer you sneak, and
+## the foes in it through walls and fog.
 func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
 		sneak_t += dt
 		if h.is_local():
-			var pd: Dictionary = d["passive"]
 			AimKit.cone(
 				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("f3e6c8")}
+				{"len": sight_len(), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("f3e6c8")}
 			)
 			sight_t -= dt
 			if sight_t <= 0.0:
@@ -278,9 +277,16 @@ func _tick_sight(dt: float) -> void:
 		sight_t = 0.0
 		sneak_t = 0.0
 
+## The cone's current angle (degrees) and length (m): both grow from start to end over `grow` seconds of sneaking.
 func sight_deg() -> float:
+	return _sight_grow("deg")
+
+func sight_len() -> float:
+	return _sight_grow("len")
+
+func _sight_grow(key: String) -> float:
 	var pd: Dictionary = d["passive"]
-	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
+	return lerpf(float(pd[key][0]), float(pd[key][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
 ## Rock Hop (AimKit's telegraphs go with them through drop_holds).
@@ -299,11 +305,11 @@ func _drop_holds() -> void:
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
-	var pd: Dictionary = d["passive"]
+	var reach := sight_len()
 	for o in m.hunters:
 		if o.team == h.team or not is_instance_valid(o) or o.dead or o.downed: continue
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
+		if to.length() > reach or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
 		m.fx.ring(o.pos, 0.9, Color("ff6a3a"), 0.55)
 		m.fx.ring(o.pos, 0.5, Color("ffd08a"), 0.4)

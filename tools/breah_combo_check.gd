@@ -658,12 +658,41 @@ func _breah() -> void:
 	var c1 := AimKit.entry(P, "sight")
 	step(m, 2.1, func(): P.inp["crouch"] = true)
 	var c2 := AimKit.entry(P, "sight")
-	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 15.0)
+	var pdef: Dictionary = K.d["passive"]
+	var mid_t := 0.5 * float(pdef["grow"])
+	var len_a := float(c1.get("len", 0.0))
+	var len_end := float(c2.get("len", 0.0))
+	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and len_a >= 15.0)
 	ok(
 		"passive: the cone widens 25 -> 40 degrees over 2s of sneaking",
 		float(c1.get("deg", 0.0)) < 28.0 and absf(float(c2.get("deg", 0.0)) - 40.0) < 0.5,
 		"%.1f -> %.1f" % [float(c1.get("deg", 0)), float(c2.get("deg", 0))]
 	)
+	ok(
+		"passive: the cone is 18m long at the start and 25m (10-14 bh at 1.8m) at the end of the grow",
+		float(pdef["len"][0]) == 18.0 and float(pdef["len"][1]) == 25.0 and len_a < 19.5
+			and absf(len_end - 25.0) < 0.05,
+		"%.2f -> %.2f" % [len_a, len_end]
+	)
+	K.sneak_t = 0.0
+	var lens: Array[float] = []
+	for i in 5:
+		K.sneak_t = mid_t * 2.0 * float(i) / 4.0
+		lens.append(K.sight_len())
+	var steady := true
+	for i in range(1, lens.size()):
+		steady = steady and absf((lens[i] - lens[i - 1]) - (lens[1] - lens[0])) < 0.001 and lens[i] > lens[i - 1]
+	ok("passive: the length grows steadily with the hold", steady, str(lens))
+	T.teleport(P.pos + Vector3(21.5, 0, 0))
+	K.sneak_t = 0.0
+	var seen_early := K.stonesight()
+	K.sneak_t = 2.0 * mid_t
+	var seen_late := K.stonesight()
+	ok(
+		"passive: a foe 21.5m out is past the cone at the start of the grow and inside it at the end",
+		seen_early == 0 and seen_late == 1, "early %d late %d" % [seen_early, seen_late]
+	)
+	T.teleport(home + Vector3(8.0, 0, 0))
 	var s_front := K.stonesight()
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
