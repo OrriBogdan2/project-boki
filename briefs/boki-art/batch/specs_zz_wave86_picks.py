@@ -33,7 +33,5 @@ TA('Rimefang',_O+'c_rimefang_f2_4.jpg'); SPECS[-1]['id']='ta_rimefang_r86'
 TA('Lanceron',_O+'c_lanceron_k2_1.jpg'); SPECS[-1]['id']='ta_lanceron_r86'
 SPECS.append({'id':'pipeworth_card86','name':'Pipeworth (hero card)','refs':[_O+'c_pipeworth_e2_1.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Pipeworth','final','piping a looping line of glowing venom icing')})
 P('pipeworth_r86','Pipeworth',_O+'c_pipeworth_e2_1.jpg','piping a looping line of glowing venom icing')
-# Owner correction via coordinator 04:35 ET: "chandelotl 1" = d1_1 crystal candy salamander, NOT the d2_2 cobra (wave60 mis-map).
-TA('Chandelotl',_O+'c_chandelotl_d1_1.jpg'); SPECS[-1]['id']='ta_chandelotl_p86'
-SPECS.append({'id':'chandelotl_card86','name':'Chandelotl (hero card)','refs':[_O+'c_chandelotl_d1_1.jpg',SRA],'runs':3,'aspect':'1:1','size':'2K','prompt':CARD('Chandelotl','final','planted proudly on four legs with its rainbow sugar-glass sail raised')})
-P('chandelotl_p86','Chandelotl',_O+'c_chandelotl_d1_1.jpg','planted proudly on four legs with its rainbow sugar-glass sail raised')
+
+# 06:15 ET coord relay of owner: the candy COBRA is Chandelotl ('i liked this one'); d1_1 redo stopped.

@@ -144,8 +144,7 @@
   "card": "briefs/boki-art/cards/Chandelotl.jpg",
   "portrait": "briefs/boki-art/portraits/light/Chandelotl.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Chandelotl.png",
-  "hero": "briefs/boki-art/batch/out/c_chandelotl_d1_1.jpg",
-  "note": "owner pick = d1_1 salamander; cobra card/sheet are wrong and are being replaced (wave86)"
+  "hero": "briefs/boki-art/portraits/cutout_v2/Chandelotl.png"
  },
  "Chuggamus": {
   "sheet": "briefs/boki-art/turnarounds/Chuggamus.jpg",

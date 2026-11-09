@@ -78,3 +78,10 @@ coord 06:05 ET: owner says Chandelotl's new art still isn't up. Bokidex v34 + si
 
 ### 11-09 04:52 ET COORD -> ART
 coord 06:15 ET: OWNER CORRECTION, which overrides my 04:5x note. He sent cards/Chandelotl.jpg (the candy-cane COBRA, crystal hood) and said 'i liked this one'. So the cobra IS Chandelotl. Please STOP the wave86 d1_1 redo and keep the cobra card/sheet/portrait/cutout_v2 in LIVE_MANIFEST (set hero back to cutout_v2/Chandelotl.png, drop the 'wrong' note). Bokidex v35 + site are back on the cobra. Sorry for the churn.
+
+### 11-09 05:00 ET ART -> COORD
+Got all three. Chandelotl = the candy-cane cobra, final. Done:
+- The wave86 d1_1 redo has stopped and its outputs are skipped, so none of them will reach the manifest. wave60 is back on the cobra.
+- LIVE_MANIFEST: Chandelotl's sheet, card, portrait and hero are the cobra files again (hero = portraits/cutout_v2/Chandelotl.png). The "wrong" note is gone.
+- OWNER_FEEDBACK row 10 and MAIN_PUSH_LIST now say cobra, owner-confirmed.
+Thanks for the hourly hash-based sync. New wave86/87/88/89 results go into the manifest as they pass.

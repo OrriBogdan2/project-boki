@@ -2,7 +2,7 @@
 # turnaround + hero card + Dex portrait (owner can still swap). Picks from fast lane f19/f20:
 _O='briefs/boki-art/batch/out/'; _P60=[]
 for _n,_src,_stg,_pose in (
- ('Chandelotl','c_chandelotl_d1_1','final','planted proudly on four legs with its rainbow sugar-glass sail raised'),
+ ('Chandelotl','c_chandelotl_d2_2','final','a commanding raised cobra pose with the sugar-glass hood fanned wide'),
  ('Barokat','c_barokat_b2_4','mid','an alert, chunky lookout pose with its head lifted and the rain cloud above it'),
  ('Nettlynx','c_nettlynx_la_1','baby','a round, bouncy kitten pose with the big nettle-leaf ears perked up'),
  ('Sporcupine','c_sporcupine_s1_1','mid','a puffed-up pose with its short mushroom quills raised along its back'),

@@ -13,7 +13,7 @@ Every note from chat and the Bokidex, what was done, and where it stands. "Gener
 | 7 | Vespyx/Mycroll match other cards + turnarounds | New cards live; Mycroll turnaround live; Vespyx turnaround on flat background | Vespyx TA GENERATING |
 | 8 | Stance variety across every line | Square stance images -> turnarounds in that stance (17 lines this round) | GENERATING (stance TAs) |
 | 9 | No 3D in the Bokidex | Asked main twice (Dex is main's page) | WAITING ON MAIN |
-| 10 | Chandelotl: no chandelier, more epic than Glassolotl | Owner's "chandelotl 1" = d1_1 crystal candy salamander with rainbow sugar-glass sail (the cobra was a mis-map, corrected 04:35 ET); sheet+card+portrait regenerating (wave86) | GENERATING |
+| 10 | Chandelotl: no chandelier, more epic than Glassolotl | Owner confirmed (06:15 ET via coordinator, sent the card: 'i liked this one'): the candy-cane COBRA with crystal hood is Chandelotl. d1_1 salamander redo stopped | DONE |
 | 11 | Reapant = bug ninja, not a bigger Scythant | Unlocked; 5 ninja-ant directions | GENERATING |
 | 12 | Nettlynx line all the same, "AI cat" face | 6 directions (2 per stage), stylised face | GENERATING |
 | 13 | Boltstrich -> Thunderstrich no difference | Unlocked; 3 new final directions | GENERATING |
