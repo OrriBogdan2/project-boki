@@ -29,3 +29,9 @@ check: `--base-life-check`.
   mentor's strongest), a habit (its quirk) or a memory line, kept on `egg["gift"]`, applied on hatching and shown
   on the hatch card (`baby["gift"]`). Nothing resets; old saves lack the keys and need no migration.
   `--mentor-check` covers it. Not done: a mentor can still be made your partner; only one gift per retirement.
+- Trait drift (GARDEN.md 3, lever 3; `scripts/home/base_drift.gd`, `content/rules/base_drift.json`, check
+  `--trait-drift-check`): when the farm's day clock wraps, `BaseLife.step` calls `BaseDrift.day`. Each Boki's four
+  traits close `step` of the gap to the average of its friends (bond at or above `friend_at`; rivals and strangers
+  do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
+  migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
+  `CareJournal.note`).
