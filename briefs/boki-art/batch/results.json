@@ -24797,5 +24797,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/barokat_card2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "bellowary_card2",
+    "name": "Bellowary (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_card2",
+    "name": "Bellowary (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bellowary_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "boltstrich_card2",
+    "name": "Boltstrich (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/boltstrich_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "boltstrich_card2",
+    "name": "Boltstrich (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/boltstrich_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bubblisk_card2",
+    "name": "Bubblisk (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bubblisk_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "buckleron_card2",
+    "name": "Buckleron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/buckleron_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bubblisk_card2",
+    "name": "Bubblisk (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bubblisk_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "canvastross_card2",
+    "name": "Canvastross (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canvastross_card2_1.jpg",
+    "ok": true
   }
 ]
