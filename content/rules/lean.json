@@ -31,12 +31,12 @@
 		"electric": {
 			"name": "Electric",
 			"tint": "#f2d43a",
-			"part": "tail_long"
+			"part": "spikes"
 		},
 		"ice": {
 			"name": "Ice",
 			"tint": "#9fe6f2",
-			"part": "spikes"
+			"part": "crest"
 		},
 		"rock": {
 			"name": "Rock",
@@ -81,7 +81,7 @@
 		"fairy": {
 			"name": "Fairy",
 			"tint": "#ffb8e0",
-			"part": "crest"
+			"part": "antennae"
 		},
 		"crystal": {
 			"name": "Crystal",

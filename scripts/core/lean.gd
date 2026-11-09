@@ -50,3 +50,18 @@ static func grow_part(rec: Dictionary) -> String:
 			return part
 	rec["muts"].append({"id": part, "lv": 1, "aff": key})
 	return part
+
+## The Boki card's line on the lean's part: what it grew, or what it will grow (base_mode and a lean only).
+static func card_line(rec: Dictionary) -> String:
+	var ln := Evo.lean(rec)
+	var key := String(ln[0])
+	var part := String(rules()["types"].get(key, {}).get("part", ""))
+	if not on() or part == "":
+		return ""
+	var name := String(face(key)["name"])
+	var has := (rec.get("muts", []) as Array).any(func(m): return m["id"] == part and m["aff"] == key)
+	if has:
+		return "%s meals grew %s" % [name, Evo.PART_NAMES[part]]
+	if float(ln[1]) >= float(rules()["part_min"]):
+		return "Next form: %s meals grow %s" % [name, Evo.PART_NAMES[part]]
+	return "More %s meals grow %s at a form" % [name, Evo.PART_NAMES[part]]
