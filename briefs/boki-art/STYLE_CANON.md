@@ -42,5 +42,10 @@ Soft hand-painted shading, a clean fairly thin dark outline (never thick cartoon
 ## How it is produced
 Hero card = one image per species: image 1 is that species' own design (identity), image 2 is the anchor (style). Builder `C()` in `batch/build_jobs.py`, ids `<species>_card`, inputs in `card_inputs/`. SAMPLE (6 species x 2 runs: vespyx, lunowl, skidlet, glaivyx, chandelotl, teapotamus) is queued; the rest wait for the owner's verdict on it. New `B()`/`V()` turnaround jobs now use the anchor as the style ref (existing ids are unchanged).
 
-## Glow (owner 11-09)
-- Every card gets its own glow: a soft radial glow behind the creature in that Boki's signature colour, so each one stands out (as on the site Boki wall). It is added when the card is composited, NOT generated, so the generated art stays on plain grey for a clean cutout.
+## Glow (owner 11-09): type-matched, added at display time
+- The site Boki wall (projectboki.com assets/style.css .bw-card, assets/site.js TYPE map) does it in CSS, not in the art:
+  card = radial-gradient(circle at 50% 42%, <type colour> 30%, transparent 62%) over linear-gradient(180deg,#121a2d,#0b111f),
+  art = drop-shadow(0 16px 22px rgba(0,0,0,.55)); hover border and shadow tint in the same colour.
+- <type colour> = the Boki's FIRST type from the site TYPE map (ember #ff8a4c, storm #ffd84a, frost #9fe3ff, shadow #a78bff,
+  prism #ff9df0, venom #a6ff3a, tide #4fc3ff, ...), so the glow echoes the creature's own colours (green venom/bloom Boki glow green).
+- So generated art stays on plain grey with no glow (clean cutout); every surface (site wall, Bokidex, cards) adds the type glow.
