@@ -72,7 +72,7 @@ func _time(m: Match, P: Hunter, K: GunslingerKit, move: String, secs: float, eve
 			r["at"] = m.time - K.anim_at
 		var live := c.cur
 		if live == "" and c.up_w > 0.0:
-			live = _upper(c)
+			live = c.cur_u
 		if live != "" and String(r["clip"]) == "":
 			r["clip"] = live
 			r["len"] = c.lib.get_animation(live).length
@@ -82,10 +82,6 @@ func _time(m: Match, P: Hunter, K: GunslingerKit, move: String, secs: float, eve
 	print("TIME %s play %.2f in %.2f hit %.2f (clip %.2f) %s %.2f out %.2f"
 			% [move, r["play"], r["in"], r["hit"], r["at"], r["clip"], r["len"], r["out"]])
 	return r
-
-## The clip on the upper-body channel (a move with "upper": the legs keep walking under it).
-func _upper(c: WardenClips) -> String:
-	return ((c.tree.tree_root as AnimationNodeBlendTree).get_node("anim_u") as AnimationNodeAnimation).animation
 
 ## Walks forward from `from` s after the press and reads, at `until`, how the body is shared: the full-body
 ## channel (the clip's legs) against the upper one (the legs walking) and her ground speed.
