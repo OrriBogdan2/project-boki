@@ -12,7 +12,8 @@ extends RefCounted
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_camera_intro, hob_3_dialogue_box,
-## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
+## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks,
+## hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
 
 const SECOND := ["juggernaut", "ashwick", "tender"]    # owner order, class_unlock.json second_picks
 
@@ -181,7 +182,8 @@ func _offer() -> void:
 			"the Relic in focus (Meeko) loops its attack, healing ring and dash (%s)" % str(slots))
 	ok(clips.filter(func(c): return (c as AbilityClip).visible).size() == 1, "one clip shows at a time")
 	offer.show_clip(2)
-	ok((clips[2] as AbilityClip).visible and not (clips[0] as AbilityClip).visible and (clips[2] as AbilityClip).t == 0.0,
+	var dash: AbilityClip = clips[2]
+	ok(dash.visible and not (clips[0] as AbilityClip).visible and dash.t == 0.0,
 			"the reel moves on to the dash, from its start")
 	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
