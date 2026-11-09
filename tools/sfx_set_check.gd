@@ -33,6 +33,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_wisp_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -125,6 +126,42 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## 7. The Boki wisp cues (KinSummon): a chirp for every body size, higher for a smaller one, and the
+## bloom, shrink, ready and grab cues, all in the boki set.
+func _wisp_cues() -> void:
+	var boki: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boki.json"))["sounds"]
+	var sizes := {}
+	for row in (KinSummon.rules()["table"] as Dictionary).values():
+		for size in row:
+			sizes[size] = true
+	var missing := []
+	for size in sizes:
+		var ks := KinSpec.new()
+		ks.size = size
+		if not boki.has(KinSummon.chirp_name(ks)):
+			missing.append(size)
+	for cue in ["wisp_bloom", "wisp_shrink", "wisp_ready", "wisp_grab"]:
+		if not boki.has(cue):
+			missing.append(cue)
+	var what := "wisp cues: a chirp per body size, bloom, shrink, ready, grab (missing %s)"
+	ok(missing.is_empty() and sizes.size() == 3, what % [missing])
+	var pitch := []
+	for size in ["small", "medium", "large"]:
+		pitch.append(_zero_crossings(_data("res://audio/wisp_chirp_%s.wav" % size)))
+	var order := "wisp chirps rise as the body gets smaller (zero crossings %s)"
+	ok(pitch[0] > pitch[1] and pitch[1] > pitch[2], order % [pitch])
+
+## Sign changes in a wav's samples: a cheap stand-in for its pitch.
+func _zero_crossings(data: PackedByteArray) -> int:
+	var n := 0
+	var prev := 0
+	for k in data.size() / 2:
+		var v := data.decode_s16(k * 2)
+		if (v < 0) != (prev < 0):
+			n += 1
+		prev = v
+	return n
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
