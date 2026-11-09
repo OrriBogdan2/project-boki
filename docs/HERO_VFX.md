@@ -46,6 +46,37 @@ the aim), with `hand` r / l between them for a point that rides a hand bone. So 
 the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
+## Team read: rival vs ally (source study, 2026-11-09)
+Question: in a 30-Hunter match, does the source mark a rival's ground zone, telegraph or projectile apart from a
+teammate's (edge tint, outline, opacity), with the Hunter's own colour kept as the fill?
+
+**Looked at.** The only footage with allies and rivals in real fights: `footage/breah` (the commentated guide, 4 fps,
+720 px) frames 736-790 and 1030-1125. Every other folder is the practice range against dummies.
+briefs/hero-ref/HUD.md covers plates only (self yellow-green, ally blue, rival red), nothing on ability looks.
+
+**Seen.**
+- Effects keep their caster's colours on both sides: the cyan ring (746) and purple ring (758) round units, the
+  magenta disc round a rival (1066, 1072), the orange spike wall (1054-1060), the magenta beam (1090). No red or blue
+  edge, outline or dimming on any of them.
+- The only red indicators are the viewer's own aim: Tetra's thin red aim line (764-788, 1088, 1096, 1104) and her
+  red Volcano Crusher circle (1090; breah.md). They are drawn for the caster only, so they say nothing about how a
+  rival's cast looks to you.
+
+**Not settled.** No frame shows the same ability cast by an ally and by a rival, and at 720 px and 4 fps a thin edge
+tint or a small opacity drop would not survive. So nothing is built from this study.
+
+**Ours today (not from the source).** AimDraw lerps a rival's shared telegraph (`"all": true`, e.g. Kitefall's ring
+and landing disc, Faultline's lane) 45% toward `Feel.RIM_ENEMY` (accent 30%); HeroVfx draws an ally's effects at
+`ALLY_K`; your own aim reticles are drawn for you alone.
+
+**Options for the owner.**
+1. Keep today's cues as they are.
+2. Edge only: one HeroVfx team pass tints the outer rim of a rival's ground looks (scorch, skirt) toward
+   `Feel.RIM_ENEMY` and leaves the fill in the Hunter's colour; AimDraw would tint the rim only, not the whole shape.
+3. Remove the ours-only cues (the RIM_ENEMY lerp and `ALLY_K`) if better footage shows the source has none.
+4. Settle it first: a 1080p+ clip of a trio match (or the source's settings, if it has an enemy-indicator colour
+   option) where an ally and a rival cast the same ability. Recommended before any of 1-3.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
