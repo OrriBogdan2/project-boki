@@ -46,6 +46,7 @@ var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
+var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -326,6 +327,9 @@ func tick_status(dt: float) -> void:
 func net_follow(dt: float) -> void:
 	prev = pos
 	if net_t < 0.0:
+		return
+	if net_buf:
+		net_buf.follow(self, m.time)
 		return
 	var age := clampf(m.time - net_t, 0.0, 0.25)
 	var tgt := net_pos + net_vel * age

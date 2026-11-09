@@ -5631,7 +5631,7 @@ func _net_state(data: Array, from: String) -> void:
 			e = _net_make(it)
 			if e == null:
 				continue
-		_net_apply(e, it)
+		_net_apply(e, it, t_host)
 	if t_host >= 0.0 and from == Net.host and absf(t_host - time) > 0.5:
 		time = t_host
 
@@ -5688,13 +5688,15 @@ func _net_make(it: Array) -> Ent:
 			return mb
 	return null
 
-func _net_apply(e: Ent, it: Array) -> void:
+func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 	e.net_pos = Vector3(it[2], it[3], it[4])
 	e.net_t = time
 	match String(it[0]):
 		"h":
 			var h: Hunter = e
 			h.net_vel = Vector3(it[5], it[6], it[7])
+			if h.net_buf == null: h.net_buf = NetSmooth.new()
+			h.net_buf.push(t_owner if t_owner >= 0.0 else time, time, h.net_pos, h.net_vel)
 			h.face = it[8]; h.hp = it[9]; h.max_hp = it[10]
 			var f := int(it[11])
 			h.downed = f & 1 != 0
