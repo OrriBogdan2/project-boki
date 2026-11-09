@@ -211,13 +211,17 @@ func _hold_locked(fire_pressed: bool) -> bool:
 			held[slot] = 0.0
 	return true
 
+## A press still locked when its wait runs out is stale: RMB, E and X replay for the slot's deny cue; LMB and
+## Shift (no cue while stunned) are dropped, so the sword's own mid-swing tap buffer never catches a stale tap.
 func _release(dt: float) -> void:
 	for slot in held.keys():
-		if _locked(slot) and float(held[slot]) < BUFFER_S:
+		var locked := _locked(slot)
+		if locked and float(held[slot]) < BUFFER_S:
 			held[slot] = float(held[slot]) + dt
 			continue
 		held.erase(slot)
-		_replay(slot)
+		if not (locked and slot in ["lmb", "dash"]):
+			_replay(slot)
 
 ## What keeps a held press of `slot` waiting: anything that makes the kit busy, and for Shift a root too.
 func _locked(slot: String) -> bool:
