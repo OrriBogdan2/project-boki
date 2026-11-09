@@ -5810,3 +5810,4 @@ READY ext/tester-guide 4ca0d4948 (docs/TESTER_GUIDE.md for itch testers + dismis
 READY ext/anim-boki-cast a9e410abe (Boki lunge+cast clips, wind-up so bite/skill land on the release frame; rig+system checks green)
 READY ext/anim-boki-idle 8a82fd243 (breathing idle + a 4-9 s fidget for all 21 rigged Bokis, runtime BokiIdle; idle-check, rig-check, system-check, GPU strip pass)
 READY ext/tester-guide 106806a04 (supersedes 4ca0d4948, adds the missing try_card.gd.uid; docs/TESTER_GUIDE.md + dismissible 'What to try today' title card from content/rules/try_today.json; --title-check: 4 new card asserts ok, the same 8 other asserts (tagline/squad/Wyrm/lead) fail identically on origin/main d255acbee; health --strict OK; gen_wiki --check OK)
+READY ext/anim-v2-audit-slice 8ea5dbb93 (v2 animation re-audit: gait, arms, prop alignment, timing tables hold; kael-sword hand assert restored; merge after ext/anim-quality-audit)
