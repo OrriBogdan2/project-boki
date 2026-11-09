@@ -405,7 +405,8 @@ func _care() -> void:
 	for s in Care.STATS: rec["stats"][s] = Care.stat_cap(rec)
 	P._refresh_kin_stats()
 	var maxed := P.owner_stat("damage")
-	ok(is_equal_approx(base, 0.05) and maxed > base and maxed <= base * cap + 0.0001, "a maxed Boki's carry passive stays in the cap (%.4f -> %.4f)" % [base, maxed])
+	var inside := is_equal_approx(base, 0.05) and maxed > base and maxed <= base * cap + 0.0001
+	ok(inside, "a maxed Boki's carry passive stays in the cap (%.4f -> %.4f)" % [base, maxed])
 	var ln := CareLink.line(rec)
 	ok(ln.contains("Trust") and ln.contains("Power"), "one line: stats, element, trust: %s" % ln)
 
