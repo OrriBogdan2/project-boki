@@ -42941,5 +42941,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_mortarfly_x2_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_mortarfly_x2",
+    "name": "Mortarfly (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_x2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_x1",
+    "name": "Mortarfly (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_x1_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_x2",
+    "name": "Mortarfly (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_x2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_f1",
+    "name": "Chandelapi (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_f1",
+    "name": "Chandelapi (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_f1",
+    "name": "Chandelapi (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_mortarfly_x2",
+    "name": "Mortarfly (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_mortarfly_x2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_chandelapi_f2",
+    "name": "Chandelapi (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_chandelapi_f2_3.jpg",
+    "ok": true
   }
 ]
