@@ -4353,6 +4353,7 @@ func step(dt: float) -> void:
 	Life.tick_stomps(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
+	CurrentSound.tick(self)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)

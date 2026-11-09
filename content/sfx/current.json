@@ -1,0 +1,11 @@
+{
+ "group": "current",
+ "name": "Wind roads and updrafts",
+ "script": "tools/gen_sfx_wind.py",
+ "sounds": {
+  "current_bed": "loop",
+  "current_ride": "loop"
+ },
+ "signature": [],
+ "loops": ["current_bed", "current_ride"]
+}
