@@ -80,7 +80,7 @@ Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scal
 | 7 | Lace | archer | 3 | 3 | 3 | 3 | 3 | 3 | 2 | 20 | data-driven; was red `#e8483e` (Kael's red); thin arrow trails; few sounds |
 | 8 | Neve | rimewright | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; frost shards read; held beam needs a hot core and ice debris on the end |
 | 9 | Meeko | tender | 3 | 3 | 3 | 3 | 3 | 4 | 4 | 23 | data-driven; heal and seed read, but the LMB pellet is small for its hitbox |
-| 10 | Motley | ostra | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | was 14. RMB, E and X are data-driven in sea teal over a void core, each with an afterglow; Nightwell now reads as a black well with teal arms (strips: jobq vfxq-ostra-abil-before/after). Left: the dome tell is a pale grey-teal, the Snap's flight is one bundle. Dash, LMB and the Swollen pink stay violet (void-jester-dash-feel-1108) |
+| 10 | Motley | ostra | 4 | 4 | 4 | 3 | 4 | 5 | 3 | 27 | was 14 (main), 25 (RMB, E, X in sea teal over a void core, each with an afterglow; Nightwell a black well with teal arms). The LMB orb, its trail, charge glow and `orb_hit` (flare, ring, shards, bigger when charged) are teal too (strips: jobq vfxq-after-motley-lmb2, `ostra_lmb`/`ostra_hold`). Left: the dome tell is a pale grey-teal, the Snap flight is one bundle. Dash and the Swollen sphere stay pink/violet (no bursts on dashes; a status colour) |
 | 11 | Cinder | ashwick | 4 | 4 | 4 | 4 | 4 | 4 | 4 | 28 | the bar. Polish: soft-particle ground clipping, hold-blade glow |
 | 12 | Kael | juggernaut | 4 | 4 | 4 | 4 | 4 | 4 | 3 | 27 | the bar. Polish: cleave sound transient, ult shockwave scale |
 
