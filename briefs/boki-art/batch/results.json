@@ -38930,5 +38930,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/c_umbrathere_u1_4.jpg",
     "ok": true
+  },
+  {
+    "id": "c_canvastross_s5",
+    "name": "Canvastross (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_canvastross_s5_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u1",
+    "name": "Umbrathere (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u1",
+    "name": "Umbrathere (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u2",
+    "name": "Umbrathere (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u2",
+    "name": "Umbrathere (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u2",
+    "name": "Umbrathere (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u1",
+    "name": "Umbrathere (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_umbrathere_u3",
+    "name": "Umbrathere (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_umbrathere_u3_3.jpg",
+    "ok": true
   }
 ]
