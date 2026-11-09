@@ -19,7 +19,7 @@ extends RefCounted
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
-const FADE := 0.1            # s: one clip into the next, and into or out of an action
+const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides it)
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
@@ -350,7 +350,7 @@ func step(dt: float) -> void:
 	if not proc and bool(want.get("upper", false)):
 		_node("anim_u").animation = String(want["clip"])
 		_p("seek_u/seek_request", float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		up_w = move_toward(up_w, 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])

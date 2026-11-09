@@ -13,13 +13,13 @@
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"tm_dart_r": {"clip": "dart_r", "upper": "moving"}, "tm_dart_l": {"clip": "dart_l", "upper": "moving"}, "tm_dart_heavy": {"clip": "dart_heavy", "upper": "moving"},
+		"tm_dart_r": {"clip": "dart_r", "upper": "moving"}, "tm_dart_l": {"fade": 0.05, "clip": "dart_l", "upper": "moving"}, "tm_dart_heavy": {"fade": 0.05, "clip": "dart_heavy", "upper": "moving"},
 		"tm_beam": {"clip": "beam", "upper": true},
-		"tm_spear_aim": {"clip": "spear_aim", "hold_from": 0.12, "upper": "moving"}, "tm_spear": {"clip": "spear", "upper": "moving"},
+		"tm_spear_aim": {"fade": 0.05, "clip": "spear_aim", "hold_from": 0.12, "upper": "moving"}, "tm_spear": {"fade": 0.05, "clip": "spear", "upper": "moving"},
 		"tm_wall": {"clip": "wall"}, "tm_freeze": {"clip": "freeze", "upper": "moving"},
-		"tm_skate_go": {"clip": "skate_go", "heading": true}, "tm_skate": {"clip": "skate", "heading": true}, "tm_skate_air": {"clip": "skate_air", "heading": true}, "tm_skate_stop": {"clip": "skate_stop"},
+		"tm_skate_go": {"clip": "skate_go", "heading": true}, "tm_skate": {"clip": "skate", "heading": true}, "tm_skate_air": {"clip": "skate_air", "heading": true}, "tm_skate_stop": {"fade": 0.05, "clip": "skate_stop"},
 		"tm_shatter": {"clip": "shatter", "upper": "moving"}, "tm_clench": {"clip": "clench", "upper": "moving"},
-		"tm_rime": {"clip": "rime"}, "tm_rime_carry": {"clip": "rime_carry"}, "tm_rime_hold": {"clip": "rime_hold", "hold_from": 0.0}, "tm_rime_crash": {"clip": "rime_crash"}, "tm_rime_break": {"clip": "rime_break"},
+		"tm_rime": {"fade": 0.05, "clip": "rime"}, "tm_rime_carry": {"fade": 0.05, "clip": "rime_carry"}, "tm_rime_hold": {"clip": "rime_hold", "hold_from": 0.0}, "tm_rime_crash": {"clip": "rime_crash"}, "tm_rime_break": {"clip": "rime_break"},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},

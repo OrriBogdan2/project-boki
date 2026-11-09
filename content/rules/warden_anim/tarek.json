@@ -49,21 +49,26 @@
 			"clip": "lmb_throw"
 		},
 		"breah_wind": {
+			"fade": 0.05,
 			"clip": "lmb_wind",
 			"hold_from": 0.24
 		},
 		"breah_punch": {
+			"fade": 0.05,
 			"clip": "lmb_punch"
 		},
 		"breah_crouch": {
+			"fade": 0.05,
 			"clip": "rmb_gather",
 			"hold_from": 0.16
 		},
 		"breah_leap": {
+			"fade": 0.05,
 			"clip": "rmb_leap",
 			"hold_from": 0.3
 		},
 		"breah_slam": {
+			"fade": 0.05,
 			"clip": "rmb_slam"
 		},
 		"breah_dive": {
@@ -74,34 +79,41 @@
 			"clip": "rmb_land"
 		},
 		"breah_lunge": {
+			"fade": 0.05,
 			"clip": "rmb_lunge"
 		},
 		"breah_leap_land": {
 			"clip": "dash_land"
 		},
 		"breah_exdash": {
+			"fade": 0.05,
 			"clip": "dash_air"
 		},
 		"breah_raise": {
 			"clip": "e_row"
 		},
 		"breah_sense": {
+			"fade": 0.05,
 			"clip": "sense"
 		},
 		"breah_spine_aim": {
+			"fade": 0.05,
 			"clip": "x_aim",
 			"hold_from": 0.12
 		},
 		"breah_spine": {
+			"fade": 0.05,
 			"clip": "x_spine"
 		},
 		"mf_xform": {
 			"clip": "fuse"
 		},
 		"breah_hop": {
+			"fade": 0.05,
 			"clip": "dash_hop"
 		},
 		"breah_skate": {
+			"fade": 0.05,
 			"clip": "dash_skate",
 			"hold_from": 0.22
 		}

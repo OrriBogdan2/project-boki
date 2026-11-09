@@ -15,11 +15,11 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"mage_lmb_l": {"clip": "lmb_l", "upper": true}, "mage_lmb_r": {"clip": "lmb_r", "upper": true},
-		"mage_rmb_hold": {"clip": "rmb_hold", "hold_from": 0.12, "upper": true}, "mage_rmb": {"clip": "rmb", "upper": true},
-		"mage_dash": {"clip": "dash", "hold_from": 0.12}, "mage_dash_go": {"clip": "dash_go"}, "mage_dash_land": {"clip": "dash_land"}, "mage_dash_ex": {"clip": "dash_ex"},
-		"mage_e": {"clip": "sky", "upper": true}, "mage_e_snap": {"clip": "sky_snap", "upper": true}, "mage_live": {"clip": "live", "upper": true}, "mage_gum": {"clip": "gum", "upper": true},
-		"mage_x": {"clip": "ult", "hold_from": 0.1}, "mage_x_air": {"clip": "ult_air", "hold_from": 0.2}, "mage_x_dive": {"clip": "ult_dive", "hold_from": 0.05}, "mage_x_land": {"clip": "ult_land"},
+		"mage_lmb_l": {"fade": 0.05, "clip": "lmb_l", "upper": true}, "mage_lmb_r": {"fade": 0.05, "clip": "lmb_r", "upper": true},
+		"mage_rmb_hold": {"fade": 0.05, "clip": "rmb_hold", "hold_from": 0.12, "upper": true}, "mage_rmb": {"fade": 0.05, "clip": "rmb", "upper": true},
+		"mage_dash": {"fade": 0.04, "clip": "dash", "hold_from": 0.12}, "mage_dash_go": {"fade": 0.05, "clip": "dash_go"}, "mage_dash_land": {"fade": 0.08, "clip": "dash_land"}, "mage_dash_ex": {"fade": 0.05, "clip": "dash_ex"},
+		"mage_e": {"clip": "sky", "upper": true}, "mage_e_snap": {"fade": 0.05, "clip": "sky_snap", "upper": true}, "mage_live": {"fade": 0.05, "clip": "live", "upper": true}, "mage_gum": {"clip": "gum", "upper": true},
+		"mage_x": {"fade": 0.04, "clip": "ult", "hold_from": 0.1}, "mage_x_air": {"clip": "ult_air", "hold_from": 0.2}, "mage_x_dive": {"fade": 0.05, "clip": "ult_dive", "hold_from": 0.05}, "mage_x_land": {"clip": "ult_land"},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},

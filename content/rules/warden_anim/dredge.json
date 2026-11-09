@@ -65,6 +65,7 @@
 			"upper": "moving"
 		},
 		"dr_reel": {
+			"fade": 0.05,
 			"clip": "reel",
 			"hold_from": 0.18,
 			"upper": "moving"
@@ -78,6 +79,7 @@
 			"upper": "moving"
 		},
 		"dr_dive": {
+			"fade": 0.05,
 			"clip": "dive",
 			"hold_from": 0.12
 		},
@@ -85,12 +87,15 @@
 			"clip": "quake"
 		},
 		"dr_lunge": {
+			"fade": 0.05,
 			"clip": "lunge"
 		},
 		"dr_pounce": {
+			"fade": 0.05,
 			"clip": "pounce"
 		},
 		"dr_flex": {
+			"fade": 0.05,
 			"clip": "flex",
 			"upper": true
 		},
@@ -99,6 +104,7 @@
 			"upper": "moving"
 		},
 		"dr_jump": {
+			"fade": 0.05,
 			"clip": "jump"
 		},
 		"dr_land": {

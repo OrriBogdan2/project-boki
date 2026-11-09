@@ -166,13 +166,13 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 
 ## Animation timing (Nov 8: parity pass against the 5 fps footage; 10 fps for the ult)
 Measured offline through `WardenClips` (hem.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s,
-blend out to locomotion 0.16 s, under one footage frame) and in `--archer-combo-check`. "Hit" is the release or contact
-key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one frame = 0.2 s).
+snaps 0.03-0.05, blend out to locomotion 0.16 s, under one footage frame) and in `--archer-combo-check`. "Hit" is the
+release or contact key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one frame = 0.2 s).
 
 | Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
 |---|---|---|---|---|
 | `arc_draw` | pose up within one frame, held [f102-107] | 0.05 nock / stages 0.6, 1.15 / held from 1.15 (clip FULL 1.25) | same | matches (the hold loops the last 0.1 s) |
-| `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | same | matches (the snap sits inside the 0.1 s blend) |
+| `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | full weight on the snap (fade 0.03) | fixed; asserted |
 | `arc_super` | body flash and a harder kick [f167-169] | kick 0.05, hip back 0.3 / 0.6 | same | matches |
 | `arc_perfect` `arc_over_loose` | one-frame star / a drooping release | 0.06 / 0.55 (overshoot to 0.6) | same | matches |
 | `arc_over` | held 0.4-0.6 s past Supercharged | from 1.65 s of draw, shakes every 0.08 s | same | matches (0.5 s past) |
@@ -191,8 +191,8 @@ Clip re-keys for the model (tools/art1/hem_clips.py, on the unmerged ravel-v2 re
 - `roll`: its last key (0.36 standing READY) could end in the crouched walk pose; the kit now hides it either way.
 - `heavy_wind`: HW at 1.1 is right once the clip runs on the hold's clock (done kit-side, no re-key).
 
-Suggestions (ours, not built): the release snap keys (0.04-0.06 s) land inside the 0.1 s blend-in, so the string hand
-snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`arc_super` would show the full snap.
+The release snap keys (0.02-0.07 s) landed inside the 0.1 s blend-in (the snap at about half weight); each snap move
+now carries its own shorter `"fade"` (docs/MOVEMENT_FEEL.md, Strike snaps).
 
 ## Engine notes
 - Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `pin_needle.gd` (the Heavy Shot's held needle), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).

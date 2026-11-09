@@ -17,11 +17,11 @@
 	"kmoves": {
 		"gunslinger_lmb": {"clip": "lmb", "upper": "moving"},
 		"gunslinger_rmb": {"clip": "rmb", "upper": "moving"},
-		"gunslinger_dash": {"clip": "dash", "legs_heading": true},
+		"gunslinger_dash": {"fade": 0.05, "clip": "dash", "legs_heading": true},
 		"gunslinger_dash_ex": {"clip": "dash_ex"},
 		"gunslinger_e": {"clip": "e"},
-		"gunslinger_x": {"clip": "x"},
-		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
+		"gunslinger_x": {"fade": 0.05, "clip": "x"},
+		"gunslinger_knock": {"fade": 0.05, "clip": "knock", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},

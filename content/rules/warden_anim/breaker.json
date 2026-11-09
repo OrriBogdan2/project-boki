@@ -75,17 +75,21 @@
 			"hold_from": 0.2
 		},
 		"bul_smash": {
+			"fade": 0.05,
 			"clip": "lmb_slam"
 		},
 		"bul_launch": {
+			"fade": 0.05,
 			"clip": "lmb_launch"
 		},
 		"bul_guard": {
+			"fade": 0.05,
 			"clip": "rmb_guard",
 			"upper": "moving",
 			"hold_from": 0.12
 		},
 		"bul_break": {
+			"fade": 0.05,
 			"clip": "guard_break",
 			"upper": true
 		},
@@ -97,6 +101,7 @@
 			"clip": "shift_whirl"
 		},
 		"bul_charge": {
+			"fade": 0.05,
 			"clip": "shift_charge"
 		},
 		"bul_short": {
@@ -117,10 +122,12 @@
 			"upper": "moving"
 		},
 		"bul_ult_wind": {
+			"fade": 0.05,
 			"clip": "x_wind",
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
+			"fade": 0.05,
 			"clip": "x_slam"
 		},
 		"mf_xform": {

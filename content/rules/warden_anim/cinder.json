@@ -14,13 +14,13 @@
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
 		"as_lance": {"clip": "lance", "hold_from": 0.34, "upper": "moving"},
-		"lw_stoke_lance": {"clip": "lance_stoke", "hold_from": 0.5, "upper": "moving"},
+		"lw_stoke_lance": {"fade": 0.05, "clip": "lance_stoke", "hold_from": 0.5, "upper": "moving"},
 		"as_lance_end": {"clip": "lance_end", "upper": "moving"},
 		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving"}, "as_shot": {"clip": "shot", "upper": "moving"},
-		"as_leap": {"clip": "leap", "heading": true}, "lw_hop": {"clip": "hop"},
-		"as_cloak": {"clip": "cloak"}, "lw_stoke": {"clip": "stoke", "upper": true},
-		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land"},
-		"lw_jump": {"clip": "jump"},
+		"as_leap": {"fade": 0.05, "clip": "leap", "heading": true}, "lw_hop": {"clip": "hop"},
+		"as_cloak": {"fade": 0.05, "clip": "cloak"}, "lw_stoke": {"fade": 0.05, "clip": "stoke", "upper": true},
+		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"fade": 0.05, "clip": "jet_land"},
+		"lw_jump": {"fade": 0.05, "clip": "jump"},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},

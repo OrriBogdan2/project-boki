@@ -50,9 +50,11 @@
 	},
 	"kmoves": {
 		"jug_slash_r": {
+			"fade": 0.05,
 			"clip": "slash_r"
 		},
 		"jug_slash_l": {
+			"fade": 0.05,
 			"clip": "slash_l"
 		},
 		"jug_wave_wind": {
@@ -61,6 +63,7 @@
 			"fade": 0.2
 		},
 		"jug_wave": {
+			"fade": 0.05,
 			"clip": "wave"
 		},
 		"jug_slam": {
@@ -72,6 +75,7 @@
 			"fade": 0.18
 		},
 		"jug_lunge": {
+			"fade": 0.05,
 			"clip": "lunge"
 		},
 		"jug_meteor": {
@@ -82,23 +86,28 @@
 			"clip": "meteor_land"
 		},
 		"jug_dash": {
+			"fade": 0.05,
 			"clip": "dash"
 		},
 		"jug_exdash": {
+			"fade": 0.05,
 			"clip": "exdash"
 		},
 		"jug_chain": {
 			"clip": "chain"
 		},
 		"jug_reel": {
+			"fade": 0.05,
 			"clip": "reel",
 			"hold_from": 0.25,
 			"heading": true
 		},
 		"jug_spin": {
+			"fade": 0.05,
 			"clip": "spin"
 		},
 		"jug_chainlunge": {
+			"fade": 0.05,
 			"clip": "chainlunge"
 		},
 		"jug_haul_wind": {
@@ -106,13 +115,16 @@
 			"hold_from": 0.15
 		},
 		"jug_haulslam": {
+			"fade": 0.05,
 			"clip": "haulslam"
 		},
 		"jug_guard": {
+			"fade": 0.05,
 			"clip": "guard",
 			"hold_from": 0.2
 		},
 		"jug_riposte": {
+			"fade": 0.05,
 			"clip": "riposte"
 		},
 		"jug_roar": {

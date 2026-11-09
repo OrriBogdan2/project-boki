@@ -17,13 +17,13 @@
 	"air": {"rise": "jump", "fall": "fall", "glide": "glide", "dive": "dive"},
 	"land": {"clip": "land", "dur": 0.4, "min_fall": 0.25},
 	"kmoves": {
-		"ostra_orb": {"clip": "orb", "alt": "orb_l", "upper": true}, "ostra_orb_hot": {"clip": "orb_hot", "upper": true},
+		"ostra_orb": {"fade": 0.05, "clip": "orb", "alt": "orb_l", "upper": true}, "ostra_orb_hot": {"clip": "orb_hot", "upper": true},
 		"ostra_flurry": {"clip": "flurry", "upper": true},
-		"ostra_snap_wind": {"clip": "snap_wind", "hold_from": 0.3}, "ostra_snap": {"clip": "snap"},
-		"ostra_swap_aim": {"clip": "swap_aim", "hold_from": 0.16}, "ostra_swap": {"clip": "swap"},
+		"ostra_snap_wind": {"clip": "snap_wind", "hold_from": 0.3}, "ostra_snap": {"fade": 0.05, "clip": "snap"},
+		"ostra_swap_aim": {"fade": 0.05, "clip": "swap_aim", "hold_from": 0.16}, "ostra_swap": {"clip": "swap"},
 		"ostra_swap_air": {"clip": "swap_air", "hold_from": 0.47}, "ostra_arrive": {"clip": "arrive"},
 		"ostra_seed": {"clip": "seed"}, "ostra_pop": {"clip": "pop", "upper": true},
-		"ostra_well": {"clip": "well", "hold_from": 0.27}, "ostra_well_snap": {"clip": "well_snap"}, "ostra_well_end": {"clip": "well_end"},
+		"ostra_well": {"clip": "well", "hold_from": 0.27}, "ostra_well_snap": {"fade": 0.05, "clip": "well_snap"}, "ostra_well_end": {"clip": "well_end"},
 		"ostra_empower": {"clip": "empower"},
 		"mf_xform": {"clip": "fuse"}
 	},

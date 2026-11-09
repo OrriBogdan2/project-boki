@@ -229,6 +229,32 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Strike snaps: per-move blend-in (`--clip-check`)
+A keyed move blends in over `WardenClips.FADE` (0.1 s), but most strike and release keys sit at 0.02-0.07 s of the
+kit clock (`kmove_t`), so the strike pose showed at a third to two thirds weight on its own hit frame; the source shows
+one-frame snaps (briefs/hero-ref/pin.md f69). Measured on the clips (the key is where the fastest arm bone, hand,
+fingers or held weapon, drops back under a third of its peak; a snap peaks at 8 m/s or more), 99 moves over the 12
+Hunters strike inside the blend. Each now carries its own `"fade"` in `content/rules/warden_anim/<art>.json`: one
+frame past its key, at most 0.05 s, so it is at full weight on the key from locomotion. The upper-body path now honours
+`"fade"` too (it was always 0.1). Clips and kit numbers are unchanged. `--clip-check` asserts it per Hunter.
+Kael's wind-ups keep their slower authored fades (0.18-0.2); Ryzz's `mage_dash_land` takes 0.08 (0.05 popped the hand
+in the dash flow); keys at 0.1 s or later were already full.
+
+| Hunter (art) | Moves (key s; fade 0.05 unless shown) |
+|---|---|
+| archer (hem) | `arc_draw` 0.034, `arc_tap` 0.034, `arc_loose` 0.017 (0.03), `arc_perfect` 0.017 (0.03), `arc_super` 0.034, `arc_heavy_wind` 0.067, `arc_heavy` 0.034, `arc_hail` 0.042, `pin_roll` 0.034, `pin_flick` 0.034, `pin_ult_cast` 0.034, `pin_ult_nock` 0.034, `pin_ult_final` 0.067 |
+| thief (sable) | `thf_lmb_r` 0.034, `thf_lmb_l` 0.034, `thf_primed` 0.034, `thf_vault_l` 0.034, `thf_vault_f` 0.034, `thf_exdash` 0.042, `thf_bola` 0.034, `thf_arrive` 0.034, `thf_flourish` 0.034 |
+| tender (pip) | `mm_shot_r` 0.067, `mm_shot_l` 0.067, `mm_seed` 0.025 (0.04), `mm_skip` 0.067, `mm_float` 0.034, `mm_kindled` 0.067, `mm_call` 0.067, `mm_call_end` 0.034 |
+| gunslinger (vex) | `gunslinger_dash` 0.034, `gunslinger_x` 0.067, `gunslinger_knock` 0.059 |
+| ashwick (cinder) | `lw_stoke_lance` 0.034, `as_leap` 0.034, `as_cloak` 0.034, `lw_stoke` 0.034, `lw_land` 0.034, `lw_jump` 0.034 |
+| mage (ryzz) | `mage_lmb_l` 0.067, `mage_lmb_r` 0.042, `mage_rmb_hold` 0.067, `mage_rmb` 0.034, `mage_dash` 0.025 (0.04), `mage_dash_go` 0.075, `mage_dash_land` 0.067 (0.08), `mage_dash_ex` 0.034, `mage_e_snap` 0.034, `mage_live` 0.034, `mage_x` 0.025 (0.04), `mage_x_dive` 0.067 |
+| dolm (tarek) | `breah_wind` 0.042, `breah_punch` 0.067, `breah_crouch` 0.034, `breah_leap` 0.034, `breah_slam` 0.034, `breah_lunge` 0.067, `breah_exdash` 0.034, `breah_sense` 0.034, `breah_spine_aim` 0.034, `breah_spine` 0.067, `breah_hop` 0.034, `breah_skate` 0.042 |
+| rimewright (claire) | `tm_dart_l` 0.067, `tm_dart_heavy` 0.034, `tm_spear_aim` 0.034, `tm_spear` 0.067, `tm_skate_stop` 0.034, `tm_rime` 0.034, `tm_rime_carry` 0.034 |
+| dredge (dredge) | `dr_reel` 0.067, `dr_dive` 0.050, `dr_lunge` 0.034, `dr_pounce` 0.034, `dr_flex` 0.034, `dr_jump` 0.034 |
+| bulwark (breaker) | `bul_smash` 0.067, `bul_launch` 0.067, `bul_guard` 0.034, `bul_break` 0.034, `bul_charge` 0.067, `bul_ult_wind` 0.067, `bul_ult_slam` 0.067 |
+| ostra (ostra) | `ostra_orb` 0.067, `ostra_snap` 0.034, `ostra_swap_aim` 0.067, `ostra_well_snap` 0.034 |
+| juggernaut (kael) | `jug_slash_r` 0.034, `jug_slash_l` 0.034, `jug_wave` 0.067, `jug_lunge` 0.034, `jug_dash` 0.075, `jug_exdash` 0.034, `jug_reel` 0.034, `jug_spin` 0.075, `jug_chainlunge` 0.034, `jug_haulslam` 0.034, `jug_guard` 0.034, `jug_riposte` 0.034 |
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
