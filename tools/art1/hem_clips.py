@@ -14,12 +14,13 @@ from mathutils import Quaternion, Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
-import hem_sculpt as H
+import hem_pieces as H
 import crouchkit
 from posekit import Clip, FnClip, Solver, add_breath, ang_dir as D, frame_of, lerp, two_bone
 
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 J = H.joints(os.path.join(REPO, "art/wardens/src/hem_rig.json"))
+LIFT = Vector((0, 0, float(J["hips"][2]) - 0.777))   # the poses below were keyed on a hips at 0.777: hers stand this much taller
 A_Z = 0.082
 FPS = 30
 UP = (0, 0, 1)
@@ -55,12 +56,12 @@ class HemSolver(Solver):
     Rw 1: the right hand on the string's nock, drawn dr (0..1) from its rest to the anchor at her jaw; Rw 0: free at RF."""
 
     def __init__(self, arm, pinch):
-        super().__init__(arm, {"pelvis": 0.777, "blade_rest": GA, "edge_rest": GS})
+        super().__init__(arm, {"pelvis": float(J["hips"][2]), "blade_rest": GA, "edge_rest": GS})
         self.bow_rest = frame_of(GA, GS)
         self.hand_rest = frame_of((0, 0, -1), (-1, 0, 0))
         self.pinch = Vector(pinch)
         self.nock0 = Vector(H.bow_to_model(_v3((0, H.STRING_Y, 0)), J))
-        self.anchor = Vector((-0.012, 0.140, 1.412))
+        self.anchor = Vector((-0.012, 0.140, 1.412 + 0.5 * LIFT.z))
         self.last = {}
 
     def solve(self, P):
@@ -80,7 +81,7 @@ class HemSolver(Solver):
         q_head = q_hips @ _eul(P["hed"])
         Q = {"root": q_root, "hips": q_hips, "head": q_head}
         # the bow hand
-        G = Vector(P["G"])
+        G = Vector(P["G"]) + LIFT
         BA, BS = Vector(P["BA"]).normalized(), Vector(P["BS"])
         q_bow = frame_of(BA, BS) @ self.bow_rest.inverted()
         WL = G - q_bow @ (Vector(GC) - H0["hand.L"])
@@ -88,11 +89,11 @@ class HemSolver(Solver):
         Q["upper_arm.L"], Q["forearm.L"], Q["hand.L"] = qu, qf, q_bow
         # the string's nock
         n0 = G + q_bow @ (self.nock0 - Vector(GC))
-        N = n0.lerp(Vector(P["CH"]) if "CH" in P else self.anchor, P["dr"])
+        N = n0.lerp(Vector(P["CH"]) + LIFT if "CH" in P else self.anchor, P["dr"])
         # the draw hand
         q_h = frame_of(P["RD"], P["RP"]) @ self.hand_rest.inverted()
         Won = N - q_h @ (self.pinch - H0["hand.R"])
-        WR = Vector(P["RF"]).lerp(Won, P["Rw"])
+        WR = (Vector(P["RF"]) + LIFT).lerp(Won, P["Rw"])
         qu, qf, _ = self.arm_ik("R", D_hips(H0["upper_arm.R"]), WR, Vector(P["Rpole"]), q_hips)
         Q["upper_arm.R"], Q["forearm.R"], Q["hand.R"] = qu, qf, q_h
         Q["pauldron.L"], Q["pauldron.R"] = q_hips, q_hips

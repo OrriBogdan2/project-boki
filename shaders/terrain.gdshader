@@ -20,6 +20,7 @@ uniform sampler2D biome_tex : filter_nearest, repeat_disable;
 uniform sampler2D path_tex : filter_linear, repeat_disable;
 uniform bool use_biome = false;
 uniform float detail = 1.0;
+uniform float depth_k = 0.0;    // height cues (DepthCues): 0 off, 1 on
 uniform float paint2 = 1.0;     // the second art pass's larger painted structure (0 = off, --art1)
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
@@ -220,6 +221,23 @@ vec3 rock(vec3 c) {
 	return c;
 }
 
+// Height cues: a cliff face is bright at its lip and dark at its foot (the darker, the longer the
+// drop), and the ground's own lip is lit where it ends in a drop, so ledges and depth read from above.
+vec3 depth_cues(vec3 c, float up, int st) {
+	if (st == 4) { return c; }
+	if (up < 0.5) {
+		float drop = hgt(wpos.xz - wnorm.xz * 0.4) - wpos.y;
+		float t = clamp(drop / 3.2, 0.0, 1.0);
+		return mix(c, c * mix(vec3(1.18, 1.14, 1.08), vec3(0.3, 0.32, 0.48), t), depth_k);
+	}
+	float lip = 0.0;
+	for (int i = 0; i < 4; i++) {
+		float a = float(i) * 1.570796;
+		lip = max(lip, clamp((wpos.y - hgt(wpos.xz + vec2(cos(a), sin(a)) * 0.6)) * 1.2, 0.0, 1.0));
+	}
+	return c * (1.0 + 0.5 * lip * depth_k);
+}
+
 void fragment() {
 	vec3 c = COLOR.rgb;
 	int st = int(style + 0.5);
@@ -287,6 +305,7 @@ void fragment() {
 		c *= 0.93 + vnoise(vec2(dot(wpos.xz, vec2(0.7, 0.7)) * 3.5, wpos.y * 7.0)) * 0.12;
 		c *= 0.96 + vnoise(wpos.xz * 9.0 + wpos.yy * 6.0) * 0.07;
 	}
+	if (depth_k > 0.0) { c = depth_cues(c, up, st); }
 	float fog = vis_fog(wpos);
 	c = vis_apply(c, fog);
 	ALBEDO = c;

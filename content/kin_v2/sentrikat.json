@@ -1,0 +1,115 @@
+{
+	"grammar": 1,
+	"id": "sentrikat",
+	"name": "Barokat",
+	"animals": [
+		"Meerkat",
+		"Brass barometer"
+	],
+	"theme": "storm",
+	"flavor": "A meerkat with a barometer in its belly; when the needle spins, lightning is coming and so is the enemy. Alert and bossy; cannot relax unless it is the one keeping watch.",
+	"colors": {
+		"body": "#c8a070",
+		"belly": "#f2e2c4",
+		"glow": "#ffe86a"
+	},
+	"look": {
+		"ears": "bolt",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "sparks"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 6.8,
+			"hop_height": 0.1,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 7,
+		"kin_damage": 1,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.6,
+		"loyalty": 0.8,
+		"temper": 0.45,
+		"curiosity": 0.7
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Lookout",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.6
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "echolocate",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "Sentri",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "alert and bossy, reports everything",
+		"syllables": [
+			"Sentri",
+			"kat"
+		]
+	},
+	"egg": {
+		"name": "Sentrikat Egg",
+		"temper": "Alert",
+		"desc": "Something alert is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}
