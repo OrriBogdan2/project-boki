@@ -56,7 +56,7 @@ body (not in the air, a crouch, or a move that owns the body):
 Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
 clip plays, its upper arm, forearm and hand ease (10/s) to their idle rotation over whatever the clip keys, so the free arm
 hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs are not re-baked (no Blender on this worker; the
-clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `dolm` (lmb_throw, lmb_punch).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
 
@@ -109,7 +109,12 @@ posts scroll at the move speed).
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
 2. Arms swung with their own side's leg (counter -0.86, fixed to +0.72).
-3. lmb_punch and lmb_throw fling the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump.
+3. lmb_punch and lmb_throw flung the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump. Fixed: the free (left)
+   arm hangs by data (free arm 1.31 to 0.38 and 1.53 to 0.68 body heights), and the hand path is re-timed by
+   `tools/art1/glb_retime.py` (no Blender): the punch's drive arrives at 0.11 s, not 0.05, and the throw's fling at 0.15,
+   not 0.13, so the hand covers the same path over four frames (jump 0.67 to 0.35, 0.40 to 0.34). The boulder still leaves at
+   the kit's 0.13 s, the punch's hit stays on its kit key. The poses are the same;
+   `tarek_clips.py` carries the new key times for the next Blender bake (which replaces the glb: do not re-run the tool on it).
 
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
 
@@ -177,7 +182,7 @@ Split into backlog items per Hunter (role build):
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
-  and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
+  jumps a hand 0.5 to 0.64 body heights in one frame (`dolm` done: re-timed, jump 0.35).
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
