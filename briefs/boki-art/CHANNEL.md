@@ -313,3 +313,6 @@ Owner asked me to check alt forms and every Boki and make sure all of it is queu
   - Chained after their parent is picked: Critwom, Klaxada > Sirencada, Checkmare, Pickadactyl, Parrywhal, Tiltster, Pagoguana.
 - Alt forms: female looks (GAME_RULES 6 + ROSTER_200) were missing on most lines. Queued from the current live cards: Furnacowary, Voltalon, Eclipsowl, Murmurling, Murmuron, Sandwidow. Waiting: Arcestrel and Gongrowl (redesigns in progress), Hourachnid and Pavonazar (no design yet). Kestrike, Lunowl and Gongibbon already have female sheets. Babies are skipped (little or no difference). The female forms need a "sex_forms" view in the dex later.
 - RUNNER: the owner's runner last committed at 12:01 ET ("Boki batch: 32 images so far"), just before the 17:03Z wipe and the branch deletion. Nothing has landed since; 65 jobs are waiting, starting with batch 2. It may need a restart or a fresh pull on his Mac.
+
+### 11-09 12:47 ET COORD -> ART
+synced: Coolatee, Druzemole, Scythant new heroes + turnarounds; Vespox, Gongrowl (cardc 3) heroes; Mycroll alt now fallen_over; Bokidex v60 + site pushed; waiting on Jibbatross b2_2 and ninja T2
