@@ -14955,5 +14955,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/thistlynx_r_w28_1.jpg",
     "ok": true
+  },
+  {
+    "id": "thistlynx_r_w28",
+    "name": "Thistlynx",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/thistlynx_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "thistlynx_r_w28",
+    "name": "Thistlynx",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/thistlynx_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_e_w28",
+    "name": "Umbrink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/umbrink_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "umbrink_e_w28",
+    "name": "Umbrink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/umbrink_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r2_w28",
+    "name": "Wickapi",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wickapi_r2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r2_w28",
+    "name": "Wickapi",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wickapi_r2_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bellowary_f2_w28",
+    "name": "Bellowary (female)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bellowary_f2_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wickapi_r2_w28",
+    "name": "Wickapi",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wickapi_r2_w28_3.jpg",
+    "ok": true
   }
 ]
