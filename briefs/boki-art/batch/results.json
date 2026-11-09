@@ -29921,5 +29921,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ta_lensling_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_glazolm",
+    "name": "Glazolm",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_glazolm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glazolm",
+    "name": "Glazolm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glazolm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_grammite",
+    "name": "Grammite",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_grammite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_grammite",
+    "name": "Grammite",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_grammite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_loafhopper",
+    "name": "Loafhopper",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_loafhopper_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_malletary",
+    "name": "Malletary",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_malletary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_loafhopper",
+    "name": "Loafhopper",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_loafhopper_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_nymphane",
+    "name": "Nymphane",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_nymphane_2.jpg",
+    "ok": true
   }
 ]
