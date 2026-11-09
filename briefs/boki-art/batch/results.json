@@ -26176,5 +26176,68 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_stance2_ringrove_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_stance2_ringrove",
+    "name": "Ringrove (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_ringrove_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_soakybara",
+    "name": "Soakybara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_soakybara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_soakybara",
+    "name": "Soakybara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_soakybara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_soakybara",
+    "name": "Soakybara (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_soakybara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_sporcupine",
+    "name": "Sporcupine (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_sporcupine_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_voltmink",
+    "name": "Voltmink (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_voltmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_snuffapi",
+    "name": "Snuffapi (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_snuffapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_sporcupine",
+    "name": "Sporcupine (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_sporcupine_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_stance2_voltmink",
+    "name": "Voltmink (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_stance2_voltmink_1.jpg",
+    "ok": true
   }
 ]
