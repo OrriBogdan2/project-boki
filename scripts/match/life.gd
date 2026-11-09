@@ -295,7 +295,7 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		var up := cur.is_empty() or Loot.value(Loot.gear(String(g["id"]), int(g["rar"]))) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"])))
 		out.append({"key": "gear", "i": i, "name": "%s%s" % [(String(r["name"]) + " ") if int(g["rar"]) > 1 else "", gd.get("name", g["id"])],
 			"sub": Gear.WORN_NAMES[slot] + "  ·  " + Gear.stat_text(String(g["id"]), int(g["rar"])),
-			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up})
+			"icon": Gear.icon_of(String(g["id"])), "col": r["color"], "upgrade": up, "vs": _worn_text(cur)})
 	var pack_row := Backpacks.box_row(h, b)
 	if not pack_row.is_empty():
 		out.append(pack_row)
@@ -305,6 +305,14 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 		out.append({"key": "pack", "i": i, "name": Loot.name_of(it), "sub": Loot.sub_of(it), "icon": Loot.icon_of(it), "col": Loot.col_of(it),
 			"upgrade": Pack.wants(h, it), "value": Loot.value(it), "el": String(it.get("el", "")), "full": not Pack.room(h)})
 	return out
+
+## "You wear: ..." for a gear slot, the tip behind a box row's better or worse arrow.
+static func _worn_text(cur: Dictionary) -> String:
+	if cur.is_empty():
+		return "Nothing in this slot yet"
+	var id := String(cur["id"])
+	var rar := int(cur["rar"])
+	return "You wear: %s  ·  %s" % [Loot.name_of(Loot.gear(id, rar)), Gear.stat_text(id, rar)]
 
 ## Takes one thing out of a box. Swapping gear leaves yours in the box in its place.
 static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> void:

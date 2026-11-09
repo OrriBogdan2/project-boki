@@ -6,6 +6,8 @@ class_name LootHold
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const GOLD := Color("f2c84a")
+const BETTER := Color("8fe0a0")
+const WORSE := Color("ff9a8a")
 const WIDTH := 470.0
 
 ## Builds the window. on_swap / on_drop get the index of the backpack thing; on_close takes no args.
@@ -96,4 +98,65 @@ static func item_row(it: Dictionary, buttons: Array, note := "") -> PanelContain
 		var b: Button = UI.primary(String(bt[0]), bt[1], 76) if is_primary else UI.button(String(bt[0]), bt[1], 70)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)
+	return rp
+
+## One thing in an open box: rarity-coloured name, slot and effect on one line, a better or worse
+## arrow against what you wear (gear), its worth (backpack things) and the Take / Swap / Full button.
+static func box_row(it: Dictionary, fits: bool, on_take: Callable) -> PanelContainer:
+	var col: Color = it["col"]
+	var is_gear: bool = it["key"] == "gear"
+	var better: bool = it["upgrade"]
+	var rp := PanelContainer.new()
+	var rs := StyleBoxFlat.new()
+	rs.bg_color = Color(col, 0.12 if better else 0.06)
+	rs.set_corner_radius_all(9)
+	rs.border_color = Color(col, 0.55 if better else 0.2)
+	rs.border_width_left = 3
+	rs.content_margin_left = 8
+	rs.content_margin_right = 8
+	rs.content_margin_top = 5
+	rs.content_margin_bottom = 5
+	rp.add_theme_stylebox_override("panel", rs)
+	var row := UI.hbox(8)
+	rp.add_child(row)
+	row.add_child(Icons.Glyph.new(String(it["icon"]), col, 24.0))
+	var cv := UI.vbox(0)
+	cv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var nm := UI.label(String(it["name"]), 15, col, UI.semi)
+	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
+	cv.add_child(nm)
+	var sub := UI.label(String(it["sub"]), 12, MUTED)
+	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
+	sub.clip_text = true
+	sub.custom_minimum_size.x = 210
+	sub.tooltip_text = String(it["sub"])
+	sub.mouse_filter = Control.MOUSE_FILTER_PASS
+	cv.add_child(sub)
+	row.add_child(cv)
+	if is_gear:
+		var tag := UI.label("▲ better", 12, BETTER, UI.semi)
+		if not better:
+			tag = UI.label("▼ worse", 12, WORSE, UI.semi)
+		tag.tooltip_text = String(it["vs"])
+		tag.mouse_filter = Control.MOUSE_FILTER_PASS
+		tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(tag)
+	elif it["key"] == "pack":
+		var vt := UI.label("%d" % int(it.get("value", 0)), 13, GOLD, UI.big)
+		vt.tooltip_text = "Worth"
+		vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
+		row.add_child(vt)
+	var swaps: bool = is_gear or (it["key"] == "pack" and it.get("full", false))
+	var verb := "Swap" if swaps else "Take"
+	if not fits:
+		verb = "Full"
+	var take := UI.button(verb, on_take, 76)
+	take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if not fits:
+		mark_full(rp)
+		take.tooltip_text = "No room: swap it with something of yours"
+	elif swaps and not is_gear:
+		take.tooltip_text = "Swaps out the least valuable thing in your backpack"
+	row.add_child(take)
 	return rp

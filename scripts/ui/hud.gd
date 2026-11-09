@@ -2654,42 +2654,7 @@ func _build_loot() -> void:
 	else:
 		v.add_child(list)
 	for it in items:
-		var row := UI.hbox(8)
-		var rp := PanelContainer.new()
-		var rs := StyleBoxFlat.new()
-		rs.bg_color = Color(it["col"], 0.12 if it["upgrade"] else 0.06)
-		rs.set_corner_radius_all(9)
-		rs.border_color = Color(it["col"], 0.55 if it["upgrade"] else 0.2); rs.border_width_left = 3
-		var fit := LootFull.fits(p, it, b)
-		rs.content_margin_left = 8; rs.content_margin_right = 8; rs.content_margin_top = 5; rs.content_margin_bottom = 5
-		rp.add_theme_stylebox_override("panel", rs)
-		rp.add_child(row)
-		row.add_child(Icons.Glyph.new(String(it["icon"]), it["col"], 24.0))
-		var col := UI.vbox(0); col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var nm := UI.label(String(it["name"]), 15, INK, UI.semi)
-		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-		col.add_child(nm)
-		var sub := UI.label(String(it["sub"]), 12, MUTED)
-		sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-		sub.clip_text = true
-		sub.custom_minimum_size.x = 210
-		col.add_child(sub)
-		row.add_child(col)
-		if it["key"] == "gear":
-			var tag := UI.label("UPGRADE" if it["upgrade"] else "WORSE", 11, GOOD if it["upgrade"] else MUTED, UI.caps)
-			tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			row.add_child(tag)
-		elif it["key"] == "pack":
-			var vt := UI.label("%d" % int(it.get("value", 0)), 13, GOLD, UI.big)
-			vt.tooltip_text = "Worth"
-			vt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-			row.add_child(Icons.Glyph.new("gem", Color(GOLD, 0.8), 12.0))
-			row.add_child(vt)
 		var itc: Dictionary = it
-		var verb := "Take"
-		if it["key"] == "gear": verb = "Swap"
-		elif not fit: verb = "Full"
-		elif it["key"] == "pack" and it.get("full", false): verb = "Swap"
 		var take_it := func():
 			if loot_open == null or not m.player:
 				return
@@ -2697,24 +2662,17 @@ func _build_loot() -> void:
 				open_hold(itc)
 			elif (loot_open as Dictionary).get("empty", false): close_loot()
 			else: _build_loot()
-		var take := UI.button(verb, take_it, 76)
+		var rp := LootHold.box_row(it, LootFull.fits(p, it, b), take_it)
 		_row_click(rp, take_it)
-		take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		if not fit:
-			LootHold.mark_full(rp)
-			take.tooltip_text = "No room: swap it with something of yours"
-		elif it["key"] == "pack" and it.get("full", false):
-			take.tooltip_text = "Swaps out the least valuable thing in your backpack"
-		row.add_child(take)
 		list.add_child(rp)
 	var foot := UI.hbox(8); v.add_child(foot)
-	var sm := UI.primary("Smart loot  (%s)" % Settings.key_cap("interact"), func():
+	var sm := UI.primary("Take best  (%s)" % Settings.key_cap("interact"), func():
 		if loot_open != null and m.player:
 			var got := LootFull.smart(m, m.player, loot_open)
 			if got > 0 or (loot_open as Dictionary).get("empty", false):
 				close_loot(), 200)
 	foot.add_child(sm)
-	var hint := UI.label("Best first: hands, then your backpack", 12, MUTED)
+	var hint := UI.label("Click a row to take or swap it", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	foot.add_child(hint)
 	pc.custom_minimum_size.x = 430

@@ -99,11 +99,23 @@ func run(main: Node) -> void:
 	ok(lh != null and is_instance_valid(lh) and lh.visible, "clicking a thing that doesn't fit opens the hold window")
 	print("LOOTFULL hold pos=%s size=%s modulate=%s scale=%s" % [lh.position, lh.size, lh.modulate, lh.scale])
 	var noop := func(_i: int): pass
+	var noop2 := func(): pass
 	var hold := LootHold.build(P, bw["pack"][0], noop, noop, func(): pass)
 	var buttons := hold.find_children("*", "Button", true, false).filter(
 		func(b): return (b as Button).text in ["Swap", "Drop"])
 	ok(buttons.size() == 2 * P.pack.size(), "hold window: Swap and Drop for each of your %d things" % P.pack.size())
 	hold.free()
 	m.hud.close_loot()
+	var gb := make_box(Q, P.pos, [])
+	gb["gear"] = [{"id": "windstep_boots", "rar": 3}]
+	P.gear[Gear.slot_on(P, "windstep_boots")] = {}
+	var grow: Dictionary = Life.box_items(m, P, gb)[0]
+	var gcard := LootHold.box_row(grow, true, noop2)
+	var labels := gcard.find_children("*", "Label", true, false)
+	var arrows := labels.filter(func(l): return (l as Label).text.begins_with("▲"))
+	ok(arrows.size() == 1 and String(grow["vs"]).contains("Nothing"), "box gear row: better arrow, empty-slot tip")
+	var names := labels.filter(func(l): return (l as Label).get_theme_color("font_color") == grow["col"])
+	ok(names.size() >= 1, "box gear row: the name is in its rarity colour")
+	gcard.free()
 	print("LOOT FULL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
