@@ -14339,5 +14339,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_olmlet_r_w28_1.jpg",
     "ok": true
+  },
+  {
+    "id": "c_morelkin_r_w28",
+    "name": "Morelkin (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_morelkin_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_morelkin_r_w28",
+    "name": "Morelkin (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_morelkin_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet_r_w28",
+    "name": "Olmlet (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_olmlet_r_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_e_w28",
+    "name": "Pinster (concept edit)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pinster_e_w28_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_olmlet_r_w28",
+    "name": "Olmlet (concept r)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_olmlet_r_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_e_w28",
+    "name": "Pinster (concept edit)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_pinster_e_w28_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinster_e_w28",
+    "name": "Pinster (concept edit)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pinster_e_w28_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_proofhop_r_w28",
+    "name": "Proofhop (concept r)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_proofhop_r_w28_2.jpg",
+    "ok": true
   }
 ]
