@@ -42,6 +42,7 @@ def desc(body,face,cols,avoid,el,arch):
     return f"{body} Face: {face}. Main colours: {cols}. Avoid: {avoid}. Element: {ELEM[el]}. Archetype: {ARCH[arch]}."
 SPECS=[]
 def B(i,n,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[SR],'prompt':base(desc(body,face,cols,avoid,el,arch))})
+def X(i,n,ref,instr,runs=2): SPECS.append({'id':i,'name':n,'refs':[ref],'runs':runs,'prompt':"Edit image 1: keep everything exactly the same, the same creature, the same four views in one row, pose, colours, style and plain pale grey background. Only change this: "+instr+" Do not add anything else."})
 def V(i,n,ref,rel,body,face,cols,avoid,el,arch): SPECS.append({'id':i,'name':n,'refs':[ref],'prompt':evo(rel,desc(body,face,cols,avoid,el,arch))})
 import glob
 for _f in sorted(glob.glob(str(HERE/'specs_*.py'))): exec(open(_f).read())
@@ -49,6 +50,6 @@ jobs=json.loads((HERE/'jobs.json').read_text()) if (HERE/'jobs.json').exists() e
 have={j['id'] for j in jobs}
 for s in SPECS:
     if s['id'] in have: continue
-    s.update({'runs':2,'aspect':'16:9','size':'4K'}); jobs.append(s)
+    s.setdefault('runs',2); s.setdefault('aspect','16:9'); s.setdefault('size','4K'); jobs.append(s)
 (HERE/'jobs.json').write_text(json.dumps(jobs,indent=2))
 print(len(jobs),'jobs')

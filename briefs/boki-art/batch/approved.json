@@ -89,6 +89,76 @@
       "pick": 1,
       "grade": 9.0,
       "note": "zipper jaws, axe-tag tail"
+    },
+    {
+      "id": "cairnback",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "crofthorn",
+      "pick": 2,
+      "grade": 9.0
+    },
+    {
+      "id": "geodelotl",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "gloamshell",
+      "pick": 2,
+      "grade": 9.0
+    },
+    {
+      "id": "glomwort",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "hivara",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "marchleaf",
+      "pick": 2,
+      "grade": 9.0
+    },
+    {
+      "id": "nettlynx",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "rampartoad",
+      "pick": 2,
+      "grade": 9.0
+    },
+    {
+      "id": "terrarimit",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "thrumbird",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "vaultara",
+      "pick": 1,
+      "grade": 9.0
+    },
+    {
+      "id": "voltalon",
+      "pick": 2,
+      "grade": 9.0
+    },
+    {
+      "id": "zephyrak",
+      "pick": 1,
+      "grade": 9.0
     }
   ],
   "rerolled": [
@@ -124,7 +194,97 @@
       "id": "zipling",
       "grade": 7.5,
       "why": "copy of Zippelith, blush"
+    },
+    {
+      "id": "anchorbill",
+      "why": "anchor reads as a pendant"
+    },
+    {
+      "id": "arcestrel",
+      "why": "copy of Kestrike"
+    },
+    {
+      "id": "barrelmander",
+      "why": "sits inside a barrel"
+    },
+    {
+      "id": "boltstrich",
+      "why": "realistic ostrich head, one run failed"
+    },
+    {
+      "id": "buckleron",
+      "why": "weak face, shield reads as worn"
+    },
+    {
+      "id": "dragonkite",
+      "why": "not a final form, copy of Kitlet"
+    },
+    {
+      "id": "echolop",
+      "why": "upright / generic"
+    },
+    {
+      "id": "gravadillo",
+      "why": "ghost copies, upright"
+    },
+    {
+      "id": "knotwyrm",
+      "why": "rears upright, weak face"
+    },
+    {
+      "id": "latchling",
+      "why": "copy of Lockatara"
+    },
+    {
+      "id": "lodestick",
+      "why": "humanoid"
+    },
+    {
+      "id": "mossgrade",
+      "why": "upright, ghost row"
+    },
+    {
+      "id": "pipewurm",
+      "why": "upright, 2x2"
+    },
+    {
+      "id": "ribbonwyrm",
+      "why": "copy of Kitlet"
+    },
+    {
+      "id": "rimeshrew",
+      "why": "sits up, rat-like"
+    },
+    {
+      "id": "snuffapi",
+      "why": "reads as deer with candles"
+    },
+    {
+      "id": "spirevark",
+      "why": "upright"
+    },
+    {
+      "id": "vespox_f",
+      "why": "upright front, weak difference"
+    },
+    {
+      "id": "portrait_chuggamus",
+      "why": "came out as a turnaround"
     }
   ],
-  "sent_to_owner": []
+  "sent_to_owner": [],
+  "portraits": [
+    {
+      "id": "portrait_lanternmit",
+      "pick": 1
+    },
+    {
+      "id": "portrait_stormit",
+      "pick": 1
+    },
+    {
+      "id": "portrait_vespox",
+      "pick": 1
+    }
+  ]
 }
