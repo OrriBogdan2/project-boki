@@ -30,6 +30,7 @@ func run(main_node: Node) -> void:
 		_hero_cycle(a)
 	_bleed_out()
 	_teammate()
+	_boki_wisps()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])

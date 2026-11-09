@@ -105,6 +105,7 @@ var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
+var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -165,7 +166,8 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	brain = KinTactics.new(self)
 	if owner_h:
 		comp = KinCompanion.new(self)
-	set_model(Models.kin(species, rec))
+	wisp = owner_h != null and KinWisp.mode(match_node)
+	set_model(KinWisp.look(self))
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
@@ -274,7 +276,7 @@ func bark(cat: String) -> void:
 
 # ------------------------------------------------------------------ owner commands
 func throw_to(p: Vector3, slot := "") -> void:
-	if dead or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
+	if dead or wisp or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
 		return
 	if state == "active":
 		if slot == "":
@@ -618,6 +620,10 @@ func sim(dt: float) -> void:
 		if shield_t <= 0.0: shield = 0.0
 	if runner:
 		runner.tick(dt)
+	if KinWisp.ride(self):
+		if not remote:
+			KinRegen.tick(self, dt)
+		return
 	if remote:
 		if state != "shoulder":
 			net_follow(dt)
@@ -1010,7 +1016,7 @@ func _sim_dazed(dt: float) -> void:
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused", "downed"]:
+	if state in ["dazed", "bench", "fused", "downed"] or wisp:
 		return 0.0
 	var calm := angry_at == null
 	var bh := BokiHit.take(self, d, opts)
