@@ -25,3 +25,6 @@ Rule (owner 04:48 ET): if unsure, still push the best pick, but save the alterna
 | Glaivyx | h4_1 long-legged blade-tail fox (8.2) queued | longer, taller legs, less scorpion | h5_1 8.1 (cream plume-tail version) |
 | Cisternmander | y2_1 mossy pond-back salamander (7.9) queued, no lightning | Just under the bar, but it fixes your note | y1_3 7.8 (stone cistern + spout) |
 | Vespox | v2_3 shell-hood prowler with pincers (8.6) queued | distinct from Vespyx | v1_1 7.9 (chitin jackal), v3_2 7.6 |
+| New evolutions | Moatpole (baby -> Rampartoad), Moundlet (baby -> Spirevark), Murmuron (Murmurling -> final), Spanglin (baby -> Mirrolin) generating | Your "1-stage should be a minority" rule; names are mine | 3 directions each |
+| Terrasloth vs Mirrolin | Both are pangolins now (you chose pangolin for Terrasloth; Mirrolin was already a disco-ball pangolin) | Two pangolins on the roster | keep both, or redo Mirrolin as another animal (e.g. armadillo is taken by Gravadillo; maybe a hedgehog or a chameleon) |
+| Lodestick | still no art | single, no art at all | needs a first design |
