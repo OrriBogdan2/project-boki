@@ -53,7 +53,7 @@ func move_k() -> float:
 ## Where a Meteor Drop would land now: the cursor, clamped to the reach from under you, on open ground.
 func point() -> Vector3:
 	var h := k.h
-	var at := AimMode.point(h, float(data().get("reach", 5.0)), AimMode.CURSOR, 0.0)
+	var at := AimMode.place(h, float(data().get("reach", 5.0)))
 	if k.m.world.is_void(at.x, at.z) or k.m.world.is_block(at.x, at.z):
 		at = Vector3(h.pos.x, at.y, h.pos.z)
 	return k.ground(at)
