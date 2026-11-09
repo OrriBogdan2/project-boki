@@ -196,6 +196,7 @@ func load_kin_content() -> void:
 	for id in ids:
 		var sp: Dictionary = KinLib.species(id)
 		var home: Dictionary = Content._load("kin", id)
+		sp["sex_forms"] = bool(home.get("sex_forms", false))
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))

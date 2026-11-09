@@ -1865,7 +1865,7 @@ static func kin(species: String, rec := {}) -> Node3D:
 	# Body moves the kin around (hops, lunges, tumbles); Flex inside it squashes and stretches (KinPuppet)
 	var body_root := Node3D.new(); body_root.name = "Body"; root.add_child(body_root)
 	var body := Node3D.new(); body.name = "Flex"; body_root.add_child(body)
-	var built := KinModels.build(species, body, {"body": m_body, "belly": m_belly, "dark": m_dark, "glow": m_glow, "eye": m_eye, "white": m_white,
+	var built := KinModels.build(species, body, {"body": m_body, "belly": m_belly, "dark": m_dark, "glow": m_glow, "eye": m_eye, "white": m_white, "rec": rec,
 		"wing_col": Shiny.palette(species).get("wing", (Shiny.col(species, rec, "belly") as Color).lerp(glow_c, 0.3)) if shimmer else sp.get("wing", (sp["belly"] as Color).lerp(glow_c, 0.3))}, mats)
 	if built.is_empty():
 		var shape := String(look.get("body", "round"))
