@@ -1,9 +1,10 @@
 extends RefCounted
-## --empty-shots --shots-dir=<dir> [--shot-size=1920x1080]: review screenshots of the Empty creator (Male / Female, three heights,
-## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|first|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and back,
-## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
-## farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check --shots-dir=.
+## --empty-shots --shots-dir=<dir> [--shot-size=1920x1080]: review screenshots of the Empty creator (Male / Female,
+## three heights, builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). 
+## Add --only=creator|first|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and
+## back, the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and
+## walking; farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check 
+## --shots-dir=.
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
