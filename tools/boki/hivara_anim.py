@@ -188,5 +188,7 @@ def _clips():
 
 
 CLIPS = _clips()
+import boki_react
+CLIPS.update({n: (sec, lp, hive(fn, sec, 0.15, 1, 0.0)) for n, (sec, lp, fn) in boki_react.react().items()})
 # unused props tucked inside the right blade they ride (m from their rest place), so no pose shows their ink
 HIDE_AT = {"prop_berry": (0.101, 0.034, 0.102), "prop_pick": (0.026, 0.074, 0.002)}

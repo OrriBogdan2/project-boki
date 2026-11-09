@@ -144,4 +144,20 @@ CLIPS.update({
     "chop": (1.2, True, chop_mouth),
     "mine": (1.1, True, mine_mouth),
 })
+import boki_react
+
+
+def _win(p, t, a):
+    feelers(p, t, 3, 0.3)
+
+
+def _sulk(p, t, a):
+    feelers(p, t, 0.5, 0.05, 0.4)
+
+
+def _push(p, t, a):
+    feelers(p, t, 1, 0.05, 0.3)
+
+
+CLIPS.update(boki_react.react(extra_win=_win, extra_sulk=_sulk, extra_push=_push))
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}
