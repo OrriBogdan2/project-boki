@@ -33,6 +33,8 @@ func run(m: Node) -> void:
 	ok(card.has("Pip: ate 3 × Boki kibble"), "the card lists the three snacks as one line")
 	ok(card.has("Ash: ate Boki kibble: Fire lean up"), "and the lean change")
 	ok(CareJournal.arrival().is_empty(), "the next arrival has nothing new (one card, once)")
+	CareJournal.note(rec, "trained power at the yard: +3")
+	ok(CareJournal.arrival().has("Pip: trained power at the yard: +3"), "other happenings use the same journal")
 	var worst := " ".join(card).to_lower()
 	ok(not ("lost" in worst or "starv" in worst or "sick" in worst), "no line says lost, starved or sick")
 	for i in 30:

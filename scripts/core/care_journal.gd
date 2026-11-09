@@ -27,8 +27,16 @@ static func fed(rec: Dictionary, food: String, lean_before: Dictionary) -> void:
 	if lines.size() > KEEP: lines.pop_front()
 	rec["journal"] = lines
 
+## Any other happening (a game with a toy, a race, a lean change): `words` is the whole line, "won the Dash".
+static func note(rec: Dictionary, words: String) -> void:
+	var lines: Array = rec.get("journal", [])
+	lines.append({"t": Time.get_unix_time_from_system(), "words": words})
+	if lines.size() > KEEP: lines.pop_front()
+	rec["journal"] = lines
+
 ## A line in words: "ate 3 Boki kibble: Fire lean up".
 static func text(e: Dictionary) -> String:
+	if e.has("words"): return String(e["words"])
 	var s := "ate %s" % Care.food_name(String(e["food"]))
 	if int(e["n"]) > 1: s = "ate %d × %s" % [int(e["n"]), Care.food_name(String(e["food"]))]
 	if not (e["up"] as Array).is_empty(): s += ": %s lean up" % " and ".join(e["up"])
@@ -45,7 +53,10 @@ static func arrival() -> Array:
 			if float(e["t"]) > since:
 				found.append([float(e["t"]), "%s: %s" % [rec["name"], text(e)]])
 	found.sort_custom(func(a, b): return a[0] < b[0])
-	return found.map(func(f): return f[1])
+	var out: Array = found.map(func(f): return f[1])
+	for egg in Incubator.ready_eggs():
+		out.append("A %s is ready to hatch" % Incubator.egg_name(egg))
+	return out
 
 ## The Boki card's journal: its lines, newest first.
 static func card(rec: Dictionary, into: Control) -> void:
