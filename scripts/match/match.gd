@@ -2914,7 +2914,7 @@ const VIEW_COS := 0.6          # about 106 degrees wide
 const NEAR_SENSE := 3.2
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or ArcherKit.sensed_by(self, team_i, target):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 

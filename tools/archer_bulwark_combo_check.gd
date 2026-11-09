@@ -51,6 +51,45 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
 
+## Hawk Sense: the half-health line, the 22m range, the 0.4s linger, and seen through a wall and behind her.
+func _hawk_sense(m: Match, P: Hunter, T: Hunter, lv: int) -> void:
+	var rd := (P.ak as ArcherKit).res_def()
+	var cut := float(rd["sense_hp"])
+	var reach := float(rd["sense_r"])
+	var linger := float(rd["sense_linger"])
+	ok("combo archer: Hawk Sense numbers (half health, 22m, 0.4s)",
+		cut == 0.5 and reach == 22.0 and linger == 0.4, "%.2f %.1f %.2f" % [cut, reach, linger])
+	fresh(T)
+	var spot := T.pos
+	var away := Vector3(T.pos.x - P.pos.x, 0.0, T.pos.z - P.pos.z).normalized()
+	T.hp = T.max_hp * (cut + 0.02)
+	step(m, 0.4)
+	var healthy := ArcherKit.sensed_by(m, P.team, T)
+	T.hp = T.max_hp * (cut - 0.02)
+	step(m, 0.4)
+	ok("combo archer: Hawk Sense threshold (sensed just under half health, not just over)",
+		not healthy and ArcherKit.sensed_by(m, P.team, T), "over %s" % healthy)
+	ok("combo archer: Hawk Sense is her team's, not the rival's", not ArcherKit.sensed_by(m, T.team, T))
+	T.pos = P.pos + away * (reach + 1.0)
+	step(m, 0.5)
+	var far := ArcherKit.sensed_by(m, P.team, T)
+	T.pos = P.pos + away * (reach - 1.0)
+	step(m, 0.4)
+	ok("combo archer: Hawk Sense range (21m sensed, 23m not)",
+		not far and ArcherKit.sensed_by(m, P.team, T), "23m %s" % far)
+	T.pos = spot
+	_wall_at(m, P.pos, lv, 2)
+	aim_at(P, P.pos - away)
+	step(m, 0.4)
+	ok("combo archer: Hawk Sense sees through a wall and behind her", m.can_see(P.team, T))
+	T.hp = T.max_hp
+	step(m, 0.05)
+	var held := ArcherKit.sensed_by(m, P.team, T)
+	step(m, linger)
+	ok("combo archer: Hawk Sense expiry (held for a moment after a heal, gone within 0.4s)",
+		held and not ArcherKit.sensed_by(m, P.team, T) and not m.can_see(P.team, T), "held %s" % held)
+	_clear_wall(m, P.pos, lv, 2)
+
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
 	for i in range(m.shots.size() - 1, -1, -1):
@@ -387,20 +426,7 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	# Hawk Sense: a rival under half health is seen through cover
-	fresh(T)
-	T.hp = T.max_hp
-	T.reveal_t = 0.0
-	step(m, 0.5)
-	var healthy_seen := T.reveal_t > 0.0
-	T.hp = T.max_hp * 0.4
-	step(m, 0.5)
-	ok(
-		"combo archer: Hawk Sense shows only the injured",
-		not healthy_seen and T.reveal_t > 0.0,
-		"healthy %s injured %.2f" % [healthy_seen, T.reveal_t]
-	)
-	T.hp = T.max_hp
+	_hawk_sense(m, P, T, lv)
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world
 	var bx := int(home.x) + 3

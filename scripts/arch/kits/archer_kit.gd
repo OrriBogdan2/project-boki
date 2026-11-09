@@ -6,7 +6,7 @@ extends ArchKit
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
-## Passive: Hawk Sense (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
+## Passive: Hawk Sense (hurt rivals are seen through walls and fog). No resource meter: the old Focus and Deadeye were invented.
 
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
@@ -17,6 +17,7 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
+const SENSE_PULSE := 0.3       # seconds between Hawk Sense scans (sense_linger must outlast it)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -42,7 +43,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 func _tick(dt: float) -> void:
 	sense_t -= dt
 	if sense_t <= 0.0:
-		sense_t = 0.3
+		sense_t = SENSE_PULSE
 		_sense_injured()
 	if pin_aim and rmb_down:
 		_heavy_tele()
@@ -131,13 +132,25 @@ func _tag_shots() -> void:
 			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
 
-## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
+## Passive, Hawk Sense: rivals under sense_hp of their health within sense_r are seen by her team
+## through walls, fog and grass (Match.can_see) until sense_linger after they heal or leave range.
 func _sense_injured() -> void:
 	var rd := res_def()
+	var until: float = m.time + float(rd["sense_linger"])
 	for f in m.foes_of(h.team):
-		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
-		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
-			f.reveal_t = maxf(f.reveal_t, 0.4)
+		var hurt_enough: bool = f.hp < f.max_hp * float(rd["sense_hp"])
+		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd["sense_r"]):
+			(f as Hunter).sensed_until[h.team] = until
+
+## A Hawk Sense on team_i still sees target (seen through walls and fog).
+static func sensed_by(m: Match, team_i: int, target: Hunter) -> bool:
+	return float(target.sensed_until.get(team_i, -1.0)) > m.time
+
+## Some rival's Hawk Sense still sees target (its HUD says SPOTTED).
+static func sensed_any(m: Match, target: Hunter) -> bool:
+	for team_i in target.sensed_until:
+		if float(target.sensed_until[team_i]) > m.time: return true
+	return false
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():

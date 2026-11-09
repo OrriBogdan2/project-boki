@@ -22,7 +22,7 @@
 		"rmb": "Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls.",
 		"e": "Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing.",
 		"dash": "Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers.",
-		"passive": "Hawk Sense: rivals under half health show through cover.",
+		"passive": "Hawk Sense: rivals under half health within 22m show through walls and fog for your team.",
 		"x": "Starpiercer (level 6): your next 3 shots need no draw and fly as big piercing arrows; the third can finish a foe.",
 		"weapons": {
 			"longbow": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw."
@@ -37,11 +37,13 @@
 		"col": "#d8ffb0",
 		"perfect_t": 0.15,
 		"sense_hp": 0.5,
-		"sense_r": 22.0
+		"sense_r": 22.0,
+		"sense_linger": 0.4,
+		"sense_src": "through fog of war, so through walls and grass [D]; team-shared like all our sight; sense_hp, sense_r, sense_linger ours: not in the data [D], wiki or footage [F]"
 	},
 	"passive": {
 		"name": "Hawk Sense",
-		"desc": "Rivals under half health are seen through cover within 22m."
+		"desc": "Rivals under half health within 22m are seen by your team through walls and fog."
 	},
 	"dash": {
 		"id": "spirit_walk",

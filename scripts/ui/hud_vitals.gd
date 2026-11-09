@@ -84,7 +84,7 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	var txt := "SPOTTED"
 	var fg: Color = HudStyle.HURT
 	var bg := Color(0.25, 0.06, 0.05, 0.85)
-	if p.reveal_t <= 0.0:
+	if p.reveal_t <= 0.0 and not ArcherKit.sensed_any(H.m, p):
 		txt = "HIDDEN" if grass else "CROUCHED"
 		fg = Color("8fe0a0") if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)

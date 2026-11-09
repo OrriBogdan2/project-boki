@@ -238,10 +238,10 @@ func _archer() -> void:
 	step(m, 1.6)
 	ok("archer passive: no Focus meter (Hawk Sense only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
-	# Hawk Sense stays: a rival under half health is seen through cover within 22m
-	fresh(T); T.hp = T.max_hp * 0.4; T.reveal_t = 0.0
+	# Hawk Sense stays: a rival under half health within 22m is seen by her team (numbers: --archer-combo-check)
+	fresh(T); T.hp = T.max_hp * 0.4
 	step(m, 0.5)
-	ok("archer Hawk Sense: a hurt rival is revealed", T.reveal_t > 0.0, "reveal %.2f" % T.reveal_t)
+	ok("archer Hawk Sense: a hurt rival is sensed", ArcherKit.sensed_by(m, P.team, T))
 	fresh(T)
 	P.equip("sniper")
 	step(m, 0.35)
