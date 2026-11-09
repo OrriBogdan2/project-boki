@@ -119,13 +119,21 @@ static func col(spec: String, team: Color, hero: Color) -> Color:
 ## only mixes its own colours in (a bot's random outfit made every canopy a fresh 12 ms build).
 static var _sheets := {}
 static func mesh(id: String, team: Color, hero: Color) -> ArrayMesh:
+	return paint(sheet(id), id, team, hero)
+
+## The skin's canopy arrays with colour weights (see mesh), built once.
+static func sheet(id: String) -> Array:
 	if not _sheets.has(id):
 		_sheets[id] = _build(id).surface_get_arrays(0)
+	return _sheets[id]
+
+## A mesh of `arrs` (a sheet, or a sheet merged into a Hunter's glider) in the skin's colours.
+static func paint(arrs: Array, id: String, team: Color, hero: Color) -> ArrayMesh:
 	var g := get_skin(id)
 	var cloth := col(g["cloth"], team, hero)
 	var stripe := col(g["stripe"], team, hero)
 	var edge := col(g["edge"], team, hero)
-	var arrs: Array = (_sheets[id] as Array).duplicate()
+	var out := arrs.duplicate()
 	var w: PackedColorArray = arrs[Mesh.ARRAY_COLOR]
 	var cs := PackedColorArray()
 	cs.resize(w.size())
@@ -134,9 +142,9 @@ static func mesh(id: String, team: Color, hero: Color) -> ArrayMesh:
 		var c := cloth * k.r + stripe * k.g + edge * k.b
 		c.a = (cloth.a * k.r + stripe.a * k.g + edge.a * k.b) / maxf(k.r + k.g + k.b, 0.001)
 		cs[i] = c
-	arrs[Mesh.ARRAY_COLOR] = cs
+	out[Mesh.ARRAY_COLOR] = cs
 	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, out)
 	return am
 
 static func _build(id: String) -> ArrayMesh:
