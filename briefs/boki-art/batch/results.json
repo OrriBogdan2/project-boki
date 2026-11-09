@@ -4343,5 +4343,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/druzemole_2.jpg",
     "ok": true
+  },
+  {
+    "id": "geodemole",
+    "name": "Geodemole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/geodemole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook",
+    "name": "Embrook",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/embrook_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "druzemole",
+    "name": "Druzemole",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/druzemole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven",
+    "name": "Pyrraven",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pyrraven_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "embrook",
+    "name": "Embrook",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/embrook_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven",
+    "name": "Pyrraven",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pyrraven_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pyrraven",
+    "name": "Pyrraven",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pyrraven_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "kayak",
+    "name": "Kayak",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kayak_1.jpg",
+    "ok": true
   }
 ]
