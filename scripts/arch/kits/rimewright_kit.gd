@@ -23,6 +23,7 @@ var ice_t := 0.0               # s until the rank-3 Skate may lay its next span 
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
+var ice: IceBody = null        # her body as ice while sealed in Rimelock
 var spear_aim := false         # RMB held: the landing ring and the raised spear are up
 var throw_t := -1.0            # s left of the push before the spear leaves her palms (-1: none)
 var zones: Array = []          # landed spears: {at, left, total, id}
@@ -47,7 +48,6 @@ const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the 
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
 const SPEAR_Y := 1.05          # m: the height of her palms at the chest
 const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
-const BUD_CLOSE_T := 0.15     # s the frost bud takes to close over her when cast standing
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
@@ -172,6 +172,8 @@ func _tick(dt: float) -> void:
 	_tick_wall(dt)
 	_tick_zones(dt)
 	_tick_rime(dt)
+	if ice != null:
+		ice.tick(dt)
 	_tick_trails(dt)
 	if h.is_local() and not busy():
 		AimKit.line(h, "aim", {"alpha": 0.7, "col": Color("e8ffff")})     # the thin aim line to the cursor, always up
@@ -850,12 +852,21 @@ func teardown() -> void:
 	if ult_look != null:
 		ult_look.teardown()
 		ult_look = null
+	if ice != null:
+		ice.restore()
+		ice = null
 
 # ------------------------------------------------------------------ X: Rimelock
 func ulk() -> UltLook:
 	if ult_look == null:
 		ult_look = UltLook.new(m, h)
 	return ult_look
+
+
+func icb() -> IceBody:
+	if ice == null:
+		ice = IceBody.new(h)
+	return ice
 
 
 func ult_running() -> bool:
@@ -880,6 +891,7 @@ func _start_rime() -> bool:
 		AimKit.hide(h, "rmb")
 	rime = {"t": 0.0, "at": h.pos, "slow": {}, "creak": 0.6, "carry": carry, "face": h.face}
 	stats["rimes"] += 1
+	icb().freeze(float(x_def()["snap_t"]))
 	_rime_hold_body()
 	play("tm_rime" if carry.is_empty() else "tm_rime_carry")
 	m.sfx("rime_lock", h.pos, 0.0, 1.0)
@@ -897,7 +909,7 @@ func _rime_hold_body() -> void:
 		h.roll_dir = carry["dir"]
 		# the statue slides on its ice: the skate's speed, easing to a stop (item 65), no steering
 		var k := clampf(float(rime["t"]) / float(x_def()["carry_t"]), 0.0, 1.0)
-		h.roll_speed = float(carry["v"]) * (1.0 - k * k)
+		h.roll_speed = float(carry["v"]) * float(x_def()["carry_k"]) * (1.0 - k * k)
 		h.roll_t = 0.1
 		rime["at"] = h.pos
 		return
@@ -993,14 +1005,12 @@ func rime_slow_of(f: Ent) -> float:
 	return float((rime["slow"] as Dictionary).get(f.get_instance_id(), 0.0))
 
 
-## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees,
-## her frost bud and the creaks.
+## The rink (snaps out in snap_t, its cracks brighter as it builds), the countdown fill everyone sees
+## and the creaks; her body is IceBody's.
 func _rime_look(at: Vector3, radius: float, k: float, dt: float) -> void:
 	var xd := x_def()
 	var snap := clampf(float(rime["t"]) / float(xd["snap_t"]), 0.0, 1.0)
 	ulk().keep("rink", "rink", at, {"r": radius * lerpf(0.25, 1.0, snap), "crack": k})
-	var close_t := float(xd["carry_t"]) if not (rime["carry"] as Dictionary).is_empty() else BUD_CLOSE_T
-	ulk().keep("bud", "frostbud", h.pos, {"k": clampf(float(rime["t"]) / close_t, 0.0, 1.0)})
 	AimKit.circle(h, "x", {"at": at, "r": radius, "fill": k, "all": true, "col": col_of(xd), "hot": k})
 	rime["creak"] = float(rime["creak"]) - dt
 	if float(rime["creak"]) <= 0.0:
@@ -1051,9 +1061,10 @@ func _rime_clear() -> void:
 	h.inv_t = minf(h.inv_t, 0.05)
 	h.root_t = 0.0
 	AimKit.hide(h, "x")
+	if ice != null:
+		ice.thaw()
 	if ult_look != null:
 		ult_look.drop("rink")
-		ult_look.drop("bud")
 		if anim_id == "tm_rime_hold":
 			anim_id = ""
 
