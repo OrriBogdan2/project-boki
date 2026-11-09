@@ -10,21 +10,26 @@ class_name UI
 const INK := Color("f3eee2")                        # text
 const MUTED := Color("a9b0bf")                      # secondary text
 const FAINT := Color(0.66, 0.69, 0.78, 0.55)        # hints, disabled
-const BG := Color("110f17")                         # full-screen menu background
-const SURFACE := Color(0.094, 0.082, 0.118, 0.98)   # panels: a warm night, not a cold navy
-const CARD := Color(0.158, 0.142, 0.19, 1.0)        # a card raised off a panel
-const RAISED := Color(0.2, 0.18, 0.235)             # button and tab faces
+const BG := Color("0d0915")                         # full-screen menu background: the void
+const SURFACE := Color(0.118, 0.078, 0.188, 0.98)  # panels: black-violet #1e1430 (Void & Masks)
+const CARD := Color(0.165, 0.11, 0.251, 1.0)        # a card raised off a panel: #2a1c40
+const RAISED := Color(0.205, 0.145, 0.3)            # button and tab faces
 const RIM := Color(0.0, 0.0, 0.02, 0.6)             # the dark outer edge of every raised box
 const WELL := Color(0, 0, 0, 0.24)                  # a recess: tab tracks, bars, inputs
 const LINE := Color(1, 1, 1, 0.08)                  # hairlines
-const ACCENT := Color("f2a24a")                     # the one action colour: primary buttons, focus, picked tabs
-const ACCENT_HI := Color("ffd79a")                  # accent text on dark
+const ACCENT := Color("ff3fd0")                     # the one action colour: primary buttons, focus, picked tabs
+const ACCENT_HI := Color("ffb0ec")                  # accent text on dark: the pink caps
 const GOOD := Color("8fe0a0")                       # success, owned, ready
 const BAD := Color("ff6a5a")                        # danger, loss, locked
 const GOLD := Color("f2c84a")                       # currency (gems) and rewards
-const TEAL := Color("8fe3c8")                       # info, extraction, the portal
+const TEAL := Color("3fe0d0")                       # info, extraction, the portal, the neon edge
 const INFO := Color("7cc4ff")
-const DARK_INK := Color(0.13, 0.08, 0.05)           # text on accent fills
+const DARK_INK := Color(0.14, 0.06, 0.15)           # text on accent and parchment fills
+const NIGHT := Color(0.075, 0.045, 0.12)             # dark glass over the world (hint rows, trackers, bars)
+const NIGHT_HI := Color(0.12, 0.08, 0.17)           # a locked or closed card on a panel
+const PARCHMENT := Color("e4d3b0")                  # info strips and title tabs (dark ink on it)
+const NEON_A := Color("3fe0d0")                     # the neon edge runs teal (left)...
+const NEON_B := Color("ff3fd0")                     # ...to magenta (right)
 
 # ---------------------------------------------------------------- corner radii (px at 720p)
 const R_PANEL := 18      # panels and modals
@@ -120,7 +125,7 @@ static func key_hints(pairs: Array, size := 13, col := Color(1, 1, 1, 0.75)) -> 
 	return row
 
 ## A small spaced-out heading for a group of things in a menu (the "eyebrow").
-static func section(text: String, col := Color("c9a46a")) -> Label:
+static func section(text: String, col := Color("c9a2e6")) -> Label:
 	var l := Label.new()
 	l.text = text.to_upper()
 	l.add_theme_font_override("font", caps if caps else body)
@@ -153,12 +158,13 @@ static func title(text: String, size := 34, col := INK) -> Label:
 
 # ---------------------------------------------------------------- buttons
 ## Buttons whose label says "go back" play the falling pair instead of the tap.
+const HOVER_GROW := 1.03     # a pointed-at button's scale
 const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
 	"Leave it  (Esc)": "ui_back"}
 
-## The secondary button (an outline). icon: an Icons id drawn at its left. Hover fills it with the
-## theme's hover colour (no growing: a button never spills over its neighbours or the panel edge);
-## pressing sinks it a touch, in about 70 ms.
+## The secondary button (an outline). icon: an Icons id drawn at its left. Hover lights the neon
+## edge and grows it 3% (UI_STYLE.md: only things you can press glow and grow); pressing sinks it a
+## touch, in about 70 ms.
 static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := Button.new()
 	b.text = text
@@ -176,6 +182,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
+		to.call(HOVER_GROW, 0.09)
 		Sfx.play("hover", null, -12.0, 0.05))
 	b.mouse_exited.connect(func(): to.call(1.0, 0.11))
 	b.button_down.connect(func(): if not b.disabled: to.call(0.97, 0.07))
@@ -417,10 +424,15 @@ static func _tile_face(on: bool, hover: bool, col: Color, pad: float) -> UiFrame
 	var tint := col if on else Color.WHITE
 	var alpha := 0.13 if on else 0.04
 	var fill := Color(tint, alpha + (0.05 if hover else 0.0))
-	var f := UiFrame.raised(fill, R_CARD)
+	var glow := 1.0 if on else 0.0
+	if hover:
+		glow += 0.5
+	var f := UiTorn.make(fill, 2.5, glow)
 	f.edge_w = 2 if on else 1
 	if on:
 		f.edge = Color(col, 0.9)
+		f.glow_a = col
+		f.glow_b = col
 	else:
 		f.edge = Color(1, 1, 1, 0.24 if hover else 0.06)
 	return f.padded(pad, pad)
@@ -468,6 +480,9 @@ static func card(col := CARD, pad := 14, rad := R_CARD) -> PanelContainer:
 	var p := PanelContainer.new()
 	var opaque := col.a > 0.6 and rad < R_PILL
 	var sb := UiFrame.raised(col, rad, 6 if opaque else 0, RIM if opaque else Color(0, 0, 0, 0))
+	if rad < R_PILL:
+		sb = UiTorn.make(col, 2.5, 0.0, 0.35 if opaque else 0.0)      # a torn card, faint speckle at its edge
+		sb.shadow = 6 if opaque else 0
 	sb.lit = 0.05 if opaque else 0.0
 	p.add_theme_stylebox_override("panel", sb.padded(pad, pad))
 	return p
@@ -482,9 +497,10 @@ static func set_card_border(p: PanelContainer, col: Color, w := 2) -> void:
 ## Dark glass for things that float over the world (prompts, hint rows, the hub bar, hover cards).
 static func glass(pad := 10, rad := 14) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := UiFrame.raised(Color(0.05, 0.045, 0.07, 0.82), rad, 10)
-	sb.edge = Color(1, 0.95, 0.85, 0.08)
-	sb.lit = 0.04
+	var sb := UiTorn.make(Color(0.06, 0.035, 0.1, 0.84), 2.5)
+	sb.rad = rad
+	sb.shadow = 10
+	sb.edge = Color(0.75, 0.6, 1.0, 0.12)
 	sb.padded(pad + 2, pad)
 	p.add_theme_stylebox_override("panel", sb)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -802,9 +818,9 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		bb.name = "Close"
 		head.add_child(bb)
 	var tcol := vbox(2); tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var t := title(title_txt, T_TITLE, INK)
-	t.clip_text = true
-	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var t := title(title_txt, T_TITLE, DARK_INK)
+	t.add_theme_stylebox_override("normal", title_tab())       # a parchment tab pinned to the panel
+	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	tcol.add_child(t)
 	var sub := label("", T_SMALL + 1, MUTED)
 	sub.visible = false
@@ -885,6 +901,16 @@ static func subtitle(body: Control, txt: String) -> void:
 	var s: Label = p.get_meta("sub")
 	s.text = txt
 	s.visible = txt != ""
+
+## The panel title's parchment tab (UI_STYLE.md): a torn cream strip with two nails, dark ink on it.
+static func title_tab() -> UiTorn:
+	var f := UiTorn.make(PARCHMENT, 2.5, 0.0, 0.6)
+	f.nails = true
+	f.shadow = 8
+	f.tilt = 3
+	f.padded(30, 3)
+	f.content_margin_top = 9.0
+	return f
 
 ## Changes a panel's title.
 static func set_title(body: Control, txt: String) -> void:

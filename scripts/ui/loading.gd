@@ -259,7 +259,7 @@ func _squad_row(p: Vector2, a: float) -> void:
 ## The tip's glass card at a fade step (cached: drawn every frame while loading).
 func _glass(alpha: float) -> UiFrame:
 	if not _glass_at.has(alpha):
-		var g := UI.frame(Color(0.05, 0.045, 0.07, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
+		var g := UI.frame(Color(UI.NIGHT, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
 		_glass_at[alpha] = g
 	return _glass_at[alpha]
 

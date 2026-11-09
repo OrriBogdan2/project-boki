@@ -730,7 +730,7 @@ func _build_bridges() -> void:
 			_bridge_stub(k)
 		var lbl := Label3D.new()
 		lbl.font = UI.big; lbl.font_size = 64; lbl.pixel_size = 0.012; lbl.outline_size = 16
-		lbl.outline_modulate = Color(0.05, 0.04, 0.08, 0.9)
+		lbl.outline_modulate = Color(UI.NIGHT, 0.9)
 		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		lbl.text = "%s\n%d gems to bridge" % [isd["name"], int(isd["cost"])]
 		lbl.modulate = UI.GOLD
@@ -2894,7 +2894,7 @@ func _say(k: Dictionary, text: String, secs := 0.0, direct := true) -> void:
 	if not k.has("say"):
 		var l := Label3D.new()
 		l.font = UI.body; l.font_size = 34; l.pixel_size = BokiSpeech.FARM_PIXEL * BokiSpeech.SCALE; l.outline_size = 14
-		l.outline_modulate = Color(0.06, 0.05, 0.09, 0.95)
+		l.outline_modulate = Color(UI.NIGHT, 0.95)
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED; l.no_depth_test = true
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; l.width = 520
 		l.position = Vector3(0, 1.75, 0)
@@ -3158,7 +3158,7 @@ func _open_chat(rec: Dictionary) -> void:
 		_face(k["pos"])
 		if chat_log.size() == 1:
 			_say(k, _greeting(rec))
-	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
+	var bar := UI.card(Color(UI.NIGHT, 0.92), 12, 14)
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -4369,7 +4369,7 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 
 func _build_train_bar() -> void:
 	if is_instance_valid(train_bar): train_bar.queue_free()
-	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
+	var bar := UI.card(Color(UI.NIGHT, 0.92), 12, 14)
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN

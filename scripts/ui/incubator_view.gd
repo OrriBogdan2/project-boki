@@ -53,7 +53,7 @@ static func build(home: Node, v: VBoxContainer, reopen: Callable, hatch: Callabl
 		grid.add_child(_slot_card(Incubator.in_slot(i), hatch))
 	var cost := Incubator.slot_cost()
 	if cost >= 0:
-		var lc := UI.card(Color(0.1, 0.11, 0.15, 0.7), 12, 12)
+		var lc := UI.card(Color(UI.NIGHT_HI, 0.7), 12, 12)
 		lc.custom_minimum_size = Vector2(CARD_W, 0)
 		var lv := UI.vbox(6); lv.alignment = BoxContainer.ALIGNMENT_CENTER
 		lc.add_child(lv)
