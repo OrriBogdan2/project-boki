@@ -19477,5 +19477,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_foldbat_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_bullsfrog",
+    "name": "Bullsfrog (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_foldbat",
+    "name": "Foldbat",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_foldbat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_bullsfrog",
+    "name": "Bullsfrog (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_bullsfrog_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire",
+    "name": "Fanpire (concept)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/c_fanpire_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire",
+    "name": "Fanpire (concept)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_fanpire_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire",
+    "name": "Fanpire (concept)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_fanpire_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_fanpire",
+    "name": "Fanpire (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_fanpire_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_glacione",
+    "name": "Glacione",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_glacione_1.jpg",
+    "ok": true
   }
 ]
