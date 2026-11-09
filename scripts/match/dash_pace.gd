@@ -43,7 +43,7 @@ static func rehearse(m: Match) -> void:
 	var frames := 0
 	while frames < REHEARSE_MAX and quiet < REHEARSE_QUIET:
 		await m.get_tree().process_frame
-		if not m.is_inside_tree():
+		if not is_instance_valid(m) or not m.is_inside_tree():
 			return
 		frames += 1
 		var now := _pipelines()
