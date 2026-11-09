@@ -53,6 +53,7 @@ func run(m: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
+	home._close_panel()
 	await _frames(30)
 	var photo: HomePhoto = home.photo
 	var yaw0: float = home.cam.yaw_to
@@ -73,6 +74,11 @@ func run(m: Node) -> void:
 	for i in 120:
 		photo.tick(home, 0.05)
 	ok(photo.focus.distance_to(Vector3(spot.x, photo.focus.y, spot.z)) < 0.5, "the camera glides to the picked Boki")
+	home.cam.snap(photo.focus)      # headless frames are too short for the camera to ease over
+	await _frames(3)
+	var on_screen: Vector2 = home.cam.unproject_position(home.kins[1]["node"].global_position + Vector3(0, 0.5, 0))
+	var middle: Vector2 = main.get_viewport().get_visible_rect().size * 0.5
+	ok(on_screen.distance_to(middle) < middle.y * 0.5, "and it sits near the middle of the frame (%s, shown %s)" % [on_screen, home.kins[1]["node"].is_visible_in_tree()])
 	var caption := photo.caption_text(home)
 	ok(caption == "Mochi the %s" % Data.KIN["zapple"]["name"], "the caption: %s" % caption)
 	await _shot("1_picked_no_caption")

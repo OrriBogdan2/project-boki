@@ -170,12 +170,14 @@ func _build_labels(home: Node) -> void:
 	_layer.layer = 90
 	home.add_child(_layer)
 	_hint = UI.label(HINT_TEXT, 14, Color(1, 1, 1, 0.8))
+	_hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 14)
 	_hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_layer.add_child(_hint)
 	_caption = UI.label("", 30, Color.WHITE, UI.big)
 	_caption.add_theme_constant_override("outline_size", 8)
 	_caption.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	_caption.autowrap_mode = TextServer.AUTOWRAP_OFF
 	_caption.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 56)
 	_caption.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_layer.add_child(_caption)
