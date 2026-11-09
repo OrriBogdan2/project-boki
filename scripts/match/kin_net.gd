@@ -3,7 +3,8 @@ extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
 ##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate), 1 when it rides as a wisp (KinWisp; Net 0.27.0),
-##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.28.0)]
+##     summon window / shrink / cooldown seconds left (KinSummon; Net 0.28.0),
+##     1 while it is a guardian (KinGuardian; Net 0.29.0)]
 ##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
 ##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
@@ -26,6 +27,8 @@ static func apply_kin(k: Kin, it: Array) -> void:
 	k.down_void = int(it[KIN_AT + 3]) == 1
 	k.rest_t = float(it[KIN_AT + 4])
 	KinWisp.set_wisp(k, it.size() > KIN_AT + 5 and int(it[KIN_AT + 5]) == 1)
+	if k.summon and it.size() > KIN_AT + 9:
+		k.summon.guardian = int(it[KIN_AT + 9]) == 1
 	if k.summon and it.size() > KIN_AT + 8:
 		k.summon.left = float(it[KIN_AT + 6])
 		k.summon.shrink = float(it[KIN_AT + 7])
@@ -33,7 +36,9 @@ static func apply_kin(k: Kin, it: Array) -> void:
 
 static func _summon_extra(k: Kin) -> Array:
 	var s := k.summon
-	return [snappedf(s.left, 0.1), snappedf(s.shrink, 0.05), snappedf(s.cd, 0.1)] if s else [0, 0, 0]
+	if s == null:
+		return [0, 0, 0, 0]
+	return [snappedf(s.left, 0.1), snappedf(s.shrink, 0.05), snappedf(s.cd, 0.1), int(s.guardian)]
 
 static func hunter_extra(h: Hunter) -> Array:
 	var f := MergeForm.of(h)

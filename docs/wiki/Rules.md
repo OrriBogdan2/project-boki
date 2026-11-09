@@ -69,6 +69,7 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | leash | 10 |
 | leash_swing | 2 |
 | rebloom_dist | 20 |
+| guardian | {"min_s": 8.0, "max_s": 15.0, "leash": 6.0, "damage_mult": 1.25, "pulse_s": 0.8} |
 
 ## boki_system (`content/rules/boki_system.json`)
 

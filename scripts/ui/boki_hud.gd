@@ -107,13 +107,15 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	if k == null or not is_instance_valid(k) or k.summon == null or not (k.wisp or k.summon.out()):
 		return
 	var s := k.summon
-	var col: Color = k.sp.get("glow", k.sp["color"])
+	var col: Color = Color.WHITE if k.summon.guardian else k.sp.get("glow", k.sp["color"])
 	var rr := r.grow(SUMMON_GROW)
 	var at := r.position + Vector2(2, -2)
 	if s.out():
 		_ring(H, rr, s.left / s.dur, col, 3.0)
 		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
 		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.left), 13, col, H.big)
+		if s.guardian:
+			H._ctext(r.get_center() + Vector2(0, r.size.y * 0.5 + 18.0), "GUARDIAN", 9, col, H.big)
 	elif s.cd > 0.0:
 		_ring(H, rr, 1.0 - s.cd / maxf(0.1, s.cd_full), Color(HudStyle.MUTED, 0.8), 2.0)
 		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
