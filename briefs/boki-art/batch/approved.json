@@ -351,12 +351,6 @@
    "pick": 1,
    "grade": 8.6,
    "note": "majestic fungal tortoise, spear-quill palisade; relaid 5->4 views -> turnarounds/Ringrove.jpg"
-  },
-  {
-   "id": "chandelapi",
-   "pick": 3,
-   "grade": 8.5,
-   "note": "brass candelabra vines grown through the whole okapi -> evolutions/Chandelapi.jpg"
   }
  ],
  "rerolled": [
@@ -703,6 +697,88 @@
   {
    "id": "vespox_f_r",
    "why": "owner 20:18: branching lines get no female looks"
+  }
+ ],
+ "redesign_lookalike": [
+  {
+   "name": "Lockatara",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Latchling",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Vaultara",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Buckleron",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Frothisk",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Tidalisk",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Blossmink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Voltmink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Prismink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Rippmink",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Dragonkite",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Voltalon",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Lanceron",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Geysirbara",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Chandelapi",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Glaivyx",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Anchorbill",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Forgebrock",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Geodelotl",
+   "why": "owner-approved look-alike audit 21:38"
+  },
+  {
+   "name": "Chandelotl",
+   "why": "owner-approved look-alike audit 21:38"
   }
  ]
 }
