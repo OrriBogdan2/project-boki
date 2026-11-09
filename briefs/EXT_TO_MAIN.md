@@ -5638,3 +5638,4 @@ READY ext/snag-audit 0ea717354 (--snag-check: 12 Hunters x 50 seeded run/dash/gl
 READY ext/step-smooth 71b5ec0db (smooth terrace steps)
 READY ext/ult-ranks a48ec55a0 (ult ranks 0022)
 READY ext/boki-react-clips 4cb196f50 (win, sulk, push clips for all 21 Boki + BokiRig/Dash/Stump Shove wiring; stacked on ext/garden-stump-shove)
+READY ext/lace-hail-wisps d93205aaa (Hail Wall vs Wisps)
