@@ -384,6 +384,8 @@ func _tab_video(v: VBoxContainer) -> void:
 		_toggle(v, "V-sync", "vsync", "Stops tearing; can add a little input delay")
 	var fps := [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]]
 	_choice(v, "Frame rate limit", "max_fps", fps)
+	_slider(v, "Interface size", "ui_scale", Settings.UI_SCALE_MIN, Settings.UI_SCALE_MAX, 0.05,
+			"HUD, menus and tooltips. Starts at a size that suits your window height")
 	_group(v, "Quality")
 	var auto_pick := Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()
 	var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[auto_pick]["name"])]]
@@ -410,7 +412,6 @@ func _tab_video(v: VBoxContainer) -> void:
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
-	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
@@ -529,7 +530,7 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 	sl.min_value = lo
 	sl.max_value = hi
 	sl.step = step
-	sl.value = float(Settings.get_v(key))
+	sl.value = Settings.ui_scale() if key == "ui_scale" else float(Settings.get_v(key))
 	sl.custom_minimum_size.x = 228
 	sl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var pct := UI.label("%d%%" % int(round(sl.value * 100.0)), UI.T_SMALL, UI.MUTED, UI.semi)

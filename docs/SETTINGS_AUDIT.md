@@ -37,7 +37,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |
 | `quality`, `msaa`, `shadows` | Video > Quality | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `show_fps` | Video > Quality | `overlay.gd` | |
-| `ui_scale` | Accessibility > Readability | `settings.gd` | |
+| `ui_scale` | Video > Display | `settings.gd` | |
 | `shake`, `reduce_flashes` | Accessibility > Comfort | `cam.gd`; `hud.gd`, `reset_pop.gd` | |
 | `rec_level`, `demo_weather`, `demo_blight`, `demo_fresh` | Demo | `settings.gd` (`demo_opts`, `Record`) | |
 

@@ -634,7 +634,7 @@ func _draw_feed(sz: Vector2) -> void:
 
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
-	var s := minf(340.0, sz.y * 0.44) if riding else 196.0      # (the big drop map leaves room under it for the squad)
+	var s := minf(minf(340.0, sz.y * 0.44), sz.y - 392.0) if riding else 196.0      # (leaves room for two squad cards)
 	var r := Rect2(Vector2(18, 18), Vector2(s, s))
 	mm_bottom = r.end.y
 	SafeArea.note(r)

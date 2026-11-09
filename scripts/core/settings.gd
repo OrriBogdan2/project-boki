@@ -5,11 +5,16 @@ extends Node
 signal changed(key: String)
 
 const PATH := "user://settings.cfg"
+const UI_SCALE_MIN := 0.8      # interface size range (1.0 = the design size for the window)
+const UI_SCALE_MAX := 1.5
+const UI_SMALL_H := 700      # window px tall: below this the default interface size is the minimum
+const UI_BIG_H := 1600      # window px tall: from this up the default is UI_SCALE_BIG (4K)
+const UI_SCALE_BIG := 1.2
 const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 3, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 4, "video_v": 3, "shadows": true, "ui_scale": 0.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -290,13 +295,23 @@ func _apply_ui_scale() -> void:
 	var win := Vector2(get_tree().root.size)
 	if win.x < 10.0 or win.y < 10.0:
 		return
-	var user := clampf(float(v.get("ui_scale", 1.0)), 0.75, 1.5)
 	var fit := minf(win.y / 720.0, win.x / 1240.0)
-	var f := user * fit
+	var f := ui_scale() * fit
 	# never let the user's own size setting push the layout past the window either
 	f = minf(f, minf(win.y / 640.0, win.x / 1100.0))
 	if absf(get_tree().root.content_scale_factor - f) > 0.001:
 		get_tree().root.content_scale_factor = f
+
+## The interface size the player chose, or (0 = never chosen) the default for the window's height:
+## small windows start smaller so every HUD group fits, 4K starts larger so it reads from the couch.
+func ui_scale() -> float:
+	var chosen := float(v.get("ui_scale", 0.0))
+	if chosen > 0.0:
+		return clampf(chosen, UI_SCALE_MIN, UI_SCALE_MAX)
+	var h := get_tree().root.size.y
+	if h < UI_SMALL_H:
+		return UI_SCALE_MIN
+	return UI_SCALE_BIG if h >= UI_BIG_H else 1.0
 
 ## Lights made later (every screen builds its own) follow the shadow setting too.
 func _on_node_added(n: Node) -> void:

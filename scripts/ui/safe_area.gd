@@ -67,5 +67,19 @@ static func problems(groups: Dictionary, sz: Vector2) -> Array:
 				bad.append("%s outside %s" % [names[i], r])
 			for j in range(i + 1, names.size()):
 				if (groups[names[j]] as Array).any(func(o: Rect2): return r.intersects(o)):
-					bad.append("%s overlaps %s" % [names[i], names[j]])
+					bad.append("%s %s overlaps %s" % [names[i], r, names[j]])
+	return bad
+
+## Labels under `root` whose text is silently cut off: not wrapped, set to clip without an ellipsis, and wider
+## than the label is.
+static func clipped(root: Node) -> Array:
+	var bad: Array = []
+	for l: Label in root.find_children("*", "Label", true, false):
+		var silent := l.clip_text and l.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING
+		if not l.is_visible_in_tree() or l.text == "" or l.autowrap_mode != TextServer.AUTOWRAP_OFF or not silent:
+			continue
+		var font := l.get_theme_font("font")
+		var w := font.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, l.get_theme_font_size("font_size")).x
+		if w > l.size.x + 1.0 and l.size.x > 0.0:
+			bad.append("'%s' needs %d px, has %d" % [l.text.left(24), int(w), int(l.size.x)])
 	return bad

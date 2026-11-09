@@ -1,20 +1,25 @@
 extends RefCounted
 ## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
-## 2560x1080 ultrawide, 1024x640). At each, every group (a registered HUD panel, or a top-level control of a
-## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
-## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
-## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
-## and size (<dir>/<W>x<H>_<screen>.png) and a contact sheet of them.
+## 2560x1080 ultrawide, 1024x640) at the default interface size, and at both ends of the interface size slider
+## (80% and 150%) on 1280x720 and 3840x2160. At each, no label's text is cut off and every group
+## (a registered HUD panel, or a top-level control of a screen) sits inside SafeArea's margin and no two
+## groups of one screen overlap. The match HUD is read from SafeArea's registry; the pick (prematch), pause,
+## results, farm HUD and expedition panel from their controls.
+## --safe-area-shots [--size=WxH] [--scale=0.8] --shots-dir=<dir>: the same run with a real renderer, one PNG per
+## screen and case (<dir>/<W>x<H>_<pct>_<screen>.png; pct 0 is the default size).
 
-const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080),
-		Vector2i(1024, 640)]
+## [window, interface size; 0 = the default for that window]
+const CASES := [[Vector2i(1280, 720), 0.0], [Vector2i(1920, 1080), 0.0], [Vector2i(2560, 1440), 0.0],
+		[Vector2i(2560, 1080), 0.0], [Vector2i(1024, 640), 0.0],
+		[Vector2i(1280, 720), 0.8], [Vector2i(1280, 720), 1.5],
+		[Vector2i(3840, 2160), 0.8], [Vector2i(3840, 2160), 1.5]]
 const RESULT := {"extracted": true, "gems": 42, "seeds": {"sunroot": 1}, "caught": [], "knocks": 3, "damage": 512,
 		"taken": 388, "kills": 1, "downs": 1, "deaths": 0, "revives": 2, "armor_tier": 3, "time": 201.0}
 
 var main: Node
 var bad := 0
 var shots := ""
-var sizes: Array = SIZES.duplicate()
+var cases: Array = CASES.duplicate()
 var m: Match
 var home
 
@@ -31,7 +36,9 @@ func run(mn: Node, mode: String) -> void:
 			shots = String(a).substr(12)
 		if String(a).begins_with("--size="):
 			var wh := String(a).substr(7).split("x")
-			sizes = [Vector2i(int(wh[0]), int(wh[1]))]
+			cases = cases.filter(func(c): return c[0] == Vector2i(int(wh[0]), int(wh[1])))
+		if String(a).begins_with("--scale="):
+			cases = cases.filter(func(c): return is_equal_approx(c[1], float(String(a).substr(8))))
 	if mode == "shots":
 		DirAccess.make_dir_recursive_absolute(shots)
 	if main.fade:
@@ -46,21 +53,28 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-## Resizes the window and returns the logical size the interface is laid out in.
-func _resize(win: Vector2i) -> Vector2:
+## Resizes the window, sets the interface size and returns the logical size the interface is laid out in.
+func _resize(win: Vector2i, ui_size: float) -> Vector2:
 	main.get_tree().root.size = win
+	Settings.set_v("ui_scale", ui_size)
 	await _frames(3)
 	return main.get_tree().root.get_visible_rect().size
 
-func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2) -> void:
-	var tag := "%dx%d %s" % [win.x, win.y, screen]
+## `root` is the screen's node: its labels are checked for cut-off text (the drawn match HUD has none).
+func _judge(screen: String, c: Array, groups: Dictionary, sz: Vector2, root: Node = null) -> void:
+	var win: Vector2i = c[0]
+	var pct := int(round(float(c[1]) * 100.0))
+	var tag := "%dx%d %d%% %s" % [win.x, win.y, pct, screen]
 	var problems := SafeArea.problems(groups, sz)
-	var what := "%s: %d groups in the %d px margin, no overlap (logical %s) %s"
+	if root != null:
+		problems += SafeArea.clipped(root)
+	var what := "%s: %d groups in the %d px margin, no overlap, no cut-off text (logical %s) %s"
 	ok(not groups.is_empty() and problems.is_empty(),
 			what % [tag, groups.size(), int(SafeArea.MARGIN), sz, problems.slice(0, 4)])
 	if shots != "":
 		await _frames(2)
-		main.get_viewport().get_texture().get_image().save_png("%s/%dx%d_%s.png" % [shots, win.x, win.y, screen])
+		var file := "%s/%dx%d_%d_%s.png" % [shots, win.x, win.y, pct, screen]
+		main.get_viewport().get_texture().get_image().save_png(file)
 
 func _hud() -> void:
 	m = Match.new()
@@ -72,35 +86,35 @@ func _hud() -> void:
 		m.feed.append({"text": line, "t": 0.0})
 	m.hud.toast("Picked up a long-range rifle", Color.WHITE)
 	m.hud.toast("Armor cracked: it held one more hit", Color.WHITE)
-	for win: Vector2i in sizes:
-		var sz := await _resize(win)
-		await _hud_at(win, sz, "drop")
+	for c: Array in cases:
+		var sz := await _resize(c[0], c[1])
+		await _hud_at(c, sz, "drop")
 		m.player.riding = false
 		m.player.dropping = false
-		await _hud_at(win, sz, "hud")
+		await _hud_at(c, sz, "hud")
 		Overlay.open_pause("match")
 		await main.get_tree().create_timer(0.8).timeout
-		await _judge("pause", win, SafeArea.groups_of(Overlay.host, sz), sz)
+		await _judge("pause", c, SafeArea.groups_of(Overlay.host, sz), sz, Overlay.host)
 		Overlay.close()
 
-func _hud_at(win: Vector2i, sz: Vector2, screen: String) -> void:
+func _hud_at(c: Array, sz: Vector2, screen: String) -> void:
 	SafeArea.seen.clear()
 	SafeArea.recording = true
 	m.hud.panels.queue_redraw()
 	await _frames(4)
 	SafeArea.recording = false
 	SafeArea.seen["toasts"] = m.hud.msgs.rects()
-	await _judge(screen, win, SafeArea.seen.duplicate(), sz)
+	await _judge(screen, c, SafeArea.seen.duplicate(), sz)
 
 func _screens() -> void:
-	for win: Vector2i in sizes:
-		var sz := await _resize(win)
+	for c: Array in cases:
+		var sz := await _resize(c[0], c[1])
 		main.show_screen("prematch", {"teams": 10, "squad": 3, "tier": 0})
 		await main.get_tree().create_timer(0.8).timeout
-		await _judge("pick", win, SafeArea.groups_of(main.current, sz), sz)
+		await _judge("pick", c, SafeArea.groups_of(main.current, sz), sz, main.current)
 		main.show_screen("results", RESULT)
 		await main.get_tree().create_timer(1.0).timeout
-		await _judge("results", win, SafeArea.groups_of(main.current, sz), sz)
+		await _judge("results", c, SafeArea.groups_of(main.current, sz), sz, main.current)
 
 func _farm() -> void:
 	home = await main._hb_home()
@@ -109,12 +123,12 @@ func _farm() -> void:
 			break
 		await _frames(1)
 	home._close_panel()
-	for win: Vector2i in sizes:
-		var sz := await _resize(win)
+	for c: Array in cases:
+		var sz := await _resize(c[0], c[1])
 		await main.get_tree().create_timer(0.6).timeout
 		home._close_panel()      # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
 		await _frames(2)
-		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz)
+		await _judge("farm", c, SafeArea.groups_of(home.root_ui, sz), sz, home.root_ui)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout
-		await _judge("expedition", win, SafeArea.groups_of(home.panel_host, sz), sz)
+		await _judge("expedition", c, SafeArea.groups_of(home.panel_host, sz), sz, home.panel_host)

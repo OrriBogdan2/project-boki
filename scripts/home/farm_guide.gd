@@ -6,6 +6,8 @@ extends RefCounted
 ## HobTalk). The rules are FarmTutorial; none of it shows when
 ## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
 
+const GOALS_SIDE := 332.0      # logical px the Goals card takes from a screen edge (300 wide, 16 margin, a gap)
+
 var h
 var tracker: PanelContainer = null
 var hint_box: PanelContainer = null
@@ -119,10 +121,13 @@ func _refresh_hint() -> void:
 		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
 	s = s.replace("{secs}", "a few")
 	hint_lbl.text = "%d/%d  %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), s]
-	# a long hint wraps at about 600 px (under the chips, clear of the Goals card) instead of running wide
+	# a long hint wraps at about 600 px (under the chips) instead of running wide, and never reaches under the
+	# Goals card: the box is centred, so the room is the width left after the card's side on both edges
 	var fw := hint_lbl.get_theme_font("font").get_string_size(hint_lbl.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 6.0
+	var screen_w: float = h.get_viewport().get_visible_rect().size.x
+	var room := screen_w - 2.0 * GOALS_SIDE - 28.0 - 14.0 - skip_row.get_combined_minimum_size().x
 	hint_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint_lbl.custom_minimum_size.x = minf(fw, 600.0)
+	hint_lbl.custom_minimum_size.x = minf(fw, clampf(room, 200.0, 600.0))
 
 func _clear_hint() -> void:
 	if is_instance_valid(hint_box):
