@@ -6,7 +6,7 @@ extends RefCounted
 ## none add KICK_RISE of height to the jump you are on; keys away push you off it. A hop only starts up to
 ## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
 ## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
-## opens the glider: the glide button or a held glide still does). Bounce: hitting a
+## opens the glider: the glide button still does). Bounce: hitting a
 ## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
 ## head-on you just stop, as ever, and a jump there kicks.
 
