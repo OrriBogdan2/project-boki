@@ -19,6 +19,14 @@ static func ult_pressed(h: Hunter) -> bool:
 		return false
 	return true
 
+## R from the keyboard, read outside the step: a kit's hunter casts it in its next step, after a Shift pressed in
+## the same frame (DashFlow.route), so the dash always goes first.
+static func press(h: Hunter) -> void:
+	if h.ak != null:
+		h.ak.flow.x_pressed = true
+	else:
+		ult_pressed(h)
+
 ## A press that did nothing: the X tile shakes red with the soft warning sound (HunterUltTile).
 static func _deny(h: Hunter) -> void:
 	h._ab_feedback("x", "deny")
