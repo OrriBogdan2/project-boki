@@ -3555,5 +3555,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/portrait_glomwort_1.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_hivara",
+    "name": "Hivara (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hivara",
+    "name": "Hivara (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hivara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_glomwort",
+    "name": "Glomwort (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_glomwort_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf",
+    "name": "Marchleaf (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_marchleaf",
+    "name": "Marchleaf (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_marchleaf_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx",
+    "name": "Nettlynx (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_nettlynx",
+    "name": "Nettlynx (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_nettlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_terrarimit",
+    "name": "Terrarimit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_terrarimit_2.jpg",
+    "ok": true
   }
 ]
