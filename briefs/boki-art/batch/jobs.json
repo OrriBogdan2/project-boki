@@ -1827,6 +1827,437 @@
     "size": "2K"
   },
   {
+    "id": "ta_bathilus",
+    "name": "Bathilus",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bathilus_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_torpecone",
+    "name": "Torpecone (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_bathilus_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: an extinct straight-shelled nautiloid that is a living torpedo. Look: The coil has straightened into a long, pointed, riveted iron cone like a torpedo hull, with stubby fins grown at the tip and a short chunky periscope horn on top. It swims head-first, its thick arms swept back into a tight bundle like a propeller hub; foam-white wave curls run along the stripes. Face: narrow focused eyes, a determined set mouth.. Colours: gunmetal and sea teal; accent rust stripes.. Archetype: fast. Avoid: coiled shell like Bathilus, a propeller, thin parts, upright. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
+    "size": "2K"
+  },
+  {
+    "id": "c_grainspin_e",
+    "name": "Grainspin (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_grainspin_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make the abdomen a single round glass bulb half full of gold sand that joins the body seamlessly at a soft sandstone-textured waist (no second bulb, no hourglass neck), and give the legs sandstone texture with rocky tips.",
+    "size": "2K"
+  },
+  {
+    "id": "c_narfoil_e",
+    "name": "Narfoil (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_narfoil_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make the tusk a short, straight, smooth fencing-foil blade with a frosted button tip, make the bell-guard frosted ice growing out of the skin at the tusk base with no clean edge, and add frost tips to the flippers and tail.",
+    "size": "2K"
+  },
+  {
+    "id": "c_pinster_e",
+    "name": "Pinster (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinster_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make the cheeks themselves domed pinball bumpers growing out of the fur (striped red-and-white mushroom-bumper caps with a yellow rim, no separate metal ring), and make the back stripes pinball lane arrows instead of a lightning bolt.",
+    "size": "2K"
+  },
+  {
+    "id": "c_reelacine_e",
+    "name": "Reelacine (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_reelacine_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove the film band at the neck so the film is only printed into the hide as the stripes, make the head bigger and more stylised with a wider jaw and chunkier sprocket holes, and make the spool tail stiffer and thicker.",
+    "size": "2K"
+  },
+  {
+    "id": "c_tootle_e",
+    "name": "Tootle (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_tootle_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove the trumpet from its mouth; instead fold the brass-sheened neck frill forward into a trumpet bell around the snout, with only a short mouthpiece grown from its lips, and make the tail a plain grooved cone with no rings.",
+    "size": "2K"
+  },
+  {
+    "id": "c_bullpole_e",
+    "name": "Bullpole (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_bullpole_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: replace the human-looking pursed lips with a small wide tadpole pucker, and make the dart-flight fins crisper with straight edges and a toxic green sheen.",
+    "size": "2K"
+  },
+  {
+    "id": "c_foldbat_e",
+    "name": "Foldbat (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_foldbat_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: fold the wings fully shut into a narrow closed-fan stick along each side, recolour to black lacquer with cream rib tips and a red accent instead of plum, and make the ears a little smaller.",
+    "size": "2K"
+  },
+  {
+    "id": "c_glaciammoth_e",
+    "name": "Glaciammoth (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_glaciammoth_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make it more colossal and stylised: a heavier raised head, one forefoot forward in a legendary stance, huge sweeping fossil-ivory tusks, longer frosted locks, larger clear permafrost plates with relics deep inside and a faint glow on the runes.",
+    "size": "2K"
+  },
+  {
+    "id": "c_lensling_e",
+    "name": "Lensling (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_lensling_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove the brass rings from its wrists, ankles and tail tip (brass-tinted toe scales instead), and blend the brass lens tube into the eye socket with skin folds so it clearly replaces one eye.",
+    "size": "2K"
+  },
+  {
+    "id": "c_nymphane_e",
+    "name": "Nymphane (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_nymphane_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make the legs shorter and chunkier, replace the human-looking teeth with insect mask-jaw hooks, and make the hinged glass-plated mask jaw folded under the chin bigger and clearer.",
+    "size": "2K"
+  },
+  {
+    "id": "c_pocketpus_e",
+    "name": "Pocketpus (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pocketpus_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove the panel seams so the red lacquer is its skin (one smooth rounded handle body with rivet spots), show a visible folded-blade seam along the bill, and make the ankle spurs glossy venom-green and clearly grown.",
+    "size": "2K"
+  },
+  {
+    "id": "c_puffuse_e",
+    "name": "Puffuse (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_puffuse_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: keep only one fuse tail, put the spark lines inside the seams as glowing cracks (no floating bolts), add short stubby iron puffer spines between the rivets and a pale yellow belly so it reads as a pufferfish.",
+    "size": "2K"
+  },
+  {
+    "id": "c_sarcobra_e",
+    "name": "Sarcobra (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_sarcobra_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: widen the sarcophagus lid into the flared hood itself (the hood skin becomes the lid edge, no gap above the head), lengthen the fangs, and keep the violet smoke to faint wisps at the hood edges.",
+    "size": "2K"
+  },
+  {
+    "id": "c_chiptero_r",
+    "name": "Chiptero (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a pterosaur hatchling knapped out of flint. Look: A chunky chibi pterosaur hatchling with an oversized head, its body built from a few big glossy conchoidal flint flakes with clean ridged knapping scars and sharp white chip edges, one sharp flint-edge beak, a blunt pick-head crest, short folded wings and a round baby body, waddling on all fours. Face: wide hungry beak, eager eyes.. Colours: slate grey and ochre; accent flint white.. Archetype: cute. Avoid: open wings, a held tool, feathers.",
+    "size": "2K"
+  },
+  {
+    "id": "c_fawngus_r",
+    "name": "Fawngus (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a fawn whose spots are tiny hat pegs, each wearing a mushroom cap. Look: A stylised big-headed fawn on all fours whose white spots swell into a few rounded wooden peg knobs like a coat rack, each topped with a single small teal mushroom cap with purple-black gill lines underneath, short peg nubs on its head where antlers will grow; a curious, shy face. Face: big wet eyes, an anxious ear-flick.. Colours: fawn brown and cream; accent teal spore glow.. Archetype: pretty. Avoid: antlers, a garden on its back, hats worn., tears, crying, a sad face, a realistic deer, a mushroom garden on its back If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent (purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.",
+    "size": "2K"
+  },
+  {
+    "id": "c_gilabacus_r",
+    "name": "Gilabacus (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a Gila monster whose beaded hide is an abacus. Look: A heavy, low, slow Gila monster with raised bony ridges running along its spine from nose to tail only, each ridge carrying a row of coral-and-black beads like an abacus rod (nothing wraps around the body or legs), a pastel pink fairy sheen on the beads, a smug half-lidded smile and one neat glossy venom bead on its lip. Face: half-lidded calculating eyes, a slow smile.. Colours: coral orange and black; accent venom green.. Archetype: tough. Avoid: a wooden frame, numbers, text., hoops, bands or rings around the body, legs or tail, drool",
+    "size": "2K"
+  },
+  {
+    "id": "c_hydrangor_r",
+    "name": "Hydrangor (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a hydra whose heads are hydrangea blooms. Look: A grand, tall three-headed hydra on powerful legs whose heads ARE hydrangea blooms: the petal clusters form each skull and mane and the dragon jaw opens out of the flower (one sleepy, one snarling, one curious), long arched necks, gold horns, petal-scale body, big leaf-plate spines and a heavy regal tail. Face: three different moods: one sleepy, one snarling, one curious.. Colours: hydrangea blue-violet and leaf green; accent old gold horns.. Archetype: majestic. Avoid: thin necks, a bouquet, more than three heads., flower wigs, petals sitting on top of lizard heads, a small cute body",
+    "size": "2K"
+  },
+  {
+    "id": "c_malletary_r",
+    "name": "Malletary (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a secretary bird that stomps with war-hammer feet. Look: A stylised big-headed secretary bird with a severe hooded face whose scaly shins thicken and flow straight into blocky iron hammer-head feet made from its own toes and heel (no handles), gold runes etched into the leg scales, in a stomping pose. Face: severe hooded eyes, a hooked frown.. Colours: dove grey and black; accent old gold.. Archetype: fast. Avoid: a quill pen, held weapons, a hornbill bill (Anchorbill), ink., handles, held hammers, gold bands or rings on the legs, a realistic bird",
+    "size": "2K"
+  },
+  {
+    "id": "c_pagodito_r",
+    "name": "Pagodito (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a baby iguana with one temple-roof eave for a crest. Look: A squat baby iguana with a clearly lizard head, a long snout and a dewlap, its body covered in terracotta roof-tile scales, and one small curled pagoda eave rising only from the head and neck spines as its crest, with a grumpy droopy-lidded old-man face. Face: grumpy old-man frown, droopy eyelids.. Colours: slate green and terracotta; accent old gold.. Archetype: tough. Avoid: tiers, a building, bells., a roof on its back, a building, a hat, two heads, a toad",
+    "size": "2K"
+  },
+  {
+    "id": "c_proofhop_r",
+    "name": "Proofhop (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a katydid nymph that is a ball of rising dough. Look: A round katydid nymph made of soft dough: long jointed hopping hind legs, leaf-shaped wing buds, stubby antennae, a glossy rounded dough body with a floury scored loaf crust split along its back with teal yeast spores puffing out, a few clean bubble dimples, and a sleepy-happy smile. Face: big round sleepy eyes, puffy cheeks.. Colours: dough cream and leaf green; accent teal spores.. Archetype: cute. Avoid: a bowl, a baker's hat, realistic insect hair, thin antennae., warts, lumps, a potato or rock, pickles If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent (purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.",
+    "size": "2K"
+  },
+  {
+    "id": "c_clinkpede_r",
+    "name": "Clinkpede (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a short centipede made of chunky chain links. Look: A SHORT stubby centipede made of exactly eight fat chunky chain links that are its body segments (no tube inside), a big round steel-link head about a third of its size tilted curiously, beady eyes, small green fangs, chunky toothed legs and glossy green venom beads under each link. Face: small beady eyes, a curious tilt.. Colours: steel grey and venom green; accent rust.. Archetype: cute. Avoid: loose chain, thin legs, a motor., a long loose chain, a worm wrapped in chain",
+    "size": "2K"
+  },
+  {
+    "id": "c_grammite_r",
+    "name": "Grammite (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a river larva with dagger jaws. Look: A chunky, short dobsonfly larva with an oversized head, two clearly blade-shaped curved bronze dagger jaws with a fuller groove and a guard-like ridge at the base, big mean-but-funny eyes, fluffy amber gill tufts as tassels down its sides, and no rings around its segments. Face: small mean eyes, mandibles open.. Colours: dark umber and amber; accent bronze edges.. Archetype: creepy. Avoid: wings, thin legs, hair., a realistic hellgrammite, bands around the segments",
+    "size": "2K"
+  },
+  {
+    "id": "c_morelkin_r",
+    "name": "Morelkin (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a tapir calf whose baby stripes are rows of tiny mushrooms. Look: A round chibi tapir calf whose cream baby stripes ARE flat rows of tiny button-mushroom caps pressed flush into the hide (nothing sticking up), whose wiggly snout tip is honeycomb-pitted morel flesh puffing teal spores, with a sleepy smile and stubby legs. Face: sleepy drooping eyes, snout mid-wiggle.. Colours: chestnut brown and cream; accent teal spore glow.. Archetype: cute. Avoid: mushrooms on its back like a garden, realistic tapir., mushrooms sticking up from the back or ears, a garden on its back, a realistic tapir If this is a Spore-type creature: keep it appealing, and use the Blight palette only as a small accent (purple-black gills or vein lines, a faint purple inner glow in its spores, a few small bone-spur quills); never green slime, never gross or rotting.",
+    "size": "2K"
+  },
+  {
+    "id": "c_pavonazar_r",
+    "name": "Pavonazar (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a peacock whose eye-spots are glass evil-eye charms. Look: A stylised, plump glass peacock walking low with a smaller body and bigger head, its body glossy cobalt glass with a teal sheen, its train made of fewer, larger domed evil-eye glass beads set in glass feather panes, some half-blinking with eyelids, three bead stalks as a crest, and a cold, heavy-lidded slow-blink stare. Face: cold, watchful, slow blink.. Colours: cobalt blue and teal; accent white glass eyes.. Archetype: pretty. Avoid: feathers loose, jewellery strung on it, a human eye., a realistic peacock, feather eye-spots",
+    "size": "2K"
+  },
+  {
+    "id": "ta_cubbat",
+    "name": "Cubbat",
+    "refs": [
+      "briefs/boki-art/batch/out/c_cubbat_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "prompt": "Character turnaround sheet of exactly the creature in image 1: the same design, proportions, colours, markings, face and every detail, nothing added or removed, in the same soft hand-painted style. Exactly four views of it in one clean row: front, three-quarter, side and back, the same size, standing or crawling naturally like an animal, neutral pose, plain flat pale grey background, no text, no shadows, no ghost copies, nothing else in the image.",
+    "size": "2K"
+  },
+  {
+    "id": "c_pipwom",
+    "name": "Pipwom (concept)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png",
+      "briefs/boki-art/batch/out/c_cubbat_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a wombat whose rump is a six-pip shield die. Look: A wedge-shaped burrower, front end low and hunched with big spade claws, rising to a huge flat square rump plate of carved ivory-stone with six pips, used as a shield. The same ivory material caps its brow, claw tips and a line of pip dots down its spine. Face: stubborn squint, jutting lower jaw, small ears flat back.. Colours: earth brown and bone ivory; accent black pips.. Archetype: tough. Avoid: cube body like Cubbat, numbers, text, saddle look. Image 2 is the earlier form of this creature: keep its face shape, eye colour and palette so the family reads, but give this form a fundamentally new body plan, silhouette and pose.",
+    "size": "2K"
+  },
+  {
+    "id": "c_cetorgan_e",
+    "name": "Cetorgan (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_cetorgan_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: thicken the organ pipes and root their base in the skin around the blowhole so the pipe fan grows out of the head, make the pipes rise out of the flanks too, give it a glowing eye and a grander arched swimming pose.",
+    "size": "2K"
+  },
+  {
+    "id": "c_lurklet_e",
+    "name": "Lurklet (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_lurklet_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: turn the lure into a small round flat steel trigger-plate disc with a faint violet glow, move small worried bead eyes higher on the head with raised brows, and make the expression a wide, nervous, sheepish clenched trap grin instead of a fully open maw.",
+    "size": "2K"
+  },
+  {
+    "id": "c_mumblet_e",
+    "name": "Mumblet (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_mumblet_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: replace the crab pincers with broad flat spade-like cicada digging forelegs, shorten the front grille plate so the head pokes out below it as its own round shape, and give it a cicada-nymph face with big bulging eyes shut tight (no human nose or lips).",
+    "size": "2K"
+  },
+  {
+    "id": "c_pawnfry_e",
+    "name": "Pawnfry (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pawnfry_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: tilt the body into a bobbing lean, make the round weighted base clearly the tail tip curled into a coil (no separate pedestal), and replace the gold ring with a thin gold grain line painted into the wood.",
+    "size": "2K"
+  },
+  {
+    "id": "c_polyshroom_e",
+    "name": "Polyshroom (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_polyshroom_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: make the cap a translucent jellyfish bell with a soft inner glow and a faint frilly rim, put two small drowsy eyes on short stalk bumps near the top of the stalk, and add faint purple-black gill lines under the cap rim.",
+    "size": "2K"
+  },
+  {
+    "id": "c_rattlebub_e",
+    "name": "Rattlebub (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_rattlebub_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: thicken the join between the tail and the maraca bulb so it flows smoothly into the gourd, and turn the body bands into painted dotted diamond patterns (no ring bands).",
+    "size": "2K"
+  },
+  {
+    "id": "c_scoopsy_e",
+    "name": "Scoopsy (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_scoopsy_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove any waffle cup underneath, and give the wafer-patterned tail a visible tapered tip that wraps up over its front paws so it can only read as a tail; make the head rounder with big round dormouse ears.",
+    "size": "2K"
+  },
+  {
+    "id": "c_gravigrub_e",
+    "name": "Gravigrub (concept edit)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_gravigrub_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Edit image 1: keep the same creature, design, colours, style, pose and plain light grey background, centred and filling about 85 percent of the square, nothing added. Only change this: remove the little arms and blend the cratered moon into the grub's underside so the cream body curls around and merges into it as its belly.",
+    "size": "2K"
+  },
+  {
+    "id": "c_ghoulamari_r",
+    "name": "Ghoulamari (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a vampire squid that is a fortune-teller's crystal ball. Look: A compact vampire squid whose whole rounded mantle IS a clear crystal ball flowing seamlessly into its wine-red flesh (no rim or seam), its only eyes two huge deadpan silver eyes floating inside the silver mist in the ball, sitting on a bell-shaped cloak of eight thick arms joined by deep wine-red webbing with short soft cirri and silver crescent marks. Face: huge silver eyes inside the ball, a knowing deadpan stare.. Colours: deep wine red and black; accent moon-silver mist.. Archetype: creepy. Avoid: a table or stand, cards, a cape worn, thin tentacles., thin curly tentacles, an octopus head, a glass bowl worn on the head, extra eyes on the body",
+    "size": "2K"
+  },
+  {
+    "id": "c_glacione_r",
+    "name": "Glacione (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: a sea angel that is a frosty shuttlecock. Look: A small translucent sea-angel: a soft rounded gelatinous head with pale cork-textured skin and a tiny face with a hidden fanged smile, two smooth translucent rounded wing-lobes flapping like a shuttlecock's leading feathers, and a lower body that flares into a frosted feather-lobed skirt with a glowing silver crescent at its core. Face: tiny, sweet closed eyes; it opens a hidden fanged mouth to strike.. Colours: ice blue and clear white; accent silver.. Archetype: pretty. Avoid: a racket, a human angel shape, a halo, snowflakes., bird or angel wings, a metal band or ring at the neck, two heads, an object with a face",
+    "size": "2K"
+  },
+  {
+    "id": "c_olmlet_r",
+    "name": "Olmlet (concept r)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_v2.png"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "prompt": "Creature-collector monster concept art for a fantasy action game, painted in exactly the soft hand-painted style of image 1 (clean, fairly thin dark outline, painterly shading, stylised and appealing), but a brand-new creature: never copy any creature from image 1. ONE creature only, full body, in a natural three-quarter view and a pose with personality, centred and filling about 85 percent of the square, plain flat light grey background, no text, no effects, no scenery. It is clearly an animal: no human posture, nothing held, worn or strapped; its idea grows through its whole body. No band, ring, belt, cuff, collar, strap or hoop around the body, neck, ankles or tail: those read as worn. No helmet, hat, mask or plate sitting on the head: the head itself is shaped by the idea. No faded, ghost or duplicate rows of the creature: exactly one clean row of views. Not a realistic animal with an object added: stylise the whole body, with a big readable head and a face full of personality. No hanging trinkets: bells, lanterns, charms and tools grow out of the body or become the body. Image 2 is only a style reference: never copy its creatures into the sheet. Show only this one creature, nothing else. Make the concept surprising and memorable: an unexpected but instantly readable mix, never the obvious version (a fire animal with flames, an ice animal with icicles). Concept: the cave folklore 'baby dragon', made of mended porcelain. Look: A very long, thin, eel-like baby olm curled into an S like a tiny dragon, with a narrow flat spade-shaped snout, tiny stick legs set far apart, only three small tight porcelain petal-tab gill nubs, glossy white glazed porcelain skin with blush only on the cheeks, and one gold kintsugi crack running down its body as the main accent; a serene blind face. Face: blind, two faint grey dot eyes, a serene little smile.. Colours: porcelain white and blush pink; accent gold crack.. Archetype: pretty. Avoid: teacup or vase shapes, realistic olm, glass., an axolotl, feathery gill fronds, a pink body, a round axolotl head",
+    "size": "2K"
+  },
+  {
     "id": "chuggamus_r2",
     "name": "Chuggamus",
     "refs": [

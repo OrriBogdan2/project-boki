@@ -4173,3 +4173,41 @@ READY ext/anim-slide-tune 7a7823459 (job 20261109-034516-a2 on w2; branched off 
 READY ext/stuck-integ-e28956f8 da83863db (supersedes: ext/art1-kael-2 fd33d2045, ext/kit-kael-113 6e18b8be7; job 20261109-040056-a2. NO new merge: the branch = ext/mc-20261109-0030 tip (contains origin/main and kit-kael-113b). kit-kael-113 is the same item re-cut as kit-kael-113b ("merge ONE"), already in; art1-kael-2 is v1 Kael art, DECISIONS keeps Kael v2 (in main). Same tips already ruled by stuck-integ-9e20dcba, kael-kit-integ, stuck-integ-950a5444, stuck-integ-51f5c1d1, stuck-integ-cb5c1c27: drop both from the READY pool. Checks: --import ok; note the mc base commits 3 empty art/kin/caecilith/*.webp (2c763f2e0, ERR_FILE_CORRUPT on import), not from this job)
 
 READY ext/cinder-sable-polish-rebased f3bf0403b (job 20261109-034726-a1; supersedes ext/cinder-sable-polish 6952af96d: origin/main d255acbee merged. git reported no conflicts (main has not touched sable.glb or sable_paint.py since the branch base bed04e50b), so the branch's rebuilt sable.glb, atlas and its tools/art1 + warden_look.json edits are carried unchanged: Sable pistol bell mouth .038, knife .34, darker silver, smaller muzzle halo/glow, calmer braid, brass guard/cap/frizzen + walnut stock, Cinder untouched. Checks on the merge: --check failures 0, --clip-check failures 0, --weapon-clip-check PASS, --cinder-art-check fails=0, --warden-model-check 157/0 (the hero-heights FAIL rows the old READY listed are gone on main), health --strict OK. Not re-run: GPU shots; sable.glb not rebuilt from source.)
+## Nov 8 23:38 ET art: first panel pass on the 37 new-species concepts (Roster 200)
+ART bathilus 8.5 briefs/boki-art/batch/out/c_bathilus_2.jpg kind=concept panel=8.6/8.2/8.7
+ART cubbat 8.5 briefs/boki-art/batch/out/c_cubbat_2.jpg kind=concept panel=8.5/8.3/8.7
+ART chiptero reject briefs/boki-art/batch/out/c_chiptero_1.jpg kind=concept grade=7.9
+ART fawngus reject briefs/boki-art/batch/out/c_fawngus_1.jpg kind=concept grade=7.4
+ART gilabacus reject briefs/boki-art/batch/out/c_gilabacus_1.jpg kind=concept grade=7.5
+ART grainspin reject briefs/boki-art/batch/out/c_grainspin_1.jpg kind=concept grade=8.1
+ART hydrangor reject briefs/boki-art/batch/out/c_hydrangor_1.jpg kind=concept grade=8.0
+ART malletary reject briefs/boki-art/batch/out/c_malletary_1.jpg kind=concept grade=7.2
+ART narfoil reject briefs/boki-art/batch/out/c_narfoil_1.jpg kind=concept grade=8.3
+ART pagodito reject briefs/boki-art/batch/out/c_pagodito_1.jpg kind=concept grade=7.8
+ART pinster reject briefs/boki-art/batch/out/c_pinster_1.jpg kind=concept grade=8.2
+ART proofhop reject briefs/boki-art/batch/out/c_proofhop_1.jpg kind=concept grade=7.8
+ART reelacine reject briefs/boki-art/batch/out/c_reelacine_1.jpg kind=concept grade=7.8
+ART tootle reject briefs/boki-art/batch/out/c_tootle_1.jpg kind=concept grade=7.8
+ART bullpole reject briefs/boki-art/batch/out/c_bullpole_1.jpg kind=concept grade=8.4
+ART clinkpede reject briefs/boki-art/batch/out/c_clinkpede_1.jpg kind=concept grade=7.8
+ART foldbat reject briefs/boki-art/batch/out/c_foldbat_1.jpg kind=concept grade=8.2
+ART glaciammoth reject briefs/boki-art/batch/out/c_glaciammoth_1.jpg kind=concept grade=8.0
+ART grammite reject briefs/boki-art/batch/out/c_grammite_1.jpg kind=concept grade=7.7
+ART lensling reject briefs/boki-art/batch/out/c_lensling_1.jpg kind=concept grade=8.47
+ART morelkin reject briefs/boki-art/batch/out/c_morelkin_1.jpg kind=concept grade=7.8
+ART nymphane reject briefs/boki-art/batch/out/c_nymphane_1.jpg kind=concept grade=8.1
+ART pavonazar reject briefs/boki-art/batch/out/c_pavonazar_1.jpg kind=concept grade=7.9
+ART pocketpus reject briefs/boki-art/batch/out/c_pocketpus_1.jpg kind=concept grade=8.3
+ART puffuse reject briefs/boki-art/batch/out/c_puffuse_1.jpg kind=concept grade=8.3
+ART sarcobra reject briefs/boki-art/batch/out/c_sarcobra_1.jpg kind=concept grade=8.1
+ART cetorgan reject briefs/boki-art/batch/out/c_cetorgan_1.jpg kind=concept grade=8.4
+ART ghoulamari reject briefs/boki-art/batch/out/c_ghoulamari_1.jpg kind=concept grade=7.6
+ART glacione reject briefs/boki-art/batch/out/c_glacione_1.jpg kind=concept grade=7.8
+ART gravigrub reject briefs/boki-art/batch/out/c_gravigrub_1.jpg kind=concept grade=8.0
+ART lurklet reject briefs/boki-art/batch/out/c_lurklet_1.jpg kind=concept grade=8.2
+ART mumblet reject briefs/boki-art/batch/out/c_mumblet_1.jpg kind=concept grade=8.0
+ART olmlet reject briefs/boki-art/batch/out/c_olmlet_1.jpg kind=concept grade=7.7
+ART pawnfry reject briefs/boki-art/batch/out/c_pawnfry_1.jpg kind=concept grade=8.2
+ART polyshroom reject briefs/boki-art/batch/out/c_polyshroom_1.jpg kind=concept grade=7.9
+ART rattlebub reject briefs/boki-art/batch/out/c_rattlebub_1.jpg kind=concept grade=8.2
+ART scoopsy reject briefs/boki-art/batch/out/c_scoopsy_1.jpg kind=concept grade=8.3

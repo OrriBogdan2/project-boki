@@ -950,5 +950,19 @@
    "name": "Wyrmink",
    "why": "not a fundamental change from its parent (owner rule 21:48)"
   }
+ ],
+ "concepts": [
+  {
+   "id": "c_bathilus",
+   "pick": 2,
+   "grade": 8.5,
+   "panel": "8.6/8.2/8.7"
+  },
+  {
+   "id": "c_cubbat",
+   "pick": 2,
+   "grade": 8.5,
+   "panel": "8.5/8.3/8.7"
+  }
  ]
 }
