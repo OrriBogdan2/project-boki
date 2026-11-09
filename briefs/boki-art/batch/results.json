@@ -68309,5 +68309,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/portrait_gambitfin_r4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "portrait_hourachnid_r4",
+    "name": "Hourachnid (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_hourachnid_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_hourachnid_r4",
+    "name": "Hourachnid (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_hourachnid_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rosedart_r4",
+    "name": "Rosedart (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_rosedart_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rosedart_r4",
+    "name": "Rosedart (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_rosedart_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_gambitfin_r4",
+    "name": "Gambitfin (portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/portrait_gambitfin_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_rosedart_r4",
+    "name": "Rosedart (portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/portrait_rosedart_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_scarabit_r4",
+    "name": "Scarabit (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_scarabit_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "portrait_chainipede_r4",
+    "name": "Chainipede (portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/portrait_chainipede_r4_2.jpg",
+    "ok": true
   }
 ]
