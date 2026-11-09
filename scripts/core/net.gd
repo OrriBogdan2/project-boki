@@ -7,6 +7,10 @@ extends Node
 
 const VERSION := "0.24.3"        # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch)
 
+const SEND_EVERY := 0.1          # s between the snapshots of what this game owns
+const EARLY_GAP := 0.03          # s: the soonest a snapshot may follow the last one
+const EARLY_DV := 8.0            # m/s: a jump in your velocity this big (a dash starts) sends a snapshot at once
+
 signal peers_changed
 signal message(topic: String, data, from: String)
 
@@ -20,6 +24,8 @@ var match_name := ""
 var m: Node = null            # the Match while online
 var out_hits: Array = []
 var out_events: Array = []
+var sent_vel := Vector3.ZERO     # your velocity in the last snapshot
+var sent_move_at := -9.0         # the start time of your kit move in the last snapshot
 var send_t := 0.0
 var host_send_t := 0.0
 var seen := {}                # nid -> last time we heard about it
@@ -219,17 +225,28 @@ func _chunks(topic: String, items: Array, header = null) -> void:
 	if cur.size() > (0 if header == null else 1):
 		_emit(topic, cur)
 
+## A dash or a kit move that began since the last snapshot goes out now, not up to SEND_EVERY later
+## (at most one early snapshot per EARLY_GAP).
+func _cast_or_dash_started() -> bool:
+	var p: Hunter = m.player
+	if p == null or send_t > SEND_EVERY - EARLY_GAP:
+		return false
+	return (p.vel - sent_vel).length() > EARLY_DV or (p.ak != null and p.ak.anim_at != sent_move_at)
+
 func tick(dt: float) -> void:
 	if not online() or m == null:
 		return
 	send_t -= dt
 	host_send_t -= dt
-	if send_t <= 0.0:
-		send_t = 0.1
+	flush()        # hits and events leave this frame, not with the next snapshot
+	if send_t <= 0.0 or _cast_or_dash_started():
+		send_t = SEND_EVERY
 		var mine: Array = m.net_snapshot(true)
 		if mine.size() > 0:
 			_chunks("st", mine, {"t": m.time})
-		flush()
+		if m.player:
+			sent_vel = m.player.vel
+			sent_move_at = m.player.ak.anim_at if m.player.ak else -9.0
 	if is_host() and host_send_t <= 0.0:
 		host_send_t = 0.15
 		var world_ents: Array = m.net_snapshot(false)
