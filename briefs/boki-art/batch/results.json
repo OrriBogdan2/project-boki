@@ -8060,5 +8060,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stormit_r2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "terrasloth_r2",
+    "name": "Terrasloth",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/terrasloth_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_r2",
+    "name": "Sporcupine",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sporcupine_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_r2",
+    "name": "Voltmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/voltmink_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sporcupine_r2",
+    "name": "Sporcupine",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sporcupine_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "voltmink_r2",
+    "name": "Voltmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/voltmink_r2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e",
+    "name": "Flarmink",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/flarmink_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e",
+    "name": "Flarmink",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/flarmink_e_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "flarmink_e",
+    "name": "Flarmink",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/flarmink_e_3.jpg",
+    "ok": true
   }
 ]
