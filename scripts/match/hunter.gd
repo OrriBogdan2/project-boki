@@ -138,6 +138,7 @@ var hit_k := 1.0               # how hard the last hit was (Oomph): scales the f
 var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
 var hit_from := Vector2.ZERO   # which way the last hit pushed
 var stagger_t := 0.0           # staggered by a big hit (Oomph)
+var react_at := -9.0           # last staggering hit (Oomph): the hit clip plays from it
 var extracted := false
 var extract_prog := 0.0
 ## What this hunter is holding interact for right now (an animation each, see HunterAnim._act_*):
@@ -3150,6 +3151,10 @@ func _anim_state(stretch: float) -> void:
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
+	s["react_t"] = m.time - react_at
+	s["knock_t"] = m.time - kb_t if knock_t > 0.0 else -1.0     # sliding under a knockback: the hit pose holds
+	s["frozen"] = freeze_t > 0.0 or (m.hitstop > 0.0 and not m.net_on and m.is_processing())     # (only a running match counts its hit-stop down)
+	s["held"] = held_s
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
 		s["hit_dir"] = Vector2(pos.x - last_hit_by.pos.x, pos.z - last_hit_by.pos.z)

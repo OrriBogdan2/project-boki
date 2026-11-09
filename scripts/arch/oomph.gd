@@ -34,18 +34,18 @@ static func on_fire(h: Hunter, _melee := false) -> void:
 
 # ------------------------------------------------------------------ being hit
 ## What a landed hit does to the body (called from Match.on_damage for every hit). Only the game that
-## owns the body changes its state (stagger); the flinch and freeze are visual, everyone shows them.
+## owns the body changes its state (stagger); the flinch and the hit clip are visual, everyone shows them.
 static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if target == null or d <= 0.0 or String(o.get("src", "")) in ["burn", "fall", "heat"] or o.get("tick", false):
 		return
 	var mh := maxf(1.0, target.max_hp)
 	var frac := d / mh
 	var big: bool = frac >= STAGGER_FRAC or o.get("payoff", false) or o.get("heavy", false) or float(o.get("stun", 0.0)) > 0.0
-	# a visual hold scaled by the hit (the Feel tier sets it too; take the larger)
-	target.freeze_t = maxf(target.freeze_t, clampf(0.03 + frac * 0.35, 0.03, 0.09))
+	# (the hit-stop itself is Feel's, by tier: Feel.hitstop)
 	if target is Hunter:
 		var h := target as Hunter
 		h.hit_k = clampf(0.8 + frac * 9.0, 0.8, HEAVY_FLINCH) if not big else HEAVY_FLINCH
+		if big: h.react_at = m.time       # only a staggering hit plays the hit clip; chip hits flash and shiver
 		h.hit_shake = maxf(h.hit_shake, clampf(frac * 1.6, 0.06, 0.22))
 		if by and is_instance_valid(by):
 			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()

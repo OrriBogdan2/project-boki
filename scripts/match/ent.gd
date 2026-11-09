@@ -22,6 +22,7 @@ var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
 var freeze_t := 0.0         # visual hit-pause
+var held_s := 0.0           # s of game time spent in hit-pauses so far (WardenClips plays the held time back)
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
@@ -116,7 +117,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):
 			flash_t = 0.12
-			freeze_t = 0.04
 			m.on_damage(self, by, dmg, opts)
 			return dmg
 		return 0.0
@@ -144,7 +144,6 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 	hp -= d
 	last_hit_by = by
 	flash_t = 0.12
-	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
 		if "knock_steer" in self:
@@ -298,7 +297,9 @@ func slide(dt: float, guard := false) -> bool:
 
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0: flash_t -= dt
-	if freeze_t > 0.0: freeze_t -= dt
+	if freeze_t > 0.0:
+		freeze_t -= dt
+		held_s += dt
 	if slow_t > 0.0:
 		slow_t -= dt
 		if slow_t <= 0.0: slow_k = 0.0

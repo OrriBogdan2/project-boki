@@ -194,8 +194,8 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 		if t >= 4 and by == p: want = maxf(want, float(HITSTOP[t][0]) * k)
 		want = _spend(p, want, now)
 		if want > 0.0: m.freeze_frame(want)
-		# your ranged hits never freeze you (Capcom), but the body you hit still holds for its tier
-		if by == p and target: target.freeze_t = maxf(target.freeze_t, tt)
+		# your ranged hits never freeze you (Capcom), but the body you (or your Boki) hit still holds for its tier
+		if target and target != p: target.freeze_t = maxf(target.freeze_t, tt)
 	else:
 		if target: target.freeze_t = maxf(target.freeze_t, tt)
 		if by and melee: by.freeze_t = maxf(by.freeze_t, ta)

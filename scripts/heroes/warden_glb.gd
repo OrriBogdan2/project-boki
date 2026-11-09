@@ -966,6 +966,8 @@ class Sync extends Node:
 
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
+		if clips and bool((root.get_meta(WardenClips.STATE, {}) as Dictionary).get("frozen", false)):
+			return      # a hit-stop: every bone holds the frame it was struck on, hair and cloth too (WardenClips catches up)
 		if clips:
 			_play(dt)
 			springs.still = clips.cur in clips.d.get("still", [])
