@@ -196,3 +196,13 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   their own game) is drawn to the centre by a Displace "glide" tow.
 - Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
   adds no hold field (nothing to drop on a merge).
+
+## v2 re-audit (Nov 9: models-v2 merged)
+Re-measured on the v2 model and clips (`--anim-audit`, a hand-to-prop sweep against the pre-v2 tree `54df2f18a^`, `--anim-shots --close`; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 walk and run strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/ostra.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![ostra v2 strips](../art/anim_audit/v2_ostra.jpg)
+
+- Gait: no stepping legs in either version (foot speed 0, slide 100 %, exempt from the gate); hip bob 3.6 cm: unchanged, still needs a new gait clip.
+- Free arm: `orb` holds an arm out for 100 % of the clip and `snap` for 75 % and flings the free arm 1.64 body heights: as on Nov 8 (open there).
+- Cube box: it rides the `root` (`x_box`); the palm anchors `anchor_hand_l` / `anchor_hand_r` sit 0.075 to 0.085 m from the hand bones at rest and in `orb` and `snap` match the pre-v2 tree to the millimetre (0.03 to 0.63 m in `snap`, where the hand reaches out). The orb anchor stays on the right hand: 0.05 to 0.15 m in `orb`, 0.03 to 0.38 m in `snap`, identical before and after.
+- Timing tables above: re-run through `--ostra-combo-check` and `--motley-live-check` on the v2 clips: 192 checks, 0 failures; no row moved.
