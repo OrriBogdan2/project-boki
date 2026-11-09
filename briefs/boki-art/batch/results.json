@@ -24461,5 +24461,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/eclipsowl_card2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "dribbara_card2",
+    "name": "Dribbara (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/dribbara_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_card2",
+    "name": "Arcestrel (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/arcestrel_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "arcestrel_card2",
+    "name": "Arcestrel (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/arcestrel_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "eclipsowl_card2",
+    "name": "Eclipsowl (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eclipsowl_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ermink_card2",
+    "name": "Ermink (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ermink_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card2",
+    "name": "Forgebrock (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/forgebrock_card2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ermink_card2",
+    "name": "Ermink (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ermink_card2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "forgebrock_card2",
+    "name": "Forgebrock (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/forgebrock_card2_2.jpg",
+    "ok": true
   }
 ]
