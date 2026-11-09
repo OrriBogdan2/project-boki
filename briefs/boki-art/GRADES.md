@@ -118,3 +118,8 @@ turnarounds keep the concept's stance instead of a neutral stand, and existing l
 ## Fast lane (owner 02:22 ET 11-09: "speed up the critics so I can see all the art fixes")
 - Cards, portraits, stance redos, turnarounds of passed concepts and fix rounds: ONE critic (fast lane, groups of ~15 run in parallel). 8.5+ no veto = live; 7.5+ no veto = owner queue (owner 02:23).
 - New-species concepts and redesigns keep the three-critic panel.
+
+## Surprise evolutions (owner, 03:44 ET 11-09)
+"In general we should try for more surprise evolutions where it goes an unexpected but related way" — e.g. a very cute baby,
+a cute-but-grubbier middle, and a gnarlier, tougher final. Grade evolutions on this: an unexpected but clearly related turn in
+character and mood scores higher than a safe "same creature, bigger" step. Built into the mid/final stage prompts (build_jobs REL).
