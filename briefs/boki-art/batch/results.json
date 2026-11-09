@@ -32868,5 +32868,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ta_scopeleon_2.jpg",
     "ok": true
+  },
+  {
+    "id": "ta_sandwidow",
+    "name": "Sandwidow",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_sandwidow",
+    "name": "Sandwidow",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_sandwidow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_truffapir",
+    "name": "Truffapir",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_truffapir_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_snapler",
+    "name": "Snapler",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_snapler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_truffapir",
+    "name": "Truffapir",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_truffapir_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_snapler",
+    "name": "Snapler",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ta_snapler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ta_scopeleon",
+    "name": "Scopeleon",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ta_scopeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_maulangler",
+    "name": "Maulangler (concept)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_maulangler_1.jpg",
+    "ok": true
   }
 ]
