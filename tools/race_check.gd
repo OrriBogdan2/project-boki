@@ -185,6 +185,13 @@ func _on_base() -> void:
 			k.erase("indoors")
 		race.use()
 		ok(race.run != null and race.runners.size() >= 2, "on: a race starts with %d Boki" % race.runners.size())
+		if race.run != null:
+			race.bar.m = race.bar.zone        # a press right on the gold
+			var press := InputEventAction.new()
+			press.action = "interact"
+			press.pressed = true
+			race.input(press)
+			ok(home.verbs.act == "cheer", "on: a good race cheer plays your Hunter's cheer (%s)" % home.verbs.act)
 		var t := 0.0
 		while race.run != null and t < MAX_S:
 			race.tick(0.1)

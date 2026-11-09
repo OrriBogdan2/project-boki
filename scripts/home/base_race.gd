@@ -340,6 +340,8 @@ func input(event: InputEvent) -> bool:
 	if run.can_cheer():
 		var r := bar.press()
 		run.cheer(r)
+		if r != "miss" and "verbs" in h:
+			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
 	return true
