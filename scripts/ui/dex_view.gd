@@ -88,7 +88,7 @@ static func type_counts() -> Dictionary:
 		out[type_of(spk)] = c
 	return out
 
-## The grid, under a "Seen N · Caught N" line and one seen/caught chip per type. on_open(species) opens a tile's page.
+## The grid, under a "Seen N · Caught N" line and the filter bar (DexFilter). on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	Care.dex_sync()
 	demo()
@@ -102,18 +102,7 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(hint)
 	v.add_child(head)
-	var per_type := HFlowContainer.new()
-	var tc := type_counts()
-	for t in TYPES:
-		if tc.has(t):
-			per_type.add_child(UI.chip("", "%s %d/%d" % [type_name(t), tc[t].x, tc[t].y], type_col(t), "Seen / caught"))
-	v.add_child(per_type)
-	var g := GridContainer.new()
-	g.columns = 6
-	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
-	v.add_child(g)
-	for spk in order():
-		g.add_child(tile(spk, tree, on_open))
+	v.add_child(DexFilter.Browser.new(tree, on_open))
 
 ## One numbered tile.
 static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:

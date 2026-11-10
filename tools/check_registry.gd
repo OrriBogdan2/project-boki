@@ -146,6 +146,8 @@ const CHECKS := {
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--dex-check": ["res://tools/dex_check.gd", "dex_check", null],      # Field Book order + counts
+	"--dex-filter-check": ["res://tools/dex_filter_check.gd", "dex_filter_check", null],      # Field Book filters
+	"--dex-filter-shots": ["res://tools/dex_filter_shots.gd", "dex_filter_shots", null],      # --shots-dir=<dir>
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
