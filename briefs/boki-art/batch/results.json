@@ -77409,5 +77409,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_moatpole_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_zipling",
+    "name": "Zipling (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_zipling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_anchorbill",
+    "name": "Anchorbill (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_anchorbill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_zippelith",
+    "name": "Zippelith (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_zippelith_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_zipling",
+    "name": "Zipling (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_zipling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_anchorbill",
+    "name": "Anchorbill (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_anchorbill_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_zippelith",
+    "name": "Zippelith (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_zippelith_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_seamwyrm",
+    "name": "Seamwyrm (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_seamwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_anchorbill",
+    "name": "Anchorbill (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_anchorbill_3.jpg",
+    "ok": true
   }
 ]
