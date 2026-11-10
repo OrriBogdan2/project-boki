@@ -105696,5 +105696,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rv_twinklup_eyes_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_lockwren_eyes",
+    "name": "Lockwren (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_lockwren_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_luckhop_eyes",
+    "name": "Luckhop (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_luckhop_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_lockwren_eyes",
+    "name": "Lockwren (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_lockwren_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_luckhop_eyes",
+    "name": "Luckhop (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_luckhop_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_palloth_eyes",
+    "name": "Palloth (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_palloth_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dreadnoyak_d1",
+    "name": "Dreadnoyak (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_dreadnoyak_d1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_twinklup_eyes",
+    "name": "Twinklup (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_twinklup_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dreadnoyak_d2",
+    "name": "Dreadnoyak (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_dreadnoyak_d2_2.jpg",
+    "ok": true
   }
 ]
