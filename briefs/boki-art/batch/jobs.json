@@ -42146,6 +42146,107 @@
     "prompt": "Edit image 1: it is a character sheet with one row of four views of a creature, but above that row there are faded, blurry, partial duplicate copies. Erase every faded or partial copy completely and fill those areas with the same plain pale grey background. Keep the four sharp full views in the main row exactly as they are: same drawing, same positions, same colours. Result: exactly four creatures in one row on a plain background, nothing else."
   },
   {
+    "id": "ogs_anime",
+    "name": "Bokidex key art, style anime",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Cetorgan.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: a hand-painted anime feature film still, lush painted clouds and grass, soft warm light, gentle and full of wonder. Scene: a summer meadow on a hill under towering white clouds; the three small creatures run through tall grass toward the viewer, laughing, while far above the great pipe-organ whale from image 4 drifts through the clouds like an airship, casting a huge soft shadow. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
+    "id": "ogs_storybook",
+    "name": "Bokidex key art, style storybook",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Kitlet.jpg",
+      "briefs/boki-art/cards/Ermink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: a rich gouache and watercolour storybook illustration with visible brush texture, warm lantern light, cosy and magical. Scene: night camp in a forest; the three small creatures sit round a little glowing campfire with the small kite dragon from image 4 curled on a log and the cream stoat from image 5 peeking from a hollow tree, fireflies and big stars above. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
+    "id": "ogs_poster",
+    "name": "Bokidex key art, style poster",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Sarcobra.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: a bold graphic adventure poster, flat shapes, strong silhouettes, a limited palette of deep teal, gold and magenta, dramatic screen-print look with clean hard-edged light. Scene: desert ruins at sunset; the huge winged cobra from image 4 rears up as a giant silhouette against an enormous setting sun, and in the foreground the three small creatures stand on a broken pillar facing it. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
+    "id": "ogs_pixel",
+    "name": "Bokidex key art, style pixel",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Aurostag.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: gorgeous detailed 16-bit pixel art, like the title screen of a classic handheld RPG, crisp pixels, limited palette, dithering in the sky. Scene: a night lakeshore; the three small creatures stand on the shore looking across the water at the star stag from image 4 on the far bank under an aurora, its reflection in the lake. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
+    "id": "ogs_clay",
+    "name": "Bokidex key art, style clay",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Chuggamus.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: a stop-motion claymation film still, the creatures as charming handmade clay and felt models on a miniature set, shallow depth of field, soft studio light, tiny fingerprints in the clay. Scene: a miniature riverside set with paper reeds; the three small creatures ride on the back of the big steam-spouting hippo from image 4 as it wades through glittery resin water. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
+    "id": "ogs_storm",
+    "name": "Bokidex key art, style storm",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Sphinxblight.jpg",
+      "briefs/boki-art/cards/Cindermaw.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: dark epic fantasy game key art, dramatic storm light, lightning, deep purples and electric cyan, cinematic. Scene: a ruined temple on a stormy cliff; the winged lion from image 4 sits enthroned at the top of the steps and the skull-faced wolf from image 5 prowls below it, both glaring down; in the foreground, small and brave, the three small creatures face them, lit from behind by a break in the clouds. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
+    "id": "ogs_dawn",
+    "name": "Bokidex key art, style dawn",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/cards/Kestrike.jpg",
+      "briefs/boki-art/cards/Wayshell.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: bright, colourful modern animated movie poster, glossy and joyful, strong sunlight and saturated sea colours. Scene: dawn over a tropical sea; the three small creatures ride on the shell of the great compass sea turtle from image 5 as it surfaces, spray flying, while the hawk from image 4 dives alongside; islands and a rising sun behind. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
