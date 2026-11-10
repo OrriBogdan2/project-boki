@@ -819,21 +819,19 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	# a paraglider canopy that unfolds above the pack: an arched wing in stripes, with lines down to the harness
 	var glider := Node3D.new(); glider.name = "Glider"; glider.position = Vector3(0, 0.62, 0.12); glider.visible = false
 	torso.add_child(glider)
-	var canopy := MeshInstance3D.new()
 	var gskin := String(lk["glider"])
-	canopy.mesh = Gliders.mesh(gskin, team_col, hero_col)
-	canopy.material_override = vtoon_outlined()
-	canopy.position = Vector3(0, 1.05, 0.02)
-	glider.add_child(canopy)
 	glider.set_meta("skin", gskin)
 	var gtrail := Gliders.trail(gskin, team_col, hero_col)
 	if gtrail:
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
-	var m_line := toon(Color("5a4636"), false)
-	for sx in [-1.0, -0.4, 0.4, 1.0]:
-		part(glider, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
-	merge_static(glider)
+	var gset := _glider_set(gskin)
+	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()], [gset[1], toon(Color("5a4636"), false)]]:
+		var gmi := MeshInstance3D.new()
+		gmi.mesh = pc[0]
+		gmi.material_override = pc[1]
+		ShadowPolicy.judge(gmi)
+		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
 	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
@@ -849,18 +847,19 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	for nd in [hair_n, gear]:
 		torso.remove_child(nd); head.add_child(nd)
 		(nd as Node3D).position.y -= 0.68
-	merge_static(torso)
-	merge_static(head)
-	merge_static(hair_n)
-	merge_static(gear)
+	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
+	# they drive the .glb's bones; "Focus" is kept and drawn)
+	var drop := WardenGlb.will_dress(arch)
+	for nd in [torso, head, hair_n, gear]:
+		merge_static(nd, drop)
 	for nm in ["Skirt", "Cape", "Scarf", "PauldronL", "PauldronR", "Focus"]:
-		if torso.has_node(nm): merge_static(torso.get_node(nm))
+		if torso.has_node(nm): merge_static(torso.get_node(nm), drop and nm != "Focus")
 	for nm in ["LegL", "LegR"]:
-		merge_static(legs.get_node(nm))
-		merge_static(legs.get_node(nm + "/Knee"))
+		merge_static(legs.get_node(nm), drop)
+		merge_static(legs.get_node(nm + "/Knee"), drop)
 	for sd in ["L", "R"]:
 		for nd in arms[sd]:
-			merge_static(nd)
+			merge_static(nd, drop)
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
@@ -1267,9 +1266,34 @@ static func vtoon_outlined() -> ShaderMaterial:
 	m.next_pass = _outline_mat
 	return m
 
+## A skin's glider merged once (merge_static): [the canopy's arrays, colour weights still in them (Gliders.paint
+## colours each Hunter's), the strings' mesh (one for all)]. Merging both per Hunter was ~3.5 ms each.
+static var _glider_sets := {}
+static func _glider_set(gskin: String) -> Array:
+	if not _glider_sets.has(gskin):
+		var g := Node3D.new()
+		var canopy := MeshInstance3D.new()
+		var sheet := ArrayMesh.new()
+		sheet.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, Gliders.sheet(gskin))
+		canopy.mesh = sheet
+		canopy.material_override = vtoon_outlined()
+		canopy.position = Vector3(0, 1.05, 0.02)
+		g.add_child(canopy)
+		var m_line := toon(Color("5a4636"), false)
+		for sx in [-1.0, -0.4, 0.4, 1.0]:
+			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
+		merge_static(g)
+		var got := {}
+		for ch in g.get_children():
+			got[(ch as MeshInstance3D).material_override == m_line] = (ch as MeshInstance3D).mesh
+		_glider_sets[gskin] = [(got[false] as Mesh).surface_get_arrays(0), got[true]]
+		g.free()
+	return _glider_sets[gskin]
+
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-static func merge_static(node: Node3D) -> void:
+## `discard`: those parts are only freed (a body nothing will draw).
+static func merge_static(node: Node3D, discard := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -1278,6 +1302,9 @@ static func merge_static(node: Node3D) -> void:
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
 		if mat == null or mi.mesh == null:
+			continue
+		if discard:
+			drop.append(mi)
 			continue
 		var key := _mat_key(mat)
 		if not groups.has(key):
