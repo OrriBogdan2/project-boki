@@ -511,7 +511,7 @@ static func make_gone(m: Match, h: Hunter) -> void:
 # ------------------------------------------------------------------ kin at risk (by run tier)
 ## When you die, what happens to your Boki depends on the tier (docs/decisions/0008, KinLoss): below
 ## loss_min_tier it keeps out of sight and goes home with you; from it up it drops dazed and guards
-## your deathbox, to be cradled once you are revived or scanned by an enemy.
+## your deathbox as a wisp on the ground, to be scanned back once you are revived (or scanned by an enemy).
 static func kin_on_death(m: Match, h: Hunter, b: Dictionary) -> void:
 	for kk in [h.kin, h.kin2]:
 		if kk == null or (kk as Kin).dead:

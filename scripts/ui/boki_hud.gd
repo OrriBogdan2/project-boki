@@ -2,20 +2,20 @@ class_name BokiHud
 extends RefCounted
 ## The Boki command system on the HUD (docs/decisions/0001), drawn through the in-match HUD `H`:
 ##   - the R slot is the bond meter and always the Merge: it fills with the bond, says MERGE (SURGE with no Boki) when
-##     ready, RESCUE when the Boki is down (R does nothing), and while merged counts the merge down with the form's
+##     ready, the dim-wisp line when the Boki is down (R does nothing), and while merged counts the merge down with the form's
 ##     ultimate (its name when ready, the seconds until it is)
 ##   - a merged hunter wears the form's name, a draining timer and the shell bar over their head (form_overhead)
 ##   - C and G show where the Boki is and what it is doing: from you / from the Boki, its order (follow, guard,
-##     chase, return), the G hold ring, DOWN with the seconds until it comes round, and whether its carried
+##     chase, return), the G hold ring, DOWN with the seconds until it recovers, and whether its carried
 ##     bonuses are on you (greyed while it is out)
 ##   - the G flick wheel (hold G, move the mouse, release): Chase, Guard, Return, Follow
-##   - a downed Boki is marked in the world (label, timer, scoop bar, an arrow at the screen edge) and
+##   - a downed Boki is marked in the world (label, timer, an arrow at the screen edge) and
 ##     on the minimap and the full map
 ## Kept out of hud.gd (a god file): hud.gd only calls these.
 
 const DOWN_COL := Color("ff7a6a")
 
-## The downed Bokis of the local player's team (the ones their squad can rescue).
+## The downed Bokis of the local player's team (dim wisps on their hunters until they recover).
 static func squad_downed(m) -> Array:
 	var out: Array = []
 	if m.player == null:
@@ -219,26 +219,15 @@ static func wheel(H, p: Hunter) -> void:
 	if sel >= 0:
 		H.c.draw_line(o, o + (KinWheel.SEGMENTS[sel]["dir"] as Vector2) * (rin - 6.0), kc, 3.0, true)
 
-## A downed Boki of your squad, in the world: its name and the seconds until it comes round, the scoop
-## bar, and an arrow at the screen edge when it is off screen. `sp` is its screen spot.
+## A downed Boki of your squad (a dim wisp orbiting its hunter): its name and the seconds until it recovers, and a bar
+## (an arrow at the screen edge when it is off screen). `sp` is its screen spot.
 static func downed_label(H, k: Kin, sp: Vector2) -> void:
 	var col := Color(k.sp.get("glow", k.sp["color"]))
 	var bob := sin(H.m.time * 3.0) * 2.0
-	if k.down_void:
-		H._ctext(sp + Vector2(0, -34 + bob), "%s fell. Back in %ds" % [k.rec.get("name", "Your Boki"), int(ceil(k.down_t))], 15, DOWN_COL, H.big)
-		return
 	H._ctext(sp + Vector2(0, -42 + bob), "%s is down" % k.rec.get("name", "Your Boki"), 17, col.lerp(Color.WHITE, 0.3), H.big)
-	var mine: bool = k.owner_h == H.m.player
-	if KinDowned.contested(k):
-		H._ctext(sp + Vector2(0, -62 + bob), "CONTESTED", 15, DOWN_COL, H.big)       # (an enemy stands on it: no pick-up until they leave)
-	H._ctext(sp + Vector2(0, -24 + bob), ("Run into it to pick it up  ·  or %ds" if mine else "Back in %ds") % int(ceil(k.down_t)), 12, Color(H.INK, 0.9), H.big)
+	H._ctext(sp + Vector2(0, -24 + bob), "A dim wisp  ·  back in %ds" % int(ceil(k.down_t)), 12, Color(H.INK, 0.9), H.big)
 	H.c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -14 + bob), sp + Vector2(7, -14 + bob), sp + Vector2(0, -4 + bob)]), col)
 	H._bar(Rect2(sp + Vector2(-30, 2), Vector2(60, 5)), clampf(k.down_t / maxf(0.1, k.down_total), 0.0, 1.0), Color(col, 0.7))
-	if k.rescue_t > 0.0:
-		# the rescue: a ring closing round the Boki (a drop resets it)
-		var rc := sp + Vector2(0, 22)
-		H.c.draw_arc(rc, 20.0, 0.0, TAU, 40, Color(0, 0, 0, 0.45), 5.0, true)
-		H.c.draw_arc(rc, 20.0, -PI / 2, -PI / 2 + TAU * KinDowned.scoop_k(k), 40, H.GOOD if k.rescue_on else H.GOOD.darkened(0.3), 4.0, true)
 
 ## The edge-of-screen arrow toward your downed Boki when it is off screen.
 static func downed_arrow(H, k: Kin, sz: Vector2) -> void:
@@ -263,7 +252,7 @@ static func map_dot(c: Control, pv: Vector2, k: Kin, r: float, time: float) -> v
 	var col := Color(k.sp.get("glow", k.sp["color"]))
 	var ph := fmod(time * 1.2, 1.0)
 	c.draw_circle(pv, r + 1.5, Color(0, 0, 0, 0.7))
-	c.draw_circle(pv, r, col if not k.down_void else Color(DOWN_COL, 0.7))
+	c.draw_circle(pv, r, col)
 	c.draw_line(pv + Vector2(-r, -r) * 0.55, pv + Vector2(r, r) * 0.55, Color(0.05, 0.03, 0.08), 1.8)
 	c.draw_line(pv + Vector2(-r, r) * 0.55, pv + Vector2(r, -r) * 0.55, Color(0.05, 0.03, 0.08), 1.8)
 	c.draw_arc(pv, r + 2.0 + ph * 8.0, 0, TAU, 20, Color(col, 1.0 - ph), 2.0, true)

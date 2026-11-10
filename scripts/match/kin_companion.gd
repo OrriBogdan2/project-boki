@@ -584,7 +584,7 @@ func _ground_ok(p: Vector3, y0: float) -> bool:
 
 ## Is it leading the way right now (tutorial)? Then the HUD can drop its own arrow.
 func leading() -> bool:
-	if guide.size() == 0 or lead_dir == Vector2.ZERO or h() == null or k.state not in ["shoulder", "active"]:
+	if guide.size() == 0 or lead_dir == Vector2.ZERO or h() == null or k.state not in ["wisp", "active"]:
 		return false
 	var kp := k.seen_pos()
 	var rel := Vector2(kp.x - h().pos.x, kp.z - h().pos.z)

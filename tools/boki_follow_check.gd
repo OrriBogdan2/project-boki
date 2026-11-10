@@ -181,7 +181,7 @@ func _traverse() -> void:
 	P.gliding = true
 	for i in 90:
 		k.sim(Match.DT)
-	ok(k.state == "shoulder" and k.cmd == "follow", "you glide: it hops onto you (state %s)" % k.state)
+	ok(k.state == "wisp" and k.cmd == "follow", "you glide: it hops onto you (state %s)" % k.state)
 	ok(not P.kin_carry_on(), "...carried over the glide, but its bonuses stay off (not an order)")
 	P.gliding = false
 	P.grounded = true
@@ -270,7 +270,7 @@ func _wheel() -> void:
 	# return
 	ok(KinCommand.order(P, "return"), "Return is accepted")
 	run_for(1.8)
-	ok(k.state == "shoulder" and k.cmd == "return" and k.carried(), "...it goes back onto you (state %s)" % k.state)
+	ok(k.state == "wisp" and k.cmd == "return" and k.carried(), "...it goes back onto you (state %s)" % k.state)
 	ok(not k.hittable(), "...safe from damage while it is on you")
 	# follow
 	ok(KinCommand.order(P, "follow"), "Follow is accepted")
@@ -382,7 +382,7 @@ func _bots() -> void:
 	BotKin.fight(m, R, P, 7.0, 1.0)
 	ok(k.cmd == "return" or k.state == "flying_home", "a hurt bot sends its Boki back onto it (Return)")
 	run_for(1.0, func(): R.hp = maxf(R.hp, R.max_hp * 0.2))      # (hurt, not killed: the player's Boki is next to it)
-	ok(k.state == "shoulder" and k.cmd == "return", "...and it is on the bot (state %s)" % k.state)
+	ok(k.state == "wisp" and k.cmd == "return", "...and it is on the bot (state %s)" % k.state)
 	R.hp = R.max_hp
 	R.ai["throw_cd"] = 0.0
 	BotKin.upkeep(R)
@@ -426,7 +426,7 @@ func _air_orders() -> void:
 	ok(k.state == "flying", "setup: sent out (state %s)" % k.state)
 	ok(KinCommand.order(P, "return"), "Return is accepted mid-flight")
 	run_for(2.5)
-	ok(k.state == "shoulder" and k.cmd == "return" and k.carried(), "...it lands and goes onto you (state %s, order %s)" % [k.state, k.cmd])
+	ok(k.state == "wisp" and k.cmd == "return" and k.carried(), "...it lands and goes onto you (state %s, order %s)" % [k.state, k.cmd])
 	# Return while it is on a Call back leap
 	_fresh()
 	P = m.player
@@ -437,7 +437,7 @@ func _air_orders() -> void:
 	ok(k.state == "flying_home", "setup: on a Call back leap")
 	KinCommand.order(P, "return")
 	run_for(2.0)
-	ok(k.state == "shoulder" and k.cmd == "return", "Return on a leap carries on up onto you (state %s)" % k.state)
+	ok(k.state == "wisp" and k.cmd == "return", "Return on a leap carries on up onto you (state %s)" % k.state)
 	# a giant-form stat merge started from Follow is ridden (Cairnback has no form of its own yet; Pebbit's Heavy Star hides the Boki inside you)
 	_fresh("cairnback")
 	P = m.player

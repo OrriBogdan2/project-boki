@@ -16,9 +16,6 @@ static func draw(H) -> void:
 	var sz: Vector2 = H.c.size
 	if KinTrack.tracked(p) and not p.out:
 		_tracked(H, sz)
-	var carried := KinLoss.rescuing(p)
-	if carried != null:
-		_carrying(H, sz, carried)
 	if not KinTrack.pulling(p):
 		return
 	var th := KinTrack.captor_for(m, p.team)
@@ -51,7 +48,3 @@ static func _tracked(H, sz: Vector2) -> void:
 	H.c.draw_circle(c + Vector2(-38, 0), 2.5, Color(1.0, 0.45, 0.35))
 	H._ctext(c + Vector2(8, 5), "TRACKED", 13, Color(1.0, 0.55, 0.45), H.big)
 
-## While you carry your Boki: what it is and how to put it down.
-static func _carrying(H, sz: Vector2, k: Kin) -> void:
-	var line := "Carrying %s  ·  %s to drop" % [k.rec.get("name", "your Boki"), Settings.key_cap("dash")]
-	H._ctext(Vector2(sz.x * 0.5, sz.y * 0.72), line, 16, Color(H.INK, 0.95), H.big)

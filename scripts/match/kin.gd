@@ -1,21 +1,26 @@
 class_name Kin
 extends Ent
-## A kin in a match. It rides on its hunter's shoulder, gets thrown into fights, fights on its own,
+## A kin in a match. On its hunter it is a small glowing wisp orbiting them (KinWisp, docs/decisions/0022); thrown,
+## it bursts into its full body, fights on its own,
 ## and has a mind: its traits, trust and memories decide whether it obeys, what it calls out, and how brave it is.
 ##
 ## Three separate pieces talk through CombatBus signals and plain calls:
 ##   this body (movement, states, visuals), KinTactics (who to chase, when to use an ability by
 ##   itself) and a KinRunner holding its two grammar abilities (k1 = the active on E, k2 = the auto
 ##   active it casts itself) from content/kin_v2. KinExec runs them from their parts; KinMerge runs
-##   its bond ultimate. How it's carried (shoulder, perch or mount) comes from its KinSpec.
+##   its bond ultimate. Its carry style (KinSpec) still shapes the throw (a perch dives) and a mount is ridden (ride).
 
 var species := "cindle"
 var sp: Dictionary = {}
 var rec: Dictionary = {}          # the saved record (player kin) or a generated one (bots, wild)
 var owner_h: Hunter = null
 var unseen := false             # a rival's kin out of the local player's sight
-var state := "shoulder"           # shoulder | flying | active | returning | flying_home | downed | reviving | wild | dazed | bench | fused | away
-var settle := 1.0                 # 0..1 while settling onto the shoulder
+var state := "wisp"           # wisp (on you) | flying | active | returning | flying_home | downed | reviving | wild | dazed | bench | fused | away
+var settle := 1.0                 # 0..1 while settling in as a wisp on you
+var form_t := 1.0                 # render: 0 = a wisp, 1 = the full body (KinWisp eases it: the summon scale-up, the recall shrink)
+var ride := false                 # a mount summoned out under you to be ridden (the Return order; a jump, a recall or going down ends it)
+var summoned := false             # sent out by a throw: it drifts back into a wisp after a while with nothing to do (KinWisp.tick_out)
+var idle_t := 0.0                 # seconds out with nothing to do (KinWisp.tick_out)
 var traits := {}
 var trust := 50.0
 var mood := 0.0
@@ -28,7 +33,7 @@ var chase_stall := 0.0          # seconds spent chasing a target without getting
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
 ## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
 var hold_at := Vector3.INF
-var cmd := "follow"               # its standing order (KinFollow): follow | guard | chase | return. State "shoulder" is "return" or a short traversal carry
+var cmd := "follow"               # its standing order (KinFollow): follow | guard | chase | return. State "wisp" is "return" or a short traversal carry
 var chase_target: Ent = null      # chase: what it sticks to
 var rest_t := 0.0                 # s left resting after the owner's merge release (land_pumped): no C, orders, Sic
 var disengaged := false           # an explicit Follow / Call back in a fight: it stays at your side until you attack, it or you are hit up close, or you Sic/Chase (KinFollow.disengage)
@@ -48,16 +53,12 @@ var pend_skill := Vector3.INF     # ability to cast when it lands
 var pend_slot := ""
 var down_t := 0.0                 # downed: seconds until it comes round on its own (KinDowned)
 var down_total := 0.0
-var rescue_t := 0.0               # downed: rescue progress in seconds (KinDowned: run into it and carry it; a drop loses it)
-var rescue_on := false            # downed: its owner is carrying it in their arms right now
+var down_calm := 0.0              # downed: seconds its owner has been out of combat (the fight is over: it recovers)
 var regen_quiet := 0.0             # seconds since it last lost health (KinRegen)
 var regen_hp := 0.0               # its health at the end of the last step (KinRegen)
 var regen_fx := 0.0               # countdown to the next healing mote (KinRegen)
 var mending := false              # KinRegen is healing it right now (the HUD pulses its bar)
-var rescue_block := 0.0           # downed: seconds before a rescue can start again (after a drop)
-var down_void := false            # downed: it fell into the abyss, only the timer brings it back
 var last_safe := Vector3.INF      # the last solid ground it stood on, where a fall marks it
-var beacon: MeshInstance3D = null # the downed marker pillar (KinDowned.render)
 var hesitate_t := 0.0
 var hesitate_to := Vector3.INF
 var revive_wait := 0.0
@@ -144,8 +145,10 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	max_hp *= float(um["hp"]); hp = max_hp
 	speed *= float(um["speed"])
 	r = 0.36 * (1.0 + minf(rec.get("forms", []).size() * 0.08, 0.4)) * (1.3 if ks and ks.size == "large" else 1.0) * Unique.hit_scale(rec, norm)
-	state = "active" if owner_h else "wild"       # a Boki walks beside you from the start (KinFollow); the shoulder is the Return order
+	state = "wisp" if owner_h else "wild"       # your Boki starts as a wisp orbiting you (KinWisp); a throw summons it
+	cmd = "return" if owner_h else "follow"
 	settle = 1.0
+	form_t = 0.0 if owner_h else 1.0
 	rng.seed = hash(m.seed_val) * 31 + absi(id.hash())
 	runner = KinRunner.new()
 	if ks:
@@ -184,7 +187,11 @@ func carry_style() -> String:
 ## On you by order (Return), settled in: its carry passives are on. A Boki out beside you, or carried only
 ## over a glide or a drop, gives nothing (docs/decisions/0002).
 func carried() -> bool:
-	return not dead and state == "shoulder" and settle >= 1.0 and cmd == "return"
+	return not dead and state == "wisp" and settle >= 1.0 and cmd == "return"
+
+## A mount summoned out under you and ridden (the Return order, or merged giant under you).
+func ridden() -> bool:
+	return state == "wisp" and carry_style() == "mount" and (ride or not giant.is_empty())
 
 ## Walking at your side under the Follow order, close enough to count as "with you" (the death-box rules).
 func with_owner() -> bool:
@@ -192,9 +199,10 @@ func with_owner() -> bool:
 
 ## Putting it on you by order, settled (the Return order; tools and setups use this).
 func stow() -> void:
-	cmd = "return"; state = "shoulder"; settle = 1.0; fly = {}; target = null; hold_at = Vector3.INF; chase_target = null
+	cmd = "return"; state = "wisp"; settle = 1.0; fly = {}; target = null; hold_at = Vector3.INF; chase_target = null
+	ride = carry_style() == "mount"; summoned = false; form_t = 1.0 if ride else 0.0
 	if owner_h:
-		pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
+		KinWisp.follow(self)
 
 ## Ability strength: treats and care, plus its level growth (capped by tier).
 func ability_power() -> float:
@@ -265,7 +273,7 @@ func throw_to(p: Vector3, slot := "") -> void:
 		if slot == "":
 			_order_sic(p)       # out beside you: it leaps at the spot
 		return
-	if state != "shoulder" or settle < 0.35:
+	if state != "wisp" or settle < 0.35:
 		return
 	if slot != "":
 		pend_skill = p
@@ -273,7 +281,7 @@ func throw_to(p: Vector3, slot := "") -> void:
 	_order_sic(p, true)
 
 ## Sic: after the Boki's own verdict (consider_throw). In a fight it never refuses: a short hesitation and a bark.
-func _order_sic(p: Vector3, from_shoulder := false) -> void:
+func _order_sic(p: Vector3, from_wisp := false) -> void:
 	var verdict := consider_throw(p) if owner_h.is_local() or rng.randf() < 0.3 else "go"
 	if verdict == "refuse" and KinFollow.in_combat(self, p):
 		verdict = "hesitate"
@@ -290,7 +298,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 			bark("hesitate")
 		m.sfx("kin_unsure", owner_h.pos, -4.0, Unique.voice(rec))
 		return
-	if from_shoulder:
+	if from_wisp:
 		_launch(p)
 	else:
 		KinFollow.sic(self, p)
@@ -299,7 +307,7 @@ func _launch(p: Vector3) -> void:
 	st_throws += 1
 	disengaged = false
 	var dive := carry_style() == "perch"
-	# a perched kin is thrown as a dive: up off your pack, then straight down onto the spot
+	# a percher is thrown as a dive: its wisp shoots up, then it bursts out straight down onto the spot
 	var start := owner_h.pos + Vector3(0, 3.4 if dive else 1.5, 0)
 	var dist := Vector2(p.x - start.x, p.z - start.z).length()
 	var maxd := float(KinCommand.rules()["throw_range_dive" if dive else "throw_range"])
@@ -311,11 +319,14 @@ func _launch(p: Vector3) -> void:
 	tgt.y = g if g > World.VOID + 1.0 else owner_h.pos.y
 	var dur := clampf(d2.length() / (24.0 if dive else 16.0), 0.18, 0.55)
 	teleport(start)
+	KinWisp.burst(self, start)
+	ride = false
 	fly = {"from": start, "to": tgt, "t": 0.0, "dur": dur, "hit": {}, "dive": dive, "charge": carry_style() == "mount"}
 	state = "flying"
 	settle = 0.0
 	if cmd == "return":
-		cmd = "follow"        # sent out from your shoulder: it is out beside you now
+		cmd = "follow"        # summoned out of its wisp: it is out beside you now, until it has nothing to do (KinWisp.tick_out)
+		summoned = true
 	hold_at = tgt if cmd == "guard" else Vector3.INF
 	last_safe = owner_h.pos
 	m.sfx("throw", owner_h.pos, 0.0)
@@ -326,7 +337,7 @@ func _launch(p: Vector3) -> void:
 	if randf() < 0.35:
 		bark("throw")
 
-## Call back: it leaps to your side (or onto you under the Return order) and hits what is on its path.
+## Call back: it leaps back to you, hitting what is on its path, and shrinks into a wisp (docs/decisions/0022).
 ## It can't be sent again for a moment.
 func recall() -> void:
 	if state in ["active", "flying", "returning"] and not fly.get("leap", false) and not fly.get("rush", false):
@@ -336,16 +347,10 @@ func recall() -> void:
 			hesitate_to = Vector3.INF
 			return
 		fly = {}
-		if cmd == "return":
-			KinFollow.leap(self, owner_h.pos + Vector3(0, 1.5, 0), "shoulder", true)
-		else:
-			KinFollow.leap(self, KinFollow.side_spot(self), "side", true)
+		cmd = "return"; chase_target = null; ride = false; summoned = false
+		KinFollow.leap(self, KinWisp.orbit_at(self), "wisp", true)
 		throw_cd = float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
 		hold_at = Vector3.INF
-		if cmd == "guard" or cmd == "chase":
-			cmd = "follow"; chase_target = null
-		if cmd == "follow":
-			KinFollow.disengage(self)       # Call back in a fight: it stays with you
 		m.sfx("recall", pos, -6.0)
 		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
@@ -356,7 +361,7 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 	use_ability(slot, p)
 
 ## Uses ability k1 (E) or k2 (the auto active) at a spot. Out on the field the kin casts it itself.
-## Carried (shoulder, perch, mount) or merged it never leaves you: it lends you the ability and you
+## A wisp on you (or a ridden mount) or merged it never leaves you: it lends you the ability and you
 ## perform it. A from:owner ability always works on its hunter, wherever the kin is.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
@@ -366,7 +371,7 @@ func use_ability(slot: String, p: Vector3, auto := false) -> bool:
 	if def.bond_cost > 0.0 and owner_h and owner_h.ult < def.bond_cost:
 		return false
 	var merged := state == "fused"
-	var carried_now := state == "shoulder" or merged
+	var carried_now := state == "wisp" or merged
 	var pw := ability_power()
 	if def.from == "owner":
 		if owner_h == null:
@@ -441,7 +446,7 @@ func fire_trigger(type: String, ev := {}) -> bool:
 				if melee_n % maxi(1, int(def.trigger.params.get("every", 3))) != 0:
 					continue
 		var at: Vector3 = ev.get("at", target.pos if target and is_instance_valid(target) else pos)
-		if def.from == "kin" and state == "shoulder":
+		if def.from == "kin" and state == "wisp":
 			continue          # a riding kin never acts on its own
 		var caster: Ent = owner_h if def.from == "owner" else self
 		_cast(slot, at, true, caster, ability_power(), ev.get("chain", []))
@@ -481,7 +486,7 @@ func merge_in(giant_form: bool) -> void:
 	target = null
 	pend_skill = Vector3.INF
 	if giant_form:
-		state = "shoulder"
+		state = "wisp"
 		cmd = "return"         # the giant form is ridden: carried() and mounted() need the Return order
 		chase_target = null
 		hold_at = Vector3.INF
@@ -493,11 +498,11 @@ func merge_in(giant_form: bool) -> void:
 		teleport(owner_h.pos + Vector3(0, 1.0, 0))
 
 ## R with the Boki out: it leaps back to you (hitting what is in its way) and the merge starts when it
-## lands on your shoulder, mid-air. Returns false if it can't (it is busy being something else).
+## reaches you, mid-air. Returns false if it can't (it is busy being something else).
 func merge_leap() -> bool:
 	if not state in ["active", "flying", "returning", "flying_home"] or owner_h == null:
 		return false
-	var to := owner_h.pos + Vector3(0, 1.5, 0)
+	var to := KinWisp.orbit_at(self)
 	fly = {"from": pos, "to": to, "t": 0.0, "dur": clampf(flat_dist(owner_h) / 26.0, 0.2, 0.5), "hit": {}, "leap": true, "home": true, "cmd": true, "merge": true}
 	state = "flying_home"
 	hold_at = Vector3.INF
@@ -533,7 +538,7 @@ func land_pumped(secs: float) -> void:
 	if owner_h.is_local():
 		KinCommand.say(owner_h, "%s is pumped: back in %ds" % [rec.get("name", "Your Boki"), int(ceil(secs))], sp["color"])
 
-## A merge with a form ended: the Boki springs out beside you, following (not downed, never a shoulder hop).
+## A merge with a form ended: the Boki springs out beside you, following (not downed, never straight back into a wisp).
 func merge_pop() -> void:
 	if state != "fused" or owner_h == null or dead:
 		return
@@ -563,10 +568,10 @@ func bench() -> void:
 	pend_skill = Vector3.INF
 
 func unbench() -> void:
-	state = "shoulder"
+	state = "wisp"
 	settle = 0.2
 	if owner_h:
-		pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
+		KinWisp.follow(self)
 	if hp <= 0.0:
 		go_down()
 
@@ -593,10 +598,10 @@ func sim(dt: float) -> void:
 	if runner:
 		runner.tick(dt)
 	if remote:
-		if state != "shoulder":
+		if state in ["wisp", "downed"] and owner_h:
+			KinWisp.follow(self)
+		else:
 			net_follow(dt)
-		elif owner_h:
-			pos = owner_h.pos + Vector3(0, 1.5, 0); prev = pos
 		if comp:
 			comp._decay(dt)
 		return
@@ -605,16 +610,16 @@ func sim(dt: float) -> void:
 		if hesitate_t <= 0.0:
 			var to := hesitate_to
 			hesitate_to = Vector3.INF
-			if to != Vector3.INF and state == "shoulder":
+			if to != Vector3.INF and state == "wisp":
 				_launch(to)
 			elif to != Vector3.INF and state == "active":
 				KinFollow.sic(self, to)
 			elif state == "active":
 				recall()
-	KinFollow.ride_the_drop(self)      # on the ship or in the drop it rides on your shoulder
+	KinFollow.ride_the_drop(self)      # on the ship or in the drop it rides along as a wisp
 	think_t -= dt
 	match state:
-		"shoulder": _sim_shoulder(dt)
+		"wisp": _sim_wisp(dt)
 		"flying": _sim_fly(dt)
 		"flying_home": _sim_fly_home(dt)
 		"active": _sim_active(dt)
@@ -629,7 +634,8 @@ func sim(dt: float) -> void:
 				pos = owner_h.pos; prev = pos
 			if hp < max_hp:
 				hp = minf(max_hp, hp + max_hp * 0.02 * dt)   # resting in your satchel
-	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain:
+	KinWisp.tick_out(self, dt)
+	if owner_h and not owner_h.out and state in ["wisp", "active"] and brain:
 		brain.think_abilities(dt)
 	KinRegen.tick(self, dt)
 	if comp:
@@ -637,21 +643,18 @@ func sim(dt: float) -> void:
 
 ## Where its speech bubble sits.
 func bubble_at() -> Vector3:
-	if state == "shoulder" and owner_h:
+	if state == "wisp" and owner_h:
 		return owner_h.position + Vector3(0, 2.3, 0)
 	return position + Vector3(0, 1.2, 0)
 
-## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
+## Where it is for the eye (on you: its wisp's orbit), for tests and callers that care.
 func seen_pos() -> Vector3:
-	if state == "shoulder" and owner_h:
-		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
-func _sim_shoulder(dt: float) -> void:
+func _sim_wisp(dt: float) -> void:
 	if owner_h.out or owner_h.extracted:
 		return
-	pos = owner_h.pos + Vector3(0, 1.5, 0)
-	prev = pos
+	KinWisp.follow(self)
 	settle = minf(1.0, settle + dt / 1.0)
 	if owner_h.downed:
 		_consider_revive(dt)
@@ -749,12 +752,12 @@ func _sim_fly(dt: float) -> void:
 func _sim_fly_home(dt: float) -> void:
 	if owner_h == null or owner_h.out:
 		return
-	var side: bool = fly.get("dest", "shoulder") == "side"
+	var side: bool = fly.get("dest", "wisp") == "side"
 	fly["t"] += dt
 	if side:
 		fly["to"] = KinFollow.side_spot(self)
 	else:
-		fly["to"] = owner_h.pos + Vector3(0, 1.5, 0)
+		fly["to"] = KinWisp.orbit_at(self)
 	var k := clampf(fly["t"] / fly["dur"], 0.0, 1.0)
 	var was := pos
 	pos = (fly["from"] as Vector3).lerp(fly["to"], k) + Vector3(0, sin(k * PI) * float(fly.get("height", 1.4)), 0)
@@ -893,11 +896,11 @@ func _sim_return(dt: float) -> void:
 
 func _hop_on() -> void:
 	hold_at = Vector3.INF
-	state = "shoulder"
+	state = "wisp"
 	settle = 0.0
 	target = null
 	fly = {}
-	pos = owner_h.pos + Vector3(0, 1.5, 0)
+	KinWisp.follow(self)
 
 func go_down(fell := false) -> void:
 	_end_merge("downed")
@@ -933,7 +936,7 @@ func _consider_revive(dt: float) -> void:
 	revive_wait -= dt
 	if revive_wait > 0.0:
 		return
-	if state == "shoulder":
+	if state == "wisp":
 		pos = owner_h.pos + Vector3(0.6, 0, 0.3)
 		pos.y = owner_h.pos.y
 		grounded = true
@@ -1016,7 +1019,6 @@ func _sim_dazed(dt: float) -> void:
 		dazed_t -= dt         # (it stays dazed while someone is scanning it)
 	_ground_move(Vector2.ZERO, dt)
 	hp = minf(max_hp * 0.25, hp + dt * 0.5)
-	KinLoss.tick_guard(self, dt)
 	if dazed_t <= 0.0:
 		state = "wild"
 		hp = max_hp * 0.45
@@ -1043,14 +1045,16 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 # ------------------------------------------------------------------ visuals
 func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
-	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
-	KinDowned.render(self, delta)
+	visible = not dead and state != "bench" and state != "away" and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	if not model:
 		return
+	if KinWisp.render(self, delta) and form_t <= 0.0:
+		if ring: ring.visible = false
+		return                       # (a wisp: the body is hidden)
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")
 	hop_ph += delta * (9.0 if Vector2(vel.x, vel.z).length() > 0.5 else 3.0)
-	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home", "downed"]
+	var out_now := state in ["active", "flying", "returning", "reviving", "flying_home"]
 	if ring:
 		ring.visible = visible and (out_now or has_meta("lineup")) and not unseen
 		if ring.visible:
@@ -1064,7 +1068,7 @@ func render(delta: float, alpha: float) -> void:
 			var sm0: ShaderMaterial = (shell as MeshInstance3D).material_override
 			sm0.shader = XRAY
 	if shell:
-		var want := 0.0 if state in ["shoulder", "fused"] else (1.0 if not giant.is_empty() else 0.6)
+		var want := 0.0 if state in ["wisp", "fused"] else (1.0 if not giant.is_empty() else 0.6)
 		if state in ["wild", "dazed"]: want = 0.25 if not has_meta("lineup") else 0.6
 		shell.set_meta("a", lerpf(float(shell.get_meta("a", 0.0)), want, minf(1.0, delta * 6.0)))
 		var sm: ShaderMaterial = (shell as MeshInstance3D).material_override
@@ -1072,7 +1076,7 @@ func render(delta: float, alpha: float) -> void:
 		shell.visible = float(shell.get_meta("a", 0.0)) > 0.02
 	var parts: Node = model.get_node_or_null("Aura")
 	if parts:
-		(parts as CPUParticles3D).emitting = visible and state not in ["shoulder", "bench", "fused"] and not unseen
+		(parts as CPUParticles3D).emitting = visible and state not in ["wisp", "bench", "fused"] and not unseen
 	if state == "fused" and owner_h and owner_h.model:
 		if MergeXform.boki_pose(self):
 			return           # (the transformation: it flies in on a spiral)
@@ -1083,46 +1087,16 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if lunge_t > 0.0 else ""))
+	model.set_meta("kstate", "perch" if state in ["wisp", "downed"] else ("attack" if lunge_t > 0.0 else ""))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
 		pose_now = "nudge"
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
-	if state == "shoulder" and owner_h and owner_h.model and carry_style() == "mount" and not owner_h.gliding and (cmd == "return" or not giant.is_empty()):
-		_render_mount(delta, body)       # you ride it (the Return order, or merged); carried over a glide it curls up on your back below
-		return
-	if state == "shoulder" and owner_h and owner_h.model and carry_style() != "shoulder":
-		# perched on the pack (or a mount curled up into a ball on your back while you glide)
-		var torso: Node3D = owner_h.model.get_node("Rig/Torso")
-		var ball := carry_style() == "mount"
-		global_position = torso.global_transform * Vector3(0, 0.92 if not ball else 0.55, 0.3 if not ball else 0.36)
-		model.rotation.y = owner_h.face
-		model.scale = Vector3.ONE * lerpf(0.75, 0.62 if not ball else 0.42, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
-		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
-		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
-		return
-	if state == "shoulder" and owner_h and owner_h.model:
-		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
-		global_position = sh.global_position
-		model.rotation.y = owner_h.face
-		model.scale = Vector3.ONE * lerpf(0.75, 0.55, settle) * minf(float(model.get_meta("evo_scale", 1.0)), 1.2)
-		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
-		# now and then it peeks out past its hunter's head, or nuzzles in against it
-		var nz := fmod(m.time + float(absi(nid.hash()) % 97), 9.0)
-		var peek := smoothstep(0.0, 0.3, nz) * (1.0 - smoothstep(1.1, 1.5, nz))
-		var nuz := smoothstep(4.5, 4.8, nz) * (1.0 - smoothstep(5.8, 6.2, nz))
-		body.rotation.x = 0.0
-		body.rotation.y = peek * 0.7
-		body.rotation.z = -nuz * 0.35 + sin(m.time * 9.0) * 0.06 * nuz
-		if comp and comp.look != Vector3.INF:
-			# turned on your shoulder toward what it's on about
-			var ld := Vector2(comp.look.x - global_position.x, comp.look.z - global_position.z)
-			if ld.length() > 0.4:
-				body.rotation.y = clampf(angle_difference(model.rotation.y, atan2(-ld.x, -ld.y)), -1.6, 1.6)
-		if comp and comp.pose == "cheer":
-			body.position.y += absf(sin(m.time * 11.0)) * 0.12
+	if KinWisp.under(self) and owner_h.model:
+		_render_mount(delta, body)       # you ride it (the Return order, or merged)
+		KinWisp.grow(self)
 		return
 	var gs := 1.0
 	model.scale = Vector3.ONE * 0.95 * float(model.get_meta("evo_scale", 1.0)) * gs
@@ -1144,8 +1118,7 @@ func render(delta: float, alpha: float) -> void:
 	if state in ["active", "reviving"]:
 		_render_attention(delta, body)
 	_render_demo()
-	Capture.dissolve(self)
-	KinDowned.scoop_pose(self)
+	KinWisp.grow(self)
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:
@@ -1169,7 +1142,7 @@ func _render_attention(delta: float, body: Node3D) -> void:
 	if comp == null:
 		return
 	var lk: Vector3 = comp.look
-	if lk == Vector3.INF and owner_h and owner_h.inp and state == "shoulder":
+	if lk == Vector3.INF and owner_h and owner_h.inp and state == "wisp":
 		lk = owner_h.inp.get("aim", Vector3.INF)
 	if lk != Vector3.INF:
 		var ld := Vector2(lk.x - global_position.x, lk.z - global_position.z)
@@ -1211,6 +1184,3 @@ func _render_mount(delta: float, body: Node3D) -> void:
 	if ring:
 		ring.visible = false
 
-func _exit_tree() -> void:
-	if beacon and is_instance_valid(beacon):
-		beacon.queue_free()

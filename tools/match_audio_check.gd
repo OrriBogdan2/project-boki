@@ -1,6 +1,6 @@
 extends RefCounted
 ## --match-audio-check, owner item 103: no sound a match started outlives it. A short match with a
-## Boki rescue channelling (its revive_hum loop) plus a deathbox revive hum and the looping hum also
+## held channel loop (Sfx.loop_hold of revive_hum) plus a deathbox revive hum and the looping hum also
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
@@ -30,19 +30,17 @@ func run(main_node: Node) -> void:
 	if k == null:
 		main.get_tree().quit(1)
 		return
-	var key := "rescue%d" % k.get_instance_id()
-	# the Boki goes down beside you and you run into it: the rescue's hum starts and follows the carry
-	k.pos = P.pos + Vector3(0.6, 0, 0)
-	k.state = "active"
-	k.fly = {}
-	k.go_down()
-	_step(m, 0.4)
-	ok(k.rescue_on and Sfx.loop_on(key), "a rescue under way has its hum (rescue_on %s)" % k.rescue_on)
+	var key := "heldcheck%d" % k.get_instance_id()
+	# a held loop (Sfx.loop_hold, asked for every step while a channel lasts) plays while the match steps
+	var hold := func(): Sfx.loop_hold(key, "revive_hum", P.pos, -8.0, 1.0)
+	_step_with(m, 0.4, hold)
+	ok(Sfx.loop_on(key), "a held loop has its hum while it is asked for")
 	# the owner stops ticking mid-channel (frozen, or its node gone): the held loop stops by itself
 	await main.get_tree().create_timer(0.5).timeout
 	ok(not Sfx.loop_on(key), "a held loop nobody asks for any more stops within %d ms" % Sfx.HOLD_MS)
-	_step(m, 0.2)
-	ok(k.rescue_on and Sfx.loop_on(key), "...and comes back while the rescue goes on")
+	_step_with(m, 0.2, hold)
+	ok(Sfx.loop_on(key), "...and comes back once it is asked for again")
+	_step_with(m, 0.4, hold)
 	# the old leak: a looping file through the one-shot pool plays once now
 	Sfx.play("revive_hum", P.pos)
 	var once := Sfx.players.filter(func(p): return p.playing and Sfx.loops_forever(p.stream))
@@ -64,6 +62,13 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+func _step_with(m: Match, secs: float, each: Callable) -> void:
+	var t := 0.0
+	while t < secs:
+		each.call()
+		m.step(Match.DT)
+		t += Match.DT
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

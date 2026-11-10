@@ -43,7 +43,7 @@ static func for_match(m) -> void:
 	var at: Vector3 = p.model.global_position if p.model else p.pos
 	var b = null
 	var k = p.kin
-	if k != null and is_instance_valid(k) and not k.dead and k.visible and String(k.get("state")) != "shoulder":
+	if k != null and is_instance_valid(k) and not k.dead and k.visible and String(k.get("state")) != "wisp":
 		b = (k as Node3D).global_position
 	update(m.cam, at, b)
 

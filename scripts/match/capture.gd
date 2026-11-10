@@ -8,14 +8,16 @@ extends RefCounted
 ##   - while it runs you are rooted and can aim but not shoot. A dash cancels it (your choice). Crowd control
 ##     on you (stun, root, a knockback, Grounded, a hex, a grapple) interrupts it; plain damage does not.
 ##     The Boki's daze timer waits (Kin.scan_by) and picks up again if you are interrupted, so you can retry.
-##   - success puts a capsule in your box (Hunter.caught, capacity in content/rules/capture.json); a full box
-##     blocks the scan. The capsule stays in the box for the match: it never follows you, fights, or joins
-##     your Boki (one active Boki per hunter). It spills into your deathbox like the rest and comes home when
-##     you extract.
+##   - a beaten Boki in the world is a wisp on the ground (KinWisp, docs/decisions/0022): the scan takes the wisp into
+##     your box (Hunter.caught: the wisps you hold, capacity box_capacity in content/rules/capture.json). With the box
+##     full, keep holding for swap_hold_s to swap the oldest wisp out (it is let go), or walk away to leave it. A held
+##     wisp stays in the box for the match: it never follows you, fights, or joins your Boki (one active Boki per
+##     hunter). It spills into your deathbox like the rest and comes home when you extract.
+##   - your own Boki guarding where you fell (KinLoss) is scanned the same way to take it back (no room needed).
 ##   - the beam and the hum are in the world: rivals see and hear it (Match.note_sound), and other players
 ##     see it through kcmd events (KinNet): scan_start (repeated about once a second, with the progress),
 ##     scan_stop, scan_done.
-## State lives in the hunter's meta "cap": {phase: "hold"|"scan", k, hold|t, seen, remote, beam, hum, ping, beat}.
+## State lives in the hunter's meta "cap": {phase: "hold"|"scan", k, hold|t, swap, seen, remote, beam, hum, ping, beat}.
 
 const HOLD_OVER := 2.5      # s: a scan nobody has confirmed for this long lets the Boki wake up again (a rival's game vanished)
 const BEAM_COL := Color("bff0ff")
@@ -34,7 +36,7 @@ static func room(h: Hunter) -> bool:
 static func full_note(m, h: Hunter) -> void:
 	if h.is_local() and m.hud and m.time - float(h.get_meta("cap_full_msg", -9.0)) > 1.5:
 		h.set_meta("cap_full_msg", m.time)
-		m.hud.toast("Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()], Color("ffb0a0"))
+		m.hud.toast("Wisps full (%d/%d): let one go first" % [h.caught.size(), box_cap()], Color("ffb0a0"))
 
 static func state(h: Hunter) -> Dictionary:
 	return h.get_meta("cap", {})
@@ -46,7 +48,22 @@ static func active(h: Hunter) -> bool:
 ## 0..1 through the hold that commits (for the fill ring), or through the scan itself.
 static func hold_frac(h: Hunter) -> float:
 	var st := state(h)
-	return clampf(float(st.get("hold", 0.0)) / float(rules()["hold_s"]), 0.0, 1.0) if st.get("phase", "") == "hold" else 0.0
+	if st.get("phase", "") != "hold":
+		return 0.0
+	return clampf(float(st.get("hold", 0.0)) / hold_need(st.get("swap", false)), 0.0, 1.0)
+
+## Seconds of holding that commit a scan: longer when it swaps a held wisp out.
+static func hold_need(swap: bool) -> float:
+	return float(rules()["swap_hold_s"] if swap else rules()["hold_s"])
+
+## The box is full and this scan would need to swap a held wisp out (your own Boki needs no room).
+static func must_swap(h: Hunter, k: Kin) -> bool:
+	return not room(h) and k.owner_h != h
+
+## The full-box prompt: swap the oldest held wisp out, or leave this one.
+static func swap_text(h: Hunter) -> String:
+	return "Wisps full (%d/%d): keep holding %s to swap out %s, or walk away to leave it" % [h.caught.size(), box_cap(),
+		Settings.key_cap("interact"), h.caught[0].get("name", Data.KIN[String(h.caught[0]["species"])]["name"])]
 
 static func scan_frac(h: Hunter) -> float:
 	var st := state(h)
@@ -58,10 +75,6 @@ static func block_reason(h: Hunter, k: Kin) -> String:
 		return "Knock it out first"
 	if not KinLoss.scannable_by(h, k):
 		return "That Boki is on your side"
-	if KinLoss.cradled(k):
-		return "Its owner is picking it up"
-	if h.caught.size() >= box_cap():
-		return "Box full (%d/%d): release a capsule first" % [h.caught.size(), box_cap()]
 	return ""
 
 # ------------------------------------------------------------------ the hold (the interact handler calls this each step)
@@ -77,16 +90,19 @@ static func hold(m, h: Hunter, k: Kin, dt: float) -> void:
 			if m.hud: m.hud.toast(why, Color("ffb0a0"))
 		return
 	if st.is_empty():
-		st = {"phase": "hold", "k": k, "hold": 0.0, "seen": m.time}
+		st = {"phase": "hold", "k": k, "hold": 0.0, "seen": m.time, "swap": must_swap(h, k)}
 		h.set_meta("cap", st)
+		if st["swap"] and h.is_local() and m.hud:
+			m.hud.toast(swap_text(h), Color("ffd89a"))
 	st["hold"] = float(st["hold"]) + dt
 	st["seen"] = m.time
 	h.set_hold("scan")
-	if float(st["hold"]) >= float(rules()["hold_s"]):
-		begin(m, h, k)
+	if float(st["hold"]) >= hold_need(st["swap"]):
+		begin(m, h, k, st["swap"])
 
-static func begin(m, h: Hunter, k: Kin) -> void:
+static func begin(m, h: Hunter, k: Kin, swap := false) -> void:
 	var st := {"phase": "scan", "k": k, "t": 0.0, "seen": m.time, "remote": false, "beat": 0.0, "ping": 0.0}
+	st["swap"] = swap
 	h.set_meta("cap", st)
 	k.scan_by = h
 	k.scan_at = m.time
@@ -144,11 +160,11 @@ const HARD_KNOCK := 8.0       # m/s (|kb| / mass, as Hunter.impulse computes it)
 const LAUNCH_AGE := 0.4       # s: how long after the launch it still counts
 
 ## Hard crowd control on a hunter: stun, root, a real knock or a launch, Grounded, a hex, a grapple or a pad flight. It
-## interrupts a scan here and a rescue (KinDowned); plain damage and the small shove most hits carry do not.
+## interrupts a scan; plain damage and the small shove most hits carry do not.
 static func controlled(h: Hunter) -> bool:
 	return h.stun_t > 0.0 or h.root_t > 0.0 or h.m.time - h.launched_at < LAUNCH_AGE or KitStatus.grounded(h) or Hex.active(h) or not h.grap.is_empty() or not h.pad.is_empty()
 
-## What stops any channel on the hunter (a scan, a rescue): "dash" (your choice) or "cc" (crowd control). "" = neither.
+## What stops a channel on the hunter (a scan): "dash" (your choice) or "cc" (crowd control). "" = neither.
 static func hunter_stop(h: Hunter) -> String:
 	if h.inp.get("dash", false) or h.roll_t > 0.0:
 		return "dash"
@@ -200,16 +216,25 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 	h.remove_meta("cap")
 	_stop_fx(m, h, st)
 	k.scan_by = null
-	if not room(h):
-		# the box filled while it ran (a deathbox looted, a net catch): it lets go, and rivals see it stop, not finish
-		_send(m, "scan_stop", h, k, 0.0)
-		full_note(m, h)
+	if k.owner_h == h:
+		# your own Boki, guarding where you fell: it is yours again, a wisp on you
+		_send(m, "scan_done", h, k, 1.0)
+		_pop(m, h, k)
+		KinLoss.reclaim(k)
 		return
+	if not room(h):
+		if not st.get("swap", false):
+			# the box filled while it ran (a deathbox looted, a net catch): it lets go, and rivals see it
+			# stop, not finish
+			_send(m, "scan_stop", h, k, 0.0)
+			full_note(m, h)
+			return
+		release(m, h, 0)                    # (the swap the long hold chose: the oldest held wisp goes free)
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
 	m._catch(h, k)
 
-## Release a capsule from your box. The Boki goes free (it is not put back in the world).
+## Let a held wisp go from your box. The Boki goes free (it is not put back in the world).
 static func release(m, h: Hunter, idx: int) -> bool:
 	if idx < 0 or idx >= h.caught.size():
 		return false
@@ -322,16 +347,3 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	var tw := cap.create_tween()
 	tw.tween_property(cap, "global_position", h.pos + Vector3(0, 1.2, 0), 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.tween_callback(cap.queue_free)
-
-## The Boki coming apart into light as the scan fills (Kin.render calls this last).
-static func dissolve(k: Kin) -> void:
-	if k.scan_by == null or k.model == null or not is_instance_valid(k.scan_by):
-		return
-	var st := state(k.scan_by)
-	if st.get("phase", "") != "scan":
-		return
-	var e := clampf(float(st["t"]) / float(rules()["scan_s"]), 0.0, 1.0)
-	e = e * e * (3.0 - 2.0 * e)
-	k.model.scale *= lerpf(1.0, 0.12, e)
-	k.model.rotation.y += e * 6.0
-	k.global_position += Vector3(0, e * 0.9, 0)

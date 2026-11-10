@@ -4,8 +4,9 @@ extends RefCounted
 ##   follow  (default) walks at your side, fights what you fight, comes back between fights
 ##   guard   holds the spot it was told to (Kin.hold_at) and fights what comes near
 ##   chase   sticks to one target (Kin.chase_target) until it falls
-##   return  on you: the shoulder, the pack, or you ride a mount; safe, and its carried passives are on
-## The body states are still Kin.state (active, flying, returning, flying_home, shoulder...).
+##   return  on you: a wisp orbiting you, or a mount summoned out under you to ride; safe, and its carried
+##           passives are on
+## The body states are still Kin.state (active, flying, returning, flying_home, wisp...).
 ## Walking is steering on top of an A* path (KinPath): arrive slowing, separation from you, a path
 ## recomputed on a timer. A Boki that is stuck for stuck_s, or beyond the leash, leaps back to your side
 ## with a visible arc (never an invisible teleport). When you glide, drop off a ledge or cross a gap it
@@ -95,35 +96,39 @@ static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 	var o := k.owner_h
 	match cmd:
 		"follow":
-			k.cmd = "follow"; k.hold_at = Vector3.INF; k.chase_target = null
+			k.cmd = "follow"; k.hold_at = Vector3.INF; k.chase_target = null; k.summoned = false
 			disengage(k)
-			if k.state == "shoulder":
+			if k.state == "wisp":
 				hop_off(k)
 		"guard":
 			k.disengaged = false
-			if k.state == "shoulder":
+			if k.state == "wisp":
 				hop_off(k)
-			k.cmd = "guard"; k.chase_target = null
+			k.cmd = "guard"; k.chase_target = null; k.summoned = false
 			k.hold_at = k.fly["to"] if not k.fly.is_empty() else k.pos
 		"chase":
 			if target == null or target.dead or not target.hittable():
 				return false
 			k.disengaged = false
-			k.cmd = "chase"; k.chase_target = target; k.hold_at = Vector3.INF
+			k.cmd = "chase"; k.chase_target = target; k.hold_at = Vector3.INF; k.summoned = false
 			k.target = target
-			if k.state == "shoulder":
+			if k.state == "wisp":
 				sic(k, target.pos)
 		"return":
 			k.disengaged = false
-			k.cmd = "return"; k.hold_at = Vector3.INF; k.chase_target = null; k.target = null
+			k.cmd = "return"; k.hold_at = Vector3.INF; k.chase_target = null; k.target = null; k.summoned = false
+			if k.carry_style() == "mount" and not k.ride:
+				k.ride = true                    # a mount summons out under you to be ridden
+				if k.state == "wisp":
+					KinWisp.burst(k, o.pos)
 			if k.state in ["active", "returning"]:
 				if k.flat_dist(o) <= float(KinCommand.rules()["recall_range"]):
-					leap(k, o.pos + Vector3(0, 1.5, 0), "shoulder")
+					leap(k, KinWisp.orbit_at(k), "wisp")
 				else:
 					k.state = "returning"         # too far to leap: it runs back (and hops when it cannot)
 			elif k.state == "flying_home" and not k.fly.is_empty():
-				k.fly["dest"] = "shoulder"          # already leaping to your side: carry on up onto you
-				k.fly["to"] = o.pos + Vector3(0, 1.5, 0)
+				k.fly["dest"] = "wisp"          # already leaping to your side: carry on up onto you
+				k.fly["to"] = KinWisp.orbit_at(k)
 			# (a Sic in the air: it lands, then Kin._sim_active sends it up onto you)
 		_:
 			return false
@@ -132,7 +137,7 @@ static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 
 ## Sic: an out Boki leaps at a spot (the cursor), hitting what it flies into and staggering what it lands on.
 static func sic(k: Kin, p: Vector3) -> void:
-	if k.state == "shoulder":
+	if k.state == "wisp":
 		k.throw_to(p)
 		return
 	if k.state not in ["active", "returning"] or k.dead:
@@ -158,7 +163,7 @@ static func sic(k: Kin, p: Vector3) -> void:
 	CombatBus.kin_thrown.emit(k, k.owner_h)
 
 # ------------------------------------------------------------------ leaps
-## A visible leap (an arc) to a spot beside you ("side") or onto you ("shoulder").
+## A visible leap (an arc) to a spot beside you ("side") or onto you ("wisp").
 static func leap(k: Kin, to: Vector3, dest: String, cmd_hit := false) -> void:
 	var dist := Vector2(to.x - k.pos.x, to.z - k.pos.z).length()
 	k.fly = {"from": k.pos, "to": to, "t": 0.0, "dur": clampf(dist / 18.0, _r("hop_dur"), 0.7), "hit": {}, "leap": true, "home": true,
@@ -174,7 +179,7 @@ static func hop_back(k: Kin) -> void:
 	if k.owner_h == null:
 		return
 	if k.cmd == "return":
-		leap(k, k.owner_h.pos + Vector3(0, 1.5, 0), "shoulder")
+		leap(k, KinWisp.orbit_at(k), "wisp")
 		return
 	var s := side_spot(k)
 	if k.cmd == "guard":
@@ -195,7 +200,7 @@ static func land_side(k: Kin) -> void:
 	k.state = "active"
 	k.m.fx.dust(k.pos, 8)
 
-## Off your shoulder to your side.
+## Out of its wisp to your side.
 static func hop_off(k: Kin) -> void:
 	if k.owner_h == null:
 		return
@@ -205,14 +210,14 @@ static func hop_off(k: Kin) -> void:
 ## On you (a glide, a drop, a gap).
 static func hop_on(k: Kin) -> void:
 	if k.owner_h != null:
-		leap(k, k.owner_h.pos + Vector3(0, 1.5, 0), "shoulder")
+		leap(k, KinWisp.orbit_at(k), "wisp")
 
-## You jumped while riding it: you come off into a normal jump, the Boki curls up on your back until you land.
+## You jumped while riding it: you come off into a normal jump and it shrinks back into a wisp on you (the Return
+## order summons it out to ride again).
 static func on_jump(h: Hunter) -> void:
 	var k: Kin = h.kin
-	if k != null and k.state == "shoulder" and k.cmd == "return" and k.carry_style() == "mount" and k.giant.is_empty():
-		k.cmd = "follow"
-		KinNet.event(k.m, "cmd", k, k.pos, "follow")
+	if k != null and k.ridden() and k.giant.is_empty():
+		k.ride = false
 
 # ------------------------------------------------------------------ traversal: carry and drop
 ## Do you have to be carried over this (a glide, a pad, a drop off a ledge, a gap)?
@@ -233,7 +238,7 @@ static func need_carry(k: Kin) -> bool:
 		k.gap_v = not KinPath.clear_line(W, Vector2(k.pos.x, k.pos.z), Vector2(o.pos.x, o.pos.z)) and KinPath.find(W, k.pos, o.pos, int(_r("path_window"))).is_empty()
 	return k.gap_v
 
-## The ship ride and the opening drop: it rides on your shoulder, never left on the ground or sent leaping
+## The ship ride and the opening drop: it rides along as a wisp on you, never left on the ground or sent leaping
 ## after you through the sky (it fell into the abyss and went down). It hops off once you are steady on the ground.
 static func ride_the_drop(k: Kin) -> void:
 	var o := k.owner_h
@@ -241,10 +246,9 @@ static func ride_the_drop(k: Kin) -> void:
 		return
 	if k.state in ["active", "returning", "flying", "flying_home"]:
 		k.fly = {}
-		k.state = "shoulder"
+		k.state = "wisp"
 		k.settle = 0.0
-		k.pos = o.pos + Vector3(0, 1.5, 0)
-		k.prev = k.pos
+		KinWisp.follow(k)
 
 ## Carried by traversal (not by order): off again once you have been steady on the ground.
 static func carry_tick(k: Kin, dt: float) -> void:

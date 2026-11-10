@@ -34,7 +34,7 @@ static func tethers(m: Match, k: Kin) -> bool:
 		return false
 	if h != p and not h.downed:
 		return false
-	return not (k.state in ["shoulder", "fused", "bench", "away"])
+	return not (k.state in ["wisp", "fused", "bench", "away"])
 
 ## What a teammate's Boki is doing while its Hunter is down: an Icons id ("" when nothing to show).
 static func status(k: Kin) -> String:

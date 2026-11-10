@@ -99,7 +99,7 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
 		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
-	elif sid == "fight" and p.kin and p.kin.state in ["shoulder", "active"]:
+	elif sid == "fight" and p.kin and p.kin.state in ["wisp", "active"]:
 		p.kin.throw_to(best.pos)
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.

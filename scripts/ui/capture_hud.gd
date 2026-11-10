@@ -15,6 +15,10 @@ static func prompt(h: Hunter, k: Kin) -> String:
 	var key := Settings.key_cap("interact")
 	if Capture.active(h):
 		return "Scanning… %ds (dash to cancel)" % int(ceil((1.0 - Capture.scan_frac(h)) * float(Capture.rules()["scan_s"])))
+	if k.owner_h == h:
+		return "Hold %s to take %s back" % [key, k.rec.get("name", "your Boki")]
+	if Capture.must_swap(h, k):
+		return Capture.swap_text(h)
 	return "Hold %s to scan %s" % [key, Data.KIN[k.species]["name"]]
 
 ## Progress of the bar under the prompt: the hold first, then the scan.

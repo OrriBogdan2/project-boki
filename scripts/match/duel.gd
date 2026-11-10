@@ -112,7 +112,7 @@ func reset() -> void:
 		h.inv_t = 0.6
 		h.vel = Vector3.ZERO
 		h.teleport(home_at if h == m.player else bot_at)
-		if h.kin and (h.kin as Kin).state != "shoulder":
+		if h.kin and (h.kin as Kin).state != "wisp":
 			(h.kin as Kin).recall()
 	_near.clear()
 	m.fx.ring(home_at, 1.6, Color("8fe3c8"), 0.35)

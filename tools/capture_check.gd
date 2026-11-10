@@ -4,7 +4,8 @@ extends RefCounted
 ##   2. the flow: hold 0.4s commits, then 4s runs on its own (let go), you are rooted and cannot shoot
 ##   3. one active Boki: the captured one is only a capsule in the box, never in the world
 ##   4. interruptions: crowd control and a dash cancel it, plain damage does not; the daze timer waits
-##   5. the box: capacity 3 from the rules, shown on the HUD, a full box blocks, Release frees a place
+##   5. the box (the wisps you hold): capacity 3 from the rules, shown on the HUD, a full box asks to swap (a longer
+##      hold lets the oldest go) or leave it, Release frees a place
 ##   6. your own Boki does not finish a dazed wild Boki
 ##   7. the Field Book: logged on sight with a place; the v3 save migration
 ##   8. the net: rivals see and hear the scan (events, a timeout when nobody confirms)
@@ -213,15 +214,31 @@ func _box() -> void:
 	for i in cap:
 		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	var k := wild()
-	ok(Capture.block_reason(P, k).contains("Box full"), "a full box blocks the scan (\"%s\")" % Capture.block_reason(P, k))
+	var asks := Capture.block_reason(P, k) == "" and Capture.must_swap(P, k)
+	asks = asks and Capture.swap_text(P).contains("swap out Filler0")
+	ok(asks, "a full box asks to swap or leave it (\"%s\")" % Capture.swap_text(P))
 	ok(CaptureHud.box_text(P) == "Box 3/3", "the HUD shows the box (%s)" % CaptureHud.box_text(P))
 	begin(P)
-	ok(not Capture.active(P) and Capture.state(P).is_empty(), "...holding the key does not start one")
+	ok(not Capture.active(P) and P.caught.size() == cap, "...a normal hold does not scan (a swap holds longer)")
+	run_for(0.5)
 	ok(Capture.release(m, P, 0) and P.caught.size() == cap - 1, "Release lets a capsule go (%d left)" % P.caught.size())
 	begin(P)
 	ok(Capture.active(P), "with a free place the scan starts")
 	run_for(float(Capture.rules()["scan_s"]) + 0.3)
 	ok(P.caught.size() == cap, "...and fills the box again (%s)" % CaptureHud.box_text(P))
+	# full again: keep holding past swap_hold_s and the oldest held wisp goes free for the new one (docs/decisions/0022)
+	var k2 := wild("cindle")
+	var oldest := String(P.caught[0]["name"])
+	P.inp["interact"] = true
+	run_for(Capture.hold_need(true) + 0.15)
+	P.inp["interact"] = false
+	ok(Capture.active(P), "full: holding swap_hold_s starts the swap scan")
+	run_for(float(Capture.rules()["scan_s"]) + 0.3)
+	ok(
+		k2.dead and P.caught.size() == cap and String(P.caught[cap - 1]["species"]) == "cindle"
+		and P.caught.all(func(r): return String(r["name"]) != oldest),
+		"...the scan takes it and the oldest held wisp (%s) goes free (%s)" % [oldest, CaptureHud.box_text(P)]
+	)
 
 # ------------------------------------------------------------------ 6. your own Boki
 func _own_kin() -> void:

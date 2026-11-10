@@ -23,7 +23,7 @@ static func class_ults() -> bool:
 ## else "". A press held past g_hold_s opens the wheel (KinWheel), and letting go picks. `blocked`: a menu
 ## or map is up (the press is ignored).
 static func poll(h: Hunter, dt: float, blocked: bool) -> String:
-	if blocked or KinLoss.rescuing(h) != null:
+	if blocked:
 		h.inp["g_t"] = 0.0; h.inp["g_fired"] = true      # swallow the rest of this press: no tap on release
 		h.inp.erase("wheel")
 		return ""
@@ -82,7 +82,7 @@ static func tap(h: Hunter) -> void:
 		return
 	if KinMerge.active(h) and not h.merge_st.get("surge", false):
 		KinMerge.end(h, "throw")        # sending your Boki ends the merge, and it goes
-	if k.state == "shoulder":
+	if k.state == "wisp":
 		if k.throw_cd > 0.0:
 			return
 		k.throw_to(h._ground_aim())
@@ -92,7 +92,7 @@ static func tap(h: Hunter) -> void:
 		elif k.throw_cd <= 0.0:
 			k.throw_to(h._ground_aim())
 	elif k.state == "downed":
-		say(h, ("%s is down: run into it to pick it up" % k.rec.get("name", "Your Boki")) if not k.down_void else "%s fell: it will come round on its own" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
+		say(h, KinDowned.deny_text(k), Color("ffb0a0"))
 
 ## Call back: it leaps to your side, hitting what is on its path. Only within the recall range.
 static func call_back(h: Hunter) -> void:
@@ -132,7 +132,7 @@ static func order(h: Hunter, id: String) -> bool:
 	var ok := KinFollow.set_cmd(k, id, tgt)
 	if ok:
 		if h.m.tut: h.m.tut.orders += 1
-		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "back on you", "follow": "at your side"}
+		var what := {"chase": "chasing %s" % target_name(tgt), "guard": "guarding this spot", "return": "riding" if k.ridden() else "a wisp on you", "follow": "at your side"}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
 		h.m.fx.ring(k.pos, 1.2, Color(k.sp["color"], 0.8), 0.3)
 		h.m.sfx("kin_alert" if id in ["guard", "chase"] else "kin_happy", k.pos, -8.0, Unique.voice(k.rec))
@@ -170,7 +170,7 @@ static func chase_pick(h: Hunter) -> Ent:
 	return best
 
 ## The Boki's own ability at the cursor, from wherever the Boki is. Out in the field it casts where
-## it stands (range-limited by the ability); on the shoulder (or merged) it is cast through you.
+## it stands (range-limited by the ability); a wisp on you (or merged) casts it through you.
 static func cast_c(h: Hunter) -> bool:
 	var k: Kin = h.kin
 	if k == null or h.downed or h.dropping or h.riding:

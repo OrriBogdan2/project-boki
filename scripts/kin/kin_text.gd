@@ -216,7 +216,7 @@ static func on_shot(os: Dictionary) -> String:
 	if int(os.get("chain", 0)) > 0: out.append("arc to %d more" % int(os["chain"]))
 	return "your shots: " + ", ".join(out)
 
-const CARRY_NAMES := {"shoulder": "Return: rides your shoulder", "perch": "Return: perches on your pack", "mount": "Return: you ride it"}
+const CARRY_NAMES := {"shoulder": "Return: a wisp orbiting you", "perch": "Return: a wisp orbiting you", "mount": "Return: summoned out to ride"}
 
 ## How it's carried and what that gives you: "You ride it (Anchor): -15% damage taken, half knockback".
 static func carry(ks: KinSpec) -> String:

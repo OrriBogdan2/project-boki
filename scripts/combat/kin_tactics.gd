@@ -107,7 +107,7 @@ func think_abilities(dt: float) -> void:
 			continue     # your Boki casts its own ability once it is out
 		if slot == "k2" and (def.trigger == null or def.trigger.type != "auto"):
 			continue
-		if k.state in ["shoulder", "fused"] and def.from == "kin":
+		if k.state in ["wisp", "fused"] and def.from == "kin":
 			continue     # kin-cast abilities wait until it's out in the fight
 		var aim := cue_aim(def.cue)
 		if aim == Vector3.INF:

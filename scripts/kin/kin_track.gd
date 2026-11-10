@@ -4,7 +4,7 @@ extends RefCounted
 ##   - you and your squad, once up (alive, not downed), see an edge arrow "<Boki> is this way" at the captor (BondHud)
 ##   - the captor's exact spot pings on your squad's map every bond_ping_s (content/rules/boki_system.json "loss")
 ##   - the captor sees a "Tracked" chip on their HUD
-##   - knocked or killed, the captor drops it: it stands dazed where they fell and its owner can cradle it
+##   - knocked or killed, the captor drops it: it is a wisp on the ground where they fell and its owner can scan it back
 ##   - the pull ends when the captor extracts
 ## State: hunter meta "bond" = [{uid, name, owner (nid), team}], on every game. Online the "caught" event starts it
 ## and the "unbond" kcmd event ends it.

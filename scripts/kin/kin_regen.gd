@@ -3,7 +3,7 @@ extends RefCounted
 ## A Boki mends on its own in a match (numbers: content/rules/boki_system.json "regen"):
 ##   - on you by the Return order, settled: carried_pct_s of max health per second
 ##   - out beside you: out_pct_s per second, once it has gone out_delay_s without losing health
-##   - downed (or dazed, benched, fused, away): none. A downed Boki has to be rescued (KinDowned).
+##   - downed (or dazed, benched, fused, away): none. A downed Boki is a dim wisp until it recovers (KinDowned).
 ## Every Boki starts a match at full health (Kin._init builds it from its stats), so nothing carries over.
 ## Called from Kin's tick. A little green + mote rises while it mends.
 
@@ -26,7 +26,7 @@ static func rate(k: Kin) -> float:
 
 ## One step. Losing health (an enemy hit, burn) restarts the out-of-combat wait; healing doesn't.
 static func tick(k: Kin, dt: float) -> void:
-	if k.hp < k.regen_hp - 0.0001 or k.state in ["downed", "reviving", "dazed", "fused", "shoulder"]:
+	if k.hp < k.regen_hp - 0.0001 or k.state in ["downed", "reviving", "dazed", "fused", "wisp"]:
 		k.regen_quiet = 0.0       # (a Boki that just came round starts its wait again)
 	else:
 		k.regen_quiet += dt

@@ -72,7 +72,7 @@ func run(main: Node) -> void:
 		ok(BokiMarks.status(k) == "dash", "a badly hurt Boki hanging back shows the run")
 	# ---------------------------------------------------------------- 3. tethers only for your squad
 	var tethered := _tethered(m)
-	ok(P.kin == null or P.kin.state == "shoulder" or tethered.has(P.kin), "your own Boki out: tethered to you")
+	ok(P.kin == null or P.kin.state == "wisp" or tethered.has(P.kin), "your own Boki out: tethered to you")
 	ok(k == null or tethered.has(k), "your downed teammate's Boki: tethered to them")
 	for f: Hunter in foes:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)

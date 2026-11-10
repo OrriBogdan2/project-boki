@@ -1,6 +1,6 @@
 # 0008: Losing a Boki
 
-- **Status:** accepted (owner decisions of Nov 2 2026)
+- **Status:** accepted (owner decisions of Nov 2 2026); the cradle and the carry rescue are superseded by [0022](0022-boki-wisps.md): the owner scans the guarding Boki's ground wisp back, and a knocked-out Boki is a dim wisp on you
 - **Date:** 2026-11-02
 - **Area:** match flow / networking / save (Boki side only; the market UI is another team's)
 

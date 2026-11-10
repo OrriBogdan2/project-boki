@@ -452,7 +452,7 @@ func _draw_world_labels() -> void:
 		else:
 			_ctext(sp, nm, 16, Loot.col_of(it), big)
 	for k in m.kins:
-		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
+		if k.dead or not k.visible or k.state == "wisp" or cam.is_position_behind(k.position):
 			continue
 		var sp := LabelCull.at(self, k.position + Vector3(0, 1.05, 0))
 		if not sp.is_finite():
@@ -1263,10 +1263,10 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	BokiHud.rest_card(self, k, pc, rr)
 	var st := ""
 	match k.state:
-		"shoulder":
-			st = ({"mount": "riding", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
+		"wisp":
+			st = ("riding" if k.ridden() else "a wisp on you") if k.settle >= 1.0 else "settling"
 			if not k.giant.is_empty(): st = "GIANT"
-			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
+			elif k.carry_style() == "mount" and p.gliding: st = "a wisp on you"
 		"flying", "flying_home": st = "in the air"
 		"active": st = "fighting" if k.target else String(KinFollow.NAMES.get(k.cmd, "Follow")).to_lower()
 		"returning": st = "coming back"
@@ -1327,7 +1327,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	if k:
 		var kc: Color = Data.KIN[k.species]["color"]
 		var out_now: bool = k.state in ["active", "flying", "returning"]
-		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
+		var can_throw: bool = (k.state == "wisp" and k.throw_cd <= 0.0) or out_now
 		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
 		x -= s + gap
 	# what you're carrying home, as a counter
@@ -2332,7 +2332,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)
 		var nb: Ent = null; var nd := 1e9
 		for e0 in (m.kins if "--hover-rival-kin" in OS.get_cmdline_user_args() else m.hunters):
-			if e0 != p and e0.team != p.team and not e0.dead and e0.visible and p.flat_dist(e0) < nd and not (e0 is Kin and (e0 as Kin).state == "shoulder"):
+			if e0 != p and e0.team != p.team and not e0.dead and e0.visible and p.flat_dist(e0) < nd and not (e0 is Kin and (e0 as Kin).state == "wisp"):
 				nd = p.flat_dist(e0); nb = e0
 		if nb and not cam.is_position_behind((nb as Node3D).position):
 			mp = cam.unproject_position((nb as Node3D).position + Vector3(0, 0.7, 0))
@@ -2341,7 +2341,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 	for mb in m.mobs:
 		if not mb.dead and mb.visible: cands.append(mb)
 	for k in m.kins:
-		if not k.dead and k.visible and k.state != "shoulder": cands.append(k)
+		if not k.dead and k.visible and k.state != "wisp": cands.append(k)
 	for h in m.hunters:
 		if h != p and not h.out and not h.extracted and not h.unseen and h.visible: cands.append(h)
 	for e in cands:

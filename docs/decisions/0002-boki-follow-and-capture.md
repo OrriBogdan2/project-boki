@@ -1,6 +1,6 @@
 # 0002: The Boki follows you, and capture by scan
 
-- **Status:** accepted (owner decisions of Nov 1 2026, after research)
+- **Status:** accepted (owner decisions of Nov 1 2026, after research); Return (the shoulder) is a wisp orbiting you and the box holds `box_capacity` wisps since [0022](0022-boki-wisps.md)
 - **Date:** 2026-11-01
 - **Area:** combat / networking / save / UI (Boki behaviour, G wheel, capture, Field Book, Net)
 

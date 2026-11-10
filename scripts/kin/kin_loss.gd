@@ -3,8 +3,9 @@ extends RefCounted
 ## Losing a Boki (docs/decisions/0008). Numbers: content/rules/boki_system.json "loss".
 ##   - Tiers below loss_min_tier are safe: when you die your Boki keeps out of sight and goes home with you ("away").
 ##   - From loss_min_tier up, when you die your Boki drops dazed and GUARDS the spot, with no box, no teleport:
-##     one that was on you stands beside your deathbox, one that was out fighting stays where it stood. Revived,
-##     you run into it for the usual 3.5s cradle (KinDowned) and it is yours again. An enemy can scan it
+##     one that was on you stands beside your deathbox, one that was out fighting stays where it stood, a wisp on the
+##     ground (KinWisp). Revived, you scan its wisp (Capture, no room needed) and it is yours again. An enemy can
+##     scan it
 ##     like any knocked-out Boki (Capture); a teammate cannot. A scanned Boki sits in the captor's box (KinTrack).
 ##   - At the end of the match the Boki's fate is written to the save by after_match(): "home", "ransom" (nobody took
 ##     it) or "captured_by:<name>". A flagged Boki cannot be brought into a match until the market clears it.
@@ -26,21 +27,12 @@ static func risky_match(m) -> bool:
 static func guarding(k: Kin) -> bool:
 	return k.state == "dazed" and k.owner_h != null and not k.dead
 
-## Can this hunter scan that knocked-out Boki? A wild one, or a rival's guard; never your own or a teammate's.
+## Can this hunter scan that knocked-out Boki's wisp? A wild one, a rival's guard, or your own guard (to take it
+## back); never a teammate's.
 static func scannable_by(h: Hunter, k: Kin) -> bool:
-	return k.state == "dazed" and not k.dead and (k.owner_h == null or k.owner_h.team != h.team)
-
-const STALE_S := 2.0     # s: a proxy's cradle progress older than this (its owner's game went quiet) no longer counts
-
-## Is its owner carrying it (or just starting to)? A proxy copy counts only while its owner is in the match and the
-## snapshots are fresh, so a disconnect mid-carry cannot leave a Boki unscannable.
-static func cradled(k: Kin) -> bool:
-	if not (k.rescue_on or k.rescue_t > 0.0):
+	if k.state != "dazed" or k.dead:
 		return false
-	var h := k.owner_h
-	if h == null or h.out or h.extracted:
-		return false
-	return not k.remote or k.m.time - k.net_t < STALE_S
+	return k.owner_h == null or (k.owner_h == h and not h.out) or k.owner_h.team != h.team
 
 ## The hunter died: safe tiers send the Boki home with them, the others drop it to guard. box_pos is
 ## where the deathbox went (Vector3.INF when there is none).
@@ -50,12 +42,10 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 	m.giant_free(k)
 	if not risky_match(m):
 		k.state = "away"            # never lost: it keeps out of sight and comes back if you are revived
-		k.rescue_on = false
-		k.rescue_t = 0.0
 		return
 	if h.remote:
 		return                       # (their own game drops it and the snapshot tells us)
-	var on_you: bool = k.state in ["shoulder", "bench", "away"] or k.with_owner()
+	var on_you: bool = k.state in ["wisp", "downed", "bench", "away"] or k.with_owner()
 	var at := k.pos
 	if on_you:
 		at = box_pos if box_pos != Vector3.INF else h.pos
@@ -80,7 +70,7 @@ static func on_owner_out(m, h: Hunter, k: Kin, box_pos: Vector3) -> void:
 				m.player_lost.erase(L)
 		m.player_lost.append({"uid": String(rec.get("uid", "")), "kin": k, "holder": null, "rec": rec})
 		var shown := String(rec.get("name", "Your Boki"))
-		m.add_feed("%s is guarding your box: get revived and run into it, or a rival can scan it" % shown)
+		m.add_feed("%s is guarding your box: get revived and scan its wisp, or a rival can scan it" % shown)
 
 ## A free Boki id for this hunter: their own slot id ("<nid>k") when it is free, because online only ids shaped like
 ## that are simulated and snapshotted by the hunter's own game (Net.owner_of). Only a hunter whose slot still holds a
@@ -158,12 +148,10 @@ static func _stand_guard(m, owner_hunter: Hunter, k: Kin) -> void:
 	k.pend_slot = ""
 	k.vel = Vector3.ZERO
 	k.scan_by = null
-	k.rescue_t = 0.0
-	k.rescue_on = false
-	k.rescue_block = 0.0
+	k.ride = false
+	k.summoned = false
 	k.catch_prog = 0.0
 	k.down_t = 0.0
-	k.down_void = false
 	k.dead = false
 	k.visible = true
 	k.lost_from = "you" if (owner_hunter == m.player or k.lost_from == "you") else owner_hunter.pname
@@ -214,28 +202,15 @@ static func ground(m, at: Vector3) -> Vector3:
 	at.y = m.world.ground_at(at.x, at.z)
 	return at
 
-## Each step while it guards (Kin._sim_dazed): its owner, once up, can cradle it.
-static func tick_guard(k: Kin, dt: float) -> void:
-	var h := k.owner_h
-	if h == null:
-		return
-	if h.out or h.extracted or k.scan_by != null:       # (an enemy is scanning it: no cradle starts)
-		if k.rescue_on:
-			KinDowned.stop(k, h, "gone")
-		k.rescue_t = 0.0
-		return
-	KinDowned.step_rescue(k, h, dt)
+## Its owner scanned its wisp (Capture.complete): a wisp on them again, with a share of health.
+static func reclaim(k: Kin) -> void:
+	k.hp = k.max_hp * float(KinDowned.rules()["recover_hp"])
+	k.dazed_t = 0.0
+	k._hop_on()
+	k.cmd = "return"
+	reclaimed(k)
 
-## The Boki a hunter is carrying right now, if any (a guard may sit outside their kin slots).
-static func rescuing(h: Hunter) -> Kin:
-	if not h.has_meta("carry"):       # (set when the carry starts: no scan of every Boki each step)
-		return null
-	var k = h.get_meta("carry")
-	if is_instance_valid(k) and k.rescue_on and k.owner_h == h and (k.state == "downed" or guarding(k)):
-		return k
-	return null
-
-## The cradle finished (KinDowned.come_round): it is the owner's again, in a slot.
+## Taken back (reclaim, or KinDowned.come_round): it is the owner's again, in a slot.
 static func reclaimed(k: Kin) -> void:
 	if k.lost_owner == null:
 		return

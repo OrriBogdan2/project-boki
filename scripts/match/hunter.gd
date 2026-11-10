@@ -397,9 +397,9 @@ func kin_carry_on() -> bool:
 		return false
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
-## Riding your mount right now (on the ground or jumping, not gliding).
+## Riding your mount right now (summoned out under you: on the ground or jumping, not gliding).
 func mounted() -> bool:
-	return kin_carry_on() and (kin as Kin).carry_style() == "mount"
+	return kin_carry_on() and (kin as Kin).ridden()
 
 ## An owner stat (KinParts.OWNER_STATS) from your kin: its carry passives while it rides with you,
 ## plus the merge's passives while merged, capped at the carry or merge maximum. Refreshed every step (_refresh_kin_stats).
@@ -761,7 +761,7 @@ func _shot_down() -> void:
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
 ## pops you into the air unless the attack says so.
 var knock_t := 0.0
-var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
+var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
@@ -1782,7 +1782,9 @@ func use_kin_ability(slot: String) -> void:
 		return
 	if not k.ready_to_fight():
 		_ab_feedback(slot, "deny")
-		if is_local() and m.hud:
+		if is_local() and m.hud and k.state == "downed":
+			m.hud.toast(KinDowned.deny_text(k), Color("a2a8bb"))
+		elif is_local() and m.hud:
 			m.hud.toast("%s is resting%s" % [k.rec.get("name", "Your Boki"), ("  ·  %s swaps in %s" % [Settings.key_cap("swap_kin"), (kin2 as Kin).rec.get("name", "your other Boki")]) if kin2 and (kin2 as Kin).hp > 0.0 else ""], Color("a2a8bb"))
 		return
 	if k.use_ability(slot, _ground_aim()) or k.pend_slot == slot:
@@ -1791,7 +1793,7 @@ func use_kin_ability(slot: String) -> void:
 		if is_local():
 			# tie the button to what happened: a flash line from you to the kin doing it, if it's away
 			var kc := KinText.color(k.runner.def_of(slot))
-			if k.flat_dist(self) > 2.5 and k.state != "shoulder":
+			if k.flat_dist(self) > 2.5 and k.state != "wisp":
 				m.fx.bolt(pos + Vector3(0, 1.2, 0), k.pos + Vector3(0, 0.6, 0), Color(kc, 0.8))
 			m.fx.ring(k.pos, 1.3, kc, 0.3)
 	else:
@@ -2016,7 +2018,6 @@ func sim(dt: float) -> void:
 		inp["move"] = Vector2.ZERO
 	# inputs
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
-	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
@@ -2163,7 +2164,6 @@ func _physics(dt: float) -> void:
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
 	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * (0.45 if drink_t > 0.0 or kit_t > 0.0 else 1.0) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
-	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	_hand_off_ended_dash()
@@ -3148,7 +3148,6 @@ func _anim_state(stretch: float) -> void:
 		s["kmove_t"] = m.time - ak.anim_at
 	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	MergeKit.anim_state(self, s)
-	KinDowned.anim_state(self, s)
 	s["hit_t"] = m.time - hurt_at
 	s["hit_k"] = hit_k
 	if last_hit_by and is_instance_valid(last_hit_by):
@@ -3157,7 +3156,7 @@ func _anim_state(stretch: float) -> void:
 	s["base"] = (1.0 - base_t / BASE_TIME) if base_t > 0.0 else -1.0
 	s["squash"] = squash
 	s["stretch"] = stretch
-	s["kin_on_shoulder"] = kin != null and (kin as Kin).state == "shoulder"
+	s["kin_on_shoulder"] = kin != null and (kin as Kin).state == "wisp"
 	# reviving a teammate: standing on their wisp
 	var rv := false
 	if grounded and not downed:

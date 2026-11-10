@@ -328,9 +328,9 @@ const STATS := {
 }
 
 const CARRY := {
-	"shoulder": {"sizes": ["small"], "doc": "rides your shoulder; its passive works once it has settled"},
-	"perch": {"sizes": ["small", "medium"], "doc": "perches on your pack; same passive rules as shoulder"},
-	"mount": {"sizes": ["large"], "doc": "a big kin you ride: it changes your movement, and you can't glide while mounted"},
+	"shoulder": {"sizes": ["small"], "doc": "a wisp orbiting you (decision 0022); its passive works once settled"},
+	"perch": {"sizes": ["small", "medium"], "doc": "a wisp orbiting you, the same as shoulder"},
+	"mount": {"sizes": ["large"], "doc": "a big kin: Return summons it out to ride; it changes your movement, no glide"},
 }
 const MOUNT := {
 	"speed": ["float", 0.8, 1.3, 1.0, "x", "ground speed while riding"],

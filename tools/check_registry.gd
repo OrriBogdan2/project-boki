@@ -34,6 +34,8 @@ const CHECKS := {
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
+	"--kin-wisp-check": ["res://tools/kin_wisp_check.gd", "kin_wisp_check", "check"],      # Boki are wisps (0022)
+	"--kin-wisp-shots": ["res://tools/kin_wisp_check.gd", "kin_wisp_check", "shots"],      # --shots-dir=<dir>, xvfb
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],

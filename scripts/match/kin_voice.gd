@@ -26,7 +26,7 @@ const BASE := {
 		"bravery": ["Falling back!", "Too hot, coming back!"],
 		"loyalty": ["I'm hurt, coming to you!", "Need a breather!"],
 		"temper": ["Ow! OW! Retreating!", "That one bites back!"],
-		"curiosity": ["Owie. Back to the shoulder.", "I've seen enough!"],
+		"curiosity": ["Owie. Back to wisp form.", "I've seen enough!"],
 	},
 	"revive": {
 		"bravery": ["Get up! I've got you!", "Hold on, I'm coming!"],
@@ -86,7 +86,7 @@ const CALL_ACT := {
 
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
-	"land": ["That meadow looks nice and quiet!", "(peeks over your shoulder at the ground below)"],
+	"land": ["That meadow looks nice and quiet!", "(glows a little brighter at the ground below)"],
 	"move": ["Come on, let's look around!", "(runs a little circle and looks back at you)"],
 	"dash": ["Dash across, like this!", "(zips off to the side and back, showing you)"],
 	"glide": ["Jump, then glide! Watch me!", "(hops high and spreads out, showing you)"],
@@ -101,7 +101,7 @@ const TUT_HINT := {
 	"fight": ["Together! Get them all!", "(bristles, ready to fight)"],
 	"crouch": ["Get low and look far away!", "(flattens itself against the ground)"],
 	"kin1": ["Watch this!", "(bounces, ready to use its power)"],
-	"throw": ["Throw me! I'm ready!", "(crouches on your shoulder, ready to jump)"],
+	"throw": ["Throw me! I'm ready!", "(spins round you faster, ready to burst out)"],
 	"chest": ["A chest! It needs a key to open. Use the one you found!", "(runs to a chest and paws at the lock)"],
 	"pickup": ["Something shiny! Grab it!", "(noses at the thing on the ground)"],
 	"goexit": ["Follow me, the outpost is this way!", "(runs ahead toward the outpost and waits)"],

@@ -1,20 +1,21 @@
 extends RefCounted
 ## --kin-loss-check: losing a Boki (docs/decisions/0008, KinLoss / KinTrack). Never touches the save file.
 ##   1. low tier: the owner dies, the Boki is safe and goes home (away, nothing lost); revived, it walks back out
-##   2. high tier: the owner dies, the Boki drops dazed beside the deathbox and guards it; revived + the 3.5s cradle
-##      by touch and it is theirs again (carrying it, see 9); its owner and teammates cannot scan it, an enemy can
+##   2. high tier: the owner dies, the Boki drops dazed beside the deathbox (a wisp on the ground) and guards it;
+##      revived,
+##      the owner scans its wisp back (docs/decisions/0022); its owner (while out) and teammates cannot scan it, an
+##          enemy can
 ##   3. an enemy scans it: it is in the captor's box, the bond pull is on for the owner once up (arrow target = captor,
 ##      the name, a map ping now and every bond_ping_s), the captor is tracked
-##   4. the captor knocked, or killed: it drops dazed there, the pull ends, the owner cradles it back
+##   4. the captor knocked, or killed: it drops dazed there, the pull ends, the owner scans it back
 ##   5. the match ends with nobody having taken it: "ransom" in the save
 ##   6. captured and the captor extracted: "captured_by:<name>" in the save, and it cannot be picked for a match
 ##   7. Net.VERSION is 0.18.0 or later
-##  10. second review: a host scan of a client's guard (proxy) takes the real Boki and starts the bond; Shift or F
-##      puts the carry down (no dash), no auto pick-up with a foe near or mid-channel; stale/proxy cradle state
-##   9. carry while rescuing: the cradle runs while you carry it at 0.9x speed, dash/jump/fire are blocked, shots do not
-##      drop it, a stun or a launch does (back down guarding, progress lost), other games get the progress and the pose
-##   8. review fixes: a second death before the cradle keeps one lost entry; cradle and scan cannot both win (block
-##      reason + the host "catch" handler); bots leave a teammate's guard alone and still scan an enemy's; leaving the
+##  10. second review: a host scan of a client's guard (proxy) takes the real Boki and starts the bond; a proxy that
+##      stands up again asks for a fresh scan
+##   8. review fixes: a second death before the scan back keeps one lost entry; the owner scans back, a teammate cannot,
+##      an enemy's scan goes through the host "catch" handler; bots leave a teammate's guard alone and still scan an
+##         enemy's; leaving the
 ##      match still loses it (Game.apply_result); online, simulated by calling the net handlers: "caught" starts the
 ##      bond in the captor's and the owner's game, "unbond" ends it, "gdrop" stands the Boki up again in the owner's
 ##      game under a slot id the owner owns
@@ -99,12 +100,15 @@ func _guard() -> Kin:
 			return k
 	return null
 
-func _cradle(k: Kin) -> void:
+## The owner scans its own Boki's wisp back (the capture hold ring, docs/decisions/0022).
+func _scan_back(k: Kin) -> void:
 	P.teleport(k.pos + Vector3(0.8, 0, 0))
 	P.vel = Vector3.ZERO
 	_run_for(0.3)
-	P.teleport(k.pos + Vector3(0.8, 0, 0))
-	_run_for(float(KinDowned.rules()["rescue_s"]) + 0.8)
+	P.inp["interact"] = true
+	_run_for(float(Capture.rules()["hold_s"]) + float(Capture.rules()["scan_s"]) + 0.5)
+	P.inp["interact"] = false
+	_run_for(0.1)
 
 ## P (at tier 2) dies with a Boki on them, the rival scans it. Leaves P revived and up.
 func _capture() -> Kin:
@@ -143,7 +147,7 @@ func run(main_node: Node) -> void:
 	Life.bring_back(m, P, P.pos, 0.5, false)
 	_run_for(0.2)
 	ok(
-		k1.state in ["active", "flying_home", "shoulder"] and k1.owner_h == P,
+		k1.state in ["active", "flying_home", "wisp"] and k1.owner_h == P,
 		"1. tier 1: revived, the Boki walks back out at their side (%s)" % k1.state
 	)
 	_fresh(0)
@@ -166,17 +170,17 @@ func run(main_node: Node) -> void:
 	ok(k.state == "dazed" and k.pos.distance_to(Vector3(bx["pos"])) < 3.0, "2. it stays put: no teleport, no recovery")
 	ok(
 		not KinLoss.scannable_by(P, k) and not KinLoss.scannable_by(G, k) and KinLoss.scannable_by(F, k),
-		"2. its owner and teammates cannot scan it, an enemy can"
+		"2. its owner (while out) and teammates cannot scan it, an enemy can"
 	)
 	P.swap_kin(true)
 	ok(k.state == "dazed", "2. swapping does not pick it up")
 	Life.bring_back(m, P, bx["pos"], 0.5, false)
 	_run_for(0.5)
 	ok(k.state == "dazed" and P.kin == k, "2. reviving the owner does not call it home by itself (%s)" % k.state)
-	_cradle(k)
+	_scan_back(k)
 	ok(
-		k.state == "shoulder" and P.kin == k and k.lost_owner == null and m.player_lost.is_empty(),
-		"2. revive then the cradle by touch: it is theirs again (%s)" % k.state
+		k.state == "wisp" and P.kin == k and k.lost_owner == null and m.player_lost.is_empty(),
+		"2. revived, the owner scans its wisp back: it is theirs again (%s)" % k.state
 	)
 
 	# 3. an enemy scan, the bond pull
@@ -225,10 +229,10 @@ func run(main_node: Node) -> void:
 		"4. the captor is knocked: it drops dazed there, the pull ends"
 	)
 	ok(g2 != null and g2.pos.distance_to(F.pos) < 3.0, "4. it is on the spot they fell")
-	_cradle(g2)
+	_scan_back(g2)
 	ok(
 		not KinLoss.guarding(g2) and g2.state != "dazed" and P.kin == g2 and m.player_lost.is_empty(),
-		"4. the owner cradles it back (%s)" % g2.state
+		"4. the owner scans it back (%s)" % g2.state
 	)
 
 	# 4b. the captor killed
@@ -246,8 +250,8 @@ func run(main_node: Node) -> void:
 		g3 != null and Vector2(g3.pos.x - fb["pos"].x, g3.pos.z - fb["pos"].z).length() < 3.0,
 		"4. beside the captor's deathbox"
 	)
-	_cradle(g3)
-	ok(not KinLoss.guarding(g3) and g3.state != "dazed" and P.kin == g3, "4. and the owner reclaims it by cradle")
+	_scan_back(g3)
+	ok(not KinLoss.guarding(g3) and g3.state != "dazed" and P.kin == g3, "4. and the owner reclaims it by a scan")
 
 	# 5. nobody takes it
 	_fresh(2)
@@ -302,145 +306,7 @@ func _loot_guard() -> Kin:
 	_die()
 	return _guard()
 
-## Metres per second over 0.3s of walking right, after half a second to get up to speed.
-func _walk_speed() -> float:
-	var walk := func():
-		P.inp["move"] = Vector2(1, 0)
-	for i in int(round(0.5 / Match.DT)):
-		walk.call()
-		_run_for(Match.DT)
-	var p0 := P.pos
-	for i in int(round(0.3 / Match.DT)):
-		walk.call()
-		_run_for(Match.DT)
-	P.inp["move"] = Vector2.ZERO
-	return Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / 0.3
-
-## P to `at`, standing still.
-func _put(at: Vector3) -> void:
-	P.teleport(at)
-	P.vel = Vector3.ZERO
-
-## Carrying the guarding Boki: 0.9x speed, the Boki rides with you, dash/jump/fire are off, shots do not drop it, hard
-## crowd control and a launch do (it falls back down still guarding, the progress lost), other players see it.
-func _carry_checks() -> void:
-	var g := _loot_guard()
-	var bx := Life.box_of(m, P)
-	Life.bring_back(m, P, bx["pos"], 0.5, false)
-	P.hp = P.max_hp
-	var origin := g.pos + Vector3(0, 0, 8.0)
-	P.teleport(origin)
-	P.vel = Vector3.ZERO
-	var plain := _walk_speed()
-	P.teleport(g.pos + Vector3(0.8, 0, 0))
-	P.vel = Vector3.ZERO
-	_run_for(0.6)
-	ok(
-		g.rescue_on and g.state == "dazed" and KinDowned.rescue_pose(P) == "rs_carry",
-		"carry: running into the guard picks it up"
-	)
-	var carried := _walk_speed()
-	ok(
-		g.rescue_on and plain > 1.0 and absf(carried / plain - 0.9) < 0.03,
-		"carry: moves at 0.9x (%.2f vs %.2f m/s)" % [carried, plain]
-	)
-	ok(
-		g.flat_dist(P) < 1.0 and g.rescue_t > 0.5,
-		"carry: it rides with you while the progress fills (%.2fm, %.2fs)" % [g.flat_dist(P), g.rescue_t]
-	)
-	var held := g.rescue_t
-	for i in int(round(0.3 / Match.DT)):
-		P.inp["fire"] = true
-		P.inp["jump"] = true
-		P.inp["sec_hold"] = true
-		_run_for(Match.DT)
-	for key in ["fire", "jump", "sec_hold"]:
-		P.inp[key] = false
-	ok(
-		P.grounded and P.roll_t <= 0.0 and not P.used.has("fire") and g.rescue_on,
-		"carry: jump and firing are blocked, not cancelling"
-	)
-	ok(g.rescue_t > held, "carry: the progress keeps filling (%.2f -> %.2f)" % [held, g.rescue_t])
-	var snap := KinNet.kin_extra(g)
-	ok(
-		float(snap[2]) > 0.0 and String(KinNet.hunter_extra(P)[4]).begins_with("rs_carry"),
-		"carry: other games get the progress and the carry pose"
-	)
-	for i in 6:
-		P.hurt(3.0, F, {"src": "shot", "kb": Vector2(2.5, 0.0)})
-		_run_for(0.1)
-	ok(g.rescue_on, "carry: shots (damage and the small shove) don't drop it")
-	P.stun_t = 0.8
-	_run_for(0.1)
-	ok(
-		not g.rescue_on and g.rescue_t == 0.0 and KinLoss.guarding(g),
-		"carry: a stun drops it, still guarding, progress lost"
-	)
-	ok(
-		g.flat_dist(P) < 1.0 and Capture.block_reason(F, g) == "",
-		"carry: it fell where you stand and an enemy may scan it again"
-	)
-	P.stun_t = 0.0
-	_run_for(1.0)
-	P.teleport(g.pos + Vector3(0.5, 0, 0))
-	P.vel = Vector3.ZERO
-	_run_for(1.0)
-	ok(g.rescue_on, "carry: running into it again picks it up")
-	# Shift puts it down on purpose: no dash, progress lost, and no automatic pick-up until you step away
-	P.inp["dash"] = true
-	_run_for(0.05)
-	P.inp["dash"] = false
-	_run_for(0.1)
-	ok(
-		not g.rescue_on and g.rescue_t == 0.0 and P.roll_t <= 0.0 and KinLoss.guarding(g),
-		"carry: Shift puts it down and is spent on that (no dash)"
-	)
-	_run_for(1.5)
-	ok(not g.rescue_on, "carry: standing on a Boki you put down does not pick it up again")
-	_put(g.pos + Vector3(4.0, 0, 0))
-	_run_for(0.3)
-	_put(g.pos + Vector3(0.5, 0, 0))
-	_run_for(0.5)
-	ok(g.rescue_on, "carry: stepping away and back picks it up again")
-	P.inp["interact"] = true
-	_run_for(0.1)
-	P.inp["interact"] = false
-	_run_for(0.1)
-	ok(not g.rescue_on and g.rescue_t == 0.0, "carry: a fresh interact press puts it down too")
-	_run_for(1.0)
-	P.inp["interact"] = true
-	_run_for(0.1)
-	P.inp["interact"] = false
-	_run_for(0.2)
-	ok(g.rescue_on, "carry: interact picks it up even right where you put it down")
-	# a foe within 6m: walking into it does not pick it up, interact does
-	P.inp["interact"] = true
-	_run_for(0.1)
-	P.inp["interact"] = false
-	_run_for(0.1)
-	_put(g.pos + Vector3(4.0, 0, 0))
-	_run_for(0.3)
-	F.out = false
-	F.teleport(g.pos + Vector3(4.0, 0, 3.0))
-	_put(g.pos + Vector3(0.5, 0, 0))
-	_run_for(0.8)
-	ok(not g.rescue_on, "carry: with a foe within 6m, walking into it does not pick it up")
-	P.inp["interact"] = true
-	_run_for(0.1)
-	P.inp["interact"] = false
-	_run_for(0.2)
-	ok(g.rescue_on, "carry: pressing interact picks it up with a foe near")
-	F.teleport(P.pos + Vector3(40.0, 0, 0))
-	P.impulse(Vector2(14.0, 0.0), 6.0)
-	_run_for(0.1)
-	ok(not g.rescue_on and g.rescue_t == 0.0 and KinLoss.guarding(g), "carry: a launch drops it too")
-	_run_for(2.0)
-	P.teleport(g.pos + Vector3(0.5, 0, 0))
-	P.vel = Vector3.ZERO
-	_run_for(float(KinDowned.rules()["rescue_s"]) + 1.5)
-	ok(not KinLoss.guarding(g) and P.kin == g, "carry: carried the full 3.5s it is theirs again (%s)" % g.state)
-
-## Second review: the host's proxy copy of a client's guard, stale cradle state, channels that block a pick-up.
+## Second review: the host's proxy copy of a client's guard.
 func _review2() -> void:
 	var g := _loot_guard()
 	var owner_h := G
@@ -481,17 +347,6 @@ func _review2() -> void:
 		late.lost_owner == owner_h and String(late.rec.get("uid", "")) == String(real["uid"]),
 		"B1. an early guard event waits for the copy"
 	)
-	# M1: a cradle left on the copy by an owner who went away does not block scans for ever
-	var pk := m.give_kin(owner_h, real)
-	pk.remote = true
-	pk.rescue_t = 1.0
-	pk.net_t = m.time
-	ok(KinLoss.cradled(pk), "M1. a fresh cradle on the copy counts")
-	owner_h.out = true
-	ok(not KinLoss.cradled(pk), "M1. ...not once its owner is out of the match")
-	owner_h.out = false
-	pk.net_t = m.time - 5.0
-	ok(not KinLoss.cradled(pk), "M1. ...nor when the snapshots stopped")
 	# M2: a copy that stands up again can be scanned again
 	pk.net_t = m.time
 	var it: Array = m._ser(pk)
@@ -503,40 +358,7 @@ func _review2() -> void:
 	pk.catch_prog = 5.0
 	KinLoss._stand_guard(m, owner_h, pk)
 	ok(pk.catch_prog == 0.0, "M2. a new guard starts with no scan asked for")
-	# M4: a copy being carried is not pushed round by body separation
-	pk.rescue_t = 1.0
-	pk.net_t = m.time
-	pk.state = "dazed"
-	pk.teleport(P.pos + Vector3(0.2, 0, 0))
-	var before := pk.pos
-	m._separate()
-	ok(pk.pos.distance_to(before) < 0.001, "M4. a copy with cradle progress (a carried Boki) is left out of separation")
-	pk.rescue_t = 0.0
 	owner_h.remote = false
-	# M3: no pick-up in the middle of another channel
-	var g2 := _loot_guard()
-	var bx := Life.box_of(m, P)
-	Life.bring_back(m, P, bx["pos"], 0.5, false)
-	P.hp = P.max_hp
-	P.teleport(g2.pos + Vector3(0.5, 0, 0))
-	P.vel = Vector3.ZERO
-	for i in int(round(0.5 / Match.DT)):
-		P.drink_t = 1.0
-		_run_for(Match.DT)
-	ok(not g2.rescue_on, "M3. no pick-up while drinking a tonic")
-	P.drink_t = 0.0
-	for i in int(round(0.5 / Match.DT)):
-		P.box_rev_at = m.time
-		_run_for(Match.DT)
-	ok(not g2.rescue_on, "M3. no pick-up while reviving at a box")
-	_run_for(0.5)
-	ok(g2.rescue_on, "M3. and it picks up once the channel is over")
-	# safe tier: a cradle in progress is cleared when the owner dies
-	_fresh(1)
-	P.kin.rescue_t = 2.0
-	P.kin.rescue_on = true
-	_die()
-	ok(not P.kin.rescue_on and P.kin.rescue_t == 0.0, "minor. a safe-tier death clears a cradle in progress")
 
 ## An online client is the captor: the host's "caught" event gives them the Boki and the bond, and dying hands it back.
 func _client_captor() -> void:
@@ -557,7 +379,7 @@ func _client_captor() -> void:
 	F.remote = false
 
 func _review_fixes() -> void:
-	# 5. a second death before the cradle: one lost entry, one guard
+	# 5. a second death before the scan back: one lost entry, one guard
 	var g := _loot_guard()
 	var bx := Life.box_of(m, P)
 	Life.bring_back(m, P, bx["pos"], 0.5, false)
@@ -566,33 +388,18 @@ func _review_fixes() -> void:
 	var guards := m.kins.filter(func(k): return KinLoss.guarding(k) and k.owner_h == P)
 	ok(
 		m.player_lost.size() == 1 and guards.size() == 1 and guards[0] == g,
-		"5. dying again before the cradle: one lost entry, one guard (%d, %d)" % [m.player_lost.size(), guards.size()]
+		"5. dying again before the scan back: one lost, one guard (%d, %d)" % [m.player_lost.size(), guards.size()]
 	)
 
-	# 3. cradle against scan
+	# 3. the owner's scan back against a teammate and an enemy
 	g = _loot_guard()
 	bx = Life.box_of(m, P)
 	Life.bring_back(m, P, bx["pos"], 0.5, false)
-	P.teleport(g.pos + Vector3(0.8, 0, 0))
-	_run_for(1.0)
-	ok(g.rescue_t > 0.0 and g.state == "dazed", "3. the owner's cradle is under way (%.2f)" % g.rescue_t)
-	ok(
-		Capture.block_reason(F, g).contains("picking"),
-		"3. an enemy cannot start a scan during it (%s)" % Capture.block_reason(F, g)
-	)
+	var scans := Capture.block_reason(P, g) == "" and Capture.block_reason(G, g) != ""
+	ok(scans, "3. the owner can scan its wisp back, a teammate cannot")
 	F.teleport(g.pos + Vector3(3.0, 0, 0))
 	m._net_ev(["catch", g.nid, F.nid], "")
-	ok(not g.dead and F.caught.is_empty(), "3. the host's catch handler refuses it too")
-	ok(Capture.block_reason(P, g) != "" and Capture.block_reason(G, g) != "", "3. and the owner's side cannot scan it")
-	# a scan under way stops the cradle starting
-	g.scan_by = F
-	g.scan_at = m.time
-	_run_for(0.3)
-	ok(not g.rescue_on and g.rescue_t <= 0.001, "3. a scan running drops the carry and the cradle does not restart")
-	g.scan_by = null
-	m._net_ev(["catch", g.nid, F.nid], "")
-	ok(g.dead and F.caught.size() == 1, "3. with nobody cradling, the host's handler lets the scan through")
-	_carry_checks()
+	ok(g.dead and F.caught.size() == 1, "3. an enemy's scan goes through the host's catch handler")
 
 	# 7. bots
 	g = _loot_guard()

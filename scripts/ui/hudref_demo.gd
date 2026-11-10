@@ -50,7 +50,7 @@ static func tick(m) -> void:
 		if kn.owner_h == null and not kn.dead:
 			kn.dead = true           # no wild Boki wandering into the picture
 			kn.visible = false
-		elif kn.owner_h and kn.state != "shoulder":
+		elif kn.owner_h and kn.state != "wisp":
 			kn.stow()                                      # everyone's Boki rides their shoulder, out of the fight
 	m.bubbles.clear()      # no Boki chatter or callouts over the plates
 	m.pings.clear()

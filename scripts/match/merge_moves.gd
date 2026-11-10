@@ -22,12 +22,4 @@ const MOVES := {
 	"mf_ult": {"hold": true, "keys": [
 		[0.0, {}],
 		[0.2, {"p": 0.35, "lift": 0.18, "sq": -0.25, "fl": UP_L, "fr": UP_R, "hw": 1.0, "rw": 1.0, "lw": 1.0, "legs": [-0.2, -0.3, -0.2, -0.3]}]]},
-	# the rescue: the Boki lifted into the arms and carried (the legs keep running)
-	"rs_carry": {"hold": true, "keys": [
-		[0.0, {}],
-		[0.3, {"p": 0.2, "lift": -0.05, "fl": Vector3(-0.12, 0.3, -0.4), "fr": Vector3(0.12, 0.3, -0.4), "hw": 1.0, "rw": 1.0}]]},
-	"rs_done": {"keys": [
-		[0.0, {"p": 0.3, "lift": -0.16, "fl": Vector3(-0.12, 0.3, -0.4), "fr": Vector3(0.12, 0.3, -0.4), "hw": 1.0, "rw": 1.0}],
-		[0.15, {"p": -0.2, "lift": 0.15, "sq": -0.25, "fl": UP_L, "fr": UP_R, "hw": 1.0, "rw": 1.0}],
-		[0.4, {}]]},
 }

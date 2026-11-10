@@ -217,7 +217,7 @@ func _xform() -> void:
 	ok(P.ult > 0.5 or before > 0.0, "the bond meter keeps filling while the Boki is down")
 	P.ult = 1.0
 	var slot := P.slot_info("r")
-	ok(String(slot.get("plan", "")) == "rescue" and not bool(slot.get("ready", true)), "the R slot hints it needs a rescue (plan '%s')" % slot.get("plan", ""))
+	ok(String(slot.get("plan", "")) == "down" and not bool(slot.get("ready", true)), "the R slot hints the Boki is down (plan '%s')" % slot.get("plan", ""))
 	# knocked while merged: the merge ends and the Boki pops out beside you, not downed
 	P = merged("pebbit")
 	k = P.kin
@@ -375,7 +375,7 @@ func _ult() -> void:
 	ok(k.state not in ["fused", "downed", "bench"] and k.hp > 0.0 and k.flat_dist(P) < 8.0, "...and the Boki is beside you, not downed (state %s)" % k.state)
 	var rest := MergeRelease.rest_s()
 	ok(k.resting() and k.rest_t > rest - 2.0 and k.rest_t <= rest, "...it rests for about %.0fs (%.1fs left)" % [rest, k.rest_t])
-	ok(k.state != "shoulder" and k.cmd == "follow",
+	ok(k.state != "wisp" and k.cmd == "follow",
 		"...landed beside you pumped, not stowed (state %s cmd %s)" % [k.state, k.cmd])
 	ok(P.ult < 0.2, "...and the bond meter restarts from about 0 (%.2f)" % P.ult)
 	ok(P.merge_cd >= rest - 1.0, "...and Merge waits for the rest (%.1fs)" % P.merge_cd)
@@ -510,7 +510,7 @@ func _ends() -> void:
 		BotKin.fight(m, P, T, 4.0, 1.0)
 		BotKin.upkeep(P)
 		m.step(Match.DT)
-	ok(P.kin.state == "shoulder" and P.kin.cmd == "return" and P.kin.resting(), "a bot does not throw or order a drained Boki (state %s cmd %s)" % [P.kin.state, P.kin.cmd])
+	ok(P.kin.state == "wisp" and P.kin.cmd == "return" and P.kin.resting(), "a bot does not throw or order a drained Boki (state %s cmd %s)" % [P.kin.state, P.kin.cmd])
 	# disengage ends with the fight (and when the merge starts or the Boki is drained)
 	_fresh("pebbit")
 	P = m.player
@@ -957,27 +957,20 @@ func _guards() -> void:
 		if P.draw_t >= 0.0 or P.mel_hold > 0.0 or P.warm_t > 0.0 or (P.ak != null and P.ak.rmb_down):
 			leaked = true
 	ok(not leaked, "a charge, draw or held RMB from before R is dropped, through the transformation and after")
-	# rescue: the Boki's own recovery mid-rescue frees you
+	# a downed Boki is a dim wisp on you: nothing roots you, and when it recovers R is back
 	_fresh("pebbit")
 	P = m.player
 	var kk: Kin = P.kin
 	kk.pos = P.pos + Vector3(2.0, 0, 0); kk.state = "active"; kk.fly = {}
 	kk.go_down()
-	P.teleport(kk.pos)
-	run_for(0.6)
-	ok(kk.rescue_on, "setup: a rescue is under way")
-	kk.down_t = 0.01
-	run_for(0.1)
-	ok(kk.state != "downed" and not kk.rescue_on and kk.rescue_block == 0.0, "its own recovery mid-rescue ends the rescue flag")
-	P.inp["move"] = Vector2(1, 0)
+	run_for(0.3)
+	ok(KinMerge.plan(P) == "down" and not KinMerge.can_cast(P), "setup: the Boki is down and R can't merge")
 	var x0 := P.pos.x
 	run_for(0.4, func(): P.inp["move"] = Vector2(1, 0))
-	ok(P.pos.x - x0 > 0.5, "...and you can move again (no stuck root, %.1fm)" % (P.pos.x - x0))
-	kk.rescue_on = true          # (a stale flag, as the old bug left it) must not root or disarm you either
-	var x1 := P.pos.x
-	run_for(0.4, func(): P.inp["move"] = Vector2(1, 0))
-	ok(P.pos.x - x1 > 0.5, "...a stale flag on a Boki that is up does not root you")
-	kk.rescue_on = false
+	ok(P.pos.x - x0 > 0.5, "...and you move freely while it recovers (%.1fm)" % (P.pos.x - x0))
+	kk.down_t = 0.01
+	run_for(0.1)
+	ok(kk.state != "downed" and KinMerge.plan(P) != "down", "once it recovers the R plan is back (%s)" % KinMerge.plan(P))
 
 # ------------------------------------------------------------------ 6. the warning
 func _warn() -> void:

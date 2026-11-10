@@ -45,23 +45,23 @@ static func ready(h: Hunter) -> bool:
 
 static func boki_with_you(h: Hunter) -> bool:
 	var k: Kin = h.kin
-	return k != null and not k.dead and k.state in ["shoulder", "active", "flying", "returning", "flying_home"]
+	return k != null and not k.dead and k.state in ["wisp", "active", "flying", "returning", "flying_home"]
 
 static func can_cast(h: Hunter) -> bool:
 	return ready(h) and boki_with_you(h)
 
-## What R would do right now: "merge" (Boki on the shoulder), "leap" (Boki out: it comes back and merges),
-## "surge" (no Boki at all), "rescue" (your Boki is down: nothing happens, the meter is kept), "far" (Boki out
-## of leap range: call it back first), or "" (not ready).
+## What R would do right now: "merge" (Boki a wisp on you), "leap" (Boki out: it comes back and merges),
+## "surge" (no Boki at all), "down" (your Boki is a dim wisp, knocked out: nothing happens, the meter is kept),
+## "far" (Boki out of leap range: call it back first), or "" (not ready).
 static func plan(h: Hunter) -> String:
 	if not ready(h):
 		return ""
 	var k: Kin = h.kin
 	if k != null and not k.dead and k.state in ["downed", "reviving"]:
-		return "rescue"
+		return "down"
 	if not boki_with_you(h):
 		return "surge"
-	if k.state == "shoulder":
+	if k.state == "wisp":
 		return "merge"
 	return "leap" if k.flat_dist(h) <= float(KinCommand.rules().get("merge_leap_range", 32.0)) else "far"
 
@@ -88,11 +88,8 @@ static func deny_text(h: Hunter) -> String:
 		return "Bond %d%%: fight together to fill it" % int(h.ult * 100.0)
 	match plan(h):
 		"far": return "Your Boki is too far: call it back first"
-		"rescue": return rescue_text(h)
+		"down": return KinDowned.deny_text(h.kin)
 	return ""
-
-static func rescue_text(h: Hunter) -> String:
-	return "Rescue %s to fuse" % String((h.kin as Kin).rec.get("name", "your Boki"))
 
 ## The weak merge with no Boki at all: short, plain, but the full meter is spent on something.
 static func surge(h: Hunter) -> bool:

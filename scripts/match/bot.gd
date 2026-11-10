@@ -35,7 +35,7 @@ static func fresh(m: Match, o: Ent) -> bool:
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
 const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
-const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
+const URGENT_GOALS := ["revive", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 ## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
 ## decides every FAR_EVERY sim steps (20 Hz) instead of every step, with the skipped time added in; its
@@ -634,7 +634,7 @@ func _use_sig(m: Match, h: Hunter, tgt: Ent) -> void:
 				_: go = d < 9.0 and randf() < 0.3
 		else:
 			var reach := def.cast_range if def.cast_range > 0.0 else 7.0
-			go = (kd < reach or (k.state == "shoulder" and d < 8.0)) and randf() < 0.35
+			go = (kd < reach or (k.state == "wisp" and d < 8.0)) and randf() < 0.35
 			if tgt is Mob and (tgt as Mob).stag_open > 0.0 and kd < reach:
 				go = true
 		if go:
@@ -714,9 +714,6 @@ func _choose(m: Match, h: Hunter) -> void:
 	for o in m.hunters:
 		if o != h and o.team == h.team and o.downed and not o.out:
 			goal = o.pos; gk = "revive"; break
-	if goal == Vector3.INF:
-		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
-		if goal != Vector3.INF: gk = "boki"
 	# a dead teammate: their deathbox while the soul's there, else a revive beacon
 	if goal == Vector3.INF:
 		for b in m.boxes:

@@ -98,12 +98,12 @@ func _follow() -> void:
 		for mb in m.mobs: mb.dead = true; mb.visible = false
 		var d := Vector2(k.seen_pos().x - P.pos.x, k.seen_pos().z - P.pos.z).length()
 		st["max"] = maxf(float(st["max"]), d)
-		if P.grounded and not P.gliding and P.roll_t <= 0.0 and k.state in ["active", "shoulder"]:
+		if P.grounded and not P.gliding and P.roll_t <= 0.0 and k.state in ["active", "wisp"]:
 			st["steady"] = int(st["steady"]) + 1
 			if k.state == "active" and k.flat_dist(P) < 3.5: st["heel"] = int(st["heel"]) + 1
 		if P.gliding:
 			st["glide"] = int(st["glide"]) + 1
-			if k.state == "shoulder": st["glide_up"] = int(st["glide_up"]) + 1
+			if k.state == "wisp": st["glide_up"] = int(st["glide_up"]) + 1
 	_walk(P, Vector2(1, 0), 2.5, watch)
 	ok(k.state == "active" and k.cmd == "follow" and k.flat_dist(P) < 3.5, "walking: out at your side, following (%s, %.1fm away)" % [k.state, k.flat_dist(P)])
 	# a dash, then keep walking
@@ -150,7 +150,7 @@ func _follow() -> void:
 		if k.state == "active": far[0] = maxf(far[0], k.flat_dist(P)))
 	_walk(P, Vector2(0, -1), 1.5, func():
 		for mb in m.mobs: mb.dead = true; mb.visible = false)
-	ok(k.state == "shoulder" or (k.state == "active" and k.flat_dist(P) < 3.0) or k.state in ["returning", "flying_home"], "you walk out of range: it comes back to your side (%s, %.1fm)" % [k.state, k.flat_dist(P)])
+	ok(k.state == "wisp" or (k.state == "active" and k.flat_dist(P) < 3.0) or k.state in ["returning", "flying_home"], "you walk out of range: it comes back to your side (%s, %.1fm)" % [k.state, k.flat_dist(P)])
 	# a threat close by: it stands between you and it
 	_open_ground_for(P, k)
 	var T: Hunter = m.make_hunter("T", 5, "medium", "Rival", "idle", {}, P.pos + Vector3(6, 0, 0))

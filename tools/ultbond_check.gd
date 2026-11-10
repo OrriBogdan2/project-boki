@@ -172,11 +172,11 @@ func _presses() -> void:
 	ok(bool(m.pending_input["throw"]), "a G tap queues the send-out / call-back order")
 	var k: Kin = P.kin
 	KinCommand.tap(P)
-	var sent := k.state != "shoulder"
+	var sent := k.state != "wisp"
 	k.state = "active"        # landed and out (the test arena aim can drop it in the void)
 	k.global_position = P.global_position + Vector3(8, 0, 0)
 	KinCommand.tap(P)
-	var back := ["returning", "flying_home", "shoulder"]
+	var back := ["returning", "flying_home", "wisp"]
 	ok(sent and k.state in back, "G sends the Boki out, and calls it back (%s)" % k.state)
 	k.state = "active"
 	Input.action_press("throw")
@@ -263,7 +263,7 @@ func _release() -> void:
 	ok(P.shield >= P.max_hp * 0.08 - 0.5 and P.shield_t > 0.0,
 		"...and a shield of 8%% max health (%.1f of %.1f)" % [P.shield, P.max_hp])
 	ok(k.resting() and k.rest_t <= 6.0 and k.rest_t > 4.0, "the Boki rests about 6s (%.1fs)" % k.rest_t)
-	ok(k.state != "shoulder" and k.state != "fused" and k.flat_dist(P) < 8.0 and k.cmd == "follow",
+	ok(k.state != "wisp" and k.state != "fused" and k.flat_dist(P) < 8.0 and k.cmd == "follow",
 		"...landed beside you, following, not stowed (state %s, %.1fm)" % [k.state, k.flat_dist(P)])
 	ok(P.merge_cd >= 5.0, "Merge waits for the rest (%.1fs)" % P.merge_cd)
 	_run_for(3.3)

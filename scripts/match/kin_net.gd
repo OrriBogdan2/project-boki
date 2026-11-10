@@ -2,18 +2,25 @@ class_name KinNet
 extends RefCounted
 ## What the Boki command system adds to the network (docs/decisions/0001, 0002, Net.VERSION 0.11.0). Everything
 ## still goes through scripts/core/net.gd; the Match calls these from its snapshot and event code.
-##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, rescue progress, fell in the abyss, rest seconds left (drained after a merge ultimate)]
-##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell now/max, 30 = the form's or rescue's pose id
+##   - Kin snapshot: indices 19+ = [order (KinFollow.CMD_IDS index), down seconds left, ridden (a mount summoned out
+##     under you: 0/1), seconds of calm toward the end-of-fight recovery, rest seconds left (drained after a merge
+##     ultimate)]
+##   - Hunter snapshot: index 26 = the merge form worn ("" when not merged), 27 = merge seconds left, 28/29 = shell
+##     now/max, 30 = the form's pose id
 ##   - Events ["kcmd", kind, nid, x, y, z, extra]: throw (a Sic too), recall (Call back), hop (a leap to your side
-##     or onto you), cmd (a new order; extra = its id), merge_leap, down, scoop, round, merge (extra = the form),
-##     mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), unbond (a captor no longer carries a Boki: KinTrack; extra = its uid; Net 0.17.0; the bond itself starts from the "caught" event, which now carries the owner's nid, and "gdrop" puts a dropped Boki back in the world), scan_start / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game runs the rescue and the recovery timer; other
-##     games get the state and play the moment.
+##     or onto you), cmd (a new order; extra = its id), merge_leap, down, round (a knocked-out Boki recovers), merge
+##     (extra = the form), mcast (a merged form's cast: slot|x|z|radius|seconds), merge_end (extra = why), unbond
+##     (a captor no longer carries a Boki: KinTrack; extra = its uid; Net 0.17.0; the bond itself starts from the
+##     "caught" event, which now carries the owner's nid, and "gdrop" puts a dropped Boki back in the world), scan_start
+##     / scan_stop / scan_done (the capture beam, Capture; nid = the hunter, extra = the Boki's nid). The owner's game
+##     runs the recovery timer; other games get the state and play the moment.
 
 const KIN_AT := 19
 const HUNTER_AT := 26
 
 static func kin_extra(k: Kin) -> Array:
-	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05), 1 if k.down_void else 0, snappedf(k.rest_t, 0.1)]
+	var order := maxi(0, KinFollow.CMD_IDS.find(k.cmd))
+	return [order, snappedf(k.down_t, 0.1), 1 if k.ride else 0, snappedf(k.down_calm, 0.1), snappedf(k.rest_t, 0.1)]
 
 static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() <= KIN_AT + 4:
@@ -21,8 +28,8 @@ static func apply_kin(k: Kin, it: Array) -> void:
 	var ci := int(it[KIN_AT])
 	k.cmd = KinFollow.CMD_IDS[ci] if ci >= 0 and ci < KinFollow.CMD_IDS.size() else "follow"
 	k.down_t = float(it[KIN_AT + 1])
-	k.rescue_t = float(it[KIN_AT + 2]) * float(KinDowned.rules()["rescue_s"])
-	k.down_void = int(it[KIN_AT + 3]) == 1
+	k.ride = int(it[KIN_AT + 2]) == 1
+	k.down_calm = float(it[KIN_AT + 3])
 	k.rest_t = float(it[KIN_AT + 4])
 
 static func hunter_extra(h: Hunter) -> Array:
@@ -33,8 +40,6 @@ static func hunter_extra(h: Hunter) -> Array:
 	var k := MergeKit.of(h)
 	if k != null and k.anim_id != "":
 		pose = "%s~%d" % [k.anim_id, k.anim_n % 100]
-	if pose == "":
-		pose = KinDowned.rescue_pose(h)
 	return [encode_form(f) if shown else "", snappedf(float(h.merge_st.get("t", 0.0)), 0.1), snappedf(sh.x, 0.5), snappedf(sh.y, 0.5), pose]
 
 static func apply_hunter(h: Hunter, it: Array) -> void:
@@ -117,7 +122,7 @@ static func on_event(m: Match, x: Array) -> void:
 				KinTrack.on_net(e as Hunter, String(x[1]), String(x[6]))
 		"down":
 			m.fx.burst(at + Vector3(0, 0.4, 0), (e as Kin).sp["color"] if e is Kin else Color.WHITE, 16, 3.0)
-		"scoop", "round":
+		"round":
 			m.fx.ring(at, 1.2, Color.WHITE, 0.3)
 			m.sfx("recall", at, -4.0)
 		"merge":

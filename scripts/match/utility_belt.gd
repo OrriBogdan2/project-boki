@@ -235,9 +235,6 @@ static func press(h, i: int) -> void:
 		return
 	if h.drink_t > 0.0 or h.kit_t > 0.0:
 		return
-	# rooted while reviving a downed Boki (KinDowned.commit clears the old keys but is not ours to edit)
-	if h.kin != null and h.kin.rescue_on and h.kin.state == "downed":
-		return
 	if float(s.get("cd", 0.0)) > 0.0 or not UtilityUse.can_use(h, String(s["id"])):
 		_feedback(h, fb, "deny")
 		return

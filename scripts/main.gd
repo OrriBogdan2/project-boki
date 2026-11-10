@@ -597,7 +597,7 @@ func _ready() -> void:
 			if a.begins_with("--glove="): so["glove"] = a.substr(8)
 			if a.begins_with("--class="): so["cls"] = a.substr(8)
 			if a.begins_with("--carry-demo="):
-				# test: bring this species and just walk with it (mount, perch or shoulder); --merge-demo merges
+				# test: bring this species and just walk with it (a wisp on you; a mount is ridden); --merge-demo merges
 				so["demo_kin"] = a.substr(13)
 				so["sandbox_demo"] = false
 				so["carry_demo"] = true
@@ -1377,7 +1377,7 @@ func _ability_check() -> void:
 	_ac_run(m, 1.0, func(): T.inp["move"] = Vector2(-1, 0))
 	_ac("trap roots on step", before_root <= 0.0 and (T.root_t > 0.0 or T.hp < T.max_hp) and m.verbs.traps.is_empty(), "root %.2f, took %.0f" % [T.root_t, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
-	# 8. Moon Swap (kin E, performed from the shoulder): trade places
+	# 8. Moon Swap (kin E, performed from a wisp on you): trade places
 	r = _ac_setup(6.0); m = r[0]; P = r[1]; T = r[2]
 	var pa := P.pos; var ta := T.pos
 	KinExec.cast(KinLib.ability("moon_swap"), KinExec.make_cx(m, P, null, P, T.pos, 1.0, "k1", "moon_swap"))
@@ -1605,7 +1605,7 @@ func _grt(name: String, ok: bool, info := "") -> void:
 	print("GRT %-34s %s  %s" % [name, "PASS" if ok else "FAIL", info])
 	if not ok: _grt_fail += 1
 
-## Gives the test player a fresh kin of this species, settled on its shoulder.
+## Gives the test player a fresh kin of this species, settled as a wisp on it.
 func _grt_kin(m: Match, P: Hunter, sp: String, rec_extra := {}) -> Kin:
 	if P.kin:
 		var o: Kin = P.kin
@@ -1920,7 +1920,7 @@ func _grammar_runtime_check() -> void:
 	_grt("merge casts: fused, timed, passives on", ok_cast and k.state == "fused" and is_equal_approx(dur, ms.duration) and P.owner_stat("damage") > 0.19,
 		"%.1fs, damage +%.2f" % [dur, P.owner_stat("damage")])
 	_ac_run(m, dur + float(MergeForm.data()["xform_s"]) + 0.3)       # (the transformation comes first, then the timer; no tiers: the length is fixed)
-	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "shoulder" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
+	_grt("merge ends on its timer, then cooldown", not KinMerge.active(P) and P.merge_cd > 0.0 and k.state == "wisp" and not KinMerge.can_cast(P), "cd %.1f" % P.merge_cd)
 	P.ult = 1.0
 	var blocked := not KinMerge.can_cast(P)
 	_ac_run(m, KinParts.MERGE_SPENT_TIME + 0.1)
@@ -1934,7 +1934,7 @@ func _grammar_runtime_check() -> void:
 	P.teleport(home); T.teleport(home + Vector3(2.0, 0, 0)); _grt_reset(T)
 	P.ult = 1.0; P.merge_cd = 0.0
 	KinMerge.cast(P)
-	_grt("mount merge: giant under you", KinMerge.active(P) and not k.giant.is_empty() and k.state == "shoulder" and P.owner_stat("knockback_resist") > 0.49, "knockback resist %.2f" % P.owner_stat("knockback_resist"))
+	_grt("mount merge: giant under you", KinMerge.active(P) and not k.giant.is_empty() and k.state == "wisp" and P.owner_stat("knockback_resist") > 0.49, "knockback resist %.2f" % P.owner_stat("knockback_resist"))
 	_ac_run(m, 0.2)
 	var ph := T.hp
 	_ac_run(m, 2.4, func(): T.teleport(home + Vector3(2.0, 0, 0)); T.vel = Vector3.ZERO)

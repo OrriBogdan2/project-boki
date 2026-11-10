@@ -126,7 +126,7 @@ func _session(main: Node) -> void:
 		var k = h.kin
 		if k == null: continue      # (no Boki in this save)
 		kin_n += 1
-		if k.state == "shoulder" or k.state == "wild" or k.owner_h != h or k.cmd != "follow":
+		if k.state == "wisp" or k.state == "wild" or k.owner_h != h or k.cmd != "follow":
 			kin_ok = false; print("ROLLING kin start: %s riding=%s %s/%s" % [h.pname, h.riding, k.state, k.cmd])
 	ok(kin_ok and kin_n >= 8, "late joiners and the earlier arrivals start with their active Boki following, none on a shoulder (%d Boki)" % kin_n)
 	var mine: Array = m.hunters.filter(func(h): return h.riding)

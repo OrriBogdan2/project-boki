@@ -23,7 +23,7 @@ static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
 		a["throw_cd"] = randf_range(1.5, 3.5)       # easier bots hold their Boki back more
 		return
 	var low: bool = h.hp < h.max_hp * LOW_HP or k.hp < k.max_hp * LOW_HP
-	if k.state == "shoulder":
+	if k.state == "wisp":
 		if k.cmd == "return" and not low and d < 8.0 and (tgt is Hunter or (tgt is Mob and tgt.mkind == "brute") or randf() < THROW_CHANCE):
 			# a stationary monster is worth guarding; a rival who moves is worth chasing
 			if tgt is Mob:
@@ -48,19 +48,12 @@ static func fight(m: Match, h: Hunter, tgt: Ent, d: float, abil: float) -> void:
 ## The Merge, once the bond is full and a fight is worth it. With the Boki out it leaps back and merges.
 static func merge(h: Hunter, tgt: Ent, d: float) -> void:
 	var plan := KinMerge.plan(h)
-	if plan in ["", "far", "rescue"] or tgt == null:
+	if plan in ["", "far", "down"] or tgt == null:
 		return
 	var worth: bool = (d < MERGE_NEAR and tgt is Hunter) or (d < 5.0 and tgt is Mob and (tgt as Mob).max_hp > 150.0) or (h.hp < h.max_hp * 0.4 and d < 9.0)
 	if worth:
 		h.inp["aim"] = Vector3(tgt.pos.x, tgt.pos.y, tgt.pos.z)
 		h.inp["ult"] = true
-
-## Out of a fight and the Boki is down where it fell: walk into it (unless it fell into the abyss).
-static func rescue_goal(h: Hunter) -> Vector3:
-	var k: Kin = h.kin
-	if k == null or k.state != "downed" or k.down_void or h.downed:
-		return Vector3.INF
-	return k.pos if h.flat_dist(k) < 40.0 else Vector3.INF
 
 ## Out of a fight: a Boki that wandered off is called back, and a returned Boki comes out again once both are healthy.
 static func upkeep(h: Hunter) -> void:
@@ -69,5 +62,5 @@ static func upkeep(h: Hunter) -> void:
 		return
 	if k.state == "active" and k.flat_dist(h) > 6.0 and KinCommand.can_recall(h):
 		k.recall()
-	elif k.state == "shoulder" and k.cmd == "return" and h.hp > h.max_hp * 0.6 and k.hp > k.max_hp * 0.6 and float(h.ai.get("throw_cd", 0.0)) <= 0.0:
+	elif k.state == "wisp" and k.cmd == "return" and h.hp > h.max_hp * 0.6 and k.hp > k.max_hp * 0.6 and float(h.ai.get("throw_cd", 0.0)) <= 0.0:
 		KinCommand.order(h, "follow")

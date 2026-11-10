@@ -2657,17 +2657,17 @@ func on_kin_down(k: Kin) -> void:
 	if k.owner_h == player:
 		add_feed("%s is down" % k.rec.get("name", "Your Boki"))
 		if hud:
-			hud.toast("%s is down  ·  %s" % [k.rec.get("name", "Your Boki"), "run into it to pick it up" if not k.down_void else "it will come round on its own"], Color("ffb0a0"))
+			hud.toast("%s is down  ·  a dim wisp on you, back in %ds" % [k.rec.get("name", "Your Boki"), ceili(k.down_t)], Color("ffb0a0"))
 	elif k.owner_h and k.owner_h.ctrl == "bot" and k.owner_h.kin == k and k.owner_h.kin2 and (k.owner_h.kin2 as Kin).hp > 0.0:
 		k.owner_h.get_tree().create_timer(0.6, false).timeout.connect(func(): if is_instance_valid(k.owner_h): k.owner_h.swap_kin())
 	KinNet.event(self, "down", k)
 	_check_team(k.team)
 
-## Its owner scooped it up, or it came round on its own.
-func on_kin_up(k: Kin, rescued: bool) -> void:
+## A knocked-out Boki recovered (KinDowned: its timer ran out or the fight ended): it can be summoned again.
+func on_kin_up(k: Kin) -> void:
 	if k.owner_h == player and hud:
-		hud.toast("%s is back%s" % [k.rec.get("name", "Your Boki"), "" if rescued else " (it came round)"], k.sp["color"])
-	KinNet.event(self, "scoop" if rescued else "round", k)
+		hud.toast("%s is back: ready to summon" % k.rec.get("name", "Your Boki"), k.sp["color"])
+	KinNet.event(self, "round", k)
 
 # ------------------------------------------------------------------ kin combat events
 ## A kin used an ability: its name pops up over it so you can read the fight.
@@ -2972,7 +2972,7 @@ func _update_vision() -> void:
 		h.unseen = looking and h != player and not can_see(player.team, h)
 	for k in kins:
 		var o: Hunter = k.owner_h
-		k.unseen = looking and o != null and o.team != player.team and k.state != "shoulder" and not sees(player.team, k.pos)
+		k.unseen = looking and o != null and o.team != player.team and k.state != "wisp" and not sees(player.team, k.pos)
 
 func _exit_tree() -> void:
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
@@ -3610,7 +3610,7 @@ func _process(delta: float) -> void:
 			e.lod_dt = 0.0
 		else:
 			e.lod_dt += delta
-		if e.unseen or (e.owner_h and (e.owner_h as Hunter).unseen and e.state == "shoulder"):
+		if e.unseen or (e.owner_h and (e.owner_h as Hunter).unseen and e.state == "wisp"):
 			e.visible = false
 	for e in mobs:
 		if _render_now(e, cf, near2):
@@ -3935,7 +3935,7 @@ func step(dt: float) -> void:
 			for x in hunters:
 				if x.team != player.team and x.kin and not x.out:
 					x.teleport(world.free_spot_near(player.pos + Vector3(3.0, 0, 1.5), [player.pos], 1.0, 0.4, 8.0))
-					if x.kin.state != "shoulder": x.kin.teleport(x.pos + Vector3(0.8, 0, 0))
+					if x.kin.state != "wisp": x.kin.teleport(x.pos + Vector3(0.8, 0, 0))
 					x.lives = 1
 					eliminate(x, null, "knocked out")
 					break
@@ -4411,7 +4411,7 @@ func _separate() -> void:
 	for mb in mobs:
 		if not mb.dead and not Shrubling.hidden(mb): bodies.append(mb)      # (you walk into a disguised Shrubling like any bush)
 	for k in kins:
-		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead and not KinLoss.cradled(k): bodies.append(k)
+		if k.state in ["active", "wild", "dazed", "returning"] and not k.dead: bodies.append(k)
 	# only bodies in the same or a neighbouring 4m cell can touch (radii are well under 2m): a grid
 	# instead of every pair, in the same pair order as before
 	var grid := {}
@@ -5564,7 +5564,7 @@ func _flags(h: Hunter) -> int:
 	if hk >= 0: f |= 2048 | ((hk + 1) << 15)
 	return f
 
-const KIN_STATES := ["shoulder", "flying", "flying_home", "active", "returning", "downed", "reviving", "wild", "dazed", "fused"]
+const KIN_STATES := ["wisp", "flying", "flying_home", "active", "returning", "downed", "reviving", "wild", "dazed", "fused"]
 const MOB_STATES := ["idle", "chase", "windup", "lunge", "recover"]
 
 func _ser(e: Ent) -> Array:
@@ -5981,7 +5981,7 @@ func _net_ev(x, from: String) -> void:
 			if is_host:
 				var k: Kin = ents_by_id.get(String(x[1]), null)
 				var h: Hunter = ents_by_id.get(String(x[2]), null)
-				if k and h and not k.dead and KinLoss.scannable_by(h, k) and not KinLoss.cradled(k):
+				if k and h and not k.dead and KinLoss.scannable_by(h, k):
 					_catch(h, k)
 		"caught":
 			var k: Kin = ents_by_id.get(String(x[1]), null)
@@ -6320,7 +6320,7 @@ func _update_aim(alpha: float) -> void:
 		aim_line.visible = false
 	# where your kin would land if you threw it now
 	var k: Kin = p.kin
-	if k and k.state == "shoulder" and k.settle >= 0.35:
+	if k and k.state == "wisp" and k.settle >= 0.35:
 		var t := Vector2(aim.x - at.x, aim.z - at.z)
 		if t.length() > 9.0:
 			t = t.normalized() * 9.0

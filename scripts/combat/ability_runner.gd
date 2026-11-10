@@ -57,7 +57,7 @@ func use(slot: String, ctx := {}) -> bool:
 	var c := ctx.duplicate()
 	c["slot"] = slot
 	c["ability"] = d.id
-	# "as": someone else performs it (a kin on your shoulder lends you its ability)
+	# "as": someone else performs it (a kin wisp on you lends you its ability)
 	var who: Node = c.get("as", caster)
 	c.erase("as")
 	Effects.run(d.effects, who, c)

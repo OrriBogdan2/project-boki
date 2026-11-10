@@ -558,12 +558,12 @@ func _kin_ability() -> void:
 	var r := setup("thief", 6.0, "puddlet")
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	var k: Kin = P.kin
-	ok("C: kin starts on the shoulder", k.state == "shoulder")
+	ok("C: kin starts on the shoulder", k.state == "wisp")
 	aim_at(P, P.pos + Vector3(3.0, 0, 0))
 	P.inp["kin_ab"] = true
 	m.step(DT)
 	var spent := not k.runner.is_ready("k1")
-	ok("C: casts its own active, through you (the Boki stays on the shoulder)", k.state == "shoulder" and spent, "state %s" % k.state)
+	ok("C: casts its own active, through you (the Boki stays on the shoulder)", k.state == "wisp" and spent, "state %s" % k.state)
 	step(m, 0.5)
 	ok("C: doesn't touch the archetype E", float(P.ak.cd["e"]) <= 0.0)
 	# G: send / recall (the old throw) still works
