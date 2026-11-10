@@ -19,7 +19,7 @@ const STATES := {
 	"perch": {"clip": "idle", "meta": {"kstate": "perch"}},
 	"attack": {"clip": "attack", "meta": {"kstate": "attack"}},
 	"ability": {"clip": "ability", "meta": {"pulse": 777}},
-	"hit": {"clip": "idle", "meta": {"hit": true}, "layer": true},
+	"hit": {"clip": "idle", "meta": {"hit": {"n": 1}}, "layer": true},
 	"faint": {"clip": "sleep", "meta": {"kstate": "faint"}},
 }
 const MAX_BLEND := 0.2        # s a state may take to show
@@ -49,7 +49,6 @@ func run(main: Node) -> void:
 		for st in STATES:
 			_state(id, st, STATES[st], k, rig)
 		k.queue_free()
-	await _primitive_hits(main)
 	if out != "":
 		await _sheet(main)
 	print("BOKISTATE DONE, failures: %d" % bad)
@@ -99,31 +98,8 @@ func _reset(k: Node3D, rig: BokiRig) -> void:
 	rig._pulse = 0
 	rig._hit_left = 0.0
 	rig._hit_k = 0.0
-	rig._hit_was = false
+	rig._hit_n = 0
 	rig.set_clip("idle", 0.0)
-
-## The primitive (KinPuppet) Boki: a hit on the kin itself jolts it (squash and ears), not only its hunter's.
-func _primitive_hits(main: Node) -> void:
-	var n := 0
-	for id in Data.KIN:
-		if id in Rig.SPECIES_LIST:
-			continue
-		var k := Models.kin(id)
-		main.add_child(k)
-		var pup: KinPuppet = null
-		for c in k.get_children():
-			if c is KinPuppet: pup = c
-		if pup == null or k.get_node("Body/Flex").has_node("BokiRig"):
-			k.queue_free()
-			continue
-		await main.get_tree().process_frame
-		var calm := absf(pup.sq_v) + absf(pup.ear_v)
-		k.set_meta("hit", true)
-		pup._process(STEP)
-		ok(absf(pup.sq_v) + absf(pup.ear_v) > calm + 1.0, "%s (puppet) jolts when hit" % id)
-		n += 1
-		k.queue_free()
-	ok(n > 0, "%d primitive species checked for the hit jolt" % n)
 
 ## Summed bone turn and shift off the rest pose at `at` seconds into the current clip.
 func _bones_off_rest(rig: BokiRig, at: float) -> float:

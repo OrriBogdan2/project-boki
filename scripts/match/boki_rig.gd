@@ -3,7 +3,7 @@ extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does. A match hit ("hit" meta) is a flinch layer on Flex over whatever clip runs; a downed Boki
+## the body does. A match hit (KinFlinch, "hit" meta) is a jolt on Flex over whatever clip runs, and its eased _hit_k shows the sad face; a downed Boki
 ## (kstate "faint") lies in the sleep clip at DOWN_SPEED with its eyes shut, then a quick hop
 ## clip for GETUP_S when it comes round: no clip of its own is baked (docs/art/kin/RIGGED_BOKI.md).
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
@@ -124,8 +124,6 @@ const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
 const HIT_WINDOW := 0.15      # s a hit keeps the flinch asked for
 const HIT_RATE := 8.0         # 1/s the flinch eases in and out at (in within 0.13 s, never a pop)
-const HIT_LEAN := 0.3         # rad it rocks back at full flinch
-const HIT_SQUASH := 0.12      # how much shorter and wider it squats at full flinch
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -174,7 +172,8 @@ var _shot_left := 0.0
 var _shot := ""
 var _hit_left := 0.0           # s of the flinch still asked for
 var _hit_k := 0.0              # the flinch layer, 0..1
-var _hit_was := false
+var _hit_n := 0               # the hit count (KinFlinch) last frame
+var _flinch_was := false      # the hunter-side flinch pose last frame
 var _was_down := false
 var _blink_t := 2.0
 var _blink := 0.0
@@ -184,6 +183,7 @@ var _look_to := Vector2.ZERO
 var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
+var _flinch := KinFlinch.new()
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -228,6 +228,7 @@ func _ready() -> void:
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
+	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
 
@@ -261,18 +262,19 @@ func _process(dt: float) -> void:
 	player.active = seen
 	if not seen:
 		return
+	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
+## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	var squat := _hit_k * HIT_SQUASH
-	flex.rotation = Vector3(_hit_k * HIT_LEAN, 0.0, 0.0)
-	flex.scale = Vector3(girth * (1.0 + squat * 0.5), 1.0 - squat, lerpf(1.0, girth, 0.5) * (1.0 + squat * 0.5))
-	flex.position = Vector3(0, _flex_y, 0)
+	flex.rotation = _flinch.rot
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
 		body.rotation = Vector3.ZERO          # home's work poses swing Body: here the clip does the swinging
@@ -301,11 +303,13 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
-	# its own hit, or its hunter's (KinCompanion's flinch pose)
-	var hit: bool = root.get_meta("hit", false) or String(root.get_meta("pose", "")) == "flinch"
-	if hit and not _hit_was:
+	# its own hit (KinFlinch counts them), or its hunter's (KinCompanion's flinch pose)
+	var hits: int = int((root.get_meta("hit", {"n": 0}) as Dictionary)["n"])
+	var flinching := String(root.get_meta("pose", "")) == "flinch"
+	if hits != _hit_n or (flinching and not _flinch_was):
 		_hit_left = HIT_WINDOW
-	_hit_was = hit
+	_hit_n = hits
+	_flinch_was = flinching
 	_hit_left -= dt
 	_hit_k = move_toward(_hit_k, 1.0 if _hit_left > 0.0 else 0.0, HIT_RATE * dt)
 	var down := String(root.get_meta("kstate", "")) == "faint"

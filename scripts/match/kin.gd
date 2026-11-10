@@ -1084,7 +1084,6 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		return
 	model.set_meta("kstate", _puppet_state())
-	model.set_meta("hit", flash_t > 0.0)
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":

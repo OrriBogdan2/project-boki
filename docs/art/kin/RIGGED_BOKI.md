@@ -52,13 +52,20 @@ crossfade; the flinch eases in over 0.125 s). `--boki-state-check --shots-dir=<d
 | work (chop, mine, carry, tend) | garden | `kwork` | the work clip |
 | attack, ability | match | `kstate` attack, `pulse` | `attack`, `ability` |
 | perch | match | `kstate` perch | `idle` (the shoulder pose is on `Kin`) |
-| hit | match | `hit` (`Kin.flash_t`), or pose `flinch` (its hunter hit) | flinch layer on Flex over the running clip: rocks back, squats, sad face; eases in and out |
+| hit | match | a `KinFlinch` hit (any damage event), or pose `flinch` (its hunter hit) | KinFlinch jolt on Flex over the running clip, sad face while the hit is fresh |
 | faint | match | `kstate` faint (downed) | `sleep` at 0.6x (a slow breath) with the eyes shut, rolled onto its side by `Kin` (`KinDowned.LIE_ROLL`); on revive the `hop` clip for 0.3 s as the get-up, then idle. No clip of its own is baked: a dedicated `down` clip per species is the alternative |
 
 The 29 primitive species (`KinPuppet`): idle, walk, run, attack (`att_k`), nap (`sleep_k`), faint (`down_k`: a per-plan slump `DOWN_T`, eyes shut, slow breath, limbs tucked, and a 0.3 s spring `getup_k` on revive; `--kin-downed-check`), perch (`perch_k`),
-play (`happy_k`), hit (a squash-and-ears jolt on the "hit" meta, as on its hunter's flinch; checked per species). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
+play (`happy_k`), hit (the KinFlinch jolt, and the ears-and-squash kick on its hunter's flinch pose). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
 
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
+
+Hit flinch: the glbs carry no hit clip. Every damage event to a Boki (owned, wild, summoned; not burn or other
+damage-over-time ticks) reaches `Oomph.react`, which calls `KinFlinch.hit` (meta "hit" on the model root). `KinFlinch`
+springs Flex (tilt, shove away from the attacker, squash), and `BokiRig._keep_flex` adds it, as `KinPuppet` does for
+the primitive bodies. Size of the jolt follows the hit's share of max health and falls with mass; the time to settle
+grows with mass (0.20 s light to 0.38 s heavy); each body plan jolts its own way (`KinFlinch.PLAN`). Checks:
+`--boki-react-check`; `--boki-flinch-shots --shots-dir=<dir>` (GPU strip of 6 species).
 
 Eyes: a visible eye about 18-20% of the head's width (the owner asked for smaller eyes in game). The dome is bigger
 than what shows: the head covers its rim. Past that the high cameras and `CamRig.char_lean` make it take the face.

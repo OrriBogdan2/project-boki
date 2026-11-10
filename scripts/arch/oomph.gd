@@ -59,6 +59,9 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
+	elif target is Kin and target.model:
+		var away := target.pos - by.pos if by and is_instance_valid(by) else Vector3.ZERO
+		KinFlinch.hit(target.model, away, frac, (target as Kin).mass())
 
 ## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
 ## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
