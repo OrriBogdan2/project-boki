@@ -4,7 +4,7 @@
 	"name": "Storm Arc",
 	"short": "Arc",
 	"flavor": "On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.",
-	"theme": "tempest",
+	"theme": "flying",
 	"tier": 1,
 	"from": "kin",
 	"range": 7,

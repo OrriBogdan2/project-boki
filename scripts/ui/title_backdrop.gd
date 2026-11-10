@@ -1,9 +1,9 @@
 class_name TitleBackdrop
 extends Control
-## The title screen's backdrop: the Hunters' painted splashes (art/brand/title/<archetype>.jpg), one at a time,
+## The title screen's backdrop: the Hunters' painted splashes (Portraits.art_path, like every screen), one at a time,
 ## each held still and crossfading to the next, in place of a 3D scene. (The slow push-in and pan was removed
 ## Nov 6: the owner read it as screen shake, mostly the lurch when a fresh, un-zoomed splash faded in over a
-## zoomed, panned one.)
+## zoomed, panned one. It stays still: no drift, so nothing here depends on Screen shake.)
 
 const ORDER := ["juggernaut", "gunslinger", "mage", "archer", "bulwark", "rimewright",
 	"ostra", "thief", "dolm", "ashwick", "dredge", "tender"]
@@ -25,7 +25,7 @@ func _ready() -> void:
 
 func _next() -> void:
 	var tr := TextureRect.new()
-	tr.texture = load("res://art/brand/title/%s.jpg" % ORDER[idx % ORDER.size()])
+	tr.texture = load(Portraits.art_path(ORDER[idx % ORDER.size()], true))
 	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE

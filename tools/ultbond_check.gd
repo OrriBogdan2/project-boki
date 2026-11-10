@@ -188,6 +188,21 @@ func _presses() -> void:
 	ok(wheel_open and not KinWheel.is_open(P) and P.inp.has("wheel_pick"),
 		"holding G opens the order wheel, letting go picks")
 	ok(KinCommand.order(P, "guard") and k.cmd == "guard", "a wheel order is applied (the Boki is told to guard)")
+	await _quick_orders(P)
+
+## The quick order keys (KinKeys) give the same orders as the wheel, from the match's input step.
+func _quick_orders(P: Hunter) -> void:
+	var k: Kin = P.kin
+	for o in [["kin_return", "return"], ["kin_hold", "guard"]]:
+		P.inp.erase("wheel_pick")
+		Input.action_press(o[0])
+		m._gather_input()
+		Input.action_release(o[0])
+		var picked := String(P.inp.get("wheel_pick", ""))
+		KinCommand.apply_pick(P)
+		var cap := Settings.key_cap(o[0])
+		ok(picked == o[1] and k.cmd == o[1], "%s gives the %s order (picked '%s', now %s)" % [cap, o[1], picked, k.cmd])
+		await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ the bond hook
 func _bond() -> void:

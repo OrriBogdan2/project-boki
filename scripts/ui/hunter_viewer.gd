@@ -142,7 +142,7 @@ func set_hunter(hunter_id: String) -> void:
 	fx.get_parent().get_child(0).queue_redraw()
 
 func _frame(col: Color) -> StyleBox:
-	return UI.frame(Color(0.05, 0.045, 0.08, 0.96), 14, Color(col, 0.45), 1, 14, 12)
+	return UI.frame(Color(UI.NIGHT, 0.96), 14, Color(col, 0.45), 1, 14, 12)
 
 func _rebuild_body() -> void:
 	if _body:
@@ -310,7 +310,7 @@ func select(i: int) -> void:
 		var row: Control = rows[j]
 		if row is AbilityClip:
 			var edge := Color(col, 0.95) if j == slot_i else Color(col, 0.35)
-			row.add_theme_stylebox_override("panel", UI.frame(Color(0.04, 0.035, 0.07, 0.96), 10, edge, 1, 6, 6))
+			row.add_theme_stylebox_override("panel", UI.frame(Color(UI.NIGHT, 0.96), 10, edge, 1, 6, 6))
 			(row as AbilityClip).play(j == slot_i)
 	slot_changed.emit(current_slot())
 
@@ -339,7 +339,7 @@ func tick(dt: float) -> void:
 	anim.update(dt, s)
 	# powering up: the Hunter's light builds and the body thrums; the burst pops it
 	glow.light_energy = 6.0 * power_k + (5.0 * maxf(0.0, 1.0 - burst_t / 0.6) if burst_t >= 0.0 else 0.0)
-	var shake := 0.018 * power_k * power_k
+	var shake := 0.018 * power_k * power_k * float(Settings.get_v("screen_shake"))   # 0 holds it still
 	model.position = Vector3(sin(spin_t * 61.0) * shake, 0.04 * power_k, cos(spin_t * 47.0) * shake)
 	if burst_t >= 0.0:
 		burst_t += dt
