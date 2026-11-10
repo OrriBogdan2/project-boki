@@ -67,10 +67,10 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | LMB tap: throw / recall | - | (a) | Matches; the throw now leaves the hand after one frame of wind-up (e625aa8e) |
 | Passive: the hammer's knock doesn't Crush | MED | (b) | `_mace_hit` arms the knock window; `bjorn audit: the thrown hammer knocking a foe into a wall Crushes it` |
 | Passive: foe-into-foe Crush invented | MED | (b) | Removed (data: walls only); `bjorn audit: a blow that knocks a foe into another foe ... doesn't Crush` |
-| Passive: Guard meter and Shield Slam invented | MED | (c) | Every kit has a built resource with an armed payoff (ArchKit's payoff design: Rage, Cash In, ...); Guard is Bjorn's. Owner question below |
+| Passive: Guard meter and Shield Slam invented | MED | (b) | Owner decision 2026-11-07: cut. No resource, no Guard HUD, no Shield Slam; the passive is Crushed only (`combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam` in the combo check, and the `bulwark: the source kit has no Guard meter` line in the archetype check) |
 | Passive: 8 damage on a Crush | MED | (c) | The stun rides a hit (Ent.hurt ignores a 0-damage hit); 8 is small. Kept, ours |
 | RMB: rises after 0.2 s | MED | (a) | 0.1 s (e625aa8e); `bjorn parity RMB: the aegis is up 0.1 s into the hold` |
-| RMB: does it block front melee? | MED | (b) | Yes now: any hit from a foe in its 140 degree arc lands on the aegis (its HP, Guard), as the data's "blocks all damage from the front"; damage over time and blows from behind still land. `bjorn audit: the raised aegis takes a melee blow from the front`, `a blow from behind still lands on him` |
+| RMB: does it block front melee? | MED | (b) | Yes now: any hit from a foe in its 140 degree arc lands on the aegis (its HP), as the data's "blocks all damage from the front"; damage over time and blows from behind still land. `bjorn audit: the raised aegis takes a melee blow from the front`, `a blow from behind still lands on him` |
 | RMB: what the aegis stops (Nov 9 pass) | MED | (b) | Data: "blocks all damage from the front"; footage: beams stop at it (0217, 0226), it breaks with SHIELD BROKEN. Hits from its 140 degree arc (melee, abilities, shots) land on it with their stun, slow, root and knock; its wall stops foes' shots in flight, so Grimble's hand and Kael's chain never reach him or the ally behind it; shots and blows from behind land. Fixed: Kael's chain used to anchor to the aegis as if it were a wall (now a miss). A beam also cutting at the aegis (allies behind it) waits for ext/barrier-block-parity. Not in the source, kept: damage over time, pulls that are not hits, move speed behind it (60%, the footage never shows him walking), the 160 HP numbers. `bjorn audit: a shot from the front is stopped`, `Kael's chain from the front`, `Grimble's hand from the front/behind`, `a stun, slow and root riding a hit from the front` |
 | Shield Charge: whole-body invulnerable | LOW | (c) | Data: "shield briefly Invulnerable" during the bash; the shield is in front of the body for the whole dash, so the whole-body window is the same in practice. Kept |
 | Shift: cooldown 9 vs data 8 | LOW | (b) | `dash.cd` 8 (ranks 6.5 / 5) |
@@ -87,7 +87,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive | knock into wall/foe | Crushed: stun 1.0 and 8 damage when any knock of his (the hammer out or back, Crushing Blow of any charge, 360 Smash, Shield Charge, Shield Slam) drives a foe into a wall; no heal. Guard from blocking (50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit). Guard stays our own loop |
+| Passive | knock into wall/foe | Crushed: stun 1.0 and 8 damage when any knock of his (the hammer out or back, Crushing Blow of any charge, 360 Smash, Shield Charge) drives a foe into a wall; no heal. No Guard meter | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit). The Guard meter was cut (owner 2026-11-07) |
 | LMB | tap | War hammer thrown to the cursor (clamped to 9 m, at least 2.5 m), 24 m/s, through foes (12); stays planted (head-down in the ground under an upright gold beacon ray with rising chevrons, your team sees foes within 4.5 m) until called back | Lands at the cursor, stays until recalled | Matches; no auto-return |
 | LMB | tap again | Recall: flies back hitting on the way (12), caught with an ember flash | 175 out, 175 back | Equal hits, as the source |
 | LMB | hold | Owner item 59: side-on and crouched, the shield arm forward, the hammer whirling round him at arm's length (2.5-4 turns a second with the charge, a gold-orange trail behind its head, a whoosh each turn), turning with the cursor (walks at 55%); a glint on the head from 0.6 s that grows. The whirl is the charge motion only, nothing is hit until the release (the owner's call is open: ext is asking). At full (1.25 s) a short ring-free flash on its head, a click and the cursor flare open the perfect window (0.18 s, the glint burning white-hot while it's open), the whirl still going. Release: Crushing Blow 36-66 (3x-5.5x the throw), 180 degree reach 2.8 m, knock 5-13, stun 0.4 at full; a flaming crescent (white-yellow core, orange and red edges); the slam steps him 1.5-1.8 m forward in 0.24 s; white dust on the target, a debris trail as it flies | A static charged swing, no lunge (footage) | The whirl, the forward step and the walk follow the owner (the whirl is item 59, over the footage notes); tracking, glint, flare, crescent and ratios follow the footage |
@@ -171,17 +171,16 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 | E zone | one burst 1 s after the cast, 26 heal, foes slowed 25%, cooldown 11 s | a column for 1 s, then a 4 s zone round the hammer (wherever it is, following it): 2 every 0.5 s, ending in a burst of 18 (the aegis mend 60 and the revive start on the burst); no foe slow | the 4 s zone length, the 2-per-tick and the burst 18 are our picks (the data gives no duration or numbers): a full zone gives 34 against the old 26 |
 | E cooldown | 11 s | 12 s (rank 3: 8 s) | seconds taken from the data directly (12 s base, -4 s at the third upgrade) |
 | E ranks | rank 2 healing +25%, rank 3 +25% and +0.5 m, +10 heal | rank 2 healing +25%, rank 3 the cooldown to 8 s and healing +50% in all | source II +25% heal, III -4 s, IV +25% heal; our rank 3 folds III and IV |
-| Passive | heal 24 on a Crush; only a Bash, Shield Charge or full Crushing Blow could Crush | no heal; any Crushing Blow, the 360 Smash, the Shield Charge and the Shield Slam Crush | stun 0.5 and 8 damage kept (our numbers) |
+| Passive | heal 24 on a Crush; only a Bash, Shield Charge or full Crushing Blow could Crush | no heal; any Crushing Blow, the 360 Smash, the Shield Charge Crush | stun 0.5 and 8 damage kept (our numbers) |
 | Bash | RMB tap or release after a block, plus Shift behind the aegis | Shift behind the aegis only; an RMB tap does nothing | none |
 | Shield Charge cooldown | spent a dash charge | its own 6 s cooldown on the RMB slot (the old RMB cooldown number), 4.5 s at dash rank 2, 3 s at rank 3; the HUD shows it on the aegis | 6 s taken directly; the -1.5 s per rank is the data's Shield Bash and Spin Dash upgrade |
-| Shield Slam | RMB tap with 50 Guard | the Shield Charge ends in it with 50 Guard (same numbers, a 0.3 s lane tell replaced by the charge) | none |
 | Dash refund | missing | rank 3: a 360 Smash that hits a foe refunds the Shield Charge | the data's fourth upgrade lands on our last rank |
 | Shield upgrades | rank 3 +60 HP | rank 2 +25% HP (200), rank 3 +50% HP (240), regen 20 -> 30 per second, the post-break lock 3 -> 2 s, the wait 2 -> 1.4 s | +25% per rank from the data; the repair numbers are ours (the data says "faster") |
 
 Rank paths that do not fit our system: the data's four tiers fold into our three (III and IV share our rank 3); the upgrade table at the top lists the numbers per rank.
 
 ## Scaling
-Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Slam 18; Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
+Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
 
 ## Telegraphs (audit C: every ground shape is gameplay, drawn at the hit's true size)
 
@@ -192,7 +191,6 @@ Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means game
 | Crushing Blow (LMB held) | a 180 degree crescent, outer edge at `lmb.smash_reach` 2.8 m | `_strike` fan, 2.8 m, 180 degrees | all | was 0.85 to 1.0 x 2.9 m by charge (2.47 to 2.9); now a constant 2.8. The band's inner hole (1.1 m) is style: the hit has no hole |
 | 360 Smash (Shift, Whirl) | swirl, outer edge at `dash.spin_r` 2.2 m | 360 degree strike, 2.2 m | all | was 2.1 to 2.7 m (a scale swell); now a constant 2.2 |
 | Shield (RMB held) | the curved aegis wall, 4.2 m (`rmb.shield.len`), and a double chevron `push` 2.0 m long, as wide as the wall | foes touching the wall are shoved `push` | all | the chevron was 0.7 x the wall; now the full wall width |
-| Shield Slam (Guard 50 + Shift) | a gold fan, `rmb.slam.radius` 2.6 m, half angle 50 degrees (`BASH_HALF`) | cone radius 2.6, angle 100 | all | was a 69 degree fan against a 100 degree cone |
 | Mending Ground (E) | circle at `e.radius` 3.5 m | 3.5 m zone | all | already true |
 | Faultline (X) | lane `x.width` 4.5 m | the cells' width | all | already true |
 
@@ -211,7 +209,7 @@ Source-faithful, kept: the crescent's hollow band, the swirl's hollow centre.
 | Full Crushing Blow into a wall | Crushed | same |
 | Half-charged blow into a wall | Crushed too (any knock) | same |
 | RMB tap | Nothing (no Bash on the RMB) | same |
-| Aegis up, Shift | Shield Charge on its own 6 s cooldown, Crushed on a wall (stun, no heal); at 50 Guard it ends in a Shield Slam | same |
+| Aegis up, Shift | Shield Charge on its own 6 s cooldown, Crushed on a wall (stun, no heal) | same |
 | 360 Smash at a foe | No hit on the way, one spin hit on arrival; into a wall it Crushes; at rank 3 a hit refunds the Shield Charge | same |
 | Hold LMB, Shift | Short dash on a full charge, still charging; let go in it, the swing goes at once | same, `bjorn #51` lines |
 | Hold LMB, jump, let go in the air | Charges on through the jump; the swing goes in the air, no step, his speed kept | `bjorn #51` lines |
@@ -252,12 +250,11 @@ Suggestions, not built (parity first): the recall catch lands at 0.17 s, before 
 | LMB release (Crushing Blow) | `bul_smash` | from the coil, sweep from behind to front in one frame, crash down, the step, 0.4 s recovery |
 | LMB release in the window (perfect) | `bul_launch` | from the coil, a full-body heave after the hammer (stretched, the back leg driving), airborne with the knees tucked over the 0.3 s launch, the front leg reaching, a hard braced plant and skid, a slow rise |
 | RMB hold (aegis) | `bul_guard` (held) | braced low behind it |
-| Shield Slam (Guard 50, Shift behind the aegis) | `bul_slamshield` | played as the charge arrives |
 | Aegis broken | `bul_break` | rocked back, shield arm flung wide |
 | Shift (360 Smash) | `bul_whirl` | a hard 0.17 s run-up, one full turn in 0.16 s with the hammer at arm's length while he slides on, a low crouched recovery to 0.58 s |
 | Shift aegis up / LMB held / long dash | `bul_charge`, `bul_short`, `bul_lumber` | |
 | E (Mending Ground) | `bul_mend` | hammer hauled to the sky, driven down |
-| Payoffs / procs | `bul_crush`, `bul_armed` | the hammer raised in triumph; a Guard pip shrug |
+| Payoffs / procs | `bul_crush` | the hammer raised in triumph |
 | X (Faultline), 10 fps beats | `bul_ult_wind` (held), `bul_ult_slam` | planted wide, the hammer hauled overhead and leaning back (0.4 s); one frame down into the ground, a deep crouch through the 0.2 s plant, then the legs free to walk while the back comes up |
 Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 

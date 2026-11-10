@@ -14,7 +14,7 @@ extends Node3D
 ## - his aegis: an ivory dome over the raised wall (HeroVfx "aegis", a shell), rising out of the ground, flashing on
 ##   a block or a push, cracking as it weakens (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden), with a pulsing double chevron in front of it showing its push
-## The aegis's moments, the Shield Slam, Mending Ground and Faultline are HeroVfx data (content/vfx/bulwark.json).
+## The aegis's moments, Mending Ground and Faultline are HeroVfx data (content/vfx/bulwark.json).
 
 const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
@@ -366,9 +366,8 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 
 # ------------------------------------------------------------------ the aegis
 ## Follows the raised shield (the verbs wall dict): its node is hidden and his dome drawn over it, the curve's
-## centre behind the wall's midpoint so its apex stands AEGIS_OUT past the wall line. `hurt` 0..1 cracks it;
-## `armed` pulses it.
-func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
+## centre behind the wall's midpoint so its apex stands AEGIS_OUT past the wall line. `hurt` 0..1 cracks it.
+func aegis_show(w: Dictionary, hurt: float) -> void:
 	var nd: Node3D = w.get("node")
 	if nd and is_instance_valid(nd):
 		nd.visible = false
@@ -383,8 +382,7 @@ func aegis_show(w: Dictionary, hurt: float, armed: bool) -> void:
 	dome.global_transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)) * Basis.from_scale(extent),
 		Vector3(c.x, float(w["y"]) + 0.02, c.y))
 	KitShaders.param(dome, "life", hurt)
-	var pulse := 0.3 + 0.2 * sin(Time.get_ticks_msec() * 0.012) if armed else 0.0
-	KitShaders.param(dome, "shine", aegis_hit * 1.5 + pulse)
+	KitShaders.param(dome, "shine", aegis_hit * 1.5)
 
 ## The dome, made on first use: a HeroVfx shell, kept with these effects so it goes when they do.
 func _aegis() -> MeshInstance3D:

@@ -111,8 +111,6 @@ func _totals(n: Dictionary, k: ArchKit) -> void:
 	if k is JuggernautKit:
 		_add(n, "lunge perfect", k.perfects)
 		_add(n, "chain reel", k.warchain.reels)
-	elif k is BulwarkKit:
-		_add(n, "shield slam", k.shield_slams)
 	elif k is DolmKit:
 		_add(n, "hops", k.hop.hops)
 	elif k is AshwickKit:
