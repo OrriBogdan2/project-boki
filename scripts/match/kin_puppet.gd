@@ -11,7 +11,7 @@ extends Node
 ##
 ## It reads a few metas on the kin root, all optional:
 ##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
-##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
+##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder) | "carried" (held in arms at home)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
 ##   "guard", "alert" (tall, ears up), "point" (leaning in, a paw up), "whine" (ears and tail down),
@@ -31,6 +31,7 @@ var sleep_k := 0.0
 var air := 0.0
 var happy_k := 0.0
 var perch_k := 0.0
+var carried_k := 0.0
 
 var root: Node3D
 var body: Node3D
@@ -142,7 +143,8 @@ func _process(dt: float) -> void:
 	var gp := root.global_position
 	var spd := (gp - pos_prev).length() / dt
 	pos_prev = gp
-	move_k = lerpf(move_k, clampf(spd / 4.0, 0.0, 1.0), 1.0 - exp(-6.0 * dt))
+	var held := String(root.get_meta("kstate", "")) == "carried"
+	move_k = lerpf(move_k, 0.0 if held else clampf(spd / 4.0, 0.0, 1.0), 1.0 - exp(-6.0 * dt))
 	var y := body.position.y
 	vy = (y - y_prev) / dt
 	y_prev = y
@@ -175,6 +177,7 @@ func _process(dt: float) -> void:
 	att_k = lerpf(att_k, 1.0 if ks == "attack" else 0.0, 1.0 - exp(-18.0 * dt))
 	sleep_k = lerpf(sleep_k, 1.0 if ks == "sleep" else 0.0, 1.0 - exp(-3.0 * dt))
 	perch_k = lerpf(perch_k, 1.0 if ks == "perch" else 0.0, ek)
+	carried_k = lerpf(carried_k, 1.0 if held else 0.0, ek)
 	happy_k = lerpf(happy_k, 1.0 if happy else 0.0, ek)
 	air = lerpf(air, clampf(vy * 0.4, -1.0, 1.0), 1.0 - exp(-10.0 * dt))
 	gait += dt * (4.0 + move_k * 12.0 + happy_k * 4.0)
@@ -264,6 +267,9 @@ func _process(dt: float) -> void:
 	sz *= float(pz["sz"])
 	rx += float(pz["rx"])
 	rz += float(pz["rz"]) + sin(t * 45.0) * 0.025 * float(pz["shiver"])
+	# held in arms: nose up against the chest, a slow sway
+	rx += carried_k * 0.5
+	rz += sin(t * 2.2 + phase) * 0.05 * carried_k
 	# asleep: curled up low, tipped onto its side a little
 	sy *= 1.0 - sleep_k * 0.22
 	sx *= 1.0 + sleep_k * 0.08

@@ -46,13 +46,14 @@ static func best_food(rec: Dictionary) -> String:
 			return String(f)
 	return ""
 
-## What the interact key does for this Boki: "feed", "nap", "bath", "brush" (no pond) or "pet".
+## What the interact key does for this Boki: "feed", "nap", "bath", "brush" (no pond), "pet" (lonely) or "lift".
 static func action(rec: Dictionary, pond: bool) -> String:
 	match Care.want(rec):
 		"food": return "feed" if best_food(rec) != "" else "pet"
 		"energy": return "nap"
 		"clean": return "bath" if pond else "brush"
-	return "pet"
+		"joy": return "pet"
+	return "lift"
 
 ## The one-line prompt when you stand next to it.
 static func line(rec: Dictionary, pond: bool) -> String:
@@ -65,7 +66,7 @@ static func line(rec: Dictionary, pond: bool) -> String:
 		"energy": return "%s is sleepy: tuck it in" % nm
 		"clean": return "%s is dirty: %s" % [nm, "give a bath" if pond else "brush it"]
 		"joy": return "%s is lonely: pet it" % nm
-	return "Pet " + nm
+	return "Lift " + nm
 
 ## Every frame: shows the most urgent wants, hides the rest, and plays the happy answer.
 static func update(home: Node, dt: float, now: float) -> void:
