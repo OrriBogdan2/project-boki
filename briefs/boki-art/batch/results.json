@@ -88392,5 +88392,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_tiltster_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_tiltster_a",
+    "name": "Tiltster (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_tiltster_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_pavonazar",
+    "name": "Pavonazar female (V2 card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv2_pavonazar_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_tiltster_b",
+    "name": "Tiltster (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_tiltster_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_tiltster_b",
+    "name": "Tiltster (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_tiltster_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_pavonazar",
+    "name": "Pavonazar female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_pavonazar_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_tiltster_c",
+    "name": "Tiltster (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_tiltster_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_tiltster_c",
+    "name": "Tiltster (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_tiltster_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_forgebrock_b",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_forgebrock_b_1.jpg",
+    "ok": true
   }
 ]
