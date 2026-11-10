@@ -3,7 +3,7 @@ Rebuilds portraits/cutout_v2 and the LIVE_MANIFEST.json/.md entries for ONLY the
 (The full refresh_manifest.py re-cuts all heroes; on a machine with another OpenCV version that changes every hero hash.)"""
 import sys,os,json,hashlib,re
 sys.path.insert(0,'briefs/boki-art/batch')
-from cutout_v2 import cutout,frame
+sys.path.insert(0,'briefs/boki-art/tools'); from herocut import hero
 from PIL import Image
 A='briefs/boki-art/'; p=A+'LIVE_MANIFEST.json'; m=json.load(open(p))
 for n in sys.argv[1:]:
@@ -12,7 +12,7 @@ for n in sys.argv[1:]:
         for c in (A+f'evolutions/{n}.jpg',A+f'turnarounds/{n}.jpg'):
             if os.path.exists(c): e['sheet']=c; break
     e['card']=A+f'cards/{n}.jpg'; e['portrait']=A+f'portraits/light/{n}.jpg'
-    c=A+f'portraits/cutout_v2/{n}.png'; frame(cutout(Image.open(e['card']))).save(c,optimize=True); e['cutout']=e['hero']=c
+    c=A+f'portraits/cutout_v2/{n}.png'; hero(e['card']).save(c,optimize=True); e['cutout']=e['hero']=c
     e['hash']={k:hashlib.sha1(open(e[k],'rb').read()).hexdigest()[:12] for k in ('sheet','card','portrait','hero') if e.get(k) and os.path.exists(e[k])}
     print(n,e['hash'])
 json.dump(m,open(p,'w'),indent=1)

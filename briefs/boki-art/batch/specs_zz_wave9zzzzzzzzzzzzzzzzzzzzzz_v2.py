@@ -1193,3 +1193,27 @@ SPECS.append({'id':'sea_canvastross','name':'Canvastross (sea read)','refs':['br
 _FEMST['Mothlet']=('baby','cute',0,1); _FEMST['Grainspin']=('baby','cute',0,1)
 FEM2('Mothlet',None,"a paler lavender-grey body with a cream chest, wing tips one step lighter, the brow crescent in silver, a slightly rounder body.",runs=3)
 FEM2('Grainspin',None,"a deep plum body where he is tan, with lilac sand in her glass globe instead of gold, slightly longer legs and a rounder abdomen.",runs=3)
+
+# ===== 11-10 afternoon OWNER NOTES (2) =====
+# Cubwom (Cubbat): back on its standing card ("I liked the old Cubwom a lot"); Pipwom tries sitting instead.
+ON_POSE('Pipwom',_LM['Pipwom']['sheet'],'mid','tough',False,True,"sitting back on its haunches like a bear, facing LEFT, front paws resting on its knees, its big dice shell behind it like a backpack, grumpy sideways look at the viewer.",_KEEPALL); SPECS[-1]['id']='pose2_pipwom_sit'; SPECS[-1]['runs']=3
+# Kitedrake (Dragonkite): "a cooler position/card, too close to Ribbonwyrm's". Checkmare: "new posing style, same as the T1". 2 poses x 2 runs.
+for _n,_st,_ar,_poses in (('Dragonkite','final','majestic',("diving down from the top right toward the lower left, wings swept back like a stooping falcon, jaws open, tail streaming straight behind","perched upright on its hind legs facing the viewer, both kite wings spread fully open to the sides like a banner, head lowered and glaring")),
+                          ('Checkmare','final','majestic',("lunging forward in a long low line, facing LEFT, body stretched out almost straight with only the tail curled, head thrust forward like a knight charging","reared straight up tall like a chess piece standing on its coiled base, seen from the front three-quarter, head turned sharply to the right in profile"))):
+    for _k,_p in zip('ab',_poses):
+        _n0=len(SPECS); ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,False,False,_p+".",_KEEPALL); SPECS[_n0]['id']='pose2_'+_n.lower()+'_'+_k; SPECS[_n0]['runs']=2
+# Grammite "has a lack of detail and Dobsabre has a lot": bring them toward each other. 3 runs each.
+SPECS.append({'id':'det_grammite','name':'Grammite (more detail)','refs':['briefs/boki-art/cards/Grammite.jpg','briefs/boki-art/cards/Dobsabre.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"give it more to look at, so it clearly belongs with its evolution in image 2: each shell segment gets a darker rim and one row of small pale dots, the yellow side stripe becomes a bold zig-zag, its two crossed sabre mandibles get a pale edge and a darker base like image 2's, and its face gets bigger amber eyes like image 2's. Take only those details from image 2. The pose, shape and colours of the creature in image 1 stay the same."})
+SPECS.append({'id':'det_dobsabre','name':'Dobsabre (a little simpler)','refs':['briefs/boki-art/cards/Dobsabre.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"simplify it a little: the wings lose their fine scale pattern and become flat wing shapes with three or four bold veins, and the body's small plates merge into a few large ones. Everything else stays the same."})
+# Scopeleon: "has a scope in its eye and its eye is open: it needs to be mostly closed like he's squinting".
+SPECS.append({'id':'eye_scopeleon','name':'Scopeleon (squinting)','refs':['briefs/boki-art/cards/Scopeleon.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"its normal eye (the one that is not the brass telescope) is squinted almost shut, like someone peering through a telescope with one eye closed: a curved lid line with only a thin sliver of eye showing, and a small concentrating frown. The telescope eye stays as it is. Nothing else changes."})
+# Snapler: "kind of random: first isn't clearly a fish, then a fish, then a fish with legs. Closer to fish but less fish face; make sense as the
+# middle stage for the two around it". Image 1 = Lurklet (baby), image 2 = Maulangler (final). 3 directions x 2 runs.
+for _k,_d in (('m1',"the baby's round dark body grown longer, with the baby's big round purple eyes and soft face (not a fish face), two stubby front legs just sprouting like the final form's, a short tail fin, the purple smoke fins of the baby grown into longer wisps, and a lure stalk that now ends in a small glowing hook. Its mouth is a wide closed grin showing a few cream teeth."),
+              ('m2',"a tadpole-like in-between: a plump dark body with the baby's face and big eyes, a wide mouth just starting to show the final form's teeth, a long finned tail it swims with, tiny hind leg buds, purple smoke trailing from its back, and a lure with a small hook held forward like a fishing rod."),
+              ('m3',"a hunched little prowler: the baby's dark round head on a longer body carried on two front legs, dragging a finned tail behind it, mouth half open with a faint purple glow inside like the final form's, eyes still big and round, lure hook swinging in front.")):
+    SPECS.append({'id':'opt_snapler_'+_k,'name':'Snapler (middle-stage rework '+_k+')','refs':[_C%'Lurklet',_C%'Maulangler'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of the MIDDLE evolution between the baby in image 1 and the final form in image 2, so the three read as one line: the same dark purple-grey body colour, purple glow and lure. THE DESIGN: "+_d+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('mid','creepy',True,False)+FRAME_V2})
