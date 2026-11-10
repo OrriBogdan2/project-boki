@@ -166,6 +166,7 @@ func _strip(main: Node, m: Match, P: Hunter, k: Kin) -> void:
 	for f in STRIP_FRAMES:
 		await main.get_tree().process_frame
 		var img := main.get_viewport().get_texture().get_image()
+		img.convert(Image.FORMAT_RGBA8)      # (the renderer's format varies; blit needs the strip's)
 		var row := 0
 		for e in [P, k]:
 			var vp := main.get_viewport()
