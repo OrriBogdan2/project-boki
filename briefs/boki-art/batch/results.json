@@ -97646,5 +97646,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/leg_comet_b_2.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_comet_a",
+    "name": "Legendary concept: comet a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_comet_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_bell_a",
+    "name": "Legendary concept: bell a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_bell_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_comet_c",
+    "name": "Legendary concept: comet c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_comet_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_bell_a",
+    "name": "Legendary concept: bell a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_bell_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_comet_a",
+    "name": "Legendary concept: comet a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_comet_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_comet_c",
+    "name": "Legendary concept: comet c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_comet_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_comet_b",
+    "name": "Legendary concept: comet b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_comet_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_bell_b",
+    "name": "Legendary concept: bell b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_bell_b_1.jpg",
+    "ok": true
   }
 ]
