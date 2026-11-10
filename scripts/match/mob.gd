@@ -371,16 +371,7 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	if dead:
-		# a death pop: swell, flatten and blink out
-		death_t += delta
-		visible = death_t < 0.32
-		if visible:
-			var dk := death_t / 0.32
-			var bd: Node3D = model.get_node("Body")
-			var w := 1.0 + sin(minf(dk * 1.6, 1.0) * PI) * 0.35
-			bd.scale = Vector3(w + dk * 0.3, maxf(0.05, 1.0 - dk * dk), w + dk * 0.3)
-			for mt in mats:
-				mt.set_shader_parameter("flash", 1.0 - dk * 0.5)
+		visible = MobDissolve.step(self, delta)
 		return
 	model.rotation.y = face
 	var spd := Vector2(vel.x, vel.z).length()

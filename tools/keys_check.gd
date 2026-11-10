@@ -21,6 +21,8 @@ func ok(label: String, cond: bool, info := "") -> void:
 	print("KEYCHECK %-58s %s  %s" % [label, "PASS" if cond else "FAIL", info])
 	if not cond: fails += 1
 
+const SPILL_S := 0.9      # s: a kill dissolves first, then its drops spill (MobDissolve)
+
 func step(m: Match, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -159,6 +161,7 @@ func _chest_and_keys() -> void:
 	var car: Mob = K.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
 	var before := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	car.hurt(99999.0, P, {"src": "shot"})
+	step(m, SPILL_S)
 	var after := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	ok(
 			"a carrier drops its key when it dies", after == before + 1 and not KeyCarry.carries(car),
@@ -344,7 +347,7 @@ func _shrubling() -> void:
 	S.hp = S.max_hp
 	var np := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	S.hurt(S.max_hp + 5.0, P, {"src": "shot"})
-	step(m, 0.2)
+	step(m, 0.3)      # (its key spills as the small body dissolves, before the player is near enough to take it)
 	ok(
 			"it has low health and no attack",
 			S.dead and float(Data.MOBS["shrubling"]["dmg"]) == 0.0 and S.max_hp <= 60.0, "hp %.0f" % S.max_hp)
@@ -457,7 +460,7 @@ func _sources() -> void:
 			if mb == null or mb.dead:
 				break
 			mb.hurt(mb.max_hp * 10.0 + 500.0, m.player, {"src": "shot"})
-			step(m, 0.3)
+			step(m, SPILL_S)
 		var want := 1 if kind_s == "monster" else 2
 		ok("a dead %s drops a bonus key" % kind_s, mb != null and m.keys.bonus_given == k0 + want,
 				"%d -> %d" % [k0, m.keys.bonus_given])
