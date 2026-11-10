@@ -199,6 +199,30 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
     runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
     to see one (see Open questions in the branch report).
+- **A delayed hit and its telegraph share one clock.** The fill (`fill`, 0..1) is the kit's own elapsed time over
+  its delay, read from the same timer that fires the damage, and the damage step runs before the telegraph is
+  drawn so a fill reaches 1 on the frame the hit lands (never off a frame count). A kit that hides the telegraph
+  on the hit frame is fine: the last drawn frame is one step short of full. The cue other players get (the Net fx
+  ring) goes out on the cast frame. `--telegraph-sync-check` casts each hit at 30, 60 and 144 fps and asserts
+  fill end within one frame of the damage. The delays come from the kit JSON:
+
+| Hero | Hit | Delay (JSON) | Telegraph |
+|---|---|---|---|
+| Vex | Cinderfall (X) | `x.delay` 1.6 s | disc fill |
+| Vex | Burr Charge | `rmb.burr.fuse` 0.9 s | cone fill |
+| Sparkle | Skycall | `e.delay` 0.8 s | ring fill |
+| Sparkle | Eye of the Storm landing | `x.drop` 0.2 s | marker fill (was a full ring, now fills over the drop) |
+| Neve | Ice Spear blast | `rmb.lance.delay` 1.8 s | ring fill |
+| Meeko | Burrseed root | `rmb.seed.delay` 0.7 s | ring fill |
+| Motley | Nightwell | `x.tell` 1.0 s | dome fill; the first catch now lands on the frame it completes (was one frame later) |
+| Kael | Finishing Slam, Meteor Drop | `rmb.windup` 0.6 s, `rmb.drop.hang` 0.2 s | lane / marker fill |
+| Grimble | Anchor slam | `e.windup` 0.38 s | cone fill |
+| Albert | Faultline | `x.windup` 0.4 s + `x.lead` 0.2 s | cell fills on the frame its slab hits (was drawn a step before) |
+| Tenzo | Basalt Spine (X) | `x.tell` 0.2 s | cracks, no fill in the source; they end with the first rise |
+| Lace | Hail Wall | `e.tell` 0.35 s | arc, no fill in the source; it runs out with the tell |
+
+Not covered: Tenzo's Quakefall (its circle is the charge, not a countdown; ext/vfx-telegraph-lead keeps it up
+through the hop) and Sable's Encore ring (an aura with a grow-in, no delayed hit).
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
