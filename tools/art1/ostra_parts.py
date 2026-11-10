@@ -284,20 +284,20 @@ def lining(P):
     return Part("lining", "void-body", V, F, ST, rigid("hips", len(V)), "lining", (64, 64))
 
 
-TAILS = ((33, 0.58, 0.50), (92, 0.64, 0.52), (152, 0.60, 0.49), (-152, 0.60, 0.49), (-92, 0.64, 0.52), (-33, 0.58, 0.50))
+TAILS = ((30, 0.46, 0.72), (90, 0.56, 0.76), (150, 0.50, 0.73), (-150, 0.50, 0.73), (-90, 0.56, 0.76), (-30, 0.46, 0.72))   # sheet: the bells hang clear above the box, the spring shows
 
 
 def tails():
-    """the six long thin coat tails: broad at the flare, arcing out and down to a point with a brass bell; each swings on its spring chain"""
+    """the six coat tails: broad at the flare, flung out and hooked down to a point with a brass bell, ending above the box as on the sheet; each swings on its spring chain"""
     out, joints = [], []
     for i, (deg, reach, drop) in enumerate(TAILS):
         a = np.radians(deg)
         d = np.array((np.sin(a), np.cos(a), 0.0))
         side = np.array((np.cos(a), -np.sin(a), 0.0))
-        pts = [d * 0.17 + (0, 0, 0.99), d * 0.27 + (0, 0, 0.86), d * (reach * 0.72) + (0, 0, drop + 0.07), d * reach + (0, 0, drop - 0.03), d * (reach + 0.035) + (0, 0, drop - 0.1)]
+        pts = [d * 0.17 + (0, 0, 0.99), d * 0.27 + (0, 0, 0.90), d * (reach * 0.78) + (0, 0, drop + 0.08), d * reach + (0, 0, drop), d * (reach + 0.02) + (0, 0, drop - 0.08)]
         path = resample(pts, 15)
         t = np.linspace(0, 1, 15)
-        wd = rmp(t, [0, 0.3, 0.7, 1], [0.125, 0.092, 0.036, 0.004])
+        wd = rmp(t, [0, 0.3, 0.7, 1], [0.13, 0.10, 0.05, 0.004])
         P = np.zeros((15, 3, 3))
         for r in range(15):
             P[r, 0] = path[r] - side * wd[r]

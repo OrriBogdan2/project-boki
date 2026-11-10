@@ -28,28 +28,26 @@ def seg_dist(u, v, pts):
 
 
 def grin(u, v):
-    """0..1 inside the grin: one huge white crescent hooked up to points, a jagged seam through the middle (upper and lower fangs
-    meshing) and deep fangs cut into both edges; -> the shape, and the seam's cut"""
+    """0..1 inside the grin: one huge white crescent hooked up to points under the eyes, a clean outline that reads at the match camera,
+    and a jagged seam through the middle (upper and lower fangs meshing); -> the shape, and the seam's cut"""
     au = np.abs(u)
-    top = -0.26 + 0.50 * (au / 0.86) ** 2.3
-    bot = -0.76 + 0.92 * (au / 0.86) ** 2.1
-    saw = np.abs(((u * 5.0) % 1.0) - 0.5) * 2.0
-    env = sm(0.10, 0.30, au) * sm(0.86, 0.66, au)
-    cut_t = 0.15 * saw * env
-    cut_b = 0.13 * (1.0 - saw) * env
-    inside = sm(-0.012, 0.012, top - cut_t - v) * sm(-0.012, 0.012, v - bot - cut_b) * (au < 0.86)
-    seam = 0.5 * (top + bot) - 0.02 + 0.07 * (saw - 0.5) * env
-    gap = sm(0.034, 0.016, np.abs(v - seam)) * sm(0.10, 0.2, au + 0.05)
+    top = -0.30 + 0.62 * (au / 0.88) ** 2.4
+    bot = -0.80 + 1.02 * (au / 0.88) ** 2.0
+    saw = np.abs(((u * 6.0) % 1.0) - 0.5) * 2.0
+    env = sm(0.06, 0.24, au) * sm(0.80, 0.60, au)
+    inside = sm(-0.012, 0.012, top - v) * sm(-0.012, 0.012, v - bot) * (au < 0.88)
+    seam = 0.5 * (top + bot) + 0.09 * (saw - 0.5) * env
+    gap = sm(0.026, 0.012, np.abs(v - seam)) * (au < 0.84)
     return inside * (1 - gap), gap
 
 
 def slits(u, v):
-    """the eyes: two slanted slits, the inner end low and blunt, the outer tip drawn high and long: a hungry, cruel squint"""
+    """the eyes: two thick crescents glaring down at the nose, a straight brow edge slanting low to the inner end, the lower edge bowed"""
     au = np.abs(u)
-    x = (au - 0.46) / 0.30
-    mid = 0.27 + 0.17 * x
-    h = 0.125 * np.clip(1.0 - x * x, 0, 1) ** 0.75
-    return sm(0.012, -0.006, v - (mid + h)) * sm(-0.012, 0.006, v - (mid - 0.35 * h)) * (np.abs(x) < 1.0)
+    x = (au - 0.44) / 0.32
+    brow = 0.36 + 0.26 * x
+    h = 0.17 * np.clip(1.0 - x * x, 0, 1) ** 0.6
+    return sm(0.012, -0.006, v - brow) * sm(-0.012, 0.006, v - (brow - h)) * (np.abs(x) < 1.0)
 
 
 def textures(size=1024):
@@ -72,8 +70,8 @@ def textures(size=1024):
     rad = np.hypot(U, V + 0.1)
     swirl = 0.5 + 0.5 * np.sin(ang * 2 + rad * 8 + neb * 5)
     deep = np.array((0.03, 0.02, 0.10))
-    mid = np.array((0.34, 0.14, 0.78))
-    c = deep + (mid - deep) * np.clip((neb * swirl * 2.6 - 0.3), 0, 1)[..., None]
+    mid = np.array((0.22, 0.08, 0.52))     # owner 11-08: the void near black so the glare and grin carry
+    c = deep + (mid - deep) * np.clip((neb * swirl * 2.0 - 0.45), 0, 1)[..., None]
     def blur_s(a):
         return (np.roll(a, 2, 0) + np.roll(a, -2, 0) + np.roll(a, 2, 1) + np.roll(a, -2, 1)) * 0.35
 
@@ -102,7 +100,7 @@ def textures(size=1024):
     bloom = np.clip(blur(shape, 18) * 0.8 + blur(shape, 6) * 0.7, 0, 1)
     hot = np.array((1.0, 0.97, 1.0))
     vio = np.array((0.62, 0.26, 1.0))
-    em = vio * (bloom * 0.6)[..., None] + c * 0.6
+    em = vio * (bloom * 0.7)[..., None] + c * 0.35
     em = em + stars[..., None] * np.array((0.9, 0.85, 1.0)) * (1 - shape[..., None])
     teeth = shape
     em = em * (1 - teeth[..., None]) + hot * teeth[..., None]
