@@ -63,8 +63,8 @@ func _grab(home, sheet: Image, col: int, at: Vector3) -> void:
 	home.cam.snap(at)
 	await RenderingServer.frame_post_draw
 	var img := main.get_viewport().get_texture().get_image()
-	var size := img.get_size()
-	var crop := img.get_region(Rect2i(size.x / 6, size.y / 6, size.x * 2 / 3, size.y * 2 / 3))
+	var view := img.get_size()
+	var crop := img.get_region(Rect2i(view.x / 6, view.y / 6, view.x * 2 / 3, view.y * 2 / 3))
 	crop.resize(px, int(px * ASPECT), Image.INTERPOLATE_BILINEAR)
 	crop.convert(Image.FORMAT_RGBA8)
 	sheet.blit_rect(crop, Rect2i(0, 0, px, int(px * ASPECT)), Vector2i(col * px, 0))
@@ -146,7 +146,7 @@ func _volley(home) -> void:
 	var alive := func(): return vb.run != null
 	for col in COLS:
 		if col > 0:
-			await _until(func(): return vb.run.state == BaseVolley.Run.S.FLIGHT and vb.run.fly_t < vb.run.fly_total * 0.5, alive)
+			await _until(func(): return vb.run.state == BaseVolley.Run.S.FLIGHT and vb.run.fly_t < 0.3, alive)
 		await main.get_tree().process_frame
 		if vb.run != null:
 			await _grab(home, sheet, col, vb.log_node.position)
