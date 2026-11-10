@@ -82925,5 +82925,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_malletary_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_proofhop",
+    "name": "Proofhop (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_proofhop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rattlebub",
+    "name": "Rattlebub (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_rattlebub_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hydrangor",
+    "name": "Hydrangor (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_hydrangor_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_proofhop",
+    "name": "Proofhop (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_proofhop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_malletary",
+    "name": "Malletary (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_malletary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_malletary",
+    "name": "Malletary (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_malletary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_proofhop",
+    "name": "Proofhop (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_proofhop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rattlebub",
+    "name": "Rattlebub (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_rattlebub_2.jpg",
+    "ok": true
   }
 ]
