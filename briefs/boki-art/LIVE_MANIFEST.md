@@ -1,7 +1,7 @@
 # Boki art live manifest (regenerated 02:31 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-250 Boki, 250 with all three. Missing something: 
+259 Boki, 259 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -33,8 +33,10 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Bulwartoad | ✓ | ✓ | ✓ |
 | Cairnback | ✓ | ✓ | ✓ |
 | Calderoise | ✓ | ✓ | ✓ |
+| Canopony | ✓ | ✓ | ✓ |
 | Canvastross | ✓ | ✓ | ✓ |
 | Carpenjaw | ✓ | ✓ | ✓ |
+| Carrousteed | ✓ | ✓ | ✓ |
 | Cetorgan (Organwhal) | ✓ | ✓ | ✓ |
 | Chainipede | ✓ | ✓ | ✓ |
 | Chandelapi (Candelapi) | ✓ | ✓ | ✓ |
@@ -72,6 +74,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Filefin | ✓ | ✓ | ✓ |
 | Fizzlet | ✓ | ✓ | ✓ |
 | Flarmink (Embermink) | ✓ | ✓ | ✓ |
+| Foalaround | ✓ | ✓ | ✓ |
 | Foldbat | ✓ | ✓ | ✓ |
 | Forgebrock | ✓ | ✓ | ✓ |
 | Frigatee | ✓ | ✓ | ✓ |
@@ -91,6 +94,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Glintmole | ✓ | ✓ | ✓ |
 | Gloamshell (Duskargot) | ✓ | ✓ | ✓ |
 | Gloamspire (Duskspire) | ✓ | ✓ | ✓ |
+| Glockodile | ✓ | ✓ | ✓ |
 | Glomwort | ✓ | ✓ | ✓ |
 | Glomworth (Glombulus) | ✓ | ✓ | ✓ |
 | Gongibbon | ✓ | ✓ | ✓ |
@@ -140,6 +144,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Malletary | ✓ | ✓ | ✓ |
 | Maracoil | ✓ | ✓ | ✓ |
 | Marchleaf | ✓ | ✓ | ✓ |
+| Marimbite | ✓ | ✓ | ✓ |
 | Maulangler | ✓ | ✓ | ✓ |
 | Medushroom | ✓ | ✓ | ✓ |
 | Meteorab | ✓ | ✓ | ✓ |
@@ -174,6 +179,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Pharoheron | ✓ | ✓ | ✓ |
 | Phonodrake | ✓ | ✓ | ✓ |
 | Pickadactyl | ✓ | ✓ | ✓ |
+| Pillaroo | ✓ | ✓ | ✓ |
 | Pinguin | ✓ | ✓ | ✓ |
 | Pinster | ✓ | ✓ | ✓ |
 | Pipeworth | ✓ | ✓ | ✓ |
@@ -181,6 +187,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Pipwom | ✓ | ✓ | ✓ |
 | Pocketpus | ✓ | ✓ | ✓ |
 | Polyshroom | ✓ | ✓ | ✓ |
+| Postroo | ✓ | ✓ | ✓ |
 | Prismander | ✓ | ✓ | ✓ |
 | Prismink | ✓ | ✓ | ✓ |
 | Proofhop | ✓ | ✓ | ✓ |
@@ -225,6 +232,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Sphinxblight (Enigmane) | ✓ | ✓ | ✓ |
 | Spirevark | ✓ | ✓ | ✓ |
 | Sporcupine | ✓ | ✓ | ✓ |
+| Stamproo | ✓ | ✓ | ✓ |
 | Starcap | ✓ | ✓ | ✓ |
 | Stormit | ✓ | ✓ | ✓ |
 | Sundormouse | ✓ | ✓ | ✓ |
@@ -252,6 +260,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Wayshell | ✓ | ✓ | ✓ |
 | Wickapi | ✓ | ✓ | ✓ |
 | Wyrmink | ✓ | ✓ | ✓ |
+| Xylogator | ✓ | ✓ | ✓ |
 | Zephyrak | ✓ | ✓ | ✓ |
 | Zipling | ✓ | ✓ | ✓ |
 | Zippelith (Zipperpent) | ✓ | ✓ | ✓ |
