@@ -98087,5 +98087,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/epic_cometfox_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "epic_cometfox_b",
+    "name": "Cometfox (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_cometfox_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_volcatoise_a",
+    "name": "Volcatoise (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_volcatoise_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_volcatoise_b",
+    "name": "Volcatoise (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_volcatoise_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_cometfox_a",
+    "name": "Cometfox (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_cometfox_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_volcatoise_a",
+    "name": "Volcatoise (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_volcatoise_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_cometfox_b",
+    "name": "Cometfox (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_cometfox_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_volcatoise_b",
+    "name": "Volcatoise (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_volcatoise_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_blightmoth_a",
+    "name": "Blightmoth (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_blightmoth_a_2.jpg",
+    "ok": true
   }
 ]
