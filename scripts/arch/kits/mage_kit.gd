@@ -23,6 +23,7 @@ const ECHO_GAP := 0.045              # s between her after-images on the Wirerun
 var sparks := {}               # foe id -> {e, n, t}
 var wire := {}                 # Wirerun held: {t, y, air, end}
 var run_t := 0.0               # Wirerun streaking (s left): the model is a lightning silhouette
+var run_exit := false          # the streak's hand-over at run speed is still to come (_exit_run)
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
@@ -190,6 +191,8 @@ func _tick(dt: float) -> void:
 		_tick_wire(dt)
 	if run_t > 0.0:
 		_tick_run(dt)
+	if run_exit and h.roll_t <= 0.0:
+		_exit_run()
 	if rmb_down:
 		_tick_rod()
 	elif rod != null and rod.visible:
@@ -398,9 +401,10 @@ func _jitter(across: float, low: float, high: float) -> Vector3:
 	var r := fx().rng
 	return Vector3(r.randf_range(-across, across), r.randf_range(low, high), r.randf_range(-across, across))
 
-## The drift you carry: your ground speed right now (it bleeds off while you hold).
+## The drift you carry: your ground speed right now (it bleeds off while you hold), never more than a run's,
+## so a launch, a glide or a knock doesn't fling the run past its ring.
 func _drift() -> Vector2:
-	return Vector2(h.vel.x, h.vel.z) * float(dash_def().get("drift_k", 1.0))
+	return (Vector2(h.vel.x, h.vel.z) * float(dash_def().get("drift_k", 1.0))).limit_length(h.base_speed)
 
 func _tick_wire(dt: float) -> void:
 	var dd := dash_def()
@@ -449,6 +453,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	h.roll_speed = v.length()
 	h.phase_t = maxf(h.phase_t, time + 0.05)
 	run_t = time
+	run_exit = true
 	last_dash_kind = "wire"
 	play("mage_dash_go")
 	var dmg := float(dd["dmg"]) * run_rank_k()
@@ -471,6 +476,17 @@ func _tick_run(dt: float) -> void:
 			_burst_mote(mt)
 	if run_t <= 0.0 and h.model:
 		h.model.visible = true
+
+## The step after the streak: she lands on the ring, handing over at run speed in the air too (a ground dash's
+## exit), so its 40 m/s never carries on as an air slide or into the next Wirerun's drift. The kit
+## ticks before the move, so nothing of the streak's speed slips into the air step; a jump out of it keeps its own.
+func _exit_run() -> void:
+	run_exit = false
+	if run_t > 0.0:
+		return
+	var hv := HunterMove.dash_exit(Vector2(h.vel.x, h.vel.z), h.base_speed)
+	h.vel.x = hv.x
+	h.vel.z = hv.y
 
 func _arrive() -> void:
 	if not is_instance_valid(h): return
