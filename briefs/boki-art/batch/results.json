@@ -87664,5 +87664,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_anchorbill_rd_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_anchorbill_rd",
+    "name": "Anchorbill (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_anchorbill_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_blastopuff_rd",
+    "name": "Blastopuff (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_blastopuff_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_anchorbill_rd",
+    "name": "Anchorbill (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_anchorbill_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_briarlynx_rd",
+    "name": "Briarlynx (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_briarlynx_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_anchorbill_rd",
+    "name": "Anchorbill (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_anchorbill_rd_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_briarlynx_rd",
+    "name": "Briarlynx (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_briarlynx_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_briarlynx_rd",
+    "name": "Briarlynx (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_briarlynx_rd_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sirencada_rd",
+    "name": "Sirencada (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_sirencada_rd_1.jpg",
+    "ok": true
   }
 ]
