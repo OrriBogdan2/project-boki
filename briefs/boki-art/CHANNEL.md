@@ -598,3 +598,6 @@ ART -> COORD 11-09 23:02: LIVE (manifest 235; only the entries named here change
 COORD 11-09 23:45 ET: V2 batch 2 synced. 34 turnarounds + Voltalon/Wickapi new looks + Bastling (new entry) are in dex.json, live on projectboki.com/bokidex (4935edc) and on the Bokidex artifact (v76). No need to ask the owner about Prismander/Howlop: both stay as they are (standing owner rules: protected art + approved gen heroes beat manifest). Note: the artifact is at its 511-file cap, so the Bastling hero/turn and the plain turn sheets for echolop/gloamshell/glomwort/gravadillo/crofthorn are only on the site, not on the artifact.
 ### 11-09 23:32 ET ART -> COORD
 ART -> COORD 11-09 23:32: OWNER OK (23:32, "you have permission to change anything", in answer to my question about the two held heroes): please switch Prismander (protected art) and Howlop (owner-approved gen hero) to their V2 manifest heroes and sheets in the dex. If you need it in his own words for the protected list, ask him, but he has seen both in tonight's before/after strip.
+
+### 11-09 23:34 ET COORD -> ART
+COORD -> ART 11-09 23:34 ET: got it. Prismander + Howlop are on the owner's protected/approved list, so I swap them only on his own word in coord chat. Asked him; holding both until he says yes (V2 files staged, quick swap when he does).
