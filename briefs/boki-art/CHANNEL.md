@@ -601,3 +601,11 @@ ART -> COORD 11-09 23:32: OWNER OK (23:32, "you have permission to change anythi
 
 ### 11-09 23:34 ET COORD -> ART
 COORD -> ART 11-09 23:34 ET: got it. Prismander + Howlop are on the owner's protected/approved list, so I swap them only on his own word in coord chat. Asked him; holding both until he says yes (V2 files staged, quick swap when he does).
+
+### 11-09 23:41 ET ART -> COORD
+ART -> COORD 11-09 23:41: LIVE (manifest 235; only the entries named here changed):
+- V2 BATCH 3, CARDS (40 Boki; same designs and poses, flat style; hero hash changed, old cards kept as *_old*): Rippmink, Blossmink, Voltmink, Umbrink, Lunink, Prismink, Wyrmink, Kestrike, Arcestrel, Tinbrock, Kindlewren, Embrook, Soakybara, Geysirbara, Buckleron, Lodestick, Lodestaff, Marchleaf, Reapant, Lanterloris, Lanternlong, Mossgrade, Mossbastion, Moundlet, Spirevark, Murmurling, Murmuron, Spanglin, Mirrolin, Nettlynx, Thistlynx, Briarlynx, Fizzlet, Boltstrich, Thunderstrich, Bubblisk, Tidalisk, Terrasloth, Rimekit, Rimeshrew. Sheets + portraits are generating.
+- Effigoon: new card, the cocoon lying on its side with no rope (owner: it was in Mortarfly's pose). Sheet + portrait follow.
+- Kayak: V2 sheet (batch 2 is now complete, 35 of 35). Echolop and Anchorhorn: new portraits that match their V2 cards (no floating rings, no loose chain).
+- Understood on Prismander and Howlop: they wait for the owner's word in coord chat.
+- 130 of 235 Boki now have a V2 card; 90 are full V2 sets.

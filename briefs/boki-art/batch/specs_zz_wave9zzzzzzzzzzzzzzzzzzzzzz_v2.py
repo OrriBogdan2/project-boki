@@ -671,3 +671,14 @@ for _n,_st,_ar,_dk,_fu,_co,_ct,_fx in _BT3:
 _bt2={r[0]:r for r in _BT2}
 for _n,_pose in (('Echolop',"hopping forward mid-bounce, big bat-wing ears spread wide, looking at the viewer"),('Anchorhorn',"swimming through the air in a rising arc, harpoon horn pointed up and forward, flippers swept back")):
     _r=_bt2[_n]; _n0=len(SPECS); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_r[1],_r[2],_r[5],_r[6],_r[3],_r[4],_pose); SPECS[_n0]['id']='v2p_'+_n.lower()+'_fix'
+
+# ===== 00:05 ET 11-10: batch 3 cards: 120 of 120 clean, picks live. Stage B: sheet (old sheet + V2 card, 3 runs), portrait (old portrait + V2 card, 2 runs).
+# Effigoon: live card is now the lying cocoon (on_effigoon_lie_1 with its cast shadow removed locally); its sheet + portrait come from that card.
+for _n,_st,_ar,_dk,_fu,_co,_ct,_fx in _BT3:
+    _cd='briefs/boki-art/cards/'+_n+'.jpg'
+    SPECS.append({'id':'v2s_'+_n.lower()+'_b3','name':_n+' (V2 sheet, batch 3)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_co,_ct)})
+    SPECS.append({'id':'v2p_'+_n.lower()+'_b3','name':_n+' (V2 portrait, batch 3)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':2,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_co,_ct,_dk,_fu)})
+_n0=len(SPECS)
+V2SHEET_NEW('Effigoon','briefs/boki-art/cards/Effigoon.jpg',"white marble cocoon with gold bands and gold spiral trim","one cocoon, no face, no legs, no rope")
+V2PORT_NEW('Effigoon','briefs/boki-art/cards/Effigoon.jpg','mid','majestic',"white marble cocoon with gold bands and gold spiral trim","one cocoon, no face, no legs, no rope",False,False,"the cocoon standing upright on its rounded end, seen from the front, nothing attached to it")
+SPECS[_n0]['id']='v2s_effigoon_lie'; SPECS[_n0+1]['id']='v2p_effigoon_lie'; SPECS[_n0+1]['runs']=2
