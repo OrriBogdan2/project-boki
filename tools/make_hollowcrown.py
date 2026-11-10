@@ -290,7 +290,7 @@ regions = [
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}},
          purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
-         purpose="The shrine on the Shrine Table, and Storm Halt (sky train) off its east rim."),
+         purpose="The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."),
     dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"],
          purpose="The Boki nest and the Thornhive lair; tall-grass ambushes and an uplink by the nest."),
     dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"],

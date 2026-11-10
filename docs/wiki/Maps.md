@@ -38,7 +38,7 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | The Crown | Gloom | The vault on the Throne, two boss Gaols and the richest chests, under the most Blight. |
 | Frostgate | Frost | The best armor on the map, and the Keep's high ground over the Gate Span. |
 | Cinder Steps | Ember | Forge country: gloves and weapon tunings from the Kilns, a camp to level on. |
-| Stormbreak | Storm | The shrine on the Shrine Table, and Storm Halt (sky train) off its east rim. |
+| Stormbreak | Storm | The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim. |
 | Thornwood | Bloom | The Boki nest and the Thornhive lair; tall-grass ambushes and an uplink by the nest. |
 | Larkhollow | Meadow | Wild Boki graze in the Hollow; a calm place to catch one, with a skiff dock out. |
 | Highwatch | Frost | The Lookout over the Gaol and the Watch Road, boots, and an uplink out. |
