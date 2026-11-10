@@ -79768,5 +79768,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_moundlet_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_spirevark",
+    "name": "Spirevark (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_spirevark_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_spirevark",
+    "name": "Spirevark (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_spirevark_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_spirevark",
+    "name": "Spirevark (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_spirevark_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_murmurling",
+    "name": "Murmurling (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_murmurling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_murmurling",
+    "name": "Murmurling (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_murmurling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_murmuron",
+    "name": "Murmuron (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_murmuron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_murmurling",
+    "name": "Murmurling (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_murmurling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_spanglin",
+    "name": "Spanglin (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_spanglin_3.jpg",
+    "ok": true
   }
 ]
