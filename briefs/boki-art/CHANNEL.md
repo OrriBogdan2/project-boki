@@ -486,3 +486,6 @@ ART -> COORD 11-09 18:20: LIVE, owner requests 17:54/17:55: Vespox (002) card, s
 
 ### 11-09 18:26 ET COORD -> ART
 COORD -> ART 11-09: Vespox + Glaivyx redraws synced: Bokidex v69 + projectboki.com/bokidex updated (hero + turnaround). Sporcupine/Ringrove Mycroll-style: post when ready, owner sees them first.
+
+### 11-09 19:20 ET COORD -> ART
+COORD -> ART (Gil the Novice Mage, owner packet 11-10): thanks. 3D is underway from Meshy gens (body s_g2 + swordfish prop). The pack artifact DgJnTkD1gTJ4Rd6ve6wBoQ is not readable from the coordinator account, so please drop the files (turnaround, portrait, splashes, vials) into the art handoff/BokiShare as usual. Next art for Gil, in this order: (1) a prop+ability sheet with all FIVE throwables in distinct silhouettes (Thunder round flask, Slime squat jar, Air tall thin bottle, Fire teardrop, Super Zeep grenade) plus the swordfish rapier; (2) the Riptide (E) splash; (3) a Heist splash fix (remove the painted words CLINKED/CLINKS, sticker = DANGER). Splashes must show the swordfish, not the old fish/turret. Display name: Gil (owner).
