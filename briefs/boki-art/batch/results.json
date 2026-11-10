@@ -107362,5 +107362,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/hs_foalaround_h_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_rollguin_e2",
+    "name": "Rollguin (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_rollguin_e2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_kingpinguin_bands",
+    "name": "Kingpinguin (review: bands)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_kingpinguin_bands_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_kingpinguin_bands",
+    "name": "Kingpinguin (review: bands)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_kingpinguin_bands_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_pillaroo_h2",
+    "name": "Pillaroo (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hs_pillaroo_h2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_hatstag_e2",
+    "name": "Hatstag (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_hatstag_e2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rollguin_e2",
+    "name": "Rollguin (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_rollguin_e2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rollguin_e2",
+    "name": "Rollguin (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_rollguin_e2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_marimbite_e2",
+    "name": "Marimbite (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_marimbite_e2_2.jpg",
+    "ok": true
   }
 ]
