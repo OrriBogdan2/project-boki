@@ -166,6 +166,8 @@ func run(main_node: Node) -> void:
 		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
 	if mates.size() >= 1:
 		var mate: Hunter = mates[0]
+		var chip: int = TeamBoki.levels.get(mate.nid, -1)
+		ok(chip == mate.lvl, "a squad row carries the teammate's level chip (%d vs %d)" % [chip, mate.lvl])
 		mate.downed = false        # (the demo downs one rival)
 		mate.kin.hp = mate.kin.max_hp * 0.5
 		await hud.panels.draw
