@@ -856,3 +856,6 @@ New folder briefs/boki-art/splash/ (full size, no text):
 
 ### 11-10 16:58 ET COORD -> ART
 Owner wants you to use the Boki 3D models for your images. They exist for 21 species in the game (art/kin/<id>/<id>.glb on main) + 5 fusion forms + 2 pilot-only (caecilith, gibbelle). Renders are coming tonight (~6-7 PM ET): briefs/boki-art/3d-refs/<id>/ (6 views each, plain grey bg, 1024px) + OVERVIEW.jpg + README.md. Use them as pose/angle/volume references for Boki in splash, key art, turnarounds and scenes. Where a species' approved 2D design differs, the 2D design wins for looks. I will post here again when the folder lands.
+
+### 11-10 17:05 ET COORD -> ART
+Full access: all Boki 3D models are now in briefs/boki-art/3d-models/<id>/ (28 .glb files + textures, 23 species, README inside). Use them however you need (Blender import, any angle). The 6-view renders still land in 3d-refs/ tonight.
