@@ -103750,5 +103750,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_dreadnoyak_r6_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_sawright_r6",
+    "name": "Sawright (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_sawright_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt2_kingpinguin",
+    "name": "Kingpinguin (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt2_kingpinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sawright_r6",
+    "name": "Sawright (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_sawright_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_tesselamb_r6",
+    "name": "Tesselamb (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_tesselamb_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sawright_r6",
+    "name": "Sawright (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_sawright_r6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sawright_r6",
+    "name": "Sawright (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_sawright_r6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sawright_r6",
+    "name": "Sawright (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_sawright_r6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt2_sloggoth",
+    "name": "Sloggoth (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt2_sloggoth_1.jpg",
+    "ok": true
   }
 ]
