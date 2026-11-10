@@ -15,6 +15,8 @@ extends RefCounted
 
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
+const CHIRP_EVERY := Vector2(14.0, 26.0)   # s: how often a riding wisp chirps (min, max): a critter by ear
+const READY_FLASH_S := 1.5  # s: the Boki box says READY after the cooldown ends (once), then just shows the key
 
 var k: Kin
 var dur := 10.0       # s: this species' window
@@ -23,16 +25,20 @@ var left := 0.0       # s of the window left (0: a wisp, or shrinking)
 var shrink := 0.0     # s of the shrink back left
 var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
+var chirp_in := 8.0   # s until the riding wisp chirps again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
 var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
 var homing := false   # killed while summoned: its wisp flies back to its hunter (fly_home)
 var beat := -1        # the last guardian ring pulse drawn (drawing only)
+var hit_k := 1.0      # x its damage while out: this species' place in the summon band (Ent.hurt)
+var ready_flash := 0.0  # s of the READY flash left on the HUD (starts when the cooldown ends)
 
 func _init(kin: Kin) -> void:
 	k = kin
 	var t := times(kin.ks)
 	dur = t.x
 	cd_base = t.y
+	hit_k = damage_k(kin.species)
 
 static func rules() -> Dictionary:
 	return Content.rules("boki_summon")
@@ -44,6 +50,33 @@ static func times(ks: KinSpec) -> Vector2:
 		var row: Dictionary = rules()["table"].get(String(ks.ai.get("role", "")), {})
 		cell = row.get(ks.size, cell)
 	return Vector2(float(cell[0]), float(cell[1]))
+
+## x a species' damage while summoned, from the rules' dmg_k (1 when unlisted): what puts it at its place in the
+## band of a Hunter's LMB (tools/summon_band_check.gd).
+static func damage_k(id: String) -> float:
+	return float(rules()["dmg_k"].get(id, 1.0))
+
+## x the damage of a hit `by` deals: its summon's hit_k while the window runs, else 1. Only on the Boki's own
+## game: a hit that comes in over the net was weighted where it was dealt.
+static func out_k(by: Ent) -> float:
+	if not is_instance_valid(by):
+		return 1.0
+	var k := by as Kin
+	return k.summon.hit_k if k and not k.remote and k.summon and k.summon.left > 0.0 else 1.0
+
+## Its chirp in the wisp's voice and as it blooms: higher for a small body (tools/gen_sfx_wisps.py).
+static func chirp_name(ks: KinSpec) -> String:
+	return "wisp_chirp_" + (ks.size if ks else "small")
+
+## A summon cue ("burst", "end", "killed") sized by its body, with the species chirp layered under it (every
+## game plays it, positional: a rival's carries 25 m, content/sfx/boki.json "reach").
+func cue(what: String, chirp_db: float) -> void:
+	k.m.sfx("summon_%s_%s" % [what, k.ks.size if k.ks else "small"], k.pos, -4.0)
+	k.m.sfx(chirp_name(k.ks), k.pos, chirp_db, Unique.voice(k.rec))
+
+## The one-word tag for a window: Burst (short and strong) or Steady (long and supportive).
+static func tag(window: float) -> String:
+	return "Steady" if window >= float(rules()["steady_from"]) else "Burst"
 
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
@@ -135,7 +168,16 @@ func fly_home(dt: float) -> bool:
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
+	if cd > 0.0 and cd <= dt:
+		k.m.sfx("wisp_ready", k.pos, -6.0)      # the cooldown is over: the wisp brightens (BokiWispLook.dim)
+		ready_flash = READY_FLASH_S
 	cd = maxf(0.0, cd - dt)
+	ready_flash = maxf(0.0, ready_flash - dt)
+	if k.wisp and not out():
+		chirp_in -= dt
+		if chirp_in <= 0.0:
+			chirp_in = randf_range(CHIRP_EVERY.x, CHIRP_EVERY.y)
+			k.m.sfx(chirp_name(k.ks), k.pos, -10.0, Unique.voice(k.rec))
 	var o := k.owner_h
 	if guardian and (o == null or o.out or not o.downed):
 		guardian = false          # revived or gone: it finishes the window beside you as a plain summon
@@ -160,11 +202,12 @@ func tick(dt: float) -> void:
 func popped(to_wisp: bool) -> void:
 	if not to_wisp:
 		_pop(true, false)
-		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+		cue("burst", -4.0)
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
+		cue("killed", -14.0)      # it never shrank: knocked down, the wisp leaving
 	_folding = false
 
 ## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
@@ -217,6 +260,7 @@ func render() -> void:
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		cue("end", -8.0)
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false          # left behind mid-fold: it stays the walking Boki
 		_drop_pop()

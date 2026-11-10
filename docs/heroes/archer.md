@@ -124,7 +124,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Knocking an enemy restores a dash charge | [wiki: Phase Walk](https://supervive.wiki.gg/wiki/Myth) | not shown | built (now main's takedown reset for every hero) | `combo archer: knock > heal + dash charge` |
 | Heartpiercer can be held 3 s after cast before it fires | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: auto-release at 3 s | `pin small: the Heavy Shot can be held 3 s` |
 | Short Heartpiercer charges push harder | [wiki patch 20.11.24](https://supervive.wiki.gg/wiki/Myth) | not shown | built: minimum push 6 -> 8 | same |
-| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall` |
+| Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
 | Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
 | Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
 | Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
@@ -133,7 +133,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
 | Ult: she walks and dodges between shots | sheet | confirms (walks f50-f62) | built: no slow, Spirit Walk keeps the shots | `pin ult small: she can move...`, `... Spirit Walk between shots keeps them` |
 | Ult: a wall stops the beam | ours | - | built | `pin ult small: a wall stops the beam` |
-| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | not built: needs a downed branch in Hunter.hurt, magnitude unknown; see docs/specs/DOWNED_ABILITIES.md rule 2 | - |
+| Affects wisps (downed hunters) | [wiki](https://supervive.wiki.gg/wiki/Myth) | not shown | built: rival Wisps in the wall lose `down_hp` each tick, 5 x 2.5 = 12.5 of 100 [est: the source drain is unknown]; no slow or burn on a Wisp; allies' Wisps untouched (docs/specs/DOWNED_ABILITIES.md row 2) | `pin E: a rival Wisp in the wall loses down_hp each tick...`, `... does not slow, burn or damage a Wisp` |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -270,3 +270,12 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/archer.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![archer v2 strips](../art/anim_audit/v2_archer.jpg)
+
+- Gait: run slide 13 %, arms against the legs +0.61, bob 5.3 cm: unchanged. The bow arm hangs static in a gait by design (reach 0.05 body heights); the free arm stands out for 21 % of the loose and perfect clips: unchanged.
+- Bow on the hand: the bow rides the closed bow hand (`anchor_bow_root`, `anchor_nock`); the string hand reaches the nock at draw length in `draw`, `loose` and `heavy`.
+- Timing table above: re-run through `--archer-combo-check` on the v2 clips: 159 checks, 0 failures; no row moved.

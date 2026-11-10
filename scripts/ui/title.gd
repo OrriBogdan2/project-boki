@@ -482,8 +482,10 @@ func _build_ui() -> void:
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
-	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	# the Training Grounds: every Hunter's kit against dummies and a sparring bot, no save needed
+	# ("Arena" is the 4v4 mode's)
+	var grounds := func(): Game.start_match(Match.arena_opts(Arch.of_save() if has else ""))
+	items.append(["Training Grounds", grounds, "knock"])
 	if has:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
@@ -529,6 +531,15 @@ func _build_ui() -> void:
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
+	var try_card := TryCard.build()
+	if try_card:
+		try_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		try_card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		try_card.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		try_card.offset_right = -28
+		try_card.offset_bottom = -112
+		root.add_child(try_card)
+		UI.pop_in(try_card, 1.6)
 	b1.grab_focus()
 
 ## The menu's item labels in order (the main button first): read by --title-check.

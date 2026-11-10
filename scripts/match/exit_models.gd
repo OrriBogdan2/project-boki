@@ -237,7 +237,8 @@ static func uplink() -> Node3D:
 		var lamp_at := Vector3(cos(a) * 1.9, 1.38, sin(a) * 1.9)
 		var lamp_mat := Models.toon(OutpostLook.NEUTRAL, false, 0.0)
 		Models.part(root, Models.box(0.3, 0.1, 0.3), lamp_mat, lamp_at, Vector3.ONE, Vector3(0, -a, 0), "Lamp%d" % i)
-	var charge := MeshInstance3D.new(); charge.name = "Charge"; charge.mesh = Models.flat_quad(Exits.OUTPOST_R * 2.0 - 0.6)
+	var charge := MeshInstance3D.new(); charge.name = "Charge"
+	charge.mesh = Models.flat_quad(Exits.OUTPOST_R * 2.0 - 0.6)
 	var chm := Models.ring_mat(Color(UPLINK.lightened(0.3), 0.95), 0.08)
 	chm.set_shader_parameter("arc", 0.0)
 	charge.material_override = chm
