@@ -871,8 +871,8 @@
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 27,
-"semicolon": 10,
+"long_line": 21,
+"semicolon": 7,
 "shadow": 2
 },
 "scripts/ui/lobby.gd": {
