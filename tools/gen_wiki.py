@@ -718,6 +718,46 @@ def _dash_ours(row, modes):
         out = "**exception:** %s (%s)" % (out, row["reason"])
     return out
 
+# Owner item 183: each Hunter's air dash against its ground dash. [verdict, air dash (distance, time, carry, slot, clip), source]
+AIR_AUDIT = {
+    "thief": ["special", "8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`)",
+              "dancer.md and owner items 7 / 129: the air dash is longer and slower"],
+    "archer": ["same", "with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot)",
+               "pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press"],
+    "mage": ["same", "the same Wirerun (7.5 to 13 m by rank, one charge, same clip)", "vireo.md: one Wirerun, no air variant"],
+    "gunslinger": ["special", "a tap in the air slides 2/3 of the ground Slipstep (`air_k`), the same charge and clip",
+                   "venator.md: the air slide is shorter"],
+    "tender": ["special", "its own air-dash slot (`air` block, about 3.8 times the ground step), its own cooldown", "mooshmoosh.md and owner item 24"],
+    "rimewright": ["same", "the same Skate, the same charge and clip; the fall is eased while it runs (`air_fall`)", "tamsin.md: one Skate"],
+    "dolm": ["same", "with a charge: the same Rock Hop (`breah_hop`, one charge), held at the height it starts at: no landing, no rock; "
+             "out of charges the class long dash (`breah_exdash`)", "breah.md: one Landslide, no air variant. Item 183 moved the generic long dash off the charged press"],
+    "ostra": ["same", "the same Lantern Trade (1.8 s), the same charge and clip", "ostra.md: one Lantern Trade"],
+    "bulwark": ["same", "with a charge: the same 360 Smash (`bul_whirl`, one charge); out of charges the class long dash",
+                "bjorn.md: one 360 Smash. Item 183 moved the generic long dash off the charged press"],
+    "juggernaut": ["same", "with a charge: the same Rampage (`jug_dash`, one charge); in the Meteor Smash's gather it rides the drive with no wind-up, "
+                   "the gather pose kept; out of charges the class shoulder charge (`jug_exdash`)",
+                   "juggernaut.md: one Rampage. Item 183 moved the generic long dash off the charged press"],
+    "ashwick": ["skipped", "air 8.0 m in 0.24 s (ground 3.4 m in 0.28 s)", "parity 11 (queued)"],
+    "dredge": ["skipped", "`air_k` carry on the Barge", "parity 13 (queued)"],
+}
+
+AIR_NAMES = {"thief": "Sable", "archer": "Hem", "mage": "Vex", "gunslinger": "Ghost", "tender": "Elluna", "rimewright": "Claire",
+             "dolm": "Tarek", "ostra": "Void", "bulwark": "Oath", "juggernaut": "Kael", "ashwick": "Cinder", "dredge": "Grimble"}
+
+def _air_audit_table():
+    rows = []
+    for aid in ARCH_ORDER:
+        a = AIR_AUDIT.get(aid)
+        if not a:
+            continue
+        d = ARCH.get(aid, {}).get("dash", {})
+        dist, tm = d.get("dist"), d.get("time")
+        ground = "%s (cd %s s)" % (d.get("name", "?"), d.get("cd", "?"))
+        if isinstance(dist, (int, float)) and tm:
+            ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
+        rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
+    return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
@@ -745,6 +785,9 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
+    body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
+             "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
+             "\"special\" = a sourced difference.\n\n") + _air_audit_table()
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 
