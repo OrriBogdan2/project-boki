@@ -24,6 +24,15 @@ static func body(id: String) -> Dictionary:
 static func hit_r(id: String, cdat: Dictionary) -> float:
 	return float(body(id).get("hit_r", cdat.get("hit_r", 0.38 * float(cdat["scale"]))))
 
+## The height of a hunter's hurtbox, feet to the top of the head (m): the body's hit_h, else a medium hunter's.
+static func hit_h(id: String) -> float:
+	return float(body(id).get("hit_h", HIT_H_DEFAULT))
+
+## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
+static func apply_body(h: Hunter) -> void:
+	h.r = hit_r(h.arch, h.cdat)
+	h.body_r = float(body(h.arch).get("body_r", -1.0))
+
 static func ids() -> Array:
 	var out: Array = []
 	for a in ORDER:

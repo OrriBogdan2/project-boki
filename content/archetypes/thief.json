@@ -7,7 +7,7 @@
 	"weight": "light",
 	"color": "#9a5cff",
 	"plate_offset": 2.15,
-	"body": {"size": 1.059, "head": 0.6, "legs": 2.04, "torso": 0.96, "shoulder": 0.92, "hit_r": 0.384},
+	"body": {"size": 1.059, "head": 0.6, "legs": 2.04, "torso": 0.96, "shoulder": 0.92, "hit_r": 0.398, "hit_h": 1.7, "body_r": 0.384},
 	"fantasy": "The duelist. Sticks to one mark from range, cartwheels past them, never lets go.",
 	"howto": ["Play: duelist; stick to one target from range.", "Combo: {dash} vault, then a shot that hits resets it.", "Avoid: missing the shot after {dash}; no reset."],
 	"silhouette": "the long braid, the moth wings and the twin pistols",
