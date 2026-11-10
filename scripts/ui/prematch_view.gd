@@ -2,6 +2,8 @@ extends Control
 ## The pre-match lobby screen (rules: Prematch): pick your Hunter, meet your squad, plan with text
 ## chat (and a voice hook), watch the countdown. At 0 the picks lock and the match loads.
 
+const SIDE_W := 300.0      # px: the squad and chat column
+
 var pm: Prematch
 var voice := VoiceChat.new()
 var timer_label: Label
@@ -35,9 +37,8 @@ func _ready() -> void:
 	var titles := UI.vbox(2)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(titles)
-	titles.add_child(UI.section("Before the drop", UI.GOLD))
 	titles.add_child(UI.title("Pick your Hunter", 34))
-	hint = UI.para("Your squad can see your pick. Picks lock when the timer ends.")
+	hint = UI.para("Picks lock when the timer ends.")
 	titles.add_child(hint)
 	timer_label = UI.label("", 56, UI.INK, UI.big)
 	head.add_child(timer_label)
@@ -49,12 +50,13 @@ func _ready() -> void:
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	cols.add_child(sc)
 	grid = GridContainer.new()
-	grid.columns = 3
+	# as many Hunter cards per row as fit beside the squad column (three at 1280 wide)
+	grid.columns = maxi(1, int((get_viewport_rect().size.x - 72.0 - 24.0 - SIDE_W) / (HeroGrid.CARD_W + 12.0)))
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	sc.add_child(grid)
 	var side_col := UI.vbox(12)
-	side_col.custom_minimum_size = Vector2(380, 0)
+	side_col.custom_minimum_size = Vector2(SIDE_W, 0)
 	cols.add_child(side_col)
 	side_col.add_child(UI.section("Your squad"))
 	squad_box = UI.vbox(6)

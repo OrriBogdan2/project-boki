@@ -1784,6 +1784,7 @@ func _draw_squad_pings(p: Hunter) -> void:
 		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2))
 
 ## For the first seconds of every match: what each of your buttons does.
+const KIT_FULL_RUNS := 3      # expeditions after which the kit panel drops its descriptions (names and keys only)
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
 	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden:
 		return
@@ -1836,8 +1837,8 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		hs.append(26.0 + dh + 8.0)
 		total += 26.0 + dh + 8.0
 	var bottom := sz.y - 176.0
-	var compact := false
-	if not m.opts.get("training", false) and total > bottom - 230.0:
+	var compact: bool = int(Save.d.get("matches", 0)) >= KIT_FULL_RUNS      # a returning player gets names only
+	if compact or (not m.opts.get("training", false) and total > bottom - 230.0):
 		# too tall to sit under the kill feed: names only
 		compact = true
 		hs = []

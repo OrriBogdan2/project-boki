@@ -275,7 +275,7 @@ static func _inputs(t: Theme) -> void:
 ## Panels: a black-violet torn sheet with speckle and runes in its border band and the teal-to-
 ## magenta neon edge. Scroll bars stay thin and quiet; progress bars are a recess with a lit fill.
 static func _panels(t: Theme) -> void:
-	var pc := UiTorn.make(UI.SURFACE, 6.0, 1.0, 1.0)
+	var pc := UiTorn.make(UI.SURFACE, 6.0, 1.0, 0.5)      # (half the speckle and runes: the frame, not a texture)
 	pc.glow_w = 2.0
 	pc.shadow = 40
 	pc.padded(UI.PAD + 6, 24)

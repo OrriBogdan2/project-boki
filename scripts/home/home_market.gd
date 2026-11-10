@@ -94,7 +94,6 @@ func _next_level(v: VBoxContainer) -> void:
 ## section headers. Some only go on sale once you've made it out of enough expeditions or finished a
 ## challenge; wear and utility restock by rarity (Stalls.vendor_has).
 func _vendor(v: VBoxContainer) -> void:
-	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
 	var row := UI.hbox(6)
 	for t in VENDOR_TABS:
 		var tt: String = t

@@ -51,18 +51,17 @@ func show_result(r: Dictionary) -> void:
 	kr.add_child(UI.tag("Extracted" if won else "Didn't make it", UI.TEAL if won else Color("ff9a8a")))
 	kr.add_child(UI.label(kick, UI.T_CAPS, UI.FAINT, UI.caps))
 	head.add_child(kr)
-	head.add_child(UI.label(HeroTitle.label(String(Save.d.get("name", "Hunter")), Arch.of_save()), UI.T_BODY, UI.MUTED))
 	head.add_child(UI.title("You made it out" if won else _lost_title(r.get("why", "")), 46, UI.INK))
 	var how_line := String({"skiff": "Flew out on the skiff from %s. ", "hatch": "Slipped out through a rift hatch. ", "uplink": "Rode the lift out of %s. "}.get(String(r.get("how", "")), ""))
 	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
 	head.add_child(UI.para((how_line + "Everything you carried is yours now.") if won else "Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
 	v.add_child(head)
-	# the four numbers that matter, big and counting up, on one strip; the rest in a quiet line
+	# the four numbers that matter, big and counting up, on one strip
 	var secs := int(r.get("time", 0))
 	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
 	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
-		["clock", "Time", float(secs), "time"], ["gem", "Armor", float(r.get("armor_tier", 0)), "armor"]]
+	var big4 := [["knock", "Knocks", float(r.get("knocks", 0)), ""], ["burst", "Kills", float(r.get("kills", 0)), ""],
+		["burst", "Damage", float(r.get("damage", 0)), ""], ["clock", "Time", float(secs), "time"]]
 	for i in big4.size():
 		var t: Array = big4[i]
 		if i > 0:
@@ -70,13 +69,6 @@ func show_result(r: Dictionary) -> void:
 			sh.add_child(sep)
 		sh.add_child(_stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08))
 	v.add_child(strip)
-	var small := UI.hbox(18)
-	for t in [["Kills", int(r.get("kills", 0))], ["Damage taken", int(r.get("taken", 0))], ["Times downed", int(r.get("downs", 0))], ["Revives", int(r.get("revives", 0))]]:
-		var one := UI.hbox(6)
-		one.add_child(UI.label(String(t[0]), UI.T_SMALL, UI.MUTED))
-		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
-		small.add_child(one)
-	v.add_child(small)
 	v.add_child(ClassCard.results_strip(s))
 	if won:
 		var chips: Array = []

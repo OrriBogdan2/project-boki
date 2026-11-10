@@ -2287,7 +2287,7 @@ func _build_ui() -> void:
 	# bottom centre: the few keys you need to get about
 	var hint_box := UI.glass(6, 12)
 	hint_box.modulate.a = 0.85
-	var keys := UI.key_hints([["W A S D", "walk"], ["Space", "jump"], [Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]], 12, Color(1, 1, 1, 0.78))
+	var keys := UI.key_hints([[Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]], 12, Color(1, 1, 1, 0.78))
 	hint_box.add_child(keys)
 	hint = UI.label("", 14, UI.INK)     # kept for code that still sets hint text; the key row replaces it
 	hint.visible = false
@@ -2395,9 +2395,11 @@ func _refresh_top() -> void:
 		var kc: Color = Data.KIN.get(String(ak.get("species", "")), {}).get("color", UI.ACCENT)
 		top_chips.add_child(_top_chip("paw", String(ak.get("name", "")), kc, "Your partner: the Boki that comes on expeditions with you"))
 	top_chips.add_child(_top_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems: spend them on buildings, seeds and treats"))
-	top_chips.add_child(_top_chip("tonic", str(int(Save.d["items"].get("tonic", 0))), Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"))
-	top_chips.add_child(_top_chip("seed", str(crops), UI.GOOD, "Crops you've harvested"))
-	if fs or Work.mat("wood") > 0 or Work.mat("stone") > 0:
+	if int(Save.d["items"].get("tonic", 0)) > 0:      # (counts you don't have yet are noise)
+		top_chips.add_child(_top_chip("tonic", str(int(Save.d["items"].get("tonic", 0))), Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"))
+	if crops > 0:
+		top_chips.add_child(_top_chip("seed", str(crops), UI.GOOD, "Crops you've harvested"))
+	if Work.mat("wood") > 0 or Work.mat("stone") > 0 or Work.mat("fibre") > 0:
 		top_chips.add_child(_top_chip("dash", FarmSites.mats_text(), Color("d8b07a"), "Building materials: wood and stone from the wild (an axe and a pickaxe from the market) or a Lumber Camp and a Quarry, fibre from harvests and clearing the wild, Ember Coals from a Kiln. They pay for buildings and upgrades."))
 	if treat != "":
 		top_chips.add_child(_top_chip("heart", "Treat: " + _treat_name(treat), Color("ffb0d0"), "A treat is ready to give to a Boki"))

@@ -29,9 +29,7 @@ func open(which := "") -> void:
 	var at_house: Array = lost.filter(func(L): return String(L["where"]) == "ransom")
 	var held: Array = lost.filter(func(L): return String(L["where"]) == "rival")
 	var offers: Array = Save.d.get("offers", [])
-	var holds := [Ransom.BROKER, Ransom.SELL_AFTER]
-	UI.subtitle(v, ("%s holds the Boki nobody came for (%d expeditions), carries word to whoever took yours, " % holds)
-		+ "and keeps a few rare things under the counter.")
+	UI.subtitle(v, "Boki nobody came for, word from whoever took yours, and rare things under the counter.")
 	UI.head_extra(v).add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Your gems"))
 	var names: Array = TABS.values()
 	UI.shell_tabs(v, names, String(TABS[tab]), func(t): open(String(TABS.find_key(t))),
