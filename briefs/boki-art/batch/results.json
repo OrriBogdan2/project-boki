@@ -98192,5 +98192,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/epic_blightmoth_b_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fit_pavonazar",
+    "name": "Pavonazar (epic pick, whole creature in frame)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fit_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fit_pavonazar",
+    "name": "Pavonazar (epic pick, whole creature in frame)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fit_pavonazar_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fit_sarcobra",
+    "name": "Sarcobra (epic pick, whole creature in frame)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fit_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_wayshell_n1",
+    "name": "Wayshell (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_wayshell_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cetorgan_n1",
+    "name": "Cetorgan (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_cetorgan_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cetorgan_n1",
+    "name": "Cetorgan (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_cetorgan_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_wayshell_n1",
+    "name": "Wayshell (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_wayshell_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cetorgan_n1",
+    "name": "Cetorgan (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_cetorgan_n1_2.jpg",
+    "ok": true
   }
 ]
