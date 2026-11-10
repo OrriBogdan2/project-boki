@@ -77577,5 +77577,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_chandelapi_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_kayak",
+    "name": "Kayak (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_kayak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kayak",
+    "name": "Kayak (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_kayak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gongibbon",
+    "name": "Gongibbon (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_gongibbon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glaciatee",
+    "name": "Glaciatee (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_glaciatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gongibbon",
+    "name": "Gongibbon (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_gongibbon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glintmole",
+    "name": "Glintmole (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_glintmole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kayak",
+    "name": "Kayak (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_kayak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glintmole",
+    "name": "Glintmole (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_glintmole_3.jpg",
+    "ok": true
   }
 ]
