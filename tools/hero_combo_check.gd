@@ -862,7 +862,8 @@ func _gunslinger() -> void:
 			float(K.cd["e"]) < 9.2 * 0.5, "%.2f" % float(K.cd["e"]))
 	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
-	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
+	# 7. Hot Streak: the kit adds nothing to the dash on a knock (DashReset gives it back, --knock-reset-check);
+	# rank 3 resets the Burr Charge
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0
 	K.cd["rmb"] = 5.0
@@ -871,8 +872,8 @@ func _gunslinger() -> void:
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
-	ok("Knock: Slipstep back, no heal from the kit (the takedown heal is DashReset's)",
-			P.hp < 41.0 and P.dashes >= 1.0, "hp %.1f" % P.hp)
+	ok("Knock: no dash and no heal from the kit (both are DashReset's)",
+			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f dashes %.2f" % [P.hp, P.dashes])
 	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
 	T.downed = false
 	T.hp = T.max_hp

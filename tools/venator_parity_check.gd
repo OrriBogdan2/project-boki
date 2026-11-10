@@ -425,7 +425,7 @@ func _audit(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> 
 	T.hp = 0.0
 	T.downed = true
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
-	var knocked := P.dashes >= 1.0
+	var knocked := K.knocked.has(T.get_instance_id())      # the knock flourish ran (the dash back is DashReset's)
 	C.ac.step(m, 0.5, watch)
 	T.downed = false
 	T.hp = T.max_hp

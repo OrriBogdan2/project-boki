@@ -2242,7 +2242,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
+		# the knock reward: the dash back (one charge of several) and a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)

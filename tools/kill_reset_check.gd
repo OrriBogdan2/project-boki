@@ -1,6 +1,7 @@
 extends RefCounted
 ## --kill-reset-check: the takedown reset (DashReset). A hunter who knocks or kills an enemy hunter has
-## every dash charge and the long-dash cooldown back at once and heals 5% of max health (never past
+## the dash back at once (a one-charge dash whole, one charge of several; assists: --knock-reset-check),
+## the long-dash cooldown cleared, and heals 5% of max health (never past
 ## max); killing a mob changes nothing; a bot gets it too but only the local hunter gets the cue (the
 ## CombatBus.dash_reset_cue event, the Shift icon pop and the sound); a knock on a teammate counts for
 ## nothing; the hero-specific resets (DashReset.cue) fire the same event; the cue variants all exist and
@@ -88,7 +89,8 @@ func run(main: Node) -> void:
 		var bhp := bot.hp
 		n0 = cues.size()
 		DashReset.takedown(bot, victim)
-		ok(bot.dashes >= bot.max_dashes() - 0.001 and bot.hp > bhp and cues.size() == n0, "(e) a bot's takedown resets its dash and heals, with no cue (%d)" % (cues.size() - n0))
+		ok(bot.dashes >= minf(1.0, bot.max_dashes()) - 0.001 and bot.hp > bhp and cues.size() == n0,
+				"(e) a bot's takedown gives its dash back (one charge of several) and heals, with no cue (%d)" % (cues.size() - n0))
 	else:
 		ok(false, "(e) no bot to test")
 

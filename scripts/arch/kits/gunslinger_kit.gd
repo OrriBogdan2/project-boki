@@ -176,17 +176,16 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
 		_on_knock(t)
 
-## Hot Streak: a knock gives Slipstep back (the takedown heal is DashReset's); rank 3 also resets the Burr Charge.
+## Hot Streak: the knock's flourish (Slipstep back and the heal are the game-wide DashReset's); rank 3
+## also resets the Burr Charge (the source's Spike Grenade upgrade "CD resets on knock").
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
-	h.dashes = h.max_dashes()
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+KNOCK", Color("8ff0a0"), false)
 	m.sfx("vn_stim", h.pos, -3.0)
 	play("gunslinger_knock")
-	DashReset.cue(h)
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
 ## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick.

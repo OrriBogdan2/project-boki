@@ -786,7 +786,8 @@ var touched := {}              # rival hunter id -> [hunter, time of our last hi
 var knocks_seen := 0           # knocks and assists this kit has seen (tests)
 
 ## Every hit this hunter lands (Match.on_damage calls it before on_deal): remembered for 5s, so a
-## knock on them inside that window reaches on_knock (mine = the knocking blow was ours, else an assist).
+## knock on them inside that window reaches on_knock (mine = the knocking blow was ours, else an assist);
+## a teammate's knock also gives our dash back (DashReset.assist).
 func note_hit(t: Ent) -> void:
 	if t is Hunter and t.team != h.team:
 		touched[t.get_instance_id()] = [t, m.time]
@@ -806,6 +807,8 @@ func _tick_knocks() -> void:
 			if by is Kin and (by as Kin).owner_h: by = (by as Kin).owner_h
 			knocks_seen += 1
 			on_knock(t, by == h)
+			if by is Hunter and by != h and (by as Hunter).team == h.team:
+				DashReset.assist(h, t)
 		elif m.time - float(e[1]) > 5.0:
 			touched.erase(key)
 
