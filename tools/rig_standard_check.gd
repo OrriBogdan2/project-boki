@@ -39,7 +39,7 @@ func run(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var ids := Arch.ids()
-	ok(ids.size() == 12, "12 Hunters (%d)" % ids.size())
+	ok(ids.size() == 13, "13 Hunters (%d)" % ids.size())
 	for id in ids:
 		_hunter(String(id))
 	print("RIG_STANDARD_DONE, failures: ", bad)
