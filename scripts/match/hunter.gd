@@ -1744,7 +1744,6 @@ func _kin_riders(extra: Dictionary) -> void:
 	var k: Kin = kin
 	if k and k.ks and kin_carry_on() and not k.ks.carry_on_shot.is_empty():
 		lists.append([k.ks.carry_on_shot, 1.0])
-		KinWispProc.proc(self)
 	var mo := KinMerge.on_shot(self)
 	if not mo.is_empty():
 		lists.append([mo, 1.0])

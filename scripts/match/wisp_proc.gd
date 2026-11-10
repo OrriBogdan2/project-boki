@@ -131,6 +131,7 @@ func _play(k: Kin, kind: String, to: Vector3, now: float) -> void:
 	_to = to
 	cues += 1
 	last_kind = kind
+	KinWispProc.chirp(k)
 
 func _fade(now: float) -> void:
 	var f := (now - _t0) / FLASH_S

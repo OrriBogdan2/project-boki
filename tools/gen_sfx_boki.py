@@ -278,6 +278,11 @@ SPECIES_VOICE = {
     'rimeshrew': ('ee', (1, 1.68, 1.5)), 'selenfin': ('oh', (1, 1.12, 1.33)), 'thrumbird': ('eh', (1, 1.19, 1.19)),
     'wisplet': ('ee', (1, 1.5, 1.78)), 'zapple': ('ah', (1, 1.33, 1)), 'zephyrak': ('ee', (1, 1.5, 2.0)),
 }
+# Species rigged after the first sets: their own seed, after the first sets, so regenerating keeps every
+# earlier bk_ file as it was.
+LATER_VOICE = {
+    'caecilith': ('mm', (1, 0.84, 1.12)),     # a low, curious hum from under the ground
+}
 
 
 def species_data(sp):
@@ -314,7 +319,7 @@ def note(f, f_end, d, vow, tail_d=None):
 
 def species_voice(sp, mood, i):
     kg, theme, curious, temper = species_data(sp)
-    vow, motif = SPECIES_VOICE[sp]
+    vow, motif = SPECIES_VOICE[sp] if sp in SPECIES_VOICE else LATER_VOICE[sp]
     kind = TIMBRE.get(theme, 'plain')
     base = float(np.clip(1000.0 * (2.5 / kg) ** 0.2, 520, 1450)) * j(i, 0.04)
     dd = 0.11 / (0.8 + 0.5 * curious)                 # curious ones chatter faster
@@ -355,6 +360,10 @@ def voice_sets():
     """Writes bk_<species>_<mood> (2 takes) for every rigged species."""
     S.reseed(7001)
     for sp in species_names():
+        for mood in MOODS:
+            S.takes_cat('bk_%s_%s' % (sp, mood), lambda i, sp=sp, mood=mood: species_voice(sp, mood, i), 1, 'boki')
+    S.reseed(7002)
+    for sp in sorted(LATER_VOICE):
         for mood in MOODS:
             S.takes_cat('bk_%s_%s' % (sp, mood), lambda i, sp=sp, mood=mood: species_voice(sp, mood, i), 1, 'boki')
 
