@@ -25,6 +25,7 @@ var _warned := false
 var _back_t := 0.0
 var bright := false      # the ring went bright in the pack beat
 var second := false      # summoned again after that
+var _was_out := true     # the Boki was out last frame (a fresh summon means the ring was bright)
 var wave2 := false
 var extra := false
 
@@ -42,6 +43,7 @@ func begin() -> void:
 	_back_t = 0.0
 	bright = false
 	second = false
+	_was_out = true
 	wave2 = false
 	extra = false
 
@@ -110,7 +112,8 @@ func pack_done() -> bool:
 			wave2 = true
 			tu.foes(["skitter"], true)
 		return wave2 and tu.live_foes() == 0
-	var rested := not s.out() and s.cd <= 0.0
+	var rested := (not s.out() and s.cd <= 0.0) or (s.out() and not _was_out)     # (pressed as it rested)
+	_was_out = s.out()
 	if rested and not bright:
 		bright = true
 		_bark("Ready again!")
