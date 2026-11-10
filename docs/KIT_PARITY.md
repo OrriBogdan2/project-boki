@@ -104,7 +104,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
-| RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
+| RMB | Arm pierces terrain, pulls first target, 18 s [D]; out 22.5 m/s, reel 9 m/s to adjacent [F] | 11.5 m at 22.5 m/s through terrain, reel 9 m/s to adjacent, 20% braced shuffle, cd 12 (heroes/dredge.md, reel parity) | match; 0.67x cd |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, Grounded (ours) | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
