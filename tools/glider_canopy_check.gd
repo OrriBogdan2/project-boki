@@ -90,7 +90,8 @@ func run(main: Node) -> void:
 	var steady := _spawned(true, true)
 	var opened := _spawned(false, true)
 	var folded := _spawned(true, false)
-	ok(opened <= steady and folded == 0, "opening (%d vs %d gliding) and closing (%d) add no puff or burst" % [opened, steady, folded])
+	var quiet: bool = opened <= steady and folded == 0
+	ok(quiet, "opening (%d vs %d gliding) and closing (%d) add no puff or burst" % [opened, steady, folded])
 	var burn := _look(0.0, true)
 	ok(burn[0] == 1.0 and burn[1] == 1.0, "overheated over the abyss, lifting at half strength: it flickers")
 	h.gliding = false
