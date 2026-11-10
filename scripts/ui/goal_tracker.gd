@@ -15,6 +15,8 @@ static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
 
 static func lines() -> Array:
+	if not GardenTutorial.farm_ok():
+		return []      # garden-first: no goals list until building and farming open (0005-garden-first)
 	var by_source := {"unlock": _unlocks(), "mastery": _mastery(), "milestone": _milestones(), "level": _level()}
 	var caps: Dictionary = cfg()["per_source"]
 	var picked: Array = []

@@ -7,6 +7,9 @@ extends RefCounted
 ##   3. the Goals tracker: at most 5 rows, none of the tutorial, sorted, hidden when empty
 ##   4. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
+##   6. garden-first (docs/decisions/0005-garden-first.md): a hatched save starts with the care tutorial
+##      (meet, pet, feed, play, give, train, head out) and the farm gated until 3 runs or Hob; old saves
+##      keep the farm tutorial; then all seven steps at a real home, with the card, the beam and the lead
 ## Never touches the real save.
 
 var bad := 0
@@ -49,11 +52,14 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
-	_hob_rules()
-	_tutorial_rules()
-	_tracker_rules()
-	await _world()
-	await _farm2()
+	if not "--garden-only" in OS.get_cmdline_user_args():      # --garden-only: just section 6
+		_hob_rules()
+		_tutorial_rules()
+		_tracker_rules()
+		await _world()
+		await _farm2()
+	_garden_rules()
+	await _garden_world()
 	print("FTUT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -614,3 +620,146 @@ func _free_cells(hb, sz: Vector2i) -> Array:
 			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
 			if hb.fits(hb.held, cs): return cs
 	return []
+
+# ------------------------------------------------------------------ 6. garden-first (0005)
+func _garden_save() -> void:
+	Save.d = _new_save()
+	HomeLayout.ensure(Save.d)
+	_stats()
+
+func _garden_rules() -> void:
+	_garden_save()
+	ok(not GardenTutorial.garden_save() and GardenTutorial.farm_ok() and FarmTutorial.active(),
+			"a save without the garden flag (older saves, and the farm checks above) keeps the farm tutorial")
+	GardenTutorial.begin()
+	var rec := Save.active_kin()
+	ok(GardenTutorial.active() and GardenTutorial.current() == "meet", "a hatched save starts the garden tutorial at 'meet'")
+	ok(not FarmTutorial.active() and not GardenTutorial.farm_open() and GoalTracker.lines().is_empty(),
+			"... with the farm tutorial, the farm and the Goals card held back")
+	ok(GardenTutorial.steps().map(func(s): return String(s["id"])) == ["meet", "pet", "feed", "play", "give", "train", "out"],
+			"seven steps: meet, pet, feed, play, give, train, head out")
+	GardenTutorial.event("feed")
+	GardenTutorial.event("pet")
+	ok(GardenTutorial.done_count() == 0, "steps only count in order")
+	GardenTutorial.event("meet")
+	ok(GardenTutorial.current() == "pet" and GardenTutorial.kin_use(rec) == "pet", "after saying hi, interact pets")
+	Care.change(rec, "food", -100.0)
+	GardenTutorial.prepare(rec)
+	ok(Care.want(rec) == "", "before the feed step it wants nothing (so the key pets, not feeds)")
+	GardenTutorial.event("pet")
+	var k0 := int(Save.d["items"].get("kibble", 0))
+	GardenTutorial.prepare(rec)
+	ok(GardenTutorial.current() == "feed" and Care.want(rec) == "food" and KinWants.action(rec, false) == "feed",
+			"at the feed step it is hungry and the key feeds")
+	ok(int(Save.d["items"].get("kibble", 0)) >= k0 + 2 and int(Save.d["items"].get("sweetbun", 0)) >= 1,
+			"the starter food is in the bag (no farm produce needed)")
+	GardenTutorial.event("feed")
+	GardenTutorial.event("play")
+	ok(GardenTutorial.kin_use(rec) == "", "the gift is not in hand until it is found")
+	var found := GardenTutorial.prepare(rec)
+	ok(found.contains("Sprout Cap") and GardenTutorial.kin_use(rec) == "give" and GardenTutorial.kin_line(rec).contains("Sprout Cap"),
+			"the gift is found: '%s', prompt '%s'" % [found, GardenTutorial.kin_line(rec)])
+	var g0 := int(rec["stats"]["guard"])
+	var line := GardenTutorial.give(rec)
+	ok(String(rec.get("acc", "")) == "leafhat" and (Save.d["accs"] as Array).has("leafhat") and int(rec["stats"]["guard"]) == g0 + 2,
+			"giving it: it wears the leaf hat and gains 2 Guard ('%s')" % line)
+	ok(float((rec.get("aff", {}) as Dictionary).get("steadfast", 0.0)) > 0.0 or str(rec).contains("steadfast"), "... and leans steadfast")
+	ok(GardenTutorial.give(rec) == "" and GardenTutorial.current() == "train", "only once; next is training")
+	ok(GardenTutorial.kin_use(rec) == "train" and GardenTutorial.train_stat(rec) == "guard", "the key trains Guard")
+	ok(not GardenTutorial.open_farm() and not GardenTutorial.farm_open(), "the farm can't be opened mid-tutorial")
+	GardenTutorial.event("train")
+	Save.d["matches"] = 1
+	GardenTutorial.event("portal")
+	ok(not GardenTutorial.active() and int(GardenTutorial.state()["m0"]) == 1, "the portal finishes it")
+	ok(not GardenTutorial.farm_open() and not FarmTutorial.active(), "the farm stays closed after the tutorial")
+	Save.d["matches"] = 3
+	ok(not GardenTutorial.farm_open(), "two runs later: still closed")
+	Save.d["matches"] = 4
+	ok(GardenTutorial.farm_open() and GardenTutorial.take_farm_toast() != "" and GardenTutorial.take_farm_toast() == "",
+			"three runs later it opens by itself, with one toast")
+	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "and the farm tutorial starts at Hob")
+	# opening early through Hob
+	_garden_save()
+	GardenTutorial.begin()
+	for id in ["meet", "pet", "feed", "play", "give", "train", "out"]:
+		GardenTutorial.mark(id)
+	ok(not GardenTutorial.farm_open() and GardenTutorial.open_farm() and GardenTutorial.farm_ok(),
+			"after the tutorial, asking (Hob, Build) opens the farm at once")
+	# old saves
+	_garden_save()
+	GardenTutorial.begin()
+	Save.d["tutorial"]["day1_done"] = true
+	ok(not GardenTutorial.garden_save() and GardenTutorial.farm_ok(), "a day1_done save is never gated")
+
+## Waits up to secs of home time for cond. Home steps at most 0.05 s a frame, so on a slow software
+## renderer this counts game time, not the clock (capped at 10 minutes of the clock).
+func _until(secs: float, cond: Callable) -> bool:
+	var t0 := Time.get_ticks_msec()
+	var gt := 0.0
+	while gt < secs and Time.get_ticks_msec() - t0 < 600000:
+		if cond.call():
+			return true
+		await main.get_tree().process_frame
+		gt += minf(main.get_process_delta_time(), 0.05)
+	return bool(cond.call())
+
+func _garden_world() -> void:
+	_garden_save()
+	GardenTutorial.begin()
+	Save.d["tutorial"]["home"] = true
+	var home = await _ready_home()
+	var gg: GardenGuide = home.guide.garden
+	var rec := Save.active_kin()
+	await _until(1.5, func(): return is_instance_valid(gg.card))
+	ok(is_instance_valid(gg.card) and gg.card.visible and gg.card_lbl.text.contains(String(rec["name"])) and gg.card_title.text.begins_with("1/7"),
+			"a centred card says what to do: '%s'" % (gg.card_lbl.text if is_instance_valid(gg.card) else ""))
+	ok(is_instance_valid(gg.beam) and gg.beam.visible and is_instance_valid(gg.mark) and gg.mark.visible,
+			"a light beam and the marker are on your Boki")
+	ok(not is_instance_valid(home.guide.hint_box) and home.guide.tracker == null, "no farm hint line and no Goals card")
+	ok(not home.hob.node.mark.visible and not home.hub_items().any(func(it): return String(it[0]) == "build"),
+			"Hob shows no blueprint mark and the hub has no Build")
+	var k: Dictionary = home._kin_entry(rec)
+	ok(gg.lead_goal(k) != Vector3.INF, "your Boki comes over to say hi")
+	home.ppos = k["pos"] + Vector3(1.2, 0, 0)
+	home.player.position = home.ppos
+	ok(await _until(3.0, func(): return GardenTutorial.current() == "pet"), "walking up to it says hi")
+	home._kin_act(k)
+	ok(GardenTutorial.current() == "feed", "pet")
+	await _until(1.5, func(): return Care.want(rec) == "food")
+	k = home._kin_entry(rec)
+	home._kin_act(k)
+	ok(GardenTutorial.current() == "play", "fed it (%s)" % GardenTutorial.current())
+	await _until(2.5, func(): return not home._kin_entry(rec).has("eat"))
+	k = home._kin_entry(rec)
+	home.ppos = k["pos"] + Vector3(1.2, 0, 0)
+	home.player.position = home.ppos
+	home._play_with_kin(k)
+	ok(await _until(45.0, func(): return GardenTutorial.current() == "give"), "it fetched the ball back")
+	await _until(1.5, func(): return GardenTutorial.kin_use(rec) == "give")
+	k = home._kin_entry(rec)
+	home._kin_act(k)
+	k = home._kin_entry(rec)
+	ok(String(rec.get("acc", "")) == "leafhat" and not k.is_empty() and GardenTutorial.current() == "train",
+			"gave it the Sprout Cap: it is wearing it")
+	home._kin_act(k)
+	ok(not home.train.is_empty() and bool(home.train.get("here", false)), "the training game starts where it stands")
+	await _until(1.0, func(): return gg.hidden)
+	ok(gg.hidden, "the card and marker step aside during the game")
+	if not home.train.is_empty():
+		home.train["results"] = ["great", "good", "great"]
+		home._finish_training()
+	ok(GardenTutorial.current() == "out" and home.train.is_empty(), "trained")
+	k = home._kin_entry(rec)
+	var portal: Vector3 = home.spots["portal"]
+	var lg: Vector3 = gg.lead_goal(k)
+	ok(lg != Vector3.INF and Vector2(lg.x - portal.x, lg.z - portal.z).length() < Vector2(home.ppos.x - portal.x, home.ppos.z - portal.z).length(),
+			"for the last step it runs ahead toward the portal")
+	await _until(1.0, func(): return gg.step == "out")
+	ok(gg.target().distance_to(portal) < 0.5 and GardenTutorial.world_text("out") == "Portal", "the beam moves to the portal")
+	home._open_expedition()
+	ok(not GardenTutorial.active() and bool(GardenTutorial.state()["done"]), "opening the expedition finishes it")
+	home._close_panel()
+	ok(await _until(1.5, func(): return not is_instance_valid(gg.card)), "the guide clears away")
+	ok(not GardenTutorial.farm_open() and not FarmTutorial.active(), "the farm is still closed")
+	home.queue_free()
+	await main.get_tree().process_frame

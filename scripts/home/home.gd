@@ -1410,6 +1410,15 @@ func _move_kin(d: float) -> void:
 		if k.has("fetch"):
 			_fetch_step(k, d)
 		_care_step(k, d)
+		if guide and guide.garden and visit.is_empty():
+			# the garden tutorial: your Boki leads (comes to say hi, stays close, runs ahead to the portal)
+			var lg: Vector3 = guide.garden.lead_goal(k)
+			if lg != Vector3.INF:
+				k["goal"] = lg
+				k["t"] = maxf(float(k["t"]), 0.5)
+				k["lead"] = true
+			else:
+				k.erase("lead")
 		var hold := float(k.get("hold_t", 0.0))
 		if hold > 0.0:
 			# being petted or talked to: it stays put and looks at you
@@ -1422,7 +1431,7 @@ func _move_kin(d: float) -> void:
 			var aim: Vector3 = hb.steer(k, pos, goal) if hb else goal
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
-				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))
+				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t") or k.has("lead")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
 		var nx := pos.x + hv.x * d
@@ -1997,11 +2006,12 @@ func _find_interact() -> void:
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
-	if hg and visit.is_empty() and (best.is_empty() or bd > 1.2):
+	var farm_ok := GardenTutorial.farm_ok()      # garden-first: no chop/mine or job prompts until the farm opens
+	if hg and farm_ok and visit.is_empty() and (best.is_empty() or bd > 1.2):
 		# a wild tree or boulder in reach: chop or mine it (with the right tool)
 		var wt := hg.find(p2)
 		if not wt.is_empty() and (best.is_empty() or float(wt["d"]) < bd): bd = float(wt["d"]); best = wt
-	if hw and visit.is_empty():
+	if hw and farm_ok and visit.is_empty():
 		# work stations: any of them opens the Job Board
 		for s in HomeLayout.stations(_d()):
 			var sc := HomeLayout.deco_center(s["e"])
@@ -2014,7 +2024,8 @@ func _find_interact() -> void:
 	prompt_box.visible = true
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
+		var use_line := GardenTutorial.kin_line(best["k"]["rec"])
+		pairs = [[Settings.key_cap("interact"), use_line if use_line != "" else KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
 	# the prompt is keycaps and words, rebuilt only when what it says changes
@@ -2198,7 +2209,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	elif hb and event.is_action_pressed("build") and hb.can_build():
-		hb.toggle()
+		if _build_gate():
+			hb.toggle()
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
@@ -2287,7 +2299,10 @@ func _build_ui() -> void:
 	# bottom centre: the few keys you need to get about
 	var hint_box := UI.glass(6, 12)
 	hint_box.modulate.a = 0.85
-	var keys := UI.key_hints([["W A S D", "walk"], ["Space", "jump"], [Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]], 12, Color(1, 1, 1, 0.78))
+	var key_list: Array = [["W A S D", "walk"], ["Space", "jump"], [Settings.key_cap("interact"), "use"], [Settings.key_cap("whistle"), "whistle"], [Settings.key_cap("build"), "build"], ["Esc", "menu"]]
+	if not GardenTutorial.farm_ok():
+		key_list = key_list.filter(func(e): return String(e[1]) != "build")      # garden-first: building is not taught or offered yet
+	var keys := UI.key_hints(key_list, 12, Color(1, 1, 1, 0.78))
 	hint_box.add_child(keys)
 	hint = UI.label("", 14, UI.INK)     # kept for code that still sets hint text; the key row replaces it
 	hint.visible = false
@@ -2328,13 +2343,14 @@ func hub_items() -> Array:
 	items.append(["kin", "Boki", "paw", open_kin])
 	items.append(["bag", "Bag", "bag", func(): Overlay.open_inventory()])
 	items.append(["shop", "Market", "shop", func(): hmk.open()])
-	if has_method("open_build"):
+	if has_method("open_build") and GardenTutorial.farm_ok():      # garden-first: no Build until the farm opens
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
 	items.append(["hero", "Relics", "swap", func(): HomeHero.open(self)])
 	return items
 
 func _build_hub() -> void:
+	hub_farm = GardenTutorial.farm_ok()
 	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
 	root_ui.add_child(hub)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
@@ -2376,8 +2392,30 @@ func set_build_ui(on: bool) -> void:
 
 ## Opens build mode (for a Build entry in the home's hub bar).
 func open_build() -> void:
-	if hb and not hb.active:
+	if hb and not hb.active and _build_gate():
 		hb.toggle()
+
+var hub_farm := true          # did the hub bar have its Build entry when it was made (garden-first gate)
+
+## Rebuilds the hub bar when building opened since it was made (garden-first: Build appears then).
+func refresh_hub() -> void:
+	if hub == null or not visit.is_empty() or hub_farm == GardenTutorial.farm_ok():
+		return
+	hub.queue_free()
+	hub_btns.clear()
+	_build_hub()
+
+## Garden-first (0005): may build mode open? Not while the home tutorial runs (it says so); after it,
+## asking to build is asking for the farm, so it opens it.
+func _build_gate() -> bool:
+	if GardenTutorial.farm_ok():
+		return true
+	if GardenTutorial.active():
+		_toast(GardenTutorial.fill(String(GardenTutorial.rules()["build_wait"])))
+		return false
+	GardenTutorial.open_farm()
+	refresh_hub()
+	return true
 
 func _refresh_top() -> void:
 	if not visit.is_empty():
@@ -2484,8 +2522,13 @@ func _open_welcome() -> void:
 	Save.save_game()
 	var kn: String = Save.active_kin().get("name", "your Boki")
 	var v := _new_panel("Welcome home", 580)
-	UI.subtitle(v, "This island is yours, and %s lives here with you." % kn)
-	v.add_child(UI.para("Hob will show you around. Out in the wild, what you find is only yours once you make it back.", UI.T_BODY, UI.MUTED))
+	if GardenTutorial.garden_save():
+		var wel: Dictionary = GardenTutorial.rules()["welcome"]
+		UI.subtitle(v, String(wel["sub"]).replace("{name}", kn))
+		v.add_child(UI.para(String(wel["para"]).replace("{name}", kn), UI.T_BODY, UI.MUTED))
+	else:
+		UI.subtitle(v, "This island is yours, and %s lives here with you." % kn)
+		v.add_child(UI.para("Hob will show you around. Out in the wild, what you find is only yours once you make it back.", UI.T_BODY, UI.MUTED))
 	var b := UI.footer_primary(v, "Let's go", func():
 		Save.d["tutorial"]["home"] = true
 		Save.save_game()
@@ -2777,6 +2820,16 @@ func _face(at: Vector3) -> void:
 ## The interact key on a Boki: do something about what it wants, otherwise pet it.
 func _kin_act(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
+	match GardenTutorial.kin_use(rec):      # the garden-first tutorial's step comes first
+		"pet":
+			_pet_kin(k)
+			return
+		"give":
+			_give_gift(k)
+			return
+		"train":
+			_start_drill(rec, GardenTutorial.train_stat(rec), true)
+			return
 	match KinWants.action(rec, POND_EDGE.x > -100.0):
 		"feed": _care_feed(rec, KinWants.best_food(rec))
 		"nap": _care_nap(rec)
@@ -2806,6 +2859,27 @@ func _pet_kin(k: Dictionary) -> void:
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
 		_say(k, BokiLines.say(rec, "petted"))
+	GardenTutorial.event("pet")
+
+## The garden tutorial's gift: it puts it on (the model changes), grows from it, and is very pleased.
+func _give_gift(k: Dictionary) -> void:
+	var line := GardenTutorial.give(k["rec"])
+	if line == "":
+		_pet_kin(k)
+		return
+	var at: Vector3 = k["pos"]
+	_spawn_kin()      # rebuilt wearing it
+	var nk := _kin_entry(Save.active_kin())
+	if not nk.is_empty():
+		nk["pos"] = at
+		nk["goal"] = at
+		(nk["node"] as Node3D).position = at
+		_face(at)
+		_emote(nk, "★", true)
+		nk["joy_t"] = 1.2
+		fx.burst(at + Vector3(0, 1.0, 0), UI.GOLD, 18, 2.2)
+	Sfx.play("unlock", null, -6.0)
+	_toast(line)
 
 ## Fetch: you toss a ball toward the cursor, the kin runs it down and brings it back.
 func _play_with_kin(k: Dictionary) -> void:
@@ -2867,6 +2941,8 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 					rec["played"] = int(Save.d["matches"])
 					Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
 					Save.save_game()
+				if rec == Save.active_kin():
+					GardenTutorial.event("play")
 	if f["life"] <= 0.0:
 		ball.queue_free()
 		k.erase("fetch")
@@ -3284,6 +3360,7 @@ func _weapon() -> String:
 
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
+	GardenTutorial.event("portal")
 	var v := _new_panel("Expedition", 940, true)
 	UI.subtitle(v, "Pick your kit and where to drop. Everything here is saved as you change it.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)
@@ -4236,6 +4313,8 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		# taken out of the pantry now, so two quick feeds can't both use the last one
 		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
 		else: Save.d["items"][f] = int(Save.d["items"][f]) - 1
+		if rec == Save.active_kin():
+			GardenTutorial.event("feed")
 	var body: Node3D = (k["node"] as Node3D).get_node("Body")
 	var tw := create_tween()
 	if res["ok"]:
@@ -4355,7 +4434,9 @@ func _care_nap(rec: Dictionary) -> void:
 	_say(k, BokiLines.say(rec, "nap"))
 
 # ---- training: a timing game at the yard; three rounds, each a little faster
-func _start_drill(rec: Dictionary, stat: String) -> void:
+## here: right where it stands, no yard needed (the garden tutorial's quick game; also any island
+## without a yard yet).
+func _start_drill(rec: Dictionary, stat: String, here := false) -> void:
 	var k := _kin_entry(rec)
 	if k.is_empty():
 		return
@@ -4370,17 +4451,25 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 		return
 	if not _care_start(k):
 		return
+	here = here or yard == null or YARD_AT.x < -100.0
 	k["busy"] = true
-	k["pos"] = YARD_KIN
 	var n: Node3D = k["node"]
-	n.position = YARD_KIN
-	var dummy := yard.get_node("Dummy") as Node3D
-	var dpos := dummy.global_position
-	n.rotation.y = atan2(-(dpos.x - YARD_KIN.x), -(dpos.z - YARD_KIN.z))
-	ppos = YARD_KIN + Vector3(-0.6, 0, 1.4)
-	player.position = ppos
-	_face(YARD_KIN)
-	train = {"k": k, "stat": stat, "round": 0, "results": [], "m": 0.0, "dir": 1.0, "speed": 0.85, "zone": randf_range(0.3, 0.7), "wait": 0.0}
+	var at: Vector3 = k["pos"] if here else YARD_KIN
+	if here:
+		at.y = 0.0
+		k["goal"] = at
+		n.rotation.y = atan2(-(ppos.x - at.x), -(ppos.z - at.z))      # it faces you
+		_face(at)
+	else:
+		k["pos"] = YARD_KIN
+		n.position = YARD_KIN
+		var dummy := yard.get_node("Dummy") as Node3D
+		var dpos := dummy.global_position
+		n.rotation.y = atan2(-(dpos.x - YARD_KIN.x), -(dpos.z - YARD_KIN.z))
+		ppos = YARD_KIN + Vector3(-0.6, 0, 1.4)
+		player.position = ppos
+		_face(YARD_KIN)
+	train = {"k": k, "stat": stat, "round": 0, "results": [], "m": 0.0, "dir": 1.0, "speed": 0.85, "zone": randf_range(0.3, 0.7), "wait": 0.0, "at": at, "here": here}
 	_build_train_bar()
 	Sfx.play("whoosh", null, -8.0)
 
@@ -4457,9 +4546,39 @@ func _train_hit() -> void:
 func _train_anim(k: Dictionary, stat: String, r: String) -> void:
 	var n: Node3D = k["node"]
 	var body: Node3D = n.get_node("Body")
-	var dummy := yard.get_node("Dummy") as Node3D
+	var base: Vector3 = train.get("at", YARD_KIN)
+	var here := bool(train.get("here", false))
+	var dummy: Node3D = null if here else yard.get_node("Dummy") as Node3D
 	var tw := create_tween()
 	var col: Color = Care.STATS[stat]["col"]
+	if here:
+		# no dummy or hoop: a lunge, a hop to the side and back, a brace, a spin, all where it stands
+		var fwd := Vector3(-sin(n.rotation.y), 0, -cos(n.rotation.y))
+		match stat:
+			"power":
+				tw.tween_property(n, "position", base + fwd * 0.8, 0.12)
+				tw.tween_callback(func():
+					if r != "miss":
+						fx.burst(base + fwd * 1.2 + Vector3(0, 0.8, 0), Color("e2c47a"), 12 if r == "great" else 6, 3.0, 0.4)
+						Sfx.play("kinhit", null, -8.0)
+					else:
+						Sfx.play("whoosh", null, -10.0))
+				tw.tween_property(n, "position", base, 0.2)
+			"speed":
+				var side := base + Vector3(fwd.z, 0, -fwd.x) * 1.4
+				tw.tween_property(n, "position", side, 0.18 if r != "miss" else 0.35)
+				tw.tween_callback(func(): if r != "miss": fx.burst(side + Vector3(0, 0.4, 0), col, 8, 2.5, 0.3))
+				tw.tween_property(n, "position", base, 0.18 if r != "miss" else 0.35)
+			"guard":
+				tw.tween_property(body, "scale", Vector3(1.2, 0.72, 1.2), 0.12)
+				tw.tween_callback(func(): if r != "miss": fx.ring(base, 1.2, col, 0.3); Sfx.play("shield", null, -10.0))
+				tw.tween_interval(0.3)
+				tw.tween_property(body, "scale", Vector3.ONE, 0.15)
+			_:
+				tw.tween_property(n, "rotation:y", n.rotation.y + TAU, 0.6)
+				tw.tween_callback(func(): if r != "miss": fx.burst(base + Vector3(0, 0.5, 0), col, 14 if r == "great" else 7, 1.6, 0.6, -3.0))
+		_emote(k, {"great": "★", "good": "♪", "miss": "?"}[r])
+		return
 	match stat:
 		"power":
 			var to := YARD_KIN.lerp(dummy.global_position, 0.55)
@@ -4508,7 +4627,7 @@ func _finish_training() -> void:
 	Evo.add(rec, aff, 2.0)
 	if int(rec.get("trained_m", -1)) != int(Save.d["matches"]):
 		rec["trained_m"] = int(Save.d["matches"])
-		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
+		Save.remember(rec, "trained", "trained %s with you %s" % [String(Care.STATS[stat]["name"]).to_lower(), "at home" if bool(train.get("here", false)) else "at the yard"], 1.0)
 	Save.save_game()
 	_toast("+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], int(rec["stats"][stat]), Care.stat_cap(rec)] if gained > 0 else "No gain this time. Try again after a rest")
 	_say(k, BokiLines.say(rec, "trained" if gained > 0 else "train_miss"))
@@ -4517,6 +4636,8 @@ func _finish_training() -> void:
 	train = {}
 	if is_instance_valid(train_bar): train_bar.queue_free()
 	train_bar = null
+	if rec == Save.active_kin():
+		GardenTutorial.event("train")
 
 # ---- eggs: two kin who are close leave an egg in the nest; you hatch and name it
 func _can_pair(rec: Dictionary) -> String:

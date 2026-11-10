@@ -22,9 +22,11 @@ var tree_t := 0.0
 var tree_at := Vector3.INF
 var tab_for := ""
 var tree_what := ""
+var garden: GardenGuide = null      # the garden-first tutorial on screen (garden_guide.gd)
 
 func _init(home) -> void:
 	h = home
+	garden = GardenGuide.new(home)
 
 func build_ui() -> void:
 	if h.root_ui == null:
@@ -63,6 +65,7 @@ func tick(dt: float) -> void:
 	if detect_t <= 0.0:
 		detect_t = 0.5
 		_poll()
+	garden.tick(dt, quiet)
 	_update_marker(dt)
 	_bubbles_under_lane(dt)
 	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"

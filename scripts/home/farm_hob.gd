@@ -79,13 +79,14 @@ func tick(dt: float) -> void:
 		return
 	_walk(dt)
 	node.tag.visible = not bool(FarmBuilder.state().get("met", false))
-	node.mark.visible = FarmBuilder.pending().size() > 0 or chat.offer_due()
+	var farm := GardenTutorial.farm_ok()      # garden-first: no blueprint nudges until the farm opens
+	node.mark.visible = (farm and FarmBuilder.pending().size() > 0) or chat.offer_due()
 	chat.tick(dt)
 	_call_out(dt)
 	poll_t -= dt
 	if poll_t <= 0.0:
 		poll_t = 1.0
-		if FarmBuilder.toast_due():
+		if farm and FarmBuilder.toast_due():
 			h._toast(String(rules()["toast"]))
 			Sfx.play("unlock", node.position, -8.0)
 
@@ -115,7 +116,7 @@ func _call_out(dt: float) -> void:
 	call_t -= dt
 	var talk: Dictionary = rules()["talk"]
 	var met := bool(FarmBuilder.state().get("met", false))
-	var line := "" if met else String(talk["call"])
+	var line := "" if met or not GardenTutorial.farm_ok() else String(talk["call"])
 	if chat.offer_due():
 		line = String(talk["call_offer"])
 	if call_t > 0.0 or chat.busy() or line == "":

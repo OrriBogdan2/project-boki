@@ -45,9 +45,15 @@ func start() -> void:
 	if talking() or not is_instance_valid(hob.node):
 		return
 	var h = hob.h
+	# garden-first (0005): while the home tutorial runs he only waves you back to your Boki; once it is
+	# over, talking to him is how building and farming open early (else they open after a few runs)
+	var wait := GardenTutorial.active() and not offer_due()
+	if not wait and not offer_due():
+		GardenTutorial.open_farm()
 	var first := not bool(FarmBuilder.state().get("met", false))
-	var ids := FarmBuilder.draw_up()
-	FarmTutorial.event("hob")
+	var ids: Array = [] if wait else FarmBuilder.draw_up()
+	if not wait:
+		FarmTutorial.event("hob")
 	Save.save_game()
 	h.panel_open = TALK
 	h.cam.zoom_to = TALK_ZOOM
@@ -55,7 +61,9 @@ func start() -> void:
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
-	if offer_due():
+	if wait:
+		box.say([{"text": GardenTutorial.fill(String(GardenTutorial.rules()["hob_wait"]))}], box.close)
+	elif offer_due():
 		box.say(_offer_lines(), _show_offer)
 	elif first and FarmTutorial.active():
 		box.say(rules()["intro"], box.close)

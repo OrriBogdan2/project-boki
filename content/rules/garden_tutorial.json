@@ -1,0 +1,88 @@
+{
+	"desc": "The garden-first home tutorial (owner decision 2026-11-10, docs/decisions/0005-garden-first.md). State: Save.d.tutorial.gt = {on, did, done, farm, m0, gift}. Only saves started through the hatch get it (on = true); older saves and saves part-way through the farm tutorial never do. Original systems and names: the Chao Garden is a feel reference only.",
+	"options": {
+		"farm_after_matches": 3,
+		"card_s": 4.0,
+		"idle_reprompt_s": 8.0,
+		"hungry_to": 30.0,
+		"settle_needs_to": 60.0,
+		"gift": "sprout_cap",
+		"train_stat": "guard",
+		"meet_m": 2.5
+	},
+	"options_doc": "farm_after_matches: expeditions after this tutorial before building and farming open by themselves (Hob opens them any time once the tutorial is over). card_s: how long the centred instruction card shows before it shrinks to the bottom pill. idle_reprompt_s: standing still this long brings the card back. hungry_to: the feed step sets the Boki's Full to this (under 38, so it asks for food). settle_needs_to: at the start the other needs are topped up to at least this, so the Boki asks for food and nothing else. gift: the item the give step hands over (see gifts). train_stat: the stat the tiny training game trains (the one with the most room is used when this one is capped). meet_m: how close counts as saying hi.",
+	"start_food": {
+		"kibble": 2,
+		"sweetbun": 1
+	},
+	"gifts": {
+		"sprout_cap": {
+			"name": "Sprout Cap",
+			"desc": "A little leaf cap. Boki that wear it feel sturdy.",
+			"acc": "leafhat",
+			"stat": "guard",
+			"n": 2,
+			"aff": "steadfast",
+			"aff_n": 4.0,
+			"joy": 10.0
+		}
+	},
+	"steps": [
+		{
+			"id": "meet",
+			"title": "Say hi",
+			"hint": "Say hi to {name}. Walk over to it.",
+			"world": "{name}"
+		},
+		{
+			"id": "pet",
+			"title": "Pet",
+			"hint": "Press {interact} next to {name} to pet it.",
+			"world": "{name}"
+		},
+		{
+			"id": "feed",
+			"title": "Feed",
+			"hint": "{name} is hungry. Press {interact} next to it to feed it.",
+			"world": "{name}"
+		},
+		{
+			"id": "play",
+			"title": "Play",
+			"hint": "Press {play} next to {name} to throw a ball. It brings it back.",
+			"world": "{name}"
+		},
+		{
+			"id": "give",
+			"title": "Give",
+			"hint": "You found a {gift}. Press {interact} next to {name} to give it.",
+			"world": "{name}"
+		},
+		{
+			"id": "train",
+			"title": "Train",
+			"hint": "Press {interact} next to {name} for a quick training game.",
+			"world": "{name}"
+		},
+		{
+			"id": "out",
+			"title": "Head out",
+			"hint": "Head out together. Follow {name} to the portal and press {interact}.",
+			"world": "Portal"
+		}
+	],
+	"prompts": {
+		"pet": "Pet {name}",
+		"give": "Give the {gift}",
+		"train": "Train {stat} together"
+	},
+	"gift_toast": "{name} wears the {gift}: +{n} {stat}",
+	"done_toast": "{name} is ready for the wild. Come home to care for it between runs.",
+	"farm_toast": "Hob has blueprints for you now. Talk to him to start building and farming.",
+	"build_wait": "Building comes later. Look after {name} first.",
+	"hob_wait": "Settle in with {name} first. When you want to build or farm, come and find me.",
+	"welcome": {
+		"sub": "This island is yours, and {name} lives here with you.",
+		"para": "Get to know {name} first: say hi, pet it, feed it and play. Out in the wild, what you find is only yours once you make it back."
+	}
+}

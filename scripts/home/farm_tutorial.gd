@@ -30,6 +30,8 @@ static func active() -> bool:
 		return false
 	if typeof(Save.d.get("layout")) != TYPE_DICTIONARY or not HomeLayout.fs(Save.d) or not FarmUnlocks.gated():
 		return false
+	if not GardenTutorial.farm_ok():
+		return false      # garden-first save: the farm waits until it opens (GardenTutorial.farm_open)
 	return not bool(state()["done"])
 
 static func steps() -> Array:

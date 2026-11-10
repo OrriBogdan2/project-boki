@@ -736,6 +736,7 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else "Hunter"
 	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
+	GardenTutorial.begin()      # a new save: home starts garden-first (docs/decisions/0005-garden-first.md)
 	Save.save_game()
 	Sfx.play("click")
 	if ClassUnlock.needs_starters():
