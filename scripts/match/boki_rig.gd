@@ -113,6 +113,7 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
 			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
+const STRIDE_DEFAULT := [0.6, 1.2]     # [walk, run] for a species not measured yet (a mid-size Boki)
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.80, 1.60],
@@ -368,7 +369,8 @@ func _pick_clip(dt: float) -> void:
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
-	var stride: float = STRIDE[species][1 if want == "run" else 0] * model.global_basis.z.length()
+	var sp: Array = STRIDE.get(species, STRIDE_DEFAULT)
+	var stride: float = sp[1 if want == "run" else 0] * model.global_basis.z.length()
 	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:

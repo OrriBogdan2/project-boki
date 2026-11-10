@@ -748,8 +748,8 @@ func _tick_slam(dt: float) -> void:
 	# the magenta strike cone ahead of him, the hit's own shape, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(slam_w["t0"]), 0.0, 1.0)
-	var cone := {"len": float(sl["radius"]) * float(slam_w["rk"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
-			"all": true}
+	var cone := {"len": float(sl["radius"]) * float(slam_w["rk"]), "deg": float(sl["angle"]), "inner": 0.0,
+			"fill": wk, "col": SLASH_OUT, "all": true}
 	AimKit.cone(h, "slam", cone)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:

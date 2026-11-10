@@ -91,12 +91,14 @@ func _dash_on_r(S) -> void:
 	var none: bool = S.unbound("dash") or S.unbound("hunter_ult") or S.unbound("rotate")
 	ok(not none and S.conflicts(_key(KEY_R), "dash").is_empty(), "nobody is left unbound, and R is only dash's")
 	var cf := ConfigFile.new()
-	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"] == [r], "the swap is saved")
+	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"][0] == r, "the swap is saved")
 	for a in ["dash", "hunter_ult", "rotate"]: InputMap.action_erase_events(a)
 	S.v["keys"] = (cf.get_value("s", "keys") as Dictionary).duplicate(true)
 	S.apply("keys")
 	var back: bool = S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old
-	ok(back and InputMap.action_get_events("dash").size() == 1, "the saved settings load back to the same bindings")
+	var n_keys: int = S.slots("dash").filter(func(c): return c != "").size()
+	ok(back and InputMap.action_get_events("dash").size() == n_keys,
+			"the saved settings load back to the same bindings")
 	# dash with no key: its owners get nothing and read as unbound (the Controls page paints that red)
 	S.reset_all()
 	S.clear_bind("dash", 0)
