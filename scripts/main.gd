@@ -128,6 +128,10 @@ func _ready() -> void:
 		if a.begins_with("--bot-diff="): opts["bot_diff"] = a.substr(11)
 		if a == "--perk-demo": opts["perk_demo"] = true
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
+		if a == "--heart-demo" or a.begins_with("--heart-demo="):
+			opts["heart_demo"] = a.substr(13) if a.length() > 13 else "ready"
+			opts["no_drop"] = true
+			opts["heart"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
 		if a.begins_with("--demo-kin="): opts["demo_kin"] = a.substr(11)      # test: bring this species (level/trust via --demo-kin-lv=)
@@ -694,7 +698,7 @@ func _ready() -> void:
 		var dm := Match.demo_opts()
 		dm.merge(opts, true)
 		show_screen("match", dm)
-	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.get("rolling", false):
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.has("heart_demo") or opts.get("rolling", false):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
