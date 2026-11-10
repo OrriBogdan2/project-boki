@@ -116,9 +116,11 @@ func ok(cond: bool, what: String) -> void:
 	print("MFEEL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func rec(key: String, v: float) -> void:
+## t: the target row when it isn't in T (knock_feel_check keeps its own)
+func rec(key: String, v: float, t: Array = []) -> void:
 	results[key] = v
-	var t: Array = T[key]
+	if t.is_empty():
+		t = T[key]
 	var pass_ := false
 	var tgt := ""
 	match String(t[0]):
@@ -214,6 +216,7 @@ func run(main: Node) -> void:
 	_ledge()
 	_drop()
 	_landing()
+	load("res://tools/knock_feel_check.gd").new().rows(self)       # how a knock feels to the one knocked
 	_camera()
 	_screen_scale()
 	_e2e()

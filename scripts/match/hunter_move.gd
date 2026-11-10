@@ -4,6 +4,8 @@ extends RefCounted
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
+const HOLD_DRIFT := 6.0          # m/s^2: a kit or tow holding your keys off (knock_t, no knock): momentum drifts down
+
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
@@ -26,6 +28,8 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var knock_launch: float = _phys["knock_launch"]
+static var knock_max: float = _phys["knock_max"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -82,6 +86,30 @@ static func air_steer(h: Hunter, hv: Vector2, wish: Vector2, dt: float) -> Vecto
 	if kept.length() > wish.length():
 		return kept.move_toward(wish.normalized() * kept.length(), steer)
 	return kept.move_toward(wish, steer)
+
+## A knocked hunter's horizontal speed for one step, as the source's movement takes a launch. On the ground
+## over run speed, UE's over-max brake: ground_friction * v + brake_decel, the keys can't add to it, and keys
+## along it hold run speed. In the air, the falling drag (air_friction). Either way the keys bend it by the
+## attack's knock_steer ([patch] Jun 2025: WASD steers knockback, high or medium influence). Back on the
+## ground at run speed the knock is over and the walk takes you. A knock_t with no knock (a kit or a tow
+## holding your keys off for a frame) only lets the momentum drift down at HOLD_DRIFT.
+static func knock_step(h: Hunter, hv: Vector2, mv: Vector2, run: float, dt: float) -> Vector2:
+	h.knock_slide = h.knock_slide and h.knock_t > 0.0
+	if not h.knock_slide:
+		return hv.move_toward(Vector2.ZERO, HOLD_DRIFT * dt)
+	var s := hv.length()
+	var s2 := s * maxf(0.0, 1.0 - air_friction * dt)
+	if h.grounded:
+		s2 = maxf(0.0, s - (ground_friction * s + brake_decel) * dt)
+		if s2 <= run:
+			h.knock_t = 0.0
+			h.knock_slide = false
+			if mv.dot(hv) > 0.0:
+				s2 = minf(s, run)
+	var v := hv * (s2 / s) if s > 0.0 else hv
+	if mv.length() > 0.1:
+		v = (v + mv * s2 * h.knock_steer * 4.0 * dt).limit_length(s2)
+	return v
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's

@@ -643,7 +643,7 @@ func _fire_needle() -> void:
 	fx().pillar(ground(h.pos), SMOKE, EMBER, 1.6, 0.45, 0.4)   # recoil smoke puffs up round her (no ground ring)
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
-	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
+	h.impulse(-d * float(ed["recoil"]))                               # the recoil shoves her back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):

@@ -229,6 +229,35 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Knocks: what the one knocked feels (`HunterMove.knock_step`, `--move-feel-check` knock rows, decision 0022)
+Source: supervive_physics.md (BrakingDecelerationWalking 2220, GroundFriction 1.0 x2, FallingLateralFriction 0.375,
+AirControl 0.015), SUPERVIVE_DATA.md ([patch] Jun 2025: WASD steers knockback) and hero-ref footage (venator.md: Ghost's
+recoil 0.5 bh in 0.2 s, his wall cone throws 3.5 bh in ~0.4 s). Distance vs mass is audited separately and is kept.
+
+- **Speed curve:** a knock starts at 1.8x its push speed (`knock_launch`), then sheds by UE's over-max brake,
+  dv/dt = -2v - 22.2 m/s^2. It is front-loaded: fast for the first 0.1 s, then a quick stop. Before, it held
+  nearly flat for 0.12-0.35 s and then stopped hard.
+
+  | Knock (push) | start | 0.1 s | 0.2 s | 0.3 s | distance (old slide) | back to run speed |
+  |---|---|---|---|---|---|---|
+  | Kael Smash (6) | 10.8 m/s | 6.8 | 3.5 | 0.8 | 1.51 m (1.56) | 0.17 s |
+  | Albert bash, Shield Charge (11) | 19.8 m/s | 14.1 | 9.5 | 5.7 | 3.98 m (3.94) | 0.35 s |
+  | Vex Longneedle recoil (4.4, was 6) | 7.9 m/s | 4.4 | 1.6 | 0 | 0.89 m (source 0.5 bh = 0.9 m) | 0.10 s |
+  | Grimble Anchor Drop (air foe) | spiked to -16 m/s, stunned 1.1 s | | | | none sideways | the step the stun ends |
+
+- **WASD during it:** the keys can't add speed (keys held along add 0.01 m) but they bend it by the attack's
+  `kbi` (0.3 medium, 0.5 high), as before: 16 degrees with a high-influence knock and the keys held across.
+- **Dash and abilities:** usable from the first step (dash out in 1 frame). A knock isn't crowd control; the source
+  has a separate lock for that (Joule's GROUNDED). A dash ends the knock, and you come out of it at run speed. The
+  glider stays shut for 0.4 s after a hard knock, as before.
+- **Air knocks:** the falling rules (0.375/s drag, almost no air control), plus the same bend. A landing goes
+  straight into the walk with no stun and no recovery, and what's left over run speed sheds on the same brake
+  (push 6 with a 4 m/s lift: lands at 0.72 s, back at run speed 0.12 s later, 7.6 m out). A glider shot down still
+  lands stunned (its own rule).
+- **Wall stun:** the rule is unchanged (over 8 m/s within 0.6 s). With the new curve, pushes 6-8 stun against a
+  wall within 0.4-1.2 m, and hard knocks reach about 0.5 m less far.
+- **GPU strip:** `--knock-feel-shots --shots-dir=<dir>`: the four knocks, 6 crops each, 4 frames apart.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
