@@ -45,3 +45,6 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## Ready cues
+- `ready_ult` (R back), `ready_boki` (Boki ability back) and `ready_dash` (a charge back after all were spent) are three short, quiet UI sounds in the ui set. `ReadyCues.watch` (called from `HudSlot.ab_slot`) plays each once, only on the local hunter's own bar, at `QUIET_DB` so they stay under combat music; none in the first 5 s of a match or while downed. `--ready-cue-check` covers it.
