@@ -101244,5 +101244,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/mobsheet_sentinel_r2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "bosssheet_brood_r2",
+    "name": "Brood (turnaround sheet, regen 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bosssheet_brood_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_brute_r2",
+    "name": "Brute (turnaround sheet, regen 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mobsheet_brute_r2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_brute_r2",
+    "name": "Brute (turnaround sheet, regen 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mobsheet_brute_r2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bosssheet_colossus_r2",
+    "name": "Colossus (turnaround sheet, regen 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bosssheet_colossus_r2_2.jpg",
+    "ok": true
   }
 ]
