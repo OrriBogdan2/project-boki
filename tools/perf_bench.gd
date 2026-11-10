@@ -5,7 +5,8 @@ extends RefCounted
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60 (0 skips the match)] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-theme=ridge]  the farm part becomes a "zone" part: the demo base on that zone theme (BaseDemo.ZONE_TOYS)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -17,6 +18,7 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var theme := ""
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -29,6 +31,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-theme="): theme = a.substr(14)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -36,7 +39,8 @@ func run(main_node: Node) -> void:
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
-	await _match()
+	if secs > 0.0:
+		await _match()
 	await _farm()
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
@@ -116,9 +120,21 @@ func _bring_fight(m: Match) -> void:
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
 func _farm() -> void:
+	if theme != "":
+		Save.d = BaseDemo.save(theme)
 	Game.goto("home")
 	for i in 30:
 		await main.get_tree().process_frame
+	if theme != "":
+		var home = main.current
+		for i in 900:      # the home builds itself over a few frames; its UI comes last
+			if home.root_ui != null and home.hb != null and home.player != null:
+				break
+			await main.get_tree().process_frame
+		BaseDemo.new().stage(home)
+		for i in 30:
+			await main.get_tree().process_frame
+	var part := "farm" if theme == "" else "zone"
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0
@@ -127,9 +143,9 @@ func _farm() -> void:
 		var now := Time.get_ticks_usec()
 		var wall := (now - last) / 1000.0
 		last = now
-		fl.append(_frame("farm", fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		fl.append(_frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
-	_summary("farm", fl)
+	_summary(part, fl)
 	_meshes()
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:

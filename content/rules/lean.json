@@ -104,6 +104,15 @@
 		"starfruit": "fairy",
 		"kibble": "normal",
 		"sweetbun": "normal",
-		"tonicbrew": "electric"
+		"tonicbrew": "electric",
+		"chimebun": "sound",
+		"frostdrop": "ice",
+		"pebblenut": "rock",
+		"scalepepper": "dragon",
+		"duskplum": "dark",
+		"pricklepear": "poison",
+		"sapjelly": "bug",
+		"ironcrisp": "steel",
+		"geodecandy": "crystal"
 	}
 }

@@ -6,6 +6,7 @@ extends RefCounted
 ## Boki out on the base run one lap; you back your partner and cheer at three marks with the
 ## Training post's timing bar (TimingBar). Pace comes from trained Speed, joy, and a lean on its own
 ## stretch (the Tide knack swims, wings glide the gap); friends run side by side, rivals bump.
+## Kitewind Ridge runs its own course (base_race.json "tracks": two glide gaps and an updraft climb).
 ## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
@@ -25,16 +26,23 @@ const TRACK_W := 1.4                         # m, the track's width (four lanes)
 const REACH := 1.6                           # m from the post to start a race
 const GARDEN_DB := -6.0                      # dB: the garden sounds sit under the Boki voices
 const SULK_DELAY := 0.7                      # s after the win sting until the loser huffs
+const UPDRAFT_H := 1.2                       # m, the top of the updraft climb
 const STRETCH_COL := {
 	"straight": Color("c9b48a"), "water": Color("4ab0ff"), "climb": Color("8a6a4a"), "jump": Color("f2c84a"),
+	"updraft": Color("9fe6f2"),
 }
 
 static func rules() -> Dictionary:
 	return Content.rules("base_race")
 
+## This island's course: its theme's "track" (home_layout.gd THEMES), else the garden's.
+static func stretches() -> Array:
+	var theme: Dictionary = HomeLayout.THEMES.get(String(HomeLayout.of(Save.d)["theme"]), {})
+	return rules()["tracks"][String(theme.get("track", "garden"))]
+
 static func lap() -> float:
 	var out := 0.0
-	for s in rules()["stretches"]:
+	for s in stretches():
 		out += float(s["len"])
 	return out
 
@@ -53,10 +61,19 @@ static func nudge_bond(a: Dictionary, b: Dictionary, amt: float) -> void:
 static func winged(rec: Dictionary) -> bool:
 	return Data.KIN.get(String(rec.get("species", "")), {}).has("wing")
 
+## 0..1 how well it rides air: a winged species fully, else its strongest lean among types.
+static func air(rec: Dictionary, types: Array) -> float:
+	if winged(rec):
+		return 1.0
+	var best := 0.0
+	for t in types:
+		best = maxf(best, float(rec.get("lean", {}).get(t, 0.0)))
+	return clampf(best, 0.0, 1.0)
+
 ## Its pace on stretch i before the wobble and your cheers (m/s).
 static func stretch_pace(rec: Dictionary, i: int) -> float:
 	var R := rules()
-	var s: Dictionary = R["stretches"][i]
+	var s: Dictionary = stretches()[i]
 	var speed := float(rec.get("stats", {}).get("speed", 0))
 	var mood: Array = R["mood"]
 	var p := float(R["pace"]) * float(s["mult"]) * (1.0 + speed * float(R["speed_per_point"]))
@@ -67,14 +84,15 @@ static func stretch_pace(rec: Dictionary, i: int) -> float:
 			var tide := maxf(Work.level(rec, "tide"), 4.0 * float(lean.get("water", 0.0)))
 			p *= 1.0 + float(R["swim_per_tide"]) * tide
 		"jump":
-			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
-			p *= lerpf(1.0, float(R["glide"]), g)
+			p *= lerpf(1.0, float(R["glide"]), air(rec, ["flying"]))
+		"updraft":
+			p *= lerpf(1.0, float(R["rise"]), air(rec, R["updraft_types"]))
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
 static func expected_time(rec: Dictionary) -> float:
 	var out := 0.0
-	var st: Array = rules()["stretches"]
+	var st: Array = stretches()
 	for i in st.size():
 		out += float(st[i]["len"]) / stretch_pace(rec, i)
 	return out
@@ -102,7 +120,7 @@ class Run:
 		backed = back
 		rng = r
 		var at := 0.0
-		for s in R["stretches"]:
+		for s in BaseRace.stretches():
 			at += float(s["len"])
 			ends.append(at)
 		for i in recs.size():
@@ -257,7 +275,7 @@ func place() -> void:
 	h.add_child(post)
 	start = post.position + LOOP_OFF
 	_post_model()
-	var st: Array = rules()["stretches"]
+	var st: Array = stretches()
 	for i in st.size():
 		var a := _corner(i)
 		var b := _corner(i + 1)
@@ -303,7 +321,7 @@ func _ground(p: Vector3) -> float:
 
 ## Corner i of the loop: 0 the start, then round the 6 x 3 rectangle back to it.
 func _corner(i: int) -> Vector3:
-	var deep := float(rules()["stretches"][1]["len"])
+	var deep := float(stretches()[1]["len"])
 	return start + [Vector3.ZERO, Vector3(LOOP_W, 0, 0), Vector3(LOOP_W, 0, -deep), Vector3(0, 0, -deep)][i % 4]
 
 func find(p2: Vector2) -> Dictionary:
@@ -425,7 +443,7 @@ func _hear_laps() -> void:
 			Sfx.play("garden_crowd", runners[i]["pos"], GARDEN_DB)
 
 func _place_runners() -> void:
-	var st: Array = rules()["stretches"]
+	var st: Array = stretches()
 	var lane := float(rules()["lane"])
 	for i in runners.size():
 		var s := int(run.stretch[i])
@@ -444,6 +462,7 @@ func _place_runners() -> void:
 func _lift(kind: String, f: float) -> float:
 	match kind:
 		"climb": return CLIMB_H * sin(PI * f)
+		"updraft": return UPDRAFT_H * sin(PI * f)
 		"jump": return JUMP_H * sin(PI * f)
 		"water": return -SWIM_DIP
 	return 0.0

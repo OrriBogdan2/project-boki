@@ -78,11 +78,25 @@ const NATURES := {
 }
 
 ## Things a kin can love or hate. Foods are crops plus what the stall sells.
-const FOODS := {
+const STALL_FOODS := {
 	"kibble": {"name": "Boki kibble", "col": Color("c8a26a"), "food": 30.0, "joy": 0.0, "price": 6, "desc": "Plain and filling."},
 	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any Boki happy."},
 	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
+	"chimebun": {"name": "Chime bun", "col": Color("f0a040"), "food": 16.0, "joy": 8.0, "price": 16,
+		"desc": "A bun that hums."},
 }
+## Every prepared food: the stall's plus the type snacks of content/rules/snacks.json (coloured by their type's tint).
+static var FOODS: Dictionary = _foods()
+
+static func _foods() -> Dictionary:
+	var all := STALL_FOODS.duplicate()
+	var r := Content.rules("snacks")
+	for id in r["foods"]:
+		var f: Dictionary = r["foods"][id]
+		all[id] = {"name": f["name"], "desc": f["desc"], "food": r["food"], "joy": r["joy"], "price": r["price"],
+			"col": Color(String(Content.rules("lean")["types"][f["type"]]["tint"]))}
+	return all
+
 const LEAN_HEAD_START := 0.5     # share of the stronger parent's lean a hatchling starts with
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
 ## Play is practice: a finished game of fetch trains this stat by one point, as long as the Boki has

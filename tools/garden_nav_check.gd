@@ -13,6 +13,7 @@ const WANT_DIST := 0.5         # m: a goal farther than this is a wish to move
 const OVERLAP_K := 0.6         # of the two body radii: closer than this is overlapping
 const CAST := ["zapple", "burrlet", "cindle", "pebbit", "lodestick", "marchleaf"]
 const SEED := 5
+const THEMES := ["meadow", "ridge"]     # the start garden and Kitewind Ridge (GARDEN.md 10.2)
 
 var bad := 0
 var main: Node
@@ -27,7 +28,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func _save() -> void:
+func _save(theme: String) -> void:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
 	for i in CAST.size():
@@ -39,6 +40,7 @@ func _save() -> void:
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	d["gems"] = 1000
 	HomeLayout.new_fs(d, SEED)
+	HomeLayout.ensure(d)["theme"] = theme
 	Save.d = d
 
 ## Every plaything and the house on the built farm, round the landing.
@@ -127,10 +129,21 @@ func _overlaps(t: float) -> int:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	for theme in THEMES:
+		await _sweep(theme)
+	FarmUnlocks.rules()["base_mode"] = false
+	print("GARDENNAV DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _sweep(theme: String) -> void:
 	seed(SEED)
-	_save()
+	track.clear()
+	lap.clear()
+	logged.clear()
+	overlaps = 0
+	_save(theme)
 	home = await main._hb_home()
-	ok(home.kins.size() == CAST.size() and home.life != null, "%d Boki on a base_mode farm" % home.kins.size())
+	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, CAST.size()])
 	_stage()
 	var cases := 0
 	var t := 0.0
@@ -139,9 +152,7 @@ func run(m: Node) -> void:
 		home._move_kin(DT)
 		t += DT
 		cases += _watch(t)
-	ok(cases == 0, "no Boki stuck or inside a block in %.0f s (%d cases); %d overlaps" % [SIM_SECS, cases, overlaps])
-	FarmUnlocks.rules()["base_mode"] = false
+	var what := "%s: none stuck or inside a block in %.0f s" % [theme, SIM_SECS]
+	ok(cases == 0, "%s (%d cases); %d overlaps" % [what, cases, overlaps])
 	home.queue_free()
 	await main.get_tree().process_frame
-	print("GARDENNAV DONE, failures: %d" % bad)
-	main.get_tree().quit(1 if bad > 0 else 0)

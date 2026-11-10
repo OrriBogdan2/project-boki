@@ -25,12 +25,16 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use. A "zone"
+## theme belongs to a garden zone (briefs/design/GARDEN.md 10.2) and is not sold in the Island tab: style is
+## the flora set its scatter uses (Flora.STYLES) and track the Dash course there (base_race.json "tracks").
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
+		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -76,6 +80,8 @@ const CATALOG := {
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
 	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
 		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"toy_vent": {"name": "Updraft vent", "cat": "Base", "gems": 22, "toy": true,
+		"desc": "Flying, Electric, Fairy and Sound Boki love to hover on its rising air. Trains Speed."},
 	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
 		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
