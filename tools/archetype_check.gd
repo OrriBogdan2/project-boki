@@ -214,7 +214,7 @@ func _data() -> void:
 func _thief() -> void:
 	await _dj().thief(self)
 
-## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Tidal Wave is 90s, owner 2026-11-10), opening at level 6.
+## An ultimate's data: no generic fuse, a 15-90s cooldown (Gil's Tidal Wave is 90s), opening at level 6.
 func _ult_shaped(rd: Dictionary) -> bool:
 	var cd := float(rd["cooldown"])
 	return float(rd.get("fuse", 0.0)) <= 0.0 and cd >= 15.0 and cd <= 90.0 and int(rd.get("unlock", 6)) == 6

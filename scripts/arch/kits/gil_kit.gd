@@ -39,7 +39,9 @@ func _refill() -> void:
 	# Fisher-Yates on the kit's own seeded generator (the match decides the order, not a global roll)
 	for i in range(bag.size() - 1, 0, -1):
 		var j := rng.randi_range(0, i)
-		var t = bag[i]; bag[i] = bag[j]; bag[j] = t
+		var t = bag[i]
+		bag[i] = bag[j]
+		bag[j] = t
 
 ## The potion the next throw takes (shown on the HUD and glowing in his hand).
 func next_vial() -> String:
@@ -89,7 +91,9 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	# the swing's rays reach on_deal as "shot" hits (Gil's only shots; the vials are "abil")
 	if String(o.get("src", "")) == "shot" and m.time < third_until and t != null and not t.dead:
 		var ld := lmb_def()
-		t.hurt(0.1, h, {"slow": float(ld["slow_t"]), "slow_k": float(ld["slow"]), "src": "abil", "ab": "primary", "tags": ["primary", "lunge"]})
+		var slow := {"slow": float(ld["slow_t"]), "slow_k": float(ld["slow"]), "src": "abil", "ab": "primary"}
+		slow["tags"] = ["primary", "lunge"]
+		t.hurt(0.1, h, slow)
 
 # ------------------------------------------------------------------ RMB: Grab Bag
 func fire_rmb(c: Dictionary) -> void:
@@ -129,7 +133,8 @@ func _shatter(it: Dictionary) -> void:
 	var col := col_of(vd)
 	m.fx.burst(at + Vector3(0, 0.4, 0), col, 18 if v != "zeep" else 34, 5.0, 0.5, 6.0)
 	m.fx.ring(at, r, col, 0.4)
-	m.sfx("boom" if v in ["thunder", "zeep", "fire"] else "whoosh", at, -3.0, 1.2 if v != "zeep" else 0.8)
+	var sound := "boom" if v in ["thunder", "zeep", "fire"] else "whoosh"
+	m.sfx(sound, at, -3.0, 1.2 if v != "zeep" else 0.8)
 	if v == "zeep": m.shake(0.25, at)
 	var p := power("sec")
 	for f in foes_in(at, r, 3.0):
@@ -137,21 +142,28 @@ func _shatter(it: Dictionary) -> void:
 		var to := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		match v:
 			"thunder":
-				if to.length() < float(vd["core"]) + f.r: o["stun"] = float(vd["stun"]); o["dr"] = true
+				if to.length() < float(vd["core"]) + f.r:
+					o["stun"] = float(vd["stun"])
+					o["dr"] = true
 			"slime":
-				o["slow"] = float(vd["slow"]); o["slow_k"] = float(vd["slow_k"])
+				o["slow"] = float(vd["slow"])
+				o["slow_k"] = float(vd["slow_k"])
 			"air":
 				var dir := to.normalized() if to.length() > 0.1 else h.aim_dir()
 				o["kb"] = dir * float(vd["push"]) * 3.0
 				o["lift"] = 3.0
 			"fire":
-				o["burn"] = float(vd["burn"]); o["burn_for"] = float(vd["burn_t"])
+				o["burn"] = float(vd["burn"])
+				o["burn_for"] = float(vd["burn_t"])
 			"zeep":
-				o["lift"] = float(vd["lift"]); o["stun"] = float(vd["knockup"]); o["dr"] = true
+				o["lift"] = float(vd["lift"])
+				o["stun"] = float(vd["knockup"])
+				o["dr"] = true
 		f.hurt(float(vd["dmg"]) * p, h, o)
 		_mark(f, String(vd.get("mark", v)), col)
 	if v == "slime":
-		puddles.append({"at": at, "r": float(vd["puddle_r"]), "left": float(vd["puddle_t"]), "k": float(vd["puddle_k"]), "tick": 0.0})
+		puddles.append({"at": at, "r": float(vd["puddle_r"]), "left": float(vd["puddle_t"]),
+			"k": float(vd["puddle_k"]), "tick": 0.0})
 
 # ------------------------------------------------------------------ passive: Fish Out of Water
 func _mark(f: Ent, mk: String, col: Color) -> void:
@@ -168,7 +180,8 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 	if n >= int(pd.get("need", 3)) and m.time >= float(beach_at.get(key, -99.0)):
 		marks.erase(key)
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
-		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive", "tags": ["passive", "beached"]})
+		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
+			"tags": ["passive", "beached"]})
 		m.fx.word(f.pos + Vector3(0, 2.4, 0), "BEACHED!", res_col(), true)
 		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
 		m.sfx("unlock", f.pos, -4.0, 0.7)
@@ -203,8 +216,9 @@ func _surface() -> void:
 	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col_of(dd), 22, 5.0, 0.5, 10.0)
 	m.sfx("whoosh", h.pos, -3.0, 0.8)
 	for f in foes_in(h.pos, float(dd["radius"])):
-		f.hurt(float(dd["dmg"]) * power("dash"), h, {"lift": float(dd["lift"]), "stun": float(dd["knockup"]), "dr": true,
-			"src": "abil", "ab": "dodge", "tags": ["dodge", "surface"]})
+		var o := {"lift": float(dd["lift"]), "stun": float(dd["knockup"]), "dr": true, "src": "abil", "ab": "dodge"}
+		o["tags"] = ["dodge", "surface"]
+		f.hurt(float(dd["dmg"]) * power("dash"), h, o)
 
 # ------------------------------------------------------------------ E: Riptide
 func cast_e() -> bool:
@@ -247,7 +261,8 @@ func _tick_spin(dt: float) -> void:
 	m.fx.slash(h.pos + Vector3(0, 0.8, 0), m.time * 12.0, TAU, r, col_of(ed), k > 0.6)
 	m.sfx("swipe", h.pos, -6.0, 0.9 + k * 0.7)
 	for f in foes_in(h.pos, r):
-		f.hurt(lerpf(float(ed["tick"][0]), float(ed["tick"][1]), k) * power("kin"), h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"]})
+		var dmg := lerpf(float(ed["tick"][0]), float(ed["tick"][1]), k) * power("kin")
+		f.hurt(dmg, h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"]})
 
 func _release_spout() -> void:
 	var ed := e_def()
@@ -259,8 +274,9 @@ func _release_spout() -> void:
 	var w := lerpf(float(ed["width"][0]), float(ed["width"][1]), k)
 	var spd := lerpf(float(ed["speed"][0]), float(ed["speed"][1]), k)
 	tele_lane(h.pos, dir, length, w, col_of(ed), length / spd)
-	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd, "hit": {},
-		"lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"), "col": col_of(ed), "ab": "k1"})
+	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
+		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
+		"col": col_of(ed), "ab": "k1"})
 	m.sfx("whoosh", h.pos, -2.0, 0.7)
 
 ## Moves spouts and the wave down their lines; each foe is hit once.
@@ -275,9 +291,11 @@ func _tick_lines(list: Array, dt: float) -> void:
 			var key: int = f.get_instance_id()
 			if s["hit"].has(key): continue
 			s["hit"][key] = true
-			var o := {"lift": float(s["lift"]), "stun": float(s["stun"]), "dr": true, "src": "abil", "ab": s["ab"], "tags": [s["ab"], "gil_line"]}
+			var o := {"lift": float(s["lift"]), "stun": float(s["stun"]), "dr": true, "src": "abil", "ab": s["ab"]}
+			o["tags"] = [s["ab"], "gil_line"]
 			if s.has("slow"):
-				o["slow"] = float(s["stun"]) + float(s["slow"]); o["slow_k"] = float(s["slow_k"])
+				o["slow"] = float(s["stun"]) + float(s["slow"])
+				o["slow_k"] = float(s["slow_k"])
 			f.hurt(float(s["dmg"]), h, o)
 			if s["ab"] == "ult": HeroUlt.landed(self, f)
 		if float(s["left"]) <= 0.0:
@@ -301,10 +319,12 @@ func _start_wave() -> bool:
 	var length := float(xd["range"])
 	untarget_t = t
 	tele_lane(h.pos, dir, length, float(xd["width"]), col_of(xd), 0.0)
-	wave = {"p": Vector2(h.pos.x, h.pos.z) - dir * 0.5, "y": h.pos.y, "dir": dir, "left": length + 0.5, "w": float(xd["width"]), "spd": length / t, "hit": {},
-		"lift": float(xd["lift"]), "stun": float(xd["knockup"]), "slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
+	wave = {"p": Vector2(h.pos.x, h.pos.z) - dir * 0.5, "y": h.pos.y, "dir": dir, "left": length + 0.5,
+		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
+		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
-	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")})
+	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
+	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
 	m.shake(0.35, h.pos)
 	m.sfx("whoosh", h.pos, 0.0, 0.6)
 	return true

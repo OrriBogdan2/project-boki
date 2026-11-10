@@ -39,7 +39,8 @@ const WARDENS := {
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	# (Pip: body size 0.68, item 108; ART-1 model: 0.66 with the ears, waist-high on the sheet's silhouette)
 	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.66, "width": [0.5, 1.5], "moves": "mm_"},
-	# (Gil: heights as measured Nov 10 on the fitted rig, body.legs 1.03; the 3D top is the floppy hat; his kit has no keyed moves yet, so "moves" is "": the rig's generic poses play)
+	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
+	# yet, so "moves" is "" and the rig's generic poses play)
 	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.956, "width": [0.5, 1.5], "moves": ""},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
