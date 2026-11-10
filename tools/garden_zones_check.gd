@@ -11,10 +11,12 @@ extends RefCounted
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
-## opens its cards. With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub.
+## opens its cards. With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub, and
+## hub_horizon_day.png and _night.png: the hub with its island silhouettes, three lit and two in mist.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 const SHOT_ZOOM := 1.5    # camera zoom for the hub shot (0.8 close .. 1.6 wide)
+const HORIZON_ZOOM := 3.0 # camera zoom for the horizon shots: pulled back to take in the sky islands
 const SHOT_WAIT_S := 1.5  # s for the ink wipe to clear and the minder to set off before the shot
 
 var bad := 0
@@ -29,6 +31,7 @@ func run(m: Node) -> void:
 	_keys_part()
 	await _travel_part(m)
 	await _move_part(m)
+	await _reload_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -115,6 +118,7 @@ func _travel_part(m: Node) -> void:
 		"you arrive beside the Waystone")
 	ok(hub.toys.toys().is_empty() and hub.hrace == null, "no toys or games in the hub")
 	_fixtures_part(hub)
+	_horizon_part(hub, [GardenZones.start()])
 	hub.ppos = HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF
 	hub._find_interact()
 	hub.hway.use()
@@ -143,7 +147,7 @@ func _travel_part(m: Node) -> void:
 		var mk: Dictionary = back._kin_entry(mrec)
 		ok(back.life != null and back.life._chore(mk) and String(mk["life_chore"]["kind"]) == "mind",
 			"the egg-minder sets off to mind the egg in the Nook")
-		await _hub_shot(m, back)
+		await _hub_shot(m, back, "hub.png", SHOT_ZOOM)
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() + 1 and (Save.d["roster"] as Array).size() == 4,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
@@ -252,6 +256,40 @@ func _cap_part() -> void:
 	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")
 
 ## Every label's text under a node, joined.
+## The hub's horizon (step 9): five islands, one lit for each zone in `open_ids`, two shared materials,
+## and the lit ones are warmer and the locked ones greyer than their zone colour.
+func _horizon_part(hub, open_ids: Array) -> void:
+	var isles: Array = hub.get_children().filter(func(n): return n.name.begins_with("Horizon_"))
+	ok(isles.size() == GardenZones.ids().size(), "the hub shows %d islands on its horizon" % isles.size())
+	var follows := true
+	var mats := {}
+	for isle in isles:
+		var id := String(isle.name).trim_prefix("Horizon_")
+		var lit: bool = isle.get_meta("open")
+		follows = follows and lit == open_ids.has(id) and lit == GardenZones.is_open(id)
+		mats[isle.material_override] = true
+		var top: Color = isle.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR][0]
+		var zone_col := Color(String(GardenZones.info(id)["colour"]))
+		ok(lit == (top.s > zone_col.s * 0.6), "%s's island reads %s" % [id, "lit" if lit else "grey in mist"])
+	ok(follows, "the islands follow Save.d zones (open: %s)" % ", ".join(open_ids))
+	ok(mats.size() == (2 if open_ids.size() < isles.size() else 1), "islands share one material per state")
+
+## Opening a zone lights its island the next time the hub loads.
+func _reload_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d["zones"]["cinderstep"] = {"open": true}
+	var was = Game.main.current
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = await _arrived(m, was)
+	ok(hub != null, "the hub reloads with Cinderstep open")
+	if hub != null:
+		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])      # glasswater: opened by _move_part
+		hub.day_t = 0.5
+		await _hub_shot(m, hub, "hub_horizon_day.png", HORIZON_ZOOM)
+		hub.day_t = 0.97
+		await _hub_shot(m, hub, "hub_horizon_night.png", HORIZON_ZOOM)
+	Content.rules("farm_build")["base_mode"] = false
+
 func _texts(n: Node) -> String:
 	var out := (n as Label).text if n is Label else ""
 	for c in n.get_children():
@@ -259,18 +297,18 @@ func _texts(n: Node) -> String:
 	return out
 
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
-func _hub_shot(m: Node, hub) -> void:
+func _hub_shot(m: Node, hub, file: String, zoom: float) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): dir = a.substr(12)
 	if dir == "" or DisplayServer.get_name() == "headless":
 		return
 	DirAccess.make_dir_recursive_absolute(dir)
-	hub.cam.zoom_to = SHOT_ZOOM
-	hub.cam.zoom = SHOT_ZOOM
+	hub.cam.zoom_to = zoom
+	hub.cam.zoom = zoom
 	hub.cam.snap(HubWaystone.HUB_AT)
 	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
 	hub.prompt_box.visible = false
 	await m.get_tree().process_frame
-	m.get_viewport().get_texture().get_image().save_png(dir.path_join("hub.png"))
-	print("ZONES shot %s" % dir.path_join("hub.png"))
+	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+	print("ZONES shot %s" % dir.path_join(file))

@@ -1,0 +1,72 @@
+class_name HubHorizon
+extends RefCounted
+## The five zone islands on the hub's horizon (briefs/design/GARDEN.md 10.1, step 9): low-poly
+## silhouettes floating in the sky round the hub, so it promises places to go. An open zone's island
+## is lit, warm and in the zone's colour; a locked one is grey in mist. Which is which is read from
+## Save.d["zones"] when the hub loads, so opening a zone lights its island the next time you arrive.
+## One mesh per island and one shared material per state: five draw calls in all (10.6 allows five).
+
+const RING_R := 40.0       # m from the hub's middle to each island
+const ARC := 3.6           # rad of sky the five spread over, centred on the far side (north, -z)
+const RISE := -7.0         # m from the hub's ground (below: the camera looks down); odd islands add RISE_STEP
+const RISE_STEP := -4.0
+const TOP_R := 8.0         # m, an island's top radius
+const DEPTH := 7.0         # m, how far its rocky underside hangs
+const SIDES := 7           # corners of the low-poly outline
+const LIT_GLOW := 0.35     # how much a lit island glows (shader glow 0..1)
+const LIT_WARM := 0.25     # how far a lit island's colours warm toward sunlight (0 none .. 1 all)
+const MIST := 0.8          # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
+const WARM := Color("ffd9a0")
+const MIST_GREY := Color("9aa0b0")
+const ROCK := Color("6e6577")
+
+static var _mats := {}      # open (bool) -> the one material that state shares
+
+## Adds the five islands to `parent`, centred on `middle` (the hub's middle).
+static func place(parent: Node3D, middle: Vector3) -> void:
+	var ids := GardenZones.ids()
+	for i in ids.size():
+		var a := PI + (float(i) / float(ids.size() - 1) - 0.5) * ARC
+		var open := GardenZones.is_open(ids[i])
+		var mi := MeshInstance3D.new()
+		mi.name = "Horizon_%s" % ids[i]
+		mi.mesh = island_mesh(i, Color(String(GardenZones.info(ids[i])["colour"])), open)
+		mi.material_override = _mat(open)
+		mi.position = middle + Vector3(sin(a) * RING_R, RISE + RISE_STEP * float(i % 2), -cos(a) * RING_R)
+		mi.set_meta("open", open)
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		parent.add_child(mi)
+
+static func _mat(open: bool) -> ShaderMaterial:
+	if not _mats.has(open):
+		var m := Models.vtoon()
+		m.set_shader_parameter("glow", LIT_GLOW if open else 0.0)
+		_mats[open] = m
+	return _mats[open]
+
+## A flat-topped island with a jagged underside, from one triangle list. `seed_i` varies the outline.
+static func island_mesh(seed_i: int, colour: Color, open: bool) -> ArrayMesh:
+	var top := colour.lerp(WARM, LIT_WARM) if open else colour.lerp(MIST_GREY, MIST)
+	var under := ROCK if open else ROCK.lerp(MIST_GREY, MIST)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5100 + seed_i
+	var rim: Array = []
+	for k in SIDES:
+		var a := TAU * float(k) / float(SIDES)
+		var r := TOP_R * rng.randf_range(0.75, 1.0)
+		rim.append(Vector3(sin(a) * r, 0, cos(a) * r))
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var tip := Vector3(0, -DEPTH * rng.randf_range(0.8, 1.1), 0)
+	for k in SIDES:
+		var p: Vector3 = rim[k]
+		var q: Vector3 = rim[(k + 1) % SIDES]
+		_tri(st, Vector3.ZERO, q, p, top)
+		_tri(st, p, q, tip, under)
+	st.generate_normals()
+	return st.commit()
+
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, col: Color) -> void:
+	for v in [a, b, c]:
+		st.set_color(col)
+		st.add_vertex(v)
