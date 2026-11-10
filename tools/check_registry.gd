@@ -156,6 +156,8 @@ const CHECKS := {
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],      # no clip stretches a skinned edge past 1.3x
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
+	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],   # Meeko's sun and cloud orbit her, bob, clear the wings
+	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],   # frames of that orbit
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
 	"--training-area-shots": ["res://tools/training_area_shots.gd", "training_area_shots", null],      # (GPU)
 	"--dummy-move-shots": ["res://tools/dummy_move_shots.gd", "dummy_move_shots", null],      # (GPU)
