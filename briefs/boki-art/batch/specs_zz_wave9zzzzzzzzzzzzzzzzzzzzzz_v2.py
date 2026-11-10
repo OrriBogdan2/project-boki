@@ -1157,3 +1157,7 @@ for _k,_d in (('a',"a great sail-winged albatross standing tall on the ground li
 _st,_ar,_dk,_fu=_FEMST['Arcestrel']; _n0=len(SPECS)
 V2SHEET_NEW('Arcestrel female','briefs/boki-art/cards/Arcestrel_female.jpg',_GC,"two wings, exactly two legs, one crest, curled tail feathers"); V2PORT_NEW('Arcestrel female','briefs/boki-art/cards/Arcestrel_female.jpg',_st,_ar,_GC,"two wings, exactly two legs, one crest, curled tail feathers",False,True,"standing still, head turned back over her shoulder to the viewer, both feet on the ground")
 SPECS[_n0]['id']='fs4_arcestrel'; SPECS[_n0+1]['id']='fp4_arcestrel'; SPECS[_n0+1]['runs']=2
+
+# 11-10 OWNER: "your picks go" -> Canvastross = opt_canvastross_a_1 (standing, sail wings, mast feather). Sheet + portrait.
+_n0=len(SPECS); V2SHEET_NEW('Canvastross','briefs/boki-art/cards/Canvastross.jpg',_GC,_GN); V2PORT_NEW('Canvastross','briefs/boki-art/cards/Canvastross.jpg','final','majestic',_GC,_GN,False,True,"gliding side-on, facing RIGHT, wings spread flat like sails, mast feather streaming back")
+SPECS[_n0]['id']='v2s_canvastross_r'; SPECS[_n0+1]['id']='v2p_canvastross_r'; SPECS[_n0+1]['runs']=2

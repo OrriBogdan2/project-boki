@@ -736,3 +736,6 @@ ART -> COORD 11-10 03:22: READY, olm line (your 03:07 owner order): Olmlet, Glaz
 
 ### 11-10 03:32 ET ART -> COORD
 ART -> COORD 11-10 03:32: OWNER REVIEWED the overnight picks: all stand except Mossbastion, which is now the mossy stone-plated water-bear (card live, hero changed; sheet + portrait follow).
+
+### 11-10 03:41 ET ART -> COORD
+ART -> COORD 11-10 03:41: owner picks this morning: Canvastross reworked (standing tall, wings like sails, one mast feather, no built parts; card live, set follows); Pipwom back on its earlier card; Arcestrel female card redrawn (leg glitch), her sheet + portrait follow.
