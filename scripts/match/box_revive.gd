@@ -60,7 +60,10 @@ static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:
 	o.set_meta("box_revived_n", int(o.get_meta("box_revived_n", 0)) + 1)
 	m.sfx("revive_done", b["pos"], 3.0)
 	BoxReviveFx.rise(m, b, h)
-	Life.box_revive(m, b, h)
+	if o.remote:
+		m.net_event(["brev", o.nid, h.nid])      # their own game brings them back (net_in)
+	else:
+		Life.box_revive(m, b, h)
 
 ## Online: a remote teammate's channel at a box comes only as the "revive" hold kind in their hunter
 ## flags (Match._flags), so it is timed here from that and fills the same rev_prog / rev_by / rev_at
@@ -105,3 +108,25 @@ static func cancel(h: Hunter) -> void:
 	h.box_t = 0.0
 	h.box_rev_at = -9.0
 	h.set_meta("box_broke", true)
+
+## Another game's deathbox events. "box": a Hunter there died, here is their soul marker; "brev":
+## a teammate finished the channel at the box of a Hunter this game owns (every game's copy of
+## them is told by Life.bring_back's "back"); "back" / "lost": that Hunter is up again / gone for good.
+static func net_in(m: Match, x: Array) -> void:
+	var o: Hunter = m.ents_by_id.get(String(x[1]), null) as Hunter
+	if o == null:
+		return
+	match String(x[0]):
+		"box":
+			Life.mirror_box(m, o, Vector3(x[2], x[3], x[4]))
+		"brev":
+			var b := Life.box_of(m, o)
+			if not o.remote and not b.is_empty() and Life.soul_here(m, b):
+				Life.box_revive(m, b, m.ents_by_id.get(String(x[2]), o) as Hunter)
+		"back":
+			if o.remote:
+				o.out = false
+				o.gone = false
+				o.downed = false
+		"lost":
+			o.gone = true
