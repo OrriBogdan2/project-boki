@@ -13,7 +13,7 @@ extends "res://tools/combo51_shots.gd"
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["hook"]}
-const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
+const GENERIC := ["lmb", "rmb", "dash", "e", "r", "tierup"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
@@ -151,6 +151,18 @@ func _part_r() -> void:
 			P.ak.cast_ult()
 		_aim(T.pos)
 	await _go(2.8, cast, _sheet("r", "R, the ultimate", [0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.4, 1.9, 2.6]), 2.5)
+	await _go(GAP)
+
+## The armour tier-up sheen on a Hunter at match zoom: Rare (blue) at 0.2 s, then Legendary (gold) at 1.4 s.
+func _part_tierup() -> void:
+	await _reset(3.0)
+	var ups := func(t: float):
+		for up: Array in [[0.2, 2], [1.4, 4]]:
+			if _at(t, float(up[0])):
+				P.armor_gain(float(Hunter.ARMOR_TIERS[int(up[1])][2]) - P.armor_xp)
+				m._armor_up(P)
+		_aim(T.pos)
+	await _go(2.2, ups, _sheet("tierup", "armour tier-up: Rare, then Legendary", [0.18, 0.28, 0.36, 0.44, 0.52, 1.38, 1.48, 1.58, 1.68]), 1.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael
