@@ -83373,5 +83373,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_narfoil_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_narfoil",
+    "name": "Narfoil (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_narfoil_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_klaxada",
+    "name": "Klaxada (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_klaxada_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_narfoil",
+    "name": "Narfoil (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_narfoil_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_klaxada",
+    "name": "Klaxada (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_klaxada_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_klaxada",
+    "name": "Klaxada (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_klaxada_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pagodito",
+    "name": "Pagodito (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_pagodito_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pagodito",
+    "name": "Pagodito (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_pagodito_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pavonazar",
+    "name": "Pavonazar (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_pavonazar_3.jpg",
+    "ok": true
   }
 ]
