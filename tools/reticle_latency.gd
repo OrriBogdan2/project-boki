@@ -14,6 +14,7 @@ const RADIUS := 100.0               # px: the circle the cursor goes round (clea
 const DOT_COL := Color("ff5cd1")    # the reticle's colour for the run: nothing else on screen is this pink
 const DOT_TOL := 0.12               # colour distance that still counts as the dot
 const AIM_FAR := 60.0               # m: a point along the aim ray to project back onto the screen
+const REACH := 6                    # samples back that a trailing reticle or aim is looked for
 const FIND_R := 90                  # px: where to look for the dot around the cursor sample
 
 var main: Node
@@ -29,6 +30,7 @@ var n := 0
 var rig := Node.new()
 var ret_lag := PackedFloat32Array()
 var aim_lag := PackedFloat32Array()
+var hist := PackedVector2Array()    # the cursor as the engine saw it, one sample per frame
 var missed := 0
 var shots_dir := ""
 
@@ -44,14 +46,24 @@ func _centre() -> Vector2:
 func _angle_step() -> float:
 	return step_px / RADIUS
 
-## The cursor sample for frame i, in viewport pixels.
+## The cursor sample for frame i, as injected.
 func _cursor_at(i: int) -> Vector2:
-	return _centre() + Vector2.from_angle(float(i) * _angle_step()) * RADIUS
+	return _centre() + Vector2.from_angle(float(i) * step_px / RADIUS) * RADIUS
 
-## How many frames behind the cursor of frame i a point on the circle's plane sits, by its angle.
-func _frames_behind(i: int, p: Vector2) -> float:
-	var d := wrapf((_cursor_at(i) - _centre()).angle() - (p - _centre()).angle(), -PI, PI)
-	return d / _angle_step()
+## How many frames behind the newest cursor sample the point `p` is: where it falls along the last few
+## samples the engine reported (the window may scale injected positions, so the engine's own are used).
+func _frames_behind(p: Vector2) -> float:
+	var best_d := INF
+	var best_k := 0.0
+	for k in range(mini(hist.size() - 1, REACH)):
+		var a := hist[hist.size() - 1 - k]
+		var b := hist[hist.size() - 2 - k]
+		var t := clampf((p - a).dot(b - a) / maxf(0.0001, (b - a).length_squared()), 0.0, 1.0)
+		var d := p.distance_to(a.lerp(b, t))
+		if d < best_d:
+			best_d = d
+			best_k = float(k) + t
+	return best_k
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -85,6 +97,7 @@ func run(main_node: Node) -> void:
 		Engine.max_fps = fps
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
 		n = 0
+		hist.clear()
 		ret_lag.clear()
 		aim_lag.clear()
 		missed = 0
@@ -102,13 +115,15 @@ func sample() -> void:
 	ev.position = p
 	ev.global_position = p
 	Input.parse_input_event(ev)
+	hist.append(main.get_viewport().get_mouse_position())
+	n += 1
 
 func _after_draw() -> void:
-	if n >= WARMUP and n < WARMUP + frames and m.player != null:
+	if n >= WARMUP and n < WARMUP + frames and m.player != null and hist.size() == n:
 		var img := main.get_viewport().get_texture().get_image()
-		var at := _find_dot(img, _cursor_at(n))
+		var at := _find_dot(img, hist[n - 1])
 		if at.x >= 0.0:
-			ret_lag.append(_frames_behind(n, at))
+			ret_lag.append(_frames_behind(at))
 		else:
 			missed += 1
 			if missed == 1 and shots_dir != "":
@@ -117,8 +132,7 @@ func _after_draw() -> void:
 		var ray: Array = m.player.inp["aim_ray"]
 		var far: Vector3 = ray[0] + ray[1] * AIM_FAR
 		if not m.cam.is_position_behind(far):
-			aim_lag.append(_frames_behind(n, m.cam.unproject_position(far)))
-	n += 1
+			aim_lag.append(_frames_behind(m.cam.unproject_position(far)))
 
 ## The dot's centre: the mean of the dot-coloured pixels around `near`, or (-1, -1).
 func _find_dot(img: Image, near: Vector2) -> Vector2:
@@ -149,6 +163,7 @@ func _report() -> void:
 	var a := _stats(aim_lag)
 	var live := maxf(1.0, Engine.get_frames_per_second())
 	var frame_ms := 1000.0 / live
+	print("LATENCY cursor sample %d: injected %s, engine %s" % [WARMUP, _cursor_at(WARMUP), hist[WARMUP]])
 	print("LATENCY cap=%d vsync=%s step=%.0fpx/frame measured_fps=%.1f dot_missed=%d" % [fps, "on" if vsync else "off",
 		step_px, live, missed])
 	print("LATENCY reticle  mean %.2f  p95 %.2f frames (%.1f ms)  n=%d" % [r[0], r[1], r[0] * frame_ms, r[2]])
