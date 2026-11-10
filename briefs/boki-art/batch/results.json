@@ -100992,5 +100992,40 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/cometail_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pharoheron_card",
+    "name": "Pharoheron (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pharoheron_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pharoheron_card",
+    "name": "Pharoheron (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pharoheron_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cometail_card",
+    "name": "Cometail (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cometail_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "palloth_card",
+    "name": "Palloth (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/palloth_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "palloth_card",
+    "name": "Palloth (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/palloth_card_2.jpg",
+    "ok": true
   }
 ]
