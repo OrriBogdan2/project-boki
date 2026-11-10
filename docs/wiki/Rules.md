@@ -111,8 +111,8 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 
 | Setting | Value |
 |---|---|
-| stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
-| stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
+| tracks | {"garden": [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}], "ridge": [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "jump", "len": 3.0, "mult": 0.75}, {"kind": "updraft", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.75}]} |
+| tracks_doc | One lap per course, in order, laid out as a 6 x 3 m loop (the lens of stretches 0 and 2 are 6, of 1 and 3 are 3). A home island runs the course named by its theme's 'track' (home_layout.gd THEMES), else 'garden'. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. 'ridge' is Kitewind Ridge's (GARDEN.md 10.2): a run, a glide gap, a climb up an updraft, a second gap. |
 | pace | 1.1 |
 | pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. |
 | speed_per_point | 0.015 |
@@ -123,6 +123,10 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | swim_per_tide_doc | The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist. |
 | glide | 1.45 |
 | glide_doc | The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it. |
+| rise | 1.4 |
+| rise_doc | The updraft stretch: a winged Boki rides the rising air at this times the pace; a lean in one of updraft_types blends toward it. |
+| updraft_types | ["flying", "electric", "fairy", "sound"] |
+| updraft_types_doc | The Kitewind Ridge types (GARDEN.md 10.2): the leans that ride an updraft. |
 | wobble | 0.1 |
 | wobble_doc | Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win. |
 | cheer | {"great": 1.15, "good": 1.07, "miss": 1.0} |
@@ -610,7 +614,7 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 | marks | 3 |
 | marks_doc | Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part. |
 | types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "tail_long"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "spikes"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "crest"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
-| foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric"} |
+| foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric", "chimebun": "sound"} |
 
 ## level_growth (`content/rules/level_growth.json`)
 
@@ -764,6 +768,8 @@ The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDE
 |---|---|
 | snacks | ["emberberry", "tidebloom", "sunroot", "puffcorn"] |
 | snacks_doc | Four Data.CROPS foods, one per lean element (lean.json foods): Fire, Water, Grass, Flying. Each one is yielded once per ripening. |
+| zone_snacks | {"ridge": ["puffcorn", "tonicbrew", "starfruit", "chimebun"]} |
+| zone_snacks_doc | The patch on a zone theme (home_layout.gd THEMES, GARDEN.md 10.2) grows that zone's types instead: Kitewind Ridge grows Flying, Electric, Fairy and Sound. Crops (Data.CROPS) go to the crops store and prepared foods (Care.FOODS) to the items store, as Econ.pantry reads them. |
 | grow_secs | 480 |
 | grow_secs_doc | Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time. |
 | reach | 0.35 |
@@ -790,7 +796,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | trait_weight | 1 |
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
-| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
+| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
