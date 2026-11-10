@@ -118,6 +118,7 @@ const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const LAND_SQUASH := 0.16     # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -161,6 +162,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _feel := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -249,16 +251,19 @@ func _process(dt: float) -> void:
 	player.active = seen
 	if not seen:
 		return
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
-func _keep_flex() -> void:
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do the rest, so only its width roll stays,
+## with a landing's squash and a lean as it starts and stops (LandLean).
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = Vector3.ZERO
-	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
+	_feel.step(dt, root.global_position)
+	var sq := _feel.squash * LAND_SQUASH
+	flex.rotation = Vector3(-_feel.lean, 0.0, 0.0)
+	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5)) * Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
 	flex.position = Vector3(0, _flex_y, 0)
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
