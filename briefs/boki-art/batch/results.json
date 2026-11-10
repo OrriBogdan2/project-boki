@@ -91255,5 +91255,19 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_canvastross_face_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_jibbatross_face",
+    "name": "Jibbatross (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_jibbatross_face_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_jibbatross_face",
+    "name": "Jibbatross (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_jibbatross_face_1.jpg",
+    "ok": true
   }
 ]
