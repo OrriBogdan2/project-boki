@@ -25,6 +25,7 @@ func _owed(P: Hunter) -> float:
 
 func run() -> void:
 	await _charge_and_waves()
+	await _props()
 	await _guards()
 	await _burst()
 
@@ -153,6 +154,32 @@ func _charge_and_waves() -> void:
 		hits.size() == 2 and int(hits[0]) > 0 and int(hits[0]) < 6, str(hits)
 	)
 	await _reel_combo(m, P, T, home)
+	await ak.done(m)
+
+## The Broadside's slugs are Explosive (source): they break a crate and a pot and light a keg in the fan.
+func _props() -> void:
+	var r: Array = ak.setup("dredge", 1.6, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var T2: Hunter = r[3]
+	var home: Vector3 = r[4]
+	P.lvl = 6
+	T.teleport(home + Vector3(-6.0, 0, -5.0))
+	T2.teleport(home + Vector3(-6.0, 0, 5.0))
+	var spots := {"crate": Vector3(3, 0, -1.2), "pot": Vector3(3, 0, 1.2), "keg": Vector3(4, 0, 0)}
+	var props := {}
+	for kind_s in spots:
+		var at: Vector3 = home + spots[kind_s]
+		at.y = m.world.ground_at(at.x, at.z)
+		m._add_break(kind_s, at)
+		props[kind_s] = m.breaks[-1]
+	_cast(P, home + Vector3(4, 0, 0))
+	ak.step(m, 2.2)
+	ok(
+		"ult props: the slugs break a crate and a pot and light a keg (Explosive)",
+		props["crate"]["dead"] and props["pot"]["dead"] and (props["keg"].has("fuse_t") or props["keg"]["dead"])
+	)
 	await ak.done(m)
 
 ## Abyssal Hand, the foe hauled to your feet stunned, then the Broadside: every slug lands.
