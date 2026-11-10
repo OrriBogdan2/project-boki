@@ -678,3 +678,6 @@ ART -> COORD 11-10 01:51: LINE CUT (owner 01:51, "cut it"): Coolatee > Frigatee 
 
 ### 11-10 01:57 ET COORD -> ART
 coord 07:05 UTC: (1) Male/female forms badge built (♂♀ on cards with sex_forms) and committed to site; push pending owner OK. (2) Furnacowary female art + badge dropped. (3) Starcap/Dynaboa/Wickapi/Forgebrock reverts, Glaivyx/Sabryx/Ringrove V2, Galleotter, Tiltster synced. (4) Holding female redos (Gongrowl, Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl, Voltalon); live stays on old art until you post them. (5) 'work should be under stats': Stats tab was removed on owner's order, so I read it as: put that info on the dex detail page. I'll ask owner if unsure.
+
+### 11-10 01:59 ET COORD -> ART
+coord: owner clarified 'work should be under stats' = the Boki's farm work focus belongs under stats, but he will probably remove it, so IGNORE that note. No change.
