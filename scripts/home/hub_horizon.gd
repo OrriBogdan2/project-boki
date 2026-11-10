@@ -13,11 +13,12 @@ const RISE_STEP := -4.0
 const TOP_R := 8.0         # m, an island's top radius
 const DEPTH := 7.0         # m, how far its rocky underside hangs
 const SIDES := 7           # corners of the low-poly outline
-const LIT_GLOW := 0.35     # how much a lit island glows (shader glow 0..1)
-const LIT_WARM := 0.25     # how far a lit island's colours warm toward sunlight (0 none .. 1 all)
-const MIST := 0.8          # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
+const HILL := 2.5          # m the middle of an island's top rises, so it reads as land, not a plate
+const LIT_GLOW := 0.2      # how much a lit island glows (shader glow 0..1)
+const LIT_WARM := 0.15     # how far a lit island's colours warm toward sunlight (0 none .. 1 all)
+const MIST := 0.85         # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
 const WARM := Color("ffd9a0")
-const MIST_GREY := Color("9aa0b0")
+const MIST_GREY := Color("767c8a")
 const ROCK := Color("6e6577")
 
 static var _mats := {}      # open (bool) -> the one material that state shares
@@ -61,7 +62,7 @@ static func island_mesh(seed_i: int, colour: Color, open: bool) -> ArrayMesh:
 	for k in SIDES:
 		var p: Vector3 = rim[k]
 		var q: Vector3 = rim[(k + 1) % SIDES]
-		_tri(st, Vector3.ZERO, q, p, top)
+		_tri(st, Vector3(0, HILL, 0), q, p, top)
 		_tri(st, p, q, tip, under)
 	st.generate_normals()
 	return st.commit()
