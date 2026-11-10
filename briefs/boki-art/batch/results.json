@@ -102280,5 +102280,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_xylogator_nl_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_marimbite_nl",
+    "name": "Marimbite (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_marimbite_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glockodile_nl",
+    "name": "Glockodile (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_glockodile_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glockodile_nl",
+    "name": "Glockodile (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_glockodile_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glockodile_nl",
+    "name": "Glockodile (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_glockodile_nl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glockodile_nl",
+    "name": "Glockodile (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_glockodile_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glockodile_nl",
+    "name": "Glockodile (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glockodile_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_foalaround_nl",
+    "name": "Foalaround (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_foalaround_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_canopony_nl",
+    "name": "Canopony (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_canopony_nl_2.jpg",
+    "ok": true
   }
 ]
