@@ -107663,5 +107663,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ogk_aurora_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ogk_egg",
+    "name": "Bokidex OG key art (egg)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogk_egg_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_titan",
+    "name": "Bokidex OG key art (titan)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogk_titan_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_titan",
+    "name": "Bokidex OG key art (titan)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogk_titan_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_vista",
+    "name": "Bokidex OG key art (vista)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogk_vista_3.jpg",
+    "ok": true
   }
 ]
