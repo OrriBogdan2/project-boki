@@ -79215,5 +79215,54 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_wickapi_on_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_kayak_b2n",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_b2n_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_lie2",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_lie2",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_lie2",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_b2n",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_b2n_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_lie2",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_b2n",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_b2n_1.jpg",
+    "ok": true
   }
 ]
