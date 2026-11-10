@@ -1975,3 +1975,12 @@ for _k,_d,_sp,_ms,_b,_t in (
     SPECS.append({'id':'hb2_'+_k,'name':'Hunter + Boki splash v2 ('+_k+')','refs':[_HR+_d+'/'+_sp,_HR+_d+'/'+_ms]+[_C%x for x in _b],'runs':2,'aspect':'16:9','size':'2K','prompt':_HS2+_t})
 SPECS.append({'id':'hb2_kael_voltalon','name':'Hunter + Boki splash v2 (kael_voltalon)','refs':[_HR+'kael_v2/kael_v2_splash_final.jpg',_HR+'kael_v2/kael_v2_master_sheet.jpg',_C%'Voltalon'],'runs':2,'aspect':'16:9','size':'2K',
   'prompt':_HS2+"Hunter: Kael, the Unbroken: white hair, a glowing scarred eye, an enormous crimson scarf over his mouth with long streaming tails, a jagged white-hot greatsword, a cracked glowing right arm with a chain hook, silver armour. Scene: a storm-lashed cliff. Kael leaps with his greatsword drawn while the storm bird dives beside him wreathed in lightning, both striking at the same unseen foe below."})
+
+# 11-10 owner pasted main's brief for the site drop-in splash (three Hunters + their Boki diving from an airship). Prompt used verbatim
+# (batch/drop_splash_prompt.txt) with a short header naming the reference images. Hunter design sheets are the authority.
+import os as _os
+_DROP=open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'drop_splash_prompt.txt')).read()
+_DREF=[_HR+'ravel_v2/ravel_v2_master_sheet.jpg',_HR+'mossy_v2/mossy_v2_master_sheet.jpg',_HR+'vex_v2/vex_v2_master_sheet.jpg',_HR+'vex_v2/vex_v2_splash.jpg',_C%'Vespyx',_C%'Mycroll',_C%'Prismander']
+_DHEAD=("REFERENCE IMAGES: image 1 is LACE's locked design sheet, image 2 is ALBERT's locked design sheet, image 3 is VEX's locked design sheet: each sheet is the authority for that Hunter's face, body, outfit, colours and weapons. "
+ "Image 4 is a finished splash showing the painting style to match. Image 5 is Lace's Boki (purple scorpion-tailed fox), image 6 is Albert's Boki (mushroom hedgehog), image 7 is Vex's Boki (pink striped axolotl): keep each Boki's design exactly.\n\n")
+SPECS.append({'id':'drop_splash','name':'Site drop-in splash (Lace, Albert, Vex + Boki)','refs':_DREF,'runs':4,'aspect':'4:3','size':'2K','prompt':_DHEAD+_DROP})
