@@ -510,3 +510,9 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - The base becomes a small hub with a teleporter in the middle. From it you travel to separate garden zones. At the start only ONE zone is unlocked; the rest show as locked destinations with a clear way to open them.
 - This is a genre pattern (creature-raising gardens), not a copy. Our own hook: zones are tied to elements and Boki personality. Names, layout and looks are ours.
 - Feeds GARDEN.md (add a "Hub and zones" section). The first slice for video stays as it is; the hub is the next garden milestone.
+
+## 2026-11-10 ~12:15 PM EST owner: 0.24.4 waits for the big changes; the farm's core is Chao-style
+- Release: 0.24.4 holds (tomorrow 11-11 is fine) until Limited Way Outs (Heart + quest exits, open extraction removed) and the Chao-style garden core are in and gated. "I want to have all the big changes in."
+- Garden direction: the CORE of the farming side must feel like a creature-raising garden (Chao-like genre pattern, our own names/looks): raise, pet, feed, play, race, breed, Boki living on their own in the garden. That core is the default for every player (base_mode on by default, not a hidden flag).
+- Base building and the farm-sim systems (crops, chopping, work stations, haul jobs, market/Exchange) are NOT the core. They stay as OPTIONAL upside: customise the garden, extra rewards, more ways to help your Boki. Never required to raise Boki. Fits the hub + zones decision (an optional workshop/fields zone is a fine home for them).
+- Coordinator: spec job turns this into GARDEN.md + a build list, then builds it for 0.24.4.
