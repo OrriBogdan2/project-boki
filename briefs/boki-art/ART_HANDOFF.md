@@ -152,3 +152,6 @@ For a Boki `<Name>` (file ID, not the display name):
 - **Waiting on the owner:** a name for the new sea-pup Anchorbill (proposal: Anchorpup).
 - **Owner notes 11-09 evening, all handled except:** Tiltster "head not very on" (not changed; ask him about the new V2 card), Parrywhal Pokémon look-alike check (not done), Effigeetle caterpillar (the `rd_effigeetle_*` concepts have floating gold bits and a human-like face: redo with `ON_CHANGE`).
 - **Roster pass:** no batches left; the work is the in-flight list above.
+
+### Standing rule: sharing splashes and key art (owner, 11-10 evening)
+Owner: "i wont ask again, always do it to the art branch and tell it to store them." Every splash or key art keeper goes, without being asked, into `briefs/boki-art/splash/` or `briefs/boki-art/og/` on `ext/agent-briefs`, is listed in `PICKS_FOR_MAIN.md` with its status, and gets a CHANNEL.md note telling main to store it in the game repo's permanent art folder. Never push to the main branch.
