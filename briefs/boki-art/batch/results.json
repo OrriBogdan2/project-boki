@@ -108776,5 +108776,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rv_malletary_light_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_tiltster_light",
+    "name": "Tiltster (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_tiltster_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_glaciatee_light",
+    "name": "Glaciatee (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_glaciatee_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rippmink_light",
+    "name": "Rippmink (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_rippmink_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_tiltster_light",
+    "name": "Tiltster (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_tiltster_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_glaciatee_light",
+    "name": "Glaciatee (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_glaciatee_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_meteorab_light",
+    "name": "Meteorab (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_meteorab_light_1.jpg",
+    "ok": true
   }
 ]
