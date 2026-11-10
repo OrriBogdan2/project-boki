@@ -109140,5 +109140,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hb3_motley_checkmare_2.jpg",
     "ok": true
+  },
+  {
+    "id": "hb3_meeko_starters",
+    "name": "Hunter + Boki splash v2 (meeko_starters) 3D Boki",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb3_meeko_starters_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash3d",
+    "name": "Site drop-in splash, Boki rendered 3D like the hunters",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_splash3d_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash3d",
+    "name": "Site drop-in splash, Boki rendered 3D like the hunters",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_splash3d_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb3_cinder_calderoise",
+    "name": "Hunter + Boki splash v2 (cinder_calderoise) 3D Boki",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb3_cinder_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash3d",
+    "name": "Site drop-in splash, Boki rendered 3D like the hunters",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_splash3d_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash3d",
+    "name": "Site drop-in splash, Boki rendered 3D like the hunters",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/drop_splash3d_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb3_neve_glaciatee",
+    "name": "Hunter + Boki splash v2 (neve_glaciatee) 3D Boki",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb3_neve_glaciatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb3_cinder_calderoise",
+    "name": "Hunter + Boki splash v2 (cinder_calderoise) 3D Boki",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb3_cinder_calderoise_1.jpg",
+    "ok": true
   }
 ]
