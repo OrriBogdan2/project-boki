@@ -1718,3 +1718,14 @@ _PXB=("Redraw the creature in image 1 as a tiny chunky 8-bit menu icon sprite, h
 for _n in ('Vespyx','Mycroll','Prismander','Ermink','Pinguin','Jerbit','Kitlet','Xylogator','Sarcobra','Calderoise','Aurostag','Chainipede'):
     for _k,_p in (('a',_PXA),('b',_PXB)):
         SPECS.append({'id':'px_'+_k+'_'+_n.lower(),'name':_n+' (pixel sprite test '+_k+')','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_p})
+
+# 11-10 pixel sprite test, round 2: same chunky look for every Boki, anchored on a pixel style reference (image 2).
+_PXC=("Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: "
+ "big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, "
+ "at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. "
+ "This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, "
+ "drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. "
+ "Three-quarter view facing left, whole body in frame, centred, filling most of the image. "
+ "Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines.")
+for _n in ('Vespyx','Mycroll','Prismander','Ermink','Pinguin','Jerbit','Kitlet','Xylogator','Sarcobra','Calderoise','Aurostag','Chainipede','Lockatara','Chuggamus','Palloth','Hydrangor'):
+    SPECS.append({'id':'px_c_'+_n.lower(),'name':_n+' (pixel sprite test c)','refs':['briefs/boki-art/cards/'+_n+'.jpg','briefs/boki-art/style_refs/pixel_sprite_ref_v1.png'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PXC})

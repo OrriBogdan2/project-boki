@@ -39614,6 +39614,198 @@
     "prompt": "Redraw the creature in image 1 as a tiny chunky 8-bit menu icon sprite, hand-pixelled on a 32 by 32 pixel grid and shown enlarged so every pixel is a crisp square. It is a NEW drawing for the tiny grid: reduce it to a big head, a small body and its one signature part, with large simple eyes; drop everything else. A dark one-pixel outline, at most eight flat colours, no anti-aliasing, no blur, no gradients. Facing left, whole body in frame and centred. Plain flat white background, nothing else."
   },
   {
+    "id": "px_c_vespyx",
+    "name": "Vespyx (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_mycroll",
+    "name": "Mycroll (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_prismander",
+    "name": "Prismander (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_ermink",
+    "name": "Ermink (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Ermink.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_pinguin",
+    "name": "Pinguin (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Pinguin.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_jerbit",
+    "name": "Jerbit (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Jerbit.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_kitlet",
+    "name": "Kitlet (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Kitlet.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_xylogator",
+    "name": "Xylogator (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Xylogator.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_sarcobra",
+    "name": "Sarcobra (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Sarcobra.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_calderoise",
+    "name": "Calderoise (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_aurostag",
+    "name": "Aurostag (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Aurostag.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_chainipede",
+    "name": "Chainipede (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Chainipede.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_lockatara",
+    "name": "Lockatara (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Lockatara.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_chuggamus",
+    "name": "Chuggamus (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Chuggamus.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_palloth",
+    "name": "Palloth (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Palloth.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
+    "id": "px_c_hydrangor",
+    "name": "Hydrangor (pixel sprite test c)",
+    "refs": [
+      "briefs/boki-art/cards/Hydrangor.jpg",
+      "briefs/boki-art/style_refs/pixel_sprite_ref_v1.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
