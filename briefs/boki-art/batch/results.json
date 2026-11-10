@@ -89792,5 +89792,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fp2_gongrowl_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fs2_gongrowl",
+    "name": "Gongrowl female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs2_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp2_voltalon",
+    "name": "Voltalon female (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fp2_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_sandwidow",
+    "name": "Sandwidow female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs2_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_gongrowl",
+    "name": "Gongrowl female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs2_gongrowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp2_eclipsowl",
+    "name": "Eclipsowl female (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fp2_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_sandwidow",
+    "name": "Sandwidow female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs2_sandwidow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_voltalon",
+    "name": "Voltalon female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs2_voltalon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_hourachnid",
+    "name": "Hourachnid female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs2_hourachnid_3.jpg",
+    "ok": true
   }
 ]
