@@ -19,11 +19,11 @@ const TREES := [Vector3(-1.1, 0.6, 0.55), Vector3(1.0, -0.4, 0.6)]   # (x, z, ho
 const TREE_R := 0.8        # m, a tree's foot radius
 const TREE_H := 2.2        # m, its height
 const TREE_DARK := 0.35    # how much darker than the island's top a tree is
-const LIT_GLOW := 0.2      # how much a lit island glows (shader glow 0..1)
+const LIT_GLOW := 0.45     # how much a lit island glows (shader glow 0..1)
 const LIT_WARM := 0.15     # how far a lit island's colours warm toward sunlight (0 none .. 1 all)
 const MIST := 0.9          # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
 const WARM := Color("ffd9a0")
-const MIST_GREY := Color("646a76")
+const MIST_GREY := Color("4f545e")
 const ROCK := Color("6e6577")
 
 static var _mats := {}      # open (bool) -> the one material that state shares
