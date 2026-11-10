@@ -105976,5 +105976,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/car3_carrousteed_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "hs_rollguin_h",
+    "name": "Rollguin (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hs_rollguin_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_pinguin_h",
+    "name": "Pinguin (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hs_pinguin_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_stamproo_h",
+    "name": "Stamproo (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hs_stamproo_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_pillaroo_h",
+    "name": "Pillaroo (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hs_pillaroo_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_kingpinguin_h",
+    "name": "Kingpinguin (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hs_kingpinguin_h_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_pinguin_h",
+    "name": "Pinguin (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hs_pinguin_h_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_postroo_h",
+    "name": "Postroo (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hs_postroo_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_postroo_h",
+    "name": "Postroo (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hs_postroo_h_1.jpg",
+    "ok": true
   }
 ]
