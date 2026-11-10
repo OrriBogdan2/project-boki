@@ -88448,5 +88448,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_forgebrock_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_forgebrock_a",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_forgebrock_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_forgebrock_c",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_forgebrock_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_forgebrock_b",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_forgebrock_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_coolatee_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_coolatee_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_forgebrock_a",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_forgebrock_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_forgebrock_c",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_forgebrock_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_coolatee_c",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_coolatee_c_1.jpg",
+    "ok": true
   }
 ]
