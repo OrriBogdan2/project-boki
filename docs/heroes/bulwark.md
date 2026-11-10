@@ -202,6 +202,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | Hold LMB, jump, let go in the air | Charges on through the jump; the swing goes in the air, no step, his speed kept | `bjorn #51` lines |
 | Hold LMB, jump or Shift, let go in the window | The perfect launch from there (in the air, at his height) | same |
 | Swing's step or perfect launch, then jump or Shift | Acts within 0.1 s | same |
+| Every move's wind-up, hit and recovery | Held to the sheet's frames and the clip beats (table in Animation timing) | `bjorn time` lines (`tools/bjorn_anim_time_check.gd`) |
 | E with the aegis down / raised | Ticks heal; the burst heals / heals and mends it |
 | Hammer recalled while the zone stands | The zone follows it back to him | same |
 | A Boki merge mid spin / aegis | The charge drops with no swing; the aegis comes down keeping its HP | same |
@@ -211,10 +212,26 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | A merge in the Faultline wind-up | No slam; a fissure already running finishes | same |
 | Faultline then a merge on a full-health light hunter | Standing (burst cap) | same |
 
+## Animation timing (measured in game; source = footage frames of 0.2 s, so +-0.2 s)
+Seconds from the input at 60 Hz, printed as `AKTIME` lines by `tools/bjorn_anim_time_check.gd` in `--bulwark-combo-check`.
+| Move | Source (briefs/hero-ref/bjorn.md) | Ours before | Ours after |
+|---|---|---|---|
+| Throw, hammer leaves the hand | cock 1 frame (0033), release next (0034) | 0.13 (`THROW_WIND` 0.08 + 0.05 step), the arm still cocked (clip release key 0.14) | 0.15, as the arm comes through |
+| Throw, key pose blend | one-frame cock | 0.1 s crossfade smeared the cock (clip key 0.07) | 0.04 s (`fade` in `warden_anim/breaker.json`) |
+| Recall, catch | flight 0.2-0.4 s | 0.17 | same (the catch is inside the 0.48 s clip; suggestion below) |
+| Smash, wind-up pose | on the hold (tap 0.2) | 0.23 | same |
+| Smash, blow after release | impact the frame after the sweep | 0.03 (clip impact key 0.08), 0.1 s blend | same hit; 0.04 s blend so the impact pose shows |
+| Smash, recovery | about 0.4 s after the impact | 0.61 free | same |
+| 360 Smash, spin hit | dash 0.15-0.2 s, one spin on arrival | 0.22, inside the spin (0.17-0.33) | same; 0.04 s blend |
+| 360 Smash, spin and recovery | spin 0.15-0.2 s, recovery about 0.4 s | 0.16 / 0.42 | same |
+| Mending Ground, column | about 1 s after the cast | 1.02 (hammer down at clip key 0.26) | same |
+| Faultline slam (X) | wind 0.4, plant 0.2 | same | same; 0.04 s blend into the slam |
+Suggestions, not built (parity first): the recall catch lands at 0.17 s, before the clip's catch key (0.3 s); the ult streak `lead` is 0.2 s against about 0.4 s in the footage.
+
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
-| LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.12 s after the press, as the arm comes through |
+| LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.15 s after the press, as the arm comes through |
 | LMB tap again (recall) | `bul_recall` | hand out, the catch |
 | LMB hold (whirl, owner item 59) | `bul_smash_wind` (held) | side-on and crouched, the hammer arm out to the side, the shield arm forward, sinking lower to full charge; BjornFx whirls the model's "Hammer" pivot on the kit's angle (eases out of the hand over 0.12 s). The release keys still start from the coil (`BUL_COIL`), so the hammer hauls back on the swing's first frame |
 | LMB release (Crushing Blow) | `bul_smash` | from the coil, sweep from behind to front in one frame, crash down, the step, 0.4 s recovery |
