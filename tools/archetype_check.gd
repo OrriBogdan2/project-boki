@@ -471,6 +471,8 @@ func _gunslinger() -> void:
 	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
 	ok("venator Dazed: the bonus gets its own pink +9 number",
 			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
+	_burr_terrain(m, P, T, K, home, r[5])
+	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
@@ -485,6 +487,44 @@ func _gunslinger() -> void:
 	ok("venator dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
+
+## Burr Charge over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
+## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short.
+## Puts the strip back after.
+func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, lv: int) -> void:
+	var W: World = m.world
+	var x0 := int(home.x); var z0 := int(home.z)
+	var shape := func(lv_of: Callable, stair_at: Array, kind_at: int) -> void:
+		for dz in range(-3, 4):
+			for dx in range(1, 12):
+				var i: int = W.idx(x0 + dx, z0 + dz)
+				W.level[i] = lv + int(lv_of.call(dx))
+				W.kind[i] = World.T_BLOCK if dx == kind_at else World.T_GROUND
+				W.stairs.erase(i)
+				if dx in stair_at: W.stairs[i] = Vector2i(1, 0)
+	var shoot := func(at: Vector3) -> int:
+		fresh(T); KitStatus.clear_rattled(T); T.teleport(at); P.teleport(home); step(m, 0.2)
+		aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
+		var hits := K.direct_hits
+		tap(m, P)
+		step(m, 0.8)
+		return K.direct_hits - hits
+	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
+	var climbed: int = shoot.call(top)
+	var info := "hits %d took %.0f" % [climbed, dmg(T)]
+	ok("venator RMB: rides a ramp up to a foe on high ground", climbed == 1 and dmg(T) >= 12.0, info)
+	shape.call(func(dx: int) -> int: return 3 if dx == 4 else 0, [], -1)      # a 2.4 m face, one tile thick
+	var walled: int = shoot.call(home + Vector3(6.5, 0, 0))
+	var stuck := K.burrs.size() == 1 and absf(float(K.burrs[0]["pos"].x) - (home.x + 3.5)) < 0.6
+	info = "hits %d burrs %d" % [walled, K.burrs.size()]
+	ok("venator RMB: a vertical wall stops it, the foe behind is safe", walled == 0 and stuck, info)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], 4)
+	var rocked: int = shoot.call(home + Vector3(6.5, 0, 0))
+	ok("venator RMB: a rock stops it too", rocked == 0 and K.burrs.size() == 1, "hits %d" % rocked)
+	step(m, 1.5)
+	shape.call(func(_dx: int) -> int: return 0, [], -1)
 
 # ------------------------------------------------------------------ Juggernaut: tools/dancer_jug_check.gd
 func _juggernaut() -> void:

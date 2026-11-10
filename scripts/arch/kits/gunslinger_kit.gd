@@ -5,7 +5,7 @@ extends ArchKit
 ##
 ## Loop: tap RMB and the Burr Charge fires from the arm-cannon's launcher along the aim. A direct hit on a foe
 ## damages and Dazes it ("rat" Rattled in code) on the spot.
-## Otherwise it flies its 10.5 m and sticks where it meets a wall
+## Otherwise it flies its 10.5 m, riding up ramps and low ledges, and sticks where it meets a steep wall
 ## or the ground at the end: a cone shows back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. The rifle does +90% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
@@ -22,6 +22,9 @@ const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const DAZE_FLASH := 1.8              # m, the pink spark on a Dazed foe per rifle round
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
+const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
+const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
+const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
 const SKID_SPREAD := 0.28            # m off the path's centre line
@@ -411,7 +414,6 @@ func fire_rmb(c: Dictionary) -> void:
 	var burr := {"pos": at, "dir": d, "t": 0.0, "node": n, "wall": false, "fuse": -1.0, "fuse0": float(bd["fuse"])}
 	burr["range"] = float(bd["range"])
 	burr["y0"] = at.y
-	burr["g0"] = ground(h.pos).y
 	burrs.append(burr)
 	play("gunslinger_rmb")
 	_launcher_puff(at, d)
@@ -477,35 +479,55 @@ func _tick_burrs(dt: float) -> void:
 				burrs.erase(b)
 				_detonate(b)
 			continue
-		var p: Vector3 = b["pos"]
-		var dir: Vector2 = b["dir"]
-		b["t"] = float(b["t"]) + dt
-		var flat := p + Vector3(dir.x, 0, dir.y) * float(bd["speed"]) * dt
-		var dist: float = float(b["t"]) * float(bd["speed"])
-		var u := clampf(dist / float(b["range"]), 0.0, 1.0)
-		# a slight lob: up a little, then down onto the lane's end
-		var gy := ground(flat).y
-		flat.y = lerpf(float(b["y0"]), gy + 0.25, u * u) + 0.6 * sin(PI * u)
-		var victim := _burr_victim(p, flat)
-		if victim != null:
-			burrs.erase(b)
-			_direct_hit(b, victim, flat)
-			continue
-		var ledge: bool = m.world.ground_at(flat.x, flat.z) > float(b["g0"]) + 0.6
-		var walled: bool = m.world.is_block(flat.x, flat.z) or ledge
-		if walled:
-			_stick(b, p, true)
-		elif dist >= float(b["range"]):
-			_stick(b, ground(flat) + Vector3(0, 0.2, 0), false)       # the ground at the lane's end
-		else:
-			b["pos"] = flat
-			var back := Vector3(dir.x, 0, dir.y) * 0.35
-			fx().smear(p - back, flat, DEEP, HOT, 0.3, 0.2)      # the ember smear behind it (joined up)
-			if int(b["t"] * 60.0) % 3 == 0:
-				m.fx.burst(flat, EMBER, 3, 0.6, 0.25, 0.0, 0.7)
+		_fly_burr(b, bd, dt)
 		if is_instance_valid(n):
 			n.global_position = b["pos"]
 			n.rotation.y += dt * 14.0
+
+## One frame of flight, read every BURR_SAMPLE m so no tile is skipped: a slight lob that rides up ramps,
+## stairs and low ledges, and stops only on a strict wall (`_burr_wall`), on a foe, or at the lane's end.
+func _fly_burr(b: Dictionary, bd: Dictionary, dt: float) -> void:
+	var p: Vector3 = b["pos"]
+	var dir: Vector2 = b["dir"]
+	var speed := float(bd["speed"])
+	var steps := maxi(1, ceili(speed * dt / BURR_SAMPLE))
+	var run := speed * dt / steps
+	var at := p
+	var g_last: float = m.world.ground_at(p.x, p.z)
+	for _i in steps:
+		b["t"] = float(b["t"]) + dt / steps
+		var q := at + Vector3(dir.x, 0, dir.y) * run
+		var dist: float = float(b["t"]) * speed
+		var u := clampf(dist / float(b["range"]), 0.0, 1.0)
+		if _burr_wall(g_last, q, run):      # q is still at the height it arrives with
+			_stick(b, at, true)
+			return
+		var gy := ground(q).y
+		q.y = maxf(lerpf(float(b["y0"]), gy + BURR_RIDE, u * u) + 0.6 * sin(PI * u), gy + BURR_RIDE)
+		var victim := _burr_victim(at, q)
+		if victim != null:
+			burrs.erase(b)
+			_direct_hit(b, victim, q)
+			return
+		if dist >= float(b["range"]):
+			_stick(b, ground(q) + Vector3(0, 0.2, 0), false)       # the ground at the lane's end
+			return
+		at = q
+		g_last = m.world.ground_at(q.x, q.z)
+	b["pos"] = at
+	var back := Vector3(dir.x, 0, dir.y) * 0.35
+	fx().smear(p - back, at, DEEP, HOT, 0.3, 0.2)      # the ember smear behind it (joined up)
+	if int(b["t"] * 60.0) % 3 == 0:
+		m.fx.burst(at, EMBER, 3, 0.6, 0.25, 0.0, 0.7)
+
+## A strict wall at `q` (the charge's next spot, at its height): a blocker tile standing above it, or ground
+## that rose from `g_from` over `run` m by more than a walkable step and steeper than BURR_WALL_DEG, with its
+## top above the charge. Ramps and stairs (39 deg) and ledges below the charge are not walls: it rides up them.
+func _burr_wall(g_from: float, q: Vector3, run: float) -> bool:
+	var g: float = m.world.ground_at(q.x, q.z)
+	if m.world.is_block(q.x, q.z):
+		return g + World.BLOCK_H > q.y
+	return g > q.y and g - g_from > maxf(World.STEP, run * tan(deg_to_rad(BURR_WALL_DEG)))
 
 ## The first foe the charge touches between two steps, or null. Reach is the foe's body plus the lane's half width.
 func _burr_victim(from: Vector3, to: Vector3) -> Ent:
