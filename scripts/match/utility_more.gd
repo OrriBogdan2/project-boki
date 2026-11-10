@@ -98,6 +98,7 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 	match String(d.get("field", "")):
 		"gate":
 			var b := h.pos
+			h.set_meta("gate_end", m.time + time)      # BeltHud shows the countdown while the gates are open
 			var tick := func(_p, _z): pass
 			m.fields.add_kx(h, at, r, time, 1.0, col, tick, func(_p): _swap(m, at, b, r), null, "")
 			m.fields.add_kx(h, b, r, time, 1.0, col, tick, Callable(), null, "")
