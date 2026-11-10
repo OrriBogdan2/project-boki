@@ -26,7 +26,7 @@ const CHECKS := {
 	"--bulwark-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--music-leave-check": ["res://tools/music_leave_check.gd", "music_leave_check", null],
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
-	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],      # draw calls, tris, shadow lights, frame ms
+	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],   # draws, tris, lights, ms
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
 	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
@@ -136,7 +136,7 @@ const CHECKS := {
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],      # the opening drop
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
-	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],      # 2 games, relay, docs/decisions/0018
+	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],   # 2 games over the relay
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
@@ -150,7 +150,7 @@ const CHECKS := {
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
-	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],      # docs/decisions/0040
+	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],   # decision 0040
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
