@@ -108517,5 +108517,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/gclean_rampartoad_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ogs_poster",
+    "name": "Bokidex key art, style poster",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogs_poster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_clay",
+    "name": "Bokidex key art, style clay",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogs_clay_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_clay",
+    "name": "Bokidex key art, style clay",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogs_clay_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_storybook",
+    "name": "Bokidex key art, style storybook",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogs_storybook_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_anime",
+    "name": "Bokidex key art, style anime",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogs_anime_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_storybook",
+    "name": "Bokidex key art, style storybook",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogs_storybook_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_poster",
+    "name": "Bokidex key art, style poster",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogs_poster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_storm",
+    "name": "Bokidex key art, style storm",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogs_storm_1.jpg",
+    "ok": true
   }
 ]
