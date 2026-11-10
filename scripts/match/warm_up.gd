@@ -152,8 +152,11 @@ func run(progress := Callable()) -> void:
 
 ## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
 ## cheap and shrink when one costs more than FRAME_MS over a plain frame (a first draw is
-## where a GPU compiles a shader). Only how many frames the warm-up takes depends on it.
-const BATCH := 8
+## where a GPU compiles a shader), down to BATCH_MIN. Only how many frames the warm-up takes depends
+## on it. From a cold shader cache a batch of 8 was a 400-560 ms frame on an RTX 4070, but batches of 1-2
+## doubled an M5's warm-up (eight frames a batch, each ~30 ms with the map loaded; item 33).
+const BATCH := 4
+const BATCH_MIN := 2
 const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -230,26 +233,34 @@ func _aim_stand_in() -> MeshInstance3D:
 	return mi
 
 func _batches(progress: Callable, seen: Dictionary) -> bool:
+	# the camera sees only the stand-ins meanwhile (their own render layer), from the scan on: the
+	# first frames back in 3D drew the whole map with every shader compiling at once (item 33: a
+	# 4-5 s frame on an RTX 4090). The lights, shadows and environment that pick a shader's variant
+	# are all still there.
+	var keep_mask := m.cam.cull_mask
+	m.cam.cull_mask = LAYER
 	var list: Array = await _sources(seen)
 	if not m.is_inside_tree():
 		return false
 	if list.is_empty():
+		m.cam.cull_mask = keep_mask
 		return true
 	var cb := m.cam.global_transform.basis
 	var front := m.cam.global_position - cb.z * 6.0
 	var wl := _lights()
-	# the camera sees only the stand-ins meanwhile (their own render layer): the lights, shadows and
-	# environment that pick a shader's variant are all still there, but each batch's frame no longer
-	# draws the whole map again
-	var keep_mask := m.cam.cull_mask
-	m.cam.cull_mask = LAYER
 	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
 	# or they'd all draw unlit)
+	# (and the sun lights and shadows only the stand-ins meanwhile: its shadow pass drew the whole map
+	# every frame, 8 frames a batch)
 	var lights := m.find_children("*", "Light3D", true, false)
 	var keep_layers: Array = []
+	var keep_cull: Array = []
 	for l in lights:
 		keep_layers.append((l as Light3D).layers)
+		keep_cull.append((l as Light3D).light_cull_mask)
 		(l as Light3D).layers |= LAYER
+		if l is DirectionalLight3D:
+			(l as Light3D).light_cull_mask = LAYER
 	# what a frame costs with nothing new in it, to tell a batch's own cost from plain drawing
 	await m.get_tree().process_frame
 	var t0 := Time.get_ticks_usec()
@@ -296,12 +307,14 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		progress.call(float(i) / list.size())
 		var extra := worst - plain
 		if extra > FRAME_MS:
-			n = maxi(4, n / 2)
-		elif extra < FRAME_MS * 0.4:
+			n = maxi(BATCH_MIN, n / 2)
+		elif extra < FRAME_MS * 0.6:
 			n = mini(n * 2, 512)
 	await m.get_tree().process_frame
 	for li in lights.size():
-		if is_instance_valid(lights[li]): (lights[li] as Light3D).layers = keep_layers[li]
+		if is_instance_valid(lights[li]):
+			(lights[li] as Light3D).layers = keep_layers[li]
+			(lights[li] as Light3D).light_cull_mask = keep_cull[li]
 	for l in wl: (l as Node).queue_free()
 	m.cam.cull_mask = keep_mask
 	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
