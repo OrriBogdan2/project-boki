@@ -63,7 +63,6 @@ const DEPLOY_H := 8.0         # the glider opens by itself this high above the g
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
-const ARMOR_WAIT := 4.0
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
@@ -174,7 +173,6 @@ var muzzle_t := 0.0
 var regen_wait := 0.0
 var armor := 0.0
 var max_armor := 50.0
-var armor_wait := 0.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
 var crouch := false           # slower, steadier aim, and much harder to spot
 var crouch_k := 0.0
@@ -527,8 +525,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
-	regen_wait = 5.0
-	armor_wait = ARMOR_WAIT
+	regen_wait = float(KinRegen.rules()["owner_shield_delay_s"])
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
@@ -1864,8 +1861,7 @@ func sim(dt: float) -> void:
 	var regen := owner_stat("regen") + kin_pt("owner_regen")
 	if regen > 0.0 and not downed and hp < max_hp:
 		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
-	if kin_pt("owner_shield") > 0.0 and regen_wait <= 0.0 and kin_shield < kin_pt("owner_shield"):
-		kin_shield = minf(kin_pt("owner_shield"), kin_shield + kin_pt("owner_shield") * 0.5 * dt)
+	KinRegen.owner_shield_tick(self, dt)
 	if owner_stat("dodge_regen") >= 0.99:
 		dashes = max_dashes()
 	for bk in kbuffs.keys():
@@ -1874,7 +1870,6 @@ func sim(dt: float) -> void:
 	if grounded:
 		air_jumps = 0
 		air_dashed = false
-	armor_wait = maxf(0.0, armor_wait - dt)
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
 		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
