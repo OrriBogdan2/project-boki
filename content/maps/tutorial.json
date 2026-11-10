@@ -3,6 +3,7 @@
  "name": "First Flight",
  "size": 80,
  "seed": 77,
+ "calm": true,
  "notes": "The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge (jump plus air dash), a long wind crossing to glide, a low lookout rise, one step up (crouch to scout the range island), a range island for the fights and the chest, and the walled outpost isle. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from, pos for the rest. No rocks, no hazards, nothing random.",
  "islands": [
   {"id": "meadow", "name": "Landing Meadow", "role": "grove", "region": 0, "poi": [13, 15], "noise": 0.06, "biome": "meadow", "danger": 0, "no_rocks": true, "drop": true,

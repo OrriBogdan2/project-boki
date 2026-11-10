@@ -1,6 +1,6 @@
 class_name DummyMove
 extends RefCounted
-## How a practice dummy moves (Training Area, content/rules/dummy_move.json): Still stands, Strafe runs side to
+## How a practice dummy moves (Training Grounds, content/rules/dummy_move.json): Still stands, Strafe runs side to
 ## side across the line to whoever it watches in random legs, Dodge adds a normal dash every few seconds. It only
 ## makes the dummy's input (move, dash); Hunter.do_dash and the movement code do the rest. It never leaves its pen.
 

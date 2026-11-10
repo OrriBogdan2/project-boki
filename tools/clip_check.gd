@@ -21,7 +21,6 @@ const STAND_OPEN := {
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
-	"dolm:stance": "0.8 s long (a bounce, not a stance)",
 }
 
 var bad := 0
@@ -299,6 +298,8 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 		while t < float(st[1]):
 			s["kmove"] = st[0]
 			s["kmove_t"] = t
+			# (a move that turns its side to the way he goes is fed that facing)
+			s["face"] = float(moves.get(st[0], {}).get("heading_off", 0.0))
 			if st[0] == "":
 				s.erase("kmove")
 			sync.call("_process", DT)
