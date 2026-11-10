@@ -30,4 +30,4 @@ is not on main; the table is local and moves to `Fsm` once that merges.
 heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.gd wiring only (+1 net line:
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
-No save change. Checks: --heart-check (early seat), new --heart-seats-check (squad take, final, order, rush, Net).
+No save change. Check: --heart-check (both seats, every edge of the state table, rush, Net).
