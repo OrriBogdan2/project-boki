@@ -99,16 +99,16 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 
 ## A knocked hunter's horizontal speed for one step, as the source's movement takes a launch. On the ground
 ## over run speed, UE's over-max brake: ground_friction * v + brake_decel, the keys can't add to it, and keys
-## along it hold run speed. In the air, the falling drag (air_friction). Either way the keys bend it by the
-## attack's knock_steer ([patch] Jun 2025: WASD steers knockback, high or medium influence). Back on the
-## ground at run speed the knock is over and the walk takes you. A knock_t with no knock (a kit or a tow
-## holding your keys off for a frame) only lets the momentum drift down at HOLD_DRIFT.
+## along it hold run speed. In the air, the falling rules' drag over run speed (Loco.air_drag). Either way
+## the keys bend it by the attack's knock_steer ([patch] Jun 2025: WASD steers knockback, high or medium
+## influence). Back on the ground at run speed the knock is over and the walk takes you. A knock_t with no
+## knock (a kit or a tow holding your keys off for a frame) only lets the momentum drift down at HOLD_DRIFT.
 static func knock_step(h: Hunter, hv: Vector2, mv: Vector2, run: float, dt: float) -> Vector2:
 	h.knock_slide = h.knock_slide and h.knock_t > 0.0
 	if not h.knock_slide:
 		return hv.move_toward(Vector2.ZERO, HOLD_DRIFT * dt)
 	var s := hv.length()
-	var s2 := s * maxf(0.0, 1.0 - air_friction * dt)
+	var s2 := s if s <= run else run + (s - run) * exp(-Loco.air_drag * dt)
 	if h.grounded:
 		s2 = maxf(0.0, s - (ground_friction * s + brake_decel) * dt)
 		if s2 <= run:
