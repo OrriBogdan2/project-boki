@@ -210,7 +210,7 @@ out 0.16 s, under one footage frame. Seconds from the press.
 | X wind-up (Faultline) | hammer overhead f25-f28: 0.4 | `x.windup` 0.4: slam 0.42; `x_wind` overhead by 0.2, held | match |
 | X slam | slam and gold flood on the same frame (f29), planted to f31 (0.2) | before: strike and flood at 0.42, the hammer met the ground 0.10 into `x_slam` (a full 10 fps frame late) under a 0.1 blend. Now `lead` 0.07, `fade` 0.04 (warden_anim/breaker.json): ground 0.03 in; plant 0.2 (`x.plant`) | **fixed** (asserted: on the strike, blend inside 0.04) |
 
-Strip: docs/shots/albert_ult_slam_timing.png (`--arena-demo=anim_bul_ult_slam`, frames 0.86 wind, 0.94 the strike step,
+Strip: `--arena --arena-demo=anim_bul_ult_slam` (GPU job 20261110-035400-15011, still queued at the hand-off; frames 0.86 wind, 0.94 the strike step,
 0.97, 1.02, 1.2, 1.5; cast at 0.5). Suggestions (ours, not built): start `bul_guard` on the RMB press so the arm is up
 as the aegis blocks; the recall flies back a frame faster than the source (`recall_speed`, kit data, not a clip).
 
