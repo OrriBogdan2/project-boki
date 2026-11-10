@@ -87496,5 +87496,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_effigeetle_rd_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_shinobant_rd",
+    "name": "Shinobant (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_shinobant_rd_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaciatee_rd",
+    "name": "Glaciatee (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glaciatee_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glaciatee_rd",
+    "name": "Glaciatee (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_glaciatee_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cisternmander_rd",
+    "name": "Cisternmander (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_cisternmander_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_effigeetle_rd",
+    "name": "Effigeetle (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_effigeetle_rd_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_shinobant_rd",
+    "name": "Shinobant (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_shinobant_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cisternmander_rd",
+    "name": "Cisternmander (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_cisternmander_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cisternmander_rd",
+    "name": "Cisternmander (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_cisternmander_rd_2.jpg",
+    "ok": true
   }
 ]
