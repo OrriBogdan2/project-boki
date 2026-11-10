@@ -41,6 +41,7 @@ func run(main_node: Node) -> void:
 	P.ak.cd["x"] = 30.0
 	await _shot("2_cast_flash", 2)
 	await _shot("3_after", 60)
+	main.get_tree().quit(0)
 
 func _shot(tag: String, frames := 40) -> void:
 	var vp := main.get_viewport()
