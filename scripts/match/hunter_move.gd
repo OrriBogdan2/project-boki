@@ -65,6 +65,12 @@ static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
 
+## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
+## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An
+## air dash needs none: it carries its own speed through the step, under air drag after.)
+static func dash_rest(dash_v: Vector2, run_v: Vector2, left: float) -> Vector2:
+	return (dash_v - run_v) * maxf(0.0, left)
+
 ## A dash's speed at u (0..1 through it) against its mean, on a piecewise-linear curve of [u, k] knots
 ## (content/rules/dash_feel.json "curve": mean 1, so the dash still covers its distance).
 static func dash_k(curve: Array, u: float) -> float:
