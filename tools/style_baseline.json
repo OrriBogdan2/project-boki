@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 28,
+"long_line": 26,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -1105,7 +1105,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 32,
+"long_line": 30,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
