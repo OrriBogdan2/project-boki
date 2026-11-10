@@ -549,8 +549,8 @@ func rmb_charge_full() -> float:
 func rmb_auto_t() -> float:
 	return INF
 
-## Holding past the tap: the Lunge's crouched wind-up pose (held while you charge). Hooked, the lane runs
-## down the chain instead: letting go is a Chain Lunge along it.
+## Holding past the tap: the Lunge's crouched wind-up pose (held while you charge). Hooked and aimed down the
+## chain, the lane runs down it instead: letting go is a Chain Lunge along it.
 func rmb_hold_tick(t: float) -> void:
 	var sd := rmb_def()
 	if not lunge_charging():
@@ -562,10 +562,10 @@ func rmb_hold_tick(t: float) -> void:
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
 			"width": lunge_w(), "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
-	if warchain.hooked():
-		var to := warchain.anchor - h.pos
-		lane["dir"] = Vector2(to.x, to.z)
-		lane["len"] = Vector2(to.x, to.z).length()
+	if _aims_down_chain():
+		var to := warchain.to_anchor()
+		lane["dir"] = to
+		lane["len"] = to.length()
 		lane["len0"] = lane["len"]
 	AimKit.lane(h, "rmb", lane)
 	AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
@@ -703,7 +703,7 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	if spin:
 		_spin()                     # in the Warchain's pull, or just arrived
-	elif warchain.hooked() and c.get("hold", false) and not c.get("air", false):
+	elif _aims_down_chain() and c.get("hold", false) and not c.get("air", false):
 		_chain_lunge(lunge_k(float(c.get("t", 0.0))))      # charged while tethered: along the chain
 	elif dropping:
 		meteor.start()
@@ -824,6 +824,15 @@ func _tick_lunge() -> void:
 			return                  # down the chain to a wall: it went where it was sent
 		cd["rmb"] = float(cd["rmb"]) * float(ld["miss_k"])        # struck nothing: the cooldown doubles
 		m.fx.word(h.pos + Vector3(0, 2.2, 0), "MISS", Color("c0b0a0"), false)
+
+## Hooked, with the aim within lunge.chain_deg of the chain: a held Smash goes down it. Aimed elsewhere it is a
+## plain Lunge along the aim, so the chain never takes the hold's direction from him.
+func _aims_down_chain() -> bool:
+	if not warchain.hooked():
+		return false
+	var to := warchain.to_anchor()
+	var off := absf(h.aim_dir().angle_to(to))
+	return to.length() > 0.05 and off <= deg_to_rad(float(rmb_def()["lunge"]["chain_deg"]))
 
 ## Charged while tethered and let go: the Lunge runs along the chain to its end (the foe it holds, or
 ## the wall), harder and with a short stun on the foe; the chain is spent.
