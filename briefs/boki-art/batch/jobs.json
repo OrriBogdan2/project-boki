@@ -10836,6 +10836,72 @@
     "size": "2K"
   },
   {
+    "id": "c_pinline_roly_baby",
+    "name": "Pinster line option: roly (baby)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one baby Boki (a stylised, cute creature-collector monster): a baby pill bug (roly-poly woodlouse) with glossy chrome-silver segmented plates that curls up into a perfect shiny ball, exactly like a pinball; shown half-uncurled with its cute face peeking out, big eyes, little legs, two short antennae. Clearly a baby: small, round, simple shapes, a slightly oversized head. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_pinline_roly_final",
+    "name": "Pinster line option: roly (final)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster): a big final-form pill bug, standing tall on many legs: its segmented back plates are a glowing pinball playfield with lane lines, three glass bumpers and a ramp, its two front legs are broad flipper paddles, its antennae end in small lit bulbs, and a chrome ball rolls along its back as part of its body. Every part grows from its body; one head, clearly attached. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_pinline_jerboa_baby",
+    "name": "Pinster line option: jerboa (baby)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one baby Boki (a stylised, cute creature-collector monster): a baby jerboa (tiny desert hopping mouse-like animal with huge hind feet and a long tufted tail) in steel-blue and white fur, its hind legs coiled like a pinball launch spring, ready to spring; the tail tuft is a chrome ball. Clearly a baby: small, round, simple shapes, a slightly oversized head. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_pinline_jerboa_final",
+    "name": "Pinster line option: jerboa (final)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster): a big final-form jerboa standing upright on spring-coiled hind legs, steel-blue and white fur, its chest and back a pinball playfield shell with glass bumpers, its forepaws flat flipper paddles, its long tail a plunger rod ending in a chrome ball. Every part grows from its body; one head, clearly attached. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_pinline_seal_baby",
+    "name": "Pinster line option: seal (baby)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one baby Boki (a stylised, cute creature-collector monster): a baby harp seal pup in silver-white and electric-blue fur with two broad front flippers shaped exactly like pinball flippers, a round glass bumper on its back, and a chrome ball balanced on its nose. Clearly a baby: small, round, simple shapes, a slightly oversized head. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_pinline_seal_final",
+    "name": "Pinster line option: seal (final)",
+    "refs": [
+      "briefs/boki-art/style_refs/boki_style_ref_2d.png"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster): a big final-form seal whose whole back is a sloped pinball playfield with glass bumpers and lane lights, its two front flippers are big pinball flippers, silver-white and electric-blue, a chrome ball balanced on its nose. Every part grows from its body; one head, clearly attached. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
     "id": "canvastross_card83",
     "name": "Canvastross (hero card)",
     "refs": [

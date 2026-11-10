@@ -375,3 +375,19 @@ SPECS.append({'id':'rd_pinster_b','name':'Pinster (redesign option)','refs':[_PI
   'prompt':("Single character illustration of one baby Boki: Pinster, the hamster in image 1, redrawn as a rounder baby: curled almost into a ball like a pinball, the same cinnamon-orange fur, cream face and cheeks, "
     "the same eyes, two small glowing white-blue bumper studs on its back, tiny flipper-shaped front paws, and a silver ball-bearing tail tip. No yellow, no lightning bolt, no glowing cheeks. "
     "Same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
+
+# 20:36 ET 11-09 owner: "the first one is trying to be an electric squirrel; try other versions that aren't like Pikachu but still electric, and fit the pinball machine better".
+# Three new animals for the Pinster > Tiltster line, each built on a pinball part; baby + final each. No rodents, no yellow, no lightning bolts, no glowing cheeks.
+_PB=" Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+_PBL={
+ 'roly':("a baby pill bug (roly-poly woodlouse) with glossy chrome-silver segmented plates that curls up into a perfect shiny ball, exactly like a pinball; shown half-uncurled with its cute face peeking out, big eyes, little legs, two short antennae",
+         "a big final-form pill bug, standing tall on many legs: its segmented back plates are a glowing pinball playfield with lane lines, three glass bumpers and a ramp, its two front legs are broad flipper paddles, its antennae end in small lit bulbs, and a chrome ball rolls along its back as part of its body"),
+ 'jerboa':("a baby jerboa (tiny desert hopping mouse-like animal with huge hind feet and a long tufted tail) in steel-blue and white fur, its hind legs coiled like a pinball launch spring, ready to spring; the tail tuft is a chrome ball",
+           "a big final-form jerboa standing upright on spring-coiled hind legs, steel-blue and white fur, its chest and back a pinball playfield shell with glass bumpers, its forepaws flat flipper paddles, its long tail a plunger rod ending in a chrome ball"),
+ 'seal':("a baby harp seal pup in silver-white and electric-blue fur with two broad front flippers shaped exactly like pinball flippers, a round glass bumper on its back, and a chrome ball balanced on its nose",
+         "a big final-form seal whose whole back is a sloped pinball playfield with glass bumpers and lane lights, its two front flippers are big pinball flippers, silver-white and electric-blue, a chrome ball balanced on its nose")}
+for _k,(_b,_f) in _PBL.items():
+    SPECS.append({'id':'c_pinline_'+_k+'_baby','name':'Pinster line option: '+_k+' (baby)','refs':[SRA],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Single character illustration of one baby Boki (a stylised, cute creature-collector monster): "+_b+". Clearly a baby: small, round, simple shapes, a slightly oversized head."+_PB})
+    SPECS.append({'id':'c_pinline_'+_k+'_final','name':'Pinster line option: '+_k+' (final)','refs':[SRA],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Single character illustration of one final-form Boki (a stylised creature-collector monster): "+_f+". Every part grows from its body; one head, clearly attached."+_PB})
