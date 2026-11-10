@@ -20,5 +20,5 @@ within MaxStepHeight, which the hero blueprint leaves at UE's default 0.45 m.
 ## Decision
 Option 2. Nothing of ours stands between 0.32 and 0.45 m except a slope, so walls, ledge rises and the terrace
 edge (0.8 m, still a fall) are unchanged; `--move-feel-check` runs the whole ledge, coyote and abyss set green.
-`slope_*` rows assert 1.000x speed, 0 air frames and the flat stop on 10/20/35° ramps and the map's flights.
+`slope_*` rows assert 1.000x speed (slowest and fastest within 3%), 0 air frames and the flat stop for all 12 hunters on 10/25/40° ramps, over a 25° crest and on the map's flights.
 Not done: a speed scale with the grade (no source data, marked [?]) and a slide-off above 50° (no such ground).

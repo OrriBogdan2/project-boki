@@ -31,7 +31,8 @@ const T := {
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	# slopes: the source keeps your horizontal speed on any walkable slope (UE), its MaxStepHeight 0.45 m keeps
 	# your feet down a slope and over its crest, and WalkableFloorAngle is 50 deg (nothing of ours is steeper)
-	"slope_speed_ratio_min":   ["~", [0.97, 1.03], "x", "[game data] 10/20/35 deg up, down, across, and the map's flights"],
+	"slope_speed_ratio_min":   ["~", [0.97, 1.03], "x", "[game data] 12 hunters on 10/25/40 deg ramps, a crest, the flights: slowest"],
+	"slope_speed_ratio_max":   ["~", [0.97, 1.03], "x", "[game data] ...and the fastest (no speed-up downhill)"],
 	"slope_air_frames":        ["<=", 0.0, "frames", "[game data] no hop down a slope or off its crest"],
 	"slope_stop_dist_min":     ["~", [0.2, 0.5], "m", "[game data] the walking stop on a slope, the shortest"],
 	"slope_stop_dist_max":     ["~", [0.2, 0.5], "m", "[game data] ...and the longest"],
@@ -285,25 +286,29 @@ class RampWorld extends World:
 	var deg := 0.0
 	var x0 := 0.0
 	var run := 5.0
+	var crest := false          # true: the ground climbs for `run`, then falls back at the same angle
 	var base_y := 0.0
 	var zc := 0.0
 	func ground_at(x: float, z: float) -> float:
-		if deg <= 0.0 or absf(z - zc) > 4.0 or x < x0 - 1.5 or x > x0 + run + 6.0:
+		if deg <= 0.0 or absf(z - zc) > 4.0 or x < x0 - 1.5 or x > x0 + run * 2.0 + 6.0:
 			return super.ground_at(x, z)
-		return base_y + tan(deg_to_rad(deg)) * clampf(x - x0, 0.0, run)
+		var d := clampf(x - x0, 0.0, run)
+		if crest:
+			d = run - absf(clampf(x - x0, 0.0, run * 2.0) - run)
+		return base_y + tan(deg_to_rad(deg)) * d
 
-const SLOPE_DEGS := [10.0, 20.0, 35.0]
+const SLOPE_DEGS := [10.0, 25.0, 40.0]
 const FLIGHTS := 4              # how many of the map's own flights are walked up and down
 var slope_ratio_min := 9.0
+var slope_ratio_max := 0.0
 var slope_air_max := 0
 var slope_stop_min := 9.0
 var slope_stop_max := 0.0
 
-## The medium hunter up, down and across 10, 20 and 35 degree ramps, then the map's flights: the speed holds,
-## the feet stay on the ground and a let-go slides as on the flat (docs/MOVEMENT_FEEL.md, slope_*).
+## Each of the 12 hunters at its own run speed up, down and across 10, 25 and 40 degree ramps, over the crest of a
+## 25 degree hill, then the map's flights: the speed holds, the feet stay on the ground and a let-go slides as on
+## the flat (docs/MOVEMENT_FEEL.md, slope_*).
 func _slope() -> void:
-	P.cls = "medium"
-	P.base_speed = float(Data.CLASSES["medium"]["speed"])
 	var rw := RampWorld.new()
 	for prop in w.get_property_list():
 		if prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE:
@@ -311,19 +316,44 @@ func _slope() -> void:
 	rw.x0 = flat.x - 5.0
 	rw.base_y = flat.y
 	rw.zc = flat.z
-	m.world = rw
-	for deg in SLOPE_DEGS:
-		rw.deg = deg
-		var top: float = flat.y + tan(deg_to_rad(deg)) * rw.run
-		var mid: float = flat.y + tan(deg_to_rad(deg)) * 2.5
-		_slope_run("%2d up" % deg, Vector3(flat.x - 6.0, flat.y, flat.z), Vector2(1, 0), flat.x - 5.0, flat.x - 2.5)
-		_slope_run("%2d down" % deg, Vector3(flat.x + 1.5, top, flat.z), Vector2(-1, 0), flat.x, flat.x - 2.5)
-		var side := Vector3(flat.x - 2.5, mid, flat.z - 1.5)
-		_slope_run("%2d across" % deg, side, Vector2(0, 1), flat.z - 1.0, flat.z + 1.0)
-	m.world = w
+	var speeds := []
+	var own := [P.arch, P.base_speed, P.ground_accel]
+	for id in HunterMove.rules():
+		if id == "doc" or id == "physics" or id == "default":
+			continue
+		for mb in m.mobs: mb.queue_free()      # the match respawns wildlife as it runs; a bite would knock the run
+		m.mobs.clear()
+		var row := HunterMove.of(id)
+		P.arch = id
+		P.base_speed = float(row["speed"])
+		P.ground_accel = float(row["accel"])
+		speeds.append("%s %.2f" % [id, P.base_speed])
+		m.world = rw
+		for deg in SLOPE_DEGS:
+			rw.deg = deg
+			var top: float = flat.y + tan(deg_to_rad(deg)) * rw.run
+			var mid: float = flat.y + tan(deg_to_rad(deg)) * 2.5
+			var foot := Vector3(flat.x - 6.0, flat.y, flat.z)
+			var side := Vector3(flat.x - 2.5, mid, flat.z - 1.5)
+			_slope_run("%s %2d up" % [id, deg], foot, Vector2(1, 0), flat.x - 5.0, flat.x - 2.5)
+			_slope_run("%s %2d down" % [id, deg], Vector3(flat.x + 1.5, top, flat.z), Vector2(-1, 0), flat.x, flat.x - 2.5)
+			_slope_run("%s %2d across" % [id, deg], side, Vector2(0, 1), flat.z - 1.0, flat.z + 1.0)
+		rw.deg = 25.0
+		rw.run = 4.0
+		rw.crest = true
+		_slope_run(id + " crest", Vector3(flat.x - 6.0, flat.y, flat.z), Vector2(1, 0), flat.x - 5.0, flat.x + 4.0)
+		rw.crest = false
+		rw.run = 5.0
+		m.world = w
+		if id == "archer":
+			_slope_flights()
 	rw.free()
-	_slope_flights()
+	P.arch = own[0]
+	P.base_speed = own[1]
+	P.ground_accel = own[2]
+	print("MFEEL slope run speeds m/s: %s" % ", ".join(speeds))
 	rec("slope_speed_ratio_min", slope_ratio_min)
+	rec("slope_speed_ratio_max", slope_ratio_max)
 	rec("slope_air_frames", slope_air_max)
 	rec("slope_stop_dist_min", slope_stop_min)
 	rec("slope_stop_dist_max", slope_stop_max)
@@ -338,6 +368,7 @@ func _slope_run(label: String, start: Vector3, dir: Vector2, from: float, to: fl
 	var sgn := dir.x + dir.y
 	var air := 0
 	var slowest := 9.0
+	var fastest := 0.0
 	for i in 120:
 		m.step(DT)
 		var at: float = P.pos[axis]
@@ -346,6 +377,7 @@ func _slope_run(label: String, start: Vector3, dir: Vector2, from: float, to: fl
 		if not P.grounded:
 			air += 1
 		slowest = minf(slowest, _hv(P).length())
+		fastest = maxf(fastest, _hv(P).length())
 		if sgn * (at - to) >= 0.0:
 			break
 	var p0 := Vector2(P.pos.x, P.pos.z)
@@ -358,9 +390,10 @@ func _slope_run(label: String, start: Vector3, dir: Vector2, from: float, to: fl
 			break
 	var stop := Vector2(P.pos.x, P.pos.z).distance_to(p0)
 	var ratio := slowest / P.base_speed
-	var row := [label, slowest, ratio, air, stop]
-	print("MFEEL slope %-14s slowest %.2f m/s (%.3fx) air %2d frames stop %.2f m" % row)
+	var row := [label, slowest, ratio, fastest / P.base_speed, air, stop]
+	print("MFEEL slope %-22s slowest %.2f m/s (%.3fx, fastest %.3fx) air %2d frames stop %.2f m" % row)
 	slope_ratio_min = minf(slope_ratio_min, ratio)
+	slope_ratio_max = maxf(slope_ratio_max, fastest / P.base_speed)
 	slope_air_max = maxi(slope_air_max, air)
 	slope_stop_min = minf(slope_stop_min, stop)
 	slope_stop_max = maxf(slope_stop_max, stop)
