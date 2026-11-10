@@ -76079,5 +76079,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_parrywhal_1.jpg",
     "ok": true
+  },
+  {
+    "id": "on_parrywhal",
+    "name": "Parrywhal (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_parrywhal_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_parrywhal",
+    "name": "Parrywhal (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_parrywhal_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pagoguana",
+    "name": "Pagoguana (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_pagoguana_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pagoguana",
+    "name": "Pagoguana (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_pagoguana_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_maracoil",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_maracoil_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pagoguana",
+    "name": "Pagoguana (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_pagoguana_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_morelossus",
+    "name": "Morelossus (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_morelossus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_frigatee",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_frigatee_3.jpg",
+    "ok": true
   }
 ]
