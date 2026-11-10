@@ -82533,5 +82533,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_hatstag_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_hatstag",
+    "name": "Hatstag (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_hatstag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_foldbat",
+    "name": "Foldbat (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_foldbat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_foldbat",
+    "name": "Foldbat (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_foldbat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_fanpire",
+    "name": "Fanpire (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_fanpire_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hatstag",
+    "name": "Hatstag (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_hatstag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_foldbat",
+    "name": "Foldbat (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_foldbat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_fanpire",
+    "name": "Fanpire (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_fanpire_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gilabacus",
+    "name": "Gilabacus (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_gilabacus_3.jpg",
+    "ok": true
   }
 ]
