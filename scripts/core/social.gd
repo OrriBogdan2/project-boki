@@ -28,6 +28,7 @@ const PROJECTS := {
 }
 const ROLES := ["founder", "officer", "member"]   # a clan's ranks; what you like to do in it is taste, not permission
 const CLAN_CAP := 24                # members a clan shows (the store query's limit)
+const SHOWCASE_CAP := 12            # Boki on a clan base's showcase wall, one per member
 const STRANDED_DAYS := 3.0          # a listing that vanished without a sale is handed back after this
 
 func _ready() -> void:
@@ -696,27 +697,30 @@ static func clean_roster(rows: Array, gid: String, founder: String) -> Array:
 			break
 	return out
 
+## A clan base doc (clanbase/<gid>) is untrusted. The showcase wall keeps one Boki per current member
+## (`members`: their ids), cleaned like a visited island's, at most SHOWCASE_CAP.
+static func clean_clanbase(d: Dictionary, members: Array) -> Dictionary:
+	var wall: Array = []
+	var owners := {}
+	for ev in arr_of(d.get("showcase")):
+		var who := txt_of(dict_of(ev).get("owner"))
+		var rec := clean_snap_kin(ev)
+		if rec.is_empty() or not members.has(who) or owners.has(who):
+			continue
+		owners[who] = true
+		rec["owner"] = who
+		wall.append(rec)
+		if wall.size() >= SHOWCASE_CAP:
+			break
+	return {"showcase": wall}
+
 ## Another player's island snapshot is untrusted data: keep only what drawing it needs, in safe shapes.
 static func clean_island(d: Dictionary) -> Dictionary:
 	var roster: Array = []
 	for rv in arr_of(d.get("roster")):
-		var r := dict_of(rv)
-		var sp := txt_of(r.get("species"))
-		if not Data.KIN.has(sp):
-			continue
-		var forms: Array = []
-		for f in arr_of(r.get("forms")):
-			if Evo.AFF.has(f): forms.append(String(f))
-		var muts: Array = []
-		for mv in arr_of(r.get("muts")):
-			var m := dict_of(mv)
-			var mid := txt_of(m.get("id")); var aff := txt_of(m.get("aff"))
-			if Evo.PART_NAMES.has(mid) and Evo.AFF.has(aff):
-				muts.append({"id": mid, "lv": clampi(int_of(m.get("lv"), 1), 1, 5), "aff": aff})
-		roster.append({"uid": txt_of(r.get("uid"), "", 24), "species": sp, "name": say_of(r.get("name"), "Kin", 14),
-			"level": clampi(int_of(r.get("level"), 1), 1, 999), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
-			"forms": forms.slice(0, 50), "muts": muts.slice(0, 40), "traits": Data.KIN[sp]["traits"].duplicate(), "memory": [],
-			"shimmer": r.get("shimmer", false) == true, "mutations": arr_of(r.get("mutations")).map(func(x): return txt_of(x)).filter(func(x): return not Mutations.info(x).is_empty()).slice(0, 4)})
+		var rec := clean_snap_kin(rv)
+		if not rec.is_empty():
+			roster.append(rec)
 		if roster.size() >= 12:
 			break
 	var plots := func(src) -> Array:
@@ -739,6 +743,26 @@ static func clean_island(d: Dictionary) -> Dictionary:
 		"cls": cl if Data.CLASSES.has(cl) else "medium", "buildings": pick.call(d.get("buildings"), Data.BUILDINGS),
 		"bridges": pick.call(d.get("bridges"), Data.ISLES), "plots": plots.call(d.get("plots")), "gh_plots": gh.slice(0, 4),
 		"guild": txt_of(d.get("guild"), "", 40), "decor": _clean_decor(d.get("decor"))}
+
+## One Boki from someone else's snapshot: {} if its species is unknown, else only safe fields, numbers clamped.
+static func clean_snap_kin(rv) -> Dictionary:
+	var r := dict_of(rv)
+	var sp := txt_of(r.get("species"))
+	if not Data.KIN.has(sp):
+		return {}
+	var forms: Array = []
+	for f in arr_of(r.get("forms")):
+		if Evo.AFF.has(f): forms.append(String(f))
+	var muts: Array = []
+	for mv in arr_of(r.get("muts")):
+		var m := dict_of(mv)
+		var mid := txt_of(m.get("id")); var aff := txt_of(m.get("aff"))
+		if Evo.PART_NAMES.has(mid) and Evo.AFF.has(aff):
+			muts.append({"id": mid, "lv": clampi(int_of(m.get("lv"), 1), 1, 5), "aff": aff})
+	return {"uid": txt_of(r.get("uid"), "", 24), "species": sp, "name": say_of(r.get("name"), "Kin", 14),
+		"level": clampi(int_of(r.get("level"), 1), 1, 999), "trust": clampf(num_of(r.get("trust"), 50.0), 0.0, 100.0),
+		"forms": forms.slice(0, 50), "muts": muts.slice(0, 40), "traits": Data.KIN[sp]["traits"].duplicate(), "memory": [],
+		"shimmer": r.get("shimmer", false) == true, "mutations": arr_of(r.get("mutations")).map(func(x): return txt_of(x)).filter(func(x): return not Mutations.info(x).is_empty()).slice(0, 4)}
 
 static func _clean_decor(src) -> Array:
 	var out: Array = []

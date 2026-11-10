@@ -512,6 +512,7 @@ func _use(it: Dictionary) -> void:
 				var v := _new_panel("Ferry", 420)
 				v.add_child(UI.button("Home", func(): Game.goto("home"), 360))
 				v.add_child(UI.button("The town", func(): Game.goto("town", {"mode": "hub"}), 360))
+				v.add_child(UI.button("The clan base", func(): ClanBase.open(gid, guild_doc), 360))
 			else:
 				Game.goto("home")
 		"to_guild": Game.goto("town", {"mode": "guild", "gid": Social.my_guild_id()})
