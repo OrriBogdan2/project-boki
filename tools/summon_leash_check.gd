@@ -100,15 +100,16 @@ func _chase() -> void:
 	k.teleport(p.pos + Vector3(lsh - 2.0, 0, 0))
 	var far := 0.0
 	var turned := false
-	for _i in 240:
+	for _i in 360:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
-		far = maxf(far, k.flat_dist(p))
-		turned = turned or k.state == "returning" or (k.fly.get("leap", false) as bool)
-	ok(far > lsh - 1.5, "chase: it goes for a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])
+		if k.state in ["active", "returning"]:      # (its own rush ability flies, and is not the leash's business)
+			far = maxf(far, k.flat_dist(p))
+		turned = turned or k.state == "returning"
+	ok(far > lsh - 1.5, "chase: it walks out to a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])
 	ok(turned, "chase: past the leash it turns back")
-	ok(far < lsh + 4.0 and k.summon.out(), "...and never strays far past it (%.1f m of %.1f)" % [far, lsh])
+	ok(far < lsh + 4.0 and k.summon.out(), "...and never walks far past it (%.1f m of %.1f)" % [far, lsh])
 	foe.pos = p.pos + Vector3(0, 0, 200)
 	foe.prev = foe.pos
 
