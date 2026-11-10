@@ -1329,3 +1329,19 @@ RV_NEW('Hydrangor','Hydrangor','final','majestic',False,False,[
  "the same three-headed hydrangea hydra made legendary: far larger and older, three long necks rising high with proud horned heads, great domes of blue and violet hydrangea blooms covering its shoulders and back like storm clouds, a long tail, calm ancient eyes.",
  "the same hydrangea hydra with five heads fanned out like a bouquet, each crowned with a different colour of bloom (blue, violet, pink, white, lilac), a heavy planted body wrapped in leaves, petals drawn as big flat clusters.",
  "the same hydrangea hydra coiled like a great serpent with no legs, three heads rearing from a mound of blooms, bodies wound together like stems, leaves like frills behind each head."])
+
+# 11-10 OWNER on the second review: "good" -> my 1st picks live for Starcap, Medushroom, Dynaboa, Furnacowary, Hydrangor, Fizzlet, Voltalon,
+# Phonodrake, Pickadactyl, Forgebrock. Thunderstrich NOT changed ("not sure"; he wants to see the line). Sets from the new cards.
+_RV2={'Starcap':('mid','cute',0,0,"drifting sideways, tentacle gills trailing, sleepy eyes on the viewer"),'Medushroom':('final','pretty',0,0,"rising upward, tentacles streaming below, calm"),
+ 'Dynaboa':('final','sleek',0,1,"mid-leap off its spring legs, copper fins fanned, mane flying"),'Furnacowary':('final','tough',1,0,"striding forward, head low, furnace chest leading"),
+ 'Hydrangor':('final','majestic',0,0,"all heads raised and fanned out, one looking at the viewer"),'Fizzlet':('baby','cute',0,1,"hopping, tiny wings out, copper coils bouncing"),
+ 'Voltalon':('final','tough',0,0,"standing its ground on two legs, wings spread wide, screeching"),'Phonodrake':('final','tough',0,0,"rearing its head back, horn-frills flared, mouth open in a roar"),
+ 'Pickadactyl':('final','tough',0,0,"perched and leaning forward, wings folded, pickaxe crest lowered"),'Forgebrock':('final','tough',0,1,"standing on all fours, head low, forge chest glowing")}
+for _n,(_st,_ar,_dk,_fu,_pose) in _RV2.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_rv'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_rv'; SPECS[_n0+1]['runs']=2
+# More Thunderstrich poses for the owner to compare against the line.
+for _k,_p in (('t1',"standing tall and still, facing RIGHT in profile, neck stretched straight up, head turned to glare at the viewer, cloud body puffed up, one foot raised"),
+              ('t2',"rearing back with both wings of cloud flared wide, facing the viewer, beak open in a screech, lightning forks on the cloud, legs planted wide"),
+              ('t3',"crouched low, neck coiled back like a striking snake, facing LEFT, about to peck, cloud body hunched")):
+    _n0=len(SPECS); ON_POSE('Thunderstrich',_LM['Thunderstrich']['sheet'],'final','tough',True,True,_p+".",_KEEPALL); SPECS[_n0]['id']='rv_thunderstrich_'+_k; SPECS[_n0]['runs']=2

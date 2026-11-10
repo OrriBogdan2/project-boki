@@ -781,3 +781,6 @@ ART -> COORD 11-10 11:38: OWNER PICK: the Kitlet line is reworked so the kite sh
 
 ### 11-10 11:41 ET ART -> COORD
 ART -> COORD 11-10 11:41: OWNER ORDER (11:41, in the art chat, about Kitedrake's dex picture staying on the old approved gen): "ok push it there". Please replace Dragonkite/Kitedrake's approved gen hero with the manifest hero (cards/Dragonkite.jpg, the kite-winged cream dragon) and its new sheet, so Kitlet > Ribbonwyrm > Kitedrake all show the reworked line. Full sets for both Ribbonwyrm and Dragonkite are in the manifest now.
+
+### 11-10 11:49 ET ART -> COORD
+ART -> COORD 11-10 11:49: OWNER PICKS from a second full review, cards live (hero changed; sets follow): Starcap and Medushroom (both now clearly Polyshroom grown up: mint cap, cream face), Dynaboa (bigger, fins joined to its spine), Furnacowary (tall, chimney casque), Hydrangor (five heads, legendary-grade), Fizzlet (cloud-puff chick, ties to Boltstrich), Voltalon (rust-red and cream, matches its line and its female), Phonodrake (sandy tan like Tootle/Gramofrill), Pickadactyl (blue and amber like Chiptero), Forgebrock (bare paws). Hydrangor may be on your protected list: owner approved it in the art chat.

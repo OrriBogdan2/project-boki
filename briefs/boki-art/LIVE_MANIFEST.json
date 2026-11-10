@@ -542,9 +542,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Fizzlet.png",
   "hash": {
    "sheet": "5bc4017d47fe",
-   "card": "89e216f37403",
+   "card": "4f77a42ec203",
    "portrait": "a7202dd63d11",
-   "hero": "3292d73acc8a"
+   "hero": "0df19cf3bb0a"
   }
  },
  "Flarmink": {
@@ -582,9 +582,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Forgebrock.png",
   "hash": {
    "sheet": "610fb6fae922",
-   "card": "cc362df9cdf3",
+   "card": "231b3a9fc759",
    "portrait": "cabf575a9c5e",
-   "hero": "6139a2f1bc9a"
+   "hero": "cb346ea7959f"
   }
  },
  "Furnacowary": {
@@ -596,9 +596,9 @@
   "display_name": "Furnowary",
   "hash": {
    "sheet": "9743b454a9c5",
-   "card": "e69882c240f7",
+   "card": "836b3d35d6c9",
    "portrait": "77a8f33365dc",
-   "hero": "fbc729e36feb"
+   "hero": "f02ef253534d"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -946,9 +946,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Hydrangor.png",
   "hash": {
    "sheet": "7c3b6db34dc3",
-   "card": "5cc292de4777",
+   "card": "b156e7901a45",
    "portrait": "818ce51c878e",
-   "hero": "993674e1e963"
+   "hero": "c0dc0c783ddf"
   },
   "legendary_tier": "ultra"
  },
@@ -1290,9 +1290,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Medushroom.png",
   "hash": {
    "sheet": "abcac046a8e4",
-   "card": "eb7324a5d659",
+   "card": "010629d23edd",
    "portrait": "f6fe26b23e51",
-   "hero": "bbdc2f667add"
+   "hero": "de148c9a50b6"
   }
  },
  "Mirrolin": {
@@ -1560,9 +1560,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Phonodrake.png",
   "hash": {
    "sheet": "fe59643155eb",
-   "card": "604c12d63460",
+   "card": "244eed7d5a0f",
    "portrait": "b217241f4508",
-   "hero": "4c49c1ba5c8e"
+   "hero": "198f3fa8ae9b"
   }
  },
  "Pipewurm": {
@@ -1993,9 +1993,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Starcap.png",
   "hash": {
    "sheet": "ea3f3a7c63a4",
-   "card": "7b38013dd7cf",
+   "card": "56e4b32c92b9",
    "portrait": "9b396dcc7ccf",
-   "hero": "feb30eaebc62"
+   "hero": "288ef3c202f4"
   }
  },
  "Stormit": {
@@ -2250,9 +2250,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Voltalon.png",
   "hash": {
    "sheet": "3c95237dcd12",
-   "card": "f05d992ff1d1",
+   "card": "3d78fc232cd2",
    "portrait": "bc3d63abb49c",
-   "hero": "ea56805aa87d"
+   "hero": "d95a58a147be"
   },
   "sex_forms": true,
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
@@ -3081,9 +3081,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Pickadactyl.png",
   "hash": {
    "sheet": "c27e39f7054a",
-   "card": "2cf77065218e",
+   "card": "8ee724e12f5a",
    "portrait": "59bd3f0d8514",
-   "hero": "e22386dacbd6"
+   "hero": "ed5e66095f74"
   }
  },
  "Pipwom": {
@@ -3270,9 +3270,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dynaboa.png",
   "hash": {
    "sheet": "a534e13ee90e",
-   "card": "e28d6d3db2e6",
+   "card": "c1329c119810",
    "portrait": "83e33d0b9826",
-   "hero": "b730a01beb72"
+   "hero": "a2429232ff83"
   }
  },
  "Bastling": {
