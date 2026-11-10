@@ -77745,5 +77745,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_mortarfly_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_mortarfly",
+    "name": "Mortarfly (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_mortarfly_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_skidlet",
+    "name": "Skidlet (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_skidlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glomworth",
+    "name": "Glomworth (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_glomworth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_skidlet",
+    "name": "Skidlet (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_skidlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mortarfly",
+    "name": "Mortarfly (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_mortarfly_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_crofthorn",
+    "name": "Crofthorn (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_crofthorn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_crofthorn",
+    "name": "Crofthorn (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_crofthorn_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_skidlet",
+    "name": "Skidlet (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_skidlet_3.jpg",
+    "ok": true
   }
 ]
