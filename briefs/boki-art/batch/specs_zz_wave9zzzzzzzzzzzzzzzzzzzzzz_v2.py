@@ -1152,3 +1152,8 @@ for _k,_d in (('a',"a great sail-winged albatross standing tall on the ground li
               ('c',"a heavy sea-bird in full sail seen side-on, facing RIGHT, skimming forward: three tiers of wing feathers stacked like the sails of a tall ship, a long streaming tail like a pennant, a strong hooked beak and windswept tuft, small swirl clouds painted on its wings.")):
     SPECS.append({'id':'opt_canvastross_'+_k,'name':'Canvastross (rework '+_k+')','refs':[_C%'Kerchick',_C%'Jibbatross'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Draw one single character illustration of the FINAL evolution of the bird in images 1 and 2 (image 1 is the baby, image 2 the middle form): clearly the same bird grown huge, with the same grumpy half-lidded eyes, big hooked orange beak, windswept white tuft, cream-white feathers and pale blue swirl markings. All its ship-like parts are feathers and body, nothing built or worn: no wood, ropes or cloth. THE DESIGN: "+_d+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('final','majestic',False,True)+FRAME_V2})
+
+# Arcestrel female: fv5_arcestrel_1 live (two clean legs). Sheet + portrait from it.
+_st,_ar,_dk,_fu=_FEMST['Arcestrel']; _n0=len(SPECS)
+V2SHEET_NEW('Arcestrel female','briefs/boki-art/cards/Arcestrel_female.jpg',_GC,"two wings, exactly two legs, one crest, curled tail feathers"); V2PORT_NEW('Arcestrel female','briefs/boki-art/cards/Arcestrel_female.jpg',_st,_ar,_GC,"two wings, exactly two legs, one crest, curled tail feathers",False,True,"standing still, head turned back over her shoulder to the viewer, both feet on the ground")
+SPECS[_n0]['id']='fs4_arcestrel'; SPECS[_n0+1]['id']='fp4_arcestrel'; SPECS[_n0+1]['runs']=2
