@@ -607,3 +607,10 @@ for _n,_st,_ar,_dk,_fu,_co,_ct,_fx in _BT2:
     _cd='briefs/boki-art/cards/'+_n+'.jpg'
     SPECS.append({'id':'v2s_'+_n.lower()+'_b2','name':_n+' (V2 sheet, batch 2)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_co,_ct)})
     SPECS.append({'id':'v2p_'+_n.lower()+'_b2','name':_n+' (V2 portrait, batch 2)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':2,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_co,_ct,_dk,_fu)})
+
+# 22:45 ET 11-09: stage B for the two owner-note cards that changed design or build: Voltalon (raptor run) and Wickapi (standing okapi calf).
+for _n,_st,_ar,_dk,_fu,_co,_ct,_pose in (
+ ('Voltalon','final','tough',True,False,"dark blue-grey scaly hide with orange-red markings, orange-red wing membranes, an antler crest with a small yellow spark, orange eyes","two hind legs, two clawed wings, one long tail, one antler crest","standing its ground on two legs, wings spread wide, head low and screeching at the viewer"),
+ ('Wickapi','baby','cute',True,True,"dark reddish-brown fur, cream-striped legs, a cream candle stub on its head with one small purple flame, purple eyes, a short purple-black wispy tail","four long legs, two big ears, one candle, one tail","taking a wobbly step toward the viewer, ears up, curious")):
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_co,_ct); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_co,_ct,_dk,_fu,_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_on'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_on'; SPECS[_n0+1]['runs']=2
