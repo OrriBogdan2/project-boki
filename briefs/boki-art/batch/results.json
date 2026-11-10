@@ -104576,5 +104576,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px_b_prismander_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px_a_xylogator",
+    "name": "Xylogator (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_xylogator_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_kitlet",
+    "name": "Kitlet (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_kitlet",
+    "name": "Kitlet (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_kitlet",
+    "name": "Kitlet (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_kitlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_kitlet",
+    "name": "Kitlet (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_kitlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_xylogator",
+    "name": "Xylogator (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_xylogator_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_xylogator",
+    "name": "Xylogator (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_xylogator_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_xylogator",
+    "name": "Xylogator (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_xylogator_2.jpg",
+    "ok": true
   }
 ]
