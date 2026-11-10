@@ -1,13 +1,13 @@
 extends RefCounted
 ## --armour-bar-shots --shots-dir=<dir> --res=<w>x<h> [--hover=armor_level] (under xvfb with a renderer):
 ## the armour progress bar under the armour strip, as crops of the bottom-left vitals block: partway into a
-## tier, a hit's tick, the next tier's colour, and full at the top tier. Files: armour_bar_<res>_<name>.png.
+## tier, a hit's tick, the next tier's colour, and full at the top tier. Files: armour_bar_<res>_<label>.png.
 
 var main: Node
 var dir := ""
 var res := "1280x720"
 
-func _grab(m: Match, name: String, crop_scale: int) -> void:
+func _grab(m: Match, label: String, crop_scale: int) -> void:
 	m.hud.c.queue_redraw()
 	m.hud.panels.queue_redraw()
 	await main.get_tree().create_timer(0.4).timeout     # the hover tip waits 0.25 s
@@ -15,8 +15,8 @@ func _grab(m: Match, name: String, crop_scale: int) -> void:
 	var sz := img.get_size()
 	var crop := img.get_region(Rect2i(0, int(sz.y * 0.62), int(sz.x * 0.42), int(sz.y * 0.38)))
 	crop.resize(crop.get_width() * crop_scale, crop.get_height() * crop_scale, Image.INTERPOLATE_BILINEAR)
-	crop.save_png(dir.path_join("armour_bar_%s_%s.png" % [res, name]))
-	print("ARMOURSHOT ", res, " ", name)
+	crop.save_png(dir.path_join("armour_bar_%s_%s.png" % [res, label]))
+	print("ARMOURSHOT ", res, " ", label)
 
 func run(main_node: Node) -> void:
 	main = main_node
