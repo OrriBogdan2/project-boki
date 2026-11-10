@@ -179,7 +179,7 @@ void fragment() {
 	float ember = 0.0;
 	if (heat > 0.0 || burn > 0.0) {
 		ember = 0.5 + 0.5 * vnoise(lpos.xz * 9.0 + vec2(TIME * 17.0, -TIME * 11.0));
-		c = mix(c, c * vec3(1.3, 0.72, 0.5), heat * 0.6) * (1.0 - burn * 0.4 * (1.0 - ember));
+		c = mix(c, vec3(0.95, 0.3, 0.1) * (0.5 + dot(c, vec3(0.5))), heat * 0.75) * (1.0 - burn * 0.5 * (1.0 - ember));
 	}
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
@@ -188,7 +188,7 @@ void fragment() {
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow
-		+ vec3(1.0, 0.4, 0.1) * (heat * heat * 0.3 + burn * ember * 0.7) * (1.0 - fog);
+		+ vec3(1.0, 0.4, 0.1) * (heat * heat * 0.4 + burn * ember * 0.8) * (1.0 - fog);
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

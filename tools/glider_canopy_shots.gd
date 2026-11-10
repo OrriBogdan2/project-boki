@@ -55,7 +55,6 @@ func _state(file: String, fuel: float, lip: bool, caption: String) -> void:
 	P.grounded = false
 	P.gliding = true
 	P.vel = Vector3(0, 0, -9.0)
-	m.cam.zoom_to = 0.6
 	for i in 90:
 		P.inp["glide"] = true
 		P.inp["move"] = Vector2(0, -1)
@@ -63,6 +62,7 @@ func _state(file: String, fuel: float, lip: bool, caption: String) -> void:
 		m.step(DT)
 		P.glide_fuel = fuel
 		P.below_lip = lip
+		m.cam.zoom = 0.3
 		m.cam.snap(P.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
