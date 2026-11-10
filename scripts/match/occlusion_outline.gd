@@ -1,29 +1,30 @@
 class_name OcclusionOutline
 extends RefCounted
-## Keeps your Hunter, your teammates and your own Boki readable behind a cliff, a tree or an arch from the
-## top-down camera: a thin team-colour line (shaders/occlusion_outline.gdshader) that shows only where
-## cover hides them. Rivals never get one, so it is no wallhack. A material overlay on each model's
-## meshes: no extra nodes, one extra pass over a few meshes. Off on Low (Settings.QUALITY "occ").
+## Keeps Hunters and their Bokis readable behind a cliff, a tree or an arch from the top-down camera: a thin
+## side-colour line (shaders/occlusion_outline.gdshader, SideColor: you, your squad, red for rivals) that
+## shows only where cover hides them. As in the source: you and your squad always; a rival only while your
+## side can see them (not `unseen`), so it is no wallhack. A material overlay on each model's meshes: no
+## extra nodes, one extra pass over a few meshes. Off on Low (Settings.QUALITY "occ").
 
-static var _mats := {}    # team colour -> its overlay material
+static var _mats := {}    # side colour -> its overlay material
 static var _shader: Shader = preload("res://shaders/occlusion_outline.gdshader")
 
-## Every frame from the match: puts the overlay on a side model that has none yet (and takes it off
-## everywhere when the preset says no). Cheap when nothing changed: one meta read per ally.
+## Every frame from the match: puts the overlay on a model that should wear it and takes it off one that
+## should not. Cheap when nothing changed: one meta read per Hunter and Boki, no allocation.
 static func for_match(m) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
 	var on: bool = Settings.q("occ")
 	for h in m.hunters:
-		if h.team == p.team:
-			_sync(h, h.model, on, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()])
+		_sync(h, h.model, on and (h.team == p.team or not h.unseen), SideColor.of(m, h))
 	for k in m.kins:
-		if k.owner_h == p:
-			_sync(k, k.model, on, Data.TEAM_COLORS[k.team % Data.TEAM_COLORS.size()])
+		var o: Hunter = k.owner_h
+		if o != null:
+			_sync(k, k.model, on and (o.team == p.team or not k.unseen), SideColor.of(m, k))
 
 static func _sync(e: Node, model: Node3D, on: bool, tint: Color) -> void:
-	var tag := model.get_instance_id() if model and on else 0
+	var tag := (model.get_instance_id() ^ tint.to_rgba32()) if model and on else 0
 	if int(e.get_meta("occ", 0)) == tag:
 		return
 	e.set_meta("occ", tag)

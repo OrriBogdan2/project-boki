@@ -1,9 +1,10 @@
 extends RefCounted
-## --occlusion-outline-check: your side (you, your teammate, your Boki) wears the cover outline and a rival
-## never does; Low takes it off again. --occlusion-outline-shots --shots-dir=<dir> (needs a GPU renderer):
-## on the Hollow Crown, you and a teammate stand behind a cliff, two trees and the stone covers it has
-## (ruin pillars, walls, boulders) with a rival
-## beside you, once with the outline (<cover>_on.png) and once without it (<cover>_off.png), cropped round the pair.
+## --occlusion-outline-check: your side (you behind a cliff, your teammate, your Boki) wears the cover
+## outline in its side colour, a rival only while in sight (red), an unseen rival never; Low takes it off.
+## --occlusion-outline-shots --shots-dir=<dir> (needs a GPU renderer): on the Hollow Crown, you and a
+## teammate stand behind a cliff, two trees and the stone covers it has (ruin pillars, walls, boulders)
+## with a rival beside you, once with the outline (<cover>_on.png) and once without (<cover>_off.png),
+## cropped round the pair.
 
 const DT := 1.0 / 60.0
 const SIDE := 0.9          # m: you and your teammate stand this far either side of the cover's line
@@ -48,20 +49,39 @@ func _expect(what: String, ok: bool) -> void:
 		failed += 1
 
 func _check() -> void:
-	await _go(0.2)
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	var rival: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
-	_expect("you wear the outline", _covered(P))
-	_expect("your teammate wears it", _covered(mate))
-	_expect("a rival does not", not _covered(rival))
+	var g := _cliff_spot(m.cam.global_position - P.pos)      # you stand behind the map's tallest cliff
+	P.teleport(g)
+	mate.teleport(g + Vector3(1, 0, 0))
+	rival.teleport(g + Vector3(-1, 0, 0))
+	rival.unseen = false
+	await _go(0.2)
+	_expect("you, behind a cliff, wear the outline", _covered(P) and _tint(P) == SideColor.YOU)
+	_expect("your teammate wears it in the squad colour", _covered(mate) and _tint(mate) == SideColor.ALLY)
+	_expect("a rival in sight wears it in red", _covered(rival) and _tint(rival) == SideColor.FOE)
+	rival.unseen = true
+	await _go(0.1)
+	_expect("an unseen rival does not", not _covered(rival))
+	_expect("but your side still does", _covered(P) and _covered(mate))
+	rival.unseen = false
+	await _go(0.1)
+	_expect("back in sight, the rival wears it again", _covered(rival))
 	if P.kin != null:
 		_expect("your Boki wears it", _covered(P.kin))
 	Settings.v["quality"] = "low"
 	await _go(0.1)
-	_expect("Low takes it off", not _covered(P) and not _covered(mate))
+	_expect("Low takes it off", not _covered(P) and not _covered(mate) and not _covered(rival))
 	Settings.v["quality"] = "medium"
 	await _go(0.1)
 	_expect("medium puts it back", _covered(P) and _covered(mate))
+
+func _tint(e: Node3D) -> Color:
+	for n in e.model.find_children("*", "MeshInstance3D", true, false):
+		var o := (n as MeshInstance3D).material_overlay as ShaderMaterial
+		if o != null:
+			return o.get_shader_parameter("color")
+	return Color.TRANSPARENT
 
 func _shots() -> void:
 	var dir := ""
@@ -88,13 +108,13 @@ func _shots() -> void:
 		rival.teleport(g - side * 6.0)
 		await _go(0.5)
 		_take(dir, cover + "_on", g)
-		_strip(P)
-		_strip(mate)
+		for h in [P, mate, rival]:
+			_strip(h)
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		_take(dir, cover + "_off", g)
-		P.set_meta("occ", 0)       # so the next cover's first shot gets the line back
-		mate.set_meta("occ", 0)
+		for h in [P, mate, rival]:
+			h.set_meta("occ", 0)       # so the next cover's first shot gets the line back
 	print("OCCLUSIONSHOTS %d in %s" % [covers.size() * 2, dir])
 
 ## A zoomed crop round the pair behind the cover, so the line reads.
