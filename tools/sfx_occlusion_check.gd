@@ -4,7 +4,8 @@ extends RefCounted
 ## for a 30-Hunter fight (30 sources, 10 Hz). Runs on a small hand-made map: a high terrace, a flat floor.
 
 const FIGHT_VOICES := 30
-const BUDGET_US := 2000.0      # per 100 ms of a 30-voice fight, every test uncached: a fraction of a frame once spread over 6 frames
+## us per 100 ms of a 30-voice fight with every test uncached: a few % of that window
+const BUDGET_US := 2000.0
 
 var fails := 0
 var n := 0
@@ -52,8 +53,10 @@ func _buses(occ: SfxOcclusion, low: Vector3, high: Vector3, floor_mate: Vector3)
 	var bus := AudioServer.get_bus_index("SFXMuffled")
 	var lp: AudioEffectLowPassFilter = AudioServer.get_bus_effect(bus, 0)
 	var far_lp: AudioEffectLowPassFilter = AudioServer.get_bus_effect(AudioServer.get_bus_index("SFXFar"), 0)
-	ok(lp.cutoff_hz < far_lp.cutoff_hz, "the muffled bus is duller than the far bus (%.0f < %.0f Hz)" % [lp.cutoff_hz, far_lp.cutoff_hz])
-	ok(AudioServer.get_bus_volume_db(bus) < 0.0, "...and a little quieter (%.1f dB)" % AudioServer.get_bus_volume_db(bus))
+	ok(lp.cutoff_hz < far_lp.cutoff_hz, "the muffled bus is duller than the far bus (%.0f < %.0f Hz)"
+		% [lp.cutoff_hz, far_lp.cutoff_hz])
+	var gain := AudioServer.get_bus_volume_db(bus)
+	ok(gain < 0.0, "...and a little quieter (%.1f dB)" % gain)
 	Sfx.occlusion = was
 	Sfx.listener = heard
 
