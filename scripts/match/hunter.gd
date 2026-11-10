@@ -2065,6 +2065,7 @@ func _physics(dt: float) -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
+	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2216,7 +2217,7 @@ func _physics(dt: float) -> void:
 		var fw := mv.normalized() * spd * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
+	elif step_up == 0.0 and HunterMove.caught(in_dash, b1, b2) and hv.length() > 1.0:
 		# caught on a corner: slip sideways around it rather than sticking
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
 		var want := hv.length() * dt
