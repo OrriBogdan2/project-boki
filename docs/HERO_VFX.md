@@ -18,7 +18,7 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   `skirt` or a `dome`; one per hunter, not pooled). Kael's guard shell, Albert's aegis.
 - `HeroVfx.pal(arch, "key")`: a palette colour for the kit's own telegraphs and areas (AimKit lanes, rings), so they
   match its looks.
-- `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
+- `HeroVfx.of(m).trail(h, "move", node, o)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. A pooled skin
   (`KitLooks.skin(shot, kind)`, which returns the skin node) is followed the same way; its return to the pool hides it.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
@@ -26,7 +26,7 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
 
 ## A recipe
 `"move": {"sfx": [...], "fx": [...]}`. Options the kit passes (`"r"`, `"len"`, `"w"`, `"k"` the charge, `"flip"`, or any flag
-named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_x"` to scale it, `"size_k"` to grow with `k`.
+named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_x"` to scale it, `"size_k"` to grow with `k` (negative shrinks: Vex's rifle passes its decay as `k`).
 
 | layer `p` | what | key fields |
 |---|---|---|
