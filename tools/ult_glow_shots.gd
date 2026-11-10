@@ -49,8 +49,7 @@ func _shot(tag: String, frames := 40) -> void:
 		await main.get_tree().process_frame
 	var img := vp.get_texture().get_image()
 	img.save_png(dir.path_join(tag + ".png"))
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var c := Vector2i(m.cam.unproject_position((m.player.pos + foe.pos) * 0.5 + Vector3.UP))
+	var c := Vector2i(m.cam.unproject_position(m.player.pos + Vector3.UP))
 	var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
 	crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 	crop.save_png(dir.path_join(tag + "_zoom.png"))
