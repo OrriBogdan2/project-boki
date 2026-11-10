@@ -33,7 +33,7 @@ func run(main_node: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	await m.start({"teams": 3, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
-		"length": 1e9})
+		"god": true, "length": 1e9})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -47,10 +47,10 @@ func run(main_node: Node) -> void:
 		h.ctrl = "idle"
 		h.max_hp = 5000.0
 		h.hp = 5000.0
-		h.teleport(x["pos"] + Vector3(70, 0, 70))
+		h.teleport(m.world.random_ground())
 	m.time = 100.0
 	focus = x["pos"] + Vector3(0, 1.5, 3.0)
-	P.teleport(x["pos"] + Vector3(14, 0, 10))
+	P.teleport(m.world.free_spot_near(x["pos"] + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
 	x["open_at"] = m.time + 95.0
 	await _grab("seat_1_locked")
 	x["open_at"] = 0.0
@@ -68,7 +68,7 @@ func run(main_node: Node) -> void:
 	await _grab("seat_5_lost")
 	var H: Heart = m.heart
 	focus = H.site + Vector3(0, 1.5, 3.0)
-	P.teleport(H.site + Vector3(14, 0, 10))
+	P.teleport(m.world.free_spot_near(H.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
 	H._force(Heart.S.FINAL, "shots")
 	await _grab("heart_1_final_open")
 	H.final_team = P.team
