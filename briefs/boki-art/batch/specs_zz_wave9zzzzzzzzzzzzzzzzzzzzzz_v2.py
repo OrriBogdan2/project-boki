@@ -436,3 +436,22 @@ _r=_B2D['Tiltster']
 for _j in [s for s in SPECS if s['id'] in ('v2s_tiltster','v2p_tiltster')]: pass
 _n0=len(SPECS); V2SHEET_NEW('Tiltster',_O+'v2t_tiltster_4.jpg',_r[6],_r[7]); V2PORT_NEW('Tiltster',_O+'v2t_tiltster_4.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],"rearing its front up with both flipper claws raised, the playfield on its back tilted toward the viewer")
 SPECS[_n0]['id']='v2s_tiltster_pb'; SPECS[_n0+1]['id']='v2p_tiltster_pb'
+
+# ===== 21:55 ET 11-09: NEW ART SESSION (second account) takes over from ART_HANDOFF.md. =====
+# Picks: Chimelop (v2t_3 / v2s_1 / v2p_3), Pinster (v2t_4 / v2s_2 / v2p_3), Tiltster pill bug (v2t_4 / v2s_pb_2 / v2p_pb_2) -> live.
+# Clean V2 cards -> sheets + portraits: Barostorm, Maulangler, Bastling, Barrelmander, Jerbit, Jerbolt. Domeleon held (owner: looks flat, redesign).
+_B3D={r[0]:r for r in _B3}
+for _n,_s,_pose in (('Barostorm','v2t_barostorm_1',_B1POSE['Barostorm']),('Maulangler','v2t_maulangler_1',_B1POSE['Maulangler']),
+                    ('Bastling','v2x_bastling_1',_B1POSE['Bastling']),('Barrelmander','v2x_barrelmander_1',_B1POSE['Barrelmander']),
+                    ('Jerbit','v2t_jerbit_2',"mid-bounce on its coiled-spring legs, ears up, tail tuft high, happy"),
+                    ('Jerbolt','v2t_jerbolt_4',"crouched low on its coiled-spring legs, about to leap, fur crest bristling, looking at the viewer")):
+    _r=(_B1D.get(_n) or _B3D[_n]); V2SHEET_NEW(_n,_O+_s+'.jpg',_r[6],_r[7]); V2PORT_NEW(_n,_O+_s+'.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_pose)
+# METHOD TEST 2 against board tiles: no style image at all, the written style only. The remove-tiles edit (v2x_bullpole) kept the tiles 3 of 3,
+# and all 4 Dynaboa board runs pasted tiles.
+def RS_CARD_TEXT(name,stage,arch,cols,counts,dark=False,furry=False,fix=''):
+    p=RS_CARD(name,stage,arch,cols,counts,dark,furry,fix)
+    return p.replace("Image 2 is the style guide only: match its line, flat shading, eye finish and amount of detail exactly, but never copy its creature, face, colours or pose. ",
+                     "There is only one image. The art style is described in words below: follow it exactly. ")
+for _r in (_B2D['Bullpole'],_B3D['Dynaboa']):
+    SPECS.append({'id':'v2n_'+_r[0].lower(),'name':_r[0]+' (V2 card, text-only style)','refs':['briefs/boki-art/'+_r[1]],'runs':4,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD_TEXT(_r[0],_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_r[8])})

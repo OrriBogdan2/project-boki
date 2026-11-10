@@ -68,3 +68,5 @@ DROP-={'v2t_bullpole','v2t_pinster','v2t_tiltster'}
 DROP-={'v2t_jerbit','v2t_jerbolt','v2t_dynaboa','v2s_pinster','v2p_pinster','v2s_tiltster','v2p_tiltster','v2x_bullpole'}
 DROP|={'citadoad_card','critwom_card','sirencada_card'}  # auto jobs from promoting their V2 sets; cards are already V2
 DROP-={'v2s_tiltster_pb','v2p_tiltster_pb'}
+# 21:58 ET 11-09 (new art session): Chimelop promoted in V2; its auto jobs must not run.
+DROP|={'chimelop_card','portrait_stance3_chimelop','stance_chimelop'}
