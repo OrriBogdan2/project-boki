@@ -2373,7 +2373,8 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
-	var waiting := false
+	var waiting: bool = not h.remote and Life.team_alive(self, h.team) and not opts.get("training", false) \
+		and not opts.get("tutorial", false)
 	if net_on: KinTrack.drop_carried(self, h, h.pos)       # (offline, Life.drop_box does it at the box)
 	if not net_on and not h.remote:
 		# everything they carried goes into a deathbox where they fell. While a teammate is still
@@ -2382,7 +2383,6 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		h.lost_gems = h.gems
 		h.gems = 0; h.seeds = {}; h.caught = []
 		Life.kin_on_death(self, h, bx)
-		waiting = Life.team_alive(self, h.team) and not opts.get("training", false) and not opts.get("tutorial", false)
 		if not waiting:
 			Life.make_gone(self, h)
 	elif net_on and not is_host and not h.remote:
@@ -2400,7 +2400,8 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		h.gems = 0; h.seeds = {}; h.caught = []
 		# the kin they brought are left behind, dazed, for anyone to collect
 		_leave_kin(h)
-		h.gone = true
+		if waiting: Life.drop_box(self, h, why)       # the gems spilled above; the rest waits for a box revive
+		else: Life.make_gone(self, h)
 	if h == player:
 		if not waiting:
 			result = {"extracted": false, "why": why}
@@ -4658,7 +4659,7 @@ func _update_interact(dt: float) -> void:
 				if h.flat_dist(b["pos"]) > 1.5 or absf(h.pos.y - float(b["pos"].y)) > 1.4:
 					continue
 				var o: Hunter = b["owner"]
-				if o.team == h.team and o != h and Life.soul_here(self, b) and not o.remote:
+				if o.team == h.team and o != h and Life.soul_here(self, b):
 					best = {"kind": "boxrev", "box": b, "label": BoxRevive.prompt(h, o), "col": Color("9ee2a0")}
 					break
 				if not b["empty"]:
@@ -5846,6 +5847,8 @@ func _net_ev(x, from: String) -> void:
 			if exits: exits.net_in(x)
 		"bcn":
 			Beacons.net_in(self, x)
+		"box", "brev", "back", "lost":
+			BoxRevive.net_in(self, x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)
