@@ -95,6 +95,7 @@ var final_team := -1           # the squad whose progress the Heart ring holds
 var final_prog := 0.0          # 0..1
 var rush := false              # one squad left: the final seat is open and faster
 var drops := 0
+var audio: HeartSfx            # the hum, stings, heartbeat, gate cues and the Ways Out calls
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
 var _sync_t := 0.0
 var _rng := RandomNumberGenerator.new()
@@ -110,6 +111,7 @@ var _final_mat: ShaderMaterial
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	audio = HeartSfx.new(self)
 
 func host() -> bool:
 	return not m.net_on or m.is_host
@@ -188,6 +190,7 @@ func tick(dt: float) -> void:
 		charge = minf(charge + dt, r("charge_s"))
 	_apply_carrier()
 	_update_nodes()
+	audio.update()
 
 func _host_tick(dt: float) -> void:
 	var t := m.sess_time()
@@ -247,6 +250,7 @@ func _ring_tick(dt: float) -> void:
 	var crews := _ring_crews()
 	if final_team < 0 and crews.size() == 1:
 		final_team = int(crews.keys()[0])
+		audio.call_out("start", "final", final_team)
 	if final_team < 0:
 		return
 	var own := int(crews.get(final_team, 0))
@@ -283,6 +287,7 @@ func _take(seat: String, team: int) -> void:
 ## This game's own Hunters of the squad at the seat leave (downed ones too): the Gate takes those within
 ## gate_take_r of it, the ring those inside it.
 func _leave(seat: String, team: int) -> void:
+	audio.call_out("taken", "early" if seat == HOW_EARLY else "final", team)
 	if seat == HOW_EARLY:
 		early_team = team
 		carrier = null
@@ -303,7 +308,6 @@ func _pick(h: Hunter) -> void:
 	else:
 		_broadcast()
 	m.add_feed("%s took the Heartspark" % h.pname)
-	m.sfx("ping", h.pos, 0.0, 0.6)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
 
 func _drop(at: Vector3) -> void:
