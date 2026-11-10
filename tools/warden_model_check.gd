@@ -34,8 +34,8 @@ const WARDENS := {
 	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.22, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
 	"juggernaut": {"hit_r": 0.428, "height": 1.31, "height_3d": 1.32, "width": [1.0, 2.0], "moves": "jug"},
-	# (Grimble: the head at his old height, the hoard towers over it)
-	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.7, "width": [1.3, 2.4], "moves": "dr_"},
+	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
+	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears, the locked design's taller ears)
 	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.76, "width": [0.5, 1.5], "moves": "mm_"},
