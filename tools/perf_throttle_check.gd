@@ -176,6 +176,7 @@ func _far_bots() -> void:
 	for i in Bot.FAR_EVERY * 4:
 		var before := float(b.ai["dash_cd"])
 		brain.tick(m, b, Match.DT)
+		m.time += Match.DT      # as the sim step does: each far bot decides on its own beat of the clock
 		if float(b.ai["dash_cd"]) != before:
 			thinks += 1
 	ok(thinks == 4, "far away it decides every %d steps (%d decisions)" % [Bot.FAR_EVERY, thinks])
