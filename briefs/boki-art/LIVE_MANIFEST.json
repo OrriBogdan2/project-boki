@@ -570,19 +570,6 @@
    "hero": "6139a2f1bc9a"
   }
  },
- "Frigatee": {
-  "sheet": "briefs/boki-art/turnarounds/Frigatee.jpg",
-  "card": "briefs/boki-art/cards/Frigatee.jpg",
-  "portrait": "briefs/boki-art/portraits/light/Frigatee.jpg",
-  "cutout": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
-  "hash": {
-   "sheet": "e11ee4577498",
-   "card": "a46569527cf8",
-   "portrait": "a0c15ffdad4d",
-   "hero": "710198308754"
-  }
- },
  "Furnacowary": {
   "sheet": "briefs/boki-art/evolutions/Furnacowary.jpg",
   "card": "briefs/boki-art/cards/Furnacowary.jpg",
@@ -664,19 +651,6 @@
    "hero": "b9e5807f8f1a"
   },
   "legendary_tier": "boss"
- },
- "Glaciatee": {
-  "sheet": "briefs/boki-art/turnarounds/Glaciatee.jpg",
-  "card": "briefs/boki-art/cards/Glaciatee.jpg",
-  "portrait": "briefs/boki-art/portraits/light/Glaciatee.jpg",
-  "cutout": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
-  "hash": {
-   "sheet": "eaa2130bf9b1",
-   "card": "61b0bc59e825",
-   "portrait": "35ff6c4ad9c0",
-   "hero": "25a89c9e054f"
-  }
  },
  "Glaivyx": {
   "sheet": "briefs/boki-art/evolutions/Glaivyx.jpg",
@@ -2536,19 +2510,6 @@
    "hero": "8b55d39b0cf5"
   },
   "display_name": "Magnestaff"
- },
- "Coolatee": {
-  "sheet": "briefs/boki-art/turnarounds/Coolatee.jpg",
-  "card": "briefs/boki-art/cards/Coolatee.jpg",
-  "portrait": "briefs/boki-art/portraits/light/Coolatee.jpg",
-  "cutout": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
-  "hero": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
-  "hash": {
-   "sheet": "02f74cc5b0e4",
-   "card": "3ec806657fea",
-   "portrait": "62661c9fac9d",
-   "hero": "f879ea562a0c"
-  }
  },
  "Druzemole": {
   "sheet": "briefs/boki-art/turnarounds/Druzemole.jpg",

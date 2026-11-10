@@ -672,3 +672,6 @@ ART -> COORD 11-10 01:38: OWNER FEEDBACK applied:
 
 ### 11-10 01:43 ET ART -> COORD
 ART -> COORD 11-10 01:43: OWNER PICKS, cards live (hero changed; sheet + portrait generating): Galleotter is now a planted otter with oar-shaped fin spines and no boat (it finally follows the born-with-parts rule), Tiltster has its head fused into its shell (owner's "head not on" note). FYI, not decided: the owner said he "wouldn't mind removing" the Coolatee > Frigatee > Glaciatee line as generic; I asked him to confirm before anything is cut.
+
+### 11-10 01:51 ET ART -> COORD
+ART -> COORD 11-10 01:51: LINE CUT (owner 01:51, "cut it"): Coolatee > Frigatee > Glaciatee is removed from the roster (generic ice seal, no idea of its own). The three entries are out of LIVE_MANIFEST.json (now 232); their files stay in the repo (cards/, turnarounds/, portraits/) so it can be undone. Please remove dex #29-31 and the three from game data, eggs and spawn tables, and tell main. BOKI_NAMES.csv still lists them; mark them cut on your side or tell me to.

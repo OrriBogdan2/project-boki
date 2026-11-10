@@ -36,7 +36,6 @@ Chuggamus
 Cisternmander
 Citadoad
 Clinkpede
-Coolatee
 Critwom
 Crofthollow
 Crofthorn
@@ -60,7 +59,6 @@ Fizzlet
 Flarmink
 Foldbat
 Forgebrock
-Frigatee
 Furnacowary
 Galleotter
 Gambitfin
@@ -69,7 +67,6 @@ Geysirbara
 Ghoulamari
 Gilabacus
 Glaciammoth
-Glaciatee
 Glacione
 Glazolm
 Glintmole
