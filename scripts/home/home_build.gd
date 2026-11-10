@@ -268,6 +268,8 @@ func _reserve() -> void:
 		rs.call(36, 37, 40, 41)      # the portal and its sign
 		rs.call(33, 39, 35, 41)      # the glider rack
 		rs.call(41, 40, 43, 41)      # the ferry
+		if h.zone == GardenZones.HUB:
+			for rc in HubLayout.CLEAR: rs.callv(rc)      # the Waystone and the games board
 		rs.call(int(HomeLayout.LANDING.x) - 2, int(HomeLayout.LANDING.z) - 2, int(HomeLayout.LANDING.x) + 1, int(HomeLayout.LANDING.z) + 1)
 		for k in Data.ISLES:
 			var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
@@ -982,7 +984,7 @@ func reset_layout() -> void:
 
 # ------------------------------------------------------------------ build mode on / off
 func can_build() -> bool:
-	return h.visit.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
+	return not h._visiting() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
 
 func toggle() -> void:
 	if active:
@@ -996,7 +998,7 @@ func toggle() -> void:
 		return
 	if not can_build():
 		return
-	cat = "Buildings"      # B always opens on Buildings
+	cat = _tabs()[0]      # B always opens on the first tab
 	_enter()
 	Sfx.play("ui_open", null, -8.0)
 	_build_bar()
@@ -1065,6 +1067,8 @@ func pick_up_at(c: Vector2i) -> void:
 ## Takes the piece an occupancy tag names into the hand, to move it.
 func pick_up_tag(tag: String) -> void:
 	_close_menu()
+	if h.zone == GardenZones.HUB and not (tag.begins_with("d:") and _dressing(tag)):
+		return
 	if tag.begins_with("b:"):
 		take_building(tag.substr(2))
 	elif tag.begins_with("f:"):
@@ -1080,6 +1084,11 @@ func pick_up_tag(tag: String) -> void:
 		_make_ghost()
 		_build_bar()
 		Sfx.play("click")
+
+## Is the piece a tag names Garden decoration (the only thing you may move in the hub)?
+func _dressing(tag: String) -> bool:
+	var e := _deco_by_uid(int(tag.substr(2)))
+	return not e.is_empty() and String(HomeLayout.CATALOG[String(e["id"])]["cat"]) == "Garden"
 
 ## Starts an upgrade of the building with this deco uid (the Upgrades tab).
 func upgrade(uid: int) -> bool:
@@ -1952,6 +1961,8 @@ func _open_ui() -> void:
 
 func _tabs() -> Array:
 	var out: Array = []
+	if h.zone == GardenZones.HUB:
+		return ["Garden"]      # the hub's fixtures stay where they are: you only dress it (HubLayout)
 	if FarmUnlocks.base_mode():
 		return ["Buildings", "Base", "Garden", "Island"]
 	for ct in HomeLayout.CATS:

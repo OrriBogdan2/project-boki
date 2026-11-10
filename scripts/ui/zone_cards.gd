@@ -27,6 +27,17 @@ static func open(h, here: String) -> void:
 			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
 			row.add_child(_card(String(z["name"]), UI.FAINT, lines, func(): h.hway.hop(id), "Locked", false))
 
+## The hub's games board: which game each zone hosts, and whether the zone is open yet.
+static func board(h) -> void:
+	var v: VBoxContainer = h._new_panel("Games board", 420.0)
+	for id in GardenZones.ids():
+		var z := GardenZones.info(id)
+		var open := GardenZones.is_open(id)
+		var row := UI.hbox(10)
+		row.add_child(UI.label(String(z["name"]), 15, Color(String(z["colour"])) if open else UI.FAINT))
+		row.add_child(UI.label(String(z["game"]), 13, UI.INK) if open else UI.label("asleep", 13, UI.MUTED))
+		v.add_child(row)
+
 ## "Move to..." on a Boki's card: only for one out in this zone, not your partner, with another zone open.
 static func add_move_link(h, row: Control, rec: Dictionary) -> void:
 	var k: Dictionary = h._kin_entry(rec)

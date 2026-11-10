@@ -10,13 +10,15 @@ extends RefCounted
 ## down on the stone, or E when it waits at the pad asking) walks to the pad and blinks out; it is in
 ## the other zone from then on. `pad` is the stone as a look target ({"pos"}) for BaseLife's ask.
 
-const HUB_AT := Vector3(38.5, 0, 31.5)     # the Waystone, the middle of the hub, north of the landing
+const HUB_AT := Vector3(38.5, 0, 33.5)     # the Waystone, the middle of the hub, north of the landing
 const PAD_NEAR := Vector3(40.5, 0, 36.5)   # a zone's return pad goes on open ground nearest this
 const REACH := 2.2                          # m from the ring's or pad's middle to press E
 const ARRIVE_OFF := Vector3(0, 0, 2.6)      # m from the Waystone to where you arrive in the hub
 
 var h                          # the Home screen
 var node: Node3D = null        # the Waystone or the return pad
+var board: Node3D = null       # the hub's games board
+var aim := ""                  # "board" while the games board is what E would use (set by find)
 var hopping := ""              # the zone being travelled to, during the light-up
 var pad := {}                  # the stone as something a Boki can look at: {"pos"}
 
@@ -34,6 +36,10 @@ func place() -> void:
 			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": GardenZones.is_open(id)})
 		node = FarmModels.waystone(stones)
 		node.position = HUB_AT
+		board = FarmModels.games_board()
+		board.position = HubLayout.BOARD_AT
+		board.rotation.y = -PI * 0.5
+		h.add_child(board)
 	else:
 		node = FarmModels.return_pad(String(GardenZones.info(here()).get("colour", "c9c2b2")))
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)
@@ -48,15 +54,24 @@ func arrive_at(p: Vector3) -> Vector3:
 	return node.position + (ARRIVE_OFF if here() == GardenZones.HUB else Vector3.ZERO)
 
 func find(p2: Vector2) -> Dictionary:
+	aim = ""
+	if board != null and p2.distance_to(Vector2(board.position.x, board.position.z)) <= REACH:
+		aim = "board"
+		return {"kind": "waystone"}
 	if node == null or hopping != "" or p2.distance_to(Vector2(node.position.x, node.position.z)) > REACH:
 		return {}
 	return {"kind": "waystone"}
 
 func label() -> String:
+	if aim == "board":
+		return "Games board"
 	return "The Waystone: travel" if here() == GardenZones.HUB else "Return pad: travel"
 
 func use() -> void:
-	ZoneCards.open(h, here())
+	if aim == "board":
+		ZoneCards.board(h)
+	else:
+		ZoneCards.open(h, here())
 
 ## Travel to a zone (or the hub). Returns false, with a toast, for a locked zone or where you are.
 func hop(id: String) -> bool:

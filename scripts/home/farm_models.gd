@@ -257,3 +257,16 @@ static func return_pad(colour: String) -> Node3D:
 	Models.part(n, Models.cyl(0.6, 0.6, 0.03, 18), Models.toon(Color(colour), false, 0.6), Vector3(0, 0.135, 0),
 			Vector3.ONE, Vector3.ZERO, "Glow")
 	return n
+
+## The hub's games board: a wooden board on two posts with a coloured tab per zone.
+static func games_board() -> Node3D:
+	var n := Node3D.new()
+	for sx in [-0.9, 0.9]:
+		_piece(n, Models.box(0.14, 1.7, 0.14), "7a5a38", Vector3(sx, 0.85, 0), "Post")
+	_piece(n, Models.box(2.1, 1.0, 0.1), "a98456", Vector3(0, 1.35, 0.05), "Board")
+	var ids := GardenZones.ids()
+	for i in ids.size():
+		var tab := Color(String(GardenZones.info(ids[i])["colour"]))
+		Models.part(n, Models.box(0.3, 0.6, 0.04), Models.toon(tab, false, 0.4 if GardenZones.is_open(ids[i]) else 0.0),
+				Vector3(-0.8 + 0.4 * i, 1.35, 0.12), Vector3.ONE, Vector3.ZERO, "Tab%d" % i)
+	return n

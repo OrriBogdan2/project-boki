@@ -36,6 +36,18 @@ static func migrate(data: Dictionary) -> void:
 		if not rec.has("zone"):
 			rec["zone"] = start()
 
+## The zone Game.goto("home", opts) shows: the one asked for; none for a visit or with the garden off;
+## the one you were in when coming back from the house; else the hub, once the first day's tutorial is done
+## (it runs in the start zone).
+static func landing(opts: Dictionary) -> String:
+	if opts.has("zone"):
+		return String(opts["zone"])
+	if not (opts.get("visit", {}) as Dictionary).is_empty() or not FarmUnlocks.base_mode():
+		return ""
+	if opts.has("spawn"):
+		return here
+	return HUB if bool(Save.d.get("tutorial", {}).get("day1_done", false)) else ""
+
 static func zone_of(rec: Dictionary) -> String:
 	return String(rec.get("zone", start()))
 
