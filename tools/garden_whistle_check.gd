@@ -74,7 +74,8 @@ func _reset() -> void:
 func _partner_run(trust: float, joy: float) -> float:
 	_reset()
 	var k := _stand(0, FAR, trust, joy)
-	ok(home.world.island_of(k["pos"].x, k["pos"].z) == home.world.island_of(home.ppos.x, home.ppos.z), "the partner starts on your island")
+	var isle: int = home.world.island_of(home.ppos.x, home.ppos.z)
+	ok(home.world.island_of(k["pos"].x, k["pos"].z) == isle, "the partner starts on your island")
 	var from := _dist(k)
 	home.life.whistle.press()
 	home.life.whistle.release()
@@ -90,7 +91,8 @@ func _sulky_run(trust: float, joy: float, what: String) -> void:
 	home.life.whistle.release()
 	ok(not k.has("called_t") and float(k.get("hold_t", 0.0)) > 0.0, "%s looks over and does not run" % what)
 	_until_close(k, REACH_SECS)
-	ok(Vector2(k["pos"].x - start.x, k["pos"].z - start.z).length() < 0.5 and _dist(k) > 4.0, "%s is still where it was after %.0f s" % [what, REACH_SECS])
+	var moved := Vector2(k["pos"].x - start.x, k["pos"].z - start.z).length()
+	ok(moved < 0.5 and _dist(k) > 4.0, "%s stays put for %.0f s" % [what, REACH_SECS])
 
 func _hold_run() -> void:
 	_reset()

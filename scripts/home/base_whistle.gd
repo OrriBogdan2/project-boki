@@ -81,7 +81,8 @@ func _call(k: Dictionary, angle: float) -> void:
 		h._house_alert([k])
 		return
 	k["nap_t"] = 0.0
-	k.erase("nap_go"); k.erase("nap_go_t"); k.erase("going_in")
+	for key in ["nap_go", "nap_go_t", "going_in"]:
+		k.erase(key)
 	k["called_t"] = float(R["give_up_s"])
 	h._emote(k, "!")
 	Sfx.play("kin_alert", k["pos"], -12.0, 0.15, Unique.voice(rec))

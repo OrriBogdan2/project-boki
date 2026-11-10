@@ -92,7 +92,7 @@ func _setup_input() -> void:
 	_key("play", [KEY_V])                     # at home: play fetch with a kin
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
-	_key("whistle", [KEY_H])                  # at home: your partner comes, hold for the nearest Boki (base_mode; else every kin comes)
+	_key("whistle", [KEY_H])                  # at home: your partner comes; hold: the nearest Boki
 	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
