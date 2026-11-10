@@ -45,13 +45,15 @@ func _hero(id: String, move: String) -> void:
 		sync.set_process(false)
 		var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "kmove": move, "kmove_t": HOLD_T, "hit_t": 99.0}
 		m.set_meta(WardenClips.STATE, s)
-		pair.append({"m": m, "sync": sync, "s": s, "clips": sync.get("clips"), "sk": WardenGlb.skeleton(m.get_node("Warden"))})
+		pair.append({"m": m, "sync": sync, "s": s, "clips": sync.get("clips"),
+				"sk": WardenGlb.skeleton(m.get_node("Warden"))})
 	var hit: Dictionary = pair[0]
 	var ctl: Dictionary = pair[1]
 	var clips: WardenClips = hit["clips"]
 	ok(clips.lib.has_animation(String(clips.d["kmoves"][move]["clip"])), "%s: %s is a keyed move" % [id, move])
 	_frames(pair, 12)
-	ok(clips.proc_w <= 0.0 and clips.act_w + clips.up_w >= 0.99, "%s: LMB hold: %s owns the body (%.2f)" % [id, move, clips.act_w + clips.up_w])
+	var owns := clips.act_w + clips.up_w
+	ok(clips.proc_w <= 0.0 and owns >= 0.99, "%s: LMB hold: %s owns the body (%.2f)" % [id, move, owns])
 	# (the twins may differ by a fixed offset, Ostra's float: every test is the change from it)
 	var off := _gap(pair)
 	var legs0 := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
@@ -64,7 +66,8 @@ func _hero(id: String, move: String) -> void:
 		ok(clips.cur == cur and clips.proc_w <= 0.0 and absf(clips.up_w - up) < 0.01 and absf(clips.act_w - act) < 0.01,
 				"%s: %s hit: the %s clip keeps running" % [id, nm, move])
 		ok(peaks[nm] >= LEAN_M, "%s: %s hit leans the torso away (%.3f m)" % [id, nm, peaks[nm]])
-		ok(absf(_bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L")) - legs0) < LEG_RAD, "%s: %s hit: the legs hold the clip" % [id, nm])
+		var legs := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
+		ok(absf(legs - legs0) < LEG_RAD, "%s: %s hit: the legs hold the clip" % [id, nm])
 		_frames(pair, 14)
 		ok((_gap(pair) - off).length() < 0.005, "%s: settles after the %s hit" % [id, nm])
 	var heavy := _hit(pair, DIRS["front"][0], Oomph.HEAVY_FLINCH, DIRS["front"][1], off)

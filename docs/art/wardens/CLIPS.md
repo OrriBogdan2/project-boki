@@ -19,7 +19,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
-- `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+- `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
+  `Oomph.HEAVY_FLINCH`); any other hit is `WardenFlinch`: a torso spring (front, back, left, right from `hit_dir`) added after
+  the clips, so it rides over a run or a cast without stopping it. `--flinch-layer-check` holds each Hero's LMB move and hits it.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree
