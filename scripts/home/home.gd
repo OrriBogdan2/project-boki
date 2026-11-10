@@ -53,6 +53,7 @@ var visit_id := ""
 var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
+var photo: HomePhoto = null         # photo mode (home_photo.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
@@ -159,6 +160,7 @@ func _ready() -> void:
 	HomeLayout.make_world(world, int(lay["grow"]), int(lay.get("seed", 0)), float(lay.get("sk", 1.0)) if fs else 0.0)
 	await _slice()
 	hb = HomeBuild.new(self)
+	photo = HomePhoto.new(self)
 	hg = HomeGather.new(self)
 	hw = HomeWork.new(self)
 	if visit.is_empty():
@@ -997,6 +999,9 @@ func _update_sky(d: float) -> void:
 
 func _process(delta: float) -> void:
 	var d := minf(delta, 0.05)
+	if photo and photo.active:
+		photo.tick(d)
+		return
 	farm_t -= delta
 	if farm_t <= 0.0:
 		farm_t = 1.0
@@ -2193,6 +2198,10 @@ func open_job_board(tab := "") -> void:
 	WorkView.open(self)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if photo and photo.active:
+		if photo.input(event):
+			get_viewport().set_input_as_handled()
+		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
 			get_viewport().set_input_as_handled()
