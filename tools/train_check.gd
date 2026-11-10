@@ -242,5 +242,45 @@ func run(main: Node) -> void:
 		mb.pos = mpin; mb.vel = Vector3.ZERO; mb.grounded = true
 		m.step(Match.DT)
 	ok(mb.dead and st.hits.any(func(x): return x["e"] == mb), "a brute on the rails is run over (%.1fs)" % (m.time - t0))
+	_halts(m, P)
 	print("TRAIN CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
+## The halts: a beacon at every pier, and the pier glow follows the stop state.
+func _halts(m: Match, P: Hunter) -> void:
+	var st: SkyTrain = m.skytrain
+	var hl: TrainHalts = st.halts
+	var per_halt := []
+	per_halt.resize((m.world.train_route["stations"] as Array).size())
+	per_halt.fill(0)
+	var on_ground := true
+	for b in hl.beacons:
+		per_halt[int(b["halt"])] += 1
+		on_ground = on_ground and not m.world.is_void(b["pos"].x, b["pos"].z)
+	ok(per_halt.all(func(n): return n > 0), "a beacon at each of %d halts %s" % [per_halt.size(), str(per_halt)])
+	ok(on_ground, "every beacon stands on pier ground")
+	var meshes := hl.get_child_count()
+	ok(meshes <= 6, "the %d posts are merged into %d meshes" % [hl.beacons.size(), meshes])
+	var lite := TrainHalts.new()
+	lite.setup(st, true)
+	var kept := lite.beacons.size() == hl.beacons.size() and lite.glow_nodes.is_empty()
+	ok(kept and not hl.glow_nodes.is_empty(), "Low keeps the beacons and drops the glow")
+	lite.free()
+	P.teleport(m.world.random_ground())
+	_set_time(m, _leg_time(st, 1, 0.0) - st.dwell + 0.5)
+	for i in 90: m.step(Match.DT)
+	var lit: Array = hl.glow_nodes.filter(func(g): return g.visible)
+	var car: Vector3 = (st.cur[1] as Transform3D).origin
+	var by_train := lit.all(func(g): return (g.position - car).length() < 14.0)
+	var stopped := st.head_v < 0.3 and hl.glow > 0.95 and not lit.is_empty()
+	ok(stopped, "stopped at halt %d: the pier glow is on (%.2f)" % [hl.halt, hl.glow])
+	ok(hl.halt >= 0 and by_train, "and it sits at the pier the train is at")
+	_set_time(m, _leg_time(st, 1, 0.5))
+	for i in 150: m.step(Match.DT)
+	lit = hl.glow_nodes.filter(func(g): return g.visible)
+	var off := st.head_v > 3.0 and hl.glow < 0.02 and lit.is_empty()
+	ok(off, "moving (%.1f m/s): the pier glow is off (%.2f)" % [st.head_v, hl.glow])
+	ok(st.lamp.trail_node.visible, "moving: the headlight trail shows")
+	_set_time(m, _leg_time(st, 2 % st.legs.size(), 0.0) - st.dwell + 0.5)
+	for i in 60: m.step(Match.DT)
+	ok(st.head_v < 0.3 and not st.lamp.trail_node.visible, "standing: no trail")
