@@ -109504,5 +109504,26 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/drop_up2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_bullsfrog_leap",
+    "name": "Bullsfrog (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_bullsfrog_leap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_bullsfrog_leap",
+    "name": "Bullsfrog (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_bullsfrog_leap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_bullsfrog_leap",
+    "name": "Bullsfrog (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_bullsfrog_leap_3.jpg",
+    "ok": true
   }
 ]
