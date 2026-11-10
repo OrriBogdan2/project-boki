@@ -22,6 +22,8 @@ const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
+const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
+const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -48,6 +50,7 @@ var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
 var act_w := 0.0             # how much the action owns the body
+var act_out := FADE_LOCO     # s the action takes to let go of the body (longer after a lock-in pose)
 var up_w := 0.0              # how much it owns the upper body only
 var air_w := 0.0
 var glide_w := 0.0
@@ -343,12 +346,15 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
 
-## The lobby's lock-in pose (data "lockin": clip, from, dur, rate): `t` s into it, a window of an existing clip.
+## The lobby's lock-in pose (data "lockin": clip, from, dur, rate, fade, settle): `t` s into it, a window of an
+## existing clip.
 func _lockin_at(t: float) -> Dictionary:
 	var lk: Dictionary = d["lockin"]
 	var clip := String(lk["clip"])
 	var at := float(lk.get("from", 0.0)) + t * float(lk.get("rate", 1.0))
-	return {"clip": clip, "t": minf(at, lib.get_animation(clip).length - 0.001), "fade": float(lk.get("fade", FADE))}
+	act_out = float(lk.get("settle", LOCKIN_SETTLE))
+	var fade := float(lk.get("fade", LOCKIN_FADE))
+	return {"clip": clip, "t": minf(at, lib.get_animation(clip).length - 0.001), "fade": fade}
 
 ## How long a Hero's lock-in pose runs (s); 0 for one that has none.
 static func lockin_dur(art_name: String) -> float:
@@ -384,10 +390,11 @@ func step(dt: float) -> void:
 		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
-		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
+		act_w = move_toward(act_w, 0.0, dt / act_out)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
+			act_out = FADE_LOCO
 	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
 	_p("act/blend_amount", xf)
 	_p("upper/blend_amount", up_w)

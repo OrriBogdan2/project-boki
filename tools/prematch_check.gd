@@ -146,8 +146,14 @@ func _lockin(main: Node) -> void:
 			continue
 		var art := WardenGlb.art(ak)
 		var clips: WardenClips = stage.model.get_node("Warden/Sync").get("clips")
-		var clip := String(WardenClips.data(art).get("lockin", {}).get("clip", ""))
-		ok(clips != null and clips.lib.has_animation(clip), "%s: lock-in clip '%s' is in its model" % [ak, clip])
+		var lk: Dictionary = WardenClips.data(art).get("lockin", {})
+		var clip := String(lk.get("clip", ""))
+		var has_clip := clips != null and clips.lib.has_animation(clip)
+		ok(has_clip, "%s: lock-in clip '%s' is in its model" % [ak, clip])
+		if not has_clip:
+			continue
+		var reach := float(lk.get("from", 0.0)) + float(lk.get("dur", 0.0)) * float(lk.get("rate", 1.0))
+		ok(reach <= clips.lib.get_animation(clip).length + 0.01, "%s: the pose's window ends inside '%s'" % [ak, clip])
 		stage.play_lockin()
 		for _i in 10:
 			stage.tick(0.05)
@@ -163,4 +169,7 @@ func _lockin(main: Node) -> void:
 		stage.tick(0.05)
 		var state: Dictionary = stage.model.get_meta(WardenClips.STATE)
 		ok(stage.lockin_t < 0.0 and not state.has("lockin_t"), "%s: back to its idle after the pose" % ak)
+		for _i in 12:
+			stage.tick(0.05)
+		ok(clips.act_w == 0.0, "%s: settled fully into its idle 0.6 s after" % ak)
 	stage.queue_free()

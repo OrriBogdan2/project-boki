@@ -27,7 +27,7 @@
 		"ostra_empower": {"clip": "empower"},
 		"mf_xform": {"clip": "fuse"}
 	},
-	"lockin": {"clip": "emote", "dur": 1.4, "rate": 1.7},
+	"lockin": {"clip": "emote", "dur": 1.45, "rate": 1.6},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.6, "stun": "stun", "emote": "emote", "hit": {"front": "hit", "back": "hit", "dur": 0.35}},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "x_fan", "x_jaw", "x_brow.L", "x_brow.R", "x_cheek.L", "x_cheek.R",

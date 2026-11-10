@@ -20,10 +20,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
-- `lockin`: the pre-match lobby pose when you pick the Hunter ({clip, from (s, 0), dur (s, 1-1.5), rate}): a window of an
-  existing clip, then the idle. Today every Hunter plays its `emote` sped up to 1.4 s. The art lane owes bespoke beats
-  (a real clip each): Vex flips her coin, Kael rests the sword on his shoulder, Lace pulls a thread taut, and one per
-  Hunter from its personality.
+- `lockin`: the pre-match lobby pose when you pick the Hunter ({clip, from (s, 0), dur (s, 1-1.5), rate, fade (s in,
+  0.2), settle (s back to the idle, 0.35)}): a window of an existing clip at about its own speed, then the idle. Each
+  Hunter's beat: Vex flips the coin and catches it, Kael hoists the sword onto his shoulder (his `stance`), Lace draws
+  the string taut (`draw`), Motley slams his lid and bursts out bowing, Sable spins her pistols into a stage bow, Neve
+  spins on the spot, Meeko grins at her lantern and hops, Sparkle cocks finger guns, Tenzo tosses and catches a pebble,
+  Cinder cackles over a flame, Albert laughs and pats his hull, Grimble rears up at his monocle. The art lane owes real
+  clips for the weakest: Kael's hoist (today a crossfade into `stance`), and Vex's coin and Tenzo's pebble, both too
+  small to read at the lobby's stage size.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree

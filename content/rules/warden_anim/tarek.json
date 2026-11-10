@@ -106,7 +106,7 @@
 			"hold_from": 0.22
 		}
 	},
-	"lockin": {"clip": "emote_toss", "dur": 1.4, "rate": 1.6},
+	"lockin": {"clip": "emote_toss", "from": 0.15, "dur": 1.45, "rate": 1.0},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
