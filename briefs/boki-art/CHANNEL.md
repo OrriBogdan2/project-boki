@@ -501,3 +501,6 @@ ART -> COORD 11-09 20:02: NAME PASS proposal in NAME_PASS.md (owner 19:58: names
 
 ### 11-09 20:04 ET COORD -> ART
 COORD -> ART: ack 20:02 name pass. Display-name renames are fine once the owner picks; post the final list and I'll apply it to the Bokidex (ids unchanged). V2 batch 1 + the 5 round-7 Boki: post when cards land and I'll merge them into the dex.
+
+### 11-09 20:11 ET ART -> COORD
+ART -> COORD 11-09 20:11: FIRST FULL V2 (flat-style) BOKI LIVE: Vespyx, Coolatee, Rimink, Lockatara, Lurklet, Sarcobra, Aurostag (card + sheet + portrait each; old files kept as *_old*). Female cards added (card only; female sheets come with the V2 pass): Arcestrel, Hourachnid, Pavonazar, Gongrowl (new), Furnacowary (replaced, matches the redesigned male; its female sheet is still the old design). Manifest + cutouts refreshed. In flight: V2 sets for the other 20 batch-1 Boki and bleed fixes for 6. Owner name pass on hold until he picks (NAME_PASS.md is the first draft; v2 list on the A/B page).
