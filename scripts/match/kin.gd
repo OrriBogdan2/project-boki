@@ -97,6 +97,7 @@ var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
+var proc_at := -9.0               # match time its wisp last chirped for an on-shot passive (KinWispProc)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
 var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)

@@ -250,6 +250,7 @@ const CHECKS := {
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
+	"--wisp-proc-sfx-check": ["res://tools/wisp_proc_sfx_check.gd", "wisp_proc_sfx_check", null],  # KinWispProc
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],  # decision 0040
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],  # BotKin.summon
 	"--wisp-clear-shots": ["res://tools/wisp_clear_shots.gd", "wisp_clear_shots", null],  # --shots-dir=<dir>, GPU
