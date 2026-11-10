@@ -23,12 +23,20 @@ its worth is the escape and the Static) knocks back about 1 bh and adds 1 Static
 source's 37.5 s at our pace, 42 s. Ranges use 1 body
 height = 1.8 m: bolt and rod lane 13 m (about 7.5 bh), Wirerun 7.5 to 13 m (owner item 70; not scaled by the dash feel), Skycall circle 1.5 m radius.
 
-## Ranks (kit data pass)
-Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own: Storm Rod throw +50% damage
-(`rmb.rank3_mult`; the source's rank IV is +50%), Wirerun's own hit doubles (`dash.rank3_mult`; the source's rank IV is
-+100% on the non-passive dash damage, so the Blowout does not grow), Skycall cooldown -3s. The source has three
-upgrades before the last one (+20% damage and -1s on the spear, -0.75s on Surge, +25% on the strike); our rank system has
-one shared step and one special, so those collapse into the shared step.
+## Ranks: tier table (source: Joule)
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB bolt | none | none | none | - | - | - |
+| RMB Storm Rod (8s; [D] 10s) | +20% damage, -1s | +20% damage, -1s | +50% damage | 7.2s, damage +20% | 6.4s, damage +90% (+40%, then +50%) | `rank_dmg.sec` |
+| Shift Wirerun (8s; [D] 9s) | -0.75s | -0.75s | +100% non-passive dash damage | 7.3s | 6.7s; the run's own hit x2 (the Blowout does not grow) | `dash.rank3_mult` (`run_rank_k`) |
+| E Skycall (10.5s; [D] 12s) | +25% damage | +25% damage | -3s cooldown | 10.5s, damage +25% | 7.9s (a quarter off: 3 of 12), damage +50% | `rank_cd.kin` |
+| Passive Static | none | none | none | - | - | - |
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
 Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md at 5 fps. Asserted in `--mage-combo-check`

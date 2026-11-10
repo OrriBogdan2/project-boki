@@ -19,6 +19,21 @@ Sources (gameplay facts only, written in our own words):
 Where they disagreed: one guide attributes the pull, Anti-Heal and shield to the bolt; the wiki puts them on the shield ability,
 which is what we follow. Latest version chosen.
 
+## Ranks: tier table (source: Felix)
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` / `rank_shield` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB Torch Lance | none | none | none | - | - | - |
+| RMB Cinder Shot (7s; [D] 9s) | +25% damage, -1.5s | +25% damage, -1.5s | +1 charge | 5.8s, damage +25% | 4.7s, damage +50%, 2 charges | `rmb.rank3_charges` (`rmb_charges`) |
+| Shift Soot Ram (9s; [D] 9s) | -0.75s | -0.75s | +40 base damage, +75 move speed and a 150 shield for 2s on hit | 8.25s | 7.5s; on hit +4.3 damage (40 of 150), +16% speed and a shield of 11.6% health for 2s | `dash.rank3_*` (the ram hit) |
+| E Furnace Cloak (10.5s; [D] 13s) | +25% damage, +25% shield, -2s | +25% damage, +25% shield, -2s | +30% shield | 8.9s, damage and shield +25% | 7.3s, damage +50%, shield +80% | `rank_shield.kin` |
+| Passive Flashover (Ignite) | none | none | none | - | - | - |
+
 ## Scaling
 Source hero 1367 HP against our heavy 193 HP: damage about x0.13 (flamethrower 205/s -> 27/s). Cooldowns about x0.8. The
 ability damages keep the source's ratios to each other: bolt : ram : cloak = 248 : 279 : 117 (footage) -> 14 : 16 : 7.

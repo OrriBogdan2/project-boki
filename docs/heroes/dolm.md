@@ -16,6 +16,21 @@ Rock Hop (first Rubble Leap), Rockwave -> Stone Row; the hero Dolm -> Breah, own
   he raises, the skateboard/parkour idea. See Rock Hop below; the crash and the rolling rock stay on the last landing.
 - Copied: structure, timing ratios and interactions. Not copied: names, text, raw numbers, art, sound.
 
+## Ranks: tier table (source: Tetra (read at level 15))
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB punch and boulder | none | none | none | - | - | - |
+| RMB Quakefall (11s; [D] 11s) | +50 damage, -1s | +50 damage, -1s | slamming foes or rocks grants a Molten Guard stack | 10s, damage +24% (+50 on [S] about 208) | 9s, damage +48%, an 18 shield stack per slam (up to 4) | `breah_slam.gd` (`guard_stack` at sec rank 3) |
+| Shift Rock Hop (12s; [D] 12s) | -2s | +1 charge | the dash lasts 33% longer | 10s | 10s, a second charge, each hop a third further | `extra_dashes`, `dash.speed_k` (breah_hop.gd) |
+| E Stone Row (12.5s; [D] 12.5s) | -1s | -1.5s | an extra rock wall | 11.5s | 10s, an extra row behind the first | `rock_cap` / the row count at kin rank 3 |
+| Passive Molten Guard | none | none | none | - | - | - |
+
 ## Design
 Weight Medium (145 hp). Fixed weapon Rubble Fists (`content/weapons/rubble_fists.json`): a huge basalt gauntlet on each fist,
 with magma cracks (shaders/molten_rock.gdshader), knuckle studs and a hot core (scripts/match/hero_arms.gd); the gauntlets
@@ -212,14 +227,13 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 | Tetraform terrain lasts longer per rank (+2.5s at levels 2 and 3) | wiki | no | not built: our X has no ranks |
 | Landslide rock shoves enemies toward the abyss (dunk setup) | footage tip "Dash -> RMB Dunk Combo" | yes (0965-1010) | built as the leap's landing crash (a shove with a lift) and the rock rolling on |
 | Rock Molten Guard shield per rock fired (2.00 passive) / hitting your rocks with the punch gives a shield | patch 2.00 notes, owner's tooltip data | no | built (data pass) as the base passive: one stack per punch |
-| Landslide: 12s, -2s / +1 charge / dash 33% longer | owner's tooltip data | no | built: 12s (10.2s at rank 2 by the shared recharge step), a second charge and the third further at rank 3 |
+| Landslide: 12s, -2s / +1 charge / dash 33% longer | owner's tooltip data | no | built: 12s (10s at ranks 2 and 3), a second charge and the third further at rank 3 |
 
 ## Data pass (SERVER_UPDATE7, owner's tooltip data)
 - Molten Guard is the base passive (above); the slam's rank-3 stacks are the data's "slamming enemies or rocks grants a stack".
 - The slam reset on a knock or kill is removed (Volcano Crusher has none).
-- The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10.2s (the shared -15% step; the data's -2s), rank 3
-  adds the second charge (the data's +1 charge) and the third-further reach (its +33%) on top of the shared step (8.4s per
-  charge, faster than the data's 10s: the shared rank step cannot be switched off for one hunter).
+- The leap rests 12s (was 9s; durations match directly); rank 2 recharges in 10s (the data's -2s), rank 3 adds the second
+  charge (+1 charge) and the third-further reach (+33%) at the same 10s per charge (see Ranks: tier table).
 - Allies climbing the rocks: the data pass let any hunter jump onto a rock; owner review item 25 replaced that: only the
   rock's caster climbs it (see Rock ownership).
 - Not touched: the X wiring and numbers (45s as in the data), the slam and Stone Row cooldowns (9s and 13s against the
