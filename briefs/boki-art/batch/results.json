@@ -72565,5 +72565,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/fam_ringrove_a_4.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_mint",
+    "name": "Chandelotl colour scheme: mint",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_mint_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_glaivyx_white",
+    "name": "Glaivyx V2 (white inner fur)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2g_glaivyx_white_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_ringrove_tilt",
+    "name": "Ringrove (head tilt to camera)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2g_ringrove_tilt_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cindermaw_circle",
+    "name": "Cindermaw (V2 new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_cindermaw_circle_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_glaivyx_white",
+    "name": "Glaivyx V2 (white inner fur)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2g_glaivyx_white_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_glaivyx_white",
+    "name": "Glaivyx V2 (white inner fur)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2g_glaivyx_white_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_gold",
+    "name": "Chandelotl colour scheme: gold",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_gold_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cindermaw_circle",
+    "name": "Cindermaw (V2 new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_cindermaw_circle_1.jpg",
+    "ok": true
   }
 ]
