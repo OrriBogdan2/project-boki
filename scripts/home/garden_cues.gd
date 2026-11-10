@@ -43,9 +43,9 @@ static func ring(inner: float, outer: float) -> TorusMesh:
 	t.ring_segments = 4
 	return t
 
-static func box(size: Vector3) -> BoxMesh:
+static func box(dims: Vector3) -> BoxMesh:
 	var b := BoxMesh.new()
-	b.size = size
+	b.size = dims
 	return b
 
 ## The cue's own root under the home, so clear() frees all of it at once.
@@ -114,8 +114,10 @@ class ShoveCue:
 	func _init(parent: Node3D, stump_at: Vector3) -> void:
 		root = GardenCues.root_in(parent, "ShoveCue")
 		root.position = stump_at + Vector3(0, HEIGHT, 0)
-		GardenCues.piece(root, GardenCues.box(Vector3(HALF * 2.0, THICK, THICK)), GardenCues.glow(GardenCues.VOID, 0.55), Vector3.ZERO)
-		GardenCues.piece(root, GardenCues.box(Vector3(0.04, THICK * 2.5, THICK * 1.4)), GardenCues.glow(Color.WHITE, 0.8), Vector3.ZERO)
+		var track := GardenCues.box(Vector3(HALF * 2.0, THICK, THICK))
+		GardenCues.piece(root, track, GardenCues.glow(GardenCues.VOID, 0.55), Vector3.ZERO)
+		var middle := GardenCues.box(Vector3(0.04, THICK * 2.5, THICK * 1.4))
+		GardenCues.piece(root, middle, GardenCues.glow(Color.WHITE, 0.8), Vector3.ZERO)
 		fill_mat = GardenCues.glow(GardenCues.TEAL, BRIGHT)
 		fill = GardenCues.piece(root, GardenCues.box(Vector3.ONE * THICK * 1.3), fill_mat, Vector3.ZERO)
 		update(0.0)

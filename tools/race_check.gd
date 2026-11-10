@@ -189,7 +189,8 @@ func _on_base() -> void:
 			k.erase("indoors")
 		race.use()
 		ok(race.run != null and race.runners.size() >= 2, "on: a race starts with %d Boki" % race.runners.size())
-		ok(race.cue != null and race.cue.mats.size() == 3 and race.cue.lit == 0, "cue: three unlit cheer marks and a finish line with the lap")
+		var fresh: bool = race.cue != null and race.cue.mats.size() == 3 and race.cue.lit == 0
+		ok(fresh, "cue: three unlit marks and a finish line with the lap")
 		if race.run != null:
 			race.bar.m = race.bar.zone        # a press right on the gold
 			var press := InputEventAction.new()
