@@ -83772,5 +83772,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_pickadactyl_big_1.jpg",
     "ok": true
+  },
+  {
+    "id": "on_forgebrock_big",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_forgebrock_big_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_shinobant_dark",
+    "name": "Shinobant (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_shinobant_dark_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_shinobant_dark",
+    "name": "Shinobant (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_shinobant_dark_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_forgebrock_big",
+    "name": "Forgebrock (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_forgebrock_big_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glaciatee_big",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_glaciatee_big_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_cisternmander_fam",
+    "name": "Cisternmander (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_cisternmander_fam_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pickadactyl_big",
+    "name": "Pickadactyl (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_pickadactyl_big_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glaciatee_big",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_glaciatee_big_3.jpg",
+    "ok": true
   }
 ]
