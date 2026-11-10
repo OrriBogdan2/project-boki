@@ -5,7 +5,8 @@ extends RefCounted
 ##   1. each hint shows once, within a second of its moment, and not before it
 ##   2. never in the first 2 s of a fight (a foe close or targeting you)
 ##   3. never more than one hint line on screen
-##   4. after a save round-trip, a second expedition shows none of them again
+##   4. the Heartspark's two lines (charged, carried) show once each, in that order
+##   5. after a save round-trip, a second expedition shows none of them again
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -93,7 +94,7 @@ func _log() -> void:
 	elif _fight_t0 < 0.0:
 		_fight_t0 = _clock
 	var on: Array = []
-	for id in FirstTimeHint.ids("match"):
+	for id in FirstTimeHint.ids("match") + FirstTimeHint.ids("heart"):
 		var line := FirstTimeHint.text(String(id))
 		if lines.any(func(l): return l.contains(line)):
 			on.append(id)
@@ -135,16 +136,36 @@ func _expedition(first: bool) -> void:
 	_check("crouch", "match time 41 s on open ground", _moment(func(): _pin = 41.0), "crouch")
 	_check("orders", "Boki sent 14 m out", _moment(_send_boki), "orders")
 	_check("utility", "foe close: nothing for 2 s, then the line", _fight(), "utility")
+	_heartspark()
 	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
 	_check("after", "everything seen: quiet", _moment(func(): pass, 5.0), "")
-	var all: Array = FirstTimeHint.ids("match")
+	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("heart")
 	ok(all.all(func(id): return FirstTimeHint.seen(String(id))), "every match hint is marked seen in the save")
 	var ids: Array = shown.map(func(s): return s["id"])
 	var early := shown.filter(func(h): return h["fight_age"] >= 0.0 and h["fight_age"] < 2.0)
 	ok(early.is_empty(), "no hint in the first 2 s of a fight (%s)" % str(early.map(func(h): return h["id"])))
 	ok(max_on_screen <= 1, "never more than one hint on screen (max %d)" % max_on_screen)
 	ok(_unique(ids), "each hint showed once (%s)" % ",".join(ids))
+
+## The Heart is charged: the first line comes once; taking the Heartspark brings the second, once; a
+## drop and a second pick-up say nothing more.
+func _heartspark() -> void:
+	var ht: Heart = m.heart
+	ok(ht != null and ht.site != Vector3.INF, "the match has a Heart")
+	_check("spark", "the Heartspark is charged", _moment(_charged), "spark")
+	_check("carry", "you take the Heartspark", _moment(ht._pick.bind(p)), "carry")
+	_check("heart-again", "dropped and taken again", _moment(_drop_and_take), "")
+	ht.carrier = null
+	ht.state = "charging"
+
+func _charged() -> void:
+	m.heart.spark_pos = m.heart.site
+	m.heart.state = "ready"
+
+func _drop_and_take() -> void:
+	m.heart._drop(p.pos)
+	m.heart._pick(p)
 
 func _unique(a: Array) -> bool:
 	var seen := {}
@@ -247,6 +268,9 @@ func _second_expedition() -> void:
 	p.chest_keys = 1
 	p.gain_xp(float(Hunter.XP_TO[1]))
 	m.spawn_gear(String(Gear.ALL.keys()[0]), 1, p.pos + Vector3(2, 0, 0))
+	_charged()
+	_secs(1.5)
+	m.heart._pick(p)
 	_over_void()
 	_secs(10.0)
 	ok(shown.is_empty(), "after a reload none of them shows again (%s)" % str(shown.map(func(s): return s["id"])))

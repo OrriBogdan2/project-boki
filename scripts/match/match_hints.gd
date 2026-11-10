@@ -34,7 +34,7 @@ func tick(dt: float) -> void:
 	_poll_t = float(r["poll_s"])
 	if _hint_up() or (_fight_t >= 0.0 and _fight_t < float(r["fight_quiet_s"])):
 		return      # one line on screen at a time, and none in the first seconds of a fight
-	for id in FirstTimeHint.ids("match"):
+	for id in FirstTimeHint.ids("match") + FirstTimeHint.ids("heart"):
 		if FirstTimeHint.seen(id) or (m.tut != null and id in REAL_ONLY):
 			continue
 		if _due(String(id), p, r):
@@ -58,6 +58,8 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"key": return p.chest_keys > 0
 		"uplink": return _outpost(p, "idle", float(r["outpost_m"]))
 		"defend": return _outpost(p, "charging", float(r["outpost_m"]))
+		"spark": return m.heart != null and m.heart.state == "ready"
+		"carry": return m.heart != null and m.heart.state == "carried" and m.heart.carrier == p
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
 	return false
 

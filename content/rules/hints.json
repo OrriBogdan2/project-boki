@@ -1,5 +1,5 @@
 {
- "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration).",
+ "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match and heart (the Heartspark's two lines, not part of the old tutorials, so the v12 -> v13 migration leaves them): shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration).",
  "match": {
   "exdash": "Too far? Jump, then press {dash} in mid-air",
   "crouch": "Hold {crouch} to crouch and see farther",
@@ -20,6 +20,10 @@
   "sell": "Sell crops at the Market for gems",
   "hob": "Hob the builder is at the stall: press {interact} to talk"
  },
+ "heart": {
+  "spark": "The Heart is charged. Take the Heartspark to a Heart Gate for a big reward.",
+  "carry": "Everyone can see you. Reach a Heart Gate."
+ },
  "when": {
   "exdash": "you are in the air over the void",
   "crouch": "a while into a match, standing on open ground",
@@ -31,6 +35,8 @@
   "uplink": "you walk near an outpost that can start",
   "defend": "an uplink of yours is charging",
   "goexit": "a few minutes into a match with no outpost close",
+  "spark": "the Heartspark is charged and nobody carries it",
+  "carry": "you carry the Heartspark (the Heart Gate is marked)",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
   "task": "the house stands and no Boki has a job",

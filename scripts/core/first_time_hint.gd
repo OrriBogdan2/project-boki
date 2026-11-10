@@ -9,7 +9,7 @@ extends RefCounted
 static func rules() -> Dictionary:
 	return Content.rules("hints")
 
-## Every hint id of a group ("match" or "farm").
+## Every hint id of a group ("match", "farm" or "heart").
 static func ids(group: String) -> Array:
 	return (rules().get(group, {}) as Dictionary).keys()
 
@@ -31,7 +31,7 @@ static func mark(id: String) -> void:
 ## The hint's line with the player's own keys and Boki name ("" for an unknown id).
 static func text(id: String) -> String:
 	var raw := ""
-	for g in ["match", "farm"]:
+	for g in ["match", "farm", "heart"]:
 		raw = String((rules()[g] as Dictionary).get(id, raw))
 	if raw.contains("{rank}"):
 		raw = raw.replace("{rank}", TutorialText.rank_combo())

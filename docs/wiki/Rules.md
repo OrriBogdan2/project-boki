@@ -350,16 +350,52 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Fiv
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## heart (`content/rules/heart.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Heart loop (docs/decisions/0023-heartspark.md; scripts/match/heart.gd). Every number of the prototype lives here. Seconds and metres. |
+| charge_s | 75 |
+| _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
+| cool_s | 90 |
+| _cool_s | after a carrier extracts, the Heart cools down this long, then charges a new Heartspark (owner: start at 90 s) |
+| pickup_hold_s | 1.5 |
+| _pickup_hold_s | hold interact (F) on a charged Heartspark this long to take it |
+| pickup_r | 2.2 |
+| carrier_slow | 0.15 |
+| _carrier_slow | the carrier moves this much slower (owner: about 15%) |
+| carrier_reveal | True |
+| _carrier_reveal | the carrier shows on every player's map and in the world while they hold it |
+| gate_dist | 24 |
+| _gate_dist | the Heart Gate stands this far from the Heart, on solid ground |
+| gate_r | 2.4 |
+| gate_hold_s | 2.5 |
+| _gate_hold_s | the carrier holds interact at the open gate this long to leave with the Heartspark |
+| tide_start_s | 15 |
+| tide_close_s | 240 |
+| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this |
+| tide_r0 | 130 |
+| tide_r1 | 34 |
+| tide_boost | 0.55 |
+| _tide_boost | added to the Blight's strength outside the tide ring (so they hit harder and are tougher there), scaled by how far out |
+| tide_heat | 0.06 |
+| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
+| reward | {"seeds": {"emberberry": 2, "sunroot": 2, "mindmint": 2, "tidebloom": 2}, "_seeds": "the four evolution foods, so any affinity can be pushed", "goods": {"heartwood": 1, "starstone": 1}, "_goods": "rare evolution materials (market goods)", "trust": 12.0, "_trust": "bond/trust added to the carrier's Boki (and each Boki that stood with the squad gets a share)", "gems": 60} |
+| demo_charge | 1 |
+
 ## hints (`content/rules/hints.json`)
 
 
 
 | Setting | Value |
 |---|---|
-| doc | One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration). |
+| doc | One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match and heart (the Heartspark's two lines, not part of the old tutorials, so the v12 -> v13 migration leaves them): shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration). |
 | match | {"exdash": "Too far? Jump, then press {dash} in mid-air", "crouch": "Hold {crouch} to crouch and see farther", "pickup": "Gear! Walk over it to pick it up", "orders": "Tap {throw} to call {boki} back. Hold it for orders", "rank": "Skill point! Press {rank} to rank it up", "utility": "Press {secondary} for your other ability", "key": "A key! Hold {interact} at a chest to open it", "uplink": "Stand in the outpost's circle to start the uplink", "defend": "Stay in the circle until the lift opens", "goexit": "Outposts get you off the island. Look for one"} |
 | farm | {"stone": "The house needs stone too: hold {interact} at a rock", "hammer": "Hold {interact} at the house to hammer it up", "task": "Click {boki} to give it a job", "buy": "Out of seeds? Buy more at the Market", "sell": "Sell crops at the Market for gems", "hob": "Hob the builder is at the stall: press {interact} to talk"} |
-| when | {"exdash": "you are in the air over the void", "crouch": "a while into a match, standing on open ground", "pickup": "gear lies within a few metres", "orders": "your Boki is out fighting for the first time", "rank": "you have a skill point to spend", "utility": "a monster has been close for 2 s and you have not used your other ability", "key": "you pick up a chest key", "uplink": "you walk near an outpost that can start", "defend": "an uplink of yours is charging", "goexit": "a few minutes into a match with no outpost close", "stone": "the house is marked out and short of stone", "hammer": "the house is marked out", "task": "the house stands and no Boki has a job", "buy": "you are out of seeds", "sell": "you hold a crop", "hob": "the tutorial is over and you have not talked to Hob"} |
+| heart | {"spark": "The Heart is charged. Take the Heartspark to a Heart Gate for a big reward.", "carry": "Everyone can see you. Reach a Heart Gate."} |
+| when | {"exdash": "you are in the air over the void", "crouch": "a while into a match, standing on open ground", "pickup": "gear lies within a few metres", "orders": "your Boki is out fighting for the first time", "rank": "you have a skill point to spend", "utility": "a monster has been close for 2 s and you have not used your other ability", "key": "you pick up a chest key", "uplink": "you walk near an outpost that can start", "defend": "an uplink of yours is charging", "goexit": "a few minutes into a match with no outpost close", "spark": "the Heartspark is charged and nobody carries it", "carry": "you carry the Heartspark (the Heart Gate is marked)", "stone": "the house is marked out and short of stone", "hammer": "the house is marked out", "task": "the house stands and no Boki has a job", "buy": "you are out of seeds", "sell": "you hold a crop", "hob": "the tutorial is over and you have not talked to Hob"} |
 | near_m | 6 |
 | outpost_m | 14 |
 | goexit_s | 150 |
