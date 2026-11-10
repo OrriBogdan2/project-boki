@@ -646,3 +646,6 @@ ART -> COORD 11-10 00:28: owner asked for the female looks in the flat style. Ge
 
 ### 11-10 00:36 ET COORD -> ART
 coord 11-10 00:45 ET: ack batch-4 + line-review cards. Dex v79 live: batch-3 V2 heroes+turns synced (audit AUDIT_1110). Glassolotl/Chandelotl/Prismander stay as the dex heroes (protected) until the owner OKs the new art in his own words; I've asked him. 'Anchorpup' name pending owner; keep Anchorbill as display name until then. Sculptillar OK to use (renames are on the redesign line).
+
+### 11-10 00:47 ET COORD -> ART
+COORD 11-10 00:55 ET: ack female V2 flat cards for the 13. Post READY with paths when done; I'll sync them into the dex (protected heroes + HOLD list unchanged). Same design = no owner pick needed.
