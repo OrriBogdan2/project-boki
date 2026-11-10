@@ -194,4 +194,23 @@ Split into backlog items per Hunter (role build):
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `gunslinger`: slides 23 % at a run, near the gate's 25 %.
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
-- Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
+
+## Idle to walk start (Nov 9)
+
+The gap is the feet: the walk's first pose is a stride contact (feet 0.3 body heights apart on every Hunter that had a
+gap over 0.25), the idle stands with the feet together, so no idle edit closes it without a wide-legged idle. What the
+player sees is how much of it one frame shows, set by the loco blend rate. `loco.blend_rate` (1/s, default 12,
+`WardenClips.LOCO_RATE`) slows it per Hunter, and `--anim-audit` now reports `pop.idle_walk_step` = gap x (1 - e^(-rate/60))
+and fails a Hunter above 0.045 body heights. Rates: `dredge` 5.5, `ashwick` 6.5, `juggernaut` 7.5, `archer` 9,
+`gunslinger` 9, `mage` 10 (one frame 0.082 to 0.039 on `dredge`, the worst). The slower blend is about 0.2 s longer to
+settle on the worst two. Slide at a run and the counter-swing stayed inside the gate.
+
+Strips: `--anim-shots` has a `start` strip (idle to a run, first 0.27 s at 30 fps). Rows are before, after
+(`anim_audit/start_<id>.jpg`).
+
+![dredge start, before and after](anim_audit/start_dredge.jpg)
+![ashwick start, before and after](anim_audit/start_ashwick.jpg)
+![juggernaut start, before and after](anim_audit/start_juggernaut.jpg)
+![archer start, before and after](anim_audit/start_archer.jpg)
+![gunslinger start, before and after](anim_audit/start_gunslinger.jpg)
+![mage start, before and after](anim_audit/start_mage.jpg)

@@ -6,6 +6,7 @@
 		"rod.0": "hips", "rod.1": "hips", "rod.2": "hips", "rod.3": "hips", "rodlit.0": "rod.0", "rodlit.1": "rod.1", "rodlit.2": "rod.2", "rodlit.3": "rod.3"},
 	"blade": {"root": "anchor_gun_R", "tip": "weapon_muzzle"},
 	"loco": {
+		"blend_rate": 10,
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
