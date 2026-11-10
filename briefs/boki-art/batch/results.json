@@ -74252,5 +74252,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_siegephant_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_chuggamus",
+    "name": "Chuggamus (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_chuggamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chuggamus",
+    "name": "Chuggamus (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_chuggamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chuggamus",
+    "name": "Chuggamus (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_chuggamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_siegephant",
+    "name": "Siegephant (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_siegephant_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_siegephant",
+    "name": "Siegephant (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_siegephant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_chuggamus",
+    "name": "Chuggamus (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chuggamus",
+    "name": "Chuggamus (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_chuggamus",
+    "name": "Chuggamus (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_chuggamus_3.jpg",
+    "ok": true
   }
 ]
