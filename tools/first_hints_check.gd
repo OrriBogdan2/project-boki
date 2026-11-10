@@ -6,6 +6,8 @@ extends RefCounted
 ##   2. never in the first 2 s of a fight (a foe close or targeting you)
 ##   3. never more than one hint line on screen
 ##   4. after a save round-trip, a second expedition shows none of them again
+##   5. the first time a carried Boki's passive acts (a scripted proc on its wisp) its line shows once:
+##      "<Boki>'s <passive name>: <what it does>", not in the first 2 s of a fight, never on a later proc or save
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -40,16 +42,19 @@ func run(mn: Node) -> void:
 	Save.d["active"] = k["uid"]
 	_expedition(true)
 	_second_expedition()
+	_proc_expeditions()
 	_table()
 	print("FHC DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-func _start() -> void:
+func _start(extra := {}) -> void:
 	if m:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 1, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle", "no_drop": true})
+	var opts := {"teams": 3, "squad": 1, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle", "no_drop": true}
+	opts.merge(extra)
+	m.start(opts)
 	m.set_process(false)
 	p = m.player
 	for i in 4000:      # the ship, the jump, the drop
@@ -250,6 +255,61 @@ func _second_expedition() -> void:
 	_over_void()
 	_secs(10.0)
 	ok(shown.is_empty(), "after a reload none of them shows again (%s)" % str(shown.map(func(s): return s["id"])))
+
+## The first-proc hint on wisps (the passive acts: a shot with a damage carry passive). Case 1: a proc in
+## the first seconds of a fight waits them out. Case 2: a later proc says nothing. Case 3: nor after a reload.
+func _proc_expeditions() -> void:
+	_start({"boki_wisps": true})
+	_pin = QUIET_TIME
+	var k: Kin = p.kin
+	k.ks.carry_passives = [{"stat": "damage", "amount": 0.1, "category": ""}]
+	var line := FirstTimeHint.text("proc", {"boki": k.rec.get("name", ""), "passive": k.ks.carry_name,
+		"did": KinText.passives(k.ks.carry_passives)})
+	var head := "%s's %s: " % [k.rec.get("name", ""), k.ks.carry_name]
+	ok(k.ks.carry_name != "" and line.begins_with(head), "proc line: '%s'" % line)
+	_secs(1.0)
+	var mb := m.spawn_mob("skitter", p.pos)
+	mb.hp = 1e6
+	mb.max_hp = 1e6
+	mb.teleport(p.pos + Vector3(7, 0, 0))
+	_anchor = p.pos
+	_secs(0.5)
+	_proc_shot()
+	var early := _secs_until_line(line, 1.0)
+	ok(early < 0.0, "proc in a fight's first 2 s: nothing shows while it is quiet")
+	var at := _secs_until_line(line, 6.0)
+	ok(at >= 0.0, "proc held back, then told once the fight is 2 s old (%.1f s)" % at)
+	_anchor = Vector3.INF
+	mb.hp = 0.0
+	var result := "told after the quiet, once" if at >= 0.0 else "MISS"
+	_rows.append(["proc", "damage carry passive acts in a fight's first 2 s", result])
+	_pin += 2.0
+	_settle()
+	_proc_shot()
+	ok(_secs_until_line(line, 3.0) < 0.0, "a later proc of that save says nothing")
+	Save.d = JSON.parse_string(JSON.stringify(Save.d))
+	ok(FirstTimeHint.seen("proc"), "the proc hint survives the save round-trip")
+	_start({"boki_wisps": true})
+	_pin = QUIET_TIME
+	p.kin.ks.carry_passives = [{"stat": "damage", "amount": 0.1, "category": ""}]
+	_secs(1.0)
+	_proc_shot()
+	ok(_secs_until_line(line, 3.0) < 0.0, "after a reload a proc says nothing")
+
+## A shot by the player: the wisp's passive acts on it (WispProc reads the muzzle).
+func _proc_shot() -> void:
+	p.muzzle_t = 0.0
+	p.kin.render(Match.DT, 1.0)
+	p.muzzle_t = 0.05
+	p.kin.render(Match.DT, 1.0)
+
+## Plays up to `secs`; the seconds in when `line` was on the HUD lane, or -1.
+func _secs_until_line(line: String, secs: float) -> float:
+	for i in int(secs / Match.DT):
+		_step()
+		if m.hud.msgs.texts().any(func(t): return t.contains(line)):
+			return i * Match.DT
+	return -1.0
 
 func _table() -> void:
 	print("FHC TABLE hint | trigger | result")

@@ -3,6 +3,7 @@ extends RefCounted
 ## The match's one-time hints (FirstTimeHint, content/rules/hints.json "match"): the moves and rules the
 ## tutorial no longer stops for, each told in one toast the first time it matters (in the air over the
 ## void, a skill point, a chest key in hand, an idle outpost close by...). Match owns one and ticks it.
+## One more, "proc", is told by WispProc's cue: the first time a carried Boki's passive acts (DECISIONS 2026-11-09).
 
 const COL := Color("8fe3c7")
 ## Hints the tutorial match leaves for a real one (its outpost opens by itself and the course is short).
@@ -12,6 +13,7 @@ var m: Match
 var _poll_t := 0.0
 var _void_t := 0.0
 var _fight_t := -1.0      # s since a foe came close (-1: none close)
+var _proc: Dictionary = {}    # {kin, kind, t}: a carried passive acted and its hint waits for a quiet moment
 var _last := ""           # the line of the hint shown last, while it may still be on screen
 
 func _init(match_node: Match) -> void:
@@ -34,12 +36,37 @@ func tick(dt: float) -> void:
 	_poll_t = float(r["poll_s"])
 	if _hint_up() or (_fight_t >= 0.0 and _fight_t < float(r["fight_quiet_s"])):
 		return      # one line on screen at a time, and none in the first seconds of a fight
+	if _proc_due(float(r["proc_keep_s"])):
+		return
 	for id in FirstTimeHint.ids("match"):
 		if FirstTimeHint.seen(id) or (m.tut != null and id in REAL_ONLY):
 			continue
 		if _due(String(id), p, r):
 			FirstTimeHint.show(id, _say)
 			return      # one at a time
+
+## A carried passive of the player's own Boki just acted (WispProc): remember it for the first-proc hint.
+func proc(k: Kin, kind: String) -> void:
+	if m.tut == null and _proc.is_empty() and not FirstTimeHint.seen("proc"):
+		_proc = {"kin": k, "kind": kind, "t": m.time}
+
+## Tells the remembered proc, if it is still fresh and its Boki still rides: "<Boki>'s <passive>: <what it did>",
+## then the wisp flashes again so the eye finds it. True if shown.
+func _proc_due(keep_s: float) -> bool:
+	if _proc.is_empty():
+		return false
+	var k: Kin = _proc["kin"] if is_instance_valid(_proc["kin"]) else null
+	var fresh: bool = m.time - float(_proc["t"]) <= keep_s
+	if not fresh or k == null or k.dead or k.ks == null:
+		_proc = {}
+		return false
+	var mine: Array = k.ks.carry_passives.filter(func(ps): return String(ps["stat"]) in WispProc.KINDS[_proc["kind"]])
+	var passive := k.ks.carry_name if k.ks.carry_name != "" else "carry passive"
+	var words := {"boki": k.rec.get("name", "Your Boki"), "passive": passive, "did": KinText.passives(mine)}
+	FirstTimeHint.show("proc", _say, words)
+	WispProc.point(k)
+	_proc = {}
+	return true
 
 func _say(line: String) -> void:
 	_last = line

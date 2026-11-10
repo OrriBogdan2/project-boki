@@ -121,6 +121,8 @@ func _look(k: Kin) -> void:
 	_seen = true
 	if kind != "" and now >= _next:
 		_play(k, kind, to, now)
+		if h == k.m.player and k.m.hints != null:
+			k.m.hints.proc(k, kind)
 	_fade(now)
 
 ## Play a cue now: the flash at the wisp, the streak from it to `to`.
@@ -131,6 +133,12 @@ func _play(k: Kin, kind: String, to: Vector3, now: float) -> void:
 	_to = to
 	cues += 1
 	last_kind = kind
+
+## Flash again at the wisp's place, at the same target: the first-proc hint points here.
+static func point(k: Kin) -> void:
+	var p := k.get_node_or_null("Proc") as WispProc
+	if p != null and p.last_kind != "":
+		p._play(k, p.last_kind, p._to, k.m.time)
 
 func _fade(now: float) -> void:
 	var f := (now - _t0) / FLASH_S

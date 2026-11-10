@@ -1,5 +1,5 @@
 {
- "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration).",
+ "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration). carry: the line the first time a carried Boki's passive acts in a match ({passive} is its carry name, {did} what it does, from its own data; MatchHints.proc); it taught nothing that was cut, so the migration leaves it. proc_keep_s: a passive that acted while a hint could not show is still told for this long.",
  "match": {
   "exdash": "Too far? Jump, then press {dash} in mid-air",
   "crouch": "Hold {crouch} to crouch and see farther",
@@ -11,6 +11,9 @@
   "uplink": "Stand in the outpost's circle to start the uplink",
   "defend": "Stay in the circle until the lift opens",
   "goexit": "Outposts get you off the island. Look for one"
+ },
+ "carry": {
+  "proc": "{boki}'s {passive}: {did}"
  },
  "farm": {
   "stone": "The house needs stone too: hold {interact} at a rock",
@@ -45,5 +48,6 @@
  "void_s": 0.35,
  "sight_m": 40.0,
  "fight_quiet_s": 2.0,
+ "proc_keep_s": 6.0,
  "poll_s": 0.25
 }
