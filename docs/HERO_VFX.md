@@ -56,3 +56,11 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+
+## Ultimate ready glow
+`UltGlow` (scripts/match/ult_glow.gd): a Hunter whose ultimate (X) is unlocked and off cooldown carries a quiet rim glow in
+their archetype colour (`Arch.color`), visible to everyone; on the cast it flashes to full and fades in ~0.3 s, on top of the
+existing cast cue. One shader value, `hero_toon.gdshader`'s `ult_glow` (+ `ult_color` set with it), written to the body's
+materials only when it changes. The ready state rides the "st" hunter flags (`UltGlow.READY_BIT`, bit 19; older clients ignore
+it); the flash on other clients is the flag dropping. Not shown while downed, out or merged. `--ult-glow-check`; stills with
+`--ult-glow-shots --shots-dir=<dir>`.

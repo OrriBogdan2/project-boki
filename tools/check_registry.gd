@@ -103,6 +103,8 @@ const CHECKS := {
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
+	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],      # ready glow, cast flash
+	"--ult-glow-shots": ["res://tools/ult_glow_shots.gd", "ult_glow_shots", null],      # --shots-dir=<dir>
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
