@@ -183,6 +183,10 @@ func _tick(dt: float) -> void:
 		ult_look.tick(dt)
 
 # ------------------------------------------------------------------ LMB: Ice Dart
+## Her thin line to the cursor replaces the shared weapon line (it ran on to the darts' 10 m past the cursor).
+func own_aim_line() -> bool:
+	return true
+
 func lmb_override(held: bool, _dt: float) -> bool:
 	if not held:
 		burst_i = 0
