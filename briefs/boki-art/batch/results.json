@@ -89960,5 +89960,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_prismander_soft_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_ringrove_p2",
+    "name": "Ringrove (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_ringrove_p2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ringrove_p2",
+    "name": "Ringrove (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ringrove_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_sporcupine_g",
+    "name": "Sporcupine (new body, option g)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_sporcupine_g_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_buckleron_p2",
+    "name": "Buckleron (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_buckleron_p2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_sporcupine_f",
+    "name": "Sporcupine (new body, option f)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_sporcupine_f_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_buckleron_p2",
+    "name": "Buckleron (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_buckleron_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_chandelotl_p2",
+    "name": "Chandelotl (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_chandelotl_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_buckleron_p2",
+    "name": "Buckleron (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_buckleron_p2_2.jpg",
+    "ok": true
   }
 ]
