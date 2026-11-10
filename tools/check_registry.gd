@@ -11,9 +11,9 @@ const CHECKS := {
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
-	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart loop (docs/decisions/0023)
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
+	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart loop (docs/decisions/0023)
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--tutorial-text-check": ["res://tools/tutorial_text_check.gd", "tutorial_text_check", null],
@@ -49,8 +49,8 @@ const CHECKS := {
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],      # draw calls, tris, shadow lights, frame ms
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
-	"--squad-format-check": ["res://tools/squad_format_check.gd", "squad_format_check", null],      # the 10-trio format
 	"--far-ranges-check": ["res://tools/far_ranges_check.gd", "far_ranges_check", null],      # visibility ranges and far cliffs
+	"--squad-format-check": ["res://tools/squad_format_check.gd", "squad_format_check", null],      # the 10-trio format
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--anim-lod-check": ["res://tools/anim_lod_check.gd", "anim_lod_check", null],      # owner 11-08 expedition fps
 	"--hotpath-check": ["res://tools/hotpath_check.gd", "hotpath_check", null],        # owner 11-08 expedition fps
@@ -214,7 +214,8 @@ const CHECKS := {
 	"--farm-tut-time": ["res://tools/farm_tut_drive.gd", "farm_tut_drive", null],
 	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
-	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],      # PLAYTEST-1108 27/28/31
+	# item 27, 28, 31 of PLAYTEST-1108
+	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],      # fresh save to first run
 	"--hob-cam-strip": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],      # talk camera
@@ -260,12 +261,12 @@ const CHECKS := {
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
-	"--demo-quick-check": ["res://tools/demo_quick_check.gd", "demo_quick_check", null],      # quick starts
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
-	"--sparkle-dash-check": ["res://tools/sparkle_dash_check.gd", "sparkle_dash_check", null],  # Wirerun, no carry
 	"--capture-read-check": ["res://tools/capture_read_check.gd", "capture_read_check", null],      # scan beam, fill and pop as an observer sees them
 	"--camera-fast-check": ["res://tools/camera_fast_check.gd", "camera_fast_check", "check"],      # locked follow
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
+	"--demo-quick-check": ["res://tools/demo_quick_check.gd", "demo_quick_check", null],      # quick starts
+	"--sparkle-dash-check": ["res://tools/sparkle_dash_check.gd", "sparkle_dash_check", null],  # Wirerun, no carry
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

@@ -6,7 +6,6 @@ extends RefCounted
 ## channel, by the move's first key. Source numbers and the table: docs/heroes/thief.md, "Animation timing".
 
 const DT := 1.0 / 60.0
-const BOLA_CAST := [0.4, 0.6]       # s: footage, the lane's wind-up window
 const VAULT := [0.37, 0.57]         # s: footage, the cartwheel (the Vault's flip)
 const KNIFE_OUT := 0.2              # s: the dagger is in the air by one frame (0.2 s) of the spin
 const SEEN := 0.9                   # share of the clip on show by the move's first key
@@ -34,7 +33,7 @@ func run(a, m: Match, K: ThiefKit) -> void:
 
 ## The kit's own clocks, against the footage.
 func _kit(K: ThiefKit) -> void:
-	var cast := float(K.rmb_def()["bola"]["cast"])
+	var cast := float(K.rmb_def()["bola"].get("cast", 0.0))
 	var flip := float(HunterAnim.km_def("thf_vault_r")["keys"][-1][0])
 	var knife := HunterAnim.km_def("thf_knife")["keys"] as Array
 	var out_t := 1.0
@@ -42,8 +41,8 @@ func _kit(K: ThiefKit) -> void:
 		if (k[1] as Dictionary).has("fl") and absf(float((k[1] as Dictionary)["fy"])) > 6.0:
 			out_t = float(k[0])
 			break
-	A.ok("dancer timing: the bola winds up %.2f s (footage %.1f-%.1f s)" % [cast, BOLA_CAST[0], BOLA_CAST[1]],
-			cast >= BOLA_CAST[0] and cast <= BOLA_CAST[1])
+	# (the footage's 0.4-0.6 s whirl is overruled: owner 121c, the Bola is thrown on the press)
+	A.ok("dancer timing: the bola leaves on the press, no wind-up (%.2f s; owner 121c)" % cast, cast == 0.0)
 	A.ok("dancer timing: the cartwheel lasts %.2f s (footage %.2f-%.2f s)" % [flip, VAULT[0], VAULT[1]],
 			flip >= VAULT[0] and flip <= VAULT[1])
 	A.ok("dancer timing: the knife leaves the hand by %.2f s of its spin (footage: one frame)" % out_t,

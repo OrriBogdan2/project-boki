@@ -57,7 +57,8 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-squad="): squad = int(a.substr(14))
 		if a.begins_with("--bench-hunters="):
 			hunters = maxi(2, int(a.substr(16)))
-			teams = ceili(hunters / 2.0); squad = 2
+			teams = ceili(hunters / 2.0)
+			squad = 2
 		if a == "--boki-wisps": wisps = true
 	stress = "--bench-stress" in OS.get_cmdline_user_args()
 	if stress:
@@ -99,8 +100,8 @@ func _gate() -> int:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": teams, "squad": squad, "total": hunters, "raid": "ash", "blight": true, "no_drop": true,
-		"god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
+	o.merge({"teams": teams, "squad": squad, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)

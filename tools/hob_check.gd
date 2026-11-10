@@ -107,8 +107,8 @@ func _first_arrival() -> void:
 			and box.text.text == String(intro[0]["text"]), "his portrait, his name and his first line")
 	var talk_at: Vector3 = hob.chat.frame(home.ppos)
 	var drawn_m := talk_at.distance_to(home.ppos)
-	ok(is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM) and drawn_m <= 1.2,
-			"one gentle framing for the talk (zoom %.2f, focus %.1f m from you)" % [home.cam.zoom_to, drawn_m])
+	ok(is_equal_approx(home.cam.zoom_to, zoom0) and drawn_m <= 1.2,
+			"one gentle framing for the talk (zoom kept at %.2f, focus %.1f m from you)" % [home.cam.zoom_to, drawn_m])
 	await _shot("hob_3_dialogue_box", 0.9)
 	for i in 4:      # (each line: one click finishes typing it, the next moves on)
 		box.advance()
@@ -118,23 +118,23 @@ func _first_arrival() -> void:
 			"line by line; on the stall line he points at it")
 	await main.get_tree().create_timer(0.5).timeout
 	await _shot("hob_4_points_at_stall", 0.1)
-	ok(hob.chat.frame(home.ppos).is_equal_approx(talk_at) and is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM),
-			"the camera does not move for a stall he can point at from here")
-	hob.chat.show_at = home.ppos + Vector3(HobTalk.SHOW_FAR_M + 8.0, 0, 0)
+	ok(not hob.chat.show_far and hob.chat.frame(home.ppos).is_equal_approx(talk_at)
+			and is_equal_approx(home.cam.zoom_to, zoom0), "the camera does not move for a stall that is on screen")
+	var off: Vector3 = home.ppos + Vector3(60.0, 0, 0)      # (well off screen)
+	hob.chat._on_line(0, {"text": "", "at": off})
 	hob.chat.show_t = 1.2
 	var far_at: Vector3 = hob.chat.frame(home.ppos)
-	ok(far_at.x > talk_at.x + 2.0 and far_at.x < hob.chat.show_at.x - 4.0
-			and is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM),
-			"only a far-off show drifts it, part of the way, with no zoom change")
-	hob.chat.show_t = -1.0
+	ok(hob.chat.show_far and far_at.x > talk_at.x + 2.0 and far_at.x < off.x - 4.0
+			and is_equal_approx(home.cam.zoom_to, zoom0),
+			"only an off-screen show drifts it, part of the way, with no zoom change")
 	for i in intro.size() * 2:
 		if hob.chat.talking():
 			box.advance()
 	await _frames(3)
 	ok(not hob.chat.talking() and home.panel_open == "" and FirstTimeHint.seen("hob") and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
-	ok(FarmTutorial.current() == "chop" and is_equal_approx(home.cam.zoom_to, home.HOME_ZOOM),
-			"the goal is still chopping (you start with the axe), and the camera eased back")
+	ok(FarmTutorial.current() == "chop" and is_equal_approx(home.cam.zoom_to, zoom0),
+			"the goal is still chopping (you start with the axe), and the zoom is still yours")
 	await _frames(40)
 	hob.talk()
 	await _frames(2)

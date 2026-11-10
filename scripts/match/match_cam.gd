@@ -18,8 +18,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
-		var ps := m.ship_of(player)
-		var sd: Vector3 = ps.get("dir", Vector3.FORWARD)
+		var sd: Vector3 = m.ship.get("dir", Vector3.FORWARD)
 		cam.yaw_to = atan2(-sd.x, -sd.z)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
@@ -30,8 +29,8 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 			cam.yaw = cam.yaw_to
 			cam.zoom = cam.zoom_to
 		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
-		var fp := m.ship_pos_of(ps) + sd * 3.0
-		cam.follow(Vector3(fp.x, m.ship_pos_of(ps).y + 7.0, fp.z), delta, false)
+		var fp := m.ship_pos() + sd * 3.0
+		cam.follow(Vector3(fp.x, m.ship_pos().y + 7.0, fp.z), delta, false)
 	elif player and DropLaunch.locked(player):
 		# the launch: chasing the squad down its heading, the ship receding overhead (item 163)
 		var hd := Vector2(player.vel.x, player.vel.z)

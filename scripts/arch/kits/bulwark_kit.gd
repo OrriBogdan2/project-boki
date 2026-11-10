@@ -531,21 +531,6 @@ func _tick_aim_line() -> void:
 func own_aim_line() -> bool:
 	return h.wid == "tower_shield"
 
-## How far a tap throws the hammer: to the cursor, clamped to its range (m).
-func throw_dist() -> float:
-	var md := lmb_def()
-	return AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
-
-## His aim line (your screen only): out to where a tap lands the hammer, while it is in hand and not swinging.
-func _tick_aim_line() -> void:
-	if not h.is_local() or h.downed or h.wid != "tower_shield" or ult.planted():
-		return
-	if mace.is_empty() and lmb_t < 0.0:
-		AimKit.line(h, "aim", {"len": throw_dist(), "alpha": 0.7})
-
-func own_aim_line() -> bool:
-	return h.wid == "tower_shield"
-
 func _throw() -> void:
 	play("bul_throw")
 	var md := lmb_def()

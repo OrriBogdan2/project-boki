@@ -10,6 +10,7 @@ extends RefCounted
 ## rocks crumble whoever stands on them falls. Bond: a hunter slowed by the rise, or hit by one of its
 ## rocks while the bond window is open, counts as a land (HeroUlt.landed).
 
+const CRACK_COL := Color("3a7cff")
 const PREVIEW_COL := Color("d8ecff")
 const PUSH_PAD := 0.15                  # m past the rock's half thickness a body on the line is moved to
 
