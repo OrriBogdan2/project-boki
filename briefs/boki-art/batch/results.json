@@ -88280,5 +88280,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/fv2_murmuron_3.jpg",
     "ok": true
+  },
+  {
+    "id": "fv2_murmurling",
+    "name": "Murmurling female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_murmurling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_sandwidow",
+    "name": "Sandwidow female (V2 card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv2_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_murmurling",
+    "name": "Murmurling female (V2 card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv2_murmurling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_murmurling",
+    "name": "Murmurling female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_murmurling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_sandwidow",
+    "name": "Sandwidow female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_sandwidow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_hourachnid",
+    "name": "Hourachnid female (V2 card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv2_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_voltalon",
+    "name": "Voltalon female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_murmuron",
+    "name": "Murmuron female (V2 card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv2_murmuron_2.jpg",
+    "ok": true
   }
 ]
