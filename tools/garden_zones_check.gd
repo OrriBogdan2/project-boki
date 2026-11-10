@@ -8,7 +8,9 @@ extends RefCounted
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
-## opens its cards.
+## opens its cards. Thrive (step 8): a Boki leaning toward the zone's types (or with its trait over 0.6)
+## loses joy at half speed and trains +25% at the zone's toys; one that doesn't loses joy as before;
+## the zone's daily trait pull stops at 0.8 (calm Glasswater pulls temper down to 0.2).
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 
@@ -24,6 +26,7 @@ func run(m: Node) -> void:
 	_keys_part()
 	await _travel_part(m)
 	await _move_part(m)
+	_thrive_part()
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -187,3 +190,71 @@ func _cap_part() -> void:
 	ok(GardenZones.move(next, "glasswater") != "" and GardenZones.zone_of(next) == "bramblebank",
 		"with %d out in Glasswater, the next move is refused" % cap)
 	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")
+
+## Thriving is a lean in the zone's types or a matching trait over 0.6; joy, toy training and the daily pull follow.
+func _thrive_part() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	var rec := Save.new_kin("zapple", "Pip")
+	var other := Save.new_kin("zapple", "Fen")
+	var T: Dictionary = GardenZones.rules()["thrive"]
+	GardenZones.here = "cinderstep"
+	rec["lean"] = {"fire": 6.0}
+	other["lean"] = {"water": 6.0}
+	rec["traits"]["temper"] = 0.5
+	other["traits"]["temper"] = 0.5
+	ok(GardenZones.thrives(rec) and not GardenZones.thrives(other),
+		"a Boki leaning Fire thrives in Cinderstep, one leaning Water does not")
+	other["traits"]["temper"] = float(T["trait_over"]) + 0.05
+	ok(GardenZones.thrives(other), "a temper over %.1f thrives there too" % float(T["trait_over"]))
+	other["traits"]["temper"] = 0.5
+	var lost := [0.0, 0.0]
+	for i in 2:
+		var r: Dictionary = [rec, other][i]
+		r["needs"] = {"food": 90.0, "clean": 90.0, "energy": 90.0, "joy": 90.0}
+		Care.tick(r, 600.0)
+		lost[i] = 90.0 - Care.need(r, "joy")
+	ok(lost[1] > 0.0 and is_equal_approx(lost[0], lost[1] * float(T["joy_rate"])),
+		"thriving joy falls at %.1fx (%.1f vs %.1f)" % [float(T["joy_rate"]), lost[0], lost[1]])
+	GardenZones.here = "glasswater"
+	ok(GardenZones.thrives(other) and not GardenZones.thrives(rec),
+		"Glasswater: Water lean thrives, Fire with temper 0.5 does not")
+	rec["traits"]["temper"] = 0.2
+	ok(GardenZones.thrives(rec), "a calm Boki (temper 0.2) thrives in Glasswater")
+	_train_pull_part(rec, other)
+	GardenZones.here = ""
+	Content.rules("farm_build")["base_mode"] = false
+
+## Toy training +25% for a thriver (never less), and the daily pull stops at the limit.
+func _train_pull_part(rec: Dictionary, other: Dictionary) -> void:
+	GardenZones.here = "cinderstep"
+	rec["zone"] = "cinderstep"
+	var gain := [0, 0]
+	for i in 400:
+		gain[0] += GardenZones.train_gain(rec, 1)
+		gain[1] += GardenZones.train_gain(other, 1)
+	ok(gain[1] == 400 and gain[0] > 440 and gain[0] < 560,
+		"a thriver's toys train about +25%% (%d vs %d per 400)" % [gain[0], gain[1]])
+	var P: Dictionary = GardenZones.rules()["trait_pull"]
+	rec["traits"]["temper"] = 0.5
+	BaseDrift.day([rec])
+	ok(is_equal_approx(float(rec["traits"]["temper"]), 0.5 + float(P["per_day"])),
+		"a day in Cinderstep: temper +%.2f" % float(P["per_day"]))
+	for i in 60:
+		BaseDrift.day([rec])
+	ok(is_equal_approx(float(rec["traits"]["temper"]), float(P["stop_at"])),
+		"the pull stops at %.1f" % float(P["stop_at"]))
+	rec["traits"]["temper"] = 0.9
+	BaseDrift.day([rec])
+	ok(is_equal_approx(float(rec["traits"]["temper"]), 0.9), "a trait already past the limit is left alone")
+	GardenZones.here = "glasswater"
+	rec["zone"] = "glasswater"
+	rec["traits"]["temper"] = 0.5
+	for i in 60:
+		BaseDrift.day([rec])
+	ok(is_equal_approx(float(rec["traits"]["temper"]), 1.0 - float(P["stop_at"])),
+		"calm Glasswater pulls temper down and stops at %.1f" % (1.0 - float(P["stop_at"])))
+	var away := Save.new_kin("zapple", "Away")
+	var temper := float(away["traits"]["temper"])
+	BaseDrift.day([away])
+	ok(is_equal_approx(float(away["traits"]["temper"]), temper), "a Boki from another zone is not pulled")

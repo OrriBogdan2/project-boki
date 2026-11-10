@@ -14,9 +14,13 @@
 	"ask_chance_doc": "Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load).",
 	"ask_s": 25.0,
 	"ask_s_doc": "Seconds it waits at the pad with its bubble before it gives up and wanders off.",
+	"thrive": {"trait_over": 0.6, "joy_rate": 0.5, "train_bonus": 0.25},
+	"thrive_doc": "A Boki in a zone thrives when its strongest lean is one of the zone's types or the zone's matching trait is over trait_over (0..1). It then loses joy at joy_rate of the usual speed and the toys there train train_bonus more (a share of a stat point, as a chance). Nothing is taken from one that does not thrive.",
+	"trait_pull": {"per_day": 0.01, "stop_at": 0.8},
+	"trait_pull_doc": "Each in-game day a resident of the zone you are in moves its matching trait per_day toward the zone's way and never past stop_at (0..1). A zone with trait_low pulls the trait down toward 1 - stop_at (Glasswater: calm), and thrives on a low trait.",
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
-		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"},
+		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "trait_low": true, "game": "Spark Volley"},
 		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"},
 		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"},
 		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}

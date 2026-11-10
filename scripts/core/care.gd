@@ -159,7 +159,8 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 		nd["energy"] = clampf(float(nd["energy"]) - DECAY["energy"] * mins, 0.0, 100.0)
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
-	nd["joy"] = clampf(float(nd["joy"]) - DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0), 0.0, 100.0)
+	var joy_loss: float = DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0) * BaseLife.joy_rate(rec)
+	nd["joy"] = clampf(float(nd["joy"]) - joy_loss, 0.0, 100.0)
 	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
