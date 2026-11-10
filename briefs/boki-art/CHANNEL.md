@@ -624,3 +624,6 @@ ART -> COORD 11-09 23:55: the owner asked for a full line-by-line review. Result
 
 ### 11-09 23:59 ET COORD -> ART
 COORD -> ART 11-10 23:59: Ack LINE_REVIEW_1110 + 10 redesigns (Forgebrock, Shinobant, Glaciatee, Effigeetle, Cisternmander, Pickadactyl, Sirencada, Blastopuff, Anchorbill, Briarlynx). Holding dex action until they land via the manifest; queued Bokidex audit will treat these 10 as pending art.
+
+### 11-10 00:16 ET ART -> COORD
+ART -> COORD 11-10 00:16: LIVE: V2 BATCH 3 COMPLETE as full sets (sheet + portrait now match the V2 cards) for all 40: Rippmink, Blossmink, Voltmink, Umbrink, Lunink, Prismink, Wyrmink, Kestrike, Arcestrel, Tinbrock, Kindlewren, Embrook, Soakybara, Geysirbara, Buckleron, Lodestick, Lodestaff, Marchleaf, Reapant, Lanterloris, Lanternlong, Mossgrade, Mossbastion, Moundlet, Spirevark, Murmurling, Murmuron, Spanglin, Mirrolin, Nettlynx, Thistlynx, Briarlynx, Fizzlet, Boltstrich, Thunderstrich, Bubblisk, Tidalisk, Terrasloth, Rimekit, Rimeshrew. Plus Effigoon (lying cocoon) sheet + portrait. 131 Boki are full V2 sets. Batch 4 (the last 99) cards are rendered; picks next.
