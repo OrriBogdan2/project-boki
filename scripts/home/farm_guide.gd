@@ -6,6 +6,8 @@ extends RefCounted
 ## HobTalk). The rules are FarmTutorial; none of it shows when
 ## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
 
+const CHIP_GROW := 30.0      # px the top chips grow taller at double text size (hint_box sits under them)
+
 var h
 var tracker: PanelContainer = null
 var hint_box: PanelContainer = null
@@ -143,7 +145,7 @@ func _make_hint() -> void:
 	UI.set_card_border(hint_box, Color(UI.GOLD, 0.5), 1)
 	hint_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	hint_box.offset_top = 66      # under the top chips
+	hint_box.offset_top = 66 + roundi(CHIP_GROW * (UI.text_k - 1.0))      # under the top chips
 	var row := UI.hbox(14)
 	hint_box.add_child(row)
 	hint_lbl = UI.label("", 16, UI.INK, UI.semi)
