@@ -71,3 +71,4 @@ DROP-={'v2s_tiltster_pb','v2p_tiltster_pb'}
 # 21:58 ET 11-09 (new art session): Chimelop promoted in V2; its auto jobs must not run.
 DROP|={'chimelop_card','portrait_stance3_chimelop','stance_chimelop'}
 DROP|={'jerbit_card','jerbolt_card','dynaboa_card','bastling_card'}  # new V2 Boki: no auto card jobs
+DROP-={'v2k_glaivyx','v2k_ringrove'}  # 11-10: straight V2 cards for the last two starters-line finals

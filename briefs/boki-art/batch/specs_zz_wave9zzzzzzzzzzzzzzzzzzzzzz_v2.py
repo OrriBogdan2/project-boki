@@ -761,3 +761,45 @@ for _n,_st,_ar,_dk,_fu,_fx in _BT4:
     _cd='briefs/boki-art/cards/'+_n+'.jpg'
     SPECS.append({'id':'v2s_'+_n.lower()+'_b4','name':_n+' (V2 sheet, batch 4)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'))})
     SPECS.append({'id':'v2p_'+_n.lower()+'_b4','name':_n+' (V2 portrait, batch 4)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':2,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'),bool(_dk),bool(_fu))})
+
+# ===== 02:10 ET 11-10: line-review redesign picks live as cards: Forgebrock (big_4), Shinobant (dark_2), Glaciatee (big_1), Effigeetle caterpillar (cat_2),
+# Cisternmander (fam_4), Pickadactyl (big_1), Sirencada (big_3), Blastopuff (fam_3), Anchorbill pup (on_anchorbill_2), Briarlynx (big_2),
+# Glassolotl new pose (on_glassolotl_4), Lunowl dusk (dusk_2), Chandelotl (b4_3), Cindermaw (b4_1). Sheets + portraits from the new cards.
+_RDP={'Forgebrock':('final','tough',0,1,"standing on all fours, head low, forge chest glowing, about to charge"),'Shinobant':('mid','sleek',1,0,"crouched low, scythe held back, ready to dash"),
+ 'Glaciatee':('final','majestic',0,0,"rearing its head back and bellowing, ice tusks raised"),'Effigeetle':('baby','cute',0,0,"curled into a loose C shape, looking up at the viewer"),
+ 'Cisternmander':('final','tough',1,0,"walking forward slowly, heavy, head turned to the viewer"),'Pickadactyl':('final','tough',0,0,"perched and leaning forward, wings folded, pickaxe crest lowered like a weapon"),
+ 'Sirencada':('final','tough',0,0,"standing on all six legs, wing-cases half open, facing the viewer"),'Blastopuff':('final','tough',1,0,"puffed up even rounder, spikes out, fuse sparking, glaring"),
+ 'Anchorbill':('baby','cute',1,0,"flopped on its belly, flippers out, looking up happily"),'Briarlynx':('final','tough',0,1,"sitting upright like a guardian statue, bramble mane full, vine tail curled round its feet"),
+ 'Glassolotl':('mid','pretty',0,0,"swimming through the air in a long S-curve, facing left, tail fins trailing"),'Lunowl':('mid','pretty',0,1,"perched with its moth wings folded down like a cloak, head turned to the viewer"),
+ 'Chandelotl':('final','majestic',0,0,"reared up tall with its crystal hood spread wide, coils planted"),'Cindermaw':('final','creepy',1,1,"starting to circle the viewer, head low, one paw forward")}
+for _n,(_st,_ar,_dk,_fu,_pose) in _RDP.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_rd'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_rd'; SPECS[_n0+1]['runs']=2
+# Glaivyx and Ringrove: the _b4 ids did not build (dropped); new ids.
+for _n,_st,_ar,_dk,_fu,_fx in (('Glaivyx','final','sleek',0,1,"no dripping slime"),('Ringrove','final','majestic',0,1,"")):
+    SPECS.append({'id':'v2k_'+_n.lower(),'name':_n+' (V2 card, text-only style)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K','prompt':RS_CARD_TEXT(_n,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_fx)})
+
+# ===== 02:10 ET OWNER: "if you have any you're questioning, queue up a bunch of options, all different, and if none are better then leave it".
+# OPTIONS: 3 different directions x 2 runs for each design I flagged. ids opt_<name>_<a|b|c>. Nothing changes unless an option clearly beats the live card.
+def OPT(n,stage,arch,dark,furry,ref,opts):
+    for _k,_d in zip('abc',opts): ON_CHANGE(n,ref,stage,arch,dark,furry,_d,runs=2,tag='_'+_k); SPECS[-1]['id']='opt_'+n.lower()+'_'+_k
+OPT('Starcap','mid','cute',False,False,_C%'Polyshroom',[
+ "this is the MIDDLE evolution of the jelly-mushroom creature in image 1: the same soft cream slug body and sleepy face grown bigger, its glassy mint dome cap now split into five rounded points like a star, with longer lilac gill tentacles under it. It drifts forward.",
+ "this is the MIDDLE evolution of the creature in image 1: it has lifted off the ground and floats like a small jellyfish, its mint dome cap flattened into a five-pointed star seen from the side, its cream body shortened into a round core with its face on it, lilac tentacles trailing below.",
+ "this is the MIDDLE evolution of the creature in image 1: it walks on four stubby cream legs like a starfish-footed animal, taller, with a wide five-lobed mint and lilac star cap worn like a sun hat grown from its head, awake curious eyes."])
+OPT('Dynaboa','final','tough',False,True,_C%'Dynaboa',[
+ "a much bigger, heavier final form: a tall powerful jerboa standing planted on huge thick spring legs, broad chest, the two copper turbine fins grown into a wide four-blade fan across its back, a thick mane of static-charged white fur, a long whip tail with a heavy sparking tuft. Fierce and proud.",
+ "a different build: a long, low, fast runner on all fours like a hare at full stretch, with a row of five copper fins down its spine like a dynamo, ears swept back, tail streaming with sparks. Sleek and dangerous.",
+ "a majestic final form: sitting tall and calm like a guardian, twice the size of the middle form, its copper fins curved up behind its head like a halo ring with small white-blue sparks inside it, long ears upright, a heavy fur collar."])
+OPT('Galleotter','final','majestic',False,True,_C%'Oarter',[
+ "this is the FINAL evolution of the otter in image 1, and its ship parts are all grown from its own body: a huge sea otter floating on its back, its broad belly and ribs shaped like a ship's hull of its own dark fur and hide, the spines on its back grown into two rows of oar-shaped fins along its sides, and one tall sail-shaped back fin of skin raised like a mast. No wood, no ropes, no separate boat.",
+ "this is the FINAL evolution of the otter in image 1: a long sea-serpent otter rearing up out of nothing, its neck arched like a longship's prow with a curled figurehead crest grown from its skull, a row of oar-shaped fins down each side, and a wide tail like a rudder. All parts are its own body; no wood and no boat.",
+ "this is the FINAL evolution of the otter in image 1: a massive, planted river-otter chief on all fours, shoulders like a galley's bow, with six long oar-shaped fin spines fanned out from its back and a broad paddle tail held high. All parts are its own body; no wood and no boat."])
+OPT('Buckleron','baby','cute',False,False,_C%'Buckleron',[
+ "a much smaller, rounder, simpler baby: a tiny round toadlet that is mostly head, big yellow-green eyes, stubby legs, wearing its shell like a small dented pot lid that only covers the top of its head, one tiny shell bump instead of a spike. Sitting.",
+ "a tadpole-stage baby: a round olive tadpole body with a short tail and two tiny back legs, its small iron-grey shell just a domed cap on its back like a limpet, big curious eyes, bouncing.",
+ "a small shy baby toad mostly hidden inside its pointed shell, only its big eyes and two front feet peeking out from under the rim, the shell clean and simple with one small spike."])
+OPT('Wickapi','baby','cute',True,True,'briefs/boki-art/cards/Wickapi.jpg',[
+ "the same standing okapi calf with more charm: a slightly bigger head and much bigger purple eyes with large highlights, pink cheeks, big soft ears, a short tufted mane of small purple flame shapes down its neck, knobbly knees, a tiny candle stub on its head with one purple flame.",
+ "the okapi calf sitting down with its long striped legs folded under it, head tilted, big purple eyes, the small candle on its head with a wobbly purple flame, a wispy flame tail curled round it.",
+ "the okapi calf mid-prance, front legs lifted, happy open mouth, big purple eyes, two tiny candle-stub horns each with a small purple flame, striped legs, a flame tuft tail."])

@@ -633,3 +633,10 @@ COORD -> ART 11-10 00:40: ack V2 batch 3 (40 + Effigoon), 131 full V2 sets. A Bo
 
 ### 11-10 00:23 ET ART -> COORD
 ART -> COORD 11-10 00:23: V2 BATCH 4, CARDS LIVE: the last 99 Boki (Rimefang through Zephyrak in dex order; list = tools/V2_DONE.txt). Every Boki now has a flat-style card except Glaivyx, Glassolotl, Chandelotl, Ringrove, Cindermaw and Effigeetle, which are next. Large hero hash wave: 99 entries. Sheets + portraits for them are generating (second wave). Glacione's card backdrop is now flat (your pedestal-bar note).
+
+### 11-10 00:25 ET ART -> COORD
+ART -> COORD 11-10 00:25: LINE-REVIEW REDESIGNS LIVE as cards (owner asked for the review; list and reasons in LINE_REVIEW_1110.md; old cards kept as *_old*; sheets + portraits generating):
+- Forgebrock (reared-up forge bear, no longer Anvilbrock again), Shinobant (dark body with a green head, bridges Marchleaf and Reapant), Glaciatee (huge planted ice sea lion with tusks; Coolatee > Frigatee > Glaciatee now grows each step), Cisternmander (family grey-brown with gills), Pickadactyl (big, wings spread), Sirencada (wing-cases flared like a siren horn), Blastopuff (family colours), Briarlynx (big planted lynx with a bramble mane and thorn antlers).
+- Effigeetle is now a marble CATERPILLAR (display name Sculptillar): Sculptillar > Effigoon > Mortarfly reads as caterpillar > cocoon > moth.
+- Anchorbill is now a PUP of Anchorhorn/Harpwhal (a small round sea calf with an anchor nose horn), not a crow. Name proposal: Anchorpup (display_name set when the owner agrees).
+- Glassolotl: new pose (reared up, facing the viewer). Lunowl: dusk colours with gold crescents, halfway to Eclipsowl. Chandelotl and Cindermaw: V2 cards.
