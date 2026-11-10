@@ -108,7 +108,8 @@ func _migration() -> void:
 	ok("a config from before Text size loads at 100%", is_equal_approx(float(fresh.get_v("text_size")), 1.0))
 	var stray := [Settings.snap_text_size(1.1), Settings.snap_text_size(9.0), Settings.snap_text_size("big")]
 	ok("Text size keeps its three choices and snaps stray values",
-			Settings.TEXT_SIZES.all(func(x): return Settings.snap_text_size(x) == x) and stray == [1.0, 1.5, 1.0], str(stray))
+			Settings.TEXT_SIZES.all(func(x): return Settings.snap_text_size(x) == x) and stray == [1.0, 1.5, 1.0],
+			str(stray))
 	main.remove_child(fresh)
 	fresh.free()
 	if had:

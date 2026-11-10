@@ -2515,7 +2515,7 @@ func _build_loot() -> void:
 		col.add_child(nm)
 		var sub := UI.label(String(it["sub"]), 12, MUTED)
 		sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-		sub.clip_text = true
+		sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		sub.custom_minimum_size.x = 210
 		col.add_child(sub)
 		row.add_child(col)
