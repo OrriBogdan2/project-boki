@@ -48,6 +48,7 @@ func running() -> bool:
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
 ## gear, the Boki's C and a throw. A press answers with the soft "can't" tick.
 const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+const SLOT_OF := {"gear1": "gear0", "gear2": "gear1"}      # input -> the HUD slot its deny pulses
 
 func lock_inputs() -> void:
 	if not running():
@@ -56,7 +57,7 @@ func lock_inputs() -> void:
 		if h.inp.get(key, false):
 			locked += 1
 			h.inp[key] = false
-			h._ab_feedback(key if key in ["dash", "sec"] else "base", "deny")
+			h._ab_feedback(SLOT_OF.get(key, key), "deny")
 	h.dash_buf = 0.0
 	h.inp["dash_down"] = false
 	h.inp["sec_hold"] = false
