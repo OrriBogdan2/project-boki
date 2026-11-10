@@ -54,12 +54,13 @@ static func _pad(h: Hunter, d: Dictionary) -> void:
 	h.m.gpads.append({
 		"pos": at, "t": float(d.get("life", 20.0)), "arm": float(d.get("arm", 0.0)),
 		"after": float(d.get("after", 0.0)), "push": float(d.get("push", 6.0)),
-		"lift": float(d.get("lift", 17.0)), "col": d.get("col", Color.WHITE), "node": n, "cd": {},
+		"lift": float(d.get("lift", 17.0)), "id": d.get("id", ""), "col": d.get("col", Color.WHITE),
+		"node": n, "cd": {},
 	})
-	h.m.sfx("throw", h.pos, -2.0, 1.2)
 
 ## Every step: pads count down, arm, and launch whoever stands on them.
 static func pads(m: Node, dt: float) -> void:
+	BeltSfx.tick(m, dt)    # the placed items' loops share this per-frame call
 	for gp in m.gpads.duplicate():
 		gp["t"] = float(gp["t"]) - dt
 		gp["arm"] = float(gp["arm"]) - dt
@@ -86,7 +87,10 @@ static func pads(m: Node, dt: float) -> void:
 				h.grounded = false
 				h.glide_cd = 0.0
 				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp["col"], 16, 5.0, 0.4, -2.0)
-				m.sfx("jump", h.pos, -2.0, 0.8)
+				if BeltSfx.cue(String(gp.get("id", "")), "hit") != "":
+					BeltSfx.play_at(m, String(gp["id"]), "hit", h.pos)
+				else:
+					m.sfx("jump", h.pos, -2.0, 0.8)
 
 # ------------------------------------------------------------------ fields
 static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
@@ -121,7 +125,6 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 		"pack":
 			var done := [false]
 			m.fields.add_kx(h, at, r, time, 0.2, col, func(p, z): _pack_tick(m, p, z, d, done), Callable(), null, "")
-	m.sfx("throw", h.pos, -2.0, 1.0)
 	return true
 
 static func _near(m: Node, at: Vector3, r: float) -> Array:
@@ -143,7 +146,7 @@ static func _swap(m: Node, a: Vector3, b: Vector3, r: float) -> void:
 	for x in inb:
 		_put(m, x, a + (x.pos - b))
 	if not ina.is_empty() or not inb.is_empty():
-		m.sfx("blink", a, -2.0, 0.9)
+		BeltSfx.play_at(m, "twin_gate", "end", a)
 
 static func random_spot(m: Node) -> Vector3:
 	for i in 8:
@@ -206,7 +209,7 @@ static func _pack_tick(m: Node, at: Vector3, z: Dictionary, d: Dictionary, done:
 		done[0] = true
 		z["t"] = 0.0
 		_regen(m, x, x.max_hp * float(d.get("heal", 0.6)), float(d.get("hold", 5.0)), 0.5, x.hp)
-		m.sfx("heal", at, -2.0, 1.2)
+		BeltSfx.play_at(m, "toss_satchel", "end", at)
 		return
 
 ## Heals `total` over `secs` in steps; getting hit stops it.
@@ -232,7 +235,6 @@ static func _pilfer(h: Hunter, d: Dictionary) -> void:
 			took += n
 			m.fx.word(o.pos + Vector3(0, 2.2, 0), "-%d gems" % n, Color("d0b080"))
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("d0b080"), 16, 4.0, 0.6)
-	m.sfx("throw", h.pos, -2.0, 1.4)
 	if took > 0:
 		m.add_feed("Raccoons carried off %d gems" % took)
 

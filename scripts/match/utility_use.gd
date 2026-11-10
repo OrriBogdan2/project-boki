@@ -41,6 +41,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	var col: Color = d.get("col", Color.WHITE)
 	if use_of(id) == "key":
 		return BeltKeys.use(h, id)       # the lock spends the key when it opens
+	BeltSfx.start(h, id)
 	match use_of(id):
 		"drink":
 			h._fold_for_action()
@@ -48,7 +49,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h.drink_len = float(d.get("time", CHANNEL_TIME))
 			h.drink_t = h.drink_len
 			h.vuln_fx_t = 0.0
-			m.sfx("pickup", h.pos, -6.0, 0.7)
+			BeltSfx.channel(h, id, true)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"repair":
@@ -56,33 +57,29 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h.kit_len = float(d.get("time", CHANNEL_TIME))
 			h.kit_t = h.kit_len
 			h.vuln_fx_t = 0.0
-			m.sfx("build", h.pos, -6.0, 1.3)
+			BeltSfx.channel(h, id, true)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"mend":
 			h.heal(MEND_HP)
 			h.armor = minf(h.max_armor, h.armor + MEND_ARMOR)
 			m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 16, 3.0, 0.6, -3.0)
-			m.sfx("heal", h.pos, -2.0, 1.1)
 		"smoke":
 			var n := Models.gear_smoke()
 			n.position = h.pos
 			m.add_child(n)
 			m.smokes.append({"pos": h.pos, "r": 3.6, "t": 8.0, "node": n})
-			m.sfx("cloak", h.pos, 0.0, 0.7)
 		"scan":
 			var rng := float(d.get("range", 26.0))
 			for o in m.hunters:
 				if o.team != h.team and not o.out and o.flat_dist(h) < rng:
 					o.reveal_t = maxf(o.reveal_t, float(d.get("time", 3.0)))
 			m.fx.ring(h.pos, minf(rng, 40.0), Color(col, 0.6), 0.8)
-			m.sfx("ping", h.pos, 0.0, 0.8)
 		"pad", "field", "pilfer", "lamp", "ember":
 			UtilityMore.start(h, id, d)
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
-			m.sfx("skill", h.pos, -4.0, 1.0)
 	# the instant ones are spent now; the channelled ones when they finish (tick)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
@@ -120,13 +117,14 @@ static func tick(h: Hunter, dt: float) -> void:
 			h.drink_t -= dt
 			if h.drink_t <= 0.0:
 				h.drink_t = 0.0
+				Sfx.loop_stop(BeltSfx.loop_key(h, h.drink_id))
 				var dd := UtilityBelt.def(h.drink_id)
 				if UtilityBelt.take(h, h.drink_id, 1) > 0:
 					var amount := heal_of(h, h.drink_id)
 					if amount > 0.0:
 						h.heal(amount * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
+					BeltSfx.play(h, h.drink_id, "end")      # before drank(): a warp moves the drinker
 					UtilityMore.drank(h, dd)
-					h.m.sfx("heal", h.pos, -2.0)
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color(dd.get("col", Color("8ff0a0"))), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
@@ -135,7 +133,10 @@ static func tick(h: Hunter, dt: float) -> void:
 			h.kit_t -= dt
 			if h.kit_t <= 0.0:
 				h.kit_t = 0.0
+				Sfx.loop_stop(BeltSfx.loop_key(h, "armor_kit"))
 				if UtilityBelt.take(h, "armor_kit", 1) > 0:
 					h.armor = minf(h.max_armor, h.armor + h.max_armor * repair_frac(h))
-					h.m.sfx("shield", h.pos, -2.0, 1.2)
+					BeltSfx.play(h, "armor_kit", "end")
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("dfe9f7"), 16, 2.5, 0.5, -3.0)
+	BeltSfx.channel(h, h.drink_id, h.drink_t > 0.0)
+	BeltSfx.channel(h, "armor_kit", h.kit_t > 0.0)
