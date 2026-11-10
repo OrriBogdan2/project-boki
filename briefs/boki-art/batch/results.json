@@ -77633,5 +77633,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_glintmole_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_geodemole",
+    "name": "Geodemole (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_geodemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_geodemole",
+    "name": "Geodemole (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_geodemole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_druzemole",
+    "name": "Druzemole (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_druzemole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_druzemole",
+    "name": "Druzemole (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_druzemole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_druzemole",
+    "name": "Druzemole (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_druzemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gloamshell",
+    "name": "Gloamshell (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_gloamshell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_geodemole",
+    "name": "Geodemole (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_geodemole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gloamshell",
+    "name": "Gloamshell (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_gloamshell_3.jpg",
+    "ok": true
   }
 ]
