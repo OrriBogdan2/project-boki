@@ -5133,7 +5133,9 @@ func _open_feed(rec: Dictionary) -> void:
 			for af in Evo.AFF:
 				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
-	any = GardenItemRows.add_bag(v, rec, func(id: String): _care_feed(rec, id)) or any
+	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
+	any = GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
+			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or any
 	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
