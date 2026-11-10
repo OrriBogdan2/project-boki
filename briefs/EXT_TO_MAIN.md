@@ -6385,3 +6385,17 @@ READY ext/garden-whistle e97e7af5e (garden whistle, base_mode: whistle key (H, n
 READY ext/sfx-run-stingers-rebased f067c66a6 (SUPERSEDES ext/sfx-run-stingers, same commit; origin/main d255acbee is already inside it so merging main changed nothing and there is no conflict with main: the docs/AUDIO.md conflict comes from the merge-candidate line, most likely ext/sfx-boss-stingers also adding to docs/AUDIO.md, so resolve there by keeping both sections. Checks: --sting-check 13 checks 0 failures, --check 0 failures, health --strict OK)
 READY ext/net-rejoin b0f9ee82e (rejoin a match within 90 s: relay holds the dropped Hunter, title 'Rejoin match' restores Hunter/health/Boki; Net.VERSION 0.25.1; --rejoin-check 15/15)
 READY ext/sable-appeal-b afc5a905e (Sable/thief: owner-approved appeal3 body b with bug eyes, cand_b_bugeye.glb, v95-swapped onto her own rig/clips/anchors; shots docs/shots/sable-appeal-b/{front_34,back_34,turnaround_close,closeup,closeup_front,moves_close_1,poses_game}.jpg; model-check 157/0, glb-check 183/0, health OK)
+READY ext/splash-v2 f69d68b10 (all 12 hunters on newest approved v2 art; builds on PR #34 ext/lace-portrait, includes it. Owner ask: "old splash still for kael". Files in art/portraits/ (P=<id>.jpg, S=<id>_splash.jpg) and art/brand/title/<id>.jpg (T, made from the v2 splash):
+| hunter | screens | old -> new |
+|---|---|---|
+| Kael (juggernaut) | P S T | kael_splash_arena/old portrait -> kael_v2_portrait + kael_v2_splash_final (Lunge) |
+| Lace (archer) | S T | PR34 portrait-cut splash -> ravel_v2_splash (P = PR34 thread-heart, kept) |
+| Tenzo (dolm) | P S T | old tarek -> tarek_v2 portrait+splash |
+| Grimble (dredge) | P S T | old -> grimble_v2 portrait+splash |
+| Meeko (tender) | P S T | old pip -> pip_v2 meeko portrait+splash |
+| Sable (thief) | P S T | old -> sable_v2 portrait+splash |
+| Neve (rimewright) | S T | old -> claire_v2 nivi splash (P already v2) |
+| Sparkle (mage) | P T | old -> ryzz_v2 portrait (S already v2) |
+| Cinder, Motley | T | old title -> v2 splash (P,S already v2) |
+| Vex, Albert | - | already v2; Albert keeps breaker_splash (mossy_v2 has no splash) |
+P = pick row, class card/hunter select, kit card, HUD, loading, unlock; S = splash screens; T = title backdrop. Face/splash focus points in content/rules/portraits.json are retuned for the new art. Checks: --portrait-check 107/0 fails, --roster-check 0 fails, health --strict OK. --title-check has 8 old 3D-title failures that are already on main and unrelated. Shots: docs/shots/splash-v2/. Before/after: /home/boki/art-review/splash-v2-1110/before_after.jpg. Heads-up: unmerged ext/hunter-art-1108 swaps the same files with older art and will conflict; take this branch.)
