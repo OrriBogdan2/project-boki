@@ -25,7 +25,8 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use;
+## its ground colours win over the theme's unless own_ground.
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
@@ -34,8 +35,8 @@ const THEMES := {
 	# a zone's own ground (ZoneLayout): never for sale, it has no gems
 	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
 		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
-	"cinderstep": {"name": "Cinderstep", "zone": true, "region": 1, "top": "7e6c60", "top2": "6a5a50",
-		"side": "54423c", "deep": "261a1a", "leaf": "e07a3a"},
+	"cinderstep": {"name": "Cinderstep", "zone": true, "own_ground": true, "region": 1,
+		"top": "7e6c60", "top2": "6a5a50", "side": "54423c", "deep": "261a1a", "leaf": "e07a3a"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and

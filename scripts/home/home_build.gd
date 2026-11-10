@@ -294,11 +294,16 @@ func _reserve() -> void:
 func _apply_theme() -> void:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), HomeLayout.THEMES["meadow"])
 	var b: Dictionary = BASE_BIOME.duplicate()
+	var own := {}
 	for k in ["top", "top2", "side", "deep", "leaf"]:
-		if t.has(k): b[k] = Color(String(t[k]))
+		if t.has(k):
+			b[k] = Color(String(t[k]))
+			own[k] = t[k]
 	h.world.biome = b
 	for isl in h.world.islands:
 		isl["region_fixed"] = int(t.get("region", 0))
+		if t.get("own_ground", false):
+			isl["biome_colors"] = own
 
 func _apply_paint() -> void:
 	var w: World = h.world

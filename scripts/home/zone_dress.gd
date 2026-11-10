@@ -4,7 +4,7 @@ extends RefCounted
 ## (one translucent sheet over the channel the tiles say, if it has one) and a scatter: Flora crystal
 ## stacks, reeds and pebbles, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
 ## The scatter is MultiMesh, one batch per kind and shape, and every instance of a kind shares one
-## cached material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
+## cached Flora material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
 ## Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
 ## content/rules/garden_zones.json (shallow = a tile rect, scatter = how many of each kind it has).
 
@@ -15,12 +15,13 @@ const TRIES := 40              # spots tried per prop before giving up on it
 const SHAPES := 1              # Flora shapes used per kind (one batch each)
 const KINDS_FLORA := ["crystal", "reed", "pebble"]
 const SHORE := ["crystal", "reed"]     # kinds that crowd the shallows' edge
-## Slab kinds, one unit box scaled per instance. size: m (x, y, z) at scale 1; steps: slabs per prop,
-## each the last one shrunk by STEP_IN and set on top of it; clear: m of free ground the prop needs;
-## colour: its albedo ("" the zone theme's side colour); glow: emission energy (lit day and night).
+## Slab kinds, one unit box scaled per instance and lit by Flora's shared rock material (the box has no
+## vertex colours, so each instance's colour is its whole colour; alpha 0 glows day and night). size: m
+## (x, y, z) at scale 1; steps: slabs per prop, each shrunk by STEP_IN and set on the one under it;
+## clear: m of free ground the prop needs.
 const KINDS_BOX := {
-	"terrace": {"size": Vector3(2.2, 0.1, 1.8), "steps": 2, "clear": 1.1, "colour": "", "glow": 0.0},
-	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": "ff7a2a", "glow": 2.2},
+	"terrace": {"size": Vector3(1.7, 0.12, 1.4), "steps": 2, "clear": 1.0, "colour": Color("a08c7c")},
+	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": Color(1.0, 0.48, 0.16, 0.0)},
 }
 const STEP_IN := 0.6           # a terrace's upper slab, as a fraction of the one under it
 
@@ -74,7 +75,8 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 			var b := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.4), s))
 			by[rng.randi_range(0, SHAPES - 1)].append(Transform3D(b, at))
 		for v in SHAPES:
-			_batch(h, Flora.mesh(kind, style, v), Flora.material(kind, kind == "crystal"), by[v], "%s_%d" % [kind, v])
+			_batch(h, Flora.mesh(kind, style, v), Flora.material(kind, kind == "crystal"), by[v], "%s_%d" % [kind, v],
+				Color.WHITE)
 	for kind in KINDS_BOX:
 		var K: Dictionary = KINDS_BOX[kind]
 		var list: Array = []
@@ -89,22 +91,7 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 				list.append(Transform3D(b.scaled(dims), at))
 				at.y += dims.y * 0.5
 				dims *= Vector3(STEP_IN, 1.0, STEP_IN)
-		_batch(h, BoxMesh.new(), _slab_material(kind, h.zone), list, kind)
-
-## One material per slab kind, shared by every instance (the zone theme gives a terrace its stone).
-static func _slab_material(kind: String, zone: String) -> StandardMaterial3D:
-	var K: Dictionary = KINDS_BOX[kind]
-	var hex: String = K["colour"]
-	if hex == "":
-		hex = HomeLayout.THEMES[GardenZones.info(zone)["build"]["theme"]]["side"]
-	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(hex)
-	m.roughness = 1.0
-	if float(K["glow"]) > 0.0:
-		m.emission_enabled = true
-		m.emission = Color(hex)
-		m.emission_energy_multiplier = float(K["glow"])
-	return m
+		_batch(h, BoxMesh.new(), Flora.material("rock", false), list, kind, K["colour"])
 
 ## A free spot on dry ground, `clear` m round, for one prop: crystals and reeds crowd the shallows' edge,
 ## the rest go anywhere.
@@ -125,7 +112,7 @@ static func _spot(h, rng: RandomNumberGenerator, kind: String, S: Dictionary, sh
 		return Vector3(p.x, h.world.ground_at(p.x, p.y), p.y)
 	return Vector3.INF
 
-static func _batch(h, mesh: Mesh, mat: Material, list: Array, label: String) -> void:
+static func _batch(h, mesh: Mesh, mat: Material, list: Array, label: String, tint: Color) -> void:
 	if list.is_empty():
 		return
 	var mm := MultiMesh.new()
@@ -135,7 +122,7 @@ static func _batch(h, mesh: Mesh, mat: Material, list: Array, label: String) -> 
 	mm.instance_count = list.size()
 	for i in list.size():
 		mm.set_instance_transform(i, list[i])
-		mm.set_instance_color(i, Color.WHITE)
+		mm.set_instance_color(i, tint)
 	var mi := MultiMeshInstance3D.new()
 	mi.multimesh = mm
 	mi.material_override = mat

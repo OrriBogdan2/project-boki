@@ -262,7 +262,7 @@ func _cinderstep_part(m: Node) -> void:
 	var kinds := {}
 	for mi in cs.find_children("*", "MultiMeshInstance3D", false, false):
 		kinds[mi.name] = (mi as MultiMeshInstance3D).multimesh.instance_count
-	var crack: Node = cs.find_child("crack", false, false)
-	ok(kinds.get("terrace", 0) >= 2 and kinds.get("crack", 0) > 0 and crack.material_override.emission_enabled,
+	var crack: MultiMeshInstance3D = cs.find_child("crack", false, false)
+	ok(kinds.get("terrace", 0) >= 2 and kinds.get("crack", 0) > 0 and crack.multimesh.get_instance_color(0).a == 0.0,
 		"terraces and glowing cracks, one batch each (%s)" % str(kinds))
 	Content.rules("farm_build")["base_mode"] = false
