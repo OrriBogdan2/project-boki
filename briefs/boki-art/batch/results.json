@@ -75526,5 +75526,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2p_pinster_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2t_jerbit",
+    "name": "Jerbit (V2 card, style board)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_jerbit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbolt",
+    "name": "Jerbolt (V2 card, style board)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_jerbolt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbolt",
+    "name": "Jerbolt (V2 card, style board)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2t_jerbolt_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbolt",
+    "name": "Jerbolt (V2 card, style board)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_jerbolt_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbolt",
+    "name": "Jerbolt (V2 card, style board)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_jerbolt_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbit",
+    "name": "Jerbit (V2 card, style board)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_jerbit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_dynaboa",
+    "name": "Dynaboa (V2 card, style board)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2t_dynaboa_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbit",
+    "name": "Jerbit (V2 card, style board)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_jerbit_3.jpg",
+    "ok": true
   }
 ]
