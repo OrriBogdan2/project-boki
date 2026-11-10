@@ -73069,5 +73069,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2p_aurostag_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2a_forgebrock",
+    "name": "Forgebrock (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_forgebrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_furnacowary",
+    "name": "Furnacowary (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_furnacowary",
+    "name": "Furnacowary (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_furnacowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_forgebrock",
+    "name": "Forgebrock (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_barostorm",
+    "name": "Barostorm (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_barostorm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_vaultara",
+    "name": "Vaultara (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_vaultara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_anvilbrock",
+    "name": "Anvilbrock (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_anvilbrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_barostorm",
+    "name": "Barostorm (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_barostorm_2.jpg",
+    "ok": true
   }
 ]
