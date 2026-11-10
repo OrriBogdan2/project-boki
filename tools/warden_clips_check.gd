@@ -96,6 +96,11 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 		_play(m, an, sync, run_st, 1)
 		far = maxf(far, sk.get_bone_global_pose(foot).origin.distance_to(idle_f))
 	ok(far > 0.1, "%s: the run blend moves the feet (%.2f m)" % [art_name, far])
+	if art_name == "breaker":
+		# the sheet's run cadence: ~2.5 Hz stride, +-15% (briefs/hero-ref/bjorn.md)
+		var cycle := lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
+		ok(cycle >= 1.0 / 2.875 and cycle <= 1.0 / 2.125,
+			"breaker: the run cycle %.2f s is %.2f Hz, within the sheet's 2.5 Hz +-15%%" % [cycle, 1.0 / cycle])
 	# every move: changes the pose, the weapon bone stays on the hand
 	var wp := WardenSkeleton.find(sk, "x_weapon")
 	var rest_off := (sk.get_bone_global_rest(hand).affine_inverse() * sk.get_bone_global_rest(wp)).origin
