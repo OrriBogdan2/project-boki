@@ -130,7 +130,6 @@ func _tick_tell(dt: float) -> void:
 	(dome.get_node("Core") as Node3D).visible = swollen
 	if phase_t >= tell:
 		_open()
-		_tick_open(0.0)       # the first catch is on the frame the fill completes
 
 func _open() -> void:
 	AimKit.hide(k.h, "x")
