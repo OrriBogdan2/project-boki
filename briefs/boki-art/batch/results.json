@@ -81917,5 +81917,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_pipeworth_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_pipeworth",
+    "name": "Pipeworth (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_pipeworth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_oarlet",
+    "name": "Oarlet (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_oarlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_oarlet",
+    "name": "Oarlet (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_oarlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_oarlet",
+    "name": "Oarlet (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_oarlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_oarter",
+    "name": "Oarter (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_oarter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pipeworth",
+    "name": "Pipeworth (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_pipeworth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_oarter",
+    "name": "Oarter (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_oarter_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kitlet",
+    "name": "Kitlet (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_kitlet_2.jpg",
+    "ok": true
   }
 ]
