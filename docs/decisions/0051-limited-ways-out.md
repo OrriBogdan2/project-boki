@@ -31,3 +31,8 @@ heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.g
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
 No save change. Checks: --heart-check (early seat), new --heart-seats-check (squad take, final, order, rush, Net).
+
+UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out strip (four pips, Squads left) top centre
+and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
+outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
+--ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.
