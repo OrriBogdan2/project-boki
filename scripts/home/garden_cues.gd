@@ -142,7 +142,7 @@ class SeekCue:
 	extends RefCounted
 	const DOTS := 8                     # per hunter
 	const REACH := 4.0                  # m the trail runs from the scent at most
-	const DOT_R := 0.14                 # m
+	const DOT_R := 0.2                  # m
 	const DRIFT := 0.5                  # trail lengths per s the dots move out
 	const MAX_ALPHA := 0.85             # the trail of a perfect nose
 
@@ -183,7 +183,7 @@ class SeekCue:
 			var dot: MeshInstance3D = dots[i][k]
 			dot.visible = span > DOT_R
 			dot.position = Vector3(p.x, float(ground.call(p)) + 0.05, p.y)
-			dot.scale = Vector3.ONE * (1.0 - 0.7 * u)
+			dot.scale = Vector3.ONE * (1.0 - 0.5 * u)
 			if dot.visible:
 				shown[i] += 1
 

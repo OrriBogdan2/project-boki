@@ -158,7 +158,7 @@ func _volley(home) -> void:
 			await _until(func(): return vb.run.state == BaseVolley.Run.S.FLIGHT and vb.run.fly_t < 0.3, alive)
 		await main.get_tree().process_frame
 		if vb.run != null:
-			await _grab(home, sheet, col, vb.log_node.position, 2.6)
+			await _grab(home, sheet, col, vb.log_node.position, 4.5)
 		for f in 20:
 			await main.get_tree().process_frame
 	sheet.save_png(out.path_join("volley.png"))
