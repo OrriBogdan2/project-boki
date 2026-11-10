@@ -2,6 +2,8 @@
 	"desc": "The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from).",
 	"start": "bramblebank",
 	"start_doc": "The zone open from the start and the home of every Boki in an older save.",
+	"wayseed_chance": 0.05,
+	"wayseed_chance_doc": "Chance that the first lair pile of a run in a matching biome holds the Wayseed (rolled once a run; Lairs).",
 	"lean_key": 12,
 	"lean_key_doc": "Lean points (of Evo.LEAN_FULL 24) a Boki needs in one of a zone's types to wake it: about two meals.",
 	"hop_fade_s": 0.5,
@@ -14,6 +16,14 @@
 	"ask_chance_doc": "Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load).",
 	"ask_s": 25.0,
 	"ask_s_doc": "Seconds it waits at the pad with its bubble before it gives up and wanders off.",
+	"pace": {
+		"seeds": 200, "days": 16,
+		"runs_a_day": 3, "run_lair_p": 0.5, "run_gems": 40, "garden_gems": 20, "zone_gems": 10,
+		"biomes": ["meadow", "bloom", "frost", "ember", "storm", "gloom"],
+		"meals": 2,
+		"zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]
+	},
+	"pace_doc": "The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1].",
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
 		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "lair_biomes": ["frost"]},

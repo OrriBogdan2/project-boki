@@ -693,7 +693,8 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
 	if zone != "" and not wayseed_given:
 		wayseed_given = true
-		m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
+		if m.rng.randf() < float(GardenZones.rules()["wayseed_chance"]):
+			m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
 	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)

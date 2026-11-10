@@ -531,6 +531,8 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 |---|---|
 | start | bramblebank |
 | start_doc | The zone open from the start and the home of every Boki in an older save. |
+| wayseed_chance | 0.05 |
+| wayseed_chance_doc | Chance that the first lair pile of a run in a matching biome holds the Wayseed (rolled once a run; Lairs). |
 | lean_key | 12 |
 | lean_key_doc | Lean points (of Evo.LEAN_FULL 24) a Boki needs in one of a zone's types to wake it: about two meals. |
 | hop_fade_s | 0.5 |
@@ -543,6 +545,8 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
 | ask_s | 25 |
 | ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
+| pace | {"seeds": 200, "days": 16, "runs_a_day": 3, "run_lair_p": 0.5, "run_gems": 40, "garden_gems": 20, "zone_gems": 10, "biomes": ["meadow", "bloom", "frost", "ember", "storm", "gloom"], "meals": 2, "zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]} |
+| pace_doc | The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1]. |
 | zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "lair_biomes": ["frost"]}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"]}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "lair_biomes": ["bloom", "gloom"]}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"]}} |
 | lair_biomes_doc | A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists). |
 | wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
@@ -677,7 +681,7 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | transfer_doc | Handing a Boki straight to a named player: a flat fee (destroyed), one per week per sender, and the receiver has to accept. |
 | auction | {"hours": [12, 24, 48], "snipe_s": 60, "extend_s": 120, "max_open": 3, "npc_lots": 3, "npc_bid_k": 0.8, "npc_lot_start": 1.0, "npc_lot_cap": 1.3} |
 | auction_doc | A bid with less than snipe_s left pushes the end out to extend_s from now. NPC bidders (offline) bid on your lots up to npc_bid_k x reference, never on friends-only lots. NPC lots open at npc_lot_start x reference and NPC rivals bid them up to npc_lot_cap x. |
-| black_market | {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5, "wayseed_price": 300, "wayseed_days": 7} |
+| black_market | {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5, "wayseed_price": 110, "wayseed_days": 3} |
 | black_market_doc | Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches. wayseed_price: once every wayseed_days he also holds one Wayseed (GARDEN.md 10.3) for a zone that is still locked, never for an open one. |
 | rarity | {"common": {"name": "Common", "restock": 0.9, "col": "c8cdd8"}, "uncommon": {"name": "Uncommon", "restock": 0.6, "col": "6fd86a"}, "rare": {"name": "Rare", "restock": 0.3, "col": "5ab0f0"}, "epic": {"name": "Epic", "restock": 0.12, "col": "c08cff"}} |
 | rarity_doc | restock: the chance an NPC stall carries a good on a given day. |
