@@ -239,8 +239,8 @@ func _hide(at: Vector2) -> void:
 	go(S.HUNT)
 	for k in pair:
 		k["busy"] = true
-	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, HomeWork.is_night(h.day_t),
-			RandomNumberGenerator.new(), _walkable)
+	var night: bool = BaseRace.tweak("seek").get("night", HomeWork.is_night(h.day_t))
+	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, night, RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
@@ -297,7 +297,7 @@ func _end(finished: bool) -> void:
 		scent.queue_free()
 	if finished:
 		go(S.RESULT)
-		_card(res)
+		_card(res, h.hrace.pin(res["win"], "seek"))
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
@@ -306,7 +306,7 @@ func _end(finished: bool) -> void:
 	hunt = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, pinned: bool) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	var sulk := "%s is a good sport" if res["friends"] else "%s sulks"
@@ -316,4 +316,4 @@ func _card(res: Dictionary) -> void:
 		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]])
+		["+%d gems" % res["gems"], 14, UI.GOLD]] + BaseRace.pin_rows(pinned))
