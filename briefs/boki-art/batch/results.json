@@ -103344,5 +103344,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/alt_kingpinguin_1.jpg",
     "ok": true
+  },
+  {
+    "id": "alt_dreadnoyak",
+    "name": "Dreadnoyak (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_dreadnoyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_sloggoth",
+    "name": "Sloggoth (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_sloggoth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_dreadnoyak",
+    "name": "Dreadnoyak (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/alt_dreadnoyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_kingpinguin",
+    "name": "Kingpinguin (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_kingpinguin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_dreadnoyak",
+    "name": "Dreadnoyak (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_dreadnoyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_kingpinguin",
+    "name": "Kingpinguin (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/alt_kingpinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_pillaroo",
+    "name": "Pillaroo (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_pillaroo_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_tesselamb",
+    "name": "Tesselamb (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_tesselamb_1.jpg",
+    "ok": true
   }
 ]
