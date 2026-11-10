@@ -75883,5 +75883,33 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/v2n_dynaboa_4.jpg",
     "ok": true
+  },
+  {
+    "id": "v2n_bullpole",
+    "name": "Bullpole (V2 card, text-only style)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2n_bullpole_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2n_dynaboa",
+    "name": "Dynaboa (V2 card, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2n_dynaboa_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2n_dynaboa",
+    "name": "Dynaboa (V2 card, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2n_dynaboa_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_jerbolt",
+    "name": "Jerbolt (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_jerbolt_1.jpg",
+    "ok": true
   }
 ]
