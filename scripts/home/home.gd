@@ -184,7 +184,7 @@ func _ready() -> void:
 	hg = HomeGather.new(self)
 	hsp = SnackPatch.new(self)
 	hw = HomeWork.new(self)
-	if visit.is_empty() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
+	if not _visiting() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
 	toys = HomeToys.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
@@ -367,8 +367,8 @@ func _ready_rest() -> void:
 			for x in range(rc[0], rc[2] + 1):
 				if world.inb(x, z) and world.kind[world.idx(x, z)] == World.T_BLOCK and not world.no_deco.has(world.idx(x, z)):
 					world.kind[world.idx(x, z)] = World.T_GROUND
-	# bridges: work out which tiles they cover before any are opened
-	for k in Data.ISLES:
+	# bridges to the side isles (none in the hub): which tiles they cover before any are opened
+	for k in ([] if HubLayout.is_hub(visit) else Data.ISLES):
 		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
@@ -754,7 +754,7 @@ func _build_lots() -> void:
 			lots[b]["at"] = FAR; lots[b]["door"] = FAR
 
 func _build_bridges() -> void:
-	for k in Data.ISLES:
+	for k in bridges:
 		var isd: Dictionary = Data.ISLES[k]
 		var br: Dictionary = bridges[k]
 		var node := Node3D.new(); add_child(node)

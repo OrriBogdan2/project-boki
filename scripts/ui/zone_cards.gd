@@ -27,7 +27,8 @@ static func open(h, here: String) -> void:
 			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
 			row.add_child(_card(String(z["name"]), UI.FAINT, lines, func(): h.hway.hop(id), "Locked", false))
 
-## The hub's games board: which game each zone hosts, and whether the zone is open yet.
+## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
+## the showcase wall's winners.
 static func board(h) -> void:
 	var v: VBoxContainer = h._new_panel("Games board", 420.0)
 	for id in GardenZones.ids():
@@ -37,6 +38,12 @@ static func board(h) -> void:
 		row.add_child(UI.label(String(z["name"]), 15, Color(String(z["colour"])) if open else UI.FAINT))
 		row.add_child(UI.label(String(z["game"]), 13, UI.INK) if open else UI.label("asleep", 13, UI.MUTED))
 		v.add_child(row)
+	var tw := BaseRace.twist()
+	v.add_child(UI.label("This week: %s. %s" % [tw["name"], tw["note"]], 14, UI.GOLD))
+	var wall: Array = Save.d.get("showcase", [])
+	v.add_child(UI.label("Showcase wall: no Dash winners yet" if wall.is_empty() else "Showcase wall:", 13, UI.MUTED))
+	for e in wall:
+		v.add_child(UI.label("%s, %s (%s)" % [e["name"], e["date"], e["twist"]], 13, UI.INK))
 
 ## "Move to..." on a Boki's card: only for one out in this zone, not your partner, with another zone open.
 static func add_move_link(h, row: Control, rec: Dictionary) -> void:

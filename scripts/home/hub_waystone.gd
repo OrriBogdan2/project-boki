@@ -40,6 +40,9 @@ func place() -> void:
 		board.position = HubLayout.BOARD_AT
 		board.rotation.y = -PI * 0.5
 		h.add_child(board)
+		var wall := BaseShowcase.build(HubLayout.BOARD_AT + HubLayout.WALL_OFF, Save.d.get("showcase", []))
+		wall.rotation.y = board.rotation.y
+		h.add_child(wall)
 	else:
 		node = FarmModels.return_pad(String(GardenZones.info(here()).get("colour", "c9c2b2")))
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)

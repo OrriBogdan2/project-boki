@@ -243,7 +243,7 @@ static func settle_solo(rec: Dictionary, grades: Array) -> int:
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
 var post: Node3D = null
-var wall: Node3D = null        # the showcase wall (BaseShowcase) by the post
+var wall: Node3D = null        # the showcase wall (BaseShowcase) by the post, when there is no hub
 var start := Vector3.ZERO      # the loop's start line
 var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
@@ -267,8 +267,9 @@ func place() -> void:
 	if h.YARD_AT.x < -100.0:
 		return
 	var at: Vector3 = h.YARD_AT + POST_OFF
-	wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, Save.d.get("showcase", []))
-	h.add_child(wall)
+	if h.zone == "":       # with the hub on, the wall hangs by its games board (HubWaystone)
+		wall = BaseShowcase.build(at + BaseShowcase.WALL_OFF, Save.d.get("showcase", []))
+		h.add_child(wall)
 	post = Node3D.new()
 	post.name = "RacePost"
 	post.position = at
@@ -499,6 +500,8 @@ func _end(finished: bool) -> void:
 func _pin(win: Dictionary) -> void:
 	var node: Node3D = h._kin_entry(win)["node"]
 	BaseShowcase.add(win, run.tw, BaseShowcase.snap(h.get_viewport(), h.cam, node.global_position + Vector3(0, 0.5, 0)))
+	if wall == null:
+		return
 	wall.queue_free()
 	wall = BaseShowcase.build(post.position + BaseShowcase.WALL_OFF, Save.d["showcase"])
 	h.add_child(wall)

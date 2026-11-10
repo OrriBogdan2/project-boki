@@ -4,7 +4,10 @@ extends RefCounted
 ## open and every Boki living in it; a new save has the same. Keys: a locked zone's two keys tick when
 ## you have them. Travel (with base_mode on, through the real Game.goto and ink wipe): the hub shows
 ## only your partner and the Waystone; a hop to a locked zone is refused and its card lists both keys;
-## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives. Moving
+## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives; with an
+## unminded egg in the Nook, a Boki with the Ember knack comes to the hub to mind it. Hub fixtures
+## (step 3): each one stands and works, the games board shows this week's Dash twist and has the
+## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. Moving
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
@@ -78,6 +81,18 @@ func _arrived(m: Node, was: Node):
 			return cur
 	return null
 
+## An egg in the Nook, waiting to be minded; returns the uid of the Boki with the Ember knack who minds it.
+func _lay_egg(partner: String) -> String:
+	var rec := Save.new_kin("kindlewren", "Wick")
+	rec["zone"] = GardenZones.start()
+	(Save.d["roster"] as Array).append(rec)
+	var other: Dictionary = (Save.d["roster"] as Array).filter(func(r): return r["uid"] != partner)[0]
+	Save.d["egg"] = {"a": partner, "b": other["uid"], "m": int(Save.d["matches"]) + 5,
+		"t": Time.get_unix_time_from_system() + 600.0}
+	var found := HubLayout.minder()
+	ok(not found.is_empty() and Work.of(found).has("ember"), "an unminded egg calls a Boki with the Ember knack")
+	return String(found.get("uid", ""))
+
 func _uids(home) -> Array:
 	var out: Array = home.kins.map(func(k): return String(k["rec"]["uid"]))
 	out.sort()
@@ -115,10 +130,18 @@ func _travel_part(m: Node) -> void:
 	ok(_uids(bb) == home_uids and home_uids.has(partner),
 		"Bramblebank has its %d Boki, your partner among them" % home_uids.size())
 	ok(bb.player.position.distance_to(bb.hway.node.position) < 0.5, "you arrive on its return pad")
+	var minder := _lay_egg(partner)
 	ok(bb.hway.hop(GardenZones.HUB), "the return pad takes you to the hub")
 	var back = await _arrived(m, bb)
-	ok(back != null and _uids(back) == [partner], "back in the hub with your partner")
-	ok(GardenZones.residents("bramblebank").size() == home_uids.size() and (Save.d["roster"] as Array).size() == 3,
+	var walkers := [partner, minder]
+	walkers.sort()
+	ok(back != null and _uids(back) == walkers, "back in the hub with your partner and the egg-minder")
+	if back != null:
+		var mrec: Dictionary = (Save.d["roster"] as Array).filter(func(r): return r["uid"] == minder)[0]
+		var mk: Dictionary = back._kin_entry(mrec)
+		ok(back.life != null and back.life._chore(mk) and String(mk["life_chore"]["kind"]) == "mind",
+			"the egg-minder sets off to mind the egg in the Nook")
+	ok(GardenZones.residents("bramblebank").size() == home_uids.size() + 1 and (Save.d["roster"] as Array).size() == 4,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
 
@@ -145,6 +168,14 @@ func _fixtures_part(hub) -> void:
 	var spots: Array = [HubWaystone.HUB_AT, HubLayout.BOARD_AT]
 	ok(spots.all(func(p): return afloat.call(Vector2i(int(p.x), int(p.z)))), "the Waystone and the board are on land")
 	ok(hub.hway.label() == "Games board", "the games board reads as one")
+	hub.hway.use()
+	var said: String = _texts(hub.root_ui)
+	ok(BaseRace.twist()["name"] in said and "Showcase wall" in said, "the board shows this week's twist and the wall")
+	hub._close_panel()
+	var wall: Node3D = hub.get_node_or_null("Showcase")
+	ok(wall != null and wall.position.distance_to(HubLayout.BOARD_AT + HubLayout.WALL_OFF) < 0.1,
+		"the showcase wall hangs beside the board")
+	ok(hub.bridges.is_empty(), "no side-isle bridges or signposts in the hub")
 	ok(hub.hb._tabs() == ["Garden"] and hub.hb.can_build(), "build mode in the hub offers only the Garden tab")
 	ok(typeof(Save.d.get("hub_layout")) == TYPE_DICTIONARY, "the hub's layout is on the save")
 
@@ -216,3 +247,10 @@ func _cap_part() -> void:
 	ok(GardenZones.move(next, "glasswater") != "" and GardenZones.zone_of(next) == "bramblebank",
 		"with %d out in Glasswater, the next move is refused" % cap)
 	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")
+
+## Every label's text under a node, joined.
+func _texts(n: Node) -> String:
+	var out := (n as Label).text if n is Label else ""
+	for c in n.get_children():
+		out += "\n" + _texts(c)
+	return out
