@@ -48,7 +48,7 @@ var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
 var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
-var knife := {}                # the stuck Shadow Knife: {target, pos, dir}
+var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
 var encore: ThiefUlt           # X, the ultimate
@@ -822,15 +822,33 @@ func _throw_knife() -> void:
 				add_mark(f, 1, true)
 				_stick(f, f.pos),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
-			if knife.is_empty() and e == null: _stick(null, ground(at) if _why == "wall" else land)}))
+			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("ffcf5a"), 1.6, 0.26)
 	fx().star(h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6), Color("ffcf5a"), 0.7, 0.1)
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 
-func _stick(f: Ent, at: Vector3) -> void:
+## The shot ended with no foe: in the barrier that stopped it, else on the ground (at the wall, or where aimed).
+func _stick_ground(at: Vector3, hit_wall: bool, land: Vector3) -> void:
+	var w: Dictionary = m.verbs.stopper(at, h.team, 0.3) if hit_wall else {}
+	if w.is_empty():
+		_stick(null, ground(at) if hit_wall else land)
+		return
+	var a: Vector2 = w["a"]
+	var ab: Vector2 = (w["b"] as Vector2) - a
+	var p := Vector2(at.x, at.z)
+	var u := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
+	var out := _wall_out(w)
+	var me := Vector2(h.pos.x, h.pos.z) - (a + ab * u)
+	var side := signf(me.dot(out))
+	if side == 0.0: side = -signf(h.aim_dir().dot(out))
+	if side == 0.0: side = 1.0
+	_stick(null, at, {"wall": w, "u": u, "s": (p - a - ab * u).dot(out), "dy": at.y - float(w["y"]), "side": side})
+
+func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	var ed := e_def()
 	knife = {"target": f, "pos": at, "dir": h.aim_dir()}
+	knife.merge(on_wall)
 	e_t = float(ed["time"])
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
@@ -851,12 +869,31 @@ func _tick_knife() -> void:
 		f = null
 	if f != null:
 		knife["pos"] = (f as Ent).pos
+	elif knife.has("wall"):
+		_ride_wall()
 	var at: Vector3 = knife["pos"]
 	var dv: Vector2 = knife["dir"]
-	if tells_visible() or f != null:
-		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, 1.2 if f != null else 0.35, 0), dv * 0.01,
+	var up := 1.2 if f != null else 0.35
+	if knife.has("wall"): up = 0.0
+	if tells_visible() or f != null or knife.has("wall"):
+		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
 	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
+
+## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
+func _wall_out(w: Dictionary) -> Vector2:
+	return ((w["b"] as Vector2) - (w["a"] as Vector2)).normalized().orthogonal()
+
+## It rides its barrier wherever it goes; when the barrier breaks or runs out the dagger lies under it.
+func _ride_wall() -> void:
+	var w: Dictionary = knife["wall"]
+	var a: Vector2 = w["a"]
+	if not m.verbs.walls.has(w):
+		knife.erase("wall")
+		knife["pos"] = ground(knife["pos"])
+		return
+	var q: Vector2 = a.lerp(w["b"], float(knife["u"])) + _wall_out(w) * float(knife["s"])
+	knife["pos"] = Vector3(q.x, float(w["y"]) + float(knife["dy"]), q.y)
 
 func e_recast() -> bool:
 	if knife.is_empty():
@@ -882,7 +919,9 @@ func _step_to_knife() -> void:
 		vault = {}
 	var f = k.get("target")
 	play("thf_arrive")
-	if f != null and is_instance_valid(f) and not (f as Ent).dead:
+	if k.has("wall") and m.verbs.walls.has(k["wall"]):
+		_step_beside(k)
+	elif f != null and is_instance_valid(f) and not (f as Ent).dead:
 		_shadow_step(f)
 	else:
 		var at: Vector3 = k["pos"]
@@ -890,6 +929,18 @@ func _step_to_knife() -> void:
 			return
 		_blink(ground(at))
 	last_e = "shadow_step"
+
+## Step to the knife in a barrier: right beside it on her own side (the far side if hers is shut), never inside.
+func _step_beside(k: Dictionary) -> void:
+	var w: Dictionary = k["wall"]
+	var c: Vector2 = (w["a"] as Vector2).lerp(w["b"], float(k["u"]))
+	var gap := float(w["th"]) + h.r + 0.35
+	for sd in [float(k["side"]), -float(k["side"])]:
+		var q: Vector2 = c + _wall_out(w) * sd * gap
+		var to := ground(Vector3(q.x, float(w["y"]), q.y))
+		if not m.world.is_void(to.x, to.z) and m.world.occupy(to.x, to.z, h.r, to.y, false) == 0.0:
+			_blink(to)
+			return
 
 ## Step to the knife in a foe: you appear right at them, on their far side.
 func _shadow_step(tgt: Ent) -> void:
