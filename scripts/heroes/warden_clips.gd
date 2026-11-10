@@ -53,6 +53,7 @@ var chan_u := 0              # which upper-body channel is live, 0 or 1
 var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
 var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
+var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less its first frame) rides on the upper body
 var air_w := 0.0
 var glide_w := 0.0
 var proc_w := 1.0            # how much of the procedural rig is shown
@@ -252,11 +253,32 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("act_u", 1, "seek_ub")
 	t.connect_node("upper", 0, "air")
 	t.connect_node("upper", 1, "act_u")
+	_build_flinch(t)
 	t.add_node("full", AnimationNodeBlend2.new())
-	t.connect_node("full", 0, "upper")
+	t.connect_node("full", 0, "flinch")
 	t.connect_node("full", 1, "act")
 	t.connect_node("output", 0, "full")
 	return t
+
+## The flinch layer over "upper": the hit clip less its own first frame, added on the spine and arms, so the run
+## under it keeps swinging and the legs never leave the loco clip.
+func _build_flinch(t: AnimationNodeBlendTree) -> void:
+	for nm in ["hit", "hit0"]:
+		t.add_node("anim_" + nm, _anim(String(d["loco"]["idle"])))
+		t.add_node("seek_" + nm, AnimationNodeTimeSeek.new())
+		t.connect_node("seek_" + nm, 0, "anim_" + nm)
+	var sub := AnimationNodeSub2.new()
+	var add := AnimationNodeAdd2.new()
+	for node in [sub, add]:
+		node.filter_enabled = true
+		for b in d.get("upper", []):
+			node.set_filter_path(_track(String(b)), true)
+	t.add_node("flinch_delta", sub)
+	t.connect_node("flinch_delta", 0, "seek_hit")
+	t.connect_node("flinch_delta", 1, "seek_hit0")
+	t.add_node("flinch", add)
+	t.connect_node("flinch", 0, "upper")
+	t.connect_node("flinch", 1, "flinch_delta")
 
 ## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
 func _build_crouch(t: AnimationNodeBlendTree) -> String:
@@ -354,7 +376,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if hit < float(hd.get("dur", 0.0)):
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
-		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
+		var vel: Vector3 = s.get("vel", Vector3.ZERO)
+		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
+		var running := Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true))
+		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
+		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
 	return {}
 
 func step(dt: float) -> void:
@@ -364,7 +390,17 @@ func step(dt: float) -> void:
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
-	if not proc and bool(want.get("upper", false)):
+	var flinching := not proc and bool(want.get("flinch", false))
+	if flinching:
+		for nm in ["hit", "hit0"]:
+			_node("anim_" + nm).animation = String(want["clip"])
+		_p("seek_hit/seek_request", float(want["t"]))
+		_p("seek_hit0/seek_request", 0.0)
+	flinch_w = move_toward(flinch_w, 1.0 if flinching else 0.0, dt / FADE)
+	if flinching:
+		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
+		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
+	elif not proc and bool(want.get("upper", false)):
 		var clip_u := String(want["clip"])
 		if clip_u != cur_u:
 			cur_u = clip_u
@@ -402,6 +438,7 @@ func step(dt: float) -> void:
 	_p("act/blend_amount", xf)
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
+	_p("flinch/add_amount", flinch_w)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	if d.has("crouch"):

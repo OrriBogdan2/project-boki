@@ -510,7 +510,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	play("thf_exdash" if air else chain.next_flip(dir))
 	var t := float(dd["time"])
-	m.sfx("thief_dash", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
