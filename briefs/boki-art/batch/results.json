@@ -103232,5 +103232,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/glom_custard_f_2.jpg",
     "ok": true
+  },
+  {
+    "id": "alt_blotlet",
+    "name": "Blotlet (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_blotlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_wax_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glom_wax_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_sloggoth",
+    "name": "Sloggoth (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_sloggoth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_honey_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glom_honey_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_wax_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_wax_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_wax_f",
+    "name": "Glomworth (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_wax_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_custard_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_custard_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_honey_f",
+    "name": "Glomworth (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glom_honey_f_1.jpg",
+    "ok": true
   }
 ]
