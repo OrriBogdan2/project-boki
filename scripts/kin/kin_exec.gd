@@ -65,7 +65,7 @@ static func run_stage(st: StageSpec, cx: Dictionary) -> void:
 				c2["dir_fixed"] = _dir(st, cx, c2["at_fixed"])
 				var tr := _reach(st)
 				if tr > 0.0 and String(st.delivery.params.get("origin", "")) in ["aim", "here"]:
-					_telegraph(m, c2["at_fixed"], tr, _color(st), wait)
+					_telegraph(m, c2["at_fixed"], tr, _color(st, cx), wait)
 			m.later(wait, func(): if is_instance_valid(c2["caster"]): run_stage(st, c2))
 			return
 	var c := cx.duplicate()
@@ -154,7 +154,11 @@ static func _reach(st: StageSpec) -> float:
 		if p.has(k): return float(p[k]) * (0.5 if k == "length" else 1.0)
 	return 1.2
 
-static func _color(st: StageSpec) -> Color:
+## A Hunter's kit stage draws in that Hunter's signature colour (ArchKit.cx sets "hero_col"); a Boki's
+## stage in its effects' category colour.
+static func _color(st: StageSpec, cx: Dictionary) -> Color:
+	if cx.has("hero_col"):
+		return cx["hero_col"]
 	if not st.effects.is_empty():
 		return KinRules.effects_color(st.effects)
 	for ev in st.then:
@@ -190,7 +194,7 @@ static func _deliver(st: StageSpec, cx: Dictionary) -> void:
 		var from := _origin(st, cx)
 		var dl := st.delivery.type
 		if dl == "projectile" and float(st.delivery.params.get("speed", 0.0)) >= 60.0: dl = "rail"
-		AbilityFx.cast(cx["m"], cx["caster"], dl, from, _dir(st, cx, from), _color(st),
+		AbilityFx.cast(cx["m"], cx["caster"], dl, from, _dir(st, cx, from), _color(st, cx),
 			{"range": float(st.delivery.params.get("range", 10.0)), "radius": float(st.delivery.params.get("radius", 1.5)), "grammar": true})
 		# the tell sound for grammar casts is Feel's (pointed at AbilityFx's rows), once per caster a frame
 		if not cx.get("silent", false):
@@ -229,7 +233,7 @@ static func _projectile(st: StageSpec, cx: Dictionary) -> void:
 	if sp:
 		n = int(sp.params["count"]); fan = deg_to_rad(float(sp.params["angle"]))
 	var y := from.y + _height(unit)
-	var col := _color(st)
+	var col := _color(st, cx)
 	var bounce := st.modifier("bounce")
 	var hits: Dictionary = cx["hits"]
 	for i in n:
@@ -302,7 +306,7 @@ static func _bounce(st: StageSpec, cx: Dictionary, at: Vector3, from_e: Ent, sta
 	var dv := Vector2(best.pos.x - at.x, best.pos.z - at.z).normalized()
 	var p := st.delivery.params
 	var st2 := {"hits": 0, "bounce": int(state["bounce"]) - 1, "seen": state["seen"]}
-	_shoot(st, c2, Vector3(at.x, best.pos.y + 0.6, at.z), dv, float(p["speed"]), bd + 1.5, float(p["size"]), _color(st), st2, hits)
+	_shoot(st, c2, Vector3(at.x, best.pos.y + 0.6, at.z), dv, float(p["speed"]), bd + 1.5, float(p["size"]), _color(st, cx), st2, hits)
 
 ## Chain: the hit arcs on to nearby foes, one after another.
 static func _chain(st: StageSpec, first: Ent, cx: Dictionary) -> void:
@@ -310,7 +314,7 @@ static func _chain(st: StageSpec, first: Ent, cx: Dictionary) -> void:
 	if ch == null or not is_instance_valid(first):
 		return
 	var m: Node = cx["m"]
-	var col := _color(st)
+	var col := _color(st, cx)
 	var seen := [first]
 	var from: Ent = first
 	var k := float(cx.get("k", 1.0))
@@ -338,7 +342,7 @@ static func _cone(st: StageSpec, cx: Dictionary) -> void:
 	var dir := _dir(st, cx, from)
 	var r := float(p["radius"])
 	var cosv := cos(deg_to_rad(float(p["angle"])) * 0.5)
-	var col := _color(st)
+	var col := _color(st, cx)
 	m.fx.cone(from, dir, r, col)
 	m.sfx("whoosh", from, -4.0, 0.9)
 	var foes: Array = []
@@ -400,7 +404,7 @@ static func _beam_once(st: StageSpec, cx: Dictionary, share: float) -> void:
 	if not foes.is_empty() and foes.size() >= n:
 		end = Vector2((foes[-1] as Ent).pos.x, (foes[-1] as Ent).pos.z)
 	var y0 := from.y + _height(unit)
-	var col := _color(st)
+	var col := _color(st, cx)
 	m.fx.bolt(Vector3(a2.x, y0, a2.y), Vector3(end.x, from.y + 0.7, end.y), col)
 	m.sfx("zap", from, -5.0, 1.2)
 	var c2 := cx.duplicate(); c2["k"] = float(cx.get("k", 1.0)) * share
@@ -415,7 +419,7 @@ static func _burst(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
 	var at := _origin(st, cx)
 	var r := float(st.delivery.params["radius"])
-	var col := _color(st)
+	var col := _color(st, cx)
 	if r > 0.01:
 		m.fx.ring(at, r, col, 0.3 if r <= KinParts.BIG_RADIUS else 0.7)
 		if r <= KinParts.BIG_RADIUS:
@@ -443,7 +447,7 @@ static func _zone(st: StageSpec, cx: Dictionary) -> void:
 		_hit(st.effects, st, _foes_near(cx, at2, r, 2.0), c2, at2, r)
 	var end := func(at2: Vector3) -> void:
 		if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, at2, cx.get("dir", Vector2.ZERO))
-	m.fields.add_kx(cx["caster"], at, r, float(p["duration"]), float(p["every"]), _color(st), tick, end)
+	m.fields.add_kx(cx["caster"], at, r, float(p["duration"]), float(p["every"]), _color(st, cx), tick, end)
 
 static func _aura(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
@@ -458,7 +462,7 @@ static func _aura(st: StageSpec, cx: Dictionary) -> void:
 		_hit(st.effects, st, _foes_near(cx, at2, r, 2.0), c2, at2, r)
 	var end := func(at2: Vector3) -> void:
 		if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, at2, Vector2.ZERO)
-	m.fields.add_kx(cx["caster"], u.pos, r, float(p["duration"]), float(p["every"]), _color(st), tick, end, u)
+	m.fields.add_kx(cx["caster"], u.pos, r, float(p["duration"]), float(p["every"]), _color(st, cx), tick, end, u)
 
 static func _summon(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
@@ -478,7 +482,7 @@ static func _summon(st: StageSpec, cx: Dictionary) -> void:
 			_hit(st.effects, st, _foes_near(cx, at2, r, 2.0), c2, at2, r)
 		var end := func(at2: Vector3) -> void:
 			if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, at2, Vector2.ZERO)
-		m.fields.add_kx(cx["caster"], q, r, float(p["duration"]), float(p["every"]), _color(st), tick, end, cx["caster"] if sprite else null, "sprite" if sprite else "totem")
+		m.fields.add_kx(cx["caster"], q, r, float(p["duration"]), float(p["every"]), _color(st, cx), tick, end, cx["caster"] if sprite else null, "sprite" if sprite else "totem")
 
 static func _trap(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
@@ -487,7 +491,7 @@ static func _trap(st: StageSpec, cx: Dictionary) -> void:
 	var n := int(p["count"])
 	var spread := float(p["spread"])
 	var d := _dir(st, cx, at)
-	var col := _color(st)
+	var col := _color(st, cx)
 	for i in n:
 		var q := at
 		if n > 1:
@@ -544,7 +548,7 @@ static func _wall(st: StageSpec, cx: Dictionary) -> void:
 				touch["slow"] = float(e.params["duration"]); touch["slow_k"] = float(e.params["strength"])
 			"push":
 				touch["kb"] = float(e.params["strength"])
-	var col := _color(st)
+	var col := _color(st, cx)
 	var e2 := {"length": float(p["length"]), "hp": float(p["hp"]), "time": float(p["duration"]), "follow": bool(p["follow"]), "dist": maxf(off, 0.6),
 		"reflect": reflect, "rk": rk, "color": col.to_html(false), "touch": touch}
 	e2["kx_end"] = func(w: Dictionary) -> void:
@@ -571,7 +575,7 @@ static func _tether(st: StageSpec, cx: Dictionary) -> void:
 			if d < bd: bd = d; tgt = f
 	if tgt == null:
 		return
-	var col := _color(st)
+	var col := _color(st, cx)
 	var dir := u.dir_to(tgt)
 	m.verbs.add_tether(u, tgt, {"max": float(p["length"]), "time": float(p["duration"]), "color": col.to_html(false), "yank": false,
 		"kx_snap": func(_a, b) -> void: if is_instance_valid(cx["caster"]) and is_instance_valid(b): _then(st, "on_snap", cx, b.pos, dir, b),
@@ -597,7 +601,7 @@ static func _dash(st: StageSpec, cx: Dictionary) -> void:
 		_then(st, "on_end", cx, at, dir)
 		_linger(st, cx, at)
 	if u is Kin and (u as Kin).state in ["active", "returning", "flying_home", "flying"]:
-		(u as Kin).start_rush(dir, {"distance": dist, "speed": spd, "width": w, "kx_hit": on_hit, "kx_end": on_end, "color": _color(st).to_html(false)}, {"slot": cx["slot"], "ability": cx["ability"]})
+		(u as Kin).start_rush(dir, {"distance": dist, "speed": spd, "width": w, "kx_hit": on_hit, "kx_end": on_end, "color": _color(st, cx).to_html(false)}, {"slot": cx["slot"], "ability": cx["ability"]})
 	elif u is Hunter:
 		var h := u as Hunter
 		h.dash_with({"speed": spd, "time": dist / spd, "kind": "rush", "invuln": 0.0})
@@ -623,7 +627,7 @@ static func _leap(st: StageSpec, cx: Dictionary) -> void:
 	for ev in st.then:
 		for sub in st.then[ev]:
 			lr = maxf(lr, _reach(sub))
-	_telegraph(m, to, lr, _color(st), float(p["time"]))
+	_telegraph(m, to, lr, _color(st, cx), float(p["time"]))
 	var dir := dd.normalized() if dd.length() > 0.05 else _dir(st, cx, u.pos)
 	var land := func(at: Vector3) -> void:
 		if not is_instance_valid(cx["caster"]): return
@@ -651,7 +655,7 @@ static func _blink(st: StageSpec, cx: Dictionary) -> void:
 		if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 			best = Vector3(q.x, m.world.ground_at(q.x, q.z), q.z); break
 		k -= 0.5
-	var col := _color(st)
+	var col := _color(st, cx)
 	m.fx.burst(u.pos + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
 	u.teleport(best)
 	m.fx.burst(best + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
@@ -779,7 +783,11 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	for e in post:
 		if not (e.type == "pull" and float(e.params["gap"]) > 0.0):
 			_post(e, f, cx, center, k)
-	var col := KinRules.cat_color("control") if cats.has("control") else (KinRules.cat_color("damage") if cats.has("damage") else KinRules.cat_color("utility"))
+	var col: Color = KinRules.cat_color("utility")
+	if cats.has("control"):
+		col = KinRules.cat_color("control")
+	elif cats.has("damage"):
+		col = cx.get("hero_col", KinRules.cat_color("damage"))
 	m.fx.burst(f.pos + Vector3(0, 0.8, 0), col, 6, 2.5, 0.3)
 	# an archetype ability's own follow-up on what it hit (Marks, Shadow Step windows, wall pins)
 	var cb = cx.get("on_foe")
