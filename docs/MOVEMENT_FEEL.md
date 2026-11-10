@@ -224,6 +224,22 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Abyss bounce** [est]: the lift reaches the lip at 4.5 m/s (was 3.5), floating ~1.6m over it.
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
+## Hits on the glider (`--glide-hit-check`, decision 0055; PARITY FIRST)
+
+Asked: what happens to a Hunter under the glider who is shot, knocked, stunned or pulled, and when they can open it again. Evidence read: `docs/SUPERVIVE_DATA.md` sections 4 (crowd control) and 5 (glider rules at 1.0), the 1.0 rules in `docs/KINFALL_CLASSES.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, `supervive_physics.md` (only the names `GliderHeatInboundDamageCoefficient` and `GliderFullHeatInboundDamageCoefficient`, no values), sync64 in `docs/ROADMAP.md`, and the hero-ref footage sheets. None of the footage shows a glider being hit, so the rows below come from the data.
+
+| Case | Source | Glider | Reopen | Ours (measured) |
+|---|---|---|---|---|
+| Shot, heat left | 1.0: a hit doesn't knock you out of the air, you take normal damage, it heats the glider (sync64: 3x) | stays open, extra heat | never shut | a 10 shot: 0.261 heat (`Hunter.GLIDER_HIT_HEAT`), 10 damage, still open 0.5 s later; heat then builds 2x for 1 s (`hit_heat_t`, [est]) |
+| Shot that fills the heat, or any shot on an overheated glider | 1.0: "damage that pushes heat to 100%: instant spike"; a spike is stun + plummet, 0.7 s stun over ground [wiki] | shut, plummets with the body | not in the air: on landing, after the 0.7 s stun (`glide_cd` 2.5 s [est] still runs into the next jump) | shut, -6 m/s, lands stunned 0.70 s |
+| A monster's shot | 1.0: "Monsters can't spike" | stays open, extra heat | never shut | heat stops at 2% |
+| Knocked (a shove, no stun) | 1.0: damage doesn't knock you out of the air; Knockback: "you can steer it" (you keep control) | stays open, shoved with the body | never shut | **changed:** a shove over 4 m/s used to fold it for 0.4 s. A 12 m/s knock now keeps it open and carries it 5.3 m in 0.5 s; WASD bends it as on foot (`knock_steer`); only the knock's damage heats it |
+| Stunned | Stun: "no movement, no air control, no abilities" | shut at once, falls with the body | a fresh press, the step the stun ends | shut, -4.6 m/s after 0.2 s, opens on the first press after |
+| Pulled by Grimble's arm | the target is stunned for the whole pull | shut (the stun row) | after the reel and its stun | as the stun row |
+| Pulled or pushed by any other move (Cinder's cloak, Neve's carry, Ostra's draw, Mossy's push, Sparkle's slide) | not in the data or the footage | open stays open unless the move stuns | | not changed, not asserted |
+
+Kept: holding Space never opens the glider (DECISIONS 11-08; every reopen above is a fresh press), and an overheated glider still lifts out of the abyss at half strength (`--abyss-check`, `--glider-heat-check`). A glider that is still shut waits out a hard knock (0.4 s, [est]) before it opens. Still open for the owner: the older wiki note "most hits on a glider deal double damage" (ours keeps 1.0's normal damage), and "spiking a below-ground glider" (a hit on the balloon under the lip, at any heat; ours spikes only when the heat runs out).
+
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.

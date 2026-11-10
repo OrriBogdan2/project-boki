@@ -50,6 +50,7 @@ const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) get
 const MANTLE_RISE := 14.0        # [footage] a deep mantle returns to the top in ~0.8s
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
 const SPIKE_STUN := 0.7         # [wiki] stun when a spiked glider hits the ground (docs/EXPEDITION_SPEC.md)
+const GLIDER_HIT_HEAT := 3.0 * 0.30 / 34.5   # [sync64] glider heat per point of damage: hits heat it 3x (34.5 burns 90%)
 const SPIKE_DMG := 8.0
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
 const DASH_TIME := 0.19       # s
@@ -500,8 +501,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	var spiked := false
 	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		var was := glide_fuel
-		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 3x
-		glide_fuel = maxf(0.0, glide_fuel - 3.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
+		glide_fuel = maxf(0.0, glide_fuel - dmg * GLIDER_HIT_HEAT / float(cdat.get("glide_cap", 1.0)))
 		hit_heat_t = 1.0
 		if is_local() and m.hud and m.hud.has_method("glider_hit"):
 			m.hud.glider_hit(was - glide_fuel)
@@ -2516,7 +2516,7 @@ func _interrupt_consume() -> void:
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
 
-## Hold jump while falling to open the glider. It folds when you land, run out, dash, or get hit.
+## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
 var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
@@ -2555,9 +2555,9 @@ func _update_glide(dt: float) -> void:
 		if heat_burn >= 20.0:                  # (in ~20-damage ticks, ~2 a second: not a stream of numbers)
 			heat_burn -= 20.0
 			hurt(20.0, null, {"src": "heat"})
-	# an overheated glider stays open (slow and sinking) until you land or get hit again
+	# an overheated glider stays open until you land or get hit again; a knock carries an open one (0055)
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
+		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	if gliding and not _handoff.is_empty() and want and can:
 		_take_glide_handoff()       # (movefeel) a burst that ended with the glider still open
