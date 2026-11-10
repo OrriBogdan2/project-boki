@@ -447,7 +447,10 @@ func _punch(k: float) -> void:
 	var dir := h.aim_dir()
 	# the step: an impulse, not a roll (a punch is not a dash: it never blocks fire or reads as one), the speed
 	# that slides "step" metres ([footage] half a body height) under the ground brake
-	var stepv := HunterMove.slide_speed(float(pd["step"])) * (float(pd["air_k"]) if not h.grounded else 1.0)
+	var stepv := HunterMove.slide_speed(float(pd["step"]))
+	if not h.grounded:
+		# no ground brake up there: a short push, but never slower than she flies (item 51, out of an air dash)
+		stepv = maxf(stepv * float(pd["air_k"]), Vector2(h.vel.x, h.vel.z).length())
 	h.vel.x = dir.x * stepv
 	h.vel.z = dir.y * stepv
 	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
