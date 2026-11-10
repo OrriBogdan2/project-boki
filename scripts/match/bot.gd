@@ -34,7 +34,8 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
+const STAY_GOALS := ["rv_wait", "yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box",
+	"beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 ## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
@@ -134,6 +135,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["seen"] = tgt
 		a["react_t"] = float(df.get("react", 0.3)) * randf_range(0.8, 1.3) * (1.6 if tgt is Hunter else 1.0)
 	a["react_t"] = float(a.get("react_t", 0.0)) - dt
+	BotKin.summon(m, h, tgt, float(df.get("abil", 0.7)), dt)
 	# ---- a decoy: the rival vanished and left a copy behind; bots keep shooting the copy
 	if tgt is Hunter and (tgt as Hunter).cloak_t > 0.0 and m.verbs:
 		var dc: Dictionary = m.verbs.decoy_of(tgt)
@@ -224,7 +226,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
-				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
+				inp["ult"] = false      # R is the Merge: BotKin decides
 				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
 					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
 					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
@@ -258,7 +260,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "dock", "uplink", "hatch", "lair_dial", "lair_lever"]:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "board", "yard", "lair_camp"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["rv_wait", "beacon", "board", "yard", "lair_camp"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -296,6 +298,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	var carry := BotRescue.carry_move(m, h)       # a Meeko bot with a wisp on her shoulder walks it out of the fight
 	if carry != Vector2.ZERO:
 		move = carry
+	elif rv.is_empty() and BotRescue.wisp_grab(m, h, inp):      # a loose Boki wisp after a down (KinSteal)
+		move = BotRescue.wisp_move(h)
 	# ---- don't walk off edges (except onto the jump pad we're heading for), and keep off other pads
 	var to_pad: bool = (a.has("pad_at") and h.flat_dist(a["pad_at"]) < 2.5) or (a.has("cross") and h.flat_dist(a["cross"]["take"]) < 2.5)
 	for pd in m.world.pads:
@@ -323,6 +327,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			move = dd
 	move = _brake_at_lip(m, h, move)
 	inp["move"] = move
+	if StoneStand.hop_ahead(h, move):
+		inp["jump"] = true      # a teammate's rock in the way: hop it (Tenzo walks up his own; a foe's stops us)
 	if a.has("dash_dir"):
 		inp["move"] = a["dash_dir"]
 		a.erase("dash_dir")
@@ -717,8 +723,13 @@ func _choose(m: Match, h: Hunter) -> void:
 	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
-		if o != h and o.team == h.team and o.downed and not o.out and BotRescue.revive_ok(m, h, o):
-			goal = o.pos; gk = "revive"; break
+		if o != h and o.team == h.team and o.downed and not o.out:
+			if BotRescue.revive_ok(m, h, o):
+				goal = o.pos; gk = "revive"; break
+			goal = BotRescue.wait_spot(m, h, o)      # in an enemy area: wait at its rim, not off on a loot run
+			if goal != Vector3.INF:
+				gk = "rv_wait"
+				break
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
 		if goal != Vector3.INF: gk = "boki"

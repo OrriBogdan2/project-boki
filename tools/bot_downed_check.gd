@@ -2,11 +2,12 @@ extends RefCounted
 ## --bot-downed-check: bots play downed teammates like a fair player (scripts/match/bot_rescue.gd). Scripted
 ## 1v2 setups on open ground (a bot and a downed squadmate against two rivals):
 ##   1. calm: a rival far off, the bot revives the squadmate
-##   2. an enemy Well on the wisp: the bot stays outside it; once it is gone the bot revives
+##   2. an enemy Well on the wisp: the bot waits outside its rim; once it is gone the bot revives
 ##   3. under fire and low: the bot gives up the revive; healthy, it takes the shooter on first
 ##   4. a Meeko bot with a rival closing in carries the wisp away, then sets it down when calm and revives
 ##   5. a rival's wisp in sight: the bot finishes it
-##   6. grabbing loose Boki wisps after a down: not built yet (DECISIONS 11-09 stealing has no code), reported as SKIP
+##   6. Boki wisps on (KinSteal, DECISIONS 11-09 stealing): a downed rival's Boki wisp floats loose; with a rival
+##      standing over it the bot leaves it, once clear the bot grabs it; a downed teammate's wisp is left for its owner
 ## Prints BOTDOWNED ok/FAIL.
 
 var bad := 0
@@ -42,11 +43,14 @@ func _roomy(p: Vector3, r: int) -> bool:
 	return true
 
 ## A fresh two-team match with the bot (team of the player), the player as the downed squadmate and two rivals.
-func _fresh(home: Vector3, arch := "") -> void:
+func _fresh(home: Vector3, arch := "", wisps := false) -> void:
 	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	var o := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true}
+	if wisps:
+		o.merge({"demo_kin": "cindle", "boki_wisps": true})
+	m.start(o)
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
@@ -54,11 +58,14 @@ func _fresh(home: Vector3, arch := "") -> void:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
 		for kk in [h.kin, h.kin2]:
-			if kk:
+			if kk and wisps:
+				if kk.summon: kk.summon.cd = 60.0      # resting: a ready summon guards its downed hunter instead (0040)
+			elif kk:
 				m.kins.erase(kk)
 				kk.queue_free()
-		h.kin = null
-		h.kin2 = null
+		if not wisps:
+			h.kin = null
+			h.kin2 = null
 	mate = m.player
 	var mates: Array = m.hunters.filter(func(x): return x.team == mate.team and x != mate)
 	bot = mates[0]
@@ -110,7 +117,7 @@ func run(mn: Node) -> void:
 	_under_fire(home)
 	_carry(home)
 	_finish_rival(home)
-	print("BOTDOWNED SKIP wisp steal: no Boki wisps in the source yet (DECISIONS 11-09), so no bot rule to check")
+	_steal(home)
 	_finish()
 
 func _calm(home: Vector3) -> void:
@@ -131,6 +138,7 @@ func _aoe(home: Vector3) -> void:
 		t += Match.DT
 		closest = minf(closest, bot.flat_dist(home))
 	ok(mate.downed and closest > 6.0, "enemy Well: the bot keeps out (closest %.1fm of 6.0)" % closest)
+	ok(bot.flat_dist(home) < 12.0, "...and waits at its rim, not off on a loot run (%.1fm)" % bot.flat_dist(home))
 	for z in m.zones.duplicate():
 		(z["node"] as Node).queue_free()
 		m.zones.erase(z)
@@ -186,6 +194,49 @@ func _finish_rival(home: Vector3) -> void:
 	wisp.down_hp = 1e6        # it would bleed out on its own, and the stomp could never end it: we watch for the stomp
 	var t := _run(16.0, func(): return not bot.stomp.is_empty())
 	ok(not bot.stomp.is_empty() and bot.stomp["o"] == wisp, "rival wisp in sight: starts the stomp (%.1fs)" % t)
+
+## A downed hunter's Boki wisp broken loose; the hunter is then parked far away (no stomp or revive pulls the bot).
+func _loose_of(h: Hunter) -> Kin:
+	var k: Kin = h.kin
+	m.knock(h, foes[1] if h.team == bot.team else bot, {})
+	h.down_hp = 1e6
+	_run(0.2, func(): return k == null or KinSteal.loose(k))
+	_put(h, _far(h.pos))
+	return k if k and KinSteal.loose(k) else null
+
+func _steal(home: Vector3) -> void:
+	_fresh(home, "", true)
+	m.revive_hunter(mate, null)
+	_put(mate, home + Vector3(0, 0, 7))
+	var rival: Hunter = foes[0]
+	_put(rival, home + Vector3(-2, 0, 0))
+	_put(bot, home + Vector3(6, 0, 0))
+	var wk := _loose_of(rival)
+	ok(wk != null, "wisps on: a downed rival's Boki wisp floats loose")
+	if wk == null:
+		return
+	var guard: Hunter = foes[1]
+	_put(guard, Vector3(wk.pos.x - 3.0, 0, wk.pos.z))
+	guard.max_hp = 1e6
+	guard.hp = 1e6
+	_run(4.0, func(): return wk.owner_h == bot)
+	ok(KinSteal.loose(wk) and wk.owner_h != bot, "...a rival stands over it: the bot leaves it (4s)")
+	_put(guard, _far(bot.pos))
+	var t := _run(8.0, func(): return wk.owner_h == bot)
+	ok(KinSteal.stolen(wk) and wk.owner_h == bot, "...the rival gone: the bot grabs it (%.1fs)" % t)
+	# a downed teammate's wisp: left for its owner (revive them instead; they take it back)
+	_fresh(home, "", true)
+	m.revive_hunter(mate, null)
+	_put(mate, _far(home))
+	var mk: Hunter = m.hunters.filter(func(x): return x.team == bot.team and x != bot and x != mate)[0]
+	_put(mk, home)
+	_put(bot, home + Vector3(5, 0, 0))
+	var tk := _loose_of(mk)
+	ok(tk != null, "a downed teammate's Boki wisp floats loose")
+	if tk:
+		bot.ai["rv_off"] = m.time + 10.0      # off the revive (as if it gave up), so only the grab rule decides
+		_run(4.0, func(): return tk.owner_h == bot)
+		ok(tk.owner_h != bot, "...the bot leaves a teammate's wisp for its owner")
 
 func _finish() -> void:
 	print("BOTDOWNED %s" % ("PASS" if bad == 0 else "FAIL (%d)" % bad))

@@ -20,15 +20,47 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
 - Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
   scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
-  procedurally (glow-shader core, halo, eyes, motes, trail). The id is `Save.d["look"]["wisp"]`, the same
-  pattern as glider skins; unknown ids give `default`.
+  procedurally. The id is `Save.d["look"]["wisp"]`, the same pattern as glider skins; unknown ids give
+  `default`.
+- **The outline rule** (owner, briefs/DECISIONS.md 2026-11-09, "round = Hunter, critter = Boki"): a Hunter
+  Wisp is a round "person" outline (a squashed round body with a head) in the team colour with a white
+  core, floating low (body centre 0.4 m), slow and heavy, with a steady glow and a quiet hum. It must read
+  differently from any Boki at match zoom, and a Boki wisp is the opposite (critter outline, quick and
+  bouncy, shoulder height, sparkles, chirps). So the Hunter Wisp has no eyes, no motes, no sparkle trail
+  and no flicker. The body is one shared mesh in one material (`shaders/wisp_core.gdshader`: team rim,
+  white core), so thirty of them stay cheap. Motion: a slow bob; when the hunter crawls the body hangs
+  back in the world (up to `drag`), leaning back, and catches up over `settle` seconds once they stop. The
+  hum (`audio/wisp_hum.wav`, tools/gen_wisp_sfx.py, a seamless loop) is held through `Sfx.loop_hold` each
+  frame, positional, and stops with the Wisp; a Wisp the local player cannot see keeps quiet, like its pops.
+  Every look must keep the outline: `--wisp-check` asserts it for each entry.
 
 ## How to add a Wisp
 Add an entry under `looks` in `wisp_looks.json` with only the keys that differ from `default`
-(nested keys merge). No code. `--wisp-check` covers every entry.
+(nested keys merge): colours, body size, hover, drift, hum, pop effects. No code. `--wisp-check` covers
+every entry, including the outline rule (round body with a head, team rim, white core, low, steady).
 
 ## Consequences
 - The local player's Wisp look is not sent to other players (they see `default`, tinted by their side colour, SideColor). Sending it
   needs a join-kit field and a Net.VERSION bump: see docs/DEBT.md.
-- `HunterAnim`'s downed crawl code is dead and can go.
+- (done) HunterAnim's downed crawl code is removed; the clip files stay.
 - Check: `--wisp-check`.
+
+## Boki wisps (the other outline, DECISIONS 2026-11-09)
+Round = Hunter, critter = Boki. `BokiWispLook` (scripts/kin/boki_wisp_look.gd) builds a Boki's wisp from its
+species: its own palette (the shiny one when it shimmers), its ears and tail tip from `look` (or a small table
+for the hand-built bodies), one baked mesh on one shared unlit material (`shaders/boki_wisp.gdshader`), a quick
+hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the wisp prototype wires it into
+matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
+
+### Readability at the match camera
+`BokiWispClear` (scripts/kin/boki_wisp_clear.gd) is the wisp's keep-clear rules, judged on screen. It orbits an arc
+(not a lap) behind and beside the aim, on the side whose arc is furthest on screen from the aim (AimDraw's ground
+ribbon and Match's hip-height line), the cursor and its Hunter's hit circle. It sinks up to half a metre to stay
+under its own plate, and dims over your aim (to 0.2) or the cursor, your hit circle or a plate within 4 m (to 0.5:
+the HUD draws those over it anyway; at shoulder height it is by a plate on about half the aims, so a lower ride
+height would dim it less: owner's call). Its trail is 40% as long while its Hunter fires. Only
+the nearest 10 wisps within 14 m keep sparkles (30 Hunters stay under the 300 budget). The body blends with no
+depth write at render priority -1, so telegraphs (priority 2) and the HUD plates draw over it. `--boki-wisp-check`
+sweeps the aim over 360 degrees for three camera styles; shots: `--wisp-clear-shots --shots-dir=<dir>` (GPU).
+`KinWisp.render` calls `place`, `alpha` and `apply` for each wisp, with the screen, your aim and the sparkle
+set built once a frame; `--wisp-check` asserts a match wisp rides on the side away from the aim.

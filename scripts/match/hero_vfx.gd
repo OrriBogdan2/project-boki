@@ -50,6 +50,7 @@ var _arcs := {}                # arc degrees -> arc mesh
 var _cyl: ArrayMesh
 var _warming: Array = []       # the loading screen's stand-ins (prewarm)
 var _anchors := {}             # "<model id>/<anchor>" -> the node found for it (null: none)
+var scarves := HeroScarf.new(self)   # the cloth ends some Heroes trail (data "scarf")
 
 static func of(match_node: Node) -> HeroVfx:
 	if match_node.has_meta("hero_vfx"):
@@ -366,6 +367,7 @@ func prewarm(at: Vector3) -> void:
 			_warming.append(_prewarm_node(kind))
 	for node: Node3D in _warming:
 		node.global_transform = Transform3D(Basis.IDENTITY, Vector3.ZERO if node.get_meta("strip", false) else at)
+	scarves.prewarm(at)
 
 func prewarm_end() -> void:
 	for node: Node3D in _warming:
@@ -373,6 +375,7 @@ func prewarm_end() -> void:
 		if node is GPUParticles3D:
 			(node as GPUParticles3D).emitting = false
 	_warming.clear()
+	scarves.prewarm_end()
 
 func _prewarm_node(kind: String) -> Node3D:
 	if not MODES.has(kind):
@@ -721,6 +724,7 @@ func _model_has(h: Hunter, node_name: String) -> bool:
 # ------------------------------------------------------------------ the running looks
 func _process(delta: float) -> void:
 	_tick_holds()
+	scarves.tick(delta)
 	for i in range(live.size() - 1, -1, -1):
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta

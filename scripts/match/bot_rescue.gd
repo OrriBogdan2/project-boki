@@ -21,6 +21,23 @@ static func in_hostile_aoe(m: Match, h: Hunter, at: Vector3) -> bool:
 				return true
 	return false
 
+## Where to wait for a downed squadmate `o` lying in an enemy area: just outside it on our side (INF when the
+## area is not why we can't go, or the wisp is beyond RV_WAIT_R).
+const RV_WAIT_R := 30.0       # m: a squadmate further than this is not worth holding for
+static func wait_spot(m: Match, h: Hunter, o: Hunter) -> Vector3:
+	if CareUtil.is_carried(o) or float(h.ai.get("rv_off", -1.0)) > m.time or h.flat_dist(o) > RV_WAIT_R \
+			or not in_hostile_aoe(m, h, o.pos):
+		return Vector3.INF
+	var dir := o.dir_to(h)
+	if dir == Vector2.ZERO:
+		dir = Vector2.RIGHT
+	for i in 40:
+		var p := o.pos + Vector3(dir.x, 0.0, dir.y) * (0.5 * i)
+		if not in_hostile_aoe(m, h, p):
+			p += Vector3(dir.x, 0.0, dir.y) * 1.5
+			return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
+	return Vector3.INF
+
 ## The foe whose fire just hit this bot, or null.
 static func shooter(m: Match, h: Hunter) -> Hunter:
 	if m.time - h.hurt_at > FIRE_T:
@@ -62,3 +79,43 @@ static func carry_move(m: Match, h: Hunter) -> Vector2:
 
 static func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
+
+## Loose Boki wisps after a down (DECISIONS 2026-11-09 stealing, KinSteal): a bot with room goes for the
+## nearest one within GRAB_SEEK when no foe is within GRAB_SAFE of it and it is not in an enemy area, and holds
+## interact on it (Match._update_interact does the grab). Its own wisp, once revived, counts too; a teammate's is
+## left for its owner. True when it is going for one this frame (the target is in h.ai["wgrab_k"] for wisp_move).
+const GRAB_SEEK := 16.0       # m: how far a bot leaves its path for a loose wisp
+const GRAB_SAFE := 9.0        # m: no foe Hunter this close to the wisp
+
+static func wisp_grab(m: Match, h: Hunter, inp: Dictionary) -> bool:
+	h.ai.erase("wgrab_k")
+	var r := KinSteal.rules()
+	var best: Kin = null
+	var bd := GRAB_SEEK
+	for k in m.kins:
+		if not KinSteal.loose(k) or k.dead or h.flat_dist(k) >= bd or absf(k.pos.y - h.pos.y) > 3.0:
+			continue
+		if k.home_h != h and (KinSteal.count(h) >= int(r["carry_max"]) or (k.home_h and k.home_h.team == h.team)):
+			continue
+		if in_hostile_aoe(m, h, k.pos) or _foe_near(m, h, k.pos):
+			continue
+		best = k
+		bd = h.flat_dist(k)
+	if best == null:
+		return false
+	h.ai["wgrab_k"] = best
+	inp["interact"] = bd < float(r["grab_r"]) * 0.8
+	return true
+
+## The way to a wisp_grab target: straight at it, standing still once it is in reach.
+static func wisp_move(h: Hunter) -> Vector2:
+	var k: Kin = h.ai.get("wgrab_k")
+	if k == null or h.flat_dist(k) < float(KinSteal.rules()["grab_r"]) * 0.6:
+		return Vector2.ZERO
+	return h.dir_to(k)
+
+static func _foe_near(m: Match, h: Hunter, at: Vector3) -> bool:
+	for f in m.foes_of(h.team):
+		if f is Hunter and f.targetable() and _flat(at, f.pos) < GRAB_SAFE:
+			return true
+	return false
