@@ -98864,5 +98864,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/idea_rimekit_1.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_rimekit",
+    "name": "Rimekit (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_rimekit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimekit",
+    "name": "Rimekit (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_rimekit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_starpup_b",
+    "name": "Cute legendary concept: starpup b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_starpup_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimeshrew",
+    "name": "Rimeshrew (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_rimeshrew_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_starpup_a",
+    "name": "Cute legendary concept: starpup a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_starpup_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_starpup_b",
+    "name": "Cute legendary concept: starpup b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_starpup_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimeshrew",
+    "name": "Rimeshrew (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_rimeshrew_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_kindlewren",
+    "name": "Kindlewren (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_kindlewren_2.jpg",
+    "ok": true
   }
 ]
