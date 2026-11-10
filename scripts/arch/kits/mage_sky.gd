@@ -79,7 +79,7 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	var dark := MageKit.VIOLET.darkened(0.4)
+	var dark := MageKit.PINK.darkened(0.75)          # the countdown disc: a dark plum of her pink until the strike
 	kit.fx().disc(at, r, dark, MageKit.GLOW, float(ed["delay"]) + 0.1, MageKit.COPPER, false, true)
 	kit.vfx("e_count", at, null, {"r": r})          # the storm gathers over the circle (other games see it too)
 	AimKit.hide(kit.h, "e_drag")
