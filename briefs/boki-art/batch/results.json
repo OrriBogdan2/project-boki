@@ -82869,5 +82869,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_scarabit_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_hydrangor",
+    "name": "Hydrangor (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_hydrangor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_scarabit",
+    "name": "Scarabit (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_scarabit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_meteorab",
+    "name": "Meteorab (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_meteorab_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_scarabit",
+    "name": "Scarabit (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_scarabit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_meteorab",
+    "name": "Meteorab (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_meteorab_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_meteorab",
+    "name": "Meteorab (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_meteorab_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hydrangor",
+    "name": "Hydrangor (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_hydrangor_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_malletary",
+    "name": "Malletary (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_malletary_1.jpg",
+    "ok": true
   }
 ]
