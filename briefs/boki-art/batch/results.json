@@ -109770,5 +109770,26 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/drop_up2_lacefix_3.jpg",
     "ok": true
+  },
+  {
+    "id": "hb2_sable_onetail",
+    "name": "Sable + Lockatara splash: one tail",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_sable_onetail_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_onetail",
+    "name": "Sable + Lockatara splash: one tail",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hb2_sable_onetail_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_onetail",
+    "name": "Sable + Lockatara splash: one tail",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_sable_onetail_2.jpg",
+    "ok": true
   }
 ]
