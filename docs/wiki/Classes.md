@@ -51,17 +51,17 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
+| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Hawk Sense | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
+| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
 | [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Guard | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
 | [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Molten Guard | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
 | [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
 | [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
-| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Hawk Sense | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
 | [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 
 ### How Hunters unlock
@@ -70,17 +70,17 @@ A new save picks 1 of 1 starters (the Hired Gun) before the egg pick and plays t
 
 | Hunter | Tier | Challenge | Target |
 |---|---|---|---|
+| [the Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
+| [the Unbroken](Class-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
 | [the Hired Gun](Class-Hired-Gun.md) | starter | pick at the start, or after your first expedition | - |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | medium | Knock down 2 hunters while under half health | 2 |
 | [the Snowglide](Class-Snowglide.md) | medium | Slow 20 enemies | 20 |
-| [the Unbroken](Class-Unbroken.md) | easy | Knock 3 enemies into walls | 3 |
 | [the Ashen Kiss](Class-Ashen-Kiss.md) | easy | Hit 3 enemies at once with one ability | 1 |
 | [the Stone Seer](Class-Stone-Seer.md) | hard | Hit 3 enemies at once with one ability, 5 times, once 6 Hunters are open | 5 |
 | [the Storm Chaser](Class-Storm-Chaser.md) | medium | Stagger 6 monsters with abilities | 6 |
 | [the Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
 | [the Dawnfox](Class-Dawnfox.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
 | [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
-| [the Red Stitch](Class-Red-Stitch.md) | easy | Stun 4 enemies | 4 |
 | [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
 
 ### Mastery
@@ -89,6 +89,14 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 | Hunter | Goal | Target | Reward |
 |---|---|---|---|
+| the Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
+| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
+| the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
+| the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
+| the Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
+| the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
+| the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
+| the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | the Hired Gun | Land 30 hits from 12 m or more | 30 | Colourway: Dust Rider |
 | the Hired Gun | Revive 2 teammates | 2 | Emote: Hat Tip |
 | the Hired Gun | Fly through 10 air rings | 10 | Trail: Spent Brass |
@@ -101,10 +109,6 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Snowglide | Fly through 10 air rings | 10 | Glider: Frost Kite |
 | the Snowglide | Revive 2 teammates | 2 | Emote: Snow Angel |
 | the Snowglide | Make it out of 3 expeditions | 3 | Title: Rinkmaster |
-| the Unbroken | Knock 10 enemies into walls | 10 | Colourway: Forge Red |
-| the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
-| the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
-| the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | the Ashen Kiss | Set 25 enemies burning | 25 | Colourway: Coal and Cinder |
 | the Ashen Kiss | Hit 3 enemies at once with one ability, 3 times | 3 | Trail: Ash Drift |
 | the Ashen Kiss | Open 6 chests | 6 | Banner: Lantern Flame |
@@ -130,10 +134,6 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
 | the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
 | the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
-| the Red Stitch | Stun 12 enemies | 12 | Colourway: Fletcher Green |
-| the Red Stitch | Your Boki lands 40 hits | 40 | Emote: Quiver Spin |
-| the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
-| the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
 | the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
 | the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
 | the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |

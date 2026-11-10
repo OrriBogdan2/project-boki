@@ -9,6 +9,68 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
+| archer | ground dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
+| archer | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
+| archer | ground dash -> ult (X) | Primal Forces can be cast in the walk | fires mid-dash |
+| archer | ground dash -> Q glove |  | fires mid-dash |
+| archer | air dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> RMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> E | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> ult (X) | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> Q glove |  | fires mid-dash |
+| archer | LMB -> dash | Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on. | the dash goes, the ability keeps running |
+| archer | RMB -> dash |  | the kit's own handling (no row yet) |
+| archer | E -> dash |  | the kit's own handling (no row yet) |
+| archer | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| archer | Q glove -> dash |  | the kit's own handling (no row yet) |
+| archer | jump -> LMB |  | fires mid-jump (default) |
+| archer | jump -> RMB |  | fires mid-jump (default) |
+| archer | jump -> E |  | fires mid-jump (default) |
+| archer | jump -> ult (X) |  | fires mid-jump (default) |
+| archer | jump -> Q glove |  | fires mid-jump (default) |
+| archer | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | hold LMB through a ground dash |  | the hold carries through and lets go there |
+| archer | hold LMB through an air dash |  | the hold carries through and lets go there |
+| archer | hold LMB through a jump |  | the hold carries through and lets go there |
+| archer | hold RMB through a ground dash |  | the hold carries through and lets go there |
+| archer | hold RMB through an air dash |  | the hold carries through and lets go there |
+| archer | hold RMB through a jump |  | the hold carries through and lets go there |
+| juggernaut | ground dash -> LMB | Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends. | buffered to the dash's end |
+| juggernaut | ground dash -> RMB | Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it. | fires mid-dash; dash momentum carries |
+| juggernaut | ground dash -> E | Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on. | fires mid-dash |
+| juggernaut | ground dash -> ult (X) | Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard. | cancels the dash |
+| juggernaut | ground dash -> Q glove | No source (the glove is ours). Ours: as every hero's default, it goes mid-dash. | fires mid-dash |
+| juggernaut | air dash -> LMB | No source: the footage shows no air dash (he uses the Air Slam in the air). Ours: as on the ground, the slash swings at the end. | buffered to the dash's end |
+| juggernaut | air dash -> RMB | Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once. | cancels the dash |
+| juggernaut | air dash -> E | No source for the air dash. Ours: the throw goes mid-dash. | fires mid-dash |
+| juggernaut | air dash -> ult (X) | Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up. | cancels the dash |
+| juggernaut | air dash -> Q glove | No source (the glove is ours). | fires mid-dash |
+| juggernaut | LMB -> dash | Footage card for his dash: 'Dash while attacking in your facing direction'; data: nothing ends a held Molten Greatsword charge. Ours: Shift goes at once between slashes, and a Searing Wave charge carries through the Rampage (hold.lmb). | the dash goes, the ability keeps running |
+| juggernaut | RMB -> dash | Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s). | the dash goes, the ability keeps running |
+| juggernaut | E -> dash | Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes. | the dash cancels its wind-up or recovery; dash momentum carries |
+| juggernaut | ult (X) -> dash | Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted', the strike at f39. Ours: Shift in the guard or the cleave is held and goes the step the cleave lands; in the recovery after it, Shift goes at once. | **exception:** the dash waits for the ability (The source plants him through the guard: he can't move until the counter has struck.) |
+| juggernaut | Q glove -> dash |  | the kit's own handling (no row yet) |
+| juggernaut | jump -> LMB |  | fires mid-jump (default) |
+| juggernaut | jump -> RMB |  | fires mid-jump (default) |
+| juggernaut | jump -> E |  | fires mid-jump (default) |
+| juggernaut | jump -> ult (X) |  | fires mid-jump (default) |
+| juggernaut | jump -> Q glove |  | fires mid-jump (default) |
+| juggernaut | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| juggernaut | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| juggernaut | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| juggernaut | ult (X) -> jump | Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it. | **exception:** the move is refused while it runs (The source plants him through the guard: no jump until the counter has struck.) |
+| juggernaut | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| juggernaut | hold LMB through a ground dash | Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's crouch and drive and goes on charging after it; let go in it, the wave goes as the drive ends. | the hold carries through and lets go there |
+| juggernaut | hold LMB through an air dash | As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air. | the hold carries through and lets go there |
+| juggernaut | hold LMB through a jump |  | the hold carries through and lets go there |
+| juggernaut | hold RMB through a ground dash |  | the hold carries through and lets go there |
+| juggernaut | hold RMB through an air dash |  | the hold carries through and lets go there |
+| juggernaut | hold RMB through a jump |  | the hold carries through and lets go there |
 | gunslinger | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |
 | gunslinger | ground dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | gunslinger | ground dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
@@ -91,37 +153,6 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | rimewright | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through an air dash |  | the hold carries through and lets go there |
 | rimewright | hold RMB through a jump |  | the hold carries through and lets go there |
-| juggernaut | ground dash -> LMB | Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends. | buffered to the dash's end |
-| juggernaut | ground dash -> RMB | Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it. | fires mid-dash; dash momentum carries |
-| juggernaut | ground dash -> E | Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on. | fires mid-dash |
-| juggernaut | ground dash -> ult (X) | Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard. | cancels the dash |
-| juggernaut | ground dash -> Q glove | No source (the glove is ours). Ours: as every hero's default, it goes mid-dash. | fires mid-dash |
-| juggernaut | air dash -> LMB | No source: the footage shows no air dash (he uses the Air Slam in the air). Ours: as on the ground, the slash swings at the end. | buffered to the dash's end |
-| juggernaut | air dash -> RMB | Data: Obsidian Slam is the RMB 'while airborne', with its own slot; footage 0251-0300: the slam from the air onto a cursor disc. Ours: RMB in the air dash ends it and the Meteor Drop's hang begins at once. | cancels the dash |
-| juggernaut | air dash -> E | No source for the air dash. Ours: the throw goes mid-dash. | fires mid-dash |
-| juggernaut | air dash -> ult (X) | Data and footage: the guard is planted (ult f33-f38). Ours: X ends the air dash and the guard goes up. | cancels the dash |
-| juggernaut | air dash -> Q glove | No source (the glove is ours). | fires mid-dash |
-| juggernaut | LMB -> dash | Footage card for his dash: 'Dash while attacking in your facing direction'; data: nothing ends a held Molten Greatsword charge. Ours: Shift goes at once between slashes, and a Searing Wave charge carries through the Rampage (hold.lmb). | the dash goes, the ability keeps running |
-| juggernaut | RMB -> dash | Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s). | the dash goes, the ability keeps running |
-| juggernaut | E -> dash | Owner: 'you can cancel or exit per the source'; the source's exit is not shown in the data or footage. Ours: Shift in the Warchain's pull ends it and the Rampage drives at once (no crouch), the pull's speed running into it; while the chain only flies or holds, the dash just goes. | the dash cancels its wind-up or recovery; dash momentum carries |
-| juggernaut | ult (X) -> dash | Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted', the strike at f39. Ours: Shift in the guard or the cleave is held and goes the step the cleave lands; in the recovery after it, Shift goes at once. | **exception:** the dash waits for the ability (The source plants him through the guard: he can't move until the counter has struck.) |
-| juggernaut | Q glove -> dash |  | the kit's own handling (no row yet) |
-| juggernaut | jump -> LMB |  | fires mid-jump (default) |
-| juggernaut | jump -> RMB |  | fires mid-jump (default) |
-| juggernaut | jump -> E |  | fires mid-jump (default) |
-| juggernaut | jump -> ult (X) |  | fires mid-jump (default) |
-| juggernaut | jump -> Q glove |  | fires mid-jump (default) |
-| juggernaut | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| juggernaut | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| juggernaut | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| juggernaut | ult (X) -> jump | Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it. | **exception:** the move is refused while it runs (The source plants him through the guard: no jump until the counter has struck.) |
-| juggernaut | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| juggernaut | hold LMB through a ground dash | Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's crouch and drive and goes on charging after it; let go in it, the wave goes as the drive ends. | the hold carries through and lets go there |
-| juggernaut | hold LMB through an air dash | As on the ground: the charge waits through the air dash; let go, the wave leaves as it ends, in the air. | the hold carries through and lets go there |
-| juggernaut | hold LMB through a jump |  | the hold carries through and lets go there |
-| juggernaut | hold RMB through a ground dash |  | the hold carries through and lets go there |
-| juggernaut | hold RMB through an air dash |  | the hold carries through and lets go there |
-| juggernaut | hold RMB through a jump |  | the hold carries through and lets go there |
 | ashwick | ground dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | ashwick | ground dash -> RMB | Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands. | buffered to the dash's end |
 | ashwick | ground dash -> E | Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends. | buffered to the dash's end |
@@ -290,37 +321,6 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | thief | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | thief | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
 | thief | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | ground dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
-| archer | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
-| archer | ground dash -> ult (X) | Primal Forces can be cast in the walk | fires mid-dash |
-| archer | ground dash -> Q glove |  | fires mid-dash |
-| archer | air dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> RMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> E | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> ult (X) | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> Q glove |  | fires mid-dash |
-| archer | LMB -> dash | Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on. | the dash goes, the ability keeps running |
-| archer | RMB -> dash |  | the kit's own handling (no row yet) |
-| archer | E -> dash |  | the kit's own handling (no row yet) |
-| archer | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| archer | Q glove -> dash |  | the kit's own handling (no row yet) |
-| archer | jump -> LMB |  | fires mid-jump (default) |
-| archer | jump -> RMB |  | fires mid-jump (default) |
-| archer | jump -> E |  | fires mid-jump (default) |
-| archer | jump -> ult (X) |  | fires mid-jump (default) |
-| archer | jump -> Q glove |  | fires mid-jump (default) |
-| archer | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | hold LMB through a ground dash |  | the hold carries through and lets go there |
-| archer | hold LMB through an air dash |  | the hold carries through and lets go there |
-| archer | hold LMB through a jump |  | the hold carries through and lets go there |
-| archer | hold RMB through a ground dash |  | the hold carries through and lets go there |
-| archer | hold RMB through an air dash |  | the hold carries through and lets go there |
-| archer | hold RMB through a jump |  | the hold carries through and lets go there |
 | ostra | ground dash -> LMB | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Gravity Orbs keep firing. | fires mid-dash |
 | ostra | ground dash -> RMB | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Void Snap casts during the flight. | fires mid-dash |
 | ostra | ground dash -> E | Swap is a lobbed projectile, not a movement (data: 'lob a projectile that swaps you'); while it flies (~1.8 s, footage 0158-0167) Void stays roughly in place and nothing in the data or footage locks him, so Unstable Anomaly plants during the flight. | fires mid-dash |
