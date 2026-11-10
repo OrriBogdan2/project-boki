@@ -3869,7 +3869,7 @@ func _care_trust(rec: Dictionary, kind: String, food := "") -> void:
 	if line != "": _toast(line)
 
 func _toast(txt: String) -> void:
-	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
+	UI.toast(root_ui, txt, UI.GOLD, guide.toast_top() if guide else 100.0)
 
 func _open_hall() -> void:
 	var v := _new_panel("Trophy Hall", 560)
