@@ -9,7 +9,8 @@ const STAND := 120             # frames standing first (the idle feet are read t
 const RUN := 40                # frames at full run before the let-go
 const TAIL := 40               # frames standing after the stop
 const PICK := [-4, 0, 2, 4, 6, 8, 10, 14, 18, 24]     # frames from the let-go that are filmed
-const SIDE_M := 3.2            # m the camera stands off the Hero
+const FRAME := 1.25            # of the Hero's height: what the square frame covers
+const FOV := 36.0
 
 ## The strip's "before": the same clips without the start and stop.
 class Off extends WardenStride:
@@ -57,6 +58,15 @@ func _speeds(id: String) -> Array:
 		v.append(0.0)
 	return [v, let_go]
 
+## The standing model's height in metres, off its meshes.
+func _height(model: Node3D) -> float:
+	var top := 0.0
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var n := mi as MeshInstance3D
+		if n.visible and n.mesh != null:
+			top = maxf(top, (n.global_transform * n.get_aabb()).end.y)
+	return maxf(top, 1.0)
+
 func _film(id: String, mode: String, dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -77,9 +87,10 @@ func _film(id: String, mode: String, dir: String) -> void:
 	for v in speeds:
 		z -= v * DT
 		zs.append(z)
-	cam.fov = 30.0
-	cam.position = Vector3(SIDE_M, 0.95, zs[let_go] - 0.35)
-	cam.look_at(Vector3(0.0, 0.9, zs[let_go] - 0.35))
+	var tall := _height(model)
+	cam.fov = FOV
+	cam.position = Vector3(FRAME * tall / (2.0 * tan(deg_to_rad(FOV) * 0.5)), tall * 0.5, zs[let_go] - 0.05)
+	cam.look_at(Vector3(0.0, tall * 0.5, zs[let_go] - 0.05))
 	for k in 30:
 		await tree.process_frame       # (past the title's fade)
 	for f in speeds.size():
