@@ -95287,5 +95287,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": true
   }
 ]
