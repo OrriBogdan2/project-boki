@@ -53,23 +53,25 @@ func _hero(id: String, out: String) -> void:
 	for gait in ["walk", "run"]:
 		var speed := float(lc[gait + "_speed"])
 		for dn in DIRS:
-			var plain := await _take(id, {}, DIRS[dn] * speed, "")
+			var plain := await _take(id, {}, DIRS[dn] * speed, "", false)
 			for ln in layers:
 				var dir := out.path_join("%s/%s_%s_%s" % [id, ln, gait, dn]) if out != "" else ""
-				var rec := await _take(id, layers[ln], DIRS[dn] * speed, dir)
-				_report(id, "%s %s_%s" % [ln, gait, dn], rec, plain, layers[ln])
+				var rec := await _take(id, layers[ln], DIRS[dn] * speed, dir, false)
+				var solo := await _take(id, layers[ln], DIRS[dn] * speed, "", true) if layers[ln].has("kmove") else plain
+				_report(id, "%s %s_%s" % [ln, gait, dn], rec, plain, solo, layers[ln])
 
 ## One run of LAYER_AT + LAYER_ON + TAIL s: per frame the feet, the hands and head (skeleton-local), the arm bone's turn.
-func _take(id: String, layer: Dictionary, vel: Vector2, dir: String) -> Array:
+func _take(id: String, layer: Dictionary, vel: Vector2, dir: String, solo: bool) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var clips: WardenClips = sync.get("clips")
 	var tall := _height(m)
 	if dir != "":
-		cam.position = Vector3(tall * 1.2, tall * 0.7, tall * 2.0)
+		cam.position = Vector3(tall * 1.2, tall * 0.7, -tall * 2.0)
 		cam.look_at(Vector3(0, tall * 0.5, 0))
 	var s := {"vel": Vector3(vel.x, 0, vel.y), "face": 0.0, "grounded": true, "hit_t": 99.0, "fired": 99.0}
 	m.set_meta(WardenClips.STATE, s)
@@ -82,6 +84,11 @@ func _take(id: String, layer: Dictionary, vel: Vector2, dir: String) -> Array:
 	var rec: Array = []
 	for i in steps:
 		_drive(s, layer, i * DT - LAYER_AT, m)
+		if solo:      # (the move's own clip, whole body: what its hand does by itself)
+			clips.force = {}
+			if s.has("kmove"):
+				var clip := String(clips.d["kmoves"][s["kmove"]]["clip"])
+				clips.force = {"clip": clip, "t": minf(float(s["kmove_t"]), clips.lib.get_animation(clip).length - 0.001)}
 		sync.call("_process", DT)
 		await tree.process_frame
 		var f := {"legs": [], "pts": [], "arm": sk.get_bone_pose_rotation(WardenSkeleton.find(sk, "upper_arm.R"))}
@@ -116,7 +123,7 @@ func _drive(s: Dictionary, layer: Dictionary, t: float, m: Node3D) -> void:
 		s["kmove_t"] = fmod(t, float(layer["cycle"])) if layer.has("cycle") else t
 		s["fired"] = s["kmove_t"]
 
-func _report(id: String, what: String, rec: Array, plain: Array, layer: Dictionary) -> void:
+func _report(id: String, what: String, rec: Array, plain: Array, solo: Array, layer: Dictionary) -> void:
 	var legs := 0.0
 	var pop := 0.0
 	var at := 0.0
@@ -128,6 +135,8 @@ func _report(id: String, what: String, rec: Array, plain: Array, layer: Dictiona
 		for j in 3:
 			var step := (rec[i]["pts"][j] as Vector3).distance_to(rec[i - 1]["pts"][j])
 			var calm := (plain[i]["pts"][j] as Vector3).distance_to(plain[i - 1]["pts"][j])
+			for k in range(maxi(i - 2, 1), mini(i + 3, solo.size())):      # (a frame or two either way: the fade)
+				calm = maxf(calm, (solo[k]["pts"][j] as Vector3).distance_to(solo[k - 1]["pts"][j]))
 			if step - calm > pop:
 				pop = step - calm
 				at = i * DT - LAYER_AT
