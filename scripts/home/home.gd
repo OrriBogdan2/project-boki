@@ -1453,6 +1453,7 @@ func _move_kin(d: float) -> void:
 		_quirk(k, n, hv.length() > 0.3, d)
 		if hw: hw.pose(k, n, d)
 		n.set_meta("happy", joy > 0.0)
+		n.set_meta("kact", KinAct.of(k))
 		n.set_meta("kstate", "sleep" if float(k.get("nap_t", 0.0)) > 0.0 else "")
 		if k.has("say"):
 			k["say_t"] = float(k.get("say_t", 0.0)) - d
