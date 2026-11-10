@@ -6112,3 +6112,4 @@ READY ext/vfx-kael-kit ffbed0ba6 (Kael kit VFX at the match camera: white-hot pa
 READY ext/garden-stat-budget 7d1acb8c6 (stat budget: caps, bands, 25-point expedition clamp, Training tab ring; --stat-budget-check)
 READY ext/garden-hub-away 7cf35456d (garden hub step 10: per-zone away card, visit snapshot with hub+zones; based on ext/garden-hub-fixtures)
 READY ext/garden-thrive 1e76a76b2 (garden zones step 8: thrive joy x0.5 and toys +25%, zone trait pull to 0.8; based on ext/garden-hub-zones)
+READY ext/tutorial-any-starter 37068e652 (match tutorial as Vex/Lace/Kael: bow shoot line 'Hold to draw, let go to shoot', strayed dummies culled and replaced, driver taps melee/draws bows; new --tutorial-check=<arch> 0 fail x3 (gunslinger, archer, juggernaut), --tutorial-hud-check 0, health --strict OK, gen_wiki --check OK)
