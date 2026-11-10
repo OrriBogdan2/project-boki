@@ -1,8 +1,9 @@
 extends RefCounted
 ## --grounds-check: the Training Area (the --arena map). The floor is at least 3x the old Arena's, five sky
-## perches (and Cloud Isle, off the Movement Fields) are joined to it by pads and glides, every Hunter, Boki, glove / armor / boot and belt item has a
+## perches are joined to it by pads and glides, every Hunter, Boki, glove / armor / boot and belt item has a
 ## pedestal that works, every Hunter can be spawned as a sparring bot, the duel ring is there, and a fall off the
-## map brings you home. Prints GROUNDSCHECK PASS/FAIL.
+## map brings you home. The Movement Fields south of it (dash lanes, tier steps, a cliff, a glide jump-off to
+## Cloud Isle) are checked too. Prints GROUNDSCHECK PASS/FAIL.
 
 const OLD_FLOOR_TILES := 616          # the old Arena's floor circle (r 14 tiles), the area to beat 3x over
 const DT := 1.0 / 60.0
@@ -135,7 +136,7 @@ func _rides(m: Match) -> void:
 		_settle(m, P, dir, 20.0)
 		var to := String(W.islands[L["to"]]["id"])
 		if W.island_id(P.pos.x, P.pos.z) != to:
-			bad.append("%s>%s ended (%.0f,%.0f) on %s, take %s land %s" % [W.islands[L["from"]]["id"], to, P.pos.x, P.pos.z, W.island_id(P.pos.x, P.pos.z), take, land])
+			bad.append("%s>%s (ended %.0f,%.0f)" % [W.islands[L["from"]]["id"], to, P.pos.x, P.pos.z])
 	var info := "%d routes %s" % [glides, " ".join(bad)]
 	ok("every glide route lands you on its island", bad.is_empty() and glides >= 5, info)
 	P.teleport(m.arena.home)

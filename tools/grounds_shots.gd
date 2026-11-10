@@ -1,8 +1,9 @@
 extends RefCounted
 ## --grounds-shots --shots-dir=<dir> [--perf-secs=4]: the Training Area (the --arena map) on a real GPU
-## (jobq submit --needs gpu): a top-down overview, ground-level shots at the start, in the Training Room and on
-## each sky perch and in the Movement Fields (lane, tier steps, cliff, glide jump-off), and frame-time numbers at the start and on a perch (GROUNDSPERF lines: wall ms, GPU ms, CPU ms,
-## draws, tris, objects, nodes). Also runs on the old Arena for the before number (no stations then).
+## (jobq submit --needs gpu): a top-down overview, ground-level shots at the start, in the Training Room, on
+## each sky perch and in the Movement Fields (lane, tier steps, cliff, glide jump-off), and frame-time numbers
+## at the start, on a perch and in the fields (GROUNDSPERF lines: wall ms, GPU ms, CPU ms, draws, tris,
+## objects, nodes). Also runs on the old Arena for the before number (no stations then).
 ## Software GL is no judge of any of this: only read the numbers from a real GPU.
 
 const DT := 1.0 / 60.0

@@ -46,14 +46,14 @@ static func _ticks(m: Match, lane: Array, xforms: Array, big: Array) -> void:
 	var a := Vector2(float(lane[0]), float(lane[1]))
 	var b := Vector2(float(lane[2]), float(lane[3]))
 	var dir := (b - a).normalized()
-	var yaw := atan2(dir.x, dir.y) + PI * 0.5
+	var across := Basis(Vector3.UP, atan2(dir.x, dir.y))
 	var steps := int((b - a).length() / TICK_EVERY)
 	for i in range(1, steps + 1):
 		var d := TICK_EVERY * i
 		var p := a + dir * d
 		var is_big := is_zero_approx(fmod(d, LABEL_EVERY))
 		var at := Vector3(p.x, m.world.ground_at(p.x, p.y) + LIFT, p.y)
-		xforms.append(Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3(1, 1, TICK_BIG if is_big else TICK_SMALL)), at))
+		xforms.append(Transform3D(across * Basis.from_scale(Vector3(1, 1, TICK_BIG if is_big else TICK_SMALL)), at))
 		big.append(is_big)
 		if is_big:
 			var lb := Grounds.label("%d m" % int(d), Color("e9dfc4"), 1.4)
@@ -87,8 +87,8 @@ static func _pebbles(m: Match, rect: Array, n: int) -> void:
 		if m.world.is_void(x, z) or ground > World.STEP:
 			continue
 		var s := rng.randf_range(0.6, 1.4)
-		var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * PEBBLE_FLAT, s))
-		xforms.append(Transform3D(basis, Vector3(x, ground, z)))
+		var turned := Basis(Vector3.UP, rng.randf() * TAU) * Basis.from_scale(Vector3(s, s * PEBBLE_FLAT, s))
+		xforms.append(Transform3D(turned, Vector3(x, ground, z)))
 	if _pebble_mat == null:
 		_pebble_mat = StandardMaterial3D.new()
 		_pebble_mat.albedo_color = Color("8f8a7c")
