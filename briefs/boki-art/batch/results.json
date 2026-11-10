@@ -106431,5 +106431,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_cindermaw_e1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_cindermaw_e1",
+    "name": "Cindermaw (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_cindermaw_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_e1",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_e1",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_e1",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_e1",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_e1",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ghoulamari_e1",
+    "name": "Ghoulamari (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ghoulamari_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ghoulamari_e1",
+    "name": "Ghoulamari (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_ghoulamari_e1_2.jpg",
+    "ok": true
   }
 ]
