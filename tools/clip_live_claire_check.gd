@@ -36,7 +36,7 @@ func _run(m: Match, P: Hunter, n: int, seen: Dictionary) -> void:
 		if c.cur != "":
 			seen[c.cur] = true
 		if c.up_w > 0.3:
-			seen[String(c._node("anim_u").animation)] = true
+			seen[c.cur_u] = true
 		ids[String((P.ak as RimewrightKit).anim_id)] = true
 
 func _shown(h: Hunter) -> int:

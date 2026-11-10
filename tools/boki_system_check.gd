@@ -9,7 +9,8 @@ extends RefCounted
 ##   6. nobody steals or hurts a downed Boki while its owner is in the map
 ##   7. the Merge: gated by the bond meter, changes your look (form) by Boki type (no tiers), leaps
 ##      back from out and merges mid-air, and without a Boki it is only a weak surge
-##   8. the net version moved for the new snapshot shape
+##   8. the net snapshot round trip (KinNet): a Boki out, carried, downed and fused survive the wire; the kcmd event
+##   9. the net version moved for the new snapshot shape
 
 var bad := 0
 var m: Match
@@ -113,7 +114,7 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "snap", "net"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -474,6 +475,158 @@ func _surge() -> void:
 	ok(KinMerge.press(P) and KinMerge.active(P) and bool(P.merge_st.get("surge", false)), "R fires the basic surge")
 	ok(float(P.merge_st["T"]) <= 4.0, "...which is short and weak (%.1fs)" % float(P.merge_st["T"]))
 
-# ------------------------------------------------------------------ 8. net
+# ------------------------------------------------------------------ 8. net snapshot round trip
+## What the owner's game sends for the hunter and its Boki, through the JSON the wire uses.
+func _wire() -> Array:
+	return JSON.parse_string(JSON.stringify([m._ser(m.player), m._ser(m.player.kin)]))
+
+## Reads a wire pair on a fresh match as a remote hunter "r_h" with its Boki "r_k" (the real _net_make/_net_apply path).
+## The sender's match is replaced, so take the pair first. Returns [Hunter, Kin].
+func _remote(pair: Array) -> Array:
+	pair[0][1] = "r_h"
+	pair[1][1] = "r_k"
+	pair[1][10] = "r_h"
+	_fresh()
+	var h: Hunter = m._net_make(pair[0])
+	m._net_apply(h, pair[0])
+	var k: Kin = m._net_make(pair[1])
+	m._net_apply(k, pair[1])
+	return [h, k]
+
+## A fresh match whose Boki lies downed 9m away (abyss: it fell out of the world).
+func _downed_kin(abyss := false) -> Kin:
+	_fresh()
+	var k: Kin = m.player.kin
+	k.pos = m.player.pos + Vector3(9.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
+	k.go_down(abyss)
+	return k
+
+func _snap() -> void:
+	# a Boki out, on the Guard order, resting after a merge, at partial health; the bond meter part full
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	k.state = "active"
+	k.fly = {}
+	k.cmd = "guard"
+	k.hold_at = k.pos
+	k.hp = k.max_hp * 0.6
+	k.rest_t = 6.0
+	P.hp = P.max_hp * 0.5
+	P.ult = 0.62
+	var sent_hp := [k.hp, P.hp]
+	var r := _remote(_wire())
+	var rh: Hunter = r[0]
+	var rk: Kin = r[1]
+	ok(rk.owner_h == rh and rh.kin == rk, "snapshot: a Boki out keeps its owner")
+	ok(rk.state == "active" and rk.cmd == "guard", "...its state and order (%s, %s)" % [rk.state, rk.cmd])
+	ok(
+		absf(rk.hp - sent_hp[0]) < 0.1 and absf(rh.hp - sent_hp[1]) < 0.1,
+		"...both healths (%.1f, %.1f)" % [rk.hp, rh.hp]
+	)
+	ok(
+		absf(rk.rest_t - 6.0) < 0.11 and absf(rh.ult - 0.62) < 0.011,
+		"...rest timer, bond meter (%.1fs, %.2f)" % [rk.rest_t, rh.ult]
+	)
+	k = _downed_kin()
+	var left := k.down_t
+	rk = _remote(_wire())[1]
+	ok(
+		rk.state == "downed" and absf(rk.down_t - left) < 0.11 and not rk.down_void,
+		"snapshot: a downed Boki keeps its timer (%s, %.1fs of %.1fs)" % [rk.state, rk.down_t, left]
+	)
+	_snap_carried()
+	_downed_kin(true)
+	ok((_remote(_wire())[1] as Kin).down_void, "snapshot: a fall into the abyss is flagged")
+	_snap_fused()
+	_kcmd()
+
+## Downed and carried out by its owner: the progress is a fraction of the rescue, the carrier's pose is an id.
+func _snap_carried() -> void:
+	var k := _downed_kin()
+	m.player.teleport(k.pos)
+	run_for(1.5)
+	var prog := k.rescue_t
+	ok(k.rescue_on and KinDowned.rescue_pose(m.player) == "rs_carry", "setup: carrying it out (%.2fs)" % prog)
+	var r := _remote(_wire())
+	var pose := String((r[0] as Hunter).get_meta("kpose", ""))
+	ok(
+		absf((r[1] as Kin).rescue_t - prog) < 0.1 and (r[1] as Kin).state == "downed",
+		"snapshot: the carry's progress arrives (%.2fs vs %.2fs)" % [(r[1] as Kin).rescue_t, prog]
+	)
+	ok(pose == "rs_carry", "...and the carrier's pose (%s)" % pose)
+
+func _snap_fused() -> void:
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	k.stow()
+	P.ult = 1.0
+	ok(KinMerge.press(P), "setup: merged")
+	run_for(float(MergeForm.data()["xform_s"]) + 0.1)
+	var form: Dictionary = P.merge_st.get("form", {})
+	var shell := MergeShell.view(P)
+	var left := float(P.merge_st.get("t", 0.0))
+	var was := k.state
+	var r := _remote(_wire())
+	var rh: Hunter = r[0]
+	var rk: Kin = r[1]
+	var fid := String(rh.get_meta("mf_id", ""))
+	var fname := String(rh.get_meta("mf_name", ""))
+	var fleft := float(rh.get_meta("mf_left", 0.0))
+	ok(was == "fused" and rk.state == "fused", "snapshot: a fused Boki arrives as fused (%s -> %s)" % [was, rk.state])
+	ok(fid == String(form["id"]) and fname == String(form["name"]), "...the form worn (%s)" % fname)
+	ok(absf(fleft - left) < 0.11, "...its seconds left (%.1f vs %.1f)" % [fleft, left])
+	ok(
+		float(rh.get_meta("shell", 0.0)) == snappedf(shell.x, 0.5),
+		"...the shell (%.1f)" % float(rh.get_meta("shell", 0.0))
+	)
+	ok(rh.get_node_or_null(MergeLook.NODE_NAME) != null, "...and the look is put on the remote hunter")
+	var back := KinNet.decode_form(KinNet.encode_form(form))
+	ok(
+		back.get("style") == form["style"] and back.get("word") == form["word"],
+		"the form string decodes to the same form"
+	)
+
+## kcmd events as the owner's game queues them, through JSON, played by a client that knows the body.
+func _kcmd() -> void:
+	_fresh()
+	var P := m.player
+	var k: Kin = P.kin
+	var saved: Array = Net.out_events.duplicate()
+	Net.out_events.clear()
+	m.net_on = true
+	k.state = "active"
+	k.fly = {}
+	KinNet.event(m, "cmd", k, k.pos, "chase")
+	k.stow()
+	P.ult = 1.0
+	KinMerge.press(P)
+	var form: Dictionary = P.merge_st.get("form", {})
+	var sent: Array = JSON.parse_string(JSON.stringify(Net.out_events))
+	m.net_on = false
+	Net.out_events = saved
+	var cmd_ev: Array = sent.filter(func(e): return e[1] == "cmd")
+	var merge_ev: Array = sent.filter(func(e): return e[1] == "merge")
+	ok(
+		cmd_ev.size() == 1 and cmd_ev[0][0] == "kcmd" and cmd_ev[0][2] == k.nid and cmd_ev[0][6] == "chase",
+		"kcmd: the order event names the Boki and the order (%d events)" % sent.size()
+	)
+	var played := KinNet.decode_form(String(merge_ev[0][6])) if merge_ev.size() == 1 else {}
+	ok(
+		merge_ev.size() == 1 and merge_ev[0][2] == P.nid and played.get("id") == form.get("id"),
+		"...the merge event carries the form"
+	)
+	var rings: int = m.fx.radial
+	if cmd_ev.size() == 1:
+		KinNet.on_event(m, cmd_ev[0])
+	ok(m.fx.radial == rings + 1, "...and a client plays the order moment (ring %d -> %d)" % [rings, m.fx.radial])
+
+# ------------------------------------------------------------------ 9. net
 func _net() -> void:
-	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "the net version moved for the new snapshot shape (%s)" % Net.VERSION)
+	ok(
+		Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0,
+		"the net version moved for the new snapshot shape (%s)" % Net.VERSION
+	)

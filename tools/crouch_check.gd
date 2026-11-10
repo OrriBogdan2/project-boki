@@ -15,7 +15,11 @@ const POP := 0.12          # m: the head's most in one frame at 60 fps, down or 
 const BOB := 0.07          # m: the head's rise and fall over a sneak
 const STEP := 0.14         # m: how far a foot travels over a sneak
 const K := 8.0             # 1/s: Hunter.render's crouch rate
+const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetype's run speed
+const PLANT := 0.45        # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
+const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
 const LATER := ["juggernaut"]    # Kael: landing after art1-integ
+const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the top rate (docs/DEBT.md)
 
 var bad := 0
 var holder: Node3D
@@ -113,6 +117,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 			zmax = maxf(zmax, z)
 	if feet:
 		ok(zmax - zmin >= STEP, "%s: the sneak steps (%.2f m)" % [id, zmax - zmin])
+		var carry := _planted_speed(m, a, sync, sk, float(HunterMove.of(id)["speed"]) * SPEED_K)
+		ok(carry >= PLANT or id in SKATES, "%s: the feet plant at the crouch speed (%.2f of it)" % [id, carry])
 	ok(hmax - hmin <= BOB, "%s: the head rides level on the sneak (%.3f m)" % [id, hmax - hmin])
 	for k in 30:
 		_tick(m, a, sync, 1.0)
@@ -150,6 +156,30 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(absf(_at(m2, sk2, "head").y - h0) <= 0.03, "%s: with no crouch data the clips stand through it, as before" % id)
 	m2.free()
 	dd["crouch"] = keep
+
+## Sneaking at the game's crouch speed: the planted foot's speed back along the ground, as a share of it (1: no skate).
+func _planted_speed(m: Node3D, a: HunterAnim, sync: Node, sk: Skeleton3D, speed: float) -> float:
+	var v := Vector3(0, 0, -speed)
+	var bone := WardenSkeleton.find(sk, _foot(sk, "L"))
+	for k in 30:
+		_tick(m, a, sync, 1.0, v)
+	var prev := sk.to_global(sk.get_bone_global_pose(bone).origin)
+	var ys: Array[float] = []
+	var vz: Array[float] = []
+	for k in 120:
+		_tick(m, a, sync, 1.0, v)
+		var f := sk.to_global(sk.get_bone_global_pose(bone).origin)
+		ys.append(f.y)
+		vz.append((f.z - prev.z) / DT)
+		prev = f
+	var low: float = ys.min()
+	var sum := 0.0
+	var n := 0
+	for i in ys.size():
+		if ys[i] <= low + PLANTED:
+			sum += vz[i]
+			n += 1
+	return sum / maxf(n, 1) / speed
 
 ## A Hero's foot bone (Breaker's clip bones carry an x_ prefix).
 func _foot(sk: Skeleton3D, side: String) -> String:
