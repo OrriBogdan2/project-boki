@@ -20,6 +20,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `recoil` {`deg`, `settle`}: every shot (the state's `fired` falling back to 0) kicks the arm bones and shoulder pieces up by `deg` degrees over whatever plays, settling in `settle` s (0.06-0.12); fast fire stacks to 1.5x. Only those bones move: the legs keep running, the shot's timing is the kit's. Vex 2 (the minigun, a shot every 0.12 s), Sable 3, Grimble 4. `--recoil-shots` films before/after strips.
+- A kmove with `"upper": "moving"` (Vex's shots, Tarek's boulder, wind and punch) rides the torso and arms only while the Hero moves, so the legs keep the walk or run; without it the clip owns the legs and the feet stop mid-stride. `--layer-verify` (`--shots-dir=<dir>` for the strips) measures every layer over walk and run in four directions.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
