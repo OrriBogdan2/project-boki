@@ -26,3 +26,6 @@ Hero live in `tools/art1/` (Kael is the pilot).
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+
+## The rescue carry (WardenCarry)
+While you carry your downed Boki (pose id `rs_carry`, KinDowned) the legs stay on the walk and run clips at the carry's 90% speed and `scripts/heroes/warden_carry.gd` lays one upper-body layer over them: two-bone IK brings both wrists in round a chest socket, the torso leans back a little, and the bones the Hero's data lists as `"carry_stow"` shrink away (Albert's weapon and shield, Hem's bow, Dredge's gun, Vex's gatling and launcher). The Boki rides at the socket (`carry_socket` model meta, read by `KinDowned.scoop_pose`). It runs on the contract bones, so no clip is authored. Open: a weapon skinned straight into the hand mesh (Kael, Sable, Cinder, Claire, Ryzz, Tarek, Ostra, Pip) cannot be put away without a weapon bone in the .glb; it rides the hand. Strip: docs/art/anim_audit/carry_pose.jpg (Vex, Kael, Albert, Sable).

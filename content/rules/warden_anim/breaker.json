@@ -140,7 +140,7 @@
 		},
 		"dead_t": 1.3
 	},
-	"carry_stow": ["x_weapon"],
+	"carry_stow": ["x_weapon", "x_shield"],
 	"procedural": [
 		"ledge",
 		"mantle",
