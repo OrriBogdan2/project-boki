@@ -118,6 +118,7 @@ var weather_t := 40.0
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if zone == GardenZones.HUB: visit = HubLayout.island()
+	GardenZones.here = zone
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
@@ -2845,6 +2846,7 @@ func _face(at: Vector3) -> void:
 
 ## The interact key on a Boki: do something about what it wants, otherwise pet it.
 func _kin_act(k: Dictionary) -> void:
+	if hway and hway.answer(k): return      # it waits at the pad asking to move: E sends it
 	var rec: Dictionary = k["rec"]
 	match KinWants.action(rec, POND_EDGE.x > -100.0):
 		"feed": _care_feed(rec, KinWants.best_food(rec))
@@ -3187,6 +3189,7 @@ func _open_kin(rec: Dictionary) -> void:
 				Save.save_game()
 				_toast("%s joins your next expedition (%s swaps)" % [rec["name"], Settings.key_cap("swap_kin")])
 				_open_kin(rec)))
+	ZoneCards.add_move_link(self, fl, rec)
 	# the Kin Burrow: put it to sleep there, or wake it and bring it out
 	if KinBox.is_boxed(rec):
 		fl.add_child(UI.ghost("Send to farm", func():
@@ -4034,7 +4037,7 @@ var kinbox_view: KinBoxView = null
 
 ## The kin out on the island being shown (yours: not the ones asleep in the Kin Burrow).
 func _farm_kin() -> Array:
-	return (_d()["roster"] as Array) if not visit.is_empty() else KinBox.farm()
+	return (_d()["roster"] as Array) if not visit.is_empty() else GardenZones.out_here()
 
 func _build_burrow() -> void:
 	burrow_node = KinBurrow.model(KinBox.boxed().size())

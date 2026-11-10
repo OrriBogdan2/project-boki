@@ -122,7 +122,9 @@ func drop() -> void:
 	var at: Vector3 = h.ppos + fwd * DROP_DIST
 	if h.world.occupy(at.x, at.z, 0.3, 0.0, true) != 0.0 or h.world.is_void(at.x, at.z):
 		at = h.ppos
-	_let_go(k, at)
+	var who := k
+	_let_go(who, at)
+	if h.hway: h.hway.dropped(who, at)      # set down on the Waystone or the pad: where should it live?
 
 func _forward() -> Vector3:
 	return Vector3(-sin(h.pface), 0.0, -cos(h.pface))

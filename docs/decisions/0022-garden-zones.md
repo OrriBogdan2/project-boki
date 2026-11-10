@@ -23,4 +23,6 @@ stall move to the hub (step 3), a plain `Game.goto("home")` still lands in Bramb
 
 ## Consequences
 The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays open: the move is a
-later migration from `layout` to `zones["bramblebank"]["layout"]`.
+later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
+Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
+(`KinBox.farm_room`) counts each zone on its own.

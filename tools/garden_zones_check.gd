@@ -1,10 +1,14 @@
 extends RefCounted
-## --garden-zones-check (briefs/design/GARDEN.md 10.7 steps 2 and 4): the zones on the save and travel
-## by the Waystone. Save: a v12 save upgrades with only the start zone open and every Boki living in
-## it; a new save has the same. Keys: a locked zone's two keys tick when you have them. Travel (with
-## base_mode on, through the real Game.goto and ink wipe): the hub shows only your partner and the
-## Waystone; a hop to a locked zone is refused and its card lists both keys; the hub to Bramblebank
-## and back keeps your partner with you and every Boki where it lives.
+## --garden-zones-check (briefs/design/GARDEN.md 10.7 steps 2, 4 and 5): the zones on the save, travel
+## by the Waystone and moving Boki between zones. Save: a v12 save upgrades with only the start zone
+## open and every Boki living in it; a new save has the same. Keys: a locked zone's two keys tick when
+## you have them. Travel (with base_mode on, through the real Game.goto and ink wipe): the hub shows
+## only your partner and the Waystone; a hop to a locked zone is refused and its card lists both keys;
+## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives. Moving
+## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
+## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
+## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
+## opens its cards.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 
@@ -19,6 +23,7 @@ func run(m: Node) -> void:
 	_save_part()
 	_keys_part()
 	await _travel_part(m)
+	await _move_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -113,3 +118,72 @@ func _travel_part(m: Node) -> void:
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() and (Save.d["roster"] as Array).size() == 3,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
+
+func _move_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
+	var partner := String(Save.d["active"])
+	Game.goto("home", {"zone": "bramblebank"})
+	var bb = await _arrived(m, Game.main.current)
+	ok(bb != null and bb.life != null, "Bramblebank loads with base life")
+	if bb == null or bb.life == null:
+		return
+	var k: Dictionary = bb.kins.filter(func(o): return String(o["rec"]["uid"]) != partner)[0]
+	var rec: Dictionary = k["rec"]
+	ZoneCards.move_to(bb, k)
+	ok(bb.panel_open == "Move %s to..." % rec["name"], "Move to... opens its zone cards")
+	bb._close_panel()
+	ok(bb.hway.send(k, "glasswater") == "", "%s is sent to Glasswater" % rec["name"])
+	var t := 0.0
+	while bb.kins.has(k) and t < float(GardenZones.rules()["walk_s"]) + 2.0:
+		await m.get_tree().process_frame
+		t += m.get_process_delta_time()
+	ok(not bb.kins.has(k) and GardenZones.zone_of(rec) == "glasswater",
+		"it walks to the pad and blinks out (%.1f s)" % t)
+	ok(bb.hway.send(bb._kin_entry(Save.active_kin()), "glasswater") != "",
+		"your partner can't be moved: it follows you")
+	_ask_part(bb, partner)
+	bb.hway.hop("glasswater")
+	var gw = await _arrived(m, bb)
+	ok(gw != null and gw.zone == "glasswater", "Glasswater loads")
+	if gw == null:
+		return
+	var want := [partner, String(rec["uid"])]
+	want.sort()
+	ok(_uids(gw) == want, "in Glasswater after the hop: your partner and %s" % rec["name"])
+	ok(GardenZones.residents("bramblebank").all(func(r): return r != rec), "%s is gone from Bramblebank" % rec["name"])
+	_cap_part()
+	Content.rules("farm_build")["base_mode"] = false
+
+## The ask at the pad, and a carried Boki set down on it.
+func _ask_part(bb, partner: String) -> void:
+	var k: Dictionary = bb.kins.filter(func(o): return String(o["rec"]["uid"]) != partner)[0]
+	k["rec"]["lean"] = {"crystal": 8.0}
+	var Z := GardenZones.rules()
+	var was := float(Z["ask_chance"])
+	Z["ask_chance"] = 1.0
+	ok(GardenZones.wants(k["rec"]) == "glasswater", "a Boki leaning Crystal would thrive in Glasswater")
+	bb.life.machine(k).go(BaseLife.S.ROAM, "check")
+	ok(bb.life._ask(k) and is_same(k["life_at"], bb.hway.pad), "it goes to wait at the pad, asking")
+	ok(not bb.life._ask(k), "it asks once per visit")
+	Z["ask_chance"] = was
+	ok(bb.hway.answer(k) and k.get("zone_go") == "glasswater", "E on it sends it to Glasswater")
+	k.erase("zone_go")
+	bb.life.machine(k).go(BaseLife.S.ROAM, "check")
+	ok(not bb.hway.answer(k), "a Boki not asking is petted as usual")
+	bb.hway.dropped(k, bb.hway.node.position)
+	ok(bb.panel_open == "Move %s to..." % k["rec"]["name"], "set down on the pad: its zone cards open")
+	bb._close_panel()
+
+## The cap is per zone: Glasswater full, the next move is refused; Bramblebank keeps its own room.
+func _cap_part() -> void:
+	var cap := KinBox.farm_cap()
+	while GardenZones.residents("glasswater").size() < cap:
+		var r := Save.new_kin("zapple", "Fill%d" % GardenZones.residents("glasswater").size())
+		r["zone"] = "glasswater"
+		(Save.d["roster"] as Array).append(r)
+	var next: Dictionary = GardenZones.residents("bramblebank").filter(func(r): return not GardenZones.is_partner(r))[0]
+	ok(GardenZones.move(next, "glasswater") != "" and GardenZones.zone_of(next) == "bramblebank",
+		"with %d out in Glasswater, the next move is refused" % cap)
+	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")

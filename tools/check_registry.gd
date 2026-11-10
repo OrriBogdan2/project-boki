@@ -6,7 +6,7 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
-	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lift, walk, drop, squirm, trust
+	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
