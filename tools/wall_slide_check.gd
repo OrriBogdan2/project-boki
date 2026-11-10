@@ -28,6 +28,28 @@ var open_spot := Vector3.ZERO       # the reference runs' ground
 var rock_spot := Vector3.ZERO
 
 func run(main: Node) -> void:
+	await _setup(main)
+	open_spot = _flat_spot(9.0)
+	rock_spot = _flat_spot(6.0)
+	var walls: Array = [_cliff()] + _corners()
+	print("WSLIDE surfaces: %s" % ", ".join(walls.map(func(s: Dictionary) -> String:
+		return "%s at %s" % [s.get("name", "none"), str(s.get("edge", "-"))])))
+	if walls.size() < 4 or walls[0].is_empty():
+		bad += 1
+	for a in HEROES:
+		P.reclass(Arch.weight(a), a, Arch.signature(a))
+		for ang in ANGLES:
+			for s in walls:
+				if s.is_empty(): continue
+				_try(a, s, ang, false)
+				if s["name"] == "cliff":
+					_try(a, s, ang, true)
+			_try_rock(a, ang)
+	print("WALL SLIDE CHECK DONE, failures: ", bad)
+	main.get_tree().quit()
+
+## A quiet Hollow Crown with only the player in it (no mobs, no Boki, the other Hunters parked far off).
+func _setup(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	m = Match.new()
@@ -49,24 +71,6 @@ func run(main: Node) -> void:
 			h.out = true
 	P.ctrl = "local"
 	P.reclass(Arch.weight(HEROES[-1]), HEROES[-1], Arch.signature(HEROES[-1]))      # the widest body finds the room
-	open_spot = _flat_spot(9.0)
-	rock_spot = _flat_spot(6.0)
-	var walls: Array = [_cliff()] + _corners()
-	print("WSLIDE surfaces: %s" % ", ".join(walls.map(func(s: Dictionary) -> String:
-		return "%s at %s" % [s.get("name", "none"), str(s.get("edge", "-"))])))
-	if walls.size() < 4 or walls[0].is_empty():
-		bad += 1
-	for a in HEROES:
-		P.reclass(Arch.weight(a), a, Arch.signature(a))
-		for ang in ANGLES:
-			for s in walls:
-				if s.is_empty(): continue
-				_try(a, s, ang, false)
-				if s["name"] == "cliff":
-					_try(a, s, ang, true)
-			_try_rock(a, ang)
-	print("WALL SLIDE CHECK DONE, failures: ", bad)
-	main.get_tree().quit()
 
 ## The body's centre where it first touches surface s: its edge point plus the Hunter's reach against it
 ## (terrain meets the full radius, rocks, trees and walls the slimmer World.BLOCK_BODY one).
