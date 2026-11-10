@@ -2117,3 +2117,11 @@ SPECS.append({'id':'hb2_sable_onetail3d','name':'Sable + Lockatara splash: one t
    "First: it has two tails. Keep the ONE tail that rises from its rump and ends in the key turning in the vault door lock; remove the second green scaly tail lying coiled on the stone floor at the bottom left near the barrel, and paint plain stone floor with a few gold coins there. "
    "Second: repaint the lizard with the same rich painterly finish as the woman, so it looks like a solid three-dimensional creature in the same world: rounded form with soft wrapped shading, real scale texture, gold light from the vault door on its face and flank, cool rim light on its back spikes, a cast shadow under it, no cartoon outline. "
    "Keep its design, pose, colours, friendly face, the round dial on its shoulder and the keyhole plate on its brow exactly as they are. Change nothing else."})
+# The first one-tail edit removed the floor coil but the real problem remains: the key tail grows out of the lizard's SHOULDER, and its rump
+# tapers off behind Sable's leg like a second tail. Fix the anatomy: one tail, from the rump.
+SPECS[:]=[s for s in SPECS if s['id']!='hb2_sable_onetail3d']
+SPECS.append({'id':'hb2_sable_tailfix','name':'Sable + Lockatara splash: tail from the rump','refs':['briefs/boki-art/batch/out/hb2_sable_onetail_3.jpg'],'runs':4,'aspect':'16:9','size':'2K',
+  'prompt':"Edit image 1: keep the picture the same: same woman, same pose, same vault, lighting, colours and background, same lizard design and face. Fix the lizard's anatomy only. "
+   "Right now a long tail with a key on its tip grows out of the lizard's shoulder and neck near its head, which is wrong, and its hind end also trails away behind the woman's leg, so it seems to have two tails. "
+   "Correct it: remove the tail that comes out of the shoulder and neck completely, so the neck and shoulder are just smooth green scales with the row of back spikes. The lizard has ONE tail, growing from its rump at the BACK end of its body (the end behind the woman's legs, on the left). "
+   "That single tail sweeps up from the rump in a big arc behind the woman and over her back, across to the vault door on the right, and its tip is the big key turning in the lock. One continuous tail, clearly joined to the rump. Change nothing else."})
