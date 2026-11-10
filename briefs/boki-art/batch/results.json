@@ -107607,5 +107607,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_luckhop_leg2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ogk_egg",
+    "name": "Bokidex OG key art (egg)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogk_egg_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_vista",
+    "name": "Bokidex OG key art (vista)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogk_vista_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_titan",
+    "name": "Bokidex OG key art (titan)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogk_titan_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_egg",
+    "name": "Bokidex OG key art (egg)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogk_egg_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_aurora",
+    "name": "Bokidex OG key art (aurora)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogk_aurora_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_vista",
+    "name": "Bokidex OG key art (vista)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogk_vista_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_aurora",
+    "name": "Bokidex OG key art (aurora)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogk_aurora_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogk_aurora",
+    "name": "Bokidex OG key art (aurora)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogk_aurora_1.jpg",
+    "ok": true
   }
 ]
