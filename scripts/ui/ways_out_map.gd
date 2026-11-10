@@ -7,7 +7,7 @@ extends RefCounted
 ## (spec task 4) the Lair seat is the first lair and the Uplink the outpost farther from it (the spec's rule).
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
-const LOCKED_COL := Color("9fb0d8")    # a seat that has not opened: cool blue-grey, brighter than the strip's muted text
+const LOCKED_COL := Color("9fb0d8")    # a seat not open yet: cool blue-grey
 const OPEN_COL := Color("fff4d0")
 const LOST_COL := Color("8a3a4a")
 const LINE_FS := 13
@@ -190,5 +190,6 @@ static func draw_line(hud, mid: Vector2) -> void:
 	if txt == "":
 		return
 	var w := TextCache.width(HudStyle.BIG, txt, LINE_FS) + 24.0
-	hud.c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, Color(1, 1, 1, 0.14), 1), Rect2(mid + Vector2(-w * 0.5, -15), Vector2(w, 26)))
+	var pill := Rect2(mid + Vector2(-w * 0.5, -15), Vector2(w, 26))
+	hud.c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, Color(1, 1, 1, 0.14), 1), pill)
 	HudStyle.ctext(hud.c, mid + Vector2(0, 3), txt, LINE_FS, HudStyle.INK, 3)
