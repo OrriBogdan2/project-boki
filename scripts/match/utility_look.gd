@@ -72,7 +72,11 @@ static func fuse(m: Node, at: Vector3, r: float, secs: float, col: Color) -> Nod
 	var disc := _glow(root, Models.cyl(r, r, 0.03, 32), Color(col, 0.38), Vector3(0, 0.06, 0))
 	disc.scale = Vector3(0.02, 1.0, 0.02)
 	var head := _glow(root, Models.sphere(0.55, 12), Color(1.0, 0.9, 0.6, 0.95), Vector3(0, WARHEAD_HEIGHT, 0))
-	root.create_tween().tween_method(_fuse_step.bind(rim, disc, head, col, secs), 0.0, 1.0, secs)
+	# Driven by match time, not wall time, so the fill lands exactly on the blast through hitstop and slow frames.
+	var t0: float = m.time
+	var tw := root.create_tween().set_loops()
+	var tick := func(_v): _fuse_step(clampf((m.time - t0) / secs, 0.0, 1.0), rim, disc, head, col, secs)
+	tw.tween_method(tick, 0.0, 1.0, 0.05)
 	m.later(secs + FUSE_END_PAD, func(): if is_instance_valid(root): root.queue_free())
 	return root
 
