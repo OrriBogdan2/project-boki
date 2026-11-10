@@ -104688,5 +104688,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px_a_aurostag_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px_a_aurostag",
+    "name": "Aurostag (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_chainipede",
+    "name": "Chainipede (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_aurostag",
+    "name": "Aurostag (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_chainipede",
+    "name": "Chainipede (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_calderoise",
+    "name": "Calderoise (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_aurostag",
+    "name": "Aurostag (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_chainipede",
+    "name": "Chainipede (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_chainipede",
+    "name": "Chainipede (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_chainipede_2.jpg",
+    "ok": true
   }
 ]
