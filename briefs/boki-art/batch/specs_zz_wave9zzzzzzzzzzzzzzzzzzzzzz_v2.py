@@ -978,3 +978,15 @@ SPECS[-1]['id']='on_oarter_dive'; SPECS[-1]['runs']=4
 # 06:00 ET 11-10 OWNER: "Ribbonwyrm too" (new position).
 ON_POSE('Ribbonwyrm',_LM['Ribbonwyrm']['sheet'],'mid','pretty',False,False,"flying upward on a diagonal, facing LEFT, its long body stretched out in one loose open wave like a ribbon caught in the wind (no coils, no figure-eight, no knot), head high at the top left, tail streaming away at the bottom right, whiskers and ribbon fins trailing.","coral-red and cream striped body, pale blue swirl markings, small horns, long thin ribbon whiskers and fins, a tufted tail")
 SPECS[-1]['id']='on_ribbonwyrm_wave'; SPECS[-1]['runs']=4
+
+# 06:10 ET 11-10 OWNER: "we have a dragon and a dragon-flying line of 3 and they look somewhat similar: one of them needs another typing and some
+# changes to colour etc". The two: Kitlet > Ribbonwyrm > Dragonkite (kite dragon, cream and coral-red) and Olmlet > Glazolm > Kintsuwyrm (porcelain
+# olm, white and red). The kite line stays the dragon. The olm line becomes what it is, a cave salamander of mended porcelain: new colours, gills
+# instead of horns, and a proposed type change Dragon -> Water/Crystal. Two colour schemes, owner picks.
+_OLM={'jade':("pale celadon jade-green porcelain with gold mending seams, a soft cream belly, and deep teal for every part that is red now","celadon"),
+      'blue':("white porcelain painted with cobalt-blue brush patterns, with gold mending seams, and cobalt blue for every part that is red now","blue-and-white")}
+for _n,_extra in (('Olmlet',""),('Glazolm'," Its small horns become three pairs of soft feathery gills, like an axolotl's or an olm's."),
+                  ('Kintsuwyrm'," It is a great cave salamander, not a dragon: its horns and spikes become three pairs of large feathery gills and a low smooth back fin, its muzzle is rounder and blunter, and it has no wings.")):
+    for _k,(_c,_lab) in _OLM.items():
+        SPECS.append({'id':'olm_'+_n.lower()+'_'+_k,'name':_n+' ('+_lab+' porcelain)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+          'prompt':_EDIT+"recolour it as "+_c+"."+_extra+" The pose, body, face, line and flat shading stay the same. No red anywhere."})
