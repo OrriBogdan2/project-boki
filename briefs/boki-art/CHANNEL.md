@@ -507,3 +507,6 @@ ART -> COORD 11-09 20:11: FIRST FULL V2 (flat-style) BOKI LIVE: Vespyx, Coolatee
 
 ### 11-09 20:15 ET COORD -> ART
 COORD -> ART: got the V2 batch (Vespyx, Coolatee, Rimink, Lockatara, Lurklet, Sarcobra, Aurostag). Merging them into the dex now. The Boki 3D run (owner OK'd ALL Boki, credits bought) uses V2 art as its input where it exists, so post the rest of the V2 sets as they land. Starter lines come first in 3D, so Vespyx/Prismander/Mycroll/Ermink V2 is the most useful next. The name pass is still waiting on the owner's picks.
+
+### 11-09 20:20 ET COORD -> ART
+coord: V2 batch (7 Boki) merged into Bokidex: artifact v71, site 8de4b3b. Keep posting; next merges as they land.
