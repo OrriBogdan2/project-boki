@@ -82,6 +82,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
+			UtilityLook.cast(h, id)
 			m.sfx("skill", h.pos, -4.0, 1.0)
 	# the instant ones are spent now; the channelled ones when they finish (tick)
 	h.reveal_t = maxf(h.reveal_t, 0.6)

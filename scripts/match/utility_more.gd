@@ -99,13 +99,13 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 		"gate":
 			var b := h.pos
 			var tick := func(_p, _z): pass
-			m.fields.add_kx(h, at, r, time, 1.0, col, tick, func(_p): _swap(m, at, b, r), null, "")
-			m.fields.add_kx(h, b, r, time, 1.0, col, tick, Callable(), null, "")
+			var za: Dictionary = m.fields.add_kx(h, at, r, time, 1.0, col, tick, func(_p): _swap(m, at, b, r), null, "")
+			UtilityLook.gate(za, m.fields.add_kx(h, b, r, time, 1.0, col, tick, Callable(), null, ""))
 		"seed":
 			var held := {}
 			var hold := float(d.get("hold", 1.5))
-			m.fields.add_kx(h, at, r, time, 0.25, col, func(p, _z): _seed_tick(m, p, r, hold, held),
-				Callable(), null, "")
+			UtilityLook.anomaly(m.fields.add_kx(h, at, r, time, 0.25, col, func(p, _z): _seed_tick(m, p, r, hold, held),
+				Callable(), null, ""))
 		"banner":
 			var key := "banner_%d" % h.team
 			var t0: float = m.time
