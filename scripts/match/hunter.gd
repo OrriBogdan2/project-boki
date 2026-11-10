@@ -455,11 +455,19 @@ func targetable() -> bool:
 func is_local() -> bool:
 	return ctrl == "local"
 
+## A cursor closer than this many body widths (2 r) says nothing about a way to face: aim_dir keeps the last good one.
+const AIM_MIN_BODIES := 2.0
+var aim_good := Vector2.ZERO      # the last aim direction taken from a cursor outside that circle
+
 func aim_dir() -> Vector2:
 	if ak and ak.aim_lock() != Vector2.ZERO:
 		return ak.aim_lock()
 	var d := Vector2(inp["aim"].x - pos.x, inp["aim"].z - pos.z)
-	return d.normalized() if d.length() > 0.05 else Vector2(sin(face), cos(face)) * -1.0
+	if d.length() > r * AIM_MIN_BODIES:
+		aim_good = d.normalized()
+	elif aim_good == Vector2.ZERO:
+		aim_good = Vector2(sin(face), cos(face)) * -1.0
+	return aim_good
 
 # ------------------------------------------------------------------ damage
 func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
