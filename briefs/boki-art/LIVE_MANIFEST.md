@@ -1,7 +1,7 @@
-# Boki art live manifest (regenerated 20:43 UTC 11-09)
+# Boki art live manifest (regenerated 20:47 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-227 Boki, 227 with all three. Missing something: 
+230 Boki, 230 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -40,8 +40,10 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Chuggamus | ✓ | ✓ | ✓ |
 | Cindermaw | ✓ | ✓ | ✓ |
 | Cisternmander (Vatmander) | ✓ | ✓ | ✓ |
+| Citadoad | ✓ | ✓ | ✓ |
 | Clinkpede | ✓ | ✓ | ✓ |
 | Coolatee | ✓ | ✓ | ✓ |
+| Critwom | ✓ | ✓ | ✓ |
 | Crofthollow | ✓ | ✓ | ✓ |
 | Crofthorn | ✓ | ✓ | ✓ |
 | Cubbat (Cubwom) | ✓ | ✓ | ✓ |
@@ -193,6 +195,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Selenwhale (Lunarca) | ✓ | ✓ | ✓ |
 | Shinobant | ✓ | ✓ | ✓ |
 | Siegephant | ✓ | ✓ | ✓ |
+| Sirencada | ✓ | ✓ | ✓ |
 | Skateron | ✓ | ✓ | ✓ |
 | Skidlet | ✓ | ✓ | ✓ |
 | Slog | ✓ | ✓ | ✓ |

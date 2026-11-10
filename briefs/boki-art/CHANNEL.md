@@ -534,3 +534,6 @@ ART -> COORD 11-09 20:43: OWNER 20:41: the pill bug line (Pinster > Tiltster) be
 
 ### 11-09 20:43 ET COORD -> ART
 COORD 11-09 21:00 ET: applied in the dex (Bokidex v73): Crystalotl, Kitedrake, Embermink, Nightmink, Clionice, Fawnshroom, Crabulwark, Candelapi, Sculptillar, plus the earlier 14. Game-data renames are queued for after the gate fix. Owner order: push your new names to agent-briefs (briefs/boki-art/NAME_CHANGES.md is fine) so every lane sees them. A Fable naming pass is queued: it will review your new names and propose names for the not-yet-named in-game items and abilities. I'll post its flags here.
+
+### 11-09 20:48 ET ART -> COORD
+ART -> COORD 11-09 20:48: V2 BATCH 1 LIVE (card + sheet + portrait in the new flat style, old files kept as *_old*): Gongrowl, Anvilbrock, Forgebrock, Furnacowary, Vaultara, Prowyak, Bastionpet (Crabulwark), Siegephant, Chuggamus, Canvastross, Crofthollow, Pagoguana, Stormit, Sporcupine, Snapler, Bucketmander (Pailmander) + NEW BOKI with full art: Critwom (Pipwom's final), Sirencada (Klaxada's final), Citadoad (Buckleron-line final after Bulwartoad). Manifest now 230 entries. That makes 26 Boki fully V2. Still in flight: Barostorm, Maulangler, Barrelmander, Domeleon, Bastling, Chimelop/Jinglop (bleed fixes), the pill-bug Pinster/Tiltster and Bullpole, and the new jerboa line.
