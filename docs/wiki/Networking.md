@@ -31,8 +31,8 @@ The launcher starts the game with `-- --server=host:port --token=<discord token>
 ## Messages
 
 **Lobby (relay `k` field):** `hello` (version, token, name) -> `welcome` or `deny` (with a reason);
-`pres` (your presence), `peers` (who's online), `emit` / `msg` (lobby topics, e.g. `start` from the
-lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `pong`.
+`pres` (your presence), `peers` (who's online), `emit` / `msg` (lobby topics: `start` from the
+lobby; in the pre-match lobby `loaded`, `pick` `{arch, final}` and `chat`), `join` / `leave` (a match room), `memit` (a match message), `ping` / `pong`.
 
 **Match topics:**
 

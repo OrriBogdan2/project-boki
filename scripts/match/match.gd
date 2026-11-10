@@ -557,7 +557,8 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		kit = kit.duplicate()
 		# bots get an archetype of their class, and a weapon from its family
 		if ctrl != "local" and String(kit.get("arch", "")) in ["", "?"]:
-			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, str(seed_val)])
+			var squad_archs := hunters.filter(func(o): return o.team == team).map(func(o): return o.arch)
+			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, str(seed_val)], squad_archs)
 		var pool: Array = Data.CLASSES[cls]["weapons"]
 		if Arch.exists(String(kit.get("arch", ""))) and Arch.weight(String(kit["arch"])) == cls:
 			pool = Arch.weapons(String(kit["arch"]))
