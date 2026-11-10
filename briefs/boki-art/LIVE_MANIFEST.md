@@ -1,4 +1,4 @@
-# Boki art live manifest (regenerated 20:11 UTC 11-09)
+# Boki art live manifest (regenerated 20:43 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
 227 Boki, 227 with all three. Missing something: 
@@ -13,7 +13,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Barokat | ✓ | ✓ | ✓ |
 | Barostorm | ✓ | ✓ | ✓ |
 | Barrelmander (Kegmander) | ✓ | ✓ | ✓ |
-| Bastionpet | ✓ | ✓ | ✓ |
+| Bastionpet (Crabulwark) | ✓ | ✓ | ✓ |
 | Bathilus | ✓ | ✓ | ✓ |
 | Bellowlet | ✓ | ✓ | ✓ |
 | Bladypus | ✓ | ✓ | ✓ |
@@ -31,10 +31,10 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Bulwartoad | ✓ | ✓ | ✓ |
 | Cairnback | ✓ | ✓ | ✓ |
 | Canvastross | ✓ | ✓ | ✓ |
-| Cetorgan | ✓ | ✓ | ✓ |
+| Cetorgan (Organwhal) | ✓ | ✓ | ✓ |
 | Chainipede | ✓ | ✓ | ✓ |
-| Chandelapi | ✓ | ✓ | ✓ |
-| Chandelotl | ✓ | ✓ | ✓ |
+| Chandelapi (Candelapi) | ✓ | ✓ | ✓ |
+| Chandelotl (Crystalotl) | ✓ | ✓ | ✓ |
 | Checkmare | ✓ | ✓ | ✓ |
 | Chiptero | ✓ | ✓ | ✓ |
 | Chuggamus | ✓ | ✓ | ✓ |
@@ -44,24 +44,24 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Coolatee | ✓ | ✓ | ✓ |
 | Crofthollow | ✓ | ✓ | ✓ |
 | Crofthorn | ✓ | ✓ | ✓ |
-| Cubbat | ✓ | ✓ | ✓ |
+| Cubbat (Cubwom) | ✓ | ✓ | ✓ |
 | Dobsabre | ✓ | ✓ | ✓ |
 | Domeleon | ✓ | ✓ | ✓ |
-| Dragonkite | ✓ | ✓ | ✓ |
+| Dragonkite (Kitedrake) | ✓ | ✓ | ✓ |
 | Dreadmonite | ✓ | ✓ | ✓ |
 | Dreadnoyak | ✓ | ✓ | ✓ |
 | Dribbara | ✓ | ✓ | ✓ |
-| Druzemole | ✓ | ✓ | ✓ |
+| Druzemole (Gemole) | ✓ | ✓ | ✓ |
 | Echolop | ✓ | ✓ | ✓ |
 | Eclipsowl | ✓ | ✓ | ✓ |
-| Effigeetle | ✓ | ✓ | ✓ |
+| Effigeetle (Sculptillar) | ✓ | ✓ | ✓ |
 | Effigoon | ✓ | ✓ | ✓ |
 | Embrook | ✓ | ✓ | ✓ |
 | Ermink | ✓ | ✓ | ✓ |
 | Fanpire | ✓ | ✓ | ✓ |
-| Fawngus | ✓ | ✓ | ✓ |
+| Fawngus (Fawnshroom) | ✓ | ✓ | ✓ |
 | Fizzlet | ✓ | ✓ | ✓ |
-| Flarmink | ✓ | ✓ | ✓ |
+| Flarmink (Embermink) | ✓ | ✓ | ✓ |
 | Foldbat | ✓ | ✓ | ✓ |
 | Forgebrock | ✓ | ✓ | ✓ |
 | Frigatee | ✓ | ✓ | ✓ |
@@ -69,18 +69,18 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Galleotter | ✓ | ✓ | ✓ |
 | Gambitfin | ✓ | ✓ | ✓ |
 | Geodemole | ✓ | ✓ | ✓ |
-| Geysirbara | ✓ | ✓ | ✓ |
+| Geysirbara (Geyserbara) | ✓ | ✓ | ✓ |
 | Ghoulamari | ✓ | ✓ | ✓ |
 | Gilabacus | ✓ | ✓ | ✓ |
 | Glaciammoth | ✓ | ✓ | ✓ |
 | Glaciatee | ✓ | ✓ | ✓ |
-| Glacione | ✓ | ✓ | ✓ |
-| Glaivyx | ✓ | ✓ | ✓ |
+| Glacione (Clionice) | ✓ | ✓ | ✓ |
+| Glaivyx (Sabryx) | ✓ | ✓ | ✓ |
 | Glassolotl | ✓ | ✓ | ✓ |
 | Glazolm | ✓ | ✓ | ✓ |
 | Glintmole | ✓ | ✓ | ✓ |
-| Gloamshell | ✓ | ✓ | ✓ |
-| Gloamspire | ✓ | ✓ | ✓ |
+| Gloamshell (Duskargot) | ✓ | ✓ | ✓ |
+| Gloamspire (Duskspire) | ✓ | ✓ | ✓ |
 | Glomwort | ✓ | ✓ | ✓ |
 | Glomworth (Glombulus) | ✓ | ✓ | ✓ |
 | Gongibbon | ✓ | ✓ | ✓ |
@@ -103,21 +103,21 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Kerchick | ✓ | ✓ | ✓ |
 | Kestrike | ✓ | ✓ | ✓ |
 | Kindlewren | ✓ | ✓ | ✓ |
-| Kintsuwyrm | ✓ | ✓ | ✓ |
+| Kintsuwyrm (Gildwyrm) | ✓ | ✓ | ✓ |
 | Kitlet | ✓ | ✓ | ✓ |
 | Klaxada | ✓ | ✓ | ✓ |
 | Knotling | ✓ | ✓ | ✓ |
 | Knotwyrm | ✓ | ✓ | ✓ |
 | Lanceron | ✓ | ✓ | ✓ |
 | Lanterloris | ✓ | ✓ | ✓ |
-| Lanternlong (Longlume) | ✓ | ✓ | ✓ |
+| Lanternlong (Glowris) | ✓ | ✓ | ✓ |
 | Lanternmit | ✓ | ✓ | ✓ |
 | Latchling | ✓ | ✓ | ✓ |
 | Lensling | ✓ | ✓ | ✓ |
 | Loafhopper | ✓ | ✓ | ✓ |
 | Lockatara | ✓ | ✓ | ✓ |
-| Lodestaff | ✓ | ✓ | ✓ |
-| Lodestick | ✓ | ✓ | ✓ |
+| Lodestaff (Magnestaff) | ✓ | ✓ | ✓ |
+| Lodestick (Magnestick) | ✓ | ✓ | ✓ |
 | Lunink | ✓ | ✓ | ✓ |
 | Lunowl | ✓ | ✓ | ✓ |
 | Lurklet | ✓ | ✓ | ✓ |
@@ -189,7 +189,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Scopeleon | ✓ | ✓ | ✓ |
 | Scythant | ✓ | ✓ | ✓ |
 | Seamwyrm | ✓ | ✓ | ✓ |
-| Selenfin | ✓ | ✓ | ✓ |
+| Selenfin (Lunafin) | ✓ | ✓ | ✓ |
 | Selenwhale (Lunarca) | ✓ | ✓ | ✓ |
 | Shinobant | ✓ | ✓ | ✓ |
 | Siegephant | ✓ | ✓ | ✓ |
@@ -220,7 +220,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Torpecone | ✓ | ✓ | ✓ |
 | Truffapir | ✓ | ✓ | ✓ |
 | Umbrathere (Ribbrella) | ✓ | ✓ | ✓ |
-| Umbrink | ✓ | ✓ | ✓ |
+| Umbrink (Nightmink) | ✓ | ✓ | ✓ |
 | Vaultara | ✓ | ✓ | ✓ |
 | Vespox | ✓ | ✓ | ✓ |
 | Vespyx | ✓ | ✓ | ✓ |
@@ -231,4 +231,4 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Wyrmink | ✓ | ✓ | ✓ |
 | Zephyrak | ✓ | ✓ | ✓ |
 | Zipling | ✓ | ✓ | ✓ |
-| Zippelith | ✓ | ✓ | ✓ |
+| Zippelith (Zipperpent) | ✓ | ✓ | ✓ |

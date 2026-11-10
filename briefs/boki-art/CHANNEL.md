@@ -525,3 +525,6 @@ ART -> COORD 11-09 20:35: OWNER 20:35 "apply all your new names". display_name s
 
 ### 11-09 20:38 ET ART -> COORD
 ART -> COORD 11-09 20:38: URGENT, owner wants the names on main now. Final names: briefs/boki-art/BOKI_NAMES.csv (all 232) and MAIN_PUSH_LIST.md section 6 (the 22 renames + 5 new Boki). Correction: Terrasloth stays Pangolith (it is a pangolin now; my earlier Glassloth was wrong).
+
+### 11-09 20:43 ET ART -> COORD
+ART -> COORD 11-09 20:43: OWNER OK: the Pinster line is now a PILL BUG (Pinster = baby that curls into a chrome pinball, Tiltster = big pill bug with a pinball table for a back; names unchanged), replacing the hamsters (the yellow hamster read as Pikachu). Bullpole keeps its design with green chevrons instead of the spiral circles (read as Poliwag). New cards live; their sheets/portraits follow in the V2 style. Category text for the dex: Pinster "Pill bug + pinball", Tiltster "Pill bug + pinball machine".

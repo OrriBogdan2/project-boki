@@ -391,3 +391,12 @@ for _k,(_b,_f) in _PBL.items():
       'prompt':"Single character illustration of one baby Boki (a stylised, cute creature-collector monster): "+_b+". Clearly a baby: small, round, simple shapes, a slightly oversized head."+_PB})
     SPECS.append({'id':'c_pinline_'+_k+'_final','name':'Pinster line option: '+_k+' (final)','refs':[SRA],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Single character illustration of one final-form Boki (a stylised creature-collector monster): "+_f+". Every part grows from its body; one head, clearly attached."+_PB})
+
+# 20:43 ET 11-09 owner OK ("sure let's do that"): Pinster line = the pill bug (baby curls into a chrome pinball, final carries the table), Bullpole = chevron marks.
+# Cards made live from the concepts; V2 cards now with the style board, 4 runs (board runs paste tiles about half the time; filtered by tile check).
+_B2=[('Bullpole','cards/Bullpole.jpg','baby','cute',False,False,"glossy red skin with dark maroon patches, two green chevron marks (one on its chest, one on its side), a red and green tail fin, big green eyes","two front legs, two back legs, one tail fin, two chevron marks",""),
+ ('Pinster','cards/Pinster.jpg','baby','cute',False,False,"chrome-silver segmented plates, a pale grey face, big dark eyes, small clear glass studs with white-blue sparks","seven body plates, two antennae, short legs, about six glass studs",""),
+ ('Tiltster','cards/Tiltster.jpg','final','tough',False,False,"chrome-silver segmented plates, a glowing blue pinball playfield on its back with clear glass bumpers and silver balls, chrome flipper claws, small lit antenna bulbs","two flipper claws, about ten legs, two antennae, three bumpers","")]
+for _n,_i,_st,_ar,_dk,_fu,_co,_ct,_fx in _B2:
+    SPECS.append({'id':'v2t_'+_n.lower(),'name':_n+' (V2 card, style board)','refs':['briefs/boki-art/'+_i,SRB],'runs':4,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD_BOARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx)+" Never paste the board's square samples into the picture."})
