@@ -9,6 +9,8 @@ extends RefCounted
 ##   5. on the base: no race post with base_mode off; with it on, a race runs to a result card
 ##   6. the Training post on the base is a solo lap of the loop: perfect cheers add Speed (and a journal
 ##      line), missed ones add none, a Boki at its cap or too tired does not start
+##   6b. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
+##      under a twist still finishes, a won Dash pins the winner on the showcase wall and the sign shows the twist
 ##   7. the Training post drill still runs on the shared timing bar: three presses, then it ends
 ## Never touches the real save.
 
@@ -34,6 +36,7 @@ func run(m: Node) -> void:
 	_leans()
 	_friends_rivals()
 	_settle()
+	_twists()
 	await _on_base()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -47,8 +50,8 @@ func _kin(sp: String, kname: String, speed: int, joy: float) -> Dictionary:
 	k["needs"]["energy"] = 90.0
 	return k
 
-func _race(recs: Array, back: int, rng: RandomNumberGenerator, cheer := true) -> BaseRace.Run:
-	var r := BaseRace.Run.new(recs, back, rng)
+func _race(recs: Array, back: int, rng: RandomNumberGenerator, cheer := true, tw := {}) -> BaseRace.Run:
+	var r := BaseRace.Run.new(recs, back, rng, tw)
 	while not r.over() and r.t < MAX_S:
 		if cheer and r.can_cheer():
 			r.cheer(["great", "good", "miss"][rng.randi() % 3])
@@ -152,6 +155,23 @@ func _settle() -> void:
 	ok(not mem_w.is_empty() and mem_w[-1]["kind"] == "race" and not mem_l.is_empty() and mem_l[-1]["kind"] == "race",
 			"both remember it: \"%s\"" % (mem_w[-1]["text"] if not mem_w.is_empty() else ""))
 
+func _twists() -> void:
+	var rec := _kin("zapple", "Tw", 10, 60.0)
+	var st: Array = BaseRace.rules()["stretches"]
+	var tw := {"mult": {"water": 0.5}}
+	for i in st.size():
+		var want := 0.5 if st[i]["kind"] == "water" else 1.0
+		var got := BaseRace.stretch_pace(rec, i, tw) / BaseRace.stretch_pace(rec, i)
+		ok(is_equal_approx(got, want), "twist row %s: x%.2f on the %s" % [st[i]["kind"], got, st[i]["kind"]])
+	ok(BaseRace.expected_time(rec, tw) > BaseRace.expected_time(rec), "a slow-water twist lengthens the lap")
+	var rng := RandomNumberGenerator.new()
+	for t in BaseRace.rules()["twists"]:
+		rng.seed = 5
+		var r := _race([rec, _kin("zapple", "Tx", 20, 60.0)], 0, rng, true, t)
+		ok(r.over(), "every race under '%s' finishes" % t["id"])
+	var wild: Dictionary = BaseRace.rules()["twists"].filter(func(t): return t.has("wobble"))[0]
+	ok(float(wild["wobble"]) > float(BaseRace.rules()["wobble"]), "a wobble twist widens the wobble")
+
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
@@ -199,6 +219,10 @@ func _on_base() -> void:
 			race.tick(0.1)
 			t += 0.1
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
+		var wall: Array = Save.d.get("showcase", [])
+		var pinned: bool = wall.size() == 1 and wall[0]["twist"] == BaseRace.twist()["name"]
+		ok(pinned, "on: the win is pinned to the wall under this week's twist")
+		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 		await _solo(home)
 	await _drill(home)
 	rules["base_mode"] = false
