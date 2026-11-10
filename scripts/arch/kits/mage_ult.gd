@@ -256,15 +256,20 @@ func _slam() -> void:
 	_next(FALL)
 	kit.play("mage_x_dive")
 	AimKit.hide(kit.h, "x_aim")
-	# the landing marker flashes on the spot a beat before she arrives (everyone sees it)
-	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
+	# the landing marker flashes on the spot a beat before she arrives (everyone sees it), filling over the drop
+	_mark(land, 0.0)
+	kit.net_ring(land, float(data()["radius"]), MageKit.GLOW)
+
+## The landing marker everyone sees: it fills over the drop and is full on the frame she strikes.
+func _mark(land: Vector3, fill: float) -> void:
+	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "fill": fill}
 	mark.merge({"col": MageKit.GLOW, "col2": MageKit.GLOW, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
-	kit.net_ring(land, float(data()["radius"]), MageKit.GLOW)
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
 func _fall_tick(u: float) -> void:
 	var h := kit.h
+	_mark(leap["land"], u)
 	var a: Vector3 = leap["high"]
 	var b: Vector3 = leap["land"]
 	h.vel = Vector3.ZERO
@@ -281,6 +286,7 @@ func _strike() -> void:
 	var xd := data()
 	var at: Vector3 = leap["land"]
 	var r := float(xd["radius"])
+	AimKit.hide(h, "x_land")
 	h.teleport(at)
 	h.vel = Vector3.ZERO
 	if h.model:
