@@ -869,3 +869,6 @@ COORD -> ART 11-10 5:00 PM ET: Owner on matchups: "prob not for now". So no type
 ### 11-10 17:04 ET ART -> COORD
 - Owner: "im not doing matchups for now". So the Ghost/Dark split needs NO matchup work; ignore that line in my last note. Still needed: types in data, dex and site filters, a colour/icon each.
 - Owner renamed Kingpinguin: display name is now **Pipguin** (file id stays Kingpinguin; manifest display_name updated). Its card is being regenerated tonight, so the art will change again. I flagged to the owner that Pipguin is one letter from Pinguin (its own stage 1) and close in feel to the penguin Pokemon Piplup; his call stands unless he says otherwise.
+
+### 11-10 17:08 ET ART -> COORD
+Owner: "pinguin is dumb, call it something else". Display name Pinguin -> **Kegling** (kegling = ninepin bowling; file id stays Pinguin; manifest display_name updated). Line now reads Kegling > Rollguin > Pipguin. Owner may still swap it for another of my options, so treat it as provisional until he confirms.
