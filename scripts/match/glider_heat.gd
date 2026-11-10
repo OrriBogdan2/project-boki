@@ -2,8 +2,9 @@ class_name GliderHeat
 extends RefCounted
 ## A glider's heat on the canopy itself, so teammates and enemies read it from the world (the HUD ring is only
 ## for you): the cloth warms toward ember as heat climbs, an overheated glider trails a thin smoke, and one that
-## burns while it lifts you out of the abyss at half strength flickers. Heat and burn are two shared toon-shader
-## parameters on the canopy's own material: no extra draw calls. Nothing happens when the glider opens or closes.
+## burns while it lifts you out of the abyss at half strength flickers. canopy_heat and canopy_burn are two
+## shared toon-shader parameters on the canopy's own material: no extra draw calls.
+## Nothing happens when the glider opens or closes.
 
 const SMOKE_EVERY := 0.12      # s between smoke puffs while overheated
 const SMOKE_BACK := 0.9        # m behind the canopy the puffs start
@@ -20,8 +21,8 @@ static func burning(h: Hunter) -> bool:
 ## Every frame on every Hunter whose canopy is open: sets the canopy's heat and burn, and puffs smoke at overheat.
 static func tick(h: Hunter, glider: Node3D, dt: float) -> void:
 	var mat := (glider.get_node("Canopy") as MeshInstance3D).material_override as ShaderMaterial
-	mat.set_shader_parameter("heat", 1.0 - clampf(h.glide_fuel, 0.0, 1.0))
-	mat.set_shader_parameter("burn", 1.0 if burning(h) else 0.0)
+	mat.set_shader_parameter("canopy_heat", 1.0 - clampf(h.glide_fuel, 0.0, 1.0))
+	mat.set_shader_parameter("canopy_burn", 1.0 if burning(h) else 0.0)
 	var puff := int(h.m.time / SMOKE_EVERY) != int((h.m.time - dt) / SMOKE_EVERY)
 	if puff and overheated(h) and h.model.visible:
 		var flat := Vector3(-h.vel.x, 0.0, -h.vel.z)

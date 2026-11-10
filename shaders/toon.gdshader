@@ -55,11 +55,9 @@ uniform vec3 mark_seed = vec3(0.0);
 uniform float mark_scale = 9.0;
 uniform float mark_amt = 0.5;
 uniform float mark_glow = 0.0;
-// A glider canopy's heat (GliderHeat): 0 cool .. 1 overheated warms the cloth toward ember; burn 1 flickers it.
-uniform float heat : hint_range(0.0, 1.0) = 0.0;
-uniform float burn : hint_range(0.0, 1.0) = 0.0;
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+#include "res://shaders/canopy_heat.gdshaderinc"
 varying vec3 lpos;
 varying vec3 wnorm;
 varying vec2 part_y;
@@ -176,19 +174,15 @@ void fragment() {
 			c *= 0.8 + 0.6 * smoothstep(0.1, 0.8, r.y);
 		}
 	}
-	float ember = 0.0;
-	if (heat > 0.0 || burn > 0.0) {
-		ember = 0.5 + 0.5 * vnoise(lpos.xz * 9.0 + vec2(TIME * 17.0, -TIME * 11.0));
-		c = mix(c, vec3(0.95, 0.3, 0.1) * (0.5 + dot(c, vec3(0.5))), heat * 0.75) * (1.0 - burn * 0.5 * (1.0 - ember));
-	}
+	float ember = canopy_ember(lpos.xz);
+	c = canopy_tint(c, ember);
 	float fog = no_fog ? 0.0 : vis_fog((INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	c = vis_apply(c, fog);
 	ALBEDO = mix(c, flash_color.rgb, flash);
 	// a faint rim everywhere (so silhouettes lift off dark ground even in shadow); the crisp,
 	// light-facing rim is added per light below
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	EMISSION = flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow
-		+ vec3(1.0, 0.4, 0.1) * (heat * heat * 0.4 + burn * ember * 0.8) * (1.0 - fog);
+	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow + rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog) + mark_color.rgb * mk * mark_glow;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

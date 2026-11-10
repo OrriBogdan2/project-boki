@@ -21,7 +21,7 @@ func _look(fuel: float, lip: bool, secs := 0.5) -> Array:
 		m.time += DT
 		h.render(DT, 1.0)
 	var mat := _canopy().material_override as ShaderMaterial
-	return [float(mat.get_shader_parameter("heat")), float(mat.get_shader_parameter("burn"))]
+	return [float(mat.get_shader_parameter("canopy_heat")), float(mat.get_shader_parameter("canopy_burn"))]
 
 ## Runs the heat cue for `secs` at the given fuel on an open glider; returns the smoke puffs it spawned.
 func _ticks(gl: Node3D, fuel: float, secs: float) -> int:
@@ -49,9 +49,12 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	m.set_process(false)
 	h = m.hunters[0]
-	h.set_arch("")
 	h.ctrl = "local"
 	h.grounded = false
+	var shader := (_canopy().material_override as ShaderMaterial).shader
+	var names: Array = shader.get_shader_uniform_list().map(func(u): return u["name"])
+	var reads: bool = "canopy_heat" in names and "canopy_burn" in names
+	ok(reads, "the canopy's own shader (%s) reads both parameters" % shader.resource_path)
 	var nodes0 := _nodes(h.model)
 	var cool := _look(1.0, false)
 	var warm := _look(0.5, false)
@@ -81,12 +84,12 @@ func run(main: Node) -> void:
 		h.below_lip = want == 0.0
 		m._net_apply(other, m._ser(h))
 		var step := 1.0 / GliderHeat.NET_LEVELS
-		var seen := 1.0 - other.glide_fuel
-		var near := absf(seen - (1.0 - want)) <= step * 0.5 + 0.001
+		var seen: float = 1.0 - other.glide_fuel
+		var near: bool = absf(seen - (1.0 - want)) <= step * 0.5 + 0.001
 		ok(near, "the wire carries heat %.2f (got %.2f)" % [1.0 - want, seen])
-		var hotter := want == 0.0
-		var state := GliderHeat.overheated(other) == hotter and other.below_lip == hotter
-		ok(state, "...and the overheat state (%.0f)" % want)
+		var hotter: bool = want == 0.0
+		var state: bool = GliderHeat.overheated(other) == hotter and other.below_lip == hotter
+		ok(state, "...and the overheat state (%s)" % ("on" if hotter else "off"))
 	m.queue_free()
 	print("CANOPY DONE, failures: ", bad)
 	main.get_tree().quit()
