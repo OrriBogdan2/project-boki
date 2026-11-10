@@ -108,7 +108,7 @@ func fire_rmb(c: Dictionary) -> void:
 		at = ground(h.pos)
 		ft = 0.25
 	else:
-		at = aim_at(float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
+		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
 	tele_circle(at, float(vd["radius"]), col_of(vd), ft)
@@ -123,7 +123,7 @@ func rmb_hold_tick(t: float) -> void:
 		aim_t = m.time + 0.1
 		var rd := rmb_def()
 		var vd := vial_def(next_vial())
-		m.fx.ring(aim_at(float(rd["range"]) * float(rd["hold_range"])), float(vd["radius"]), col_of(vd), 0.12)
+		m.fx.ring(AimMode.place(h, float(rd["range"]) * float(rd["hold_range"])), float(vd["radius"]), col_of(vd), 0.12)
 
 func _shatter(it: Dictionary) -> void:
 	var v := String(it["v"])

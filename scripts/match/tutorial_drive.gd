@@ -94,17 +94,9 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if best == null:
 		return
 	p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
-<<<<<<< HEAD
-	if p.flat_dist(best) > 3.0: goto.call(best.pos)
-	if sid in ["shoot", "fight"]:
-		# (a bow or a charged blade acts on release: tap it)
-		var held: bool = p.wpn.has("draw") or p.wpn.has("charge_time")
-		p.inp["fire"] = fmod(m.time, 0.6) < 0.1 if held else true
-=======
 	var melee: bool = p.wpn.get("melee", false)
 	if p.flat_dist(best) > (1.6 if melee else 3.0): goto.call(best.pos)
 	if sid in ["shoot", "fight"]: p.inp["fire"] = _fire_key(m)
->>>>>>> origin/ext/tut-fight-per-starter
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
 		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
@@ -118,6 +110,8 @@ static func _fire_key(m: Match) -> bool:
 	var st: Array = p.wpn.get("draw", [])
 	if not st.is_empty():
 		return p.draw_t < float((st[0] as Array)[0]) + 0.05
+	if p.wpn.has("charge_time"):
+		return fmod(m.time, 0.6) < 0.1      # a charged blade acts on release: tap it
 	if p.wpn.get("melee", false):
 		return fmod(m.time, 0.5) < 0.1
 	return true
