@@ -142,7 +142,7 @@ func _arena() -> void:
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
-	step(m, 0.75)          # (the Bola's 0.4s wind-up with the lane, then its flight)
+	step(m, 0.75)          # (the Bola's flight)
 	var tk := P.ak as ThiefKit
 	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
 		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])
