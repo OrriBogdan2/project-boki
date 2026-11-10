@@ -2020,3 +2020,7 @@ _BWI=("It is now a WIND and metal bird, not a fire bird: no black feathers, no o
 for _k,_x in (('gh',_BGH),('wi',_BWI)):
     ON_CHANGE('Bellowlet',_C%'Bellowlet','baby','cute',False,True,_HOUSE+_x+"A small round chick, puffed up mid-breath with its chest swollen, cheeks full, one foot lifted, three-quarter view facing right.",runs=2,tag='_'+_k)
     ON_CHANGE('Furnacowary',_C%'Furnacowary','final','tough',False,True,_HOUSE+_x+"A tall powerful cassowary-like bird, three times the chick's size, with a long neck, heavy clawed legs and a tall casque crest. The chest cage is part of its own body, with no straps, belts, bands or rivets. Mid-stride, neck stretched forward and beak open as it lets out a great breath, side-on facing left.",runs=2,tag='_'+_k)
+
+# 11-10 promoted: Bellowlet on_bellowlet_gh_2 + Furnacowary on_furnacowary_gh_2 (ghost route), Glaciammoth + Rampartoad turnarounds (g5_3).
+for _a in (('Bellowlet','baby','cute',0,1,"hopping, wings out, chest light glowing"),('Furnacowary','final','tough',0,1,"standing tall, head turned to the viewer, wisps rising from its crest")):
+    SETOF(*_a,'gh')

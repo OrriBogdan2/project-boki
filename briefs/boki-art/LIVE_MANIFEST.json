@@ -108,9 +108,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Bellowlet.png",
   "hash": {
    "sheet": "ebad71873a28",
-   "card": "817c4621ef0e",
+   "card": "abffaa07ba87",
    "portrait": "8ea9631dca0e",
-   "hero": "76375da3019d"
+   "hero": "8ffe7cf9fab0"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "sheet_for_card": "817c4621ef0e"
@@ -638,9 +638,9 @@
   "display_name": "Furnowary",
   "hash": {
    "sheet": "c7ba81e9d808",
-   "card": "836b3d35d6c9",
+   "card": "62cdfdd6ee40",
    "portrait": "7e1496a5026a",
-   "hero": "f02ef253534d"
+   "hero": "76e23fb6c2e5"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "sheet_for_card": "836b3d35d6c9"
@@ -709,13 +709,13 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png",
   "hash": {
-   "sheet": "e8a1ac275da3",
+   "sheet": "fe548b1dfa2a",
    "card": "edf1479885fc",
    "portrait": "064c5a4ae6ef",
    "hero": "495989f99489"
   },
   "legendary_tier": "boss",
-  "sheet_for_card": null
+  "sheet_for_card": "edf1479885fc"
  },
  "Glaivyx": {
   "sheet": "briefs/boki-art/evolutions/Glaivyx.jpg",
@@ -1792,12 +1792,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Rampartoad.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Rampartoad.png",
   "hash": {
-   "sheet": "cae043cb0aca",
+   "sheet": "12679fdd1c81",
    "card": "35a2b7238224",
    "portrait": "3e6a9a603e5e",
    "hero": "34e6513b0efd"
   },
-  "sheet_for_card": null
+  "sheet_for_card": "35a2b7238224"
  },
  "Rattlebub": {
   "sheet": "briefs/boki-art/turnarounds/Rattlebub.jpg",
