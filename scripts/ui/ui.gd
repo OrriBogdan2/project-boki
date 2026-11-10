@@ -366,7 +366,7 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 
 ## A selectable card (a tier, a skin, an item): lights up on hover and focus, the picked one wears
 ## an accent edge. Add your content to the returned container. Click, Enter or the pad's A pick it.
-static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> PanelContainer:
+static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT, press_snd := "click") -> PanelContainer:
 	var p := PanelContainer.new()
 	var n := _tile_face(on, false, col, pad)
 	var h := _tile_face(on, true, col, pad)
@@ -392,7 +392,8 @@ static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> Panel
 		var go: bool = (ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT) or ev.is_action_pressed("ui_accept")
 		if go and cb.is_valid():
 			p.accept_event()
-			Sfx.play("click")
+			if press_snd != "":
+				Sfx.play(press_snd)
 			cb.call())
 	return p
 

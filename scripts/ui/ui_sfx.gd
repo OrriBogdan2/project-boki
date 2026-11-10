@@ -4,6 +4,9 @@ class_name UiSfx
 
 const HOVER_DB := -12.0      # dB: the tick under the cursor stays well under a click
 const FOCUS_DB := -14.0      # dB: keyboard and pad moves are a touch quieter than the mouse
+const TICK_FROM := 10        # s: the lobby countdown ticks once a second from here
+const URGENT_FROM := 5       # s: the last few ticks are higher and doubled
+const MATE_DB := -9.0        # dB: a teammate's lock-in sits well under your own
 const BACK_WORDS := {"Back": true, "Close": true, "Cancel": true, "✕": true, "Leave it  (Esc)": true}
 
 static func hover(keyboard := false) -> void:
@@ -30,3 +33,18 @@ static func extract_success() -> void:
 
 static func extract_fail() -> void:
 	Sfx.play("ui_extract_fail", null, -4.0, 0.02)
+
+## Lobby: your Hunter chosen (not yet locked).
+static func lobby_pick() -> void:
+	Sfx.play("lobby_pick", null, -4.0, 0.02)
+
+## Lobby: a pick is final. Yours is that Hunter's own sting; a teammate's is one quiet note.
+static func lobby_lock(arch: String, mine: bool) -> void:
+	if mine:
+		Sfx.play("%s_lock" % arch, null, -3.0, 0.02)
+	else:
+		Sfx.play("lobby_mate", null, MATE_DB, 0.02)
+
+## Lobby: one second of the countdown (sec left, TICK_FROM or less); the last URGENT_FROM are sharper.
+static func lobby_tick(sec: int) -> void:
+	Sfx.play("lobby_tick_urgent" if sec <= URGENT_FROM else "lobby_tick", null, -4.0, 0.02)
