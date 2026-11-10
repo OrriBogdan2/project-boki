@@ -1,9 +1,9 @@
 extends "res://tools/archetype_check.gd"
-## --ttk-check: time to down, every Hunter's LMB into every other Hunter (docs/TTK.md). A training
+## --ttk-matrix-check: time to down, every Hunter's LMB into every other Hunter (docs/TTK_MATRIX.md). A training
 ## dummy takes the defender's base health and armour; the attacker stands 8 m off with the aim dead
 ## on it and uses the best LMB mode that reaches (hold, taps, or hold-to-charge). An LMB that cannot
 ## reach 8 m (melee, short guns) is measured again at 80% of its range and marked "near".
-## Prints TTK <attacker> <defender> <mode> <metres> <seconds> <hits> rows that tools/ttk_table.py turns into
+## Prints TTK <attacker> <defender> <mode> <metres> <seconds> <hits> rows that tools/ttk_matrix.py turns into
 ## the table, and asserts every cell downs the dummy and the dummy's numbers are the Hunter's own.
 
 const FAR := 8.0               # m, the owner's distance
@@ -15,7 +15,7 @@ func run(main_node: Node) -> void:
 	main_node.set_meta("hero_combo_check", self)      # (kept alive while it awaits, as the combo checks do)
 	Save.no_write = true
 	Save.d = Save.fresh()
-	var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/ttk_source.json"))
+	var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tools/ttk_matrix_source.json"))
 	var order: Array = source["order"]
 	var probe := setup(order[0], FAR)
 	for d in order:
@@ -28,7 +28,7 @@ func run(main_node: Node) -> void:
 	await done(probe[0])
 	var only := ""
 	for arg in OS.get_cmdline_user_args():
-		if String(arg).begins_with("--ttk-only="): only = String(arg).substr(11)
+		if String(arg).begins_with("--ttk-matrix-only="): only = String(arg).substr(18)
 	for a in order:
 		if only == "" or only == a: await _attacker(a, order, source["hunters"][a])
 	print("TTK DONE, %d checks, failures: %d" % [n, fails])

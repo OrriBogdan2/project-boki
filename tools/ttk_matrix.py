@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Builds docs/TTK.md from a --ttk-check log and tools/ttk_source.json.
-Usage: godot --headless --path . -- --ttk-check > log; python3 tools/ttk_table.py log > docs/TTK.md"""
+"""Builds docs/TTK_MATRIX.md from a --ttk-matrix-check log and tools/ttk_matrix_source.json.
+Usage: godot --headless --path . -- --ttk-matrix-check > log; python3 tools/ttk_matrix.py log > docs/TTK_MATRIX.md"""
 import json, os, re, sys
 R = os.path.join(os.path.dirname(__file__), "..")
-SRC = json.load(open(os.path.join(R, "tools/ttk_source.json")))
+SRC = json.load(open(os.path.join(R, "tools/ttk_matrix_source.json")))
 ORDER, H = SRC["order"], SRC["hunters"]
 CLS = {"light": 124, "medium": 145, "heavy": 193}  # scripts/core/data.gd
 DR, OFF = SRC["armour_dr"], 0.15
@@ -73,8 +73,9 @@ def causes(a):
 def main():
     p = print
     p("# Time to down: every Hunter's LMB into every other Hunter\n")
-    p("Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the combat area. `--ttk-check` puts a Training Area dummy at 8 m with the defender's base health and armour (124/145/193 hp, armour durability 2.2x, 20% off every hit while it lasts) and holds the attacker's LMB on it with perfect aim (aim dead on the dummy, shooter and dummy pinned, no dodging, no dash, no ability). It tries every LMB mode the weapon has (hold, taps, hold-to-charge) and keeps the fastest that reaches. An LMB that cannot reach 8 m (melee, short guns) is measured at 80% of its range and the cell carries a `~`. Cells are seconds to down; the check fails if a cell never downs the dummy in 20 s. Regenerate: `godot --headless --path . -- --ttk-check > log; python3 tools/ttk_table.py log > docs/TTK.md`.\n")
-    p("**Source figure.** Effective HP = Base HP / 0.8 (the source's Common armour is also 20% and its 2,500 durability outlasts any single life, so armour only ever scales HP; docs/SUPERVIVE_DATA.md section 3). Source seconds = that / the Hunter's LMB DPS from `tools/ttk_source.json` (kit text damage and cadence). Seconds are scale-free: our HP and damage are both about 1/8 of the source's, so the two columns compare directly. Cells show `ours / source`; a cell with no source figure shows ours only. **Bold** = ours off the source by more than 15%.\n")
+    p("Companion to docs/TTK.md (`--ttk-check`, ext/ttk-table): that table is the per-Hunter parity bar (LMB and combo, rank 0/max); this matrix is LMB only, attacker by defender.\n")
+    p("Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the combat area. `--ttk-matrix-check` puts a Training Area dummy at 8 m with the defender's base health and armour (124/145/193 hp, armour durability 2.2x, 20% off every hit while it lasts) and holds the attacker's LMB on it with perfect aim (aim dead on the dummy, shooter and dummy pinned, no dodging, no dash, no ability). It tries every LMB mode the weapon has (hold, taps, hold-to-charge) and keeps the fastest that reaches. An LMB that cannot reach 8 m (melee, short guns) is measured at 80% of its range and the cell carries a `~`. Cells are seconds to down; the check fails if a cell never downs the dummy in 20 s. Regenerate: `godot --headless --path . -- --ttk-matrix-check > log; python3 tools/ttk_matrix.py log > docs/TTK_MATRIX.md`.\n")
+    p("**Source figure.** Effective HP = Base HP / 0.8 (the source's Common armour is also 20% and its 2,500 durability outlasts any single life, so armour only ever scales HP; docs/SUPERVIVE_DATA.md section 3). Source seconds = that / the Hunter's LMB DPS from `tools/ttk_matrix_source.json` (kit text damage and cadence). Seconds are scale-free: our HP and damage are both about 1/8 of the source's, so the two columns compare directly. Cells show `ours / source`; a cell with no source figure shows ours only. **Bold** = ours off the source by more than 15%.\n")
     p("## Seconds to down (ours / source)\n")
     p(table(cell))
     p("\nRows are the attacker (best LMB mode in brackets), columns the defender. `~` = measured near (80% of weapon range).\n")
