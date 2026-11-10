@@ -92,7 +92,7 @@ Code: `scripts/core/care.gd`, `scripts/core/kin_speak.gd`, the raising section o
 
 ## The Boki's mind
 
-Code: `scripts/match/kin.gd`, `scripts/match/kin_voice.gd`, `scripts/core/bridge.gd`.
+Code: `scripts/match/kin.gd`, `scripts/core/bridge.gd`.
 
 - **Traits.** Bravery, loyalty, temper and curiosity, seeded per species and varied per Boki. They drift with experience.
 - **Trust** (0 to 100). It rises when you extract together, chat, pet and feed. It falls when you throw the Boki into danger while it's hurt, or when you lose.

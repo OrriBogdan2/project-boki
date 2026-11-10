@@ -63,7 +63,6 @@ var beacon: MeshInstance3D = null # the downed marker pillar (KinDowned.render)
 var hesitate_t := 0.0
 var hesitate_to := Vector3.INF
 var revive_wait := 0.0
-var bark_cd := 0.0
 var callout_seen := {}
 var think_t := 0.0
 var hop_ph := 0.0
@@ -254,13 +253,10 @@ func note(kindk: String, text: String, trust_d := 0.0) -> void:
 	events.append({"kind": kindk, "text": text, "trust": trust_d})
 	trust = clampf(trust + trust_d, 0.0, 100.0)
 
-func bark(cat: String, extra := "") -> void:
+func bark(cat: String) -> void:
 	if state == "fused" and owner_h != null and KinMerge.in_form(owner_h):
 		return          # (inside you: it says nothing)
-	if bark_cd > 0.0 and cat not in ["refuse", "hesitate", "revive", "callout"]:
-		return
-	bark_cd = 3.0
-	var txt := KinVoice.line(self, cat, extra)
+	var txt := BokiChatter.line(self, cat)
 	if txt != "":
 		m.kin_bark(self, txt, cat)
 
@@ -591,7 +587,7 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "bark_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
+	for k in ["atk_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
 		set(k, maxf(0.0, get(k) - dt))
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
@@ -811,8 +807,7 @@ func _sim_active(dt: float) -> void:
 	# a hurt, cautious Boki stays at your side and sits the fight out
 	var hang_back: bool = owner_h != null and hp < max_hp * brain.retreat_frac()
 	if hang_back:
-		if bark_cd <= 0.0:
-			bark("scared")
+		bark("scared")
 		target = null
 	if chase_target != null and (not is_instance_valid(chase_target) or chase_target.dead or not chase_target.hittable()):
 		chase_target = null
