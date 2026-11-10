@@ -361,6 +361,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		# (wiki patch 20.11.24: a recall can't come within 0.25 s of the throw)
 		if pressed and String(mace["st"]) != "back" and m.time - throw_at >= float(md.get("recall_lock", 0.25)):
 			_recall()
+		elif pressed and String(mace["st"]) != "back":
+			buffer_recast("lmb")            # inside the lockout: RecastCue's buffer recalls it as soon as it may
 		return true
 	var local := h.ctrl == "local"
 	if pressed and not local:
@@ -531,6 +533,24 @@ func _throw() -> void:
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
+
+## RecastCue: LMB again calls the hammer back (from the recall lockout on); the marker rides the hammer. Lying
+## on the ground it comes back by itself after lie_t (the ring runs down then).
+func recast_window() -> Dictionary:
+	if mace.is_empty() or String(mace["st"]) == "back":
+		return {}
+	var md := lmb_def()
+	var lie := float(md.get("lie_t", 0.0))
+	var total := lie if lie > 0.0 else 1.0
+	var left := total - float(mace["t"]) if lie > 0.0 and String(mace["st"]) == "ground" else total
+	var armed: bool = m.time - throw_at >= float(md.get("recall_lock", 0.25))
+	return RecastCue.window("lmb", left, total, mace["pos"], armed, true)
+
+func recast_now(slot_id: String) -> void:
+	if slot_id == "lmb" and not mace.is_empty() and String(mace["st"]) != "back":
+		_recall()
+	else:
+		super(slot_id)
 
 func _recall() -> void:
 	play("bul_recall")
