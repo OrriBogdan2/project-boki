@@ -84227,5 +84227,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_selenfin_b4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_kerchick_b4",
+    "name": "Kerchick (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kerchick_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kerchick_b4",
+    "name": "Kerchick (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kerchick_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_barokat_b4",
+    "name": "Barokat (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_barokat_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kerchick_b4",
+    "name": "Kerchick (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_kerchick_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kerchick_b4",
+    "name": "Kerchick (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_kerchick_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_jibbatross_b4",
+    "name": "Jibbatross (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_jibbatross_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kerchick_b4",
+    "name": "Kerchick (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kerchick_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_knotling_b4",
+    "name": "Knotling (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_knotling_b4_3.jpg",
+    "ok": true
   }
 ]
