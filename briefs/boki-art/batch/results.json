@@ -75911,5 +75911,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_jerbolt_1.jpg",
     "ok": true
+  },
+  {
+    "id": "on_effigoon",
+    "name": "Effigoon (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_effigoon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon",
+    "name": "Effigoon (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_effigoon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pyrraven",
+    "name": "Pyrraven (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_pyrraven_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_gloamspire",
+    "name": "Gloamspire (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_gloamspire_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dreadnoyak",
+    "name": "Dreadnoyak (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_dreadnoyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_scythant",
+    "name": "Scythant (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_scythant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_gloamspire",
+    "name": "Gloamspire (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_gloamspire_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_loafhopper",
+    "name": "Loafhopper (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_loafhopper_2.jpg",
+    "ok": true
   }
 ]
