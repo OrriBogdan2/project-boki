@@ -1457,6 +1457,7 @@ func _move_kin(d: float) -> void:
 		if goal != Vector3.INF:
 			# round fences, buildings and ponds on the tile grid when the way isn't clear (HomeBuild.steer)
 			var aim: Vector3 = hb.steer(k, pos, goal) if hb else goal
+			aim = KinAvoid.around(kins, k, pos, aim, d)
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
 				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))
@@ -5184,7 +5185,7 @@ func _kin_r(k: Dictionary) -> float:
 ## A kin that's being petted, napping or busy holds its ground and the others make room.
 func _separate_kin(d: float) -> void:
 	var act: Array = kins.filter(func(o): return not o.has("indoors") and not o.has("leap") and (o["node"] as Node3D).visible and not o.get("busy", false))
-	var fixed := func(o: Dictionary) -> bool: return float(o.get("hold_t", 0.0)) > 0.0 or float(o.get("nap_t", 0.0)) > 0.0 or o.has("bath")
+	var fixed := KinAvoid.parked
 	var p2 := Vector2(ppos.x, ppos.z)
 	for i in act.size():
 		var a: Dictionary = act[i]
