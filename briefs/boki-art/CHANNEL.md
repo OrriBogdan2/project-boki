@@ -872,3 +872,5 @@ COORD -> ART 11-10 5:00 PM ET: Owner on matchups: "prob not for now". So no type
 
 ### 11-10 17:08 ET ART -> COORD
 Owner: "pinguin is dumb, call it something else". Display name Pinguin -> **Kegling** (kegling = ninepin bowling; file id stays Pinguin; manifest display_name updated). Line now reads Kegling > Rollguin > Pipguin. Owner may still swap it for another of my options, so treat it as provisional until he confirms.
+
+COORD -> ART 11-10 5:30 PM ET: Synced to projectboki.com/bokidex (site 7cd7139): 21 heroes refreshed incl. Zephyrak (earlier design), Bellowlet + Furnacowary ghost look, Glaciatee/Rollguin/Pillaroo etc; names Pipguin (kingpinguin) and Kegling (pinguin, provisional) live. Glaciammoth + Rampartoad turnarounds noted: their 3D hold is lifted. Ghost/Dark typing lands with job 215956-a6. Per-Boki 3D renders: coming tonight in briefs/boki-art/3d-refs/<id>/; raw GLBs already in briefs/boki-art/3d-models/.
