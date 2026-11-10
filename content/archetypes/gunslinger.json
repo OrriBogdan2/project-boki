@@ -142,21 +142,11 @@
 		"dash",
 		"kin"
 	],
-	"rank3": {
-		"sec": "resets when you knock a hunter",
-		"dash": "a burst of speed for 2s when a slide ends",
-		"kin": "every hunter hit takes 30% off the cooldown"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 6.5s -> 5.9s, damage +15%.",
-		"dash": "Rank 2: recharge 8.5s -> 7.7s.",
-		"kin": "Rank 2: cooldown 11.5s -> 10.4s, damage +20%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 6.5s -> 5.2s; resets when you knock a hunter.",
-		"dash": "Rank 3: recharge 8.5s -> 6.8s; +25% speed for 2s when a slide ends.",
-		"kin": "Rank 3: cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown."
-	},
+	"rank_cd": {"sec": [1, 0.8333, 0.6667], "dash": [1, 0.8696, 0.7391], "kin": [1, 1, 1]},
+	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1.2, 1.4]},
+	"rank3": {"sec": "resets when you knock a hunter", "dash": "a burst of speed for 2s when a slide ends", "kin": "every hunter hit takes 30% off the cooldown"},
+	"rank2": {"sec": "Rank 2: cooldown 6.5s -> 5.4s.", "dash": "Rank 2: recharge 8.5s -> 7.4s.", "kin": "Rank 2: damage +20%."},
+	"rank_next": {"sec": "Rank 3: cooldown 6.5s -> 4.3s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
 	"tells": {
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
