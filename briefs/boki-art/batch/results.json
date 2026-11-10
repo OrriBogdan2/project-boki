@@ -89904,5 +89904,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fp2_lunowl_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fp2_lunowl",
+    "name": "Lunowl female (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fp2_lunowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_prismander_soft",
+    "name": "Prismander (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_prismander_soft_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prismander_soft",
+    "name": "Prismander (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_prismander_soft_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_lunowl",
+    "name": "Lunowl female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs2_lunowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prismander_soft",
+    "name": "Prismander (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_prismander_soft_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prismander_soft",
+    "name": "Prismander (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_prismander_soft_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs2_lunowl",
+    "name": "Lunowl female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs2_lunowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_prismander_soft",
+    "name": "Prismander (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_prismander_soft_2.jpg",
+    "ok": true
   }
 ]
