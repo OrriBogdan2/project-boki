@@ -109749,5 +109749,26 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pose_postroo_compact_1.jpg",
     "ok": true
+  },
+  {
+    "id": "drop_up2_lacefix",
+    "name": "Drop splash from below: finish Lace",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_up2_lacefix_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up2_lacefix",
+    "name": "Drop splash from below: finish Lace",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_up2_lacefix_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up2_lacefix",
+    "name": "Drop splash from below: finish Lace",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_up2_lacefix_3.jpg",
+    "ok": true
   }
 ]
