@@ -31,7 +31,7 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
-## Status (2026-11-10): Grimble NOT swapped yet
+## Status (2026-11-10): Vex swapped (appeal3 body b, spec vex_v95.json, ext/vex-appeal-b); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
 the master has no extra hand and its slime arm and gauntlet are right (master_v95_grid_front.jpg), the skeleton,
 inverse binds and all 40 clips round-trip unchanged, but the result is not shippable (attempt8_*.jpg), so
