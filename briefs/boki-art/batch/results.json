@@ -92144,5 +92144,40 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_kintsuwyrm_wc_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_mossbastion_b",
+    "name": "Mossbastion (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_mossbastion_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mossbastion_b",
+    "name": "Mossbastion (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_mossbastion_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_mossbastion_b",
+    "name": "Mossbastion (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_mossbastion_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mossbastion_b",
+    "name": "Mossbastion (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_mossbastion_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mossbastion_b",
+    "name": "Mossbastion (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_mossbastion_b_3.jpg",
+    "ok": true
   }
 ]
