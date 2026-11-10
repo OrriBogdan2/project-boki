@@ -67,6 +67,7 @@ func run(main: Node) -> void:
 	_strip_chime()
 	_boss_moves()
 	_cc_cues()
+	_voices()
 	_inv_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -645,3 +646,33 @@ func _boss_moves() -> void:
 	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
 	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
 	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
+
+
+## 9. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
+func _voices() -> void:
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	var at := Sfx.listener + Vector3(2, 0, 0)
+	var far := Sfx.listener + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	var recs := []
+	for i in 6:
+		recs.append({"uid": "voice_test_%d" % i, "species": "no_such_species", "name": "T%d" % i})
+	HomeVoice.say(recs[5], "happy", far)
+	ok(HomeVoice._until.is_empty(), "voices: a Boki past earshot takes no slot")
+	for i in 5:
+		HomeVoice.say(recs[i], "happy", at)
+	ok(HomeVoice._until.size() == HomeVoice.MAX_VOICES, "voices: five Bokis at once sound %d" % HomeVoice._until.size())
+	HomeVoice._until.clear()
+	HomeVoice.say(recs[0], "happy", at)
+	ok(HomeVoice._until.is_empty(), "voices: the same Boki twice inside its gap speaks once")
+	recs[1]["needs"] = {"food": 5.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
+	var k := {"rec": recs[1], "pos": at}
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	var sulked := HomeVoice._until.size()
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
