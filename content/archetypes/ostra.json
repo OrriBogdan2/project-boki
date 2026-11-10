@@ -7,6 +7,7 @@
 	"weight": "medium",
 	"color": "#2ee6c0",
 	"fantasy": "The Void Jester who never touches the ground. Pulls the fight to him, then lets it fall in.",
+	"howto": ["Play: floating mid-range; pull the fight in with seeds.", "Combo: {secondary} stuns, drop a {signature} seed on them.", "Avoid: spamming {dash}; with no charge it does nothing."],
 	"silhouette": "a floating jester in a three-tailed cap, his smoky tail trailing below",
 	"card": {
 		"role_word": "Controller",

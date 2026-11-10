@@ -14,6 +14,7 @@
 		"neck": -0.05
 	},
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
+	"howto": ["Play: long-range bow; hold {fire} to draw, release to loose.", "Combo: {secondary} into a wall pins and stuns the foe.", "Avoid: overdrawing; past full draw the damage halves."],
 	"silhouette": "the long weapon over the shoulder",
 	"card": {
 		"role_word": "Marksman",
