@@ -144,4 +144,5 @@ func _show(r: Dictionary) -> void:
 
 func _text(g: Dictionary) -> String:
 	return String(g["text"]).format({"throw": Settings.key_cap("throw"), "interact": Settings.key_cap("interact"),
-		"jump": Settings.key_cap("jump"), "dash": Settings.key_cap("dash")})
+		"jump": Settings.key_cap("jump"), "dash": Settings.key_cap("dash"),
+		"summon": Settings.key_cap("summon")})

@@ -9,6 +9,7 @@ extends RefCounted
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into, and the Dodge Pen's shooter; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
+## - the Summon pad on the range (SummonStation): stand on it for the Boki wisp card, interact swaps its practice Boki
 ## - a goal line and a pass tick over each station (StationGoals, content/rules/station_goals.json; Esc: Hide goals)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
@@ -37,7 +38,8 @@ const SIGNS := [["MOVEMENT LANE\nvault  ·  gap  ·  ledges  ·  ramp", Vector3(
 	["MANTLE 2.4 m", Vector3(63.0, 0, 47.0)], ["DASH THE GAP", Vector3(66.5, 0, 47.0)],
 	["RAMP UP, DROP OFF\nglide to the Landing", Vector3(73.5, 0, 47.0)], ["RANGE\n10 · 20 · 35 m", Vector3(44.0, 0, 29.0)],
 	["PRACTICE WING\ngear  ·  monsters  ·  duel room", Vector3(27.5, 0, 41.0)],
-	["DODGE PEN\ndash out of its shots and circles", Vector3(64.0, 0, 14.0)]]
+	["DODGE PEN\ndash out of its shots and circles", Vector3(64.0, 0, 14.0)],
+	["SUMMON PAD\nstand on it", Vector3(45.0, 0, 24.0)]]
 const SPOTS := [["still", Vector3(23.5, 0, 26.5), "light", "Dummy"],
 	["strafe", Vector3(29.5, 0, 26.0), "medium", "Strafer"],
 	["heavy", Vector3(30.2, 0, 22.8), "heavy", "Training dummy"], ["still", Vector3(53.5, 0, 26.5), "light", "10 m"],
@@ -51,6 +53,7 @@ var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t
 var station_label: Label3D = null
 var goals: StationGoals = null
 var dodge: DodgeDummy = null
+var summon_pad: SummonStation = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -92,6 +95,7 @@ func setup(match_node: Match, which: String) -> void:
 	_sign()
 	goals = StationGoals.new(m, self)
 	dodge = DodgeDummy.new(m, dummies[-1]["h"], goals)
+	summon_pad = SummonStation.new(self)
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:
@@ -244,8 +248,11 @@ func tick(dt: float) -> void:
 			P.hp = P.max_hp
 	if Input.is_action_just_pressed("interact") and not m.paused and not P.downed and P.flat_dist(_arena_point(STATION)) < STATION_R:
 		cycle_dummy()
+	if Input.is_action_just_pressed("interact") and not m.paused and summon_pad.on_pad():
+		summon_pad.cycle()
 	goals.tick()
 	dodge.tick(dt)
+	summon_pad.tick()
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 

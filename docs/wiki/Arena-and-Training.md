@@ -32,6 +32,13 @@ Signs on posts name each area and each piece of the lane.
   one slow orb (its red lane fills first) and one ground circle that fills under you and bursts. Hits do no damage.
   Dash out of the way (the goal line says "Dodge 5 with your dash") and each dodge counts; 5 ticks the goal. Skippable
   like every goal (Esc, Hide goals).
+- **The Summon pad** (on the Range, by its first dummy): stand on it for a short card: your Boki rides as a little
+  critter-shaped wisp, a downed Hunter's wisp is round (round = Hunter, critter = Boki), and the Summon key (your live key)
+  bursts it out for its species' window, then it shrinks back and rests for its cooldown. The card shows both numbers and
+  counts the time; the Boki ring on the HUD shows them too. The dummies on the Range are the targets. The interact key on
+  the pad brings the next of three practice Bokis (Kestrike 7 s out / 55 s rest, Cindowary 12 / 70, Moonloris 18 / 85;
+  `content/rules/summon_station.json`, numbers from `boki_summon.json`). There is no go-down step yet: the guardian summon
+  is not built on this base.
 - **A sparring bot** you switch between Off, Idle, Moving and Fighting (**N**), with any Hunter.
 - **Backspace** resets. **O** turns cooldowns off (dash, RMB, E, R and the glove). **U** unlocks the ultimate.
 - **2-9** swap to the first eight Hunters on the spot. **L** opens the loadout (Hunter, weapon, Boki, gloves,

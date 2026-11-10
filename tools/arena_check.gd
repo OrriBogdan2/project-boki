@@ -266,6 +266,9 @@ func _station_goals() -> void:
 	ok("station goals: 4 of 5 dodges is no tick yet", not done.call("dash_dodge") and hits.call("dash_dodge") == 4)
 	G.hit("SHOOTER", "dodges")
 	ok("station goals: the 5th dodge ticks it", done.call("dash_dodge"))
+	ok("station goals: the Summon pad line names the key", text.call("summon").contains(Settings.key_cap("summon")))
+	G.hit(SummonStation.NAME.to_upper(), "summons")
+	ok("station goals: one summon on the pad ticks it", done.call("summon"))
 	ok("station goals: all but the duel ticked, nothing blocked",
 		G.done_count() == want - 1 and not done.call("duel") and not m.paused)
 	StationGoals.mark_duel()
