@@ -1,4 +1,4 @@
-# The Silver Thief
+# Silver Thief
 
 A light duelist who picks one target and never lets go, from range. Every bolt marks them, every
 cartwheel empowers the next bolt, and landing that bolt gives the cartwheel straight back.
@@ -8,9 +8,9 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
 
 |  |  |
 |---|---|
-| Class title | the Silver Thief |
+| Class title | Silver Thief |
 | Base character | Sable, female |
-| Personality | The thief who reached the Wyrmheart in Malgrave's vault. Touching it woke the Wyrm and set off the Hollowing. Everyone has a reason to hate her, and she knows it. She's still after the treasure. |
+| Personality | Quick, quiet and light-fingered. She is never where you aimed, and she smiles when you miss. She steals the moment first and the loot second. |
 
 <!-- /gen:profile -->
 
@@ -25,7 +25,7 @@ cartwheel empowers the next bolt, and landing that bolt gives the cartwheel stra
    and flies on; catch a second and both are stunned. It bounces once off a wall.
 5. **Encore** (X, from level 6): a violet ring grows round you and rides with you; for 2s blades fly at every
    foe inside it, harder from its outer edge (which also blights them), and the Vault comes back. Landing it
-   on a rival hunter fills your bond meter a long way. The Boki Fusion has its own key.
+   on a rival hunter fills your bond meter a long way. The Boki Merge has its own key.
 
 ## Combos and interactions
 
@@ -97,10 +97,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; flies 1m further after the first foe, and two foes caught pool their Marks. |
-| Dash (Shift) | recharge 4.5s -> 3.8s per charge; the empowered bonus +20%. | recharge 4.5s -> 3.2s; the empowered bonus +40% in all, and the speed boost is half again as big. |
-| E | cooldown 15s -> 13.5s, damage +15%. | cooldown 15s -> 12s, damage +30%; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
-| R (ultimate) | Encore cooldown 24s -> 21.5s, damage 4 -> 4.4, rim damage 2 -> 2.2. The Merge lasts 30% longer. | Encore cooldown 24s -> 19s, damage 4 -> 4.8, rim damage 2 -> 2.4. |
+| RMB | damage +50%. | cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks. |
+| Dash (Shift) | the empowered bonus +20%. | the empowered bonus +40% in all, and the speed boost is half again as big. |
+| E | cooldown 15s -> 10.7s. | cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 
