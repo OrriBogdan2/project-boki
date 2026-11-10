@@ -81,7 +81,7 @@
 		],
 		"gil": [
 			{"stat": "stuns", "target": 8, "text": "Stun 8 enemies", "reward": {"kind": "colourway", "id": "deep_tide", "name": "Deep Tide"}},
-			{"stat": "multi3", "target": 2, "text": "Hit 3 enemies at once with one ability, twice", "reward": {"kind": "emote", "id": "flop", "name": "Flop"}}
+			{"stat": "multi3", "target": 2, "text": "Hit 3 enemies at once with one ability, twice", "reward": {"kind": "emote", "id": "flop", "name": "Flop"}}, {"stat": "chests", "target": 6, "text": "Open 6 chests", "reward": {"kind": "banner", "id": "tide_pool", "name": "Tide Pool"}}, {"stat": "kin_hits", "target": 40, "text": "Your Boki lands 40 hits", "reward": {"kind": "title", "id": "fishmonger", "name": "Fishmonger"}}
 		],
 		"thief": [
 			{"stat": "air_hits", "target": 25, "text": "Land 25 hits while in the air", "reward": {"kind": "colourway", "id": "midnight_silk", "name": "Midnight Silk"}},

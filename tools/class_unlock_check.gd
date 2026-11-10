@@ -123,9 +123,9 @@ func _rules() -> void:
 			% str(no_challenge))
 	ok(["gunslinger", "archer"].all(func(a): return ClassUnlock.challenge(a).is_empty()),
 		"Vex and Lace have no unlock challenge (a starter not taken opens after the first expedition)")
-	var easy_ids := ["ashwick", "juggernaut"]
+	var easy_ids := ["ashwick", "juggernaut", "gil"]
 	ok(easy_ids.all(func(a): return ClassUnlock.tier(a) == "easy"),
-			"Kael and Cinder are easy challenges")
+			"Kael, Cinder and Gil are easy challenges")
 	var others := Arch.ids().filter(func(a):
 		return not STARTERS.has(a) and not easy_ids.has(a) and not CHALLENGE_ONLY.has(a))
 	ok(others.all(func(a): return ClassUnlock.tier(String(a)) == "medium"), "the other Hunters are medium")
