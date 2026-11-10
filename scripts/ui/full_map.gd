@@ -186,6 +186,7 @@ func draw(sz: Vector2) -> void:
 	hud.mm_circ = saved
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
+	HeartHud.full_map(self)
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)

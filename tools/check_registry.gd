@@ -7,6 +7,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--first-hints-check": ["res://tools/first_hints_check.gd", "first_hints_check", null],
+	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart loop (docs/decisions/0023)
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
