@@ -86579,5 +86579,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_checkmare_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_gambitfin_b4",
+    "name": "Gambitfin (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_gambitfin_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_gambitfin_b4",
+    "name": "Gambitfin (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_gambitfin_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gambitfin_b4",
+    "name": "Gambitfin (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_gambitfin_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_checkmare_b4",
+    "name": "Checkmare (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_checkmare_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gambitfin_b4",
+    "name": "Gambitfin (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_gambitfin_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pebblamb_b4",
+    "name": "Pebblamb (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_pebblamb_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pebblamb_b4",
+    "name": "Pebblamb (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_pebblamb_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pebblamb_b4",
+    "name": "Pebblamb (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pebblamb_b4_3.jpg",
+    "ok": true
   }
 ]
