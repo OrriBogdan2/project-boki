@@ -183,8 +183,8 @@ func _budget(part: String, fl: Array) -> void:
 	var B: Dictionary = GardenZones.rules()["budget_hub" if part == "hub" else "budget"]
 	var emit := 0
 	for cls in ["GPUParticles3D", "CPUParticles3D"]:
-		var live := main.get_tree().root.find_children("*", cls, true, false).filter(func(n): return n.emitting and n.is_visible_in_tree())
-		emit += live.size()
+		var all := main.get_tree().root.find_children("*", cls, true, false)
+		emit += all.filter(func(n): return n.emitting and n.is_visible_in_tree()).size()
 	var home = main.current
 	home.root_ui.visible = false
 	for cl in home.find_children("*", "CanvasLayer", true, false):
