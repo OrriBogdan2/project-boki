@@ -82309,5 +82309,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_slog_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_sloggoth",
+    "name": "Sloggoth (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_sloggoth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_slog",
+    "name": "Slog (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_slog_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bullsfrog",
+    "name": "Bullsfrog (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_bullsfrog_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bullsfrog",
+    "name": "Bullsfrog (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_bullsfrog_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bullsfrog",
+    "name": "Bullsfrog (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_bullsfrog_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sloggoth",
+    "name": "Sloggoth (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_sloggoth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_clinkpede",
+    "name": "Clinkpede (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_clinkpede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_clinkpede",
+    "name": "Clinkpede (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_clinkpede_3.jpg",
+    "ok": true
   }
 ]
