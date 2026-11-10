@@ -787,3 +787,12 @@ ART -> COORD 11-10 11:49: OWNER PICKS from a second full review, cards live (her
 
 ### 11-10 11:52 ET COORD -> ART
 COORD -> ART 11:52 ET: (1) Seals + Canvastross noted as owner picks, no rollback. (2) Nothing missing: Chimelop (shown as Jinglop) is in the dex as a branch form under Howlop/Echolop, so 234 entries + 1 form = your 235. (3) Kitedrake swapped to the manifest hero cards/Dragonkite.jpg + new sheet per owner 'ok push it there'; Ribbonwyrm refreshed too, so Kitlet > Ribbonwyrm > Kitedrake shows the reworked line. Site pushed 9d185b6.
+
+### 11-10 12:28 ET ART -> COORD
+ART -> COORD 11-10 12:28: large update on the owner's orders tonight.
+- BACKDROP PASS: 124 card backdrops were off the #E8E8EE spec; all are flat spec grey now (tools/flat_card.py). Creatures are unchanged, but every one of those heroes was re-cut, so expect about 130 hero hash changes with no visible difference.
+- LEGENDARY "EPIC PASS" (owner: legendaries did not look legendary): new cards live for Wayshell, Ghoulamari, Cetorgan/Organwhal, Cindermaw. Sarcobra, Pavonazar, Aurostag, Sphinxblight/Enigmane, Hydrangor, Siegephant, Glaciammoth follow. Several are on your protected list: the owner approved the pass in the art chat ("1st on others").
+- NEW BOKI coming (entries appear when their sets land): legendaries Cometail (comet fox), Calderoise (volcano tortoise), Pharoheron (lighthouse heron), Palloth (Blight moth); and Barokit, a kitten that is the new STAGE 1 of Barokat > Barostorm. The owner wants Barokit > Barokat > Barostorm shown together as one line in the dex (he says they are not together now).
+- Also live: Chuggamus (teapot hippo, nothing built), Rampartoad, Lanternlong/Glowris, Crofthollow.
+- Fizzlet: the dex shows it with its legs cut off. That was my first card; cards/Fizzlet.jpg has had the full-legs version since about 19:00. Please re-sync it.
+- In progress: every "animal plus element" line is getting a real idea (Rimekit = snow globe, Kindlewren = match/torch/bonfire, Nettlynx = topiary, Lunafin = moon phases, Blotlet = ink and type, Kayak = boats), Fawnshroom > Hatstag stops being a mushroom line, Pebblamb gets an evolution, and babies for five new lines.

@@ -1470,3 +1470,103 @@ EPIC('Lightheron','majestic',False,True,[
 EPIC('Blightmoth','creepy',True,True,[
  "an enormous Blight moth with four wings spread, the pattern on its wings forming one huge staring eye in bone white and violet, a furred bone-white body with a ruff, antennae like great feathered horns, thin violet vein lines, long trailing wing tails.",
  "a moth empress of the Blight: tall, upright, wings folded round her like a hooded cloak of purple-black with bone-white edges, a crown of feathered antennae, six thin arms, a pale mask-like face with pinpoint eyes."],ref=_O+'leg_blightmoth_a_2.jpg')
+
+# ===== 11-10 night OWNER: legendary picks (Comet fox = 2nd, Volcano tortoise = 2nd, Blight moth = 3rd, 1st on the others), "we need some more cute
+# ones", Barostorm kitten = a new stage 1 (line of three), "for the issue ones and style inconsistency, fix all of them", rework a mushroom family,
+# replace weak lines with missing animals. "Make a bunch of changes now."
+# Live as cards: Wayshell (epic a_2), Ghoulamari (b_1), Cetorgan (a_1), Cindermaw (b_2), Chuggamus (t1_1), Rampartoad (b_2), Lanternlong (a_2).
+# Sarcobra (b_1) and Pavonazar (b_1) were cut off by the frame -> zoomed-out redraws. New Boki cards saved, entries follow with their sets:
+# Cometail (comet fox), Calderoise (volcano tortoise), Pharoheron (lighthouse heron), Palloth (Blight moth), Barokit (Barostorm's kitten).
+for _n,_s in (('Sarcobra','epic_sarcobra_b_1'),('Pavonazar','epic_pavonazar_b_1')):
+    SPECS.append({'id':'fit_'+_n.lower(),'name':_n+' (epic pick, whole creature in frame)','refs':[_O+_s+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':"Redraw the creature in image 1 exactly as it is, the same design, pose, colours, line and flat shading, but zoomed out so the WHOLE creature fits inside the picture: every wing tip, feather tip, coil and tail is complete and nothing touches or is cut by the edges, with about 10 percent empty margin on every side. "+FRAME_V2})
+def SETOF(n,stage,arch,dark,furry,pose,tag):
+    _n0=len(SPECS); V2SHEET_NEW(n,'briefs/boki-art/cards/'+n+'.jpg',_GC,_GN); V2PORT_NEW(n,'briefs/boki-art/cards/'+n+'.jpg',stage,arch,_GC,_GN,bool(dark),bool(furry),pose)
+    SPECS[_n0]['id']='v2s_'+n.lower()+'_'+tag; SPECS[_n0+1]['id']='v2p_'+n.lower()+'_'+tag; SPECS[_n0+1]['runs']=2
+for _a in (('Wayshell','final','majestic',0,0,"swimming up toward the viewer, flippers spread, compass shell tilted"),('Ghoulamari','final','creepy',1,0,"rising up, tentacles spread wide, orb glowing"),
+           ('Cetorgan','final','majestic',0,0,"breaching, pipes fanned, jaw open"),('Cindermaw','final','creepy',1,1,"stalking forward, head low, bone ridge raised"),
+           ('Chuggamus','final','tough',0,0,"charging, head down, steam puffing from its spout horn"),('Rampartoad','mid','tough',0,0,"mid-hop, wall crown bouncing"),('Lanternlong','final','pretty',0,1,"curled in a loose ring, lanterns glowing, looking at the viewer"),
+           ('Cometail','final','sleek',1,1,"trotting on nothing, head turned to the viewer, comet tail arching overhead"),('Calderoise','final','tough',1,0,"head raised, roaring, lava cracks blazing"),
+           ('Pharoheron','final','majestic',0,1,"standing on one leg, neck straight up like a tower, light beams fanned from its crest"),('Palloth','final','creepy',1,1,"hovering, wings half open, calm"),
+           ('Barokit','baby','cute',0,1,"batting at its own cloud tuft with one paw")):
+    SETOF(*_a,'n1')
+# Epic pass for the other five legendaries, so all of them share the look.
+EPIC('Aurostag','majestic',True,True,[
+ "a towering stag whose antlers spread into a vast branching crown that fills the top of the frame, hung with ribbons of aurora light in green, violet and pink drawn as flat bands, a deep midnight coat with glowing vein lines, one hoof raised, head high.",
+ "a great aurora stag rearing, antlers like a frozen river delta, a curtain of flat aurora bands falling from them like a cloak round its body, star marks on its flanks."])
+EPIC('Sphinxblight','majestic',True,True,[
+ "a colossal Blight sphinx-lion seated like a monument, wings raised straight up behind it like two blades, a mane of dark spines with violet light between them, a bone crown, one great paw forward, violet eyes.",
+ "a winged Blight lion mid-roar on a ledge of nothing, wings spread to both edges, cracks of violet lightning shapes running through its body like veins, a ring of bone spurs round its neck like a collar grown from its hide."])
+EPIC('Hydrangor','majestic',False,False,[
+ "a towering hydrangea hydra with five long necks rising like a fountain, each head crowned with a great dome of blooms in a different colour, bodies wound together like a tree trunk, leaves like dragon wings spread behind, ancient calm eyes.",
+ "a great hydra coiled round a mound of hydrangea blooms the size of a hill, seven heads fanned in a half circle like a peacock's tail, petals drifting as flat shapes attached to its mane."])
+EPIC('Siegephant','majestic',False,False,[
+ "a mountain of an elephant carrying an entire walled citadel on its back with a tall central keep and banners of its own ear-skin, four huge ram tusks banded with stone, a trunk like a drawbridge chain, amber eyes, seen from below.",
+ "an ancient war-elephant rearing, its forehead grown into a great stone gate arch, towers rising from its shoulders, tusks crossed like gate bars, moss and cracks of amber light."])
+EPIC('Glaciammoth','majestic',False,False,[
+ "a colossal ice musk-ox seen from below, its single blade horn sweeping up like a frozen wave taller than its body, a curtain of icicle hair to the ground, a blazing amber heart shining through its chest, a crown of ice shards along its back.",
+ "a glacier titan musk-ox walking, its back a jagged mountain range of ice with small frozen waterfalls, the blade horn like a ship's prow, amber light in its eyes and chest."])
+# More CUTE legendaries (owner: only the ice one and the fox are cute). Small, charming, still unmistakably rare. No reference image.
+for _i,_opts in (('cloverhare',["a small round hare with soft mint-green fur and enormous four-leaf-clover ears, each leaf a heart shape, a gold coin-shaped tail, tiny gold freckles, huge happy eyes, mid-hop.",
+                                "a tiny sleepy leveret curled inside one giant four-leaf clover grown from its own back like a parasol, cream fur, gold nose, lucky horseshoe-shaped mark on its chest."]),
+                 ('wishwren',["a tiny round wren with a music-box cylinder pattern down its chest in gold studs, a tail like a wind-up key grown of feathers, pastel blue and cream plumage, a single musical-note crest, singing.",
+                              "a very small plump songbird whose wings are shaped like two halves of a locket heart, rose-gold and cream feathers, a keyhole mark on its chest, big shy eyes."]),
+                 ('starpup',["a small fluffy white pup with a star-shaped tail tip and star marks on its paws, a crescent mark on its forehead, pale gold ears, floating a little above the ground, tongue out.",
+                             "a tiny round seal-pup-like star cub with five stubby limbs like a starfish, cream and pale gold, a glowing soft star on its belly, big dark eyes."])):
+    for _k,_d in zip('ab',_opts):
+        SPECS.append({'id':'leg_'+_i+'_'+_k,'name':'Cute legendary concept: '+_i+' '+_k,'refs':[],'runs':2,'aspect':'1:1','size':'2K',
+          'prompt':"Draw one single character illustration of a new creature: "+_d+" A rare, cute legendary creature for a creature-collecting game: one single small animal with one clear idea, every part grown from its own body, with an animal face. One creature only. The art style is described in words below, follow it exactly. "+STYLE_V2('baby','cute',False,True)+FRAME_V2})
+
+# ----- Lines with no idea behind them: each gets ONE object idea that grows through the stages (same animal, colours and face). 3 runs per stage, ids idea_<name>.
+def IDEA(n,stage,arch,dark,furry,text):
+    ON_CHANGE(n,'briefs/boki-art/cards/'+n+'.jpg',stage,arch,dark,furry,text,runs=3,tag='_idea'); SPECS[-1]['id']='idea_'+n.lower()
+# Rimekit line = SNOW GLOBE
+IDEA('Rimekit','baby','cute',False,True,"it is a snow-globe creature: the same round white ice kit, with a small clear dome of ice grown on its back like a snow globe, a tiny pine-tree-shaped crystal and three snowflake shapes inside it. Sitting.")
+IDEA('Rimeshrew','mid','cute',False,True,"it is a snow-globe creature: the same white ice shrew, its ice shell now a big clear globe dome with a little frozen village shape and swirling snowflake shapes inside, a ring-shaped base of blue ice round the dome. Trotting.")
+IDEA('Rimefang','final','tough',False,True,"it is the final snow-globe beast: a big white frost wolf-shrew carrying a great cracked globe dome on its back with a whole blizzard inside drawn as flat swirl shapes and a small mountain crystal, shards of the dome forming its back spikes, simple clean fur with a few big clumps instead of dense swirls. Planted.")
+# Kindlewren line = MATCHSTICK / CANDLE / LIGHTHOUSE-less: a MATCH that becomes a TORCH that becomes a BONFIRE crow
+IDEA('Kindlewren','baby','cute',True,True,"it is a matchstick bird: the same small charcoal wren with a rounded red match-head crest on top of its head and one tiny flat flame on its tail tip, a pale wood-coloured beak and legs like matchsticks. Perched.")
+IDEA('Embrook','mid','tough',True,True,"it is a torch bird: the same charcoal rook with a tall torch-shaped head crest burning in flat orange and yellow flame shapes, wing feathers like charred kindling sticks with glowing orange tips. Mid-leap.")
+IDEA('Pyrraven','final','creepy',True,True,"it is a bonfire raven: the same great black raven whose body is built like a stacked bonfire, crossed log-shaped feathers on its chest glowing orange between them, a crown of flame shapes rising from its back, bone-white skull mask kept. Wings folded like a cloak.")
+# Nettlynx line = TOPIARY (clipped hedge)
+IDEA('Nettlynx','baby','cute',False,True,"it is a topiary kitten: the same small tan lynx kit with its leaf ears and tail tip clipped into neat round topiary balls, like a little trimmed hedge. Sitting.")
+IDEA('Thistlynx','mid','sleek',False,True,"it is a topiary lynx: the same tan lynx with a mane and tail of green hedge clipped into neat geometric shapes, a spiral-clipped tail and a cone on each ear, one purple thistle flower on its chest. Prowling.")
+IDEA('Briarlynx','final','tough',False,True,"it is a grand hedge-maze lynx: the same big brown lynx whose bramble mane is a clipped hedge with a maze pattern of paths cut into it across its shoulders and back, rose blooms at the corners, thorn antlers kept. Planted.")
+# Lunafin line = MOON PHASES
+IDEA('Selenfin','baby','cute',False,False,"it shows the moon's phases: the same round pale moonfish with a thin crescent-shaped body marking and a single row of four small moon-phase marks along its side from new to half. Swimming.")
+IDEA('Selenwhale','final','majestic',False,False,"it shows the moon's phases: the same great pale whale with a row of eight moon-phase discs along its side from new moon to full and back, a full-moon dome on its brow, and a tail fluke shaped like two crescents. Breaching.")
+# Blotlet line = INK (inkwell, blot, printing press)
+IDEA('Blotlet','baby','cute',True,False,"it is an ink creature: the same small black blob sitting in a little round inkwell shape made of its own darker body, with a quill-feather-shaped curl on its head. Purple eyes.")
+IDEA('Slog','mid','creepy',True,False,"it is an ink creature: the same dark slug whose back is covered in rows of raised letter-shaped bumps like metal type, leaving no trail, with three eye stalks. One solid body, no drips.")
+IDEA('Sloggoth','final','creepy',True,False,"it is the final ink beast: the same hulking dark creature with a broad flat chest like a printing plate covered in rows of raised type shapes, roller-shaped forearms, and a mane of curled paper-ribbon shapes in off-white. Sitting heavy.")
+# Kayak line = make the BOAT visible
+IDEA('Kayak','baby','cute',False,True,"it is a boat creature: the same fluffy white yak calf with a little kayak-shaped saddle ridge of blue ice grown along its back and two small paddle-shaped horns. Standing.")
+IDEA('Prowyak','mid','cute',False,True,"it is a boat creature: the same white yak with a bony ship's prow grown forward from its face like a figurehead, horns swept back like oars, and a keel-shaped ridge of ice down its chest. Trotting.")
+IDEA('Dreadnoyak','final','tough',False,True,"it is a warship creature: the same huge frost yak with a hull-shaped chest of blue ice like an icebreaker's bow, two rows of round ice portholes along its flanks, tusks like anchors, and tall ice smokestack horns. Planted, whole body in view.")
+# Singles
+IDEA('Zephyrak','final','majestic',False,False,"it is a weather-vane serpent: the same teal and white wind serpent, simplified to a few big clean shapes, with a tail tip shaped like a weather vane's arrow, a head crest shaped like a rooster comb, and four small compass-point fins along its body. One loose open S-curve.")
+IDEA('Hivara','final','sleek',False,False,"it is a honeycomb accordion wasp: the same amber wasp-mantis drawn in the flat cartoon style with a big simple face, its abdomen a stretchy accordion bellows of honeycomb cells, two fold-out comb-shaped wings. Rearing.")
+# Pebblamb gets an evolution (owner: "should probably get a T2, something interesting"): the pebble wool becomes a rock garden.
+for _k,_d in (('a',"a calm grown ram whose pebble wool has become a Japanese rock garden: its back is a flat bed of pale raked-sand ripples with three large mossy stones, big curled horns of polished river stone, soft sage-green and cream. Standing still."),
+              ('b',"a sturdy ram whose wool is a stack of balanced river stones along its back like a row of cairns, largest at the shoulders, horns shaped like skipping-stone spirals, grey-blue and cream. Walking."),
+              ('c',"a round heavy ewe with wool of big smooth pebbles in a mosaic pattern of blue, grey and cream like a pebble path, a horn crown of stacked stones, a tail like a rolling boulder. Sitting.")):
+    SPECS.append({'id':'evo_pebblamb_'+_k,'name':'Pebblamb evolution '+_k,'refs':[_C%'Pebblamb'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of the EVOLVED form of the lamb in image 1, clearly the same animal grown up with the same face and colours: "+_d+" All parts are its own body. Ignore how image 1 is painted. "+_TXT+STYLE_V2('final','majestic',False,True)+FRAME_V2})
+# One mushroom family fewer: Fawnshroom > Hatstag becomes a HAT line (the name already says it): caps become hat shapes of velvet and horn.
+IDEA('Fawngus','baby','cute',False,True,"it is a hat creature, not a mushroom one: the same little fawn, with its two big cap ears reshaped into one soft beanie-shaped tuft of velvet between small ear nubs. No mushrooms.")
+IDEA('Hatstag','final','majestic',False,True,"it is a hat-stand stag, not a mushroom one: the same tall stag whose branching antlers end in different hat-shaped tips of velvet and horn (a top hat, a bowler, a beret, a wide brim), with a ruff like a scarf of its own fur. No mushrooms.")
+# Style outlier: Glassolotl's line is much thinner and paler than the rest.
+SPECS.append({'id':'line_glassolotl','name':'Glassolotl (line weight to match the roster)','refs':['briefs/boki-art/cards/Glassolotl.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"redraw its outline in the same bold, even line as a flat cel-shaded cartoon: a clear dark rose-plum silhouette line, thinner inner lines, and flat pastel fills with one hard shade. It stays translucent-looking through colour, not through faint lines."})
+# Jerbolt: new pose (owner).
+for _k,_p in (('a',"mid-leap high off its coiled spring legs, body stretched in an arc, facing RIGHT, static fur crest standing on end, tail whipping"),('b',"crouched low on all fours, facing LEFT, ears flat, about to spring, fur crest bristling like a brush")):
+    _n0=len(SPECS); ON_POSE('Jerbolt',_LM['Jerbolt']['sheet'],'mid','sleek',False,True,_p+".",_KEEPALL); SPECS[_n0]['id']='pose2_jerbolt_'+_k; SPECS[_n0]['runs']=2
+# NEW LINES from animals the roster lacks: babies first (2 directions x 2 runs, no reference); later stages are built from the picked baby.
+for _i,_opts in (('pinguin',["a round penguin chick shaped like a bowling pin: white body with two red neck stripes, tiny flippers, a wobble, big eyes.","a chubby penguin chick with a glossy black round belly like a bowling ball with three finger-hole spots, short neck, proud stance."]),
+                 ('sawshark',["a small cute sawshark pup whose long nose is a little wood file with tiny teeth, sandy-brown and cream like sanded wood, a pencil-shaped tail fin.","a tiny round shark pup with a nose shaped like a carpenter's plane, wood-grain stripes down its back, a curl of wood shaving on its head."]),
+                 ('postroo',["a small joey with a round red body, a letter-slot-shaped pouch across its belly, stamp-shaped ears with scalloped edges, big feet.","a tiny kangaroo joey shaped like a little brown parcel with string-patterned fur markings, a postage-stamp tail tip, peeking eyes."]),
+                 ('xylocroc',["a small crocodile hatchling whose back scutes are five flat coloured bars like a toy xylophone from long to short, a round mallet-shaped tail tip, a big grin.","a tiny round croc hatchling with rainbow bar scales down its back and a rattle-shaped tail, sitting upright."]),
+                 ('carousel',["a small foal with a pastel cream and pink coat, a short twisted candy-stripe horn like a carousel pole on its forehead, a scalloped canopy-shaped mane, mid-prance.","a tiny round pony foal with a gold spiral pole-shaped tail, a ribbon-striped mane, painted-looking rosy cheeks, one hoof raised."])):
+    for _k,_d in zip('ab',_opts):
+        SPECS.append({'id':'new_'+_i+'_'+_k,'name':'New line baby: '+_i+' '+_k,'refs':[],'runs':2,'aspect':'1:1','size':'2K',
+          'prompt':"Draw one single character illustration of a new creature: "+_d+" A baby creature for a creature-collecting game: one single small animal with one clear idea, every part grown from its own body (nothing built, worn or carried), with an animal face. One creature only. The art style is described in words below, follow it exactly. "+STYLE_V2('baby','cute',False,False)+FRAME_V2})
