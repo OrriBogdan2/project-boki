@@ -769,6 +769,8 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
+	if ak and ak.cast_locked() and not grounded and not gliding:
+		_glide_armed = true      # a cast keeps the glider shut: held, it opens as the cast ends
 	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
 		return
 	if not lfloat.is_empty():
@@ -805,14 +807,14 @@ func do_jump() -> void:
 		return
 	if wall_moves.try_kick(self):
 		return
-	# already in the air: a second press opens the glider straight away, rising or falling,
-	# unless you're about to land, where it buffers a jump instead
+	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
 	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
 	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
 		return
+	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = JUMP_BUFFER
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
@@ -846,8 +848,8 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 		return minf(vy + acc * dt, maxf(top, vy))
 	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, ABYSS_LIP_VY), ABYSS_BRAKE * dt)
 
-## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button); this stays
-## true while that press is held, so a fold (heal, dash, a knock) re-opens it, and clears on release or landing.
+## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
+## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
 var _glide_armed := false
 var _glide_btn_held := false
 
@@ -887,7 +889,7 @@ func _open_glider() -> void:
 	if not loco.go(Loco.S.GLIDING):
 		return
 	gliding = true
-	_glide_armed = true
+	_glide_armed = false
 	grounded = false
 	_glider_sfx("open")
 	vel.y = Loco.glide_start(vel.y)
@@ -2388,7 +2390,7 @@ func _deploy() -> void:
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
-## Using a heal in the air: the glider folds (it can't be held while you drink; holding glide again
+## Using a heal in the air: the glider folds (it can't be held while you drink; a fresh glide press
 ## opens it after a beat and spills what's left). The opening drop never gets here (AirLimits).
 func _fold_for_action() -> void:
 	if gliding and not dropping:
@@ -2477,6 +2479,7 @@ func _update_glide(dt: float) -> void:
 		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
 		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
 		gliding = true
+		_glide_armed = false
 		if below_lip:
 			m.sfx("glide", pos, -2.0, 1.4)
 			add_stat("feathers")
