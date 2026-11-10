@@ -97,6 +97,7 @@ static func render(k: Kin) -> bool:
 	var resting := k.summon != null and k.summon.cd > 0.0       # no sparkles while its summon rests
 	BokiWispClear.apply(k.model, fade, o.fire_cd > 0.0, _sparkly.has(k.get_instance_id()) and not resting)
 	_thief_ring(k)
+	WispProc.watch(k)
 	return true
 
 ## Debug (F8 in a debug build): the player's own Boki bursts out of its wisp (BokiWispPop), and folds back on

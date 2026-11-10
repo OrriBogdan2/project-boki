@@ -242,6 +242,8 @@ const CHECKS := {
 	"--warden-stance-shots": ["res://tools/warden_stance_shots.gd", "warden_stance_shots", null],
 	"--mantle-look-check": ["res://tools/mantle_look_check.gd", "mantle_look_check", null],      # Mantle look, creator
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
+	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],      # WispProc cues
+	"--wisp-proc-shots": ["res://tools/wisp_proc_shots.gd", "wisp_proc_shots", null],      # --shots-dir=<dir>, GPU
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 	"--summon-band-check": ["res://tools/summon_band_check.gd", "summon_band_check", null],      # decision 0042
 	"--summon-side-shots": ["res://tools/summon_side_shots.gd", "summon_side_shots", null],      # --shots-dir=<dir>
