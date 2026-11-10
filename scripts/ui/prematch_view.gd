@@ -133,7 +133,7 @@ func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
 	card.custom_minimum_size = Vector2(HeroGrid.CARD_W, 0)
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # the row's cards share the width left by the squad column
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # cards share the width beside the squad column
 	var row := UI.hbox(10)
 	card.add_child(row)
 	row.add_child(ClassCard.portrait(ak))
