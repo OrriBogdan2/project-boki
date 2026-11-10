@@ -85459,5 +85459,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_grammite_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_dobsabre_b4",
+    "name": "Dobsabre (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_dobsabre_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_dobsabre_b4",
+    "name": "Dobsabre (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_dobsabre_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dobsabre_b4",
+    "name": "Dobsabre (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dobsabre_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dobsabre_b4",
+    "name": "Dobsabre (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_dobsabre_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lensling_b4",
+    "name": "Lensling (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_lensling_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dobsabre_b4",
+    "name": "Dobsabre (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_dobsabre_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lensling_b4",
+    "name": "Lensling (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_lensling_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_fawngus_b4",
+    "name": "Fawngus (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_fawngus_b4_1.jpg",
+    "ok": true
   }
 ]
