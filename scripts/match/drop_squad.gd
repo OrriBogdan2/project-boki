@@ -48,6 +48,8 @@ func setup() -> void:
 		elif mem.has(m.player):
 			lead = m.player
 		leads[t] = lead
+	if m.player and (m.player.riding or m.player.dropping):
+		KeyChest.show_all(m, false)      # until you land (DropFeel.land)
 	var o: Dictionary = m.opts
 	if m.big and not m.ship.is_empty() and not o.get("no_plan", false) and not o.get("tutorial", false) and not o.get("training", false) and not o.get("duel", false):
 		planning = true

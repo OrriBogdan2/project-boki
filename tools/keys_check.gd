@@ -10,6 +10,8 @@ extends RefCounted
 ##      dash) and hides again, repeats, always carries a key, a root or a slow catches it, Grounded
 ##      stops its dive, it drops the key
 ##   6. bots go for a key, then open a chest
+##   7. fewer chests: a match places chest.keep of the map's chests (the most crowded go first, no dice)
+##      and of the item caches; the vaults stay
 
 var main: Node
 var fails := 0
@@ -39,7 +41,7 @@ func build(seed_i: int, extra := {}) -> Match:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
-	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus runs one part while iterating
+	var only := ""      # --keys-part=carriers|chest|shrubling|bots|bonus|fewer runs one part while iterating
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--keys-part="): only = String(a).substr(12)
 	if only in ["", "carriers"]: await _carriers()
@@ -47,6 +49,7 @@ func run(main_node: Node) -> void:
 	if only in ["", "shrubling"]: await _shrubling()
 	if only in ["", "bots"]: await _bots()
 	if only in ["", "bonus"]: await _bonus()
+	if only in ["", "fewer"]: await _fewer()
 	print("KEYCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -97,6 +100,29 @@ func _carriers() -> void:
 		m.queue_free()
 		await main.get_tree().process_frame
 	ok("carriers change between seeds", sets[0] != sets[1] or sets[1] != sets[2])
+
+# ------------------------------------------------------------------ 7. fewer chests
+func _fewer() -> void:
+	var at := [Vector3(0, 0, 0), Vector3(40, 0, 0), Vector3(41, 0, 0), Vector3(0, 0, 40), Vector3(40, 0, 40)]
+	var spots := at.map(func(p): return {"pos": p})
+	var kept := KeyChest.thin(spots)
+	var crowded_gone := not kept.any(func(c): return c["pos"] == at[2])
+	ok("thinning keeps chest.keep of the spots, the crowded one first out",
+			kept.size() == KeyChest.kept(5) and crowded_gone)
+	ok("thinning is the same every time (no dice)", KeyChest.thin(spots) == kept)
+	for map_id in ["hollowcrown", "skyreach"]:
+		var m: Match = await build(5, {"map": map_id})
+		var spots_n: int = m.world.chest_spots.size()
+		var vaults: int = m.spawn_plan.active_of("vault").size()
+		var caches: int = m.spawn_plan.active_of("cache").size()
+		var train := m.chests.filter(func(c): return c.has("ride")).size()
+		var map_n := m.chests.size() - vaults - caches - train
+		var info := "%s: map %d of %d spots, vaults %d, caches %d, train %d, total %d" % [
+				map_id, map_n, spots_n, vaults, caches, train, m.chests.size()]
+		ok("%s: chest.keep of the map's chests and caches, every vault" % map_id,
+				map_n == KeyChest.kept(spots_n) and caches == KeyChest.kept(4) and vaults == 2, info)
+		m.queue_free()
+		await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ 2, 3, 4. chest, box, ground, carrier death
 func _chest_and_keys() -> void:
