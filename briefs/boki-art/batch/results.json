@@ -110120,5 +110120,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px8_chainipede_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px8_aurostag",
+    "name": "Aurostag (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_aurostag",
+    "name": "Aurostag (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_sarcobra",
+    "name": "Sarcobra (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_chainipede",
+    "name": "Chainipede (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_calderoise",
+    "name": "Calderoise (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_hydrangor",
+    "name": "Hydrangor (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_hydrangor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_calderoise",
+    "name": "Calderoise (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_chuggamus",
+    "name": "Chuggamus (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_chuggamus_1.jpg",
+    "ok": true
   }
 ]
