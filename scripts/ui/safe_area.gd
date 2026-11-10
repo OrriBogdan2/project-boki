@@ -66,8 +66,9 @@ static func problems(groups: Dictionary, sz: Vector2) -> Array:
 			if not safe.encloses(r):
 				bad.append("%s outside %s" % [names[i], r])
 			for j in range(i + 1, names.size()):
-				if (groups[names[j]] as Array).any(func(o: Rect2): return r.intersects(o)):
-					bad.append("%s overlaps %s" % [names[i], names[j]])
+				for o: Rect2 in groups[names[j]]:
+					if r.intersects(o):
+						bad.append("%s %s overlaps %s %s" % [names[i], r, names[j], o])
 	return bad
 
 ## Text cut off under `root`: a label or button that is narrower than its text and neither wraps nor
