@@ -28,6 +28,10 @@ Signs on posts name each area and each piece of the lane.
 - **The dummy station** (a sign by the first dummy, **F** within two metres) switches that dummy between Still, Strafe
   (side to side at run speed, random 0.6-1.4 s legs) and Dodge (strafe plus a dash every 4-6 s), for testing skillshots
   against targets that move like players. It stays in its pen. Tuning: `content/rules/dummy_move.json`.
+- **The Dodge Pen** (north bridge off the Range): a shooter dummy that, while you stand near it, loops every 3 s through
+  one slow orb (its red lane fills first) and one ground circle that fills under you and bursts. Hits do no damage.
+  Dash out of the way (the goal line says "Dodge 5 with your dash") and each dodge counts; 5 ticks the goal. Skippable
+  like every goal (Esc, Hide goals).
 - **A sparring bot** you switch between Off, Idle, Moving and Fighting (**N**), with any Hunter.
 - **Backspace** resets. **O** turns cooldowns off (dash, RMB, E, R and the glove). **U** unlocks the ultimate.
 - **2-9** swap to the first eight Hunters on the spot. **L** opens the loadout (Hunter, weapon, Boki, gloves,

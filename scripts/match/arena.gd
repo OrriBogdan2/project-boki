@@ -7,7 +7,7 @@ extends RefCounted
 ##
 ## What it gives you:
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
-##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into; each
+##   one that stands and watches you (its station sign, F, switches it Still / Strafe / Dodge), one that strafes, a heavy one by a pillar to slam into, and the Dodge Pen's shooter; each
 ##   shows its damage per second, last hit and total over its head, and heals up when left alone
 ## - a goal line and a pass tick over each station (StationGoals, content/rules/station_goals.json; Esc: Hide goals)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
@@ -36,11 +36,13 @@ const SIGNS := [["MOVEMENT LANE\nvault  ·  gap  ·  ledges  ·  ramp", Vector3(
 	["STEP 0.8 m", Vector3(55.0, 0, 47.0)], ["JUMP 1.6 m", Vector3(59.0, 0, 47.0)],
 	["MANTLE 2.4 m", Vector3(63.0, 0, 47.0)], ["DASH THE GAP", Vector3(66.5, 0, 47.0)],
 	["RAMP UP, DROP OFF\nglide to the Landing", Vector3(73.5, 0, 47.0)], ["RANGE\n10 · 20 · 35 m", Vector3(44.0, 0, 29.0)],
-	["PRACTICE WING\ngear  ·  monsters  ·  duel room", Vector3(27.5, 0, 41.0)]]
+	["PRACTICE WING\ngear  ·  monsters  ·  duel room", Vector3(27.5, 0, 41.0)],
+	["DODGE PEN\ndash out of its shots and circles", Vector3(64.0, 0, 14.0)]]
 const SPOTS := [["still", Vector3(23.5, 0, 26.5), "light", "Dummy"],
 	["strafe", Vector3(29.5, 0, 26.0), "medium", "Strafer"],
 	["heavy", Vector3(30.2, 0, 22.8), "heavy", "Training dummy"], ["still", Vector3(53.5, 0, 26.5), "light", "10 m"],
-	["still", Vector3(63.5, 0, 26.5), "light", "20 m"], ["still", Vector3(78.5, 0, 26.5), "medium", "35 m"]]
+	["still", Vector3(63.5, 0, 26.5), "light", "20 m"], ["still", Vector3(78.5, 0, 26.5), "medium", "35 m"],
+	["shooter", Vector3(64.0, 0, 5.0), "light", DodgeDummy.NAME]]
 
 var m: Match
 var layout := "arena"          # (one layout since 11-08: the separate "practice" training island is retired)
@@ -48,6 +50,7 @@ var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, mv: DummyMove}
 var station_label: Label3D = null
 var goals: StationGoals = null
+var dodge: DodgeDummy = null
 var bot: Hunter = null
 var bot_mode := "off"
 var bot_arch := "gunslinger"
@@ -88,6 +91,7 @@ func setup(match_node: Match, which: String) -> void:
 	_build_ui()
 	_sign()
 	goals = StationGoals.new(m, self)
+	dodge = DodgeDummy.new(m, dummies[-1]["h"], goals)
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
 	if m.hud:
@@ -167,7 +171,7 @@ func after_think(dt: float) -> void:
 			D.inp[k] = false
 		# a still or heavy dummy faces your start (so you can get behind them: Thief Marks); a mover watches you
 		var mover: DummyMove = dm["mv"]
-		var watch: Vector3 = home if mover.mode == "still" else P.pos
+		var watch: Vector3 = home if mover.mode == "still" and dm["kind"] != "shooter" else P.pos
 		D.inp["aim"] = watch + Vector3(0, 0.9, 0)
 		var at: Vector3 = dm["at"]
 		var mv := mover.step(D, at, watch, dt, m.rng)
@@ -241,6 +245,7 @@ func tick(dt: float) -> void:
 	if Input.is_action_just_pressed("interact") and not m.paused and not P.downed and P.flat_dist(_arena_point(STATION)) < STATION_R:
 		cycle_dummy()
 	goals.tick()
+	dodge.tick(dt)
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 

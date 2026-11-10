@@ -87,10 +87,11 @@ func tick() -> void:
 		if not r["done"] and _passed(r, P, slammed):
 			_pass(r)
 
-func hit(dummy: String) -> void:
+## One more count for the goal of this kind ("hits": you hit the dummy, "dodges": you dodged its shot).
+func hit(dummy: String, kind := "hits") -> void:
 	for r in rows:
 		var g: Dictionary = r["g"]
-		if not r["done"] and g["kind"] == "hits" and String(g["who"]).to_upper() == dummy:
+		if not r["done"] and g["kind"] == kind and String(g["who"]).to_upper() == dummy:
 			r["n"] += 1
 			if r["n"] >= int(g["need"]):
 				_pass(r)
@@ -143,4 +144,4 @@ func _show(r: Dictionary) -> void:
 
 func _text(g: Dictionary) -> String:
 	return String(g["text"]).format({"throw": Settings.key_cap("throw"), "interact": Settings.key_cap("interact"),
-		"jump": Settings.key_cap("jump")})
+		"jump": Settings.key_cap("jump"), "dash": Settings.key_cap("dash")})

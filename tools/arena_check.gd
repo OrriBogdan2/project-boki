@@ -8,6 +8,7 @@ var main: Node
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const MIN_DODGES := 2      # dashes in 25 s: one recharges in ~6.5 s and fires only where it fits the pen
 
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
@@ -24,6 +25,7 @@ func run(main_node: Node) -> void:
 	await _arena()
 	await _dummy_modes()
 	await _station_goals()
+	await _dodge_pen()
 	await _breaker_whirl()
 	await _cards()
 	await _loadout()
@@ -123,6 +125,65 @@ func _dummy_modes() -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+## The Dodge Pen: the shooter fires a lane and an orb on its loop, standing still costs nothing and counts nothing,
+## a dash out of the way is a dodge, and 5 dodges tick the goal.
+func _dodge_pen() -> void:
+	StationGoals.state()["done"].clear()
+	var m := Match.new()
+	main.add_child(m)
+	await m.start(Match.arena_opts("thief"))
+	m.set_process(false)
+	var A: Arena = m.arena
+	var P: Hunter = m.player
+	var D: DodgeDummy = A.dodge
+	A.cd_off = true
+	var row: Dictionary = A.goals.rows.filter(func(r): return r["g"]["id"] == "dash_dodge")[0]
+	var start := A._arena_point(Vector3(64.0, 0, 10.5))
+	P.teleport(start)
+	P.vel = Vector3.ZERO
+	step(m, 1.5)         # (the match settles the Hunter's health in its first second)
+	var hp0 := P.hp
+	step(m, DodgeDummy.LOOP * 2.0)
+	ok("dodge pen: standing still gets no dodge and no damage", D.dodges == 0 and is_equal_approx(P.hp, hp0))
+	var orb_out := false
+	for i in 60 * 4:
+		step(m, DT)
+		if not D._shot.is_empty() and D._shot["orb"].visible:
+			orb_out = true
+			break
+	ok("dodge pen: the shooter's orb is in the air on its loop", orb_out)
+	ok("dodge pen: the shot's red lane is on the ground", not D._shot.is_empty() and D._shot["lane"].is_inside_tree())
+	var side := 1.0
+	var before := D.dodges
+	while D.dodges < before + 1 and m.time < 120.0:
+		P.teleport(start)
+		P.vel = Vector3.ZERO
+		while D._shot.is_empty() or float(D._shot["t"]) < DodgeDummy.SHOT_WINDUP + 0.1:
+			step(m, DT)
+		P.inp["move"] = Vector2(side, 0)
+		P.do_dash()
+		side = -side
+		step(m, 1.0)
+	ok("dodge pen: a dash out of the shot's way is a dodge", D.dodges == before + 1 and int(row["n"]) == D.dodges)
+	ok("dodge pen: the dodge cost no health", is_equal_approx(P.hp, hp0))
+	var tries := 0
+	while not row["done"] and tries < 12:
+		P.teleport(start)
+		P.vel = Vector3.ZERO
+		while D._shot.is_empty() or float(D._shot["t"]) < DodgeDummy.SHOT_WINDUP + 0.1:
+			step(m, DT)
+		P.inp["move"] = Vector2(side, 0)
+		P.do_dash()
+		side = -side
+		step(m, 1.0)
+		tries += 1
+	var line: String = (row["label"] as Label3D).text
+	ok("dodge pen: 5 dodges tick the goal", bool(row["done"]) and D.dodges >= 5 and line.begins_with("[x]"))
+	ok("dodge pen: the goal line names the dash key", line.contains(Settings.key_cap("dash")))
+	A.teardown()
+	m.queue_free()
+	await main.get_tree().process_frame
+
 ## The station goals: a goal line per station, a tick when you do it once, saved per save, hideable, never blocking.
 func _station_goals() -> void:
 	StationGoals.state()["done"].clear()
@@ -200,6 +261,11 @@ func _station_goals() -> void:
 	m.train["smash"] = true
 	G.tick()
 	ok("station goals: the crate goal follows its checklist step", done.call("crate"))
+	for i in 4:
+		G.hit("SHOOTER", "dodges")
+	ok("station goals: 4 of 5 dodges is no tick yet", not done.call("dash_dodge") and hits.call("dash_dodge") == 4)
+	G.hit("SHOOTER", "dodges")
+	ok("station goals: the 5th dodge ticks it", done.call("dash_dodge"))
 	ok("station goals: all but the duel ticked, nothing blocked",
 		G.done_count() == want - 1 and not done.call("duel") and not m.paused)
 	StationGoals.mark_duel()
@@ -292,7 +358,7 @@ func _dummy_mode_asserts(m: Match, want: String) -> void:
 			ok(tag + ": side to side at run speed, short legs", moves and turns >= 12 and turns <= 45, info)
 			ok(tag + ": stays in its pen, never dashes", in_pen and dashes == 0, info)
 		"dodge":
-			ok(tag + ": strafes and dashes every 4-6 s", moves and dashes >= 3 and dashes <= 7 and dash_gap_ok,
+			ok(tag + ": strafes and dashes every 4-6 s", moves and dashes >= MIN_DODGES and dashes <= 7 and dash_gap_ok,
 				info)
 			ok(tag + ": stays in its pen", in_pen, info)
 
@@ -316,7 +382,7 @@ func _arena() -> void:
 		"%s on %s" % [P.arch, m.world.island_id(P.pos.x, P.pos.z)]
 	)
 	var A: Arena = m.arena
-	ok("arena: six dummies (three in the ring, three on the range)", A.dummies.size() == 6)
+	ok("arena: seven dummies (three in the ring, three on the range, the Dodge Pen's shooter)", A.dummies.size() == 7)
 	ok("arena: ult unlocked by default", int(P.slot_lv["ult"]) >= 1 and P.lvl >= 6)
 	# dummies take damage and show it
 	var D: Hunter = A.dummies[0]["h"]
@@ -552,8 +618,8 @@ func _training() -> void:
 	printerr("ARENACHECK training match up")
 	var P: Hunter = m.player
 	ok(
-		"the Training Area: six dummies (ring and range), the duel pad on the Practice Wing",
-		m.arena != null and m.arena.dummies.size() == 6 and m.duel_pad != Vector3.INF
+		"the Training Area: seven dummies (ring, range, Dodge Pen), the duel pad on the Practice Wing",
+		m.arena != null and m.arena.dummies.size() == 7 and m.duel_pad != Vector3.INF
 			and m.duel_pad.distance_to(Arena.WING) < Arena.WING_R + 2.0
 	)
 	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)

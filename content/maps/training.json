@@ -3,7 +3,7 @@
  "name": "Training Area",
  "size": 100,
  "seed": 31,
- "notes": "The Training Area, the one practice space (title screen, the Expedition menu, the farm's Esc menu). Ability Ring: the old Arena floor (round, low ruin walls with four gates, four 2x2 blocks to slam into, a dais, two grass patches); your start, the three practice dummies and the sparring bot. Range (east gate): still dummies at 10, 20 and 35 m from the line at x 43. Movement Lane (over the bridge from the range): a low wall to vault, a 2 m gap, ledges at 0.8, 1.6 and 2.4 m (step, jump, mantle), a 3 m gap to dash, a ramp up to 4.8 m and a drop off its end, with the Landing islet 6 m out for air control. Practice Wing (south bridge): the checklist's gear rack, crates, the target monsters and the Duel Room pad. No monsters, chests or breakables are spawned on the map itself.",
+ "notes": "The Training Area, the one practice space (title screen, the Expedition menu, the farm's Esc menu). Ability Ring: the old Arena floor (round, low ruin walls with four gates, four 2x2 blocks to slam into, a dais, two grass patches); your start, the three practice dummies and the sparring bot. Range (east gate): still dummies at 10, 20 and 35 m from the line at x 43. Movement Lane (over the bridge from the range): a low wall to vault, a 2 m gap, ledges at 0.8, 1.6 and 2.4 m (step, jump, mantle), a 3 m gap to dash, a ramp up to 4.8 m and a drop off its end, with the Landing islet 6 m out for air control. Practice Wing (south bridge): the checklist's gear rack, crates, the target monsters and the Duel Room pad. Dodge Pen (north bridge from the range): a shooter dummy that fires slow lanes and ground circles on a 3 s loop, for dashing out of the way. No monsters, chests or breakables are spawned on the map itself.",
  "islands": [
   {
    "id": "floor",
@@ -275,6 +275,31 @@
     }
    ],
    "sheer": []
+  },
+  {
+   "id": "dodge",
+   "name": "Dodge Pen",
+   "role": "grove",
+   "region": 1,
+   "poi": [
+    64,
+    9
+   ],
+   "noise": 0.04,
+   "biome": "meadow",
+   "danger": 0,
+   "no_rocks": true,
+   "shapes": [
+    {
+     "circle": [
+      64,
+      9
+     ],
+     "r": 7,
+     "lv": 0
+    }
+   ],
+   "sheer": []
   }
  ],
  "bridges": [
@@ -317,6 +342,20 @@
    "to": [
     46,
     41
+   ],
+   "r": 1.4
+  },
+  {
+   "name": "Dodge Bridge",
+   "a": "range",
+   "b": "dodge",
+   "from": [
+    64,
+    22
+   ],
+   "to": [
+    64,
+    16
    ],
    "r": 1.4
   }
