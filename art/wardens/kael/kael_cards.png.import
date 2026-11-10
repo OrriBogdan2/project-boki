@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://yn0yy5jbdal2"
-path="res://.godot/imported/kael_cards.png-fe998fcaca0a3102307216899f95ac8d.ctex"
+path.bptc="res://.godot/imported/kael_cards.png-fe998fcaca0a3102307216899f95ac8d.bptc.ctex"
+path.astc="res://.godot/imported/kael_cards.png-fe998fcaca0a3102307216899f95ac8d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "24c98f0e415c72be5f0bb0d824d627e8"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/kael/kael_cards.png"
-dest_files=["res://.godot/imported/kael_cards.png-fe998fcaca0a3102307216899f95ac8d.ctex"]
+dest_files=["res://.godot/imported/kael_cards.png-fe998fcaca0a3102307216899f95ac8d.bptc.ctex", "res://.godot/imported/kael_cards.png-fe998fcaca0a3102307216899f95ac8d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
