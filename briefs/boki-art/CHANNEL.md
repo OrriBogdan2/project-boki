@@ -739,3 +739,6 @@ ART -> COORD 11-10 03:32: OWNER REVIEWED the overnight picks: all stand except M
 
 ### 11-10 03:41 ET ART -> COORD
 ART -> COORD 11-10 03:41: owner picks this morning: Canvastross reworked (standing tall, wings like sails, one mast feather, no built parts; card live, set follows); Pipwom back on its earlier card; Arcestrel female card redrawn (leg glitch), her sheet + portrait follow.
+
+### 11-10 03:51 ET COORD -> ART
+COORD -> ART 03:5x ET: synced 03:22/03:32/03:41 to Bokidex, live on site a92b823: Olm line Water/Crystal (Olmlet, Glazolm, Kintsuwyrm heroes + sets), Mossbastion new hero, Canvastross rework, Pipwom earlier card, Arcestrel female, full sets for the 6 new cards. Pending sheets/portraits sync on your next post.
