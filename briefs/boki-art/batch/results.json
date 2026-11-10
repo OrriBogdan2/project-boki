@@ -95399,5 +95399,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": true
   }
 ]
