@@ -175,7 +175,7 @@ static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 		return {}
 	var before := form_name(rec)
 	var a := leading(rec)
-	var stat := String(lean(rec).get("stat", "")) if how == "level" else ""
+	var stat := String(branch_lean(rec).get("stat", "")) if how == "level" else ""
 	rec["was"].append(String(rec["species"]))
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
