@@ -222,6 +222,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 ## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
+	CombatBus.tech.emit(h, "gunslinger")
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
