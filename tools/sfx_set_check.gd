@@ -14,6 +14,8 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
+##   9. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
+##      without taking a slot, and a need falling to urgent sulks once
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -41,6 +43,7 @@ func run(main: Node) -> void:
 	_fallback()
 	_boki_cues()
 	_garden()
+	_voices()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -170,10 +173,11 @@ func _fallback() -> void:
 func _boki_cues() -> void:
 	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
 		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
-		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/match/kin_voice.gd"}
 	for cue in wired:
 		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
 		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
+
 ## 8. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
 ## first, the player walking from the pond to far away and back.
 func _garden() -> void:
@@ -279,3 +283,32 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 9. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
+func _voices() -> void:
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	var at := Sfx.listener + Vector3(2, 0, 0)
+	var far := Sfx.listener + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	var recs := []
+	for i in 6:
+		recs.append({"uid": "voice_test_%d" % i, "species": "no_such_species", "name": "T%d" % i})
+	HomeVoice.say(recs[5], "happy", far)
+	ok(HomeVoice._until.is_empty(), "voices: a Boki past earshot takes no slot")
+	for i in 5:
+		HomeVoice.say(recs[i], "happy", at)
+	ok(HomeVoice._until.size() == HomeVoice.MAX_VOICES, "voices: five Bokis at once sound %d" % HomeVoice._until.size())
+	HomeVoice._until.clear()
+	HomeVoice.say(recs[0], "happy", at)
+	ok(HomeVoice._until.is_empty(), "voices: the same Boki twice inside its gap speaks once")
+	recs[1]["needs"] = {"food": 5.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
+	var k := {"rec": recs[1], "pos": at}
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	var sulked := HomeVoice._until.size()
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
