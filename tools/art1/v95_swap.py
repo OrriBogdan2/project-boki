@@ -7,7 +7,7 @@ Warden's own skeleton, clips and anchors, which come from its current .glb and s
     the bone and a girth across it; the limbs take the rig's joint heights and keep the master's spread, or with `spread`
     "rig" sit on the rig's joints; past a segment's ends the master keeps its own scale (a hook, a gauntlet keep their shape).
  3. Weights: bone heat on the body bones, `past_wrist` (the bone that takes each hand's weights: Grimble's hook), then
-    `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`.
+    `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`, within `in_segs` capsules if given.
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
@@ -257,6 +257,9 @@ def region_masks(P):
         for seg, rad in r.get("except_segs", []):
             j0, j1 = next((s[1], s[2]) for s in SEG if s[0] == seg)
             m &= seg_dist(P, j0, j1) >= rad
+        for seg, rad in r.get("in_segs", []):     # only within these capsules (a limb pinned whole where a part touches it)
+            j0, j1 = next((s[1], s[2]) for s in SEG if s[0] == seg)
+            m &= seg_dist(P, j0, j1) < rad
         for x0, x1, y0, y1, z0, z1 in r.get("except_boxes", []):
             m &= ~((P[:, 0] >= x0) & (P[:, 0] <= x1) & (P[:, 1] >= y0) & (P[:, 1] <= y1) & (P[:, 2] >= z0) & (P[:, 2] <= z1))
         out.append((r["bone"], m))
@@ -309,10 +312,42 @@ def fit(P, W, T, K):
     return Q
 
 
+def capsule_weights(low, arm):
+    """`weights` "capsule": each body bone's soft share by distance to its segment (minus its `radius`), never across the
+    midline for a sided bone nor above the pelvis for a leg bone, the hips reaching the neck; smooth in space, so it cannot
+    fail on a scan's loose or fused pieces the way bone heat does."""
+    head = {b.name: np.array(b.head_local, float) for b in arm.data.bones}
+    tail = {b.name: np.array(b.tail_local, float) for b in arm.data.bones}
+    tail["hips"] = head["head"]
+    for sd in "RL":     # (a hand bone is short or a stub: it reaches on along the forearm)
+        u = tail["forearm." + sd] - head["forearm." + sd]
+        tail["hand." + sd] = head["hand." + sd] + u / np.linalg.norm(u) * max(np.linalg.norm(tail["hand." + sd] - head["hand." + sd]), 0.3)
+    rad = SPEC.get("radius", {})
+    V = verts(low)
+    names = [b for b in BODY if b in head]
+    D = np.zeros((len(V), len(names)))
+    for i, nm in enumerate(names):
+        a, u = head[nm], tail[nm] - head[nm]
+        h = np.clip(((V - a) @ u) / (u @ u), 0, 1)
+        off = (V - (a + h[:, None] * u)) * ((0.75, 1, 1) if nm == "hips" else (1, 1, 1))
+        D[:, i] = np.linalg.norm(off, axis=1) - rad.get(nm.split(".")[0], 0.06)
+        if nm.endswith(".R"):
+            D[V[:, 0] < -0.01, i] = 9.0
+        if nm.endswith(".L"):
+            D[V[:, 0] > 0.01, i] = 9.0
+        if nm.split(".")[0] in ("thigh", "shin", "foot"):
+            D[V[:, 2] > head["hips"][2] + 0.12, i] = 9.0
+    W = np.exp(-(D - D.min(1, keepdims=True)) / float(SPEC.get("falloff", 0.035)))
+    W /= W.sum(1, keepdims=True)
+    return {nm: W[:, i] for i, nm in enumerate(names)}
+
+
 def heat_weights(low, arm, P):
     """Step 3: bone heat (fit_warden.auto_weights) on the body bones of a copy of the rig whose hips bone reaches the neck
     (the contract has no spine: left alone, the chest goes to the arms and the head); then `past_wrist` (each hand's
     weights to its bone) and the `regions`, whole."""
+    if SPEC.get("weights") == "capsule":
+        return place_weights(capsule_weights(low, arm), P)
     tmp = arm.copy()
     tmp.data = arm.data.copy()
     tmp.animation_data_clear()
@@ -335,6 +370,11 @@ def heat_weights(low, arm, P):
     low.modifiers.clear()
     low.parent = None
     bpy.data.objects.remove(tmp)
+    return place_weights(gr, P)
+
+
+def place_weights(gr, P):
+    """Each hand's weights to its `past_wrist` bone, then the `regions`, whole."""
     for sd, bone in SPEC["past_wrist"].items():
         hand = gr.pop("hand." + sd)
         gr[bone] = gr.get(bone, 0) + hand
@@ -576,6 +616,12 @@ def main():
         b.inputs["Roughness"].default_value = 0.8
         me.materials.append(m)
     me.polygons.foreach_set("material_index", np.array([names.index(s) for s in slots], np.int32))
+    ntri = sum(len(p.vertices) - 2 for p in me.polygons)
+    if ntri > SPEC.get("max_tris", 15000):       # the detach caps can push it over the budget: collapse a little, weights interpolated
+        d = low.modifiers.new("Decimate", "DECIMATE")
+        d.ratio = (SPEC.get("max_tris", 15000) - 100) / ntri
+        bpy.context.view_layer.objects.active = low
+        bpy.ops.object.modifier_apply(modifier=d.name)
     for p in me.polygons:
         p.use_smooth = True
     low.name = me.name = old_name
@@ -584,6 +630,8 @@ def main():
     move_anchors(arm, T, K)
     print("SWAP tris", sum(len(p.vertices) - 2 for p in me.polygons), "slots", {s: slots.count(s) for s in names}, flush=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "fit.blend"))      # (before the relax: for looking at the weights)
+    for k, v in SPEC.get("relax", {}).items():      # e.g. {"CUTS": 0}: relax only, no cut-and-cap holes
+        setattr(skin_relax, k, v)
     skin_relax.relax(arm)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "swap.blend"))
     select([o for o in bpy.data.objects if o.type in ("ARMATURE", "MESH", "EMPTY")], arm)
