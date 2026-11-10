@@ -2,7 +2,8 @@ class_name DashExit
 extends RefCounted
 ## How a dash hands its speed on as it ends. The shared rule carries the burst: HunterMove.dash_exit as
 ## the roll runs out on the ground, Loco.dash_jump_keep on a jump out of it, and a glide pressed during an
-## air dash takes its velocity (Hunter._dash_into_glide), so a dash into a jump or a glide keeps going. A kit's dash_exit() rule {"cap": k, "ease": s} says no carried momentum
+## air dash takes its velocity (Hunter._dash_into_glide), so a dash into a jump or a glide keeps going.
+## A kit's dash_exit() rule {"cap": k, "ease": s} says no carried momentum
 ## (Sparkle's Wirerun, owner 11-08: no dash into a bunny hop or a fast glide): the run, a jump out of it
 ## or a glide right after start at most k x run speed and ease down to run speed over s seconds (no hard
 ## stop, and the ordinary run speed stays if you were moving). --sparkle-dash-check.

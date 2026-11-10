@@ -360,7 +360,8 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var weight_base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	var base := float(ak.dash_def().get("charges", weight_base)) if ak else weight_base      # the archetype's own count wins
+	# the archetype's own count wins
+	var base := float(ak.dash_def().get("charges", weight_base)) if ak else weight_base
 	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
@@ -1516,7 +1517,7 @@ func _emit_shot() -> void:
 	var sus_k := 1.0 - float(wpn.get("sustain_loss", 0.0)) * sus_fade
 	dmg *= sus_k
 	sus_n += 1
-	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0)), "sus_k": sus_k}      # sus_k: share of full damage
+	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0)), "sus_k": sus_k}   # sus_k: of full damage
 	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
