@@ -865,32 +865,24 @@ func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 	return inner.grow(-pad).has_point(v)
 
 ## A world marker: a bobbing pin and label over the spot, or (when it's off screen or behind the
-## camera) a big arrow at the screen edge pointing the way. Both show how far it is.
+## camera, or under the hunter: MarkerDir) a big arrow at the screen edge pointing the way. Both show how far.
 func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 	var cam := m.cam
 	var sz := c.size
 	var dist := int(round(Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length()))
 	var bob := sin(Time.get_ticks_msec() / 1000.0 * 4.0) * 4.0
-	var tp := cam.unproject_position(at + Vector3(0, 2.6, 0))
-	var behind := cam.is_position_behind(at)
-	var on := not behind and Rect2(Vector2(40, 110), sz - Vector2(80, 230)).has_point(tp)
-	if on:
-		var p := tp + Vector2(0, bob)
+	var d := MarkerDir.off_dir(cam, sz, at, m.player.pos)
+	if d == Vector2.ZERO:
+		var p := cam.unproject_position(at + Vector3(0, MarkerDir.PIN_UP, 0)) + Vector2(0, bob)
 		c.draw_circle(p, 24.0, Color(0, 0, 0, 0.5))
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col)
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-12, 27), p + Vector2(12, 27), p + Vector2(0, 46)]), col)
 		_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
-		# a ring on the ground under it
-		if not behind:
-			var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))
-			c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
+		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
+		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
-		var ctr := sz * 0.5
-		var d := (tp - ctr).normalized() if not behind else (ctr - tp).normalized()
-		if d.length() < 0.1: d = Vector2.UP
-		# kept inside the play area: under the tutorial banner, above the pill and the ability bar
-		var ctr2 := Vector2(sz.x * 0.5, sz.y * 0.47)
-		ctr = ctr2
+		# kept inside the play area: under the tutorial panel, above the ability bar
+		var ctr := Vector2(sz.x * 0.5, sz.y * 0.47)
 		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
 		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
 		var edge := ctr + d * t + d * bob * 0.5
@@ -1876,7 +1868,7 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
-	var y := TutorialHud.prompt_y(self, sz)
+	var y := sz.y - 222.0
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:

@@ -43,6 +43,8 @@ var last_us := 0
 var frames: Array = []
 var load_frames: Array = []
 var load_ms := 0.0
+const READY_HOLD_MS := 300.0    # ms the loading screen may stay up once the match is ready (playtest 11-09)
+const LOADING := preload("res://scripts/ui/loading.gd")
 var landed_at := -1.0
 var vp_rid: RID
 var _end := false
@@ -416,8 +418,14 @@ func _finish_load() -> void:
 	lines.append("LOAD build steps (total ms): " + ", ".join(sk.slice(0, 16).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	for nt in PerfLog.notes: lines.append("LOAD note: " + String(nt))
 	var spin_ok := up == 0 or drawn >= up - 1
-	var ok := over == 0 and spin_ok and up > 0
-	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s)" % [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen"]))
+	var tail := 0.0       # ms the screen stayed up once the match was built and drawn ("Ready")
+	for f in fl:
+		if String(f["stage"]) == LOADING.STAGES["ready"]: tail += float(f["wall"])
+	lines.append("LOAD held after Ready: %.0f ms (at most %.0f)" % [tail, READY_HOLD_MS])
+	var tail_ok := tail <= READY_HOLD_MS
+	var ok := over == 0 and spin_ok and up > 0 and tail_ok
+	var why := [over, "" if spin_ok else ", spinner skipped frames", "" if up > 0 else ", no loading screen seen", "" if tail_ok else ", held after Ready"]
+	lines.append("LOAD %s" % ("PASS" if ok else "FAIL (%d slow frames%s%s%s)" % why))
 	var txt := "\n".join(lines)
 	print(txt)
 	if out_path != "":

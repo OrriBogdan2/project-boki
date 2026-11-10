@@ -3,8 +3,8 @@ extends RefCounted
 ## The first-match tutorial: a scripted course on content/maps/tutorial.json, one stop per skill (its
 ## "course" table holds each stop). Match owns one of these as `tut` and calls update() every step.
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
-## What the player sees is drawn by TutorialHud: a small banner at the top for each new step that
-## settles into a pill, a pulse when they stall, a quiet check when a step is done; the marker (beam,
+## What the player sees is drawn by TutorialHud: a panel pinned at the top-centre for each step (it pops
+## in when the step starts), a pulse when they stall, a quiet check when a step is done; the marker (beam,
 ## arrow) is here and in the Hud. Nothing but the first intro card ever pauses play.
 
 ## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
@@ -25,8 +25,8 @@ const GAP_STEPS := ["dash", "exdash", "glide"]      # leave from the glowing pad
 const FOE_STEPS := ["gkey", "shoot", "sig", "utility", "throw", "kin1", "fight"]     # the marker is the nearest monster
 const WALK_LEAD := ["move", "crouch", "pickup", "key", "chest", "goexit", "uplink", "extract"]
 
-const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
-const NAG_T := 8.0         # s without progress before the pill pulses and the Boki says it again
+const CARD_T := 1.5        # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
+const NAG_T := 8.0         # s without progress before the panel pulses and the Boki says it once more
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0        # s the lookout shows the chest it spotted
 const DONE_T := 0.9        # s of the step-done sting
@@ -42,7 +42,7 @@ var m: Match
 var step := -1
 var intro := true            # the "Training run" card: the first time only, until a key or INTRO_T
 var intro_t := 0.0
-var text := ""               # this step's one line, on the banner and the pill
+var text := ""               # this step's one line, on the panel
 var detail := ""             # and the plain-words line under it ("" for none)
 var key_cap := ""            # the key cap beside it ("" for none)
 var got := 0                 # times this step's action has landed (shown as got/need)
@@ -52,7 +52,7 @@ var t := 0.0                 # s in this step
 var card_t := 0.0            # s since the card (re)appeared
 var done_t := 0.0            # s left of the step-done check
 var flash_t := 0.0           # s the marker flashes (after a stall)
-var nag_t := 0.0             # s the pill pulses (after a stall)
+var nag_t := 0.0             # s the panel pulses (after a stall)
 var spot_t := 0.0            # s left of "You spotted it!" and the chest beam
 var wait := 0.0
 var down_t := 0.0
@@ -550,7 +550,7 @@ func _point(sid: String) -> void:
 	target = at
 	label = String(Content.rules("tutorial")["labels"].get(sid, "Monster"))
 
-## A stall (NAG_T without getting closer): the pill and the marker pulse and the Boki says it once
+## A stall (NAG_T without getting closer): the panel and the marker pulse and the Boki says it once
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt

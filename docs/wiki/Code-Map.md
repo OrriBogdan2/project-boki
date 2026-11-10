@@ -132,7 +132,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `title.gd`, `prologue.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story, first egg |
 | `kit_card.gd` | A class's whole kit on one page (K) |
 | `full_map.gd`, `map_paint.gd` | The M map and its baked painting |
-| `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd`, `hold_skip.gd` | Between screens |
+| `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd` | Between screens |
 | `dex_view.gd`, `about_view.gd`, `iv_view.gd`, `kinbox_view.gd`, `incubator_view.gd`, `work_view.gd` | Boki menus |
 | `egg_hatch.gd`, `kin_reveal.gd`, `kin_portrait.gd`, `portraits.gd`, `icons.gd` | Hatching, portraits, icons |
 
