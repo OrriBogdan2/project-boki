@@ -109896,5 +109896,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hb5_sable_eyeswings_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px8_mycroll",
+    "name": "Mycroll (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_mycroll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_mycroll",
+    "name": "Mycroll (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_mycroll_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_vespyx",
+    "name": "Vespyx (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_prismander",
+    "name": "Prismander (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_prismander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_prismander",
+    "name": "Prismander (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_prismander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_vespyx",
+    "name": "Vespyx (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_vespyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_vhalo",
+    "name": "Pavonazar V fan + crown ring",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_vhalo_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_L1",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_L1_3.jpg",
+    "ok": true
   }
 ]
