@@ -98976,5 +98976,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/idea_embrook_3.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_nettlynx",
+    "name": "Nettlynx (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_nettlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_nettlynx",
+    "name": "Nettlynx (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_nettlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_pyrraven",
+    "name": "Pyrraven (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_pyrraven_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_nettlynx",
+    "name": "Nettlynx (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_nettlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_pyrraven",
+    "name": "Pyrraven (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_pyrraven_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_embrook",
+    "name": "Embrook (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_embrook_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_pyrraven",
+    "name": "Pyrraven (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_pyrraven_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_thistlynx",
+    "name": "Thistlynx (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_thistlynx_2.jpg",
+    "ok": true
   }
 ]
