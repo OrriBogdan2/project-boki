@@ -1,12 +1,14 @@
 extends RefCounted
 ## --tutorial-hud-check: the tutorial shows one voice at a time, in its own lanes.
-##   1. the lanes at 1280x720 and 1920x1080: the banner is at most 35% of the width and 10% of the
-##      height, no two lanes (banner, pill, check, toasts, intro) intersect, none sits in the middle
+##   1. the lanes at 1280x720 and 1920x1080: the step panel is at most 35% of the width and 10% of the
+##      height and, even with its second line, stays in the top fifth; no two lanes (panel, check,
+##      toasts, intro) intersect, none sits in the middle
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner
-##   3. the pill counter, the right click taught from its kit data, the Boki step by its state
-##   4. the lookout: every course stop is climbable from the one before it with plain movement
+##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
+##   4. the panel counter, the right click taught from its kit data, the Boki step by its state
+##   5. the lookout: every course stop is climbable from the one before it with plain movement
 
 var bad := 0
 var m: Match
@@ -35,6 +37,9 @@ func _lanes() -> void:
 		var tag := "%dx%d" % [sz.x, sz.y]
 		var small: bool = b.size.x <= sz.x * 0.35 + 0.5 and b.size.y <= sz.y * 0.10 + 0.5
 		ok(small, "%s: the banner is at most 35%% x 10%% of the screen (%s)" % [tag, str(b.size)])
+		var tall_end := b.position.y + b.size.y * TutorialHud.DETAIL_K
+		var top_fifth := "%s: the panel with its second line stays in the top fifth (%.0f)" % [tag, tall_end]
+		ok(tall_end <= sz.y * 0.2 + 0.5, top_fifth)
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
 		var clash := ""
@@ -48,7 +53,7 @@ func _lanes() -> void:
 			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
 
-# ------------------------------------------------------------------ 2, 3. a run of the course
+# ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
 	m = Match.new()
 	main.add_child(m)
@@ -65,6 +70,7 @@ func _course() -> void:
 	var closed := not tu.intro and held_at < Tutorial.INTRO_T + 0.2
 	ok(closed, "the intro card closes by itself within %.1fs (%.2fs)" % [Tutorial.INTRO_T, held_at])
 	ok(bool(Save.d["tutorial"].get("tut_intro", false)), "and is remembered, so it only shows the first time")
+	_marker()
 	var t := 0.0
 	var last := -1
 	var step_t := 0.0
@@ -110,7 +116,7 @@ func _course() -> void:
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
-	ok(counts_ok, "the pill counts hits and casts (%s)" % str(counters))
+	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak
 	if ak != null:
 		var hold := float(ak.rmb_def().get("hold", 0.0)) > 0.0
@@ -120,6 +126,18 @@ func _course() -> void:
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("throw", ""))
 	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
+
+## The marker's pin or arrow: a spot well ahead shows its pin, one behind the hunter gets the arrow.
+func _marker() -> void:
+	var cam := m.cam
+	var sz := m.get_viewport().get_visible_rect().size
+	var fwd := -cam.global_transform.basis.z
+	fwd = Vector3(fwd.x, 0.0, fwd.z).normalized()
+	var me := m.player.pos
+	var ahead := MarkerDir.off_dir(cam, sz, me + fwd * 2.0, me)
+	ok(ahead == Vector2.ZERO, "a target ahead of the hunter shows its pin (%s)" % str(ahead))
+	var back := MarkerDir.off_dir(cam, sz, me - fwd * 4.0, me)
+	ok(back != Vector2.ZERO and back.y > 0.0, "one behind the hunter gets an arrow pointing down (%s)" % str(back))
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
 func _under_banner() -> int:
@@ -141,7 +159,7 @@ func _under_banner() -> int:
 				hit += 1
 	return hit
 
-# ------------------------------------------------------------------ 4. every stop can be reached
+# ------------------------------------------------------------------ 5. every stop can be reached
 ## From each stop to the next on the same island, plain walking: no step up taller than half a jump.
 func _reach() -> void:
 	var tu: Tutorial = m.tut
