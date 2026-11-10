@@ -60,7 +60,7 @@ func _share_with_allies() -> void:
 		var walk := walk_time()
 		x.spirit_t = walk
 		granted.append([x, walk])
-		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+		k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 
 ## Rank 3: extra move speed while inside something that fades to nothing as the walk runs out (the physics
 ## data's +150 on a 455 base speed is the 0.33 in "inside_boost").
@@ -72,7 +72,7 @@ func inside_boost() -> float:
 ## Walking into something leaves a spirit orb at the entry: anyone else who touches it (ally or foe) walks
 ## as a spirit too, for the same time (wiki: Phase Walk's phase orb).
 func _drop_orb(at: Vector3) -> void:
-	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.GREEN))
+	var n := KitMeshes.inst(k.fx, Models.sphere(0.3, 12), KitShaders.mat("star", PinFx.THREAD))
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
@@ -94,7 +94,7 @@ func tick_orbs(dt: float) -> void:
 				var walk := walk_time()
 				x.spirit_t = walk
 				granted.append([x, walk])
-				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.GREEN, 12, 3.0, 0.3)
+				k.m.fx.burst(x.pos + Vector3(0, 0.8, 0), PinFx.THREAD, 12, 3.0, 0.3)
 	for g in granted.duplicate():
 		var x: Hunter = g[0]
 		g[1] = float(g[1]) - dt
