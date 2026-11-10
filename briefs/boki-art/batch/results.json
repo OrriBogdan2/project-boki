@@ -85627,5 +85627,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_fanpire_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_gilabacus_b4",
+    "name": "Gilabacus (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_gilabacus_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_foldbat_b4",
+    "name": "Foldbat (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_foldbat_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_fanpire_b4",
+    "name": "Fanpire (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_fanpire_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_fanpire_b4",
+    "name": "Fanpire (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_fanpire_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_fanpire_b4",
+    "name": "Fanpire (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_fanpire_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_foldbat_b4",
+    "name": "Foldbat (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_foldbat_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_fanpire_b4",
+    "name": "Fanpire (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_fanpire_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaciammoth_b4",
+    "name": "Glaciammoth (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_glaciammoth_b4_2.jpg",
+    "ok": true
   }
 ]
