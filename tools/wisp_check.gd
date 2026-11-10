@@ -248,6 +248,10 @@ func _summon() -> void:
 	var pop := k.get_node_or_null(KinSummon.POP) as BokiWispPop
 	ok(pop != null and pop.out and not k.model.visible and m.fx.radial == radial0,
 		"...as a BokiWispPop burst, the walking model hidden, no burst or ring of sparks")
+	var cs := {}
+	KinSummon.anim_state(p, cs)
+	ok(absf(s.left - 8.0) < 0.01 and float(cs["call_t"]) < 0.05,
+		"...on the press (its window already runs) and the Hunter's call gesture starts with it")
 	pop._process(BokiWispPop.DURATION + 0.01)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the walking Boki takes over")
 	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
@@ -288,6 +292,16 @@ func _summon() -> void:
 	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding from where it fell up to the shoulder")
 	pop._process(BokiWispPop.DURATION + 0.01)
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp rides on")
+	s.cd = 0.0
+	p.set_meta(KinSummon.CALL_AT, -99.0)
+	p.downed = true
+	s.burst()
+	p.downed = false
+	KinSummon.anim_state(p, cs)
+	ok(not k.wisp and float(cs["call_t"]) > 50.0,
+		"summon: a burst while the Hunter is downed (the guardian) makes no call gesture")
+	s.end()
+	_frames(KinSummon.SHRINK_S + 0.05)
 	s.cd = 0.0
 	KinSummon.press(p)
 	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]

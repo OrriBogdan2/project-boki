@@ -1,5 +1,5 @@
 {
-	"doc": "Short keyed gestures for the emote wheel (scripts/heroes/warden_gestures.gd). Each: len (s) and keys [time, {bone: [pitch, yaw, roll] degrees from the rig's rest}]; a bone left out of a key is at rest there, and every clip starts and ends at rest. Rig axes (all 12 Hunters share them): arms hang down at rest; R arm: pitch -90 raises it forward, roll +90 out to the side (L: roll -90); forearm bends the same way from the upper arm; head pitch - nods, yaw + turns to the left; hips pitch - bows forward.",
+	"doc": "Short keyed gestures for the emote wheel (scripts/heroes/warden_gestures.gd). Each: len (s) and keys [time, {bone: [pitch, yaw, roll] degrees from the rig's rest}]; a bone left out of a key is at rest there, and every clip starts and ends at rest. Rig axes (all 12 Hunters share them): arms hang down at rest; R arm: pitch -90 raises it forward, roll +90 out to the side (L: roll -90); forearm bends the same way from the upper arm; head pitch - nods, yaw + turns to the left; hips pitch - bows forward. The call_* gestures are the Hunter's summon call (warden_anim summon_call, 0.3 s: one hand flung toward the Boki's burst point, then back; KinSummon.anim_state).",
 	"gestures": {
 		"flag": {"len": 1.6, "keys": [
 			[0.35, {"head": [-6, 0, 0], "upper_arm.R": [-15, 0, 70], "forearm.R": [0, 0, 95], "upper_arm.L": [-15, 0, -70], "forearm.L": [0, 0, -95]}],
@@ -55,6 +55,12 @@
 			[0.3, {"head": [0, 16, 0], "upper_arm.R": [-35, 0, -25], "forearm.R": [-125, 0, -50], "upper_arm.L": [-35, 0, 25], "forearm.L": [-125, 0, 50]}],
 			[0.55, {"head": [0, -16, 0], "upper_arm.R": [-35, 0, -25], "forearm.R": [-125, 0, -50], "upper_arm.L": [-35, 0, 25], "forearm.L": [-125, 0, 50]}],
 			[0.8, {"head": [0, 16, 0], "upper_arm.R": [-35, 0, -25], "forearm.R": [-125, 0, -50], "upper_arm.L": [-35, 0, 25], "forearm.L": [-125, 0, 50]}],
-			[1.05, {"head": [0, -10, 0], "upper_arm.R": [-35, 0, -25], "forearm.R": [-125, 0, -50], "upper_arm.L": [-35, 0, 25], "forearm.L": [-125, 0, 50]}]]}
+			[1.05, {"head": [0, -10, 0], "upper_arm.R": [-35, 0, -25], "forearm.R": [-125, 0, -50], "upper_arm.L": [-35, 0, 25], "forearm.L": [-125, 0, 50]}]]},
+		"call_point_r": {"len": 0.3, "keys": [[0.09, {"head": [-4, 0, 0], "upper_arm.R": [-88, 0, 6], "forearm.R": [-4, 0, 0]}], [0.19, {"head": [-4, 0, 0], "upper_arm.R": [-88, 0, 6], "forearm.R": [-4, 0, 0]}]]},
+		"call_point_l": {"len": 0.3, "keys": [[0.09, {"head": [-4, 0, 0], "upper_arm.L": [-88, 0, -6], "forearm.L": [-4, 0, 0]}], [0.19, {"head": [-4, 0, 0], "upper_arm.L": [-88, 0, -6], "forearm.L": [-4, 0, 0]}]]},
+		"call_raise_r": {"len": 0.3, "keys": [[0.09, {"head": [-8, 0, 0], "upper_arm.R": [-150, 0, 14], "forearm.R": [-22, 0, 0]}], [0.19, {"head": [-8, 0, 0], "upper_arm.R": [-150, 0, 14], "forearm.R": [-22, 0, 0]}]]},
+		"call_fling_r": {"len": 0.3, "keys": [[0.09, {"hips": [-3, 0, 0], "upper_arm.R": [-70, 0, 40], "forearm.R": [-12, 0, 10]}], [0.19, {"hips": [-3, 0, 0], "upper_arm.R": [-70, 0, 40], "forearm.R": [-12, 0, 10]}]]},
+		"call_fling_l": {"len": 0.3, "keys": [[0.09, {"hips": [-3, 0, 0], "upper_arm.L": [-70, 0, -40], "forearm.L": [-12, 0, -10]}], [0.19, {"hips": [-3, 0, 0], "upper_arm.L": [-70, 0, -40], "forearm.L": [-12, 0, -10]}]]},
+		"call_slam_r": {"len": 0.3, "keys": [[0.09, {"hips": [-10, 0, 0], "head": [4, 0, 0], "upper_arm.R": [-96, 0, 8], "forearm.R": [-6, 0, 0]}], [0.19, {"hips": [-10, 0, 0], "head": [4, 0, 0], "upper_arm.R": [-96, 0, 8], "forearm.R": [-6, 0, 0]}]]}
 	}
 }

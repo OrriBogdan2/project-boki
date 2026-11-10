@@ -11,6 +11,7 @@ extends RefCounted
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
+const CALL_AT := "summon_call_at"   # meta on the Hunter: match time of the burst that last called
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 
 var k: Kin
@@ -98,7 +99,7 @@ func tick(dt: float) -> void:
 			end()
 		elif o and k.flat_dist(o) > float(rules()["rebloom_dist"]):
 			k.teleport(KinFollow.side_spot(k))       # you dashed or glided off: it re-blooms beside you
-			popped(false)
+			popped(false, false)
 	elif shrink > 0.0 and k.state != "fused":
 		shrink -= dt
 		if shrink > 0.0:
@@ -110,15 +111,28 @@ func tick(dt: float) -> void:
 
 ## The burst (into the Boki) or the fold (back into the wisp), on every game (KinWisp.set_wisp). A fold already
 ## playing through the shrink carries on; one that never shrank (knocked down, or a late snapshot) folds from here.
-func popped(to_wisp: bool) -> void:
+func popped(to_wisp: bool, gesture := true) -> void:
 	if not to_wisp:
 		_pop(true, false)
+		if gesture:
+			_call()
 		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
 	_folding = false
+
+## The Hunter's call gesture (warden_anim "summon_call", WardenClips): only from the burst itself, not while downed
+## (the guardian summon) and not on a re-bloom. Pure animation: the burst has already happened.
+func _call() -> void:
+	var o := k.owner_h
+	if o and not o.downed:
+		o.set_meta(CALL_AT, k.m.time)
+
+## The call's age for the Hunter's anim state (HunterAnim / WardenClips read call_t).
+static func anim_state(h: Hunter, s: Dictionary) -> void:
+	s["call_t"] = h.m.time - float(h.get_meta(CALL_AT, -99.0))
 
 ## A BokiWispPop over the kin: its wisp home at the hunter's shoulder, the Boki's feet where the kin stands
 ## now. stowing: the kin is about to move to the shoulder itself (KinSummon._back), so the pop sits on it.
