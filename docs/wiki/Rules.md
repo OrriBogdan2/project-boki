@@ -476,6 +476,23 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## status_sfx (`content/rules/status_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | StatusSfx (scripts/match/status_sfx.gd): a short start cue on the affected body for each status, a quiet loop for the long ones. Sounds from tools/gen_status_sfx.py, Cinder's as_ignite and Sparkle's mage_zap. Dbs are call-site volumes under the sound's own level; 'mine' (on your body, or put there by you or your Boki) adds mine_db. pitch_step: the cue climbs this much per stack (static). Voice caps: at most cue_cap cues start within cue_window_ms across all statuses, and at most loop_cap loops run at once. |
+| cue_db | -9 |
+| mine_db | 3 |
+| loop_db | -16 |
+| loop_reach_m | 14 |
+| cue_cap | 4 |
+| cue_window_ms | 200 |
+| loop_cap | 3 |
+| cues | {"ignite": {"sound": "as_ignite", "db": -6.0}, "chill": {"sound": "st_chill"}, "static": {"sound": "mage_zap", "db": -6.0, "pitch_base": 0.9, "pitch_step": 0.08}, "slow": {"sound": "st_slow"}, "stun": {"sound": "st_stun"}, "root": {"sound": "st_root"}, "ground": {"sound": "st_ground"}, "daze": {"sound": "st_daze"}, "antiheal": {"sound": "st_antiheal"}} |
+| loops | {"ignite": {"sound": "st_ignite_loop", "pitch_step": 0.0}, "static": {"sound": "st_static_loop", "pitch_step": 0.1}} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 
