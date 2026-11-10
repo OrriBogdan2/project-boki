@@ -109196,5 +109196,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/hb3_cinder_calderoise_1.jpg",
     "ok": true
+  },
+  {
+    "id": "drop_land",
+    "name": "Site drop splash, new angle (land)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_land_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up",
+    "name": "Site drop splash, new angle (up)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_up_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_down",
+    "name": "Site drop splash, new angle (down)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_down_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_land",
+    "name": "Site drop splash, new angle (land)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_land_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up",
+    "name": "Site drop splash, new angle (up)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_up_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_down",
+    "name": "Site drop splash, new angle (down)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_down_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up",
+    "name": "Site drop splash, new angle (up)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_up_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_land",
+    "name": "Site drop splash, new angle (land)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_land_3.jpg",
+    "ok": true
   }
 ]
