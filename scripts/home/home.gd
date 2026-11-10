@@ -114,13 +114,14 @@ var rain: CPUParticles3D
 var raining := false
 var rain_k := 0.0
 var weather_t := 40.0
+var ambience := HomeAmbience.new()
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if zone == GardenZones.HUB: visit = HubLayout.island()
 	GardenZones.here = zone
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Sfx.play_ambience("home")
+	Sfx.play_ambience("")        # the beds of HomeAmbience take over
 	Sfx.new_track.connect(_on_new_track)
 	var dbg := OS.get_cmdline_user_args()
 	for a in dbg:
@@ -1011,8 +1012,8 @@ func _update_sky(d: float) -> void:
 		raining = not raining and randf() < 0.45
 		weather_t = randf_range(50.0, 110.0) if raining else randf_range(70.0, 160.0)
 		rain.emitting = raining
-		Sfx.play_ambience("rain" if raining else "home")
 	rain_k = move_toward(rain_k, 1.0 if raining else 0.0, d * 0.3)
+	ambience.tick(d, day_t, raining, _d(), ppos)
 	rain.position = Vector3(ppos.x, 12.0, ppos.z)
 	# home is the warm place: a honey-coloured sun, a long golden hour, and lamps glowing amber
 	# against a soft blue night (the expedition is the cold, moody one)
@@ -1122,6 +1123,7 @@ func _see_through() -> void:
 
 func _exit_tree() -> void:
 	SeeThrough.off()
+	Sfx.clear_amb_layers()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
