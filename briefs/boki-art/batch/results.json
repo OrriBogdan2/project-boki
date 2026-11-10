@@ -83261,5 +83261,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_checkmare_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_sundormouse",
+    "name": "Sundormouse (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_sundormouse_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bonsolith",
+    "name": "Bonsolith (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_bonsolith_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bonsolith",
+    "name": "Bonsolith (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_bonsolith_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chiptero",
+    "name": "Chiptero (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chiptero_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bonsolith",
+    "name": "Bonsolith (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_bonsolith_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pickadactyl",
+    "name": "Pickadactyl (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_pickadactyl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_harvantis",
+    "name": "Harvantis (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_harvantis_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pickadactyl",
+    "name": "Pickadactyl (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_pickadactyl_2.jpg",
+    "ok": true
   }
 ]
