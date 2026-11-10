@@ -131,3 +131,17 @@ For a Boki `<Name>` (file ID, not the display name):
 1. Set up the checkout (section 1). Read this file and the last 40 entries of `CHANNEL.md`.
 2. `git fetch`, then look at the in-flight results in section 6 (one grid per group). Pick, promote, commit, push, and post to CHANNEL.
 3. Tell the owner in one short message what went live, then continue with the in-flight items, then batch 2 of the roster.
+
+## 10. Update 11-09 22:12 ET (second-account art session). Read this after sections 1-9; where they disagree, this wins.
+- **Bleed is solved: use the text-only route.** No style image at all, the style in words: `RS_CARD_TEXT(...)` in the v2 spec file (same arguments as `RS_CARD`). 180+ images so far with no second creature and no board tiles. Do not use `SRV2` anchors or the `SRB` board any more. For new poses and design changes use `ON_POSE` (ref = the sheet; a card ref keeps the old pose) and `ON_CHANGE` (ref = the card).
+- **Stage B for unchanged designs:** `RS_SHEET` (old sheet + V2 card) and `RS_PORTRAIT` (old portrait + V2 card). For new or changed designs: `V2SHEET_NEW` / `V2PORT_NEW` from the V2 card. Sheets 3 runs, portraits 2.
+- **Promotion tools (run from the repo root, need `pip install opencv-python-headless scipy`):**
+  - `python3 briefs/boki-art/tools/promote.py Name card_stem sheet_stem portrait_stem [dc]` (card_stem `-` keeps the card; `dc` removes floating bits from the portrait)
+  - `python3 briefs/boki-art/tools/promote_card.py Name:stem[:dc] ...` (card only)
+  - `python3 briefs/boki-art/tools/refresh_names.py Name ...` updates only those manifest entries and heroes. **Do not run the full `refresh_manifest.py` on a cloud machine:** a different OpenCV re-cuts all heroes and moves every hero hash.
+- **Card backdrops must be flat.** Scopeleon's "bug" in the dex was a shaded backdrop that the cut-out kept. Check `portraits/cutout_v2/<Name>.png` on a dark background after promoting anything that looks shaded.
+- **State:** manifest 234. Fully V2: 52 Boki (the 26 in section 6 plus Chimelop, Pinster, Tiltster, Barostorm, Maulangler, Barrelmander, Jerbit, Jerbolt, Dynaboa, Bullpole, Dreadnoyak, Gloamspire, Pyrraven, Scythant, Loafhopper, Parrywhal, Maracoil, Morelossus, Frigatee, Bulwartoad, Dribbara, Bastionpet, Domeleon, Pawnfry, Lanceron, Scopeleon). Crofthollow and Pagoguana have a new card pose (sheet and portrait unchanged).
+- **V2 card only, sheet + portrait in flight:** batch 2 (`_BT2` in the spec file, 35 Boki, dex 2-53; jobs `v2s_<name>_b2`, `v2p_<name>_b2`), Voltalon and Wickapi (new cards from owner notes; no stage-B jobs queued yet).
+- **In flight, small:** Bastling in tide colours to match the new Bastionpet (`on_bastling_1` is the card pick; `v2s_bastling_tide`, `v2p_bastling_tide`; new manifest entry, `turnarounds/`); Effigoon lying down (`on_effigoon_clean`; the owner wanted it out of Mortarfly's pose).
+- **Owner notes 11-09 evening, all handled except:** Tiltster "head not very on" (not changed; ask him about the new V2 card), Parrywhal Pokémon look-alike check (not done), Effigeetle caterpillar (the `rd_effigeetle_*` concepts have floating gold bits and a human-like face: redo with `ON_CHANGE`).
+- **Next roster batch:** dex 54 onward (Rippmink, Blossmink, Voltmink, Umbrink, Lunink, Prismink, ...), skipping what is listed above. Still waiting on an owner pick: Glaivyx, Glassolotl, Chandelotl, Ringrove, Cindermaw (section 6).
