@@ -76247,5 +76247,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/on_bastionpet_3.jpg",
     "ok": true
+  },
+  {
+    "id": "on_pawnfry",
+    "name": "Pawnfry (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_pawnfry_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_domeleon",
+    "name": "Domeleon (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_domeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pawnfry",
+    "name": "Pawnfry (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_pawnfry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_domeleon",
+    "name": "Domeleon (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_domeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_domeleon",
+    "name": "Domeleon (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_domeleon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pawnfry",
+    "name": "Pawnfry (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_pawnfry_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lanceron",
+    "name": "Lanceron (owner note: back in its family, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_lanceron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_scopeleon",
+    "name": "Scopeleon (V2 card, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_scopeleon_2.jpg",
+    "ok": true
   }
 ]
