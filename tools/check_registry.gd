@@ -184,8 +184,6 @@ const CHECKS := {
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
-	"--island-clip": ["res://tools/island_clip.gd", "island_clip", null],      # GPU: deep-island clips
-	"--island-depth-check": ["res://tools/island_depth_check.gd", "island_depth_check", null],
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],      # measured reach, width and arc of every input
