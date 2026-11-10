@@ -109721,5 +109721,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/carp2_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_pavonazar_vfan",
+    "name": "Pavonazar (review: vfan)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_vfan_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tenpin_t2",
+    "name": "Kingpinguin (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tenpin_t2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tenpin_t2",
+    "name": "Kingpinguin (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tenpin_t2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_postroo_compact",
+    "name": "Postroo (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_postroo_compact_1.jpg",
+    "ok": true
   }
 ]
