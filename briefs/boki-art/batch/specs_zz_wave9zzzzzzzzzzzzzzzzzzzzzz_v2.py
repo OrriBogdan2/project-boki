@@ -269,3 +269,46 @@ SPECS.append({'id':'v2g_ringrove_tilt2','name':'Ringrove (strong head tilt)','re
   'prompt':_EDIT+"tilt its whole head strongly to one side, about 30 degrees, so one ear is clearly lower than the other, like a puzzled, friendly dog. Its eyes look straight at the viewer, with a small lopsided smile. Its body, mushroom caps, colours and everything else stay exactly the same. Do not add anything else."})
 _POSE('v2p_glassolotl_left2','Glassolotl',_LM['Glassolotl']['sheet'],_O+'v2a2_glassolotl_3.jpg',
   "the mirror image of image 2: its head is on the LEFT side of the picture and its tail on the right, swimming through the air toward the left edge, body in a long S-curve.",3)
+
+# ===== 20:08 ET 11-09: V2 batch 1 picks. Anchor bleed hit 9 of 26 (a white Rimink head beside Barostorm, Chandelotl beside Chimelop, black
+# Cindermaw sludge over the anglers, purple fog under the cute ones). Clean picks go to stage B; the rest get an edit that removes the bleed.
+_B1PICK={'Gongrowl':'v2a_gongrowl_1','Anvilbrock':'v2a_anvilbrock_1','Forgebrock':'v2a_forgebrock_2','Furnacowary':'v2a_furnacowary_2','Vaultara':'v2a_vaultara_2',
+ 'Prowyak':'v2a_prowyak_3','Bastionpet':'v2a_bastionpet_1','Siegephant':'v2a_siegephant_1','Chuggamus':'v2a_chuggamus_1','Tiltster':'v2a_tiltster_1',
+ 'Canvastross':'v2a_canvastross_2','Crofthollow':'v2a_crofthollow_1','Pagoguana':'v2a_pagoguana_3','Stormit':'v2a_stormit_2','Sporcupine':'v2a_sporcupine_2',
+ 'Critwom':'v2a_critwom_2','Sirencada':'v2a_sirencada_1','Citadoad':'v2a_citadoad_2','Snapler':'v2a_snapler_3','Bucketmander':'v2a_bucketmander_2'}
+_B1FIX={'Barostorm':('v2a_barostorm_1',"remove the white ferret head with ice crystals floating beside it and the small ice shard below it"),
+ 'Maulangler':('v2a_maulangler_3',"remove the black smoke cloud floating above its back and the purple fog around its feet"),
+ 'Chimelop':('v2a_chimelop_1',"remove the pink axolotl head in the top right corner and every faint shape around its feet"),
+ 'Barrelmander':('v2a_barrelmander_1',"remove the purple cloud under its feet; its feet stand on nothing"),
+ 'Domeleon':('v2a_domeleon_2',"remove the purple blob under its feet; its feet stand on nothing"),
+ 'Bastling':('v2a_bastling_1',"remove the purple cloud under it; its legs stand on nothing")}
+for _n,(_s,_w) in _B1FIX.items():
+    SPECS.append({'id':'v2x_'+_n.lower(),'name':_n+' (V2 card, remove bleed)','refs':[_O+_s+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':_EDIT+_w+". The creature itself, its colours, line and flat shading stay exactly the same, and the plain pale grey background is empty around it. Do not add anything else."})
+_B1D={r[0]:r for r in _B1}
+def V2SHEET_NEW(n,card,cols,counts):
+    SPECS.append({'id':'v2s_'+n.lower(),'name':n+' (V2 sheet from card)','refs':[card],'runs':3,'aspect':'16:9','size':'2K',
+      'prompt':("Clean flat model sheet of exactly the creature in image 1: "+n+". Exactly four views of it in one single row: front, three-quarter, side and back, in that order, "
+        "all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. "
+        "Colours: "+cols+". Parts, the same in every view: "+counts+". Model-sheet finish: "+LINE_V2+"Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. "
+        "The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. "
+        "Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature.")})
+def V2PORT_NEW(n,card,stage,arch,cols,counts,dark,furry,pose):
+    SPECS.append({'id':'v2p_'+n.lower(),'name':n+' (V2 portrait from card)','refs':[card],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':("POSE FIRST: "+pose+". Official encyclopedia portrait of exactly the creature in image 1: "+n+". Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: "
+        "draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: "+cols+". Parts: "+counts+". "
+        +STYLE_V2(stage,arch,dark,furry).replace(FX_V2,"The air around the creature is empty: nothing drifts, sparks or trails. ")+FRAME_V2)})
+_B1POSE={'Gongrowl':"knuckle-walking forward on all fours, head low, glaring up at the viewer",'Anvilbrock':"digging in its claws and lowering its head, ready to charge",
+ 'Forgebrock':"standing tall on its hind legs, front paws raised, roaring",'Furnacowary':"striding forward mid-step, one big foot raised, head high",
+ 'Vaultara':"turning its head back over its shell to look at the viewer, key tail curled",'Prowyak':"trotting forward happily, shaggy coat swinging",
+ 'Bastionpet':"raising both claws high in a defensive stance",'Siegephant':"rearing on its hind legs, trunk raised high",'Chuggamus':"charging forward head-down, mouth open",
+ 'Tiltster':"sitting back on its haunches, front paws raised like flippers, cheeky grin",'Canvastross':"gliding with wings spread wide, seen from slightly below",
+ 'Crofthollow':"lying down calmly with its legs folded, head turned to the viewer",'Pagoguana':"rearing up on its hind legs with its tail planted",
+ 'Stormit':"scuttling sideways with one claw raised",'Sporcupine':"curled half into a ball, quills raised defensively, peeking out",
+ 'Critwom':"rolling forward with its shell tucked, mid-tumble",'Sirencada':"wings spread, about to take off, horn raised",'Citadoad':"swinging its club tail over its back, mouth open",
+ 'Snapler':"swimming through the air, mouth wide open, lure glowing ahead of it",'Bucketmander':"waddling forward with its little arms out, happy",
+ 'Barostorm':"sitting up on its haunches like a meerkat, looking out over the horizon",'Maulangler':"lunging forward with its jaws wide open",
+ 'Chimelop':"sitting upright with its long bell ears hanging down, calm",'Barrelmander':"waddling forward, tail swaying",'Domeleon':"gripping with its feet and turning its telescope eye toward the viewer",
+ 'Bastling':"waving one claw happily"}
+for _n,_s in _B1PICK.items():
+    _r=_B1D[_n]; V2SHEET_NEW(_n,_O+_s+'.jpg',_r[6],_r[7]); V2PORT_NEW(_n,_O+_s+'.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_B1POSE[_n])
