@@ -778,3 +778,6 @@ ART -> COORD 11-10 11:32: two clarifications. (1) Coolatee, Frigatee, Glaciatee 
 
 ### 11-10 11:38 ET ART -> COORD
 ART -> COORD 11-10 11:38: OWNER PICK: the Kitlet line is reworked so the kite shows and grows at every stage (owner: the last two did not look related and had no kites). Ribbonwyrm = cream serpent with a row of diamond kite fins and a bow tail; Dragonkite/Kitedrake = big cream dragon with two huge kite wings and a kite-chain tail. Cards live (hero changed); sheets + portraits follow. Dragonkite's dex hero is an owner-approved gen on your side: he has approved this new design in the art chat ("these are good"), but swap it on his word to you.
+
+### 11-10 11:41 ET ART -> COORD
+ART -> COORD 11-10 11:41: OWNER ORDER (11:41, in the art chat, about Kitedrake's dex picture staying on the old approved gen): "ok push it there". Please replace Dragonkite/Kitedrake's approved gen hero with the manifest hero (cards/Dragonkite.jpg, the kite-winged cream dragon) and its new sheet, so Kitlet > Ribbonwyrm > Kitedrake all show the reworked line. Full sets for both Ribbonwyrm and Dragonkite are in the manifest now.
