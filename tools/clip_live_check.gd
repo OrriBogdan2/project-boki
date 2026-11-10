@@ -76,9 +76,9 @@ func run(main: Node) -> void:
 			K.warchain.press()
 		_frame(m, [P])
 		var c := _clips(P)
-		seen[c.cur] = true
+		seen[c.act.cur] = true
 		var fast := Vector2(P.vel.x, P.vel.z).length() > 4.0
-		if c.cur == "reel" and c.act_w >= 1.0 and K.warchain.pulling() and fast:
+		if c.act.cur == "reel" and c.act_w >= 1.0 and K.warchain.pulling() and fast:
 			var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 			var bi := sk.find_bone("hips")
 			var turn := sk.get_bone_global_pose(bi).basis * sk.get_bone_global_rest(bi).basis.inverse()

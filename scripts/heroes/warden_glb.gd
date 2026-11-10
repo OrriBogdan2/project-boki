@@ -968,7 +968,7 @@ class Sync extends Node:
 		_keep_one_weapon()
 		if clips:
 			_play(dt)
-			springs.still = clips.cur in clips.d.get("still", [])
+			springs.still = clips.act.cur in clips.d.get("still", [])
 		else:
 			apply()
 			apply_blade()

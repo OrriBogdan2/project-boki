@@ -112,7 +112,7 @@ func run(main: Node) -> void:
 	var was_visible := false
 	for f in 60:
 		_frame(m, P)
-		dead_seen = dead_seen or c.cur == "death"
+		dead_seen = dead_seen or c.act.cur == "death"
 		was_visible = was_visible or P.visible
 	ok(dead_seen and was_visible, "a knock-out plays the death clip on screen (clip %s, visible %s)"
 			% [dead_seen, was_visible])

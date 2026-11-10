@@ -9,8 +9,8 @@ extends RefCounted
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
-## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
-## next without a pop (item 32).
+## (Blend2: moves that own the body). Each of those two is a Layer: two seekable channels crossfaded, so one move hands
+## to the next without a pop (item 32), a cancel inside a fade included.
 ##
 ## Data "crouch" (item 143): under air, a crouch layer (idle and a sneak ring) with a one-shot channel for the dip into
 ## and out of it. The game state's crouch (0..1) only says which way it is going; the layer has its own eased weight.
@@ -44,9 +44,8 @@ var lib: AnimationLibrary
 var alt_on := false          # this play of a move takes its "alt" clip
 var alt_km := ""
 var alt_t := 0.0
-var cur := ""                # the clip on the live channel
-var chan := 0                # which channel is live, 0 or 1
-var xf := 0.0                # the crossfade between the channels (0: channel a)
+var act := Layer.new("act")  # the moves that own the body
+var up := Layer.new("up")    # the moves on the torso and arms only
 var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
 var air_w := 0.0
@@ -77,6 +76,18 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+
+## One layer's two channels. A new clip, or the same one started over (a recast, a hold loop's wrap), goes on the
+## channel with less weight on screen and fades in over the move's fade; the one still showing fades out under it. So a
+## cancel that lands inside the last fade never snaps a half-shown pose to the next clip.
+class Layer:
+	var nm: String           # the blend node: "act" or "up"
+	var chan := 0            # which channel is live, 0 or 1
+	var cur := ""            # the clip on the live channel
+	var xf := 0.0            # the crossfade between the channels (0: channel a)
+	var t := -1.0            # s the live clip was last seeked to (-1: it plays on its own)
+	func _init(node: String) -> void:
+		nm = node
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -221,30 +232,32 @@ func _build() -> AnimationNodeBlendTree:
 	t.add_node("air", AnimationNodeBlend2.new())
 	t.connect_node("air", 0, _build_crouch(t) if d.has("crouch") else "stance_w")
 	t.connect_node("air", 1, "glide_w")
-	for ch in ["a", "b"]:
-		t.add_node("anim_" + ch, _anim(String(lc["idle"])))
-		t.add_node("seek_" + ch, AnimationNodeTimeSeek.new())
-		t.connect_node("seek_" + ch, 0, "anim_" + ch)
-		t.add_node("rate_" + ch, AnimationNodeTimeScale.new())
-		t.connect_node("rate_" + ch, 0, "seek_" + ch)
-	t.add_node("act", AnimationNodeBlend2.new())
-	t.connect_node("act", 0, "rate_a")
-	t.connect_node("act", 1, "rate_b")
-	var up := AnimationNodeBlend2.new()
-	up.filter_enabled = true
+	_build_layer(t, act.nm, String(lc["idle"]))
+	_build_layer(t, up.nm, String(lc["idle"]))
+	var torso := AnimationNodeBlend2.new()
+	torso.filter_enabled = true
 	for b in d.get("upper", []):
-		up.set_filter_path(_track(String(b)), true)
-	t.add_node("upper", up)
-	t.add_node("anim_u", _anim(String(lc["idle"])))
-	t.add_node("seek_u", AnimationNodeTimeSeek.new())
-	t.connect_node("seek_u", 0, "anim_u")
+		torso.set_filter_path(_track(String(b)), true)
+	t.add_node("upper", torso)
 	t.connect_node("upper", 0, "air")
-	t.connect_node("upper", 1, "seek_u")
+	t.connect_node("upper", 1, up.nm)
 	t.add_node("full", AnimationNodeBlend2.new())
 	t.connect_node("full", 0, "upper")
-	t.connect_node("full", 1, "act")
+	t.connect_node("full", 1, act.nm)
 	t.connect_node("output", 0, "full")
 	return t
+
+## A layer's two channels, anim > seek > rate each, crossfaded by a Blend2 named for the layer.
+func _build_layer(t: AnimationNodeBlendTree, nm: String, idle: String) -> void:
+	for ch in ["a", "b"]:
+		t.add_node("%s_anim_%s" % [nm, ch], _anim(idle))
+		t.add_node("%s_seek_%s" % [nm, ch], AnimationNodeTimeSeek.new())
+		t.connect_node("%s_seek_%s" % [nm, ch], 0, "%s_anim_%s" % [nm, ch])
+		t.add_node("%s_rate_%s" % [nm, ch], AnimationNodeTimeScale.new())
+		t.connect_node("%s_rate_%s" % [nm, ch], 0, "%s_seek_%s" % [nm, ch])
+	t.add_node(nm, AnimationNodeBlend2.new())
+	t.connect_node(nm, 0, nm + "_rate_a")
+	t.connect_node(nm, 1, nm + "_rate_b")
 
 ## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
 func _build_crouch(t: AnimationNodeBlendTree) -> String:
@@ -318,7 +331,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			up = Vector2(vel.x, vel.z).length() >= STILL
 		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
+				"hold": mv.has("hold_from"), "fade": float(mv.get("fade", FADE)),
+				"legs_heading": bool(mv.get("legs_heading", false))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
@@ -328,7 +342,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
-	land_t += dt
 	var ld: Dictionary = d.get("land", {})
 	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
 		return {"clip": ld["clip"], "t": land_t}
@@ -340,6 +353,26 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
 
+## The layer takes `clip` at `tt` s (-1: it plays on its own), fading in over `fade` s (see Layer). A time that goes
+## back is the move started over, unless the clip is a hold whose loop wrapped.
+func _play(L: Layer, clip: String, tt: float, fade: float, hold: bool, dt: float) -> void:
+	if clip != L.cur or (tt >= 0.0 and tt < L.t - 0.001 and not hold):
+		if L.cur == "":                      # (the layer was off: nothing to fade from, so no stale pose bleeds in)
+			L.xf = float(L.chan)
+		elif (L.xf if L.chan == 1 else 1.0 - L.xf) >= 0.5:      # (the live channel shows: the other one takes it)
+			L.chan = 1 - L.chan
+		L.cur = clip
+		var ch := "a" if L.chan == 0 else "b"
+		_node("%s_anim_%s" % [L.nm, ch]).animation = clip
+		_p("%s_seek_%s/seek_request" % [L.nm, ch], maxf(tt, 0.0))
+	L.t = tt
+	var live := "a" if L.chan == 0 else "b"
+	if tt >= 0.0:
+		_p("%s_seek_%s/seek_request" % [L.nm, live], tt)
+	_p("%s_rate_%s/scale" % [L.nm, live], 0.0 if tt >= 0.0 else 1.0)
+	L.xf = move_toward(L.xf, float(L.chan), dt / fade)
+	_p(L.nm + "/blend_amount", L.xf)
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
 	var want := force
@@ -347,35 +380,27 @@ func step(dt: float) -> void:
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
+	if act_w <= 0.0:          # (a layer faded out starts its next clip afresh, even the same one)
+		act.cur = ""
+	if up_w <= 0.0:
+		up.cur = ""
+	var fade := float(want.get("fade", FADE))
+	var hold := bool(want.get("hold", false))
+	# (one layer takes over from the other with one motion: an upper move under a full one starts at the full one's
+	# weight, so the legs' arm swing never shows between them; a full move hides the upper one and drops it once it
+	# owns the body)
 	if not proc and bool(want.get("upper", false)):
-		_node("anim_u").animation = String(want["clip"])
-		_p("seek_u/seek_request", float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		_play(up, String(want["clip"]), float(want.get("t", 0.0)), fade, hold, dt)
+		up_w = move_toward(maxf(up_w, act_w), 1.0, dt / fade)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
-		var clip := String(want["clip"])
-		var tt := float(want.get("t", -1.0))
-		if clip != cur:
-			cur = clip
-			chan = 1 - chan
-			var ch := "a" if chan == 0 else "b"
-			_node("anim_" + ch).animation = clip
-			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
-		var live := "a" if chan == 0 else "b"
-		if tt >= 0.0:
-			_p("seek_%s/seek_request" % live, tt)
-			_p("rate_%s/scale" % live, 0.0)
-		else:
-			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
-		up_w = move_toward(up_w, 0.0, dt / FADE)
+		_play(act, String(want["clip"]), float(want.get("t", -1.0)), fade, hold, dt)
+		act_w = move_toward(act_w, 1.0, dt / fade)
+		if act_w >= 1.0:
+			up_w = 0.0
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
-		if act_w <= 0.0 and up_w <= 0.0:
-			cur = ""
-	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
-	_p("act/blend_amount", xf)
 	_p("upper/blend_amount", up_w)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
@@ -432,11 +457,16 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var grounded := bool(s.get("grounded", true))
 	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall
+	# pose under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
+	var busy := maxf(act_w, up_w)
+	if busy <= 0.0 or busy >= 1.0 or gliding:
+		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
 	_p("air_pose/blend_position", rise_w)
+	land_t += dt           # (ticks under a move too: a landing a move covered is over, not owed)
 	if not grounded:
 		air_t += dt
 	elif was_air:

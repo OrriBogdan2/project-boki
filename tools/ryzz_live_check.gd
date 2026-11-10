@@ -37,9 +37,9 @@ func _run(m: Match, P: Hunter, frames: int, seen: Dictionary) -> float:
 	for f in frames:
 		_frame(m, P)
 		var c := _clips(P)
-		seen[c.cur] = true
+		seen[c.act.cur] = true
 		if c.up_w > 0.5:
-			seen[String(c._node("anim_u").animation)] = true
+			seen[c.up.cur] = true
 		top = maxf(top, _flare(P))
 	return top
 
@@ -134,7 +134,7 @@ func run(main: Node) -> void:
 	var was_visible := false
 	for f in 60:
 		_frame(m, P)
-		dead_seen = dead_seen or _clips(P).cur == "death"
+		dead_seen = dead_seen or _clips(P).act.cur == "death"
 		was_visible = was_visible or P.visible
 	ok(dead_seen and was_visible, "a knock-out stays on screen and plays the death clip")
 	print("RYZZ_LIVE_DONE, failures: ", bad)

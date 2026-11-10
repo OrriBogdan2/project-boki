@@ -52,7 +52,7 @@ func run(main: Node) -> void:
 	var peak := rest
 	for f in 90:
 		_frame(m, P)
-		seen[clips.cur] = true
+		seen[clips.act.cur] = true
 		peak = maxf(peak, _emit(P))
 		await main.get_tree().process_frame
 	ok(seen.has("hearth"), "Hearthlight plays its clip (%s)" % str(seen.keys()))
@@ -69,7 +69,7 @@ func run(main: Node) -> void:
 	var dead_seen := false
 	for f in 60:
 		_frame(m, P)
-		dead_seen = dead_seen or clips.cur == "death"
+		dead_seen = dead_seen or clips.act.cur == "death"
 	ok(dead_seen, "a knock-out plays the death clip")
 	print("PIP_LIVE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
