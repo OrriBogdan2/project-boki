@@ -137,10 +137,3 @@ static func _check(h, r: Rect2, k: float) -> void:
 ## Where the interact prompt ("Hold F to open") goes: above the pill in the tutorial, else its usual spot.
 static func prompt_y(h, sz: Vector2) -> float:
 	return sz.y - 222.0 if h.m.tut == null else lanes(sz)["pill"].position.y - 64.0
-
-## During the tutorial the message lane is the top-right column, clear of the banner and the pill
-## (Hud holds it while the banner is up).
-static func place_msgs(lane: MsgLane, sz: Vector2) -> void:
-	var r: Rect2 = lanes(sz)["toast"]
-	lane.top = r.position.y
-	lane.right_edge = r.end.x

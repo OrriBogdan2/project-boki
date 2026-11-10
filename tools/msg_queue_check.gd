@@ -3,10 +3,9 @@ extends RefCounted
 ##   1. five lines fired at once: at most MAX_SHOWN show, the rest wait, no two cards overlap
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
-##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. rows the host's own cards take (the ally alerts) leave fewer for messages, at least one
-##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
-##   7. a world label under a card fades back
+##   4. the match HUD's toast, toast_small, tip and level_up go to its NoticeQueue, the farm's UI.toast to a lane
+##   5. a world label under a card fades back
+## (the match's own queue is checked by --notice-queue-check)
 ## Never touches the save.
 
 var bad := 0
@@ -27,8 +26,6 @@ func run(main_node: Node) -> void:
 	_layout(host)
 	_merge(host)
 	_priority(host)
-	_hold(host)
-	_reserved(host)
 	await _wiring()
 	_yield()
 	host.queue_free()
@@ -38,8 +35,6 @@ func run(main_node: Node) -> void:
 func _fresh(host: Control) -> MsgLane:
 	var lane := MsgLane.of(host)
 	lane.clear()
-	lane.hold = false
-	lane.reserved = 0
 	return lane
 
 # ------------------------------------------------------------------ 1. five at once
@@ -100,28 +95,7 @@ func _priority(host: Control) -> void:
 		lane.push(t, Color.WHITE)
 	ok(lane.waiting() == MsgLane.WAIT_CAP, "at most %d wait (%d)" % [MsgLane.WAIT_CAP, lane.waiting()])
 
-# ------------------------------------------------------------------ 4. hold
-func _hold(host: Control) -> void:
-	var lane := _fresh(host)
-	lane.hold = true
-	lane.push("check 1", Color.WHITE)
-	lane._process(0.5)
-	ok(lane.texts().is_empty() and lane.waiting() == 1, "held: the line waits")
-	lane.hold = false
-	ok(str(lane.texts()) == str(["check 1"]), "the hold lifts: it shows at once")
-
-# ------------------------------------------------------------------ 5. rows the host takes
-func _reserved(host: Control) -> void:
-	var lane := _fresh(host)
-	lane.reserved = 2
-	for t in ["a", "b", "c"]:
-		lane.push(t, Color.WHITE)
-	ok(lane.texts().size() == 1, "two alert cards up: one message row left (%d)" % lane.texts().size())
-	lane.reserved = 5
-	lane.push("d", Color.WHITE)
-	ok(lane.texts().size() >= 1, "never fewer than one row")
-
-# ------------------------------------------------------------------ 6. one lane everywhere
+# ------------------------------------------------------------------ 4. one queue per screen
 func _wiring() -> void:
 	var m := Match.new()
 	main.add_child(m)
@@ -129,17 +103,16 @@ func _wiring() -> void:
 		"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
 	m.set_process(false)
 	await main.get_tree().process_frame
-	var lane: MsgLane = m.hud.msgs
+	var lane: NoticeQueue = m.hud.msgs
 	lane.clear()
 	m.hud.toast("Bramble Isle", Color.GOLD)
 	m.hud.toast_small("Chest key found", Color.WHITE)
 	m.hud.level_up(3)
-	ok(lane.count() == 3 and lane.texts().has("LEVEL 3  ·  +1 skill point"),
-		"Hud.toast, toast_small and level_up all land in the HUD's lane (%s)" % str(lane.texts()))
+	ok(lane.count() == 3, "Hud.toast, toast_small and level_up all land in the HUD's queue (%d)" % lane.count())
 	lane.clear()
 	m.hud.tip("Hold left click to shoot")
-	ok(lane.count() == 1, "a hint lands in the same lane")
-	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
+	ok(lane.count() == 1, "a hint lands in the same queue")
+	ok(lane.get_parent() == m.hud, "the queue is part of the HUD")
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
@@ -149,7 +122,7 @@ func _wiring() -> void:
 		"UI.toast (the farm, town, houses) uses a lane too, repeats merged")
 	farm.queue_free()
 
-# ------------------------------------------------------------------ 7. world labels yield
+# ------------------------------------------------------------------ 5. world labels yield
 func _yield() -> void:
 	var cam := Camera3D.new()
 	main.add_child(cam)

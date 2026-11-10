@@ -12,7 +12,7 @@ var hit_t := 0.0
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
-var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
+var msgs := NoticeQueue.new()      # every banner and toast on screen: one at a time, by priority
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
 
@@ -119,13 +119,11 @@ func flash(col: Color, strength := 0.35) -> void:
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
 
-## The message lane sits under the ally alerts (they take its first rows), or in the tutorial's own
-## lane while that runs (Tutorial holds it while its banner is up).
+## The notice band sits under the ally alerts, or in the tutorial's own lane while that runs
+## (Tutorial holds the queue while its banner is up).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.reserved = alerts.size()
-	msgs.top = 84.0 + alerts_h
-	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	msgs.band = TutorialHud.lanes(c.size)["toast"] if m.tut else NoticeQueue.band_for(c.size, 84.0 + alerts_h)
 
 ## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
 ## them, so two lines of text never overlap on screen; they come back as it goes.
@@ -139,14 +137,14 @@ func _clear_under_toasts(delta: float) -> void:
 		if lbl is Label3D and is_instance_valid(lbl):
 			MsgLane.yield_label(lbl, m.cam, rects, delta)
 
-## A message in the lane (MsgLane).
-func toast(text: String, col: Color) -> void:
-	msgs.push(text, col)
+## A banner in the notice queue (NoticeQueue); `prio` says how soon it shows, `short` is its form when others wait.
+func toast(text: String, col: Color, prio := NoticeQueue.SQUAD, short := "") -> void:
+	msgs.push(text, col, prio, short)
 
 ## A first-time hint, in the lane for longer (Match._tip says each once).
 func tip(text: String) -> void:
 	if not Record.clean():
-		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
+		msgs.push(text, TIP_COL, NoticeQueue.REGION, "", TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
 
@@ -1019,7 +1017,7 @@ func hurt_from(at: Vector3) -> void:
 
 ## A less urgent message: it waits behind the others, and goes if it waits too long.
 func toast_small(text: String, col: Color) -> void:
-	msgs.push(text, col, MsgLane.LOW)
+	msgs.push(text, col, NoticeQueue.PICKUP)
 
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
@@ -1074,7 +1072,7 @@ func level_up(lv: int, info := {}) -> void:
 	if lv % 2 == 0:
 		flash(Color("ffd27a"), 0.16)
 		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
-	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
+	msgs.push(line, Color("ffd27a"), NoticeQueue.SQUAD)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:

@@ -130,7 +130,7 @@ func _offer(h: Hunter) -> void:
 	_cool["%d>%d" % [h.team, to]] = m.time + 25.0
 	events.append("offer %d->%d" % [h.team, to])
 	if _mine(to) and m.hud and not m.player.out:
-		m.hud.toast("%s offers a truce! Hold %s and pick Deal to accept" % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
+		m.hud.toast("%s offers a truce! Hold %s and pick Deal to accept" % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"), NoticeQueue.CALL)
 	elif _mine(h.team) and m.hud:
 		m.hud.toast_small("Truce offered to %s" % squad_name(to), Color("f4f1e6"))
 	# a bot squad answers in a moment (one with a living player in it waits for the player)
@@ -166,7 +166,7 @@ func make(a: int, b: int) -> void:
 	m.add_feed("%s and %s made a truce" % [squad_name(a), squad_name(b)])
 	m.sfx("unlock", null, -8.0, 1.1)
 	if m.player and (_mine(a) or _mine(b)) and m.hud:
-		m.hud.toast("Truce with %s: don't shoot each other, and you can share a way out" % squad_name(b if _mine(a) else a), Color("f4f1e6"))
+		m.hud.toast("Truce with %s: don't shoot each other, and you can share a way out" % squad_name(b if _mine(a) else a), Color("f4f1e6"), NoticeQueue.CALL)
 
 func end(k: String, why: String) -> void:
 	var p: Dictionary = pacts.get(k, {})
@@ -209,7 +209,7 @@ func on_damage(target: Ent, by: Ent, d: float) -> void:
 	# the big toast only for a truce you were in, or a betrayal right by you (the feed has the rest):
 	# bots across the map making and breaking truces stacked red toasts over your fight
 	if m.hud and m.player and not m.player.out and (_mine(credit.team) or _mine(tt) or traitor.flat_dist(m.player) < 30.0):
-		m.hud.toast("%s broke the truce!" % traitor.pname, Color("ff6a5a"))
+		m.hud.toast("%s broke the truce!" % traitor.pname, Color("ff6a5a"), NoticeQueue.CALL)
 
 func is_marked(h: Hunter) -> bool:
 	return float(marked.get(h.nid, -1.0)) > m.time

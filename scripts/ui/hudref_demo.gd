@@ -129,7 +129,7 @@ static func _busy(m, P: Hunter) -> void:
 			break
 	m.hud.level_up(8, {})
 	m.hud.tip("Hold %s to scan  ·  4s, rivals hear it" % Settings.key_cap("interact"))
-	m.hud.toast("Bramble Isle", Color("f2c84a"))
+	m.hud.toast("Bramble Isle", Color("f2c84a"), NoticeQueue.REGION)
 	for i in 3:
 		m.hud.toast_small("Chest key found", KeyModels.BRASS)
 	m.hud.toast_small("ARMOR BROKEN", Color("7ac8ff"))

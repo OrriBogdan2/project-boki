@@ -1300,9 +1300,11 @@ func ship_jump(h: Hunter, force := false) -> void:
 	if h == player:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
-			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
+			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down",
+				Color("cfeaff"), NoticeQueue.CALL)
 		elif hud:
-			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
+			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"),
+				Color("cfeaff"), NoticeQueue.CALL)
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
@@ -1441,7 +1443,7 @@ func on_blight_shriek(b: Mob) -> void:
 	blight_ping(b.pos, "shriek")
 	if player and not player.out and player.flat_dist(b) < 26.0 and hud:
 		var lv: float = (b as Blight).lvl
-		hud.toast("A Watcher shrieked  ·  the Blight is coming" if lv >= 0.35 else "A Watcher spotted you  ·  get out of its light", Color("ff7a3a"))
+		hud.toast("A Watcher shrieked  ·  the Blight is coming" if lv >= 0.35 else "A Watcher spotted you  ·  get out of its light", Color("ff7a3a"), NoticeQueue.CALL)
 
 ## The Blight on the minimap: a mark where you hear something you can't see.
 func blight_ping(at: Vector3, kind := "blight") -> void:
@@ -1653,7 +1655,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 	sfx("pickup", h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:
-		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
+		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col, NoticeQueue.PICKUP)
 
 ## Walking over a tuning applies it (to bots too); one you've maxed stays on the ground.
 func _take_tune(h: Hunter, wp: Dictionary, from_net := false) -> void:
@@ -1672,7 +1674,7 @@ func _take_tune(h: Hunter, wp: Dictionary, from_net := false) -> void:
 	fx.ring(h.pos, 1.6, pd["col"], 0.35)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), pd["col"], 14, 3.0, 0.5, -2.0)
 	if h == player and hud:
-		hud.toast("%s  ·  %s" % [pd["name"], pd["desc"]], pd["col"])
+		hud.toast("%s  ·  %s" % [pd["name"], pd["desc"]], pd["col"], NoticeQueue.PICKUP, String(pd["name"]))
 
 ## Fire the active on a gear slot.
 func use_gear(h: Hunter, slot: int) -> void:
@@ -2415,7 +2417,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 			_slow(1.0, 0.22)
 			if hud:
 				hud.flash(Color("ffd23f"), 0.3)
-				hud.toast("Last squad down", Color("ffd23f"))
+				hud.toast("Last squad down", Color("ffd23f"), NoticeQueue.CALL)
 			Sfx.duck(1.0)
 	_check_last()
 
@@ -2514,7 +2516,7 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 		_slow(0.6, 0.35)
 		if hud:
 			hud.flash(Color("ff3a2a"), 0.35)
-			hud.toast(("Last life. Be careful" if h.lives == 1 else "%d lives left" % h.lives) + ("  ·  you dropped %d gems" % lose if lose > 0 else ""), Color("ffb0a0"))
+			hud.toast(("Last life. Be careful" if h.lives == 1 else "%d lives left" % h.lives) + ("  ·  you dropped %d gems" % lose if lose > 0 else ""), Color("ffb0a0"), NoticeQueue.CRITICAL)
 
 func _check_last() -> void:
 	var teams := {}
@@ -2824,7 +2826,7 @@ func kin_stolen(thief: Hunter, rec: Dictionary) -> void:
 	player.chase = thief
 	ping(thief.pos, Color("ffd23f"))
 	if hud:
-		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"))
+		hud.toast("%s took %s! Chase them down: they're marked, and you're faster heading their way" % [thief.pname, rec.get("name", "your Boki")], Color("ffd23f"), NoticeQueue.CRITICAL)
 
 ## Who has one of your squad's Boki right now (an enemy still in the match), or null (KinTrack).
 func kin_thief() -> Hunter:
@@ -3084,13 +3086,13 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 		"key":
 			h.rift_keys += 1
 			if h == player:
-				hud.toast("+1 Rift Key: opens any rift hatch, quietly, any time", ExitModels.HATCH)
+				hud.toast("+1 Rift Key: opens any rift hatch, quietly, any time", ExitModels.HATCH, NoticeQueue.PICKUP)
 				sfx("unlock", null, -6.0, 1.2)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
 	if h == player:
 		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
-			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
+			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"], NoticeQueue.PICKUP)
 
 # ------------------------------------------------------------------ shots
 func spawn_shot(by: Ent, at: Vector3, v2: Vector2, dmg: float, life: float, size: float, col: Color, extra := {}) -> void:
@@ -5213,7 +5215,7 @@ func _update_events() -> void:
 	ping(world.heart_spot, Color("c9a0ff"))
 	if player and not player.out:
 		add_feed("The Watcher has woken on the center island")
-		hud.toast("The Watcher wakes", Color("c9a0ff"))
+		hud.toast("The Watcher wakes", Color("c9a0ff"), NoticeQueue.CALL)
 
 # ---- mid-match events
 ## A meteor shower partway through: falling stars hit the ground where hunters are, knock them

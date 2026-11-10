@@ -658,4 +658,4 @@ func _tick_region_banner() -> void:
 		return
 	player_biome = b
 	var B: Dictionary = defs.get(b, {})
-	m.hud.toast("%s  ·  %s" % [String(B.get("name", b)), String(B.get("blurb", ""))], Color(String(B.get("tint", "ffffff"))))
+	m.hud.toast("%s  ·  %s" % [String(B.get("name", b)), String(B.get("blurb", ""))], Color(String(B.get("tint", "ffffff"))), NoticeQueue.REGION, String(B.get("name", b)))

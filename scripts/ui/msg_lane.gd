@@ -2,10 +2,10 @@ class_name MsgLane
 extends Control
 ## The one lane for short messages on screen: toasts, pickups, level-ups, hints and the lines the
 ## tutorial holds back. Every screen has one (the match HUD, the farm, the town, a house; UI.toast finds
-## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
-## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
-## (fewer while the host's own cards take rows, see `reserved`) and the rest wait, the most important
-## first; each lives a short while. A low-priority line that waits too long is dropped as old news.
+## or makes it); the match HUD has its own, NoticeQueue. Messages stack down a fixed column under `top`,
+## so two never sit on top of each other; a repeat of one on show or waiting merges into it
+## ("Ember  x3"); at most MAX_SHOWN show at once and the rest wait, the most important first; each
+## lives a short while. A low-priority line that waits too long is dropped as old news.
 
 enum { LOW, NORMAL, HIGH }
 const MAX_SHOWN := 3
@@ -20,12 +20,6 @@ const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when on
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
 
 var top := 100.0                ## px from the top of the screen where the column starts
-var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
-var reserved := 0               ## rows the host's own cards take at the top (the ally alerts)
-var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
-	set(v):
-		hold = v
-		_promote()
 var _shown: Array[Dictionary] = []
 var _waiting: Array[Dictionary] = []
 
@@ -42,8 +36,8 @@ static func of(host: Control) -> MsgLane:
 	host.add_child(lane)
 	return lane
 
-## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one.
-func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
+## Puts a line in the lane.
+func push(text: String, col: Color, prio := NORMAL) -> void:
 	if text == "":
 		return
 	for e in _shown:
@@ -55,8 +49,7 @@ func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
 		if e["text"] == text:
 			_bump(e)
 			return
-	var life_s := life if life > 0.0 else float(LIFE[prio])
-	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "n": 1, "t": 0.0, "wait": 0.0})
+	_waiting.append({"text": text, "col": col, "prio": prio, "life": float(LIFE[prio]), "n": 1, "t": 0.0, "wait": 0.0})
 	Sfx.play("ui_toast", null, -4.0, 0.03)
 	if _waiting.size() > WAIT_CAP:
 		_waiting.remove_at(_lowest())
@@ -142,7 +135,7 @@ func _process(delta: float) -> void:
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < maxi(1, MAX_SHOWN - reserved):
+	while not _waiting.is_empty() and _shown.size() < MAX_SHOWN:
 		var best := 0
 		for i in _waiting.size():
 			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
@@ -161,7 +154,7 @@ func _layout(delta: float) -> void:
 	for e in _shown:
 		var box: Control = e["box"]
 		box.reset_size()
-		var x := (size.x - box.size.x) * 0.5 if right_edge <= 0.0 else right_edge - box.size.x
+		var x := (size.x - box.size.x) * 0.5
 		var y := want if not e.has("placed") else lerpf(box.position.y, want, k)
 		e["placed"] = true
 		y = maxf(y, above + GAP)
