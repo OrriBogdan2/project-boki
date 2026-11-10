@@ -22,6 +22,7 @@ const DEFAULTS := {
 	"reticle_outline": true,
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
+	"cam_motion": true,     # (camera motion, briefs CAMERA_MOTION.md) eased pan start + a decaying shake; off = the old exponential follow and flat shake
 	# sounds
 	"reset_cue": "a",
 	# accessibility

@@ -364,6 +364,7 @@ func _tab_camera(v: VBoxContainer) -> void:
 	var follow := [["supervive", "Cursor lean"], ["standard", "Standard dynamic"], ["dynamic", "Fully dynamic"], ["locked", "Locked"]]
 	_choice(v, "Camera follow", "cam_follow", follow, Callable(), "Cursor lean: the view slides toward where you aim")
 	_slider(v, "Lean toward the cursor", "cam_lead", 0.0, 1.5)
+	_toggle(v, "Smooth camera motion", "cam_motion", "The view eases into a pan and a hit's shake dies away; off = the old snappy follow")
 
 func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")

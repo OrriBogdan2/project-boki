@@ -24,6 +24,7 @@ var focus := Vector3.ZERO
 var target: Node3D = null
 var shake_amp := 0.0          # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
+var shake_len := 0.0          # how long the shake in progress was asked to run (its decay is shake_left / shake_len)
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
@@ -58,6 +59,11 @@ var base := Vector3.ZERO      # the followed point, before the cursor pan
 ## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
 const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
 const FOLLOW_Y := 3.5
+## (camera motion, Settings "cam_motion") Across, the follow is a critically damped spring instead of a first-order
+## lag: the same steady lag at a run (2/OMEGA = 1/FOLLOW_XZ = 0.067 s) but the pan eases IN over ~0.1 s the way the
+## footage's pans do (docs: briefs CAMERA_MOTION.md) instead of starting at full speed, and it settles sooner.
+const FOLLOW_OMEGA := 30.0    # 1/s
+var base_vel := Vector2.ZERO  # m/s of the followed point across (x, z), the spring's velocity
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
@@ -112,6 +118,7 @@ func _ready() -> void:
 func snap(p: Vector3) -> void:
 	focus = p
 	base = p
+	base_vel = Vector2.ZERO
 	pan = Vector3.ZERO
 	lead_off = Vector3.ZERO
 	_apply(Vector3.ZERO)
@@ -152,6 +159,7 @@ func cast_wide() -> float:
 func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
 	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
+	shake_len = maxf(shake_len, shake_left)
 
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
@@ -196,7 +204,17 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
 	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
-	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
+	if Settings.get_v("cam_motion") and not Record.clean():
+		# exact critically damped spring (stable at any frame time): no overshoot, ease-in on a start
+		var e := exp(-FOLLOW_OMEGA * delta)
+		var rel := Vector2(base.x - want.x, base.z - want.z)
+		var tmp := (base_vel + rel * FOLLOW_OMEGA) * delta
+		var nrel := (rel + tmp) * e
+		base_vel = (base_vel - tmp * FOLLOW_OMEGA) * e
+		base = Vector3(want.x + nrel.x, lerpf(base.y, want.y, ky), want.z + nrel.y)
+	else:
+		base_vel = Vector2.ZERO
+		base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
 	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
@@ -207,11 +225,14 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var shake := Vector3.ZERO
 	if shake_left > 0.0:
 		var s := shake_amp * float(rr[4])
+		if Settings.get_v("cam_motion"):
+			s *= pow(clampf(shake_left / maxf(0.001, shake_len), 0.0, 1.0), 2.0)     # a hit's shake dies away, not cut off
 		shake = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
 		shake_total += minf(delta, shake_left)
 		shake_left = maxf(0.0, shake_left - delta)
 		if shake_left <= 0.0:
 			shake_amp = 0.0
+			shake_len = 0.0
 	_apply(shake)
 	Sfx.listener = focus
 
