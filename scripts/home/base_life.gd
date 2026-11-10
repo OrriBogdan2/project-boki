@@ -15,10 +15,11 @@ extends RefCounted
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD],
+	S.LEAD: [S.ROAM, S.NAP],
 	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
 	S.EAT: [S.ROAM, S.NAP],
 	S.NAP: [S.ROAM],
@@ -196,6 +197,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		m.go(S.NAP, "dozed")
 	if k.has("play") and m.is_in(S.ROAM):
 		m.go(S.PLAY, "toy")      # home_toys.gd took it to a toy (home.gd _care_goal): the machine says so
+	elif m.is_in(S.ROAM) and BaseTutLead.target(h, k).x != INF:
+		m.go(S.LEAD, "tutorial")      # the base tutorial's step is up: your Boki leads (BaseTutLead)
 	match m.state:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
@@ -217,6 +220,9 @@ func _tick(k: Dictionary, dt: float) -> void:
 			_look_tick(k, m)
 		S.CHORE:
 			BaseChore.tick(self, k, m, dt)
+		S.LEAD:
+			if not BaseTutLead.tick(h, k):
+				m.go(S.ROAM, "led")
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))

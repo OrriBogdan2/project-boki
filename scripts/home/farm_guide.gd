@@ -77,6 +77,8 @@ func tick(dt: float) -> void:
 		_poll()
 	_update_marker(dt)
 	_bubbles_under_lane(dt)
+	if FarmTutorial.base():
+		return      # the farm steps' guides (FarmTaskGuide, FarmCropGuide) are retired in the base
 	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
 	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
@@ -136,7 +138,7 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	var grow := FarmCropGuide.growing()
+	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
 	if not grow.is_empty() and id != "crop":
 		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
 	elif id == "crop" and not grow.is_empty():
@@ -317,7 +319,7 @@ func _nearest_wild(what: String) -> Vector3:
 
 ## A growth bar and countdown over the first patch while a seed grows, whatever step is showing.
 func _update_crop_label() -> void:
-	var g := FarmCropGuide.growing()
+	var g := {} if FarmTutorial.base() else FarmCropGuide.growing()
 	if g.is_empty() or not FarmTutorial.active() or h.plots.size() <= int(g["plot"]):
 		if is_instance_valid(crop_lbl):
 			crop_lbl.visible = false

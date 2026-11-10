@@ -2,7 +2,8 @@ class_name FarmTaskGuide
 extends RefCounted
 ## The farm tutorial's "give your Boki a job" step, made hard to miss: a pulsing outline and arrow on the
 ## Kin button (until the Boki's page is open) and on the page's job dropdown, the best job named in the
-## hint, and a confirmation on picking one. FarmTutorial/FarmGuide/WorkView call in here.
+## hint, and a confirmation on picking one. FarmTutorial/FarmGuide/WorkView call in here. Retired with base_mode on
+## (the base tutorial has no job step); delete with the farm steps (docs/DEBT.md).
 
 const GOLD := Color("f2c84a")
 const PULSE := "TutPulse"
