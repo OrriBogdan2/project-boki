@@ -4800,7 +4800,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	_close_panel()
 	_refresh_nest()
 	fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
-	Sfx.play("garden_egg")
+	NookSfx.commit(get_tree(), rec, ok, NEST_AT)
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
 ## Tooling for --nest-demo: a bred kin and a Rare Egg kin join the demo roster, then a view opens.

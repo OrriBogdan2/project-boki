@@ -90,8 +90,45 @@ func run(m: Node) -> void:
 	var joy := float(baby["needs"]["joy"])
 	ok(joy == Care.UNSTABLE_JOY, "an unstable baby hatches low on joy (%.0f)" % joy)
 	ok(NookPreview.facts(fire, ice)["unstable"], "the preview card notes the unstable mix")
+	await _sounds(m, a, b, fire, ice)
 	print("NOOK done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
+
+## The pairing sounds: each step once and at the nest, notes pitched by size, a wobble only for an unstable
+## mix, and the commit plays them.
+func _sounds(m: Node, a: Dictionary, b: Dictionary, fire: Dictionary, ice: Dictionary) -> void:
+	var big := _kin("cindle", "Big", 8, 60.0)
+	var tiny := _kin("cindle", "Tiny", 8, 60.0)
+	big["dna"] = {"seed": 1, "size": 2.0, "voice": 0.8}
+	tiny["dna"] = {"seed": 2, "size": -2.0, "voice": 1.2}
+	var steps := NookSfx.plan(big, tiny)
+	var notes: Array = _of(steps, "nook_note")
+	var low_first: bool = notes.size() == 2 and notes[0]["pitch"] < notes[1]["pitch"]
+	ok(low_first, "the chime is two notes, the bigger parent's the lower")
+	var chirps: Array = _of(steps, "kin_happy")
+	var own: bool = chirps.size() == 2 and is_equal_approx(chirps[0]["pitch"], 0.8)
+	own = own and is_equal_approx(chirps[1]["pitch"], 1.2)
+	ok(own, "each parent chirps in its own voice")
+	var seen := {}
+	for s in steps:
+		var key := "%s@%.2f" % [s["snd"], s["t"]]
+		ok(not seen.has(key) and Sfx.ensure(String(s["snd"])), "%s plays once and loads" % key)
+		seen[key] = true
+	for cue in ["nook_nuzzle", "nook_settle", "garden_egg"]:
+		ok(_of(steps, cue).size() == 1, "%s plays once" % cue)
+	ok(_of(steps, "nook_wobble").is_empty(), "a stable pair has no wobble")
+	var wobbles := _of(NookSfx.plan(fire, ice), "nook_wobble").size()
+	ok(Care.unstable_mix(fire, ice) and wobbles == 1, "an unstable mix gets one wobble")
+	var home_src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
+	ok(home_src.contains("NookSfx.commit(get_tree(), rec, ok, NEST_AT)"), "pairing plays them at the nest")
+	Sfx.last_played.clear()
+	var at := Vector3(3, 0, 4)
+	NookSfx.commit(m.get_tree(), big, tiny, at)
+	await m.get_tree().create_timer(float(steps[-1]["t"]) + 0.3).timeout
+	var heard := true
+	for s in steps:
+		heard = heard and Sfx.last_played.has(s["snd"])
+	ok(heard, "the commit plays every step")
 
 ## The Nook's preview card against the eggs it promises: its species and lean match 20 of 20 hatchlings
 ## (each egg's kind picked the way the Nook lays it, one parent's at random).
@@ -108,3 +145,6 @@ func _preview(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
 	var c := NookPreview.card(a, b, null)
 	ok(c.get_child_count() == 1, "the preview card builds")
 	c.free()
+
+func _of(steps: Array, snd: String) -> Array:
+	return steps.filter(func(s): return s["snd"] == snd)

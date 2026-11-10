@@ -182,6 +182,38 @@ def toy(i):
     return finish(room(mix(hop(330, 0.1), at(hop(400, 0.08), 0.12) * 0.7, at(pluck(NOTE['C6'], 0.3, 0.08), 0.22)), 0.4), 4600)
 
 
+# ---------------------------------------------------------------- the Nesting Nook (scripts/home/nook_sfx.gd)
+def nook_note(i):
+    """One warm tine on C5 with its octave below; the Nook plays it twice, pitched by each parent's size."""
+    return finish(room(mix(pluck(NOTE['C5'], 0.8, 0.22, 0.5), 0.35 * pluck(NOTE['C4'], 0.8, 0.2, 0.0)), 0.8), 3800)
+
+
+def nuzzle(i):
+    """A soft brush of fur (swelling filtered noise) over a quiet low purr."""
+    d = 0.45; n = N(d); t = T(d)
+    swell = np.sin(np.pi * np.arange(n) / n) ** 2
+    purr = np.sin(2 * np.pi * 170 * jit(i, 0.03) * t) * (0.6 + 0.4 * np.sin(2 * np.pi * 20 * t))
+    return finish(room(mix(0.5 * lpf(noise(d), 1500) * swell, 0.35 * purr * swell), 0.4), 2400)
+
+
+def settle(i):
+    """A small body sinking into straw: a low soft thump and a short sigh of air."""
+    thump = S.sweep(170, 85, 0.2) * env(N(0.2), 0.004, 0.07)
+    sigh = 0.4 * lpf(noise(0.35), 900) * env(N(0.35), 0.06, 0.12)
+    return finish(room(mix(thump * 0.8, at(sigh, 0.04)), 0.4), 2200)
+
+
+def wobble(i):
+    """An unsure mix: two tines a little flat and sour with a slow wobble, then a soft one that stays open.
+    Gentle on purpose: it says 'needs care', not 'failed'."""
+    def tine(f, d, dec):
+        t = T(d)
+        ph = 2 * np.pi * np.cumsum(f * (1 + 0.025 * np.sin(2 * np.pi * 6 * t))) / S.SR
+        return np.sin(ph) * env(N(d), 0.004, dec)
+    return finish(room(mix(tine(NOTE['E5'], 0.4, 0.12), 0.7 * tine(NOTE['E5'] * 1.04, 0.4, 0.12),
+                           at(tine(NOTE['D5'] * 0.97, 0.5, 0.14), 0.17), at(tine(NOTE['A4'], 0.7, 0.2), 0.36)), 0.6), 3200)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -204,6 +236,10 @@ def main():
     S.save_cat('garden_trait', trait(0), 'ui')
     S.save_cat('garden_egg', egg(0), 'ui')
     S.save_cat('garden_toy', toy(0), 'ui')
+    S.save_cat('nook_note', nook_note(0), 'ui')
+    S.takes_cat('nook_nuzzle', nuzzle, 2, 'ui')
+    S.save_cat('nook_settle', settle(0), 'ui')
+    S.save_cat('nook_wobble', wobble(0), 'ui')
 
 
 if __name__ == '__main__':

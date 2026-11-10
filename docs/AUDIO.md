@@ -31,6 +31,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
 - Farm reactions: `garden_feed|pet|friend|trait|egg|toy` (UI set, `tools/gen_sfx_ui.py`), one per kind of good thing at home; `unlock` is only for real unlocks. The Boki eat and nap sounds (`boki_eat`, `boki_sleep`) play from the care states. `--garden-sfx-check` guards both. (No race exists on the farm yet, so there is no race cue.)
+- Pairing in the Nesting Nook (`NookSfx`, UI set): `nook_note` twice (a chime, each note pitched by one parent's size, the bigger the lower), the egg settling (`garden_egg`), `nook_nuzzle` and `nook_settle` each layered with a parent's own `kin_happy` chirp, and `nook_wobble` for an unstable mix (a sour, soft wobble: it needs care, it did not fail). All at the nest, timed from the pairing click; `--nook-check` guards it.
 
 ## Sound sets (`content/sfx/<group>.json`)
 ```json
