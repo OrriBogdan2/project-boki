@@ -81749,5 +81749,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_selenwhale_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_knotling",
+    "name": "Knotling (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_knotling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_knotling",
+    "name": "Knotling (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_knotling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_thrumbird",
+    "name": "Thrumbird (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_thrumbird_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_knotwyrm",
+    "name": "Knotwyrm (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_knotwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_knotwyrm",
+    "name": "Knotwyrm (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_knotwyrm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_latchling",
+    "name": "Latchling (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_latchling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_knotwyrm",
+    "name": "Knotwyrm (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_knotwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lyrewing",
+    "name": "Lyrewing (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_lyrewing_2.jpg",
+    "ok": true
   }
 ]
