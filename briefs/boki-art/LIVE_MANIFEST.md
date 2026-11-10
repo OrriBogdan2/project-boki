@@ -5,7 +5,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
-| Anchorbill | ✓ | ✓ | ✓ |
+| Anchorbill (Anchorpup) | ✓ | ✓ | ✓ |
 | Anchorhorn (Harpwhal) | ✓ | ✓ | ✓ |
 | Anvilbrock | ✓ | ✓ | ✓ |
 | Arcestrel | ✓ | ✓ | ✓ |
@@ -206,7 +206,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Snuffapi | ✓ | ✓ | ✓ |
 | Soakybara | ✓ | ✓ | ✓ |
 | Spanglin | ✓ | ✓ | ✓ |
-| Sphinxblight | ✓ | ✓ | ✓ |
+| Sphinxblight (Enigmane) | ✓ | ✓ | ✓ |
 | Spirevark | ✓ | ✓ | ✓ |
 | Sporcupine | ✓ | ✓ | ✓ |
 | Starcap | ✓ | ✓ | ✓ |

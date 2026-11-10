@@ -1086,3 +1086,21 @@ for _n in ('Lunowl','Murmuron'):
 for _k,_pose in (('a',"curled into a ring lying flat on its side, seen from a low side angle so the ring looks like a wide oval, head resting on its tail, one eye open"),
                  ('b',"walking on all fours in a side view facing RIGHT, back arched, long scaled tail trailing, head turned to the viewer")):
     ON_POSE('Terrasloth',_LM['Terrasloth']['sheet'],'mid','cute',False,False,_pose+". It is small in the frame, with about 20 percent empty margin on every side.",_KEEPALL); SPECS[-1]['id']='v2p_terrasloth_new_'+_k; SPECS[-1]['runs']=2
+
+# ===== 09:00 ET 11-10 OWNER picks: Sporcupine = D2 mirrored (faces the other way from Mycroll); olm line = blue-and-white; Siegephant = A2;
+# clean-ups Dragonkite 2, Terrarimit 1, Lyrewing 1. Names: Sphinxblight -> Enigmane, Anchorbill -> Anchorpup (display names).
+# Checkmare: clean-up 1 "without the needle thing on its mouth". Knotwyrm: clean-up 3 "has no contrast without the wood thing: give him contrast".
+# Glaciammoth: "merge the two so the 2nd has the 1st's tusk" = the ice musk-ox (A1) with the ice rhino's blade horn (B1).
+SPECS.append({'id':'fix_checkmare','name':'Checkmare (clean-up, no beak needle)','refs':[_O+'tidy_checkmare_1.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"remove the long thin needle or spear point sticking out from the front of its mouth: its head ends in a normal short seahorse-horse muzzle with a closed mouth. Do not add anything else."})
+SPECS.append({'id':'fix_knotwyrm','name':'Knotwyrm (clean-up with contrast)','refs':[_O+'tidy_knotwyrm_3.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"give it contrast, because it is all one pale tan now: the inside of the big knot becomes dark brown weathered wood like an old mooring post that the rope is tied round, the rope gets alternating light tan and darker brown twist bands, the frayed tail end is dark, two patches of bright green moss sit on the knot, and its three mushrooms get rust-red caps. The shape and pose stay the same."})
+SPECS.append({'id':'fix_glaciammoth','name':'Glaciammoth (ice musk-ox with the blade horn)','refs':[_O+'opt_glaciammoth_a_1.jpg',_O+'opt_glaciammoth_b_1.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':"Redraw the ice musk-ox in image 1 exactly as it is: the same body, long icicle hair, glowing amber heart, face, colours, pose, line and flat shading. Change only this: in place of its two curled horns it has ONE enormous flat curved blade horn of clear blue ice on its nose and brow, like the horn of the creature in image 2, sweeping forward and up like an ice-breaker's prow. Take only that horn from image 2. One creature only. "+FRAME_V2})
+_PK={'Sporcupine':('mid','sleek',0,1,"trotting toward the viewer, head high, mushroom tail swinging"),'Olmlet':('baby','cute',0,0,"curled in a loose loop, looking up"),
+ 'Glazolm':('mid','pretty',0,0,"swimming through the air in an open S, gills flared"),'Kintsuwyrm':('final','majestic',0,0,"coiled and rearing, gills spread wide, looking down at the viewer"),
+ 'Siegephant':('final','majestic',0,0,"standing square to the viewer, trunk raised, fortress towering behind its head"),'Dragonkite':('final','majestic',0,0,"wings spread wide like a kite catching the wind, rearing"),
+ 'Terrarimit':('final','cute',0,0,"scuttling sideways, peeking out from under its garden"),'Lyrewing':('final','majestic',0,1,"standing on the ground with its harp wings folded upright, head turned to the viewer")}
+for _n,(_st,_ar,_dk,_fu,_pose) in _PK.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_p3'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_p3'; SPECS[_n0+1]['runs']=2

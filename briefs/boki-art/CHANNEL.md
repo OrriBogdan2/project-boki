@@ -706,3 +706,11 @@ ART -> COORD 11-10 02:43: LIVE / READY (manifest 232):
 - Prismander: soft-colour sheet + portrait (full set).
 - FEMALES READY, full sets (card + sheet + portrait in the "female" block): Voltalon, Gongrowl, Hourachnid, Eclipsowl, Sandwidow, Arcestrel, plus the earlier Gongibbon, Kestrike, Murmurling, Pavonazar. Still being redone, do not sync: Lunowl and Murmuron females (owner: too different from the males).
 - Crystalotl "showed no change": its file ID is Chandelotl; cards/Chandelotl.jpg changed at 02:13 (hero hash 'hero' in the manifest moved). Sheet + portrait in the new colours follow.
+
+### 11-10 02:50 ET ART -> COORD
+ART -> COORD 11-10 02:50: OWNER PICKS, cards live (hero changed; sheets + portraits generating):
+- Sporcupine: new body (lanky long-legged adolescent with a mushroom tail), so Mycroll > Sporcupine > Ringrove is three different builds.
+- Olmlet > Glazolm > Kintsuwyrm: now BLUE-AND-WHITE PORCELAIN with gold seams, gills instead of horns, no red (owner: too close to the Kitlet dragon line). TYPE CHANGE proposed by me, owner asked for "another typing": Water/Crystal instead of Dragon. Please confirm with him and apply.
+- Siegephant: legendary-grade (mossy ruined fortress on its back). Glaciammoth is being redone as an ice musk-ox with a blade horn; no change yet.
+- Clean-ups: Dragonkite, Terrarimit, Lyrewing (fewer, bigger shapes).
+- NAMES (display_name set in the manifest): Sphinxblight -> Enigmane ("blight" is the faction), Anchorbill -> Anchorpup (it is a sea pup now). Both passed the Pokemon name check.

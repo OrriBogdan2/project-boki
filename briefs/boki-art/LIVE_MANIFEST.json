@@ -10,7 +10,8 @@
    "card": "d4670f135e52",
    "portrait": "7bc2eaea224a",
    "hero": "c057144befd7"
-  }
+  },
+  "display_name": "Anchorpup"
  },
  "Anvilbrock": {
   "sheet": "briefs/boki-art/turnarounds/Anvilbrock.jpg",
@@ -391,9 +392,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dragonkite.png",
   "hash": {
    "sheet": "621df432d7c5",
-   "card": "1b1ce0b7dcfb",
+   "card": "9ce94ba3beb8",
    "portrait": "a41aa387fb3b",
-   "hero": "e7ad9a624c12"
+   "hero": "f799e972b6e5"
   },
   "display_name": "Kitedrake"
  },
@@ -698,9 +699,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glazolm.png",
   "hash": {
    "sheet": "f9068d029cbc",
-   "card": "a86b515a12b4",
+   "card": "4030a6f358e8",
    "portrait": "0e102f7aaf8b",
-   "hero": "597b8e1d9b98"
+   "hero": "75d875023faf"
   }
  },
  "Glintmole": {
@@ -1012,9 +1013,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Kintsuwyrm.png",
   "hash": {
    "sheet": "4b0dd61292cb",
-   "card": "9aebc8f77230",
+   "card": "5e59fa3c7983",
    "portrait": "8df5fd945a7c",
-   "hero": "1eb78b80a967"
+   "hero": "87efe59f2443"
   },
   "display_name": "Gildwyrm"
  },
@@ -1192,9 +1193,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Lyrewing.png",
   "hash": {
    "sheet": "6294e6769eb0",
-   "card": "e49eec43af63",
+   "card": "a63d22380b0a",
    "portrait": "4dff9d1489ba",
-   "hero": "e831a549ce8a"
+   "hero": "fc6ecc0528fb"
   }
  },
  "Malletary": {
@@ -1446,9 +1447,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Olmlet.png",
   "hash": {
    "sheet": "7213870ddd18",
-   "card": "485f3b7cbcdf",
+   "card": "1a909762adc9",
    "portrait": "bb41ddf3cbdd",
-   "hero": "20edc4665956"
+   "hero": "fd6eb08dbd33"
   }
  },
  "Orbitle": {
@@ -1928,9 +1929,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Sporcupine.png",
   "hash": {
    "sheet": "9166d4bda2d7",
-   "card": "360d8e1d7579",
+   "card": "9ee9693c4ac4",
    "portrait": "043ed3663548",
-   "hero": "54312b98057a"
+   "hero": "78855d843555"
   }
  },
  "Starcap": {
@@ -1993,9 +1994,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hash": {
    "sheet": "e12915f1edac",
-   "card": "8df736f1e2d2",
+   "card": "8a34487ff32b",
    "portrait": "0b043d5c4f97",
-   "hero": "df8b2bbb65ec"
+   "hero": "bf6cd3782d65"
   }
  },
  "Terrasloth": {
@@ -3043,9 +3044,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Siegephant.png",
   "hash": {
    "sheet": "7b50f721e0a2",
-   "card": "6a101a2eb929",
+   "card": "1c810d231ccc",
    "portrait": "6b9f6e1782ad",
-   "hero": "72334dd4c18e"
+   "hero": "d557ddc7b5fe"
   },
   "legendary_tier": "boss"
  },
@@ -3061,7 +3062,8 @@
    "portrait": "c426e57dc3dd",
    "hero": "684cb7328d20"
   },
-  "legendary_tier": "blight"
+  "legendary_tier": "blight",
+  "display_name": "Enigmane"
  },
  "Tiltster": {
   "sheet": "briefs/boki-art/turnarounds/Tiltster.jpg",
