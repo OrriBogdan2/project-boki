@@ -18,6 +18,8 @@ const HALF_W := 1.2
 const ENGINE_KILL_SPEED := 2.0
 const GLOW_N := 16
 ## The decks reach half way across the couplings, so you can walk from car to car without a gap.
+const REACH_PAD := CAR_LEN + 1.0   # m: past the train's half-length nothing touches it (a car's half-diagonal
+                                   # is 2.6, the engine's front sweep reaches 3.6)
 const GAP_PAD := (CAR_GAP - CAR_LEN) * 0.5 + 0.05
 const HORN_LEAD := 2.2        # seconds of warning before the engine reaches someone in its path
 
@@ -155,6 +157,8 @@ func solid_at(x: float, z: float, y: float, r: float) -> float:
 	return 0.0
 
 func _car_under(p: Vector3, xf: Array, up := 0.25) -> int:
+	if not _near_train(p, xf):
+		return -1
 	for k in range(1, cars_n):
 		var t: Transform3D = xf[k]
 		if absf(p.x - t.origin.x) > CAR_LEN or absf(p.z - t.origin.z) > CAR_LEN:
@@ -163,6 +167,14 @@ func _car_under(p: Vector3, xf: Array, up := 0.25) -> int:
 		if absf(l.x) <= HALF_W + 0.1 and absf(l.z) <= CAR_LEN * 0.5 + GAP_PAD + 0.05 and l.y > -0.3 and l.y < up:
 			return k
 	return -1
+
+## Is p (x/z) within reach of the train at all: the cheap cull before the per-car tests, which every
+## hunter, monster, Boki and pickup on the map goes through each tick.
+func _near_train(p: Vector3, xf: Array) -> bool:
+	var a: Vector3 = (xf[0] as Transform3D).origin
+	var b: Vector3 = (xf[cars_n - 1] as Transform3D).origin
+	var r := (cars_n - 1) * CAR_GAP * 0.5 + REACH_PAD
+	return Vector2(p.x - (a.x + b.x) * 0.5, p.z - (a.z + b.z) * 0.5).length_squared() < r * r
 
 func _carry(k: int, p: Vector3) -> Vector3:
 	return (cur[k] as Transform3D) * ((old[k] as Transform3D).affine_inverse() * p)
@@ -265,6 +277,8 @@ func _kill_zone() -> void:
 ## track ahead; the engine's body and the cars' frames hit anything that isn't up on a deck. A rider
 ## (on a car a moment ago) is never hit by the engine's body, only by its front.
 func hit_by(p: Vector3, rider := false) -> int:
+	if not _near_train(p, cur):
+		return -1
 	var t: Transform3D = cur[0]
 	var l := t.affine_inverse() * p
 	if absf(l.x) < HALF_W + 0.3 and l.z < -CAR_LEN * 0.5 + 0.8 and l.z > -CAR_LEN * 0.5 - 1.3 and l.y > -1.8 and l.y < 2.8:

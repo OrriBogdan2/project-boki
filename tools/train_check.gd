@@ -54,7 +54,8 @@ func run(main: Node) -> void:
 		for a in 24:
 			var q := at + Vector3(cos(a * TAU / 24.0), 0, sin(a * TAU / 24.0)) * 2.2
 			if not m.world.is_void(q.x, q.z): pier = minf(pier, m.world.ground_at(q.x, q.z))
-		ok(pier < INF and absf(pier - at.y) < 0.05, "the stop at %s: deck %.1f m, pier %.1f m" % [str(Vector2(at.x, at.z).snapped(Vector2.ONE)), at.y, pier])
+		var where := str(Vector2(at.x, at.z).snapped(Vector2.ONE))
+		ok(pier < INF and absf(pier - at.y) < 0.05, "the stop at %s: deck %.1f m, pier %.1f m" % [where, at.y, pier])
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
@@ -219,9 +220,12 @@ func run(main: Node) -> void:
 		land_d += 0.5
 		for a in 48:
 			var q := hit_pos + Vector3(cos(a * TAU / 48.0), 0, sin(a * TAU / 48.0)) * land_d
-			if not m.world.is_void(q.x, q.z): land = q; break
+			if not m.world.is_void(q.x, q.z):
+				land = q
+				break
 	var box_d := Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() if not bx.is_empty() else -1.0
-	ok(not bx.is_empty() and box_d < maxf(16.0, land_d + 4.0), "the deathbox drops by where they were hit (%.1f m away, ground %.1f m)" % [box_d, land_d])
+	var box_ok := not bx.is_empty() and box_d < maxf(16.0, land_d + 4.0)
+	ok(box_ok, "the deathbox drops by where they were hit (%.1f m away, ground %.1f m)" % [box_d, land_d])
 	ok(Q.has_meta("fling"), "the body is flung")
 	# ---- 3. the cars' frames hit anything below the deck; nobody on top
 	var t2: Transform3D = st.cur[2]
