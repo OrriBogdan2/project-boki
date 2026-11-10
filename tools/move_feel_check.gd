@@ -33,6 +33,14 @@ const T := {
 	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
+	# slopes: the source keeps your horizontal speed on any walkable slope (UE), its MaxStepHeight 0.45 m keeps
+	# your feet down a slope and over its crest, and WalkableFloorAngle is 50 deg (nothing of ours is steeper)
+	"slope_speed_ratio_min":   ["~", [0.97, 1.03], "x", "[game data] 12 hunters on 10/25/40 deg ramps, a crest, the flights: slowest"],
+	"slope_speed_ratio_max":   ["~", [0.97, 1.03], "x", "[game data] ...and the fastest (no speed-up downhill)"],
+	"slope_air_frames":        ["<=", 0.0, "frames", "[game data] no hop down a slope or off its crest"],
+	"slope_stop_dist_min":     ["~", [0.2, 0.5], "m", "[game data] the walking stop on a slope, the shortest"],
+	"slope_stop_dist_max":     ["~", [0.2, 0.5], "m", "[game data] ...and the longest"],
+	"slope_flight_deg":        ["<=", 50.0, "deg", "[game data] WalkableFloorAngle: the map's flights are walkable"],
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
@@ -221,6 +229,7 @@ func run(main: Node) -> void:
 	print("MFEEL flat spot %s" % str(flat))
 	_ground()
 	_face_turn()
+	_slope()
 	_jump()
 	_glide()
 	_glide_dive()
@@ -319,6 +328,147 @@ func _face_turn() -> void:
 		rec(turn[0], t)
 	P.face = face0          # (the rows after read the body and the cursor as they were)
 	P.inp["aim"] = aim0
+
+# ---------------------------------------------------------------- slopes
+## A test ramp laid over the flat spot: from x0 the ground climbs along +x at `deg` degrees for `run` metres,
+## then runs flat on top. Outside its strip it is the map's own ground (every array is a copy of the match's).
+class RampWorld extends World:
+	var deg := 0.0
+	var x0 := 0.0
+	var run := 5.0
+	var crest := false          # true: the ground climbs for `run`, then falls back at the same angle
+	var base_y := 0.0
+	var zc := 0.0
+	func ground_at(x: float, z: float) -> float:
+		if deg <= 0.0 or absf(z - zc) > 4.0 or x < x0 - 1.5 or x > x0 + run * 2.0 + 6.0:
+			return super.ground_at(x, z)
+		var d := clampf(x - x0, 0.0, run)
+		if crest:
+			d = run - absf(clampf(x - x0, 0.0, run * 2.0) - run)
+		return base_y + tan(deg_to_rad(deg)) * d
+
+const SLOPE_DEGS := [10.0, 25.0, 40.0]
+const FLIGHTS := 4              # how many of the map's own flights are walked up and down
+var slope_ratio_min := 9.0
+var slope_ratio_max := 0.0
+var slope_air_max := 0
+var slope_stop_min := 9.0
+var slope_stop_max := 0.0
+
+## Each of the 12 hunters at its own run speed up, down and across 10, 25 and 40 degree ramps, over the crest of a
+## 25 degree hill, then the map's flights: the speed holds, the feet stay on the ground and a let-go slides as on
+## the flat (docs/MOVEMENT_FEEL.md, slope_*).
+func _slope() -> void:
+	var rw := RampWorld.new()
+	for prop in w.get_property_list():
+		if prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE:
+			rw.set(prop["name"], w.get(prop["name"]))
+	rw.x0 = flat.x - 5.0
+	rw.base_y = flat.y
+	rw.zc = flat.z
+	var speeds := []
+	var own := [P.arch, P.base_speed, P.ground_accel]
+	for id in HunterMove.rules():
+		if id == "doc" or id == "physics" or id == "default":
+			continue
+		for mb in m.mobs: mb.queue_free()      # the match respawns wildlife as it runs; a bite would knock the run
+		m.mobs.clear()
+		var row := HunterMove.of(id)
+		P.arch = id
+		P.base_speed = float(row["speed"])
+		P.ground_accel = float(row["accel"])
+		speeds.append("%s %.2f" % [id, P.base_speed])
+		m.world = rw
+		for deg in SLOPE_DEGS:
+			rw.deg = deg
+			var top: float = flat.y + tan(deg_to_rad(deg)) * rw.run
+			var mid: float = flat.y + tan(deg_to_rad(deg)) * 2.5
+			var foot := Vector3(flat.x - 6.0, flat.y, flat.z)
+			var side := Vector3(flat.x - 2.5, mid, flat.z - 1.5)
+			_slope_run("%s %2d up" % [id, deg], foot, Vector2(1, 0), flat.x - 5.0, flat.x - 2.5)
+			_slope_run("%s %2d down" % [id, deg], Vector3(flat.x + 1.5, top, flat.z), Vector2(-1, 0), flat.x, flat.x - 2.5)
+			_slope_run("%s %2d across" % [id, deg], side, Vector2(0, 1), flat.z - 1.0, flat.z + 1.0)
+		rw.deg = 25.0
+		rw.run = 4.0
+		rw.crest = true
+		_slope_run(id + " crest", Vector3(flat.x - 6.0, flat.y, flat.z), Vector2(1, 0), flat.x - 5.0, flat.x + 4.0)
+		rw.crest = false
+		rw.run = 5.0
+		m.world = w
+		if id == "archer":
+			_slope_flights()
+	rw.free()
+	P.arch = own[0]
+	P.base_speed = own[1]
+	P.ground_accel = own[2]
+	print("MFEEL slope run speeds m/s: %s" % ", ".join(speeds))
+	rec("slope_speed_ratio_min", slope_ratio_min)
+	rec("slope_speed_ratio_max", slope_ratio_max)
+	rec("slope_air_frames", slope_air_max)
+	rec("slope_stop_dist_min", slope_stop_min)
+	rec("slope_stop_dist_max", slope_stop_max)
+	rec("slope_flight_deg", rad_to_deg(atan(World.LEVEL)))
+
+## One run: keys held along `dir` from `start`. The slowest speed and the frames off the ground are read
+## between `from` and `to` on the axis you move on; then a let-go, and how far you slide.
+func _slope_run(label: String, start: Vector3, dir: Vector2, from: float, to: float) -> void:
+	_reset(start)
+	P.inp["move"] = dir
+	var axis := 0 if dir.x != 0.0 else 2
+	var sgn := dir.x + dir.y
+	var air := 0
+	var slowest := 9.0
+	var fastest := 0.0
+	for i in 120:
+		m.step(DT)
+		var at: float = P.pos[axis]
+		if sgn * (at - from) < 0.0:
+			continue
+		if not P.grounded:
+			air += 1
+		slowest = minf(slowest, _hv(P).length())
+		fastest = maxf(fastest, _hv(P).length())
+		if sgn * (at - to) >= 0.0:
+			break
+	var p0 := Vector2(P.pos.x, P.pos.z)
+	P.inp["move"] = Vector2.ZERO
+	for i in 60:
+		m.step(DT)
+		if not P.grounded:
+			air += 1
+		if _hv(P).length() < 0.05:
+			break
+	var stop := Vector2(P.pos.x, P.pos.z).distance_to(p0)
+	var ratio := slowest / P.base_speed
+	var row := [label, slowest, ratio, fastest / P.base_speed, air, stop]
+	print("MFEEL slope %-22s slowest %.2f m/s (%.3fx, fastest %.3fx) air %2d frames stop %.2f m" % row)
+	slope_ratio_min = minf(slope_ratio_min, ratio)
+	slope_ratio_max = maxf(slope_ratio_max, fastest / P.base_speed)
+	slope_air_max = maxi(slope_air_max, air)
+	slope_stop_min = minf(slope_stop_min, stop)
+	slope_stop_max = maxf(slope_stop_max, stop)
+
+## The map's own flights (one terrace over one tile, the Hollow Crown's ramps): up and then down the first
+## FLIGHTS with clear tiles at both ends, keys held through the flight.
+func _slope_flights() -> void:
+	var done := 0
+	for i in w.stairs:
+		if done >= FLIGHTS:
+			break
+		var dv := Vector2(w.stairs[i])
+		var c := Vector2(int(i) % w.w + 0.5, int(i) / w.w + 0.5)
+		var lo := c - dv * 1.4
+		var hi := c + dv * 1.4
+		var lo_y: float = w.ground_at(lo.x, lo.y)
+		var hi_y: float = w.ground_at(hi.x, hi.y)
+		if w.occupy(lo.x, lo.y, P.r, lo_y, false) != 0.0 or w.occupy(hi.x, hi.y, P.r, hi_y, false) != 0.0:
+			continue
+		done += 1
+		var axis := 0 if dv.x != 0.0 else 1
+		var tag := "flight %d,%d" % [int(c.x), int(c.y)]
+		_slope_run(tag + " up", Vector3(lo.x, lo_y, lo.y), dv, (c - dv * 0.5)[axis], hi[axis])
+		_slope_run(tag + " down", Vector3(hi.x, hi_y, hi.y), -dv, (c + dv * 0.5)[axis], lo[axis])
+	ok(done > 0, "slope: %d of the map's flights walked" % done)
 
 # ---------------------------------------------------------------- jump
 func _jump() -> void:

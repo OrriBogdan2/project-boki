@@ -2266,7 +2266,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - 0.05:
+	if grounded and g < pos.y - World.STEP:     # down a slope or a step your feet stay on it; more is a fall
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12
