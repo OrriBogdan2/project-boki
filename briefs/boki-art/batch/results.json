@@ -108230,5 +108230,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_sloggoth_f1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_geysirbara_f1",
+    "name": "Geysirbara (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_geysirbara_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dynaboa_f1",
+    "name": "Dynaboa (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dynaboa_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dynaboa_f1",
+    "name": "Dynaboa (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_dynaboa_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_geysirbara_f1",
+    "name": "Geysirbara (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_geysirbara_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaciammoth_f1",
+    "name": "Glaciammoth (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_glaciammoth_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_geysirbara_f1",
+    "name": "Geysirbara (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_geysirbara_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaciammoth_f1",
+    "name": "Glaciammoth (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glaciammoth_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaciammoth_f1",
+    "name": "Glaciammoth (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_glaciammoth_f1_3.jpg",
+    "ok": true
   }
 ]
