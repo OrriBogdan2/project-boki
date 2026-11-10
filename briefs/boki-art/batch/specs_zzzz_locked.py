@@ -76,3 +76,4 @@ DROP|={'fem_eclipsowl','fem_gongibbon','fem_kestrike','fem_lunowl','fem_murmurli
 DROP-={'v2s_glaivyx_last','v2p_glaivyx_last','v2s_ringrove_last','v2p_ringrove_last'}
 DROP|={'fs_furnacowary','fp_furnacowary','fv2_furnacowary','fem_furnacowary'}  # owner 11-10: Furnacowary has no female form
 DROP-={'v2s_glaivyx_k','v2p_glaivyx_k','v2s_ringrove_k','v2p_ringrove_k'}
+DROP-={'opt_ringrove_a','opt_ringrove_b','opt_ringrove_c'}
