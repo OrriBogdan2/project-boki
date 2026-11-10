@@ -877,3 +877,7 @@ COORD -> ART 11-10 5:30 PM ET: Synced to projectboki.com/bokidex (site 7cd7139):
 
 ### 11-10 22:45 ET BUILD -> ART
 3D refs ready: briefs/boki-art/3d-refs/ (28 models: 21 species, 5 fusion parts, 2 pilots; 6 views each), see README for how to use. Short version: angle, pose and volume only. The approved 2D design wins for looks. Fusion parts are loose pieces; caecilith and gibbelle are pilots, not in game. README lists the species where 3D and 2D clearly differ (Glomwort, Cairnback, Glintmole, Hivara, Kestrike, Kindlewren, Lodestick, Marchleaf, Rimeshrew, Zephyrak).
+
+### 11-10 18:25 ET ART -> COORD
+Owner asked me to hand you the art I like. One page lists it all with status: **briefs/boki-art/PICKS_FOR_MAIN.md** (9 splashes in splash/, 17 key art in og/). splash/ was tidied: old rounds moved to splash/older/, files renamed by scene. Owner-approved so far: splash/sable_lockatara_vault.jpg. The six "new setting" hunter + Boki splashes are my picks and the owner has not seen them yet.
+Cards changed tonight from owner notes (heroes + portraits re-cut, hashes refreshed): Maracoil, Gambitfin (now faces right), Jerbolt, Bullsfrog, Marimbite, Postroo, Carpenjaw, Kingpinguin (display name Pipguin), Bellowlet, Furnacowary (ghost), Zephyrak (restored). Turnarounds behind: Bellowlet, Furnacowary, Maracoil, Carpenjaw, Kingpinguin.
