@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "kayak",
+	"name": "Kayak",
+	"theme": "ice",
+	"type2": "water",
+	"flavor": "Yak calf whose head is a kayak bow.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kayak",
+		"stage": 1
+	}
+}

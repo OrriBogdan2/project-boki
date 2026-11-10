@@ -1,13 +1,11 @@
 extends RefCounted
 ## --mystery-egg-check: the black mystery egg of the hatch scene (MysteryEgg, briefs/DECISIONS.md).
-## Its pool is many early wild species (rares included, drawn less often than commons, never a starter
-## or a boss kin), it hatches with a mutation far more often than an egg at base odds while the
+## It always hatches Ermink (the 11-08 roster decision, not a starter or a boss kin), it hatches with a mutation far more often than an egg at base odds while the
 ## starter eggs roll none, and in the scene the three starters stand front and centre while the black
 ## egg sits in its basket at the back, its card showing only once you've found it. Never touches the
 ## real save.
 
 const HATCH := preload("res://scripts/ui/hatch.gd")
-const DRAWS := 30000
 const ROLLS := 20000
 
 var bad := 0
@@ -25,33 +23,11 @@ func run(main: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _pool() -> void:
-	var w := MysteryEgg.weights()
-	var tiers: Dictionary = MysteryEgg.rules()["pool"]
-	ok(w.size() == tiers.size(), "every pool species is in the game (%d of %d)" % [w.size(), tiers.size()])
-	ok(w.size() >= 20, "the pool is many early species, not just a few (%d)" % w.size())
-	var wrong: Array = w.keys().filter(func(sp): return Data.is_rare(sp) or sp in HATCH.STARTERS)
-	ok(wrong.is_empty(), "no starter or boss kin in the pool %s" % str(wrong))
-	var rares: Array = w.keys().filter(func(sp): return tiers[sp] == "rare")
-	var commons: Array = w.keys().filter(func(sp): return tiers[sp] == "common")
-	ok(rares.size() >= 3, "rares are in the pool (%d)" % rares.size())
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 5
-	var got := {}
-	for i in DRAWS:
-		var sp := MysteryEgg.roll_species(rng)
-		got[sp] = int(got.get(sp, 0)) + 1
-	ok(got.keys().all(func(sp): return w.has(sp)), "every draw comes from the pool")
-	var rare_missing: Array = rares.filter(func(sp): return not got.has(sp))
-	ok(rare_missing.is_empty(), "every rare can hatch (%s never drawn in %d)" % [str(rare_missing), DRAWS])
-	var per_rare := _mean(got, rares)
-	var per_common := _mean(got, commons)
-	var odds := "%.0f vs %.0f draws each" % [per_rare, per_common]
-	ok(per_common > 3.0 * per_rare, "a rare is much less likely than a common (%s)" % odds)
-
-func _mean(got: Dictionary, ids: Array) -> float:
-	var n := 0
-	for sp in ids: n += int(got.get(sp, 0))
-	return float(n) / maxf(1.0, ids.size())
+	var eggs: Array = HATCH.starter_eggs().filter(func(d): return d["mystery"])
+	ok(eggs.size() == 1, "one mystery egg (%d)" % eggs.size())
+	var sp: String = eggs[0]["species"] if eggs.size() == 1 else ""
+	ok(sp == "ermink" and Data.KIN.has(sp), "the mystery egg hatches Ermink (%s)" % sp)
+	ok(not Data.is_rare(sp) and not sp in HATCH.STARTERS, "Ermink is no starter and no boss kin")
 
 func _mutations() -> void:
 	var rng := RandomNumberGenerator.new()

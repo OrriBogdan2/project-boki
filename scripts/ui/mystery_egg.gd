@@ -3,8 +3,8 @@ extends Node3D
 ## The mystery egg of the hatch scene (the owner's call in briefs/DECISIONS.md): a black egg in a
 ## small woven basket, tucked at the back of the dais among rocks and flowers, with a faint glint on
 ## its shell now and then so a curious player finds it. This node is the basket and the glint (the
-## egg itself is an EggHatch the hatch scene puts on top); the draw and the mutation odds come from
-## content/rules/mystery_egg.json.
+## egg itself is an EggHatch the hatch scene puts on top). It always hatches Ermink (hatch.gd MYSTERY,
+## the 11-08 roster decision); its mutation odds come from content/rules/mystery_egg.json.
 
 const PATH := "res://content/rules/mystery_egg.json"
 const SHELL := Color("17131f")      # the black shell
@@ -22,28 +22,6 @@ static func rules() -> Dictionary:
 	if _rules.is_empty():
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	return _rules
-
-## {species: tickets}: each pool species' roster rarity as its share of the draw.
-static func weights() -> Dictionary:
-	var r := rules()
-	var out := {}
-	for sp in r["pool"]:
-		if Data.KIN.has(sp):
-			out[sp] = int(r["weights"][r["pool"][sp]])
-	return out
-
-## The species inside: a draw weighted by rarity, so a rare one hatches now and then.
-static func roll_species(rng: RandomNumberGenerator) -> String:
-	var w := weights()
-	var total := 0
-	for sp in w:
-		total += int(w[sp])
-	var ticket := rng.randi_range(1, maxi(1, total))
-	for sp in w:
-		ticket -= int(w[sp])
-		if ticket <= 0:
-			return sp
-	return "cindle"
 
 ## Its mutations at birth: Mutations' own roll at mutation_mult times the base odds.
 static func roll_mutations(rng: RandomNumberGenerator) -> Array:

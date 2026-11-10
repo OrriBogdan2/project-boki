@@ -15,6 +15,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Vespyx](#vespyx) | Fox + Scorpion | Poison | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Fire | large | bruiser | Wild, nest eggs |
 | [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Dark | large | trickster | Wild, nest eggs |
+| [Ermink](#ermink) | Stoat | Normal | small | trickster | Wild, nest eggs |
 | [Frigatee](#frigatee) | Manatee + Antique icebox | Ice | large | support | Wild, nest eggs |
 | [Gongibbon](#gongibbon) | Gibbon + Bronze temple bell | Sound | medium | controller | Wild, nest eggs |
 | [Prowyak](#prowyak) | Yak + Icebreaker prow | Ice | large | tank | Wild, nest eggs |
@@ -73,6 +74,7 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Flying | Canvastross, Zephyrak |
 | Grass | Crofthorn, Soakybara, Mossgrade, Terrasloth |
 | Ice | Frigatee, Prowyak, Skateron, Rimeshrew |
+| Normal | Ermink |
 | Poison | Vespyx, Nettlynx, Pipewurm |
 | Psychic | Anchorbill, Lodestick, Gravadillo |
 | Rock | Rampartoad, Glintmole, Effigeetle, Buckleron |
@@ -238,6 +240,26 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 
 - E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - Auto ability (it casts this on its own): **Echolocate** (14s cooldown). On its own in a fight, Echolop pings: every rival within 18m is revealed through grass and walls for 3s, and your next shots for 1.5s crit.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Ermink
+
+_Stoat_ (`ermink`). A stoat whose tail is a calligraphy brush, its cream coat as blank as a fresh page. Dip its tail in an Ink and it becomes something new.
+
+|  |  |
+|---|---|
+| Type | Normal |
+| Body | small, reach 1.3, mass 0.8; about 30 cm, 0.3 kg on average |
+| Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
+| Personality | bravery 0.6, loyalty 0.6, temper 0.4, curiosity 0.9 |
+| Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
+| Rides | shoulder (Brushstroke) |
+| Farm work | Craft 3, Forage 2, Mend 1 |
+| Egg | Mystery Egg: Speckled, and strangely quiet. Nobody knows what's inside. |
+
+- E ability: `moon_swap` (missing)
+- Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
@@ -1082,3 +1104,83 @@ _Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body 
 - Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Not in the game yet
+
+In the roster (docs/boki/ROSTER.md) with no model yet, so they never spawn.
+
+| Boki | Type | Evolves from |
+|---|---|---|
+| Amanitusk | Spore / Poison | Sporcupine |
+| Arcestrel | Electric / Flying | Kestrike |
+| Bellowlet | Fire | - |
+| Blossmink | Grass | Ermink |
+| Briarlynx | Poison / Grass | Thistlynx |
+| Bucketmander | Electric / Water | - |
+| Chandelapi | Dark / Fire | Snuffapi |
+| Chandelotl | Crystal / Fairy | Glassolotl |
+| Chimelop | Sound / Fairy | Echolop |
+| Cisternmander | Electric / Water | Barrelmander |
+| Coolatee | Ice / Water | - |
+| Dragonkite | Dragon / Flying | Ribbonwyrm |
+| Dreadnoyak | Ice / Steel | Prowyak |
+| Dribbara | Grass / Water | - |
+| Druzemole | Rock / Crystal | Geodemole |
+| Eclipsowl | Fairy / Dark | Lunowl |
+| Embrook | Fire / Flying | Kindlewren |
+| Fizzlet | Electric | - |
+| Flarmink | Fire | Ermink |
+| Forgebrock | Fire / Steel | Anvilbrock |
+| Frothisk | Crystal / Water | Bubblisk |
+| Furnacowary | Fire / Steel | Bellowary |
+| Galleotter | Water / Steel | Oarter |
+| Geodelotl | Crystal / Rock | Glassolotl |
+| Geodemole | Rock / Crystal | Glintmole |
+| Geysirbara | Grass / Water | Soakybara |
+| Glaciatee | Ice / Water | Frigatee |
+| Glaivyx | Poison / Steel | Vespox |
+| Glassolotl | Crystal / Water | Prismander |
+| Gongrowl | Sound / Steel | Gongibbon |
+| Howlop | Sound / Dark | Echolop |
+| Jarmit | Water | - |
+| Jibbatross | Flying / Water | Kerchick |
+| Kayak | Ice / Water | - |
+| Kerchick | Flying / Water | - |
+| Kitlet | Dragon | - |
+| Lanceron | Ice / Flying | Skateron |
+| Lanternmit | Water / Fire | Jarmit |
+| Lashyx | Poison / Dark | Vespox |
+| Latchling | Steel / Psychic | - |
+| Lunink | Fairy | Ermink |
+| Lyrewing | Sound / Flying | Thrumbird |
+| Mothlet | Fairy | - |
+| Oarlet | Water | - |
+| Oarter | Water | Oarlet |
+| Parasolth | Dark | - |
+| Prismink | Crystal | Ermink |
+| Puffamus | Fire | Teapotamus |
+| Pyrraven | Fire / Flying | Embrook |
+| Reapant | Bug / Grass | Scythant |
+| Ribbonwyrm | Dragon / Flying | Kitlet |
+| Rimink | Ice | Ermink |
+| Ringrove | Spore / Grass | Sporcupine |
+| Rippmink | Water | Ermink |
+| Scythant | Bug / Grass | Marchleaf |
+| Seamwyrm | Dark / Dragon | Zippelith |
+| Skidlet | Ice | - |
+| Sporcupine | Spore | Mycroll |
+| Stormit | Water / Electric | Jarmit |
+| Teapotamus | Fire / Water | - |
+| Terrarimit | Water / Grass | Jarmit |
+| Thistlynx | Poison / Grass | Nettlynx |
+| Thunderstrich | Electric / Flying | Boltstrich |
+| Tidalisk | Crystal / Water | Frothisk |
+| Tinbrock | Fire | - |
+| Umbrink | Dark | Ermink |
+| Vaultara | Steel / Psychic | Lockatara |
+| Vespox | Poison | Vespyx |
+| Voltalon | Electric / Flying | Arcestrel |
+| Voltmink | Electric | Ermink |
+| Wickapi | Dark / Fire | - |
+| Wyrmink | Dragon | Ermink |
+| Zipling | Dark | - |

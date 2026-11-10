@@ -1,5 +1,7 @@
 # Roster 50: original Boki for owner review
 
+Superseded by ROSTER.md (the 124-species roster); kept for the name map and the first-50 design notes.
+
 Status: **proposal, for owner review before any art.** Revised after the owner's review: big Boki now have roles, not just riding. Phase 1 (design, no credits). The owner asked for
 "a bunch of original Boki to play with that have good 3D modelling I can later change": 50 species in
 total, a range of sizes, and some big rideable ones (revised: big Boki get roles, at most about 6 mounts). Today's 9 count toward the 50, so this adds 41.

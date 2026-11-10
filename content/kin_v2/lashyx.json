@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "lashyx",
+	"name": "Lashyx",
+	"theme": "poison",
+	"type2": "dark",
+	"flavor": "Sleek speedster, whip tail with three stings.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "cindle",
+		"stage": 3,
+		"from": "vespox"
+	}
+}

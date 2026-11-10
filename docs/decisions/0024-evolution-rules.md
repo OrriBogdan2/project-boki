@@ -27,5 +27,14 @@ a boss with `ink` in its def gives its Ink to the killer, and an extracted run f
   freezes the old generated form name ("Cindfang") in `form_name` until the Boki evolves.
 - Today no line can evolve: every target lacks data or a model. Lines start as art lands.
 - No line uses trade yet (the owner named none); the condition works and is tested.
-- Inks have no use button yet (`Evo.use_ink` is the API); it needs Ermink and Jarmit in data.
-- Only the Sky Serpent has an Ink type (Wyrm); the Colossus and Brood Mother drop none.
+- Inks are used from the Growth tab of a Boki's card (`EvoView`, `Evo.use_ink`).
+- Every lair boss drops an Ink: the Sky Serpent its Wyrm Ink, the others (no Ink type) any Ink.
+
+## Update 2026-11-09 (GAME_RULES_NOV8.md)
+- Levels: the first form evolves at Grown (8), the second at Elder (16).
+- `path` is gone: the four branching finals (Sporcupine, Vespox, Glassolotl, Echolop) carry `stat`
+  (power/guard/speed). The higher trained stat at evolve time picks it; a tie goes by the affinity
+  behind each stat (`Evo.STAT_AFF`). `Evo.lean` shows the pick on the Growth tab beforehand.
+- Sex looks: roster `sex_forms: true` on the owner's 11 species; `BokiRig.model_path` loads
+  `<id>_f.glb` for a female when it exists, else the male model. One special rule per line
+  (a branch or sex looks) is enforced by `--evo-check`.

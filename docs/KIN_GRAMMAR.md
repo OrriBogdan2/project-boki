@@ -135,7 +135,8 @@ has two damage effects, so presets live on parts.)
 |---|---|---|
 | `id`, `name` | yes | |
 | `animals` | yes | the 1 or 2 real animals it's based on |
-| `theme` | | cosmetic (what used to be its element "type") |
+| `theme` | | cosmetic (what used to be its element "type"); its first type |
+| `type2` | | optional second type, another theme |
 | `flavor` | | reveal card / Field Book line |
 | `colors` | yes | `body`, `belly`, `glow`, optional `wing` (hex) |
 | `look` | yes | `body` `ears` `tail` `feet` `aura`: core model builder ids (`LOOK`) |
@@ -153,6 +154,8 @@ has two damage effects, so presets live on parts.)
 | `voice` | | `line` (how it talks) and `syllables` (its two name syllables) |
 | `egg` | | `name`, `temper`, `desc`, `play` |
 | `infusion` | | optional: what the kin lends archetype sockets (docs/ARCHETYPES.md §4.2): `hit` (a damage-over-time or blight part), `ctrl` (a control part), `guard` (shield, heal, reflect), `util` (mark, buff), `mod` (modifiers in order of preference), `move` (`blink`). Each must sit in its socket's category. Left out, it's derived from the kin's active, dodge rider and throw (`Arch.infusion`) |
+| `roster` | | its place in the roster (docs/boki/ROSTER.md): `art` (locked, todo, new), `line` (id of the line's first form), `stage` (1-3), `from` (the form it evolves from), optional `raised` (the affinity it was raised on) or `ink` (a theme) that picks its branch |
+| `data_only` | | `true` for a species with no model yet: the file holds only `grammar`, `id`, `name`, `theme`, `type2`, `flavor` and `roster`. KinLib keeps it out of `kin_ids()` (never spawned); `roster_ids()` and `entry()` include it |
 
 The stat profile is a fixed budget: each kin spends exactly 20 points. Kin stats are
 `base + points x per_point`; owner stats are bonuses the hunter gets while this is their kin.

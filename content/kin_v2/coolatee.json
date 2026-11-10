@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "coolatee",
+	"name": "Coolatee",
+	"theme": "ice",
+	"type2": "water",
+	"flavor": "Manatee calf, little cooler-box body.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "coolatee",
+		"stage": 1
+	}
+}

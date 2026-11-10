@@ -3,26 +3,21 @@ extends Node3D
 ## Empty), then three eggs on a little island. Pick an egg, knock on the shell until it hatches, name what
 ## comes out; then your first Relic drifts to you (MaskMoment) and you head into the tutorial together.
 
-## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
-## Names, tempers and blurbs come from each species' "egg" block in content/kin/<id>.json, so every
-## egg is named for its element (Venom Egg, ...).
+## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg), which
+## always hatches Ermink. Names, tempers and blurbs come from each species' "egg" block in
+## content/kin_v2/<id>.json, so every egg is named for its element (Venom Egg, ...) and Ermink's is the Mystery Egg.
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const MYSTERY := {
-	"species": "mystery", "name": "Mystery Egg", "temper": "???",
-	"desc": "Black as a moonless night, tucked in an old basket at the back. Nobody knows what's inside.",
-	"play": "Almost anything from the wilds could be in there, even a rare one,"
-		+ " and it's more likely than most to hatch a little strange.",
-}
+const MYSTERY := "ermink"
 
 static func starter_eggs() -> Array:
 	var out: Array = []
-	for sp in STARTERS:
+	for sp in STARTERS + [MYSTERY]:
 		var e: Dictionary = Data.egg_info(sp)
 		e["species"] = sp
+		e["mystery"] = sp == MYSTERY
 		for k in ["temper", "desc", "play"]:
 			if not e.has(k): e[k] = ""
 		out.append(e)
-	out.append(MYSTERY.duplicate())
 	return out
 
 const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
@@ -50,7 +45,7 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var cam_from := Vector3(0, 3.6, 6.4)
-var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
+var egg_defs: Array = []      # starter_eggs(), the mystery egg's mutations decided
 var mystery_found := false    # its card shows once you've hovered or picked the black egg
 var look: Dictionary = {}
 var preview: Node3D
@@ -83,10 +78,8 @@ func _ready() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	for d in egg_defs:
-		if d["species"] == "mystery":
-			d["species"] = MysteryEgg.roll_species(rng)
+		if d["mystery"]:
 			d["rec"] = {"mutations": MysteryEgg.roll_mutations(rng)}
-			d["mystery"] = true
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var holder := Node3D.new()

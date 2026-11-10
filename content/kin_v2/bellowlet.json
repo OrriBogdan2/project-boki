@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "bellowlet",
+	"name": "Bellowlet",
+	"theme": "fire",
+	"flavor": "Cassowary chick, tiny squeezebox chest.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "bellowlet",
+		"stage": 1,
+		"sex_forms": true
+	}
+}

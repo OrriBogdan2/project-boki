@@ -10,6 +10,9 @@ var id := ""
 var display_name := ""
 var animals: Array = []
 var theme := "none"
+var type2 := ""              # optional second type, a theme other than the first
+var roster := {}             # art, line, stage, from, ink, sex_forms: its place in the roster (docs/boki/ROSTER.md)
+var data_only := false       # in the roster without a model yet: loaded for the dex, never spawned
 var flavor := ""
 var colors := {}             # body belly glow wing: hex
 var look := {}               # body ears tail feet aura: core model builder ids
@@ -35,7 +38,11 @@ var voice := {}
 var egg := {}
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
+const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "infusion", "type2", "roster"]
+## A data-only species (no model yet) is just its roster entry.
+const STUB_FIELDS := ["grammar", "id", "name", "theme", "type2", "flavor", "roster", "data_only"]
+const STUB_REQUIRED := ["grammar", "id", "name", "theme", "roster", "data_only"]
+const ROSTER_ART := ["locked", "todo", "new"]
 const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
@@ -44,7 +51,13 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	if d.is_empty():
 		return null
 	rep.scan_refs(d, "")
-	rep.keys(d, "", FIELDS, REQUIRED)
+	k.data_only = typeof(d.get("data_only")) == TYPE_BOOL and bool(d["data_only"])
+	if d.has("data_only") and not k.data_only:
+		rep.err("data_only", "is true or left out")
+	if k.data_only:
+		rep.keys(d, "", STUB_FIELDS, STUB_REQUIRED)
+	else:
+		rep.keys(d, "", FIELDS, REQUIRED)
 	AbilitySpec._grammar(d, rep)
 	k.id = rep.ident(d, "id", "")
 	k.display_name = rep.text(d, "name", "", "", true)
@@ -52,6 +65,13 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	k.theme = rep.text(d, "theme", "", "none")
 	if not KinParts.THEMES.has(k.theme):
 		rep.err("theme", "unknown theme '%s' (themes are cosmetic: %s)" % [k.theme, ", ".join(KinParts.THEMES)])
+	k.type2 = rep.text(d, "type2", "")
+	if k.type2 != "" and (k.type2 in [k.theme, "none"] or not KinParts.THEMES.has(k.type2)):
+		rep.err("type2", "'%s' must be a theme other than the first type" % k.type2)
+	if d.has("roster"):
+		k.roster = _roster(d["roster"], rep)
+	if k.data_only:
+		return k
 	# based on one or two real animals
 	var an := rep.arr(d.get("animals", []), "animals")
 	if d.has("animals") and (an.size() < 1 or an.size() > 2):
@@ -168,6 +188,19 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		k.infusion = _infusion(d["infusion"], rep)
 	return k
 
+## The roster block: art status, the id of the line's first form, the stage, the form it evolves
+## from, the Ink that picks its branch, and sex_forms (a female look next to the male one).
+static func _roster(v: Variant, rep: GrammarReport) -> Dictionary:
+	var r := rep.obj(v, "roster")
+	rep.keys(r, "roster", ["art", "line", "stage", "from", "ink", "sex_forms"], ["art", "line", "stage"])
+	var out := {"art": rep.choice(r, "art", ROSTER_ART, "roster"), "line": rep.ident(r, "line", "roster"),
+		"stage": int(rep.number(r, "stage", "roster", 1, 3, null, true)), "from": rep.ident(r, "from", "roster", false)}
+	if r.has("ink"):
+		out["ink"] = rep.choice(r, "ink", KinParts.THEMES, "roster")
+	if r.has("sex_forms"):
+		out["sex_forms"] = rep.param(r, "sex_forms", ["bool", null, null, false, "", ""], "roster")
+	return out
+
 ## The optional infusion block: one effect part per socket (hit, ctrl, guard, util), a list of
 ## modifiers in order of preference (mod), and move: blink. Each must sit in its socket's category.
 static func _infusion(v: Variant, rep: GrammarReport) -> Dictionary:
@@ -209,6 +242,8 @@ static func _unit_block(d: Dictionary, key: String, names: Array, rep: GrammarRe
 
 ## Checks the slots and evolution against the loaded library {abilities, merges, evolution}.
 func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
+	if data_only:
+		return
 	var abil: Dictionary = lib.get("abilities", {})
 	var slots := {}
 	if active != "":

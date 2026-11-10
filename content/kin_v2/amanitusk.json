@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "amanitusk",
+	"name": "Amanitusk",
+	"theme": "spore",
+	"type2": "poison",
+	"flavor": "Boar-sized, toxic red caps as spear quills, stem tusks.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "burrlet",
+		"stage": 3,
+		"from": "sporcupine"
+	}
+}

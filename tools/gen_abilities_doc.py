@@ -47,7 +47,8 @@ for c in ["light", "medium", "heavy"]:
     w(f"| {c.capitalize()} | **{a['name']}** ({e['speed']*e['time']:.1f}m) | {a.get('charges',1)} / {a['cooldown']}s | {a['desc']} |")
 KV = {}
 for f in sorted(os.listdir(os.path.join(R, "content/kin_v2"))):
-    k = j("content/kin_v2/" + f); KV[k["id"]] = k
+    k = j("content/kin_v2/" + f)
+    if not k.get("data_only"): KV[k["id"]] = k
 def parts(effs):
     out = []
     for e in effs:

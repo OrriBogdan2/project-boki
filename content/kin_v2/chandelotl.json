@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "chandelotl",
+	"name": "Chandelotl",
+	"theme": "crystal",
+	"type2": "fairy",
+	"flavor": "Gills become a crystal chandelier crown.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "puddlet",
+		"stage": 3,
+		"from": "glassolotl"
+	}
+}
