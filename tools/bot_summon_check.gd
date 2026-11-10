@@ -5,6 +5,7 @@ extends RefCounted
 ## bot waits longer than an expert one.
 
 const DT := 1.0 / 60.0
+const FOE_DIST := 8.0   # m from the bot: inside its reach for a rival (8 m x aggro)
 const EXPERT := {"abil": 1.0, "react": 0.16, "fire": 1.0, "dmg": 1.0, "aggro": 1.1}
 
 var bad := 0
@@ -32,7 +33,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-## A fresh match: one bot with a wisp Boki, the other hunters idle, the foe 8 m from the bot.
+## A fresh match: one bot with a wisp Boki, the other hunters idle, the foe 8 m from the bot in its sight.
 func _start(opts := {}) -> void:
 	if m:
 		m.queue_free()
@@ -50,7 +51,7 @@ func _start(opts := {}) -> void:
 			h.ctrl = "idle"
 			h.inp["move"] = Vector2.ZERO
 	foe = m.hunters.filter(func(h: Hunter) -> bool: return h.team != bot.team)[0]
-	foe.pos = bot.pos + Vector3(8, 0, 0)
+	foe.pos = _in_sight(FOE_DIST)
 	foe.prev = foe.pos
 	bot.ai["diff"] = EXPERT
 	bot.ai["skill"] = 0.9
@@ -59,12 +60,23 @@ func _start(opts := {}) -> void:
 	_prev_left = 0.0
 	pin = 0.0
 
+## A spot `dist` m from the bot on its own level that it can see (the world at the seed decides which way:
+## a fixed direction can land behind a rise).
+func _in_sight(dist: float) -> Vector3:
+	for i in 16:
+		var at := bot.pos + Vector3(dist, 0, 0).rotated(Vector3.UP, TAU * i / 16.0)
+		at.y = m.world.ground_at(at.x, at.z)
+		if absf(at.y - bot.pos.y) < 0.5 and m.world.los(bot.pos, at, bot.pos.y + 0.95):
+			return at
+	return bot.pos + Vector3(dist, 0, 0)
+
 func _frames(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
 		foe.hp = foe.max_hp
+		foe.reveal_t = 1.0      # seen whichever way the bot faces (its view cone, grass)
 		if pin > 0.0:
 			bot.hp = bot.max_hp * pin
 		var left: float = bot.kin.summon.left
