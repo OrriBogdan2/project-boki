@@ -291,7 +291,7 @@ func feed_step(k: Dictionary, d: float) -> bool:
 					if res.get("new", false): h._toast("%s loves %s!" % [rec["name"], Care.food_name(String(res["food"]))])
 				else:
 					h._emote(k, "♪")
-				Sfx.play("pickup", c, -16.0, 0.1, 1.4)
+				Sfx.play("boki_eat", c, -8.0, 0.1, Unique.voice(rec))
 				# eats until it's had enough, if there's still food
 				if Care.need(rec, "food") < Econ.HUNGRY_AT and Econ.fill(f) > 0:
 					k["eat"] = {"fid": String(f["id"]), "seat": int(e["seat"]), "phase": "go", "t": 0.0}

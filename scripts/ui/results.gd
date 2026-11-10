@@ -257,7 +257,7 @@ func _kin_card(s: Dictionary) -> Control:
 	if s["levelup"]:
 		var lu := UI.label("%s grew to level %d!" % [k["name"], k["level"]], 17, UI.GOLD, UI.big)
 		kv.add_child(lu)
-		tw.tween_callback(func(): Sfx.play("unlock", null, -4.0); UI.pop_in(lu))
+		tw.tween_callback(func(): Sfx.play("garden_trait", null, -4.0); UI.pop_in(lu))
 	for et in s.get("evo", []):
 		kv.add_child(UI.label(et, 15, Color("c9a0ff")))
 	var mem: Array = k["memory"]

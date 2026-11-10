@@ -134,6 +134,54 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+# ---------------------------------------------------------------- garden reactions
+# The farm's own cues (what you hear most at home): short, warm, one per kind, so `unlock` stays for real unlocks.
+def feed(i):
+    """Two soft munches (a low tine and a crumb of noise) and a pleased rising tine."""
+    j = jit(i, 0.03)
+
+    def munch(f):
+        return mix(pluck(f, 0.1, 0.03, 0.2), 0.5 * lpf(noise(0.05), 1400) * env(N(0.05), 0.003, 0.02))
+    return finish(room(mix(munch(NOTE['C4'] * j), at(munch(NOTE['D4'] * j), 0.1),
+                           at(pluck(NOTE['G5'] * j, 0.35, 0.1), 0.22)), 0.5), 3800)
+
+
+def pet(i):
+    """A purr: a low tone with a quick tremolo, rounded off, and one warm tine on top."""
+    d = 0.5; n = N(d); t = T(d)
+    f = 150 * jit(i, 0.04)
+    purr = np.sin(2 * np.pi * f * t) * (0.6 + 0.4 * np.sin(2 * np.pi * 24 * t)) * np.sin(np.pi * np.arange(n) / n) ** 1.5
+    return finish(room(mix(purr * 0.6, at(pluck(NOTE['E5'] * jit(i, 0.02), 0.4, 0.12, 0.4), 0.05)), 0.5), 2600)
+
+
+def friend(i):
+    """Two tines a fifth apart ring together (a handshake), then a bright third above."""
+    return finish(room(mix(pluck(NOTE['G4'], 0.5, 0.14), pluck(NOTE['D5'], 0.5, 0.14),
+                           at(pluck(NOTE['G5'], 0.7, 0.2), 0.12), at(pluck(NOTE['D6'], 0.8, 0.26), 0.2)), 0.8), 5200)
+
+
+def trait(i):
+    """A shimmer rising through a pentatonic climb, ending in a chime: something about it changed."""
+    sw = S.sweep(420, 1250, 0.4) * env(N(0.4), 0.05, 0.2) * 0.25
+    steps = [at(pluck(NOTE[nm], 0.4, 0.09), 0.06 * k) for k, nm in enumerate(['D5', 'E5', 'G5', 'A5'])]
+    chime = at(S.chime(NOTE['D6'], 0.9, 0.3, ((1.0, 0.6), (2.76, 0.2))) * 0.3, 0.26)
+    return finish(room(mix(sw, *steps, chime), 0.8), 5400)
+
+
+def egg(i):
+    """A hollow wooden tock (a shell settling in straw) and a small warm bell."""
+    tock = (S.sweep(420, 210, 0.09) * env(N(0.09), 0.002, 0.03)
+            + 0.3 * S.pad(bpf(noise(0.04), 900, 1800) * env(N(0.04), 0.002, 0.012), 0.09))
+    return finish(room(mix(tock, at(pluck(NOTE['E5'], 0.55, 0.16, 0.5), 0.07), at(pluck(NOTE['A5'], 0.6, 0.18, 0.4), 0.17)), 0.7), 4200)
+
+
+def toy(i):
+    """A rubber bounce: a pitch that hops up twice, each hop smaller, with a tine on the last."""
+    def hop(f, d):
+        return S.sweep(f, f * 1.7, d) * env(N(d), 0.003, d * 0.5)
+    return finish(room(mix(hop(330, 0.1), at(hop(400, 0.08), 0.12) * 0.7, at(pluck(NOTE['C6'], 0.3, 0.08), 0.22)), 0.4), 4600)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -150,6 +198,12 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.takes_cat('garden_feed', feed, 2, 'ui')
+    S.takes_cat('garden_pet', pet, 3, 'ui')
+    S.save_cat('garden_friend', friend(0), 'ui')
+    S.save_cat('garden_trait', trait(0), 'ui')
+    S.save_cat('garden_egg', egg(0), 'ui')
+    S.save_cat('garden_toy', toy(0), 'ui')
 
 
 if __name__ == '__main__':
