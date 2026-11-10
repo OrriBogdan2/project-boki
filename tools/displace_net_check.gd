@@ -100,6 +100,7 @@ func _host() -> void:
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
+	await _ally_safe(G)
 	_finish()
 
 func _finish() -> void:
@@ -285,6 +286,31 @@ func _knock_extras(G: Hunter, B: Hunter) -> void:
 	ok(_got("burn") > 3.3 and absf(_got("slow_k") - 0.4) < 0.01,
 		"hit: the burn's length and the slow's strength reach the player (4 s, 40%)",
 		"burn %.2f slow_k %.2f" % [_got("burn"), _got("slow_k")])
+
+## The same moves aimed at a teammate (the host's view of the guest is moved to its own team): no move is sent
+## over the relay and the guest's own game leaves it standing.
+func _ally_safe(G: Hunter) -> void:
+	var P := m.player
+	G.team = P.team
+	var moves := [["ashwick", Vector3(3.8, 0, 0), _cinder, 1.0, "Cinder's cloak pull"],
+		["mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag"],
+		["bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Albert's shield push"]]
+	for c in moves:
+		_kit(c[0])
+		var start: Vector3 = home + c[1]
+		await _place(G, start)
+		Displace.capture = true
+		Displace.sent.clear()
+		await c[2].call(G)
+		await _run(float(c[3]) + 0.6)
+		Displace.capture = false
+		var sent := Displace.sent.filter(func(e): return String(e[2]) == G.nid).size()
+		var own: Vector3 = await _ask()
+		var moved := Vector2(own.x - start.x, own.z - start.z).length()
+		ok(sent == 0 and moved < 0.3, "%s: a teammate on the guest's game is left alone" % c[4],
+			"sent %d, moved %.1f m" % [sent, moved])
+		P.teleport(home)
+		await _place(G, home + PARK)
 
 func _kit(arch: String) -> void:
 	var P := m.player
