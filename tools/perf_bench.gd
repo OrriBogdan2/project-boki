@@ -32,6 +32,8 @@ const SLOW_MS := 33.0               # a frame over this counts as a hitch in the
 const BASELINE := "res://tools/perf_baseline.json"
 const P99_SLACK := 1.15             # the gate: match p99 may be at most 15% over the baseline
 var match_p99 := 0.0
+var created := {}        # node name -> count, nodes that entered the tree from the fight on (BENCH created)
+var fought := false
 var vp: RID
 
 func run(main_node: Node) -> void:
@@ -111,13 +113,15 @@ func _match() -> Array:
 	_hook_hud(m)
 	main.get_tree().node_added.connect(func(n: Node):
 		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+		added[k] = int(added.get(k, 0)) + 1
+		if fought:
+			created[k] = int(created.get(k, 0)) + 1)
 	Match.prof_on = true
 	Match.prof.clear()
 	Match.vprof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := stress
+	fought = stress
 	var out_at := 0.0
 	var boki_out := 0
 	var P: Hunter = m.player
@@ -144,6 +148,12 @@ func _match() -> Array:
 		added.clear()
 		last = now
 	_summary("match", fl)
+	var made := created.keys()
+	made.sort_custom(func(a, b): return created[a] > created[b])
+	var total := 0
+	for k in made: total += int(created[k])
+	var top := made.slice(0, 12).map(func(k): return "%s %d" % [k, created[k]])
+	print("BENCH created in the fight: %d nodes, %s" % [total, ", ".join(top)])
 	_emitters()
 	if stress:
 		print("BENCH stress: %d Hunters, %d Boki out at the last send" % [m.hunters.size(), boki_out])
