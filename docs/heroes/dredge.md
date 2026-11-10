@@ -145,6 +145,18 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 | Best after a stun (the reel or the slam covers the charge) | built (the reel combo is asserted) | [guide](https://deltiasgaming.com/?p=298298) | yes |
 | Explosive: more damage to destructibles | not built (we have no destructible cover) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB wind-up and arm flight (0.4 s, f121-123) | Keeps moving; body planted, arm extends; the caster shows GROUNDED. Cursor line aimed | Walks at 20% (`rmb.fly_slow`, `CastHold`), height held, faces the cursor | walk speed not measured; owner item 31 default, kept |
+| RMB reel (about 1.0 s, f124-129) | Braced and side-on, turned toward the target (the cursor is elsewhere, 0147); GROUNDED; walking not tested | Shuffles at 20% (`fly_slow`), Grounded, only the barge works, faces the CURSOR | facing differs (source: toward the target); needs code, not data, so listed, not fixed |
+| RMB recovery | Not shown (turns back to the aim within 0.1 s) | Free the step the reel ends | matches |
+| E wind-up (0.38 s, f1 fist hauled back) | Fist back, shoulder turned; a 1 bh forward hop at f2 (owner item 33 removed the hop) | Walks at 70% (`move_k`: `wind > 0`), facing LOCKED to the press direction (the telegraph cone) | walk 70% has no source number; decision (b)+(c) in Audit keeps it |
+| E slam and recovery (to 0.8 s, f3-f5 crouch) | Crouched follow-through; movement not shown | Free at once after the slam (pose only), faces the cursor again | unmeasured: source recovery may root; no number to set |
+
 ## Assumptions
 Where the footage and the wiki are silent, we picked the most likely behaviour (the owner can correct these):
 - "Through terrain" means rocks, trees, props and cliff faces: the hook flies through them and the body is hauled up and over
