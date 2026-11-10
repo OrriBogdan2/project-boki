@@ -148,6 +148,7 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
 		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
 		if can:
+			RankMarks.beam(H, r, slot)
 			RankMarks.mark(slot, r)
 		return
 	ab_slot(H, id, r, icon, key, col, cdf, cds, ready, ch, mx)
