@@ -198,13 +198,16 @@ func marks_on(f: Ent) -> int:
 
 # ------------------------------------------------------------------ dash: Ground Swim
 func on_dash(use_ex: bool) -> bool:
-	if use_ex and not h.grounded:
-		return false            # the class long dash in the air, as everyone's
 	if spin_t >= 0.0 or not wave.is_empty():
+		return true             # the spin and the wave hold him (content/dash_flow/gil.json: lock)
+	var dd := dash_def()
+	if use_ex and not h.grounded:
+		# the class long dash in the air: no ground to swim through, so no dive and no surfacing
+		if spend_dash(true):
+			travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
 		return true
 	if not spend_dash(false):
 		return true
-	var dd := dash_def()
 	travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
 	swim_t = float(dd["time"]) * float(dash_feel()["time"])
 	m.fx.burst(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)

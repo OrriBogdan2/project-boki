@@ -193,8 +193,10 @@ func run(main_node: Node) -> void:
 const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
 		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
 
+const NO_SOURCE := ["gil"]      # our own Hunters: no source Base HP row, left out of the share
+
 func _health() -> void:
-	var ids := Arch.ids()
+	var ids := Arch.ids().filter(func(x): return not NO_SOURCE.has(x))
 	var ours := {}
 	var sum_o := 0.0
 	var sum_s := 0.0

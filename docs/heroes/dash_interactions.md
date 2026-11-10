@@ -358,8 +358,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | gil | air dash -> Q glove |  | buffered to the dash's end |
 | gil | LMB -> dash |  | the kit's own handling (no row yet) |
 | gil | RMB -> dash |  | the kit's own handling (no row yet) |
-| gil | E -> dash |  | the kit's own handling (no row yet) |
-| gil | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| gil | E -> dash | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | **exception:** the dash is refused while it runs (Riptide is a planted spin that ends in the waterspout; Shift during it would drop the spout he is aiming. Recast E sends it early.) |
+| gil | ult (X) -> dash | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | **exception:** the dash is refused while it runs (Tidal Wave: he rides the wave down its line, untargetable, until it lands; the wave is his movement.) |
 | gil | Q glove -> dash |  | the kit's own handling (no row yet) |
 | gil | jump -> LMB |  | fires mid-jump (default) |
 | gil | jump -> RMB |  | fires mid-jump (default) |
