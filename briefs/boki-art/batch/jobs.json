@@ -42466,6 +42466,88 @@
     "prompt": "Epic splash art for a hero-and-creature adventure game, painted in exactly the same rich painterly style, lighting quality and finish as image 1. The hunter is the character from image 1: keep the same person, face, hair, outfit, colours and weapon, drawn in a NEW pose for this scene. The creature or creatures come from the other reference images: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the creature are partners working together, both clearly visible, the creature given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Scene: a midnight carnival. The jester from image 1 springs up from his box juggling glowing cards, riding the chess sea horse from image 2 like a carousel mount, while the dice wombat from image 3 tumbles alongside."
   },
   {
+    "id": "hb2_sable_lockatara",
+    "name": "Hunter + Boki splash v2 (sable_lockatara)",
+    "refs": [
+      "briefs/art-refs/sable_v2/sable_v2_splash.jpg",
+      "briefs/art-refs/sable_v2/sable_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Lockatara.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Sable, the Silver Thief: grey-lilac skin, fuzzy moth antennae, white braid, long buckled coat with moth-wing tails, twin enchanted flintlock pistols. Scene: a moonlit vault heist. Sable crouches on the back of the key-tailed lizard as it turns its key tail in a huge vault door lock; gold light spills through the opening door, both grinning."
+  },
+  {
+    "id": "hb2_neve_glaciatee",
+    "name": "Hunter + Boki splash v2 (neve_glaciatee)",
+    "refs": [
+      "briefs/art-refs/claire_v2/nivi_v2_splash.jpg",
+      "briefs/art-refs/claire_v2/nivi_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Glaciatee.jpg",
+      "briefs/boki-art/cards/Coolatee.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Neve, the Snowglide: a gentle, innocent young woman with real frost-white rabbit ears, loose silver hair, ice-blade skates and a candy-cane striped ice spear. Scene: a frozen sea under the northern lights. Neve skates across the ice with one hand on the big aurora walrus sliding beside her, the little seal pup spinning ahead of them; snow spray and ribbons of aurora. Joyful, graceful."
+  },
+  {
+    "id": "hb2_meeko_starters",
+    "name": "Hunter + Boki splash v2 (meeko_starters)",
+    "refs": [
+      "briefs/art-refs/pip_v2/meeko_v2_splash.jpg",
+      "briefs/art-refs/pip_v2/meeko_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Mycroll.jpg",
+      "briefs/boki-art/cards/Vespyx.jpg",
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Meeko, the Dawnfox: a small waist-high upright pink fairy-fox medic with her little sun and raincloud companions exactly as on her sheet. She reads as a hunter, not as one of the Boki. Scene: a sunny forest path. Meeko leads a cheerful parade: the mushroom hedgehog, the purple scorpion-tailed fox and the pink striped axolotl marching behind her in a line, her companions floating overhead."
+  },
+  {
+    "id": "hb2_cinder_calderoise",
+    "name": "Hunter + Boki splash v2 (cinder_calderoise)",
+    "refs": [
+      "briefs/art-refs/cinder_v2/cinder_v2_splash.jpg",
+      "briefs/art-refs/cinder_v2/cinder_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Cinder, the Ashen Kiss: a salamander woman with magma-cracked charcoal skin, horns, living-fire hair, a flame-tipped tail, no weapons, fire from her hands. Scene: a volcanic battlefield at night. Cinder stands on the head of the colossal volcano tortoise as it strides through lava, her arm raised with fire streaming from her palm, the tortoise roaring, embers everywhere."
+  },
+  {
+    "id": "hb2_motley_checkmare",
+    "name": "Hunter + Boki splash v2 (motley_checkmare)",
+    "refs": [
+      "briefs/art-refs/motley_v2/motley_v2_splash.jpg",
+      "briefs/art-refs/motley_v2/motley_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Checkmare.jpg",
+      "briefs/boki-art/cards/Pipwom.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Motley, the Void Jester: a jester upper body on a brass spring rising from a hovering card-suit box, no feet, a starry void face with a glowing grin, a swirl of burning cards. Scene: a midnight carnival. Motley springs up from his hovering box juggling glowing cards beside the chess sea horse, which rears like a carousel mount, while the dice wombat tumbles alongside."
+  },
+  {
+    "id": "hb2_kael_voltalon",
+    "name": "Hunter + Boki splash v2 (kael_voltalon)",
+    "refs": [
+      "briefs/art-refs/kael_v2/kael_v2_splash_final.jpg",
+      "briefs/art-refs/kael_v2/kael_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Voltalon.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Kael, the Unbroken: white hair, a glowing scarred eye, an enormous crimson scarf over his mouth with long streaming tails, a jagged white-hot greatsword, a cracked glowing right arm with a chain hook, silver armour. Scene: a storm-lashed cliff. Kael leaps with his greatsword drawn while the storm bird dives beside him wreathed in lightning, both striking at the same unseen foe below."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
