@@ -1,6 +1,7 @@
 extends RefCounted
 ## --glider-canopy-shots --shots-dir=<dir>: the canopy's heat as other players see it (GliderHeat), in a live match
 ## under xvfb with a renderer. One Hunter glides across open ground at the match camera's closest zoom:
+##   canopy_cool      no heat: the skin's own colours (reference)
 ##   canopy_warm      60% heat: the cloth warms toward ember
 ##   canopy_overheat  overheated on level air: full ember and a thin smoke trail
 ##   canopy_burning   overheated over the abyss, lifting at half strength: the cloth flickers
@@ -21,6 +22,7 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
+	await _state("canopy_cool", 1.0, false, "Cool glider (reference): the skin's own colours")
 	await _state("canopy_warm", 0.4, false, "60% heat: the canopy warms toward ember")
 	await _state("canopy_overheat", 0.0, false, "Overheated on level air: full ember and a thin smoke trail behind")
 	await _state("canopy_burning", 0.0, true, "Overheated over the abyss, lifting at half strength: the cloth flickers")
@@ -62,8 +64,8 @@ func _state(file: String, fuel: float, lip: bool, caption: String) -> void:
 		m.step(DT)
 		P.glide_fuel = fuel
 		P.below_lip = lip
-		m.cam.zoom = 0.3
-		m.cam.snap(P.pos)
+		m.cam.zoom = 0.5
+		m.cam.snap(P.pos + Vector3(0, 1.0, -2.0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
