@@ -1345,3 +1345,68 @@ for _k,_p in (('t1',"standing tall and still, facing RIGHT in profile, neck stre
               ('t2',"rearing back with both wings of cloud flared wide, facing the viewer, beak open in a screech, lightning forks on the cloud, legs planted wide"),
               ('t3',"crouched low, neck coiled back like a striking snake, facing LEFT, about to peck, cloud body hunched")):
     _n0=len(SPECS); ON_POSE('Thunderstrich',_LM['Thunderstrich']['sheet'],'final','tough',True,True,_p+".",_KEEPALL); SPECS[_n0]['id']='rv_thunderstrich_'+_k; SPECS[_n0]['runs']=2
+
+# ===== 11-10 OWNER: "make options for all of those" (remaining weak spots), "make the legendaries", and look for gaps in the roster. =====
+RV_NEW('Chuggamus','Teapotamus','final','tough',False,False,[
+ "a huge steam hippo with nothing built on it: its purple-brown hide swells into a round boiler belly, two short horn-like chimneys of its own bone puff flat steam clouds from its back, its nostrils vent steam, thick natural legs, big tusks. Charging.",
+ "a massive kettle hippo: the baby's round pot body grown into a great barrel-chested hippo with a curved spout-shaped horn on its nose and a handle-shaped crest of bone along its back, steam whistling from the horn. Planted, mouth open in a roar.",
+ "a long locomotive hippo: body stretched like an engine, a row of small bone chimneys along its spine each puffing a flat steam ring, heavy rolling shoulders, glowing orange mouth. Walking forward."])
+RV_NEW('Maracoil','Rattlebub','final','tough',False,False,[
+ "a giant rattlesnake reared in a tall S with its head high, the same cream and orange diamond scales, its tail a big cluster of five maraca rattles like a bunch of fruit held above its head, a short crest of rattle beads along its neck, narrow fierce eyes and long fangs. No hood.",
+ "a thick heavy viper lying in a tight spiral like a coiled drum, head resting on top, the same diamond pattern, with maraca rattles grown at intervals all along its body so the whole snake rattles. Half-lidded dangerous eyes.",
+ "a two-rattled sidewinder mid-slither, body in three sharp diagonal waves across the picture, a maraca rattle at the tail and a second one on a horn-like stalk above its head, tongue flicking."])
+RV_NEW('Rampartoad','Moatpole','mid','tough',False,False,[
+ "a sturdy toad whose warty back has grown into a proper little castle wall with three square battlements and one round tower turret, moss in the cracks, the baby's sandy-tan skin darkened to moss green at the back, the same big yellow eyes. Mid-hop.",
+ "a wide toad wearing its wall like a crown: a ring of stone battlements round its head and shoulders grown from its skin, a deep throat pouch puffed out like a drum, sandy and moss-green skin, yellow eyes. Sitting, croaking.",
+ "a guard toad standing up on its hind legs behind a curved shield-wall of stone grown from its forearms, peeking over the top with big yellow eyes, moss on the stones."])
+RV_NEW('Crofthollow','Crofthorn','final','majestic',False,True,[
+ "a great highland bull, far bigger and older: its back carries a whole thatched croft with a round chimney puffing one flat smoke curl, a dry-stone wall running along its spine to the tail, ivy and wild roses on its huge sweeping horns, a long shaggy ginger coat to the ground. Planted, calm.",
+ "an ancient cattle giant lying down like a hillside, the cottage and a small garden with a tree grown on its back, horns like old branches, a mossy face with gentle eyes. Massive and still.",
+ "a rearing highland bull with horns grown into a tall arch like a gateway, thatch along its neck like a mane, stone wall plates down its back, ivy trailing from its horns."])
+RV_NEW('Lanternlong','Lanterloris','final','pretty',False,True,[
+ "a long graceful loris-dragon whose body is a string of five round paper lanterns from small to large, each glowing orange through the baby's cream fur, with the baby's round face and big brown eyes, long thin limbs, and a tassel tail. Climbing through the air.",
+ "a tall slow loris standing upright, holding its own long tail like a lantern pole with three glowing lanterns hanging from it, a large lantern body, cream fur ruff, big calm eyes.",
+ "a festival-dragon loris coiled in a ring, lantern segments all round the loop, face and big eyes at the front, tassels at each joint."])
+# Knotwyrm sheet redo (views disagreed); portraits from the sheet for Canvastross and Mossbastion (theirs repeat the card).
+SPECS.append({'id':'v2s_knotwyrm_fix','name':'Knotwyrm (sheet redo)','refs':['briefs/boki-art/cards/Knotwyrm.jpg'],'runs':3,'aspect':'16:9','size':'2K',
+  'prompt':("Clean flat model sheet of exactly the creature in image 1: a rope snake tied in one big knot round a dark wooden post, lying on the ground. Exactly four views in one single row: front, three-quarter, side and back, "
+   "all the same size, all showing the SAME pose as image 1: the same single knot, the same head resting low at one end, the same frayed dark tail raised at the other, the same moss and mushrooms. Do not stand it upright and do not change the knot. "
+   "Model-sheet finish: "+LINE_V2+"Flat colour fills only, no shading. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no shadow, no text, no extra copies.")})
+for _n,_st,_ar,_fu,_pose in (('Canvastross','final','majestic',True,"gliding side-on, facing RIGHT, wings stretched out flat to both sides like sails, legs tucked, mast feather streaming back"),
+                             ('Mossbastion','final','majestic',False,"walking side-on, facing RIGHT, head turned toward the viewer, one front leg lifted")):
+    _n0=len(SPECS); ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,False,_fu,_pose+".",_KEEPALL); SPECS[_n0]['id']='v2p_'+_n.lower()+'_side'; SPECS[_n0]['runs']=3
+# NEW LEGENDARIES (concepts; no reference image, the style is in words). 3 directions x 2 runs. ids leg_<idea>_<a|b|c>.
+_LEGRULE=(" A legendary creature for a creature-collecting game: one single animal with one clear idea, every part grown from its own body (nothing built, worn, strapped or carried), "
+          "grand and memorable, with an animal face. One creature only. ")
+def LEG(idea,arch,dark,furry,opts):
+    for _k,_d in zip('abc',opts):
+        SPECS.append({'id':'leg_'+idea+'_'+_k,'name':'Legendary concept: '+idea+' '+_k,'refs':[],'runs':2,'aspect':'1:1','size':'2K',
+          'prompt':"Draw one single character illustration of a new creature: "+_d+_LEGRULE+"The art style is described in words below, follow it exactly. "+STYLE_V2('final',arch,dark,furry)+FRAME_V2.replace(" Crisp clean edges"," Crisp clean edges")})
+LEG('lighthouse','majestic',False,True,[
+ "a very tall white heron with red bands round its long neck like a lighthouse tower, its head crowned with a lantern-like crest of clear crystal feathers, one eye bright gold like a lamp, standing on one leg on nothing, wings folded.",
+ "a great grey heron whose long neck spirals like a lighthouse stair, with a glowing pale-yellow eye and a cap-shaped crest, wings half open like a keeper's cloak, long legs planted wide.",
+ "a stout pelican-heron with a tower-shaped body, a domed head crest that shines pale gold, a long beak, and banded white and navy plumage, calm and watchful."])
+LEG('loom','creepy',True,True,[
+ "a huge elegant spider with a patterned woven tapestry stretched between its two raised front legs, the cloth pattern grown from its own silk in deep red and gold, a furry indigo body, eight calm eyes.",
+ "a great orb-weaver whose abdomen is shaped like a wound ball of thread in many colours, with shuttle-shaped leg tips and a half-woven web patterned like a carpet behind it.",
+ "a tall spindly spider standing like a loom frame, its long legs the uprights, threads of gold silk running between them in neat rows, a small wise face with eight eyes."])
+LEG('hourowl','majestic',False,True,[
+ "an ancient owl whose body is shaped like an hourglass: a broad feathered chest narrowing to a tiny waist and widening again to its tail, with a band of pale gold sand-coloured feathers that seem to pour upward, huge round amber eyes, wings spread.",
+ "a round old owl with clock-face rings in its eyes, feathers arranged like the numbers of a dial round its face, and long tail feathers shaped like two clock hands, perched and still.",
+ "a tall horned owl with wings patterned like falling sand in bands of gold and brown, a narrow waist, and a pendulum-shaped tail feather, staring straight ahead."])
+LEG('volcano','tough',True,False,[
+ "a massive tortoise whose shell is a small volcano: a cone of dark basalt plates with a crater of flat orange lava at the top and three lava cracks running down, heavy clawed legs like rock, a blunt old face with ember-orange eyes.",
+ "a broad snapping turtle with a shell of cooled black lava in hexagon columns and a glowing orange seam round its rim, a hooked beak, a spiked tail like a cooled lava flow.",
+ "a giant tortoise rearing its head high, its shell a ring of five small smoking cones round a lava lake drawn as flat orange and yellow shapes, ash-grey skin, calm eyes."])
+LEG('comet','sleek',False,True,[
+ "a small swift fox mid-leap with midnight-blue fur and a white chest, its long tail a comet's trail drawn as three flat bands of pale blue, white and gold tapering to a point, a small star-shaped mark on its brow, bright silver eyes.",
+ "a slim silver-white fox running, with two long tails streaming behind like a comet's twin tails, dark blue legs and ear tips, tiny flat star shapes in its tail fur.",
+ "a little fox curled in mid-air like a falling star, deep violet fur, a blazing white-gold tail wrapped round it in a spiral, one eye open."])
+LEG('bell','majestic',False,False,[
+ "a long temple dragon whose body is a chain of seven great bronze bells from large to small, each bell a segment of its own bronze-scaled body with a green patina edge, a horned head with long whiskers, coiled upright.",
+ "a wingless dragon with a single enormous bell-shaped chest and a clapper-shaped tail tip, bronze and jade-green scales, a mane of red, rearing with its mouth open as if ringing.",
+ "a serpent dragon looped in a ring, small bells grown along its spine like a ridge, a broad bell-shaped frill behind its head, old bronze colour with gold inlay lines."])
+LEG('blightmoth','creepy',True,True,[
+ "a huge pale moth of the Blight: bone-white furry body, wings of deep purple-black with a skull-like eye pattern in bone white and a few violet vein lines, long feathery antennae, calm pinpoint eyes. Unsettling but beautiful.",
+ "a great dark stag beetle of the Blight with antler-like jaws of bone white, a purple-black shell cracked with thin violet lines, small bone spurs along its legs, low and heavy.",
+ "a tall thin heron-like Blight bird with purple-black feathers, a bone-white skull-shaped beak mask, long legs with bone spurs, and a ragged cloak of wing feathers, standing very still."])
