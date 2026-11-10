@@ -110176,5 +110176,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px8_chuggamus_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px8_zephyrak",
+    "name": "Zephyrak (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_zephyrak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_palloth",
+    "name": "Palloth (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_palloth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_chuggamus",
+    "name": "Chuggamus (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_lockatara",
+    "name": "Lockatara (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_lockatara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_lockatara",
+    "name": "Lockatara (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_palloth",
+    "name": "Palloth (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_palloth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_hydrangor",
+    "name": "Hydrangor (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_hydrangor_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_kestrike",
+    "name": "Kestrike (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_kestrike_1.jpg",
+    "ok": true
   }
 ]
