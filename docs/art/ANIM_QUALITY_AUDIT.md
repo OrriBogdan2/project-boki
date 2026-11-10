@@ -51,6 +51,15 @@ body (not in the air, a crouch, or a move that owns the body):
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
 
+## Free arm in attacks (`WardenFreeArm`)
+
+Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
+clip plays, its upper arm, forearm and hand ease (10/s) to their idle rotation over whatever the clip keys, so the free arm
+hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs are not re-baked (no Blender on this worker; the
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
+`--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
+(either arm); `t_pose` stays up where the weapon arm itself reaches out.
+
 ## Per Hunter, before to after
 
 Slide is the share of the move speed (lower is better). Counter is +1 natural, -1 pacing. Clip speed is the feet's
@@ -85,7 +94,7 @@ posts scroll at the move speed).
 
 **Cinder (`ashwick`)**
 1. Both arms swung with their own side's leg (counter -0.93, fixed to +0.80); the run clip ran 12 % ahead of the move (fixed).
-2. Both attacks hold an arm out to the side for 92 to 96 % of the clip (T-pose).
+2. Both attacks held the free (left) arm out to the side for 92 to 96 % of the clip (T-pose; fixed: 0 %, the arm hangs loose, see "Free arm" below).
 3. Idle to walk first-pose gap 0.38 body heights.
 
 ![ashwick walk and run, before and after](anim_audit/ashwick.jpg)
@@ -107,7 +116,7 @@ posts scroll at the move speed).
 **Grimble (`dredge`)**
 1. Hip bob 17 cm at a run (12 % of his height); not changed.
 2. Idle to walk first-pose gap 0.45 body heights, the largest of the roster.
-3. The throw sends the free arm 1.4 body heights and holds an arm sideways for 67 %; slide 28 % to 12 % (fixed).
+3. The throw held the free arm sideways for most of the clip (fixed: the free arm is loose; the thrower's own arm still reaches out, 62 %) and the free hand still travels 1.4 body heights, because the torso spins under it; slide 28 % to 12 % (fixed).
 
 ![dredge walk and run, before and after](anim_audit/dredge.jpg)
 
@@ -149,7 +158,7 @@ posts scroll at the move speed).
 **Meeko (`tender`)**
 1. Feet slid 62 % of the run speed, 76 % at a walk (now 17 %, 39 %). A 0.65 m body takes 6.7 steps/s.
 2. The left arm paced its leg (counter -0.82, now +0.39, still weakest).
-3. seed and shot_r hold an arm sideways for 71 to 88 % and fling the free arm 1.0 to 1.2 body heights. Foot speed stays at 3.9 of 4.65 m/s (gain cap 1.5, rate cap 1.4).
+3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself). Foot speed stays at 3.9 of 4.65 m/s (gain cap 1.5, rate cap 1.4).
 
 ![tender walk and run, before and after](anim_audit/tender.jpg)
 
@@ -167,7 +176,7 @@ Split into backlog items per Hunter (role build):
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
+- Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.

@@ -11,6 +11,7 @@
 			"cloud": {"calm": 4, "happy": 5, "angry": 7, "determined": 4, "cry": 7, "sleepy": 6, "shy": 4, "sad": 7}
 		}
 	},
+	"free_arm": {"seed": "R", "shot_r": "L"},
 	"loco": {
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},

@@ -24,6 +24,7 @@
 	"hide_while_chain": [
 		"hook"
 	],
+	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
 		"idle": "idle",
 		"stance": "stance",
