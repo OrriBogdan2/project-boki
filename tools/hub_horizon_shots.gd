@@ -15,6 +15,8 @@ func run(m: Node) -> void:
 	Game.goto("home", {"zone": GardenZones.HUB})
 	for i in 90:
 		await m.get_tree().process_frame
+	m.current.cam.zoom_to = 2.4      # pulled back: the whole sky round the hub
+	m.current.cam.zoom = 2.4
 	m.fade.reveal(0.05)
 	await m.get_tree().create_timer(0.5).timeout
 	m.get_viewport().get_texture().get_image().save_png(out.path_join("hub_horizon.png"))

@@ -5,12 +5,12 @@ extends RefCounted
 ## island is lit in the zone's colour; a locked one is misty (its colours washed toward the sky).
 ## Which is which comes from Save.d["zones"] (GardenZones.is_open). Nothing here is saved or ticked.
 
-const RING_R := 62.0       # m from the hub's middle to each island
-const ARC := 2.4           # rad of sky the five spread over, centred on the view's far side (north, -z)
-const RISE := 9.0          # m an island floats above the hub's ground, plus RISE_STEP for each odd one
-const RISE_STEP := 5.0
-const TOP_R := 9.0         # m, an island's top radius
-const DEPTH := 8.0         # m, how far its rocky underside hangs
+const RING_R := 28.0       # m from the hub's middle to each island
+const ARC := 3.6           # rad of sky the five spread over, centred on the far side (north, -z)
+const RISE := -7.0         # m an island floats from the hub's ground (below it: the camera looks down), plus RISE_STEP for each odd one
+const RISE_STEP := -4.0
+const TOP_R := 6.0         # m, an island's top radius
+const DEPTH := 6.0         # m, how far its rocky underside hangs
 const SIDES := 7           # corners of the low-poly outline
 const MIST := 0.7          # how far a locked island's colours wash toward the sky (0 none .. 1 all)
 const SKY := Color("8a96c8")
