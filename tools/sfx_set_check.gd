@@ -131,11 +131,20 @@ func _garden_names() -> void:
 	var re := RegEx.create_from_string("\"(garden_[a-z0-9_]+)\"")
 	var seen := []
 	var silent := []
-	for f in ["base_race.gd", "base_shove.gd"]:
+	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "garden_sfx.gd"]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
+			if hit.get_string(1).ends_with("_"):          # a prefix, completed below
+				continue
 			seen.append(hit.get_string(1))
 			if not Sfx.ensure(hit.get_string(1)):
 				silent.append(hit.get_string(1))
+	var sizes: Array = GardenSfx.SIZE.values()
+	var prefixed := {"garden_cheer_": GardenSfx.GRADE.values(), "garden_win_": sizes, "garden_sulk_": sizes}
+	for prefix in prefixed:
+		for tail in prefixed[prefix]:
+			seen.append(prefix + tail)
+			if not Sfx.ensure(prefix + tail):
+				silent.append(prefix + tail)
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 

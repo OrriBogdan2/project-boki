@@ -1,14 +1,16 @@
-"""Garden minigame sounds (GARDEN.md 5, docs/AUDIO.md): the Dash race and the Stump Shove. Run from tools/.
+"""Garden minigame sounds (GARDEN.md 5, docs/AUDIO.md): the Dash, Stump Shove, Seek and Spark Volley. Run from tools/.
 
 Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Boki chirps, no hard hits.
-  garden_start    a wooden clap-clap and a rising two-note call (Ready... go)   garden_lap     a light pat and tick
-  garden_cheer    a good cheer press: a bright pluck and a chirp                garden_miss    a dull wooden thunk
-  garden_finish   a tape-snap swish and a bell                                  garden_crowd   six Boki chirps cheering
-  garden_strain   a loop: two Boki pushing, breath and a wood groan             garden_creak   the stump leaning
-  garden_thud     the stump going over                                          garden_win     a short happy sting
-  garden_sulk     a small huff
-Boki voices reuse gen_sfx_boki's chirp. The new names are lazy-loaded; call sites are in
-scripts/home/base_race.gd and base_shove.gd.
+  garden_count     a countdown tick (twice)             garden_go           the third beat, bright
+  garden_cheer_perfect / _good / _miss   the crowd of Boki answering your timing press: a spray of chirps and
+                   plucks, a few cheers, a small "aww" and a dull thunk
+  garden_lap       a light pat and tick                 garden_finish       a tape-snap swish and a bell
+  garden_crowd     six Boki chirps for the first home   garden_strain       a loop: two Boki pushing
+  garden_creak     the stump leaning                    garden_thud         the stump going over
+  garden_win_small / _medium / _large    the winner's fanfare, higher and quicker for a small Boki, fuller for a large
+  garden_sulk_small / _medium / _large   the loser's huff, a squeaky puff down to a deep sigh
+  garden_sniff     a loop: quick little sniffs for Seek garden_bat   the seed hit over the Volley log
+Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd.
 """
 import numpy as np
 import sfx_lib as S
@@ -40,25 +42,44 @@ def chirp(f, d=0.1, i=0):
 
 
 # ---------------------------------------------------------------- race
-def start(i):
-    clap = mix(wood_tick(400), at(wood_tick(400), 0.16))
-    call = at(mix(pluck(523, 0.22, 0.12), 0.4 * S.sweep(523, 560, 0.22) * env(N(0.22), 0.02, 0.1)), 0.42)
-    go = at(mix(pluck(784, 0.4, 0.2), 0.3 * pluck(1568, 0.4, 0.1), 0.35 * chirp(1000, 0.14, i)), 0.62)
-    return B.soft(B.room(mix(clap, call, go), 0.4), 5000)
+def count(i):
+    """One beat of the countdown: a soft stick tick and a low pluck."""
+    return B.soft(B.room(mix(wood_tick(520, 0.06), 0.8 * pluck(392, 0.2, 0.08)), 0.3), 4500)
+
+
+def go(i):
+    """The third beat: a rising pluck pair and a chirp."""
+    return B.soft(B.room(mix(pluck(784, 0.4, 0.2), at(pluck(1175, 0.4, 0.2), 0.05), 0.3 * pluck(1568, 0.4, 0.1),
+                             at(0.5 * chirp(1000, 0.14, i), 0.04)), 0.4), 5200)
+
+
+def cheer_perfect(i):
+    """Every Boki in the crowd cheers: a rising run of chirps over two bright plucks."""
+    fs = [880, 990, 1100, 1240, 1320, 1480]
+    parts = [at(chirp(f * j(i + k, 0.05), 0.11, i + k), 0.045 * k + S.rng.uniform(0, 0.02)) * S.rng.uniform(0.6, 0.9)
+             for k, f in enumerate(fs)]
+    bells = mix(pluck(1319 * j(i, 0.02), 0.35, 0.14), at(pluck(1760, 0.35, 0.16), 0.08))
+    return B.soft(B.room(mix(*parts, 0.7 * bells), 0.5), 5600)
+
+
+def cheer_good(i):
+    """A few Boki cheer: four chirps and a single pluck."""
+    fs = [900, 1020, 960, 1100]
+    parts = [at(chirp(f * j(i + k, 0.05), 0.1, i + k), 0.06 * k + S.rng.uniform(0, 0.02)) * S.rng.uniform(0.5, 0.8)
+             for k, f in enumerate(fs)]
+    return B.soft(B.room(mix(*parts, 0.6 * pluck(988 * j(i, 0.03), 0.3, 0.12)), 0.4), 5200)
+
+
+def cheer_miss(i):
+    """A small crowd "aww": three chirps sliding down and a dull wooden thunk."""
+    parts = [at(mix(B.squeak(f * j(i + k, 0.05), 0.2, -0.3, 0.02, 0.1), 0.3 * S.sweep(f, f * 0.7, 0.2)), 0.07 * k) * 0.6
+             for k, f in enumerate([760, 680, 620])]
+    return B.soft(B.room(mix(*parts, 0.7 * wood_tick(190 * j(i, 0.06), 0.12)), 0.4), 3600)
 
 
 def lap(i):
     pat = mix(wood_tick(330 * j(i, 0.05), 0.06), 0.7 * lpf(noise(0.12), 1800) * env(N(0.12), 0.03, 0.04))
     return B.soft(mix(pat, at(pluck(880 * j(i, 0.03), 0.16, 0.06), 0.03) * 0.6), 4500)
-
-
-def cheer(i):
-    return B.soft(B.room(mix(pluck(988 * j(i, 0.03), 0.3, 0.12), at(pluck(1319 * j(i, 0.03), 0.3, 0.14), 0.07),
-                             at(0.5 * chirp(1100, 0.1, i), 0.04)), 0.3), 5500)
-
-
-def miss(i):
-    return B.soft(mix(wood_tick(190 * j(i, 0.06), 0.12), 0.5 * S.sweep(300, 190, 0.14) * env(N(0.14), 0.005, 0.06)), 2600)
 
 
 def finish(i):
@@ -95,30 +116,61 @@ def thud(i):
 
 
 # ---------------------------------------------------------------- results
-def win(i):
-    notes = [(523, 0.0), (659, 0.1), (784, 0.2), (1047, 0.32)]
-    parts = [at(pluck(f, 0.45 if k == 3 else 0.25, 0.28 if k == 3 else 0.12), t0) for k, (f, t0) in enumerate(notes)]
-    return B.soft(B.room(mix(*parts, at(0.4 * chirp(1250, 0.14, i), 0.34)), 0.4), 5200)
+SIZES = {'small': 1.45, 'medium': 1.0, 'large': 0.7}     # pitch factor: a small Boki squeaks, a large one booms softly
 
 
-def sulk(i):
-    huff = bpf(noise(0.28), 500, 2200) * S.shape(0.28, 0.04, 0.0, 0.22)
-    sigh = B.vowel(380 * j(i, 0.05), 250, 0.3, 'uh', 1.3, breath=0.3)
-    return B.soft(mix(huff, 0.6 * sigh), 3600)
+def win(f):
+    """The winner's fanfare: four rising notes and a chirp, higher and quicker for small, slower and rounder for large."""
+    def make(i):
+        notes = [(523, 0.0), (659, 0.1), (784, 0.2), (1047, 0.32)]
+        parts = [at(pluck(n * f, 0.45 if k == 3 else 0.25, 0.28 if k == 3 else 0.12), t0 / f ** 0.5)
+                 for k, (n, t0) in enumerate(notes)]
+        return B.soft(B.room(mix(*parts, at(0.4 * chirp(1250 * f, 0.14 / f ** 0.5, i), 0.34 / f ** 0.5)), 0.4), 5200)
+    return make
+
+
+def sulk(f):
+    """The loser's huff: breath, then a sigh; a small Boki puffs and squeaks, a large one sighs low and long."""
+    def make(i):
+        d = 0.28 / f ** 0.5
+        huff = bpf(noise(d), 500 * f, 2200 * f) * S.shape(d, 0.04, 0.0, d * 0.8)
+        sigh = B.vowel(380 * f * j(i, 0.05), 250 * f, d * 1.1, 'uh', 1.3, breath=0.3)
+        return B.soft(mix(huff, 0.6 * sigh), 3600)
+    return make
+
+
+# ---------------------------------------------------------------- seek and volley
+def sniff():
+    """Seek: three quick little sniffs and a pause, about 1.2 s, looped."""
+    d = 1.2; n = N(d); out = np.zeros(n)
+    for t0, g in [(0.0, 1.0), (0.14, 0.8), (0.28, 0.9)]:
+        sn = bpf(noise(0.1), 1800, 5200) * S.shape(0.1, 0.02, 0.0, 0.07)
+        out += g * np.concatenate([np.zeros(N(t0)), sn, np.zeros(n)])[:n]
+    return lpf(out, 4200)
+
+
+def bat(i):
+    """Volley: a soft seed knock off a Boki's paw, a dry pok and a faint spark ping."""
+    return B.soft(mix(wood_tick(520 * j(i, 0.06), 0.08), 0.5 * pluck(1568 * j(i, 0.03), 0.18, 0.05)), 5000)
 
 
 def main():
-    S.takes_cat('garden_start', start, 0, 'boki')
+    S.takes_cat('garden_count', count, 1, 'boki')
+    S.takes_cat('garden_go', go, 1, 'boki')
+    S.takes_cat('garden_cheer_perfect', cheer_perfect, 2, 'boki')
+    S.takes_cat('garden_cheer_good', cheer_good, 2, 'boki')
+    S.takes_cat('garden_cheer_miss', cheer_miss, 2, 'boki')
     S.takes_cat('garden_lap', lap, 2, 'ui')
-    S.takes_cat('garden_cheer', cheer, 2, 'ui')
-    S.takes_cat('garden_miss', miss, 2, 'ui')
     S.takes_cat('garden_finish', finish, 1, 'boki')
     S.takes_cat('garden_crowd', crowd, 2, 'boki')
     S.save_loop('garden_strain', strain(), 'loop')
     S.takes_cat('garden_creak', creak, 2, 'step')
     S.takes_cat('garden_thud', thud, 1, 'impact')
-    S.takes_cat('garden_win', win, 0, 'boki')
-    S.takes_cat('garden_sulk', sulk, 2, 'boki')
+    for size, f in SIZES.items():
+        S.takes_cat('garden_win_' + size, win(f), 0, 'boki')
+        S.takes_cat('garden_sulk_' + size, sulk(f), 2, 'boki')
+    S.save_loop('garden_sniff', sniff(), 'loop')
+    S.takes_cat('garden_bat', bat, 2, 'ui')
 
 
 if __name__ == '__main__':

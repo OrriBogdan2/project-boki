@@ -245,7 +245,7 @@ func _hide(at: Vector2) -> void:
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
-	Sfx.play("whoosh", null, -8.0)
+	GardenSfx.countdown(h, scent.position)
 
 func _walkable(p: Vector2) -> bool:
 	return h._ground_h(p.x, p.y) > -50.0
@@ -272,6 +272,8 @@ func tick(d: float) -> void:
 		S.HUNT:
 			hunt.step(d)
 			_move_pair(d)
+			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
+			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
 			if hunt.over():
 				_end(true)
 		S.RESULT:
@@ -296,9 +298,11 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 	if is_instance_valid(scent):
 		scent.queue_free()
+	GardenSfx.sniff_stop()
 	if finished:
 		go(S.RESULT)
 		_card(res)
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()

@@ -78,6 +78,7 @@ class Run:
 	var called := false             # your one call is used
 	var last_miss := -1             # the side that dropped the last seed, -1 before the first point
 	var rally := 0                  # hits since the serve
+	var hits := 0                   # hits in the whole match (the seed bat sound)
 
 	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
 		R = BaseVolley.rules()
@@ -143,6 +144,7 @@ class Run:
 			spike = ""
 		fly_t = fly_total
 		rally += 1
+		hits += 1
 
 	func _arrive() -> void:
 		var p := BaseVolley.p_return(recs[to], recs[hitter]) * hard
@@ -245,7 +247,7 @@ func use() -> void:
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
 	seed_node.visible = true
 	_place()
-	Sfx.play("whoosh", null, -8.0)
+	GardenSfx.countdown(h, log_node.position)
 
 ## A press: true when the match took it.
 func input(event: InputEvent) -> bool:
@@ -259,6 +261,7 @@ func input(event: InputEvent) -> bool:
 	if run.can_call():
 		var r := bar.press()
 		run.call_spike(r)
+		GardenSfx.crowd(r, pair[run.backed]["pos"])
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -271,7 +274,10 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	var points: int = run.score[0] + run.score[1]
+	var hits: int = run.hits
 	run.step(d)
+	if run.hits != hits:
+		GardenSfx.cue("garden_bat", pair[run.hitter]["pos"])
 	if not run.called:
 		bar.step(d)
 	if run.score[0] + run.score[1] != points:
@@ -318,6 +324,7 @@ func _end(finished: bool) -> void:
 	seed_node.visible = false
 	if finished:
 		_card(res)
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
