@@ -3976,4 +3976,6 @@ func _hb_home():
 	current = hm
 	await get_tree().process_frame
 	await get_tree().process_frame
+	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
+		await get_tree().process_frame
 	return hm
