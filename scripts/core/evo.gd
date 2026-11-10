@@ -1,11 +1,12 @@
 class_name Evo
-## Kin evolution. How you raise a kin decides what it grows into, and it never stops growing.
+## Boki evolution (docs/decisions/0024-evolution-rules.md). Data: content/rules/evolve.json.
 ##
-## Every kin builds up four affinities from how it lives: what it eats, what it does in matches
-## and its own personality. Every 4 levels it takes a new form along its strongest affinity, so
-## one Vespyx can become fierce and another steadfast. Between forms, every 4 levels from level 2,
-## it gains a mutation: a new body part (or a bigger version of one it has) with a small perk.
-## There is no cap, and the parts and order differ for every kin.
+## Each species evolves into the next one at its own level, with a Lunar/Ember/... Ink used on it,
+## or by being traded, as its entry in evolve.json says. Where a line branches by temperament, the
+## Boki's leading affinity (what it eats, does in matches and its personality) picks the branch.
+## A Boki never evolves into a species that has no data or no model yet: it waits at the level,
+## and evolves once the art exists (catch_up on load). Levels stop at the cap (100).
+## Every 4 levels from level 2 it also gains a mutation: a cosmetic body part, or a bigger one.
 
 const AFF := {
 	"fierce": {"name": "Fierce", "tint": Color("e0503a"), "stat": "dmg", "amt": 0.05,
@@ -16,14 +17,6 @@ const AFF := {
 		"why": "explores and uses its skill", "food": "mindmint", "parts": ["antennae", "spots", "third_eye", "crest"]},
 	"swift": {"name": "Swift", "tint": Color("5ad0e0"), "stat": "speed", "amt": 0.05,
 		"why": "gets thrown around and moves fast", "food": "tidebloom", "parts": ["wings", "tail_long", "fins", "crest"]},
-}
-
-const ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb", "wisplet": "Wisp"}
-const SUFFIX := {
-	"fierce": ["fang", "claw", "maw", "rend", "fury"],
-	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
-	"curious": ["wick", "seer", "mote", "glim", "oracle"],
-	"swift": ["dart", "wing", "gale", "streak", "comet"],
 }
 
 const PART_NAMES := {"horns": "horns", "spikes": "back spikes", "fangs": "fangs", "brow": "an armored brow",
@@ -39,6 +32,8 @@ static func ensure(rec: Dictionary) -> void:
 		rec["forms"] = []          # one affinity per form taken
 	if not rec.has("muts"):
 		rec["muts"] = []           # [{id, lv, aff}]
+	if not rec.has("was"):
+		rec["was"] = []            # the species it evolved from, oldest first
 
 static func add(rec: Dictionary, aff: String, n: float) -> void:
 	ensure(rec)
@@ -60,19 +55,71 @@ static func leading(rec: Dictionary) -> String:
 		if score[k] > bv: bv = score[k]; best = k
 	return best
 
-## The name of a kin's current form, e.g. "Cindfang" or "Pudward".
+## The name it goes by: its species, or the form name an older save gave it (kept until it evolves).
 static func form_name(rec: Dictionary) -> String:
 	ensure(rec)
-	var sp_id: String = rec.get("species", "cindle")
-	var forms: Array = rec["forms"]
-	if forms.is_empty():
-		return Data.KIN[sp_id]["name"]
-	var last: String = forms[forms.size() - 1]
-	var sfx: Array = SUFFIX[last]
-	return String(ROOTS.get(sp_id, "Kin")) + String(sfx[mini(forms.size() - 1, sfx.size() - 1)]) + ("" if forms.size() <= sfx.size() else " " + _roman(forms.size() - sfx.size() + 1))
+	var old := String(rec.get("form_name", ""))
+	return old if old != "" else String(Data.KIN[rec.get("species", "cindle")]["name"])
 
-static func _roman(n: int) -> String:
-	return ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][clampi(n, 0, 10)] if n <= 10 else str(n)
+static func rules() -> Dictionary:
+	return Content.rules("evolve")
+
+## The highest level a Boki can reach.
+static func cap() -> int:
+	return int(rules()["cap"])
+
+## One level more, never past the cap.
+static func level_up(rec: Dictionary) -> void:
+	rec["level"] = mini(int(rec.get("level", 1)) + 1, cap())
+
+## Can a Boki take this species' shape? It needs data, a model and the rig's framing for it.
+static func has_art(id: String) -> bool:
+	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
+
+## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, or "trade"),
+## art or not; "" when that isn't a way it evolves.
+static func next_for(rec: Dictionary, how: String, item := "") -> String:
+	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
+	var fits: Array = []
+	for o in line.get("into", []):
+		match how:
+			"level":
+				var by_level: bool = not o.has("item") and not o.get("trade", false)
+				if by_level and line.has("level") and int(rec.get("level", 1)) >= int(line["level"]):
+					fits.append(o)
+			"item":
+				if String(o.get("item", "")) == item: fits.append(o)
+			"trade":
+				if o.get("trade", false): fits.append(o)
+	if fits.is_empty():
+		return ""
+	var lead := leading(rec)
+	for o in fits:
+		if String(o.get("path", "")) == lead: return String(o["id"])
+	return String(fits[0]["id"])
+
+## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
+static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
+	ensure(rec)
+	var to := next_for(rec, how, item)
+	if to == "" or not has_art(to):
+		return {}
+	var before := form_name(rec)
+	var a := leading(rec)
+	rec["was"].append(String(rec["species"]))
+	rec["species"] = to
+	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
+	rec.erase("form_name")
+	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+
+## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
+static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
+	if Goods.have("good:" + ink) <= 0:
+		return {}
+	var ev := try_evolve(rec, "item", ink)
+	if not ev.is_empty():
+		Goods.take("good:" + ink)
+	return ev
 
 ## Called each time a kin gains a level. Returns what changed, or {} if nothing did.
 static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dictionary:
@@ -80,11 +127,9 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 	var lv := int(rec.get("level", 1))
 	if rng == null:
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
-	if lv >= 4 and lv % 4 == 0:
-		var a := leading(rec)
-		var before := form_name(rec)
-		rec["forms"].append(a)
-		return {"kind": "form", "aff": a, "from": before, "to": form_name(rec)}
+	var ev := try_evolve(rec, "level")
+	if not ev.is_empty():
+		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)
 		# mostly from the leading affinity, sometimes from another one it's been building
@@ -100,10 +145,59 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		return {"kind": "mutate", "aff": a, "part": part}
 	return {}
 
+## Boki that reached their level while their next form had no art evolve once it exists (on load).
+## Returns the events; each is also queued on the Boki for the home island to play.
+static func catch_up(roster: Array) -> Array:
+	var out: Array = []
+	for rec in roster:
+		var ev := try_evolve(rec, "level")
+		while not ev.is_empty():
+			ev["text"] = describe(ev, rec)
+			if not rec.has("pending_evo"): rec["pending_evo"] = []
+			rec["pending_evo"].append(ev)
+			out.append(ev)
+			ev = try_evolve(rec, "level")
+	return out
+
+## The form names version-11 saves gave every 4 levels (e.g. "Cindfang"), so migrate can keep them.
+const V11_ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb",
+	"wisplet": "Wisp"}
+const V11_SUFFIX := {
+	"fierce": ["fang", "claw", "maw", "rend", "fury"],
+	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
+	"curious": ["wick", "seer", "mote", "glim", "oracle"],
+	"swift": ["dart", "wing", "gale", "streak", "comet"],
+}
+
+## Save v11 -> v12: levels and forms stay as they are (a level over the cap comes down to it), and
+## each Boki keeps the form name it had. Safe to run twice.
+static func migrate(data: Dictionary) -> void:
+	var recs: Array = (data.get("roster", []) as Array).duplicate()
+	for L in data.get("lost_kin", []):
+		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec")) == TYPE_DICTIONARY: recs.append(L["rec"])
+	for rec in recs:
+		if typeof(rec) != TYPE_DICTIONARY:
+			continue
+		rec["level"] = mini(int(rec.get("level", 1)), cap())
+		if rec.has("was"):
+			continue
+		rec["was"] = []
+		var forms: Array = rec.get("forms", [])
+		if forms.is_empty() or not V11_SUFFIX.has(String(forms[-1])):
+			continue
+		var sfx: Array = V11_SUFFIX[String(forms[-1])]
+		var n := forms.size()
+		var root := String(V11_ROOTS.get(String(rec.get("species", "")), "Kin"))
+		var extra := "" if n <= sfx.size() else " " + _roman(n - sfx.size() + 1)
+		rec["form_name"] = root + String(sfx[mini(n - 1, sfx.size() - 1)]) + extra
+
+static func _roman(n: int) -> String:
+	return ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][clampi(n, 0, 10)] if n <= 10 else str(n)
+
 ## Gives a generated kin (wild or a bot's) the forms and parts it would have grown by its level.
 static func simulate(rec: Dictionary, rng: RandomNumberGenerator) -> void:
 	ensure(rec)
-	var target := int(rec.get("level", 1))
+	var target := mini(int(rec.get("level", 1)), cap())
 	var bias: String = ["fierce", "steadfast", "curious", "swift"][rng.randi_range(0, 3)]
 	for lv in range(2, target + 1):
 		add(rec, bias, rng.randf_range(2.0, 6.0))
@@ -127,6 +221,9 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 	var a: Dictionary = AFF[ev["aff"]]
 	match String(ev["kind"]):
 		"form":
+			match String(ev.get("how", "level")):
+				"item": return "%s became a %s! The %s did it." % [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
+				"trade": return "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
 			return "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
 		"mutate":
 			return "%s grew %s. (%s)" % [kname, PART_NAMES.get(ev["part"], ev["part"]), _perk(ev["aff"])]
