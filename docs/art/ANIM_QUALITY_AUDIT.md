@@ -37,7 +37,7 @@ Every kind now has the table below; `check` runs on all of it.
 | flinch | a 0.12 s recoil along the hit flash | `FLASH_S` |
 | death | per kind: legs curl, bulb wilts, brute topples, puff bursts, crystal cracks out, ears droop | `DEATH_S` (0.32 s) |
 
-The wind-up cannot drift from the telegraph: `Mob.sim`, the proxy path (`_net_telegraph`) and `MobAnim.state_of` all use
+The wind-up cannot drift from the telegraph: `Mob.sim`, the proxy path (`_net_telegraph`) and `MobAnim.phase_of` all use
 `windup_k(st_t, windup)`, and `--mob-anim-check` steps the real sim and compares the two every frame.
 
 ### Proof
