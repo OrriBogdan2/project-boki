@@ -33,3 +33,6 @@ not merged yet. Each rebuild here starts from main after they land, so it keeps 
 ## Vex at 70k (11-10)
 `VEX_LOW_TRIS=44000 VEX_HEAD_TRIS=24000 VEX_FACE_TRIS=9000 VEX_ATLAS=4096 VEX_HEAD_WELD=seam`, steps as in the pilot
 (`~/meshy/vex_v2/hr/build.sh`).
+[regen/vex_closeup.jpg](regen/vex_closeup.jpg): shipped | pilot 40k | 70k (GPU shots, 11-10). The 70k reads cleaner in
+hair locks, face and bandolier; its skin and sky read paler than the shipped shot, which looks like the render
+worker's light rather than the model: check it at the match camera before the next Hunter.
