@@ -42,7 +42,7 @@ static func preview(dv: VBoxContainer, a: Dictionary, b: Dictionary) -> void:
 		var top: String = lean.keys().reduce(func(x, y): return x if float(lean[x]) >= float(lean[y]) else y)
 		var line := "Head start: it takes after %s's lean toward %s." % [Care.stronger(a, b)["name"], top]
 		dv.add_child(UI.para(line, 12, UI.MUTED))
-	if Care.unstable_mix(a, b):
-		dv.add_child(UI.para("An unstable mix: it hatches low on joy and needs more care for a day.", 12, UI.MUTED))
+	var unstable := UnstableMix.preview_line(a, b)
+	if unstable != "": dv.add_child(UI.para(unstable, 12, UI.MUTED))
 	var why := pair_why(a, b)
 	if why != "": dv.add_child(UI.para(why, 12, UI.BAD))
