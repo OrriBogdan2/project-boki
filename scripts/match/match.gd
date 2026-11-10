@@ -20,6 +20,7 @@ var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
+var ways_vfx: WaysOutVfx    # the far-read look of every seat out (null without a Heart)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
@@ -774,6 +775,7 @@ func _start(o: Dictionary) -> void:
 	if Heart.enabled(opts):
 		heart = Heart.new(self)
 		heart.setup()
+		ways_vfx = WaysOutVfx.new(self)
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()
@@ -4361,6 +4363,7 @@ func step(dt: float) -> void:
 	_tick_chase()
 	Beacons.tick(self, dt)
 	if heart: heart.tick(dt)
+	if ways_vfx: ways_vfx.tick(dt)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)

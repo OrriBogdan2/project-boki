@@ -617,6 +617,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 					m._extract(h, "uplink", x["name"])
 			if float(x["t"]) <= 0.0:
 				x["state"] = "spent"
+				x["taken"] = true     # the lift opened once: WaysOutLook shows the seat used
 				x["t"] = UPLINK_CD
 				n.get_node("Lift").visible = false
 				m.sfx("thump", p, -6.0, 0.8)
