@@ -8,7 +8,7 @@
 	"color": "#e8483e",
 	"body": {
 		"size": 1.073,
-		"hit_r": 0.392,
+		"hit_r": 0.408, "hit_h": 1.85, "body_r": 0.392,
 		"head": 0.72,
 		"legs": 2.05,
 		"neck": -0.05

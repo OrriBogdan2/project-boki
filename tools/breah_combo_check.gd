@@ -719,7 +719,7 @@ func _walk_over(m: Match, h: Hunter, home: Vector3, w: Dictionary) -> Dictionary
 	var mid2: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	var mid := Vector3(mid2.x, float(w["y"]), mid2.y)
 	var dir := (mid - home).normalized()
-	var face := float(w["th"]) + h.r * 0.8
+	var face := float(w["th"]) + h.hull_r() * 0.8
 	h.teleport(home)
 	h.vel = Vector3.ZERO
 	var out := {"t": -1.0, "peak": 0.0, "jumped": false}

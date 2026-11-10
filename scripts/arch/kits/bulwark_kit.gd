@@ -186,7 +186,7 @@ func _shield_push() -> void:
 			continue
 		var p := Vector2(f.pos.x, f.pos.z)
 		var q := Geometry2D.get_closest_point_to_segment(p, a, b)
-		var reach: float = f.r + Verbs.WALL_TH + PUSH_REACH
+		var reach: float = f.hull_r() + Verbs.WALL_TH + PUSH_REACH
 		var key: int = f.get_instance_id()
 		var in_front: bool = (p - q).dot(n) > 0.0 and absf(f.pos.y - float(wall["y"])) < 2.2
 		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))

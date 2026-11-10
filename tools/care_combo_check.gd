@@ -932,8 +932,8 @@ func tender() -> void:
 			absf(glide_d - glide_want) < 1.0 and sink < 1.0 and K.anim_id == "mm_float",
 			"%.1f m of %.1f, sank %.2f m in 0.5 s" % [glide_d, glide_want, sink])
 	ok(
-			"mm body: small (a 0.65 model) with the 0.34 m hitbox",
-			absf(P.r - 0.34) < 0.001 and P.model.scale.y < 0.9,
+			"mm body: small (a 0.65 model) with the 0.352 m hurtbox (the chart size, --hurtbox-check)",
+			absf(P.r - 0.352) < 0.001 and P.model.scale.y < 0.9,
 			"r %.2f scale %.2f" % [P.r, P.model.scale.y])
 	step(m, 1.0)
 	# --- Carrier: a teammate being stomped can't be picked up (small mechanic), else a pickup move

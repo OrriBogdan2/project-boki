@@ -44,12 +44,12 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null
 		for e in m.hunters:
 			if is_instance_valid(e) and e != skip and not e.dead and Vector2(
 				e.pos.x - p.x, e.pos.z - p.z
-			).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
+			).length() < ROCK_R + e.hull_r() + 0.15 and absf(e.pos.y - g) < 2.0:
 				return false
 		for mb in m.mobs:
 			if is_instance_valid(mb) and not mb.dead and Vector2(
 				mb.pos.x - p.x, mb.pos.z - p.z
-			).length() < ROCK_R + mb.r + 0.15 and absf(mb.pos.y - g) < 2.0:
+			).length() < ROCK_R + mb.hull_r() + 0.15 and absf(mb.pos.y - g) < 2.0:
 				return false
 	return true
 
