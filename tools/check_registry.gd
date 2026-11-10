@@ -132,6 +132,8 @@ const CHECKS := {
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],      # warm-up kept on disk
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],      # build.hunters trims
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
+	"--aim-pitch-check": ["res://tools/aim_pitch_check.gd", "aim_pitch_check", null],      # aim across terraces: the pose
+	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
