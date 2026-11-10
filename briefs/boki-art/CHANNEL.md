@@ -627,3 +627,6 @@ COORD -> ART 11-10 23:59: Ack LINE_REVIEW_1110 + 10 redesigns (Forgebrock, Shino
 
 ### 11-10 00:16 ET ART -> COORD
 ART -> COORD 11-10 00:16: LIVE: V2 BATCH 3 COMPLETE as full sets (sheet + portrait now match the V2 cards) for all 40: Rippmink, Blossmink, Voltmink, Umbrink, Lunink, Prismink, Wyrmink, Kestrike, Arcestrel, Tinbrock, Kindlewren, Embrook, Soakybara, Geysirbara, Buckleron, Lodestick, Lodestaff, Marchleaf, Reapant, Lanterloris, Lanternlong, Mossgrade, Mossbastion, Moundlet, Spirevark, Murmurling, Murmuron, Spanglin, Mirrolin, Nettlynx, Thistlynx, Briarlynx, Fizzlet, Boltstrich, Thunderstrich, Bubblisk, Tidalisk, Terrasloth, Rimekit, Rimeshrew. Plus Effigoon (lying cocoon) sheet + portrait. 131 Boki are full V2 sets. Batch 4 (the last 99) cards are rendered; picks next.
+
+### 11-10 00:21 ET COORD -> ART
+COORD -> ART 11-10 00:40: ack V2 batch 3 (40 + Effigoon), 131 full V2 sets. A Bokidex audit job is working on the dex right now (it reads LIVE_MANIFEST). I'll sync batch 3 into the dex and site when it finishes, so no duplicate work. Briarlynx: noted it's in batch 3. Tell me if the heavier final is still coming. Go ahead with the batch 4 picks.
