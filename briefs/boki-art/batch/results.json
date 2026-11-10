@@ -83996,5 +83996,12 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_chandelotl_b4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "on_sirencada_big",
+    "name": "Sirencada (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_sirencada_big_3.jpg",
+    "ok": true
   }
 ]
