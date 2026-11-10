@@ -105640,5 +105640,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rv_hydrangor_eyes_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_cometail_eyes",
+    "name": "Cometail (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_cometail_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_cometail_eyes",
+    "name": "Cometail (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_cometail_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pharoheron_eyes",
+    "name": "Pharoheron (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_pharoheron_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pharoheron_eyes",
+    "name": "Pharoheron (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_pharoheron_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_palloth_eyes",
+    "name": "Palloth (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_palloth_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_calderoise_eyes",
+    "name": "Calderoise (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_calderoise_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_calderoise_eyes",
+    "name": "Calderoise (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_calderoise_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_twinklup_eyes",
+    "name": "Twinklup (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_twinklup_eyes_1.jpg",
+    "ok": true
   }
 ]
