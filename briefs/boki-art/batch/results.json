@@ -100936,5 +100936,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/new_carousel_mid_3.jpg",
     "ok": true
+  },
+  {
+    "id": "new_carousel_final",
+    "name": "new_carousel_final",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_carousel_final_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_final",
+    "name": "new_carousel_final",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_carousel_final_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_final",
+    "name": "new_carousel_final",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/new_carousel_final_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokit_card",
+    "name": "Barokit (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/barokit_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "barokit_card",
+    "name": "Barokit (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/barokit_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "calderoise_card",
+    "name": "Calderoise (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/calderoise_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "calderoise_card",
+    "name": "Calderoise (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/calderoise_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cometail_card",
+    "name": "Cometail (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cometail_card_2.jpg",
+    "ok": true
   }
 ]
