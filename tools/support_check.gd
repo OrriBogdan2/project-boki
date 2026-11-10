@@ -84,6 +84,8 @@ func run(mn: Node, md := "all") -> void:
 	combos.sc = self
 	var ults = load("res://tools/care_ult_check.gd").new()
 	ults.sc = self
+	var anims = load("res://tools/rimewright_anim_check.gd").new()
+	anims.sc = self
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await combos.tender()
@@ -92,6 +94,7 @@ func run(mn: Node, md := "all") -> void:
 		await _rime_support()
 		await combos.rimewright()
 		await ults.rimewright()
+		await anims.rimewright()
 		await ults.burst_cap()
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
