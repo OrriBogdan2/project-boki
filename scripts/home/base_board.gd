@@ -12,8 +12,9 @@ const REACH := 1.6                            # m from the board to open it
 const CLOSE_AT := 3.2                         # m from the board at which the list closes itself
 const POST_H := 1.1                           # m, the board's height
 
-## Records a finished game for the board; id is the game's key in the list below.
-static func record(game: String, win: Dictionary) -> void:
+## Records a finished game for the board (id is the game's key in the list below) and tells BaseRival who lost.
+static func record(game: String, win: Dictionary, lose: Dictionary) -> void:
+	BaseRival.result(game, win, lose)
 	var all: Dictionary = Save.d["game_board"]
 	if not all.has(game):
 		all[game] = {"last": "", "wins": {}}
@@ -82,10 +83,20 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "board"}
 
+func has_game(id: String) -> bool:
+	return games().any(func(g): return g[0] == id)
+
 func label() -> String:
+	var k := BaseRival.waiting(h)
+	if not k.is_empty():
+		return "Accept %s's rematch with %s" % [k["rec"]["name"], k["life_ask"]["foe"]["rec"]["name"]]
 	return "Read the Games board"
 
 func use() -> void:
+	var k := BaseRival.waiting(h)
+	if not k.is_empty():
+		BaseRival.accept(h, k)
+		return
 	if is_instance_valid(panel):
 		return
 	pick = 0
@@ -125,6 +136,10 @@ func input(event: InputEvent) -> bool:
 		return false
 	return true
 
+## Starts the game with this id (a rematch's).
+func start_game(id: String) -> void:
+	start(games().find_custom(func(g): return g[0] == id))
+
 ## Starts the game at index i of the list through its own prop code.
 func start(i: int) -> void:
 	close()
@@ -134,6 +149,8 @@ func start(i: int) -> void:
 		games()[i][2].use()
 
 func tick(_d: float) -> void:
+	if not h.hrace.pair_force.is_empty() and not games().any(func(g): return g[2].running()):
+		h.hrace.pair_force = []      # the rematch's pair is spent once its game is over
 	if not is_instance_valid(panel):
 		return
 	var me := Vector2(h.ppos.x, h.ppos.z)

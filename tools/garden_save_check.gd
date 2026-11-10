@@ -11,7 +11,7 @@ const FILE_ARG := "--garden-save-file="
 const WANT_EXT := ".want"      # beside the save: the garden fields as the parent wrote them
 ## Boki record keys the garden added or leans on (trust is older, but the garden now moves it).
 const KEYS := ["trust", "bonds", "lean", "journal", "known", "bond_seen", "extra_care", "drift", "mentor",
-		"gifts", "lineage"]
+		"gifts", "lineage", "grudge"]
 const TOY_IDS := ["toy_ball", "toy_post"]
 
 var bad := 0
@@ -71,6 +71,8 @@ func _garden() -> Dictionary:
 	a["drift"] = {"day": 3, "moved": {"power": 0.05}}
 	a["mentor"] = {"gifted": true}
 	c["gifts"] = {"lean": 0, "habit": 2}
+	a["grudge"] = {c["uid"]: {"lost": 2, "rival": true, "good": 1, "game": "shove"}}
+	c["grudge"] = {a["uid"]: {"lost": 0, "rival": true, "good": 1, "game": ""}}
 	c["lineage"] = {"parents": [a["uid"], b["uid"]]}
 	d["roster"] = [a, b, c]
 	d["active"] = a["uid"]

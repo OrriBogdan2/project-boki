@@ -112,7 +112,7 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]))
 	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
-	BaseBoard.record("shove", win)
+	BaseBoard.record("shove", win, lose)
 	var backed_won: bool = run.recs[run.backed] == win
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems

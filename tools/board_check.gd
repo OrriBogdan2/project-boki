@@ -43,9 +43,9 @@ func _results() -> void:
 	ok(BaseBoard.summary("race") == "no games yet", "results: nothing played reads 'no games yet'")
 	var a := _kin("zapple", "Pip")
 	var b := _kin("cindle", "Ash")
-	BaseBoard.record("race", a)
-	BaseBoard.record("race", a)
-	BaseBoard.record("race", b)
+	BaseBoard.record("race", a, b)
+	BaseBoard.record("race", a, b)
+	BaseBoard.record("race", b, a)
 	var line := "best Pip, 2 wins · last Ash"
 	ok(BaseBoard.summary("race") == line, "results: best is the most wins, last is the latest")
 	ok(BaseBoard.summary("seek") == "no games yet", "results: another game keeps its own record")

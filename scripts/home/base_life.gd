@@ -15,10 +15,10 @@ extends RefCounted
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, ASK }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Ask"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.ASK],
 	S.MENTOR: [S.ROAM, S.EAT, S.NAP],
 	S.EAT: [S.ROAM, S.NAP],
 	S.NAP: [S.ROAM],
@@ -27,6 +27,7 @@ const TABLE := {
 	S.WATCH: [S.ROAM, S.NAP, S.REACT],
 	S.REACT: [S.ROAM, S.NAP, S.WATCH],
 	S.CHORE: [S.ROAM, S.NAP, S.REACT],
+	S.ASK: [S.ROAM, S.NAP],
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
 const CATCH := 0.8         # m: a tag lands this close
@@ -83,10 +84,13 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.PLAY, func(_from: int) -> bool: return k.has("play"))
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
+		m.guard(S.ASK, func(_from: int) -> bool: return _awake(k))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
+		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_spot"))
+		m.on_exit(S.ASK, func(_to: int) -> void: k.erase("life_ask"))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
 		k["life"] = m
@@ -101,7 +105,9 @@ func step(d: float) -> void:
 	_acc = 0.0
 	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
 	if h.day_t < _day_t:
-		BaseDrift.day(h.kins.map(func(k): return k["rec"]))
+		var recs: Array = h.kins.map(func(k): return k["rec"])
+		BaseDrift.day(recs)
+		BaseRival.day(recs)
 	_day_t = h.day_t
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one
@@ -166,6 +172,8 @@ func choose(k: Dictionary) -> void:
 		if bond(rec, o["rec"]) <= float(R["rival_at"]) and randf() < 0.3 + float(traits.get("temper", 0.5)) * 0.5:
 			_watch(k, o, "rival")
 			return
+	if BaseRival.ask(self, k):
+		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
 	var mate := _mate(k, near)
@@ -217,6 +225,10 @@ func _tick(k: Dictionary, dt: float) -> void:
 			_look_tick(k, m)
 		S.CHORE:
 			BaseChore.tick(self, k, m, dt)
+		S.ASK:
+			BaseRival.ask_tick(self, k, m, dt)
+	if not m.is_in(S.NAP):
+		BaseRival.glare(h, k, dt)
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
@@ -225,6 +237,12 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 		k["goal"] = to["pos"]
 		if _dist(k, to) < PILE_JOIN or m.since >= PILE_WALK or not (to["life"] as Fsm).is_in(S.NAP):
 			k.erase("life_pile")
+			_lie_down(k)
+		return
+	if k.has("life_spot") and nap <= 0.0:
+		k["goal"] = k["life_spot"]
+		if BaseRival.flat(k["pos"], k["life_spot"]) < PILE_JOIN or m.since >= PILE_WALK:
+			k.erase("life_spot")
 			_lie_down(k)
 		return
 	if nap <= 0.0:
@@ -298,6 +316,11 @@ func _nap(k: Dictionary, why: String) -> void:
 			k["t"] = PILE_WALK
 			note_parent(k, best, "napped beside")
 			return
+	var spot := BaseRival.nap_spot(h, k)      # a rival close by: it walks off to nap away from it
+	if spot != Vector3.INF:
+		k["life_spot"] = spot
+		k["t"] = PILE_WALK
+		return
 	_lie_down(k)
 
 func _lie_down(k: Dictionary) -> void:

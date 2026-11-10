@@ -138,7 +138,7 @@ static func settle(hunt: Hunt) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]) * (float(R["friend_sulk"]) if friends else 1.0))
 	Save.remember(win, "seek", "sniffed out the scent before %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "seek", "lost the Seek to %s" % win["name"])
-	BaseBoard.record("seek", win)
+	BaseBoard.record("seek", win, lose)
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
 	BaseRace.nudge_bond(win, lose, step)
 	Save.d["gems"] = int(Save.d["gems"]) + int(R["gems"])

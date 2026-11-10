@@ -199,7 +199,7 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]))
 	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
-	BaseBoard.record("race", win)
+	BaseBoard.record("race", win, lose)
 	nudge_bond(win, lose, -float(R["rival_step"]))
 	for n in range(1, order.size()):
 		var a: Dictionary = run.recs[order[n - 1]]
@@ -235,6 +235,7 @@ var post: Node3D = null
 var start := Vector3.ZERO      # the loop's start line
 var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
+var pair_force: Array = []     # a rematch's two kin entries, which every game takes before the rested ones (BaseRival)
 var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var cheers: Array = []         # the grades of your presses this lap
@@ -321,6 +322,8 @@ func label() -> String:
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
+	if pair_force.size() == 2 and pair_force.all(func(k): return h.kins.has(k) and not BaseLife._taken(k)):
+		return pair_force
 	var R := rules()
 	var out: Array = []
 	var ak := Save.active_kin()
