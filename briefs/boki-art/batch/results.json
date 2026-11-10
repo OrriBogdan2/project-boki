@@ -97807,5 +97807,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/baby_barostorm_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_chuggamus_t3",
+    "name": "Chuggamus (teapot hippo, toned down t3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_t3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_t1",
+    "name": "Chuggamus (teapot hippo, toned down t1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_t1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_t1",
+    "name": "Chuggamus (teapot hippo, toned down t1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_t1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_wayshell_a",
+    "name": "Wayshell (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_wayshell_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_wayshell_a",
+    "name": "Wayshell (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_wayshell_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_t2",
+    "name": "Chuggamus (teapot hippo, toned down t2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_t2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_sarcobra_a",
+    "name": "Sarcobra (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_sarcobra_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_pavonazar_b",
+    "name": "Pavonazar (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_pavonazar_b_1.jpg",
+    "ok": true
   }
 ]
