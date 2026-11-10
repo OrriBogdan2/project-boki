@@ -4,8 +4,8 @@ extends RefCounted
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel),
-## and movement sounds (MoveSfx): a remote Hunter's footstep plays placed at it (panned), quieter than
-## yours, out to the step reach and silent past it or while crouched; landings are placed and weighted.
+## and movement sounds (MoveSfx): a remote Hunter's footstep plays placed at it (panned), an enemy's louder than yours,
+## quieter in a fight, out to the step reach and silent past it or while crouched; landings are placed.
 
 var main: Node
 var fails := 0
@@ -82,11 +82,13 @@ func _footsteps(m: Match, P: Hunter) -> void:
 	var theirs = _step_of(P, e, Vector3(6.0, 0, 0))
 	ok(theirs is AudioStreamPlayer3D, "an enemy's footstep 6 m away plays placed at it, so it pans (%s)" % theirs)
 	if theirs is AudioStreamPlayer3D and mine != null:
-		var wt := MoveSfx.weight(e.arch)
-		var dbs := [theirs.volume_db, mine.volume_db]
-		ok(dbs[0] < dbs[1], "...quieter than yours (%.1f vs %.1f dB)" % dbs)
-		var pitch: float = theirs.pitch_scale
-		ok(absf(pitch / wt.x - 1.0) <= 0.081, "...at its weight's pitch (%.2f, weight %.2f)" % [pitch, wt.x])
+		ok(absf(theirs.pitch_scale / MoveSfx.pitch(e.arch) - 1.0) <= 0.081, "...at its height's pitch (%.2f, height %.2f)" % [theirs.pitch_scale, MoveSfx.pitch(e.arch)])
+	var base := float(MoveSfx.rules()["step_db"])
+	var calm_e := MoveSfx.level(e, base)
+	ok(calm_e > MoveSfx.level(P, base), "an enemy's step is set louder than yours so you hear it coming (%.1f vs %.1f dB)" % [calm_e, MoveSfx.level(P, base)])
+	e.hurt_at = m.time
+	ok(MoveSfx.level(e, base) < calm_e, "...and drops while it fights (%.1f dB)" % MoveSfx.level(e, base))
+	e.hurt_at = -9.0
 	ok(_step_of(P, e, Vector3(0, 0, reach - 1.0)) != null, "...heard just inside the step reach (%.0f m)" % reach)
 	ok(_step_of(P, e, Vector3(0, 0, reach + 1.0)) == null, "...silent past it")
 	e.crouch = true
@@ -94,10 +96,9 @@ func _footsteps(m: Match, P: Hunter) -> void:
 	e.crouch = false
 	var landed = _probe(P, P.pos + Vector3(-8.0, 0, 0), func(): MoveSfx.land(e, -12.0), e)
 	ok(landed is AudioStreamPlayer3D, "an enemy's landing plays placed at it")
-	var kael := MoveSfx.weight("juggernaut")
-	var neve := MoveSfx.weight("rimewright")
-	var what := "weight: Kael (2.05 m) lower and louder than Neve (1.56 m)"
-	ok(kael.x < neve.x and kael.y > neve.y, "%s: %s vs %s" % [what, kael, neve])
+	var kael := MoveSfx.pitch("juggernaut")
+	var neve := MoveSfx.pitch("rimewright")
+	ok(kael < neve, "height: Kael (2.05 m) sounds lower than Neve (1.56 m): %.2f vs %.2f" % [kael, neve])
 
 ## The voice e's footstep starts with e standing `off` from P (null if none).
 func _step_of(P: Hunter, e: Hunter, off: Vector3):

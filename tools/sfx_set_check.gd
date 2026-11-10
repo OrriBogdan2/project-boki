@@ -9,6 +9,8 @@ extends RefCounted
 ##   7. footsteps: a Hunter walked over every surface of the Hollow Crown (and the sky train's deck on
 ##      Skyreach) plays the cue for it: its own set on grass, stone, wood and snow, the weight class's
 ##      steps on sand, water and metal, a little louder the heavier it is
+##   8. jump, land and wall kick exist for every weight class an archetype has, HeroSfx.weighted picks them,
+##      a heavy hunter's glider open has its own layer, and a landing gets louder the faster the fall
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
@@ -39,6 +41,7 @@ func run(main: Node) -> void:
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
 	await _steps(main)
+	_weighted()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -181,7 +184,7 @@ func _data(path: String) -> PackedByteArray:
 
 ## 7. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
 const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
-const STEP_VOL := -13.0       # dB: the player's own step in Juice.footstep
+const STEP_VOL := -17.0       # dB: step_db in content/rules/move_sfx.json
 
 func _steps(main: Node) -> void:
 	var m := Match.new()
@@ -220,7 +223,7 @@ func _walk(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
 		Sfx.last_played.clear()
 		Sfx.recent.clear()
 		Sfx.listener = p
-		Juice.footstep(h)
+		MoveSfx.footstep(h)
 		var got: Array = Sfx.last_played.keys()
 		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
 		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
@@ -243,3 +246,24 @@ func _surface_tiles(w: World, train: SkyTrain) -> Dictionary:
 				out[surf] = p
 	return out
 
+## 8. Movement by weight: every archetype's class has its variants and gets them; louder landings from faster falls.
+func _weighted() -> void:
+	var picked := []
+	var missing := []
+	for arch in Arch.ids():
+		var h := Hunter.new()
+		h.arch = arch
+		for kind in ["jump", "land", "kick"]:
+			var want := "%s_%s" % [kind, Arch.weight(arch)]
+			if HeroSfx.weighted(h, kind, "") != want:
+				missing.append("%s/%s" % [arch, want])
+		picked.append(HeroSfx.weighted(h, "glide_open", "") != "")
+		h.free()
+	ok(missing.is_empty(), "every Hunter gets jump, land and kick in its weight class (missing %s)" % [missing])
+	var heavies := Arch.ids().filter(func(a): return Arch.weight(a) == "heavy").size()
+	ok(picked.count(true) == heavies, "only the heavy class has the heavier glider open")
+	var db := [HeroSfx.land_db(4.0), HeroSfx.land_db(10.0), HeroSfx.land_db(20.0)]
+	ok(db[0] < db[1] and db[1] < db[2], "a landing is louder the faster the fall %s dB" % [db])
+	var plain := Hunter.new()
+	ok(HeroSfx.weighted(plain, "jump", "jump") == "jump", "no class: the shared jump")
+	plain.free()
