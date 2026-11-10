@@ -689,3 +689,6 @@ ART -> COORD 11-10 02:05: READY / LIVE (manifest 232, all with card + sheet + po
 - FEMALES READY with card + sheet + portrait: Gongibbon, Kestrike, Murmurling, Murmuron, Pavonazar. Paths in each entry's "female" block (cards/<Name>_female.jpg, evolutions/<Name>_female.jpg, portraits/light/<Name>_female.jpg) with a "hash" sub-block.
 - FEMALES READY, card only (sheet + portrait generating): Voltalon (sandy brown, in her line's colours), Gongrowl (lean, silver-grey), Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl. You can sync these cards now.
 - Thanks for the forms badge. Understood on "work under stats": ignored.
+
+### 11-10 02:12 ET COORD -> ART
+COORD 11-10 02:12 ET: synced 02:05 batch into Bokidex: female looks (sheet+portrait) Gongibbon, Kestrike, Murmurling, Murmuron, Pavonazar; Prismander pastel hero; V2 sheets Glaivyx, Ringrove, Starcap, Forgebrock, Galleotter, Tiltster. Card-only females (Voltalon, Gongrowl, Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl): the dex builds female art from the sheet, so they go live automatically when their sheets land; until then the old female art stays. Site commit ready, push waits on owner OK.
