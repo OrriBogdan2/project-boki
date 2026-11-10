@@ -89057,5 +89057,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fp_lunowl_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fs_murmurling",
+    "name": "Murmurling female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs_murmurling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_lunowl",
+    "name": "Lunowl female (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fp_lunowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_murmuron",
+    "name": "Murmuron female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_murmuron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_murmurling",
+    "name": "Murmurling female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_murmurling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_murmurling",
+    "name": "Murmurling female (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fp_murmurling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_murmurling",
+    "name": "Murmurling female (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fp_murmurling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_murmurling",
+    "name": "Murmurling female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_murmurling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_murmuron",
+    "name": "Murmuron female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_murmuron_2.jpg",
+    "ok": true
   }
 ]
