@@ -43,6 +43,7 @@ const SWING := 6.0                     # 1/s: how fast a reeled body turns onto 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
 var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
+var hook_aloft := false        # the hand left mid-jump: the air steers and his run-up carries on
 var flying := false             # hold: the hook is in the air
 var hook_sd := {}               # the hook's shot while it flies
 var snap_t := 0.0               # the arm snapping back: time left
@@ -159,13 +160,13 @@ func can_shoot() -> bool:
 	return fire_ok() and fuse.is_empty() and pull.is_empty() and dive.is_empty() and not broadside.running()
 
 func hovering() -> bool:
-	return broadside.running() or hook_hold != null
+	return broadside.running() or (hook_hold != null and not hook_aloft)
 
 func move_k() -> float:
 	if broadside.running():
 		return broadside.move_k()           # a slow walk through the charge and the waves
 	if flying and hook_hold != null:
-		return hook_hold.slow_k           # a slow walk while the hand flies out
+		return hook_hold.slow_k           # a slow walk while the hand flies out (mid-jump: his run-up)
 	if not pull.is_empty():
 		return float(rmb_def()["fly_slow"])   # braced side-on while he reels (footage), a shuffle that still swings it
 	return 0.7 if wind > 0.0 else 1.0
@@ -300,7 +301,12 @@ func fire_rmb(c: Dictionary) -> void:
 	var rdf := rmb_def()
 	flying = true
 	scoop = []
-	hook_hold = CastHold.hover_slow(h, float(rdf["fly_slow"]))
+	# thrown mid-jump the hold keeps the speed he brought (up to his run: a dash's or launch's extra bleeds
+	# under the air drag), so a jump back carries on at its height; from a standstill it is the slow walk,
+	# steered as on the ground (item 31: the air's low control would leave him almost still)
+	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if not h.grounded else 0.0
+	hook_aloft = carry > float(rdf["fly_slow"])
+	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
