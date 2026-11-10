@@ -144,7 +144,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .48 vs .45, walks 55% vs stands | differ (owner); cadence S fix (gap 12) |
-| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6 | match; routing `[?]` |
+| RMB | Hold shield, front block, Shift = bash, 6 s [D] | hold .1, aegis, bash cd 6; every input case settled in [bulwark.md](heroes/bulwark.md#aegis-input-cases) | match |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
