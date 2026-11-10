@@ -803,3 +803,32 @@ OPT('Wickapi','baby','cute',True,True,'briefs/boki-art/cards/Wickapi.jpg',[
  "the same standing okapi calf with more charm: a slightly bigger head and much bigger purple eyes with large highlights, pink cheeks, big soft ears, a short tufted mane of small purple flame shapes down its neck, knobbly knees, a tiny candle stub on its head with one purple flame.",
  "the okapi calf sitting down with its long striped legs folded under it, head tilted, big purple eyes, the small candle on its head with a wobbly purple flame, a wispy flame tail curled round it.",
  "the okapi calf mid-prance, front legs lifted, happy open mouth, big purple eyes, two tiny candle-stub horns each with a small purple flame, striped legs, a flame tuft tail."])
+
+# ===== 02:30 ET 11-10 OWNER: "queue up the female versions and everything you could possibly need (not counting 3D)".
+# FEMALE LOOKS in V2: image 1 = the male's live V2 card (design, pose and style), image 2 = the old female art (only what differs in the female).
+# 13 Boki have a female look; babies have none by design. 3 runs. Sheets + portraits follow from the picked female card.
+_FEMREF={'Arcestrel':'cards/Arcestrel_female.jpg','Eclipsowl':'cards/Eclipsowl_female.jpg','Furnacowary':'cards/Furnacowary_female.jpg','Gongibbon':'evolutions/Gongibbon_female.jpg',
+ 'Gongrowl':'cards/Gongrowl_female.jpg','Kestrike':'evolutions/Kestrike_female.jpg','Lunowl':'evolutions/Lunowl_female.jpg','Murmurling':'cards/Murmurling_female.jpg',
+ 'Murmuron':'cards/Murmuron_female.jpg','Sandwidow':'cards/Sandwidow_female.jpg','Voltalon':'cards/Voltalon_female.jpg','Hourachnid':'cards/Hourachnid_female.jpg','Pavonazar':'cards/Pavonazar_female.jpg'}
+_FEMST={'Arcestrel':('mid','sleek',0,1),'Eclipsowl':('final','majestic',1,1),'Furnacowary':('final','tough',1,0),'Gongibbon':('baby','cute',0,1),'Gongrowl':('final','tough',1,1),'Kestrike':('baby','cute',0,1),
+ 'Lunowl':('mid','pretty',0,1),'Murmurling':('baby','cute',1,1),'Murmuron':('final','majestic',1,1),'Sandwidow':('mid','creepy',1,1),'Voltalon':('final','tough',1,0),'Hourachnid':('final','creepy',0,1),'Pavonazar':('final','majestic',0,1)}
+for _n,_ref in _FEMREF.items():
+    _st,_ar,_dk,_fu=_FEMST[_n]
+    SPECS.append({'id':'fv2_'+_n.lower(),'name':_n+' female (V2 card)','refs':['briefs/boki-art/cards/'+_n+'.jpg','briefs/boki-art/'+_ref],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. Image 1 is the male, and it is the truth for the species, body plan, signature parts, pose, view and the way it is drawn: "
+        "keep all of that. Image 2 shows this species' female in an older painting style: take from it ONLY what makes the female different from the male (her own colours, markings, and any bigger, smaller or missing "
+        "crest, mane, tail or ornament), and ignore its pose, layout and how it is painted. If image 2 shows several views, it is still one creature: draw her once. The result must read at a glance as the same species as "
+        "image 1 and clearly as the other sex. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2(_st,_ar,bool(_dk),bool(_fu))+FRAME_V2)})
+# More OPTIONS for things I or the owner questioned (3 directions x 2 runs; nothing changes unless one clearly wins).
+OPT('Tiltster','final','tough',False,False,'briefs/boki-art/cards/Tiltster.jpg',[   # owner 11-09: "Tiltster's head is not very on"
+ "the same big chrome pill bug with a blue pinball playfield on its back, but its head is clearly part of its body: a broad armoured head plate that is simply the first and largest of its body segments, flowing straight into the back with no neck and no gap, two big friendly eyes set into that plate, short antennae with small lit bulbs.",
+ "the same big chrome pill bug, seen from the front three-quarter so its face leads the picture: a wide domed head fused into the front of the shell like a helmet visor, big eyes under the rim, flipper claws at its sides, the playfield rising behind it.",
+ "the same big chrome pill bug, half curled, so its head tucks under the front rim of its own shell like a turtle's, peeking out with big eyes, the playfield curving over its back."])
+OPT('Forgebrock','final','tough',False,True,'briefs/boki-art/cards/Forgebrock.jpg',[   # the new card's iron fists read as gauntlets
+ "the same reared-up forge bear, but nothing looks worn: its forearms and paws are bare orange-brown fur with dark iron claws, the anvil is a grey horn-like growth across its shoulders, and the forge is a glowing orange hollow in its own chest between dark rib bones.",
+ "the same forge bear standing planted on all fours instead of rearing: huge shoulders, an anvil-shaped hump of grey horn on its back with a short chimney horn, its chest and belly glowing orange through dark rib bones, bare furry paws with iron claws.",
+ "the same forge bear rearing, its forepaws grown into heavy hammer-shaped hooves of dark iron-coloured horn (part of its body, with fur running onto them), an anvil hump on its shoulders and a glowing rib forge in its chest."])
+OPT('Coolatee','baby','cute',False,False,'briefs/boki-art/cards/Coolatee.jpg',[   # nearest Pokemon look-alike on the roster (white seal pup)
+ "the same baby seal, moved away from a plain white seal pup: its body is pale mint-blue with a white belly, it has a square boxy build like a little ice chest with rounded corners, a row of clear ice-cube crystals along its back, tiny flippers, big dark eyes.",
+ "the same baby seal, moved away from a plain white seal pup: a round pup with a thick collar of frosty fur like a scarf of its own, pale blue speckles on its back like frost flowers, one big ice crystal on its tail tip instead of on its back, big dark eyes.",
+ "the same baby seal, moved away from a plain white seal pup: it balances on its tail and belly like a wobbling toy, with two short ice-crystal ear tufts, a pale blue saddle patch, and a small clear ice dome on its back with a snowflake shape inside it."])

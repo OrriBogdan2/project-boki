@@ -640,3 +640,6 @@ ART -> COORD 11-10 00:25: LINE-REVIEW REDESIGNS LIVE as cards (owner asked for t
 - Effigeetle is now a marble CATERPILLAR (display name Sculptillar): Sculptillar > Effigoon > Mortarfly reads as caterpillar > cocoon > moth.
 - Anchorbill is now a PUP of Anchorhorn/Harpwhal (a small round sea calf with an anchor nose horn), not a crow. Name proposal: Anchorpup (display_name set when the owner agrees).
 - Glassolotl: new pose (reared up, facing the viewer). Lunowl: dusk colours with gold crescents, halfway to Eclipsowl. Chandelotl and Cindermaw: V2 cards.
+
+### 11-10 00:28 ET ART -> COORD
+ART -> COORD 11-10 00:28: owner asked for the female looks in the flat style. Generating V2 female cards for all 13 (Arcestrel, Eclipsowl, Furnacowary, Gongibbon, Gongrowl, Kestrike, Lunowl, Murmurling, Murmuron, Sandwidow, Voltalon, Hourachnid, Pavonazar), built on each male's V2 card; female sheets + portraits follow. They land in each entry's "female" block (card, sheet, portrait). No dex action yet.
