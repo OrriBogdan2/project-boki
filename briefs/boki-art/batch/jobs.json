@@ -31468,6 +31468,105 @@
     "prompt": "Draw one single character illustration of Coolatee, a new version of the creature in image 1. Image 1 is the starting design: keep its species, face, colours and signature idea, and ignore how it is painted. DESIGN CHANGE (the whole point of this image): the same baby seal, moved away from a plain white seal pup: it balances on its tail and belly like a wobbling toy, with two short ice-crystal ear tufts, a pale blue saddle patch, and a small clear ice dome on its back with a snowflake shape inside it. Every part is grown from its own body: nothing strapped on, belted, bolted or worn. There is only one image and no style image: the art style is described in words below, follow it exactly. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. Effects: at most one small effect, attached to the body and drawn as flat hard-edged shapes. Anything that glows is simply the brightest flat colour on the creature with a lighter flat shape inside it; the air around the creature is empty. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
   },
   {
+    "id": "opt_prismander_a",
+    "name": "Prismander (softer colours a)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: make all its colours softer and lighter, like the gentle pastel original: a pale blush-pink body, soft rose and pale mint candy stripes instead of strong red and green, soft pink gills, and warm brown eyes with big highlights. Thinner, softer-coloured outlines in a dusty rose shade. Rounder cheeks."
+  },
+  {
+    "id": "opt_prismander_b",
+    "name": "Prismander (softer colours b)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: make it softer and cuter: very pale pink body, wide gentle stripes in soft coral-pink and pale seafoam, fluffy pale pink gills, bigger eyes with two highlights, a tiny smile, outlines in soft plum instead of dark."
+  },
+  {
+    "id": "opt_prismander_c",
+    "name": "Prismander (softer colours c)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: soften the palette only: every colour moves halfway toward white (pastel pink, pastel coral, pastel mint), keeping the same stripes and the same flat style, with the outline in a mid rose-brown."
+  },
+  {
+    "id": "opt_chandelotl_pastel",
+    "name": "Chandelotl/Crystalotl (colour pastel)",
+    "refs": [
+      "briefs/boki-art/cards/Chandelotl.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it in soft pastels: pale pink body, soft rose and pale mint stripes, a pale pearly hood with pastel pink and mint facets. Nothing else changes: the same pose, shapes, stripes layout, face and line."
+  },
+  {
+    "id": "opt_chandelotl_berry",
+    "name": "Chandelotl/Crystalotl (colour berry)",
+    "refs": [
+      "briefs/boki-art/cards/Chandelotl.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it in berry tones: a soft lilac-pink body, raspberry and cream stripes, a pale lilac crystal hood, magenta gills. Nothing else changes: the same pose, shapes, stripes layout, face and line."
+  },
+  {
+    "id": "opt_chandelotl_ocean",
+    "name": "Chandelotl/Crystalotl (colour ocean)",
+    "refs": [
+      "briefs/boki-art/cards/Chandelotl.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it in sea tones: a pale aqua body, teal and white stripes, a clear pale blue crystal hood, coral-pink gills. Nothing else changes: the same pose, shapes, stripes layout, face and line."
+  },
+  {
+    "id": "opt_chandelotl_sunset",
+    "name": "Chandelotl/Crystalotl (colour sunset)",
+    "refs": [
+      "briefs/boki-art/cards/Chandelotl.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it in sunset tones: a peach body, coral and cream stripes, a pale gold crystal hood, rose gills. Nothing else changes: the same pose, shapes, stripes layout, face and line."
+  },
+  {
+    "id": "opt_chandelotl_frost",
+    "name": "Chandelotl/Crystalotl (colour frost)",
+    "refs": [
+      "briefs/boki-art/cards/Chandelotl.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it in winter tones: a white body, ice-blue and silver-grey stripes, a clear pale blue crystal hood, soft pink gills. Nothing else changes: the same pose, shapes, stripes layout, face and line."
+  },
+  {
+    "id": "opt_chandelotl_candy",
+    "name": "Chandelotl/Crystalotl (colour candy)",
+    "refs": [
+      "briefs/boki-art/cards/Chandelotl.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: keep its red, white and green candy stripes but make the red a softer cherry-pink and the green a pale mint, with a pinker body and a pearl-white hood. Nothing else changes: the same pose, shapes, stripes layout, face and line."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

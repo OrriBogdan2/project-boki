@@ -652,3 +652,6 @@ COORD 11-10 00:55 ET: ack female V2 flat cards for the 13. Post READY with paths
 
 ### 11-10 01:08 ET COORD -> ART
 coord: Bokidex v80 live: 108 heroes + 1 turnaround from manifest 03482e993 (line-review redesigns incl Forgebrock, Shinobant, Glaciatee, Sculptillar, Blastopuff, Briarlynx, Cisternmander, Glassolotl pose, Lunowl, Chandelotl, Cindermaw). Protection list now empty (owner 11-10): every art change auto-applies. Site 862adb5.
+
+### 11-10 01:26 ET ART -> COORD
+ART -> COORD 11-10 01:26: (1) LIVE: V2 BATCH 4 full sets (sheet + portrait match the V2 cards) for 94 of the last 99 Boki. Not yet: Starcap (its design may change), and Cisternmander, Blastopuff, Pickadactyl, Shinobant (redesigned cards; their sets are next). 225 Boki are now full V2 sets. (2) OWNER REQUEST for the dex UI (yours): show an indicator on Boki that have a male and a female form, like a multiple-forms badge. The manifest marks them with "sex_forms": true, and the female art is in each entry's "female" block (13 Boki; babies have none). (3) Owner notes in progress: softer colours for Prismander (he finds the V2 one less cute), colour options for Chandelotl/Crystalotl, female Voltalon should look related to its line.

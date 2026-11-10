@@ -832,3 +832,17 @@ OPT('Coolatee','baby','cute',False,False,'briefs/boki-art/cards/Coolatee.jpg',[ 
  "the same baby seal, moved away from a plain white seal pup: its body is pale mint-blue with a white belly, it has a square boxy build like a little ice chest with rounded corners, a row of clear ice-cube crystals along its back, tiny flippers, big dark eyes.",
  "the same baby seal, moved away from a plain white seal pup: a round pup with a thick collar of frosty fur like a scarf of its own, pale blue speckles on its back like frost flowers, one big ice crystal on its tail tip instead of on its back, big dark eyes.",
  "the same baby seal, moved away from a plain white seal pup: it balances on its tail and belly like a wobbling toy, with two short ice-crystal ear tufts, a pale blue saddle patch, and a small clear ice dome on its back with a snowflake shape inside it."])
+
+# ===== 03:00 ET 11-10 OWNER: "Prismander needs a bit softer colours, the change made him less cute" + "Crystalotl needs some colour exploration
+# with the same everything else".
+for _k,_d in (('a',"make all its colours softer and lighter, like the gentle pastel original: a pale blush-pink body, soft rose and pale mint candy stripes instead of strong red and green, soft pink gills, and warm brown eyes with big highlights. Thinner, softer-coloured outlines in a dusty rose shade. Rounder cheeks."),
+              ('b',"make it softer and cuter: very pale pink body, wide gentle stripes in soft coral-pink and pale seafoam, fluffy pale pink gills, bigger eyes with two highlights, a tiny smile, outlines in soft plum instead of dark."),
+              ('c',"soften the palette only: every colour moves halfway toward white (pastel pink, pastel coral, pastel mint), keeping the same stripes and the same flat style, with the outline in a mid rose-brown.")):
+    SPECS.append({'id':'opt_prismander_'+_k,'name':'Prismander (softer colours '+_k+')','refs':['briefs/boki-art/cards/Prismander.jpg'],'runs':2,'aspect':'1:1','size':'2K','prompt':_EDIT+_d})
+for _k,_d in (('pastel',"recolour it in soft pastels: pale pink body, soft rose and pale mint stripes, a pale pearly hood with pastel pink and mint facets"),
+              ('berry',"recolour it in berry tones: a soft lilac-pink body, raspberry and cream stripes, a pale lilac crystal hood, magenta gills"),
+              ('ocean',"recolour it in sea tones: a pale aqua body, teal and white stripes, a clear pale blue crystal hood, coral-pink gills"),
+              ('sunset',"recolour it in sunset tones: a peach body, coral and cream stripes, a pale gold crystal hood, rose gills"),
+              ('frost',"recolour it in winter tones: a white body, ice-blue and silver-grey stripes, a clear pale blue crystal hood, soft pink gills"),
+              ('candy',"keep its red, white and green candy stripes but make the red a softer cherry-pink and the green a pale mint, with a pinker body and a pearl-white hood")):
+    SPECS.append({'id':'opt_chandelotl_'+_k,'name':'Chandelotl/Crystalotl (colour '+_k+')','refs':['briefs/boki-art/cards/Chandelotl.jpg'],'runs':1,'aspect':'1:1','size':'2K','prompt':_EDIT+_d+". Nothing else changes: the same pose, shapes, stripes layout, face and line."})
