@@ -105416,5 +105416,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px7_aurostag_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px7_chainipede",
+    "name": "Chainipede (pixel sprite style 7)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px7_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_chainipede",
+    "name": "Chainipede (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_aurostag",
+    "name": "Aurostag (pixel sprite style 7)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px7_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_aurostag",
+    "name": "Aurostag (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_chainipede",
+    "name": "Chainipede (pixel sprite style 5)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px5_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_chainipede",
+    "name": "Chainipede (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_chainipede",
+    "name": "Chainipede (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_chainipede",
+    "name": "Chainipede (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_chainipede_2.jpg",
+    "ok": true
   }
 ]
