@@ -1023,3 +1023,9 @@ OPT('Glaciammoth','final','majestic',False,False,'briefs/boki-art/cards/Glaciamm
  "no longer an elephant shape: a legendary glacier beast built like a giant musk-ox carved from blue ice, with a huge curtain of icicle hair hanging to the ground, two massive down-curved ice horns, and a frozen amber heart glowing inside its chest. Planted and immense.",
  "no longer an elephant shape: a legendary woolly rhinoceros of ancient ice, with one enormous flat blade horn like an ice-breaker's prow, a shaggy frost mane, and small creatures frozen in amber inside its translucent blue flanks.",
  "kept as a mammoth but made unmistakably legendary and unlike a stone elephant: a ghostly mammoth of clear glacier ice, its skeleton faintly visible inside, with four spiralling tusks sweeping forward like a sleigh, a trailing cloak of frozen fur, and drops of glowing amber set along its spine."])
+
+# 06:55 ET 11-10 OWNER: "Sirencada, Quivertoad, all same pose" (each stands like the stage before it: Klaxada, Bullsfrog).
+ON_POSE('Sirencada',_LM['Sirencada']['sheet'],'final','tough',False,False,"taking off straight at the viewer, facing LEFT in a rising three-quarter view: body tilted up at 45 degrees, wing-cases flung wide open, clear wings spread, all six legs lifted off the ground and tucked, siren horn aimed forward and up.","copper and bronze exoskeleton, a siren-horn body with a fan vent, bronze wing-cases, red eyes")
+SPECS[-1]['id']='on_sirencada_fly'; SPECS[-1]['runs']=4
+ON_POSE('Quivertoad',_LM['Quivertoad']['sheet'],'final','tough',False,False,"reared up on its hind legs facing LEFT, front legs raised, throat puffed out in a huge bellow, the arrow quills on its back fanned out behind it like a peacock tail, tail planted on the ground.","red and green skin with red target rings on its sides, green arrow-shaft quills on its back, small horns, a red tail")
+SPECS[-1]['id']='on_quivertoad_rear'; SPECS[-1]['runs']=4
