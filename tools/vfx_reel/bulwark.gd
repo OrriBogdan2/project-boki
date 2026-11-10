@@ -59,7 +59,7 @@ func _part_bash() -> void:
 func _part_wall() -> void:
 	var rock := _rock()
 	await _reset(7.0)
-	P.teleport(rock - Vector3(7.0, 0, 0))
+	P.teleport(rock - Vector3(3.3, 0, 0))
 	T.teleport(rock - Vector3(1.2, 0, 0))
 	var swing := func(t: float):
 		T.vel = Vector3.ZERO
