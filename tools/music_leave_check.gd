@@ -1,5 +1,5 @@
 extends RefCounted
-## --music-leave-check: the music and ambience follow the screen. Training area -> duel room -> back
+## --music-leave-check: the music and ambience follow the screen. Training Grounds -> duel room -> back
 ## out, a normal match -> title, and the farm -> title: after each change only that place's score is
 ## audible (no stem of the match's layered score, no abyss / ruins bed, and no stray player on the
 ## Music or Ambience bus left playing above silence). Inspects Sfx's players' `playing` and volume_db.
@@ -87,7 +87,7 @@ func _training_duel_leave() -> void:
 	ok("duel: a duel match is up", d.duel != null and d.duel.bot != null and d != m)
 	await settle(8.0)
 	a = audible()
-	ok("duel: the score is the training area's, one set of stems", a.keys().filter(func(k): return String(k).begins_with("layer:") or String(k).begins_with("music")).size() == training_music.size(), str(a))
+	ok("duel: the score is the Training Grounds's, one set of stems", a.keys().filter(func(k): return String(k).begins_with("layer:") or String(k).begins_with("music")).size() == training_music.size(), str(a))
 	# leaving the room (Esc > Leave: the match finishes and the game goes on to the farm)
 	d.result = {"extracted": true, "why": "left"}
 	d._finish()
