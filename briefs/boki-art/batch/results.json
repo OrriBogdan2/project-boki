@@ -75162,5 +75162,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/rd_tiltster_b_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_pinster_b",
+    "name": "Pinster (redesign option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_pinster_b_2.jpg",
+    "ok": true
   }
 ]
