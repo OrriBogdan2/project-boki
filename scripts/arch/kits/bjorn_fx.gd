@@ -32,6 +32,7 @@ const CRES_IN := 1.1
 const CRES_OUT := 2.9
 const CRES_Y := 0.45
 const SWIRL_T := 0.45
+const SWIRL_IN := 0.55         # the spin ring's inner edge as a share of the hit radius (its outer edge is the radius)
 const BASH_T := 0.2
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
 ## many are pooled and how often one is left (s)
@@ -92,6 +93,7 @@ var crescent: MeshInstance3D
 var cres_t := 0.0
 var swirl: MeshInstance3D
 var swirl_t := 0.0
+var swirl_r := 1.0             # m, the hit radius the spin ring was drawn at
 var bash_fan: MeshInstance3D
 var bash_t := 0.0
 var aegis: Node3D              # the plated wall
@@ -142,7 +144,7 @@ func _ready() -> void:
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
 	var cres_mesh := KitMeshes.band(CRES_IN, CRES_OUT, -PI * 0.5, PI * 0.5, 40)
 	crescent = KitMeshes.inst(self, cres_mesh, KitShaders.mat("crescent", Color(1.0, 0.6, 0.12), true))
-	var swirl_mesh := KitMeshes.band(1.0, 2.4, 0.0, TAU, 48)
+	var swirl_mesh := KitMeshes.band(SWIRL_IN, 1.0, 0.0, TAU, 48)
 	swirl = KitMeshes.inst(self, swirl_mesh, KitShaders.mat("swirl", Color("e8301a"), true))
 	KitShaders.param(swirl, "color2", Color("ffc93a"))
 	KitShaders.param(swirl, "twist", 2.2)
@@ -413,9 +415,11 @@ func crescent_centre() -> Vector3:
 	var ahead := -crescent.basis.z.normalized()
 	return _cres_at() + ahead * reach - Vector3(0, CRES_Y, 0)
 
-func smash_ring(at: Vector3) -> void:
+## The 360 Smash's spin ring: a red-gold band out to the spin's hit radius `r`, sweeping out to it with the hit.
+func smash_ring(at: Vector3, r: float) -> void:
 	swirl.visible = true
 	swirl.global_position = at + Vector3(0, 0.3, 0)
+	swirl_r = r
 	swirl_t = SWIRL_T
 
 ## The Bash (or a Shield Slam): a gold fan of force in front of `at` toward `dir`, out to `reach`, and a
@@ -611,7 +615,7 @@ func _tick_slam(delta: float) -> void:
 		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
 		swirl.rotation.y += delta * 12.0
 		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
-		swirl.scale = Vector3.ONE * lerpf(1.12, 0.88, life)
+		swirl.scale = Vector3.ONE * swirl_r * lerpf(1.0, 0.8, life)
 		swirl.visible = swirl_t > 0.0
 
 ## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and

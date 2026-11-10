@@ -1,16 +1,20 @@
 extends RefCounted
 ## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
-## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, the Wisp
-## trails when it moves, a revive brings the hero back (scaled up from the pop) and frees the Wisp, and a
-## bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
-## look data: every look has all its keys and real sounds, an unknown id gives the default Wisp, a look
-## that lists only a few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
+## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, it hums, it
+## hangs back heavily when the hunter moves and settles once they stop, a revive brings the hero back
+## (scaled up from the pop), frees the Wisp and stops the hum, and a bleed-out breaks it. The downed
+## gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
+## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
+## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
+## few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
 ## off by default (the Boki walks); on, every Boki rides as a critter-outline wisp orbiting its hunter at
 ## shoulder height, carry passives on, no orders or hits, the AI not ticking, and the snapshot flag turns a
 ## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
 ## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
 ## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
-## a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
+## a dim wisp, a resting summon refuses, the snapshot carries it. The stolen-wisp looks (StolenWisp): loose
+## wisps bob and pulse, a grab puts a thin side-colour ring and a tether on it, a scatter sends each wisp its own
+## way, the flight home trails and arrives, all within the particle budget. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -29,6 +33,7 @@ func run(main_node: Node) -> void:
 	_boki_wisps()
 	_summon_data()
 	_summon()
+	_stolen()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -50,7 +55,7 @@ func _start(opts: Dictionary) -> void:
 		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
-		h.ctrl = "idle" if h != m.player else h.ctrl
+		h.ctrl = "idle"      # the player too: a crawling bot would hide the Wisp settling
 		h.inp["move"] = Vector2.ZERO
 
 func _frames(secs: float, drift := Vector3.ZERO) -> void:
@@ -84,13 +89,19 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.4)
 	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
 	ok(p.downed and not p.out, tag + "downed gameplay untouched: still downed, not out")
+	ok(Sfx.loop_on(HunterWisp.hum_key(p)), tag + "a downed Wisp hums")
 	_frames(0.3, Vector3(0.08, 0, 0))
-	ok((wisp.get_node("Trail") as CPUParticles3D).emitting, tag + "a moving Wisp sheds its trail")
-	ok((wisp.get_node("Tilt") as Node3D).basis != Basis.IDENTITY, tag + "a moving Wisp leans")
+	ok(wisp.position.x < -0.1, tag + "a moving Wisp hangs back behind the hunter (%.2f m)" % -wisp.position.x)
+	ok((wisp.get_node("Body") as Node3D).basis != Basis.IDENTITY, tag + "...and leans")
+	_frames(0.15)
+	ok(wisp.position.x < -0.05, tag + "it settles heavily: still behind 0.15 s after the stop")
+	_frames(1.5)
+	ok(absf(wisp.position.x) < 0.02, tag + "...and has caught up after 1.65 s (%.3f m)" % wisp.position.x)
 	m.revive_hunter(p, null)
 	_frames(0.04)
 	var popping: bool = HunterWisp.mode_of(p) == HunterWisp.OUT
 	ok(not p.downed and p.model.visible and popping, tag + "revived: the hero is back, the pop-out plays")
+	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), tag + "the revive stops the hum")
 	ok(p.model.scale.y < base.y * 0.95, tag + "the hero starts small (%.2f of full)" % (p.model.scale.y / base.y))
 	_frames(0.5)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
@@ -108,6 +119,7 @@ func _bleed_out() -> void:
 	_frames(0.1)
 	var gone: bool = HunterWisp.node_of(p) == null and HunterWisp.mode_of(p) == ""
 	ok(gone, "bleed-out or an execute breaks the Wisp (it is freed)")
+	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), "...and stops the hum")
 	ok(m.fx.radial > burst0, "...with a burst of sparks")
 	m.revive_hunter(p, null)
 	Life.bring_back(m, p, p.pos, 0.5, false)
@@ -154,22 +166,18 @@ func _looks() -> void:
 		for key in default_look:
 			same_keys = same_keys and look.has(key)
 		ok(same_keys, "look '%s' has every key" % id)
-		for spec in [look["pop_in"], look["pop_out"], look["snuff"]]:
+		for spec in [look["pop_in"], look["pop_out"], look["snuff"], look["hum"]]:
 			ok(String(spec["sfx"]) in Sfx.NAMES, "look '%s': sound '%s' exists" % [id, spec["sfx"]])
-		var body := WispLook.build(look, Color.RED)
-		var built: bool = body.get_node_or_null("Tilt/Core") != null and body.get_node_or_null("Trail") != null
-		ok(built, "look '%s' builds" % id)
-		body.free()
+		_outline(String(id), look)
 	ok(WispLook.get_look("no_such_wisp") == default_look, "an unknown id gives the default Wisp")
 	var rules_looks: Dictionary = rules["looks"]
-	rules_looks["check_ember"] = {"core": {"color": "ff6a00"}, "eyes": {"on": false}}      # a new Wisp is data only
+	rules_looks["check_ember"] = {"core": {"rim": "ff6a00"}, "hover": 0.3}      # a new Wisp is data only
 	var ember := WispLook.get_look("check_ember")
-	var kept: bool = ember["core"]["radius"] == default_look["core"]["radius"]
-	ok(ember["core"]["color"] == "ff6a00" and kept, "a look lists only what it changes")
+	var kept: bool = ember["body"]["radius"] == default_look["body"]["radius"]
+	ok(ember["core"]["rim"] == "ff6a00" and kept, "a look lists only what it changes")
 	var body2 := WispLook.build(ember, Color.RED)
-	var core_mat: ShaderMaterial = body2.get_node("Tilt/Core").material_override
-	var own_colour: bool = core_mat.get_shader_parameter("core_col") == Color("ff6a00")
-	ok(body2.get_node_or_null("Tilt/Eyes") == null and own_colour, "...and builds with its own colour, no eyes")
+	var mat: ShaderMaterial = body2.get_node("Body").material_override
+	ok(mat.get_shader_parameter("rim_col") == Color("ff6a00"), "...and builds with its own rim colour")
 	body2.free()
 	ok(WispLook.equip("check_ember") and WispLook.equipped() == "check_ember", "the saved Wisp id round-trips")
 	rules_looks.erase("check_ember")
@@ -282,3 +290,114 @@ func _summon() -> void:
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
 	ok(not other.wisp and absf(other.summon.left - s.left) < 0.11,
 		"online: the snapshot shows the summoned Boki and its seconds")
+
+func _stolen() -> void:
+	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true})
+	var thief: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != thief.team)[0]
+	var at := thief.position + Vector3(6, 1.3, 0)
+	var a := StolenWisp.spawn(m, "cindle", {}, at)
+	var b := StolenWisp.spawn(m, "puddlet", {}, at)
+	var body := a.model.get_node("Body") as Node3D
+	var lo := 9.0
+	var hi := -9.0
+	for i in 240:
+		a.tick(1.0 / 60.0)
+		lo = minf(lo, body.position.y)
+		hi = maxf(hi, body.position.y)
+	ok(a.state == StolenWisp.State.LOOSE and a.position == at and hi - lo > StolenWisp.BOB_M,
+			"stolen: a loose wisp bobs in place (%.2f m)" % (hi - lo))
+	var dims := []
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		dims.append(float(body.get_instance_shader_parameter("dim")))
+	ok(dims.min() < StolenWisp.PULSE_LOW + 0.05 and dims.max() > 0.98 and dims.min() >= StolenWisp.PULSE_LOW - 0.01,
+			"...and pulses softly (%.2f to %.2f)" % [dims.min(), dims.max()])
+	a.grab(thief, 0)
+	b.grab(thief, 1)
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	ok(a.col.is_equal_approx(SideColor.of(m, thief)) and not a.col.is_equal_approx(SideColor.FOE),
+			"stolen: the ring takes the thief's side colour")
+	var torus := a._ring.mesh as TorusMesh
+	ok(torus.outer_radius - torus.inner_radius <= 0.03 and (a._tether.mesh as CylinderMesh).top_radius <= 0.02,
+			"...thin ring and thin tether")
+	var ring_body_y := (a.model.get_node("Body") as Node3D).global_position.y
+	ok(a.position.y - thief.position.y > 1.0 and absf(a._ring.global_position.y - ring_body_y) < 0.01,
+			"...round the wisp, up at shoulder height, never on the ground")
+	ok(a.position.distance_to(b.position) > 0.5, "...two stolen wisps float apart")
+	var run := thief.position
+	for i in 30:
+		thief.position += Vector3(0.3, 0, 0)
+		a.tick(1.0 / 60.0)
+	var chest := thief.position + Vector3(0, StolenWisp.CHEST_Y, 0)
+	var tl := a._tether.global_transform
+	var held_body := (a.model.get_node("Body") as Node3D)
+	ok(a._ring.position == held_body.position, "...the ring rides the body's bob")
+	ok(tl.basis.y.length() > 1.5 and tl.origin.distance_to((chest + held_body.global_position) * 0.5) < 0.05,
+			"...a running thief drags the tether out (%.1f m)" % tl.basis.y.length())
+	ok(a.get_children().all(func(n): return not n is CPUParticles3D),
+			"...no particles of its own beyond the body's sparkles")
+	thief.position = run
+	var from := a.global_position
+	m.fx.radial = 0
+	a.scatter(0, 2)
+	b.scatter(1, 2)
+	ok(a._ring == null or a._ring.is_queued_for_deletion(), "scatter: the ring and tether let go")
+	for i in int(StolenWisp.SCATTER_S * 60.0) + 2:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	var da := a.position - from
+	var db := b.position - from
+	ok(a.state == StolenWisp.State.LOOSE and b.state == StolenWisp.State.LOOSE, "...each settles loose again")
+	ok(da.length() > 3.0 and db.length() > 3.0 and absf(da.angle_to(db)) > 0.6,
+			"...and darted its own way (%.0f deg apart)" % rad_to_deg(da.angle_to(db)))
+	ok(m.fx.radial >= 2, "...a small burst marks each")
+	var sparkles := 0
+	for w in [a, b]:
+		sparkles += (w.model.get_node("Trail") as CPUParticles3D).amount
+	ok(sparkles + 8 * BokiWispLook.TRAIL_AMOUNT < 300,
+			"particles: ten wisps stay under the 300 budget (%d now)" % sparkles)
+	var homed := [false]
+	a.arrived.connect(func(): homed[0] = true)
+	a.go_home(foe)
+	for i in 5:
+		a.tick(1.0 / 60.0)
+	ok(a._ribbon != null and (a._ribbon.mesh as ImmediateMesh).get_surface_count() == 1,
+			"home: a ribbon trails behind the flight")
+	for i in 400:
+		if homed[0]:
+			break
+		a.tick(1.0 / 60.0)
+	ok(homed[0] and a.is_queued_for_deletion(),
+			"...it arrives at its owner within %.1f s and folds in" % StolenWisp.HOME_S.y)
+	b.queue_free()
+
+## The outline rule (briefs/DECISIONS.md 2026-11-09): a round body with a head, team colour rim, white
+## core, low to the ground, a steady glow, and one mesh in one material so thirty stay cheap.
+func _outline(id: String, look: Dictionary) -> void:
+	var tag := "look '%s': " % id
+	var body := WispLook.build(look, Color.RED)
+	var mesh := body.get_node_or_null("Body") as MeshInstance3D
+	ok(mesh != null and body.get_child_count() == 1 and mesh.get_child_count() == 0, tag + "one mesh, nothing else")
+	if mesh == null:
+		body.free()
+		return
+	var box := mesh.mesh.get_aabb()
+	var round_body: bool = absf(box.size.x - box.size.z) < 0.01 and box.size.x > 0.3
+	var shape := "%.2f wide, %.2f tall" % [box.size.x, box.size.y]
+	ok(round_body and box.size.y > box.size.x * 1.1, tag + "a round body with a head on top (" + shape + ")")
+	var mat := mesh.material_override as ShaderMaterial
+	ok(mat != null and body.get_meta("mat") == mat, tag + "one material, the one HunterWisp flashes")
+	ok(mat.get_shader_parameter("rim_col") == Color.RED, tag + "the rim is the team colour")
+	ok(mat.get_shader_parameter("core_col") == Color.WHITE, tag + "the core is white")
+	var steady := true
+	for uniform in mat.shader.get_shader_uniform_list():
+		steady = steady and not String(uniform["name"]).contains("flicker")
+	ok(steady, tag + "the glow is steady: the shader has no flicker")
+	var low: bool = float(look["hover"]) <= 0.5 and float(look["hover"]) + box.position.y > 0.05
+	ok(low, tag + "it floats low, clear of the ground (centre %.2f m)" % float(look["hover"]))
+	var heavy: bool = float(look["settle"]) >= 0.3 and float(look["bob_hz"]) <= 0.7
+	ok(heavy, tag + "slow and heavy: settle %.1f s, bob %.2f Hz" % [look["settle"], look["bob_hz"]])
+	body.free()
