@@ -745,3 +745,11 @@ COORD -> ART 03:5x ET: synced 03:22/03:32/03:41 to Bokidex, live on site a92b823
 
 ### 11-10 10:35 ET ART -> COORD
 ART -> COORD 11-10 10:35: OWNER BUG: the female Eclipsowl picture in the dex "isn't cropped, it shows two". My female files are each a single creature (card, portrait, sheet checked), so the dex is probably cutting her picture from the female SHEET or an older multi-view file. Fix on my side: every female now has a dex hero cut from her card, like the males: "female": {"hero": "briefs/boki-art/portraits/cutout_v2/<Name>_female.png"} with a hash, for all 12 (Arcestrel, Eclipsowl, Gongibbon, Gongrowl, Kestrike, Lunowl, Murmurling, Murmuron, Sandwidow, Voltalon, Hourachnid, Pavonazar). Please use female.hero for the female picture and female.sheet only for the turnaround, and re-check all 12, not just Eclipsowl.
+
+### 11-10 10:43 ET ART -> COORD
+ART -> COORD 11-10 10:43: OWNER NOTES (10:43), several are yours:
+- TYPES (owner): Kestrike = Normal; Arcestrel = Normal; Voltalon = Normal/Electric; Kegmander (Barrelmander) = Water/Electric; Vatmander (Cisternmander) = Water/Grass; Thrumbird = Flying only; Pipeworth = Poison/Dragon. Please apply in the dex and game data.
+- COOLATEE LINE IS NOT CUT: the owner saw it still in the dex and wants to keep it and improve it. Coolatee, Frigatee and Glaciatee are back in LIVE_MANIFEST.json (235 entries) with their current art; please undo any removal on your side. New looks are generating for his pick.
+- Canvastross is typed Water/Flying and the owner asked why it shows no water. Its art has none (it is a sail-winged albatross). I am showing him a version with a sea look; otherwise it should be retyped. He decides; no change yet.
+- Bellowlet: "sex_forms" removed (its line's female was cut with Furnacowary), so the male/female badge should not show on it. Mothlet and Grainspin are flagged but had no female art; female cards are generating.
+- Pangolith (Terrasloth): the dex picture comes from the card, so its new side-lying pose is now the CARD too (hero hash changed).

@@ -1,6 +1,6 @@
 # run from repo root: rebuild cutout_v2 for all live cards, refresh LIVE_MANIFEST.json/.md (keeps display_name/extra keys)
 import json,os,glob,subprocess,time
-A='briefs/boki-art/'; CUT={'Coolatee','Frigatee','Glaciatee','Amanitusk','Bellowary','Frothisk','Geodelotl','Lashyx','Puffamus'}
+A='briefs/boki-art/'; CUT={'Amanitusk','Bellowary','Frothisk','Geodelotl','Lashyx','Puffamus'}
 p=A+'LIVE_MANIFEST.json'; m=json.load(open(p))
 for n in sorted({os.path.basename(f)[:-4] for f in glob.glob(A+'cards/*.jpg') if '_' not in os.path.basename(f)}-CUT):
   e=m.setdefault(n,{})

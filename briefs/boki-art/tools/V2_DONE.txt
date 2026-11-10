@@ -231,3 +231,6 @@ Cindermaw
 Effigeetle
 Glaivyx
 Ringrove
+Coolatee
+Frigatee
+Glaciatee

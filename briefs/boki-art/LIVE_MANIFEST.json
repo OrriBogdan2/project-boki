@@ -106,7 +106,6 @@
    "portrait": "8ea9631dca0e",
    "hero": "76375da3019d"
   },
-  "sex_forms": true,
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
  "Bladypus": {
@@ -2034,9 +2033,9 @@
   "display_name": "Pangolith",
   "hash": {
    "sheet": "f1c467060fbb",
-   "card": "353a87928f01",
+   "card": "b81152ba4d1e",
    "portrait": "8c43970fa13a",
-   "hero": "c706fd196ace"
+   "hero": "793ef235cf37"
   }
  },
  "Thistlynx": {
@@ -3261,6 +3260,45 @@
    "card": "5232e7abaa84",
    "portrait": "cb63d8552a2f",
    "hero": "fbd0fc53e64b"
+  }
+ },
+ "Coolatee": {
+  "sheet": "briefs/boki-art/turnarounds/Coolatee.jpg",
+  "card": "briefs/boki-art/cards/Coolatee.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Coolatee.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
+  "hash": {
+   "sheet": "02f74cc5b0e4",
+   "card": "3ec806657fea",
+   "portrait": "62661c9fac9d",
+   "hero": "7fed3c30153a"
+  }
+ },
+ "Frigatee": {
+  "sheet": "briefs/boki-art/turnarounds/Frigatee.jpg",
+  "card": "briefs/boki-art/cards/Frigatee.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Frigatee.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
+  "hash": {
+   "sheet": "e11ee4577498",
+   "card": "a46569527cf8",
+   "portrait": "a0c15ffdad4d",
+   "hero": "710198308754"
+  }
+ },
+ "Glaciatee": {
+  "sheet": "briefs/boki-art/turnarounds/Glaciatee.jpg",
+  "card": "briefs/boki-art/cards/Glaciatee.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Glaciatee.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
+  "hash": {
+   "sheet": "eaa2130bf9b1",
+   "card": "61b0bc59e825",
+   "portrait": "35ff6c4ad9c0",
+   "hero": "25a89c9e054f"
   }
  }
 }

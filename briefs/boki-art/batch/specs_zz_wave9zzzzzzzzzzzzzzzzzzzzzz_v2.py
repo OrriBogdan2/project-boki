@@ -1161,3 +1161,35 @@ SPECS[_n0]['id']='fs4_arcestrel'; SPECS[_n0+1]['id']='fp4_arcestrel'; SPECS[_n0+
 # 11-10 OWNER: "your picks go" -> Canvastross = opt_canvastross_a_1 (standing, sail wings, mast feather). Sheet + portrait.
 _n0=len(SPECS); V2SHEET_NEW('Canvastross','briefs/boki-art/cards/Canvastross.jpg',_GC,_GN); V2PORT_NEW('Canvastross','briefs/boki-art/cards/Canvastross.jpg','final','majestic',_GC,_GN,False,True,"gliding side-on, facing RIGHT, wings spread flat like sails, mast feather streaming back")
 SPECS[_n0]['id']='v2s_canvastross_r'; SPECS[_n0+1]['id']='v2p_canvastross_r'; SPECS[_n0+1]['runs']=2
+
+# ===== 11-10 midday OWNER NOTES =====
+# Wickapi "looks good but Snuffapi doesn't look older by much: Wickapi probably needs to be aged down / smaller". 3 takes, 2 runs each.
+for _k,_d in (('y1',"a newborn calf, much younger and smaller than now: a big round head, huge eyes, very short neck, short wobbly legs with knobbly knees, a tiny candle stub on its head with one small purple flame, a stubby tail. Standing unsteadily."),
+              ('y2',"a tiny round calf sitting with its legs folded under it, head too big for its body, enormous sleepy eyes, tiny ears, a short candle stub melted a little down one side, flame small."),
+              ('y3',"a small chubby calf mid-hop, short legs, round belly, big head, stubby striped legs, candle stub leaning, happy open mouth.")):
+    ON_CHANGE('Wickapi','briefs/boki-art/cards/Wickapi.jpg','baby','cute',True,True,"the same okapi calf with the same dark red-brown fur, cream-striped legs, candle and purple eyes, but clearly a baby: "+_d,runs=2,tag='_'+_k); SPECS[-1]['id']='opt_wickapi_'+_k
+# New poses: Candelapi ("straight up staring"), Dribbara ("looks a bit weird"), Spirevark ("same as evo 1"). 2 poses x 2 runs each; sheet as reference.
+for _n,_st,_ar,_dk,_fu,_poses in (
+ ('Chandelapi','final','majestic',1,1,("walking side-on, facing LEFT, head held high and turned slightly toward the viewer, one foreleg lifted, flame mane and tail streaming behind","rearing up on its hind legs, facing RIGHT, forelegs tucked, chandelier antlers thrown back, flame mane flaring")),
+ ('Dribbara','baby','cute',0,1,("standing on all four stubby legs, facing LEFT, looking back over its shoulder at the viewer, the little puddle on its back catching a drop","lying flat on its belly with its chin on the ground and legs splayed out, eyes looking up, puddle on its back")),
+ ('Spirevark','final','tough',0,0,("head down, digging with its big front claws, facing LEFT, tail raised, the termite spire on its back tilted forward","standing tall on its hind legs and tail like a meerkat, facing RIGHT, long snout raised sniffing the air, spire rising behind its shoulders"))):
+    for _k,_p in zip('ab',_poses):
+        _n0=len(SPECS); ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,bool(_dk),bool(_fu),_p+".",_KEEPALL); SPECS[_n0]['id']='pose2_'+_n.lower()+'_'+_k; SPECS[_n0]['runs']=2
+# Coolatee line is NOT cut after all (owner: "looks okay... maybe we work on it a bit to give it something extra and keep it"). Restored to the manifest.
+# Two ideas per stage, 2 runs each. A = the names' own idea (cooler > frigate > glacier). B = aurora seals.
+_COOL={'Coolatee':('baby','cute',("its back is a little hollow ice-chest grown from its own body: a square block of clear ice with rounded corners, holding two tiny frozen fish and a snowflake, with a small lid of frost; a round white seal pup under it, pale mint flippers.",
+                                  "its white fur carries soft aurora bands of pale green and pink along its back, and one small ice lantern crystal glows on its forehead; round pup, big dark eyes.")),
+       'Frigatee':('mid','sleek',("a sea lion built like a small ice frigate: two tall sail-shaped back fins of thin clear ice, a pointed ice ram on its nose, a row of round frost portholes along its sides, swimming forward fast.",
+                                  "a sleek sea lion with bright aurora ribbons of green and pink flowing from its neck like a scarf of light drawn as flat bands, ice crystal ridge, leaping.")),
+       'Glaciatee':('final','majestic',("a colossal sea lion that carries a glacier ship: three ice masts with frozen sails grown from its back, a prow-shaped ice crest on its head, long ice tusks, small ice floes fused to its flippers. Planted and immense.",
+                                  "a huge bull sea lion crowned with an ice crown, with a full aurora curtain in green, pink and violet rising from its back like a mane of light drawn as flat bands, long ice tusks, calm and regal."))}
+for _n,(_st,_ar,_ds) in _COOL.items():
+    for _k,_d in zip('ab',_ds):
+        ON_CHANGE(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,False,False,"the same ice seal, given one strong idea of its own: "+_d,runs=2,tag='_x'+_k); SPECS[-1]['id']='cool_'+_n.lower()+'_'+_k
+# Canvastross is typed Water/Flying but shows nothing of water (owner asked). Option: sea read added to the new design. 3 runs.
+SPECS.append({'id':'sea_canvastross','name':'Canvastross (sea read)','refs':['briefs/boki-art/cards/Canvastross.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"give it a clear sea look: its wing tips and tail feathers end in white foam-curl shapes like breaking waves, the swirl marks on its wings become deeper sea-blue wave curls, its belly feathers are tipped sea-blue, and it has webbed orange feet. Everything else stays the same."})
+# Missing female forms the owner asked about: Mothlet (Lunowl line) and Grainspin (Sandwidow line) are flagged male/female but had no female art.
+_FEMST['Mothlet']=('baby','cute',0,1); _FEMST['Grainspin']=('baby','cute',0,1)
+FEM2('Mothlet',None,"a paler lavender-grey body with a cream chest, wing tips one step lighter, the brow crescent in silver, a slightly rounder body.",runs=3)
+FEM2('Grainspin',None,"a deep plum body where he is tan, with lilac sand in her glass globe instead of gold, slightly longer legs and a rounder abdomen.",runs=3)

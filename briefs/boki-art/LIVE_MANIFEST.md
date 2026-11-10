@@ -1,7 +1,7 @@
 # Boki art live manifest (regenerated 02:31 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-232 Boki, 232 with all three. Missing something: 
+235 Boki, 235 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -44,6 +44,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Cisternmander (Vatmander) | ✓ | ✓ | ✓ |
 | Citadoad | ✓ | ✓ | ✓ |
 | Clinkpede | ✓ | ✓ | ✓ |
+| Coolatee | ✓ | ✓ | ✓ |
 | Critwom | ✓ | ✓ | ✓ |
 | Crofthollow | ✓ | ✓ | ✓ |
 | Crofthorn | ✓ | ✓ | ✓ |
@@ -68,6 +69,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Flarmink (Embermink) | ✓ | ✓ | ✓ |
 | Foldbat | ✓ | ✓ | ✓ |
 | Forgebrock | ✓ | ✓ | ✓ |
+| Frigatee | ✓ | ✓ | ✓ |
 | Furnacowary (Furnowary) | ✓ | ✓ | ✓ |
 | Galleotter | ✓ | ✓ | ✓ |
 | Gambitfin | ✓ | ✓ | ✓ |
@@ -76,6 +78,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Ghoulamari | ✓ | ✓ | ✓ |
 | Gilabacus | ✓ | ✓ | ✓ |
 | Glaciammoth | ✓ | ✓ | ✓ |
+| Glaciatee | ✓ | ✓ | ✓ |
 | Glacione (Clionice) | ✓ | ✓ | ✓ |
 | Glaivyx (Sabryx) | ✓ | ✓ | ✓ |
 | Glassolotl | ✓ | ✓ | ✓ |
