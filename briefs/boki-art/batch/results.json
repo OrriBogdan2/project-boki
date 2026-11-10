@@ -87832,5 +87832,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_cindermaw_rd_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_cindermaw_rd",
+    "name": "Cindermaw (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_cindermaw_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_rd",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_chandelotl_rd",
+    "name": "Chandelotl (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_chandelotl_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_rd",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_rd",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_rd_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_chandelotl_rd",
+    "name": "Chandelotl (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_chandelotl_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2k_glaivyx",
+    "name": "Glaivyx (V2 card, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2k_glaivyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2k_glaivyx",
+    "name": "Glaivyx (V2 card, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2k_glaivyx_2.jpg",
+    "ok": true
   }
 ]
