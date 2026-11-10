@@ -106123,5 +106123,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/og_lineup_1.jpg",
     "ok": true
+  },
+  {
+    "id": "hat_fix1",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hat_fix1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hat_fix2",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hat_fix2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hat_fix2",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hat_fix2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hat_fix1",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hat_fix1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hat_fix2",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hat_fix2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hat_fix1",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hat_fix1_1.jpg",
+    "ok": true
   }
 ]
