@@ -83317,5 +83317,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_pickadactyl_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_harvantis",
+    "name": "Harvantis (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_harvantis_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mumblet",
+    "name": "Mumblet (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_mumblet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_harvantis",
+    "name": "Harvantis (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_harvantis_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pickadactyl",
+    "name": "Pickadactyl (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_pickadactyl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_nymphane",
+    "name": "Nymphane (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_nymphane_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mumblet",
+    "name": "Mumblet (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_mumblet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mumblet",
+    "name": "Mumblet (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_mumblet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_narfoil",
+    "name": "Narfoil (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_narfoil_2.jpg",
+    "ok": true
   }
 ]
