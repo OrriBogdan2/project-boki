@@ -72,3 +72,37 @@ Options rendered as `rv_*`; nothing is live. My ranking (1st / 2nd / 3rd):
 | Pickadactyl | Brown; its baby is blue and amber | `rv_pickadactyl_family_1` | `2` | `3` |
 | Forgebrock | Fists read as iron gauntlets | `rv_forgebrock_paws_1` | `2` | `3` |
 Looked at and left alone: Moatpole > Rampartoad (plain but distinct), Crofthorn > Crofthollow, Teapotamus > Chuggamus (barrel body reads built), Rattlebub > Maracoil, Lanterloris > Glowris, Sandwidow (dark middle is the sex-form line).
+
+## Third review, 11-10 evening (owner: consistent art style, interesting ideas we are missing, weak concepts; "no basic ones with no ideas behind their family tree")
+### Lines with no real idea (an animal plus an element, nothing else)
+| Line | Why it is basic | Direction to try |
+|---|---|---|
+| Rimekit > Rimeshrew > Rimefang | Ice animal that gets bigger and spikier | Give it one object idea, e.g. snow globe (baby is the globe, final carries a blizzard dome) |
+| Kindlewren > Embrook > Pyrraven | Fire bird, then bigger fire bird | Matchstick / candle / forge-bellows idea, or a volcano-glass bird |
+| Nettlynx > Thistlynx > Briarlynx | Plant cat | Tie to hedge mazes or topiary (clipped-hedge lynx) |
+| Lunafin > Lunarca | Moon fish, then moon whale | Tide clock / moon phases shown on its body |
+| Blotlet > Slog > Sloggoth | Dark blob | Ink: inkwell, blot, printing press |
+| Zephyrak, Hivara, Pebblamb (singles) | Wind serpent, wasp-mantis, pebble lamb | Each needs a second idea or to become a line |
+| Kayak > Prowyak > Dreadnoyak | Named after boats, drawn as ice yaks | Make the boat idea visible (hull-shaped horns, a keel beard) or rename |
+### Structure too close to something else
+- The nine Ermink forms are one baby with element branches: the structure of Eevee. Art is distinct; the idea is not.
+- Five mushroom families (Mycroll, Polyshroom, Morelkin, Fawnshroom, Glomwort). Too many for one roster; Glomwort and Fawnshroom are the weakest.
+### Style consistency
+- 124 of 235 card backdrops are a lilac-grey up to 29 levels off the #E8E8EE spec (worst: Reapant, Shinobant, Terrarimit, Murmuron). The dex cuts creatures out, so it only shows where raw cards are used. Fixable in one automated pass.
+- Outliers in line and finish: Glassolotl (very thin pale line), Rimefang (dense swirl linework), Hivara and Zephyrak (more realistic and busier than the rest), Pinster (chrome gloss).
+- Legendary "epic pass" options are deliberately heavier; if adopted, all 12 should get the same treatment.
+### Animal families the roster does not have
+Penguin, shark, ray, eel, crocodile, kangaroo, giraffe, camel, rhino (only Gravidon-like), horse, dog/wolf (non-legendary), monkey (only the gibbon), parrot, flamingo, swan, squirrel, raccoon, bee, firefly, ladybird, starfish, coral, dinosaur (only a pterosaur).
+### New line ideas (animal + far-apart idea), for the owner to choose from
+1. Bowling penguins: a pin-shaped chick, a ball-bellied middle, a champion with a lane-shaped belly slide.
+2. Carpenter sawshark: file-nose pup, plane-backed middle, a great saw-and-chisel shark.
+3. Bagpipe camel: humps are the bags, drone pipes for a mane.
+4. Postbox kangaroo: pouch is a letter slot; the joey is a stamp-sized parcel.
+5. Xylophone crocodile: back scutes are tuned bars, tail is the mallet.
+6. Crane giraffe: a construction-crane neck with a hook-shaped horn.
+7. Carousel horse: a foal with a twisted pole horn, then a full merry-go-round stallion with a canopy mane.
+8. Plug-and-cable eel: the baby is a plug, the final a coiled extension-reel eel.
+9. Accordion bee: honeycomb bellows body that stretches when it flies.
+10. Traffic-light firefly: three lights down its tail, red, amber, green.
+11. Piggy-bank squirrel: cheeks are coin slots, tail curls like a safe dial.
+12. Record-player stingray: a flat disc body with grooves, tail is the needle arm.
