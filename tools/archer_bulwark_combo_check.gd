@@ -17,6 +17,8 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var atime = load("res://tools/bjorn_anim_time_check.gd").new()
+	atime.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
@@ -28,8 +30,9 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails
+		await atime.anim_time()
+	n += ult.n + own.n + launch.n + tall.n + atime.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + atime.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -839,10 +842,12 @@ func _bulwark_combos() -> void:
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
+	var calls0 := int(HeroVfx.of(m).plays.get("mend_call", 0))
 	P.ak.use_e()
 	ok(
 		"bjorn E: with the hammer in hand it comes down on him, the column and circle shown",
-		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible,
+		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5
+		and int(HeroVfx.of(m).plays.get("mend_call", 0)) == calls0 + 1,
 		"mend %s" % str(K.mend.get("pos"))
 	)
 	step(m, 0.1)

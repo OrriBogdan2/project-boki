@@ -15,6 +15,67 @@ func _key(k: int) -> InputEventKey:
 	var e := InputEventKey.new(); e.physical_keycode = k; e.pressed = true
 	return e
 
+const RX := "(?:is_action_(?:just_)?(?:pressed|released)|get_action_strength|get_axis)\\(\"(\\w+)\"(?:, \"(\\w+)\")?"
+
+## Every action name a script reads (is_action_*, get_axis).
+func _used_actions(dir: String, out: Dictionary) -> void:
+	var rx := RegEx.create_from_string(RX)
+	for f in DirAccess.get_files_at(dir):
+		if not f.ends_with(".gd"):
+			continue
+		for m in rx.search_all(FileAccess.get_file_as_string(dir + "/" + f)):
+			for g in [1, 2]:
+				if m.get_string(g) != "":
+					out[m.get_string(g)] = true
+	for d in DirAccess.get_directories_at(dir):
+		_used_actions(dir + "/" + d, out)
+
+func _names() -> Array:
+	return Settings.ACTIONS.map(func(a): return String(a[0]))
+
+func _code(k: int) -> String:
+	return "key:%d" % k
+
+func _mouse(b: int) -> String:
+	return "mouse:%d" % b
+
+func _actions_and_orders(S) -> void:
+	S.reset_all()
+	var used := {}
+	_used_actions("res://scripts", used)
+	var tooling := func(n): return n.begins_with("kf_") or n.begins_with("ui_") or n == "menu"
+	var missing: Array = used.keys().filter(func(n): return not tooling.call(n) and not _names().has(n))
+	ok(missing.is_empty(), "every action the scripts read can be rebound in Controls (missing: %s)" % str(missing))
+	ok(_names().has("crouch") and _names().has("whistle") and _names().has("rotate"), "sneak, whistle, rotate listed")
+	ok(S.slots("ping") == [_mouse(MOUSE_BUTTON_MIDDLE), _mouse(MOUSE_BUTTON_XBUTTON1)], "Mouse 4 pings by default")
+	ok(S.slots("dash") == [_code(KEY_SHIFT), _mouse(MOUSE_BUTTON_XBUTTON2)], "Mouse 5 is the second dash key")
+	var orders: Array = [S.slots("kin_attack")[0], S.slots("kin_return")[0], S.slots("kin_hold")[0]]
+	ok(orders == [_code(KEY_K), _code(KEY_N), _code(KEY_L)], "the Boki orders ship on K, N and L (%s)" % str(orders))
+	var clash := _names().filter(func(n): return not S.clashes(n).is_empty())
+	ok(clash.is_empty(), "no two actions share a default key (clashing: %s)" % str(clash))
+	S.rebind("kin_attack", _key(KEY_G), 0)
+	ok(S.clashes("kin_attack") == ["throw"] and S.clashes("throw") == ["kin_attack"], "a shared key flags both actions")
+	S.rebind("signature", _key(KEY_U), 0)
+	ok(S.key_cap("signature") == "U" and S.slots("signature")[0] == _code(KEY_U), "a key cap follows a rebind")
+	S.reset_all()
+
+## Old saves: custom bindings survive the new defaults, and a default that lands on a saved custom key backs off.
+func _migration(S) -> void:
+	var saved := {"fire": [_code(KEY_K)], "jump": [_mouse(MOUSE_BUTTON_XBUTTON2)]}
+	saved["glide"] = [_code(KEY_O)]
+	saved["util3"] = [_code(KEY_N)]
+	var m := {"keys": saved, "keys2_v": 1, "keys3_v": 1, "keys4_v": 1, "keys5_v": 1}
+	KeyMigrate.run(m)
+	var ks: Dictionary = m["keys"]
+	var kept: bool = ks["fire"] == [_code(KEY_K)] and ks["glide"] == [_code(KEY_O)]
+	ok(m["keys6_v"] == 1 and kept, "migration keeps custom bindings")
+	ok(ks["kin_attack"] == [] and ks["kin_return"] == [] and not ks.has("kin_hold"), "a taken order key starts unbound")
+	ok(ks["dash"] == [_code(KEY_SHIFT)] and not ks.has("ping"), "dash backs off a taken Mouse 5, ping does not")
+	var before := ks.duplicate(true)
+	KeyMigrate.run(m)
+	ok(m["keys"] == before, "and it runs once")
+	ok(S.DEFAULTS.has("keys6_v"), "the settings carry the migration step")
+
 ## Binds R (the ultimate's, shared with turning a piece) to dash: the swap leaves every action
 ## bound, and the saved file round-trips.
 func _dash_on_r(S) -> void:
@@ -30,12 +91,14 @@ func _dash_on_r(S) -> void:
 	var none: bool = S.unbound("dash") or S.unbound("hunter_ult") or S.unbound("rotate")
 	ok(not none and S.conflicts(_key(KEY_R), "dash").is_empty(), "nobody is left unbound, and R is only dash's")
 	var cf := ConfigFile.new()
-	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"] == [r], "the swap is saved")
+	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"][0] == r, "the swap is saved")
 	for a in ["dash", "hunter_ult", "rotate"]: InputMap.action_erase_events(a)
 	S.v["keys"] = (cf.get_value("s", "keys") as Dictionary).duplicate(true)
 	S.apply("keys")
 	var back: bool = S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old
-	ok(back and InputMap.action_get_events("dash").size() == 1, "the saved settings load back to the same bindings")
+	var n_keys: int = S.slots("dash").filter(func(c): return c != "").size()
+	ok(back and InputMap.action_get_events("dash").size() == n_keys,
+			"the saved settings load back to the same bindings")
 	# dash with no key: its owners get nothing and read as unbound (the Controls page paints that red)
 	S.reset_all()
 	S.clear_bind("dash", 0)
@@ -83,6 +146,8 @@ func run(main: Node) -> void:
 	S.reset_all()
 	_dash_on_r(S)
 	# (the move of old saves to the new defaults is --ultbond-check)
+	_actions_and_orders(S)
+	_migration(S)
 	# the arena and duel resets are on Backspace now
 	var ar := FileAccess.get_file_as_string("res://scripts/match/arena.gd")
 	var du := FileAccess.get_file_as_string("res://scripts/match/duel.gd")
@@ -91,6 +156,9 @@ func run(main: Node) -> void:
 	var shot := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shot = a.substr(12)
+	if shot != "" and main.fade:
+		main.fade.reveal(0.05)          # the boot splash covers the window until the title would reveal it
+		await tree.create_timer(0.35).timeout
 	Overlay.tab = "Controls"
 	Overlay.open_settings()
 	for i in 20: await tree.process_frame

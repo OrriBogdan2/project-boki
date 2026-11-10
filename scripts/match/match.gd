@@ -20,6 +20,7 @@ var shot_floor := ShotFloor.new(self)      # the readable core on every LMB proj
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
+var heart: Heart            # the Heart, its Heartspark and Gate (null when the match has none)
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
 var keys: KeyRun = null     # who carries the chest keys, and the Shrublings (host / offline)
 var shrines: Array = []     # {pos, used, prog, node}
@@ -123,12 +124,6 @@ var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
 var _finish_now := false
-var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
-var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
-var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
-func sess_time() -> float: return sess_t0 + time     # the session clock: seconds since the session began (the match clock unless you joined a rolling session part-way)
-func sess_len() -> float: return Rolling.SESSION if rolling else length     # the whole session (a rolling session: Rolling.SESSION)
-func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session (negative if before you joined)
 
 func _ready() -> void:
 	set_process(false)
@@ -208,11 +203,18 @@ func warm_up(progress := Callable()) -> void:
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
+static var prof_top := ""         # the last step's costliest section and its us (the hitch log, PerfOverlay)
+static var prof_top_us := 0
 var _prof_t := 0
 func _prof(lbl: String) -> void:
 	if prof_on:
 		var now := Time.get_ticks_usec()
-		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+		if lbl == "pre": prof_top_us = 0
+		elif _prof_t > 0:
+			prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+			if now - _prof_t > prof_top_us:
+				prof_top = lbl
+				prof_top_us = now - _prof_t
 		_prof_t = now
 
 ## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).
@@ -225,6 +227,13 @@ func _vprof(lbl: String) -> void:
 		_vprof_t = now
 
 var _render_n := 0
+func _render_lod(e: Ent, delta: float, alpha: float, cf: Vector3, near2: float) -> void:
+	if _render_now(e, cf, near2):
+		e.render(delta + e.lod_dt, alpha)
+		e.lod_dt = 0.0
+	else:
+		e.lod_dt += delta
+
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 	if e.dead or e.lod_dt > 0.2:
 		return true
@@ -282,10 +291,6 @@ func _start(o: Dictionary) -> void:
 	# real expeditions happen on the big map and start from the skyship
 	big = not (o.get("tutorial", false) or o.get("training", false)) and o.get("big", true)
 	length = float(o.get("length", Data.MATCH["length"] * (1.7 if big else 1.0)))
-	if Rolling.enabled(o):
-		# a rolling session: the waves, which one you're in, who's out there already (sets length and sess_t0)
-		rolling = Rolling.new(self)
-		rolling.plan(o)
 	tier = clampi(int(o.get("tier", 0)), 0, Data.TIERS.size() - 1)
 	T = Data.TIERS[tier]
 	bot_diff = String(o.get("bot_diff", Settings.get_v("bot_diff")))
@@ -305,7 +310,7 @@ func _start(o: Dictionary) -> void:
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
-		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
+		layout = World.load_layout(String(o.get("map", World.layout_for_tier(tier))))     # the expedition map
 	elif o.get("tutorial", false):
 		layout = World.load_layout("tutorial")
 	elif o.get("arena", false):
@@ -367,6 +372,9 @@ func _start(o: Dictionary) -> void:
 		skytrain.setup(self)
 	await _slice()
 	Beacons.place(self)
+	if Heart.enabled(opts):
+		heart = Heart.new(self)
+		heart.setup()
 	await _slice()
 	if opts.get("arena", false) and player: player.teleport(Arena.wing_spot(world))  # (the Wing first)
 	await _spawn_breakables()
@@ -409,8 +417,6 @@ func _start(o: Dictionary) -> void:
 		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
 		blight = BlightDir.new(self)
 		blight.setup()
-	if rolling:
-		rolling.after_setup()      # the map as picked over as the session is old
 	if not (opts.get("duel", false) or opts.get("arena", false) or opts.get("tutorial", false)):
 		keys = KeyRun.new(self)
 		keys.setup()               # who carries the chest keys, and the Shrublings
@@ -559,7 +565,7 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		kit = kit.duplicate()
 		# bots get an archetype of their class, and a weapon from its family
 		if ctrl != "local" and String(kit.get("arch", "")) in ["", "?"]:
-			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, str(seed_val)])
+			kit["arch"] = Arch.pick_for(cls, "%s|%s" % [id, str(seed_val)], opts.get("bot_archs", []))
 		var pool: Array = Data.CLASSES[cls]["weapons"]
 		if Arch.exists(String(kit.get("arch", ""))) and Arch.weight(String(kit["arch"])) == cls:
 			pool = Arch.weapons(String(kit["arch"]))
@@ -706,11 +712,6 @@ func _spawn_hunters() -> void:
 	if net_on:
 		_spawn_net_hunters(spots, names)
 		return
-	if rolling:
-		# who's already out there, then your wave's ship over the quiet side and its squads' spots under it
-		rolling.populate_before(names)
-		_setup_ship()
-		spots = rolling.spots_along(ship, n_teams)
 	var total := int(opts.get("total", 999))
 	var made := 0
 	var mates: Array = opts.get("mates", [])
@@ -834,10 +835,6 @@ var ship := {}
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
 
 func _setup_ship() -> void:
-	if rolling:
-		# your wave's ship flies over the less crowded side (Rolling.new_ship), starting now
-		if ship.is_empty(): ship = rolling.new_ship(0.0)
-		return
 	var ang := rng.randf() * TAU
 	var c := Vector3(world.w / 2.0 + rng.randf_range(-10, 10), SHIP_Y, world.h / 2.0 + rng.randf_range(-10, 10))
 	var dir := Vector3(cos(ang), 0, sin(ang))
@@ -849,32 +846,22 @@ func _setup_ship() -> void:
 	add_child(n)
 	ship["node"] = n
 
+## Where the skyship is now.
 func ship_pos() -> Vector3:
-	return ship_pos_of(ship)
-
-## Where a skyship is now (each drop wave's ship sets off at its own "t0", match time).
-func ship_pos_of(s: Dictionary) -> Vector3:
-	if s.is_empty() or not s.has("a"):
+	if ship.is_empty() or not ship.has("a"):
 		return Vector3.ZERO
-	return (s["a"] as Vector3).lerp(s["b"], clampf((time - float(s.get("t0", 0.0))) / float(s["dur"]), 0.0, 1.0))
-
-## The skyship a hunter rides (a rolling session's later waves have their own; otherwise `ship`).
-func ship_of(h: Hunter) -> Dictionary:
-	if h != null and h.has_meta("ship"):
-		return h.get_meta("ship")
-	return ship
+	return (ship["a"] as Vector3).lerp(ship["b"], clampf(time / float(ship["dur"]), 0.0, 1.0))
 
 ## When a bot aboard should jump to come down on a spot: as the ship passes nearest it.
 func plan_jump(h: Hunter, at: Vector3) -> void:
-	var s := ship_of(h)
+	var s := ship
 	if s.is_empty() or not s.has("a"):
 		return
 	h.ai["land"] = at
 	var a: Vector3 = s["a"]; var b: Vector3 = s["b"]
-	var st := float(s.get("t0", 0.0))
 	var ab := Vector2(b.x - a.x, b.z - a.z)
 	var k := clampf(Vector2(at.x - a.x, at.z - a.z).dot(ab) / ab.length_squared(), 0.04, 0.97)
-	h.ai["jump_at"] = clampf(st + k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(st + 0.6, time + 0.2), st + float(s["ride"]) - 0.5)
+	h.ai["jump_at"] = clampf(k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(0.6, time + 0.2), float(s["ride"]) - 0.5)
 
 ## Off the ship. A squadmate waiting on the drop leader can't jump by themselves (force: they're
 ## jumping with the leader, or the ship has reached the end of its run).
@@ -887,15 +874,14 @@ func ship_jump(h: Hunter, force := false) -> void:
 		return
 	h.riding = false
 	var off := Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
-	var hs := ship_of(h)
-	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
+	h.teleport(ship_pos() + Vector3(0, -1.5, 0) + off)
 	h.dropping = true
 	h.diving = true
 	h.drop_from = Vector2(h.pos.x, h.pos.z)
 	h.gliding = true
 	h.glide_k = 1.0
 	h.grounded = false
-	DropLaunch.start(h, hs["dir"])      # the squad's rocket launch (item 163)
+	DropLaunch.start(h, ship["dir"])      # the squad's rocket launch (item 163)
 	if h == player:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
@@ -905,24 +891,19 @@ func ship_jump(h: Hunter, force := false) -> void:
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
+## The skyship along its line, and everyone aboard it: jump when it's time, or at the end of its run.
 func _update_ship(dt: float) -> void:
-	_update_one_ship(ship, dt)
-
-## One skyship along its line, and everyone aboard it: jump when it's time, or at the end of its run.
-func _update_one_ship(s: Dictionary, dt: float) -> void:
+	var s := ship
 	if s.is_empty() or s.get("gone", false):
 		return
-	var st := float(s.get("t0", 0.0))
 	var n: Node3D = s["node"]
 	# drawn along the line past the end too, so it sails off over the clouds
-	n.position = (s["a"] as Vector3).lerp(s["b"], (time - st) / float(s["dur"])) + Vector3(0, 1.4 + sin(time * 1.3) * 0.25, 0)
+	n.position = (s["a"] as Vector3).lerp(s["b"], time / float(s["dur"])) + Vector3(0, 1.4 + sin(time * 1.3) * 0.25, 0)
 	for pn in ["PropL", "PropR"]:
 		(n.get_node(pn) as Node3D).rotation.z += dt * 14.0
-	var done := time >= st + float(s["ride"])
+	var done := time >= float(s["ride"])
 	for h in hunters:
-		if h.riding and not is_same(ship_of(h), s):
-			continue
-		if h.riding and h.remote and is_host and time > st + float(s["ride"]) + 6.0:
+		if h.riding and h.remote and is_host and time > float(s["ride"]) + 6.0:
 			# someone who dropped connection aboard: stop counting them as still in the match
 			h.riding = false
 			eliminate(h, null, "left", true)
@@ -941,7 +922,7 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 			continue          # jumps with the leader
 		if done or (auto and time >= float(h.ai.get("jump_at", 0.0))):
 			ship_jump(h, done)
-	if done and time > st + float(s["dur"]) * 1.5:
+	if done and time > float(s["dur"]) * 1.5:
 		n.queue_free()
 		s["node"] = null
 		s["gone"] = true
@@ -960,7 +941,6 @@ func on_drop_landed(h: Hunter) -> void:
 		h.teleport(best)
 	DropFeel.land(self, h)
 	if blight: blight.on_landed(h)
-	if rolling: rolling.on_landed(h)
 
 func _apply_treat(k: Kin) -> void:
 	match String(Save.d.get("treat", "")):
@@ -1003,7 +983,6 @@ func _spawn_mobs() -> void:
 			var smb := spawn_mob(kk, q)
 			if biomes: biomes.dress(smb)
 			made.append(smb)
-		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
 
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
@@ -1632,7 +1611,8 @@ func ground_grip(p: Vector3) -> float:
 func foes_of(team: int) -> Array:
 	var out: Array = []
 	for h in hunters:
-		if h.team != team and h.hittable() and not h.downed:
+		# (Hunter.hittable written out: foes_of runs many times a step and the call cost more than the test)
+		if h.team != team and not h.dead and not h.out and not h.extracted and not h.riding and not h.downed:
 			out.append(h)
 	for k in kins:
 		if k.dead or k.is_wild():
@@ -1769,6 +1749,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
@@ -1841,7 +1822,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
+		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
@@ -1855,7 +1836,6 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 				BokiChatter.say(self, player.kin, "kill")
 	else:
 		add_feed("%s went down" % h.pname)
-	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
@@ -1958,6 +1938,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
+	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -2121,7 +2102,7 @@ func _check_last() -> void:
 	for h in hunters:
 		if not h.out and not h.extracted:
 			teams[h.team] = true
-	if teams.size() <= 1 and exits and (rolling == null or rolling.waves_left() == 0):
+	if teams.size() <= 1 and exits:
 		exits.on_last_team()
 
 func on_fell(e: Ent) -> void:
@@ -2626,7 +2607,8 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		net_event(["drop", pid, kind_s, v, key, _r(at.x), _r(at.y), _r(at.z), _r(v0.x), _r(v0.y), _r(v0.z)])
 
 func _update_pickups(dt: float) -> void:
-	for p in pickups.duplicate():
+	for i in range(pickups.size() - 1, -1, -1):      # (backwards: a pickup collected or lost leaves the list)
+		var p: Dictionary = pickups[i]
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
 		var g := world.ground_at(pos.x, pos.z)
@@ -2641,12 +2623,14 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if net_on and not is_host and h != player:
 					continue
+				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
+				if d >= 2.2 or absf(h.pos.y - pos.y) >= 2.0:
+					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
 				if p["kind"] == "key" and h.rift_keys >= BeltKeys.cap("rift_key"):
 					continue      # one Rift Key at a time (BeltKeys); the next waits on the ground
-				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
-				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0 and UtilityBelt.can_take(h, String(p["kind"])):
+				if UtilityBelt.can_take(h, String(p["kind"])):
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
 					v = dir.normalized() * (6.0 + (2.2 - d) * 6.0)
 					if dir.length() < 0.6:
@@ -3196,29 +3180,23 @@ func _process(delta: float) -> void:
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
-	for e in hunters: e.render(delta, alpha)
-	_vprof("hunters")
-	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
-	# the time it skipped); near ones every frame
+	# hunters, monsters and kin well away from the view animate at a quarter rate (each catches up with
+	# the time it skipped); near ones every frame. Hunters only below Ultra (Settings.QUALITY anim_lod)
 	_render_n += 1
 	var cf := cam.focus
 	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var hunter_near2: float = near2 if Settings.q("anim_lod") else INF
+	for e in hunters:
+		_render_lod(e, delta, alpha, cf, hunter_near2)
+		if e.unseen: e.visible = false
+	_vprof("hunters")
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
-		if _render_now(e, cf, near2):
-			e.render(delta + e.lod_dt, alpha)
-			e.lod_dt = 0.0
-		else:
-			e.lod_dt += delta
+		_render_lod(e, delta, alpha, cf, near2)
 		if e.unseen or (e.owner_h and (e.owner_h as Hunter).unseen and e.state == "shoulder"):
 			e.visible = false
-	for e in mobs:
-		if _render_now(e, cf, near2):
-			e.render(delta + e.lod_dt, alpha)
-			e.lod_dt = 0.0
-		else:
-			e.lod_dt += delta
+	for e in mobs: _render_lod(e, delta, alpha, cf, near2)
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
 	for s in shots:
@@ -3295,12 +3273,13 @@ func _gather_input() -> void:
 		player.inp["move"] = Vector2.ZERO
 	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
 		pending_input["throw"] = true
+	KinKeys.poll(player, paused or map_up or on_panel)       # the quick order keys (attack, come back, hold)
 	player.inp["interact"] = Input.is_action_pressed("interact")
 	if lairs and not lairs.puzzle_of(player).is_empty():
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
 		player.inp["interact"] = player.inp["interact"] or (player.inp["fire"] and not (hud and hud.mouse_on_ui())) or pad
 		player.inp["fire"] = false
-	# a second Space press (or Mouse 5/4) in the air, held, glides; Space held from the jump never does
+	# a second Space press (or the glide key, if set) in the air, held, glides; Space held from the jump never does
 	player.inp["glide_press_only"] = true
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
 	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) a fresh press opens the glider with no wait
@@ -3777,6 +3756,8 @@ func step(dt: float) -> void:
 		SeeThrough.demo(self, String(opts["see_demo"]))
 	if opts.has("exit_demo") and exits and player and not player.dropping:
 		exits.demo(String(opts["exit_demo"]))
+	if opts.has("heart_demo") and heart and player and not player.dropping:
+		heart.demo(String(opts["heart_demo"]))
 	if (opts.get("raid_demo", false) or opts.get("chest_demo", false) or has_meta("stairs_demo")) and hud and not hud.guide_hidden:
 		Settings.v["tips"] = false          # (screenshots of a raid condition: no tutorial cards)
 		hud.guide_hidden = true
@@ -3873,11 +3854,6 @@ func step(dt: float) -> void:
 	_prof("pickups")
 	if not ship.is_empty() and not ship.get("gone", false):
 		_update_ship(dt)
-	for s in ships:
-		_update_one_ship(s, dt)
-	if rolling:
-		rolling.tick(dt)
-		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
 	_update_box_hums()
 	_prof("interact")
@@ -3888,6 +3864,7 @@ func step(dt: float) -> void:
 	Life.tick_stomps(self, dt)
 	_tick_chase()
 	Beacons.tick(self, dt)
+	if heart: heart.tick(dt)
 	if not net_on:
 		_watch_death()
 	_update_dex(dt)
@@ -4190,6 +4167,13 @@ func _update_interact(dt: float) -> void:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
+		if not want and h != player:
+			# a bot that isn't pressing interact: nothing to prompt, so the scans below wait for the press
+			h.box_t = 0.0
+			h.set_meta("loot_hold", false)
+			h.set_meta("box_broke", false)
+			if exits: exits.interact_for(h)      # (lets go of a dock or hatch hold)
+			continue
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
 		if best.is_empty():
 			for b in boxes:
@@ -4248,6 +4232,10 @@ func _update_interact(dt: float) -> void:
 		if lairs:
 			var lx := lairs.interact_for(h)
 			if not lx.is_empty() and (best.is_empty() or not String(best.get("kind", "")) in ["revive", "finish", "boxrev", "loot", "catch", "exit"]): best = lx
+		# 7. the Heart: take the Heartspark, leave through the Heart Gate with it
+		if heart:
+			var hx := heart.interact_for(h)
+			if not hx.is_empty() and (best.is_empty() or hx.has("act")): best = hx
 		if h == player:
 			interact = best
 		if best.is_empty() or not want:
@@ -4306,6 +4294,9 @@ func _update_interact(dt: float) -> void:
 				if xa in ["call", "start"]: h.set_hold("console")
 				elif xa in ["open", "enter"]: h.set_hold("key")
 				exits.hold(h, best, dt)
+			"heart":
+				h.set_hold("key")
+				heart.hold(h, best, dt)
 			"lair":
 				if String(best.get("what", "")) == "rune": h.set_hold("rune")
 				lairs.hold(h, best, dt)
@@ -4380,7 +4371,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air and hold to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
@@ -4400,16 +4391,18 @@ var player_engaged := false
 func demo_shielded(e: Ent) -> bool:
 	return e != null and e == player and bool(opts.get("demo_match", false)) and not player_engaged and Bot.fresh(self, e)
 
-## The Demo match (title screen): a real Duos expedition set up for filming. A fixed map roll, clear
+## The Demo match (title screen): a real expedition set up for filming. A fixed map roll, clear
 ## weather, no Blight, normal rivals (who leave you be for a minute after you land), on the Dusk Isles (the first tier where a Boki can be lost: one in
 ## a deathbox goes to whoever loots it); your bot squadmate leads the drop to land you between a live boss
 ## lair and an outpost uplink (_demo_drop). It plays on your save like any expedition (what you bring
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
-		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
-		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
+	# (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
+	var o := Data.squad_opts()
+	o.merge({"tier": 1, "seed": DEMO_SEED, "raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T,
+		"demo_match": true, "live_lair": "The Thornhive"})
+	return o
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
 static func arena_opts(arch_id := "") -> Dictionary:
@@ -4734,10 +4727,10 @@ func _update_events() -> void:
 	if opts.get("tutorial", false) or opts.get("training", false):
 		return
 	_update_meteors()
-	if not glimmer_done and time > at_sess(0.5) and (not net_on or is_host):
+	if not glimmer_done and time > length * 0.5 and (not net_on or is_host):
 		glimmer_done = true
 		_spawn_glimmer()
-	if warden_done or time < at_sess(0.4) or world.heart_spot == Vector3.INF:
+	if warden_done or time < length * 0.4 or world.heart_spot == Vector3.INF:
 		return
 	warden_done = true
 	if not net_on or is_host:
@@ -4766,17 +4759,12 @@ func _update_meteors() -> void:
 			_meteor_hit(mt["at"])
 	if not big or (net_on and not is_host):
 		return
-	if meteor_at < 0.0 or (rolling and time > meteor_end + 1.0 and meteor_end > 0.0):
-		if rolling:
-			# a rolling session has a shower every few minutes: fresh gems for the late arrivals too
-			meteor_at = rolling.next_meteor(maxf(time, meteor_end))
-		else:
-			meteor_at = length * 0.24 if not opts.get("meteor_test", false) else 1.5
+	if meteor_at < 0.0:
+		meteor_at = length * 0.24 if not opts.get("meteor_test", false) else 1.5
 		meteor_end = meteor_at + 16.0
 	if time < meteor_at or time > meteor_end:
 		return
 	if time - dt < meteor_at:
-		if rolling: rolling.stats["meteors"] += 1
 		_announce("A meteor shower is coming down. Stars leave gems where they land", Color("ffcf8a"))
 		if net_on: net_event(["anc", "meteor", 0, 0, 0])
 	meteor_next -= dt
@@ -4854,11 +4842,13 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		return
 	h.extracted = true
 	h.downed = false
+	var hb: Dictionary = heart.pay(h) if heart and how == "heart" else {}      # the Heartspark's reward bundle
+	if heart: heart.on_leave(h, how)
 	if not h.stomp.is_empty(): Life.end_stomp(self, h, "extract")
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
-	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK}.get(how, Color("8fe3c8"))
+	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK, "heart": Heart.COL}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, -4.0 if how == "hatch" else 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
 	Juice.extract(self, h, col)
@@ -4870,6 +4860,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if h.kin and h.kin.state != "downed":
 			BokiChatter.say(self, h.kin, "extract")
 		result = {"extracted": true, "why": "extracted", "how": how, "where": where}
+		if not hb.is_empty(): result["heart"] = hb
 		_end_soon(1.6)
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
@@ -4933,8 +4924,6 @@ func _end_soon(after: float) -> void:
 	if result.get("ending", false):
 		return
 	result["ending"] = true
-	if opts.get("sim_keep", false) and time < length:
-		return      # (--rolling-sim: the session runs on to 30:00 after the player is done)
 	get_tree().create_timer(after).timeout.connect(_finish)
 
 func _finish() -> void:
@@ -5004,8 +4993,6 @@ func _finish() -> void:
 		if h.extracted and h != player:
 			placed += 0
 	r["placed"] = placed
-	if rolling:
-		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if net_on:
 		Net.end_match()
@@ -5357,9 +5344,9 @@ func _net_ev(x, from: String) -> void:
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
+				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
-					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5367,9 +5354,9 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
+				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true
@@ -5388,6 +5375,8 @@ func _net_ev(x, from: String) -> void:
 			Beacons.net_in(self, x)
 		"box", "brev", "back", "lost":
 			BoxRevive.net_in(self, x)
+		"ht":
+			if heart: heart.net_in(x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)

@@ -2456,6 +2456,7 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 		var old_sc := _panel_scroll()
 		if old_sc: keep_scroll = old_sc.scroll_vertical
 	_close_panel()
+	get_viewport().gui_release_focus()      # a clicked build tile kept the focus and took Enter from the panel
 	var pb := UI.scroll_panel(title_txt, width, _close_panel, "Close", scroll)
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
@@ -3377,15 +3378,7 @@ func _open_expedition() -> void:
 		right.add_child(tc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
-	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
-	var rolling_on: bool = Save.d.get("exp_rolling", false)
-	var stabs := UI.tabs(["Fixed match", "Rolling session"], "Rolling session" if rolling_on else "Fixed match", func(nm): Save.d["exp_rolling"] = nm == "Rolling session"; _open_expedition(), {}, 150)
-	for tb in stabs.get_child(0).get_children():
-		tb.tooltip_text = "Everyone drops together; the islands fall after about 10 minutes" if String(tb.get_meta("tab")) == "Fixed match" else "A 30-minute session already under way: you drop in with the next wave, wherever it's at"
-	right.add_child(stabs)
-	right.add_child(UI.label("30 minutes, waves every 2-3 minutes; late arrivals start at a higher level" if rolling_on else "Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+	right.add_child(UI.label("%d squads of %d" % [Data.SQUADS, Data.SQUAD_SIZE], UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3508,11 +3501,8 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
-	if Save.d.get("exp_rolling", false):
-		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
+	# the one format: 10 trios (your squadmates and every other squad are bots)
+	var o := Data.squad_opts()
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -5107,8 +5097,8 @@ func _personality(rec: Dictionary) -> Dictionary:
 	var h := absi(String(rec.get("uid", rec.get("name", ""))).hash())
 	var typ := String(Data.KIN.get(rec.get("species", ""), {}).get("type", ""))
 	# [hop rate, hop height, pace]: heavy kinds plod, light ones skip
-	var gait: Array = {"gravity": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "lunar": [4.5, 0.2, 0.95],
-		"prism": [11.0, 0.09, 1.12], "venom": [9.5, 0.05, 1.06], "echo": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
+	var gait: Array = {"psychic": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "fairy": [4.5, 0.2, 0.95],
+		"crystal": [11.0, 0.09, 1.12], "poison": [9.5, 0.05, 1.06], "sound": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
 	var quirks := ["spin", "sniff", "hop", "sit", "look", "wiggle"]
 	return {
 		"speed": float(gait[2]) * lerpf(0.86, 1.18, (brave + hot) * 0.5) * (0.94 + float(h % 13) * 0.01),

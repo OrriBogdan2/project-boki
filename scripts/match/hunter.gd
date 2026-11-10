@@ -19,7 +19,7 @@ const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
 const GLIDE_GRAV := 14.0
 const GLIDE_ENGAGE := 0.1        # scripted input only (checks, demos): hold glide this long in the air and it opens. A player's keys never hold-open it (glide_press_only)
-                                 # (the dedicated glide button, Mouse 5, opens it at once)
+                                 # (the optional glide button opens it at once)
 ## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
 ## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
 ## lift just under the lip, a hard surge from deep down. See abyss_lift_vy (the match and home both use it).
@@ -348,6 +348,7 @@ func _chase_mod(mv: Vector2) -> float:
 	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
 	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
 	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
+	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
 	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
@@ -358,7 +359,9 @@ func accent() -> Color:
 	return cdat.get("color", Color.WHITE) if not cdat.is_empty() else Color.WHITE
 
 func max_dashes() -> float:
-	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
+	var weight_base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
+	# the archetype's own count wins
+	var base := float(ak.dash_def().get("charges", weight_base)) if ak else weight_base
 	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
 
 func dash_regen() -> float:
@@ -791,8 +794,9 @@ func do_jump() -> void:
 			_open_glider()
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
-		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
-		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
+		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too);
+		# a no-carry kit (DashExit) keeps at most its cap x run
+		var keep := DashExit.carry(self, Vector2(vel.x, vel.z) * Loco.dash_jump_keep)
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
@@ -871,7 +875,9 @@ func _dash_into_glide() -> bool:
 		return false
 	roll_t = 0.0
 	shove = {}
-	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
+	var hv := DashExit.carry(self, Vector2(vel.x, vel.z))     # a no-carry kit glides off at most cap x run
+	vel.x = hv.x; vel.z = hv.y
+	if hv.length() > GLIDE_SPEED * 1.25:
 		_glide_boost_fx()
 	return true
 
@@ -1057,7 +1063,7 @@ func do_dash() -> void:
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
-## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
+## The theme of the kin you brought ("poison", "fairy"...). Cosmetic only: it tints, never rules.
 func kin_element() -> String:
 	if kin == null or (kin as Kin).dead:
 		return ""
@@ -1359,8 +1365,8 @@ func _tick_weapon(dt: float) -> void:
 		elif warm_t <= 0.0:
 			warm_t = 0.0
 			_release()
-	# per-shot bloom recovers once you've stopped firing for a beat
-	if wbloom > 0.0 and idle_fire > float(wpn["rate"]) + 0.2:
+	# per-shot bloom recovers once you've stopped firing for a beat (`bloom_wait` s; the shotgun breathes between shots)
+	if wbloom > 0.0 and idle_fire > float(wpn.get("bloom_wait", float(wpn["rate"]) + 0.2)):
 		wbloom = maxf(0.0, wbloom - float(wpn.get("bloom_recover", 20.0)) * dt)
 	if idle_fire > 0.35 or reload_t > 0.0:
 		sus_n = 0
@@ -1514,10 +1520,11 @@ func _emit_shot() -> void:
 	if wpn.has("nth"):
 		nth_n += 1
 		if nth_n % int(wpn["nth"][0]) == 0: dmg *= 1.0 + float(wpn["nth"][1])
-	if wpn.has("sustain_loss"):
-		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
+	var sus_fade := minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
+	var sus_k := 1.0 - float(wpn.get("sustain_loss", 0.0)) * sus_fade
+	dmg *= sus_k
 	sus_n += 1
-	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
+	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0)), "sus_k": sus_k}   # sus_k: of full damage
 	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
@@ -1826,6 +1833,9 @@ func launch_to(target: Vector3, t: float) -> void:
 	roll_t = 0.0
 
 # ------------------------------------------------------------------ simulation
+const GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]  # _gate: input, slot, feedback
+const GEAR_KEYS := ["gear1", "gear2"]       # the two gear slots' inputs (consts: no strings built per step)
+
 func sim(dt: float) -> void:
 	Hex.tick(self, dt)
 	prev = pos
@@ -1838,7 +1848,7 @@ func sim(dt: float) -> void:
 		if remote:
 			net_follow(dt)
 		else:
-			pos = m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
+			pos = m.ship_pos() + Vector3(0, -1.2, 0)
 			prev = pos
 			vel = Vector3.ZERO
 			if ctrl == "local" and inp["jump"]:
@@ -1849,8 +1859,7 @@ func sim(dt: float) -> void:
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
-	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "regen_wait", "land_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	HunterTimers.tick(self, dt)
 	if shield_t > 0.0:
 		shield_t -= dt
 		if shield_t <= 0.0: shield = 0.0
@@ -1917,7 +1926,7 @@ func sim(dt: float) -> void:
 	MergeAugment.route(self)         # merging: nothing fires mid-transformation; merged in a form, C is off
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
 	# gloves need no point: Gloves
-	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
+	for gk in GATES:
 		_gate(gk[0], gk[1], gk[2])
 	if not downed and not dropping and not out:
 		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
@@ -1930,15 +1939,15 @@ func sim(dt: float) -> void:
 		dash_buf = 0.0
 		do_dash()
 	if inp["jump"]: do_jump()
-	if runner:
-		runner.rate = 1.0 + gear_stat("cdr")
-		runner.tick(dt)
 	var cdr := gear_stat("cdr")
+	if runner:
+		runner.rate = 1.0 + cdr
+		runner.tick(dt)
 	if cdr > 0.0:
 		sig_cd = maxf(0.0, sig_cd - dt * cdr)
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
-		if inp.get("gear%d" % (gi + 1), false):
+		if inp.get(GEAR_KEYS[gi], false):
 			if Hex.active(self) or (ak and ak.cast_locked()):
 				_ab_feedback("gear%d" % gi, "deny")
 			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
@@ -2070,8 +2079,8 @@ func _physics(dt: float) -> void:
 		if not dash_pass.is_empty():
 			_pass_along()
 		if roll_t <= 0.0:
-			if grounded:
-				hv = HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+			if grounded or not DashExit.rule(self).is_empty():
+				hv = DashExit.leave(self, hv, spd)     # no hard stop: the run carries on (in the air, air drag)
 	elif fly_t > 0.0:
 		fly_t -= dt
 	elif knock_t > 0.0:
@@ -2768,8 +2777,6 @@ var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 func gain_xp(x: float) -> void:
 	if lvl >= XP_TO.size() or x <= 0.0:
 		return
-	if m and m.rolling:
-		x = m.rolling.scale_xp(self, x)      # catch-up XP below the session's median level (Rolling.xp_mult)
 	xp += x
 	while lvl < XP_TO.size() and xp >= float(XP_TO[lvl]):
 		lvl += 1

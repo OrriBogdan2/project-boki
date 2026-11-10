@@ -580,7 +580,8 @@ def gen_rules():
     if mt:
         # only the keys the game still reads (the rest of Data.MATCH predates Life.R and the exits)
         live = [k for k in ("length", "down_hp") if k in mt]
-        rows = [["players", num(gd_const("core/data.gd", "MATCH_PLAYERS") or "?"), "hunters in an expedition (solos, duos or trios)"]]
+        rows = [["squads", num(gd_const("core/data.gd", "SQUADS") or "?"), "squads in every expedition"],
+                ["squad size", num(gd_const("core/data.gd", "SQUAD_SIZE") or "?"), "hunters a squad (always trios)"]]
         rows += [[k, num(mt[k]), mc.get(k, "")] for k in live]
         body += "\n\n## Match\n\n" + table(["Setting", "Value", "Meaning"], rows)
     lr = gd_const("match/life.gd", "R") or {}
@@ -757,6 +758,18 @@ def _air_audit_table():
             ground = "%s, %s m in %s s (cd %s s)" % (d.get("name", "?"), dist, tm, d.get("cd", "?"))
         rows.append(["%s (%s)" % (AIR_NAMES.get(aid, aid), aid), ground, a[1], a[0], a[2]])
     return table(["Hero", "Ground dash", "Air dash", "Verdict", "Source"], rows)
+def _dash_window(flows):
+    """The buffer-window section: DashFlow.BUFFER_S and each hero's footage evidence for it (window.source)."""
+    buffer_s = gd_const("arch/dash_flow.gd", "BUFFER_S")
+    rows = [[ARCH.get(aid, {}).get("name", aid), flows.get(aid, {}).get("window", {}).get("source", "")]
+            for aid in ARCH_ORDER]
+    return ("A press held for the dash's end that finds the hunter unable to act (stunned, downed, out) waits up to "
+            "`DashFlow.BUFFER_S` = %s s, then goes through its slot's own path (the cast, or the deny cue). The "
+            "source footage is 5 fps (0.2 s a frame; briefs/supervive-data/PHYSICS_PARITY.md): every chain in it has "
+            "the follow-up on the first frame after the dash and none shows a press dropped, so the window is that "
+            "one frame, and there is no early-press limit (a press any time inside the dash is kept). `--dash-flow-check` "
+            "stuns the hunter as a dash ends, inside and outside the window. The evidence per hero:\n\n"
+            % buffer_s) + table(["Hero", "Source footage"], rows)
 
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
@@ -788,6 +801,7 @@ def gen_dash_flow():
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
              "\"special\" = a sourced difference.\n\n") + _air_audit_table()
+    body += "\n\n## Buffer window\n\n" + _dash_window(flows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

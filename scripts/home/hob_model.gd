@@ -65,7 +65,8 @@ func _process(dt: float) -> void:
 	if _shout_t > 0.0:
 		_shout_t -= dt
 		bubble.visible = _shout_t > 0.0
-		tag.modulate.a = 0.0 if bubble.visible else 1.0      # (one line over him at a time)
+		tag.modulate.a = 0.0 if bubble.visible else 1.0      # one line over him at a time
+		tag.outline_modulate.a = tag.modulate.a              # (the outline too, or its dark ghost stays)
 
 func _turn(dt: float) -> void:
 	if face_to.x == INF:
@@ -230,6 +231,7 @@ func _labels() -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_color = PLATE_COLOUR
 	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.billboard_keep_scale = true      # (without it the plate stays a 1 m square behind the line)
 	mat.no_depth_test = true
 	mat.render_priority = -2      # under the outline and the letters
 	_plate.material_override = mat

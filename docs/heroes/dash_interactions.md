@@ -276,7 +276,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | thief | air dash -> ult (X) | Not shown from the air; same as on the ground. | fires mid-dash |
 | thief | air dash -> Q glove | Not in the source; same as her other actives. | fires mid-dash |
 | thief | LMB -> dash | Footage 0187 -> 0193: the empowered hit lands and the next Cartwheel follows at once; a bolt in flight keeps going. | the dash goes, the ability keeps running |
-| thief | RMB -> dash | Not shown in the data or footage. Ours: Shift in the Bola's 0.4s wind-up cartwheels and the Bola still goes at the end of the wind-up. | the dash goes, the ability keeps running |
+| thief | RMB -> dash | Not shown in the data or footage. Ours: the Bola is thrown on the press, so a cartwheel under way doesn't hold it back. | the dash goes, the ability keeps running |
 | thief | E -> dash | Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to. | the dash goes, the ability keeps running |
 | thief | ult (X) -> dash | Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back. | the dash goes, the ability keeps running |
 | thief | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
@@ -364,3 +364,22 @@ Every Hunter's air dash is its ground dash or a special one the source has, neve
 | Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
 | Hem (archer) | Spirit Walk (cd 9.5 s) | with a charge: the same Spirit Walk (`pin_roll`, one charge); out of charges the class long dash (flick and tumble, the `ex_cd` slot) | same | pin.md: one Spirit Walk, no air variant. Item 183 moved the generic long dash off the charged press |
 | Void (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
+
+## Buffer window
+
+A press held for the dash's end that finds the hunter unable to act (stunned, downed, out) waits up to `DashFlow.BUFFER_S` = 0.2 s, then goes through its slot's own path (the cast, or the deny cue). The source footage is 5 fps (0.2 s a frame; briefs/supervive-data/PHYSICS_PARITY.md): every chain in it has the follow-up on the first frame after the dash and none shows a press dropped, so the window is that one frame, and there is no early-press limit (a press any time inside the dash is kept). `--dash-flow-check` stuns the hunter as a dash ends, inside and outside the window. The evidence per hero:
+
+| Hero | Source footage |
+|---|---|
+| gunslinger | Vex (venator.md 87-92): fires the rifle inside Combat Slide (0149-0151 of the 0116-0153 slide, 0.45 s): a fire row, nothing waits for the window. |
+| bulwark | Breaker (bjorn.md 0370-0372): the dash arrives in one frame with the spin on arrival; the footage has no dash into an ability, so the shared one-frame bound stands. |
+| rimewright | Claire (tamsin.md 66-79): Skate 0169-0296 is a hold and darts cast inside it become beams (0239-0245): a fire row; no buffered press to time. |
+| juggernaut | Kael (juggernaut.md 0371-0420): Quick Dash chains 0.4 s apart over 3 charges, 0.3 s drive and 0.35 s recovery; no slash inside and no dropped press. OWNER_REVIEW_1103 item 24 asks for about 0.1 s, within the frame. |
+| ashwick | Cinder (linwick.md 0159-0161): LMB resumes on the frame after the bash with the nozzle already on the aim (0.2 s bash, charges 0.4 s apart); the follow-up never falls later than one frame. |
+| dolm | Tarek (breah.md 0985-0997, 246-249 s): dash at 0985/0986, the KNOCK beam at 0989-0990; with the RMB hop's own 0.4 s, the RMB press fell within a frame of the dash's end and was kept. |
+| mage | Ryzz (vireo.md 460-470, 10 fps): Surge arrives at 32.6 s, is ready at 33.0 s (0165) and the next Surge goes at 33.4 s (0168): chains wait for the reset; no buffered press is shown. |
+| dredge | Grimble (dredge.md 296): back on the aim within 0.1 s after a dash (493.45-493.55 s), Brute Dash a 0.12 s blink; no press inside it is visible. |
+| tender | Pip (mooshmoosh.md 321, 340; 30 fps crops): every dash comes 0.1-0.3 s after a jump and the air dash lasts 0.6 s; no ability pressed inside a dash is shown. |
+| thief | Sable (dancer.md 131-136, 452; 10 fps): hit at 0187, Cartwheel at 0193 and the empowered shot out in the same frame (it hits at 0194): LMB fires inside the 0.3 s dash (fire row); no gap resolves. |
+| archer | Hem (pin.md 322-327): Spirit Walk's roll lasts 0.1-0.15 s, under one 5 fps frame; no press inside it is shown, so nothing resolves the window below a frame. |
+| ostra | Ostra (ostra.md 74): Swap 0152-0200 runs 1.7 s; the footage has no dash into an ability, so the shared one-frame bound stands. |

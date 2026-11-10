@@ -7,7 +7,7 @@ extends CanvasLayer
 signal shown
 
 const TIPS := [
-	"Press Space again in the air (or Mouse 5) and hold to glide. You can open your glider off any booster too.",
+	"Press Space again in the air and hold to glide. You can open your glider off any booster too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
@@ -31,7 +31,7 @@ const TIPS := [
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (press Space again in the air, or Mouse 5, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
+	"Falling all the way into the abyss is death. Glide (press Space again in the air, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
@@ -102,16 +102,11 @@ func setup(opts: Dictionary) -> void:
 		title = "Training Grounds"; sub = "Dummies, a range, a movement lane and the duel room. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
-		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
-		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
-		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
-		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
+		var squads := "%d squads of %d" % [int(opts.get("teams", Data.SQUADS)), int(opts.get("squad", Data.SQUAD_SIZE))]
+		mode_line = "%s  •  skyship drop" % squads
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
-		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
-		if opts.get("rolling", false):
-			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))

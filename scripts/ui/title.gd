@@ -47,6 +47,7 @@ const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (ne
 const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
+	DemoQuick.restore()                 # back from a quick start: the real save again
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
@@ -487,7 +488,7 @@ func _build_ui() -> void:
 	var grounds := func(): Game.start_match(Match.arena_opts(Arch.of_save() if has else ""))
 	items.append(["Training Grounds", grounds, "knock"])
 	if has:
-		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
+		# one click to a match made for filming: a trio whose bot squadmate leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if Net.available():

@@ -138,8 +138,8 @@ func shot_demo(which: PackedStringArray) -> void:
 				PracticeHero.open(Practice.of(psc))      # the Hunters picker (class titles)
 		"confirm":
 			open_pause(ctx)
-			UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.",
-				"Leave", close)
+			var lw := LeaveMatch.warning(LeaveMatch.Kind.get(arg.to_upper(), LeaveMatch.Kind.DEEP), true)
+			UI.confirm(root, lw["head"], lw["body"], "Leave", close, arg != "practice")
 		"tooltip":
 			tab = "Controls"
 			open_settings()
@@ -269,11 +269,11 @@ func open_pause(where: String) -> void:
 		var leave := func():
 			close()
 			Practice.leave(m, tut)
+		var ask := func(): LeaveMatch.ask(root, m, leave)
 		if tut:
-			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", ask)
 		else:
-			var lb: Button = item.call("Leave match", "back", func():
-				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
+			var lb: Button = item.call("Leave match", "back", ask, "", "Danger")
 			lb.tooltip_text = "You lose what you carry"
 	else:
 		item.call("Save and go to the main menu", "home", func():
@@ -361,8 +361,9 @@ func _tab_controls(v: VBoxContainer) -> void:
 			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "base",
 		]],
+		["Boki orders", ["kin_attack", "kin_return", "kin_hold"]],
 		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
-		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
+		["At home", ["interact", "play", "talk", "details", "whistle", "inventory", "hero"]]]
 	var named := {}
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
@@ -455,6 +456,16 @@ func _tab_demo(v: VBoxContainer) -> void:
 		Record.set_level(i)
 		Settings.set_v("rec_level", i))
 	rec_row.add_child(rec_ob)
+	_group(v, "Quick start")
+	var qs := HFlowContainer.new()
+	qs.add_theme_constant_override("h_separation", 8)
+	for i in DemoQuick.IDS.size():
+		var id := String(DemoQuick.IDS[i])
+		qs.add_child(UI.button(String(DemoQuick.NAMES[i]), func():
+			close()
+			DemoQuick.start(id)))
+	v.add_child(qs)
+	_note(v, "Plays on a made-up save that is never written. Your own save is back on the title screen.")
 	_group(v, "Next match")
 	_choice(v, "Weather", "demo_weather", [["random", "Random"], ["clear", "Always clear"]])
 	_choice(v, "Blight", "demo_blight", [[true, "On"], [false, "Off"]])
@@ -528,6 +539,11 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		elif Settings.unbound(an):
 			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
 			b.tooltip_text = "No key: this action can't be used until you set one"
+		var shared := Settings.conflicts_of_code(code, an)
+		if not shared.is_empty():
+			b.modulate = Color("ff8a7a")
+			var names := shared.map(func(c): return _action_name(String(c[0])))
+			b.tooltip_text = "Also used by: %s. Both fire on one press." % ", ".join(names)
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -544,6 +560,11 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		x.modulate.a = 1.0 if code != "" else 0.25
 		cell.add_child(x)
 		r.add_child(cell)
+
+func _action_name(an: String) -> String:
+	for a in Settings.ACTIONS:
+		if a[0] == an: return String(a[1])
+	return an
 
 func _bind_text(code: String, slot: int) -> String:
 	if code != "":

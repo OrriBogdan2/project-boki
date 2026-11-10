@@ -24,12 +24,12 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s (no reload pause), damage 100% to 50% over 10 rounds then flat, tracer/flash/impact thin with it (to 40%), string resets after the 0.35 s rest | match; the wiki gives mag 30 and the decay only, "rapidly reloads when not firing" is game data, the refill rate is ours |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) |
 | Q | none | glove | ours |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) |
-| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m, hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
+| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | One charge (archetype `dash.charges`), tap 4.8 m, hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15; both eased in and out (tuning.json `dash_ease`, owner 11-08 item 10) | match |
 | Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match |
 | Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
 
@@ -104,8 +104,8 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | 7 slugs, bloom [D] | Seven-slug blast, bloom | match |
-| RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
+| LMB | 7 slugs, bloom [D]; ~30 degree fan, 20 rested, recovering between shots [F] | 20 degrees rested, +10 a shot to 35, breathes back 24/s from 0.1 s; edge lines breathe with it | match (Nov 8: the bloom never recovered while firing and rested at 30) |
+| RMB | Arm pierces terrain, pulls first target, 18 s [D] | 11.5 m through terrain (0.1 s wind, whip 45.5 m/s slowing, 0.4 s out), hook r .36, reel, 20% braced shuffle, cd 12 | match; 0.67x cd |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, Grounded (ours) | match; **0.58x cd** |
 | R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |

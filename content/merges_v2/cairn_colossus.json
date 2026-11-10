@@ -3,7 +3,7 @@
 	"id": "cairn_colossus",
 	"name": "Cairn Colossus",
 	"flavor": "Cairnback rises into a rune-carved colossus under you for 8s: a stone shell takes the hits first, and every stomp quakes the ground and stuns.",
-	"theme": "titan",
+	"theme": "steel",
 	"duration": 8,
 	"passives": [
 		{

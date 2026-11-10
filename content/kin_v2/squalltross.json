@@ -6,7 +6,7 @@
 		"Albatross",
 		"Patched ship sails"
 	],
-	"theme": "tempest",
+	"theme": "flying",
 	"flavor": "An albatross with patched ship sails for wings; grab the rigging under it and it carries you across the gap. Easygoing, fearless, a wanderer; restless when it has not seen the sea.",
 	"colors": {
 		"body": "#e8ecf0",

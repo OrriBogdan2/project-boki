@@ -21,9 +21,10 @@ const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
-const FADE := 0.1            # s: one clip into the next, and into or out of an action
+const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade": the way in)
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
+const LOCO_RATE := 12.0      # 1/s: how fast the walk and run blend follows the move ("loco.blend_rate" per Hunter)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -331,8 +332,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moves: Dictionary = d.get("kmoves", {})
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
-		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
-		var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
+		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit; "speed": the clip runs this much
+		# slower or faster than the kit's beat, until the model is re-keyed)
+		var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("speed", 1.0)) + float(mv.get("lead", 0.0))
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
@@ -346,6 +348,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		if mv.has("hold_from") and root.has_meta(PHASE):
 			var start := float(mv["hold_from"])
 			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+		elif mv.has("hold_at") and tt >= float(mv["hold_at"]) and tt < float(mv["hold_until"]):
+			tt = float(mv["hold_at"])          # (a pose held while the kit waits: Skycall's raised arm to its snap)
 		elif tt >= length:
 			if not mv.has("hold_from"):
 				return {}
@@ -393,6 +397,7 @@ func step(dt: float) -> void:
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
 	var proc := bool(want.get("proc", false))
+	var fade := float(want.get("fade", FADE))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	if not proc and bool(want.get("upper", false)):
 		var clip_u := String(want["clip"])
@@ -403,7 +408,7 @@ func step(dt: float) -> void:
 			if up_w <= 0.0:
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
 		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		up_w = move_toward(up_w, 1.0, dt / fade)
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
@@ -420,15 +425,15 @@ func step(dt: float) -> void:
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
-		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
+		act_w = move_toward(act_w, 1.0, dt / fade)
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
-	xf = move_toward(xf, float(chan), dt / float(want.get("fade", FADE)))
-	xf_u = move_toward(xf_u, float(chan_u), dt / float(want.get("fade", FADE)))
+	xf = move_toward(xf, float(chan), dt / fade)
+	xf_u = move_toward(xf_u, float(chan_u), dt / fade)
 	_p("act/blend_amount", xf)
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
@@ -486,7 +491,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
+	var blend := float(lc.get("blend_rate", LOCO_RATE))
+	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * blend))
 	_p("loco/blend_position", loco_pos)
 	var rate := gait.plan(spd, lc)
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)

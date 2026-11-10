@@ -9,7 +9,7 @@ numbers behind bonds, IVs, mutations and evolution are on [Boki growth](Boki-Gro
 
 ## Types
 
-A Boki's type (Venom, Prism, Spore, Echo, Gravity, Lunar, Titan, Swarm, Tempest) is the flavour of
+A Boki's type (Poison, Crystal, Spore, Sound, Psychic, Fairy, Steel, Bug, Flying) is the flavour of
 its abilities. It doesn't change what your class can do; it adds to it (see
 [Classes](Classes.md#your-boki-and-your-class)). On the farm, each species also has work knacks that
 roughly follow its type (an Ember-type knack bakes and warms eggs, Tide waters, and so on).
