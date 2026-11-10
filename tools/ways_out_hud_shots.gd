@@ -59,8 +59,8 @@ func run(main_node: Node) -> void:
 	H._force(Heart.S.READY, "charged")
 	H.carrier = foe
 	H._force(Heart.S.CARRIED, "shots")
-	var lair := {"flown": [foe2], "sealed_in": [], "state": "cleared"}
-	m.lairs.list.append(lair)
+	if not m.lairs.list.is_empty():
+		m.lairs.list[0]["flown"] = [foe2]
 	await _grab("strip_3_in_use")
 	H.carrier = null
 	H.early_team = foe.team
