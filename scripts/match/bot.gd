@@ -115,7 +115,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if inp["glide"] and not h.gliding and h.vel.y < 1.0 and h.can_glide():
 				inp["jump"] = true
 			return
-		elif h.grounded and h.flat_dist(L["take"]) < 0.9 and h.glide_fuel > 0.6:
+		# (only heading for the landing: reaching the take-off spot from the landing's side and jumping on that
+		# momentum dropped the bot back on its own island, and it hopped there until the crossing timed out)
+		elif h.grounded and h.flat_dist(L["take"]) < 0.9 and h.glide_fuel > 0.6 \
+				and Vector2(h.vel.x, h.vel.z).dot(tol) >= 0.0:
 			inp["move"] = tol.normalized()
 			inp["jump"] = true
 			a["cross_go"] = true
