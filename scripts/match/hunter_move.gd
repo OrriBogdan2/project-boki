@@ -26,6 +26,9 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var speed_cap: float = _phys["speed_cap"]
+static var haste: float = _phys["haste"]
+const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -44,6 +47,23 @@ static func apply(h: Hunter) -> void:
 	var row := of(h.arch)
 	h.base_speed = float(row["speed"])
 	h.ground_accel = float(row["accel"])
+
+## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
+## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).
+static func ground_speed(run: float, bonus: float, mult: float) -> float:
+	return clampf(run * maxf(0.0, 1.0 + bonus) * mult, 0.0, speed_cap)
+
+## Every move-speed bonus a hunter has right now, summed: gear, perk orbs, kin carry passives, owner
+## points, merge and kin-ability buffs (gear_stat), the haste status, its kit's own bursts, its mount's
+## gait and the chase after a kin thief.
+static func speed_bonus(h: Hunter, mv: Vector2) -> float:
+	var b := h.gear_stat("speed") + (haste if h.haste_t > 0.0 else 0.0)
+	if h.ak: b += h.ak.speed_bonus()
+	if h.mounted() and h.grounded: b += h.mount_speed() - 1.0
+	var c := h.chase
+	if c and not c.out and not c.extracted and mv.length() > 0.1 and mv.normalized().dot(h.dir_to(c)) > 0.5:
+		b += CHASE_BONUS
+	return b
 
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:

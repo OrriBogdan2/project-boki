@@ -540,11 +540,11 @@ func _all() -> void:
 	)
 	ok(
 		"ram rank 3: a hit gives +16% speed and a 11.6% shield, and no instant burn",
-		P.shield >= P.max_hp * 0.11 and absf(K.move_k() - 1.16) < 0.02 and K.burning(T) == 0,
-		"shield %.1f move_k %.2f burning %d" % [P.shield, K.move_k(), K.burning(T)]
+		P.shield >= P.max_hp * 0.11 and absf(K.speed_bonus() - 0.16) < 0.02 and K.burning(T) == 0,
+		"shield %.1f bonus %.2f burning %d" % [P.shield, K.speed_bonus(), K.burning(T)]
 	)
 	ak.step(m, 2.5)
-	ok("ram rank 3: the boost ends after 2s", absf(K.move_k() - 1.0) < 0.02, "move_k %.2f" % K.move_k())
+	ok("ram rank 3: the boost ends after 2s", K.speed_bonus() <= 0.0, "bonus %.2f" % K.speed_bonus())
 	P.slot_lv["dash"] = 1
 	# --- Furnace Cloak: fires on the press frame, centred on Cinder whatever the cursor
 	reset.call()

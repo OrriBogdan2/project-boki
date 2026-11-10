@@ -408,6 +408,15 @@ func _turn_to_heading(s: Dictionary, on: bool, legs_only: bool, dt: float) -> vo
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
 
+## Playback rate of the walk/run blend at a ground speed of `spd` m/s, so the feet keep pace with the
+## ground (no slide): the clip's authored speed lerps from walk to run, and a hasted run plays faster,
+## up to the fastest a hunter can go (HunterMove.speed_cap).
+static func loco_rate(spd: float, walk: float, run: float) -> float:
+	if spd < STILL:
+		return 1.0
+	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
+	return clampf(spd / gait, 0.6, HunterMove.speed_cap / run)
+
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -424,8 +433,7 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
+	_p("loco_rate/scale", loco_rate(spd, walk, run))
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)

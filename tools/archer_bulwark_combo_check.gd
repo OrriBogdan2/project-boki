@@ -426,7 +426,7 @@ func _archer_combos() -> void:
 	var mk := [0.0]
 	step(m, 1.2, func():
 		P.inp["move"] = Vector2(1, 0)
-		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k()))
+		if K.spirit.inside: mk[0] = maxf(mk[0], K.move_k() + K.speed_bonus()))
 	var mk_in: float = mk[0]
 	ok(
 		"pin small: no extra speed inside something below rank 3 (x1.1 like outside)",
