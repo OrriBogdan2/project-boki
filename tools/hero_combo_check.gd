@@ -25,6 +25,10 @@ func run(main_node: Node, who: String) -> void:
 		await _mage()
 		await _growth()
 		await ults.mage()
+		var before: Array = [ac.n, ac.fails]
+		await load("res://tools/hold_release_check.gd").sparkle(ac)      # how the Skycall drag ends
+		n += ac.n - before[0]
+		fails += ac.fails - before[1]
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
