@@ -40,6 +40,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	var k: ArchKit
 	match arch_id:
 		"thief": k = ThiefKit.new()
+		"gil": k = GilKit.new()
 		"archer": k = ArcherKit.new()
 		"mage": k = MageKit.new()
 		"gunslinger": k = GunslingerKit.new()

@@ -46,6 +46,7 @@
 		"archer": {"tier": "easy", "stat": "stuns", "target": 4, "text": "Stun 4 enemies"},
 		"ashwick": {"tier": "easy", "stat": "multi3", "target": 1, "text": "Hit 3 enemies at once with one ability"},
 		"thief": {"tier": "medium", "stat": "air_hits", "target": 12, "text": "Land 12 hits while in the air"},
+		"gil": {"tier": "easy", "stat": "stuns", "target": 4, "text": "Stun 4 enemies"},
 		"bulwark": {"tier": "medium", "stat": "lowhp_knocks", "target": 2, "text": "Knock down 2 hunters while under half health"},
 		"mage": {"tier": "medium", "stat": "staggers", "target": 6, "text": "Stagger 6 monsters with abilities"},
 		"dredge": {"tier": "medium", "stat": "best_haul", "target": 8, "text": "Make it out carrying 8 items"},
@@ -78,6 +79,10 @@
 			{"stat": "multi3", "target": 3, "text": "Hit 3 enemies at once with one ability, 3 times", "reward": {"kind": "trail", "id": "ash_drift", "name": "Ash Drift"}},
 			{"stat": "chests", "target": 6, "text": "Open 6 chests", "reward": {"kind": "banner", "id": "lantern_flame", "name": "Lantern Flame"}},
 			{"stat": "caught", "target": 1, "text": "Scan a wild Boki and bring it home", "reward": {"kind": "glider", "id": "ember_leaf", "name": "Ember Leaf"}}
+		],
+		"gil": [
+			{"stat": "stuns", "target": 8, "text": "Stun 8 enemies", "reward": {"kind": "colourway", "id": "deep_tide", "name": "Deep Tide"}},
+			{"stat": "multi3", "target": 2, "text": "Hit 3 enemies at once with one ability, twice", "reward": {"kind": "emote", "id": "flop", "name": "Flop"}}
 		],
 		"thief": [
 			{"stat": "air_hits", "target": 25, "text": "Land 25 hits while in the air", "reward": {"kind": "colourway", "id": "midnight_silk", "name": "Midnight Silk"}},

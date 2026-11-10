@@ -3,5 +3,6 @@
 	"default": {"dist": 0.85, "time": 1.15},
 	"mage": {"dist": 1.0, "time": 1.15},
 	"thief": {"dist": 1.0, "time": 1.0},
+	"gil": {"dist": 1.0, "time": 1.0},
 	"ashwick": {"dist": 1.0, "time": 1.0}
 }

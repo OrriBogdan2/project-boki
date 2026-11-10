@@ -6,7 +6,7 @@ extends Control
 ## zoomed, panned one.)
 
 const ORDER := ["juggernaut", "gunslinger", "mage", "archer", "bulwark", "rimewright",
-	"ostra", "thief", "dolm", "ashwick", "dredge", "tender"]
+	"ostra", "thief", "dolm", "ashwick", "dredge", "tender", "gil"]
 const HOLD := 7.0            # s each splash is on screen
 const FADE := 1.4            # s of crossfade into the next
 
