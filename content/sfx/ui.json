@@ -5,7 +5,7 @@
  "sounds": {
   "click": "ui", "hover": "ui", "ui_confirm": "ui", "ui_back": "ui", "ui_deny": "ui", "ui_tab": "ui",
   "ui_open": "ui", "ui_close": "ui", "ui_toast": "ui", "pickup": "ui", "unlock": "ui", "level_up": "ui",
-  "ping": "ui", "ui_charge": "ui"
+  "ping": "ui", "ui_charge": "ui", "ui_capture": "ui", "ui_extract_start": "ui", "ui_extract_fail": "ui"
  },
  "signature": [],
  "replaces": ["click", "hover", "pickup", "unlock", "level_up", "ping"]

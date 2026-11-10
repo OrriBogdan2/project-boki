@@ -202,7 +202,7 @@ static func extract(m: Match, h: Hunter, col: Color) -> void:
 	m.fx.flash(c + Vector3(0, 0.8, 0), col.lerp(Color.WHITE, 0.6), 1.6, 0.3)
 	m.fx.ring(h.pos, 3.2, Color(col, 0.9), 0.5)
 	if h == m.player:
-		m.sfx("extract_ok", null, -3.0)
+		UiSfx.extract_success()
 		Sfx.duck(1.6)
 		if m.hud: m.hud.flash(col.lerp(Color.WHITE, 0.6), 0.3)
 

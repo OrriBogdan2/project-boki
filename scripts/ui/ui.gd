@@ -152,10 +152,6 @@ static func title(text: String, size := 34, col := INK) -> Label:
 	return l
 
 # ---------------------------------------------------------------- buttons
-## Buttons whose label says "go back" play the falling pair instead of the tap.
-const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
-	"Leave it  (Esc)": "ui_back"}
-
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover fills it with the
 ## theme's hover colour (no growing: a button never spills over its neighbours or the panel edge);
 ## pressing sinks it a touch, in about 70 ms.
@@ -163,8 +159,7 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var b := Button.new()
 	b.text = text
 	if cb.is_valid():
-		var snd: String = BACK_WORDS.get(text, "click")
-		b.pressed.connect(func(): Sfx.play(String(b.get_meta("snd", snd))); cb.call())
+		b.pressed.connect(func(): UiSfx.press(text, String(b.get_meta("snd", ""))); cb.call())
 	if minw > 0.0:
 		b.custom_minimum_size.x = minw
 	if icon != "":
@@ -176,14 +171,14 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 		tw.tween_property(b, "scale", Vector2(s, s), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	b.mouse_entered.connect(func():
 		if b.disabled: return
-		Sfx.play("hover", null, -12.0, 0.05))
+		UiSfx.hover())
 	b.mouse_exited.connect(func(): to.call(1.0, 0.11))
 	b.button_down.connect(func(): if not b.disabled: to.call(0.97, 0.07))
 	b.button_up.connect(func(): to.call(1.0, 0.1))
 	b.focus_entered.connect(func():
 		# keyboard and pad focus tick and lift like the mouse does
 		if not b.is_hovered() and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			Sfx.play("hover", null, -14.0, 0.05))
+			UiSfx.hover(true))
 	b.focus_exited.connect(func(): if not b.is_hovered(): to.call(1.0, 0.11))
 	return b
 
