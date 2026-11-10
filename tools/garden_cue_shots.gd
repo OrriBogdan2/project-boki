@@ -89,7 +89,7 @@ func _dash(home) -> void:
 	var mid := (race._corner(0) + race._corner(2)) * 0.5
 	var alive := func(): return race.run != null
 	for col in COLS:
-		var want := [0, 1, 3][col]
+		var want: int = [0, 1, 3][col]
 		if want > 0:
 			await _until(func(): return race.cue != null and race.cue.lit >= want, alive)
 		else:
@@ -106,7 +106,7 @@ func _shove(home) -> void:
 	var sheet := _sheet()
 	var alive := func(): return sh.run != null
 	for col in COLS:
-		var want := [0.0, 0.3, 0.7][col]
+		var want: float = [0.0, 0.3, 0.7][col]
 		if want > 0.0:
 			await _until(func(): return sh.cue != null and sh.cue.power >= want, alive)
 		else:
