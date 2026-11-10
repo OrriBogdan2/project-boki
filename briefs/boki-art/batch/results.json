@@ -109525,5 +109525,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/pose_bullsfrog_leap_3.jpg",
     "ok": true
+  },
+  {
+    "id": "mara3_b",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mara3_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mara3_a",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mara3_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mara3_c",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mara3_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mara3_b",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mara3_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mara3_a",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mara3_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mara3_c",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mara3_c_1.jpg",
+    "ok": true
   }
 ]
