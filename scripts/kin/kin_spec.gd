@@ -43,6 +43,8 @@ const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors"
 const STUB_FIELDS := ["grammar", "id", "name", "theme", "type2", "flavor", "roster", "data_only"]
 const STUB_REQUIRED := ["grammar", "id", "name", "theme", "roster", "data_only"]
 const ROSTER_ART := ["locked", "todo", "new"]
+## The nine Inks (market goods ink_<name>): their own names, not type ids (the 11-10 type rename left them).
+const INKS := ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"]
 const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
@@ -196,7 +198,7 @@ static func _roster(v: Variant, rep: GrammarReport) -> Dictionary:
 	var out := {"art": rep.choice(r, "art", ROSTER_ART, "roster"), "line": rep.ident(r, "line", "roster"),
 		"stage": int(rep.number(r, "stage", "roster", 1, 3, null, true)), "from": rep.ident(r, "from", "roster", false)}
 	if r.has("ink"):
-		out["ink"] = rep.choice(r, "ink", KinParts.THEMES, "roster")
+		out["ink"] = rep.choice(r, "ink", INKS, "roster")
 	if r.has("sex_forms"):
 		out["sex_forms"] = rep.param(r, "sex_forms", ["bool", null, null, false, "", ""], "roster")
 	return out

@@ -1,9 +1,9 @@
 extends RefCounted
 ## --mystery-egg-check: the black mystery egg of the hatch scene (MysteryEgg, briefs/DECISIONS.md).
-## It always hatches Ermink (the 11-08 roster decision, not a starter or a boss kin), it hatches with a mutation far more often than an egg at base odds while the
-## starter eggs roll none, and in the scene the three starters stand front and centre while the black
-## egg sits in its basket at the back, its card showing only once you've found it. Never touches the
-## real save.
+## It always hatches Ermink (the 11-08 roster decision, not a starter or a boss kin), it hatches
+## with a mutation far more often than an egg at base odds while the starter eggs roll none, and in
+## the scene the three starters stand front and centre while the black egg sits in its basket at
+## the back, its card showing only once you've found it. Never touches the real save.
 
 const HATCH := preload("res://scripts/ui/hatch.gd")
 const ROLLS := 20000
