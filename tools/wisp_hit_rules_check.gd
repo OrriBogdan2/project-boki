@@ -51,10 +51,16 @@ func _hero(arch: String) -> void:
 			var base: Dictionary = await _cast(arch, d, slot, "empty")
 			var down: Dictionary = await _cast(arch, d, slot, "downed")
 			ok(not down["touched"], tag + ": a downed rival takes nothing (%s)" % down["why"])
-			ok(float(down["behind"]) >= BLOCK_TOL * float(base["behind"]) - SLACK, tag + ": over a Wisp the one behind takes %.0f of %.0f" % [down["behind"], base["behind"]])
+			_behind(down, base, tag + ": over a Wisp")
 			var boki: Dictionary = await _cast(arch, d, slot, "boki")
 			ok(not boki["touched"], tag + ": a rival's Boki wisp takes nothing (%s)" % boki["why"])
-			ok(float(boki["behind"]) >= BLOCK_TOL * float(base["behind"]) - SLACK, tag + ": through a Boki wisp the one behind takes %.0f of %.0f" % [boki["behind"], base["behind"]])
+			_behind(boki, base, tag + ": through a Boki wisp")
+
+## The one behind the wisp took what it takes with an empty lane (give or take the tick timing).
+func _behind(got: Dictionary, base: Dictionary, what: String) -> void:
+	var took := float(got["behind"])
+	var want := float(base["behind"])
+	ok(took >= BLOCK_TOL * want - SLACK, "%s the one behind takes %.0f of %.0f" % [what, took, want])
 
 ## Fires `slot` in a fresh match (a kit's charges and cooldowns carry over) from the Hunter at `t` placed `d` m
 ## ahead with `t2` 2 m behind it. `mode`: "empty" (t off the lane), "downed" (t a Wisp in the lane) or "boki"
@@ -73,7 +79,8 @@ func _cast(arch: String, d: float, slot: String, mode: String) -> Dictionary:
 		k = m.give_kin(t, Save.new_kin(BOKI))
 		t.riding = true      # (its owner is no target, so only the wisp is in the lane)
 		ac.step(m, 0.3)
-		ok(k.wisp and not k.hittable() and not (k in m.foes_of(p.team)), "[%s] the rival's Boki rides as a wisp, off every target list" % arch)
+		var off_lists := k.wisp and not k.hittable() and not (k in m.foes_of(p.team))
+		ok(off_lists, "[%s] the rival's Boki rides as a wisp, off every target list" % arch)
 	elif mode == "downed":
 		m.knock(t, p, {})
 		t.down_hp = 1e6
@@ -87,7 +94,9 @@ func _cast(arch: String, d: float, slot: String, mode: String) -> Dictionary:
 	hits.clear()
 	match slot:
 		"lmb":
-			ac.step(m, 0.7, func(): p.inp["fire"] = true; ac.aim_at(p, aim))
+			ac.step(m, 0.7, func():
+				p.inp["fire"] = true
+				ac.aim_at(p, aim))
 			p.inp["fire"] = false
 		"rmb":
 			p.ak.cd["rmb"] = 0.0
@@ -100,8 +109,10 @@ func _cast(arch: String, d: float, slot: String, mode: String) -> Dictionary:
 	var why: Array = []
 	if mode == "downed":
 		var marked := not (t.get_meta("marks", {}) as Dictionary).is_empty()
+		var hooked := arch == "dredge" and slot == "rmb"      # (the hook scoops a Wisp: allowed)
+		var moved := t.pos.distance_to(at) > 0.05 and not hooked
 		for pair in [["hp", t.hp != 0.0], ["stun", t.stun_t > 0.0], ["root", t.root_t > 0.0], ["slow", t.slow_t > 0.0],
-				["burn", t.burn_t > 0.0], ["moved", t.pos.distance_to(at) > 0.05 and not (arch == "dredge" and slot == "rmb")], ["marked", marked]]:
+				["burn", t.burn_t > 0.0], ["moved", moved], ["marked", marked]]:
 			if pair[1]:
 				why.append(pair[0])
 	elif mode == "boki" and k.hp != k_hp:
@@ -140,14 +151,16 @@ func _exceptions() -> void:
 	ac.aim_at(p, t.pos)
 	ac.tap(m, p)
 	ac.step(m, 1.0)
-	ok(t.downed and (p.ak.scoop.has(t) or bool(p.ak.pull.get("wisp", false))), "Abyssal Hand scoops a Hunter Wisp (the source lets it)")
+	var scooped: bool = p.ak.scoop.has(t) or bool(p.ak.pull.get("wisp", false))
+	ok(t.downed and scooped, "Abyssal Hand scoops a Hunter Wisp (the source lets it)")
 	m.eliminate(t, p, "executed", true)
 	ok(t.out, "an execute still ends a downed rival")
 	await ac.done(m)
 	s = ac.setup("bulwark", 3.0, "", false)
 	m = s[0]
 	p = s[1]
-	var mate: Hunter = m.make_hunter("M", p.team, "medium", "Mate", "idle", {}, s[4] + Vector3(1.0, 0, 0), {"arch": "none"})
+	var at: Vector3 = s[4] + Vector3(1.0, 0, 0)
+	var mate: Hunter = m.make_hunter("M", p.team, "medium", "Mate", "idle", {}, at, {"arch": "none"})
 	m.knock(mate, null, {})
 	mate.down_hp = 1e6
 	var r0 := mate.revive
