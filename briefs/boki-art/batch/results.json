@@ -99662,5 +99662,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/mobsheet_bomber_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mobsheet_skitter",
+    "name": "Skitter (turnaround sheet)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mobsheet_skitter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_skitter",
+    "name": "Skitter (turnaround sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mobsheet_skitter_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_spitter",
+    "name": "Spitter (turnaround sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mobsheet_spitter_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_skitter",
+    "name": "Skitter (turnaround sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mobsheet_skitter_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_warden",
+    "name": "Warden (turnaround sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mobsheet_warden_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_bomber",
+    "name": "Bomber (turnaround sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mobsheet_bomber_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_glimmer",
+    "name": "Glimmer (turnaround sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mobsheet_glimmer_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mobsheet_warden",
+    "name": "Warden (turnaround sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/mobsheet_warden_3.jpg",
+    "ok": true
   }
 ]
