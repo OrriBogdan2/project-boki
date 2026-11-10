@@ -1048,6 +1048,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
 		angry_at = by.owner_h
+	if summon and d > 0.0:
+		summon.note_hit(by)
 	if shield > 0.0 and d > 0.0:
 		var soak := minf(shield, d)
 		shield -= soak

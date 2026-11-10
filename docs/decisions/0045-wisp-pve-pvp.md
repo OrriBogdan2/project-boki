@@ -24,7 +24,10 @@ Only the tutorial differed. It stays walking-Boki only: its steps (`kin1`, order
 there: add a wisp step to the tutorial and drop the guard in `KinWisp.mode`. Nothing else needed a fix.
 
 ## Decision
-No game-code change. `tools/wisp_rules_check.gd` (`--wisp-rules-check`) runs one summon, kill and steal script in an
+One code change: a kill counts as a monster's only when no rival Hunter hurt the summon in the last
+`rival_window_s` (3 s, content/rules/boki_summon.json); KinSummon.note_hit remembers the rival, so a monster that
+finishes a rival's work still costs x1.25 and reveals. `--summon-death-check` has the monster-kill and mixed-kill rows.
+Besides that, no game-code change. `tools/wisp_rules_check.gd` (`--wisp-rules-check`) runs one summon, kill and steal script in an
 expedition, the Meadow tier and the training area, once with a rival Hunter as killer and once with a monster, and
 requires every recorded field to match except the exception-2 fields (cooldown multiplier, reveal, loose when the
 owner is down).

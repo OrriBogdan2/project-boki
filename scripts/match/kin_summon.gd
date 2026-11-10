@@ -26,6 +26,8 @@ var cd_full := 1.0    # s: the cooldown now running (longer after a rival's kill
 var fly := 0.0        # s of the flight home left after a kill (drawing only)
 var fly_len := 1.0    # s: that flight in all
 var fly_from := Vector3.ZERO  # where it was killed
+var rival: Hunter = null      # the last rival hunter who damaged it while out
+var rival_t := -1e9           # Match.time of that hit
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -89,14 +91,26 @@ func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
 
+## Remember a rival hunter's damage, for a kill that a monster finishes (see `killed`).
+func note_hit(by: Ent) -> void:
+	var h := _rival_of(by)
+	if h and out():
+		rival = h
+		rival_t = k.m.time
+
 ## Killed while summoned (Kin.go_down, `by` is the killer): back into a wisp where it fell. True if it was out.
-## A rival hunter's kill costs the longer cooldown and shows its owner (reveal_s); a monster's or a fall's does not.
+## A rival hunter's kill, or a monster's after a rival hurt it in the last rival_window_s, costs the longer
+## cooldown and shows its owner (reveal_s); a monster's alone or a fall's does not (WISP_DESIGN_OPEN.md Q9).
 func killed(by: Ent) -> bool:
 	if not out():
 		return false
 	var at := k.pos
 	var o := k.owner_h
 	var foe := _rival_of(by)
+	if foe == null and k.m.time - rival_t <= float(rules()["rival_window_s"]):
+		foe = rival
+	rival = null
+	rival_t = -1e9
 	k.m.fx.burst(at + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
 	KinCommand.say(o, "%s was killed and went back to a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
 	_back(cd_base * (float(rules()["killed_cd_mult"]) if foe else 1.0))

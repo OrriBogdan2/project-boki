@@ -87,6 +87,8 @@ func _death() -> void:
 	ok(k.wisp and absf(k.summon.cd - base) < 0.01, "killed by a monster: the plain cooldown (%.1f s)" % k.summon.cd)
 	ok(f.reveal_t <= 0.0 and _wisp_pings() == pings, "...no reveal and no ping")
 
+	_pve_rows(f, p, base, mult)
+
 	k = _summoned(f)
 	f.downed = true
 	k.hurt(k.max_hp * 5.0, p)
@@ -116,3 +118,47 @@ func _death() -> void:
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
 	ok(other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
 		"online: the snapshot shows the killed summon as a resting wisp")
+
+## Q9: a real monster's kill is plain; a monster's kill within rival_window_s of a rival's hit counts as the rival's.
+func _pve_rows(f: Hunter, p: Hunter, base: float, mult: float) -> void:
+	var mob := m.spawn_mob("skitter", f.pos + Vector3(40, 0, 0))
+	var win := float(KinSummon.rules()["rival_window_s"])
+	var pings := _wisp_pings()
+	f.reveal_t = 0.0
+	var k := _summoned(f)
+	k.hurt(k.max_hp * 5.0, mob)
+	ok(k.wisp and absf(k.summon.cd - base) < 0.01 and f.reveal_t <= 0.0 and _wisp_pings() == pings,
+		"monster kill, no rival: plain cooldown, no reveal, no ping")
+	ok(not KinSteal.loose(k) and k.summon.rival == null, "...and a monster is never credited as a rival")
+	_frames(k.summon.fly_len + 0.1)
+
+	k = _summoned(f)
+	k.hurt(k.max_hp * 0.2, p)
+	_frames(win * 0.5)
+	k.hurt(k.max_hp * 5.0, mob)
+	ok(k.wisp and absf(k.summon.cd - base * mult) < 0.01,
+		"mixed kill (rival hit %.1f s ago, monster finishes): x%.2f" % [win * 0.5, mult])
+	ok(f.reveal_t >= float(KinSummon.rules()["reveal_s"]) - 0.01 and _wisp_pings() == pings + 1,
+		"...with the reveal and the ping")
+	_frames(k.summon.fly_len + 0.1)
+
+	f.reveal_t = 0.0
+	pings = _wisp_pings()
+	k = _summoned(f)
+	k.hurt(k.max_hp * 0.2, p)
+	_frames(win + 0.5)
+	k.hurt(k.max_hp * 5.0, mob)
+	ok(k.wisp and absf(k.summon.cd - base) < 0.01 and f.reveal_t <= 0.0 and _wisp_pings() == pings,
+		"mixed kill, rival hit over %.0f s ago: counts as the monster's (plain, no reveal)" % win)
+	_frames(k.summon.fly_len + 0.1)
+
+	k = _summoned(f)
+	f.downed = true
+	k.hurt(k.max_hp * 0.2, p)
+	k.hurt(k.max_hp * 5.0, mob)
+	ok(k.wisp and KinSteal.loose(k) and absf(k.summon.cd - base * mult) < 0.01,
+		"mixed kill, owner downed: loose and x%.2f" % mult)
+	KinSteal.go_home(k)
+	f.downed = false
+	m.mobs.erase(mob)
+	mob.queue_free()
