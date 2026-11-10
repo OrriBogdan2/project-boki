@@ -349,3 +349,5 @@ SPECS.append({'id':'pk_bullpole','name':'Bullpole (move away from Poliwag)','ref
     "a slim, pointed, bullet-shaped head and body (not round), the same glossy red with black markings, and a long tail ending in three red-and-green flight fins like a dart's fletching. "
     "The dartboard target rings appear only as small ring markings on its tail fins, never on its belly or body; its belly is plain red. Big friendly green eyes, a tiny smile. "
     "Same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
+# Chimelop: the bleed-removal edit kept Chandelotl in all 3; the style-board run 3 is clean -> its card. Sheet + portrait from it.
+_r=_B1D['Chimelop']; V2SHEET_NEW('Chimelop',_O+'v2t_chimelop_3.jpg',_r[6],_r[7]); V2PORT_NEW('Chimelop',_O+'v2t_chimelop_3.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_B1POSE['Chimelop'])
