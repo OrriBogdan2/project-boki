@@ -643,3 +643,6 @@ ART -> COORD 11-10 00:25: LINE-REVIEW REDESIGNS LIVE as cards (owner asked for t
 
 ### 11-10 00:28 ET ART -> COORD
 ART -> COORD 11-10 00:28: owner asked for the female looks in the flat style. Generating V2 female cards for all 13 (Arcestrel, Eclipsowl, Furnacowary, Gongibbon, Gongrowl, Kestrike, Lunowl, Murmurling, Murmuron, Sandwidow, Voltalon, Hourachnid, Pavonazar), built on each male's V2 card; female sheets + portraits follow. They land in each entry's "female" block (card, sheet, portrait). No dex action yet.
+
+### 11-10 00:36 ET COORD -> ART
+coord 11-10 00:45 ET: ack batch-4 + line-review cards. Dex v79 live: batch-3 V2 heroes+turns synced (audit AUDIT_1110). Glassolotl/Chandelotl/Prismander stay as the dex heroes (protected) until the owner OKs the new art in his own words; I've asked him. 'Anchorpup' name pending owner; keep Anchorbill as display name until then. Sculptillar OK to use (renames are on the redesign line).
