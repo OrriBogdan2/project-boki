@@ -455,3 +455,54 @@ def RS_CARD_TEXT(name,stage,arch,cols,counts,dark=False,furry=False,fix=''):
 for _r in (_B2D['Bullpole'],_B3D['Dynaboa']):
     SPECS.append({'id':'v2n_'+_r[0].lower(),'name':_r[0]+' (V2 card, text-only style)','refs':['briefs/boki-art/'+_r[1]],'runs':4,'aspect':'1:1','size':'2K',
                   'prompt':RS_CARD_TEXT(_r[0],_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_r[8])})
+
+# ===== 22:40 ET 11-09: OWNER NOTES (22:15-22:35) on the dex: same-pose pairs, too-small evolution jumps, look-alikes, a few redesigns. =====
+# All done straight in V2 with the written style only (no style image, so nothing can bleed). 3 runs each. ids on_<name>.
+_TXT="There is only one image and no style image: the art style is described in words below, follow it exactly. "
+def ON_POSE(n,ref,stage,arch,dark,furry,pose,keep):
+    # new pose, same design. ref = sheet (old-style Boki) or its V2 card.
+    SPECS.append({'id':'on_'+n.lower(),'name':n+' (owner note: new pose, V2)','refs':[ref],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':("POSE FIRST (the whole point of this image): "+pose+" Draw one single character illustration of "+n+", the creature in image 1. "
+        "Image 1 is the design only: keep exactly the same creature, body plan, proportions, face, colours, markings and signature parts ("+keep+"), with nothing added or removed. "
+        "Do not copy image 1's pose, views or layout, and ignore how it is painted: draw the creature once, in the new pose. "+_TXT
+        +STYLE_V2(stage,arch,dark,furry)+FRAME_V2)})
+def ON_CHANGE(n,ref,stage,arch,dark,furry,change,runs=3,tag=''):
+    # design change. ref = current card.
+    SPECS.append({'id':'on_'+n.lower()+tag,'name':n+' (owner note: design change, V2)','refs':[ref],'runs':runs,'aspect':'1:1','size':'2K',
+      'prompt':("Draw one single character illustration of "+n+", a new version of the creature in image 1. Image 1 is the starting design: keep its species, face, colours and signature idea, "
+        "and ignore how it is painted. DESIGN CHANGE (the whole point of this image): "+change+" Every part is grown from its own body: nothing strapped on, belted, bolted or worn. "+_TXT
+        +STYLE_V2(stage,arch,dark,furry)+FRAME_V2)})
+_C='briefs/boki-art/cards/%s.jpg'
+# --- same-pose pairs: one of each pair gets a new pose ---
+ON_POSE('Dreadnoyak',_LM['Dreadnoyak']['sheet'],'final','tough',False,True,"standing side-on in a three-quarter view facing left, all four legs planted wide, the whole body clearly visible from horns to tail: heavy shoulders, long back, belly, four legs and tail, head turned a little toward the viewer.","white frost hair, icicle horns and ice keel")
+ON_POSE('Gloamspire',_LM['Gloamspire']['sheet'],'final','creepy',True,False,"facing LEFT, the front half of its body reared up tall off the ground, eye stalks spread wide apart, its purple crystal spire shell towering behind and above it.","purple body, dark purple crystal spire shell, two eye stalks")
+ON_POSE('Effigoon',_C%'Effigoon','mid','majestic',False,False,"the cocoon stands upright on its pointed tip, leaning a little to one side like a spinning top coming to rest, seen from a low three-quarter angle. No rope, no thread, nothing above it.","white marble cocoon with gold bands and gold spiral trim, no face")
+ON_POSE('Crofthollow',_C%'Crofthollow','final','majestic',False,True,"facing RIGHT in a side three-quarter view, head lowered and turned toward the viewer as if grazing, one root foreleg stepping forward, all feet planted.","ginger shaggy fur, straw thatched-roof hump, tree-root legs with moss, branch horns with small roses")
+ON_POSE('Voltalon',_LM['Voltalon']['sheet'],'final','tough',True,False,"standing tall and upright facing LEFT, chest out, wings half spread behind it, head thrown back mid-screech, tail planted on the ground behind it.","dark blue-grey and orange-red scaly hide, antler crest with a spark, clawed wings")
+ON_POSE('Pyrraven',_LM['Pyrraven']['sheet'],'final','creepy',True,False,"perched low and hunched forward facing LEFT, both wings folded tight against its body like a cloak, head lowered and glaring at the viewer.","black feathers with glowing orange lava cracks, a bone-white skull mask with horns")
+ON_POSE('Scythant',_LM['Scythant']['sheet'],'mid','sleek',False,False,"reared up on its back four legs facing RIGHT, both scythe forelegs raised high and crossed above its head, ready to slash.","green leaf-armoured ant body, two curled fern antennae, two curved scythe forelegs, small leaf wings")
+ON_POSE('Loafhopper',_LM['Loafhopper']['sheet'],'final','cute',False,False,"mid-leap facing RIGHT, seen from the side, long hind legs kicked out straight behind it, bread-crust wings spread wide above its back.","golden-brown baked-bread body, croissant-crust wings, long grasshopper legs")
+ON_POSE('Parrywhal',_LM['Parrywhal']['sheet'],'final','sleek',False,False,"body upright and vertical like a fencer en garde, facing LEFT, its long horn held diagonally forward like a rapier, one blade fin stretched out behind for balance, tail curled under.","blue-grey and white narwhal body, one long spiral horn, blade-shaped fins, a gold band marking")
+ON_POSE('Pagoguana',_C%'Pagoguana','final','majestic',False,False,"facing RIGHT in a front three-quarter view, head raised high and proud, front legs planted wide, its long tail curled round to the front.","green scales, orange-brown belly, five green pagoda roof tiers with red edges along its spine, brown horns")
+# --- evolution jump too small: the later stage grows up ---
+ON_CHANGE('Maracoil',_C%'Maracoil','final','tough',False,False,"it is a much larger, heavier adult snake, clearly two sizes up from a baby: a thick muscular body stacked in three big coils, a wide flared cobra hood painted with bold maraca zig-zag bands, a forked tail ending in two big maraca rattles, long fangs and narrow fierce eyes. No baby roundness and no smile.")
+ON_CHANGE('Morelossus',_C%'Morelossus','final','majestic',False,False,"it is much bigger and older, mammoth-sized: four thick pillar legs planted on the ground (not rearing), two long curved tusks, a long heavy trunk, and a towering grove of tall morel mushrooms in three sizes growing along its whole back. Calm and immense.")
+ON_CHANGE('Frigatee',_C%'Frigatee','final','majestic',False,False,"it is a big grown-up bull sea lion, clearly not a baby seal: a thick neck and heavy chest, propped upright on its front flippers, pale ice-blue grey hide instead of white, two short ice tusks, a proud stern face, and a tall jagged ridge of large ice crystals grown along its back from neck to tail. No lid, no latch, no mist.")
+ON_CHANGE('Bulwartoad',_C%'Bulwartoad','mid','tough',False,False,"it is bigger and bulkier: broader shoulders, thicker forelegs, a taller and wider spiked iron-coloured shell, and it fills the frame. Same grumpy face and olive warty skin.")
+# --- look-alikes ---
+ON_CHANGE('Dribbara',_C%'Dribbara','baby','cute',False,False,"it is a tiny, round baby capybara, much smaller and cuter: a big head on a small chubby body, very short stubby legs, sitting on its bottom with open happy eyes, no tusks. The pond on its back shrinks to one small puddle-sized dimple holding a single lily pad and one water drop.")
+ON_CHANGE('Bastionpet',_C%'Bastionpet','final','tough',False,False,"it becomes a clear sea creature of the tide: its shell is wave-worn blue-grey slate instead of rusty brown, with pale pink coral branches and bright green seaweed growing between the plates, a small tide pool of clear water in a hollow on top, the pale barnacles kept; its legs and claws are deep teal with cream undersides. No rust, no iron, no brown.")
+ON_CHANGE('Domeleon',_C%'Domeleon','mid','sleek',True,False,"it is a bigger, leaner, cooler chameleon standing tall and alert: the bronze observatory dome is a large casque fused to its skull, with an open slit from which its long brass telescope eye extends and aims forward; a tall sail-like crest of night-sky navy skin dotted with pale constellation spots runs down its back; long gripping limbs; a strong spiral tail. A sharp, focused stare, not a round frog body.")
+ON_CHANGE('Pawnfry',_C%'Pawnfry','baby','cute',False,False,"it is no longer bald: a short crest of carved-wood mane tufts, striped dark and light like a chess piece, runs from its forehead down the back of its neck, and it has two small rounded fin ears. Same baby seahorse-snake with a wood-grain body and big grumpy eyes.")
+# --- Lanceron no longer looks like its line (Skidlet > Skateron are lilac skating herons): redraw as their final ---
+SPECS.append({'id':'on_lanceron','name':'Lanceron (owner note: back in its family, V2)','refs':[_C%'Skateron',_C%'Lanceron'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':("Draw one single character illustration of Lanceron, the grown-up final evolution of the bird in image 1. Image 1 is the family: Lanceron is clearly the same species grown up, a tall elegant heron with the same "
+   "soft lilac-grey plumage, the same curled head crest, the same face and the same ice-skate blade feet. From image 2 take only two ideas, not its body: a long lance-like beak of pale blue ice, and pale blue ice-crystal "
+   "feathers at the wing tips and tail. It is twice as tall as image 1, long-necked and long-legged, standing proudly on one blade with the other leg tucked, wings half open. It is a bird, not a dragon: no scales, no horns, no claws, no armour. "
+   "Ignore how both images are painted. The art style is described in words below, follow it exactly. "+STYLE_V2('final','majestic',False,False)+FRAME_V2)})
+# --- same design, straight V2 card (Scopeleon's card had a dark backdrop that broke its dex cut-out; Wickapi "looks like it's from another game") ---
+SPECS.append({'id':'on_scopeleon','name':'Scopeleon (V2 card, text-only style)','refs':[_C%'Scopeleon'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':RS_CARD_TEXT('Scopeleon','baby','cute',"navy skin with pale crescent-moon and star spots, a brass telescope eye, a tightly curled tail, a yellow eye","four legs, one telescope eye, one curled tail",True,False,"")})
+SPECS.append({'id':'on_wickapi','name':'Wickapi (V2 card, text-only style)','refs':[_C%'Wickapi'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':RS_CARD_TEXT('Wickapi','baby','cute',"dark reddish-brown fur, cream-striped legs, a cream wax candle stub on its head with one small purple flame, purple eyes, a purple-black wispy tail","four legs, two big ears, one candle, one tail",True,True,
+    "its proportions become a real okapi calf's: longer legs, a longer neck and a smaller head, standing on all four legs")})
