@@ -10,7 +10,7 @@ extends RefCounted
 
 const VIEW := Vector2i(960, 540)
 const WARMUP := 90                  # frames before measuring (the camera settles, shaders compile)
-const RADIUS := 100.0               # px: the circle the cursor goes round (clear of the bottom bar)
+const RADIUS := 220.0               # px: the circle the cursor goes round: wide enough to pan the camera
 const DOT_COL := Color("ff5cd1")    # the reticle's colour for the run: nothing else on screen is this pink
 const DOT_TOL := 0.12               # colour distance that still counts as the dot
 const AIM_FAR := 60.0               # m: a point along the aim ray to project back onto the screen
