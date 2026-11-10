@@ -9,17 +9,17 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 |---|---|---|---|---|---|
 | [Rampartoad](#rampartoad) | Cane toad + Castle rampart | Stone | medium | tank | Wild, nest eggs |
 | [Mycroll](#mycroll) | Hedgehog + Toadstool | Spore | small | controller | Starter egg |
-| [Zippelith](#zippelith) | Caecilian + Giant zipper | Shadow | medium | trickster | Wild, nest eggs |
+| [Zippelith](#zippelith) | Caecilian + Giant zipper | Dark | medium | trickster | Wild, nest eggs |
 | [Cairnback](#cairnback) | Tortoise + Ibex | Titan | large | tank | Rare Egg from The Stone Colossus |
 | [Anchorbill](#anchorbill) | Hornbill + Ship's anchor | Gravity | medium | controller | Wild, nest eggs |
 | [Vespyx](#vespyx) | Fox + Scorpion | Venom | small | bruiser | Starter egg |
 | [Bellowary](#bellowary) | Cassowary + Forge bellows | Ember | large | bruiser | Wild, nest eggs |
-| [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Shadow | large | trickster | Wild, nest eggs |
+| [Snuffapi](#snuffapi) | Okapi + Brass candelabra | Ghost | large | trickster | Wild, nest eggs |
 | [Frigatee](#frigatee) | Manatee + Antique icebox | Frost | large | support | Wild, nest eggs |
 | [Gongibbon](#gongibbon) | Gibbon + Bronze temple bell | Echo | medium | controller | Wild, nest eggs |
 | [Prowyak](#prowyak) | Yak + Icebreaker prow | Frost | large | tank | Wild, nest eggs |
 | [Glintmole](#glintmole) | Star-nosed mole + Quartz geode | Stone | small | controller | Wild, nest eggs |
-| [Gloamshell](#gloamshell) | Garden snail + Smoked obsidian | Shadow | small | controller | Wild, nest eggs |
+| [Gloamshell](#gloamshell) | Garden snail + Smoked obsidian | Dark | small | controller | Wild, nest eggs |
 | [Glomwort](#glomwort) | Slime mold + Puffball | Spore | small | controller | Wild, nest eggs |
 | [Effigeetle](#effigeetle) | Goliath beetle + Marble statue face | Stone | large | tank | Wild, nest eggs |
 | [Crofthorn](#crofthorn) | Highland cow + Stone cottage garden | Bloom | large | tank | Wild, nest eggs |
@@ -52,7 +52,7 @@ Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its h
 | [Knotwyrm](#knotwyrm) | Slow worm + Knotted hemp rope | Spore | medium | controller | Wild, nest eggs |
 | [Thrumbird](#thrumbird) | Hummingbird + Tuning fork | Echo | small | support | Wild, nest eggs |
 | [Lockatara](#lockatara) | Tuatara + Iron padlock | Titan | medium | tank | Wild, nest eggs |
-| [Umbrathere](#umbrathere) | Giant ground sloth + Ragged black umbrella | Shadow | large | tank | Wild, nest eggs |
+| [Umbrathere](#umbrathere) | Giant ground sloth + Ragged black umbrella | Ghost | large | tank | Wild, nest eggs |
 | [Pipewurm](#pipewurm) | Velvet worm + Piping bag | Venom | medium | controller | Wild, nest eggs |
 | [Lunowl](#lunowl) | Owl + Luna moth | Lunar | small | trickster | Wild, nest eggs |
 | [Echolop](#echolop) | Hare + Bat | Echo | small | skirmisher | Wild, nest eggs |
@@ -65,13 +65,14 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Type | Species |
 |---|---|
 | Bloom | Crofthorn, Soakybara, Mossgrade, Terrasloth |
+| Dark | Zippelith, Gloamshell |
 | Echo | Gongibbon, Thrumbird, Echolop |
 | Ember | Bellowary, Anvilbrock, Kindlewren, Chuggamus |
 | Frost | Frigatee, Prowyak, Skateron, Rimeshrew |
+| Ghost | Snuffapi, Umbrathere |
 | Gravity | Anchorbill, Lodestick, Gravadillo |
 | Lunar | Lanterloris, Selenfin, Lunowl |
 | Prism | Mirrolin, Bubblisk, Prismander |
-| Shadow | Zippelith, Snuffapi, Gloamshell, Umbrathere |
 | Spore | Mycroll, Glomwort, Knotwyrm |
 | Stone | Rampartoad, Glintmole, Effigeetle, Buckleron |
 | Storm | Kestrike, Boltstrich, Barokat, Barrelmander |
@@ -126,7 +127,7 @@ _Caecilian + Giant zipper_ (`caecilith`). A worm that unzips the ground: it dive
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | medium, reach 1.4, mass 1.1; about 44 cm, 9 kg on average |
 | Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
 | Personality | bravery 0.55, loyalty 0.45, temper 0.5, curiosity 0.85 |
@@ -227,7 +228,7 @@ _Okapi + Brass candelabra_ (`duskapi`). An okapi with a candelabra for horns; sn
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Ghost |
 | Body | large, reach 1.5, mass 1.5; about 70 cm, 60 kg on average |
 | Stat points | Health 7, Damage 2, Speed 9, owner_move_speed 2 |
 | Personality | bravery 0.4, loyalty 0.8, temper 0.3, curiosity 0.6 |
@@ -327,7 +328,7 @@ _Garden snail + Smoked obsidian_ (`gloamshell`). A snail whose shell is smoked o
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Dark |
 | Body | small, reach 1.3, mass 0.8; about 32 cm, 2.5 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.3, loyalty 0.6, temper 0.35, curiosity 0.55 |
@@ -988,7 +989,7 @@ _Giant ground sloth + Ragged black umbrella_ (`umbrathere`). A giant ground slot
 
 |  |  |
 |---|---|
-| Type | Shadow |
+| Type | Ghost |
 | Body | large, reach 1.6, mass 2; about 60 cm, 30 kg on average |
 | Stat points | Health 12, Damage 5, Speed 2, owner_armor 1 |
 | Personality | bravery 0.8, loyalty 0.85, temper 0.3, curiosity 0.35 |
