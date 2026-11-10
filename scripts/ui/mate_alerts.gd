@@ -1,7 +1,7 @@
 class_name MateAlerts
 extends RefCounted
-## A teammate going down, coming back or being lost, kept quiet (owner playtest 11-09: a big card in
-## the top centre for as long as they were down was too much):
+## A teammate going down, coming back or being lost, kept quiet (nothing in the middle of the screen,
+## nothing that lasts):
 ##   - their squad row (Hud._draw_squad) carries it: a small knocked mark on the portrait's corner
 ##   - one short, faint line beside that row as it happens (LINE_S, at most LINE_A opacity)
 ##   - a sound cue

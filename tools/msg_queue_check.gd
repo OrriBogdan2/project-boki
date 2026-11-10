@@ -117,7 +117,8 @@ func _fight(host: Control) -> void:
 	for t in ["a", "b", "c"]:
 		lane.push(t, Color.WHITE, MsgLane.HIGH)
 	lane.push("hint", Color.WHITE, MsgLane.NORMAL, 6.0)
-	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN, "a fight: %d lines at most (%d)" % [MsgLane.FIGHT_SHOWN, lane.texts().size()])
+	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN,
+		"a fight: %d lines at most (%d)" % [MsgLane.FIGHT_SHOWN, lane.texts().size()])
 	lane._process(MsgLane.FIGHT_LIFE + 0.05)
 	ok(not lane.texts().has("a") and not lane.texts().has("b"), "a fight: lines go after %.1fs" % MsgLane.FIGHT_LIFE)
 	lane._process(MsgLane.FIGHT_LIFE + 0.05)

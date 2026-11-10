@@ -3968,7 +3968,7 @@ func step(dt: float) -> void:
 		GearDrops.demo(self)
 	if opts.get("mates_demo", false) and player:
 		# test: the squad UI. One teammate gets knocked, one dies into a deathbox, and the first is
-		# picked back up a few seconds later (frames under the minimap and the ally alerts up top)
+		# picked back up a few seconds later (frames under the minimap, MateAlerts beside them)
 		var mates: Array = hunters.filter(func(x): return x.team == player.team and x != player)
 		if time < 0.05:
 			for i in mates.size():
