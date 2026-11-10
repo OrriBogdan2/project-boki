@@ -56,7 +56,6 @@ var nag_t := 0.0             # s the panel pulses (after a stall)
 var spot_t := 0.0            # s left of "You spotted it!" and the chest beam
 var wait := 0.0
 var down_t := 0.0
-var kills := 0               # monsters you or your Boki beat
 var flag := false
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
@@ -76,7 +75,6 @@ var recalled := false        # the Boki came back (it started out)
 var need_back := false
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
-var fight_n := 0
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
@@ -286,7 +284,6 @@ func _enter() -> void:
 		"key":
 			_spawn_key()
 		"shoot":
-			kills = 0
 			_foes(["skitter"])
 		"sig":
 			_foes(["skitter", "skitter", "skitter"])
@@ -299,9 +296,7 @@ func _enter() -> void:
 		"kin1":
 			_foes(["skitter"])
 		"fight":
-			kills = 0
-			fight_n = 3
-			_foes(["skitter", "spitter", "skitter"])
+			_foes(Content.rules("tutorial")["fight_foes"].get(p.arch, ["skitter", "spitter", "skitter"]))
 		"chest":
 			m.ping(stop("chest"), Color("dfe8f2"))
 			for mb in m.mobs:
@@ -333,12 +328,10 @@ func _spawn_key() -> void:
 func _foes(kinds: Array) -> void:
 	if m.mobs.any(func(x): return not x.dead):
 		return
-	var i := 0
-	for kd in kinds:
-		var at := spot(5.0 + i * 1.2, 0.6 + i * 1.3)
+	for i in kinds.size():
+		var at := spot(5.0 + (i % 3) * 1.2, 0.6 + i * 1.3)      # (three rings out, round and round)
 		if at != Vector3.INF:
-			_tank(m.spawn_mob(kd, at))
-		i += 1
+			_tank(m.spawn_mob(kinds[i], at))
 
 ## Keeps a monster around for the shooting steps (another comes if it falls off).
 func _keep_foe(kind: String) -> void:
@@ -434,7 +427,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			var k: Kin = p.kin
 			return k == null or k.state == "downed" or k.st_skills > skills0 or t >= KIN_WATCH_T
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
-		"fight": return kills >= fight_n and not m.mobs.any(func(x): return not x.dead)
+		"fight": return not m.mobs.any(func(x): return not x.dead)      # (however each one fell)
 		"goexit":
 			var o := outpost()
 			return not o.is_empty() and m.exits.in_yard(o, p)
@@ -619,7 +612,10 @@ func _words() -> void:
 	var sid := id()
 	var line := String(steps()[step][1])
 	var alt: Dictionary = Content.rules("tutorial")["alt"]
-	if sid == "utility" and rmb_has_hold():
+	var shoot_kind := _shoot_kind() if sid == "shoot" else ""
+	if shoot_kind != "":
+		line = String(alt["shoot_" + shoot_kind])
+	elif sid == "utility" and rmb_has_hold():
 		line = String(alt["utility_hold"])
 	elif sid == "throw" and not recalled and (need_back or throw_recalls()):
 		line = String(alt["throw_back"])
@@ -631,7 +627,8 @@ func _words() -> void:
 		need = 2
 	elif sid == "throw":
 		need = 2 if need_back or throw_recalls() else 1
-	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(sid, "")), m.player))
+	var detail_key := "shoot_" + shoot_kind if shoot_kind != "" else sid
+	detail = _fill(TutorialText.fill(String(Content.rules("tutorial")["detail"].get(detail_key, "")), m.player))
 	key_cap = ""
 	if sid in ["land", "move"]:
 		key_cap = _wasd()
@@ -639,6 +636,13 @@ func _words() -> void:
 		key_cap = TutorialText.rank_combo()
 	elif KEYS.has(sid):
 		key_cap = Settings.key_cap(KEYS[sid])
+
+## How the first step's weapon is worked, when that needs saying: "draw" (a bow), "melee" (step in), else "".
+func _shoot_kind() -> String:
+	var w: Dictionary = m.player.wpn
+	if w.has("draw"):
+		return "draw"
+	return "melee" if w.get("melee", false) else ""
 
 ## "1/3" for a step that wants its action a few times, else "".
 func progress_text() -> String:
@@ -661,7 +665,6 @@ func _fill(txt: String) -> String:
 	var kname := "your Boki"
 	if p.kin:
 		kname = String(p.kin.rec.get("name", kname))
-	txt = txt.replace("%W", "Swing at" if p.wpn.get("melee", false) else "Shoot")
 	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
 	return txt.replace("%A", an).replace("%s", kname)
