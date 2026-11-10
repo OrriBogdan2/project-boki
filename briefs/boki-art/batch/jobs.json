@@ -42247,6 +42247,127 @@
     "prompt": "The creatures come from the reference images: keep each one on-model (same design, colours, face and signature parts), lit by the scene and part of it, each appearing once. Wide 16:9, bold composition with a clear focal point that reads as a small thumbnail. The left 40 percent of the picture is naturally darker and calmer (shadow, sky or dark scenery, never a box or overlay) with no characters, so a logo can sit there. No text, no letters, no logo, no border, no UI. Style: bright, colourful modern animated movie poster, glossy and joyful, strong sunlight and saturated sea colours. Scene: dawn over a tropical sea; the three small creatures ride on the shell of the great compass sea turtle from image 5 as it surfaces, spray flying, while the hawk from image 4 dives alongside; islands and a rising sun behind. The three small creatures are the mushroom hedgehog (image 1), the purple scorpion-tailed fox (image 2) and the pink striped axolotl (image 3)."
   },
   {
+    "id": "rv_glaciatee_light",
+    "name": "Glaciatee (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Glaciatee.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Its body is a clean pale ice blue, the mane lightly shaded, outline mid blue."
+  },
+  {
+    "id": "rv_rippmink_light",
+    "name": "Rippmink (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Rippmink.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Pale aqua body with a mid teal outline."
+  },
+  {
+    "id": "rv_malletary_light",
+    "name": "Malletary (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Malletary.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Feathers a lighter warm grey with simple flat feather shapes."
+  },
+  {
+    "id": "rv_tiltster_light",
+    "name": "Tiltster (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Tiltster.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Shell plates flat steel blue-grey with one lighter band each, no heavy metallic shading."
+  },
+  {
+    "id": "rv_pinster_light",
+    "name": "Pinster (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Pinster.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Plates flat silver-grey with one lighter band each."
+  },
+  {
+    "id": "rv_rimink_light",
+    "name": "Rimink (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Rimink.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. White coat with only a little pale blue shade, outline mid blue-grey."
+  },
+  {
+    "id": "rv_druzemole_light",
+    "name": "Druzemole (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Druzemole.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Body a lighter warm grey; crystals flat lilac with one lighter facet each."
+  },
+  {
+    "id": "rv_meteorab_light",
+    "name": "Meteorab (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Meteorab.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Rock plates a lighter warm charcoal brown so the shapes read; keep the glowing cracks."
+  },
+  {
+    "id": "rv_bulwartoad_light",
+    "name": "Bulwartoad (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Bulwartoad.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Shell flat iron brown with a few simple rust patches, no painterly texture; skin a brighter olive."
+  },
+  {
+    "id": "rv_torpecone_light",
+    "name": "Torpecone (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Torpecone.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Flat lavender-grey body, no airbrushed gradients."
+  },
+  {
+    "id": "rv_blastopuff_light",
+    "name": "Blastopuff (review: light)",
+    "refs": [
+      "briefs/boki-art/cards/Blastopuff.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Body a lighter slate so the face reads; keep the yellow cracks and spines."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
