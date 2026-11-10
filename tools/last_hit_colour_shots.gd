@@ -34,7 +34,7 @@ func run(main_node: Node) -> void:
 
 ## A monster in front of the player dies to `by`; frames at the flash and the dissolve.
 func _die(kind: String, side: String, by: Hunter) -> void:
-	var at := P.pos + Vector3(0, 0, 3.0)
+	var at := P.pos + Vector3(2.0, 0, -3.0)
 	var mb := m.spawn_mob(kind, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	await _go(0.3)
 	mb.hp = 0.0
