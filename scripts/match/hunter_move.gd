@@ -1,6 +1,6 @@
 class_name HunterMove
 extends RefCounted
-## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit, air,
+## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
@@ -9,16 +9,12 @@ static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]
-static var air_control: float = _phys["air_control"]
-static var air_friction: float = _phys["air_friction"]
 static var fall_max: float = _phys["fall_cap"]
 static var abyss_fall_max: float = _phys["abyss_fall_cap"]
 static var abyss_slow_from: float = _phys["abyss_slow_from"]
 static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
-static var swoop_ratio: float = _phys["swoop_ratio"]
-static var swoop_fade: float = _phys["swoop_fade"]
 static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
 static var mantle_launch_min: float = _phys["mantle_launch_min"]
 static var dive_vy: float = _phys["dive_vy"]
@@ -70,18 +66,6 @@ static func slide(v0: float) -> float:
 	if k <= 0.0:
 		return v0 * v0 / (2.0 * brake_decel)
 	return v0 / k - brake_decel / (k * k) * log(1.0 + k * v0 / brake_decel)
-
-## Horizontal speed after a step in the air: your keys steer at air_control of your ground
-## acceleration and what you carry bleeds off at air_friction, so a jump keeps its run-up. Above
-## run speed (a dash, a pad, a knock) the keys turn the momentum without topping it up.
-static func air_steer(h: Hunter, hv: Vector2, wish: Vector2, dt: float) -> Vector2:
-	var kept := hv * maxf(0.0, 1.0 - air_friction * dt)
-	if wish.length() < 0.01:
-		return kept
-	var steer := h.ground_accel * air_control * dt
-	if kept.length() > wish.length():
-		return kept.move_toward(wish.normalized() * kept.length(), steer)
-	return kept.move_toward(wish, steer)
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's

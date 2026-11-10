@@ -187,10 +187,9 @@ func _leap() -> void:
 	flight = {}
 	leaps += 1
 	h.roll_t = 0.0
-	var keep := dir * speed * Hunter.DASH_JUMP_CARRY
+	var keep := dir * speed * Loco.dash_jump_keep
 	h.vel.x = keep.x
 	h.vel.z = keep.y
-	h.glide_handoff(dir, speed)
 	AimKit.hide(h, "x_steer")
 	k.play("lw_hop")                 # tucked for the leap off (no burst: the jet's own flame just stops)
 
