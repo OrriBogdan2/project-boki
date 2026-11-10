@@ -185,7 +185,7 @@ func _ready() -> void:
 	hg = HomeGather.new(self)
 	hsp = SnackPatch.new(self)
 	hw = HomeWork.new(self)
-	if visit.is_empty() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
+	if not _visiting() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
 	toys = HomeToys.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
@@ -368,8 +368,8 @@ func _ready_rest() -> void:
 			for x in range(rc[0], rc[2] + 1):
 				if world.inb(x, z) and world.kind[world.idx(x, z)] == World.T_BLOCK and not world.no_deco.has(world.idx(x, z)):
 					world.kind[world.idx(x, z)] = World.T_GROUND
-	# bridges: work out which tiles they cover before any are opened
-	for k in Data.ISLES:
+	# bridges to the side isles (none in the hub): which tiles they cover before any are opened
+	for k in ([] if HubLayout.is_hub(visit) else Data.ISLES):
 		bridges[k] = {"tiles": world.bridge_tiles(HomeLayout.isle_bridge(world, k)["rect"]), "built": _has_br(k)}
 		if bridges[k]["built"]:
 			world.open_bridge(bridges[k]["tiles"])
@@ -409,7 +409,7 @@ func _ready_rest() -> void:
 	if FarmUnlocks.base_mode() and not _visiting():
 		hway = HubWaystone.new(self)
 		hway.place()
-	if visit.is_empty():
+	if not _visiting():
 		rack_node = _glider_rack()
 		rack_node.position = spots["rack"]
 		add_child(rack_node)
@@ -756,7 +756,7 @@ func _build_lots() -> void:
 			lots[b]["at"] = FAR; lots[b]["door"] = FAR
 
 func _build_bridges() -> void:
-	for k in Data.ISLES:
+	for k in bridges:
 		var isd: Dictionary = Data.ISLES[k]
 		var br: Dictionary = bridges[k]
 		var node := Node3D.new(); add_child(node)
@@ -2020,7 +2020,7 @@ func _find_interact() -> void:
 			bd = 0.5
 			best = near_hob
 	for nm in ["pot", "stall", "portal", "house", "ferry", "rack"]:
-		if not spots.has(nm) or (nm == "rack" and not visit.is_empty()): continue
+		if not spots.has(nm) or (nm == "rack" and _visiting()): continue
 		var sp: Vector3 = spots[nm]
 		if sp.x < -100.0: continue      # a farm-start fixture not put down yet
 		var reach := 2.6 if nm in ["house", "portal"] else 1.9
@@ -2042,13 +2042,13 @@ func _find_interact() -> void:
 		if k.has("indoors"): continue
 		var d := p2.distance_to(Vector2(k["pos"].x, k["pos"].z))
 		if d < bd: bd = d; best = {"kind": "kin", "k": k}
-	if visit.is_empty() and is_instance_valid(burrow_node):
+	if not _visiting() and is_instance_valid(burrow_node):
 		var bdoor := BURROW_AT + _turn(Vector3(0, 0, 1.55), burrow_r)
 		var bdd := p2.distance_to(Vector2(bdoor.x, bdoor.z))
 		if bdd < 1.7 and bdd < bd + 0.4: bd = bdd; best = {"kind": "burrow"}
-	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and visit.is_empty():
+	if p2.distance_to(Vector2(NEST_AT.x, NEST_AT.z)) < 1.8 and not _visiting():
 		best = {"kind": "egg"} if is_instance_valid(nest) else {"kind": "nook"}
-	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and visit.is_empty():
+	if hinc and p2.distance_to(Vector2(INCUB_AT.x, INCUB_AT.z)) < 1.6 and not _visiting():
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
@@ -4058,7 +4058,7 @@ func _refresh_burrow() -> void:
 
 ## The Kin Box (Kin Burrow) screen, for menus and shortcuts (the hub bar's Kin button).
 func open_kin_box() -> void:
-	if visit.is_empty(): _open_burrow()
+	if not _visiting(): _open_burrow()
 
 ## The Kin Burrow screen: the farm, the box pages and the kin you picked.
 func _open_burrow() -> void:
@@ -4086,10 +4086,11 @@ func _setup_care() -> void:
 		nl.modulate = Color("ffc0d0"); nl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		nl.position = NEST_AT + Vector3(0, 2.95, -0.7)
 		add_child(nl)
-	if visit.is_empty():
+	if not _visiting():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
 	if not visit.is_empty():
+		_refresh_nest()
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	KinWelcome.start(self, KinWelcome.away_secs())      # and they run over to say hello
@@ -4111,7 +4112,7 @@ func _refresh_nest() -> void:
 	if is_instance_valid(nest):
 		nest.queue_free()
 	nest = null
-	if visit.is_empty():
+	if not _visiting():
 		Incubator.ensure()
 		if Incubator.migrate():
 			# an older save's Rare Egg was sitting in the breeding nest: it moves to the Incubator
@@ -4122,7 +4123,7 @@ func _refresh_nest() -> void:
 			Save.save_game()
 			if hinc: hinc.refresh()
 	var egg: Dictionary = Save.d.get("egg", {})
-	if egg.is_empty() or not visit.is_empty():
+	if egg.is_empty() or _visiting():
 		return
 	var col: Color = Data.KIN[_egg_species()]["color"] if _egg_species() != "" else Color("f2e6cf")
 	if egg.get("rare", false):

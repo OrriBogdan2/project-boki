@@ -1,7 +1,7 @@
 extends RefCounted
 ## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then a farm run. Every frame is
+## on the map, a fight: two rivals and a monster pack brought to you), then a farm run and a hub run. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
@@ -43,7 +43,8 @@ func run(main_node: Node) -> void:
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
 	await _match()
-	await _farm()
+	await _farm("farm", {})
+	await _farm("hub", {"zone": GardenZones.HUB})
 	if zone != "":
 		await _zone()
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
@@ -123,13 +124,21 @@ func _bring_fight(m: Match) -> void:
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
-func _farm(part := "farm", params := {}) -> void:
+func _farm(part: String, params: Dictionary) -> void:
+	if part == "hub": Content.rules("farm_build")["base_mode"] = true      # the hub only exists in base mode
 	var was = main.current
 	Game.goto("home", params)
 	while main.current == was or main.current.get("root_ui") == null or main.fade.covered:
 		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
+	await _frames(part)
+	if part == "hub":      # same scene, horizon hidden: the islands' own cost (GARDEN 10.7 step 9)
+		for n in Game.main.current.get_children():
+			if String(n.name).begins_with("Horizon_"): n.visible = false
+		await _frames("hub_bare")
+
+func _frames(part: String) -> void:
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0

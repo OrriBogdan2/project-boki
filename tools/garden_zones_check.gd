@@ -4,7 +4,10 @@ extends RefCounted
 ## open and every Boki living in it; a new save has the same. Keys: a locked zone's two keys tick when
 ## you have them. Travel (with base_mode on, through the real Game.goto and ink wipe): the hub shows
 ## only your partner and the Waystone; a hop to a locked zone is refused and its card lists both keys;
-## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives. Moving
+## the hub to Bramblebank and back keeps your partner with you and every Boki where it lives; with an
+## unminded egg in the Nook, a Boki with the Ember knack comes to the hub to mind it. Hub fixtures
+## (step 3): each one stands and works, the games board shows this week's Dash twist and has the
+## showcase wall beside it, no side-isle bridges, build mode offers only the Garden tab. Moving
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
@@ -12,8 +15,13 @@ extends RefCounted
 ## and scatter), build mode off, the patch's timer on the save, and nothing of it left in Bramblebank.
 ## Cinderstep (step 7b): its theme, a warm stone and a climbing post, a Fire/Rock/Steel/Dragon patch,
 ## the Stump Shove stump on its own spot with no Training post, terraces and glowing cracks in batches.
+## With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub, and
+## hub_horizon_day.png and _night.png: the hub at arrival zoom with its five zone islands, three lit, two in mist.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
+const SHOT_ZOOM := 1.5    # camera zoom for the hub shot (0.8 close .. 1.6 wide)
+const FRAME_MARGIN := 0.92  # an island counts as in frame with its middle this far from the centre (1 = the edge)
+const SHOT_WAIT_S := 1.5  # s for the ink wipe to clear and the minder to set off before the shot
 
 var bad := 0
 
@@ -29,6 +37,7 @@ func run(m: Node) -> void:
 	await _move_part(m)
 	await _glasswater_part(m)
 	await _cinderstep_part(m)
+	await _reload_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -83,6 +92,18 @@ func _arrived(m: Node, was: Node):
 			return cur
 	return null
 
+## An egg in the Nook, waiting to be minded; returns the uid of the Boki with the Ember knack who minds it.
+func _lay_egg(partner: String) -> String:
+	var rec := Save.new_kin("kindlewren", "Wick")
+	rec["zone"] = GardenZones.start()
+	(Save.d["roster"] as Array).append(rec)
+	var other: Dictionary = (Save.d["roster"] as Array).filter(func(r): return r["uid"] != partner)[0]
+	Save.d["egg"] = {"a": partner, "b": other["uid"], "m": int(Save.d["matches"]) + 5,
+		"t": Time.get_unix_time_from_system() + 600.0}
+	var found := HubLayout.minder()
+	ok(not found.is_empty() and Work.of(found).has("ember"), "an unminded egg calls a Boki with the Ember knack")
+	return String(found.get("uid", ""))
+
 func _uids(home) -> Array:
 	var out: Array = home.kins.map(func(k): return String(k["rec"]["uid"]))
 	out.sort()
@@ -102,6 +123,10 @@ func _travel_part(m: Node) -> void:
 	ok(hub.hway.node.name == "Waystone" and off < HubWaystone.ARRIVE_OFF.length() + 0.5,
 		"you arrive beside the Waystone")
 	ok(hub.toys.toys().is_empty() and hub.hrace == null, "no toys or games in the hub")
+	_fixtures_part(hub)
+	_horizon_part(hub, [GardenZones.start()])
+	hub.ppos = HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF
+	hub._find_interact()
 	hub.hway.use()
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
@@ -117,12 +142,55 @@ func _travel_part(m: Node) -> void:
 	ok(_uids(bb) == home_uids and home_uids.has(partner),
 		"Bramblebank has its %d Boki, your partner among them" % home_uids.size())
 	ok(bb.player.position.distance_to(bb.hway.node.position) < 0.5, "you arrive on its return pad")
+	var minder := _lay_egg(partner)
 	ok(bb.hway.hop(GardenZones.HUB), "the return pad takes you to the hub")
 	var back = await _arrived(m, bb)
-	ok(back != null and _uids(back) == [partner], "back in the hub with your partner")
-	ok(GardenZones.residents("bramblebank").size() == home_uids.size() and (Save.d["roster"] as Array).size() == 3,
+	var walkers := [partner, minder]
+	walkers.sort()
+	ok(back != null and _uids(back) == walkers, "back in the hub with your partner and the egg-minder")
+	if back != null:
+		var mrec: Dictionary = (Save.d["roster"] as Array).filter(func(r): return r["uid"] == minder)[0]
+		var mk: Dictionary = back._kin_entry(mrec)
+		ok(back.life != null and back.life._chore(mk) and String(mk["life_chore"]["kind"]) == "mind",
+			"the egg-minder sets off to mind the egg in the Nook")
+		await _hub_shot(m, back, "hub.png", SHOT_ZOOM)
+	ok(GardenZones.residents("bramblebank").size() == home_uids.size() + 1 and (Save.d["roster"] as Array).size() == 4,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
+
+## The hub's fixtures: each one is there and E works at it; build mode there offers only the Garden tab.
+func _fixtures_part(hub) -> void:
+	var lay: Dictionary = hub._d()
+	for fx in ["house", "stall", "nook", "burrow"]:
+		ok(not HomeLayout.fixtures(lay, fx).is_empty(), "the hub has its %s" % fx)
+	ok(HomeLayout.placed("shrine", lay) and hub.lots["shrine"]["at"].x > -100.0, "the Soul Shrine has its lot")
+	ok(hub.rack_node != null and hub.hinc != null and hub.hway.board != null, "rack, Incubator and games board stand")
+	ok(is_instance_valid(hub.house_node) and is_instance_valid(hub.burrow_node), "the house and the Burrow are built")
+	var at := {"house": hub._house_door(), "stall": hub.spots["stall"] + Vector3(0, 0, 1.2),
+		"portal": hub.spots["portal"], "rack": hub.spots["rack"], "burrow": hub.BURROW_AT + Vector3(0, 0, 1.55),
+		"nook": hub.NEST_AT, "incubator": hub.INCUB_AT, "waystone": HubLayout.BOARD_AT + Vector3(-1.2, 0, 0)}
+	for kind in at:
+		hub.ppos = at[kind]
+		hub._find_interact()
+		ok(String(hub.interact.get("kind", "")) == kind or (kind == "nook" and hub.interact.get("kind") == "egg"),
+			"E at the %s uses it (got %s)" % [kind, hub.interact.get("kind", "nothing")])
+	var w: World = hub.world
+	var afloat := func(c: Vector2i) -> bool: return w.inb(c.x, c.y) and w.kind[w.idx(c.x, c.y)] != World.T_VOID
+	var decos: Array = lay["layout"]["deco"]
+	ok(decos.all(func(e): return HomeLayout.deco_cells(e).all(afloat)), "every fixture stands on land")
+	var spots: Array = [HubWaystone.HUB_AT, HubLayout.BOARD_AT]
+	ok(spots.all(func(p): return afloat.call(Vector2i(int(p.x), int(p.z)))), "the Waystone and the board are on land")
+	ok(hub.hway.label() == "Games board", "the games board reads as one")
+	hub.hway.use()
+	var said: String = _texts(hub.root_ui)
+	ok(BaseRace.twist()["name"] in said and "Showcase wall" in said, "the board shows this week's twist and the wall")
+	hub._close_panel()
+	var wall: Node3D = hub.get_node_or_null("Showcase")
+	ok(wall != null and wall.position.distance_to(HubLayout.BOARD_AT + HubLayout.WALL_OFF) < 0.1,
+		"the showcase wall hangs beside the board")
+	ok(hub.bridges.is_empty(), "no side-isle bridges or signposts in the hub")
+	ok(hub.hb._tabs() == ["Garden"] and hub.hb.can_build(), "build mode in the hub offers only the Garden tab")
+	ok(typeof(Save.d.get("hub_layout")) == TYPE_DICTIONARY, "the hub's layout is on the save")
 
 func _move_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
@@ -192,6 +260,80 @@ func _cap_part() -> void:
 	ok(GardenZones.move(next, "glasswater") != "" and GardenZones.zone_of(next) == "bramblebank",
 		"with %d out in Glasswater, the next move is refused" % cap)
 	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")
+
+## Every label's text under a node, joined.
+## The hub's horizon (step 9): five islands, one lit for each zone in `open_ids`, two shared materials,
+## and the lit ones are warmer and the locked ones greyer than their zone colour.
+func _horizon_part(hub, open_ids: Array) -> void:
+	var isles: Array = hub.get_children().filter(func(n): return n.name.begins_with("Horizon_"))
+	ok(isles.size() == GardenZones.ids().size(), "the hub shows %d islands on its horizon" % isles.size())
+	var follows := true
+	var mats := {}
+	for isle in isles:
+		var id := String(isle.name).trim_prefix("Horizon_")
+		var lit: bool = isle.get_meta("open")
+		follows = follows and lit == open_ids.has(id) and lit == GardenZones.is_open(id)
+		mats[isle.material_override] = true
+		var top: Color = isle.mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR][0]
+		var zone_col := Color(String(GardenZones.info(id)["colour"]))
+		ok(lit == (top.s > zone_col.s * 0.6), "%s's island reads %s" % [id, "lit" if lit else "grey in mist"])
+	ok(follows, "the islands follow Save.d zones (open: %s)" % ", ".join(open_ids))
+	ok(mats.size() == (2 if open_ids.size() < isles.size() else 1), "islands share one material per state")
+	# seen as you arrive: the hub's own camera (arrival zoom, on the landing spot) takes in every island
+	hub.cam.zoom_to = hub.HOME_ZOOM
+	hub.cam.zoom = hub.HOME_ZOOM
+	hub.cam.snap(HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF)
+	var seen := isles.filter(func(n): return _in_frame(hub.cam, n.global_position))
+	ok(seen.size() == isles.size(), "at arrival zoom %d of %d islands are in frame" % [seen.size(), isles.size()])
+
+## Whether `p` shows on a 16:9 screen (inside FRAME_MARGIN of its edges) through `cam`'s lens. The
+## headless viewport is square, so the screen point is rescaled to 16:9 at the same height (Godot keeps
+## the vertical lens and widens the view sideways).
+func _in_frame(cam: Camera3D, p: Vector3) -> bool:
+	if cam.is_position_behind(p):
+		return false
+	var vs := cam.get_viewport().get_visible_rect().size
+	var s := (cam.unproject_position(p) - vs * 0.5) / (vs * 0.5)
+	return absf(s.x * (vs.x / vs.y) / (16.0 / 9.0)) < FRAME_MARGIN and absf(s.y) < FRAME_MARGIN
+
+## Opening a zone lights its island the next time the hub loads.
+func _reload_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d["zones"]["cinderstep"] = {"open": true}
+	var was = Game.main.current
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = await _arrived(m, was)
+	ok(hub != null, "the hub reloads with Cinderstep open")
+	if hub != null:
+		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])      # glasswater: opened by _move_part
+		hub.day_t = 0.5
+		await _hub_shot(m, hub, "hub_horizon_day.png", hub.HOME_ZOOM, true)
+		hub.day_t = 0.97
+		await _hub_shot(m, hub, "hub_horizon_night.png", hub.HOME_ZOOM, true)
+	Content.rules("farm_build")["base_mode"] = false
+
+func _texts(n: Node) -> String:
+	var out := (n as Label).text if n is Label else ""
+	for c in n.get_children():
+		out += "\n" + _texts(c)
+	return out
+
+## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
+func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): dir = a.substr(12)
+	if dir == "" or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	hub.cam.zoom_to = zoom
+	hub.cam.zoom = zoom
+	hub.cam.snap(HubWaystone.HUB_AT + (HubWaystone.ARRIVE_OFF if arrival else Vector3.ZERO))
+	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
+	hub.prompt_box.visible = false
+	await m.get_tree().process_frame
+	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+	print("ZONES shot %s" % dir.path_join(file))
 
 func _glasswater_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
