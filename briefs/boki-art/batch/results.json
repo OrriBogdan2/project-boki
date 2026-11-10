@@ -95896,5 +95896,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fp5_grainspin_2.jpg",
     "ok": true
+  },
+  {
+    "id": "base_scopeleon",
+    "name": "Scopeleon (scope attached to its eye)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/base_scopeleon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "older_snapler",
+    "name": "Snapler (a bit less baby)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/older_snapler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fur_wickapi",
+    "name": "Wickapi (fur matches its line)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fur_wickapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_spirevark_c",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose3_spirevark_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_spirevark_c",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose3_spirevark_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "older_snapler",
+    "name": "Snapler (a bit less baby)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/older_snapler_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "base_scopeleon",
+    "name": "Scopeleon (scope attached to its eye)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/base_scopeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_spirevark_d",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose3_spirevark_d_1.jpg",
+    "ok": true
   }
 ]
