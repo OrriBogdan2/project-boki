@@ -108174,5 +108174,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_tesselamb_f1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_rimekit_f1",
+    "name": "Rimekit (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_rimekit_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_tesselamb_f1",
+    "name": "Tesselamb (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_tesselamb_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rimekit_f1",
+    "name": "Rimekit (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_rimekit_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sloggoth_f1",
+    "name": "Sloggoth (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_sloggoth_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sloggoth_f1",
+    "name": "Sloggoth (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_sloggoth_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_tesselamb_f1",
+    "name": "Tesselamb (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_tesselamb_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dynaboa_f1",
+    "name": "Dynaboa (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_dynaboa_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sloggoth_f1",
+    "name": "Sloggoth (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_sloggoth_f1_1.jpg",
+    "ok": true
   }
 ]
