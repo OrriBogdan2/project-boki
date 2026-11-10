@@ -77521,5 +77521,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_snuffapi_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_chandelapi",
+    "name": "Chandelapi (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_chandelapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glaciatee",
+    "name": "Glaciatee (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_glaciatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelapi",
+    "name": "Chandelapi (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chandelapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glintmole",
+    "name": "Glintmole (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_glintmole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gongibbon",
+    "name": "Gongibbon (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_gongibbon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glaciatee",
+    "name": "Glaciatee (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_glaciatee_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_snuffapi",
+    "name": "Snuffapi (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_snuffapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelapi",
+    "name": "Chandelapi (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_chandelapi_2.jpg",
+    "ok": true
   }
 ]
