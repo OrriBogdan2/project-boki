@@ -7,10 +7,10 @@
 	"weight": "light",
 	"color": "#e04aff",
 	"body": {
-		"size": 1.073,
+		"size": 1.01,
 		"hit_r": 0.392,
 		"head": 0.72,
-		"legs": 2.05,
+		"legs": 2.35,
 		"neck": -0.05
 	},
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
