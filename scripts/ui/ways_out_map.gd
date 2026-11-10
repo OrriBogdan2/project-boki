@@ -132,14 +132,15 @@ static func full_map(fm) -> void:
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	var area: Rect2 = fm.rect.grow(-14.0)
-	var r := clampf(7.0 + fm.k() * 0.5, 10.0, 16.0)
+	var r := clampf(8.0 + fm.k() * 0.8, 12.0, 18.0)
 	for i in 4:
 		if at[i] == Vector3.INF:
 			continue
 		var pv: Vector2 = fm.to_screen(at[i])
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
-			HudStyle.ctext(fm.hud.c, pv + Vector2(0, r + 30.0), word(i, sd[i]), 11, color_of(sd[i]), 3)
+			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
+			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
 
 # ------------------------------------------------------------------ the dead and the watching
