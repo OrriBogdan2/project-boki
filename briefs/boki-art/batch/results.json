@@ -105136,5 +105136,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px5_prismander_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px5_pinguin",
+    "name": "Pinguin (pixel sprite style 5)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px5_pinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_pinguin",
+    "name": "Pinguin (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_jerbit",
+    "name": "Jerbit (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_jerbit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_pinguin",
+    "name": "Pinguin (pixel sprite style 7)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px7_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_pinguin",
+    "name": "Pinguin (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_pinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_pinguin",
+    "name": "Pinguin (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_pinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_pinguin",
+    "name": "Pinguin (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_jerbit",
+    "name": "Jerbit (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_jerbit_2.jpg",
+    "ok": true
   }
 ]
