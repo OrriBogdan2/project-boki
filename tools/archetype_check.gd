@@ -465,8 +465,12 @@ func _gunslinger() -> void:
 	var dazed := KitStatus.rattled(T) and K.direct_hits >= 1
 	ok("venator RMB: a direct hit hurts and Dazes", dmg(T) >= 12.0 and dazed, "took %.0f" % dmg(T))
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
+	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
+	ok("venator Dazed: the bonus gets its own pink +9 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()

@@ -14,10 +14,13 @@ extends ArchKit
 
 const EMBER := Color("ff9a5c")
 const HOT := Color("fff1c8")
+const DAZE_PINK := Color("ff4fb0")   # the Daze's own colour (stars, swirl): its bonus is not a plain crit
 const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
+const DAZE_FLASH := 1.8              # m, the pink spark on a Dazed foe per rifle round
+const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
@@ -190,8 +193,17 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 			dazed_hits += 1
 			ComboMark.payoff(m, h, t)
 			h.sus_n = maxi(0, h.sus_n - 1)
-			return dmg * (1.0 + float(res_def()["rattle_k"]))
+			var bonus := dmg * float(res_def()["rattle_k"])
+			_daze_bonus_fx(t, bonus)
+			return dmg + bonus
 	return dmg
+
+## The Daze's share of a rifle round, shown on its own: a pink "+N" above the gold hit number (rounds in a
+## burst add up on it) and a pink spark on the body. Only the shooter's screen gets the number.
+func _daze_bonus_fx(t: Ent, bonus: float) -> void:
+	m.fx.flash(t.pos + Vector3(0, 1.1, 0), DAZE_PINK, DAZE_FLASH, 0.1)
+	if h.is_local() and Settings.get_v("damage_numbers"):
+		m.fx.number(t.pos + Vector3(0, DAZE_NUM_LIFT, 0), bonus, DAZE_PINK, true, "+")
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
