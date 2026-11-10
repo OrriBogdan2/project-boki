@@ -149,7 +149,7 @@ const CHECKS := {
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--interact-pick-check": ["res://tools/interact_pick_check.gd", "interact_pick_check", null],    # which F wins
 	"--interact-prompt-check": ["res://tools/interact_prompt_check.gd", "interact_prompt_check", null],
-	"--interact-prompt-shots": ["res://tools/interact_prompt_shots.gd", "interact_prompt_shots", null],      # --shots-dir
+	"--interact-prompt-shots": ["res://tools/interact_prompt_shots.gd", "interact_prompt_shots", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],      # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],      # shields never hide a Hunter
