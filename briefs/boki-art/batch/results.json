@@ -85291,5 +85291,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_clinkpede_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_clinkpede_b4",
+    "name": "Clinkpede (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_clinkpede_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_clinkpede_b4",
+    "name": "Clinkpede (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_clinkpede_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_clinkpede_b4",
+    "name": "Clinkpede (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_clinkpede_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_clinkpede_b4",
+    "name": "Clinkpede (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_clinkpede_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chainipede_b4",
+    "name": "Chainipede (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_chainipede_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chainipede_b4",
+    "name": "Chainipede (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_chainipede_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chainipede_b4",
+    "name": "Chainipede (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_chainipede_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cubbat_b4",
+    "name": "Cubbat (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_cubbat_b4_1.jpg",
+    "ok": true
   }
 ]
