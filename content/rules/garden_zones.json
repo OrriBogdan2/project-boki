@@ -16,10 +16,11 @@
 	"ask_s_doc": "Seconds it waits at the pad with its bubble before it gives up and wanders off.",
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
-		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"},
-		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"},
-		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"},
-		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}
+		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "lair_biomes": ["frost"]},
+		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"]},
+		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "lair_biomes": ["bloom", "gloom"]},
+		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"]}
 	},
+	"lair_biomes_doc": "A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists).",
 	"wayseed_from": "a lair of a matching type on a run, or the Drift Trader once a week"
 }
