@@ -100,6 +100,8 @@ static func leading(rec: Dictionary) -> String:
 ## The name of a kin's current form, e.g. "Cindfang" or "Pudward".
 static func form_name(rec: Dictionary) -> String:
 	ensure(rec)
+	if String(rec.get("final", "")) != "":
+		return String(rec["final"]).capitalize()      # its branching final (EvoPath.evolve)
 	var sp_id: String = rec.get("species", "cindle")
 	var forms: Array = rec["forms"]
 	if forms.is_empty():
