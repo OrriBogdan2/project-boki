@@ -6,7 +6,8 @@ extends RefCounted
 const SETTLE_FRAMES := 600
 const COLS := 3
 const MAX_FRAMES := 2400          # frames; the longest wait for one game
-const ZOOM := 1.0                 # the home camera's wheel
+const ZOOM := 0.8                 # the home camera's wheel, all the way in
+const FADE_FRAMES := 90           # frames for the scene fade to clear
 const ASPECT := 0.5               # each frame is px wide and px * this tall
 
 var main: Node
@@ -49,6 +50,8 @@ func run(m: Node) -> void:
 	home.player.visible = false
 	home.cam.zoom_to = ZOOM
 	home.cam.zoom = ZOOM
+	for f in FADE_FRAMES:
+		await main.get_tree().process_frame
 	for k in home.kins:
 		k.erase("indoors")
 	await _dash(home)
@@ -58,13 +61,17 @@ func run(m: Node) -> void:
 	print("GARDEN_CUE_SHOTS_DONE")
 	main.get_tree().quit()
 
-## One frame of the live view, centred on `at`, into column `col` of the sheet.
-func _grab(home, sheet: Image, col: int, at: Vector3) -> void:
+## One frame of the live view, centred on `at` and showing `span` metres either side, into column `col`.
+func _grab(home, sheet: Image, col: int, at: Vector3, span: float) -> void:
 	home.cam.snap(at)
 	await RenderingServer.frame_post_draw
+	var cam := main.get_viewport().get_camera_3d()
 	var img := main.get_viewport().get_texture().get_image()
-	var view := img.get_size()
-	var crop := img.get_region(Rect2i(view.x / 6, view.y / 6, view.x * 2 / 3, view.y * 2 / 3))
+	var mid := cam.unproject_position(at)
+	var half := absf(cam.unproject_position(at + Vector3(span, 0, 0)).x - mid.x)
+	var wide := Vector2(half, half * ASPECT)
+	var rect := Rect2i(Vector2i(mid - wide), Vector2i(wide * 2.0)).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var crop := img.get_region(rect)
 	crop.resize(px, int(px * ASPECT), Image.INTERPOLATE_BILINEAR)
 	crop.convert(Image.FORMAT_RGBA8)
 	sheet.blit_rect(crop, Rect2i(0, 0, px, int(px * ASPECT)), Vector2i(col * px, 0))
@@ -95,7 +102,7 @@ func _dash(home) -> void:
 		else:
 			await main.get_tree().process_frame
 		if race.cue != null:
-			await _grab(home, sheet, col, mid)
+			await _grab(home, sheet, col, mid, 4.5)
 	sheet.save_png(out.path_join("dash.png"))
 	print("GARDEN_DASH lit=%d" % (race.cue.lit if race.cue != null else -1))
 	_stop(home, race)
@@ -112,7 +119,7 @@ func _shove(home) -> void:
 		else:
 			await main.get_tree().process_frame
 		if sh.cue != null:
-			await _grab(home, sheet, col, sh.stump.position)
+			await _grab(home, sheet, col, sh.stump.position, 1.6)
 	sheet.save_png(out.path_join("shove.png"))
 	_stop(home, sh)
 
@@ -129,7 +136,7 @@ func _seek(home) -> void:
 		if sk.state == BaseSeek.S.HUNT:
 			var at := Vector3(sk.hunt.item.x, 0, sk.hunt.item.y)
 			var p: Vector2 = sk.hunt.pos[0]
-			await _grab(home, sheet, col, (at + Vector3(p.x, 0, p.y)) * 0.5)
+			await _grab(home, sheet, col, (at + Vector3(p.x, 0, p.y)) * 0.5, 5.0)
 	sheet.save_png(out.path_join("seek.png"))
 	print("GARDEN_SEEK dots=%d" % (sk.cue.shown[0] if sk.cue != null else -1))
 	_stop(home, sk)
@@ -149,7 +156,7 @@ func _volley(home) -> void:
 			await _until(func(): return vb.run.state == BaseVolley.Run.S.FLIGHT and vb.run.fly_t < 0.3, alive)
 		await main.get_tree().process_frame
 		if vb.run != null:
-			await _grab(home, sheet, col, vb.log_node.position)
+			await _grab(home, sheet, col, vb.log_node.position, 2.6)
 		for f in 20:
 			await main.get_tree().process_frame
 	sheet.save_png(out.path_join("volley.png"))
