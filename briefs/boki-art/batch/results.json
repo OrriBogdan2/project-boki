@@ -83037,5 +83037,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_morelkin_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_morelkin",
+    "name": "Morelkin (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_morelkin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_medushroom",
+    "name": "Medushroom (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_medushroom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_medushroom",
+    "name": "Medushroom (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_medushroom_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_morelkin",
+    "name": "Morelkin (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_morelkin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_truffapir",
+    "name": "Truffapir (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_truffapir_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_truffapir",
+    "name": "Truffapir (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_truffapir_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_medushroom",
+    "name": "Medushroom (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_medushroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rosedart",
+    "name": "Rosedart (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_rosedart_3.jpg",
+    "ok": true
   }
 ]
