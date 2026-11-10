@@ -26,7 +26,7 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 ## Merge notes
 - ext/hot-zone and ext/map-regions both built a `HotZone`. The build's (map-regions) stays: region based, no Net change, region loot leans, bot drop weighting. ext/hot-zone's island version, `content/rules/hot_zone.json`, the lobby `hot` field and its Net bump are dropped.
 - Both branches had the far-monster 20 Hz step; one `Mob._far_step` stays (the build's time-based one, which `--perf-throttle-check` tests).
-- Net.VERSION 0.24.5 (map size and 30-hunter expeditions).
+- Net.VERSION 0.24.4: the 2x map and 30-hunter expeditions ship in the 0.24.4 release (owner 11-10), so no separate bump.
 
 ## Checks
 - **Sky train in the 0.24.4 build:** its Hollow Crown has no train at all (`--train-check` stops at "the map has a sky train"). This branch brings it back as the winding loop.

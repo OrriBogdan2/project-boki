@@ -24,7 +24,7 @@ ring form (`TrainRoute` reads either one). A ride averages ~8 m/s between stops 
 MAX_NODES, because cross-island trips on the bigger land ran out of nodes.
 
 ## Consequences
-- Net.VERSION 0.26.0 on its own branch; it shipped in the 0.24.5 build as Net.VERSION 0.24.5 (match size and map change). No save change.
+- Net.VERSION 0.26.0 on its own branch; it ships in the 0.24.4 release under Net.VERSION 0.24.4 (match size and map change; owner 11-10). No save change.
 - Matchmaker trio slots follow the match size on ext/matchmaker-map-2x (18 at 30 hunters).
 - TEAM_COLORS has 40 entries: the first 8 as before, the other 32 picked farthest-first in OKLab, so no two
   are closer than Data.TEAM_COLOR_GAP (0.08; the earlier deeper shades came as close as 0.028 and two
