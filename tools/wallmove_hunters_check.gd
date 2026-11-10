@@ -73,6 +73,10 @@ func _hunter(a: String) -> void:
 	m.queue_free()
 
 func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
+	# a Spirit Walk from the last case ends here: set_arch builds a new kit, but Hunter.spirit_t
+	# would outlive it and let her climb the wall face (fbf2e50d0) in every case after it
+	if P.ak and P.ak.get("spirit") != null:
+		P.ak.spirit.end("merge")
 	P.set_arch(arch)
 	P.unlock_all()
 	P.out = false
@@ -84,7 +88,7 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	for f in ["pad", "grap", "lfloat", "shove", "charge", "stomp", "abil_charge"]:
 		P.set(f, {})
 	for f in ["grap_cd", "mantle_cd", "roll_t", "glide_cd", "knock_t", "fly_t", "stun_t", "root_t", "wall_touch_t",
-			"fire_cd", "reload_t"]:
+			"fire_cd", "reload_t", "spirit_t"]:
 		P.set(f, 0.0)
 	P.kb_t = -9.0
 	P.wall_hit_v = Vector2.ZERO
@@ -138,7 +142,10 @@ func _kick_case(what: String) -> void:
 
 ## In the air with the wall within the hop's reach.
 func _at_wall() -> bool:
-	return not P.grounded and face - P.pos.x - P.r < WallMoves.FACE_REACH
+	# beside the face: not through it (a Spirit Walk ghosts terrain) and not up over its top
+	var gap: float = face - P.pos.x - P.r
+	return not P.grounded and gap < WallMoves.FACE_REACH and P.pos.x < face \
+		and P.pos.y < m.world.ground_at(face + 0.5, z0) - 0.1
 
 func _kicks() -> int:
 	return int(P.stats.get("wall_kicks", 0))
