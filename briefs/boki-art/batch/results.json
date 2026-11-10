@@ -90121,5 +90121,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_sporcupine_g_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fv4_lunowl",
+    "name": "Lunowl female (same family as the dusk male)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv4_lunowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv4_lunowl",
+    "name": "Lunowl female (same family as the dusk male)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv4_lunowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv4_lunowl",
+    "name": "Lunowl female (same family as the dusk male)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fv4_lunowl_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv4_lunowl",
+    "name": "Lunowl female (same family as the dusk male)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv4_lunowl_2.jpg",
+    "ok": true
   }
 ]
