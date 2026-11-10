@@ -72733,5 +72733,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_glassolotl_rear_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_coral",
+    "name": "Chandelotl colour scheme: coral",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_coral_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_night",
+    "name": "Chandelotl colour scheme: night",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_night_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_amethyst",
+    "name": "Chandelotl colour scheme: amethyst",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_amethyst_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_night",
+    "name": "Chandelotl colour scheme: night",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_night_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_amethyst",
+    "name": "Chandelotl colour scheme: amethyst",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_amethyst_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_coral",
+    "name": "Chandelotl colour scheme: coral",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_coral_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_vespyx",
+    "name": "Vespyx (V2 sheet)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vespyx",
+    "name": "Vespyx (V2 portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_vespyx_2.jpg",
+    "ok": true
   }
 ]
