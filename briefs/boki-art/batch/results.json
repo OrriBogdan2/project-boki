@@ -86299,5 +86299,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_rattlebub_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_polyshroom_b4",
+    "name": "Polyshroom (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_polyshroom_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_polyshroom_b4",
+    "name": "Polyshroom (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_polyshroom_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_malletary_b4",
+    "name": "Malletary (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_malletary_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rattlebub_b4",
+    "name": "Rattlebub (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_rattlebub_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rattlebub_b4",
+    "name": "Rattlebub (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_rattlebub_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rattlebub_b4",
+    "name": "Rattlebub (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_rattlebub_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rattlebub_b4",
+    "name": "Rattlebub (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_rattlebub_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_starcap_b4",
+    "name": "Starcap (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_starcap_b4_2.jpg",
+    "ok": true
   }
 ]
