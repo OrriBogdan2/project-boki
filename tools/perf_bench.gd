@@ -1,8 +1,8 @@
 extends RefCounted
 ## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then a farm run, then the base demo (BaseDemo plus two Boki: 6 Boki, toys, snacks, an egg) with a Dash run at
-## BASE_RACE_AT. Every frame is
+## on the map, a fight: two rivals and a monster pack brought to you), then a farm run, then the base demo
+## (BaseDemo plus two Boki: 6 Boki, toys, snacks, an egg) with a Dash run at BASE_RACE_AT. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
@@ -13,6 +13,9 @@ const DT := 1.0 / 60.0
 const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
 const BASE_RACE_AT := 10.0          # s into the base part: the Dash starts
+const SLOW_MS := 50.0               # ms: the DECISIONS 2026-11-08 ceiling for a frame after warm-up
+const WARM_S := 3.0                 # s of the base part treated as warm-up
+const SECTION_FRAMES := 120         # frames the base part's step timing samples
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
 var main: Node
@@ -144,27 +147,49 @@ func _base() -> void:
 		var rec := Save.new_kin(spec[0], spec[1])
 		Care.ensure(rec)
 		d["roster"].append(rec)
-	Game.goto("home")
-	for i in 30:
-		await main.get_tree().process_frame
-	var home = main.current
+	main.current.queue_free()
+	var home = await main._hb_home()
 	BaseDemo.new().stage(home)
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0
 	var raced := false
-	while t < base_secs:
+	hud_us = 0
+	while t < base_secs:      # real seconds: the garden runs on the frame's own delta
 		if not raced and t >= BASE_RACE_AT:
 			home.hrace.use()
 			raced = true
+			print("BENCH base race started: %s" % (home.hrace.run != null))
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append(_frame("base", fl.size(), (now - last) / 1000.0, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		fl.append(_frame("base", fl.size(), (now - last) / 1000.0, 0.0))
+		if fl[-1]["wall"] > SLOW_MS and t > WARM_S:
+			print("BENCH base slow frame t=%.1f s: %.0f ms" % [t, fl[-1]["wall"]])
 		last = now
-		t += DT
-	print("BENCH base race ran: %s" % (home.hrace.run != null or home.hrace.card_t > 0.0))
+		t += fl[-1]["wall"] / 1000.0
 	_summary("base", fl)
+	await _sections(home)
 	_meshes()
+
+## The costliest per-frame steps of the garden: home._process off, its steps timed by hand for SECTION_FRAMES.
+func _sections(home) -> void:
+	var steps := {"sky": home._update_sky, "hover": func(_d): home._update_hover(), "move_kin": home._move_kin,
+		"care": home._care_tick, "econ": home.hecon.tick, "race": home.hrace.tick, "shove": home.hshove.tick,
+		"seek": home.hseek.tick, "volley": home.hvolley.tick, "bubbles": home._update_bubbles, "gather": home.hg.tick,
+		"snack": home.hsp.tick, "work": home.hw.tick, "incub": home.hinc.tick}
+	var us := {}
+	home.set_process(false)
+	for i in SECTION_FRAMES:
+		for k in steps:
+			var t0 := Time.get_ticks_usec()
+			steps[k].call(DT)
+			us[k] = int(us.get(k, 0)) + Time.get_ticks_usec() - t0
+		await main.get_tree().process_frame
+	home.set_process(true)
+	var ks := us.keys()
+	ks.sort_custom(func(a, b): return us[a] > us[b])
+	var top := ks.slice(0, 8).map(func(k): return "%s %.2f" % [k, us[k] / 1000.0 / SECTION_FRAMES])
+	print("BENCH base steps (ms per frame): " + ", ".join(top))
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
@@ -206,19 +231,25 @@ func _summary(part: String, fl: Array) -> void:
 	sc.sort()
 	var p99 := float(w[int((w.size() - 1) * 0.99)])
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
-	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps)" % [part, fl.size(), _avg(fl, "wall"),
-		p99, 1000.0 / maxf(low, 0.001)])
+	var slow := w.filter(func(x): return x > SLOW_MS).size()
+	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), max %.1f ms, over %.0f ms: %d" % [
+		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
 	print("BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, render cpu %.2f ms" % [
 		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
-	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
+	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
-		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights()])
+		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights(), _casters()])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
+
+func _casters() -> int:
+	var all := main.get_tree().root.find_children("*", "MeshInstance3D", true, false)
+	var on := GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return all.filter(func(m): return m.cast_shadow != on and m.is_visible_in_tree()).size()
 
 func _shadow_lights() -> int:
 	var lights := main.get_tree().root.find_children("*", "Light3D", true, false)
