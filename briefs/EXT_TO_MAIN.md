@@ -6059,3 +6059,4 @@ READY ext/anim-aim-pitch ea21ce611 (aim pitch across terraces for all 12 Hunters
 READY ext/combat-perk-orbs 6079b6cea (perk orbs vs source)
 READY ext/anim-gun-recoil c5ee85647 (additive arm+shoulder shot kick on Vex/Sable/Grimble clips, 2/3/4 deg, settle 0.07-0.11 s; --clip-check 221 ok/0 fail, health strict, gen_wiki ok; before/after strips via --recoil-shots)
 READY ext/perf-train-0245 c14728951 (perf train on 0.24.4: perf-actors-rebased (+expedition-fps r2), fight-pools, mobs, model-drawcalls, occluders, render-presets-1108b x2, visibility-ranges-rebased, fight-hitch, farm-perf-low shadow half merged; fps-feel reverted (60 Hz apex/feel-golden drift); fixes: catch-up cap (bench-real p99 85->66 ms), chest/breakable draw range; hitch-check double-step fixed. 4090 box hitch medians -6..-18 ms, land frames>50ms 160->39. No new reds vs base on 22 checks + feel-golden. docs/PERF_TRAIN.md)
+READY ext/combat-boots-charms 9f526d7cc (boots and charms to source)
