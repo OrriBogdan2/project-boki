@@ -91038,5 +91038,40 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/pose_dynaboa_3.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_dynaboa",
+    "name": "Dynaboa (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_dynaboa_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_dynaboa",
+    "name": "Dynaboa (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_dynaboa_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_stormit",
+    "name": "Stormit (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_stormit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_stormit",
+    "name": "Stormit (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_stormit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_stormit",
+    "name": "Stormit (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_stormit_3.jpg",
+    "ok": true
   }
 ]
