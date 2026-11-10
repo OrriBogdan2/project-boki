@@ -244,12 +244,15 @@ func _open_farm(main: Node) -> void:
 	hm = load("res://scripts/home/home.gd").new()
 	main.add_child(hm)
 	await tree.process_frame
+	while hm.building:      # with a display the farm builds under the ink wipe, over several frames
+		await tree.process_frame
 	await tree.process_frame
 	hm.set_process(false)
 	farm_at = _farm_lane(12.0)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
+	RenderingServer.render_loop_enabled = false      # thousands of frames, none looked at (a soft renderer is slow)
 	_begin(main)
 	m.paused = false
 	await _trials("match")
