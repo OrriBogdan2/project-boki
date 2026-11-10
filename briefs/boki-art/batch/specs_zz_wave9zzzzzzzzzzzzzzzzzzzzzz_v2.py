@@ -974,3 +974,7 @@ for _n,_who in (('Canvastross',"the final form"),('Jibbatross',"the middle form"
 # 05:55 ET 11-10 OWNER: "Oarter needs a new position because it's the same as Galleotter" (both prowl on all fours, facing left).
 ON_POSE('Oarter',_LM['Oarter']['sheet'],'mid','sleek',False,True,"mid-dive, swimming through the air facing RIGHT: body stretched long in a smooth arc, front paws tucked to its chest, its big oar-shaped tail swept up behind it like a paddle mid-stroke, a cheeky grin back at the viewer.","dark brown fur with a tan throat and belly, a row of small oar-shaped spines along its back, a broad tan oar tail, blue eyes")
 SPECS[-1]['id']='on_oarter_dive'; SPECS[-1]['runs']=4
+
+# 06:00 ET 11-10 OWNER: "Ribbonwyrm too" (new position).
+ON_POSE('Ribbonwyrm',_LM['Ribbonwyrm']['sheet'],'mid','pretty',False,False,"flying upward on a diagonal, facing LEFT, its long body stretched out in one loose open wave like a ribbon caught in the wind (no coils, no figure-eight, no knot), head high at the top left, tail streaming away at the bottom right, whiskers and ribbon fins trailing.","coral-red and cream striped body, pale blue swirl markings, small horns, long thin ribbon whiskers and fins, a tufted tail")
+SPECS[-1]['id']='on_ribbonwyrm_wave'; SPECS[-1]['runs']=4
