@@ -79936,5 +79936,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_briarlynx_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_fizzlet",
+    "name": "Fizzlet (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_fizzlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_fizzlet",
+    "name": "Fizzlet (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_fizzlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_fizzlet",
+    "name": "Fizzlet (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_fizzlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_boltstrich",
+    "name": "Boltstrich (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_boltstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_thunderstrich",
+    "name": "Thunderstrich (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_thunderstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_boltstrich",
+    "name": "Boltstrich (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_boltstrich_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_boltstrich",
+    "name": "Boltstrich (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_boltstrich_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bubblisk",
+    "name": "Bubblisk (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_bubblisk_2.jpg",
+    "ok": true
   }
 ]
