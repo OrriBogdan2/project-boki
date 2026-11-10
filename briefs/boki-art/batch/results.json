@@ -100432,5 +100432,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_slog_r4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_slog_r4",
+    "name": "Slog (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_slog_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_slog_r4",
+    "name": "Slog (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_slog_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_slog_r4",
+    "name": "Slog (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_slog_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sloggoth_r4",
+    "name": "Sloggoth (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_sloggoth_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sloggoth_r4",
+    "name": "Sloggoth (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_sloggoth_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sloggoth_r4",
+    "name": "Sloggoth (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_sloggoth_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_r4",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_r4",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_r4_3.jpg",
+    "ok": true
   }
 ]
