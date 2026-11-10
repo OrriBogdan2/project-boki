@@ -4,6 +4,7 @@ extends RefCounted
 ## has made no progress for 3 s), two Boki sitting on each other for 3 s, and any Boki standing inside the house,
 ## a toy, water or any other block it can't enter. Zero stuck and zero inside is the pass bar; overlaps are printed
 ## and counted (two Boki sharing a toy or a pile may brush), not failed. Never touches the real save.
+## `--nav-zone=<id>` runs it in that garden zone (garden_zones.json) instead of Bramblebank.
 
 const SIM_SECS := 600.0        # s of game time (10 in-game minutes)
 const DT := 0.25               # s per step
@@ -14,6 +15,7 @@ const OVERLAP_K := 0.6         # of the two body radii: closer than this is over
 const CAST := ["zapple", "burrlet", "cindle", "pebbit", "lodestick", "marchleaf"]
 const SEED := 5
 
+var zone := ""         # --nav-zone=: the zone to sweep ("" the start zone)
 var bad := 0
 var main: Node
 var home
@@ -33,13 +35,29 @@ func _save() -> void:
 	for i in CAST.size():
 		var rec := Save.new_kin(CAST[i], "B%d" % i)
 		Care.ensure(rec)
+		if zone != "":
+			rec["zone"] = zone
 		d["roster"].append(rec)
 	d["roster"][0]["starter"] = true
 	d["active"] = d["roster"][0]["uid"]
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	d["gems"] = 1000
 	HomeLayout.new_fs(d, SEED)
+	if zone != "":
+		d["zones"][zone] = {"open": true}
 	Save.d = d
+
+## The base's Home, in the zone if there is one.
+func _open_home() -> Node:
+	if zone == "":
+		return await main._hb_home()
+	var hm: Node = load("res://scripts/home/home.gd").new()
+	hm.zone = zone
+	main.add_child(hm)
+	main.current = hm
+	for i in 2:
+		await main.get_tree().process_frame
+	return hm
 
 ## Every plaything and the house on the built farm, round the landing.
 func _stage() -> void:
@@ -128,8 +146,11 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	seed(SEED)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--nav-zone="):
+			zone = a.substr(11)
 	_save()
-	home = await main._hb_home()
+	home = await _open_home()
 	ok(home.kins.size() == CAST.size() and home.life != null, "%d Boki on a base_mode farm" % home.kins.size())
 	_stage()
 	var cases := 0

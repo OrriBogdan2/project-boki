@@ -185,16 +185,22 @@ var card_t := 0.0
 func _init(home) -> void:
 	h = home
 
-## The log and the seed beside the Training post (none without one); called when fixtures move.
+## This zone's own court (base_volley.json "courts": the log's middle, and what a miss splashes), or {}.
+static func court() -> Dictionary:
+	return rules()["courts"].get(GardenZones.here, {})
+
+## The log and the seed beside the Training post, or on the zone's court over its shallows (none without
+## either); called when fixtures move.
 func place() -> void:
 	if is_instance_valid(log_node):
 		log_node.queue_free()
 	log_node = null
-	if h.YARD_AT.x < -100.0:
+	var C := court()
+	if C.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	log_node = Node3D.new()
 	log_node.name = "VolleyLog"
-	log_node.position = h.YARD_AT + LOG_OFF
+	log_node.position = h.YARD_AT + LOG_OFF if C.is_empty() else Vector3(C["at"][0], 0.0, C["at"][1])
 	h.add_child(log_node)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -217,6 +223,13 @@ func place() -> void:
 	seed_node.material_override = glow
 	seed_node.visible = false
 	log_node.add_child(seed_node)
+
+## A miss over a court's shallows: the seed drops in and throws up water at the side that missed.
+func _splash(side: int) -> void:
+	var C := court()
+	if not C.is_empty():
+		var at := log_node.position + Vector3(0, 0.1, _side_z(side, 0.9))
+		h.fx.burst(at, Color(String(C["splash"])), 14, 2.2, 0.5, 6.0)
 
 func find(p2: Vector2) -> Dictionary:
 	if run != null or not is_instance_valid(log_node):
@@ -275,6 +288,7 @@ func tick(d: float) -> void:
 		bar.step(d)
 	if run.score[0] + run.score[1] != points:
 		h._emote(pair[run.last_miss], "!", true)
+		_splash(run.last_miss)
 		h._toast("%s %d : %d %s" % [run.recs[0]["name"], run.score[0], run.score[1], run.recs[1]["name"]])
 	_place()
 	if run.over():

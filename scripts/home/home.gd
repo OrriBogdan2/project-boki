@@ -119,6 +119,7 @@ func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if zone == GardenZones.HUB: visit = HubLayout.island()
 	GardenZones.here = zone
+	ZoneLayout.enter(zone)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
@@ -408,6 +409,7 @@ func _ready_rest() -> void:
 	if FarmUnlocks.base_mode() and not _visiting():
 		hway = HubWaystone.new(self)
 		hway.place()
+	ZoneDress.place(self)
 	if visit.is_empty():
 		rack_node = _glider_rack()
 		rack_node.position = spots["rack"]
@@ -1121,6 +1123,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	ZoneLayout.leave()
 	SeeThrough.off()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the

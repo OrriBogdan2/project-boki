@@ -6,6 +6,8 @@ extends RefCounted
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-zone=<garden zone id>]  adds a "zone" part: that zone with six Boki out, judged against the
+##   budget in content/rules/garden_zones.json ("BENCH zone budget" lines say ok or FAIL)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -13,10 +15,13 @@ const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fil
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
+const NavCheck := preload("res://tools/garden_nav_check.gd")
+
 var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var zone := ""
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -29,6 +34,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-zone="): zone = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -38,6 +44,8 @@ func run(main_node: Node) -> void:
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
 	await _match()
 	await _farm()
+	if zone != "":
+		await _zone()
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
@@ -115,8 +123,8 @@ func _bring_fight(m: Match) -> void:
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
-func _farm() -> void:
-	Game.goto("home")
+func _farm(part := "farm", params := {}) -> void:
+	Game.goto("home", params)
 	for i in 30:
 		await main.get_tree().process_frame
 	var fl: Array = []
@@ -127,10 +135,42 @@ func _farm() -> void:
 		var now := Time.get_ticks_usec()
 		var wall := (now - last) / 1000.0
 		last = now
-		fl.append(_frame("farm", fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		fl.append(_frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
-	_summary("farm", fl)
+	_summary(part, fl)
 	_meshes()
+	if part == "zone":
+		_budget(fl)
+
+## A garden zone with the nav sweep's six Boki out, as a farm part.
+func _zone() -> void:
+	var nav := NavCheck.new()
+	nav.main = main
+	nav.zone = zone
+	FarmUnlocks.rules()["base_mode"] = true
+	nav._save()
+	await _farm("zone", {"zone": zone})
+
+## The zone part against GARDEN.md 10.6: the worst frame's draws, objects and nodes, the emitting particle
+## systems, and the average frame.
+func _budget(fl: Array) -> void:
+	var B: Dictionary = GardenZones.rules()["budget"]
+	var emit := 0
+	for cls in ["GPUParticles3D", "CPUParticles3D"]:
+		emit += main.get_tree().root.find_children("*", cls, true, false).filter(func(n): return n.emitting).size()
+	var got := {"draws": _peak(fl, "draws"), "objects": _peak(fl, "objs"), "nodes": _peak(fl, "nodes"),
+		"emitters": emit, "frame_ms": _avg(fl, "wall")}
+	var bad := false
+	for k in got:
+		var good: bool = float(got[k]) <= float(B[k])
+		bad = bad or not good
+		print("BENCH zone budget %s: %.1f of %.1f %s" % [k, got[k], B[k], "ok" if good else "FAIL"])
+	print("BENCH zone budget: %s" % ("FAIL" if bad else "ok"))
+
+func _peak(fl: Array, key: String) -> float:
+	var m := 0.0
+	for f in fl: m = maxf(m, float(f[key]))
+	return m
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,

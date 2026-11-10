@@ -26,3 +26,10 @@ The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays
 later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
 Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
 (`KinBox.farm_room`) counts each zone on its own.
+
+Step 7a (Glasswater) is the first zone with its own island. A zone with a `build` in `garden_zones.json`
+is laid out from that data (`ZoneLayout`, theme `glasswater` in `HomeLayout.THEMES`) and, while its Home is
+open, `HomeLayout.of(Save.d)` answers with it, so no reader of the layout changes. Nothing of it is saved
+but the snack patch's ripening timer (`Save.d["zones"][id]["patch"]`, a key that is simply missing on an
+older save); build mode is off there. `ZoneDress` adds the shallows and a MultiMesh scatter; `BaseVolley`
+reads the zone's court from `base_volley.json`.

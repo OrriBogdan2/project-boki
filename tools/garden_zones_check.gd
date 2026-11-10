@@ -8,7 +8,8 @@ extends RefCounted
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
-## opens its cards.
+## opens its cards. Glasswater (step 7a): its own island from data (theme, tub, patch, shallow court
+## and scatter), build mode off, the patch's timer on the save, and nothing of it left in Bramblebank.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 
@@ -24,6 +25,7 @@ func run(m: Node) -> void:
 	_keys_part()
 	await _travel_part(m)
 	await _move_part(m)
+	await _glasswater_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -187,3 +189,46 @@ func _cap_part() -> void:
 	ok(GardenZones.move(next, "glasswater") != "" and GardenZones.zone_of(next) == "bramblebank",
 		"with %d out in Glasswater, the next move is refused" % cap)
 	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")
+
+func _glasswater_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
+	var B: Dictionary = GardenZones.info("glasswater")["build"]
+	Game.goto("home", {"zone": "glasswater"})
+	var gw = await _arrived(m, Game.main.current)
+	ok(gw != null and gw.hvolley != null, "Glasswater loads")
+	if gw == null or gw.hvolley == null:
+		return
+	ok(HomeLayout.of(Save.d)["theme"] == "glasswater" and String(Save.d["layout"]["theme"]) == "meadow",
+		"its layout stands in while it is open; the save's own layout stays Bramblebank's")
+	ok(gw.toys.toys().any(func(t): return t["id"] == "toy_tub"),
+		"the splash tub stands in it")
+	var snacks := SnackPatch.snacks(Save.d)
+	var types: Array = GardenZones.info("glasswater")["types"]
+	ok(snacks.size() == 3 and snacks.all(func(f): return types.has(Content.rules("lean")["foods"][f])),
+		"its patch grows Water, Ice and Crystal snacks (%s)" % ", ".join(snacks))
+	var log_at: Vector3 = gw.hvolley.log_node.position
+	var sh: Array = B["shallow"]
+	ok(log_at.x >= sh[0] and log_at.x <= sh[2] + 1.0 and log_at.z >= sh[1] and log_at.z <= sh[3] + 1.0,
+		"the Spark Volley log lies in the shallow channel")
+	gw.hvolley._splash(0)
+	ok(not BaseVolley.court().is_empty(), "a miss splashes on the court")
+	ok(gw.hway.node != null and gw.player.position.distance_to(gw.hway.node.position) < 0.5,
+		"you arrive on its return pad")
+	ok(not gw.hb.can_build(), "build mode is off in the zone")
+	var batches: Array = gw.find_children("*", "MultiMeshInstance3D", false, false)
+	var mats := {}
+	var n := 0
+	for mi in batches:
+		mats[(mi as MultiMeshInstance3D).material_override] = true
+		n += (mi as MultiMeshInstance3D).multimesh.instance_count
+	var want: int = int(B["scatter"]["crystal"]) + int(B["scatter"]["reed"]) + int(B["scatter"]["pebble"])
+	ok(batches.size() >= 3 and batches.size() <= 6 and mats.size() == 3 and n > want / 2,
+		"the scatter is %d props in %d MultiMesh batches over 3 shared materials" % [n, batches.size()])
+	gw.hsp.tick(1.0)
+	ok(Save.d["zones"]["glasswater"]["patch"].has("t"), "the patch's timer is kept on the save")
+	gw.hway.hop(GardenZones.HUB)
+	var hub = await _arrived(m, gw)
+	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")
+	Content.rules("farm_build")["base_mode"] = false

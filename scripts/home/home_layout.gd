@@ -31,6 +31,9 @@ const THEMES := {
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	# a zone's own ground (ZoneLayout): never for sale, it has no gems
+	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
+		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -248,9 +251,11 @@ static func ensure(d: Dictionary) -> Dictionary:
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
 	SnackPatch.grant(d)
-	return L
+	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
+	if not ZoneLayout.live.is_empty() and is_same(d, Save.d):
+		return ZoneLayout.live        # a built zone's Home is open: its island stands in for the save's
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 

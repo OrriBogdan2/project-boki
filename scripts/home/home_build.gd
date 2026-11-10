@@ -982,7 +982,7 @@ func reset_layout() -> void:
 
 # ------------------------------------------------------------------ build mode on / off
 func can_build() -> bool:
-	return h.visit.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
+	return h.visit.is_empty() and ZoneLayout.live.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
 
 func toggle() -> void:
 	if active:
