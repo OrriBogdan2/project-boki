@@ -16,7 +16,7 @@ const DEFAULTS := {
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
-	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
+	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
@@ -125,6 +125,7 @@ const ACTIONS := [
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
+	["move_readout", "Movement readout (tuning)"],
 ]
 
 var v: Dictionary = {}
