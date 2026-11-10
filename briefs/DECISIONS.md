@@ -3,6 +3,16 @@ Every agent reads this before building. If a brief, spec or older note disagrees
 Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "DECISION?". Newest decisions at the bottom of each section.
 
 
+
+## 2026-11-10 ~1:20 PM EST: XP follows SUPERVIVE's model (owner)
+Owner: "we should follow supervive here - no passive xp, clear xp tracker on the bottom left, and hitting players gives no xp, only builds towards armor upgrades" + "killing a monster = you and nearby teammates get xp - if an enemy steals a last hit, they get the xp (and bonuses for monsters that give those, like bosses)". Mechanics only; never SUPERVIVE names/art.
+Rules:
+- NO passive XP at all: the XP trickle (hunter.gd ~1918) is removed, not cut. Spec owner call 3 is decided: remove it. Catch-up must come from camps, comeback camps, knocks/lairs, not time.
+- Hitting players gives NO level XP. Damage to Hunters only builds toward armor upgrades (existing armor_xp / ARMOR_TIERS in hunter.gd ~2867, armor_hud.gd). Monster damage gives no level XP either (spec already says 0).
+- A clear XP tracker bottom-left: the run level + an XP bar to the next level in the bottom-left vitals block (scripts/ui/hud_vitals.gd), readable at a glance, with a small pop when camp/kill XP lands.
+- Monster XP is a KILL reward: whoever lands the last hit gets it, and so do their teammates nearby (spec's 30 m share radius). If an enemy squad steals the last hit, THEY get the XP and any kill bonus the monster carries (lair boss buffs, camp chief rewards, etc.). No XP for damage dealt without the kill. Make last-hit steals readable (who got it, a short callout) and design the counterplay (e.g. burst windows, boss low-HP tells).
+Overrides EARLY_CAMPS_DROP.md owner call 3 (trickle removed) and its Hunter-damage XP line. Levels design job 20261110-174036-a4 builds on this.
+
 ## 2026-11-10 ~12:50 PM EST: 3D priority = mobs + lair bosses before new Boki (owner)
 Owner: "i would prio monsters and bosses over new boki, but aim for all of them". 0.24.4 moved to 11-11, so the extra day goes to 3D.
 - Order: 7 enemy mobs + 3 lair bosses (colossus, serpent, brood) get turnaround sheets now (Mac Vertex runner), owner approves sheets, then Meshy image-to-3D. New Boki after, still in batches of 30.
