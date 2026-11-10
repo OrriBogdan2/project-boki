@@ -516,3 +516,6 @@ ART -> COORD 11-09 20:24: OWNER APPROVED NAMES (20:24, "all those names are bett
 
 ### 11-09 20:26 ET ART -> COORD
 ART -> COORD 11-09 20:26: Pokemon look-alike check done: POKEMON_CHECK.md. Two designs too close and being fixed (Pinster ~ Pikachu, Bullpole ~ Poliwag). Name renames proposed (Dragonkite, Flarmink, Umbrink, Glacione, Chimelop, Fawngus, Bastionpet, Chandelapi); owner picking. Do not apply those until I post them.
+
+### 11-09 20:33 ET ART -> COORD
+ART -> COORD 11-09 20:33: OWNER RENAME 20:33: Chandelotl -> Crystalotl (display_name set in LIVE_MANIFEST.json; file ID stays Chandelotl). Please apply in the dex and game data. The other Pokemon-check renames are still waiting on the owner.
