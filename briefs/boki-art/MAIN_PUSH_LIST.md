@@ -57,3 +57,38 @@ Renames: see briefs/boki-art/NAME_CHANGES.md (13 old -> new names; owner authori
 - Art: the main sheet/card/portrait is the male look. The entry's "female" block holds the female sheet/card/portrait as they land. Babies differ little or not at all, so they may have no "female" block: use the main art.
 - Lines: Bellowlet > Furnacowary; Gongibbon > Gongrowl; Kestrike > Arcestrel > Voltalon; Mothlet > Lunowl > Eclipsowl; Murmurling > Murmuron; Grainspin > Sandwidow > Hourachnid; Pavonazar (rare).
 - Ready now: female sheets for Kestrike, Lunowl, Gongibbon. Generating: Furnacowary, Eclipsowl, Murmurling, Murmuron, Sandwidow (sheet + card), then Voltalon, Arcestrel and Gongrowl.
+
+## 6. NAMES (owner-approved 20:38 ET 11-09): apply in game data and the Bokidex
+Full list of every Boki (dex no, file ID, old dex name, name): **briefs/boki-art/BOKI_NAMES.csv** (232 rows). File IDs and art paths do NOT change; only the shown name. Also in LIVE_MANIFEST.json as display_name.
+
+| Dex | File ID | Old name | New name |
+|---|---|---|---|
+| 3 | Glaivyx | Glaivyx | **Sabryx** |
+| 6 | Chandelotl | Chandelotl | **Crystalotl** |
+| 20 | Zippelith | Zippelith | **Zipperpent** |
+| 28 | Chandelapi | Chandelapi | **Candelapi** |
+| 39 | Druzemole | Druzemole | **Gemole** |
+| 40 | Gloamshell | Gloamshell | **Duskargot** |
+| 41 | Gloamspire | Gloamspire | **Duskspire** |
+| 44 | Effigeetle | Effigeetle | **Sculptillar** |
+| 53 | Flarmink | Flarmink | **Embermink** |
+| 58 | Umbrink | Umbrink | **Nightmink** |
+| 73 | Geysirbara | Geysirbara | **Geyserbara** |
+| 76 | Bastionpet | Bastionpet | **Crabulwark** |
+| 77 | Lodestick | Lodestick | **Magnestick** |
+| 78 | Lodestaff | Lodestaff | **Magnestaff** |
+| 83 | Lanternlong | Longlume | **Glowris** |
+| 106 | Selenfin | Selenfin | **Lunafin** |
+| 131 | Dragonkite | Dragonkite | **Kitedrake** |
+| 150 | Cubbat | Cubbat | **Cubwom** |
+| 157 | Fawngus | Fawngus | **Fawnshroom** |
+| 165 | Kintsuwyrm | Kintsuwyrm | **Gildwyrm** |
+| 218 | Cetorgan | Cetorgan | **Organwhal** |
+| 224 | Glacione | Glacione | **Clionice** |
+| new | Critwom | (new) | **Critwom** |
+| new | Sirencada | (new) | **Sirencada** |
+| new | Chimelop | (new) | **Jinglop** |
+| new | Citadoad | (new) | **Citadoad** |
+| new | Bastling | (new) | **Bastling** |
+
+Why: owner name pass (easy to say, obvious, memorable) plus a Pokemon look-alike check (POKEMON_CHECK.md). Pangolith keeps its name (Terrasloth is a pangolin now).
