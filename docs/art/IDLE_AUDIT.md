@@ -61,6 +61,10 @@ No source hero's pose or attitude is copied.
    The specs below follow the newer source; a text task should bring the archetype files in line.
 6. **No fidget.** No Hunter has a signature beat. Each spec below bakes one into a longer loop (6 to 9 s), because
    WardenClips has no random fidget layer. Adding that layer later would let the loops shrink back.
+   - Now a layer: `WardenBreak` (scripts/heroes/warden_break.gd, data content/rules/idle_breaks.json). After 6 s standing
+     calm (no input, no shot, ability or hit for 6 s) the player's Hunter plays one 2 to 3 s break from that Hunter's
+     personality line, then returns to idle and waits 12 s. Any key, button, move or hit cancels it in under 0.1 s.
+     Only at home, in the Training Area and in a match. `--idle-break-check` asserts it; `--idle-break-shots` films it.
 
 ## Per Hunter
 
