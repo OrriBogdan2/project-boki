@@ -787,8 +787,10 @@ func on_last_team() -> void:
 	for x in list:
 		if x["kind"] == "dock" and x["state"] == "called" and float(x["t"]) > RUSH_CALL_T:
 			x["t"] = RUSH_CALL_T
-	if m.player and not m.player.out and not m.player.extracted and m.hud:
-		m.hud.toast_small("Last squad: exits speed up", Color("8fe3c8"))
+	if m.player and not m.player.out and not m.player.extracted:
+		m.music_dir.last_squad()
+		if m.hud:
+			m.hud.toast_small("Last squad: exits speed up", Color("8fe3c8"))
 
 ## The admin menu's "exits ready now".
 func admin_ready() -> void:
