@@ -31,6 +31,8 @@ var guest_pid := 0
 var start_d := {}
 var pongs := {}               # ping n -> msec it came back
 var result := {}              # the client's report
+var flag := "--cast-predict-check"    # this check's flag (--summon-press-check reuses the harness with its own)
+var tag := "CASTPRED"                 # the prefix of its lines
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -40,7 +42,7 @@ func run(main_node: Node) -> void:
 	dn = load("res://tools/displace_net_check.gd").new()
 	dn.main = main
 	Net.message.connect(_on_msg)
-	if "--cast-predict-check=guest" in OS.get_cmdline_user_args():
+	if flag + "=guest" in OS.get_cmdline_user_args():
 		await _guest()
 	else:
 		await _host()
@@ -56,8 +58,8 @@ func _host() -> void:
 	var dir := ProjectSettings.globalize_path("user://cast_predict")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var log_path := dir.path_join("guest.log")
-	var cmd := "cd '%s' && %s --headless -- --cast-predict-check=guest --dn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), dn.GODOT, dn.port, log_path]
+	var cmd := "cd '%s' && %s --headless -- %s=guest --dn-port=%d > '%s' 2>&1" % [
+		ProjectSettings.globalize_path("res://"), dn.GODOT, flag, dn.port, log_path]
 	guest_pid = OS.create_process("/bin/sh", ["-c", cmd])
 	var other := ""
 	var t0 := Time.get_ticks_msec()
@@ -83,17 +85,17 @@ func _host() -> void:
 	var rtt := float(result["rtt"])
 	if rtt < RTT_MIN:
 		bad += 1
-	print("CASTPRED rtt %.0f ms (client, %d pings), relay lost %d packets, weather %s" % [
-		rtt, PINGS, relay.lost, "ok" if rtt >= RTT_MIN else "FAIL (no lag)"])
+	print("%s rtt %.0f ms (client, %d pings), relay lost %d packets, weather %s" % [
+		tag, rtt, PINGS, relay.lost, "ok" if rtt >= RTT_MIN else "FAIL (no lag)"])
 	_finish("")
 
 func _finish(why: String) -> void:
 	if why != "":
-		print("CASTPRED FAIL " + why)
+		print(tag + " FAIL " + why)
 		bad += 1
 	Net.lobby_emit("cp", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	print("CASTPRED DONE, failures: %d" % bad)
+	print("%s DONE, failures: %d" % [tag, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 # ------------------------------------------------------------------ the client

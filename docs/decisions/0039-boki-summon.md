@@ -25,3 +25,4 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 ## Consequences
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
+- Press timing: `--summon-press-check` (the burst on the press frame, offline and at 100 ms; G never swallowed).
