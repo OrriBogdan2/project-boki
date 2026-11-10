@@ -5952,3 +5952,4 @@ READY ext/vfx-meeko-weight-rebased 8d2b6858e (supersedes ext/vfx-meeko-weight 9c
 READY ext/ui-squad-rows 954e20cb9 (squad rows to HUD.md)
 READY ext/combat-hp-regen 0a8927e17 (Hunter OOC regen at source values)
 READY ext/vfx-dash-streak c52552edf (dash streak for every Hunter)
+READY ext/feel-knock-recover 1d6cdd3ab (knock slide and recovery to source)
