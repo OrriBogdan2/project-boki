@@ -101902,5 +101902,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_rollguin_nl_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_kingpinguin_nl",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_kingpinguin_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rollguin_nl",
+    "name": "Rollguin (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_rollguin_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rollguin_nl",
+    "name": "Rollguin (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_rollguin_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rollguin_nl",
+    "name": "Rollguin (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_rollguin_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kingpinguin_nl",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_kingpinguin_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_filefin_nl",
+    "name": "Filefin (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_filefin_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_nl",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_nl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_filefin_nl",
+    "name": "Filefin (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_filefin_nl_1.jpg",
+    "ok": true
   }
 ]
