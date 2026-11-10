@@ -260,9 +260,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hash": {
    "sheet": "ffad5cee8289",
-   "card": "78f668fda27e",
+   "card": "fce0e1678c49",
    "portrait": "a05dd50b01e9",
-   "hero": "1f65758604e4"
+   "hero": "07638c2dcc95"
   }
  },
  "Chandelapi": {
@@ -1920,9 +1920,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Snapler.png",
   "hash": {
    "sheet": "3d96f1bebc65",
-   "card": "5cea21b1d7bb",
+   "card": "4318d33bb8e8",
    "portrait": "b3fda74a3ebc",
-   "hero": "bab131108575"
+   "hero": "ed9dbd144c47"
   }
  },
  "Snuffapi": {
@@ -1959,9 +1959,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Spirevark.png",
   "hash": {
    "sheet": "21c2ff9d7d18",
-   "card": "4a328a6aee2d",
+   "card": "95b73d8fc034",
    "portrait": "4001cc58fa6d",
-   "hero": "3a36dcc16a8a"
+   "hero": "3ccd27553dcc"
   }
  },
  "Sporcupine": {
@@ -3006,9 +3006,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Checkmare.png",
   "hash": {
    "sheet": "04cb4cf898fc",
-   "card": "028a9c7c7746",
+   "card": "439795b92f49",
    "portrait": "e12dcd9bd338",
-   "hero": "23649c8131fe"
+   "hero": "97fbf95ba1ef"
   }
  },
  "Cindermaw": {
@@ -3288,9 +3288,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
   "hash": {
    "sheet": "02f74cc5b0e4",
-   "card": "3ec806657fea",
+   "card": "fb05e0d66024",
    "portrait": "62661c9fac9d",
-   "hero": "7fed3c30153a"
+   "hero": "1d4e2f850867"
   }
  },
  "Frigatee": {
@@ -3301,9 +3301,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
   "hash": {
    "sheet": "e11ee4577498",
-   "card": "a46569527cf8",
+   "card": "218c6487c9a0",
    "portrait": "a0c15ffdad4d",
-   "hero": "710198308754"
+   "hero": "4cf91ef78d35"
   }
  },
  "Glaciatee": {
@@ -3314,9 +3314,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
   "hash": {
    "sheet": "eaa2130bf9b1",
-   "card": "61b0bc59e825",
+   "card": "5579745883ad",
    "portrait": "35ff6c4ad9c0",
-   "hero": "25a89c9e054f"
+   "hero": "78bd61866907"
   }
  }
 }

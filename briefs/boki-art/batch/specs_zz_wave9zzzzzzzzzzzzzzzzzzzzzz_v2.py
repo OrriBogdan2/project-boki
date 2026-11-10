@@ -1230,3 +1230,30 @@ for _n in ('Mothlet','Grainspin'):
     _st,_ar,_dk,_fu=_FEMST[_n]; _cd='briefs/boki-art/cards/'+_n+'_female.jpg'; _n0=len(SPECS)
     V2SHEET_NEW(_n+' female',_cd,_GC,_GN); V2PORT_NEW(_n+' female',_cd,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_FEMPOSE[_n])
     SPECS[_n0]['id']='fs5_'+_n.lower(); SPECS[_n0+1]['id']='fp5_'+_n.lower(); SPECS[_n0+1]['runs']=2
+
+# ===== 11-10 OWNER on the strips: agrees with the other 1sts. Changes:
+# Seals = the aurora route (cool_*_b_2 live). Snapler = 2nd (m2_1) but "still a bit baby, maybe needs more". Spirevark's new pose "messed up his eyes,
+# try new prompts" (reverted). Wickapi's fur must match Snuffapi and Chandelapi. Checkmare "needs new poses that are more thought out" (reverted).
+# Scopeleon: "something to attach the end of the scope to his eye, like a base: it looks like it's magically floating there".
+_EYES=" Its eyes are small, round and amber with a dark pupil and one white highlight, both clearly drawn and matching, set on the sides of its long snout exactly as in image 1."
+for _k,_p in (('c',"digging: front half lowered, big front claws scooping forward, hind legs braced, facing LEFT, tail raised for balance, the tall termite spire on its back leaning forward"),
+              ('d',"walking side-on, facing RIGHT, long snout low to the ground sniffing, one front foot lifted, tail trailing, spire upright"),
+              ('e',"turned three-quarters away from the viewer, looking back over its shoulder, facing LEFT, so the spire on its back is the nearest thing to the viewer")):
+    _n0=len(SPECS); ON_POSE('Spirevark',_LM['Spirevark']['sheet'],'final','tough',False,False,_p+"."+_EYES,_KEEPALL); SPECS[_n0]['id']='pose3_spirevark_'+_k; SPECS[_n0]['runs']=2
+SPECS.append({'id':'fur_wickapi','name':'Wickapi (fur matches its line)','refs':['briefs/boki-art/cards/Wickapi.jpg','briefs/boki-art/cards/Snuffapi.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"recolour its fur so it is clearly the baby of the creature in image 2: the same dark chocolate-brown coat as image 2 (not red-brown), the same cream zebra stripes on its legs, the same purple for its eyes and candle flame, and a small tuft of purple flame-fur at the back of its neck like the start of image 2's mane. Take only the colours and that tuft from image 2. Its body, pose, face and size stay the same."})
+SPECS.append({'id':'base_scopeleon','name':'Scopeleon (scope attached to its eye)','refs':['briefs/boki-art/cards/Scopeleon.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"attach the telescope to its head properly: where the telescope meets its face there is a raised cone-shaped eye turret of its own navy skin, like a real chameleon's eye cone, with a brass ring collar at the tip that the telescope tube grows out of. The telescope clearly comes out of that eye socket, with no gap. Its other eye stays squinted shut. Nothing else changes."})
+SPECS.append({'id':'older_snapler','name':'Snapler (a bit less baby)','refs':['briefs/boki-art/cards/Snapler.jpg',_C%'Maulangler'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"age it up so it sits halfway to the adult in image 2: its eyes become smaller and narrower with a heavier brow, its mouth is wider with a row of uneven cream teeth showing, its body is longer and leaner with a ridge of small fin spikes along the back, its front legs are longer and stronger, and the pink cheek marks are gone. It keeps its colour, lure and purple smoke. Take only the mood and teeth from image 2."})
+# Checkmare poses, thought through: it is a chess knight sea-dragon, so the poses come from chess.
+for _k,_p in (('k1',"the knight's move: body bent in a sharp L shape, neck and head upright on the left, the long striped body turning at a right angle along the ground to the right, tail tip raised; proud profile facing LEFT"),
+              ('k2',"standing guard like a chess piece on its square: coiled into a tight round base at the bottom, neck rising straight up from the centre, head in strict profile facing RIGHT, the row of chess-piece plates running down the back of the neck like a mane"),
+              ('k3',"rearing like a warhorse: front of the body thrown up and back, head tossed high, facing RIGHT, the long body sweeping down and round in one big open curve to a raised spear tail")):
+    _n0=len(SPECS); ON_POSE('Checkmare',_LM['Checkmare']['sheet'],'final','majestic',False,False,_p+".",_KEEPALL); SPECS[_n0]['id']='pose3_checkmare_'+_k; SPECS[_n0]['runs']=2
+# Sets for the picks that are final: seals (aurora) and Canvastross (sea look).
+for _n,(_st,_ar,_pose) in {'Coolatee':('baby','cute',"rolling onto its back, flippers up, aurora bands showing"),'Frigatee':('mid','sleek',"leaping in an arc, aurora ribbons trailing"),
+                           'Glaciatee':('final','majestic',"head raised, bellowing, aurora curtain rising behind it"),'Canvastross':('final','majestic',"gliding side-on, facing RIGHT, wings spread flat like sails, foam-curl tips trailing")}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,False,_n=='Canvastross',_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_z'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_z'; SPECS[_n0+1]['runs']=2
+SPECS[:]=[s for s in SPECS if s['id'] not in ('v2s_wickapi_q','v2p_wickapi_q','v2s_snapler_q','v2p_snapler_q','v2s_scopeleon_q','v2p_scopeleon_q')]
