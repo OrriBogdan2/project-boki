@@ -35,6 +35,8 @@ func run(main_node: Node) -> void:
 	HomeLayout.new_fs(d, 5)
 	Save.d = d
 	var home = await main._hb_home()
+	while home.building:      # the farm builds over several frames under the ink wipe
+		await main.get_tree().process_frame
 	main.fade.reveal(0.01)
 	home.ppos = HomeLayout.LANDING + Vector3(0, 0, 1.0)
 	home.player.position = home.ppos
