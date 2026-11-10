@@ -96750,5 +96750,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rv_phonodrake_family_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_forgebrock_paws",
+    "name": "Forgebrock (review: paws)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_forgebrock_paws_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_forgebrock_paws",
+    "name": "Forgebrock (review: paws)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_forgebrock_paws_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_b",
+    "name": "Hydrangor (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_a",
+    "name": "Hydrangor (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_a",
+    "name": "Hydrangor (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_b",
+    "name": "Hydrangor (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_c",
+    "name": "Hydrangor (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_c",
+    "name": "Hydrangor (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_c_2.jpg",
+    "ok": true
   }
 ]
