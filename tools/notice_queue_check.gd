@@ -5,7 +5,9 @@ extends RefCounted
 ##   3. a higher notice cuts a lower banner short (after its MIN_SHOW); a stale low one is dropped
 ##   4. a region name with a short form shows it when others wait; a hold keeps everything back
 ##   5. the band stays inside the safe area and out of the reticle zone, 720p to ultrawide,
-##      with the ally alerts up too, and a long line wraps inside it
+##      and a long line wraps inside it
+##   6. a real match: a teammate knocked or picked up is a SQUAD notice in the HUD's queue (no
+##      separate ally cards), and your stolen Boki beats it to the screen
 ## Never touches the save.
 
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080), Vector2(2560, 1440), Vector2(3440, 1440), Vector2(5120, 1440)]
@@ -32,6 +34,8 @@ func run(main_node: Node) -> void:
 	_short_and_hold(host)
 	_band(host)
 	host.queue_free()
+	var reached := await _squad_events()
+	ok(reached, "the match part ran to its end")
 	print("NOTICEQ DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -151,3 +155,42 @@ func _band(host: Control) -> void:
 			q.clear()
 		ok(all_ok, "%dx%d: the banner stays in the safe area, off the reticle zone, two lines at most" % [sz.x, sz.y])
 		q.queue_free()
+
+# ------------------------------------------------------------------ 6. squad events in a match
+func _squad_events() -> bool:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4, "no_drop": true})
+	m.set_process(false)
+	await main.get_tree().process_frame
+	var q: NoticeQueue = m.hud.msgs
+	var mate: Hunter = null
+	for h in m.hunters:
+		if h != m.player and h.team == m.player.team:
+			mate = h
+	ok(mate != null and not ("alerts" in m.hud) and not m.hud.has_method("_draw_alerts"),
+		"the HUD has no ally cards of its own")
+	if mate == null:
+		m.queue_free()
+		return true
+	m.hud._track_mates(m.player, 0.1)
+	q.clear()
+	mate.downed = true
+	m.hud._track_mates(m.player, 0.1)
+	ok(q.count() == 1 and q.texts().size() == 1 and q.texts()[0].begins_with("ALLY KNOCKED"),
+		"a teammate knocked is one notice in the queue (%s)" % str(q.texts()))
+	ok(int(q._cur.get("prio", -1)) == NoticeQueue.SQUAD, "at SQUAD priority")
+	mate.downed = false
+	m.hud._track_mates(m.player, 0.1)
+	m.hud.toast("Thief took Ember!", Color.GOLD, NoticeQueue.CRITICAL)
+	var seen: Array[String] = []
+	_run(q, 3.0, seen)
+	var ci := seen.find("Thief took Ember!")
+	var ri := -1
+	for i in seen.size():
+		if seen[i].contains("revived") or seen[i].begins_with("ALLY REVIVED"):
+			ri = i
+	ok(ci >= 0 and (ri < 0 or ci < ri), "a stolen Boki shows before the waiting revive (%s)" % str(seen))
+	m.queue_free()
+	await main.get_tree().process_frame
+	return true

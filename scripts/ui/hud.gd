@@ -119,11 +119,11 @@ func flash(col: Color, strength := 0.35) -> void:
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
 
-## The notice band sits under the ally alerts, or in the tutorial's own lane while that runs
+## The notice band sits under the timer, or in the tutorial's own lane while that runs
 ## (Tutorial holds the queue while its banner is up).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.band = TutorialHud.lanes(c.size)["toast"] if m.tut else NoticeQueue.band_for(c.size, 84.0 + alerts_h)
+	msgs.band = TutorialHud.lanes(c.size)["toast"] if m.tut else NoticeQueue.band_for(c.size, 84.0)
 
 ## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
 ## them, so two lines of text never overlap on screen; they come back as it goes.
@@ -287,10 +287,6 @@ func _draw_all() -> void:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
-	if p and not m.duel:
-		_draw_alerts(sz, p)
-	else:
-		alerts_h = 0.0
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
 	if p and not p.out and not p.extracted:
@@ -1473,19 +1469,12 @@ func _has_status(e: Ent) -> bool:
 	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
 		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
 
-## Ally alerts, top centre under the timer. A teammate getting knocked gets a big card (their face,
-## name, bleed-out countdown, and how far and which way); it turns green if they're picked up, red if
-## they're lost, then fades. Smaller cards for a teammate eliminated or revived from their deathbox.
+## Ally events (a teammate knocked, picked up, eliminated, back from their deathbox, their wisp lost)
+## go to the notice queue as SQUAD notices; the squad panel keeps the live countdown and distance.
 var mate_last := {}       # nid -> last squad state label
-var alerts: Array = []    # {h, kind, t}
 
-func _track_mates(p: Hunter, delta: float) -> void:
-	for a in alerts.duplicate():
-		a["t"] = float(a["t"]) + delta
-		var life := 999.0 if a["kind"] == "knocked" else 2.6
-		if float(a["t"]) > life or (a["kind"] == "knocked" and not is_instance_valid(a["h"])) or (a["kind"] == "knocked" and not (a["h"] as Hunter).downed and float(a["t"]) > 1.0):
-			alerts.erase(a)
-	if p == null:
+func _track_mates(p: Hunter, _delta: float) -> void:
+	if p == null or m.duel:
 		return
 	for h in m.hunters:
 		if h == p or h.team != p.team:
@@ -1495,90 +1484,22 @@ func _track_mates(p: Hunter, delta: float) -> void:
 		mate_last[h.nid] = now
 		if now == was:
 			continue
-		var card = null
-		for a in alerts:
-			if a["h"] == h and a["kind"] == "knocked":
-				card = a
+		var who: String = h.pname.substr(0, 16)
 		if now == "WISP":
-			if card == null:
-				alerts.append({"h": h, "kind": "knocked", "t": 0.0})
+			var dm := int(round(Vector2(h.pos.x - p.pos.x, h.pos.z - p.pos.z).length()))
+			toast("ALLY KNOCKED  ·  %s  ·  %dm away, get them up" % [who, dm], Color("ff5a3a"), NoticeQueue.SQUAD, "%s knocked" % who)
 			Sfx.play("warn", null, -4.0, 0.0, 0.8)
 		elif was == "WISP" and now == "ALIVE":
-			if card: card["kind"] = "revived"; card["t"] = 0.0
-			else: alerts.append({"h": h, "kind": "revived", "t": 0.0})
+			toast("ALLY REVIVED  ·  %s is back on their feet" % who, GOOD, NoticeQueue.SQUAD, "%s revived" % who)
 			Sfx.play("revive", null, -6.0)
 		elif (now == "DEATHBOX" or now == "DEAD") and was in ["WISP", "ALIVE"]:
-			if card: card["kind"] = "eliminated"; card["t"] = 0.0
-			else: alerts.append({"h": h, "kind": "eliminated", "t": 0.0, "small": true})
+			toast("ALLY ELIMINATED  ·  %s  ·  get to their deathbox" % who, BAD, NoticeQueue.SQUAD, "%s eliminated" % who)
 			Sfx.play("warn", null, -8.0, 0.0, 0.6)
 		elif was == "DEATHBOX" and now == "ALIVE":
-			alerts.append({"h": h, "kind": "revived", "t": 0.0, "small": true})
+			toast("ALLY REVIVED  ·  %s is back from their deathbox" % who, GOOD, NoticeQueue.SQUAD, "%s revived" % who)
 			Sfx.play("revive", null, -6.0)
 		elif was == "DEATHBOX" and now == "DEAD":
-			alerts.append({"h": h, "kind": "lost", "t": 0.0, "small": true})
-	while alerts.size() > 3:
-		alerts.pop_front()
-
-var alerts_h := 0.0       # how much room the alerts take (the message lane sits below them)
-
-func _draw_alerts(sz: Vector2, p: Hunter) -> void:
-	var y := 82.0
-	alerts_h = 0.0
-	for a in alerts:
-		var h: Hunter = a["h"]
-		var kind := String(a["kind"])
-		var t := float(a["t"])
-		var fade := 1.0 if kind == "knocked" else clampf((2.6 - t) / 0.6, 0.0, 1.0)
-		var pop := clampf(t / 0.15, 0.0, 1.0)
-		var small: bool = a.get("small", false)
-		var w := 300.0 if not small else 236.0
-		var hh := 70.0 if not small else 44.0
-		var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, y + (1.0 - pop) * -10.0), Vector2(w, hh))
-		var col := Color("ff5a3a")
-		var title := "ALLY KNOCKED"
-		match kind:
-			"revived": col = GOOD; title = "ALLY REVIVED"
-			"eliminated": col = BAD; title = "ALLY ELIMINATED"
-			"lost": col = MUTED; title = "WISP LOST"
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0) if kind == "knocked" else 0.0
-		_rounded(r, Color(0.06, 0.03, 0.04, 0.9 * fade), 10, Color(col, (0.6 + 0.4 * pulse) * fade), 2)
-		var ps := hh - 12.0
-		var pr := Rect2(r.position + Vector2(6, 6), Vector2(ps, ps))
-		var pst := "down" if kind == "knocked" else ("dead" if kind in ["eliminated", "lost"] else "")
-		if fade > 0.05:
-			_draw_portrait(pr, h, pst, col)
-		var tx := pr.end.x + 10.0
-		if small:
-			_text(Vector2(tx, r.position.y + 19), title, 12, Color(col, fade), big)
-			_text(Vector2(tx, r.position.y + 36), h.pname.substr(0, 16), 14, Color(INK, fade), big)
-		else:
-			_text(Vector2(tx, r.position.y + 21), title, 13, Color(col, fade), big)
-			_text(Vector2(tx, r.position.y + 42), h.pname.substr(0, 16), 17, Color(INK, fade), big)
-			if kind == "knocked":
-				_text(Vector2(tx, r.position.y + 61), "%ds to revive" % int(ceil(_bleed_left(h))), 12, Color("ffb0a0"))
-				# which way, and how far
-				var dv := Vector2(h.pos.x - p.pos.x, h.pos.z - p.pos.z)
-				var ctr := Vector2(r.end.x - 34, r.position.y + 30)
-				var ang := _screen_dir(dv)
-				var tip := ctr + Vector2.from_angle(ang) * 13.0
-				var side := Vector2.from_angle(ang + PI * 0.5) * 7.0
-				var back := ctr - Vector2.from_angle(ang) * 6.0
-				c.draw_circle(ctr, 17.0, Color(0, 0, 0, 0.35))
-				c.draw_colored_polygon(PackedVector2Array([tip, back + side, back - side]), col)
-				_ctext(Vector2(ctr.x, r.position.y + 63), "%dm" % int(round(dv.length())), 12, INK, big)
-			else:
-				_text(Vector2(tx, r.position.y + 61), "Back on their feet" if kind == "revived" else "Get to their deathbox", 12, Color(MUTED, fade))
-		y += hh + 8.0
-		alerts_h += hh + 8.0
-
-## A ground direction as a screen angle, using the camera's view.
-func _screen_dir(dv: Vector2) -> float:
-	var cam := m.cam
-	if cam == null or m.player == null:
-		return dv.angle()
-	var a := cam.unproject_position(m.player.position)
-	var b := cam.unproject_position(m.player.position + Vector3(dv.x, 0, dv.y).normalized() * 3.0)
-	return (b - a).angle()
+			toast("WISP LOST  ·  %s" % who, MUTED, NoticeQueue.SQUAD)
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
