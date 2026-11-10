@@ -143,7 +143,7 @@ Built as its own ultimate on X (owner decision, SERVER_UPDATE6). It was never fo
 | He stands planted through the charge | replaced (owner item 36): a slow walk (30% charging, 20% firing) and the aim follows the cursor; still no gun, Abyssal Hand, Anchor or barge until it ends | footage | yes (ult 0022-0041) |
 | Up close every slug of both waves connects | built (slugs leave his fists, so at 1.6m all six hit) | footage | yes (ult 0034, 0040) |
 | Best after a stun (the reel or the slam covers the charge) | built (the reel combo is asserted) | [guide](https://deltiasgaming.com/?p=298298) | yes |
-| Explosive: more damage to destructibles | not built (we have no destructible cover) | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
+| Explosive: more damage to destructibles | built: every slug breaks a crate or pot and lights a keg (props break in one hit, so "more damage" is moot); asserted `ult props` | [wiki](https://supervive.wiki.gg/wiki/Kingpin) | no |
 
 ## Moving while casting (RMB and E)
 
