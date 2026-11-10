@@ -1381,12 +1381,12 @@ func _ability_check() -> void:
 	_ac_run(m, 1.0, func(): T.inp["move"] = Vector2(-1, 0))
 	_ac("trap roots on step", before_root <= 0.0 and (T.root_t > 0.0 or T.hp < T.max_hp) and m.verbs.traps.is_empty(), "root %.2f, took %.0f" % [T.root_t, T.max_hp - T.hp])
 	m.queue_free(); await get_tree().process_frame
-	# 8. Moon Swap (kin E, performed from the shoulder): trade places
+	# 8. Moon Mark (kin E, performed from the shoulder): the foe is marked, you stay where you are
 	r = _ac_setup(6.0); m = r[0]; P = r[1]; T = r[2]
-	var pa := P.pos; var ta := T.pos
-	KinExec.cast(KinLib.ability("moon_swap"), KinExec.make_cx(m, P, null, P, T.pos, 1.0, "k1", "moon_swap"))
+	var pa := P.pos
+	KinExec.cast(KinLib.ability("moon_mark"), KinExec.make_cx(m, P, null, P, T.pos, 1.0, "k1", "moon_mark"))
 	_ac_run(m, 0.5)
-	_ac("swap trades places", P.flat_dist(ta) < 1.2 and T.flat_dist(pa) < 1.2, "player at %.1f from target's spot" % P.flat_dist(ta))
+	_ac("moon mark reveals and marks, you stay", P.flat_dist(pa) < 0.05 and T.vuln_t > 0.0 and T.reveal_t > 0.0, "player moved %.2f, vuln %.1f" % [P.flat_dist(pa), T.vuln_t])
 	m.queue_free(); await get_tree().process_frame
 	# 9. Fissure glove: the line throws the target up
 	r = _ac_setup(5.0); m = r[0]; P = r[1]; T = r[2]
@@ -1734,10 +1734,10 @@ func _grammar_runtime_check() -> void:
 	_grt("zapple auto Echolocate", T.reveal_t > 0.0 and P.crit_t > 0.0, "reveal %.1f crit %.1f" % [T.reveal_t, P.crit_t])
 	_grt_reset(T)
 	k = _grt_kin(m, P, "wisplet")
-	var pa := P.pos; var ta := T.pos
+	var pa := P.pos
 	k.use_ability("k1", T.pos)
 	_ac_run(m, 0.6)
-	_grt("wisplet E Moon Swap trades places", P.flat_dist(ta) < 1.2 and T.flat_dist(pa) < 1.2, "player %.1f from target's spot" % P.flat_dist(ta))
+	_grt("wisplet E Moon Mark marks the foe, you stay", P.flat_dist(pa) < 0.05 and T.vuln_t > 0.0 and T.reveal_t > 0.0, "player moved %.2f" % P.flat_dist(pa))
 	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); _grt_reset(T)
 	_ac_run(m, 0.2)
 	k.use_ability("k2", P.pos)
@@ -1877,11 +1877,11 @@ func _grammar_runtime_check() -> void:
 	var kb := P.vel.x
 	P.impulse(Vector2(8, 0))
 	var kbv := P.vel.x - kb
-	_grt("mount: rider, -15% damage, half knockback", P.mounted() and is_equal_approx(P.owner_stat("damage_reduction"), 0.15) and k.ride_height() > 0.2, "kb %.1f, ride %.2f" % [kbv, k.ride_height()])
+	_grt("big Boki on Return: at your side, -15% damage, half knockback", not P.mounted() and k.beside and is_equal_approx(P.owner_stat("damage_reduction"), 0.15), "kb %.1f, %.1f m away" % [kbv, P.flat_dist(k)])
 	P.vel = Vector3.ZERO
 	P.gliding = true
 	P._refresh_kin_stats()
-	_grt("mount curls up while you glide", not P.mounted() and P.owner_stat("damage_reduction") == 0.0, "")
+	_grt("big Boki curls up while you glide", not P.mounted() and P.owner_stat("damage_reduction") == 0.0, "")
 	P.gliding = false
 	P._refresh_kin_stats()
 	var dashes0 := P.max_dashes()
