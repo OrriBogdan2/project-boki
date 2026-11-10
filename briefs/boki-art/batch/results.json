@@ -82141,5 +82141,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_dreadmonite_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_dreadmonite",
+    "name": "Dreadmonite (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_dreadmonite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_torpecone",
+    "name": "Torpecone (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_torpecone_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bathilus",
+    "name": "Bathilus (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_bathilus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_dreadmonite",
+    "name": "Dreadmonite (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_dreadmonite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ribbonwyrm",
+    "name": "Ribbonwyrm (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_ribbonwyrm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pocketpus",
+    "name": "Pocketpus (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_pocketpus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bathilus",
+    "name": "Bathilus (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_bathilus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pocketpus",
+    "name": "Pocketpus (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_pocketpus_3.jpg",
+    "ok": true
   }
 ]
