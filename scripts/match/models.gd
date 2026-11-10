@@ -824,7 +824,8 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
 	var gset := _glider_set(gskin)
-	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()], [gset[1], toon(Color("5a4636"), false)]]:
+	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()],
+			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
 		gmi.material_override = pc[1]
@@ -1279,7 +1280,8 @@ static func _glider_set(gskin: String) -> Array:
 		g.add_child(canopy)
 		var m_line := toon(Color("5a4636"), false)
 		for sx in [-1.0, -0.4, 0.4, 1.0]:
-			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
+			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE,
+					Vector3(0, 0, -0.62 * sx))
 		merge_static(g)
 		var got := {}
 		for ch in g.get_children():
