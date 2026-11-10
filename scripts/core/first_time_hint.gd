@@ -42,10 +42,11 @@ static func text(id: String) -> String:
 	return raw
 
 ## Shows the hint through toast(text) if this save has not had it; then never again. True if shown.
-static func show(id: String, toast: Callable) -> bool:
+## `words` overrides the line for a hint worded at the moment (the belt items).
+static func show(id: String, toast: Callable, words := "") -> bool:
 	if seen(id):
 		return false
-	var line := text(id)
+	var line := words if words != "" else text(id)
 	if line == "":
 		return false
 	mark(id)

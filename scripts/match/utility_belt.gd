@@ -177,6 +177,18 @@ static func pickup(h, id: String, n := 1) -> void:
 	var got := grant(h, id, n)
 	if got > 0 and h == h.m.player and h.m.hud:
 		h.m.hud.toast_small("+%d %s" % [got, name_of(id).to_lower()], col_of(id))
+		h.m.hints.belt_picked(id)
+
+## The one-time hint line for an item on this hunter's belt ("" if it is not there): its name, its
+## slot's key cap and the first sentence of its desc (content/rules/hints.json belt_line).
+static func hint_line(h, id: String) -> String:
+	var slot := slot_of(h, id)
+	if slot < 0:
+		return ""
+	var effect := String(def(id).get("desc", "")).split(". ")[0].trim_suffix(".")
+	var line := String(FirstTimeHint.rules()["belt_line"])
+	line = line.replace("{name}", name_of(id)).replace("{effect}", effect)
+	return line.replace("{key}", Settings.key_cap(KEYS[slot]))
 
 ## Removes charges (issued ones go first). Returns how many were taken.
 static func take(h, id: String, n := 1) -> int:
