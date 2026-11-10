@@ -117,6 +117,7 @@ static func ensure(rec: Dictionary) -> void:
 		rec["journal"] = []        # the last CareJournal.KEEP lines of what happened to it
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
+	StatBudget.ensure(rec)
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
 	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
 		rec.erase(old)              # the old once-per-expedition care stamps (now care_day)
@@ -282,7 +283,6 @@ static func want(rec: Dictionary) -> String:
 ## How the kin's shape at home carries into a match.
 static func match_mods(rec: Dictionary) -> Dictionary:
 	ensure(rec)
-	var st: Dictionary = rec["stats"]
 	var c := condition(rec)
 	var cm := 1.1 if c >= 75.0 else (1.0 if c >= 50.0 else (0.92 if c >= 28.0 else 0.82))
 	if starve_h(rec) >= STARVE["weak"]:
@@ -290,10 +290,10 @@ static func match_mods(rec: Dictionary) -> Dictionary:
 	var trust := float(rec.get("trust", 50.0))
 	var bond := 1.1 if trust >= 90.0 else 1.0
 	return {
-		"dmg": (1.0 + float(st["power"]) * 0.004) * cm * bond,
-		"hp": (1.0 + float(st["guard"]) * 0.005) * cm * bond,
-		"speed": 1.0 + float(st["speed"]) * 0.0025,
-		"cd": 1.0 - minf(0.3, float(st["focus"]) * 0.003),
+		"dmg": (1.0 + float(StatBudget.match_points(rec, "power")) * 0.004) * cm * bond,
+		"hp": (1.0 + float(StatBudget.match_points(rec, "guard")) * 0.005) * cm * bond,
+		"speed": 1.0 + float(StatBudget.match_points(rec, "speed")) * 0.0025,
+		"cd": 1.0 - minf(0.3, float(StatBudget.match_points(rec, "focus")) * 0.003),
 		"skill": 1.05 if trust >= 50.0 else 1.0,
 		"mood": clampf((c - 50.0) / 50.0, -1.0, 1.0),
 	}
@@ -320,15 +320,13 @@ static func care_line(rec: Dictionary) -> String:
 		return "Care, training and trust at home make it stronger out there."
 	return "From how you've raised it: %s." % ", ".join(bits)
 
-## Trained points can't run too far ahead of its level.
+## Trained points can't run too far ahead of its level (StatBudget: also 100 a stat, 240 in all).
 static func stat_cap(rec: Dictionary) -> int:
-	return 12 + int(rec.get("level", 1)) * 6
+	return StatBudget.cap(rec)
 
 static func add_stat(rec: Dictionary, s: String, n: int) -> int:
 	ensure(rec)
-	var before := int(rec["stats"].get(s, 0))
-	rec["stats"][s] = clampi(before + n, 0, stat_cap(rec))
-	return int(rec["stats"][s]) - before
+	return StatBudget.add(rec, s, n)
 
 static func bond(rec: Dictionary) -> Array:
 	var t := float(rec.get("trust", 0.0))
