@@ -74882,5 +74882,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2t_bastling_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2t_barrelmander",
+    "name": "Barrelmander (V2 card, style-board test)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_barrelmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_maulangler",
+    "name": "Maulangler (V2 card, style-board test)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_maulangler_3.jpg",
+    "ok": true
   }
 ]
