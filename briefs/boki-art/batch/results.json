@@ -109812,5 +109812,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hb2_sable_onetail3d_2.jpg",
     "ok": true
+  },
+  {
+    "id": "hb2_sable_tailfix",
+    "name": "Sable + Lockatara splash: tail from the rump",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_sable_tailfix_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_tailfix",
+    "name": "Sable + Lockatara splash: tail from the rump",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_sable_tailfix_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_tailfix",
+    "name": "Sable + Lockatara splash: tail from the rump",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/hb2_sable_tailfix_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_tailfix",
+    "name": "Sable + Lockatara splash: tail from the rump",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hb2_sable_tailfix_3.jpg",
+    "ok": true
   }
 ]
