@@ -76947,5 +76947,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_lanceron_on_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_lanceron_on",
+    "name": "Lanceron (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_lanceron_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lanceron_on",
+    "name": "Lanceron (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_lanceron_on_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_lanceron_on",
+    "name": "Lanceron (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_lanceron_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scopeleon_on",
+    "name": "Scopeleon (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_scopeleon_on_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scopeleon_on",
+    "name": "Scopeleon (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_scopeleon_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scopeleon_on",
+    "name": "Scopeleon (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_scopeleon_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_scopeleon_on",
+    "name": "Scopeleon (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_scopeleon_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_scopeleon_on",
+    "name": "Scopeleon (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_scopeleon_on_2.jpg",
+    "ok": true
   }
 ]
