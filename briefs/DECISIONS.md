@@ -500,3 +500,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
   - Quest exits: ~2 per map; teams race to finish the quest, the winner gets out.
   - Everyone else: last team standing as the Blight closes.
 - Spec (exit timeline, how many teams each exit releases, Boki/loot outcome for teams that never get out vs pet-loss tiers, bots, UI, build tasks) is queued as a deep job; it implements this as THE mode, not a toggle.
+
+## Starter masks: pick one of three, Lace is the face (owner idea 11-10 ~8:20 PM EST; coordinator recommends yes, building after Gil ships unless the owner says no)
+- The opening "Choose your first Mask" offers three: Lace, Kael, Vex. No single locked starter. The tutorial and first portal work with any of the three.
+- Lace is the signature hero (key art, store capsule, trailer lead). Kael and Vex are the other two advertised faces. Vex reads as the obvious hero, so he sits next to the face rather than being it (owner's comparison: Ekko).
+- New roster and unlock order: Lace, Kael, Vex, Albert, then the rest in their current order. This supersedes "Vex free starter, met first" in the 12-hunter order above.
