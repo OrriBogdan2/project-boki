@@ -52,7 +52,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `bot.gd` | Bot hunters: fight, farm, loot, catch, revive, extract |
 | `kin.gd` | A Boki in a match: shoulder, thrown, fighting, dazed, fused |
 | `kin_companion.gd` | A Boki as a teammate: callouts, caring, keeping close |
-| `kin_voice.gd` | What a Boki says in a match |
+| `boki_chatter.gd` | What a Boki says in a match (BokiLines) |
 | `life.gd` | Down, death, deathboxes, revives and beacons |
 | `exits.gd`, `exit_models.gd` | Skiff docks, rift hatches, uplink outposts and their props |
 | `lairs.gd`, `boss.gd`, `boss_models.gd` | Boss lairs, their locks and seals; the three bosses |
