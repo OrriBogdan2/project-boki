@@ -9,6 +9,7 @@ const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
+const NO_CLIPS_YET := ["gil"]  # his .glb carries no clips yet (content/rules/warden_anim/gil.json)
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
@@ -40,7 +41,7 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if WardenClips.data(art_name).is_empty():
+		if WardenClips.data(art_name).is_empty() or id in NO_CLIPS_YET:
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
