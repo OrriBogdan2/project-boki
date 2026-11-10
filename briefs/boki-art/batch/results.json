@@ -105472,5 +105472,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px7_chainipede_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_glacione_eyes",
+    "name": "Glacione (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_glacione_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_sarcobra_eyes",
+    "name": "Sarcobra (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_sarcobra_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_cetorgan_eyes",
+    "name": "Cetorgan (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_cetorgan_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_glacione_eyes",
+    "name": "Glacione (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_glacione_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_sarcobra_eyes",
+    "name": "Sarcobra (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_sarcobra_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_cetorgan_eyes",
+    "name": "Cetorgan (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_cetorgan_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_aurostag_eyes",
+    "name": "Aurostag (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_aurostag_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_cindermaw_eyes",
+    "name": "Cindermaw (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_cindermaw_eyes_1.jpg",
+    "ok": true
   }
 ]
