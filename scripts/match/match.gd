@@ -2603,11 +2603,13 @@ func S_dev_god() -> bool:
 
 const BOSS_GEM_DROPS := 4     # a lair boss's gems come as this many big drops (same total)
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
+	var top := KillCues.top_team(mb)
 	if net_on:
-		net_event(["mobdead", mb.nid, by.nid if by else ""])
+		net_event(["mobdead", mb.nid, by.nid if by else "", top])
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	KillCues.on_kill(self, mb, credit, top)
 	if credit == player:
 		if tut: tut.kills += 1
 		player.add_stat("mobs")
@@ -5905,6 +5907,7 @@ func _net_ev(x, from: String) -> void:
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				sfx("kill", who.pos, -6.0, 1.3)
+				KillCues.on_kill(self, who, ents_by_id.get(String(x[2]), null), int(x[3]) if x.size() > 3 else -1)
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
