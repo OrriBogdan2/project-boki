@@ -175,7 +175,7 @@ func run(m: Node) -> void:
 				ti = i; st = bs; break
 	home.ppos = st; home.player.position = st
 	var it: Dictionary = hg.find(Vector2(st.x, st.z))
-	ok(not it.is_empty() and it["kind"] == "wild" and hg.label(it).begins_with("Needs an axe"), "next to a tree the prompt says you need an axe (%s)" % (hg.label(it) if not it.is_empty() else "nothing"))
+	ok(not it.is_empty() and it["kind"] == "wild" and String(hg.label(it).get("note", "")).begins_with("Needs an axe"), "next to a tree the prompt says you need an axe (%s)" % (hg.label(it) if not it.is_empty() else {}))
 	hg.use(it)
 	ok(not hg.busy(), "without one, nothing happens")
 	var goods: Array = HomeGather.shop_goods()
@@ -184,7 +184,7 @@ func run(m: Node) -> void:
 	(goods[1][5] as Callable).call()
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "bought, they're yours")
 	it = hg.find(Vector2(st.x, st.z))
-	ok(hg.label(it) == "Chop the tree", "now the prompt says: %s" % hg.label(it))
+	ok(hg.label(it) == {"verb": "Chop", "who": "Tree"}, "now the prompt says: %s" % hg.label(it))
 	hg.use(it)
 	home.tw.test_hold = true
 	for i in 120:

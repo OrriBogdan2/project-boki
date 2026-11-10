@@ -2011,8 +2011,7 @@ func _find_interact() -> void:
 		prompt.visible = false
 		return
 	var more: Array = [["play", "Play fetch"], ["talk", "Talk"], ["details", "Details"]] if best["kind"] == "kin" and visit.is_empty() else []
-	var verb := KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0) if best["kind"] == "kin" and visit.is_empty() else _label_for(best)
-	prompt.show_for({"verb": verb, "more": more})
+	prompt.show_for(HomePrompt.item(self, best).merged({"more": more}))
 	var vp := get_viewport().get_visible_rect().size
 	prompt.place(vp, vp.y - 60.0)
 	_keep_off_hub(prompt)
@@ -2079,50 +2078,6 @@ func _update_hover() -> void:
 	if pos.x + hover_box.size.x > vs.x - 8: pos.x = mp.x - hover_box.size.x - 20
 	if pos.y + hover_box.size.y > vs.y - 8: pos.y = mp.y - hover_box.size.y - 16
 	hover_box.position = pos
-
-func _label_for(it: Dictionary) -> String:
-	if not visit.is_empty():
-		match it["kind"]:
-			"kin": return ("Pet %s" % it["k"]["rec"]["name"]) if not petted.has(it["k"]["rec"]["uid"]) else "%s is happy you came" % it["k"]["rec"]["name"]
-			"house": return "Leave a gift"
-			"portal", "ferry": return "Go home"
-			"plot": return "%s's crops" % visit.get("name", "Their")
-		return "Look around"
-	match it["kind"]:
-		"ferry": return "Take the ferry"
-		"plot":
-			var d: Dictionary = Save.d[it["arr"]][it["i"]]
-			if d["crop"] == "": return "Plant something"
-			var cd: Dictionary = Data.CROPS[d["crop"]]
-			if int(d["stage"]) >= int(cd["grow"]): return "Harvest the %s" % cd["name"]
-			if it["arr"] == "plots" and FarmWater.plot_near(Save.d, it["i"]):
-				return "%s: the water nearby tends it (%s)" % [cd["name"], _grow_left(it["arr"], d)]
-			if float(d.get("wt", 0.0)) <= 0.0: return "Water the %s" % cd["name"]
-			if int(d.get("wet", 2)) < 2: return "Water the %s (the rain only soaked it)" % cd["name"]
-			return "%s: watered, growing (%s)" % [cd["name"], _grow_left(it["arr"], d)]
-		"pot": return "Cook"
-		"rack": return "Glider skins"
-		"stall": return "Shop"
-		"portal": return "Start an expedition"
-		"house": return "Go inside"
-		"lot":
-			var bd: Dictionary = Data.BUILDINGS[it["b"]]
-			if lots[it["b"]]["built"]: return _building_verb(it["b"])
-			return "Build a %s" % bd["name"]
-		"bridge": return "Build a bridge to %s" % Data.ISLES[it["isle"]]["name"]
-		"kin":
-			var rec: Dictionary = it["k"]["rec"]
-			return "Spend time with %s" % rec["name"]
-		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
-		"yard": return "Train your partner"
-		"nook": return "Pair two Boki for an egg"
-		"incubator": return hinc.prompt()
-		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
-		"hob", "site": return hob.label(it)
-		"feeder", "grave", "graveyard", "place": return hecon.label(it)
-		"station": return "Job Board" if it["id"] == "job_board" else "%s: assign a Boki" % HomeLayout.CATALOG[it["id"]]["name"]
-		"wild": return hg.label(it)
-	return ""
 
 func _use(it: Dictionary) -> void:
 	Sfx.play("click")
@@ -3552,14 +3507,6 @@ func _play_evolutions() -> void:
 		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED)))
 
 # ---- buildings and bridges
-func _building_verb(b: String) -> String:
-	match b:
-		"hall": return "Look at your trophies"
-		"cottage", "cottage2": return "Peek into the %s" % Data.BUILDINGS[b]["name"]
-		"armory": return "Open the armory  ·  %d stored" % Econ.armory().size()
-		"shrine": return "Visit the Soul Shrine"
-	return "Visit the %s" % Data.BUILDINGS[b]["name"]
-
 func _open_lot(b: String) -> void:
 	var bd: Dictionary = Data.BUILDINGS[b]
 	if lots[b]["built"]:

@@ -173,17 +173,18 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 	if gd < 1.3 and gd < bd: best = {"kind": "graveyard"}
 	return best
 
-func label(it: Dictionary) -> String:
+func label(it: Dictionary) -> Dictionary:
 	match String(it["kind"]):
 		"place":
-			var ok := _place_ok(_carry_spot())
-			return ("Set the %s down here" % Econ.FEEDERS[carry["kind"]]["name"]) if ok else "Can't set it down here (open ground, away from other feeders)"
+			if _place_ok(_carry_spot()):
+				return {"verb": "Set down", "who": Econ.FEEDERS[carry["kind"]]["name"]}
+			return {"note": "Can't set it down here (open ground, away from other feeders)"}
 		"feeder":
 			var f: Dictionary = it["f"]
-			return "%s  ·  %d/%d meals" % [Econ.fdef(f)["name"], Econ.fill(f), int(Econ.fdef(f)["cap"])]
-		"grave": return "Visit %s's grave" % it["g"]["name"]
-		"graveyard": return "The graveyard  ·  %d resting" % Econ.graves().size()
-	return ""
+			return {"verb": "Open", "who": Econ.fdef(f)["name"], "note": "%d/%d meals" % [Econ.fill(f), int(Econ.fdef(f)["cap"])]}
+		"grave": return {"verb": "Visit", "who": "%s's grave" % it["g"]["name"]}
+		"graveyard": return {"verb": "Open", "who": "Graveyard", "note": "%d resting" % Econ.graves().size()}
+	return {}
 
 func use(it: Dictionary) -> void:
 	match String(it["kind"]):

@@ -376,18 +376,21 @@ func _world() -> void:
 	# talking
 	home.ppos = home.hob.pos + Vector3(1.0, 0, 0)
 	var it: Dictionary = home.hob.find(Vector2(home.ppos.x, home.ppos.z))
-	ok(String(it.get("kind", "")) == "hob" and home._label_for(it).begins_with("Talk to Hob"),
-			"walking up to him offers to talk: '%s'" % home._label_for(it))
+	var say := HomePrompt.item(home, it)
+	ok(String(it.get("kind", "")) == "hob" and say.get("verb") == "Talk" and say.get("who") == "Hob",
+			"walking up to him offers to talk: %s" % say)
 	home.ppos = hc + Vector3(2.0, 0, 2.2)
 	it = home.hob.find(Vector2(home.ppos.x, home.ppos.z))
-	ok(String(it.get("kind", "")) == "site" and home._label_for(it).begins_with("Needs "),
-			"by a site with no materials the prompt says what it needs: '%s'" % home._label_for(it))
+	say = HomePrompt.item(home, it)
+	ok(String(it.get("kind", "")) == "site" and String(say.get("note", "")).begins_with("Needs "),
+			"by a site with no materials the prompt says what it needs: %s" % say)
 	var e := _entry("house")
 	Work.add_mat("wood", int(house_cost["wood"]))
 	Work.add_mat("stone", int(house_cost["stone"]))
-	var prompt: String = home._label_for(it)
-	ok(prompt.contains("Hold to hammer") and prompt.contains("0/%d" % int(house_cost["labour"])),
-			"with them, you may hold to hammer: '%s'" % home._label_for(it))
+	var prompt := HomePrompt.item(home, it)
+	var zero := "0/%d" % int(house_cost["labour"])
+	ok(prompt.get("verb") == "Hammer" and prompt.get("hold") == true and prompt.get("note") == zero,
+			"with them, you may hold to hammer: %s" % prompt)
 	home.hob.use(it)
 	home.tw.test_hold = true
 	var beats := 2
@@ -538,7 +541,7 @@ func _farm2() -> void:
 	home._farm_tick()
 	var p0: Dictionary = Save.d["plots"][0]
 	ok(float(p0["wt"]) > 0.0 and int(p0["wet"]) == 2, "a patch by the water waters its own plot, as tended")
-	var lbl: String = home._label_for({"kind": "plot", "arr": "plots", "i": 0})
+	var lbl := str(HomePrompt.item(home, {"kind": "plot", "arr": "plots", "i": 0}))
 	ok(lbl.contains("water nearby"), "the prompt says why: '%s'" % lbl)
 	ok(String(HomeLayout.CATALOG["crop_patch"]["desc"]).contains("2 tiles of water"), "and the build menu says it in the patch's tooltip")
 	ok(home._dry_plot().is_empty(), "the farmhand has nothing to water there")

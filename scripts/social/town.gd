@@ -74,8 +74,8 @@ func _build_env() -> void:
 	add_child(env)
 	Look.lights(self, Color("ffe6c8"), 0.95, Vector3(-52, -35, 0), 45.0)
 
-func _spot(kind: String, at: Vector3, label: String, reach := 2.2, data = null) -> void:
-	spots.append({"kind": kind, "pos": at, "label": label, "reach": reach, "data": data})
+func _spot(kind: String, at: Vector3, say: Dictionary, reach := 2.2, data = null) -> void:
+	spots.append({"kind": kind, "pos": at, "say": say, "reach": reach, "data": data})
 
 # ------------------------------------------------------------------ the town
 func _build_hub() -> void:
@@ -100,22 +100,22 @@ func _build_hub() -> void:
 	(f.get_node("Spray") as CPUParticles3D).emitting = true
 	for i in 3:
 		var st := Models.stall(); st.position = Vector3(15.6 + i * 1.6, 0, 13.8); add_child(st)
-	_spot("market", Vector3(17.2, 0, 15.6), "Browse the market", 2.6)
+	_spot("market", Vector3(17.2, 0, 15.6), {"verb": "Browse", "who": "Market"}, 2.6)
 	var nb := Models.notice_board(); nb.position = Vector3(25, 0, 12.6); add_child(nb)
-	_spot("notices", Vector3(25, 0, 14.0), "Read the notice board", 2.4)
+	_spot("notices", Vector3(25, 0, 14.0), {"verb": "Read", "who": "Notice board"}, 2.4)
 	var reg := Models.building("hall"); reg.position = Vector3(32.8, 0, 12.4); add_child(reg)
-	_spot("guilds", Vector3(32.8, 0, 15.2), "Guild registry", 2.4)
+	_spot("guilds", Vector3(32.8, 0, 15.2), {"verb": "Open", "who": "Guild registry"}, 2.4)
 	var portal := Models.portal(UI.TEAL); portal.position = Vector3(25, 0, 33.5); add_child(portal)
 	portal.get_node("Disc").visible = true
 	(portal.get_node("Beam") as CPUParticles3D).emitting = true
-	_spot("lobby", Vector3(25, 0, 33.5), "Expeditions with other players", 2.4)
+	_spot("lobby", Vector3(25, 0, 33.5), {"verb": "Join", "who": "Expeditions", "note": "with other players"}, 2.4)
 	var fp := Models.ferry_post(); fp.position = Vector3(10.5, 0, 22); fp.rotation.y = PI * 0.5; add_child(fp)
-	_spot("ferry", Vector3(10.5, 0, 22), "Ferry home", 2.2)
+	_spot("ferry", Vector3(10.5, 0, 22), {"verb": "Ride", "who": "Ferry home"}, 2.2)
 	var vp := Models.signpost(["Islands", "to visit"]); vp.position = Vector3(39.5, 0, 22.8); add_child(vp)
-	_spot("visit", Vector3(39.5, 0, 22.8), "Visit a player's island", 2.2)
+	_spot("visit", Vector3(39.5, 0, 22.8), {"verb": "Visit", "who": "A player's island"}, 2.2)
 	if Social.my_guild_id() != "":
 		var gp := Models.ferry_post(); gp.position = Vector3(40.5, 0, 26.5); gp.rotation.y = -PI * 0.5; add_child(gp)
-		_spot("to_guild", Vector3(40.5, 0, 26.5), "Ferry to your guild isle", 2.2)
+		_spot("to_guild", Vector3(40.5, 0, 26.5), {"verb": "Ride", "who": "Ferry to your guild isle"}, 2.2)
 	for lp in [Vector3(19.5, 0, 18), Vector3(30.5, 0, 18), Vector3(19.5, 0, 26.5), Vector3(30.5, 0, 26.5), Vector3(23, 0, 31.5), Vector3(27, 0, 31.5)]:
 		var l := Models.lamp(); l.position = lp; add_child(l)
 	var drng := RandomNumberGenerator.new(); drng.seed = 9
@@ -151,7 +151,7 @@ func _build_guild() -> void:
 		var b := Models.flower_bed(drng); b.position = Vector3(center.x + cos(a) * 8.0, 0, center.y + sin(a) * 8.0); add_child(b)
 	ppos = Vector3(28, 0, 44.5)
 	var fp := Models.ferry_post(); fp.position = Vector3(28, 0, 45.5); fp.rotation.y = PI; add_child(fp)
-	_spot("ferry", Vector3(28, 0, 45.5), "Take the ferry", 2.2)
+	_spot("ferry", Vector3(28, 0, 45.5), {"verb": "Ride", "who": "Ferry"}, 2.2)
 	topbar.text = "Guild isle"
 	Social.get_guild(gid, func(g: Dictionary):
 		if not is_inside_tree(): return
@@ -187,7 +187,7 @@ func _load_members() -> void:
 			_solid(at, 2.4, 2.4)
 			var sg := Models.signpost([String(d["name"])]); sg.position = at + Vector3(cos(a), 0, sin(a)) * -2.0; sg.rotation.y = -a - PI * 0.5
 			add_child(sg)
-			_spot("member", at + Vector3(cos(a), 0, sin(a)) * -2.2, "Visit %s's island" % d["name"], 2.0, {"id": m["id"], "data": d})
+			_spot("member", at + Vector3(cos(a), 0, sin(a)) * -2.2, {"verb": "Visit", "who": "%s's island" % d["name"]}, 2.0, {"id": m["id"], "data": d})
 			for rec in d["roster"]:
 				if rec["uid"] == d["active"]:
 					_add_npc(rec, at + Vector3(cos(a), 0, sin(a)) * -2.8)
@@ -235,7 +235,7 @@ func _build_projects(prog: Dictionary) -> void:
 				"forge": _solid(at, 3.0, 2.4)
 				"shrine": _solid(at, 1.6, 1.6)
 				"lighthouse": _solid(at, 1.8, 1.8)
-		_spot("project", at + Vector3(0, 0, 2.6 if k != "lighthouse" else 2.0), ("%s (built)" % pd["name"]) if done else "Build the %s together" % pd["name"], 2.4, k)
+		_spot("project", at + Vector3(0, 0, 2.6 if k != "lighthouse" else 2.0), {"verb": "Look", "who": pd["name"], "note": "built"} if done else {"verb": "Build", "who": pd["name"], "note": "together"}, 2.4, k)
 
 func _add_npc(rec: Dictionary, at: Vector3) -> void:
 	var n := Models.kin(rec["species"], rec)
@@ -403,7 +403,7 @@ func _find_interact() -> void:
 		if dd < float(s["reach"]) and dd < bd:
 			bd = dd; best = s
 	interact = best
-	prompt.show_for({} if panel_open != "" or best.is_empty() else {"verb": String(best["label"])})
+	prompt.show_for({} if panel_open != "" or best.is_empty() else best["say"])
 	prompt.place(get_viewport().get_visible_rect().size, get_viewport().get_visible_rect().size.y - 60.0)
 
 func _unhandled_input(event: InputEvent) -> void:

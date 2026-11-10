@@ -3,7 +3,7 @@ extends RefCounted
 ## The two pieces of furniture that do something when you stand next to them: the Boki journal and the gramophone.
 ## They are ordinary furniture (placed, moved and stored like the rest); this is their look and what they open.
 
-const USES := {"journal": "Read the Boki journal", "gramophone": "Play some music"}
+const USES := {"journal": {"verb": "Read", "who": "Boki journal"}, "gramophone": {"verb": "Play", "who": "Music"}}
 
 static func is_usable(id: String) -> bool:
 	return USES.has(id)

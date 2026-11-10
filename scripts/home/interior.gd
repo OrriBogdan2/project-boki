@@ -108,7 +108,7 @@ func _build_room() -> void:
 	Models.part(self, Models.box(W * 0.5 - 0.8, 0.35, 0.2), wall, Vector3((W * 0.5 - 0.8) * 0.5, 0.17, D + 0.1))
 	Models.part(self, Models.box(W * 0.5 - 0.8, 0.35, 0.2), wall, Vector3(W - (W * 0.5 - 0.8) * 0.5, 0.17, D + 0.1))
 	Models.part(self, Models.box(1.4, 0.03, 0.8), Models.toon(Color("8a6a3a"), false), Vector3(W * 0.5, 0.015, D - 0.4))
-	spots.append({"kind": "door", "pos": Vector3(W * 0.5, 0, D - 0.4), "label": "Go outside"})
+	spots.append({"kind": "door", "pos": Vector3(W * 0.5, 0, D - 0.4), "say": {"verb": "Go out"}})
 # ------------------------------------------------------------------ furniture on the grid
 static func footprint(id: String, r: int) -> Vector2i:
 	var sz: Array = Data.FURN[id]["size"]
@@ -156,7 +156,7 @@ func _rebuild_decor() -> void:
 		if visit.is_empty():
 			_occupy(i)
 			if RoomPieces.is_usable(e["id"]):
-				spots.append({"kind": e["id"], "pos": n.position, "label": RoomPieces.USES[e["id"]]})
+				spots.append({"kind": e["id"], "pos": n.position, "say": RoomPieces.USES[e["id"]]})
 
 ## Marks the tiles of piece i as taken (rugs and cushions can be walked over, so they are not).
 func _occupy(i: int) -> void:
@@ -293,9 +293,9 @@ func _find_interact() -> void:
 		if dd < bd: bd = dd; best = s
 	for k in kins:
 		var dd := Vector2(k["pos"].x - ppos.x, k["pos"].z - ppos.z).length()
-		if dd < bd: bd = dd; best = {"kind": "kin", "k": k, "label": "Pet %s" % k["rec"]["name"]}
+		if dd < bd: bd = dd; best = {"kind": "kin", "k": k, "say": {"verb": "Pet", "who": k["rec"]["name"]}}
 	interact = best
-	prompt.show_for({} if best.is_empty() or panel_open != "" else {"verb": String(best["label"])})
+	prompt.show_for({} if best.is_empty() or panel_open != "" else best["say"])
 	prompt.place(get_viewport().get_visible_rect().size, get_viewport().get_visible_rect().size.y - 70.0)
 
 func _use(it: Dictionary) -> void:
