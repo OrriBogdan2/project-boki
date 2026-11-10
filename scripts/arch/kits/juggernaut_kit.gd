@@ -215,21 +215,21 @@ func move_k() -> float:
 	if not slam_w.is_empty(): return 0.6
 	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
 
-## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
-## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
-## enemy resets Volcanic Rebuke", any hit, not only the sweet spot).
+## A knock of ours heals a share of the knocked hunter's health, and if the Finishing Slam hit them in the
+## last 2s the Gilded Riposte is ready again (the data: "knocking an enemy resets Volcanic Rebuke", any hit,
+## not only the sweet spot). An assist gives neither.
 func on_knock(t: Hunter, mine: bool) -> void:
-	var rd := res_def()
-	if mine and is_instance_valid(t):
-		var hp0 := h.hp
-		h.heal(t.max_hp * float(rd.get("heal_knock", 0.2)))
-		knock_healed += h.hp - hp0
-		fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
-		fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
-		m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
-		m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
-		if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
-	var key := t.get_instance_id() if is_instance_valid(t) else -1
+	if not mine or not is_instance_valid(t):
+		return
+	var hp0 := h.hp
+	h.heal(t.max_hp * float(res_def().get("heal_knock", 0.2)))
+	knock_healed += h.hp - hp0
+	fx().pillar(h.pos, Color("5ae07a"), 3.6, 0.7, 0.75)
+	fx().star(t.pos + Vector3(0, 1.3, 0), Color("ff2a2a"), 3.2, 0.55, Color(1, 0.85, 0.8))
+	m.fx.word(h.pos + Vector3(0, 2.7, 0), "+%d" % int(round(h.hp - hp0)), Color("7fe08a"), true)
+	m.sfx("juggernaut_heal", h.pos, -4.0, 1.0)
+	if h.is_local() and m.hud: m.hud.flash(Color(1, 0.1, 0.05), 0.12)      # the red tint of a kill
+	var key := t.get_instance_id()
 	if slam_hit.has(key) and m.time - float(slam_hit[key]) <= float(rmb_def()["slam"].get("reset_t", 2.0)):
 		slam_hit.erase(key)
 		_reset_riposte()

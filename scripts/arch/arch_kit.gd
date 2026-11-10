@@ -192,7 +192,6 @@ func tick(dt: float) -> void:
 			r_t = 0.0
 			_r_end()
 	res_wait = maxf(0.0, res_wait - dt)
-	_tick_knocks()
 	_tick(dt)
 	_tells(dt)
 	_tick_charge(dt)
@@ -782,34 +781,14 @@ func on_perfect_dodge() -> void: pass
 func dash_payoff_ready() -> bool: return false
 
 # ------------------------------------------------------------------ knocks and assists (kits2)
-var touched := {}              # rival hunter id -> [hunter, time of our last hit on them]
 var knocks_seen := 0           # knocks and assists this kit has seen (tests)
 
-## Every hit this hunter lands (Match.on_damage calls it before on_deal): remembered for 5s, so a
-## knock on them inside that window reaches on_knock (mine = the knocking blow was ours, else an assist).
-func note_hit(t: Ent) -> void:
-	if t is Hunter and t.team != h.team:
-		touched[t.get_instance_id()] = [t, m.time]
+## KnockCredit.settle: a rival went down (mine = our blow was the knock, else we assisted inside its window).
+func credited(t: Hunter, mine: bool) -> void:
+	knocks_seen += 1
+	on_knock(t, mine)
 
-func _tick_knocks() -> void:
-	if touched.is_empty():
-		return
-	for key in touched.keys():
-		var e: Array = touched[key]
-		var t = e[0]
-		if not is_instance_valid(t):
-			touched.erase(key)
-			continue
-		if (t as Hunter).downed:
-			touched.erase(key)
-			var by = (t as Hunter).last_hit_by
-			if by is Kin and (by as Kin).owner_h: by = (by as Kin).owner_h
-			knocks_seen += 1
-			on_knock(t, by == h)
-		elif m.time - float(e[1]) > 5.0:
-			touched.erase(key)
-
-## A rival we hit in the last 5s was knocked (mine: our blow did it; else an assist).
+## A rival went down and we get credit (mine: our blow did it; else an assist).
 func on_knock(_t: Hunter, _mine: bool) -> void: pass
 ## The weapon fires in this hero's dash when its LMB row says "fire" (DashFlow); a kit with its own dash overrides.
 func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
