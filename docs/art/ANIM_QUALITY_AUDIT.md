@@ -45,7 +45,11 @@ The wind-up cannot drift from the telegraph: `Mob.sim`, the proxy path (`_net_te
 `godot -- --mob-anim-check` (registered in `tools/check_registry.gd`): every state a kind can enter has tracks that move
 at least 0.02 and loops that close; every pivot named exists in the model; the wind-up fraction equals the telegraph's
 shader progress on every frame, lasts the data's `windup` seconds to within one frame, and the first pivot sits on its
-key at the end; 30 monsters pose in under 0.5 ms a frame. Numbers are in the commit message and the READY line.
+key at the end; 30 monsters pose in under 0.5 ms a frame (0.21 ms measured, 300 frames, headless).
+
+`--perf-bench` (30 s match, jobq rp1, software GL so wall time is noise; script numbers compare): match script avg
+24.2 ms before, 21.4 ms after (p99 49.9 / 44.2 ms); step section `mobs` 3.17 ms before, 3.04 ms after. No regression;
+the per-kind `match` block with its string-built node lookups is gone from the frame.
 
 Not covered: the old procedural models used only with `--art1` lose their per-kind wobble (they were hand-driven by the
 removed block); pack-model (`.glb`) monsters keep their clips; bosses and Blight monsters have their own renderers.
