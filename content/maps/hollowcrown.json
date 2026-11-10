@@ -3060,6 +3060,78 @@
   }
  ],
  "winds": [],
+ "surfaces": [
+  {
+   "kind": "sand",
+   "rect": [
+    8,
+    164,
+    46,
+    204
+   ],
+   "name": "Saltmere shore"
+  },
+  {
+   "kind": "water",
+   "rect": [
+    14,
+    186,
+    28,
+    196
+   ],
+   "name": "Saltmere tide pool"
+  },
+  {
+   "kind": "sand",
+   "rect": [
+    196,
+    172,
+    206,
+    196
+   ],
+   "name": "Duskmoor skiff beach"
+  },
+  {
+   "kind": "water",
+   "rect": [
+    92,
+    172,
+    100,
+    178
+   ],
+   "name": "Nest Glade pool"
+  },
+  {
+   "kind": "metal",
+   "rect": [
+    34,
+    108,
+    50,
+    122
+   ],
+   "name": "Forge Yard iron floor"
+  },
+  {
+   "kind": "metal",
+   "rect": [
+    40,
+    64,
+    52,
+    76
+   ],
+   "name": "The Kilns grating"
+  },
+  {
+   "kind": "metal",
+   "rect": [
+    53,
+    143,
+    67,
+    157
+   ],
+   "name": "Sunken Forge scrap"
+  }
+ ],
  "docks": [
   [
    15,

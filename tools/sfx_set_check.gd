@@ -6,6 +6,9 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
+##   7. footsteps: a Hunter walked over every surface of the Hollow Crown (and the sky train's deck on
+##      Skyreach) plays the cue for it: its own set on grass, stone, wood and snow, the weight class's
+##      steps on sand, water and metal, a little louder the heavier it is
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
@@ -24,6 +27,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
 	levels = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))
 	ok(levels is Dictionary and (levels.get("cats", {}) as Dictionary).size() >= 8, "the loudness table loads")
 	var sets := 0
@@ -33,6 +38,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	await _steps(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -172,3 +178,68 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 7. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
+const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
+const STEP_VOL := -13.0       # dB: the player's own step in Juice.footstep
+
+func _steps(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.set_process(false)
+	var w: World = m.world
+	var h: Hunter = m.player
+	var tiles := _surface_tiles(w, m.skytrain)
+	ok(w.layout_id == "hollowcrown", "step check runs on the Hollow Crown (%s)" % w.layout_id)
+	for surf in ["grass", "stone", "wood", "snow", "sand", "water", "metal"]:
+		if tiles.has(surf):
+			_walk(m, h, surf, tiles[surf])
+		else:
+			ok(false, "the Hollow Crown has a %s tile to step on" % surf)
+	m.queue_free()
+	var sky := Match.new()
+	main.add_child(sky)
+	sky.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "map": "skyreach"})
+	sky.set_process(false)
+	var car: Transform3D = sky.skytrain.cur[1]
+	var deck := Vector3(car.origin.x, sky.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
+	ok(sky.skytrain.on_deck(deck), "a point on a sky train car is on its deck")
+	_walk(sky, sky.player, "metal", deck)
+	sky.queue_free()
+
+## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
+## shared steps get quieter to heavier, and the sound has its takes loaded.
+func _walk(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
+	var arch0 := h.arch
+	var vols := []
+	for cls in WEIGHT_ARCH:
+		h.arch = WEIGHT_ARCH[cls]
+		h.teleport(p)
+		var want := "step_%s_%s" % [surf, cls] if surf in StepSurface.SHARED else "%s_step_%s" % [h.arch, surf]
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		Sfx.listener = p
+		Juice.footstep(h)
+		var got: Array = Sfx.last_played.keys()
+		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
+		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
+	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
+	ok(spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
+			"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols])
+	h.arch = arch0
+
+## A walkable ground tile centre per surface (the last rect's tile wins, as in StepSurface.at).
+func _surface_tiles(w: World, train: SkyTrain) -> Dictionary:
+	var out := {}
+	for z in w.h:
+		for x in w.w:
+			var i := w.idx(x, z)
+			if w.kind[i] != World.T_GROUND and not w.bridge.has(i):
+				continue
+			var p := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
+			var surf := StepSurface.at(w, train, p)
+			if not out.has(surf):
+				out[surf] = p
+	return out
+
