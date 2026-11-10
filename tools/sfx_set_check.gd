@@ -8,6 +8,8 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
+##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -33,6 +35,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_ult_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -125,6 +128,27 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
+func _ult_cues() -> void:
+	var names := ["ult_tag_ally", "ult_tag_foe"]
+	for arch in Arch.ids():
+		if not (Arch.def(arch).get("x", {}) as Dictionary).is_empty():
+			names.append(arch + "_ult_cue")
+	var wrong := []
+	for sname in names:
+		var reach: float = Sfx.sound_reach.get(sname, 0.0)
+		var carries := reach > Sfx.hear_range and reach <= REACH_MAX and reach == float(Sfx.sound_reach["ult_tag_foe"])
+		if not (Sfx.ensure(sname) and carries):
+			wrong.append("%s %.0f m" % [sname, reach])
+	ok(names.size() == 14 and wrong.is_empty(), "%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
+	var press := FileAccess.get_file_as_string("res://scripts/arch/hero_ult.gd")
+	var cue := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var wired := press.contains("UltCue.cast(k)") and cue.contains("\"ucast\"")
+	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
+	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
+	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
