@@ -44,7 +44,7 @@ var _foot: HBoxContainer
 var _thumbs := {}                 # picture key -> SubViewport
 
 func _init() -> void:
-	var look := UI.card(Color(0.06, 0.07, 0.1, 0.93), 10, 14)
+	var look := UI.card(Color(UI.NIGHT, 0.93), 10, 14)
 	add_theme_stylebox_override("panel", look.get_theme_stylebox("panel"))
 	set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	grow_vertical = Control.GROW_DIRECTION_BEGIN

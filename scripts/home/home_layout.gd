@@ -65,6 +65,13 @@ const CATALOG := {
 	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true},
 	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true},
 	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true},
+	# the Boki base's playthings (HomeToys, content/rules/toys.json); the Base tab shows only while base_mode is on
+	"toy_ball": {"name": "Play ball", "cat": "Base", "gems": 12, "toy": true,
+		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
+	"toy_post": {"name": "Climbing post", "cat": "Base", "gems": 30, "block": true, "toy": true,
+		"desc": "Flying and Rock Boki love to climb it. Trains Power."},
+	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "toy": true,
+		"desc": "Water and Ice Boki love a splash. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
 	# work: the element. wood / stone: building materials (Save.d["mats"]) on top of the gems.
 	"job_board": {"name": "Job Board", "cat": "Work", "gems": 30, "block": true, "work": "board",

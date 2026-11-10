@@ -94,7 +94,7 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(c)
 	var name_label := UI.label(Arch.name_of(id), 14, col if st in ["open", "ready"] else UI.FAINT, UI.big)
-	name_label.clip_text = true
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # ("The Barnacle Knight" wraps; it used to be cut)
 	c.add_child(name_label)
 	var cur := id == Arch.of_save()
 	match st:
