@@ -52,7 +52,7 @@ func _ready() -> void:
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("match")          # the wind
 	rng.seed = 2026
-	low = Settings.quality() == "low"
+	low = Settings.lite()
 	fx_k = float(Settings.q("fx"))
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--title-cam="):
