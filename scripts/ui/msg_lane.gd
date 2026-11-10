@@ -15,6 +15,7 @@ const STALE := 3.0              # s a LOW line may wait before it's dropped
 const WAIT_CAP := 6             # lines waiting at most: past it the oldest of the lowest priority goes
 const FADE_IN := 0.15           # s
 const FADE_OUT := 0.35          # s
+const ICON_GAP := 26.0         # px left of the text for a card's icon
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
@@ -42,8 +43,9 @@ static func of(host: Control) -> MsgLane:
 	host.add_child(lane)
 	return lane
 
-## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one.
-func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
+## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one; `icon`
+## (an Icons id) draws a small mark at the card's left.
+func push(text: String, col: Color, prio := NORMAL, life := 0.0, icon := "") -> void:
 	if text == "":
 		return
 	for e in _shown:
@@ -56,7 +58,8 @@ func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
 			_bump(e)
 			return
 	var life_s := life if life > 0.0 else float(LIFE[prio])
-	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "n": 1, "t": 0.0, "wait": 0.0})
+	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "n": 1, "t": 0.0, "wait": 0.0,
+		"icon": icon})
 	Sfx.play("ui_toast", null, -4.0, 0.03)
 	if _waiting.size() > WAIT_CAP:
 		_waiting.remove_at(_lowest())
@@ -184,8 +187,20 @@ func _card(e: Dictionary) -> PanelContainer:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long line wraps at a sane width, never word by word
 	_fit(l, px)
 	c.add_child(l)
+	if e["icon"] != "":
+		l.add_theme_stylebox_override("normal", _icon_gap())
+		var mark := Control.new()
+		mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		mark.draw.connect(func(): Icons.draw(mark, e["icon"], Vector2(14.0, mark.size.y * 0.5), px * 0.55, e["col"]))
+		c.add_child(mark)
 	c.modulate.a = 0.0
 	return c
+
+## Room at a label's left for the icon.
+func _icon_gap() -> StyleBoxEmpty:
+	var gap := StyleBoxEmpty.new()
+	gap.content_margin_left = ICON_GAP
+	return gap
 
 func _bump(e: Dictionary) -> void:
 	e["n"] = int(e["n"]) + 1
@@ -197,6 +212,8 @@ func _bump(e: Dictionary) -> void:
 ## The label as wide as its line, up to WIDE of the screen (past that it wraps).
 func _fit(l: Label, px: int) -> void:
 	var natural := UI.big.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	if l.has_theme_stylebox_override("normal"):
+		natural += ICON_GAP
 	var widest := get_viewport_rect().size.x * WIDE if is_inside_tree() else 600.0
 	l.custom_minimum_size.x = minf(natural + 2.0, widest)
 
