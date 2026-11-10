@@ -99536,5 +99536,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/new_postroo_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "new_carousel_a",
+    "name": "New line baby: carousel a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_carousel_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_b",
+    "name": "New line baby: carousel b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_carousel_b_1.jpg",
+    "ok": true
   }
 ]
