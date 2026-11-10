@@ -108888,5 +108888,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_rampartoad_g5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "hb_sable_lockatara",
+    "name": "Hunter + Boki splash (sable_lockatara)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb_sable_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_sable_lockatara",
+    "name": "Hunter + Boki splash (sable_lockatara)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb_sable_lockatara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_motley_checkmare",
+    "name": "Hunter + Boki splash (motley_checkmare)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb_motley_checkmare_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_motley_checkmare",
+    "name": "Hunter + Boki splash (motley_checkmare)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb_motley_checkmare_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_kael_voltalon",
+    "name": "Hunter + Boki splash (kael_voltalon)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb_kael_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_kael_voltalon",
+    "name": "Hunter + Boki splash (kael_voltalon)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb_kael_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_cinder_calderoise",
+    "name": "Hunter + Boki splash (cinder_calderoise)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb_cinder_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_cinder_calderoise",
+    "name": "Hunter + Boki splash (cinder_calderoise)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb_cinder_calderoise_1.jpg",
+    "ok": true
   }
 ]
