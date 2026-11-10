@@ -507,6 +507,20 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | gems_toast | Hob gives you %d gems to buy seeds |
 | steps_doc | needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect). |
 
+## garden_items (`content/rules/garden_items.json`)
+
+Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose. sources are where the item comes from; this file does not drop them.
+
+| Setting | Value |
+|---|---|
+| pip | 6 |
+| pip_doc | Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food. |
+| max_tokens | 3 |
+| max_tokens_doc | Path tokens worn at once on one Boki. |
+| verbs | {"eaten": "ate", "worn": "put on"} |
+| verbs_doc | Journal verb by use; an item's own verb wins. |
+| items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}] |
+
 ## garden_trust (`content/rules/garden_trust.json`)
 
 Trust from care at the base (Care.trust_up). Petting, its habit food and winning together each raise trust by a named amount, shown to the player as one plain line. Trust stays 0 to 100 and nothing here lowers it. A habit (rec.habit.food) is picked when a Boki hatches, from its element (the species theme).
