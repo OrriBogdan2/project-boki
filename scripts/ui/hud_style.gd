@@ -186,3 +186,9 @@ static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 		sb.anti_aliasing = true
 		_boxes[key] = sb
 	return sb
+
+## Width of the clock chip: the time at the left, the phase in the middle and "LV nn" at the right never touch,
+## at every Text size (196 px is enough at 100%).
+static func clock_w(time_txt: String, phase: String) -> float:
+	var side := maxf(TextCache.width(BIG, time_txt, 16), TextCache.width(BIG, "LV 99", 12))
+	return maxf(196.0, TextCache.width(BIG, phase, 11) + 2.0 * side + 28.0)
