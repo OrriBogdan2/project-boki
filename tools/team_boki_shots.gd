@@ -1,6 +1,6 @@
 extends RefCounted
 ## --team-boki-shots --shots-dir=<dir> [--size=WxH]: the squad rows with their Boki icons in the hudref demo
-## (needs a renderer): one full frame with every Boki healthy, one with a hurt, a downed and a resting Boki.
+## (needs a renderer): one frame with every Boki healthy, one with a hurt and a resting Boki, one with a dead Boki and a teammate down (wisp).
 
 var main: Node
 
@@ -20,6 +20,7 @@ func run(main_node: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	m.start(HudRefDemo.opts("--hudref-demo=plates").merged({"tier": 0, "length": 1e9, "seed": 5, "arch": "thief"}))
+	main.fade.reveal(0.05)     # the boot splash stays up when a tool starts a match by hand
 	await _frames(90)
 	_shot(dir, "team_boki_healthy")
 	var mates: Array = m.hunters.filter(func(x): return x != m.player and x.team == m.player.team and x.kin != null)
@@ -31,6 +32,7 @@ func run(main_node: Node) -> void:
 	await _frames(30)
 	_shot(dir, "team_boki_hurt_resting")
 	mates[0].kin.dead = true
+	mates[0].downed = true      # a teammate down (a wisp): the 3-squad HUD with one down
 	await _frames(30)
 	_shot(dir, "team_boki_down")
 	print("TEAMBOKISHOTS in ", dir)
@@ -43,6 +45,6 @@ func _frames(n: int) -> void:
 func _shot(dir: String, file: String) -> void:
 	var sz := main.get_viewport().get_visible_rect().size
 	var img := main.get_viewport().get_texture().get_image()
-	var crop := Rect2i(0, 0, int(img.get_width() * 0.3), int(img.get_height() * 0.55))
+	var crop := Rect2i(0, 0, int(img.get_width() * 0.3), int(img.get_height() * 0.9))
 	img.get_region(crop).save_png(dir.path_join(file + ".png"))
 	print("TEAMBOKISHOT %s window %s" % [file, str(sz)])
