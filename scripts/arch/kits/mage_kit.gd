@@ -620,12 +620,16 @@ func fire_rmb(c: Dictionary) -> void:
 	var min_t := float(sd["min_t"])
 	var k := clampf((held_t - min_t) / (float(sd["hold"]) - min_t), 0.0, 1.0)
 	last_variant = "hold" if k > 0.5 else "tap"
-	play("mage_rmb")
 	var wait := maxf(0.0, min_t - held_t)
-	if wait > 0.0:
-		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _coil(k))
+	if wait > 0.0:         # (a tap: the rod leaves at min_t, and the throw beat plays with it)
+		m.later(wait, func(): if is_instance_valid(h) and not h.downed: _throw(k))
 	else:
-		_coil(k)
+		_throw(k)
+
+## The Storm Rod leaves her hand: the throw beat plays as it goes.
+func _throw(k: float) -> void:
+	play("mage_rmb")
+	_coil(k)
 
 ## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
 func run_rank_k() -> float:
