@@ -45,13 +45,19 @@ static func colour(type: String, fallback: Color) -> Color:
 	return Color(String(look["col"])) if not look.is_empty() else fallback
 
 func _ready() -> void:
-	var dot := QuadMesh.new(); dot.size = Vector2(0.12, 0.12)
-	var dot_mat := ShaderMaterial.new(); dot_mat.shader = load("res://shaders/fx_dot.gdshader")
-	var streak := QuadMesh.new(); streak.size = Vector2(1, 1)
-	var streak_mat := ShaderMaterial.new(); streak_mat.shader = load("res://shaders/spark.gdshader")
+	var dot := QuadMesh.new()
+	dot.size = Vector2(0.12, 0.12)
+	var dot_mat := ShaderMaterial.new()
+	dot_mat.shader = load("res://shaders/fx_dot.gdshader")
+	var streak := QuadMesh.new()
+	streak.size = Vector2(1, 1)
+	var streak_mat := ShaderMaterial.new()
+	streak_mat.shader = load("res://shaders/spark.gdshader")
 	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1, 1, 1, 1)); ramp.set_color(1, Color(1, 1, 1, 0))
-	var fade := GradientTexture1D.new(); fade.gradient = ramp
+	ramp.set_color(0, Color(1, 1, 1, 1))
+	ramp.set_color(1, Color(1, 1, 1, 0))
+	var fade := GradientTexture1D.new()
+	fade.gradient = ramp
 	for g: String in GROUPS:
 		var def: Dictionary = GROUPS[g]
 		var pm := ParticleProcessMaterial.new()

@@ -76,6 +76,17 @@ asserts coverage of all 18 types, distinct colours and shapes, the budget and a 
 20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
 The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
 
+### Movement trail and capture pop
+
+`KinTypeTrail` (`scripts/match/kin_type_trail.gd`) gives every **moving** summoned or wild Boki a light trail in its
+type's colour (`KinTypeFx.LOOKS`): embers and motes rise (Fire, Spore, Psychic, Fairy, Dark, Poison, Dragon), drips fall
+(Water, Ice, Rock), leaves flutter (Grass, Bug, Normal, Flying), Electric/Steel/Crystal/Sound crackle in short streaks.
+Budget: four shared `GPUParticles3D` (one per group, 64 live particles each), fed one particle at a time with
+`emit_particle`, one per 0.12 s per moving Boki at full quality (scaled by the `fx` preset); nothing for a Boki that is
+standing still, parked, knocked out, out of sight or over 45 m from the local player. The capture pop's colour burst
+uses the same type colour. `--kin-type-trail-check` asserts group coverage and the cut-offs; `--kin-type-trail-shots`
+(GPU) walks one Boki per type and pops them.
+
 | Type | Species | Colour | Accent | Before |
 |---|---|---|---|---|
 | Normal | 0 | cream | plain short puff | none |

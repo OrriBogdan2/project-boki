@@ -33,8 +33,8 @@ const CHECKS := {
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--kin-type-fx-check": ["res://tools/kin_type_fx_check.gd", "kin_type_fx_check", null],      # 18 type accents
-	"--kin-type-trail-check": ["res://tools/kin_type_trail_check.gd", "kin_type_trail_check", null],      # moving Boki leave a type-coloured trail
-	"--kin-type-trail-shots": ["res://tools/kin_type_trail_shots.gd", "kin_type_trail_shots", null],      # --shots-dir=<dir>
+	"--kin-type-trail-check": ["res://tools/kin_type_trail_check.gd", "kin_type_trail_check", null],
+	"--kin-type-trail-shots": ["res://tools/kin_type_trail_shots.gd", "kin_type_trail_shots", null],
 	"--kin-type-sheet": ["res://tools/kin_type_sheet.gd", "kin_type_sheet", null],      # --shots-dir=<dir>
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
