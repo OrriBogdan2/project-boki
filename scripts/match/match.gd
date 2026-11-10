@@ -5480,11 +5480,7 @@ func _finish() -> void:
 		if not player_lost.is_empty():
 			r["lost_kin"] = _resolve_lost()
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
-	var placed := 1
-	for h in hunters:
-		if h.extracted and h != player:
-			placed += 0
-	r["placed"] = placed
+	if player and not r.has("how"): r.merge(WaysResult.placing(hunters, player.team, time))
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

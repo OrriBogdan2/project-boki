@@ -31,3 +31,13 @@ heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.g
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
 No save change. Checks: --heart-check (early seat), new --heart-seats-check (squad take, final, order, rush, Net).
+
+## Results (spec task 5)
+`WaysResult` (scripts/match/ways_result.gd) owns the results lines: `how` (lair, heart_early, uplink, heart_final) for a
+squad that left, `place`/`squads` for one that did not (`Match._finish`; replaces the dead `placed` stub). A squad's place
+is 1 + the squads still in or already gone when its last Hunter went out; the islands falling on everyone is a tie; a
+squad with a Hunter out the door has a seat, not a place. Placement pay (`heart.json` "place": 5 gems per squad below,
+max 40) goes through `Game.apply_result` into `gems`. `KinLoss.resolve`: "nobody took it, or its taker is out" is now
+`home` (was `ransom`); results show one line per Boki, "came home" or "held by <name>". No save-shape change, no Net change.
+The skiff and hatch lines are gone from the screen (task 3 deletes those exits). Open: `Ransom.lose`'s non-rival branch
+is no longer reached from a match.
