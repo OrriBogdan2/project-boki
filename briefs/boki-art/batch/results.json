@@ -87944,5 +87944,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_dynaboa_b_2.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_dynaboa_b",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_dynaboa_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_starcap_b",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_starcap_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_dynaboa_a",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_dynaboa_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_starcap_c",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_starcap_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_dynaboa_a",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_dynaboa_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_dynaboa_c",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_dynaboa_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_dynaboa_c",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_dynaboa_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_starcap_c",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_starcap_c_2.jpg",
+    "ok": true
   }
 ]
