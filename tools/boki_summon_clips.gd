@@ -21,6 +21,7 @@ var p: Hunter
 var k: Kin
 var foe: Hunter
 var dir := ""
+var cam: Camera3D
 var draw := false
 var tiles: Array = []
 var captions: Array = []
@@ -275,9 +276,14 @@ func _knock(tag: String) -> void:
 func _strips() -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	draw = true
+	cam = Camera3D.new()
+	cam.fov = 60.0
+	main.add_child(cam)
+	_hide_ui()
 	for plan in SPECIES:
 		var id: String = SPECIES[plan]
 		await _start(id)
+		_hide_ui()
 		tiles.clear()
 		_foe_at(-FAR)
 		await _go(0.3)
@@ -314,7 +320,17 @@ func _strips() -> void:
 		strip.save_png(dir.path_join("summon_%s.png" % id))
 		print("SUMMONCLIPS strip %s: %s" % [id, " | ".join(captions)])
 		captions.clear()
+	cam.queue_free()
 	draw = false
+
+## The title screen and the match's HUD sit over the world: hide them for the tiles.
+func _hide_ui() -> void:
+	for root in [main, m]:
+		for n in root.find_children("*", "CanvasLayer", true, false):
+			(n as CanvasLayer).visible = false
+		for n in root.get_children():
+			if n is Control:
+				(n as Control).visible = false
 
 func _until(clip: String, secs: float) -> void:
 	for i in int(secs / DT):
@@ -324,12 +340,15 @@ func _until(clip: String, secs: float) -> void:
 		await _go(DT)
 
 func _tile(what: String) -> void:
+	var at3 := k.global_position + Vector3(0, 0.6, 0)
+	cam.global_position = at3 + Vector3(0.9, 0.5, 2.4)
+	cam.look_at(at3)
+	cam.make_current()
 	for i in 3:
 		await RenderingServer.frame_post_draw
 	var img := main.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
-	var cam := main.get_viewport().get_camera_3d()
-	var c := Vector2i(cam.unproject_position(k.global_position + Vector3(0, 0.6, 0))) if cam else img.get_size() / 2
+	var c := Vector2i(cam.unproject_position(k.global_position + Vector3(0, 0.6, 0)))
 	var at := Vector2i(clampi(c.x - TILE / 2, 0, img.get_width() - TILE),
 		clampi(c.y - TILE / 2, 0, img.get_height() - TILE))
 	tiles.append(img.get_region(Rect2i(at, Vector2i(TILE, TILE))))
