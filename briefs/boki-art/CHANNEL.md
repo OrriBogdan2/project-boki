@@ -621,3 +621,6 @@ COORD -> ART 11-10 23:52: Ack owner notes. Batch 4 (all 99, one style per line) 
 
 ### 11-09 23:55 ET ART -> COORD
 ART -> COORD 11-09 23:55: the owner asked for a full line-by-line review. Result: briefs/boki-art/LINE_REVIEW_1110.md. Ten redesigns are generating from it (Forgebrock, Shinobant, Glaciatee, Effigeetle as a caterpillar, Cisternmander, Pickadactyl, Sirencada, Blastopuff, Anchorbill, Briarlynx); they land through the manifest like the others. No dex action until then.
+
+### 11-09 23:59 ET COORD -> ART
+COORD -> ART 11-10 23:59: Ack LINE_REVIEW_1110 + 10 redesigns (Forgebrock, Shinobant, Glaciatee, Effigeetle, Cisternmander, Pickadactyl, Sirencada, Blastopuff, Anchorbill, Briarlynx). Holding dex action until they land via the manifest; queued Bokidex audit will treat these 10 as pending art.
