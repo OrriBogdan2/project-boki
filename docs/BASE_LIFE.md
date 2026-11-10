@@ -55,3 +55,11 @@ check: `--base-life-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
   toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
+- Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
+  stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
+  is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
+  tub, held, at a toy or bowl; they also hold their ground in `_separate_kin`), steps a boxed-in walker out and
+  drops its errand (toy walk, chore) if that repeats; `HomeToys.stand` keeps a toy's standing place off anyone parked
+  or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
+  0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
+  tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
