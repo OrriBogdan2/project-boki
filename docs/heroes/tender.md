@@ -180,6 +180,24 @@ Strips: `--arena=thief --arena-demo=care_tender_<lmb|emp|rmb|e|dash|air|airsteer
   mends someone, plus her own dash, light little footsteps and a small wordless voice (`tender_hurt`, `_down` with the
   lantern flickering, `_death` with its star dimming). The old names still load through `SfxKits.NAMES`.
 
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/care_combo_check.gd` (run by `--tender-combo-check`) asserts drawn size = hit size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Lantern crook (LMB) | none | the weapon | - | none | ok |
+| Burrseed (RMB) wind-up | dotted lane 6 m, 1.4 m wide, flare r 1.4 m round her | seed 0.7 m radius (1.4 m wide) | her screen | short lane | lane ok, asserted. The flare is a wind-up glow; left in place |
+| Burrseed burst, 0.7 s | disc r 2.2 m filling under the foe (4.4 m at rank 3) | burst 2.2 m (x2 at rank 3), `burst_radius()` | everyone | disc under the foe | ok, asserted |
+| Burst flare | flare r = burst radius | burst radius | everyone | grows to 1.8 body heights | fixed: was 1.5x radius. The source flare is wider than its root disc, so the hit radius wins |
+| Hearthlight (E) | disc r 2.6 m (2.9 m on a toss) | heal zone 2.6 m | everyone | lantern ring | ok, asserted |
+| Hearth Call (X) range | dashed ring r 12.6 m round her | pick range 12.6 m | her screen / everyone while linked | range ring | a range marker, not an area; ok |
+| Hearth Call pick | ring r 0.7-0.8 m on the teammate and a line | the chosen target | her screen / everyone | ring + line | a marker, kept |
+| Hearth Call arrival | heal word + ring pulse | single heal | everyone | - | fixed: removed the 2.4 m and 1.0 m rings and a 1.8 m flare (a heal marks no area) |
+| Relay Step (dash) | none | none | - | none | ok |
+
+Suggestion (not built): the wind-up flare could be dropped too if the owner wants the wind-up to show only the lane.
+
 ## Engine notes
 - Kit: `scripts/arch/kits/tender_kit.gd`, with helpers in `care_util.gd`. Data: `content/archetypes/tender.json`, `content/weapons/lantern_crook.json`.
 - Merge-start hold fields: `seed_aim` and `rmb_down` (the Burrseed aim), the carry (set down, unbroken), and `hearth_call` (the X channel).
