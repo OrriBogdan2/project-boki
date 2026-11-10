@@ -37,9 +37,13 @@ func run(main_node: Node) -> void:
 		for kind in ["weapon", "abil"]:
 			var extra := {} if kind == "weapon" else {"src": "abil"}
 			var w := _fire(home, 1.0, extra)
-			ok("%s %s into a wall: one puff, small, in the kit colour" % [id, kind], w.size() == 1 and _col(w[0]) == Color(col, 1.0) and is_equal_approx(_size(w[0]), MissFx.WALL_SIZE), str(w.size()))
+			var wall_ok := w.size() == 1 and _col(w[0]) == Color(col, 1.0)
+			wall_ok = wall_ok and is_equal_approx(_size(w[0]), MissFx.WALL_SIZE)
+			ok("%s %s into a wall: one puff, small, in the kit colour" % [id, kind], wall_ok, str(w.size()))
 			var a := _fire(home, -1.0, extra)
-			ok("%s %s into open air: one wider, fainter puff" % [id, kind], a.size() == 1 and is_equal_approx(_size(a[0]), MissFx.RANGE_SIZE) and is_equal_approx(_col(a[0]).a, MissFx.RANGE_ALPHA), str(a.size()))
+			var air_ok := a.size() == 1 and is_equal_approx(_size(a[0]), MissFx.RANGE_SIZE)
+			air_ok = air_ok and is_equal_approx(_col(a[0]).a, MissFx.RANGE_ALPHA)
+			ok("%s %s into open air: one wider, fainter puff" % [id, kind], air_ok, str(a.size()))
 	m.fx.own_look = true
 	var owned := _fire(home, 1.0, {})
 	m.fx.own_look = false
@@ -52,8 +56,11 @@ func run(main_node: Node) -> void:
 	_clear()
 	for i in SPAM:
 		_fire(home, 1.0 if i % 2 == 0 else -1.0, {})
-	ok("%d misses: the pool stays at its cap and makes no node" % SPAM, fxd.made == warm_made and fxd.live.size() <= DJFx.POOL_CAP, "%d made %d live" % [fxd.made, fxd.live.size()])
+	var capped := fxd.made == warm_made and fxd.live.size() <= DJFx.POOL_CAP
+	var info := "%d made, %d live" % [fxd.made, fxd.live.size()]
+	ok("%d misses: the pool stays at its cap, no node made" % SPAM, capped, info)
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
+	main.get_tree().quit(1 if fails > 0 else 0)
 
 ## Fires one shot east from `home` (into the cliff when wall >= 0, with a short life into the air otherwise),
 ## runs the match until it ends and returns the puffs it made.

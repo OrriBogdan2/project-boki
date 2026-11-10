@@ -16,7 +16,9 @@ const SPECK_WHITE := 0.6      # how much of white the puff's specks carry
 ## A shot ended on nothing: why is "wall" or "expire" (anything else, a dome or a crate, draws its own effect).
 static func shot_ended(m: Match, s: Dictionary, at: Vector3, why: String) -> void:
 	var x: Dictionary = s["x"]
-	if why != "wall" and why != "expire" or x.has("boom") or x.has("lob") or x.get("mob", false) or x.get("melee", false):
+	if why != "wall" and why != "expire":
+		return
+	if x.has("boom") or x.has("lob") or x.get("mob", false) or x.get("melee", false):
 		return
 	var by = s["by"]
 	if by is Kin:
@@ -36,6 +38,9 @@ static func puff(m: Match, col: Color, at: Vector3, wall: bool) -> void:
 	var p: Hunter = m.player
 	if p != null and Vector2(p.pos.x - at.x, p.pos.z - at.z).length() > AbilityFx.FAR:
 		return
-	var c := col if wall else Color(col, RANGE_ALPHA)
-	DJFx.of(m).puff(at + Vector3(0, LIFT, 0), c, WALL_SIZE if wall else RANGE_SIZE, WALL_S if wall else RANGE_S,
-			col.lerp(Color.WHITE, SPECK_WHITE))
+	var speck := col.lerp(Color.WHITE, SPECK_WHITE)
+	var spot := at + Vector3(0, LIFT, 0)
+	if wall:
+		DJFx.of(m).puff(spot, col, WALL_SIZE, WALL_S, speck)
+	else:
+		DJFx.of(m).puff(spot, Color(col, RANGE_ALPHA), RANGE_SIZE, RANGE_S, speck)

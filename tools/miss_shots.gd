@@ -7,7 +7,10 @@ extends "res://tools/vv_shots.gd"
 const HEROES := {"gunslinger": "vex", "archer": "lace", "mage": "sparkle"}
 const MISS_CROP := Vector2i(220, 150)         # px round the end point for a frame (scaled 2x)
 const AFTER_S := [0.0, 0.07, 0.14, 0.22, 0.32]   # s after the puff appears that a frame is taken
-const CLIFF_GAP := 8                          # tiles of flat ground in front of the cliff
+const SHOT_H := 0.95                        # m: ground this far above home stops a shot fired at chest height
+const SCAN_M := 40                            # m to look along a direction for a wall
+const WALL_GAP := 6.0                         # m from the shooter to the wall
+const DIRS := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]
 const FIRE_S := 0.12                          # s the button is held: one shot
 const WATCH_S := 2.5                          # s to wait for the shot to end
 
@@ -34,7 +37,7 @@ func run(main_node: Node) -> void:
 		fxd = DJFx.of(m)
 		fxd.prewarm(P.pos)
 		T.teleport(home + Vector3(-30, 0, 30))
-		await _miss("wall", _cliff_dir())
+		await _miss("wall", Vector2.ZERO)
 		await _miss("air", _open_dir())
 		var f := FileAccess.open(dir.path_join("MANIFEST_%s.txt" % hero_name), FileAccess.WRITE)
 		for l in lines:
@@ -45,34 +48,69 @@ func run(main_node: Node) -> void:
 	print("MISSSHOTS in %s" % dir)
 	main.get_tree().quit(0)
 
-## A direction with a real cliff face CLIFF_GAP tiles away (a tile at least one level higher), as a unit vector in x/z.
-func _cliff_dir() -> Vector2:
-	for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-		var lv: int = int(m.world.level[m.world.idx(int(floor(home.x)), int(floor(home.z)))])
-		var p: Vector3 = home + Vector3(d.x, 0, d.y) * CLIFF_GAP
-		if m.world.inb(int(p.x), int(p.z)) and int(m.world.level[m.world.idx(int(p.x), int(p.z))]) > lv:
-			return d
-	return Vector2(1, 0)
+## A tile in front of a wall or rock with WALL_GAP tiles of level ground behind it: [shooter start, direction],
+## or [] if the map has none.
+func _wall_spot() -> Array:
+	var W = m.world
+	for z in range(4, W.h - 4):
+		for x in range(4, W.w - 4):
+			if not W.is_block(x + 0.5, z + 0.5):
+				continue
+			for d in DIRS:
+				var start := Vector3(x + 0.5 - d.x * WALL_GAP, 0, z + 0.5 - d.y * WALL_GAP)
+				start.y = W.ground_at(start.x, start.z)
+				if _level_run(start, d):
+					return [start, d]
+	return []
 
-## A direction whose ground stays level out to the weapon's range.
+## Level, open ground from `start` along d for WALL_GAP tiles, a tile either side too.
+func _level_run(start: Vector3, d: Vector2) -> bool:
+	for s in range(0, int(WALL_GAP)):
+		for side: int in [-1, 0, 1]:
+			var x: float = start.x + d.x * s - d.y * side
+			var z: float = start.z + d.y * s + d.x * side
+			if not m.world.inb(int(x), int(z)) or m.world.is_block(x, z):
+				return false
+			if absf(m.world.ground_at(x, z) - start.y) > 0.05:
+				return false
+	return true
+
+## Metres from home along d to the first tile that stops a level shot (higher ground or a rock), or INF.
+func _wall_dist(d: Vector2) -> float:
+	for s in range(2, SCAN_M):
+		var x := home.x + d.x * s
+		var z := home.z + d.y * s
+		if m.world.ground_at(x, z) > home.y + SHOT_H or m.world.is_block(x, z):
+			return float(s)
+	return INF
+
+## A direction with no wall for well past the weapon's range (the shot runs out in the air).
 func _open_dir() -> Vector2:
-	var rng := float(P.wpn["range"])
-	for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-		var clear := true
-		for s in range(2, int(rng), 2):
-			var g := m.world.ground_at(home.x + d.x * s, home.z + d.y * s)
-			if g > home.y + 0.05 or m.world.is_block(home.x + d.x * s, home.z + d.y * s):
-				clear = false
-		if clear:
-			return d
-	return Vector2(-1, 0)
+	var best := Vector2(-1, 0)
+	var far := 0.0
+	for d in DIRS:
+		var w := _wall_dist(d)
+		if w > far:
+			far = w
+			best = d
+	return best
 
 func _miss(part: String, d: Vector2) -> void:
 	await _reset(7.0)
 	T.teleport(home + Vector3(-30, 0, 30))
-	end_pt = home + Vector3(d.x, 0, d.y) * (CLIFF_GAP if part == "wall" else float(P.wpn["range"]))
-	_aim(home + Vector3(d.x, 0, d.y) * 12.0)
-	cam_at = end_pt.lerp(home, 0.35)
+	var from := home
+	end_pt = home + Vector3(d.x, 0, d.y) * float(P.wpn["range"])
+	if part == "wall":
+		var spot := _wall_spot()
+		if spot.is_empty():
+			print("MISS no wall with level ground in front of it on this map")
+			return
+		from = spot[0]
+		d = spot[1]
+		end_pt = from + Vector3(d.x, 0, d.y) * WALL_GAP
+		P.teleport(from)
+	_aim(from + Vector3(d.x, 0, d.y) * 12.0)
+	cam_at = end_pt.lerp(from, 0.35)
 	var seen := {"t": -1.0, "taken": []}      # (a lambda copies plain variables, so its state lives in a dictionary)
 	var watch := func(t: float):
 		P.inp["fire"] = t < FIRE_S
@@ -97,6 +135,7 @@ func _frame(part: String, caption: String, img: Image) -> void:
 	var file := "%s_miss_%s.png" % [hero_name, part]
 	if not strips.has(file):
 		strips[file] = []
-		lines.append("%s/%s|%s|LMB missing into %s: %s" % [hero_name, tag, file, "a cliff face" if part == "wall" else "open air", caption])
+		var into := "a cliff face" if part == "wall" else "open air"
+		lines.append("%s/%s|%s|LMB missing into %s: %s" % [hero_name, tag, file, into, caption])
 	(strips[file] as Array).append(_crop(img, end_pt, MISS_CROP, 2.0))
 	_save_strip(file)
