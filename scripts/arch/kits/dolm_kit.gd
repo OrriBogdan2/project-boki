@@ -249,8 +249,19 @@ func _tick_dive() -> void:
 		dive = false
 		dive_glide = false
 		slam.land(dive_k)
+	elif dive_fall and h.over_void() and h.pos.y <= h.lip_y - float(slam_def()["void_drop"]):
+		_end_plunge()
 	elif dive_fall:
 		h.vel.y = minf(h.vel.y, -dive_speed())
+
+## Over the abyss the plunge takes him `void_drop` under the nearest lip and no further (low, never
+## dunked): no ground to slam, so the slam is dropped and he falls on at the abyss's own pace, glider free.
+func _end_plunge() -> void:
+	dive = false
+	dive_fall = false
+	dive_glide = false
+	h.vel.y = maxf(h.vel.y, -HunterMove.fall_cap(h))
+	play("")
 
 ## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
 func dive_speed() -> float:
