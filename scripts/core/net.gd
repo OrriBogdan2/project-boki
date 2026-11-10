@@ -5,7 +5,7 @@ extends Node
 ## On desktop the same messages go through the Project Boki relay server instead (net_enet.gd,
 ## scripts/server/relay.gd). The launcher passes `-- --server=host:port --token=<discord token>`.
 
-const VERSION := "0.28.0"        # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch, 0.27.0: the kin snapshot carries the Boki wisp flag, 0.28.0: and the Boki summon seconds)
+const VERSION := "0.28.1"        # online play only matches players on the same version; bump on network changes (0.13.0: gear wdrop carries kind/rarity/id, 0.14.0: the "carry" and "zone" events, 0.15.0: the kin snapshot carries its rest seconds; merge augments, 0.16.0: the kit move id rides the hunter snapshot; perk orbs "odrop"/"otake", 0.17.0: a merge release lands the Boki beside you pumped with a 6s rest instead of draining it on your shoulder, and the hunter gets an afterglow, 0.18.0: Boki loss: the "guard" event (a guarding Boki's uid and record), "caught" carries the owner, "gdrop", kcmd "unbond"; a carried Boki rides its carrier's position, 0.19.0: the host re-sends live perk orbs on join; the run level on the hunter snapshot; chest-key carrier flags and the Shrubling state on the monster snapshot, 0.19.1: ext/equal-loadout's GripNet fields, 0.20.0: revive beacons run online with the "bcn" event, 0.21.0: a squad ping ("sping") carries its kind, 0.22.0: the first GitHub Release for the launcher, Nov 5; 0.23.0+: one release per merge batch; 0.24.0: the READY-queue merge of Nov 6, 0.24.1: still title backdrop, 0.25.0: the pre-match lobby: its "pick" and "chat" topics, the roster carries each hunter's arch, 0.27.0: the kin snapshot carries the Boki wisp flag, 0.28.0: and the Boki summon seconds, 0.28.1: the "kab" event, a Boki ability cast shown on the other games)
 
 signal peers_changed
 signal message(topic: String, data, from: String)
@@ -21,6 +21,7 @@ var m: Node = null            # the Match while online
 var out_hits: Array = []
 var out_events: Array = []
 var send_t := 0.0
+var _kin_form := 0            # my Boki's wisp/shrink form last frame (_kin_form_changed)
 var host_send_t := 0.0
 var seen := {}                # nid -> last time we heard about it
 var _msg_cb = null
@@ -148,6 +149,8 @@ func _on_js_msg(args) -> void:
 	var data = parsed.get("d", null)
 	if topic in ["st", "hit", "ev"]:
 		if m and is_instance_valid(m) and in_match:
+			if topic == "ev" and typeof(data) == TYPE_ARRAY:
+				for x in data: _cast_in(x)
 			m.net_receive(topic, data, from)
 		return
 	message.emit(topic, data, from)
@@ -158,6 +161,8 @@ func begin_match(name: String, host_peer: String, match_node: Node) -> void:
 	host = host_peer
 	m = match_node
 	in_match = true
+	if not CombatBus.ability_used.is_connected(_on_cast):
+		CombatBus.ability_used.connect(_on_cast)
 	out_hits.clear(); out_events.clear(); seen.clear()
 	if enet:
 		enet.send({"k": "join", "room": name})
@@ -184,6 +189,36 @@ func owner_of(nid: String) -> String:
 
 func owns(nid: String) -> bool:
 	return owner_of(nid) == me
+
+## My Boki just bloomed, shrank or fell back into its wisp: send my snapshot now, not on the next 0.1 s beat.
+func _kin_form_changed() -> bool:
+	var k = m.player.kin if m.player else null
+	var form: int = (int(k.wisp) + 2 * int(k.summon.shrink > 0.0)) if k and k.summon else 0
+	var changed: bool = form != _kin_form
+	_kin_form = form
+	return changed
+
+## A Boki's ability (k1 active, k2 auto) cast by a body this game owns: tell the others at once.
+func _on_cast(caster: Node, ability: String, slot: String) -> void:
+	if not (in_match and online() and slot in ["k1", "k2"] and caster is Ent):
+		return
+	var e: Ent = caster
+	if e.remote or not owns(e.nid):
+		return
+	event(["kab", e.nid, ability, slot])
+	flush()
+
+## The same cast on this game: the ability bus fires for the remote body, and its name floats up.
+func _cast_in(x) -> void:
+	if typeof(x) != TYPE_ARRAY or x.size() < 4 or String(x[0]) != "kab":
+		return
+	var e: Ent = m.ents_by_id.get(String(x[1]), null)
+	var def := KinLib.ability(String(x[2]))
+	if not is_instance_valid(e) or not e.remote or def == null:
+		return
+	CombatBus.ability_used.emit(e, def.id, String(x[3]))
+	if e is Kin and m.player and e.flat_dist(m.player) < 20.0:
+		m.fx.word(e.pos + Vector3(0, 1.3 + e.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 
 func hit(target_nid: String, d: Array) -> void:
 	out_hits.append([target_nid] + d)
@@ -224,6 +259,12 @@ func tick(dt: float) -> void:
 		return
 	send_t -= dt
 	host_send_t -= dt
+	if _kin_form_changed():
+		send_t = 0.0
+	for k in m.kins:
+		if k.remote and k.summon:
+			k.summon.left = maxf(0.0, k.summon.left - dt)       # (their copy of the timer runs between snapshots)
+			k.summon.cd = maxf(0.0, k.summon.cd - dt)
 	if send_t <= 0.0:
 		send_t = 0.1
 		var mine: Array = m.net_snapshot(true)
