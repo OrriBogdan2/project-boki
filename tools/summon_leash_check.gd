@@ -119,7 +119,7 @@ func _chase() -> void:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
-		if _i == int(RUSH_S * 60) + 20:      # (its own rush ability flew it home: back to the edge, the walk is what is measured)
+		if _i == int(RUSH_S * 60) + 20:      # (the rush flew it home: back to the edge, the walk is measured)
 			k.teleport(p.pos + east * (lsh - 2.0))
 		if _i > RUSH_S * 60 + 20:
 			far = maxf(far, k.flat_dist(p))
