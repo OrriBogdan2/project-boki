@@ -109441,5 +109441,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/hb4_neve_glaciatee_1.jpg",
     "ok": true
+  },
+  {
+    "id": "drop_up2",
+    "name": "Site drop splash, from below, accuracy pass",
+    "run": 5,
+    "file": "briefs/boki-art/batch/out/drop_up2_5.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up2",
+    "name": "Site drop splash, from below, accuracy pass",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_up2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up2",
+    "name": "Site drop splash, from below, accuracy pass",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/drop_up2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb4_cinder_calderoise",
+    "name": "Hunter + Boki splash, new setting (cinder_calderoise)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb4_cinder_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb4_neve_glaciatee",
+    "name": "Hunter + Boki splash, new setting (neve_glaciatee)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb4_neve_glaciatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb4_kael_voltalon",
+    "name": "Hunter + Boki splash, new setting (kael_voltalon)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb4_kael_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb4_kael_voltalon",
+    "name": "Hunter + Boki splash, new setting (kael_voltalon)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb4_kael_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_up2",
+    "name": "Site drop splash, from below, accuracy pass",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_up2_2.jpg",
+    "ok": true
   }
 ]
