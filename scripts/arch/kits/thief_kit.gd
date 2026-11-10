@@ -459,7 +459,7 @@ func _tick_vault(dt: float) -> void:
 		if h.grounded and float(vault["t"]) > 0.12:
 			h.roll_t = 0.0
 		return
-	h.roll_speed = float(vault["speed"]) * _curve(VAULT_CURVE, u) / VAULT_MEAN
+	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -473,14 +473,6 @@ func _tick_landing() -> void:
 	landing_due = false
 	if anim_id == "thf_exdash":
 		play("thf_land")
-
-static func _curve(pts: Array, u: float) -> float:
-	for i in pts.size() - 1:
-		var a: Array = pts[i]
-		var b: Array = pts[i + 1]
-		if u <= float(b[0]):
-			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
-	return float(pts[-1][1])
 
 ## A move another press starts mid-cartwheel (a bolt, the Bola, the dagger) waits out the flip: the ability
 ## goes off, the cartwheel isn't cut short.

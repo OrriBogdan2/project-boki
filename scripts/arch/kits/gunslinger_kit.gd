@@ -287,7 +287,7 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var start := h.position
-	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
+	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
 	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
@@ -320,17 +320,11 @@ func _slide_end() -> void:
 	last_dash_kind = String(st["last_dash"])
 	slide = {}
 
-## A tap: a skid that starts fast and bleeds off to a run over roll_t, covering `roll` m (you shoot
-## through it); the speed falls linearly from the peak that covers the distance.
+## A tap: a skid on her fitted dash curve (content/rules/dash_feel.json, ArchKit.travel's "curved"), covering
+## `roll` m over roll_t (you shoot through it).
 func _skid(t: float, dd: Dictionary) -> void:
-	var feel := dash_feel()                 # the global dash feel, as travel() applies it
-	var dur := float(dd["roll_t"]) * float(feel["time"])
-	if t >= dur:
+	if t >= float(dd["roll_t"]) * float(dash_feel()["time"]):
 		_slide_end()
-		return
-	var run := float(h.cdat["speed"])
-	var peak := 2.0 * float(dd["roll"]) * float(feel["dist"]) / dur - run
-	h.roll_speed = lerpf(peak, run, t / dur)
 
 func _tick_slide(dt: float) -> void:
 	if h.gliding:
@@ -352,6 +346,7 @@ func _tick_slide(dt: float) -> void:
 		if t >= float(dd["tap_t"]) and not bool(slide.get("tap", false)):
 			if held("dash") and can_hold:
 				slide["held"] = true
+				curved = {}                              # the hold slide sets its own speed
 				slide["t0"] = t
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]

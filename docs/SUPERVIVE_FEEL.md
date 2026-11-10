@@ -15,7 +15,7 @@ The owner read these straight from the installed game (config files, curve table
 | Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
 | Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m. Speed over a run with no keys (a kit step, a knock) sheds at `Hunter.GROUND_SHED` first (kit distances) |
-| Dash end | no hard stop (dash curves not decoded) | | **Yes**: a dash hands over at run speed (`physics.dash_exit_run`), then the walk, brake or air carry |
+| Dash end | no hard stop (DashCurves not decoded; three heroes fitted from footage, below) | | **Yes**: a dash hands over at no more than run speed (`physics.dash_exit_run`), then the walk, brake or air carry; Ghost, Brall and Myth slow through their fitted curve first |
 | Walkable floor | 50° | | n/a (heightmap) |
 | Walk off ledges | off | you need a jump or dash to leave a platform | No, on purpose: the owner wants walking off ledges allowed everywhere |
 | Mantle | pulls up ledges within 150 uu; Z speed cap 250 uu/s; mini-mantle launch 0.75 s at 0.6x forward speed, min 350 uu/s | 1.5 m, 2.5 m/s, min 3.5 m/s | Reach 1.5 m; topping out sends you onto the ledge at max(0.6x run speed, 3.5 m/s) (`physics.mantle_launch_*`) |
@@ -25,6 +25,18 @@ The owner read these straight from the installed game (config files, curve table
 | Dive | Z target -3250 uu/s, ZForceMax 350,000 / Mass 100, XY force x0.25, cancel 350 uu up, 10 s timeout | -32.5 m/s at 35 m/s², steer 0.25, 3.5 m, 10 s | **Yes**: hold crouch under the glider (`GlideDive`, `HunterMove.dive_*`); the key is ours, the source names none |
 
 Still unknown (encrypted C++ defaults): base glide speeds and gravity factor, glide braking, hoop boost, jump hold time, air-dash multipliers. Keep current tuning for those (TODO).
+
+## Dash speed curves, fitted from footage (Nov 9 2026)
+The game's DashCurves (e.g. `C_AssaultSlide_VelCurve`) sit in the encrypted code, so these come from the hero-ref sheets (`ext/agent-briefs:briefs/hero-ref/<hero>.md`, "Body, scale and movement feel" section 4). The sheets tracked the hunter's bar plus the camera pan at 30 fps and give the ground speed over each 1/15 s; the 5 fps frames alone (0.2 s) hold only 2-3 frames of a dash, too few for a shape, so the 1/15 s samples are the evidence here. 1 px (960 wide) = 0.0375 m. Model: speed rises in a straight line from a start speed to a peak, holds, then falls in a straight line to the end; least squares on the interval averages (each sample is the mean over its 1/15 s, not a point), knots on a 0.01 grid.
+
+| Hero (ours) | Samples used (px/s per 1/15 s) | Window | Start / peak / end (m/s) | Ramp, plateau | Mean | RMS error | Kit curve (`content/rules/dash_feel.json`, u: k) | Hand-over |
+|---|---|---|---|---|---|---|---|---|
+| Ghost (gunslinger, Slipstep tap) | 332 454 377 287 213 144 86 (552.75-553.3 s, frames 0150-0152) | 0.47 s, 4.73 m | 0.1 / 18.4 / 1.4 | 0.04 s, 0.02 s | 10.2 m/s | 0.30 m/s (3%), max 0.47 | 0: 0.01, 0.09: 1.81, 0.13: 1.81, 1: 0.13 | last sample 0.78x run: the skid falls through run speed and the walk takes it |
+| Brall (juggernaut, Rampage) | 143 365 423 336 266 190 112 (inside 434.40-435.35 s, frames 0372-0377) | 0.47 s, 4.59 m | 1.2 / 17.1 / 2.8 | 0.13 s, 0.01 s | 9.8 m/s | 0.11 m/s (1%), max 0.23 | 0: 0.12, 0.27: 1.73, 0.29: 1.73, 1: 0.28 | last sample 1.08x run |
+| Myth (archer, Spirit Walk roll) | 147 346 447 258 125 (from 655.55 s, frames 0388-0389) | 0.33 s, 3.31 m | 1.7 / 18.4 / 1.2 | 0.15 s, none | 9.9 m/s | 0.45 m/s (4.5%), max 0.78 | 0: 0.17, 0.44: 1.86, 1: 0.12 | last sample 1.11x run, straight into the Spirit Walk |
+| Felix (ashwick, Soot Ram) [?] | none per frame: "about 700 px/s (1080p) for the first 0.1 s, then 450-500, then it stops dead" (245.53-245.87 s, frames 0159-0160) | 0.33 s, 3.4 m | n/a | n/a | 10 m/s | n/a | none: the kit's own two-step (1.4x for the first 30%, then 0.85x, `RAM_FRONT*`) stays | `dash_exit_run` [?] (the sheet says a dead stop) |
+
+How the game uses them: the curve is in the dash's own time (u = share of its duration) and speed against its mean (mean 1), so each kit keeps its distance and time; only the shape is the source's (`ArchKit.travel` with `"curved"`, `HunterMove.dash_k`). The dash then hands over through `HunterMove.dash_exit`: never above run speed, so a curve that ends under run speed (Ghost 0.48x, Myth 0.31x of ours) hands over that slower speed and the walk (47-54 m/s²) brings it back to run in ~0.05 s with keys held, as the footage's last samples dip and recover. Our Rampage is 0.20 s against Brall's 0.47 s (owner, item 113: "a quicker Rampage"), so the same shape peaks at ~34 m/s (1.73 x 19.5); the source peak is 17 m/s. Air dashes, Ghost's hold slide and every other hero keep a constant speed (no footage). `--move-feel-check` asserts each fitted hero's peak share, peak / mean, distance and hand-over (`dash_curve_*`).
 
 ## What's in it
 
