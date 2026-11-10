@@ -82981,5 +82981,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_rattlebub_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_polyshroom",
+    "name": "Polyshroom (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_polyshroom_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_polyshroom",
+    "name": "Polyshroom (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_polyshroom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_starcap",
+    "name": "Starcap (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_starcap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_starcap",
+    "name": "Starcap (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_starcap_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_polyshroom",
+    "name": "Polyshroom (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_polyshroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rattlebub",
+    "name": "Rattlebub (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_rattlebub_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_starcap",
+    "name": "Starcap (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_starcap_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_morelkin",
+    "name": "Morelkin (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_morelkin_2.jpg",
+    "ok": true
   }
 ]
