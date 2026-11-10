@@ -62,11 +62,12 @@ const T := {
 	"glide_open_press_frames": ["<=", 1.0, "frames", "[wiki/guide] hold jump in the air to glide; a second press opens at once"],
 	"glide_open_hold_s":       ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
-	"glide_catch_t":           ["<=", 0.20, "s", "glider opens 'instantly' on input; brakes a terminal fall to sink rate"],
+	"glide_catch_t":           ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
+	"glide_start_vy":          ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
 	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
 	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
-	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] the glide force: a turn has inertia (item 163)"],
-	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same force brakes a reversal (item 163)"],
+	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
+	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
 	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
 	"glide_swoop_speed":       ["<=", 5.3, "m/s", "[owner 11-08 item 8] a high glide's pull-down never turns into speed"],
@@ -410,6 +411,21 @@ func _glide() -> void:
 		P.inp["glide"] = true
 		if f < 0 and P.gliding: f = i + 1
 	rec("glide_open_press_frames", f)
+	# opened while still rising from the jump: the canopy never carries the rise on
+	_reset(flat)
+	P.inp["jump"] = true
+	m.step(DT)
+	_steps(3)
+	var rise := P.vel.y
+	P.inp["jump"] = true
+	P.inp["glide"] = true
+	m.step(DT)
+	ok(rise > 3.0 and P.gliding, "glide_start: opened while rising at %.1f m/s" % rise)
+	rec("glide_start_vy", -P.vel.y)
+	var ga := HunterMove.glide_accel
+	var gv := HunterMove.glide_start_vy
+	ok(is_equal_approx(ga, 16.25), "glide_accel = GlideTargetXYForce 162,500 / Mass 100 (%s)" % ga)
+	ok(is_equal_approx(gv, 0.85), "glide_start_vy = GlideStartFallSpeedMin 85 uu/s (%s)" % gv)
 	# hold Space from the jump press
 	_reset(flat)
 	P.inp["jump"] = true
