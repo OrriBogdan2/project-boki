@@ -80,6 +80,9 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | fallback | [10, 60] |
 | uptime_band | [0.09, 0.2] |
 | knocked_cd_mult | 1.25 |
+| _home_doc | A summoned Boki that is killed: its wisp flies home to a hunter who is up at home_mps m/s, showing them through walls for home_reveal_s s (KinSummon.knocked). |
+| home_mps | 25 |
+| home_reveal_s | 2 |
 | leash | 10 |
 | leash_swing | 2 |
 | rebloom_dist | 20 |
