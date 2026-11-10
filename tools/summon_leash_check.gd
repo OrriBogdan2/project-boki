@@ -6,6 +6,7 @@ extends RefCounted
 ## glide off a ledge or are knocked. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
+const RUSH_S := 1.5      # s: its rush ability has landed and it is walking home again
 
 var bad := 0
 var m: Match
@@ -104,7 +105,7 @@ func _chase() -> void:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
-		if k.state in ["active", "returning"]:      # (its own rush ability flies, and is not the leash's business)
+		if _i > RUSH_S * 60:      # (its own rush ability flies first and is not the leash's business)
 			far = maxf(far, k.flat_dist(p))
 		turned = turned or k.state == "returning"
 	ok(far > lsh - 1.5, "chase: it walks out to a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])
