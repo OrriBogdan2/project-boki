@@ -96372,5 +96372,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/kite_dragonkite_f2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "kite_ribbonwyrm_r1",
+    "name": "Ribbonwyrm (kite rework r1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kite_ribbonwyrm_r1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kite_ribbonwyrm_r1",
+    "name": "Ribbonwyrm (kite rework r1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kite_ribbonwyrm_r1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kite_dragonkite_f1",
+    "name": "Dragonkite/Kitedrake (kite rework f1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kite_dragonkite_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kite_ribbonwyrm_r3",
+    "name": "Ribbonwyrm (kite rework r3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kite_ribbonwyrm_r3_2.jpg",
+    "ok": true
   }
 ]
