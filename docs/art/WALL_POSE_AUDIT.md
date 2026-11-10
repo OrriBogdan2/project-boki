@@ -13,9 +13,13 @@ Fix: `WardenWall` (`scripts/heroes/warden_wall.gd`), one shared layer in every H
 WallMoves' contact frame (the face found once per kick or bounce). It solves the nearer leg onto the face with the Hero's
 own leg lengths, holds the spot through the push and eases back to the clip; a bounce or push-off (body already leaving
 fast) has the sole on the wall that frame, a kick eases it in over 0.05 s; a short leg (Pip, a facing kick 0.4 m off)
-leans the body in. The move's timing is unchanged (`--wallmove-check` 0 failures).
+leans the body in. The chest also turns away from the wall about the hip (0.6 rad at most), and a heavy Hero (archetype weight: Kael, Cinder,
+Grimble, Albert) crouches deeper into the plant (0.6 of its reach, not 0.75), turns less (0.35 rad) and lets go slower
+(0.2 s, not 0.12 s), so its push has weight. The plant starts on the contact frame (0 frames after the kick, all 12).
+No VFX on the kick (owner rule): the pose is the only thing added. The move's timing is unchanged (`--wallmove-check`
+0 failures).
 
-`--wallpose-check` (sole within 0.10 m of the face on the contact frame, all 12, 0 failures). Sole to face on the
+`--wall-kick-pose-check` (sole within 0.10 m of the face on the contact frame, the plant starts within one frame, the chest turns, all 12, 0 failures). Sole to face on the
 contact frame, clips alone / with the plant, and the frames it stays within 0.10 m:
 
 | Hero | kick: clips alone / plant (frames on) | push-off | bounce |
@@ -33,7 +37,7 @@ contact frame, clips alone / with the plant, and the frames it stays within 0.10
 | thief (Sable) | 0.43 m / 0.020 m (9) | 0.56 m / 0.020 m (2) | 0.34 m / 0.020 m (3) |
 | ostra (Ostra) | 0.17 m / 0.016 m (12) | -0.03 m / 0.008 m (2) | -0.22 m / 0.018 m (3) |
 
-Strips: `--wallpose-check --shots-dir=<dir>` on a GPU, `tools/wall_pose_sheet.py <dir> <out>` lays them out (one sheet
+Strips: `--wall-kick-pose-check --shots-dir=<dir>` on a GPU, `tools/wall_pose_sheet.py <dir> <out>` lays them out (one sheet
 per Hero, each case clips above, plant below, every 2nd frame from the press or hit). The carved wall is drawn as a
 stand-in block (the terrain mesh predates the carve).
 

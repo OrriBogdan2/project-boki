@@ -6,12 +6,18 @@ extends RefCounted
 ## into the push, and lets go as it runs out of leg or the hold ends. A kick eases the leg in over PLANT_IN; a body
 ## already leaving the wall fast (a bounce, a push-off) has the sole on it that frame. A wall further off than a short
 ## leg reaches leans the body in. A two-bone solve on the Hero's own leg (thigh length, and knee to sole off its rest
-## pose) after the clips, so a small Hero and a big one both meet the wall. The move's timing is the hunter's; this only
-## poses the body. Reads the state's wall_ev, wall_age, wall_at and wall_n (WallMoves), vel and grounded.
+## pose) after the clips, so a small Hero and a big one both meet the wall. The chest turns away from the wall about
+## the hip over it, a heavy Hero (archetype weight) crouching deeper, turning less and letting go slower. The move's
+## timing is the hunter's; this only poses the body. Reads the state's wall_ev, wall_age, wall_at and wall_n
+## (WallMoves), vel and grounded.
 
 const PLANT_IN := 0.05       # s: the leg reaches the wall (the contact frame plus three at 60 fps)
 const LET_GO := 0.12         # s: the leg eases back to the clip's
+const LET_GO_HEAVY := 0.2    # s: a heavy Hero (the weight class in its archetype) lets go slower, its push has weight
 const BENT := 0.75           # of the leg's reach: hip to sole at contact (a crouched plant that then pushes)
+const BENT_HEAVY := 0.6      # of the leg's reach: a heavy Hero crouches deeper into the plant
+const TURN := 0.6            # rad: the most the chest turns away from the wall about the hip
+const TURN_HEAVY := 0.35     # rad: a heavy Hero turns less, its body is slower to swing
 const FADE_FROM := 0.92      # of the leg's reach: the plant starts to let go once the push stretches it past this
 const SOLE_GAP := 0.02       # m (Hero scale): the sole stops this far in front of the face, not in the stone
 const POLE_UP := 0.3         # the knee bends forward and a little up
@@ -27,8 +33,12 @@ var w := 0.0                 # how much of the plant is shown
 var side := 1                # the planted leg (0 left, 1 right)
 var point := Vector3.ZERO    # the planted sole, world
 var seen_ev := 0
+var heavy := false           # the archetype's weight class is heavy
+var turn := 0.0              # rad about up: the chest's turn away from the wall, set at contact, shown w of it
+var placed := false          # the skeleton node is off its own spot (turned or leaned)
+var skel_basis := Basis.IDENTITY
 var lean := Vector3.ZERO     # world: the body moved in to the wall while the plant shows (a short leg, a far wall)
-var skel_at := Vector3.ZERO  # the skeleton node's own position, under the lean
+var skel_at := Vector3.ZERO  # the skeleton node's own position, under the lean and the turn
 var leaned := Vector3.ZERO   # world: the lean the skeleton carries now
 
 static func make(model: Node3D, sk: Skeleton3D) -> WardenWall:
@@ -46,6 +56,7 @@ static func make(model: Node3D, sk: Skeleton3D) -> WardenWall:
 	var knee := to_model * sk.get_bone_global_rest(int(o.shin[1])).origin
 	o.sole_k = knee.y / maxf(hip.distance_to(knee), 0.01)
 	o.skel_at = sk.position
+	o.skel_basis = sk.basis
 	return o
 
 ## One frame, after the clips (and the sway) posed the bones.
@@ -62,14 +73,25 @@ func step(dt: float) -> void:
 		var hip := skel.global_transform * _hip() + lean - leaned
 		var reach := _thigh_len() * (1.0 + sole_k) * skel.global_transform.basis.get_scale().y
 		want = 1.0 - smoothstep(FADE_FROM, 1.0, hip.distance_to(point) / reach)
-	w = move_toward(w, want, dt / (PLANT_IN if want > w else LET_GO))
-	if lean != Vector3.ZERO:
-		leaned = lean * w
-		skel.position = skel_at + (skel.get_parent() as Node3D).global_transform.basis.inverse() * leaned
-		if w <= 0.0:
+	var span := PLANT_IN
+	if want <= w:
+		span = LET_GO_HEAVY if heavy else LET_GO
+	w = move_toward(w, want, dt / span)
+	if w > 0.0 or placed:
+		_place()
+		placed = w > 0.0
+		if not placed:
 			lean = Vector3.ZERO
 	if w > 0.0:
 		_solve()
+
+## The skeleton node turned about the hip (the chest away from the wall) and moved in by the lean, w of the way.
+func _place() -> void:
+	leaned = lean * w
+	var base: Transform3D = (skel.get_parent() as Node3D).global_transform * Transform3D(skel_basis, skel_at)
+	var pivot := base * _hip()
+	var spin := Basis(Vector3.UP, turn * w)
+	skel.global_transform = Transform3D(spin * base.basis, spin * (base.origin - pivot) + pivot + leaned)
 
 ## The contact frame: the sole's spot on the wall face, below the hip of the leg nearest the wall, the leg bent.
 func _plant(s: Dictionary) -> void:
@@ -90,7 +112,9 @@ func _plant(s: Dictionary) -> void:
 	lean = -n * maxf(out - LEAN_FROM * reach, 0.0)
 	out -= lean.length()
 	hip += lean
-	var bent := BENT * reach
+	var away := (root.global_transform.basis * Vector3.FORWARD).signed_angle_to(n, Vector3.UP)
+	turn = clampf(away, -1.0, 1.0) * (TURN_HEAVY if heavy else TURN)
+	var bent := (BENT_HEAVY if heavy else BENT) * reach
 	var drop := sqrt(maxf(bent * bent - out * out, 0.0))
 	var across := hip - n * out
 	point = Vector3(across.x, hip.y - drop, across.z)      # (on the face: across is the hip moved onto it)

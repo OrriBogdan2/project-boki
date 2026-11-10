@@ -1,12 +1,14 @@
 extends "res://tools/wallmove_check.gd"
-## --wallpose-check [--shots-dir=<dir>]: every Hero's body in a wall kick, a push-off kick and a wall bounce. Each
+## --wall-kick-pose-check [--shots-dir=<dir>]: every Hero's body in a wall kick, a push-off kick and a wall bounce. Each
 ## Hero's model is put on the hunter and played as in a match (Hunter.render, then its Sync), once with the plant and
 ## push (WardenWall) and once without it, from the press or hit on. Asserts that with it the sole meets the
-## wall face within CONTACT_M on the contact frame (the first with the plant in full) for all of them, and
+## wall face within CONTACT_M on the contact frame (the first with the plant in full) for all of them, that the
+## plant starts within one frame of the kick or bounce, that the chest turns away, and
 ## prints what the clips alone leave there. With --shots-dir and a renderer it also writes the frames side-on:
 ## <dir>/<id>_<case>_<on|off>_<frame>.png (tools/wall_pose_sheet.py lays them out). Never touches the save.
 
 const CONTACT_M := 0.1         # m: the sole on the wall face, either side of it
+const MIN_TURN := 0.05         # rad: the chest's least turn away from the wall at its most
 const FRAMES := 24             # steps from the event the case watches (0.4 s: the plant, the push and the let go)
 
 const SHOT_EVERY := 2          # steps between two frames of a strip
@@ -48,6 +50,7 @@ func run(main: Node) -> void:
 		ok(wall != null, "%s: its model has the plant and push" % id)
 		if wall == null:
 			continue
+		ok(wall.heavy == (Arch.weight(id) == "heavy"), "%s: heavy push only for the heavy weight class" % id)
 		sync.set_process(false)
 		for kind in ["kick", "push", "bounce"]:
 			var on: Dictionary = await _case(String(id), kind, wl, sync, -1)
@@ -56,7 +59,10 @@ func run(main: Node) -> void:
 				id, kind, on["d"], on["contact"]] + "(clips alone: %.2f m), %d frames within %.2f m" % [
 				off["d"], on["held"], CONTACT_M] + "; sole's biggest step to it %.3f m, after %.3f (alone %.3f)" % [
 				on["reach"], on["push"], off["push"]])
-	print("WALLPOSE DONE, failures: ", bad)
+			ok(int(on["start"]) <= 1, "%s %s: the plant starts %d frames after the kick (one at most)" % [
+				id, kind, on["start"]])
+			ok(float(on["turn"]) > MIN_TURN, "%s %s: chest turns %.2f rad off its rest" % [id, kind, on["turn"]])
+	print("WALLKICKPOSE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 ## Plays one case: with the plant when `contact` < 0 (the contact frame is the first with the plant in full), else
@@ -77,7 +83,8 @@ func _case(id: String, kind: String, wl: Dictionary, sync: Node, contact: int) -
 		_reset(Vector3(at.x, wl["low"], at.y), true)
 	_frame(DT)
 	var ev0 := int(h.anim_s.get("wall_ev", 0))
-	var res := {"event": false, "contact": contact, "d": 9.0, "held": 0, "reach": 0.0, "push": 0.0}
+	var res := {"event": false, "contact": contact, "d": 9.0, "held": 0, "reach": 0.0, "push": 0.0,
+			"start": 99, "turn": 0.0}
 	var out := Vector3(-n.x, 0.0, -n.y)
 	var since := -1
 	var last := Vector3.INF
@@ -94,6 +101,10 @@ func _case(id: String, kind: String, wl: Dictionary, sync: Node, contact: int) -
 			res["event"] = true
 		if since < 0:
 			continue
+		if wall.w > 0.0:
+			res["start"] = mini(int(res["start"]), since)
+		var spun := (wall.skel_basis.inverse() * wall.skel.basis).orthonormalized()
+		res["turn"] = maxf(float(res["turn"]), spun.get_rotation_quaternion().get_angle())
 		var face: Vector3 = h.anim_s["wall_at"]
 		var leg: int = wall.side
 		if not on and absf((wall.sole(0) - face).dot(out)) < absf((wall.sole(1) - face).dot(out)):

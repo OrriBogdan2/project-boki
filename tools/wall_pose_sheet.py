@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lays out --wallpose-check --shots-dir frames: one sheet per Hero, a row pair per case (clips alone above, with the
+"""Lays out --wall-kick-pose-check --shots-dir frames: one sheet per Hero, a row pair per case (clips alone above, with the
 plant and push below), frames left to right from the press or hit. Usage: wall_pose_sheet.py <shots dir> <out dir>."""
 import glob
 import os
