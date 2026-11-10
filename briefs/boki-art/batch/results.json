@@ -81581,5 +81581,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_rimeshrew_b3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_jibbatross",
+    "name": "Jibbatross (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_jibbatross_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_selenfin",
+    "name": "Selenfin (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_selenfin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_selenfin",
+    "name": "Selenfin (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_selenfin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_selenfin",
+    "name": "Selenfin (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_selenfin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_jibbatross",
+    "name": "Jibbatross (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_jibbatross_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kerchick",
+    "name": "Kerchick (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_kerchick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_jibbatross",
+    "name": "Jibbatross (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_jibbatross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimefang",
+    "name": "Rimefang (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_rimefang_1.jpg",
+    "ok": true
   }
 ]
