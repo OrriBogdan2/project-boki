@@ -1,6 +1,6 @@
 extends Control
 ## The pre-match lobby screen (rules: Prematch): pick your Hunter, meet your squad, plan with text
-## chat (and a voice hook), watch the countdown. At 0 the picks lock and the match loads.
+## chat (SquadChat, Enter) and a voice hook, watch the countdown. At 0 the picks lock and the match loads.
 
 var pm: Prematch
 var voice := VoiceChat.new()
@@ -8,9 +8,7 @@ var timer_label: Label
 var hint: Label
 var grid: GridContainer
 var squad_box: VBoxContainer
-var chat_log: VBoxContainer
-var chat_scroll: ScrollContainer
-var chat_in: LineEdit
+var chat: SquadChat
 var talk_btn: Button
 
 func setup(opts: Dictionary) -> void:
@@ -59,23 +57,6 @@ func _ready() -> void:
 	side_col.add_child(UI.section("Your squad"))
 	squad_box = UI.vbox(6)
 	side_col.add_child(squad_box)
-	side_col.add_child(UI.section("Squad chat"))
-	chat_scroll = ScrollContainer.new()
-	chat_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	chat_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	side_col.add_child(chat_scroll)
-	chat_log = UI.vbox(4)
-	chat_log.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	chat_scroll.add_child(chat_log)
-	var row := UI.hbox(8)
-	side_col.add_child(row)
-	chat_in = LineEdit.new()
-	chat_in.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	chat_in.placeholder_text = "Plan with your squad..."
-	chat_in.max_length = Prematch.CHAT_MAX
-	chat_in.text_submitted.connect(func(_t): _send_chat())
-	row.add_child(chat_in)
-	row.add_child(UI.button("Say", _send_chat))
 	talk_btn = UI.button("", Callable())
 	talk_btn.button_down.connect(func(): _talk(true))
 	talk_btn.button_up.connect(func(): _talk(false))
@@ -84,6 +65,7 @@ func _ready() -> void:
 	_fill_hunters()
 	_fill_squad()
 	_tick_label()
+	chat = SquadChat.attach(self, pm.opts)
 	Net.message.connect(_on_msg)
 	_announce_pick()
 
@@ -98,7 +80,8 @@ func _process(delta: float) -> void:
 	if pm.locked and not was:
 		hint.text = "Picks are locked. Loading in..."
 		_fill_hunters()
-		chat_in.release_focus()
+		if chat:
+			chat.close()
 	if go:
 		set_process(false)
 		Game.goto("match", pm.launch_opts())
@@ -109,7 +92,7 @@ func _tick_label() -> void:
 	timer_label.add_theme_color_override("font_color", UI.BAD if pm.left <= 10.0 else UI.INK)
 
 func _unhandled_key_input(e: InputEvent) -> void:
-	if e is InputEventKey and e.physical_keycode == KEY_V and not e.echo and not chat_in.has_focus():
+	if e is InputEventKey and e.physical_keycode == KEY_V and not e.echo and not (chat and chat.typing):
 		_talk(e.pressed)
 
 ## Push-to-talk: the button (hold) or V. The transport is VoiceChat's; none ships yet.
@@ -173,34 +156,16 @@ func _fill_squad() -> void:
 	if squad_box.get_child_count() == 1 and int(pm.opts.get("squad", 1)) <= 1:
 		squad_box.add_child(UI.para("A solo drop: nobody to plan with, but everyone else is out there."))
 
-# ------------------------------------------------------------------ chat and picks
-func _add_chat(who: String, text: String, col: Color) -> void:
-	var l := UI.para("%s: %s" % [who, text], UI.T_BODY, col)
-	chat_log.add_child(l)
-	await get_tree().process_frame
-	chat_scroll.scroll_vertical = int(chat_scroll.get_v_scroll_bar().max_value)
-
-func _send_chat() -> void:
-	var text := Prematch.clean_chat(chat_in.text)
-	chat_in.clear()
-	if text == "":
-		return
-	var me := String(Save.d.get("name", "Hunter"))
-	_add_chat(me, text, UI.ACCENT_HI)
-	if Net.mode != "":
-		Net.lobby_emit("chat", {"name": me, "t": text})
-
+# ------------------------------------------------------------------ picks
 func _announce_pick() -> void:
 	if Net.mode != "":
 		Net.lobby_emit("pick", {"arch": pm.pick})
 
-## A teammate's chat line or pick (the lobby channel reaches everyone online: other squads' are dropped).
+## A teammate's pick (the lobby channel reaches everyone online: other squads' are dropped).
 func _on_msg(topic: String, data, from: String) -> void:
 	if typeof(data) != TYPE_DICTIONARY or not _teammate(from):
 		return
-	if topic == "chat":
-		_add_chat(String(data.get("name", "Hunter")), Prematch.clean_chat(String(data.get("t", ""))), UI.INK)
-	elif topic == "pick" and Arch.exists(String(data.get("arch", ""))):
+	if topic == "pick" and Arch.exists(String(data.get("arch", ""))):
 		pm.peer_picks[from] = String(data["arch"])
 		_fill_squad()
 

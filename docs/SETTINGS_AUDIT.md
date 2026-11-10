@@ -19,6 +19,8 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `name` (save, not settings) | Gameplay > You | `Save.d["name"]` | |
 | `damage_numbers` | Gameplay > Combat | `fx.gd` | |
 | `tips` | Gameplay > Combat | `hud.gd` | renamed "Tips during expeditions" |
+| `squad_chat` | Gameplay > Combat | `squad_chat.gd` | on by default: squad text chat in the lobby and in a match (Enter types, Esc closes) |
+| `chat_muted` | `/mute name` in the chat | `squad_chat.gd` | lower-case names whose lines are hidden; no row of its own |
 | `kin_chatter` | Gameplay > Boki | `kin_companion.gd` | renamed "How much your Boki talks" |
 | `mod_mode` | Gameplay > Admin (admin only) | `game.gd` | |
 | `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the 90 s pre-match lobby before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |

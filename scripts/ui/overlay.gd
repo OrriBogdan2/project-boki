@@ -317,6 +317,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Expeditions")
 	_toggle(v, "Damage numbers", "damage_numbers", "Numbers pop up where your hits land")
 	_toggle(v, "Tips during expeditions", "tips", "Short hints about what's around you")
+	_toggle(v, "Squad text chat", "squad_chat", "Enter types to your squad, Esc closes. /mute name hushes a player")
 	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]

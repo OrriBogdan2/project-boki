@@ -7,7 +7,6 @@ extends RefCounted
 
 const DURATION := 90.0      # seconds the lobby runs
 const LOCK_HOLD := 1.0      # seconds "picks locked" shows before the match loads
-const CHAT_MAX := 140       # characters in one chat line
 ## Options that mark a match as something other than a real expedition: no lobby for those.
 const NOT_EXPEDITION := [
 	"tutorial", "training", "practice", "arena", "duel", "sandbox", "autoplay", "probe", "spectate", "demo_match",
@@ -104,7 +103,3 @@ func launch_opts() -> Dictionary:
 			r["cls"] = Arch.weight(ak)
 			r["weapon"] = Arch.signature(ak)
 	return o
-
-## A chat line made safe to show and send: trimmed, one line, at most CHAT_MAX characters.
-static func clean_chat(s: String) -> String:
-	return s.replace("\n", " ").strip_edges().left(CHAT_MAX)

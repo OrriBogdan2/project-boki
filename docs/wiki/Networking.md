@@ -41,6 +41,7 @@ lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `po
 | `st` | Every owner, every 0.1 s; the host's world every 0.15 s | Snapshots of owned entities, with the match time as a header. Unreliable channel. |
 | `hit` | Anyone who hits something they don't own | `[target nid, damage, knockback x, z, lift, crit, ...]`, applied by the owner |
 | `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `hex`, `knock`, `out`, `catch` / `caught`, `chest`, and more |
+| `chat` | Anyone | Squad text `{"t": text}`, sent by `Net.chat` (the match room in a match, the lobby channel before). The room gets it; `SquadChat` keeps it only if the sender (the relay's `f`) is on your team. |
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
 

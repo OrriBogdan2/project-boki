@@ -2,7 +2,7 @@ extends RefCounted
 ## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0019-prematch-lobby.md).
 ## The 90 s countdown and the lock at 0, picks refused once locked (and for a Hunter that isn't open),
 ## the admin toggle (Settings lobby_enabled) and which matches get a lobby, the squad the lobby and the
-## loading screen share, the options the match starts with, chat lines, the voice hook, and the screen.
+## loading screen share, the options the match starts with, the voice hook, and the screen.
 
 var bad := 0
 const EXPEDITION := {"teams": 10, "squad": 2, "tier": 0}
@@ -25,7 +25,7 @@ func run(main: Node) -> void:
 	_pick_lock()
 	_toggle()
 	_squad_and_launch()
-	_chat_and_voice()
+	_voice()
 	await _screen(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
@@ -96,10 +96,7 @@ func _squad_and_launch() -> void:
 	var kept: bool = lo["arch"] == other and Save.d["arch"] == other and lo["mates"] == o["mates"]
 	ok(kept, "the locked pick is what the match starts with and what is saved")
 
-func _chat_and_voice() -> void:
-	ok(Prematch.clean_chat("  push north\nnow  ") == "push north now", "a chat line is trimmed and one line")
-	var capped := Prematch.clean_chat("x".repeat(500)).length()
-	ok(capped == Prematch.CHAT_MAX, "a chat line is capped at %d characters" % Prematch.CHAT_MAX)
+func _voice() -> void:
 	var v := VoiceChat.new()
 	var seen: Array = []
 	v.set_talking(true)
@@ -118,10 +115,7 @@ func _screen(main: Node) -> void:
 	ok(view.grid.get_child_count() == Arch.ids().size(), "the screen shows every Hunter")
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
 	ok(view.timer_label.text == "1:30", "the screen counts down from 1:30 (%s)" % view.timer_label.text)
-	view.chat_in.text = "hello"
-	view._send_chat()
-	await main.get_tree().process_frame
-	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
+	ok(view.chat == null, "an offline lobby has no chat (squad chat is for online squads)")
 	view.pm.left = 0.0
 	view.set_process(false)
 	view.queue_free()
