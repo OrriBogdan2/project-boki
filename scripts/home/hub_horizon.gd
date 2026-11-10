@@ -10,16 +10,20 @@ extends RefCounted
 ## below its ground]. The home camera looks down from the south, so at the arrival zoom the hub's north rim
 ## is the top of the screen and its south rim the bottom: the islands hang in the corners and at the sides,
 ## in the void beside the hub, where you see them the moment you arrive (garden_zones_check asserts it).
-const SLOTS := [[-122.0, 16.0, 7.0], [-56.0, 16.5, 5.0], [60.0, 16.5, 5.5], [120.0, 16.0, 7.5], [-92.0, 17.5, 9.5]]
-const TOP_R := 4.0         # m, an island's top radius
+const SLOTS := [[-114.0, 16.0, 7.0], [-84.0, 18.0, 9.0], [58.0, 17.0, 5.5], [92.0, 17.5, 8.5], [118.0, 16.5, 7.5]]
+const TOP_R := 3.6         # m, an island's top radius
 const DEPTH := 4.5         # m, how far its rocky underside hangs
 const SIDES := 7           # corners of the low-poly outline
 const HILL := 1.4          # m the middle of an island's top rises, so it reads as land, not a plate
+const TREES := [Vector3(-1.1, 0.6, 0.55), Vector3(1.0, -0.4, 0.6)]   # (x, z, how far up the hill) per tree
+const TREE_R := 0.8        # m, a tree's foot radius
+const TREE_H := 2.2        # m, its height
+const TREE_DARK := 0.35    # how much darker than the island's top a tree is
 const LIT_GLOW := 0.2      # how much a lit island glows (shader glow 0..1)
 const LIT_WARM := 0.15     # how far a lit island's colours warm toward sunlight (0 none .. 1 all)
-const MIST := 0.85         # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
+const MIST := 0.9          # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
 const WARM := Color("ffd9a0")
-const MIST_GREY := Color("767c8a")
+const MIST_GREY := Color("646a76")
 const ROCK := Color("6e6577")
 
 static var _mats := {}      # open (bool) -> the one material that state shares
@@ -66,8 +70,18 @@ static func island_mesh(seed_i: int, colour: Color, open: bool) -> ArrayMesh:
 		var q: Vector3 = rim[(k + 1) % SIDES]
 		_tri(st, Vector3(0, HILL, 0), q, p, top)
 		_tri(st, p, q, tip, under)
+	for t in TREES:      # a couple of low-poly trees, so a speck in the void reads as land you could go to
+		_cone(st, Vector3(t.x, HILL * t.z, t.y), top.darkened(TREE_DARK))
 	st.generate_normals()
 	return st.commit()
+
+## A five-sided cone (a tree, or in mist a crag) standing on `foot`.
+static func _cone(st: SurfaceTool, foot: Vector3, col: Color) -> void:
+	var apex := foot + Vector3(0, TREE_H, 0)
+	for k in 5:
+		var a := TAU * float(k) / 5.0
+		var b := TAU * float(k + 1) / 5.0
+		_tri(st, foot + Vector3(sin(a), 0, cos(a)) * TREE_R, foot + Vector3(sin(b), 0, cos(b)) * TREE_R, apex, col)
 
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, col: Color) -> void:
 	for v in [a, b, c]:
