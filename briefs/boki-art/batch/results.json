@@ -83541,5 +83541,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_wayshell_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_wayshell",
+    "name": "Wayshell (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_wayshell_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sphinxblight",
+    "name": "Sphinxblight (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_sphinxblight_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sphinxblight",
+    "name": "Sphinxblight (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_sphinxblight_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_wayshell",
+    "name": "Wayshell (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_wayshell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sphinxblight",
+    "name": "Sphinxblight (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_sphinxblight_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glacione",
+    "name": "Glacione (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_glacione_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glacione",
+    "name": "Glacione (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_glacione_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glacione",
+    "name": "Glacione (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_glacione_3.jpg",
+    "ok": true
   }
 ]
