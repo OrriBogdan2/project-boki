@@ -12,9 +12,10 @@ extends RefCounted
 ## snapshot flag turns a remote Boki into a wisp and back. The summon (KinSummon): every species has a window
 ## and cooldown in the uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash,
 ## damage never ends it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a
-## shrink back to a dim wisp, a resting summon refuses, the snapshot carries it. The stolen-wisp looks (StolenWisp): loose
-## wisps bob and pulse, a grab puts a thin side-colour ring and a tether on it, a scatter sends each wisp its
-## own way, the flight home trails and arrives, all within the particle budget. Prints PASS/FAIL.
+## shrink back to a dim wisp, a resting summon refuses, the snapshot carries it. The stolen-wisp looks
+## (StolenWisp): loose wisps bob and pulse, a grab puts a thin side-colour ring and a tether on it, a scatter
+## sends each wisp its own way, the flight home trails and arrives, all within the particle budget. Prints
+## PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
