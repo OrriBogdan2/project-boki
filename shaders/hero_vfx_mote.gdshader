@@ -1,6 +1,8 @@
 // One Hero VFX GPU particle, a camera-facing quad (the motion: hero_vfx_motes.gdshader; its velocity, size and age
 // arrive in the instance transform). Embers are hot streaks along their velocity that cool to col3; smoke is a soft
-// noisy puff that grows and thins. Premultiplied like shaders/hero_vfx.gdshader.
+// noisy puff that grows and thins. Premultiplied like shaders/hero_vfx.gdshader. A mote fades out over its last
+// SOFT_M above the ground, so a quad that dips into it never shows a hard cut (a soft particle by height, not by
+// the depth texture, which gl_compatibility can't read).
 shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
@@ -14,6 +16,10 @@ uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);
 uniform int look = 0;
 uniform float stretch = 0.05;  // s of velocity an ember's streak spans
 uniform float gain = 1.0;
+uniform float floor_y = -1.0e9;  // m, the ground under the emitter (hero_vfx.gd)
+const float SOFT_M = 0.15;      // m above the ground a mote fades in over
+
+varying float above;
 
 varying float age;
 varying float pick;
@@ -50,6 +56,7 @@ void vertex() {
 		vec2 off = vec2(qq.x * ca - qq.y * sa, qq.x * sa + qq.y * ca) * grow;
 		world = center + right * off.x + up * off.y;
 	}
+	above = world.y - floor_y;
 	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
 }
 
@@ -120,4 +127,7 @@ void fragment() {
 		ALBEDO = mix(col3.rgb, col.rgb, lit * (1.0 - age)) * a * gain;
 		ALPHA = a * gain;
 	}
+	float soft = smoothstep(0.0, SOFT_M, above);
+	ALBEDO *= soft;
+	ALPHA *= soft;
 }
