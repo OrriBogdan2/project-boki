@@ -105,12 +105,35 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
 }
+## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-footslide-check.
+const STRIDE := {
+	"cindle": [0.74, 1.34],
+	"puddlet": [0.57, 0.95],
+	"burrlet": [0.45, 0.83],
+	"glintmole": [0.43, 0.88],
+	"rimeshrew": [0.48, 0.96],
+	"zephyrak": [1.50, 2.90],
+	"pebbit": [0.43, 0.91],
+	"cairnback": [0.26, 0.71],
+	"wisplet": [0.37, 0.52],
+	"gloamshell": [1.50, 2.90],
+	"selenfin": [1.50, 2.90],
+	"zapple": [0.76, 1.72],
+	"hivara": [0.55, 1.16],
+	"glomwort": [1.50, 2.90],
+	"kestrike": [0.25, 0.45],
+	"kindlewren": [0.37, 0.49],
+	"lodestick": [0.23, 0.62],
+	"marchleaf": [0.48, 1.73],
+	"mossgrade": [0.11, 0.66],
+	"nettlynx": [0.45, 0.88],
+	"thrumbird": [1.50, 2.90],
+}
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
-const RUN_SPEED := 3.2        # m/s: from here it gallops
-const RUN_STRIDE := 2.9       # m/s the run clip covers at speed 1 (Vespyx: reach 1.3, pace 1.06)
-const WALK_STRIDE := 1.5
+const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
+const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -318,10 +341,11 @@ func _pick_clip(dt: float) -> void:
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
-	if want == "run":
-		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
-	elif want == "walk" or want == "carry":
-		player.speed_scale = clampf(_speed / WALK_STRIDE, 0.6, 1.6)
+	if want != "run" and want != "walk" and want != "carry":
+		return
+	# the world scale: a size roll's bigger Boki takes longer steps
+	var stride: float = STRIDE[species][1 if want == "run" else 0] * model.global_basis.z.length()
+	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:
 	_shot = which
