@@ -78032,5 +78032,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_mycroll_b2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_gravitank_b2",
+    "name": "Gravitank (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_gravitank_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_gravadillo_b2",
+    "name": "Gravadillo (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_gravadillo_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vespox_b2",
+    "name": "Vespox (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_vespox_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prismander_b2",
+    "name": "Prismander (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_prismander_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gravadillo_b2",
+    "name": "Gravadillo (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_gravadillo_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prismander_b2",
+    "name": "Prismander (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_prismander_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mycroll_b2",
+    "name": "Mycroll (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_mycroll_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gravitank_b2",
+    "name": "Gravitank (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_gravitank_b2_2.jpg",
+    "ok": true
   }
 ]
