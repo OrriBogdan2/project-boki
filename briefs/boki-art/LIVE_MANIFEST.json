@@ -45,10 +45,13 @@
    "hash": {
     "card": "bb6f26b73df2",
     "sheet": "10e0507c3a06",
-    "portrait": "4a646e33fbc3"
+    "portrait": "4a646e33fbc3",
+    "hero": "bf463ba6a247"
    },
    "sheet": "briefs/boki-art/evolutions/Arcestrel_female.jpg",
-   "portrait": "briefs/boki-art/portraits/light/Arcestrel_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Arcestrel_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Arcestrel_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Arcestrel_female.png"
   }
  },
  "Barokat": {
@@ -470,9 +473,12 @@
    "hash": {
     "card": "bc7710990f2b",
     "sheet": "192c73d28686",
-    "portrait": "cc8ec96b950c"
+    "portrait": "cc8ec96b950c",
+    "hero": "f9f00c62a268"
    },
-   "portrait": "briefs/boki-art/portraits/light/Eclipsowl_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Eclipsowl_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Eclipsowl_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Eclipsowl_female.png"
   }
  },
  "Effigeetle": {
@@ -764,8 +770,11 @@
    "hash": {
     "card": "a811d40272fb",
     "sheet": "6d6a259ba48d",
-    "portrait": "d99adc8848d8"
-   }
+    "portrait": "d99adc8848d8",
+    "hero": "3513ad8a4e03"
+   },
+   "hero": "briefs/boki-art/portraits/cutout_v2/Gongibbon_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Gongibbon_female.png"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -788,10 +797,13 @@
    "hash": {
     "card": "c58f8851c045",
     "sheet": "75c29dd654df",
-    "portrait": "52de5aa7dfe6"
+    "portrait": "52de5aa7dfe6",
+    "hero": "3dd0b4a0908e"
    },
    "sheet": "briefs/boki-art/evolutions/Gongrowl_female.jpg",
-   "portrait": "briefs/boki-art/portraits/light/Gongrowl_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Gongrowl_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Gongrowl_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Gongrowl_female.png"
   }
  },
  "Grainspin": {
@@ -987,8 +999,11 @@
    "hash": {
     "card": "74533e4a8e77",
     "sheet": "958033985a86",
-    "portrait": "681ad655d444"
-   }
+    "portrait": "681ad655d444",
+    "hero": "57dfb38f56ba"
+   },
+   "hero": "briefs/boki-art/portraits/cutout_v2/Kestrike_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Kestrike_female.png"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -1168,9 +1183,12 @@
    "hash": {
     "card": "a4ab985b4cc9",
     "sheet": "45302238af04",
-    "portrait": "8aa65103b0b7"
+    "portrait": "8aa65103b0b7",
+    "hero": "9c4280c3cca9"
    },
-   "portrait": "briefs/boki-art/portraits/light/Lunowl_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Lunowl_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Lunowl_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Lunowl_female.png"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -1366,8 +1384,11 @@
    "hash": {
     "card": "60147f62aea5",
     "sheet": "69864eb965cf",
-    "portrait": "d19db555ed90"
-   }
+    "portrait": "d19db555ed90",
+    "hero": "06da01271f21"
+   },
+   "hero": "briefs/boki-art/portraits/cutout_v2/Murmurling_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Murmurling_female.png"
   }
  },
  "Mycroll": {
@@ -1760,9 +1781,12 @@
    "hash": {
     "card": "41b6e0e8a57e",
     "sheet": "2c1d6938249d",
-    "portrait": "c0fa7c65a8b2"
+    "portrait": "c0fa7c65a8b2",
+    "hero": "788ed55a4e91"
    },
-   "portrait": "briefs/boki-art/portraits/light/Sandwidow_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Sandwidow_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Sandwidow_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Sandwidow_female.png"
   }
  },
  "Sarcobra": {
@@ -2213,9 +2237,12 @@
    "hash": {
     "card": "e6cd77fce06e",
     "sheet": "48015a6ce551",
-    "portrait": "7a05755d4b17"
+    "portrait": "7a05755d4b17",
+    "hero": "631e60f9efe6"
    },
-   "portrait": "briefs/boki-art/portraits/light/Voltalon_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Voltalon_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Voltalon_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Voltalon_female.png"
   }
  },
  "Voltmink": {
@@ -2534,8 +2561,11 @@
    "hash": {
     "card": "1d3d5ad65cb0",
     "sheet": "778ae2af3eea",
-    "portrait": "693b52bf7594"
-   }
+    "portrait": "693b52bf7594",
+    "hero": "af88ddfb9375"
+   },
+   "hero": "briefs/boki-art/portraits/cutout_v2/Murmuron_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Murmuron_female.png"
   }
  },
  "Spanglin": {
@@ -2741,10 +2771,13 @@
    "hash": {
     "card": "0e92e9df1c1d",
     "sheet": "3e6909204862",
-    "portrait": "29fc8ac02f7f"
+    "portrait": "29fc8ac02f7f",
+    "hero": "9fa571910c20"
    },
    "sheet": "briefs/boki-art/evolutions/Hourachnid_female.jpg",
-   "portrait": "briefs/boki-art/portraits/light/Hourachnid_female.jpg"
+   "portrait": "briefs/boki-art/portraits/light/Hourachnid_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Hourachnid_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Hourachnid_female.png"
   }
  },
  "Meteorab": {
@@ -2821,8 +2854,11 @@
    "hash": {
     "card": "5a9b7a39a32f",
     "sheet": "3fb1a43f62be",
-    "portrait": "d5eaa843c1f9"
-   }
+    "portrait": "d5eaa843c1f9",
+    "hero": "0e68a4c164ba"
+   },
+   "hero": "briefs/boki-art/portraits/cutout_v2/Pavonazar_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Pavonazar_female.png"
   }
  },
  "Pinster": {

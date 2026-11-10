@@ -16,5 +16,8 @@ if s!='-': f=A+f'evolutions/{N}_female.jpg'; bk(f); bload.load(s).save(f,quality
 if p!='-':
     for q in (f'portraits/light/{N}_female.jpg',f'portraits/dark/{N}_female.jpg',f'portraits/cutout/{N}_female.png'): bk(A+q)
     t=tempfile.gettempdir()+'/fp.jpg'; bload.load(p).save(t,quality=95); cutout.make_all(t,N+'_female',A+'portraits'); fe['portrait']=A+f'portraits/light/{N}_female.jpg'
-fe.pop('note',None); fe['hash']={k:hashlib.sha1(open(fe[k],'rb').read()).hexdigest()[:12] for k in ('card','sheet','portrait') if fe.get(k) and os.path.exists(fe[k])}
+if fe.get('card'):
+    sys.path.insert(0,'briefs/boki-art/batch'); from cutout_v2 import cutout as _c2,frame as _f2; from PIL import Image as _I
+    _h=A+f'portraits/cutout_v2/{N}_female.png'; _f2(_c2(_I.open(fe['card']))).save(_h,optimize=True); fe['hero']=fe['cutout']=_h
+fe.pop('note',None); fe['hash']={k:hashlib.sha1(open(fe[k],'rb').read()).hexdigest()[:12] for k in ('card','sheet','portrait','hero') if fe.get(k) and os.path.exists(fe[k])}
 json.dump(m,open(A+'LIVE_MANIFEST.json','w'),indent=1); print('female',N,sorted(fe['hash']))
