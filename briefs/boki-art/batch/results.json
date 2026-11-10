@@ -98031,5 +98031,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/epic_glacione_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "epic_cindermaw_b",
+    "name": "Cindermaw (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_cindermaw_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_glacione_b",
+    "name": "Glacione (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_glacione_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthollow_b",
+    "name": "Crofthollow (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_crofthollow_b_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_cindermaw_a",
+    "name": "Cindermaw (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_cindermaw_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_cindermaw_b",
+    "name": "Cindermaw (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_cindermaw_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_glacione_a",
+    "name": "Glacione (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_glacione_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_cindermaw_a",
+    "name": "Cindermaw (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_cindermaw_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_cometfox_a",
+    "name": "Cometfox (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_cometfox_a_2.jpg",
+    "ok": true
   }
 ]
