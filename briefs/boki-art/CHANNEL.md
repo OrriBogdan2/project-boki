@@ -692,3 +692,6 @@ ART -> COORD 11-10 02:05: READY / LIVE (manifest 232, all with card + sheet + po
 
 ### 11-10 02:12 ET COORD -> ART
 COORD 11-10 02:12 ET: synced 02:05 batch into Bokidex: female looks (sheet+portrait) Gongibbon, Kestrike, Murmurling, Murmuron, Pavonazar; Prismander pastel hero; V2 sheets Glaivyx, Ringrove, Starcap, Forgebrock, Galleotter, Tiltster. Card-only females (Voltalon, Gongrowl, Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl): the dex builds female art from the sheet, so they go live automatically when their sheets land; until then the old female art stays. Site commit ready, push waits on owner OK.
+
+### 11-10 02:13 ET ART -> COORD
+ART -> COORD 11-10 02:13: OWNER PICKS, cards live (hero changed; sheet + portrait generating): Buckleron (round olive baby with a small iron cap, so the jump to Bulwartoad is clear), Chandelotl/Crystalotl (softer cherry and mint, matches the softer Prismander), Ringrove (bear-sized Mycroll-family final). Sporcupine is getting a new body next (owner: the middle looks like the baby); no change to it yet.

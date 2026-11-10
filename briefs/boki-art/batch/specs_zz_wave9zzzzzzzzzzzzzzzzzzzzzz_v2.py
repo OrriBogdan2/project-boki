@@ -925,3 +925,20 @@ for _n in ('Voltalon','Gongrowl','Hourachnid','Eclipsowl','Sandwidow','Arcestrel
     SPECS[_n0]['id']='fs2_'+_n.lower(); SPECS[_n0+1]['id']='fp2_'+_n.lower(); SPECS[_n0+1]['runs']=2
 _n0=len(SPECS); V2SHEET_NEW('Prismander','briefs/boki-art/cards/Prismander.jpg',_GC,_GN); V2PORT_NEW('Prismander','briefs/boki-art/cards/Prismander.jpg','baby','cute',_GC,_GN,False,False,"sitting up, head tilted, tail curled round its feet")
 SPECS[_n0]['id']='v2s_prismander_soft'; SPECS[_n0+1]['id']='v2p_prismander_soft'; SPECS[_n0+1]['runs']=2
+
+# ===== 05:10 ET 11-10 OWNER picks: Buckleron = D (round olive baby, iron cap), Crystalotl = candy colours, Ringrove option A2 "decent" -> live.
+# Sheets + portraits from the new cards.
+for _n,(_st,_ar,_dk,_fu,_pose) in {'Buckleron':('baby','cute',0,0,"mid-hop, tiny legs out, cap wobbling"),'Chandelotl':('final','majestic',0,0,"reared up tall with its crystal hood spread wide, coils planted"),
+                                   'Ringrove':('final','majestic',0,1,"sitting upright, calm, looking at the viewer")}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_p2'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_p2'; SPECS[_n0+1]['runs']=2
+# OWNER: "the middle of the line looks the same as the beginning one, which we said is bad". Sporcupine round 2: a NEW BODY, not Mycroll bigger.
+# Image 1 = Mycroll (baby), image 2 = the new Ringrove (final). The middle keeps the family colours and face but changes build and stance.
+_SP2=(" It belongs between the baby in image 1 and the final form in image 2: the same cream face, warm brown quills, mint mushroom caps with cream spots and teal eyes, but its BODY is new, "
+      "not the round baby made bigger and not the bulky final made smaller. A teenager's face: narrower eyes than the baby, a confident look, no pink cheeks.")
+for _k,_d in (('d',"a lanky, long-legged adolescent porcupine standing tall on all fours like a young wolf, slim waist, long neck, its quills grown into a tall mane-crest from head to tail with small mint caps at the tips, and a long tail ending in one big cap it swings like a mace. Mid-stride."),
+              ('e',"a rolling attacker: curled most of the way into a spiked wheel, mid-roll, with its face and one arm showing at the front, long quills sticking out all round like spokes, and mint mushroom caps on the rim like studs."),
+              ('f',"a low, long digger built like a badger: flat wide body close to the ground, big shovel front claws, a broad wedge head, and a single ridge of large mint mushroom caps down its back like plates on a stegosaur, quills swept back along its sides. Prowling forward."),
+              ('g',"an upright, long-armed climber like a young sloth-bear, standing on its hind legs, long quills hanging down its back like a spiky cloak, a cluster of mint mushroom caps growing from each shoulder, big clawed hands held ready. Wiry, not chubby.")):
+    SPECS.append({'id':'opt_sporcupine_'+_k,'name':'Sporcupine (new body, option '+_k+')','refs':[_C%'Mycroll',_C%'Ringrove'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of the MIDDLE evolution of a creature line: "+_d+_SP2+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('mid','sleek',False,True)+FRAME_V2})
