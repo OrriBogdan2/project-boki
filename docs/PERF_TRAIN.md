@@ -18,16 +18,17 @@ Each phase cell is median / p95 / worst ms, then (frames over 50 ms).
 | drop | 54 / 97 / 154 (274) | 42 / 70 / 464 (194) | 48 / 81 / 174 (204) | 47 / 80 / 85 (201) |
 | land | 58 / 71 / 155 (160) | 40 / 49 / 83 (5) | 43 / 58 / 99 (36) | 42 / 58 / 87 (39) |
 | draws (ride, worst frames) | ~2240 | ~2100 | ~2060 | ~2030 |
+| perf-bench match (one step a frame) | 33.8 ms avg, p99 52.7, script 13.0 / p99 26.8, 849 draws | | | 31.5 ms avg, p99 47.3, script 10.9 / p99 21.4, 773 draws |
 
 **mac-Naruto-Founder (Apple M5; the jobq Mac runs GL Compatibility, so the compile counter reads 0)**
-| | merged | + catch-up cap | + prop range (tip) |
-|---|---|---|---|
-| loading screen | 24.3 s (warm_up 17.4 s) | 22.9 s (warm_up 16.4 s) | 23.3 s (warm_up 16.6 s) |
-| ride | 21 / 44 / 62 (3) | 20 / 41 / 61 (3) | 21 / 45 / 106 (5) |
-| drop | 31 / 50 / 154 (16) | 29 / 45 / 102 (6) | 28 / 51 / 107 (20) |
-| land | 25 / 36 / 308 (4) | 24 / 32 / 147 (3) | 25 / 32 / 82 (3) |
-| draws (drop / land, worst frames) | ~2915 / ~1090 | ~2920 / ~1080 | ~2650 / ~960 |
-| perf-bench match (merged) | 17.0 ms avg, p99 41.5, 55 frames over 33 ms, 1019 draws, script 2.9 ms | | |
+| | base 0.24.4 | merged | + catch-up cap | + prop range (tip) |
+|---|---|---|---|---|
+| loading screen | 22.9 s (warm_up 15.9 s) | 24.3 s (warm_up 17.4 s) | 22.9 s (warm_up 16.4 s) | 23.3 s (warm_up 16.6 s) |
+| ride | 29 / 83 / 111 (56) | 21 / 44 / 62 (3) | 20 / 41 / 61 (3) | 21 / 45 / 106 (5) |
+| drop | 43 / 70 / 91 (159) | 31 / 50 / 154 (16) | 29 / 45 / 102 (6) | 28 / 51 / 107 (20) |
+| land | 34 / 44 / 92 (2) | 25 / 36 / 308 (4) | 24 / 32 / 147 (3) | 25 / 32 / 82 (3) |
+| draws (drop / land, worst frames) | | ~2915 / ~1090 | ~2920 / ~1080 | ~2650 / ~960 |
+| perf-bench match | 19.0 ms avg, p99 72.2, 854 draws, script 3.0 ms | 17.0 ms avg, p99 41.5, 1019 draws | | 15.5 ms avg, p99 69.6, 730 draws, script 2.5 ms |
 
 **Catch-up cap, A/B** (`--perf-bench --bench-real`, rp1-1, merged vs + cap): match p99 85.2 -> 66.1 ms, script p99
 45.4 -> 32.2 ms, frames over 33 ms 953 -> 895; 60 s of match took 67.4 vs 68.8 s of frames (the cap barely slows
@@ -42,8 +43,10 @@ Reading it:
 - On the M5 the hitches are render, not script: drop frames of 2600-2900 draws spend 60-140 ms in render submit,
   while the sim runs 4-6 ms. A landing frame of 300 ms came right after the hitch-check's 10-monster pack, first
   drawn on GL (a compile at first draw). The loading screen is mostly warm-up (16-17 s of 23 s on the Mac).
-- Base on the Mac: its runs here had a stale script cache (my copy) and are left out. The owner's 11-10 run is the
-  M5 base: 37 s loading, 146 compiles, medians 44-71 ms. Those medians held the hitch-check double step fixed below.
+- On the M5, base -> tip: ride, drop and land medians 29/43/34 -> 21/28/25 ms, and frames over 50 ms 56/159 -> 5/20
+  in the ride and drop. The tip's perf-bench gate fails on the Mac (p99 69.6 ms against a recorded 54.9). Base
+  measures 72.2 with the same bench, so the recorded Mac baseline is stale, not a regression. The owner's 11-10 M5
+  medians (44-71 ms) held the hitch-check double step fixed below.
 
 ## What merged
 | Branch | What it brings | Conflicts and how both intents were kept |
