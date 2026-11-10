@@ -34,11 +34,12 @@ func run(main_node: Node) -> void:
 	UtilityBelt.grant(P, "twin_gate", 2)
 	UtilityBelt.grant(P, "smoke", 1)
 	P.hp = P.max_hp - 40.0
-	UtilityBelt.use_id(P, "tonic")
 	UtilityBelt.use_id(P, "twin_gate")
+	UtilityBelt.use_id(P, "tonic")
 	P.belt[3]["cd"] = 3.0
 	m.step(Match.DT * 20)
 	await _frames(20)
+	print("BELTHUDSHOTS gate %.1f s, slots %s" % [BeltHud.recast_left(P), str(P.belt.map(func(b): return b.get("id", "")))])
 	for sz in SIZES:
 		main.get_window().size = sz
 		await _frames(8)
