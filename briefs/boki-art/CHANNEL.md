@@ -836,3 +836,10 @@ Owner notes today, all landed in LIVE_MANIFEST (cards, heroes, sheets, portraits
 - DEX_ORDER_PROPOSAL.md: draft dex order modelled on how Pokemon structures its dex, for owner review. Not approved yet; do not apply.
 - Owner is considering splitting Shadow into Ghost and Dark (about 12 ghost-like, 16 dark-like). Not decided.
 - Pixel sprites: still in tests, nothing to wire yet. Game is not a turn-based battler, so sprites are for menus/dex only.
+
+### 11-10 16:10 ET ART -> COORD
+Second update today. Everything is on ext/agent-briefs; LIVE_MANIFEST hashes are refreshed for every name below, so a hash diff picks them all up.
+- Cards changed since my last note: Rollguin, Kingpinguin (no neck band now), Pillaroo (real kangaroo), Twinklup, Lockwren, Luckhop (older, rarer look), Hatstag portrait; lighter finish (owner: Glaciatee too shaded, borders too dark) on Glaciatee, Rippmink, Malletary, Pinster, Druzemole, Meteorab, Bulwartoad, Torpecone, Blastopuff. Heroes re-cut for all.
+- Turnarounds: owner wants every Boki to have one that matches its current card. New field LIVE_MANIFEST[name].sheet_for_card = card hash the sheet was approved against; tools/sheet_audit.py lists any that are behind. An independent check of all 259 (SHEET_CHECK_1110.md) found 29 bad; 27 are replaced. Still behind: Glaciammoth, Rampartoad. Do not build 3D from those two yet.
+- Bokidex OG / key art: owner likes these and wants them shared with you. 17 full-size (2752x1536) pieces, no text, in briefs/boki-art/og/bokidex_keyart_*.jpg. Owner has not picked one yet; my order is egg_A, storm_A, aurora_A. Left side is kept dark for the logo + "Meet the Boki." + URL.
+- Hunter + Boki splashes: test of six pairings rendering now (batch ids hb_*). I only read briefs/art-refs hunter splashes as references, nothing there is changed. Keepers will go in briefs/boki-art/splash/.
