@@ -42,7 +42,8 @@ func _judge(imp: String) -> void:
 	for p in UI_PREFIXES:
 		ui = ui or rel.begins_with(p)
 	if ui:
-		_fail(rel, mode != MODE_LOSSLESS or mips, "UI art must stay lossless without mipmaps (mode %d, mips %s)" % [mode, mips])
+		var bad := mode != MODE_LOSSLESS or mips
+		_fail(rel, bad, "UI art must be lossless, no mipmaps (mode %d, mips %s)" % [mode, mips])
 		return
 	_fail(rel, mode != MODE_VRAM, "3D texture is not VRAM compressed (mode %d)" % mode)
 	_fail(rel, not mips, "3D texture has no mipmaps")
@@ -50,7 +51,8 @@ func _judge(imp: String) -> void:
 	if tex == null:
 		_fail(rel, true, "not imported")
 		return
-	_fail(rel, maxi(tex.get_width(), tex.get_height()) > MAX_PX, "larger than %d px (%dx%d)" % [MAX_PX, tex.get_width(), tex.get_height()])
+	var side := maxi(tex.get_width(), tex.get_height())
+	_fail(rel, side > MAX_PX, "longest side %d px, over %d" % [side, MAX_PX])
 
 func _fail(rel: String, bad: bool, why: String) -> void:
 	if bad:
