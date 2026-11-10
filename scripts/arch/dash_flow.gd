@@ -202,9 +202,12 @@ func cc_left(slot: String) -> float:
 	return maxf(h.stun_t, 0.0)
 
 ## Presses the CC forbids now, in its last BUFFER_S: held for the first step it allows them. A held LMB is left
-## alone (it fires on its own once allowed); a tap is replayed.
+## alone (it fires on its own once allowed); a tap is replayed. A cast that holds the hunter still (Rimelock's
+## statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> void:
 	var h := kit.h
+	if kit.cast_locked():
+		return
 	if fire_pressed:
 		_hold_for_cc("lmb")
 	for slot in CC_KEY_OF:
