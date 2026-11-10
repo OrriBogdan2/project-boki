@@ -591,18 +591,23 @@ func _late_homing() -> void:
 	step(m, 1.0 / 60.0)
 	P.inp["dash"] = false
 	var beams0: int = K.stats["beams"]
-	for i in 36:
+	var launch := {}                  # beam sid -> heading it left with
+	var beam_turn := 0.0              # deg the most-turned skating beam bent off that heading
+	for i in 76:
 		sc.aim_at(P, T.pos + Vector3(1.5, 0, 0))
-		P.inp["fire"] = true
+		P.inp["fire"] = i < 36
 		step(m, 1.0 / 60.0)
+		for b in _mine(m, P):
+			var v: Vector2 = b["vel"]
+			launch[b["sid"]] = launch.get(b["sid"], v)
+			beam_turn = maxf(beam_turn, rad_to_deg(absf((launch[b["sid"]] as Vector2).angle_to(v))))
 	P.inp["fire"] = false
 	P.inp["dash_down"] = false
-	step(m, 0.4)
 	var shot := int(K.stats["beams"]) - beams0
 	ok(
-			"tm Shift: skating, beams aimed 1.5 m off a foe still home in late and hit it",
-			shot >= 3 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
-			"%d beams, %.0f damage" % [shot, hp0 - T.hp])
+			"tm Shift: skating, beams aimed 1.5 m off a foe home in late (bend over 5 deg) and hit it",
+			shot >= 3 and beam_turn > 5.0 and hp0 - T.hp >= float(P.wpn["dmg"]) * float(shot) * 0.6,
+			"%d beams, bent %.1f deg, %.0f damage" % [shot, beam_turn, hp0 - T.hp])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 1.8)
 	var slabs := K.lk().live.filter(func(e): return String(e["kind"]) == "slab").size()
