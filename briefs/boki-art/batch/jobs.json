@@ -43354,6 +43354,45 @@
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
   },
   {
+    "id": "tent_sparkle",
+    "name": "Field tent splash with sparkle",
+    "refs": [
+      "briefs/boki-art/batch/out/hb4_meeko_starters_1.jpg",
+      "briefs/art-refs/ryzz_v2/ryzz_v2_master_sheet.jpg",
+      "briefs/art-refs/ryzz_v2/ryzz_v2_portrait.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1. Keep the scene exactly as it is: the same cosy field-hospital tent at night with rain outside, the same shelves of jars and bandages, the same warm light, the same three small creatures in the same places and poses (the purple scorpion-tailed fox having its paw bandaged, the mushroom hedgehog holding the bandage roll, the pink striped axolotl asleep in the water bowl), the same painting style and framing. Change only the hunter: remove the small pink fox character and her little sun and raincloud companions completely, and in her place put the hunter shown in images 2 and 3 (design sheet and portrait), drawn exactly on-model, kneeling or sitting at the same spot and gently bandaging the purple fox's paw with both hands. She is a full-size adult human-shaped hunter, clearly much bigger than the three little creatures. The hunter is Sparkle, the Storm Chaser: blue-to-pink twin pigtails, a lightning scar over her right eye, a nose ring, a backpack of four tall copper lightning rods with small pink arcs between them, fingerless gloves, platform boots. The warm light in the tent now comes from the soft pink glow of the arcs on her rods and a hanging lantern. She has a goofy, tender, concentrating smile with the tip of her tongue out; one stray pink spark makes the hedgehog's mushrooms stand on end. No text, no logo, no extra characters."
+  },
+  {
+    "id": "tent_lace",
+    "name": "Field tent splash with lace",
+    "refs": [
+      "briefs/boki-art/batch/out/hb4_meeko_starters_1.jpg",
+      "briefs/art-refs/ravel_v2/ravel_v2_master_sheet.jpg",
+      "briefs/art-refs/ravel_v2/ravel_v2_portrait.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1. Keep the scene exactly as it is: the same cosy field-hospital tent at night with rain outside, the same shelves of jars and bandages, the same warm light, the same three small creatures in the same places and poses (the purple scorpion-tailed fox having its paw bandaged, the mushroom hedgehog holding the bandage roll, the pink striped axolotl asleep in the water bowl), the same painting style and framing. Change only the hunter: remove the small pink fox character and her little sun and raincloud companions completely, and in her place put the hunter shown in images 2 and 3 (design sheet and portrait), drawn exactly on-model, kneeling or sitting at the same spot and gently bandaging the purple fox's paw with both hands. She is a full-size adult human-shaped hunter, clearly much bigger than the three little creatures. The hunter is Lace, the Red Stitch: pale porcelain doll skin with fine cracks and a red stitched scar across her face (no mask on her face), black hair in a high bun pierced with silver needles and long loose hair, a white mask on her left shoulder, wine-red corset, ball-jointed doll arms. She is the seamstress: she ties the bandage off neatly with her own red thread, calm and gentle. The warm light comes from a hanging lantern. No text, no logo, no extra characters."
+  },
+  {
+    "id": "tent_tenzo",
+    "name": "Field tent splash with tenzo",
+    "refs": [
+      "briefs/boki-art/batch/out/hb4_meeko_starters_1.jpg",
+      "briefs/art-refs/tarek_v2/tarek_v2_master_sheet.jpg",
+      "briefs/art-refs/tarek_v2/tarek_v2_portrait.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1. Keep the scene exactly as it is: the same cosy field-hospital tent at night with rain outside, the same shelves of jars and bandages, the same warm light, the same three small creatures in the same places and poses (the purple scorpion-tailed fox having its paw bandaged, the mushroom hedgehog holding the bandage roll, the pink striped axolotl asleep in the water bowl), the same painting style and framing. Change only the hunter: remove the small pink fox character and her little sun and raincloud companions completely, and in her place put the hunter shown in images 2 and 3 (design sheet and portrait), drawn exactly on-model, kneeling or sitting at the same spot and gently bandaging the purple fox's paw with both hands. She is a full-size adult human-shaped hunter, clearly much bigger than the three little creatures. The hunter is Tenzo, the Stone Seer: a blind man with a plain cloth blindfold, dreadlocks with copper beads, prayer beads, an orange sash, a huge stone left arm and three small floating eye-stones orbiting his head, which look down at the fox's paw for him. He bandages the paw very carefully with his one ordinary hand, the big stone hand cupped under the little fox to steady it. Kind, patient. The warm light comes from a hanging lantern. No text, no logo, no extra characters."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
