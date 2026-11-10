@@ -37766,6 +37766,314 @@
     "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
   },
   {
+    "id": "halo_sarcobra",
+    "name": "Sarcobra (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Sarcobra.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_pavonazar",
+    "name": "Pavonazar (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Pavonazar.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_wayshell",
+    "name": "Wayshell (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Wayshell.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_ghoulamari",
+    "name": "Ghoulamari (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Ghoulamari.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_cetorgan",
+    "name": "Cetorgan (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Cetorgan.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_cindermaw",
+    "name": "Cindermaw (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Cindermaw.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_aurostag",
+    "name": "Aurostag (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Aurostag.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_sphinxblight",
+    "name": "Sphinxblight (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Sphinxblight.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_hydrangor",
+    "name": "Hydrangor (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Hydrangor.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_siegephant",
+    "name": "Siegephant (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Siegephant.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_glaciammoth",
+    "name": "Glaciammoth (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Glaciammoth.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_pharoheron",
+    "name": "Pharoheron (legendary halo crown)",
+    "refs": [
+      "briefs/boki-art/cards/Pharoheron.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side."
+  },
+  {
+    "id": "halo_palloth",
+    "name": "Palloth (legendary halo crown, bright)",
+    "refs": [
+      "briefs/boki-art/cards/Palloth.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side. On this dark creature the ring is bright bone-white with five small violet points, clearly visible above its head against the pale background."
+  },
+  {
+    "id": "v2s_pinguin_nl",
+    "name": "Pinguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Pinguin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Pinguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_pinguin_nl",
+    "name": "Pinguin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Pinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: waddling, flippers out, wobbling like a pin about to fall. Official encyclopedia portrait of exactly the creature in image 1: Pinguin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_rollguin_nl",
+    "name": "Rollguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Rollguin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Rollguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_rollguin_nl",
+    "name": "Rollguin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Rollguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: sliding forward on its round belly. Official encyclopedia portrait of exactly the creature in image 1: Rollguin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_kingpinguin_nl",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Kingpinguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_kingpinguin_nl",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: mid-throw, one flipper swung forward. Official encyclopedia portrait of exactly the creature in image 1: Kingpinguin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: small eyes set deep under a heavy, straight brow ridge, a coloured iris and one small crisp white highlight; a wide jaw with an underbite, tusks or bared teeth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_filefin_nl",
+    "name": "Filefin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Filefin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Filefin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_filefin_nl",
+    "name": "Filefin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Filefin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: swimming in a little loop, nose up. Official encyclopedia portrait of exactly the creature in image 1: Filefin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_carpenjaw_nl",
+    "name": "Carpenjaw (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Carpenjaw.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Carpenjaw. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_carpenjaw_nl",
+    "name": "Carpenjaw (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Carpenjaw.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: darting forward, saw nose slicing. Official encyclopedia portrait of exactly the creature in image 1: Carpenjaw. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: narrow almond eyes tilted up at the outer corners, a coloured iris and one crisp white highlight; the flat upper lid works as the brow; a cool, knowing smirk. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_sawright_nl",
+    "name": "Sawright (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Sawright.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Sawright. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_sawright_nl",
+    "name": "Sawright (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Sawright.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: turning in a slow arc, saw nose raised. Official encyclopedia portrait of exactly the creature in image 1: Sawright. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: small eyes set deep under a heavy, straight brow ridge, a coloured iris and one small crisp white highlight; a wide jaw with an underbite, tusks or bared teeth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "new_postroo_baby2",
+    "name": "Postbox kangaroo baby (reads as a kangaroo)",
+    "refs": [
+      "briefs/boki-art/batch/out/new_postroo_a_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Draw one single character illustration of a baby kangaroo in exactly the colours and finish of image 1: the same postbox-red fur, cream belly, big stamp-edged ears and letter-slot-shaped pouch. But it is clearly a little KANGAROO: a small head with a soft muzzle, short front paws held up, big long hind feet, and a thick tail it leans on. Sitting upright, cute. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. Effects: at most one small effect, attached to the body and drawn as flat hard-edged shapes. Anything that glows is simply the brightest flat colour on the creature with a lighter flat shape inside it; the air around the creature is empty. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "new_xylocroc_mid2",
+    "name": "new_xylocroc_mid2",
+    "refs": [
+      "briefs/boki-art/batch/out/new_xylocroc_a_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Draw one single character illustration of the MIDDLE evolution of the creature in image 1, clearly the same animal grown up with the same colours, face and idea: a young crocodile twice the baby's length, long and low with a narrower snout and real teeth showing, eight xylophone bars down its back, its tail split into two mallet tips held up over its back like drumsticks, mid-stride. Not round and not baby-faced. Every part is grown from its own body: nothing built, worn, tied on or carried. Draw it exactly the way image 1 is drawn. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: narrow almond eyes tilted up at the outer corners, a coloured iris and one crisp white highlight; the flat upper lid works as the brow; a cool, knowing smirk. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. Effects: at most one small effect, attached to the body and drawn as flat hard-edged shapes. Anything that glows is simply the brightest flat colour on the creature with a lighter flat shape inside it; the air around the creature is empty. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "new_carousel_mid2",
+    "name": "new_carousel_mid2",
+    "refs": [
+      "briefs/boki-art/batch/out/new_carousel_a_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Draw one single character illustration of the MIDDLE evolution of the creature in image 1, clearly the same animal grown up with the same colours, face and idea: a leggy young horse, twice the foal's height with long slim legs and a longer neck, its canopy mane grown into two scalloped tiers down its neck, a longer twisted striped horn, a long ribbon tail, cantering. Not chubby and not baby-faced. Every part is grown from its own body: nothing built, worn, tied on or carried. Draw it exactly the way image 1 is drawn. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: large almond eyes with one to three lash flicks, a coloured iris, one large and one small crisp white highlight; a soft arched brow; a small, poised mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. Effects: at most one small effect, attached to the body and drawn as flat hard-edged shapes. Anything that glows is simply the brightest flat colour on the creature with a lighter flat shape inside it; the air around the creature is empty. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

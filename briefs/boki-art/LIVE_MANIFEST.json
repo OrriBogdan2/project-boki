@@ -3176,9 +3176,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glacione.png",
   "hash": {
    "sheet": "36528c2ac69a",
-   "card": "5984e0b74e2f",
+   "card": "7f210baa63cd",
    "portrait": "be1e8d3e4ef3",
-   "hero": "62da4ac75d9c"
+   "hero": "f823a34cfb30"
   },
   "legendary_tier": "minor",
   "display_name": "Clionice"
@@ -3335,9 +3335,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Cometail.png",
   "hash": {
    "sheet": "2a65c4d0fffb",
-   "card": "dcd353668326",
+   "card": "b04da45d5e60",
    "portrait": "3c8bdb2ee7b3",
-   "hero": "6a45f9df8a85"
+   "hero": "3e089cf0c5ba"
   },
   "legendary_tier": "minor"
  },
@@ -3349,9 +3349,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Calderoise.png",
   "hash": {
    "sheet": "e9d7f37633c1",
-   "card": "b2e623f54fb4",
+   "card": "7b8653e775dd",
    "portrait": "25206767a2c8",
-   "hero": "36f42074701e"
+   "hero": "292493a35df0"
   },
   "legendary_tier": "boss"
  },
@@ -3404,9 +3404,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Luckhop.png",
   "hash": {
    "sheet": "ad323c56940b",
-   "card": "4ee031f0dbce",
+   "card": "77d4a43b8cdb",
    "portrait": "e48f530eaf1c",
-   "hero": "3f07781c49c1"
+   "hero": "e0281c20ff3a"
   },
   "legendary_tier": "minor"
  },
@@ -3431,9 +3431,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Twinklup.png",
   "hash": {
    "sheet": "d26a480eb510",
-   "card": "c7da78ebd37e",
+   "card": "5b4a4bcdbe23",
    "portrait": "9e39caf09ef4",
-   "hero": "3516b1ac20e1"
+   "hero": "51d78c1fd7e4"
   },
   "legendary_tier": "minor"
  },
@@ -3445,9 +3445,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Lockwren.png",
   "hash": {
    "sheet": "1bd7390e6b97",
-   "card": "47c100d42abb",
+   "card": "34106afc296c",
    "portrait": "bdadb8a45aec",
-   "hero": "06d91bda2890"
+   "hero": "d91c8fbc5a58"
   },
   "legendary_tier": "minor"
  }

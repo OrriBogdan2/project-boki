@@ -1616,3 +1616,21 @@ for _n in ('Luckhop','Twinklup','Lockwren','Glacione','Cometail','Calderoise','P
     for _k,_t in _MARKS.items():
         SPECS.append({'id':'mark_'+_n.lower()+'_'+_k,'name':_n+' (legendary mark '+_k+')','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'2K',
           'prompt':_EDIT+_t+" It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."})
+
+# ===== 11-10 OWNER: "go with all the first / your choices". LEGENDARY MARK = the HALO CROWN, on all 19 legendaries. Live on Luckhop, Twinklup, Lockwren,
+# Glacione, Cometail, Calderoise. Queued for the other 13 (ids halo_<name>, 3 runs). Palloth gets a brighter ring.
+_HALO=(_MARKS['h']+" The ring is NOT metal jewellery: it is made of the creature's own material and floats, touching nothing. If the creature already has a crown, halo or fan shape behind its head, turn that into this ring. "
+       "It stays the same creature in the same pose, and the whole creature with its ring fits inside the frame with empty margin on every side.")
+for _n in ('Sarcobra','Pavonazar','Wayshell','Ghoulamari','Cetorgan','Cindermaw','Aurostag','Sphinxblight','Hydrangor','Siegephant','Glaciammoth','Pharoheron'):
+    SPECS.append({'id':'halo_'+_n.lower(),'name':_n+' (legendary halo crown)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K','prompt':_EDIT+_HALO})
+SPECS.append({'id':'halo_palloth','name':'Palloth (legendary halo crown, bright)','refs':['briefs/boki-art/cards/Palloth.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+_HALO+" On this dark creature the ring is bright bone-white with five small violet points, clearly visible above its head against the pale background."})
+# NEW LINES. Penguin and sawshark are added now (cards saved: Pinguin > Rollguin > Kingpinguin, Filefin > Carpenjaw > Sawright). The other three get
+# better MIDDLE stages first (the first tries were the baby again), and the kangaroo baby is redrawn so it reads as a kangaroo.
+for _a in (('Pinguin','baby','cute',0,0,"waddling, flippers out, wobbling like a pin about to fall"),('Rollguin','mid','cute',0,0,"sliding forward on its round belly"),('Kingpinguin','final','tough',0,0,"mid-throw, one flipper swung forward"),
+           ('Filefin','baby','cute',0,0,"swimming in a little loop, nose up"),('Carpenjaw','mid','sleek',0,0,"darting forward, saw nose slicing"),('Sawright','final','tough',0,0,"turning in a slow arc, saw nose raised")):
+    SETOF(*_a,'nl')
+SPECS.append({'id':'new_postroo_baby2','name':'Postbox kangaroo baby (reads as a kangaroo)','refs':[_O+'new_postroo_a_2.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':"Draw one single character illustration of a baby kangaroo in exactly the colours and finish of image 1: the same postbox-red fur, cream belly, big stamp-edged ears and letter-slot-shaped pouch. But it is clearly a little KANGAROO: a small head with a soft muzzle, short front paws held up, big long hind feet, and a thick tail it leans on. Sitting upright, cute. "+STYLE_V2('baby','cute',False,True)+FRAME_V2})
+NEXT('new_xylocroc_mid2','new_xylocroc_a_2','mid','sleek',"a young crocodile twice the baby's length, long and low with a narrower snout and real teeth showing, eight xylophone bars down its back, its tail split into two mallet tips held up over its back like drumsticks, mid-stride. Not round and not baby-faced.")
+NEXT('new_carousel_mid2','new_carousel_a_2','mid','pretty',"a leggy young horse, twice the foal's height with long slim legs and a longer neck, its canopy mane grown into two scalloped tiers down its neck, a longer twisted striped horn, a long ribbon tail, cantering. Not chubby and not baby-faced.")
