@@ -38,7 +38,8 @@ static func draw(hud, p: Hunter, x: float, y: float) -> float:
 			HudStyle.slot_frame(c, r, HudStyle.MUTED, "off")
 			var pin := UtilityBelt.reserved_id(k)
 			if pin != "":
-				Icons.draw(c, UtilityBelt.icon_of(pin), r.get_center() + Vector2(0, -2), SLOT * 0.27, Color(UtilityBelt.col_of(pin), 0.22))
+				var ghost := Color(UtilityBelt.col_of(pin), 0.22)
+				Icons.draw(c, UtilityBelt.icon_of(pin), r.get_center() + Vector2(0, -2), SLOT * 0.27, ghost)
 			HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), Settings.key_cap(key), HudStyle.MUTED)
 			shown[k] = {"id": "", "n": 0, "key": Settings.key_cap(key), "fill": 0.0, "recast": -1.0}
 		else:

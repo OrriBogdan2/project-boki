@@ -67,11 +67,11 @@ func _slots(hud) -> void:
 		for b in range(a + 1, rects.size()):
 			if (rects[a] as Rect2).intersects(rects[b]): clear = false
 	ok(clear, "the belt overlaps no slot, card or other HUD box")
-	var size: Vector2 = hud.get_viewport().get_visible_rect().size
+	var view: Vector2 = hud.get_viewport().get_visible_rect().size
 	var left := 1e9
 	for r in rects: left = minf(left, (r as Rect2).position.x)
-	ok(rects.size() == 6 and (rects[0] as Rect2).end.x <= size.x and left > size.x * 0.4,
-		"the belt stays on the right of the screen (%dpx wide, from x %d)" % [int(size.x), int(left)])
+	ok(rects.size() == 6 and (rects[0] as Rect2).end.x <= view.x and left > view.x * 0.4,
+		"the belt stays on the right of the screen (%dpx wide, from x %d)" % [int(view.x), int(left)])
 
 func _items(P: Hunter) -> void:
 	var sh := BeltHud.shown
