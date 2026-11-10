@@ -187,13 +187,28 @@ func _summary(part: String, fl: Array) -> void:
 		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
-		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights()])
+		_emitting().size(), _count("Light3D"), _shadow_lights()])
+	var by := {}
+	for e in _emitting():
+		var k := String((e as Node).name).rstrip("0123456789@")
+		by[k] = int(by.get(k, 0)) + 1
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	var nodes := _count("GPUParticles3D") + _count("CPUParticles3D")
+	print("BENCH %s emitters (%d particle nodes in all): %s" % [part, nodes,
+		", ".join(ks.slice(0, 12).map(func(k): return "%s %d" % [k, by[k]]))])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
+
+## Particle systems that are emitting and visible (GARDEN.md 10.6 counts these, not idle ones).
+func _emitting() -> Array:
+	var all := main.get_tree().root.find_children("*", "GPUParticles3D", true, false)
+	all.append_array(main.get_tree().root.find_children("*", "CPUParticles3D", true, false))
+	return all.filter(func(p): return p.emitting and (p as Node3D).is_visible_in_tree())
 
 func _shadow_lights() -> int:
 	var lights := main.get_tree().root.find_children("*", "Light3D", true, false)
