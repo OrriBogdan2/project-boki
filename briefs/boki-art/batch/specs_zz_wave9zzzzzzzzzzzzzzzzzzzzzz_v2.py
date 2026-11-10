@@ -359,3 +359,19 @@ for _k,_m in (('star',"a bold green four-point star"),('diamond',"a bold green d
     SPECS.append({'id':'pk_bullpole_'+_k,'name':'Bullpole (chest mark: '+_k+')','refs':['briefs/boki-art/cards/Bullpole.jpg'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':_EDIT+"replace each of the two green spiral circles on its body with "+_m+", the same size, the same green and the same places, one in the middle of its chest and one on its side. "
         "Keep its round body, face, eyes, tail fin, colours and pose exactly the same. No circles or spirals anywhere on its body. Do not add anything else."})
+
+# 20:36 ET 11-09 owner: "Tiltster and Pinster are a bit weird; Tiltster's head looks not super attached to its body. Maybe redesign them?"
+# One family: cinnamon hamster (the Pikachu-safe Pinster fix 1 is the colour/face reference). Tiltster's table grows from its own back; head part of the body.
+_PIN=_O+'pk_pinster_1.jpg'
+for _k,_p in (('a',"standing on all four legs, chest forward, cheeky grin"),('b',"rearing up on its hind legs, front paws raised like flippers, mid-tilt")):
+    SPECS.append({'id':'rd_tiltster_'+_k,'name':'Tiltster (redesign)','refs':[_PIN],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':("Single character illustration of one final-form Boki (a stylised creature-collector monster): Tiltster, the grown-up form of the baby hamster in image 1. "
+        "Same family: the same cinnamon-orange fur, cream belly and cheeks, the same face and eyes, only bigger and stockier with a confident look. "
+        "Its whole back is a sloped pinball-table shell that grows out of its own body from the back of its neck to its tail: a glossy wooden-and-glass playfield with a few lane lines, "
+        "three round bumpers that glow white-blue and two small flipper paddles near its tail. Its big round hamster head sits at the front of the body with a thick fur neck, clearly attached, never tucked under the table. "
+        "Its front paws are broad and flipper-shaped; its tail is a short coiled plunger spring with a silver ball-bearing tip. One body, one head, four legs. "
+        "Pose: "+_p+". Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
+SPECS.append({'id':'rd_pinster_b','name':'Pinster (redesign option)','refs':[_PIN],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':("Single character illustration of one baby Boki: Pinster, the hamster in image 1, redrawn as a rounder baby: curled almost into a ball like a pinball, the same cinnamon-orange fur, cream face and cheeks, "
+    "the same eyes, two small glowing white-blue bumper studs on its back, tiny flipper-shaped front paws, and a silver ball-bearing tail tip. No yellow, no lightning bolt, no glowing cheeks. "
+    "Same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})

@@ -63,3 +63,4 @@ DROP-={'rd_effigeetle_a','rd_effigeetle_b'}
 DROP-={'pk_pinster','pk_bullpole'}
 DROP-={'v2s_chimelop','v2p_chimelop'}
 DROP-={'pk_bullpole_star','pk_bullpole_diamond','pk_bullpole_arrow','pk_bullpole_cross','pk_bullpole_chevron'}
+DROP-={'rd_tiltster_a','rd_tiltster_b','rd_pinster_b'}
