@@ -109791,5 +109791,26 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hb2_sable_onetail_2.jpg",
     "ok": true
+  },
+  {
+    "id": "hb2_sable_onetail3d",
+    "name": "Sable + Lockatara splash: one tail, lizard rendered like Sable",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hb2_sable_onetail3d_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_onetail3d",
+    "name": "Sable + Lockatara splash: one tail, lizard rendered like Sable",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_sable_onetail3d_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_sable_onetail3d",
+    "name": "Sable + Lockatara splash: one tail, lizard rendered like Sable",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_sable_onetail3d_2.jpg",
+    "ok": true
   }
 ]
