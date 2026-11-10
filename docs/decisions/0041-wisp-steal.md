@@ -31,3 +31,7 @@ loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-
   loose (KinGuardian.on_down runs first; KinSteal.ride only takes a wisp at the shoulder).
 - Numbering: ext/combat-summon-band also wrote a 0041; it landed as 0042-summon-band.md (T2).
 - match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it.
+- HUD (ext/ui-stolen-wisps): up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside
+  an ally-blue thief ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's
+  squad row wears a count badge (`TeamBoki`). It sits on the Boki box's group, so the HUD stays at five groups.
+  `--stolen-hud-check` covers it.
