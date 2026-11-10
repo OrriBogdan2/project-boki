@@ -79201,5 +79201,19 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_wickapi_on_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_voltalon_on",
+    "name": "Voltalon (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_voltalon_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_wickapi_on",
+    "name": "Wickapi (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_wickapi_on_1.jpg",
+    "ok": true
   }
 ]
