@@ -97534,5 +97534,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/leg_lighthouse_c_1.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_loom_c",
+    "name": "Legendary concept: loom c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_loom_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_loom_b",
+    "name": "Legendary concept: loom b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_loom_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_loom_c",
+    "name": "Legendary concept: loom c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_loom_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_hourowl_a",
+    "name": "Legendary concept: hourowl a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_hourowl_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_hourowl_a",
+    "name": "Legendary concept: hourowl a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_hourowl_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_hourowl_b",
+    "name": "Legendary concept: hourowl b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_hourowl_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_hourowl_b",
+    "name": "Legendary concept: hourowl b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_hourowl_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_volcano_c",
+    "name": "Legendary concept: volcano c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_volcano_c_2.jpg",
+    "ok": true
   }
 ]
