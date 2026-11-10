@@ -13,6 +13,8 @@ cursor state plus `MANIFEST.txt`).
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
 
+Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
+
 Scale: 1 body height (bh) = 1.8 m (`AimKit.BH`). The hero sheets measure in bh.
 
 ## 1. Aim modes
