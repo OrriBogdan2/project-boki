@@ -485,7 +485,8 @@ func _gunslinger() -> void:
 	await done(m)
 
 ## Burr Charge over terrain: it rides two stair flights (1.6 m) up to a foe on the raised ground and hits;
-## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short. Puts the strip back after.
+## a strict wall (a 2.4 m vertical terrain face, then a rock) in front of a foe stops it short.
+## Puts the strip back after.
 func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vector3, lv: int) -> void:
 	var W: World = m.world
 	var x0 := int(home.x); var z0 := int(home.z)
