@@ -237,8 +237,8 @@ func _glide_open(m: Match, P: Hunter, hold: bool) -> float:
 	P.inp["glide_btn"] = false
 	return -1.0
 
-## #49 off a ledge: the perfect launch carries him over the edge and the glider opens by itself at >= 70% of
-## the launch's speed (the shared dash -> glide hand-off).
+## #49 off a ledge: the perfect launch carries him over the edge; the held swing never opens the glider by itself
+## (owner 11-09), a fresh glide press just after opens it at >= 70% of the launch's speed (the shared hand-off).
 func _launch_glide() -> void:
 	var r := setup("bulwark", 7.0)
 	var m: Match = r[0]
@@ -253,8 +253,11 @@ func _launch_glide() -> void:
 	_ready_swing(m, P, T, home)
 	step(m, float(K.lmb_def()["full"]) + 0.08, press_at.bind(P, home + Vector3(9.0, 0, 0)))
 	P.inp["fire"] = false
-	var open := _glide_open(m, P, false)
-	ok("bjorn #49: launched off a ledge he glides straight away at >= 70% of the launch's speed",
+	step(m, 0.4)
+	ok("bjorn 11-09: launched off a ledge with no glide press he falls on (no glider by itself)", not P.gliding,
+		"gliding %s" % P.gliding)
+	var open := _glide_open(m, P, true)
+	ok("bjorn #49: launched off a ledge, a fresh glide press glides at >= 70% of the launch's speed",
 		open >= K.launch.speed * 0.7 and P.pos.x - home.x > 3.0,
 		"glide opens at %.1f of %.1f m/s, %.1f m out" % [open, K.launch.speed, P.pos.x - home.x])
 	await done(m)
