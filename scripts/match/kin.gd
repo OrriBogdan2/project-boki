@@ -625,8 +625,8 @@ func sim(dt: float) -> void:
 		if comp:
 			comp._decay(dt)
 		return
-	if fainting():
-		return          # (lying knocked out: no thinking, no moving, until it shrinks into the wisp)
+	if summon != null and summon.shrink > 0.0:
+		return          # (fainted or going back into the wisp: no thinking, no moving, until it is one)
 	if hesitate_t > 0.0:
 		hesitate_t -= dt
 		if hesitate_t <= 0.0:

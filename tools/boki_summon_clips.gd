@@ -264,7 +264,8 @@ func _knock(tag: String) -> void:
 	ok_fn.call(not k.wisp and k.pos.is_equal_approx(at) and rig.clip == "sleep",
 		"%s: ...it stays put and keeps the faint clip" % tag)
 	await _go(KinSummon.FAINT_S * 0.3 + KinSummon.SHRINK_S * 0.5)
-	ok_fn.call(not k.wisp and not s.fainting() and s.shrink > 0.0 and k.scale.x < 1.0, "%s: ...then the shrink" % tag)
+	ok_fn.call(not k.wisp and not s.fainting() and s.shrink > 0.0 and k.scale.x < 1.0 and k.pos.is_equal_approx(at),
+		"%s: ...then the shrink, where it lay" % tag)
 	await _go(KinSummon.SHRINK_S)
 	ok_fn.call(k.wisp and absf(s.cd_full - s.cd_base * float(KinSummon.rules()["knocked_cd_mult"])) < 0.01,
 		"%s: ...and the wisp rests the longer cooldown (%.1f s)" % [tag, s.cd_full])
@@ -290,6 +291,10 @@ func _strips() -> void:
 		k.lunge_t = 0.3
 		await _go(0.15)
 		await _tile("attack")
+		k.lunge_t = 0.0
+		_foe_at(-FAR)
+		_out()
+		await _go(0.5)
 		k.runner.slots["k1"]["charges"] = 1.0
 		k._cast("k1", foe.pos, true, k, 1.0)
 		await _go(0.25)
