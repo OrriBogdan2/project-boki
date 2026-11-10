@@ -74140,5 +74140,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2p_vaultara_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_prowyak",
+    "name": "Prowyak (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_prowyak",
+    "name": "Prowyak (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_prowyak",
+    "name": "Prowyak (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_prowyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_prowyak",
+    "name": "Prowyak (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_prowyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prowyak",
+    "name": "Prowyak (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_prowyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_prowyak",
+    "name": "Prowyak (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_prowyak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bastionpet",
+    "name": "Bastionpet (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_bastionpet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bastionpet",
+    "name": "Bastionpet (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_bastionpet_3.jpg",
+    "ok": true
   }
 ]
