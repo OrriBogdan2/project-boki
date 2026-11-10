@@ -1,6 +1,6 @@
 extends RefCounted
 ## --motley-live-check: Motley's jack-in-the-box through the real match code (Match, Hunter.render, HunterAnim, Sync).
-## He wears his clips; he floats at his hover height (KMovesStone.HOVER_H); running tilts the box, sways the body and never steps;
+## He wears his clips; he floats at his hover height; running tilts the box, sways the body and never steps;
 ## the dash compresses the spring (the hips come down) and arriving starts inside the box; a knock-out plays the death
 ## clip on screen. Never touches the save.
 
