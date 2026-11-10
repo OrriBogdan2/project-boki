@@ -29,7 +29,7 @@ func _on_hit(_a: Node, _t: Node, _amt: float, tags: Array) -> void:
 	for t in tags:
 		tags_seen[String(t)] = int(tags_seen.get(String(t), 0)) + 1
 
-func _fresh(species := "cindle") -> Match:
+func _fresh(species := "cindle", out := true) -> Match:
 	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
@@ -61,12 +61,27 @@ func _fresh(species := "cindle") -> Match:
 		if h.team != P.team:
 			h.ctrl = "idle"
 			h.teleport(Vector3(P.pos.x + 38.0, P.pos.y, P.pos.z + 18.0))
+	if out:
+		for h in m.hunters:
+			if h.kin != null:
+				_out(h.kin)
 	keep = []
 	for i in 40:
 		_clear_mobs()
 		m.step(Match.DT)
 	tags_seen = {}
 	return m
+
+## Out under the Follow order. Since docs/decisions/0022 a match starts with the Boki as a wisp on you; these checks
+## are about the summoned Boki's walking AI, so they start with it already out (as main did before 0022).
+func _out(k: Kin) -> void:
+	k.cmd = "follow"
+	k.state = "active"
+	k.ride = false
+	k.summoned = false
+	k.form_t = 1.0
+	k.fly = {}
+	k.teleport(k.owner_h.pos + Vector3(1.0, 0, 0.7))
 
 func _clear_mobs() -> void:
 	for mb in m.mobs.duplicate():
@@ -106,10 +121,15 @@ func run(mn: Node) -> void:
 
 # ------------------------------------------------------------------ 1. default
 func _default() -> void:
-	_fresh()
+	_fresh("cindle", false)
 	var P := m.player
 	var k: Kin = P.kin
-	ok(k.state == "active" and k.cmd == "follow", "a new match: the Boki is out and following (state %s, order %s)" % [k.state, k.cmd])
+	ok(k.state == "wisp" and k.cmd == "return" and P.kin_carry_on(),
+		"a new match: the Boki is a wisp on you, its carry on (state %s, order %s)" % [k.state, k.cmd])
+	_out(k)
+	for i in 10:
+		m.step(Match.DT)
+	ok(k.state == "active" and k.cmd == "follow", "out under Follow: it is out (state %s, order %s)" % [k.state, k.cmd])
 	ok(k.flat_dist(P) < 4.0, "...at your side (%.1fm)" % k.flat_dist(P))
 	ok(not P.kin_carry_on(), "...and its carried bonuses are off while it is out")
 	var path := KinPath.find(m.world, P.pos, P.pos + Vector3(12.0, 0, 5.0))
@@ -236,11 +256,11 @@ func _sic_call() -> void:
 	var skit := mob_at("skitter", P.pos + Vector3(6.0, 0, 0.2))
 	var hp0 := skit.hp
 	KinCommand.tap(P)
-	ok(k.state == "flying_home" and k.fly.get("dest", "") == "side", "G tap while it is away: Call back, a leap to your side (state %s)" % k.state)
-	var land_d := {"d": -1.0}
-	run_for(1.5, func():
-		if float(land_d["d"]) < 0.0 and k.state == "active": land_d["d"] = k.flat_dist(P))
-	ok(float(land_d["d"]) >= 0.0 and float(land_d["d"]) < 3.5 and k.cmd == "follow", "...it lands beside you and follows again (%.1fm, %s)" % [float(land_d["d"]), k.cmd])
+	# (docs/decisions/0022: a recall shrinks it back into a wisp on you; before, it leapt to your side and followed)
+	ok(k.state == "flying_home" and k.fly.get("dest", "") == "wisp",
+		"G tap while it is away: Call back, a leap back onto you (state %s)" % k.state)
+	run_for(1.5)
+	ok(k.state == "wisp" and k.cmd == "return", "...it is a wisp on you again (state %s, %s)" % [k.state, k.cmd])
 	ok(int(tags_seen.get("recall", 0)) >= 1 and (not is_instance_valid(skit) or skit.hp < hp0), "...hitting what was on its path (recall hits %d)" % int(tags_seen.get("recall", 0)))
 	k.teleport(P.pos + Vector3(40.0, 0, 0)); k.state = "active"; k.fly = {}
 	KinCommand.call_back(P)
@@ -338,7 +358,9 @@ func _mount() -> void:
 	KinCommand.order(P, "return")
 	run_for(1.8)
 	P.do_jump()
-	ok(k.cmd == "follow" and not P.mounted(), "a jump while mounted: you come off it (order %s, mounted %s)" % [k.cmd, P.mounted()])
+	# (0022: it shrinks back into a wisp on you, still under Return; before, its order flipped to Follow)
+	ok(not k.ride and not P.mounted() and k.state == "wisp",
+		"a jump while mounted: you come off it, a wisp again (ride %s, mounted %s)" % [k.ride, P.mounted()])
 
 # ------------------------------------------------------------------ 8. no refusal in a fight
 func _no_refusal() -> void:
@@ -550,7 +572,9 @@ func _disengage() -> void:
 	mb = _hold_brute(P, k)
 	k.cmd = "guard"; k.hold_at = k.pos
 	KinCommand.call_back(P)
-	ok(k.disengaged, "Call back in a fight disengages it too")
+	# (0022: Call back in a fight recalls it into a wisp on you; before, it stayed out, disengaged)
+	ok(k.cmd == "return" and k.state in ["flying_home", "wisp"],
+		"Call back in a fight recalls it into a wisp (%s)" % k.state)
 	_fresh()
 	P = m.player
 	k = P.kin

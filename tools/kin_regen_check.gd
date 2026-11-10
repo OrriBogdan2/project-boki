@@ -75,10 +75,12 @@ func run(main: Node) -> void:
 		P.hurt_at = m.time
 		_run_for(m, 1.0)
 	ok(k.state == "downed" and k.hp == 0.0, "(c) a downed Boki does not regen (%.2f hp after 10s)" % k.hp)
-	# and a Boki that comes round starts its wait again
+	# a Boki that comes round is a wisp on you by order (docs/decisions/0022), so it mends at the carried rate
+	# (before 0022 it came round onto your shoulder still under Follow, hopped off and waited out_delay_s)
 	KinDowned.come_round(k)
 	var h3 := k.hp
 	_run_for(m, 3.0)
-	ok(k.hp <= h3 + 0.01, "(c) after coming round it waits again before mending (%.2f -> %.2f)" % [h3, k.hp])
+	ok(k.carried() and k.hp > h3 + 0.01 and KinRegen.rate(k) == float(rr["carried_pct_s"]),
+		"(c) after coming round it is a wisp on you, mending at the carried rate (%.2f -> %.2f)" % [h3, k.hp])
 	print("KINREGEN DONE, failures: ", bad)
 	main.get_tree().quit()
