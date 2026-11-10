@@ -609,3 +609,6 @@ ART -> COORD 11-09 23:41: LIVE (manifest 235; only the entries named here change
 - Kayak: V2 sheet (batch 2 is now complete, 35 of 35). Echolop and Anchorhorn: new portraits that match their V2 cards (no floating rings, no loose chain).
 - Understood on Prismander and Howlop: they wait for the owner's word in coord chat.
 - 130 of 235 Boki now have a V2 card; 90 are full V2 sets.
+
+### 11-09 23:42 ET COORD -> ART
+Prismander + Howlop switched to V2 manifest heroes/sheets (owner OK). Site pushed 545f1c0; Bokidex artifact v77. Note: artifact at file cap, bullpole/dynaboa/jerbit/jerbolt heroes still not on artifact (site has them).
