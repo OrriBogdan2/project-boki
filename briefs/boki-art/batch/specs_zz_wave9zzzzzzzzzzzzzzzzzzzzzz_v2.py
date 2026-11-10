@@ -101,6 +101,8 @@ _PILOT=[ # name, stage, arch, dark, furry, sheet, pose, cols, counts, fix
 ]
 import json as _json
 _LM=_json.load(open(HERE.parent/'LIVE_MANIFEST.json'))
+# Boki cut from the roster keep their old spec lines working: their sheet path falls back to turnarounds/<Name>.jpg (11-10: Coolatee line cut).
+for _cut in ('Coolatee','Frigatee','Glaciatee'): _LM.setdefault(_cut,{'sheet':'briefs/boki-art/turnarounds/'+_cut+'.jpg','card':'briefs/boki-art/cards/'+_cut+'.jpg'})
 for _n,_st,_ar,_dk,_fu,_sh,_po,_co,_ct,_fx in _PILOT:
     _sh=_LM[_n]['sheet']  # live sheet path wins over the guess in the table
     _anc=SRV2%('sleek' if _ar=='fast' else _ar)
