@@ -554,6 +554,17 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | default | default |
 | looks | {"default": {"name": "Wisp", "desc": "A small glowing spirit in your team's colour.", "core": {"radius": 0.34, "color": "team", "rim": "ffffff", "glow": 0.45, "flicker": 0.25, "flicker_hz": 9.0}, "halo": {"radius": 0.8, "alpha": 0.5}, "eyes": {"on": true, "color": "1a1530", "size": 0.055, "gap": 0.1, "height": 0.04}, "motes": {"amount": 10, "color": "ffffff", "size": 0.05, "life": 0.9, "rise": 0.5}, "trail": {"amount": 20, "color": "team", "size": 0.16, "life": 0.5}, "hover": 1.0, "bob": 0.12, "bob_hz": 1.1, "lean": 0.5, "stretch": 0.18, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
 
+## words (`content/rules/words.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The Words page (Help in the pause menu, Help on the title): one plain line per term, in the canon wording (briefs/DECISIONS.md, briefs/LORE_MASKS.md). A term shows once its 'seen' rule holds: {} always, {tut: key} a Save.d tutorial flag, {matches: n} that many expeditions played. Budget (checked by --words-check): max_words per line, max_chars per line. |
+| max_words | 16 |
+| max_chars | 100 |
+| words | [{"term": "Relic", "line": "The cursed mask of a fallen Hunter. Take one up and you become them.", "seen": {}}, {"term": "Hunter", "line": "What you become when you put on a Relic. Every player in a match is one.", "seen": {}}, {"term": "Boki wisp", "line": "Your Boki's soul, orbiting you in a match as a small critter-shaped light.", "seen": {"tut": "hatched"}}, {"term": "Summon", "line": "Your Boki wisp bursts into the full Boki for a short time, then shrinks back.", "seen": {"tut": "hatched"}}, {"term": "Extract", "line": "Leave the expedition with what you carry. Only extracted loot comes home.", "seen": {"tut": "hatched"}}, {"term": "Wisp", "line": "A downed Hunter pops into a round glowing Wisp, until a friend revives them.", "seen": {"matches": 1}}, {"term": "Fusion", "line": "A Hunter merged with their Boki. It needs a full bond meter.", "seen": {"matches": 1}}, {"term": "The Blight", "line": "The Wyrm's blood. Each match it closes in toward the Heart.", "seen": {"matches": 1}}, {"term": "The Heart", "line": "The Wyrmheart: one wish to remake the world, or rule it. Every Hunter wants it.", "seen": {"matches": 1}}, {"term": "Heartspark", "line": "A mote of the Heart's light that charges at its site. Everyone sees where.", "seen": {"matches": 1}}] |
+
 ## Combos
 
 One fighter sets a foe up with a status, the partner pays it off (`content/combos/`).
