@@ -27,7 +27,6 @@ const GLIDE_TURN_FAST := 0.45    # ...down to this share of GLIDE_TURN at the bo
 const GLIDE_BRAKE := 36.0        # steering more than GLIDE_BRAKE_DEG against your heading brakes this hard
 const GLIDE_BRAKE_DEG := 115.0
 const GLIDE_GRAV := 14.0
-const GLIDE_ENGAGE := 0.1        # hold Space this long in the air before the glider opens (a tap is a jump); was 0.15
                                  # (the dedicated glide button, Mouse 5, opens it at once)
 ## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
 ## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
@@ -216,6 +215,7 @@ var glide_cd := 0.0
 var glide_k := 0.0             # how far the glider is unfolded, for the model
 var _auto_glide_held := true   # (glide held last frame: auto_glide ends on a fresh press, not a held key)
 var auto_glide := false        # carried by a lair's escape updraft: the glider opens and stays open
+var reglide := false           # a dash folded an open glider while glide stayed held: it comes back as the dash ends
                                # by itself until you land (hold glide yourself to take it back)
 var wind_t := 0.0
 var perk := ""                  # (old single home perk; perks are now found in the run, see perks)
@@ -835,8 +835,7 @@ func do_jump() -> void:
 		return
 	if wall_moves.try_kick(self):
 		return
-	# already in the air: a second press opens the glider straight away, rising or falling,
-	# unless you're about to land, where it buffers a jump instead
+	# in the air: a second press opens the glider at once, unless you're about to land (then it buffers a jump)
 	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
 	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
@@ -1151,6 +1150,7 @@ func do_dash() -> void:
 			return
 		ex_cd = float(cdat.get("ex_cd", EX_DASH_CD))
 		ex_next = true
+		reglide = gliding and inp.get("glide", false)     # an open glider held through the dash comes back as it ends
 		gliding = false
 	else:
 		dashes -= 1.0
@@ -2516,7 +2516,7 @@ func _interrupt_consume() -> void:
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
 
-## Hold jump while falling to open the glider. It folds when you land, run out, dash, or get hit.
+## Opened by a second jump press in the air or by the glide button, kept open by holding; folds on a landing, dash or hit.
 var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
@@ -2559,11 +2559,13 @@ func _update_glide(dt: float) -> void:
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
+	reglide = reglide and want
 	if gliding and not _handoff.is_empty() and want and can:
 		_take_glide_handoff()       # (movefeel) a burst that ended with the glider still open
 	if gliding:
 		if not want or not can:
 			gliding = false
+			reglide = want and roll_t > 0.0
 			glide_off_t = 0.0 if want == false and can else 9.0     # (feathering) a let-go, not a knock
 			_glider_sfx("close")
 		elif not in_current:
@@ -2575,10 +2577,8 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and can and air_t >= (0.0 if inp.get("glide_btn", false) else GLIDE_ENGAGE) \
-			and not AirLimits.glide_locked(self):
-		# hold Space in the air and the glider opens a beat after you leave the ground (the glide
-		# button opens it at once: there's no tap-to-jump to tell apart)
+	elif want and can and (inp.get("glide_btn", false) or auto_glide or reglide) and not AirLimits.glide_locked(self):
+		# the glide button, an updraft or a dash's end open it; a held Space never does (a second press does: jump())
 		gliding = true
 		_take_glide_handoff()
 		if below_lip:
@@ -2807,7 +2807,6 @@ func _ledge_fling() -> void:
 	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
 	vel.y = sqrt(2.0 * H_GRAV * (left + (FLING_HEIGHT if timed else FLING_EARLY_HEIGHT)))
 	mantle_cd = 0.3
-	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
 	m.sfx("jump", pos, -6.0)
 	if timed:

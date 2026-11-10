@@ -329,8 +329,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		if h.vel.y < 0.0 and h.coyote > 0.0:
 			inp["jump"] = true
 		var back := _nearest_ground(m, h)
-		# hold the glider: below the lip it lifts you back up to ground level
+		# hold the glider: below the lip it lifts you back up to ground level (a press opens it, a hold never does)
 		inp["glide"] = h.ai["skill"] > 0.15
+		if inp["glide"] and not h.gliding and h.coyote <= 0.0 and h.can_glide():
+			inp["jump"] = true
 		if back != Vector2.ZERO:
 			inp["move"] = back
 	# unstick

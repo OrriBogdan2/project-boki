@@ -2594,6 +2594,7 @@ func _abyss_demo(mode: String) -> void:
 	elif mode == "dip":
 		# (feelfix) the reference's repeated dips: fall, glide back up, let go and fall again, glide home
 		player.inp["glide"] = (t > 1.7 and t < 2.5) or t > 3.4
+		player.inp["jump"] = player.inp["glide"] and not player.gliding     # (the second press opens it)
 		player.inp["move"] = Vector2(0, -1) if t > 3.4 else Vector2.ZERO
 	else:
 		player.inp["move"] = Vector2(0, -1) if mode == "grab" else Vector2.ZERO
@@ -3771,9 +3772,10 @@ func _gather_input() -> void:
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
 		player.inp["interact"] = player.inp["interact"] or (player.inp["fire"] and not (hud and hud.mouse_on_ui())) or pad
 		player.inp["fire"] = false
-	# hold Space or Mouse 5 (Mouse 4 works too) in the air to glide; the mouse buttons never jump
-	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
-	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) opens the glider with no tap/hold wait
+	# Mouse 5 (or 4) opens the glider at once and never jumps; Space keeps it open, and opens it only on a
+	# second press in the air (Hunter.jump)
+	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused
+	player.inp["glide"] = player.inp["glide_btn"] or (Input.is_action_pressed("jump") and not paused)
 	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
 	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
@@ -4257,19 +4259,14 @@ func step(dt: float) -> void:
 		blight.demo(String(opts["blight_demo"]))
 	if opts.has("teammate_demo"):
 		KinCompanion.demo_tick(self, String(opts["teammate_demo"]))
-	if opts.get("glide_demo", false) and player:
-		if time < 0.05:
-			player.teleport(player.pos + Vector3(0, 6, 0)); player.grounded = false
-		player.inp["glide"] = true
-		player.inp["move"] = Vector2(1, 0.3).normalized()
-	if opts.get("dashglide_demo", false) and player:
-		# test (movefeel): glide along, Shift at 0.7s, keep holding glide: the glider keeps the dash
+	if (opts.get("glide_demo", false) or opts.get("dashglide_demo", false)) and player:
+		# test (movefeel): glide along on the glide button; dashglide: Shift at 0.7s, the glider keeps the dash
 		if time < 0.05:
 			player.teleport(player.pos + Vector3(0, 7, 0)); player.grounded = false
 			player.unlock_all()
-		player.inp["glide"] = true
+		player.inp["glide"] = true; player.inp["glide_btn"] = true
 		player.inp["move"] = Vector2(1, 0.3).normalized()
-		if time > 0.7 and time - DT <= 0.7: pending_input["dash"] = true
+		if opts.get("dashglide_demo", false) and time > 0.7 and time - DT <= 0.7: pending_input["dash"] = true
 	if opts.get("dashpip_demo", false) and player:
 		# test (HUD): on foot, spend the short dashes and then the long one, then stand still and refill
 		player.inp["move"] = Vector2(1, 0.2).normalized() if time < 1.6 else Vector2.ZERO
@@ -4842,7 +4839,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- training area
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, press Space again in the air and hold to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
@@ -6073,7 +6070,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  hold Space to glide")
+	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  Space again in the air to glide")
 	if _tip_t > 14.0:
 		if player.ak:
 			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])

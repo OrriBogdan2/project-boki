@@ -847,8 +847,10 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	var t := 0.0
 	while not P.gliding and t < 1.0:
 		P.inp["glide"] = true
+		P.inp["glide_btn"] = true     # (the glide button: a held Space never opens it)
 		m.step(DT)
 		t += DT
+	P.inp["glide_btn"] = false
 	var glided := P.gliding
 	var s0 := K.slams
 	var vx0 := absf(P.vel.x)

@@ -62,7 +62,9 @@ Nothing here comes from SUPERVIVE's files.
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
-| glide_open_hold_s (Space held from the jump) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
+| glide_press_held_s (jump, let go, press and hold) | 1.0s | 1.0s | >= 1.0s | owner 11-08: the double press |
+| glide_hold_opens (Space held 2 s from the jump) | opened at 0.117s | never | never | owner 11-08: a hold never glides |
+| albert_lmb_hold_glides (Albert, LMB and Space held) | opened | never | never | owner 11-08 |
 | glide_open_button_frames (glide button) | 6 | 1 | <= 1 | no tap ambiguity |
 | glide_catch_t (terminal fall to sink rate) | 0.383s | 0.150s | <= 0.2s | opens "instantly" |
 | glide_speed | 6.5 m/s | 5.0 m/s | 4.5–5.5 | [game data] MaxGlide 500 uu/s (item 163: ours was "too fast and controllable") |
@@ -140,7 +142,7 @@ Other checks:
     - Steering more than 115° against your heading brakes at 36 m/s². Letting go drifts.
   - Cruise 5.0 → 6.5 m/s and sink 2.2 → 1.4 m/s. The owner found the glide "falls a bit faster and feels weaker than SUPERVIVE".
   - The canopy catches a fall at 60 m/s² (was 16).
-  - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
+  - Space opens the glider only on a second press in the air (`Hunter.jump`), and holding it keeps the glider open; holding Space from the jump, or while doing anything else (Albert's held swing), never glides (owner 11-08, decision 0058). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only). Bots and the tutorial drive press jump again to open it.
   - **Dive** (`GlideDive`, `HunterMove.dive_*`, all [game data]): hold crouch (Ctrl) under an open glider and the canopy folds into a plunge toward 32.5 m/s at 35 m/s², the keys steering at a quarter of their glide force. Let go, come within 3.5 m of the ground (or the island's lip over the abyss) or hold for 10 s and the glide catches you again; the drop you pull out of becomes speed, capped at the glide's 15 m/s max. The key is ours: the source names no dive input, and Space is the glider itself. The folded pose is local-only (the dive isn't in the net snapshot).
   - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2). Updrafts grab at 45 m/s² (was 30).
 - **Heat** (owner, Nov 2: "lasts too long, not punishing enough"): a level glide overheats after 9s (was 14). Hits heat it 3x (was 2x). An overheated glider burns ~3.5% of max health a second in 20-damage ticks, flies at 0.5x speed and sinks at 5 m/s.

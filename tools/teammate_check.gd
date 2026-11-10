@@ -116,8 +116,10 @@ func _follow() -> void:
 	_walk(P, Vector2(-1, 0), 0.12, watch)
 	P.inp["jump"] = false
 	P.inp["glide"] = true
+	P.inp["glide_btn"] = true     # (the glide button: a held Space never opens it)
 	_walk(P, Vector2(-1, 0), 1.4, watch)
 	P.inp["glide"] = false
+	P.inp["glide_btn"] = false
 	_walk(P, Vector2(-1, 0), 2.0, watch)
 	_walk(P, Vector2(0, 1), 2.0, watch)
 	ok(float(st["max"]) <= 10.0, "never more than 10m from you through walk, dash, jump and glide (a dash outruns it for a moment) (max %.2fm)" % float(st["max"]))
