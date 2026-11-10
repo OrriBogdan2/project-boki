@@ -1,6 +1,6 @@
 # Audio: sound sets, loudness and buses
 
-How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py` and `tools/gen_ambience.py`.
+How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py`, `tools/gen_ambience.py` and `tools/gen_garden_ambience.py`.
 
 ## Making sounds
 - Sounds are **synthesised in code** (numpy/scipy, `pip install numpy scipy`), one script per group: `tools/gen_sfx_<group>.py` (e.g. `gen_sfx_vex.py`, `gen_sfx_boki.py`, `gen_sfx_ui.py`). Each one imports `tools/sfx_lib.py`, calls `S.reseed(<its own seed>)` and writes `audio/<name>.wav` (44.1 kHz mono 16-bit). Then `godot --headless --import`.
@@ -45,3 +45,6 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## The garden's ambience (`scripts/home/home_ambience.gd`)
+One bed for the part of the day on the home clock (`Home.day_t`): `amb_garden_morning` birds (0.2-0.4), `amb_garden_midday` a quiet hush (0.4-0.6), `amb_garden_evening` insects (0.6-0.8), `amb_garden_night` a slow wind; `amb_rain` while it rains. `amb_pond` comes up as you near water (full within 2 tiles, silent past 9, from `layout["water"]`). The beds go through `Sfx.amb_layer`, so they sit on the **Ambience** bus and follow its volume setting; a bed fades out as the next fades in over 20 s. At most 2 loops sound at once (the pond steps out during a crossfade), and the garden never plays `amb_match` (the title's wind). `Sfx` frees a bed once it has faded to nothing. Regenerate the beds with `tools/gen_garden_ambience.py`. `--sfx-set-check` section 7 asserts all of this.
