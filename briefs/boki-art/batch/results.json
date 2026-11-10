@@ -104303,5 +104303,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_mortarfly_r8_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_bonsolith_r8",
+    "name": "Bonsolith (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_bonsolith_r8_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bonsolith_r8",
+    "name": "Bonsolith (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_bonsolith_r8_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mortarfly_r8",
+    "name": "Mortarfly (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_mortarfly_r8_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mortarfly_r8",
+    "name": "Mortarfly (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_mortarfly_r8_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mortarfly_r8",
+    "name": "Mortarfly (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_mortarfly_r8_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bonsolith_r8",
+    "name": "Bonsolith (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_bonsolith_r8_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bonsolith_r8",
+    "name": "Bonsolith (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_bonsolith_r8_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_terrasloth_r8",
+    "name": "Terrasloth (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_terrasloth_r8_1.jpg",
+    "ok": true
   }
 ]
