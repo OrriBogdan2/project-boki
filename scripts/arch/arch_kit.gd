@@ -983,10 +983,11 @@ func armed_fx(word: String, slot := "sec") -> void:
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null) -> void:
+func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null, rings := true) -> void:
 	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
-	m.fx.ring(at, 2.4, col, 0.38)
-	m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
+	if rings:
+		m.fx.ring(at, 2.4, col, 0.38)
+		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
 	if snd != "": m.sfx(snd, at, 0.0, 1.0)
@@ -994,7 +995,8 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)
-	net_ring(at, 2.4, col)
+	if rings:
+		net_ring(at, 2.4, col)
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
