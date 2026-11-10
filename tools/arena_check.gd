@@ -1,7 +1,7 @@
 extends RefCounted
 ## --arena-check: the Arena boots on its own map with its practice tools, dummies take damage and
 ## show it, reset works, archetype / weapon / Boki / glove swaps apply, the toggles work, the kit
-## card builds for all six archetypes, the expedition loadout shows the card, and the training area
+## card builds for all six archetypes, the expedition loadout shows the card, and the Training Grounds
 ## gets the same tools. Prints ARENACHECK PASS/FAIL.
 
 var main: Node
@@ -112,6 +112,13 @@ func _dummy_modes() -> void:
 	await m.start(Match.arena_opts("thief"))
 	m.set_process(false)
 	var A: Arena = m.arena
+	# the player's Boki fights whatever is near, so its hits would knock the station dummy about;
+	# this measures only how DummyMove moves it
+	for o in m.kins.filter(func(k): return k.owner_h == m.player):
+		o.dead = true
+		m.kins.erase(o)
+		o.queue_free()
+	m.player.kin = null
 	var mv: DummyMove = A.dummies[0]["mv"]
 	var sign_still := func() -> bool: return A.station_label.text.begins_with("DUMMY: STILL")
 	ok("dummy station: Still to start, the sign says so", mv.mode == "still" and sign_still.call())
@@ -369,7 +376,7 @@ func _arena() -> void:
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(
-		"the Training Area boots on its own map",
+		"the Training Grounds boots on its own map",
 		m.world.layout_id == "training" and m.arena != null and m.arena.layout == "arena",
 		"layout %s" % m.world.layout_id
 	)
@@ -613,12 +620,12 @@ func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
 	printerr("ARENACHECK starting the training match")
-	await m.start(Match.arena_opts())      # (the old training island is the Training Area's Practice Wing since 11-08)
+	await m.start(Match.arena_opts())      # (the old training island is now the Grounds' Practice Wing)
 	m.set_process(false)
 	printerr("ARENACHECK training match up")
 	var P: Hunter = m.player
 	ok(
-		"the Training Area: seven dummies (ring, range, Dodge Pen), the duel pad on the Practice Wing",
+		"the Training Grounds: seven dummies (ring, range, Dodge Pen), the duel pad on the Practice Wing",
 		m.arena != null and m.arena.dummies.size() == 7 and m.duel_pad != Vector3.INF
 			and m.duel_pad.distance_to(Arena.WING) < Arena.WING_R + 2.0
 	)
@@ -686,4 +693,4 @@ func _loadout() -> void:
 		)
 	)
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
-	ok("expedition panel uses KitCard.strip", src.contains("KitCard.strip(cur_a"))
+	ok("expedition panel shows no ability strip", not src.contains("KitCard.strip("))

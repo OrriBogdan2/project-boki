@@ -1,5 +1,5 @@
 extends RefCounted
-## --training-area-shots --shots-dir=<dir> (GPU): the Training Area as the title screen opens it
+## --training-area-shots --shots-dir=<dir> (GPU): the Training Grounds as the title screen opens it
 ## (Match.arena_opts with no Hunter, then each one picked in place, Arena.set_arch): <dir>/hunter_<id>_front|back.png,
 ## every Hunter from both sides;
 ## <dir>/overview.png from high above; <dir>/clip/f000.png ... a slow flyover (ffmpeg it into a clip). Runs on older

@@ -88,7 +88,17 @@ func _lance_combos() -> void:
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
 			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
 			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+	# hold-pose audit: a lance let go in the middle of a ram takes its pose down with it
 	P.inp["fire"] = false
+	ak.step(m, 0.5)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 0.05, keep_fire)
+	var in_ram: bool = P.roll_t > 0.0
+	P.inp["fire"] = false
+	ak.step(m, 0.25)
+	ok("lance: let go mid-ram, the lance pose is gone 0.25s later (hold-pose audit)",
+			in_ram and K.anim_id != "as_lance", "in ram %s, move %s" % [in_ram, K.anim_id])
 	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.
@@ -378,6 +388,11 @@ func _all() -> void:
 		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
+	ok(
+		"cinder: the aim lane is twice the shot radius (%.2f m), drawn = hit" % float(K.rmb_def()["size"]),
+		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
+		"width %.2f" % float(lane.get("width", 0.0))
+	)
 	P.inp["sec_hold"] = false
 	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
@@ -611,7 +626,7 @@ func _all() -> void:
 	P.slot_lv["kin"] = 3
 	K._cloak_blast()
 	ok(
-		"cloak rank 3: shield +30%", shield1 > 5.0 and absf(P.shield / shield1 - 1.3) < 0.02,
+		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
 		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
@@ -620,6 +635,30 @@ func _all() -> void:
 	K.cd["rmb"] = 0.0
 	ak.step(m, 0.1)
 	ok("cinder: a second charge at rank 3", K.rmb_charges() == 2 and K.ch_rmb >= 2.0, "charges %.1f" % K.ch_rmb)
+	# upgrade parity (docs/heroes/ashwick.md): the source's tier II / III+IV numbers per slot
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var up: Array = []
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	var pb1 := K.power("sec")
+	var pc1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		up.append([
+			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
+			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("sec") / pb1, K.power("kin") / pc1,
+			K.rank_k("rank_shield", "kin", 1.0),
+		])
+	ok("upgrade parity: Cinderbolt cooldown 7 -> 5.8 -> 4.7 and damage +25% / +50%",
+			near.call(up[1][0], 5.8) and near.call(up[2][0], 4.7)
+			and near.call(up[1][3], 1.25) and near.call(up[2][3], 1.5), str(up))
+	ok("upgrade parity: Ram recharge 9 -> 8.25 -> 7.5", near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5), str(up))
+	ok("upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
+			near.call(up[1][2], 8.9) and near.call(up[2][2], 7.3) and near.call(up[1][4], 1.25)
+			and near.call(up[2][4], 1.5) and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.8), str(up))
+	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	P.slot_lv["sec"] = 1
 	reset.call()

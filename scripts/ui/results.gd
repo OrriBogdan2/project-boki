@@ -44,8 +44,10 @@ func show_result(r: Dictionary) -> void:
 	v.minimum_size_changed.connect(func(): fit.call_deferred())
 	sc.tree_entered.connect(func(): fit.call_deferred())
 	# header: a coloured kicker, the outcome, one line on what it means
-	var tier_name := String(Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]["name"])
-	var kick := "FIRST EXPEDITION" if r.get("tutorial", false) else tier_name.to_upper()
+	var td: Dictionary = Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]
+	var kick := "FIRST EXPEDITION"
+	if not r.get("tutorial", false):
+		kick = "%s · DEPTH %d" % [String(td["name"]).to_upper(), int(td["depth"])]
 	var head := UI.vbox(4)
 	var kr := UI.hbox(8)
 	kr.add_child(UI.tag("Extracted" if won else "Didn't make it", UI.TEAL if won else Color("ff9a8a")))

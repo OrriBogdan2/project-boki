@@ -1,6 +1,6 @@
 class_name Arena
 extends RefCounted
-## The Training Area (opts "arena", map content/maps/training.json; the name "Arena" is kept for the code, the
+## The Training Grounds (opts "arena", map content/maps/training.json; the name "Arena" is kept for the code, the
 ## player-facing name "Arena" is reserved for the 4v4 team mode): the one practice space, from the title screen
 ## and the farm. Its Practice Wing holds the old training island's extras (Match._spawn_breakables: crates,
 ## gear rack, the duel-room pad, the checklist, the wandering mobs).
@@ -96,7 +96,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast("Training Area  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
+		m.hud.toast("Training Grounds  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
