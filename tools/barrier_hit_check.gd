@@ -14,7 +14,7 @@ func run(main_node: Node) -> void:
 	if shots_dir != "":
 		DirAccess.make_dir_recursive_absolute(shots_dir)
 		if main.get("fade") != null:
-			main.fade.reveal(0.01)      # lift the boot splash, or every shot is the logo
+			await main.fade.reveal(0.01)      # lift the boot splash (logo fade too), or every shot is the logo
 	await _albert()
 	await _tenzo()
 	await _neve()

@@ -10,6 +10,8 @@ const BREAK_R := 2.4       # m: the breaking hit's
 const RING_T := 0.3        # s: a plain ring's life
 const BREAK_T := 0.5       # s: the breaking hit's
 const FACE_GAP := 0.04     # m: off the face, so the ring never z-fights the slab
+const LEAN := 0.8          # how far the ring tips up toward the camera: flat on a vertical face it reads edge-on
+const RING_W := 0.24       # ring band width (Models.ring_mat thickness)
 
 var m: Node = null
 var _free: Array[MeshInstance3D] = []
@@ -22,7 +24,7 @@ func _init(match_node: Node) -> void:
 	for i in POOL:
 		var mi := MeshInstance3D.new()
 		mi.mesh = quad
-		mi.material_override = Models.ring_mat(Color.WHITE, 0.16)
+		mi.material_override = Models.ring_mat(Color.WHITE, RING_W)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.visible = false
 		add_child(mi)
@@ -51,6 +53,7 @@ func hit(at: Vector3, tan: Vector2, nrm: Vector2, col: Color, broke: bool) -> vo
 		mi = _free.pop_back()
 	var t3 := Vector3(tan.x, 0.0, tan.y)
 	var n3 := Vector3(nrm.x, 0.0, nrm.y)
+	var up := (n3 + Vector3.UP * LEAN).normalized()      # the ring's normal: out of the face, tipped up
 	var shown := col.lerp(Color.WHITE, 0.3)
 	var radius := RING_R
 	var life := RING_T
@@ -63,7 +66,7 @@ func hit(at: Vector3, tan: Vector2, nrm: Vector2, col: Color, broke: bool) -> vo
 	mi.global_position = at + n3 * FACE_GAP
 	mi.visible = true
 	_live.append({"node": mi, "t": 0.0, "dur": life, "r": radius,
-		"basis": Basis(t3, n3, t3.cross(n3)), "col": shown})
+		"basis": Basis(t3, up, t3.cross(up)), "col": shown})
 	tick(0.0)
 	m.fx.flash(at + n3 * FACE_GAP, shown, flare, 0.07 + flare * 0.05)
 
