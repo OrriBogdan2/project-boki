@@ -11,17 +11,17 @@ extends RefCounted
 
 enum St {LOCKED, OPEN, IN_USE, TAKEN, LOST}
 
-const NEUTRAL := Color("fff3d6")      # an open seat: clear warm-white light, nobody's colour
-const DIM := Color("8a93a8")          # a locked seat
+const NEUTRAL := Color("f4fbff")      # an open seat: clear cool-white light, nobody's colour (reads on warm ground)
+const DIM := Color("6f7a9c")          # a locked seat
 const DARK := Color("3a3a44")         # a used seat gone dark
 const SMOTHER := Color("2c1638")      # the Blight over a seat
 const BEAM_H := 38.0                  # m, a lit column (reads from across the island at match zoom)
-const STUB_H := 5.0                   # m, a locked seat's stub / the smother's height
+const STUB_H := 8.0                   # m, a locked seat's stub / the smother's height
 const COLLAPSE_S := 0.7               # a used seat's beam sinks this fast (s)
 ## Per state: beam colour, beam height (m), beam width factor, ring alpha, ring colour (null = the beam's).
 const LOOKS := {
-	St.LOCKED: {"col": DIM, "a": 0.22, "h": STUB_H, "ring_a": 0.3},
-	St.OPEN: {"col": NEUTRAL, "a": 0.42, "h": BEAM_H, "ring_a": 0.85},
+	St.LOCKED: {"col": DIM, "a": 0.4, "h": STUB_H, "ring_a": 0.3},
+	St.OPEN: {"col": NEUTRAL, "a": 0.7, "h": BEAM_H, "ring_a": 0.85},
 	St.IN_USE: {"col": Color.WHITE, "a": 0.55, "h": BEAM_H, "ring_a": 0.95},
 	St.TAKEN: {"col": DARK, "a": 0.0, "h": 0.0, "ring_a": 0.2},
 	St.LOST: {"col": SMOTHER, "a": 0.6, "h": STUB_H, "ring_a": 0.55},

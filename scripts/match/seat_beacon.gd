@@ -4,7 +4,7 @@ extends RefCounted
 ## Built once with its own two materials (pooled: nothing is created after setup) and re-looked by show();
 ## the look is only pushed to the materials when it changes. WaysOutLook decides which look.
 
-const BEAM_R := 0.55              # m, the column's radius
+const BEAM_R := 0.8               # m, the column's radius
 const GLYPH_Y := 6.5              # m above the seat
 const GLYPH_PX := 0.0016          # fixed-size glyph: share of the screen height per font pixel
 const FILL := 0.16                # the ring's pad (a soft disc inside the ring, so the seat reads from afar)
@@ -49,7 +49,7 @@ func _init(parent: Node3D, at: Vector3, radius: float) -> void:
 	_glyph.font_size = 48
 	_glyph.outline_size = 14
 	_glyph.outline_modulate = Color(0.1, 0.1, 0.14, 0.9)
-	_glyph.modulate = WaysOutLook.DIM.lightened(0.35)
+	_glyph.modulate = Color("eef2ff")
 	_glyph.pixel_size = GLYPH_PX
 	_glyph.fixed_size = true
 	_glyph.billboard = BaseMaterial3D.BILLBOARD_ENABLED
