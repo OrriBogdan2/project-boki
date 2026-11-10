@@ -2098,3 +2098,10 @@ ON_CHANGE('Kingpinguin',_C%'Kingpinguin','final','tough',False,True,_KP+"Hurtlin
 for _s in SPECS[-2:]: _s['id']=_s['id'].replace('on_kingpinguin','tenpin')
 # Pavonazar (male): cool but too much going on. Tail fan no longer a full circle behind him: an open V.
 RV_EDIT('Pavonazar','vfan',"the tail fan. It is no longer a full circular fan filling the whole background. Reduce it to a clean open V shape: two tall sweeps of feathers rising up and outward from behind his back, one to the left and one to the right, with clear empty background between them above his head and to both sides. About half as many eye feathers as before, larger and simpler. His body, head, crown ring, chest marking, colours and long trailing tail ribbons stay exactly the same.",runs=3)
+
+# 11-10 owner caught it: Lace has NO mask on her face (stitched scar only); the white mask is on her LEFT SHOULDER. My accuracy text copied an
+# older note ("half-mask over her right eye") and was wrong. drop_up2_1 is closest to her sheet; small edit to finish Lace only.
+SPECS.append({'id':'drop_up2_lacefix','name':'Drop splash from below: finish Lace','refs':['briefs/boki-art/batch/out/drop_up2_1.jpg',_HR+'ravel_v2/ravel_v2_master_sheet.jpg'],'runs':3,'aspect':'4:3','size':'2K',
+  'prompt':"Edit image 1: keep the whole picture exactly the same: same composition, same camera, same characters, same creatures, same lighting and background. Only finish the dark-haired doll woman in the centre foreground (Lace) so she matches her design sheet in image 2: "
+   "her face has NO mask on it, just pale porcelain skin with the red stitched scar running diagonally across it and her calm smile; her black hair is gathered into a high bun pierced by two long silver sewing needles, with the rest of her hair still flowing long and loose; "
+   "a cracked white mask is fastened on her LEFT SHOULDER like a shoulder guard, edged with red stitches; a thin black lace choker at her neck. Change nothing else about her and nothing else in the picture."})
