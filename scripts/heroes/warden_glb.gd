@@ -211,6 +211,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
+	WardenMerge.merge_equal(glb)
+	WardenMerge.join_inks(glb)
 	_lights(glb, look(art(arch)))
 	_far_hide(glb, look(art(arch)))
 	root.set_meta("mats", mats)
@@ -997,7 +999,14 @@ class Sync extends Node:
 			WardenGlb._skinned_weapon(root)
 			WardenGlb._hide_shield(root)
 
+	var lod: AnimLod.Gate
+
 	func _process(dt: float) -> void:
+		if lod == null:
+			lod = AnimLod.Gate.new(root)
+		dt = lod.step(root.global_position, get_viewport(), dt)
+		if dt == 0.0:
+			return
 		_keep_one_weapon()
 		if clips:
 			_play(dt)

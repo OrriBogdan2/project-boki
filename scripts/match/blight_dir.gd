@@ -251,7 +251,7 @@ func on_shriek(w: Blight, at_h: Ent) -> void:
 
 # ------------------------------------------------------------------ tick
 func cap() -> int:
-	return clampi(CAP_BASE + int(round(10.0 * level_here(Vector3(m.world.w * 0.5, 0, m.world.h * 0.5)) / LVL_MAX * raid_k)), CAP_BASE, CAP_MAX)
+	return MobBudget.count(clampi(CAP_BASE + int(round(10.0 * level_here(Vector3(m.world.w * 0.5, 0, m.world.h * 0.5)) / LVL_MAX * raid_k)), CAP_BASE, CAP_MAX))
 
 func tick(dt: float) -> void:
 	_vis_t -= dt

@@ -5,7 +5,11 @@ extends RefCounted
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
-## once and reused until it changes.
+## once and reused until it changes. Fight effects (FxPool): a flurry of rings, ghosts, bolts and beams
+## adds no node to the Fx and every mesh is hidden again once they end (telegraphs are freed, not pooled).
+## SpawnPlan's sight checks are spread over frames. World.los and
+## World.tile_kind read the grid once a tile and agree with the plain per-sample rule; Hunter.gear_stat's
+## worn-gear and perk sums are kept a step and renewed by refresh_gear and a perk taken.
 
 var main: Node
 var fails := 0
@@ -24,9 +28,15 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	_mob_naps()
 	_far_bots()
+	_catch_up()
 	_far_mobs()
 	_shadows()
+	await _occluders()
+	_spawn_sight()
+	_sight_lines()
+	_worn_sums()
 	await _plates()
+	await _fx_pools()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -35,6 +45,97 @@ func _step(secs: float) -> void:
 	while t < secs:
 		m.step(Match.DT)
 		t += Match.DT
+
+## SpawnPlan looks at a slice of its spots each frame, each spot again within REVISIT_S, and a squad
+## standing on one still learns it in that time.
+func _spawn_sight() -> void:
+	var sp := m.spawn_plan
+	ok(sp != null and sp.cands.size() > 4, "setup: a spawn plan with spots")
+	if sp == null or sp.cands.size() <= 4:
+		return
+	var n := sp.cands.size()
+	var c: Dictionary = sp.cands[n / 2]
+	(c["known"] as Dictionary).erase(m.player.team)
+	m.player.teleport(c["pos"])
+	var at := sp._next
+	sp.tick(Match.DT)
+	var per := posmod(sp._next - at, n)
+	ok(per <= ceili(n * Match.DT / SpawnPlan.REVISIT_S), "one frame looks at %d of %d spots" % [per, n])
+	var t := Match.DT
+	while not (c["known"] as Dictionary).has(m.player.team) and t < SpawnPlan.REVISIT_S + 0.1:
+		sp.tick(Match.DT)
+		t += Match.DT
+	ok((c["known"] as Dictionary).has(m.player.team), "the spot underfoot is known within %.2f s" % t)
+
+## World.los reads each tile once (three lookups a sample before); World.tile_kind is one read. On random
+## lines over the real map both agree with the plain per-sample reading of the same rule.
+func _sight_lines() -> void:
+	var W: World = m.world
+	ok(W.dyn_walls.is_empty(), "setup: no ability walls up (the plain rule below reads terrain only)")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var bad := 0
+	for i in 400:
+		var a := Vector3(rng.randf_range(0.0, W.w), 0.0, rng.randf_range(0.0, W.h))
+		var b := a + Vector3(rng.randf_range(-12.0, 12.0), 0.0, rng.randf_range(-12.0, 12.0))
+		var y := rng.randf_range(0.5, 2.0)
+		if not W.is_void(a.x, a.z):
+			y += W.ground_at(a.x, a.z)
+		if W.los(a, b, y) != _plain_los(W, a, b, y):
+			bad += 1
+		var plain := World.T_GROUND
+		if W.is_block(b.x, b.z):
+			plain = World.T_BLOCK
+		elif W.is_void(b.x, b.z):
+			plain = World.T_VOID
+		if W.tile_kind(b.x, b.z) != plain:
+			bad += 1
+	ok(bad == 0, "los and tile_kind agree with the plain per-sample reading on 400 random lines (%d differ)" % bad)
+
+## The sight rule as World.los stated it before, a fresh read of every sample.
+func _plain_los(W: World, a: Vector3, b: Vector3, y: float) -> bool:
+	var d := Vector2(b.x - a.x, b.z - a.z)
+	var n := int(d.length() / 0.4) + 1
+	for i in range(1, n):
+		var t := float(i) / n
+		var px := a.x + d.x * t
+		var pz := a.z + d.y * t
+		if W.is_block(px, pz) and W.ground_at(px, pz) + World.BLOCK_H > y:
+			return false
+		if W.ground_at(px, pz) > y + 0.2:
+			return false
+	return true
+
+## Hunter.gear_stat keeps its worn-gear and perk sums for a step: a slot changed through refresh_gear
+## and a perk taken count in the same step, not the next.
+func _worn_sums() -> void:
+	var p: Hunter = m.player
+	p.gear = Gear.empty_slots()
+	p.refresh_gear()
+	var base := p.gear_stat("speed")
+	var gid := ""
+	for g in Gear.ALL:
+		if float((Gear.ALL[g]["stats"] as Dictionary).get("speed", 0.0)) > 0.0:
+			gid = String(g)
+			break
+	ok(gid != "", "setup: a gear piece with a speed stat")
+	if gid != "":
+		p.gear[0] = {"id": gid, "rar": 1}
+		p.refresh_gear()
+		ok(p.gear_stat("speed") > base, "gear put on through refresh_gear counts in the same step")
+	var pid := ""
+	var pk := ""
+	for id in Data.PERKS:
+		var st: Dictionary = (Data.PERKS[id] as Dictionary).get("stats", {})
+		if not st.is_empty() and String(st.keys()[0]) != "dmg" and p.perk_open(String(id)):
+			pid = String(id)
+			pk = String(st.keys()[0])
+			break
+	ok(pid != "", "setup: an open perk with a stat")
+	if pid != "":
+		var before := p.gear_stat(pk)
+		p.add_perk(pid)
+		ok(p.gear_stat(pk) != before, "a perk taken counts in the same step (%s: %s)" % [pid, pk])
 
 func _mob_naps() -> void:
 	var mb: Mob = null
@@ -60,6 +161,14 @@ func _mob_naps() -> void:
 	_step(1.5)
 	ok(mb.st != "idle" or mb.pos != at, "a Hunter walking up wakes it (%s)" % mb.st)
 
+## A 100 ms frame offline advances DashPace.CATCH_UP_S of sim (three steps, not six); online the clock can't wait.
+func _catch_up() -> void:
+	m.player.roll_t = 0.0
+	ok(is_equal_approx(DashPace.frame_dt(m, 0.1), DashPace.CATCH_UP_S), "offline a slow frame advances three steps")
+	m.net_on = true
+	ok(is_equal_approx(DashPace.frame_dt(m, 0.1), 0.1), "online a slow frame advances its whole time")
+	m.net_on = false
+
 func _far_bots() -> void:
 	var b: Hunter = null
 	for h in m.hunters:
@@ -76,6 +185,7 @@ func _far_bots() -> void:
 	for i in Bot.FAR_EVERY * 4:
 		var before := float(b.ai["dash_cd"])
 		brain.tick(m, b, Match.DT)
+		m.time += Match.DT      # as the sim step does: each far bot decides on its own beat of the clock
 		if float(b.ai["dash_cd"]) != before:
 			thinks += 1
 	ok(thinks == 4, "far away it decides every %d steps (%d decisions)" % [Bot.FAR_EVERY, thinks])
@@ -266,3 +376,69 @@ func _plates() -> void:
 	ok(is_same(a, b) and TextCache.shaped == n0, "the same label reuses its layout")
 	TextCache.line(f, "Wild Pebblit 2", 16)
 	ok(TextCache.shaped == n0 + 1, "changed text is laid out once")
+
+func _fx_pools() -> void:
+	var fx: Fx = m.fx
+	var kids := fx.get_child_count()
+	var out := [fx.ring_pool.live(), fx.ghost_pool.live(), fx.beam_pool.live()]
+	var tele: Array = []
+	for i in 3:
+		var at := Vector3(i, 0, 0)
+		fx.ring(at, 3.0, Color.WHITE)
+		fx.ghost(at, 0.0, Color.WHITE, 1.0)
+		fx.bolt(at, at + Vector3(4, 1, 0), Color.CYAN)
+		fx.beam(at, at + Vector3(5, 1, 0), Color.WHITE)
+		tele.append(fx.telegraph_rect(at, Vector2.RIGHT, 3.0, 1.0, Color.RED))
+	for t in tele:
+		fx.end_telegraph(t)
+	ok(fx.ring_pool.live() == int(out[0]) + 3, "a flurry takes pooled meshes (3 more rings out)")
+	for i in 60:
+		fx._process(0.02)
+		await main.get_tree().process_frame
+	ok(fx.get_child_count() == kids, "a flurry of rings, ghosts, bolts, beams and telegraphs adds no node to the Fx")
+	var back: bool = fx.ring_pool.live() <= out[0] and fx.ghost_pool.live() <= out[1]
+	back = back and fx.beam_pool.live() <= out[2]
+	ok(back,
+		"the flurry's ring, ghost and beam meshes (a bolt is beams) are all back in their pools")
+
+## Baked occluders (Occluders): on for Medium and up, off at Low; on a big map the boxes stay under the
+## ground and above the underside (so they never hide what shows), large rocks get a box inside them,
+## small rocks none, and a small map gets nothing.
+func _occluders() -> void:
+	var low: bool = Settings.QUALITY["low"]["occlusion"]
+	ok(not low and bool(Settings.QUALITY["medium"]["occlusion"]), "occlusion culling is off at Low, on at Medium")
+	var W := m.world
+	var holder := Node3D.new()
+	main.add_child(holder)
+	await Occluders.build(W, holder, {})
+	var oi := holder.get_node_or_null("Occluders") as OccluderInstance3D
+	ok(W.w < Occluders.MIN_MAP or oi != null, "a %d-tile map gets an occluder" % W.w)
+	if oi != null:
+		var arr := (oi.occluder as ArrayOccluder3D)
+		var verts := arr.vertices
+		var bad := 0
+		for p in verts:
+			# a corner on a tile border is judged by the highest ground of the four tiles around it
+			var g := -INF
+			for d in [Vector2(-0.01, -0.01), Vector2(0.01, -0.01), Vector2(-0.01, 0.01), Vector2(0.01, 0.01)]:
+				g = maxf(g, W.ground_at(p.x + d.x, p.z + d.y))
+			if p.y > g + 0.01: bad += 1
+		ok(bad == 0, "no occluder corner above the ground (%d boxes' %d corners)" % [verts.size() / 8, verts.size()])
+		ok(arr.indices.size() / 3 <= 24000, "%d occluder triangles stay under the budget" % (arr.indices.size() / 3))
+		var sunk := 0
+		for p in verts:
+			var ti := W.idx(clampi(int(p.x), 0, W.w - 1), clampi(int(p.z), 0, W.h - 1))
+			if W.kind[ti] != World.T_VOID and p.y < W.under[ti] - 0.01: sunk += 1
+		ok(sunk == 0, "no occluder corner below its island's underside")
+	holder.free()
+	var at := [Transform3D(Basis.IDENTITY, Vector3(5, 2, 5)), Color.WHITE]
+	var rock := {"k": {"mesh": Models.box(3.0, 3.0, 3.0), "label": "rock_a", "items": [at]},
+		"s": {"mesh": Models.box(1.0, 1.0, 1.0), "label": "rock_b", "items": [at]}}
+	var o := Occluders.new()
+	o._w = W
+	o._rocks(rock)
+	ok(o._verts.size() == 8, "a 3 m rock gets one box and a 1 m rock none (%d corners)" % o._verts.size())
+	var inside := true
+	for p in o._verts:
+		if absf(p.x - 5.0) > 1.5 or absf(p.y - 2.0) > 1.5 or absf(p.z - 5.0) > 1.5: inside = false
+	ok(inside, "the rock's box is inside its bounds")

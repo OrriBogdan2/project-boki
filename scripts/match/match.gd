@@ -20,6 +20,8 @@ var kins: Array = []
 var mobs: Array = []
 var shots: Array = []
 var pickups: Array = []     # {pos, vel, kind:"gem"|"seed"|"tonic", v, key, node, t}
+var gem_pool := NodePool.new()
+var mob_spares := MobSpares.new()
 var boxes: Array = []       # deathboxes, see Life
 var beacons: Array = []     # revive beacons, see Beacons
 var chests: Array = []      # {pos, open, prog, node}: the one locked chest (KeyChest); "free" ones need no key
@@ -209,11 +211,18 @@ func warm_up(progress := Callable()) -> void:
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
+static var prof_top := ""         # the last step's costliest section and its us (the hitch log, PerfOverlay)
+static var prof_top_us := 0
 var _prof_t := 0
 func _prof(lbl: String) -> void:
 	if prof_on:
 		var now := Time.get_ticks_usec()
-		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+		if lbl == "pre": prof_top_us = 0
+		elif _prof_t > 0:
+			prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+			if now - _prof_t > prof_top_us:
+				prof_top = lbl
+				prof_top_us = now - _prof_t
 		_prof_t = now
 
 ## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).
@@ -226,6 +235,13 @@ func _vprof(lbl: String) -> void:
 		_vprof_t = now
 
 var _render_n := 0
+func _render_lod(e: Ent, delta: float, alpha: float, cf: Vector3, near2: float) -> void:
+	if _render_now(e, cf, near2):
+		e.render(delta + e.lod_dt, alpha)
+		e.lod_dt = 0.0
+	else:
+		e.lod_dt += delta
+
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 	if e.dead or e.lod_dt > 0.2:
 		return true
@@ -323,6 +339,7 @@ func _start(o: Dictionary) -> void:
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
+	add_child(mob_spares)
 	brk = Breakables.new(self)
 	fields = Fields.new(self)
 	verbs = Verbs.new(self)
@@ -996,6 +1013,7 @@ func _spawn_mobs() -> void:
 		# a camp in a biome region spawns from that region's table instead
 		var bcomp: Array = biomes.camp_comp(c) if biomes else []
 		if not bcomp.is_empty(): comp = bcomp
+		comp = MobBudget.trim(comp)
 		var made: Array = []
 		for kk in comp:
 			var q := p
@@ -1101,6 +1119,7 @@ func add_chest(p: Vector3) -> Dictionary:
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
 	KeyChest.dress(n)
+	FarRanges.props(n)
 	var c := {"pos": p, "open": false, "prog": 0.0, "node": n}
 	chests.append(c)
 	return c
@@ -1172,6 +1191,7 @@ func _add_break(kind_s: String, at: Vector3) -> void:
 	n.position = at
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
+	FarRanges.props(n)
 	breaks.append({"i": breaks.size(), "pos": at, "kind": kind_s, "node": n, "dead": false})
 
 ## Motes drifting off a pickup in a colour (a Brand tuning, a Soul Ember), so you can spot it from afar.
@@ -1635,7 +1655,8 @@ func ground_grip(p: Vector3) -> float:
 func foes_of(team: int, wilds := true) -> Array:
 	var out: Array = []
 	for h in hunters:
-		if h.team != team and h.hittable() and not h.downed:
+		# (Hunter.hittable written out: foes_of runs many times a step and the call cost more than the test)
+		if h.team != team and not h.dead and not h.out and not h.extracted and not h.riding and not h.downed:
 			out.append(h)
 	for k in kins:
 		if k.dead or (k.is_wild() and (not wilds or team == -2)):
@@ -2615,15 +2636,16 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		pid = "d%d" % drop_n
 	var n: Node3D
 	match kind_s:
-		"gem": n = Models.gem()
+		"gem": n = gem_pool.take(Models.gem)
 		"seed": n = Models.seed_bag(Data.CROPS[key]["color"])
 		"tonic": n = Models.tonic()
 		"armor": n = Models.armor_shard()
 		"key": n = ExitModels.rift_key()
 		"ckey": n = KeyModels.pickup()
 		_: n = UtilityBelt.pickup_model(kind_s) if UtilityBelt.is_item(kind_s) else Models.gem()
-	add_child(n)
+	if n.get_parent() == null: add_child(n)
 	n.position = at
+	if kind_s == "gem": n.scale = Vector3.ONE      # a reused node may have been a big pile (DropMerge sizes it)
 	var a := randf() * TAU
 	var v0: Vector3 = vel0 if vel0 != null else Vector3(cos(a) * randf_range(1.5, 3.5), randf_range(4.0, 7.0), sin(a) * randf_range(1.5, 3.5))
 	pickups.append({"id": pid, "pos": at, "vel": v0, "kind": kind_s, "v": v, "key": key, "node": n, "t": 0.0})
@@ -2631,7 +2653,8 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		net_event(["drop", pid, kind_s, v, key, _r(at.x), _r(at.y), _r(at.z), _r(v0.x), _r(v0.y), _r(v0.z)])
 
 func _update_pickups(dt: float) -> void:
-	for p in pickups.duplicate():
+	for i in range(pickups.size() - 1, -1, -1):      # (backwards: a pickup collected or lost leaves the list)
+		var p: Dictionary = pickups[i]
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
 		var g := world.ground_at(pos.x, pos.z)
@@ -2646,12 +2669,14 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if net_on and not is_host and h != player:
 					continue
+				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
+				if d >= 2.2 or absf(h.pos.y - pos.y) >= 2.0:
+					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
 				if p["kind"] == "key" and h.rift_keys >= BeltKeys.cap("rift_key"):
 					continue      # one Rift Key at a time (BeltKeys); the next waits on the ground
-				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
-				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0 and UtilityBelt.can_take(h, String(p["kind"])):
+				if UtilityBelt.can_take(h, String(p["kind"])):
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
 					v = dir.normalized() * (6.0 + (2.2 - d) * 6.0)
 					if dir.length() < 0.6:
@@ -2671,11 +2696,16 @@ func _update_pickups(dt: float) -> void:
 		n.position = pos + Vector3(0, sin(time * 3.0 + p["v"]) * 0.06, 0)
 		n.rotation.y += dt * 2.0
 		if pos.y < -12.0:
-			n.queue_free(); pickups.erase(p)
+			_release_pickup(p)
+
+## A pickup leaves the ground: a gem's node goes back to the pool, anything else is freed.
+func _release_pickup(p: Dictionary) -> void:
+	if p["kind"] == "gem": gem_pool.give(p["node"])
+	else: p["node"].queue_free()
+	pickups.erase(p)
 
 func _collect(h: Hunter, p: Dictionary) -> void:
-	p["node"].queue_free()
-	pickups.erase(p)
+	_release_pickup(p)
 	if net_on:
 		net_event(["take", p["id"]])
 	match p["kind"]:
@@ -3199,29 +3229,23 @@ func _process(delta: float) -> void:
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
-	for e in hunters: e.render(delta, alpha)
-	_vprof("hunters")
-	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
-	# the time it skipped); near ones every frame
+	# hunters, monsters and kin well away from the view animate at a quarter rate (each catches up with
+	# the time it skipped); near ones every frame. Hunters only below Ultra (Settings.QUALITY anim_lod)
 	_render_n += 1
 	var cf := cam.focus
 	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var hunter_near2: float = near2 if Settings.q("anim_lod") else INF
+	for e in hunters:
+		_render_lod(e, delta, alpha, cf, hunter_near2)
+		if e.unseen: e.visible = false
+	_vprof("hunters")
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
-		if _render_now(e, cf, near2):
-			e.render(delta + e.lod_dt, alpha)
-			e.lod_dt = 0.0
-		else:
-			e.lod_dt += delta
+		_render_lod(e, delta, alpha, cf, near2)
 		if e.unseen or (e.owner_h and (e.owner_h as Hunter).unseen and e.state == "shoulder"):
 			e.visible = false
-	for e in mobs:
-		if _render_now(e, cf, near2):
-			e.render(delta + e.lod_dt, alpha)
-			e.lod_dt = 0.0
-		else:
-			e.lod_dt += delta
+	for e in mobs: _render_lod(e, delta, alpha, cf, near2)
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
 	for s in shots:
@@ -4262,6 +4286,13 @@ func _update_interact(dt: float) -> void:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
+		if not want and h != player:
+			# a bot that isn't pressing interact: nothing to prompt, so the scans below wait for the press
+			h.box_t = 0.0
+			h.set_meta("loot_hold", false)
+			h.set_meta("box_broke", false)
+			if exits: exits.interact_for(h)      # (lets go of a dock or hatch hold)
+			continue
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
 		if best.is_empty():
 			for b in boxes:
@@ -5529,8 +5560,7 @@ func _net_ev(x, from: String) -> void:
 		"take", "gone":
 			for p in pickups:
 				if p["id"] == String(x[1]):
-					p["node"].queue_free()
-					pickups.erase(p)
+					_release_pickup(p)
 					break
 			if String(x[0]) == "take" and is_host:
 				net_event(["gone", String(x[1])])

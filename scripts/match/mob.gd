@@ -41,7 +41,8 @@ func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0)
 	r = md["r"]
 	camp = at
 	cd = randf_range(0.5, 1.5)
-	set_model(Models.mob(k))
+	var spares = m.get("mob_spares")
+	set_model(spares.take(k) if spares else Models.mob(k))
 	if model.has_meta("sculpted") and m.get("world"):
 		# a little of the island grows on its back
 		var wx := int(floor(at.x)); var wz := int(floor(at.z))
