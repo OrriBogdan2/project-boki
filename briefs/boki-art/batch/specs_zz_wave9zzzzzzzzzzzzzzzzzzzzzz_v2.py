@@ -1669,3 +1669,10 @@ ALT('Pillaroo',"it reads as a postbox, not an animal: give it a real kangaroo he
 ALT('Tesselamb',"the stack of flat stones on its head reads as a hat: remove it, leaving a soft tuft of pebble wool between its ears.")
 # Sawshark line: all three stages swim the same way. New pose for the final.
 _n0=len(SPECS); ON_POSE('Sawright',_LM['Sawright']['sheet'] if 'Sawright' in _LM else 'briefs/boki-art/cards/Sawright.jpg','final','tough',False,False,"breaching straight up, body vertical, saw nose pointing to the sky, tail curled, seen from the side facing LEFT.",_KEEPALL); SPECS[_n0]['id']='alt_sawright_pose'
+
+# 11-10 fourth-review picks live (they only remove worn or built-looking parts): Kindlewren (comb crest, not a beret), Blotlet (no pot), Dreadnoyak (no
+# chimneys, smoke or anchor), Pillaroo (real kangaroo head and legs), Tesselamb (no stone hat), Sawright (breaching pose). Sets from the new cards.
+for _a in (('Kindlewren','baby','cute',1,1),('Blotlet','baby','cute',1,0),('Dreadnoyak','final','tough',0,1),('Pillaroo','final','tough',0,1),('Tesselamb','final','majestic',0,1),('Sawright','final','tough',0,0)): SETOF(*_a,_GP,'r6')
+# Second tries where the alt failed: Kingpinguin's alt became a feathered war bonnet (rejected), Sloggoth's kept its treads.
+ALT('Kingpinguin',"remove everything from the top of its head: it has a smooth round penguin head with two long yellow-and-red brow plumes sweeping back, like a macaroni penguin. Its bowling idea is carried by its body instead: a white chest with a red band and three dark round spots on its belly like a bowling ball's finger holes."); SPECS[-1]['id']='alt2_kingpinguin'
+ALT('Sloggoth',"its lower body must not look like a machine: remove the tank treads and roller drums completely. It sits on a broad, smooth, heavy slug-like base of its own dark body, with two thick soft arms ending in round paws. It keeps the raised letter shapes on its chest and its curled paper-ribbon mane."); SPECS[-1]['id']='alt2_sloggoth'
