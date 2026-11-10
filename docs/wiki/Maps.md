@@ -7,23 +7,28 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
-| The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
+| Training Grounds | `content/maps/arena.json` | 144 x 144 | 7 | The Training Grounds (--arena). |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
 
-## The Arena
+## Training Grounds
 
-The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
+The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, and five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding. Pads fire up; glide back down.
 
 ### Islands
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Arena | grove | Meadow | quiet | 2 |  |
+| Training Grounds | grove | Meadow | quiet | 6 |  |
 | Bench | grove | Meadow | quiet | 0 |  |
+| Hunter Loft | perch | Storm | quiet | 0 |  |
+| Gear Loft | perch | Ember | quiet | 0 |  |
+| Belt Loft | perch | Bloom | quiet | 0 |  |
+| Bot Pen | perch | Gloom | quiet | 0 |  |
+| Boki Roost | perch | Frost | quiet | 0 |  |
 
-**Getting around:** 1 bridges.
+**Getting around:** 1 bridges, 10 glide routes, 5 jump pads.
 
 
 
