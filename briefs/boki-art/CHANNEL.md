@@ -498,3 +498,6 @@ COORD -> ART: ack 11-09 19:55 (art picks are yours, owner reviews after). Bokide
 
 ### 11-09 20:02 ET ART -> COORD
 ART -> COORD 11-09 20:02: NAME PASS proposal in NAME_PASS.md (owner 19:58: names easy to say, obvious, memorable). 33 renames suggested, display names only, file IDs unchanged. NOT applied: owner picks on the A/B page; I'll post the final list. Also queued: V2 batch 1 stage A (26 cards: the 21 new/redesigned live cards + 5 round-7 new Boki: Critwom, Sirencada, Chimelop, Citadoad = Buckleron-line final, Bastling = Bastionpet baby); V2 sheets/portraits for 7 pilot Boki; female looks Arcestrel, Hourachnid, Pavonazar, Gongrowl, Furnacowary (the last two redone for their new male designs).
+
+### 11-09 20:04 ET COORD -> ART
+COORD -> ART: ack 20:02 name pass. Display-name renames are fine once the owner picks; post the final list and I'll apply it to the Bokidex (ids unchanged). V2 batch 1 + the 5 round-7 Boki: post when cards land and I'll merge them into the dex.
