@@ -10,7 +10,7 @@ preview: python3 tools/make_hollowcrown.py --preview out.png. Never edit the JSO
 
 Layout (216 x 216 tiles = metres, north up, heights in terraces of 0.8 m):
 
-                  [Highwatch]           outer isles: lv 0, quiet landings, docks / uplinks
+                  [Highwatch]           outer isles: lv 0, quiet landings, docks
      [Larkhollow]   [  Frostgate  ]--   mid ring:    lv 2, one raised plateau each (lv 6)
           |          ||  Gate Span  [Stormcrown Gaol]   core: lv 4, the Throne at lv 8
      [Cinder ]   [ THE CROWN ]=====/
@@ -50,9 +50,10 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
-  pads, updrafts, winds, docks, outposts, hatches, lairs, spawn_points: as Skyreach
+  pads, updrafts, winds, heart (the Heart site [x, z]), docks, outposts, hatches, lairs, spawn_points: as Skyreach
 """
 import json, math, os, random, sys
+import ways_out_sites
 
 SIZE = 216
 LEVEL = 0.8
@@ -163,7 +164,7 @@ islands = [
          traps=[[166, 120]],
          shrine=[174, 118]),
     # ---- THORNWOOD (south): a low bramble wood full of tall grass and blossom trees, the Boki nest in
-    # its west glade and the Thornhive lair at its east end, with an uplink outpost by the nest.
+    # its west glade and the Thornhive lair at its east end.
     dict(id="thorn", name="Thornwood", role="nest", region=4, biome="bloom", danger=1, poi=[96, 170], noise=0.06,
          shapes=[poly([(84, 154), (104, 150), (126, 152), (142, 158), (147, 172), (137, 186), (112, 192), (90, 188), (78, 174)], 2)],
          sheer=[[60, 110]],
@@ -224,17 +225,17 @@ regions = [
          purpose="Contested core: the vault on the Throne, two boss Gaols, the richest loot and the most Blight. "
                  "Every route in is a bridge or a glide over open air."),
     dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"],
-         purpose="Northern ridge and Keep: high ground over the Gate Span, a camp to level on, Rimefield cover."),
+         purpose="Northern ridge and Keep: high ground over the Gate Span, a camp to level on, Rimefield cover, an uplink outpost on the south edge."),
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"],
-         purpose="Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol."),
+         purpose="Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol; an uplink outpost on the east rim."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
          purpose="Eastern tableland with the shrine on the Shrine Table; launch pad up to Shardfall."),
     dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"],
-         purpose="Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair and its uplink."),
+         purpose="Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair."),
     dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"], purpose="Quiet NW landing with a skiff dock."),
-    dict(id="highwatch", name="Highwatch", biome="frost", islands=["highwatch"], purpose="Quiet NE landing with an uplink outpost."),
+    dict(id="highwatch", name="Highwatch", biome="frost", islands=["highwatch"], purpose="Quiet NE landing."),
     dict(id="duskmoor", name="Duskmoor", biome="storm", islands=["duskmoor"], purpose="Quiet SE landing with a skiff dock."),
-    dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"], purpose="Quiet SW landing with an uplink outpost."),
+    dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"], purpose="Quiet SW landing."),
 ]
 
 # ------------------------------------------------------------------ geometry helpers
@@ -324,10 +325,11 @@ lairs = [
     dict(id="forge", name="The Sunken Forge", boss="colossus", island="gaol_sw", at=[60, 150], half=7, gate="e", entry=["dial"]),
     dict(id="hive", name="The Thornhive", boss="brood", island="thorn", at=[127, 172], half=7, gate="w", entry=["dial", "wards"]),
 ]
-# exits: skiff docks on the quiet NW/SE isles (pointing out to open sky), walled uplink outposts on
-# the NE/SW isles and in Thornwood (each a short run from a boss lair), rift hatches in the ring.
+# exits: skiff docks on the quiet NW/SE isles (pointing out to open sky), two walled uplink outposts 42-50 m
+# from the Heart (tools/ways_out_sites.py has the rule), rift hatches in the ring.
 docks = [[15, 30, -1, 0], [201, 184, 1, 0]]
-outposts = [[190, 26, 1], [26, 186, 1], [92, 178, 1]]
+outposts = [[112, 59, 1], [59, 104, 1]]   # Frostgate's south edge and Cinder's east rim, 49 m from the Throne
+heart = [108, 108]                        # the Heart site: the Throne (Limited Ways Out; the Gate stands 24 m from it)
 hatches = [[124, 92], [100, 36], [36, 82], [182, 98], [118, 158]]
 
 spawn_points = {
@@ -410,6 +412,9 @@ def check(lv, owner, stairs):
             for lst, r, what in ((camps, 9, "camp"), (exits, 9, "exit"), (lands, 8, "landing")):
                 for q in lst:
                     if math.hypot(wp[0] - q[0], wp[1] - q[1]) < r: probs.append("warden %s too close to %s %s" % (wp, what, q[:2]))
+    sites, arc = ways_out_sites.check(heart, outposts, lairs, lambda x, z: (int(x), int(z)) in lv and (int(x), int(z)) not in stairs)
+    probs += sites
+    print("heart gate: %d degrees of seeded angle are clear (%s)" % (len(arc), "%d..%d" % (arc[0], arc[-1]) if arc else "none"))
     for B in bridges:
         assert owner.get((int(B["from"][0]), int(B["from"][1]))) == B["a"], B
     return probs
@@ -814,7 +819,7 @@ def main():
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=pads, updrafts=updrafts,
-               winds=[], docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
+               winds=[], heart=heart, docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)
