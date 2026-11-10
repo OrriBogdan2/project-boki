@@ -614,3 +614,8 @@ for _n,_st,_ar,_dk,_fu,_co,_ct,_pose in (
  ('Wickapi','baby','cute',True,True,"dark reddish-brown fur, cream-striped legs, a cream candle stub on its head with one small purple flame, purple eyes, a short purple-black wispy tail","four long legs, two big ears, one candle, one tail","taking a wobbly step toward the viewer, ears up, curious")):
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_co,_ct); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_co,_ct,_dk,_fu,_pose)
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_on'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_on'; SPECS[_n0+1]['runs']=2
+
+# ===== 23:15 ET 11-09: batch 2 stage B picks live (34 of 35) + Voltalon, Wickapi, Bastling (new). Kayak: all 3 sheets had a ghost row -> sheet
+# from the V2 card instead. Effigoon: the shadow-removal edit kept the shadow -> 4 fresh runs.
+_r=[r for r in _BT2 if r[0]=='Kayak'][0]; _n0=len(SPECS); V2SHEET_NEW('Kayak','briefs/boki-art/cards/Kayak.jpg',_r[5],_r[6]); SPECS[_n0]['id']='v2s_kayak_b2n'
+ON_CHANGE('Effigoon',_C%'Effigoon','mid','majestic',False,False,"the same white marble cocoon with gold bands and gold spiral trim, drawn alone in empty space: it does not hang and nothing is attached to it, so the top of the picture is empty background. The cocoon is tipped over onto its side at a slant, pointed tip toward the lower right. It has no face. It casts no shadow at all: the background under and around it is the same flat pale grey as everywhere else.",runs=4,tag='_lie2')
