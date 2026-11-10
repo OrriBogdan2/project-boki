@@ -52,3 +52,4 @@ func run(main_node: Node) -> void:
 	await _grab(m, "4_levelup_rank", 50)
 	m.over = true
 	m.queue_free()
+	main.get_tree().quit(0)
