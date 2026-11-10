@@ -38,7 +38,7 @@ func _part_shield() -> void:
 	await _reset(6.0)
 	_hand()
 	var guard := func(t: float):
-		P.inp["sec_hold"] = t > 0.2
+		P.inp["sec_hold"] = t > 0.15
 		if _at(t, 0.2):
 			P.ak.set("lock_t", 0.0)
 			P.ak.press_rmb()
@@ -55,7 +55,7 @@ func _part_bash() -> void:
 	_hand()
 	P.ak.res = 50.0          # (a full Guard: the charge ends in a Shield Slam)
 	var charge := func(t: float):
-		P.inp["sec_hold"] = t > 0.2
+		P.inp["sec_hold"] = t > 0.15
 		if _at(t, 0.2):
 			P.ak.set("lock_t", 0.0)
 			P.ak.press_rmb()
