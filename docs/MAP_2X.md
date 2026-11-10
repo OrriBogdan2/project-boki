@@ -7,7 +7,7 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 |---|---|---|
 | Double the size, one SIZE constant | done | `SIZE = 305` in tools/make_hollowcrown.py (216 design grid × √2 = 2x the land); everything with a body keeps its size. |
 | More squads, same squads per m² | partial | Data.MATCH_PLAYERS 20 → 30 (10 trios). 2x land wants 40; 40 was not frame-time flat on the GPU box (0022), so it is capped at 30: about 0.75 of today's density. |
-| Sky train is the fast travel: winding loop, every region, stops that matter | done | A 938 m closed loop with 10 halts (one per outer region, Eyrie and Ash Halts for the Crown's Gaols); a lap is 177 s; every leg rides faster than running it (`check_train`). |
+| Sky train is the fast travel: winding loop, every region, stops that matter | done | A 938 m closed loop with 10 halts (one per outer region, Eyrie and Ash Halts for the Crown's Gaols); a lap is 177 s; every leg rides faster than running it (`check_train`). Each stop's deck sits level with its pier (7 of 10 piers are on 1.6-3.2 m terraces), so you step on and off. |
 | The Crown: a reason to go | done | The vault on the Throne, two boss Gaols, the richest chests (most Blight). |
 | Frostgate | done | Best armor (armor ×1.6 region lean on the frost biome's ×1.8) and the Keep's high ground. Leans slots, not rarity: "gold" armor there comes from the Crown/hot zone steps. |
 | Cinder Steps | done | Gloves and weapon tunings (glove ×1.6), a camp to level on. |
@@ -31,9 +31,12 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 ## Checks
 - **Sky train in the 0.24.4 build:** its Hollow Crown has no train at all (`--train-check` stops at "the map has a sky train"). This branch brings it back as the winding loop.
 - **Fast suite** (suite-fast.sh is hetzner-only, so on w2: all 223 registered `-check` flags, xvfb + opengl3, branch; base re-run on every branch red). 56 branch reds on the first pass, 46 the same on base. Fixed here: `--cover-check` (ambush cover, Saltmere dock), `--perf-throttle-check` far-monster case, `--rolling-check` (map size from the layout), 4 of `--train-check`'s rider cases (check pushed off the car beside land). Load flakes that pass alone: hold-pose, hot-zone, hp-regen, music-leave, wallhug, weapon-clip.
-- **Still red, new vs base:**
-  - `--keys-check` (2): the key Shrubling flees onto Stormbreak's lv 6 Shrine Table, and with the hunter gone `Shrubling._pick_hide` scores patches as if a threat stood 1 m east and tries only the top 3, all on the level below (it walks flat: no stairs). It never hides again.
-  - `--train-check` (3, base stops at 1): at Frost Halt the rider can't step off the car onto the pier (and back), and the deathbox after a train kill lands 202 m from the hit.
+- **Fixed in the second pass (job 20261110-083254-a1, rpc1):**
+  - `--train-check` 0 failures: stops ramp the deck up to their pier's height (the rider no longer has to climb a 1.6 m step at Frost Halt); a train kill over the abyss boxes on the nearest ground within 40 m (the 14 m reach was 1x-sized, so the box fell back 200 m to the last safe spot); the check asserts every stop's deck vs pier and the box on the nearest ground.
+  - `--keys-check` 0 failures: the Shrubling hides only in grass on its own terrace (it walks flat), so it never picks three unreachable patches below the Shrine Table.
+  - SkyTrain: one reach cull before the per-car tests (`_near_train`), so the far hunters, monsters, Boki and pickups skip the matrix inverses.
+  - Re-run after the merge of ext/release-integ-0244 b80a3d67b: `--train-check`, `--keys-check`, `--cover-check` (85/0), `--ping-check`, `--arena-check` (106/0); `--simtest --teams=10 --squad=3 --god` headless ran to its end, no script errors (bots finished the player at 121 s). `health --strict`: only `tools/move_feel_check.gd` long_line 32 -> 34, the same file and baseline as the base (a base red).
+- **ext/matchmaker-map-2x** is already in ext/release-integ-0244 (TRIO_SLOTS 18).
 - **Full match on the new map:** `--simtest --teams=10 --squad=3 --god` (30 hunters, headless) ran to its end with no script errors: fights, revives, truces and extractions; it ended at 310 s sim when the autoplayed player bled out.
 - **GPU frame time** (`--perf-bench --bench-secs=60 --bench-view=1920x1080`, rp1-1 RTX 4090, two runs each):
 
@@ -51,5 +54,3 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 ## Big items left
 - In-match shops (the "Utilities and shops" order) so a shop can be a region's reason.
 - 40 hunters (true same density) needs the frame time above to come down first.
-- `--keys-check` Shrubling hiding on the Shrine Table; `--train-check` pier step-off and train-kill deathbox.
-- ext/matchmaker-map-2x (online trio slots follow the match size) still pairs with this branch.
