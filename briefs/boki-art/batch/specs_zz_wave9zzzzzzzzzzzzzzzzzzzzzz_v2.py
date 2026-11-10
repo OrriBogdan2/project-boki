@@ -2136,3 +2136,18 @@ SPECS.append({'id':'hb5_sable_escape','name':'Sable + Lockatara splash: the esca
 # 11-10 owner pasted an edit brief for the fresh Sable escape picture (hb5_sable_escape_1): black insect eyes + her four moth wings. Verbatim.
 SPECS.append({'id':'hb5_sable_eyeswings','name':'Sable escape splash: eyes + wings (owner brief)','refs':['briefs/boki-art/batch/out/hb5_sable_escape_1.jpg',_HR+'sable_v2/sable_v2_portrait.jpg'],'runs':4,'aspect':'16:9','size':'2K',
   'prompt':open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'sable_edit_prompt.txt')).read()})
+
+# 11-10 late. Promoted cards: Maracoil mara3_a_1, Gambitfin gambit_p1_3 (mirrored to face right), Jerbolt pose3_2, Bullsfrog leap_1,
+# Marimbite compact_2, Postroo compact_1, Carpenjaw carp2_a_1, Kingpinguin (Pipguin) tenpin_t2_1. New designs need sets:
+for _a in (('Maracoil','final','pretty',0,0,"coiled, head high, both rattles held still"),('Carpenjaw','mid','sleek',0,0,"cruising level, saw nose forward"),('Kingpinguin','final','tough',0,1,"standing tall, flippers on hips, ten pin plumes fanned")):
+    _n0=len(SPECS); SETOF(*_a,'L1'); SPECS[_n0]['prompt']+=_NOGHOST
+# Pavonazar V fan: vfan_3 is right but lost its crown ring. Put the ring back.
+SPECS.append({'id':'rv_pavonazar_vhalo','name':'Pavonazar V fan + crown ring','refs':['briefs/boki-art/batch/out/rv_pavonazar_vfan_3.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"add his legendary crown ring: a thin floating ring of gold and purple peacock-eye feathers hovering just above his head crest, not touching it, clear and bright. Nothing else changes: the tail stays an open V with empty background between the two sweeps."})
+# Pixel sprites, round 4 (owner: does not need to be exact, "just has to look good"). 80px look only, simplify hard, one standout feature.
+_PX8=("Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. "
+ "It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. "
+ "Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. "
+ "Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image."+_PXTAIL)
+for _n in ('Vespyx','Mycroll','Prismander','Ermink','Jerbit','Kitlet','Sarcobra','Calderoise','Aurostag','Chainipede','Hydrangor','Palloth','Lockatara','Chuggamus','Zephyrak','Kestrike'):
+    SPECS.append({'id':'px8_'+_n.lower(),'name':_n+' (pixel sprite 80, simplified)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})

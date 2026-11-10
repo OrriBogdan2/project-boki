@@ -43101,6 +43101,259 @@
     "prompt": "Edit the attached picture (Sable and Lockatara at the vault). The second\nattached picture is Sable's portrait, for reference only. Keep the\ncomposition, pose, style, lighting and colors of the first picture exactly as\nthey are. Make only these two changes:\n\n1. Fix Sable's eyes. They are solid glossy black from edge to edge, like an\n   insect's, with a small white highlight. No whites, no iris, no pupil. Match\n   the portrait.\n\n2. Give Sable her wings. She has two pairs of pale lilac moth wings with a\n   purple eye-spot on each, as in her portrait. They sit folded behind her\n   back, visible on both sides of her coat.\n\nKeep everything else, including her pose with one boot on Lockatara's back:\n- Lockatara has exactly one tail. It curves up behind Sable and ends in the\n  big key, which is turned in the lock of the vault door.\n- Lockatara keeps the padlock dial on its shoulder, the keyhole on its\n  forehead and its friendly open-mouthed look.\n- Sable keeps her white braid, feathered antennae, pointed ears, the beauty\n  mark under her eye, purple coat, grin and both flintlock pistols.\n- Gold coins and gems stay piled on both sides, with the warm light pouring\n  from the open vault door on the right.\n\nFraming: 16:9, 2576 x 1438, unchanged.\n\nNo text, no logo, no extra characters, no extra limbs or tails.\n"
   },
   {
+    "id": "v2s_maracoil_L1",
+    "name": "Maracoil (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Maracoil.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Maracoil. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere."
+  },
+  {
+    "id": "v2p_maracoil_L1",
+    "name": "Maracoil (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Maracoil.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: coiled, head high, both rattles held still. Official encyclopedia portrait of exactly the creature in image 1: Maracoil. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: large almond eyes with one to three lash flicks, a coloured iris, one large and one small crisp white highlight; a soft arched brow; a small, poised mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_carpenjaw_L1",
+    "name": "Carpenjaw (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Carpenjaw.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Carpenjaw. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere."
+  },
+  {
+    "id": "v2p_carpenjaw_L1",
+    "name": "Carpenjaw (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Carpenjaw.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: cruising level, saw nose forward. Official encyclopedia portrait of exactly the creature in image 1: Carpenjaw. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: narrow almond eyes tilted up at the outer corners, a coloured iris and one crisp white highlight; the flat upper lid works as the brow; a cool, knowing smirk. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_kingpinguin_L1",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Kingpinguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere."
+  },
+  {
+    "id": "v2p_kingpinguin_L1",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: standing tall, flippers on hips, ten pin plumes fanned. Official encyclopedia portrait of exactly the creature in image 1: Kingpinguin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: small eyes set deep under a heavy, straight brow ridge, a coloured iris and one small crisp white highlight; a wide jaw with an underbite, tusks or bared teeth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "rv_pavonazar_vhalo",
+    "name": "Pavonazar V fan + crown ring",
+    "refs": [
+      "briefs/boki-art/batch/out/rv_pavonazar_vfan_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: add his legendary crown ring: a thin floating ring of gold and purple peacock-eye feathers hovering just above his head crest, not touching it, clear and bright. Nothing else changes: the tail stays an open V with empty background between the two sweeps."
+  },
+  {
+    "id": "px8_vespyx",
+    "name": "Vespyx (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_mycroll",
+    "name": "Mycroll (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_prismander",
+    "name": "Prismander (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_ermink",
+    "name": "Ermink (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Ermink.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_jerbit",
+    "name": "Jerbit (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Jerbit.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_kitlet",
+    "name": "Kitlet (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Kitlet.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_sarcobra",
+    "name": "Sarcobra (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Sarcobra.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_calderoise",
+    "name": "Calderoise (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_aurostag",
+    "name": "Aurostag (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Aurostag.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_chainipede",
+    "name": "Chainipede (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Chainipede.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_hydrangor",
+    "name": "Hydrangor (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Hydrangor.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_palloth",
+    "name": "Palloth (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Palloth.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_lockatara",
+    "name": "Lockatara (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Lockatara.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_chuggamus",
+    "name": "Chuggamus (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Chuggamus.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_zephyrak",
+    "name": "Zephyrak (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Zephyrak.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px8_kestrike",
+    "name": "Kestrike (pixel sprite 80, simplified)",
+    "refs": [
+      "briefs/boki-art/cards/Kestrike.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
