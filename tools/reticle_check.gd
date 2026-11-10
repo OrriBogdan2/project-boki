@@ -9,20 +9,22 @@ extends RefCounted
 ##      the hold and flashes at full; the aim and raise holds (a lane, a shield, a fan) show no ring
 ## Runs with a temporary XDG_DATA_HOME: it writes user://settings.cfg.
 
-## Every hold slot of the 12 kits: [kit, what, input, ring]. Input: "lmb" held, "rmb" held, "dash" held, "e" pressed (it
-## charges by itself). ring false: an aim or raise hold (a lane, a shield, a fan, a stream), which draws no ring.
+## Every hold slot of the 12 kits: [kit, what, input, ring, at]. at: where the ring sits, "body" where the source
+## shows its charge arc round the hero (hero-ref juggernaut item 8: Kael's blast), else "cursor".
+## Input: "lmb" held, "rmb" held, "dash" held, "e" pressed (it charges by itself). ring false: an aim or raise
+## hold (a lane, a shield, a fan, a stream), which draws no ring.
 ## Tender and Thief have no hold slot.
 const HOLDS := [
-	["archer", "Heavy Shot", "rmb", true], ["archer", "bow draw", "lmb", false],
-	["ashwick", "Cinder Shot lane", "rmb", false], ["ashwick", "Torch Lance stream", "lmb", false],
-	["bulwark", "hammer whirl", "lmb", true], ["bulwark", "Aegis", "rmb", false],
-	["dolm", "punch", "lmb", true], ["dolm", "Quakefall", "rmb", true],
-	["dredge", "Brass Broadside fan", "e", false],
-	["gunslinger", "Longneedle", "e", true],
-	["juggernaut", "blast", "lmb", true], ["juggernaut", "Lunge", "rmb", true],
-	["mage", "Wirerun", "dash", true], ["mage", "Storm Rod", "rmb", true],
-	["ostra", "Lantern Trade ends", "dash", false],
-	["rimewright", "Ice Spear aim", "rmb", false], ["rimewright", "Skate", "dash", false],
+	["archer", "Heavy Shot", "rmb", true, "cursor"], ["archer", "bow draw", "lmb", false, ""],
+	["ashwick", "Cinder Shot lane", "rmb", false, ""], ["ashwick", "Torch Lance stream", "lmb", false, ""],
+	["bulwark", "hammer whirl", "lmb", true, "cursor"], ["bulwark", "Aegis", "rmb", false, ""],
+	["dolm", "punch", "lmb", true, "cursor"], ["dolm", "Quakefall", "rmb", true, "cursor"],
+	["dredge", "Brass Broadside fan", "e", false, ""],
+	["gunslinger", "Longneedle", "e", true, "cursor"],
+	["juggernaut", "blast", "lmb", true, "body"], ["juggernaut", "Lunge", "rmb", true, "cursor"],
+	["mage", "Wirerun", "dash", true, "cursor"], ["mage", "Storm Rod", "rmb", true, "cursor"],
+	["ostra", "Lantern Trade ends", "dash", false, ""],
+	["rimewright", "Ice Spear aim", "rmb", false, ""], ["rimewright", "Skate", "dash", false, ""],
 ]
 const HOLD_SECS := 2.5         # s each hold is kept down
 const OLD_REACH := 13.0     # px: how far the old cross reached from the cursor at rest (gap 6 + arm 7)
@@ -98,6 +100,7 @@ func _hold_run(ac: RefCounted, kit: String, input: String) -> Array:
 	var top := -1.0
 	var rising := true
 	var flared := false
+	var at := ""
 	var t := 0.0
 	P.fire_cd = 0.0
 	K.cd["e"] = 0.0
@@ -121,9 +124,10 @@ func _hold_run(ac: RefCounted, kit: String, input: String) -> Array:
 			first = k if first < 0.0 else first
 			rising = rising and (top >= 1.0 or k >= top - 0.001)      # (past full the shot goes and the ring resets)
 			top = maxf(top, k)
+			at = String(rt["at"])
 		flared = flared or float(rt["flare"]) > 0.0
 	m.queue_free()
-	return [first, top, rising, flared]
+	return [first, top, rising, flared, at]
 
 func _holds(main: Node) -> void:
 	var ac = load("res://tools/archetype_check.gd").new()
@@ -133,8 +137,10 @@ func _holds(main: Node) -> void:
 		var tag := "%s %s" % [row[0], row[1]]
 		if row[3]:
 			var starts: bool = float(res[0]) >= 0.0 and float(res[0]) < 0.6
-			var good: bool = starts and bool(res[2]) and float(res[1]) >= 1.0 and bool(res[3])
-			ok(good, "hold ring: %s fills from the start, never falls, flashes at full %s" % [tag, str(res)])
+			var placed: bool = String(res[4]) == row[4]
+			var good: bool = starts and bool(res[2]) and float(res[1]) >= 1.0 and bool(res[3]) and placed
+			ok(good, "hold ring: %s fills from the start, never falls, flashes at full, at the %s %s"
+					% [tag, row[4], str(res)])
 		else:
 			ok(float(res[1]) < 0.0, "hold ring: %s draws no ring (an aim or raise hold) %s" % [tag, str(res)])
 		await main.get_tree().process_frame

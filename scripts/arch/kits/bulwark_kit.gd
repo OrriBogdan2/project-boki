@@ -268,7 +268,8 @@ func ult_running() -> bool:
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
-		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		# it takes the hit (and turns it into Guard) as it does a shot
+		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
@@ -310,7 +311,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not KnockWall.behind(m, t, dir, float(res_def().get("crush_reach", 1.5))):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()

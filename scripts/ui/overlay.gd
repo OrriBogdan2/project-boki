@@ -108,6 +108,14 @@ func shot_demo(which: PackedStringArray) -> void:
 	match which[0]:
 		"pause":
 			open_pause(ctx)
+		"controls":
+			if arg == "rebound":
+				var acts := ["fire", "signature", "dash", "jump", "throw", "crouch"]
+				for i in acts.size():
+					var ev := InputEventKey.new()
+					ev.physical_keycode = KEY_J + i as Key      # J K L M N O
+					Settings.rebind(acts[i], ev)
+			open_controls()
 		"settings":
 			if arg != "":
 				tab = arg
@@ -183,6 +191,7 @@ func back() -> void:
 		page = ""
 		match prev:
 			"pause": open_pause(ctx)
+			"controls": open_controls()
 			"settings": open_settings()
 			"saves": open_saves()
 			"inventory": open_inventory()
@@ -233,7 +242,7 @@ func open_pause(where: String) -> void:
 	item.call("Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	item.call("Controls", "dash", func(): tab = "Controls"; open_settings())
+	item.call("Controls", "dash", open_controls)
 	if where != "match":
 		item.call("Save files", "satchel", open_saves)
 	# the rarely used ones: quiet text links in a row
@@ -277,6 +286,15 @@ func open_pause(where: String) -> void:
 			RateCard.gate(root, get_tree().quit), "", "Ghost")
 		q.add_theme_color_override("font_color", UI.MUTED)
 	res.grab_focus.call_deferred()
+
+## The quick-reference card under Esc; "Change keys" goes on to the rebinding list.
+func open_controls() -> void:
+	var v := _page("controls", "Controls", 720)
+	var psc = Game.main.screen_node() if ctx == "match" and Game.main else null
+	var hero: String = (psc.player.arch if psc is Match and psc.player.arch != "" else Arch.of_save())
+	ControlsCard.fill(v, hero)
+	UI.footer_left(v).add_child(UI.ghost("Change keys", func(): tab = "Controls"; open_settings()))
+	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
 # ------------------------------------------------------------------ settings
 func open_settings() -> void:
@@ -507,6 +525,9 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
+		elif Settings.unbound(an):
+			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
+			b.tooltip_text = "No key: this action can't be used until you set one"
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -593,26 +614,19 @@ func _finish_rebind(ev: InputEvent) -> void:
 		Settings.rebind(an, ev, slot)
 		_show_settings()
 		return
-	# already someone else's key: say whose, and offer to swap (they get what this slot had)
+	# already someone else's key: say whose, and offer to swap (they take what this slot had) or cancel
 	var named := {}
-	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
-	var other: String = cf[0][0]; var oslot: int = cf[0][1]
+	for a in Settings.ACTIONS: named[String(a[0])] = "\"%s\"" % a[1]
+	var owners: Array = cf.map(func(c): return named.get(c[0], c[0]))
 	var mine: String = Settings.slots(an)[slot]
-	var key_txt := Settings.code_text(Settings.ev_code(ev))
-	var oname := "\"%s\"" % named.get(other, other)
-	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
+	var txt := "%s is already the key for %s.\nSwap: they take %s, and this action gets %s." % [
+			Settings.code_text(Settings.ev_code(ev)), " and ".join(owners),
+			Settings.code_text(mine) if mine != "" else "no key (they are marked red until you set one)",
+			Settings.code_text(Settings.ev_code(ev))]
 	_show_settings()
-	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
-		Settings.swap_bind(an, slot, ev, other, oslot)
-		_show_settings(), false)
-	set_meta("bind_conflict", layer)
-	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
-	var both := UI.ghost("Use for both", func():
-		layer.queue_free()
-		Settings.rebind(an, ev, slot)
-		_show_settings())
-	row.add_child(both)
-	row.move_child(both, 1)
+	set_meta("bind_conflict", UI.confirm(root, "Key already in use", txt, "Swap", func():
+		Settings.swap_bind(an, slot, ev, cf)
+		_show_settings(), false))
 
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"

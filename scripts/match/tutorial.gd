@@ -1,7 +1,7 @@
 class_name Tutorial
 extends RefCounted
 ## The first-match tutorial: a short scripted course on content/maps/tutorial.json (its "course" table
-## holds each stop), eight steps (decision 0023: what the cut steps taught is
+## holds each stop), ten steps (decision 0023: what the cut steps taught is
 ## MatchHints now). Match owns one of these as `tut` and calls update() every step.
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
 ## What the player sees is drawn by TutorialHud: a small banner at the top for each new step that
@@ -14,11 +14,11 @@ static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
 const KEYS := {"move": "move", "dash": "dash", "glide": "glide", "shoot": "fire", "sig": "signature",
-	"summon": "summon", "fight": "summon", "chest": "interact"}
+	"summon": "summon", "fight": "summon", "grab": "interact", "chest": "interact"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"move": "move", "dash": "glide"}
 const PADS := ["dash", "glide"]      # course stops left from a glowing pad on one island, landed on the next
-const FOE_STEPS := ["shoot", "sig", "summon", "fight"]     # the marker is the nearest monster
+const FOE_STEPS := ["shoot", "sig", "summon", "fight", "rival"]     # the marker is the nearest monster
 const WALK_LEAD := ["move", "chest", "extract"]
 
 const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
@@ -61,6 +61,7 @@ var _beams: Array = []
 var _pads: Array = []
 var pell: TutorialGuide
 var sm: TutorialSummon       # the two summon beats
+var rival: TutorialRival       # beats 7 and 8: the rival Hunter, its wisps and the grab
 var skip_btn: Button = null    # the Skip button (TutorialHud.add_skip), once the Hud is there
 
 func _init(match_node: Match) -> void:
@@ -69,6 +70,7 @@ func _init(match_node: Match) -> void:
 	_course = World.load_layout("tutorial").get("course", {})
 	pell = TutorialGuide.new(self)
 	sm = TutorialSummon.new(self)
+	rival = TutorialRival.new(self)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -182,6 +184,7 @@ func update(dt: float) -> void:
 	_point(sid)
 	_stall(dt)
 	_props()
+	rival.tick(dt)
 	pell.tick(dt)
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(stop_id(), goal(sid))
@@ -277,6 +280,8 @@ func _enter() -> void:
 		"fight":
 			kills = 0
 			sm.start_pack()
+		"rival":
+			rival.start()
 		"chest":
 			if p.chest_keys == 0:
 				KeyChest.give(p, 1)      # (the key is handed over: finding one is a hint now)
@@ -376,6 +381,8 @@ func _is_done(sid: String, dt := 0.0) -> bool:
 			return got >= need
 		"summon": return sm.summon_done(dt)
 		"fight": return sm.pack_done()
+		"rival": return rival.knocked()
+		"grab": return rival.grabbed()
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
 	return false      # (extract: the match ends when you step into the light)
 
@@ -401,6 +408,8 @@ func goal(sid: String) -> Vector3:
 			if best:
 				return best.pos
 			return Vector3.INF if sid == "summon" else stop("yard")
+		"rival": return rival.hunter_at()
+		"grab": return rival.boki_at()
 		"chest":
 			for c in m.chests:
 				if c.get("tut", false):

@@ -53,6 +53,13 @@ static func drive(m: Match) -> void:
 			_fight(m, tu, goto)
 		"summon":
 			_summon(m, tu)
+		"rival":
+			_rival(m, tu, goto)
+		"grab":
+			var at := tu.rival.boki_at()
+			if at != Vector3.INF:
+				goto.call(at, 0.3)
+				p.inp["interact"] = true       # (held: the hold is what grabs)
 		"chest":
 			goto.call(tu.stop("chest"), 0.4)
 			p.inp["interact"] = true
@@ -92,6 +99,18 @@ static func _summon(m: Match, tu: Tutorial) -> void:
 		KinSummon.press(m.player)
 	elif not s.out() and s.cd <= 0.0:
 		KinSummon.press(m.player)
+
+## The rival Hunter: stand off a little and shoot it, with the E ability now and then.
+static func _rival(m: Match, tu: Tutorial, goto: Callable) -> void:
+	var h := tu.rival.h
+	if h == null or h.downed:
+		return
+	var p := m.player
+	p.inp["aim"] = h.pos + Vector3(0, 0.9, 0)
+	if p.flat_dist(h) > 5.0:
+		goto.call(h.pos)
+	p.inp["fire"] = not h.dropping
+	p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 
 ## The lift: there the way a bot would go (over the bridge), then into the light.
 static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:

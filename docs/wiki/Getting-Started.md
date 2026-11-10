@@ -24,7 +24,7 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 3. **First Flight.** A short tutorial on four small islands, one line at a time: steer your landing and
    walk to the beam, dash and glide the gap, shoot a monster dead, use your E on a group, summon
    your Boki out of its wisp and watch its ring run down, beat the pack and summon again when the
-   ring is bright, open a chest, then step into the lift. Nothing is random and
+   ring is bright, knock down a rival Hunter and take its Boki light, open a chest, then step into the lift. Nothing is random and
    nothing is lost if you fall (you go back to the last stop). A **Skip tutorial** button is on screen
    the whole time: pressing it ends the course as finished, and the one-time hints in your first real
    match cover what it would have shown (the chest key, the lift).

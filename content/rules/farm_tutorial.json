@@ -25,7 +25,7 @@
 			"needs": [],
 			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Hold {interact} at a tree to chop wood for the house."
+				"go": "Hold {interact} at a tree to chop. The house takes {house_cost}."
 			},
 			"world": {
 				"go": "Chop a tree"
