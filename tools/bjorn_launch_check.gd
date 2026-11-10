@@ -131,7 +131,8 @@ func _window() -> void:
 		var now := K.launch.in_window(K.lmb_t)
 		if now and opened < 0.0:
 			opened = K.lmb_t
-			flashed = int(HeroVfx.of(m).plays.get("full", 0)) == fulls + 1      # the full flare (content/vfx/bulwark.json)
+			# the full flare (content/vfx/bulwark.json)
+			flashed = int(HeroVfx.of(m).plays.get("full", 0)) == fulls + 1
 			hot = K.fx.hot
 		if not now and opened >= 0.0 and shut < 0.0:
 			shut = K.lmb_t
