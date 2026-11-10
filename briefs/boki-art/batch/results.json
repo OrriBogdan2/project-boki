@@ -89589,5 +89589,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_sporcupine_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_buckleron_d",
+    "name": "Buckleron (round baby in the line's colours)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_d_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_tiltster_pick",
+    "name": "Tiltster (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_tiltster_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_d",
+    "name": "Buckleron (round baby in the line's colours)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_d_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_d",
+    "name": "Buckleron (round baby in the line's colours)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_d_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_galleotter_pick",
+    "name": "Galleotter (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_galleotter_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_tiltster_pick",
+    "name": "Tiltster (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_tiltster_pick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_tiltster_pick",
+    "name": "Tiltster (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_tiltster_pick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_galleotter_pick",
+    "name": "Galleotter (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_galleotter_pick_1.jpg",
+    "ok": true
   }
 ]
