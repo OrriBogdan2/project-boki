@@ -91325,5 +91325,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fp3_lunowl_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fs3_murmuron",
+    "name": "Murmuron female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs3_murmuron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs3_lunowl",
+    "name": "Lunowl female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs3_lunowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_terrasloth_new_a",
+    "name": "Terrasloth (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_terrasloth_new_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs3_murmuron",
+    "name": "Murmuron female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs3_murmuron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_terrasloth_new_b",
+    "name": "Terrasloth (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_terrasloth_new_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs3_murmuron",
+    "name": "Murmuron female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs3_murmuron_3.jpg",
+    "ok": true
   }
 ]
