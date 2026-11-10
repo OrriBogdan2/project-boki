@@ -107,12 +107,6 @@ func on_perfect_dodge() -> void:
 		add_res(float(dash_def().get("dodge_rage", 15.0)))
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "RAGE", res_col(), false)
 
-## Warchain cooldown per rank: 12.5% off at rank 2, 37.5% in all at rank 3 (the data's -2s three times).
-func cd_k(slot: String) -> float:
-	if slot != "kin":
-		return super.cd_k(slot)
-	return 1.0 - float(e_def().get("rank_cut", 0.125)) * float([0, 1, 3][clampi(rank("kin") - 1, 0, 2)])
-
 func _enrage_fx() -> void:
 	var rc := res_col()
 	if lunge.is_empty() and slam_w.is_empty() and not rmb_down: play("jug_roar")
