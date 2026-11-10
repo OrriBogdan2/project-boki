@@ -60,10 +60,12 @@ func _setup() -> void:
 	for h in m.hunters.filter(func(x): return x.team != P.team):
 		h.max_hp = 1e6
 		h.hp = 1e6
-		h.teleport(m.world.free_spot_near(P.pos + Vector3(3.0 + i * 1.6, 0, -2.0 + i * 1.1), [], 1.0, 0.4, 4.0))
+		var ring := Vector3(1, 0, 0).rotated(Vector3.UP, i * TAU / 5.0) * 3.5
+		h.teleport(m.world.free_spot_near(P.pos + ring, [], 1.0, 0.4, 6.0))
 		foes.append(h)
 		i += 1
 	await _frame()
+	print("DMGNUMSHOTS foes at ", foes.map(func(h): return h.pos.snapped(Vector3(0.1, 0.1, 0.1))))
 	var cam := main.get_viewport().get_camera_3d()
 	main.get_viewport().warp_mouse(cam.unproject_position(foes[0].pos + Vector3(0, 1.5, 0)))
 
