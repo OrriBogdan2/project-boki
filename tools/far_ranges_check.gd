@@ -2,7 +2,8 @@ extends RefCounted
 ## --far-ranges-check: builds the first authored map at every quality preset and looks at it from a
 ## skyship-high camera and a play camera. Prints one PERF line per preset and view (draws, visible tris)
 ## for before/after numbers, and asserts the ranges: High and Ultra never drop a tree, boulder or cliff,
-## lower presets do, cliffs have a far version from the near range out, and the far version is lighter.
+## lower presets do, cliffs have a far version from the near range out, and the far version is lighter; a chest's
+## parts but its Beacon draw within FarRanges.PROP_END.
 ## (Without FarRanges in the tree it only prints the numbers, so the same tool measures the old build.)
 ##   --far-shots=<dir> also saves a PNG per preset and view.
 
@@ -65,7 +66,28 @@ func _preset(p: String, shots: String) -> void:
 	sv.free()
 	if ResourceLoader.exists("res://scripts/perf/far_ranges.gd"):
 		_asserts(p, w)
+		_props(p)
 	w.free()
+
+## A dressed chest: every part but its Beacon draws within PROP_END on the lower presets, all of it always above.
+func _props(p: String) -> void:
+	var chest := Models.chest()
+	KeyChest.dress(chest)
+	FarRanges.props(chest)
+	var end := float(FarRanges.PROP_END.get(p, 0.0))
+	var parts := 0
+	var wrong := 0
+	var beacon_limited := 0
+	for gi in chest.find_children("*", "GeometryInstance3D", true, false):
+		var g := gi as GeometryInstance3D
+		if chest.get_node("Beacon").is_ancestor_of(g):
+			beacon_limited += 1 if g.visibility_range_end > 0.0 else 0
+			continue
+		parts += 1
+		wrong += 0 if is_equal_approx(g.visibility_range_end, end) else 1
+	ok(parts > 0 and wrong == 0, "%s: %d chest parts draw within %.0f m (0 = always), %d off" % [p, parts, end, wrong])
+	ok(beacon_limited == 0, "%s: the chest's Beacon always draws" % p)
+	chest.free()
 
 func _asserts(p: String, w: Node) -> void:
 	var row: Dictionary = load("res://scripts/perf/far_ranges.gd").BIG[p]

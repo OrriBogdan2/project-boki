@@ -22,6 +22,27 @@ const BIG := {
 	"very_low": {"tree": 100.0, "rock": 85.0, "cliff": 115.0, "near": 70.0},
 }
 
+## Chests and breakables: their parts draw within this many metres of the camera on the lower presets, 0 = always.
+## Hundreds of lids, locks and keys were drawn across the map from the skyship and the drop; a chest's Beacon (the
+## light pillar that shows it from afar) always draws. The ground view spans ~24 m, so play there looks the same.
+const PROP_END := {"very_low": 60.0, "low": 80.0, "medium": 110.0}
+
+## Limits every mesh under a chest or breakable `root` to PROP_END, its Beacon excepted.
+static func props(root: Node) -> void:
+	var end := float(PROP_END.get(Settings.quality(), 0.0))
+	if end <= 0.0:
+		return
+	for gi in root.find_children("*", "GeometryInstance3D", true, false):
+		if not _in_beacon(gi, root):
+			limit(gi as GeometryInstance3D, end)
+
+static func _in_beacon(n: Node, root: Node) -> bool:
+	while n != root:
+		if n.name == &"Beacon":
+			return true
+		n = n.get_parent()
+	return false
+
 ## The class of one scatter batch: its group's "far" hint ("tree", "rock" or "cliff"), or the name.
 static func class_of(label: String, chunk: int, hint := "") -> String:
 	if label.begins_with("Bushes"):

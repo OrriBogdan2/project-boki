@@ -1116,6 +1116,7 @@ func add_chest(p: Vector3) -> Dictionary:
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
 	KeyChest.dress(n)
+	FarRanges.props(n)
 	var c := {"pos": p, "open": false, "prog": 0.0, "node": n}
 	chests.append(c)
 	return c
@@ -1187,6 +1188,7 @@ func _add_break(kind_s: String, at: Vector3) -> void:
 	n.position = at
 	n.rotation.y = rng.randf() * TAU
 	add_child(n)
+	FarRanges.props(n)
 	breaks.append({"i": breaks.size(), "pos": at, "kind": kind_s, "node": n, "dead": false})
 
 ## Motes drifting off a pickup in a colour (a Brand tuning, a Soul Ember), so you can spot it from afar.
