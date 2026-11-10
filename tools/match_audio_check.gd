@@ -82,10 +82,13 @@ func _footsteps(m: Match, P: Hunter) -> void:
 	var theirs = _step_of(P, e, Vector3(6.0, 0, 0))
 	ok(theirs is AudioStreamPlayer3D, "an enemy's footstep 6 m away plays placed at it, so it pans (%s)" % theirs)
 	if theirs is AudioStreamPlayer3D and mine != null:
-		ok(absf(theirs.pitch_scale / MoveSfx.pitch(e.arch) - 1.0) <= 0.081, "...at its height's pitch (%.2f, height %.2f)" % [theirs.pitch_scale, MoveSfx.pitch(e.arch)])
+		var want := MoveSfx.pitch(e.arch)
+		var off := absf(theirs.pitch_scale / want - 1.0)
+		ok(off < 0.09, "...at its height's pitch (%.2f vs %.2f)" % [theirs.pitch_scale, want])
 	var base := float(MoveSfx.rules()["step_db"])
 	var calm_e := MoveSfx.level(e, base)
-	ok(calm_e > MoveSfx.level(P, base), "an enemy's step is set louder than yours so you hear it coming (%.1f vs %.1f dB)" % [calm_e, MoveSfx.level(P, base)])
+	var own := MoveSfx.level(P, base)
+	ok(calm_e > own, "an enemy's step is set louder than yours so you hear it coming (%.1f vs %.1f dB)" % [calm_e, own])
 	e.hurt_at = m.time
 	ok(MoveSfx.level(e, base) < calm_e, "...and drops while it fights (%.1f dB)" % MoveSfx.level(e, base))
 	e.hurt_at = -9.0

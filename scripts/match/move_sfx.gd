@@ -19,8 +19,12 @@ static func pitch(arch: String) -> float:
 static func level(h: Hunter, base: float) -> float:
 	var r := rules()
 	var p: Hunter = h.m.player
-	var role := "own" if h == p else ("enemy" if p != null and h.team != p.team else "ally")
-	var fight := h.m.time - maxf(h.hurt_at, maxf(h.swing_at, h.cast_at)) < float(r["fight_s"])
+	var role := "ally"
+	if h == p:
+		role = "own"
+	elif p != null and h.team != p.team:
+		role = "enemy"
+	var fight: bool = h.m.time - maxf(h.hurt_at, maxf(h.swing_at, h.cast_at)) < float(r["fight_s"])
 	return base + float((r["role_db"] as Dictionary)[role]) + (float(r["fight_db"]) if fight else 0.0)
 
 ## The foot strike's sound on what is underfoot.
