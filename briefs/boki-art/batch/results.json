@@ -105584,5 +105584,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rv_siegephant_eyes_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_aurostag_eyes",
+    "name": "Aurostag (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_aurostag_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_ghoulamari_eyes",
+    "name": "Ghoulamari (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_ghoulamari_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_eyes",
+    "name": "Pavonazar (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_eyes",
+    "name": "Pavonazar (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_wayshell_eyes",
+    "name": "Wayshell (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_wayshell_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_sphinxblight_eyes",
+    "name": "Sphinxblight (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_sphinxblight_eyes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_cindermaw_eyes",
+    "name": "Cindermaw (review: eyes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_cindermaw_eyes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_hydrangor_eyes",
+    "name": "Hydrangor (review: eyes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_hydrangor_eyes_1.jpg",
+    "ok": true
   }
 ]
