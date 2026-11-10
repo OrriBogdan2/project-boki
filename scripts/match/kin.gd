@@ -222,8 +222,6 @@ func slot_open(_slot: String) -> bool:
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
-	if wisp:
-		return false          # (a wisp casts nothing: KinWisp)
 	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
 
 ## Resting after the merge ultimate (docs/decisions/0004)?
@@ -394,6 +392,8 @@ func use_ability(slot: String, p: Vector3, auto := false) -> bool:
 		if merged or not KinExec.moves_caster(def):
 			_cast(slot, p, auto, owner_h, pw * (1.0 if merged else 0.85))
 			return true
+		if wisp:
+			return false        # a wisp lends no dash, leap or blink (it never moves you): summon it for those
 		KinFollow.drop_beside(self)
 	if state in ["returning", "flying_home"]:
 		state = "active"

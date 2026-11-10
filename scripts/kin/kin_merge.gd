@@ -135,6 +135,8 @@ static func cast(h: Hunter) -> bool:
 	h.merge_st = {"def": ms, "t": ms.duration, "T": ms.duration, "giant": giant, "pulse": timers, "form": form, "surge": false,
 		"phase": "xform", "xt": xs, "kit": MergeKit.new(h, form), "contact": false, "from": k.pos}
 	k.merge_in(giant)
+	if k.summon:
+		k.summon.fuse()
 	h._refresh_kin_stats()
 	h.inv_t = maxf(h.inv_t, xs)
 	MergeXform.begin(h, form)

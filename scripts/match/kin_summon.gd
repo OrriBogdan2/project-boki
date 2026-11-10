@@ -23,6 +23,7 @@ var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
 var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
+var fused := false    # merged by R (fuse): it folds back into the wisp when the merge ends
 var beat := -1        # the last guardian ring pulse drawn (drawing only)
 
 func _init(kin: Kin) -> void:
@@ -84,6 +85,21 @@ func burst(window := dur, guard := false) -> void:
 	k.vel = Vector3.ZERO
 	left = window
 	guardian = guard
+	fused = false
+
+## R (KinMerge.cast) fuses it as the Boki itself, from the wisp or out of a summon (WISP_DESIGN_OPEN.md Q2). A
+## summon's window ends here and its one cooldown starts now; a merge from the wisp leaves the cooldown alone.
+func fuse() -> void:
+	if not k.wisp and not out():
+		return          # (Boki wisps off: the walking Boki merges as before)
+	if out():
+		cd = cd_base
+		cd_full = cd_base
+	guardian = false
+	left = 0.0
+	shrink = 0.0
+	fused = true
+	KinWisp.set_wisp(k, false)
 
 ## The window is over (timer or sent back early): the shrink starts.
 func end() -> void:
@@ -105,14 +121,18 @@ func tick(dt: float) -> void:
 	var o := k.owner_h
 	if guardian and (o == null or o.out or not o.downed):
 		guardian = false          # revived or gone: it finishes the window beside you as a plain summon
-	if left > 0.0:
+	if fused:
+		_unfuse(o)
+	elif KinMerge.transforming(o):
+		return          # (the window holds while the Boki leaps in to merge)
+	elif left > 0.0:
 		left -= dt
 		if left <= 0.0:
 			end()
 		elif o and k.flat_dist(o) > float(rules()["rebloom_dist"]):
 			k.teleport(KinFollow.side_spot(k))       # you dashed or glided off: it re-blooms beside you
 			popped(false)
-	elif shrink > 0.0 and k.state != "fused":
+	elif shrink > 0.0:
 		shrink -= dt
 		if shrink > 0.0:
 			return
@@ -121,10 +141,20 @@ func tick(dt: float) -> void:
 		else:
 			_back(cd_base)
 
+## The merge is over (KinMerge.end let it out): it folds back into the wisp, the cooldown as it was.
+func _unfuse(o: Hunter) -> void:
+	if o != null and KinMerge.active(o) and o.kin == k:
+		return
+	fused = false
+	if o != null and not o.out and not KinLoss.guarding(k):
+		_fold()
+
 ## The burst (into the Boki) or the fold (back into the wisp), on every game (KinWisp.set_wisp). A fold already
 ## playing through the shrink carries on; one that never shrank (knocked down, or a late snapshot) folds from here.
 func popped(to_wisp: bool) -> void:
-	if not to_wisp:
+	if not to_wisp and (fused or k.state == "fused"):
+		_drop_pop()          # (fused by R: the merge's own transformation is the show)
+	elif not to_wisp:
 		_pop(true, false)
 		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
 	elif _folding:
@@ -165,11 +195,15 @@ func _drop_pop() -> void:
 		k.model.visible = true
 
 func _back(cool: float) -> void:
-	guardian = false
-	left = 0.0
-	shrink = 0.0
 	cd = cool
 	cd_full = cool
+	_fold()
+
+func _fold() -> void:
+	guardian = false
+	fused = false
+	left = 0.0
+	shrink = 0.0
 	k.hp = k.max_hp
 	KinWisp.set_wisp(k, true)
 	k.stow()

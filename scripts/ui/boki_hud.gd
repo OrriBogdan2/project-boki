@@ -186,7 +186,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
 	var away := out and KinCommand.is_away(p, k)
-	H._ab_slot("throw", gr, "recall" if away else "throw", Settings.key_cap("throw"), Color("cfe8ff"), 0.0, 0.0, k.ready_to_fight() and k.throw_cd <= 0.0)
+	H._ab_slot("throw", gr, "recall" if away else "throw", Settings.key_cap("throw"), Color("cfe8ff"), 0.0, 0.0, k.ready_to_fight() and not k.wisp and k.throw_cd <= 0.0)
 	var hf := KinCommand.hold_frac(p)
 	if hf > 0.0 and hf < 1.0 or bool(p.inp.get("g_fired", false)) and Input.is_action_pressed("throw"):
 		H.c.draw_arc(gr.get_center(), 22.0, -PI / 2, -PI / 2 + TAU * hf, 28, Color("cfe8ff"), 3.0, true)

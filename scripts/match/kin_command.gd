@@ -31,7 +31,7 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 		t += dt
 		if t >= float(rules().get("g_hold_s", 0.35)) and not h.inp.get("g_fired", false):
 			h.inp["g_fired"] = true
-			if h.kin != null and (h.kin as Kin).ready_to_fight():
+			if h.kin != null and (h.kin as Kin).ready_to_fight() and not (h.kin as Kin).wisp:
 				KinWheel.open(h, mouse)
 			elif h.kin != null:
 				say(h, resting_text(h.kin) if (h.kin as Kin).resting() else "Your Boki can't take orders right now", Color("ffd89a"))     # (down, away or fused: not a silent swallow)
@@ -186,6 +186,8 @@ static func c_deny_text(h: Hunter) -> String:
 		return resting_text(k)
 	if k.state == "downed":
 		return "%s is down: it can't cast" % k.rec.get("name", "Your Boki")
+	if k.wisp and k.runner and KinExec.moves_caster(k.runner.def_of("k1")):
+		return "Summon %s to use it" % k.rec.get("name", "your Boki")
 	return ""
 
 ## What a drained Boki says to any order (docs/decisions/0004).

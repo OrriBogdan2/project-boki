@@ -12,7 +12,9 @@ extends RefCounted
 ## snapshot flag turns a remote Boki into a wisp and back. The summon (KinSummon): every species has a window
 ## and cooldown in the uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash,
 ## damage never ends it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a
-## shrink back to a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
+## shrink back to a dim wisp, a resting summon refuses, the snapshot carries it. R from the wisp fuses it and it
+## rides as a wisp again (summon cooldown untouched; a mount grows giant); R while summoned ends the window with one
+## cooldown; E from the wisp casts through you, a moving ability waits for the summon. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -32,6 +34,8 @@ func run(main_node: Node) -> void:
 	_boki_wisps()
 	_summon_data()
 	_summon()
+	_merge_from_wisp()
+	_ability_from_wisp()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -238,7 +242,7 @@ func _boki_wisps() -> void:
 	ok(k.state == "shoulder" and lag < 0.06, "...it rides along as you move (%.2f m behind)" % lag)
 	k.throw_to(p.pos + Vector3(5, 0, 0))
 	ok(k.state == "shoulder" and not KinFollow.set_cmd(k, "follow"), "...it takes no throw and no order")
-	ok(k.hurt(50.0, null) == 0.0 and not k.ready_to_fight(), "...it takes no hits and casts nothing")
+	ok(k.hurt(50.0, null) == 0.0, "...it takes no hits")
 	k.render(DT, 1.0)
 	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
 	var high := k.global_position.y - p.position.y
@@ -339,3 +343,93 @@ func _summon() -> void:
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
 	ok(not other.wisp and absf(other.summon.left - s.left) < 0.11,
 		"online: the snapshot shows the summoned Boki and its seconds")
+
+## The frames with the Boki drawn too (the wisp's fold and burst run in render).
+func _kin_frames(k: Kin, secs: float) -> void:
+	var t := 0.0
+	while t < secs:
+		_frames(DT)
+		k.render(DT, 1.0)
+		t += DT
+
+## The kin row another game would apply for k (KinNet), on other.
+func _mirror(k: Kin, other: Kin) -> void:
+	var row: Array = []
+	row.resize(KinNet.KIN_AT)
+	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
+
+## R from the wisp (WISP_DESIGN_OPEN.md Q2): the wisp fuses as the Boki and comes back a wisp, the summon cooldown
+## untouched; R while summoned leaps it in, the window ends and its one cooldown starts at the press.
+func _merge_from_wisp() -> void:
+	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
+		"boki_wisps": true})
+	_frames(0.3)
+	var p: Hunter = m.player
+	var k: Kin = p.kin
+	var s := k.summon
+	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]
+	p.slot_lv["ult"] = 1
+	p.ult = 1.0
+	ok(KinMerge.plan(p) == "merge", "R from the wisp: it merges (%s)" % KinMerge.plan(p))
+	p.use_ultimate()
+	ok(KinMerge.active(p) and k.state == "fused" and not k.wisp and k.model.name != "BokiWisp" and s.cd == 0.0,
+		"...the wisp fuses as the Boki itself, the summon cooldown untouched")
+	_mirror(k, other)
+	ok(not other.wisp, "online: the snapshot shows the fused Boki, not a wisp")
+	_kin_frames(k, float(p.merge_st["T"]) + float(MergeForm.data()["xform_s"]) + 0.2)
+	ok(not KinMerge.active(p) and k.wisp and k.state == "shoulder" and k.model.name == "BokiWisp",
+		"...when the merge ends it rides as a wisp again")
+	ok(s.cd == 0.0 and p.merge_cd > 0.0 and p.merge_cd <= MergeRelease.timeout_rest_s() + 0.01,
+		"...only the merge's own cooldown runs (%.1f s), the summon is still ready" % p.merge_cd)
+	_mirror(k, other)
+	ok(other.wisp, "online: and the snapshot shows the wisp again")
+	p.merge_cd = 0.0
+	k.rest_t = 0.0
+	KinSummon.press(p)
+	_kin_frames(k, 1.0)
+	p.ult = 1.0
+	ok(KinMerge.plan(p) == "leap" and s.left > 6.0, "R while summoned: it leaps in to merge (%s)" % KinMerge.plan(p))
+	p.use_ultimate()
+	_kin_frames(k, 0.6)
+	ok(KinMerge.active(p) and not k.wisp and not s.out() and s.cd > s.cd_base - 0.7 and s.cd_full == s.cd_base,
+		"...the window ends and the one %.0f s cooldown starts (%.1f s left)" % [s.cd_base, s.cd])
+	var cd0 := s.cd
+	var secs := float(p.merge_st["T"]) + float(MergeForm.data()["xform_s"]) + KinSummon.SHRINK_S
+	_kin_frames(k, secs)
+	ok(k.wisp and k.state == "shoulder" and absf(s.cd - (cd0 - secs)) < 0.1,
+		"...it is a wisp again after the merge, the cooldown ticking on, never restarted (%.1f s)" % s.cd)
+	_mirror(k, other)
+	ok(other.wisp and absf(other.summon.cd - s.cd) < 0.11, "online: the snapshot shows the wisp and its cooldown")
+	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cairnback",
+		"boki_wisps": true})
+	_frames(0.3)
+	p = m.player
+	k = p.kin
+	p.slot_lv["ult"] = 1
+	p.ult = 1.0
+	p.use_ultimate()
+	_kin_frames(k, 1.0)
+	ok(not k.giant.is_empty() and not k.wisp and k.carried(), "R from a mount's wisp: it grows giant under you")
+	_kin_frames(k, float(p.merge_st["T"]) + 0.2)
+	ok(k.giant.is_empty() and k.wisp and k.state == "shoulder", "...and rides as a wisp again after")
+
+## E from the wisp: the Boki's ability through you, at the carried power, the wisp staying a wisp. One that would
+## move its caster (a dash, leap or blink) waits for the summon: a wisp never moves you.
+func _ability_from_wisp() -> void:
+	for id in ["cindle", "pebbit"]:
+		_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": id,
+			"boki_wisps": true})
+		_frames(0.3)
+		var p: Hunter = m.player
+		var k: Kin = p.kin
+		p.slot_lv["kin"] = 1
+		var moves := KinExec.moves_caster(k.runner.def_of("k1"))
+		var cast := KinCommand.cast_c(p)
+		_kin_frames(k, 0.2)
+		var rode: bool = k.wisp and k.state == "shoulder"
+		if not moves:
+			ok(k.ready_to_fight() and cast and not k.runner.is_ready("k1") and rode,
+				"E from the wisp [%s]: its ability goes off through you, the wisp rides on" % id)
+		else:
+			ok(not cast and k.runner.is_ready("k1") and rode and KinCommand.c_deny_text(p) != "",
+				"E from the wisp [%s]: a moving ability waits for the summon (%s)" % [id, KinCommand.c_deny_text(p)])
