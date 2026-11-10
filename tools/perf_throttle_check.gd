@@ -182,6 +182,7 @@ func _far_bots() -> void:
 	b.teleport(m.player.pos + Vector3(Bot.FAR_M + 15.0, 0, 0))
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
+	b.ai["far_dt"] = 0.0      # (time an earlier step left over would make the first tick decide at once)
 	var thinks := 0
 	for i in Bot.FAR_EVERY * 4:
 		var before := float(b.ai["dash_cd"])
