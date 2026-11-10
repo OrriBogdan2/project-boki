@@ -122,10 +122,12 @@ func _shots(mn: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var P: Hunter = mf.merged("pebbit")
+	var P: Hunter = mf.merged("pebbit")          # (one Fusion first, so the scene has played its form)
 	P.merge_st["t"] = 0.05
 	mf.run_for(0.2)
-	P.merge_st = {}
+	P.kin.rest_t = 0.0          # (the warm-up timeout is over: the walk starts at a rested Boki)
+	P.merge_cd = 0.0
+	P.kin.stow()
 	var m: Match = mf.m
 	if mn.fade:
 		await mn.fade.reveal(0.01)
