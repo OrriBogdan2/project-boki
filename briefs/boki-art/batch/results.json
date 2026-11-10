@@ -110246,5 +110246,54 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px8_zephyrak_2.jpg",
     "ok": true
+  },
+  {
+    "id": "tent_sparkle",
+    "name": "Field tent splash with sparkle",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tent_sparkle_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tent_lace",
+    "name": "Field tent splash with lace",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tent_lace_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tent_sparkle",
+    "name": "Field tent splash with sparkle",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tent_sparkle_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tent_tenzo",
+    "name": "Field tent splash with tenzo",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tent_tenzo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tent_tenzo",
+    "name": "Field tent splash with tenzo",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tent_tenzo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tent_lace",
+    "name": "Field tent splash with lace",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tent_lace_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tent_sparkle",
+    "name": "Field tent splash with sparkle",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tent_sparkle_2.jpg",
+    "ok": true
   }
 ]
