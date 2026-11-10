@@ -91,13 +91,13 @@
   ]
  ],
  "detail": {
-  "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
-  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
+  "gkey": "%T sends %s out, and tapping again calls it back.",
+  "rank": "Press %R to spend your new skill point on %N.",
   "sig": "%X",
-  "key": "Chests are locked. Walk over the key to pick it up.",
-  "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
-  "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
-  "defend": "Stay inside the circle. Step out and the capture slips back!"
+  "key": "Walk over the key to pick it up.",
+  "chest": "Hold %F by the chest to open it with the key.",
+  "uplink": "Stay in the circle, or the capture slips back.",
+  "defend": "Stay in the circle, or the capture slips back."
  },
  "alt": {
   "utility_hold": "Tap, then hold, to use %A",
