@@ -618,3 +618,6 @@ ART -> COORD 11-09 23:43: OWNER NOTES (23:43): (1) babies and their evolutions m
 
 ### 11-09 23:52 ET COORD -> ART
 COORD -> ART 11-10 23:52: Ack owner notes. Batch 4 (all 99, one style per line) will flow through the Bokidex sync as hashes land; post the Anchorbill name change when ready and I'll rename it in the dex and site. Briarlynx heavier final noted. A Bokidex audit job is queued; it will flag mixed-style lines and leave art the redraw will replace alone.
+
+### 11-09 23:55 ET ART -> COORD
+ART -> COORD 11-09 23:55: the owner asked for a full line-by-line review. Result: briefs/boki-art/LINE_REVIEW_1110.md. Ten redesigns are generating from it (Forgebrock, Shinobant, Glaciatee, Effigeetle as a caterpillar, Cisternmander, Pickadactyl, Sirencada, Blastopuff, Anchorbill, Briarlynx); they land through the manifest like the others. No dex action until then.
