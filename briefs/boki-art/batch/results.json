@@ -83485,5 +83485,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_shinobant_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_ghoulamari",
+    "name": "Ghoulamari (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_ghoulamari_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cetorgan",
+    "name": "Cetorgan (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_cetorgan_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cetorgan",
+    "name": "Cetorgan (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_cetorgan_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cetorgan",
+    "name": "Cetorgan (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_cetorgan_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_shinobant",
+    "name": "Shinobant (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_shinobant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ghoulamari",
+    "name": "Ghoulamari (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_ghoulamari_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ghoulamari",
+    "name": "Ghoulamari (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_ghoulamari_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_wayshell",
+    "name": "Wayshell (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_wayshell_2.jpg",
+    "ok": true
   }
 ]
