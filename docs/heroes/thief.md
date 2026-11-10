@@ -5,6 +5,17 @@ ext/kitfix-dancer-juggernaut (Nov 2, server update 5) matched it to the gameplay
 from Thief to Dancer, and the ult pass (server update 6) gave her own ultimate back on X. Player-facing names and text are ours; the source is named only in this research
 section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file names stay `thief`.
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Shiv, `Upg:` lines. Numbers live in `rank_cd` / `rank_dmg` (the shared steps are not used). Cooldown cuts keep the
+source's fraction of its own cooldown (Bolas -4 of 13, Farstep -8 of 28; Farstep's 20s is read at tier IV, so 28 at tier I).
+The ultimate takes no upgrade in our kit (the source's R: +10% damage, -5s, twice; our X has a fixed 24s), so it is not changed.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Bola | +50% damage; +100 distance after the hit and -4s; tier IV: two foes caught pool their Marks | 6.3s / 5.6s, damage +15% / +30%; 1m further and pooling at 3 | 7s / 4.8s, damage +50% / +50%; 1m further and pooling at 3 |
+| Shift Vault | +20% empowered damage x2; tier IV: +50% speed boost | recharge 3.8s / 3.2s (shared -15%), empowered +20% / +40%, speed boost x1.5 at 3 | recharge 4.5s flat (the source has none), empowered +20% / +40%, speed boost x1.5 at 3 |
+| E Shadow Knife | -8s; refund 25% on terrain, doubled on foes; landing on a foe resets Quickflip | 13.5s / 12s, damage +15% / +30%; refund and reset at 3 | 10.7s / 10.7s, no damage step; refund and reset at 3 |
+
 ## Research summary
 
 - **Source hero:** Shiv, from SUPERVIVE. The kit now follows the footage reference sheet

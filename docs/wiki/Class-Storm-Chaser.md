@@ -88,9 +88,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 8s -> 7.2s, damage +15%. | cooldown 8s -> 6.4s, damage +30%; +50% damage on top. |
-| Dash (Shift) | recharge 8s -> 7.2s. | recharge 8s -> 6.4s; the run's own hit deals double. |
-| E | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 5.4s (3s off), damage +30%. |
+| RMB | cooldown 8s -> 7.2s, damage +20%. | cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top). |
+| Dash (Shift) | recharge 8s -> 7.3s. | recharge 8s -> 6.7s; the run's own hit deals double. |
+| E | damage +25%. | cooldown 10.5s -> 7.9s (a quarter off), damage +50%. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 
