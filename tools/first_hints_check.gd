@@ -6,7 +6,8 @@ extends RefCounted
 ##   2. never in the first 2 s of a fight (a foe close or targeting you)
 ##   3. never more than one hint line on screen
 ##   4. the Heartspark's two lines (charged, carried) show once each, in that order
-##   5. after a save round-trip, a second expedition shows none of them again
+##   5. the Lair, Uplink and final seats each tell how they let a squad out, once, when they open (not before)
+##   6. after a save round-trip, a second expedition shows none of them again
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -131,8 +132,12 @@ func _expedition(first: bool) -> void:
 	_check("orders", "Boki sent 14 m out", _moment(_send_boki), "orders")
 	_check("utility", "foe close: nothing for 2 s, then the line", _fight(), "utility")
 	_heartspark()
+	_check("lair_out-early", "match time 100 s, Lair seat not open", _moment(func(): _pin = 100.0), "")
+	var lair_at: float = Heart.rules()["quest"]["lair_open_s"]
+	_check("lair_out", "the Lair seat opens", _moment(func(): _pin = lair_at + 1.0), "lair_out")
 	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
+	_seats()
 	_check("after", "everything seen: quiet", _moment(func(): pass, 5.0), "")
 	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("heart")
 	ok(all.all(func(id): return FirstTimeHint.seen(String(id))), "every match hint is marked seen in the save")
@@ -151,11 +156,19 @@ func _heartspark() -> void:
 	_check("carry", "you take the Heartspark", _moment(ht._pick.bind(p)), "carry")
 	_check("heart-again", "dropped and taken again", _moment(_drop_and_take), "")
 	ht.carrier = null
-	ht.state = "charging"
+	ht.state = Heart.S.CHARGING
+
+## The Uplink seat opens, then the Heart's final seat: one line each, once.
+func _seats() -> void:
+	var up: float = Heart.rules()["quest"]["uplink_open_s"]
+	_check("uplink_out-early", "just before the Uplink seat opens", _moment(func(): _pin = up - 5.0, 3.0), "")
+	_check("uplink_out", "the Uplink seat opens", _moment(func(): _pin = up + 1.0), "uplink_out")
+	_check("final_out", "the final seat opens", _moment(func(): m.heart.state = Heart.S.FINAL, 3.0), "final_out")
 
 func _charged() -> void:
+	m.heart.charge = Heart.r("charge_s")
 	m.heart.spark_pos = m.heart.site
-	m.heart.state = "ready"
+	m.heart.state = Heart.S.READY
 
 func _drop_and_take() -> void:
 	m.heart._drop(p.pos)
@@ -264,6 +277,8 @@ func _second_expedition() -> void:
 	_secs(1.5)
 	m.heart._pick(p)
 	_over_void()
+	_pin = Heart.rules()["quest"]["uplink_open_s"] + 1.0
+	m.heart.state = Heart.S.FINAL
 	_secs(10.0)
 	ok(shown.is_empty(), "after a reload none of them shows again (%s)" % str(shown.map(func(s): return s["id"])))
 

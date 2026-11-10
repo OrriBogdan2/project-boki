@@ -21,8 +21,11 @@
   "hob": "Hob the builder is at the stall: press {interact} to talk"
  },
  "heart": {
-  "spark": "The Heart is charged. Take the Heartspark to a Heart Gate for a big reward.",
-  "carry": "Everyone can see you. Reach a Heart Gate."
+  "spark": "Carry the Heart to the Gate to leave now, small reward",
+  "carry": "Everyone can see you. Reach a Heart Gate.",
+  "lair_out": "Beat the Sealed Lair: the winners fly out",
+  "uplink_out": "Hold an Uplink to be lifted out: one squad, once",
+  "final_out": "One squad leaves at the end with the big reward"
  },
  "when": {
   "exdash": "you are in the air over the void",
@@ -37,6 +40,9 @@
   "goexit": "a few minutes into a match with no outpost close",
   "spark": "the Heartspark is charged and nobody carries it",
   "carry": "you carry the Heartspark (the Heart Gate is marked)",
+  "lair_out": "the Sealed Lair seat has opened (heart.json quest lair_open_s)",
+  "uplink_out": "the Uplink seat has opened (heart.json quest uplink_open_s)",
+  "final_out": "the Heart final seat has opened",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
   "task": "the house stands and no Boki has a job",

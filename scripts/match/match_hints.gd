@@ -6,7 +6,7 @@ extends RefCounted
 
 const COL := Color("8fe3c7")
 ## Hints the tutorial match leaves for a real one (its outpost opens by itself and the course is short).
-const REAL_ONLY := ["crouch", "uplink", "defend", "goexit"]
+const REAL_ONLY := ["crouch", "uplink", "defend", "goexit", "lair_out", "uplink_out", "final_out"]
 
 var m: Match
 var _poll_t := 0.0
@@ -58,10 +58,19 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"key": return p.chest_keys > 0
 		"uplink": return _outpost(p, "idle", float(r["outpost_m"]))
 		"defend": return _outpost(p, "charging", float(r["outpost_m"]))
-		"spark": return m.heart != null and m.heart.state == "ready"
-		"carry": return m.heart != null and m.heart.state == "carried" and m.heart.carrier == p
+		"spark": return m.heart != null and m.heart.state == Heart.S.READY
+		"carry": return m.heart != null and m.heart.state == Heart.S.CARRIED and m.heart.carrier == p
+		"lair_out": return _seat_open("lair_open_s") and not m.lairs.list.is_empty()
+		"uplink_out": return _seat_open("uplink_open_s") and not m.exits.of_kind("outpost").is_empty()
+		"final_out": return m.heart != null and m.heart.state in [Heart.S.FINAL, Heart.S.DONE]
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
 	return false
+
+## A quest seat's opening time (heart.json "quest") has come: the Lair or Uplink way out is open.
+func _seat_open(key: String) -> bool:
+	if m.heart == null or m.lairs == null or m.exits == null:
+		return false
+	return m.sess_time() >= float(Heart.rules()["quest"][key])
 
 ## The last hint is still on the lane, or something waits behind it (a hint never stacks on another).
 func _hint_up() -> bool:
