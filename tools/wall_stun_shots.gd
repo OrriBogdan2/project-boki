@@ -44,6 +44,8 @@ func run(main_node: Node) -> void:
 		T.wslam_t = 0.0
 		var wall := _wall(m, T, home + Vector3(7.5, 0, 0), String(s[2]))
 		var wi: WallImpact = m.fx.wall_impact
+		for i in 40:      # (a second stun of the same body within 0.5 s is the same stun)
+			m.step(1.0 / 60.0)
 		var n0 := wi.placed
 		T.hurt(5.0, P, {"src": "abil", "ab": "lmb", "kb": Vector2(14.0, 0.0), "lift": 0.5})
 		for i in 90:

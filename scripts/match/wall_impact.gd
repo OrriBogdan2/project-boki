@@ -9,6 +9,7 @@ const POOL := 6                 # decals alive at once
 const LIFE := 0.6               # s from stamp to gone
 const HOLD := 0.3               # s the crack stays full strength before it fades
 const SIZE := 1.3               # m, the quad's side
+const LEAN := 0.7071          # sin 45: the quad's top edge sits on the wall at the contact point
 const LIFT := 0.04              # m off the wall, so the quad is not inside it
 const DEDUPE := 0.5             # s: a second source stunning the same body on the same wall is the same stun
 const STONE_DUST := Color(0.62, 0.6, 0.56, 0.85)
@@ -61,7 +62,8 @@ func _on_wall_stunned(target: Node, at: Vector3, normal: Vector3, by: Node) -> v
 	_seen[e.get_instance_id()] = now
 	stamp(at, normal, _rim_of(by))
 
-## One decal on the wall at `at` (facing `normal`, out of the wall) and a puff of dust in front of it.
+## One decal hanging from `at` on the wall (`normal` points out of the wall) and a puff of dust in front of it.
+## The quad leans out 45 degrees from the wall to the floor, so the top-down camera sees it on any wall face.
 func stamp(at: Vector3, normal: Vector3, rim: Color) -> void:
 	placed += 1
 	last_at = at
@@ -70,8 +72,9 @@ func stamp(at: Vector3, normal: Vector3, rim: Color) -> void:
 	var mat := mi.material_override as ShaderMaterial
 	mat.set_shader_parameter("rim", Vector3(rim.r, rim.g, rim.b))
 	mat.set_shader_parameter("fade", 1.0)
-	var look := Basis.looking_at(-normal, Vector3.UP)
-	mi.global_transform = Transform3D(look.rotated(normal, TAU * float(placed % 7) / 7.0), at + normal * LIFT)
+	var lean := (normal + Vector3.UP).normalized()
+	var look := Basis.looking_at(-lean, Vector3.UP).rotated(lean, TAU * float(placed % 7) / 7.0)
+	mi.global_transform = Transform3D(look, at + (normal - Vector3.UP) * (SIZE * 0.5 * LEAN) + normal * LIFT)
 	mi.visible = true
 	_age[_next] = 0.0
 	_next = (_next + 1) % POOL
