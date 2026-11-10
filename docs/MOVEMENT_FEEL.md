@@ -231,14 +231,14 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 
 ## Brake under a cast: let go and cast RMB the same frame (`--move-feel-check` `brake_cast` rows)
 
-The source brakes a let-go the same whatever the walk's cap is: UE's CalcVelocity applies the walking brake (22.2 m/s² plus friction 2/s) whenever the keys are off, and a cast's move scale only caps the walk while keys are held. Ours passed the cast-scaled walk cap to `HunterMove.brake` as the run speed, so a wind-up slow (Lumen's Burrseed x0.5, Sable's Shard Snap x0.75) turned an ordinary run into "over-run" and shed it at `Hunter.GROUND_SHED` 110 m/s² first: a short, dead stop under those two casts. Now only speed over the Hunter's own run (base speed with gear) counts as over-run, so a slow, a crouch or a cast's wind-up brakes like the plain stop too. Kit rows are untouched (the walk caps still apply while you hold a key). No kit's RMB cast lock zeroes the speed; Sable's well lock and Neve's Rimelock (X, the statue slides on its ice on purpose, item 65) only block other keys.
+The source brakes a let-go the same whatever the walk's cap is: UE's CalcVelocity applies the walking brake (22.2 m/s² plus friction 2/s) whenever the keys are off, and a cast's move scale only caps the walk while keys are held. Ours passed the cast-scaled walk cap to `HunterMove.brake` as the run speed, so a wind-up slow (Meeko's Burrseed x0.5, Motley's Shard Snap x0.75) turned an ordinary run into "over-run" and shed it at `Hunter.GROUND_SHED` 110 m/s² first: a short, dead stop under those two casts. Now only speed over the Hunter's own run (base speed with gear) counts as over-run, so a slow, a crouch or a cast's wind-up brakes like the plain stop too. Kit rows are untouched (the walk caps still apply while you hold a key). No kit's RMB cast lock zeroes the speed; Motley's well lock and Neve's Rimelock (X, the statue slides on its ice on purpose, item 65) only block other keys.
 
 Run at full speed on flat ground, keys off and RMB pressed the same frame (a tap on hold kits goes on the release, one frame later), 60 fps:
 
 | Hunter | Plain stop | Cast stop before | Cast stop after | Gap after |
 |---|---|---|---|---|
-| Lumen (tender) | 0.325 m / 0.183 s | 0.166 m / 0.133 s | 0.325 m / 0.183 s | 0.000 m |
-| Sable (ostra) | 0.339 m / 0.183 s | 0.253 m / 0.150 s | 0.339 m / 0.183 s | 0.000 m |
+| Meeko (tender) | 0.325 m / 0.183 s | 0.166 m / 0.133 s | 0.325 m / 0.183 s | 0.000 m |
+| Motley (ostra) | 0.339 m / 0.183 s | 0.253 m / 0.150 s | 0.339 m / 0.183 s | 0.000 m |
 | gunslinger, juggernaut, archer | 0.325 m / 0.183 s | 0.325 m / 0.183 s | 0.325 m / 0.183 s | 0.000 m |
 | ashwick, dolm, dredge, mage, thief | 0.339 m / 0.183 s | 0.339 m / 0.183 s | 0.339 m / 0.183 s | 0.000 m |
 | rimewright | 0.311 m / 0.167 s | 0.311 m / 0.167 s | 0.311 m / 0.167 s | 0.000 m |
