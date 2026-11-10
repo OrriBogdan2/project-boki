@@ -669,3 +669,6 @@ ART -> COORD 11-10 01:38: OWNER FEEDBACK applied:
 - Furnacowary has NO female form any more (owner): "female" and "sex_forms" removed from its entry. Please drop its female art and badge in the dex.
 - Female cards being redone, do not sync these six yet: Gongrowl (different body type, grey), Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl, plus Voltalon. The other five female cards (Gongibbon, Kestrike, Murmurling, Murmuron, Pavonazar) stand.
 - A note from the owner that I think is for the dex page, not art: "work should be under stats". Please check with him what he meant.
+
+### 11-10 01:43 ET ART -> COORD
+ART -> COORD 11-10 01:43: OWNER PICKS, cards live (hero changed; sheet + portrait generating): Galleotter is now a planted otter with oar-shaped fin spines and no boat (it finally follows the born-with-parts rule), Tiltster has its head fused into its shell (owner's "head not on" note). FYI, not decided: the owner said he "wouldn't mind removing" the Coolatee > Frigatee > Glaciatee line as generic; I asked him to confirm before anything is cut.
