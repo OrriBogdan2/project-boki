@@ -103638,5 +103638,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_kindlewren_r6_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_tesselamb_r6",
+    "name": "Tesselamb (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_tesselamb_r6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pillaroo_r6",
+    "name": "Pillaroo (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pillaroo_r6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kindlewren_r6",
+    "name": "Kindlewren (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kindlewren_r6_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pillaroo_r6",
+    "name": "Pillaroo (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pillaroo_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kindlewren_r6",
+    "name": "Kindlewren (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_kindlewren_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dreadnoyak_r6",
+    "name": "Dreadnoyak (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dreadnoyak_r6_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dreadnoyak_r6",
+    "name": "Dreadnoyak (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_dreadnoyak_r6_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_tesselamb_r6",
+    "name": "Tesselamb (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_tesselamb_r6_3.jpg",
+    "ok": true
   }
 ]
