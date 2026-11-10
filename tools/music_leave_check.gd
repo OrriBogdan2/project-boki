@@ -9,6 +9,7 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const AUDIBLE_DB := -45.0      # a player quieter than this (and fading) isn't heard
+const SETTLE_SPEED := 4.0      # time scale while settling
 const SETTLE := 6.0            # seconds: longer than the slowest crossfade (home 2.5s, layers 3s)
 
 func ok(name: String, cond: bool, info := "") -> void:
@@ -38,7 +39,9 @@ func audible() -> Dictionary:
 	return out
 
 func settle(secs := SETTLE) -> void:
+	Engine.time_scale = SETTLE_SPEED      # the fades are tweens on game time: the same game seconds in less wall time
 	await main.get_tree().create_timer(secs).timeout
+	Engine.time_scale = 1.0
 
 func step(m: Match, secs: float) -> void:
 	var t := 0.0
