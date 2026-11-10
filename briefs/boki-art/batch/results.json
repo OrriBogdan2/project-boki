@@ -103400,5 +103400,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/alt_tesselamb_1.jpg",
     "ok": true
+  },
+  {
+    "id": "alt_tesselamb",
+    "name": "Tesselamb (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/alt_tesselamb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_pillaroo",
+    "name": "Pillaroo (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/alt_pillaroo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_pillaroo",
+    "name": "Pillaroo (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_pillaroo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_tesselamb",
+    "name": "Tesselamb (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_tesselamb_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_sawright_pose",
+    "name": "Sawright (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_sawright_pose_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_sawright_pose",
+    "name": "Sawright (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/alt_sawright_pose_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "foalaround_card",
+    "name": "Foalaround (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/foalaround_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_sawright_pose",
+    "name": "Sawright (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_sawright_pose_3.jpg",
+    "ok": true
   }
 ]
