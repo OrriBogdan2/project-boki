@@ -5,6 +5,8 @@ extends RefCounted
 ## Hunter's weight class (HeroSfx: jump_/land_ light, medium, heavy) and its height (pitch). Levels are in
 ## content/rules/move_sfx.json: enemies louder than you so you hear them coming, quieter in a fight.
 ## Footsteps ride the run cycle's foot strikes (HunterAnim.stepped), silent while sneaking or unseen.
+## Under steps and dashes sits each Hunter's own foley (its gear: chain, skates, wings), a row per Hunter in
+## content/rules/hunter_foley.json, louder the faster it moves and capped in voices for a crowd.
 
 static func rules() -> Dictionary:
 	return Content.rules("move_sfx")
@@ -35,6 +37,40 @@ static func footstep(h: Hunter) -> void:
 	var surf := StepSurface.at(m.world, m.skytrain, h.pos)
 	var vol := StepSurface.vol_db(h, surf, level(h, float(rules()["step_db"])))
 	Sfx.play(StepSurface.cue(h, surf), h.pos, vol, 0.08, pitch(h.arch), float(rules()["step_reach_m"]))
+	var speed_k := clampf(Vector2(h.vel.x, h.vel.z).length() / maxf(h.base_speed, 0.1), 0.0, 1.0)
+	foley(h, "foley", "step_db", float(foley_rules()["walk_db"]) * (1.0 - speed_k), float(rules()["step_reach_m"]))
+
+## A dash's foley: the Hunter's gear whipping along.
+static func dash(h: Hunter) -> void:
+	foley(h, "foley_dash", "dash_db", 0.0)
+
+static func foley_rules() -> Dictionary:
+	return Content.rules("hunter_foley")
+
+## The row of foley data for archetype `arch` (empty if it has none).
+static func foley_row(arch: String) -> Dictionary:
+	return (foley_rules()["rows"] as Dictionary).get(arch, {})
+
+static var foley_ms: Array[int] = []     # when the latest foley sounds started (the voice cap's window)
+
+## `h`'s foley `kind` ("foley" or "foley_dash") at `row_key` + `trim_db` dB, placed at it and out to `reach`
+## (0 = the usual). At most voice_cap start per voice_window_ms across everyone.
+static func foley(h: Hunter, kind: String, row_key: String, trim_db: float, reach := 0.0) -> void:
+	var row := foley_row(h.arch)
+	var cue := HeroSfx.of(h, kind, "")
+	if row.is_empty() or cue == "":
+		return
+	var carry := reach if reach > 0.0 else Sfx.hear_range
+	if Vector2(h.pos.x - Sfx.listener.x, h.pos.z - Sfx.listener.z).length() > carry:
+		return
+	var fr := foley_rules()
+	var now := Time.get_ticks_msec()
+	while not foley_ms.is_empty() and now - foley_ms[0] > int(fr["voice_window_ms"]):
+		foley_ms.pop_front()
+	if foley_ms.size() >= int(fr["voice_cap"]):
+		return
+	foley_ms.append(now)
+	Sfx.play(cue, h.pos, level(h, float(fr["base_db"]) + float(row[row_key]) + trim_db), 0.08, pitch(h.arch), reach)
 
 ## A landing at `vol_db`: the weight class's thud with the ground's step under it.
 static func land(h: Hunter, vol_db: float) -> void:

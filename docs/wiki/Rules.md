@@ -270,6 +270,19 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## hunter_foley (`content/rules/hunter_foley.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Each Hunter's quiet foley layer under its steps and dashes (MoveSfx, docs/AUDIO.md). One row per archetype: note = what makes the sound (from its final design); step_db / dash_db = that Hunter's level trim in dB (its sounds are <arch>_foley and <arch>_foley_dash, made by tools/gen_sfx_foley.py). A step's foley follows the Hunter's speed: walk_db quieter at a standstill, full level at its base run speed. Foley is carried to step_reach_m like the step itself; at most voice_cap foley sounds start per voice_window_ms across all Hunters, so a crowd of 30 stays readable. base_db: the level before the role (own/ally/enemy) and fight trims MoveSfx.level adds. |
+| base_db | -6 |
+| walk_db | -8 |
+| voice_cap | 5 |
+| voice_window_ms | 200 |
+| rows | {"dredge": {"note": "Grimble: the junk hoard on his back rattles and clinks (chests, tin, coins, a dull bell)", "step_db": 0.0, "dash_db": 0.0}, "bulwark": {"note": "Albert: barnacle armour clanks, plate on plate and shell crunch", "step_db": 0.0, "dash_db": 0.0}, "rimewright": {"note": "Neve: skate blades hiss on the ground", "step_db": 2.0, "dash_db": 0.0}, "juggernaut": {"note": "Kael: the chain at his collar and wrists", "step_db": 0.0, "dash_db": 0.0}, "ashwick": {"note": "Cinder: living-fire hair and molten seams crackle", "step_db": 0.0, "dash_db": 0.0}, "thief": {"note": "Sable: coat and buckle on steps, moth wings flutter on dashes", "step_db": -2.0, "dash_db": 2.0}, "archer": {"note": "Lace: porcelain joints click, the wooden control cross knocks", "step_db": 0.0, "dash_db": 0.0}, "dolm": {"note": "Tenzo: pebbles and the floating eye stones, a soft jade ring", "step_db": 0.0, "dash_db": 0.0}, "gunslinger": {"note": "Vex: brass ammo strap and the coin chain jingle", "step_db": 0.0, "dash_db": 0.0}, "mage": {"note": "Sparkle: copper coils at the wrists spit static", "step_db": -1.0, "dash_db": 0.0}, "ostra": {"note": "Motley: tiny jester bells and a flick of cards", "step_db": 0.0, "dash_db": 0.0}, "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0}} |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 

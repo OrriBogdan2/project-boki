@@ -6,6 +6,8 @@ extends RefCounted
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel),
 ## and movement sounds (MoveSfx): a remote Hunter's footstep plays placed at it (panned), an enemy's louder than yours,
 ## quieter in a fight, out to the step reach and silent past it or while crouched; landings are placed.
+## Hunter foley: every Hunter has its foley row and sounds, it plays under a run step and a dash, louder the
+## faster it moves, heard out to the step reach, and a crowd of 30 starts no more than the voice cap.
 
 var main: Node
 var fails := 0
@@ -99,9 +101,75 @@ func _footsteps(m: Match, P: Hunter) -> void:
 	e.crouch = false
 	var landed = _probe(P, P.pos + Vector3(-8.0, 0, 0), func(): MoveSfx.land(e, -12.0), e)
 	ok(landed is AudioStreamPlayer3D, "an enemy's landing plays placed at it")
+	_foley(P, e)
 	var kael := MoveSfx.pitch("juggernaut")
 	var neve := MoveSfx.pitch("rimewright")
 	ok(kael < neve, "height: Kael (2.05 m) sounds lower than Neve (1.56 m): %.2f vs %.2f" % [kael, neve])
+
+func _foley(P: Hunter, e: Hunter) -> void:
+	var home := e.arch
+	var reach := float(MoveSfx.rules()["step_reach_m"])
+	var rows: Dictionary = MoveSfx.foley_rules()["rows"]
+	var missing := []
+	var silent := []
+	e.vel = Vector3(e.base_speed, 0, 0)
+	for id: String in Arch.ids():
+		e.arch = id
+		var step_cue := HeroSfx.of(e, "foley", "")
+		var dash_cue := HeroSfx.of(e, "foley_dash", "")
+		if not rows.has(id) or step_cue == "" or dash_cue == "":
+			missing.append(id)
+			continue
+		if _foley_voice(P, e, Vector3(5.0, 0, 0), func(): MoveSfx.footstep(e), step_cue) == null:
+			silent.append(id + " run")
+		if _foley_voice(P, e, Vector3(5.0, 0, 0), func(): MoveSfx.dash(e), dash_cue) == null:
+			silent.append(id + " dash")
+	var all: bool = missing.is_empty() and rows.size() == Arch.ids().size()
+	ok(all, "every Hunter has a foley row and sounds (missing: %s)" % [missing])
+	ok(silent.is_empty(), "...and it plays on a run step and a dash (silent: %s)" % [silent])
+	e.arch = "juggernaut"
+	var cue := HeroSfx.of(e, "foley", "")
+	var run = _foley_voice(P, e, Vector3(5.0, 0, 0), func(): MoveSfx.footstep(e), cue)
+	e.vel = Vector3.ZERO
+	var walk = _foley_voice(P, e, Vector3(5.0, 0, 0), func(): MoveSfx.footstep(e), cue)
+	var louder: bool = run != null and walk != null and run.volume_db > walk.volume_db
+	ok(louder, "foley is louder the faster the Hunter moves")
+	e.vel = Vector3(e.base_speed, 0, 0)
+	var step := func(): MoveSfx.footstep(e)
+	var near = _foley_voice(P, e, Vector3(0, 0, reach - 1.0), step, cue)
+	ok(near != null, "a rival's foley is heard in the step reach")
+	ok(_foley_voice(P, e, Vector3(0, 0, reach + 1.0), step, cue) == null, "...and not past it")
+	e.crouch = true
+	ok(_foley_voice(P, e, Vector3(3.0, 0, 0), step, cue) == null, "...nor while it sneaks")
+	e.crouch = false
+	var crowd := func():
+		for k in 30:
+			e.arch = Arch.ids()[k % Arch.ids().size()]
+			MoveSfx.foley(e, "foley", "step_db", 0.0)
+	_foley_voice(P, e, Vector3(5.0, 0, 0), crowd, cue)
+	var started := 0
+	for id: String in Arch.ids():
+		for p in Sfx.voices():
+			if _plays(p, id + "_foley"):
+				started += 1
+	var cap := int(MoveSfx.foley_rules()["voice_cap"])
+	ok(started > 0 and started <= cap, "30 Hunters' foley at once start %d voices (cap %d)" % [started, cap])
+	e.arch = home
+	e.vel = Vector3.ZERO
+
+## The voice that plays `cue` when `make` runs with e standing `off` from P (null if none).
+func _foley_voice(P: Hunter, e: Hunter, off: Vector3, make: Callable, cue: String):
+	MoveSfx.foley_ms.clear()
+	_probe(P, P.pos + off, make, e)
+	for p in Sfx.voices():
+		if _plays(p, cue):
+			return p
+	return null
+
+## Whether voice `p` holds one of the takes of sound `sname`.
+func _plays(p, sname: String) -> bool:
+	var st = Sfx.streams.get(sname)
+	return p.stream != null and (p.stream in st if st is Array else p.stream == st)
 
 ## The voice e's footstep starts with e standing `off` from P (null if none).
 func _step_of(P: Hunter, e: Hunter, off: Vector3):
