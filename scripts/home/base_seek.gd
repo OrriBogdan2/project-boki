@@ -141,7 +141,8 @@ static func settle(hunt: Hunt) -> Dictionary:
 	var step := float(BaseRace.rules()["friend_step"]) if friends else -float(BaseRace.rules()["rival_step"])
 	BaseRace.nudge_bond(win, lose, step)
 	Save.d["gems"] = int(Save.d["gems"]) + int(R["gems"])
-	return {"win": win, "lose": lose, "gems": int(R["gems"]), "friends": friends}
+	var prize := GardenPrizes.settle("seek", win, lose, true)
+	return {"win": win, "lose": lose, "gems": int(R["gems"]), "friends": friends, "prize": prize}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -316,4 +317,4 @@ func _card(res: Dictionary) -> void:
 		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]])
+		["+%d gems" % res["gems"], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))

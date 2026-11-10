@@ -3104,6 +3104,7 @@ func _open_kin(rec: Dictionary) -> void:
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
 			more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 			c2.add_child(more)
+			c2.add_child(UI.ghost("Prizes and cups", func(): PrizeBoard.open(self), 0, "info"))
 		"Growth":
 			var lead := Evo.leading(rec)
 			var lv := int(rec["level"])

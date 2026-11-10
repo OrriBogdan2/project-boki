@@ -115,7 +115,8 @@ static func settle(run: Run) -> Dictionary:
 	var backed_won: bool = run.recs[run.backed] == win
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won}
+	var prize := GardenPrizes.settle("shove", run.recs[run.backed], run.recs[1 - run.backed], backed_won)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -272,5 +273,5 @@ func _card(res: Dictionary) -> void:
 		["%s holds the stump!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost the Stump Shove to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])
