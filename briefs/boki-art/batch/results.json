@@ -76191,5 +76191,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_bulwartoad_1.jpg",
     "ok": true
+  },
+  {
+    "id": "on_dribbara",
+    "name": "Dribbara (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_dribbara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dribbara",
+    "name": "Dribbara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_dribbara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bastionpet",
+    "name": "Bastionpet (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_bastionpet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bastionpet",
+    "name": "Bastionpet (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_bastionpet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bulwartoad",
+    "name": "Bulwartoad (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_bulwartoad_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dribbara",
+    "name": "Dribbara (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_dribbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bulwartoad",
+    "name": "Bulwartoad (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_bulwartoad_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bastionpet",
+    "name": "Bastionpet (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_bastionpet_3.jpg",
+    "ok": true
   }
 ]
