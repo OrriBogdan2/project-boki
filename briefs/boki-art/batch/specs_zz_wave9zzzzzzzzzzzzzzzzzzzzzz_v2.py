@@ -1944,3 +1944,18 @@ for _n,_x in (('Glaciatee',"Its body is a clean pale ice blue, the mane lightly 
 # more tries, plus a square 2x2 layout try that I can re-lay into a row.
 for _n in ('Glaciammoth','Rampartoad'):
     V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_g5'; SPECS[-1]['runs']=5
+
+# 11-10 owner: splashes of hunters + Boki. Test of six pairings. Image 1 = the hunter's own v2 splash (briefs/art-refs, read only), then Boki cards.
+_HR='briefs/art-refs/'
+_HS=("Epic splash art for a hero-and-creature adventure game, painted in exactly the same rich painterly style, lighting quality and finish as image 1. "
+ "The hunter is the character from image 1: keep the same person, face, hair, outfit, colours and weapon, drawn in a NEW pose for this scene. "
+ "The creature or creatures come from the other reference images: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. "
+ "The hunter and the creature are partners working together, both clearly visible, the creature given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. ")
+for _k,_r,_t in (
+ ('sable_lockatara',[_HR+'sable_v2/sable_v2_splash.jpg',_C%'Lockatara'],"Scene: a moonlit vault heist. The pale horned thief from image 1 crouches on the back of the key-tailed lizard from image 2 as it turns its key tail in a huge vault door lock; gold light spills through the opening door, both grinning."),
+ ('nivi_glaciatee',[_HR+'claire_v2/nivi_v2_splash.jpg',_C%'Glaciatee',_C%'Coolatee'],"Scene: a frozen sea under the northern lights. The ice-skating girl from image 1 glides across the ice holding a tusk of the big aurora walrus from image 2 as it slides beside her, the little seal pup from image 3 spinning ahead of them; snow spray and ribbons of aurora."),
+ ('meeko_starters',[_HR+'pip_v2/meeko_v2_splash.jpg',_C%'Mycroll',_C%'Vespyx',_C%'Prismander'],"Scene: a sunny forest path. The little pink fox mage from image 1 leads a cheerful parade: the mushroom hedgehog from image 2, the purple scorpion-tailed fox from image 3 and the pink striped axolotl from image 4 marching behind in a line, her sun and cloud spirits floating overhead."),
+ ('cinder_calderoise',[_HR+'cinder_v2/cinder_v2_splash.jpg',_C%'Calderoise'],"Scene: a volcanic battlefield at night. The fire demon woman from image 1 stands on the head of the colossal volcano tortoise from image 2 as it strides through lava, her arm raised, the tortoise roaring, embers everywhere."),
+ ('kael_voltalon',[_HR+'kael_v2/kael_v2_splash_final.jpg',_C%'Voltalon'],"Scene: a storm-lashed cliff. The white-haired swordsman from image 1 leaps with his great sword drawn while the storm bird from image 2 dives beside him wreathed in lightning, both striking at the same unseen foe below."),
+ ('motley_checkmare',[_HR+'motley_v2/motley_v2_splash.jpg',_C%'Checkmare',_C%'Pipwom'],"Scene: a midnight carnival. The jester from image 1 springs up from his box juggling glowing cards, riding the chess sea horse from image 2 like a carousel mount, while the dice wombat from image 3 tumbles alongside.")):
+    SPECS.append({'id':'hb_'+_k,'name':'Hunter + Boki splash ('+_k+')','refs':_r,'runs':2,'aspect':'16:9','size':'2K','prompt':_HS+_t})
