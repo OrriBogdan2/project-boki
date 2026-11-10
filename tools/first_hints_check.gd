@@ -7,7 +7,8 @@ extends RefCounted
 ##   3. never more than one hint line on screen
 ##   4. after a save round-trip, a second expedition shows none of them again
 ##   5. the first time a carried Boki's passive acts (a scripted proc on its wisp) its line shows once:
-##      "<Boki>'s <passive name>: <what it does>", not in the first 2 s of a fight, never on a later proc or save
+##      "<Boki>'s <passive name>: <what it does>", not in the first 2 s of a fight, never on a later proc or save;
+##      with the wisps off, a walking Boki carried by order tells it too, and one out beside you does not
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -295,6 +296,25 @@ func _proc_expeditions() -> void:
 	_secs(1.0)
 	_proc_shot()
 	ok(_secs_until_line(line, 3.0) < 0.0, "after a reload a proc says nothing")
+	_walking_proc(line)
+
+## Wisps off (a fresh save): a proc of a Boki out beside you says nothing; carried by order, it is told.
+func _walking_proc(line: String) -> void:
+	FirstTimeHint._seen().erase("proc")
+	_start({"boki_wisps": false})
+	_pin = QUIET_TIME
+	var k: Kin = p.kin
+	k.ks.carry_passives = [{"stat": "damage", "amount": 0.1, "category": ""}]
+	ok(not k.wisp, "wisps off: the Boki walks")
+	_secs(1.0)
+	_proc_shot()
+	ok(_secs_until_line(line, 3.0) < 0.0, "wisps off, Boki not carried: a shot tells nothing")
+	k.stow()
+	_secs(0.5)
+	_proc_shot()
+	var at := _secs_until_line(line, 3.0)
+	ok(at >= 0.0 and p.kin_carry_on(), "wisps off, Boki carried by order: its proc is told (%.1f s)" % at)
+	_rows.append(["proc (walking)", "damage carry passive of a Boki carried by order", "told" if at >= 0.0 else "MISS"])
 
 ## A shot by the player: the wisp's passive acts on it (WispProc reads the muzzle).
 func _proc_shot() -> void:

@@ -6,6 +6,7 @@ extends Node3D
 ## own glow (the shiny colours when shiny) and a thin streak to where it acted. At most one cue per RATE_S per
 ## wisp. One WispProc node per wisp holds its two meshes for the whole match: nothing is built per cue.
 ## It reads the hunter's state (hp, shield, armor, muzzle, speed), so a rival's wisp cues too, from the snapshot.
+## With the wisps off, a walking Boki carried by order (the Return order) cues the same way while it rides.
 
 const RATE_S := 0.5        # s between cues of one wisp
 const FLASH_S := 0.25      # s the flash takes to swell and fade
@@ -46,6 +47,17 @@ static func watch(k: Kin) -> void:
 	if p == null:
 		p = _make(k)
 	p._look(k)
+
+## A walking Boki (no wisp): watched while its hunter carries it by order; off them its watch rests, so
+## the hp or shield it missed meanwhile is not read as a proc when it is carried again (KinWisp.render calls it).
+static func watch_carried(k: Kin) -> void:
+	if k.owner_h != null and k.owner_h.kin_carry_on():
+		watch(k)
+		return
+	var p := k.get_node_or_null("Proc") as WispProc
+	if p != null:
+		p._seen = false
+		p._fade(k.m.time)
 
 static func _make(k: Kin) -> WispProc:
 	if _flash_mesh == null:
