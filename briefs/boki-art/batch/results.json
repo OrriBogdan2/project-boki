@@ -90219,5 +90219,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_terrasloth_side_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "face_jibbatross",
+    "name": "Jibbatross (Kerchick's face)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/face_jibbatross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_oarter_dive",
+    "name": "Oarter (owner note: new pose, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_oarter_dive_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "face_jibbatross",
+    "name": "Jibbatross (Kerchick's face)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/face_jibbatross_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "face_jibbatross",
+    "name": "Jibbatross (Kerchick's face)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/face_jibbatross_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "face_canvastross",
+    "name": "Canvastross (Kerchick's face)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/face_canvastross_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_oarter_dive",
+    "name": "Oarter (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_oarter_dive_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_oarter_dive",
+    "name": "Oarter (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_oarter_dive_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_ribbonwyrm_wave",
+    "name": "Ribbonwyrm (owner note: new pose, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_ribbonwyrm_wave_4.jpg",
+    "ok": true
   }
 ]
