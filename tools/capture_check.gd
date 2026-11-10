@@ -11,6 +11,7 @@ extends RefCounted
 ##   9. bots scan the same way
 ##  10. mid-scan: a hunter downed, extracted or killed, walking past the cancel range, and the box filling
 ##      during the scan all clean up (no beam, no hum, the Boki wakes up on its own timer)
+##  7b. branching finals: one entry with two forms (caught/seen by either, both-forms star, totals, old saves)
 ##  11. looting a deathbox cannot push your box past its capacity
 
 var bad := 0
@@ -95,7 +96,9 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--capture-only="): only = a.substr(15)
-	for part in ["gating", "flow", "interrupts", "mid_scan", "box", "loot", "own_kin", "book", "net", "bots", "bots_full"]:
+	var parts := ["gating", "flow", "interrupts", "mid_scan", "box", "loot", "own_kin"]
+	parts.append_array(["book", "branch_forms", "net", "bots", "bots_full"])
+	for part in parts:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	print("CAPTURE DONE, failures: ", bad)
@@ -265,6 +268,50 @@ func _book() -> void:
 	var dx: Dictionary = old["dex"]
 	ok(bool(dx.get("puddlet", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("caught", false)), "...Boki you own count as seen, and are in the book even with no entry")
 	ok(dx["puddlet"].has("places") and dx["cindle"].has("places"), "...and every entry gets its places list")
+
+# ------------------------------------------------------------------ 7b. branching finals share an entry
+func _branch_forms() -> void:
+	var pairs: Array = Content.rules("branch_forms")["pairs"]
+	var ids: Array = []
+	for pair in pairs:
+		ids.append_array(pair)
+	ok(pairs.size() == 4 and _uniq(ids) == 8, "the table lists 4 pairs of 8 different species")
+	var before: int = FieldBook.entries().size()
+	var kin_base: int = Data.KIN.size()
+	for id in ids:
+		Data.KIN[id] = Data.KIN["pebbit"].duplicate(true)
+	var a: String = pairs[0][0]
+	var b: String = pairs[0][1]
+	ok(Data.KIN.size() == kin_base + 8, "8 forms are added to the game")
+	ok(FieldBook.entries().size() == before + 4, "...but they make 4 entries: 4 fewer than one per species")
+	ok(FieldBook.entry_key(b) == a and FieldBook.forms_of(a) == [a, b], "...the pair is one entry, keyed by the first")
+	ok(DexView.number(b) == DexView.number(a), "...so both forms share one number")
+	Save.d["dex"] = {}
+	ok(not FieldBook.entry_seen(a) and not FieldBook.entry_caught(a), "nothing logged: the entry is unmet")
+	Care.dex_mark(b, "seen")
+	ok(FieldBook.entry_seen(a) and not FieldBook.entry_caught(a), "seen by either form: the entry is seen, not caught")
+	ok(FieldBook.face(a) == b, "...and its tile shows the form that was seen")
+	Care.dex_mark(b, "caught")
+	ok(FieldBook.entry_caught(a) and not FieldBook.both_forms(a), "caught by either form: caught, no star yet")
+	ok(DexView.counts() == Vector2i(1, 1), "...and it counts once in Seen / Caught")
+	Care.dex_mark(a, "caught")
+	ok(FieldBook.both_forms(b) and FieldBook.caught_count() == 1, "owning both forms earns the star, still one entry")
+	var old_dex := {a: {"seen": true, "caught": true, "forms": ["X"], "shimmer": true, "mutations": []}}
+	var old := {"v": 3, "roster": [{"species": b, "name": "Old"}], "dex": old_dex}
+	ok(Save.migrate(old), "an old save with per-species records upgrades")
+	var kept: Dictionary = old["dex"][a]
+	ok(kept["shimmer"] and kept["forms"] == ["X"], "...its caught data is kept as it was")
+	ok(old["dex"].has(b), "...and an owned form gets its record")
+	Save.d["dex"] = old["dex"]
+	ok(FieldBook.entry_caught(b) and FieldBook.both_forms(a), "...so the old save shows it caught, with the star")
+	for id in ids:
+		Data.KIN.erase(id)
+	ok(FieldBook.entries().size() == before and FieldBook.forms_of(a) == [a], "...and without the forms, nothing changes")
+
+func _uniq(a: Array) -> int:
+	var seen := {}
+	for x in a: seen[x] = true
+	return seen.size()
 
 # ------------------------------------------------------------------ 8. the net
 func _net() -> void:

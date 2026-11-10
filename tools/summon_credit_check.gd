@@ -73,7 +73,7 @@ func _summon_credit() -> void:
 	v.hp = 5.0
 	v.hurt(20.0, bk, {"src": "kin"})
 	ok(v.downed and p.knocks == k0 + 1, "last hit: the summoned Boki's knock is its Hunter's")
-	ok(_feed() == "%s knocked %s" % [line, HeroTitle.of_hunter(v)], "...and the feed names it: \"%s\"" % _feed())
+	ok(_feed() == "%s knocked %s" % [line, v.pname], "...and the feed names it: \"%s\"" % _feed())
 	ok(seen.size() == 1 and seen[0]["kind"] == "knock" and seen[0]["hunter"] == p and seen[0]["boki"] == bk
 		and seen[0]["victim"] == v, "...CombatBus.takedown: knock, Hunter and Boki")
 	ok(KnockCredit.boki_nid(bk) == bk.nid and m.ents_by_id.get(bk.nid) == bk, "...the net event carries the Boki's id")
@@ -81,7 +81,7 @@ func _summon_credit() -> void:
 	seen.clear()
 	var kills := p.kills
 	m.eliminate(v, bk, "finished")
-	ok(p.kills == kills + 1 and _feed() == "%s took out %s" % [line, HeroTitle.of_hunter(v)],
+	ok(p.kills == kills + 1 and _feed() == "%s took out %s" % [line, v.pname],
 		"last hit, kill: the Hunter's kill, \"%s\"" % _feed())
 	ok(seen.size() == 1 and seen[0]["kind"] == "out" and seen[0]["hunter"] == p and seen[0]["boki"] == bk,
 		"...CombatBus.takedown: out, Hunter and Boki")
@@ -99,7 +99,7 @@ func _summon_credit() -> void:
 	ok(p.ak.knocks_seen == seen0 + 1, "...the Boki's Hunter hears it as an assist")
 	ok(seen.size() == 1 and seen[0]["hunter"] == mate and seen[0]["boki"] == null and seen[0]["assists"].has(p),
 		"...CombatBus.takedown lists the Boki's Hunter as an assister")
-	ok(_feed() == "%s knocked %s" % [HeroTitle.of_hunter(mate), HeroTitle.of_hunter(v2)],
+	ok(_feed() == "%s knocked %s" % [mate.pname, v2.pname],
 		"...and the feed names the finisher")
 
 func _stolen_credit() -> void:
@@ -124,7 +124,7 @@ func _stolen_credit() -> void:
 	v.hurt(20.0, fk, {"src": "kin"})
 	ok(v.downed and p.knocks == thief_k + 1 and f.knocks == home_k,
 		"stolen summon: the thief gets the knock, not its Boki's own Hunter")
-	ok(_feed() == "%s's %s knocked %s" % [p.pname, fk.rec.get("name", "Boki"), HeroTitle.of_hunter(v)],
+	ok(_feed() == "%s's %s knocked %s" % [p.pname, fk.rec.get("name", "Boki"), v.pname],
 		"...the feed shows the thief's: \"%s\"" % _feed())
 	ok(seen.size() == 1 and seen[0]["hunter"] == p and seen[0]["boki"] == fk, "...CombatBus.takedown credits the thief")
 	var kills := p.kills

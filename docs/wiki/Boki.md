@@ -24,7 +24,7 @@ You bring **one Boki** per expedition. It walks beside you and fights with you; 
   landing staggers whatever it lands on. With it away, tap to **Call back**: it leaps to your side and hits
   anything along the path (only within a set range; farther out it comes back on its own). **Hold G** for the
   order wheel and flick toward one: **Chase** (go for what is under the cursor), **Guard** (hold this spot),
-  **Return** (back onto you: perch, or you ride it) or **Follow** (the default: beside you). A Boki you are
+  **Return** (back onto you: shoulder or pack; a big Boki guards at your side, never under you) or **Follow** (the default: beside you). A Boki you are
   carrying only gives its carried bonuses on **Return**, so choose between a fighting partner and a perk.
   It never leaves you behind: if it is stuck or too far it leaps back to your side, and on a glide or a
   long drop it hops onto you and hops off again once you are steady. In a fight it never turns down an
@@ -72,17 +72,27 @@ sentences, and a grown, Devoted Boki talks freely.
 
 - **Needs.** Full, Energy, Happy and Clean drift down at home and drop after every expedition. A Boki
   in great shape fights better; a struggling one fights worse and refuses you more. A Boki left with
-  nothing to eat starves in stages (weak, too weak to go out, sick) and can die. Feeders prevent it.
+  nothing to eat starves in stages (weak, too weak to go out, sick) but never dies of neglect
+  (content/rules/care.json `natural_death`); regular meals bring it back. Feeders prevent it.
 - **Care.** Pet (F), play fetch (V), talk (T); the details card (C) has Feed, Brush, Bath, Nap, Train,
   Dress and Pair. Every Boki loves one food, refuses another and has a favourite pastime: you find
-  out by trying, and the card remembers.
+  out by trying, and the card remembers. Each kind of care builds a little trust once a farm day
+  (5 minutes), so a Boki raised only at home still grows close. Reaching a new bond rank is a
+  moment: it hops to you with a heart and a line, and a card says what the rank brings.
+- **Taking it out.** The expedition panel says under your partner what its raising does for the
+  run (for example "+10% damage, +10% health" when it's in great shape, a cost when it's run down).
+- **Coming home.** After an expedition (or two minutes or more away), the Boki out on the farm
+  notice you and run over to say hello, the ones that trust you most first. Wary or napping ones
+  don't.
 - **Training.** Power, Guard, Speed and Focus, trained at the Training post with a three-round timing
-  drill. A happy Boki learns faster; a tired one won't train.
+  drill. A happy Boki learns faster; a tired one won't train. Play is practice too: a finished game
+  of fetch trains a point of Speed while it still has the energy.
 - **Life stages.** Hatchling, Youngling (level 4), Grown (8), Elder (16).
 - **Evolution.** How you raise it decides what it grows into. It builds four affinities (Fierce,
   Steadfast, Curious, Swift) from what it eats, what it does in matches and its personality, and every
   4 levels takes a new form along the strongest one. Between forms it grows new body parts. There's
-  no cap.
+  no cap. Food shows at once: each Emberberry, Sunroot, Mindmint or Tidebloom leans its colour toward
+  that affinity's tint, and the last few meals decide which way (full after four in a row).
 - **IVs.** Five inborn gifts (Health, Power, Speed, Work, Bond) from 0 to 31, fixed for life. The
   difference is small on purpose: a perfect Boki is at most 10% ahead in a stat.
 
@@ -106,9 +116,11 @@ it, and its number among its kind.
   backpack to make room) and comes home with you only if you **extract**. It never joins the fight: you
   always have exactly one active Boki. Every Boki you glimpse is written into the **Field Book**, with
   where you saw it.
-- **Breeding.** Two Boki at level 5 with a Close bond, rested from their last egg, can leave an egg in
-  the **Nesting Nook**. It hatches after your next expedition, or in about ten minutes at home. The
-  baby mixes its parents' personalities, takes 3 of its 5 IVs from them, and can inherit a mutation.
+- **Breeding.** Two Grown Boki who are friends and rested from their last egg can leave an egg in
+  the **Nesting Nook** (one egg at a time). It hatches after your next expedition, or in about ten
+  minutes at home. The baby mixes its parents' personalities, takes 3 of its 5 IVs from them, can
+  inherit a mutation, gets a head start on the stronger parent's lean, and takes a favourite food from
+  one parent and a favourite play from the other. A clashing pair hatches low on joy.
 - **Rare Eggs.** Each lair boss guards a Rare Egg (see [Expeditions](Expeditions.md#boss-lairs)).
   Bring it home and it goes into the **Incubator** by the Nook (5 cradles, up to 8 bought). It warms
   for 2 expeditions or about 8 minutes at home; an Ember Boki at the brazier doubles that, and Ember

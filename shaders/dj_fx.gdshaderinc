@@ -72,7 +72,7 @@ vec4 dj_look(vec2 uv0) {
 		float link = fract(uv0.x * stripes);
 		float lit = step(0.5, link);
 		float bevel = smoothstep(0.0, 0.12, link) * (1.0 - smoothstep(0.38, 0.5, link)) + smoothstep(0.5, 0.62, link) * (1.0 - smoothstep(0.88, 1.0, link));
-		c = mix(color2.rgb, color.rgb, lit) * (0.6 + 0.4 * bevel);
+		c = mix(color2.rgb, color.rgb, lit) * (0.6 + 0.4 * bevel) * mix(0.55, 1.0, smoothstep(0.1, 0.6, across));   // rounded: the rim is darker
 		cov = smoothstep(0.0, 0.35, across) * k;
 	} else {
 		// lightning: a bright core that jitters across the ribbon, thin and hot
