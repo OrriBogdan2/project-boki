@@ -6,6 +6,8 @@ extends RefCounted
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
+##   7. a teammate going down stays quiet: one faint line by their squad row that goes after
+##      MateAlerts.LINE_S
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -121,6 +123,7 @@ func run(main_node: Node) -> void:
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
+	await _mate_down(m, hud, P)
 	# ---------------------------------------------------------------- 4b. everyone's level, rivals included
 	var lv_ok := true
 	var seen := 0
@@ -216,6 +219,23 @@ func _shown(hud, h: Hunter) -> Dictionary:
 ## The plate's animation state (chip, crack, burst ...) for this hunter.
 func _state(hud, h: Hunter) -> Dictionary:
 	return hud.plates.st.get(h.nid, {})
+
+## 7. A teammate knocked: a short faint line (MateAlerts), gone after LINE_S.
+func _mate_down(m: Match, hud, P: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.downed)
+	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
+	ok(not mates.is_empty() and not rivals.is_empty(), "a teammate and a rival to knock them (%d, %d)" % [mates.size(), rivals.size()])
+	if mates.is_empty() or rivals.is_empty():
+		return
+	var mate: Hunter = mates[0]
+	m.knock(mate, rivals[0], {})
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var ln: Dictionary = hud.mates.lines.get(mate.nid, {})
+	ok(String(ln.get("text", "")) == "down", "a teammate down: one line by their squad row ('%s')" % ln.get("text", ""))
+	ok(MateAlerts.LINE_S <= 1.5 and MateAlerts.LINE_A <= 0.6, "the line is short and faint (%.1fs, %.1f)" % [MateAlerts.LINE_S, MateAlerts.LINE_A])
+	hud.mates.track(hud, P, MateAlerts.LINE_S)
+	ok(not hud.mates.lines.has(mate.nid) and mate.downed, "after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)
