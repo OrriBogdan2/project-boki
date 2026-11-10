@@ -64,10 +64,10 @@ func _rules_and_save() -> void:
 	ok(SnackPatch.harvest(Save.d, now).is_empty() and Save.d["crops"] == before, "before its timer it yields nothing")
 	var late: float = now + float(SnackPatch.rules()["grow_secs"]) + 1.0
 	var got := SnackPatch.harvest(Save.d, late)
-	var each := got.size() == 4
+	var each: bool = got.size() == 5 and got[4] == SnackPatch.extra(Save.d, {"rot": 0})      # + one rotating extra
 	for s in SnackPatch.rules()["snacks"]:
 		each = each and got.has(s) and int(Save.d["crops"].get(s, 0)) == int(before.get(s, 0)) + 1
-	ok(each, "after its timer it yields the four snacks, one each: %s" % str(got))
+	ok(each, "after its timer it yields the four snacks, one each, and a rotating extra: %s" % str(got))
 	ok(SnackPatch.harvest(Save.d, late).is_empty(), "picked, it starts over")
 
 ## On Kitewind Ridge the patch grows the ridge's four types (Flying, Electric, Fairy, Sound), crops and foods alike.
