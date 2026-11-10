@@ -871,3 +871,24 @@ SPECS.append({'id':'fv3_voltalon','name':'Voltalon female (in her line\'s colour
   'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. Image 1 is the male: keep exactly its species, body plan, pose, view, antler crest and the way it is drawn. "
    "Image 2 is the female of her younger form, and it gives ONLY her colours: warm sandy brown plumage and hide with fine dark brown barring, a cream chest, soft slate-blue on the wings, and a smaller, paler crest. "
    "So she is the same thunder-raptor as image 1 in those warmer, quieter colours, with a slightly bigger body and a shorter crest. No teal, no gold. "+STYLE_V2('final','tough',False,False)+FRAME_V2)})
+
+# ===== 03:50 ET 11-10 OWNER on the strips: "the afters are all worse than the befores" -> Starcap, Dynaboa, Wickapi, Forgebrock reverted to their
+# previous V2 cards; Glaivyx and Ringrove use the faithful V2 cards (v2k_*_1) instead of the white-fur / head-tilt versions. Sheets + portraits for those two:
+for _n,(_st,_ar,_dk,_fu,_pose) in {k:_LAST[k] for k in ('Glaivyx','Ringrove')}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_k'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_k'; SPECS[_n0+1]['runs']=2
+# OWNER on the females: Furnacowary loses its male/female difference (removed from the manifest). Gongrowl's female "looks male still: needs a
+# different body type, and grey like its earlier version". Hourachnid "a bit more different". For the slight ones: "make the face slightly more
+# feminine" and "change their body proportions a bit as well".
+_FEMFACE=" Her face is a little softer than the male's: slightly larger eyes with one or two lash flicks, a finer muzzle or beak, a gentler brow. Still the same animal, never a human face and no make-up."
+def FEM2(n,ref2,desc,runs=4):
+    _st,_ar,_dk,_fu=_FEMST[n]
+    SPECS.append({'id':'fv3_'+n.lower(),'name':n+' female (V2 card, round 2)','refs':['briefs/boki-art/cards/'+n+'.jpg']+([ref2] if ref2 else []),'runs':runs,'aspect':'1:1','size':'2K',
+      'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. Image 1 is the male: she is the same species with the same signature parts, drawn the same way, but she must be told apart from him at a glance. "
+        +(("Image 2 is her younger form: take her colours from it. ") if ref2 else "")+"HOW SHE DIFFERS (the whole point of this image): "+desc+_FEMFACE+" "+STYLE_V2(_st,_ar,bool(_dk),bool(_fu))+FRAME_V2)})
+FEM2('Gongrowl','briefs/boki-art/cards/Gongibbon_female.jpg',"a different body type from the bulky male: a tall, lean, long-armed ape with narrow shoulders and a slim waist, sitting upright with one long arm resting on her knee instead of pounding her chest; pale silver-grey and white fur like image 2 instead of black; a smaller, rounder bronze chest gong and a small neat head crest; calm watchful eyes, closed mouth.")
+FEM2('Hourachnid',None,"a clearly different build and colours: a rounder, heavier abdomen, shorter thicker legs, a dark chocolate-brown body with cream bands on the legs where he is pale tan; her hourglass is wider and squatter with rose-red sand instead of pale sand, tilted the other way.")
+FEM2('Eclipsowl',None,"different proportions: a slimmer, longer-legged body with a longer neck and a narrower chest, smaller wings held folded, a longer and thinner pair of ribbon tails; a pale silver-lilac chest and face mask where he is all dark, and a thin silver crescent crest instead of his heavy gold one.")
+FEM2('Sandwidow',None,"different proportions: a larger rounder abdomen and a smaller head, longer more delicate legs; her body is deep plum instead of black, with lilac sand in a taller, narrower hourglass.")
+FEM2('Arcestrel',None,"different proportions: a rounder, fuller body on slightly shorter legs, a shorter head crest and shorter curled tail feathers; warm sandy brown plumage with fine dark barring and a cream chest, with only a little slate-blue on the wings.")
+FEM2('Lunowl',None,"different proportions: a rounder, fluffier body with a bigger head, shorter and wider moth wings and shorter tails; soft blush-pink and cream feathers with pale mint wings and small silver crescents where he is dusk lilac and gold.")

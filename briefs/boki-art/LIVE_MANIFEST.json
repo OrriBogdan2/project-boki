@@ -565,9 +565,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Forgebrock.png",
   "hash": {
    "sheet": "3bb121eb57d7",
-   "card": "4ecb0b41c8a3",
+   "card": "cc362df9cdf3",
    "portrait": "55801b9d53a6",
-   "hero": "f1e139e5e2fe"
+   "hero": "6139a2f1bc9a"
   }
  },
  "Frigatee": {
@@ -596,13 +596,7 @@
    "portrait": "77a8f33365dc",
    "hero": "60fc21a0d25e"
   },
-  "sex_forms": true,
-  "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
-  "female": {
-   "sheet": "briefs/boki-art/evolutions/Furnacowary_female.jpg",
-   "card": "briefs/boki-art/cards/Furnacowary_female.jpg",
-   "note": "V2 card; female sheet + portrait follow"
-  }
+  "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
  "Galleotter": {
   "sheet": "briefs/boki-art/evolutions/Galleotter.jpg",
@@ -692,9 +686,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaivyx.png",
   "hash": {
    "sheet": "e44892705180",
-   "card": "fc3b7125116c",
+   "card": "f85dd7719574",
    "portrait": "0bcf1ad64dda",
-   "hero": "bc45f3f718c5"
+   "hero": "9215a526bf7b"
   },
   "display_name": "Sabryx"
  },
@@ -1716,9 +1710,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Ringrove.png",
   "hash": {
    "sheet": "015d675ce171",
-   "card": "70600fc29e2e",
+   "card": "82170d0d30f0",
    "portrait": "7b864da3e561",
-   "hero": "25d8afdcbfad"
+   "hero": "ca7529a95459"
   }
  },
  "Rippmink": {
@@ -1933,9 +1927,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Starcap.png",
   "hash": {
    "sheet": "028f1dafde78",
-   "card": "409bec883de6",
+   "card": "7b38013dd7cf",
    "portrait": "6c422d65755a",
-   "hero": "3c18fec2e1eb"
+   "hero": "feb30eaebc62"
   }
  },
  "Stormit": {
@@ -2222,9 +2216,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Wickapi.png",
   "hash": {
    "sheet": "90d9e53329e7",
-   "card": "617f9de47ff7",
+   "card": "9d6f9c8518e1",
    "portrait": "774695875e57",
-   "hero": "ef50ecbed008"
+   "hero": "62cc8cd3e95f"
   }
  },
  "Wyrmink": {
@@ -3187,9 +3181,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dynaboa.png",
   "hash": {
    "sheet": "a534e13ee90e",
-   "card": "8a14969f4703",
+   "card": "2dfc9a3f657e",
    "portrait": "83e33d0b9826",
-   "hero": "900dfb4232d6"
+   "hero": "94e8f6d7da0d"
   }
  },
  "Bastling": {

@@ -662,3 +662,10 @@ ART -> COORD 11-10 01:30: LIVE (manifest 235):
 - NEW CARDS (sheet + portrait generating): Glaivyx/Sabryx (V2, white inner fur), Ringrove (V2, head tilt), Starcap (now Polyshroom grown up with a star cap, so its line reads as one family), Dynaboa (bigger, maned final), Wickapi (house-style calf), Forgebrock (bare paws, no gauntlet look).
 - FEMALE V2 CARDS READY, in each entry's "female" block as "card": Arcestrel, Eclipsowl, Furnacowary, Gongibbon, Gongrowl, Kestrike, Lunowl, Murmurling, Murmuron, Sandwidow, Hourachnid, Pavonazar (paths cards/<Name>_female.jpg). Female sheets + portraits follow. Voltalon's female is being redone in her line's colours (owner: the old one looks disconnected); please keep showing nothing new for her until I post.
 - Every Boki now has a V2 card. Old-style art remains only in a few sheets/portraits that are generating.
+
+### 11-10 01:38 ET ART -> COORD
+ART -> COORD 11-10 01:38: OWNER FEEDBACK applied:
+- REVERTED (owner: "the afters are all worse than the befores"): Starcap, Dynaboa, Wickapi and Forgebrock are back on their previous V2 cards (hash changes back). Glaivyx/Sabryx and Ringrove now use plain V2 cards of their existing designs (no white fur, no head tilt).
+- Furnacowary has NO female form any more (owner): "female" and "sex_forms" removed from its entry. Please drop its female art and badge in the dex.
+- Female cards being redone, do not sync these six yet: Gongrowl (different body type, grey), Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl, plus Voltalon. The other five female cards (Gongibbon, Kestrike, Murmurling, Murmuron, Pavonazar) stand.
+- A note from the owner that I think is for the dex page, not art: "work should be under stats". Please check with him what he meant.
