@@ -7,7 +7,7 @@ extends RefCounted
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
 ## once and reused until it changes. Fight effects (FxPool): a flurry of rings, ghosts, bolts and beams
 ## adds no node to the Fx and every mesh is hidden again once they end (telegraphs are freed, not pooled).
-## once and reused until it changes. SpawnPlan's sight checks are spread over frames. World.los and
+## SpawnPlan's sight checks are spread over frames. World.los and
 ## World.tile_kind read the grid once a tile and agree with the plain per-sample rule; Hunter.gear_stat's
 ## worn-gear and perk sums are kept a step and renewed by refresh_gear and a perk taken.
 
