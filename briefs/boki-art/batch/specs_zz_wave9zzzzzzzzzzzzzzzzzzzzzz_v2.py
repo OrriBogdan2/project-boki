@@ -1704,3 +1704,17 @@ SPECS.append({'id':'nodrip_chainipede','name':'Chainipede (no venom drips)','ref
 
 # 11-10: review upgrades (owner: "do all of this"). Sheet-vs-card colour check found Pillaroo's sheet and portrait still on the old postbox design.
 SETOF('Pillaroo','final','tough',0,1,_GP,'r9')
+
+# ===== 11-10 OWNER: the scripted pixel icons are "not good pixels: look at Pokemon pixels, it's not just a pixelized version". Right: a real sprite is
+# REDRAWN for the grid (simplified shapes, bigger head and eyes, clean one-pixel outline, a small palette with deliberate shading). TEST: the image
+# model redraws the sprite from the card; a script then snaps it to a true pixel grid. Two looks x 12 Boki x 2 runs. ids px_<look>_<name>.
+_PXA=("Redraw the creature in image 1 as a classic 16-bit handheld RPG monster battle sprite, hand-pixelled on a 64 by 64 pixel grid and shown enlarged so every pixel is a crisp square. "
+      "It is a NEW drawing for the small grid, not a shrunken copy: simplify it to its most recognisable shapes, make the head and eyes a little bigger, drop small details, and keep its signature part bold. "
+      "A clean dark one-pixel outline, about twelve flat colours in total, two or three shades per colour placed in deliberate clusters, a few highlight pixels on the eyes. No anti-aliasing, no blur, no gradients, no dithering noise. "
+      "Front three-quarter battle stance, facing left, whole body in frame and centred. Plain flat white background, nothing else: no ground, no shadow, no text, no border.")
+_PXB=("Redraw the creature in image 1 as a tiny chunky 8-bit menu icon sprite, hand-pixelled on a 32 by 32 pixel grid and shown enlarged so every pixel is a crisp square. "
+      "It is a NEW drawing for the tiny grid: reduce it to a big head, a small body and its one signature part, with large simple eyes; drop everything else. "
+      "A dark one-pixel outline, at most eight flat colours, no anti-aliasing, no blur, no gradients. Facing left, whole body in frame and centred. Plain flat white background, nothing else.")
+for _n in ('Vespyx','Mycroll','Prismander','Ermink','Pinguin','Jerbit','Kitlet','Xylogator','Sarcobra','Calderoise','Aurostag','Chainipede'):
+    for _k,_p in (('a',_PXA),('b',_PXB)):
+        SPECS.append({'id':'px_'+_k+'_'+_n.lower(),'name':_n+' (pixel sprite test '+_k+')','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_p})

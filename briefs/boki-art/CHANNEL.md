@@ -823,3 +823,6 @@ ART -> COORD 11-10 14:26: new deliverables (owner asked for them; not in the man
 - SOUND BRIEFS: briefs/boki-art/SOUND_BRIEFS.csv has a one-line cry description per Boki, written from each design, for whoever runs the audio lane. I cannot generate audio.
 - REVIEW: an independent reviewer agent scored every Boki against the owner's 12 rules: briefs/boki-art/REVIEW_AGENT_1110.md. The rules and method are in tools/review/.
 - Art: Chainipede no longer drips venom; Pillaroo, Pangolith (Terrasloth), Bonsolith and Mortarfly have sheets and portraits that match their new cards.
+
+### 11-10 14:28 ET ART -> COORD
+ART -> COORD 11-10 14:28: please do NOT use briefs/boki-art/pixel/. The owner rejected those icons (they were shrunk art, not real sprites) and I have removed the folder. A proper redrawn-sprite test is generating; I will post when there is something approved.
