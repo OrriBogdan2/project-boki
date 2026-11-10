@@ -86691,5 +86691,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_reelacine_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_reelacine_b4",
+    "name": "Reelacine (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_reelacine_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scoopsy_b4",
+    "name": "Scoopsy (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_scoopsy_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scoopsy_b4",
+    "name": "Scoopsy (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_scoopsy_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_reelacine_b4",
+    "name": "Reelacine (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_reelacine_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scoopsy_b4",
+    "name": "Scoopsy (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_scoopsy_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_scoopsy_b4",
+    "name": "Scoopsy (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_scoopsy_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_scoopsy_b4",
+    "name": "Scoopsy (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_scoopsy_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_nymphane_b4",
+    "name": "Nymphane (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_nymphane_b4_2.jpg",
+    "ok": true
   }
 ]
