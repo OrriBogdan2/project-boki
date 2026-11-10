@@ -107747,5 +107747,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_twinklup_e3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_lockwren_e3",
+    "name": "Lockwren (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_lockwren_e3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rimeshrew_e3",
+    "name": "Rimeshrew (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_rimeshrew_e3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pillaroo_e3",
+    "name": "Pillaroo (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_pillaroo_e3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lockwren_e3",
+    "name": "Lockwren (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_lockwren_e3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_luckhop_e3",
+    "name": "Luckhop (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_luckhop_e3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pillaroo_e3",
+    "name": "Pillaroo (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pillaroo_e3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_twinklup_e3",
+    "name": "Twinklup (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_twinklup_e3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rimeshrew_e3",
+    "name": "Rimeshrew (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_rimeshrew_e3_1.jpg",
+    "ok": true
   }
 ]
