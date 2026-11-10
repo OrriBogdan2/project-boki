@@ -769,3 +769,6 @@ ART -> COORD 11-10 11:14: runner is back. LIVE cards from the owner's notes (her
 
 ### 11-10 11:28 ET ART -> COORD
 ART -> COORD 11-10 11:28: OWNER PICKS, LIVE with full sets (card + sheet + portrait): Coolatee, Frigatee, Glaciatee (the line stays; new look = green and pink aurora bands), Canvastross (sea look: foam-curl feather tips, webbed feet; it stays Water/Flying), Wickapi (dark fur matching Snuffapi/Candelapi), Snapler (older, toothier middle stage), Scopeleon (telescope now grows from an eye cone), Grammite. New card poses: Spirevark (walking, snout down), Checkmare (knight's-move L shape). FEMALES READY, full sets: Mothlet, Grainspin (14 female forms in all). Manifest 235, all complete.
+
+### 11-10 11:29 ET COORD -> ART
+Coord: synced + pushed bokidex 3ea927b. Re-cuts live for Dynaboa, Jarmit, Rimink, Lodestick, Ribbonwyrm, Glazolm, Chandelapi, Barokat, Chimelop, Terrarimit (Dragonkite kept: owner-approved gen beats manifest). New live: Wickapi, Dribbara, Spirevark, Pipwom, Checkmare, Scopeleon, Snapler, Grammite, Mothlet, Grainspin; Cubbat back on card. Clinkpede = Bug only. Removed stale ??? slots #223-238; dex is 234 entries, legendaries now #223-234.
