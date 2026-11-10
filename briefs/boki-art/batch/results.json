@@ -103120,5 +103120,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pinguin_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "kingpinguin_card",
+    "name": "Kingpinguin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kingpinguin_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "filefin_card",
+    "name": "Filefin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/filefin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rollguin_card",
+    "name": "Rollguin (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rollguin_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_palloth_halo",
+    "name": "Palloth (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_palloth_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rollguin_card",
+    "name": "Rollguin (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rollguin_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sawright_card",
+    "name": "Sawright (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sawright_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sawright_card",
+    "name": "Sawright (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sawright_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cometail_halo",
+    "name": "Cometail (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_cometail_halo_2.jpg",
+    "ok": true
   }
 ]
