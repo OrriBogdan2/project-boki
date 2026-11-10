@@ -999,3 +999,16 @@ ON_POSE('Pipwom',_LM['Pipwom']['sheet'],'mid','tough',False,True,"mid-tumble, ro
 SPECS[-1]['id']='on_pipwom_roll'
 ON_POSE('Critwom',_LM['Critwom']['sheet'],'final','tough',False,True,"reared up on its hind legs facing LEFT, front paws raised, spiked dice-dome shell towering behind its shoulders, tail knob planted on the ground, roaring.","brown wombat fur, a cream dice-dome shell with black pips and cream spikes, cream dice plates on its legs and tail knob")
 SPECS[-1]['id']='on_critwom_rear'
+
+# 06:30 ET 11-10 OWNER: "Checkmare is cool but kind of messy; there's a few like that: they need a good reason to be messy".
+# CLEAN-UP options (same design and pose, fewer and bigger shapes). Shown to the owner next to the live card; nothing changes unless he picks.
+_TIDY={'Checkmare':"its spikes: instead of dozens of thin spines all over, it has one clean row of about seven large chess-piece-shaped back plates (like rook tops) from neck to tail and one spear tail tip; its striped body shows clearly between them",
+ 'Dragonkite':"its wings and trim: two big clean kite-panel wings with one bold swirl each, a plain red body with a cream belly, a short mane, and one ribbon tail; no tattered edges, no extra streamers or small spikes",
+ 'Terrarimit':"its garden: instead of many small flowers and leaves, its cracked clay pot back holds one small bonsai tree and three big flowers, with plain moss between; four clear root legs",
+ 'Knotwyrm':"its rope body: one thick rope tied in a single clear big knot, with its head at one end and a frayed tail at the other, three mushrooms and one patch of moss; no extra loops or loose strands",
+ 'Scarabit':"its rings: one bold orbit ring round its body instead of several crossing ones, with two small moons on it; the beetle's shell is plain dark with three orange lines",
+ 'Quivertoad':"its back: about six big arrow-shaft quills in one neat row instead of a thicket, bold red target rings on its side kept, plain green skin elsewhere, no drips",
+ 'Lyrewing':"its feathers: each wing is one clean harp shape with about eight strings and a gold frame, the tail is five big lyre feathers instead of many, and the body is plain green with a gold chest mark"}
+for _n,_d in _TIDY.items():
+    SPECS.append({'id':'tidy_'+_n.lower(),'name':_n+' (clean-up option)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':_EDIT+"simplify "+_d+". Everything is drawn as few, large, readable shapes with plain flat areas between them. The creature, pose, face, colours and size stay the same."})
