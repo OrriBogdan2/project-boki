@@ -59,3 +59,4 @@ DROP-={'fem_arcestrel','fem_hourachnid','fem_pavonazar','fem_gongrowl','fem_furn
 DROP-={'v2g_ringrove_tilt2'}
 DROP-={'v2x_'+_n.lower() for _n in _B1FIX}|{'v2s_'+_n.lower() for _n in _B1PICK}|{'v2p_'+_n.lower() for _n in _B1PICK}
 DROP-={'v2t_barostorm','v2t_chimelop','v2t_maulangler','v2t_bastling','v2t_barrelmander','v2t_mycroll'}
+DROP-={'rd_effigeetle_a','rd_effigeetle_b'}

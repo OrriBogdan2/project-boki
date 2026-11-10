@@ -327,3 +327,14 @@ for _n in ('Barostorm','Chimelop','Maulangler','Bastling','Barrelmander'):
                   'prompt':RS_CARD_BOARD(_n,_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_r[8])})
 SPECS.append({'id':'v2t_mycroll','name':'Mycroll (V2 card, style-board test)','refs':['briefs/boki-art/cards/Mycroll.jpg',SRB],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':RS_CARD_BOARD('Mycroll','baby','cute',"brown spiky back, cream face and belly, mint mushroom caps with cream spots, teal eyes, dark brown nose","four legs, two ears, three big and four small mushroom caps, one mushroom tail tip",False,True,"")})
+
+# 20:24 ET 11-09 owner: "Effigeetle doesn't fit in super well with his group, he might need to be adjusted". Its line is Effigeetle > Effigoon (a marble-and-gold
+# cocoon) > Mortarfly (a marble-and-gold moth), so the baby becomes the caterpillar that spins that cocoon. Also: its new name 'Marbeetle' is too close to
+# the Pokemon Orbeetle, so it gets a new name with this design (proposal: Marbillar = marble + caterpillar).
+for _k,_v in (('a',"plump and round, inching forward with its front half raised"),('b',"curled into a loose C shape, looking up at the viewer")):
+    SPECS.append({'id':'rd_effigeetle_'+_k,'name':'Effigeetle (redesign: caterpillar baby)','refs':['briefs/boki-art/cards/Effigoon.jpg','briefs/boki-art/cards/Mortarfly.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':("Single character illustration of one baby Boki (a stylised, cute creature-collector monster): the caterpillar baby that later spins the cocoon in image 1 and becomes the moth in image 2. "
+        "Same family look as images 1 and 2: polished white marble body segments with thin gold trim and soft grey veining, and a small serene carved-statue face like the moth's mask, with big friendly eyes. "
+        "Six short stubby gold legs at the front and soft marble prolegs behind, two tiny gold antenna nubs, and one small gold spiral on its tail that matches the cocoon's spiral. "
+        "Pose: "+_v+". Clearly a baby: small, round, simple shapes, a slightly oversized head. Draw it in the same rendering style as images 1 and 2. Never copy the cocoon or the moth themselves; only one creature. "
+        "Whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})

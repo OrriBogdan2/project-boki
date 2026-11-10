@@ -346,7 +346,8 @@
    "card": "f4d17435d7c7",
    "portrait": "553e316bf66f",
    "hero": "737973cfa4d5"
-  }
+  },
+  "display_name": "Cubwom"
  },
  "Dobsabre": {
   "sheet": "briefs/boki-art/turnarounds/Dobsabre.jpg",
@@ -633,7 +634,8 @@
    "card": "87c744f40a95",
    "portrait": "9c1a7181deae",
    "hero": "038a6b97c9f9"
-  }
+  },
+  "display_name": "Geyserbara"
  },
  "Gilabacus": {
   "sheet": "briefs/boki-art/turnarounds/Gilabacus.jpg",
@@ -686,7 +688,8 @@
    "card": "c5ecf340e312",
    "portrait": "0bcf1ad64dda",
    "hero": "5c54cb73cdce"
-  }
+  },
+  "display_name": "Sabryx"
  },
  "Glassolotl": {
   "sheet": "briefs/boki-art/evolutions/Glassolotl.jpg",
@@ -738,7 +741,8 @@
    "card": "bb3b3fe52492",
    "portrait": "86fcaa36ce26",
    "hero": "3801ac84df44"
-  }
+  },
+  "display_name": "Duskargot"
  },
  "Glomwort": {
   "sheet": "briefs/boki-art/turnarounds/Glomwort.jpg",
@@ -1005,7 +1009,8 @@
    "card": "f39d34f2d390",
    "portrait": "a085ae3ed1a9",
    "hero": "d3d6d5aa0780"
-  }
+  },
+  "display_name": "Gildwyrm"
  },
  "Kitlet": {
   "sheet": "briefs/boki-art/evolutions/Kitlet.jpg",
@@ -1785,7 +1790,8 @@
    "card": "a8285ec9a113",
    "portrait": "729198ca6363",
    "hero": "e2f3bdb3bea8"
-  }
+  },
+  "display_name": "Lunafin"
  },
  "Skateron": {
   "sheet": "briefs/boki-art/turnarounds/Skateron.jpg",
@@ -1975,7 +1981,7 @@
   "portrait": "briefs/boki-art/portraits/light/Terrasloth.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Terrasloth.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Terrasloth.png",
-  "display_name": "Pangolith",
+  "display_name": "Glassloth",
   "hash": {
    "sheet": "62e8c698e4f2",
    "card": "6d5f3b006323",
@@ -2255,7 +2261,8 @@
    "card": "1fb62fc530cd",
    "portrait": "1510badf839c",
    "hero": "a8e535fd8d35"
-  }
+  },
+  "display_name": "Zipperpent"
  },
  "Gloamspire": {
   "sheet": "briefs/boki-art/turnarounds/Gloamspire.jpg",
@@ -2268,7 +2275,8 @@
    "card": "af2b7a376049",
    "portrait": "89b111af2710",
    "hero": "2c428bd1b7eb"
-  }
+  },
+  "display_name": "Duskspire"
  },
  "Glomworth": {
   "sheet": "briefs/boki-art/turnarounds/Glomworth.jpg",
@@ -2303,7 +2311,7 @@
   "portrait": "briefs/boki-art/portraits/light/Lanternlong.jpg",
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Lanternlong.png",
-  "display_name": "Longlume",
+  "display_name": "Glowris",
   "hash": {
    "sheet": "db125e01a2ec",
    "card": "627e2a6e9964",
@@ -2442,7 +2450,8 @@
    "card": "43bee4a6482d",
    "portrait": "289ec15096cb",
    "hero": "69bd0c90dd38"
-  }
+  },
+  "display_name": "Magnestick"
  },
  "Moatpole": {
   "sheet": "briefs/boki-art/turnarounds/Moatpole.jpg",
@@ -2513,7 +2522,8 @@
    "card": "66c705be36cd",
    "portrait": "0a2e91a90209",
    "hero": "85c1af82f8f0"
-  }
+  },
+  "display_name": "Magnestaff"
  },
  "Coolatee": {
   "sheet": "briefs/boki-art/turnarounds/Coolatee.jpg",
@@ -2539,7 +2549,8 @@
    "card": "70a9d5571249",
    "portrait": "7c5476a2722a",
    "hero": "ef613a68fd4c"
-  }
+  },
+  "display_name": "Gemole"
  },
  "Scythant": {
   "sheet": "briefs/boki-art/turnarounds/Scythant.jpg",
@@ -2892,7 +2903,8 @@
    "portrait": "b5bfc6445cb1",
    "hero": "ee6fbbffe044"
   },
-  "legendary_tier": "ultra"
+  "legendary_tier": "ultra",
+  "display_name": "Organwhal"
  },
  "Checkmare": {
   "sheet": "briefs/boki-art/turnarounds/Checkmare.jpg",
