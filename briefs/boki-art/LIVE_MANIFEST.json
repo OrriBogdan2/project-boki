@@ -107,13 +107,13 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Bellowlet.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Bellowlet.png",
   "hash": {
-   "sheet": "ebad71873a28",
+   "sheet": "15001e0d499e",
    "card": "abffaa07ba87",
-   "portrait": "8ea9631dca0e",
+   "portrait": "45a56ce9e14a",
    "hero": "8ffe7cf9fab0"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
-  "sheet_for_card": "817c4621ef0e"
+  "sheet_for_card": "abffaa07ba87"
  },
  "Bladypus": {
   "sheet": "briefs/boki-art/turnarounds/Bladypus.jpg",
@@ -637,13 +637,13 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Furnacowary.png",
   "display_name": "Furnowary",
   "hash": {
-   "sheet": "c7ba81e9d808",
+   "sheet": "93f5c6d95d90",
    "card": "62cdfdd6ee40",
-   "portrait": "7e1496a5026a",
+   "portrait": "be5a35306028",
    "hero": "76e23fb6c2e5"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
-  "sheet_for_card": "836b3d35d6c9"
+  "sheet_for_card": "62cdfdd6ee40"
  },
  "Galleotter": {
   "sheet": "briefs/boki-art/evolutions/Galleotter.jpg",
@@ -3066,9 +3066,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Pavonazar.png",
   "hash": {
    "sheet": "2e12e890ed83",
-   "card": "605e9758c385",
-   "portrait": "8d2e7f6833fe",
-   "hero": "f36bc0061773"
+   "card": "0efda9dfe441",
+   "portrait": "c098521b2893",
+   "hero": "0f6f27ae2c37"
   },
   "sex_forms": true,
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
@@ -3732,9 +3732,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hash": {
    "sheet": "9e4875f49c9b",
-   "card": "fa0f43ce995e",
-   "portrait": "23582f44a253",
-   "hero": "16dcc01c47c7"
+   "card": "f8382e405ba2",
+   "portrait": "f0b1d6685fc4",
+   "hero": "2315baaa88d2"
   },
   "sheet_for_card": "2fa0ef4d4362",
   "display_name": "Pipguin"
@@ -3760,12 +3760,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Carpenjaw.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Carpenjaw.png",
   "hash": {
-   "sheet": "2373409a7b02",
+   "sheet": "f6453f7dfaed",
    "card": "a79524d7de88",
    "portrait": "095907a39b89",
    "hero": "c2332a43ae37"
   },
-  "sheet_for_card": "335e45e6c657"
+  "sheet_for_card": "a79524d7de88"
  },
  "Sawright": {
   "sheet": "briefs/boki-art/turnarounds/Sawright.jpg",

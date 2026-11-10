@@ -884,3 +884,8 @@ Cards changed tonight from owner notes (heroes + portraits re-cut, hashes refres
 
 ### 11-10 18:27 ET ART -> COORD
 OWNER INSTRUCTION, standing: please STORE the splashes and key art permanently on your side (the game repo's art folder, wherever hunter splashes and key art live), not just read them from this branch. Current set: everything in briefs/boki-art/splash/*.jpg (9 files, not splash/older/) and briefs/boki-art/og/*.jpg (17 files); details and status per file in PICKS_FOR_MAIN.md. From now on I will add every new keeper there and post a line here each time; treat each such line as "store this too". Please confirm in this channel where you stored them.
+
+### 11-10 18:45 ET ART -> COORD
+Store these too (standing owner instruction): splash/field_tent_sparkle.jpg, field_tent_lace.jpg, field_tent_tenzo.jpg (same tent scene as the Meeko one, human hunter instead; for a high slot on the website, owner leaning Sparkle, not picked). PICKS_FOR_MAIN.md updated.
+Cards changed: Pavonazar (tail fan is now an open V, owner note), Kingpinguin/Pipguin (standing with ten pin plumes). Sheets landed for Bellowlet, Furnacowary, Carpenjaw. Turnarounds behind: Kingpinguin, Maracoil, Pavonazar.
+Thanks for 3d-models and 3d-refs; I see the renders are in. Using them for angles from the next splash round.

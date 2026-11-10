@@ -2161,3 +2161,9 @@ for _k,_d,_ms,_po,_r,_t in (
  ('lace','ravel_v2','ravel_v2_master_sheet.jpg','ravel_v2_portrait.jpg',2,"The hunter is Lace, the Red Stitch: pale porcelain doll skin with fine cracks and a red stitched scar across her face (no mask on her face), black hair in a high bun pierced with silver needles and long loose hair, a white mask on her left shoulder, wine-red corset, ball-jointed doll arms. She is the seamstress: she ties the bandage off neatly with her own red thread, calm and gentle. The warm light comes from a hanging lantern."),
  ('tenzo','tarek_v2','tarek_v2_master_sheet.jpg','tarek_v2_portrait.jpg',2,"The hunter is Tenzo, the Stone Seer: a blind man with a plain cloth blindfold, dreadlocks with copper beads, prayer beads, an orange sash, a huge stone left arm and three small floating eye-stones orbiting his head, which look down at the fox's paw for him. He bandages the paw very carefully with his one ordinary hand, the big stone hand cupped under the little fox to steady it. Kind, patient. The warm light comes from a hanging lantern.")):
     SPECS.append({'id':'tent_'+_k,'name':'Field tent splash with '+_k,'refs':['briefs/boki-art/batch/out/hb4_meeko_starters_1.jpg',_HR+_d+'/'+_ms,_HR+_d+'/'+_po],'runs':_r,'aspect':'16:9','size':'2K','prompt':_TENT+_t+" No text, no logo, no extra characters."})
+
+# 11-10 late 2. Promoted: Pavonazar rv_pavonazar_vhalo_2 (V fan + ring), Kingpinguin card = v2p_kingpinguin_L1_2 (standing, ten pins; better
+# than the belly dive), sheets for Bellowlet, Furnacowary, Carpenjaw. Sheets still needed (ghost row / new card):
+for _n in ('Kingpinguin','Maracoil','Pavonazar'):
+    V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_L2'; SPECS[-1]['runs']=5
+    SPECS[-1]['prompt']+=" No ground line or floor under the views."

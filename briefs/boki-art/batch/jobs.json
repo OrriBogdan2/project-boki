@@ -43393,6 +43393,39 @@
     "prompt": "Edit image 1. Keep the scene exactly as it is: the same cosy field-hospital tent at night with rain outside, the same shelves of jars and bandages, the same warm light, the same three small creatures in the same places and poses (the purple scorpion-tailed fox having its paw bandaged, the mushroom hedgehog holding the bandage roll, the pink striped axolotl asleep in the water bowl), the same painting style and framing. Change only the hunter: remove the small pink fox character and her little sun and raincloud companions completely, and in her place put the hunter shown in images 2 and 3 (design sheet and portrait), drawn exactly on-model, kneeling or sitting at the same spot and gently bandaging the purple fox's paw with both hands. She is a full-size adult human-shaped hunter, clearly much bigger than the three little creatures. The hunter is Tenzo, the Stone Seer: a blind man with a plain cloth blindfold, dreadlocks with copper beads, prayer beads, an orange sash, a huge stone left arm and three small floating eye-stones orbiting his head, which look down at the fox's paw for him. He bandages the paw very carefully with his one ordinary hand, the big stone hand cupped under the little fox to steady it. Kind, patient. The warm light comes from a hanging lantern. No text, no logo, no extra characters."
   },
   {
+    "id": "v2s_kingpinguin_L2",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 5,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Kingpinguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. No ground line or floor under the views."
+  },
+  {
+    "id": "v2s_maracoil_L2",
+    "name": "Maracoil (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Maracoil.jpg"
+    ],
+    "runs": 5,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Maracoil. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. No ground line or floor under the views."
+  },
+  {
+    "id": "v2s_pavonazar_L2",
+    "name": "Pavonazar (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Pavonazar.jpg"
+    ],
+    "runs": 5,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Pavonazar. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. No ground line or floor under the views."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
