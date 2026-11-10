@@ -16,7 +16,8 @@ import warden_kit as WK
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SRC, RIG, OUT = a[0], a[1], a[2]
-ATLAS = 2048
+ATLAS = int(os.environ.get("VEX_ATLAS", 2048))     # px, the atlas and normal map side (4096: HUNTER_REGEN.md)
+PX = ATLAS // 2048                                   # pixel radii below are tuned at 2048
 NRM_CAGE, NRM_RAY = 0.005, 0.012      # m: the normal bake cage's extrusion, its ray's reach
 RAW = os.path.expanduser(os.environ.get("VEX_RAW", "~/meshy/vex_v2"))      # the Meshy run (never in git)
 UNIQ_W = 0.755
@@ -245,7 +246,7 @@ sc = bpy.context.scene
 sc.render.engine = "CYCLES"
 sc.cycles.device = "CPU"
 sc.cycles.samples = 32
-sc.render.bake.margin = 6
+sc.render.bake.margin = 6 * PX
 sc.render.bake.use_clear = True
 for mt in me.materials:
     nt = mt.node_tree
@@ -256,7 +257,7 @@ bpy.ops.object.select_all(action="DESELECT")
 ob.select_set(True)
 bpy.context.view_layer.objects.active = ob
 bpy.context.view_layer.update()
-bpy.ops.object.bake(type="AO", use_clear=True, margin=6)
+bpy.ops.object.bake(type="AO", use_clear=True, margin=6 * PX)
 AO = np.array(ao_img.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)[..., 0]
 
 
@@ -270,7 +271,7 @@ def blur(a, m, r):
     return box(a * m) / np.maximum(box(m), 1e-3)
 
 
-AO = blur(AO, (PID >= 0).astype(np.float32), 3)
+AO = blur(AO, (PID >= 0).astype(np.float32), 3 * PX)
 
 # ---- the scan's paint
 sm = src.data
@@ -470,7 +471,7 @@ OUTC[ys_, xs_] = hc * (0.84 + 0.16 * np.clip(AO[ys_, xs_], 0, 1))[:, None]
 fm0 = np.array([p.material_index for p in me.polygons])
 TMAT = np.where(FACEI >= 0, fm0[np.maximum(FACEI, 0)], -1)
 skin_t = mask & (TMAT == mat_i["skin-vex"])
-OUTC = P.clean_skin(OUTC, skin_t, blur)
+OUTC = P.clean_skin(OUTC, skin_t, lambda a_, m_, r_: blur(a_, m_, r_ * PX))
 pants = mask & (POS[..., 2] < Z_BELT) & (POS[..., 2] > Z_BOOT) & (OUTC.max(2) < 0.32) & ~((OUTC[..., 1] > OUTC[..., 0] * 1.2) & (OUTC[..., 1] > 0.25))
 OUTC[pants] = OUTC[pants] * 1.2 + np.array([0.075, 0.07, 0.055], np.float32)
 # the jacket: her lime green, the scan's paint washed it out
@@ -489,7 +490,7 @@ paint(lambda n: n.startswith(("elbowcap", "fpad", "thumbpad")), lambda p, n, ao:
 paint(lambda n: n == "gren0", lambda p, n, ao: ramp(np.clip(lit(n, ao) * 1.12, 0, 1), [hexc("#2c3a14"), hexc("#55702a"), hexc("#86a843"), hexc("#b9d77a")]))
 
 known = PID >= 0
-for _ in range(10):
+for _ in range(10 * PX):
     acc = np.zeros_like(OUTC)
     cnt = np.zeros((ATLAS, ATLAS), np.float32)
     for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
@@ -556,7 +557,7 @@ src.select_set(True)
 hsrc.select_set(True)
 ob.select_set(True)
 bpy.context.view_layer.objects.active = ob
-bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6)
+bpy.ops.object.bake(type="NORMAL", use_clear=True, margin=6 * PX)
 NR = np.array(nrm_img.pixels[:], dtype=np.float32).reshape(ATLAS, ATLAS, 4)[..., :3]
 flat = ~((PID == 0) | (PID == names.index("hscan")))
 NR[flat] = (0.5, 0.5, 1.0)
