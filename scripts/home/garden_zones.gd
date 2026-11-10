@@ -18,6 +18,10 @@ static func rules() -> Dictionary:
 static func ids() -> Array:
 	return (rules()["zones"] as Dictionary).keys()
 
+## The zones with a build of their own (a zone's island is made from its "build" data) plus the start zone.
+static func built() -> Array:
+	return ids().filter(func(id): return id == start() or rules()["zones"][id].has("build"))
+
 static func info(id: String) -> Dictionary:
 	return rules()["zones"].get(id, {})
 

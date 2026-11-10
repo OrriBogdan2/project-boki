@@ -299,13 +299,15 @@ func _in_frame(cam: Camera3D, p: Vector3) -> bool:
 ## Opening a zone lights its island the next time the hub loads.
 func _reload_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	Save.d["zones"]["glasswater"] = {"open": true}
 	Save.d["zones"]["cinderstep"] = {"open": true}
 	var was = Game.main.current
 	Game.goto("home", {"zone": GardenZones.HUB})
 	var hub = await _arrived(m, was)
 	ok(hub != null, "the hub reloads with Cinderstep open")
 	if hub != null:
-		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])      # glasswater: opened by _move_part
+		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])
 		hub.day_t = 0.5
 		await _hub_shot(m, hub, "hub_horizon_day.png", hub.HOME_ZOOM, true)
 		hub.day_t = 0.97

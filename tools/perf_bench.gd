@@ -6,8 +6,9 @@ extends RefCounted
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
-##   [--bench-zone=<garden zone id>]  adds a "zone" part: that zone with six Boki out, judged against the
-##   budget in content/rules/garden_zones.json ("BENCH zone budget" lines say ok or FAIL)
+##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
+##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
+##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -15,6 +16,9 @@ const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fil
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
+const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
+const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
+const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
 const NavCheck := preload("res://tools/garden_nav_check.gd")
 
 var main: Node
@@ -22,6 +26,7 @@ var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
 var zone := ""
+var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -45,14 +50,14 @@ func run(main_node: Node) -> void:
 	await _match()
 	await _farm("farm", {})
 	await _farm("hub", {"zone": GardenZones.HUB})
-	if zone != "":
-		await _zone()
+	for id in (GardenZones.built() if zone == "all" else ([zone] if zone != "" else [])):
+		await _zone(id)
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
-	main.get_tree().quit()
+	main.get_tree().quit(1 if failed else 0)
 
 func _match() -> void:
 	var o := Match.demo_opts()
@@ -151,26 +156,32 @@ func _frames(part: String) -> void:
 		t += DT
 	_summary(part, fl)
 	_meshes()
-	if part == "zone":
-		await _budget(fl)
+	if part != "farm":
+		await _budget(part, fl)
 
-## A garden zone with the nav sweep's six Boki out, as a farm part.
-func _zone() -> void:
+## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
+func _zone(id: String) -> void:
 	var nav := NavCheck.new()
 	nav.main = main
-	nav.zone = zone
+	nav.zone = "" if id == GardenZones.start() else id
 	FarmUnlocks.rules()["base_mode"] = true
 	nav._save()
-	await _farm("zone", {"zone": zone})
+	for i in BOKI_OUT - Save.d["roster"].size():
+		var rec := Save.new_kin(VISITORS[i % VISITORS.size()], "V%d" % i)
+		Care.ensure(rec)
+		rec["zone"] = id
+		Save.d["roster"].append(rec)
+	await _farm("zone_" + id, {"zone": id})
 
-## The zone part against GARDEN.md 10.6. Draws and objects are the zone itself: the screen UI (a quarter to a
-## half of a frame's draws, the same in every scene) is hidden for a few frames and read then. Nodes and the
-## emitting particle systems are the whole tree's; the frame is the average of the run.
-func _budget(fl: Array) -> void:
-	var B: Dictionary = GardenZones.rules()["budget"]
+## A part against GARDEN.md 10.6 (the hub against its own column). Draws and objects are the scene itself: the
+## screen UI (a quarter to a half of a frame's draws, the same in every scene) is hidden for a few frames and
+## read then. Nodes and the emitting particle systems are the whole tree's; the frame is the average of the run;
+## base_life is the cost of one 10 Hz step with every Boki out, timed apart from the frame.
+func _budget(part: String, fl: Array) -> void:
+	var B: Dictionary = GardenZones.rules()["budget_hub" if part == "hub" else "budget"]
 	var emit := 0
 	for cls in ["GPUParticles3D", "CPUParticles3D"]:
-		emit += main.get_tree().root.find_children("*", cls, true, false).filter(func(n): return n.emitting).size()
+		emit += main.get_tree().root.find_children("*", cls, true, false).filter(func(n): return n.emitting and n.is_visible_in_tree()).size()
 	var home = main.current
 	home.root_ui.visible = false
 	for cl in home.find_children("*", "CanvasLayer", true, false):
@@ -179,14 +190,25 @@ func _budget(fl: Array) -> void:
 		await main.get_tree().process_frame
 	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
-		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall")}
-	print("BENCH zone draws with the UI: %.0f" % _avg(fl, "draws"))
+		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall"), "base_life_ms": _life_ms(home)}
+	if Settings.quality() == "low": B = B.merged({"frame_ms": B["frame_ms_low"]}, true)
+	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
 	var bad := false
 	for k in got:
 		var good: bool = float(got[k]) <= float(B[k])
 		bad = bad or not good
-		print("BENCH zone budget %s: %.1f of %.1f %s" % [k, got[k], B[k], "ok" if good else "FAIL"])
-	print("BENCH zone budget: %s" % ("FAIL" if bad else "ok"))
+		print("BENCH budget %s %s: %.2f of %.1f %s" % [part, k, got[k], B[k], "ok" if good else "FAIL"])
+	failed = failed or bad
+	print("BENCH budget %s: %s" % [part, "FAIL" if bad else "ok"])
+
+## ms per 10 Hz BaseLife step with the home's Boki out (0 where the home has no base life, like the hub).
+func _life_ms(home) -> float:
+	if home.life == null:
+		return 0.0
+	var t0 := Time.get_ticks_usec()
+	for i in LIFE_STEPS:
+		home.life.step(1.0 / 10.0)
+	return (Time.get_ticks_usec() - t0) / 1000.0 / LIFE_STEPS
 
 func _peak(fl: Array, key: String) -> float:
 	var m := 0.0
