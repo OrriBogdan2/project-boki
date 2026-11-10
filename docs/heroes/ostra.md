@@ -55,7 +55,7 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
 | X Nightwell (level 6, 64s) | tap | at the cursor, clamped to 10m (on ground short of walls, like the seed): a pale dome of the well's exact size that everyone sees, filling over 1.0s (with a pink core when Swollen) | it opens into a turning violet disc for 3.5s, 3.6m wide (5.1m Swollen): every foe inside in sight of its centre, or who walks in, is stunned until it closes and drawn to the middle (12 m/s), taking 0.16 every 0.1s. Allies are untouched. Motley is locked in the cast for the 1.0s dome (Void's telegraph, footage f23-f33; owner 18:20): no moving, jumping, dashing, other abilities, the glove or the Boki's C, or attacks, no turning after the 0.25s wind-up; he sinks, then rises with his arms flung wide and the crook raised under a swelling black orb while the dome fills. When it opens he hauls his fists in to his chest, hunches over the pull, flings the hands away and is free: he can walk out at full speed, fight or Trade away while it keeps going (Void acts freely while it holds, f50). A stun or knock, or a merge, frees him early (the placed well goes on). It closes with no blast | `ostra_well` (held for the dome), `ostra_well_snap` (the release, 0.55s), `ostra_well_end` (knocked out of the cast) | `os_well`, `os_well_hum` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
-Rank 3: Snap +30% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
+Rank 3: Snap +40% and a burst of speed (+11% on the cast, +22% on a hit, 2s: the data's +50 and +100 of 465); Trade shields
 allies beside him when he leaves or at the landing (26, 3s: the data's 375 shield as a share of a level-15 hunter's health,
 on 145); the growing seed burns foes inside for 8.2 a second (the data's 250 against a 365 bomb) and rests 8s.
 
@@ -123,13 +123,31 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 2074-hp hunter (level 15) -> 26 of 145.
 - Done: the pop no longer Grounds; the knock heal is gone; ground hazards pass him by (`incoming`; the lightning rod's sky
   strike still hits); Snap's speed bursts at rank 3 (the data's rank IV); the seed's burn at rank 3 is 8.2 a second and its
-  cooldown is 10s -> 8s at rank 3 through the shared rank step (the data's -2s at rank IV).
+  cooldown is 10s -> 8s at rank 3 (the data's -2s at rank IV; see "Ranks: source tier table").
 - Kept, not in the data: the Snap's distance-scaled stun (the owner's note: RMB visibly stuns); the Trade's 1.8s (no number in the
   data).
 - Not done: items in the swap circle (the data says "all
   units"; pickups are each game's own copies); an ice patch's slide still takes him (ground grip is not his to change).
-- Rank paths that do not fit: the data's Snap +20% damage at ranks 2 and 3, the seed's +10% each and the Trade's -1.5s twice go
-  through the shared rank step (+15%/+30% damage, -10%/-20% cooldown on RMB and E, -15%/-30% recharge on the dash).
+- Rank paths: now the data's own, per slot (see "Ranks: source tier table").
+
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
+(briefs/supervive-data/supervive_kits.md, Void `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in ostra.json
+(the shared -10% cooldown / +15% damage / -15% recharge steps no longer apply to him). Cooldowns match the data directly
+(Snap 10s, Trade 9.5s, seed 10s). LMB and the passive have no tiers in the data and do not rank; R (Nightwell on X) is
+decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--ostra-combo-check` |
+|---|---|---|---|---|
+| LMB orb | none [D] | - | - | - |
+| RMB Shard Snap | +20% dmg, -1.5s / +20% dmg, -1.5s / +50 move speed on cast, +100 on impact, 2s [D] | 8.5s, damage +20% | 7s, damage +40%; +11% speed on the cast, +22% on a hit, 2s | `upgrade parity: Snap ...`, `data rank 3: Snap speeds him up ...` |
+| Shift Lantern Trade | -1.5s / -1.5s / allies in the cast radius get a 375 HP shield for 3s [D] (6.5s at IV) | recharge 8s | 6.5s; allies beside him or at the landing get 26 shield for 3s | `upgrade parity: Trade ...`, `data rank 3: an ally beside him ...` |
+| E Brimseed | +10% / +10% / -2s, 250 dmg/s on overlap [D] (8s at IV) | damage +10% | damage +20%, 8s; the growing seed burns 8.2 a second | `upgrade parity: Brimseed ...`, `rank 3: the growing seed burns ...` |
+| Passive | none [D] | - | - | - |
+
+Fixed to the data in this pass: Snap 9s / 8s (shared -10%) -> 8.5s / 7s, its damage +15% / +30% (shared) -> +20% / +40%;
+Trade 8.1s / 6.7s (shared -15%) -> 8s / 6.5s; the seed's rank 2 cooldown cut (shared, not in the data) is gone and its damage
+is +10% / +20% (was +15% / +30%).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |

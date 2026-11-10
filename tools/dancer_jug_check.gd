@@ -122,6 +122,23 @@ func thief(a) -> void:
 			absf(float(vault_ranks[0][0]) - 1.0) < 0.001 and absf(float(vault_ranks[1][0]) - 1.2) < 0.001
 			and absf(float(vault_ranks[2][0]) - 1.4) < 0.001 and absf(float(vault_ranks[1][1]) - 0.18) < 0.001
 			and absf(float(vault_ranks[2][1]) - 0.27) < 0.001, str(vault_ranks))
+	# upgrade parity (docs/heroes/thief.md): rank 2 = source tier II, rank 3 = tiers III + IV
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		up.append([float(K.rmb_def()["cooldown"]) * K.cd_k("sec"), K.power("sec") / ps, P.dash_regen(),
+				float(K.e_def()["cooldown"]) * K.cd_k("kin"), K.power("dash"), K.power("kin"), K.lane_len()])
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	A.ok("upgrade parity: Bola damage +50% from rank 2, cooldown 7 -> 7 -> 4.85, 1m further after the hit at rank 3",
+			near.call(up[1][1], 1.5) and near.call(up[2][1], 1.5) and near.call(up[1][0], 7.0)
+			and near.call(up[2][0], 4.85) and near.call(up[2][6] - up[1][6], 1.0), str(up))
+	A.ok("upgrade parity: Vault recharge stays 4.5 (no cooldown tier), no rank damage on the dash or knife",
+			near.call(up[2][2], 4.5) and up[2][4] == up[0][4] and up[2][5] == up[0][5], str(up))
+	A.ok("upgrade parity: Shadow Knife cooldown 15 -> 10.7 -> 10.7",
+			near.call(up[1][3], 10.71) and near.call(up[2][3], 10.71), str(up))
 	# Vault: a cartwheel, speed, the next bolt empowered; it lands for 3.5x and the Vault comes back
 	A.fresh(T)
 	P.teleport(home)

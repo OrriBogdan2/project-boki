@@ -5,6 +5,26 @@ ext/kitfix-dancer-juggernaut (Nov 2, server update 5) matched it to the gameplay
 from Thief to Dancer, and the ult pass (server update 6) gave her own ultimate back on X. Player-facing names and text are ours; the source is named only in this research
 section, in docs/ARCHETYPES.md and in docs/wiki/Inspirations.md. Ids and file names stay `thief`.
 
+## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
+On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
+(briefs/supervive-data/supervive_kits.md, Shiv `Upg:` II / III / IV, read at level 15). Each slot reads `rank_cd` /
+`rank_dmg` in thief.json (the shared -10% cooldown / +15% damage / -15% recharge steps no longer apply to her). Our
+cooldowns differ from the source's, so a cut keeps the source's share of its own cooldown (Bolas -4 of 13; Farstep -8 of
+28, its 20s being read at tier IV). LMB and the Marks passive have no tiers in the data and do not rank; R (Encore on X)
+is decision 0022's.
+
+| Slot | Source II / III / IV [D] | Our rank 2 | Our rank 3 (max bonus) | Asserted in `--dancer-combo-check` |
+|---|---|---|---|---|
+| LMB bolts | none [D] | - | - | - |
+| RMB Bola | +50% dmg / +100 distance after a hit, -4s / two foes caught pool their stacks [D] | damage +50% | damage +50%, 7s -> 4.85s; flies 1m further after the first foe; two caught pool their Marks | `upgrade parity: Bola ...`, `Bola on two (rank 3) = pooled Marks` |
+| Shift Vault | +20% empowered dmg / +20% / +50% speed boost [D] (5s at IV: no cooldown tier) | empowered bonus +20%, recharge 4.5s | empowered bonus +40%, speed boost x1.5 (0.18 -> 0.27), recharge 4.5s | `Vault ranks ...`, `upgrade parity: Vault recharge stays 4.5 ...` |
+| E Shadow Knife | -8s / sticking refunds 25% of the cooldown, doubled in a foe / a dagger in a foe resets the dash [D] | 15s -> 10.7s | 10.7s; the refund and the Vault back from a foe | `upgrade parity: Shadow Knife ...`, `Knife in a foe (rank 3) = Vault reset + refund` |
+| Passive Marks | none [D] | - | - | - |
+
+Fixed to the data in this pass: the Bola 6.3s / 5.6s and +15% / +30% (shared) -> 7s / 4.85s and +50% / +50%; the Vault
+recharge 3.8s / 3.2s (shared -15%, not in the data) -> 4.5s flat; the Knife 13.5s / 12s and +15% / +30% (shared) -> 10.7s /
+10.7s and no damage step (the data has none).
+
 ## Research summary
 
 - **Source hero:** Shiv, from SUPERVIVE. The kit now follows the footage reference sheet
