@@ -142,7 +142,8 @@ func _ult_cues() -> void:
 		var carries := reach > Sfx.hear_range and reach <= REACH_MAX and reach == float(Sfx.sound_reach["ult_tag_foe"])
 		if not (Sfx.ensure(sname) and carries):
 			wrong.append("%s %.0f m" % [sname, reach])
-	ok(names.size() == Arch.ids().size() + 2 and wrong.is_empty(), "%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
+	ok(names.size() == Arch.ids().size() + 2 and wrong.is_empty(),
+			"%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
 	var press := FileAccess.get_file_as_string("res://scripts/arch/hero_ult.gd")
 	var cue := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
 	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
