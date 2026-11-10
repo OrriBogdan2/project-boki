@@ -75337,5 +75337,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2t_tiltster_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_jerboa_baby",
+    "name": "Jerboa line (baby, no pinball)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_jerboa_baby_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_final_vanes",
+    "name": "Jerboa line (final, back: vanes)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_jerboa_final_vanes_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_final_vanes",
+    "name": "Jerboa line (final, back: vanes)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_jerboa_final_vanes_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_final_cells",
+    "name": "Jerboa line (final, back: cells)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_jerboa_final_cells_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_final_cells",
+    "name": "Jerboa line (final, back: cells)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_jerboa_final_cells_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_baby",
+    "name": "Jerboa line (baby, no pinball)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/c_jerboa_baby_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_final_crest",
+    "name": "Jerboa line (final, back: crest)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_jerboa_final_crest_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_jerboa_final_coil",
+    "name": "Jerboa line (final, back: coil)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_jerboa_final_coil_1.jpg",
+    "ok": true
   }
 ]
