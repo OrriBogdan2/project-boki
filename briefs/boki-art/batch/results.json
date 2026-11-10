@@ -108664,5 +108664,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/ogs_anime_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_meteorab_light",
+    "name": "Meteorab (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_meteorab_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pinster_light",
+    "name": "Pinster (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_pinster_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rippmink_light",
+    "name": "Rippmink (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_rippmink_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rimink_light",
+    "name": "Rimink (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_rimink_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rimink_light",
+    "name": "Rimink (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_rimink_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pinster_light",
+    "name": "Pinster (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_pinster_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_druzemole_light",
+    "name": "Druzemole (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_druzemole_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_druzemole_light",
+    "name": "Druzemole (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_druzemole_light_2.jpg",
+    "ok": true
   }
 ]
