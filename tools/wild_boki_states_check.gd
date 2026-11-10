@@ -79,13 +79,15 @@ func _species(main: Node, id: String) -> void:
 
 	var dazed := _hold(rig, k, "dazed", SETTLE_S * 2.0)
 	lean_by_plan[plan] = maxf(float(lean_by_plan.get(plan, 0.0)), float(dazed["lean"]))
-	ok(rig.clip == "idle" and is_equal_approx(rig.player.speed_scale, 0.4), "%s dazed: a slow idle, not a frozen pose" % label)
+	var slow := rig.clip == "idle" and is_equal_approx(rig.player.speed_scale, 0.4)
+	ok(slow, "%s dazed: a slow idle, not a frozen pose" % label)
 	ok(rig.flex.scale.y < 0.92, "%s dazed: slumped to %.2f of its height" % [label, rig.flex.scale.y])
 	ok(float(dazed["swing"]) > 0.1, "%s dazed: sways %.2f rad side to side" % [label, dazed["swing"]])
 	_face(rig, k, "sleepy", "dazed", label)
 	rig.seek(0.5)
 	ok(_posed(rig), "%s dazed: the skeleton is off its rest pose (no T-pose)" % label)
-	ok(k.global_position == at and rig.flex.position.is_equal_approx(Vector3(0, rig._flex_y, 0)), "%s dazed: it stays put" % label)
+	var rest := Vector3(0, rig._flex_y, 0)
+	ok(k.global_position == at and rig.flex.position.is_equal_approx(rest), "%s dazed: it stays put" % label)
 
 	_hold(rig, k, "scan", SETTLE_S)
 	ok(rig.clip == "run" and is_equal_approx(rig.player.speed_scale, 0.7), "%s lifted by the scan: legs kick" % label)

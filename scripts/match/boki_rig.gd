@@ -333,7 +333,12 @@ func _pick_clip(dt: float) -> void:
 func _step_layer(feel: Dictionary, dt: float) -> void:
 	_layer_t += dt
 	for key in _layer:
-		var want := float(feel.get(key, 0.0)) * (_feel.x if key == "lean" else (_feel.y if key == "sway" else 1.0))
+		var mult := 1.0
+		if key == "lean":
+			mult = _feel.x
+		elif key == "sway":
+			mult = _feel.y
+		var want := float(feel.get(key, 0.0)) * mult
 		_layer[key] = lerpf(float(_layer[key]), want, 1.0 - exp(-LAYER_RATE * dt))
 
 func _start_shot(which: String) -> void:
