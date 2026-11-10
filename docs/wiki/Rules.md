@@ -77,6 +77,8 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | bond_nap_doc | per second two Boki nap side by side. |
 | bond_squabble | -0.16 |
 | bond_squabble_doc | added when two Boki squabble over a toy or their tempers clash. |
+| home | {"stagger": 1.5, "run_max": 8.0, "greet": 2.0, "nap_trust": 70.0, "bound_at": 0.62, "shy_at": 0.4, "stop": {"bound": 1.2, "wave": 2.2, "shy": 3.5}} |
+| home_doc | Coming home from a run: a Boki starts running to the portal `stagger` s after the one before it (highest trust first), greets after at most `run_max` s of running and for `greet` s, then goes back to what it was doing. A napping Boki only comes at trust >= nap_trust. bravery >= bound_at bounds in, below shy_at peeks from afar, else waves; `stop` is the metres from the portal each greeter stands. |
 | clash | 0.55 |
 | clash_doc | the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more. |
 
