@@ -1410,3 +1410,11 @@ LEG('blightmoth','creepy',True,True,[
  "a huge pale moth of the Blight: bone-white furry body, wings of deep purple-black with a skull-like eye pattern in bone white and a few violet vein lines, long feathery antennae, calm pinpoint eyes. Unsettling but beautiful.",
  "a great dark stag beetle of the Blight with antler-like jaws of bone white, a purple-black shell cracked with thin violet lines, small bone spurs along its legs, low and heavy.",
  "a tall thin heron-like Blight bird with purple-black feathers, a bone-white skull-shaped beak mask, long legs with bone spurs, and a ragged cloak of wing feathers, standing very still."])
+
+# 11-10 OWNER: "Barostorm should have a small cat T1 evo". Kitten baby built from Barostorm's card (ids baby_barostorm_*). Whether it replaces
+# Barokat (a meerkat) or sits before it is the owner's call.
+for _k,_d in (('a',"a tiny round kitten sitting, with cream fur and pale blue swirl marks, one small puff of grey cloud fur between its ears like a tuft, a short tail with a tiny gold arrow tip, a small round dial mark on its chest, huge amber eyes."),
+              ('b',"a small fluffy kitten mid-pounce, cream fur with pale blue swirls, a little grey cloud collar round its neck, tiny gold horn buds, a gold arrow-tipped tail held high, amber eyes."),
+              ('c',"a sleepy kitten curled up with its tail round it, cream fur with pale blue swirl marks, a small grey cloud resting on its back like a blanket of its own fur, one amber eye open, a tiny dial mark on its flank.")):
+    SPECS.append({'id':'baby_barostorm_'+_k,'name':'Barostorm baby kitten '+_k,'refs':[_C%'Barostorm'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of the BABY form of the creature in image 1, clearly the same animal as a small kitten, with the same cream fur, pale blue swirl markings, grey storm-cloud fur and gold details in baby size: "+_d+" All parts are its own body. Ignore how image 1 is painted. "+_TXT+STYLE_V2('baby','cute',False,True)+FRAME_V2})
