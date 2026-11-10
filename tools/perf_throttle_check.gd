@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	_mob_naps()
 	_far_bots()
+	_far_hunters()
 	_catch_up()
 	_far_mobs()
 	_shadows()
@@ -197,6 +198,48 @@ func _far_bots() -> void:
 		if float(b.ai["dash_cd"]) != before:
 			thinks += 1
 	ok(thinks == 6, "near the player it decides every step (%d of 6)" % thinks)
+
+## HunterPace: a calm bot past FAR_M runs its sim every FAR_EVERY steps with the skipped time; near you, with a
+## target or online, every step.
+func _far_hunters() -> void:
+	var b: Hunter = null
+	for h in m.hunters:
+		if h.ctrl == "bot":
+			b = h
+	if b == null:
+		return
+	b.teleport(m.player.pos + Vector3(HunterPace.FAR_M + 15.0, 0, 0))
+	b.grounded = true
+	b.ai["tgt"] = null
+	b.hurt_at = -99.0
+	var runs := 0
+	var simmed := 0.0
+	for i in HunterPace.FAR_EVERY * 4:
+		var d := HunterPace.step(b, Match.DT)
+		m.time += Match.DT
+		if d > 0.0:
+			runs += 1
+			simmed += d
+	ok(runs == 4 and is_equal_approx(simmed + b.pace_dt, Match.DT * HunterPace.FAR_EVERY * 4),
+		"a far, calm bot runs its sim every %d steps with the time it skipped (%d runs, %.3f s + %.3f s due)" % [
+			HunterPace.FAR_EVERY, runs, simmed, b.pace_dt])
+	b.ai["tgt"] = m.player
+	ok(_every_step(b), "with a target it runs every step")
+	b.ai["tgt"] = null
+	m.net_on = true
+	ok(_every_step(b), "online every step")
+	m.net_on = false
+	b.teleport(m.player.pos + Vector3(5.0, 0, 0))
+	b.grounded = true
+	ok(_every_step(b), "near you every step")
+
+func _every_step(b: Hunter) -> bool:
+	for i in HunterPace.FAR_EVERY * 2:
+		var d := HunterPace.step(b, Match.DT)
+		m.time += Match.DT
+		if d <= 0.0:
+			return false
+	return true
 
 func _far_mobs() -> void:
 	var mb: Mob = null

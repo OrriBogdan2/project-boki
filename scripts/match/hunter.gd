@@ -119,6 +119,7 @@ var chase: Hunter = null       # whoever has your kin: you run faster toward the
 var box_t := 0.0               # holding interact at a deathbox
 var box_rev_at := -9.0         # last time we were channelling a deathbox revive (BoxRevive)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
+var pace_dt := 0.0              # sim time a far, calm bot skipped (HunterPace)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
 var hit_from := Vector2.ZERO   # which way the last hit pushed
