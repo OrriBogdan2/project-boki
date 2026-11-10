@@ -104968,5 +104968,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px_c_hydrangor_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px7_prismander",
+    "name": "Prismander (pixel sprite style 7)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px7_prismander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_mycroll",
+    "name": "Mycroll (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_mycroll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_ermink",
+    "name": "Ermink (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_vespyx",
+    "name": "Vespyx (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_mycroll",
+    "name": "Mycroll (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_mycroll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_prismander",
+    "name": "Prismander (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_prismander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_prismander",
+    "name": "Prismander (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_prismander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_ermink",
+    "name": "Ermink (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_ermink_2.jpg",
+    "ok": true
   }
 ]
