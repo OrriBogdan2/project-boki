@@ -682,3 +682,44 @@ _n0=len(SPECS)
 V2SHEET_NEW('Effigoon','briefs/boki-art/cards/Effigoon.jpg',"white marble cocoon with gold bands and gold spiral trim","one cocoon, no face, no legs, no rope")
 V2PORT_NEW('Effigoon','briefs/boki-art/cards/Effigoon.jpg','mid','majestic',"white marble cocoon with gold bands and gold spiral trim","one cocoon, no face, no legs, no rope",False,False,"the cocoon standing upright on its rounded end, seen from the front, nothing attached to it")
 SPECS[_n0]['id']='v2s_effigoon_lie'; SPECS[_n0+1]['id']='v2p_effigoon_lie'; SPECS[_n0+1]['runs']=2
+
+# ===== 00:35 ET 11-10 OWNER: "a lot of baby types look a different art style than their evolutions: make sure we get parity on style"
+# (Chuggamus vs Teapotamus, Lockatara vs Latchling). The only real fix is finishing the pass, so BATCH 4 = ALL 99 remaining Boki, cards, text-only,
+# 3 runs. To move fast the colour and count lines are generic (image 1 is the truth); only stage / face / dark / furry / one clean-up are by eye.
+_GC="exactly the colours of image 1, each part keeping its own colour"; _GN="every part image 1 shows, the same number of each"
+_BT4=[ # name, stage, arch, dark, furry, fix
+ ('Rimefang','final','tough',0,1,""),('Teapotamus','baby','cute',0,0,"the spout, lid and handle are grown from its own body; one small flat steam puff"),('Selenfin','baby','cute',0,0,""),
+ ('Selenwhale','final','majestic',0,0,""),('Barokat','baby','cute',0,1,"the brass horns and the dial are grown parts of its body; at most one small cloud"),
+ ('Cisternmander','final','tough',0,0,"no dripping water and no puddle"),('Kerchick','baby','cute',0,1,""),('Jibbatross','mid','sleek',0,1,""),('Knotling','baby','cute',0,0,""),
+ ('Knotwyrm','final','majestic',0,0,""),('Thrumbird','baby','cute',0,1,"no motion rings round its wings"),('Lyrewing','final','majestic',0,1,""),('Latchling','baby','cute',0,0,""),
+ ('Parasolth','baby','cute',1,1,""),('Umbrathere','final','creepy',1,1,""),('Pipewurm','baby','cute',0,0,"no dripping slime and no puddle: its funnel snout is clean"),
+ ('Pipeworth','final','creepy',0,0,"no dripping slime: the green frill is clean solid shapes"),('Oarlet','baby','cute',0,1,"no water drops"),('Oarter','mid','sleek',0,1,"no water drops"),
+ ('Galleotter','final','majestic',0,1,""),('Kitlet','baby','cute',0,0,""),('Ribbonwyrm','mid','pretty',0,0,""),('Dragonkite','final','majestic',0,0,""),('Jarmit','baby','cute',0,0,""),
+ ('Lanternmit','mid','tough',1,0,""),('Terrarimit','final','cute',0,0,""),('Bathilus','baby','cute',0,0,""),('Torpecone','mid','cute',0,0,""),('Dreadmonite','final','creepy',1,0,""),
+ ('Pocketpus','baby','cute',0,0,""),('Bladypus','mid','cute',0,0,""),('Puffuse','baby','cute',1,0,""),('Blastopuff','final','tough',0,0,""),('Blotlet','baby','cute',1,0,""),
+ ('Slog','mid','creepy',1,0,"no splatter drops around it: one solid body shape"),('Sloggoth','final','creepy',1,0,""),('Bullsfrog','final','tough',0,0,""),('Clinkpede','baby','cute',0,0,""),
+ ('Chainipede','final','creepy',1,0,"no dripping venom"),('Cubbat','baby','cute',0,1,""),('Pipwom','mid','tough',0,1,""),('Grammite','baby','cute',1,0,""),('Dobsabre','final','tough',0,0,""),
+ ('Lensling','baby','cute',0,0,""),('Fawngus','baby','cute',0,1,"no glowing wisp above it"),('Hatstag','final','majestic',0,1,""),('Foldbat','baby','cute',1,1,""),('Fanpire','final','sleek',1,1,""),
+ ('Gilabacus','mid','tough',0,0,"no drool"),('Glaciammoth','final','majestic',0,0,""),('Olmlet','baby','cute',0,0,""),('Glazolm','mid','pretty',0,0,""),('Kintsuwyrm','final','majestic',0,0,""),
+ ('Grainspin','baby','cute',0,1,""),('Sandwidow','mid','creepy',1,1,""),('Hourachnid','final','creepy',0,1,""),('Tootle','baby','cute',0,0,""),('Gramofrill','mid','sleek',0,0,""),
+ ('Phonodrake','final','tough',0,0,""),('Gravigrub','baby','cute',0,0,""),('Orbitle','mid','tough',1,0,""),('Scarabit','mid','tough',1,0,""),('Meteorab','final','tough',1,0,"at most four chunky pebbles, close to its body"),
+ ('Hydrangor','final','majestic',0,0,""),('Proofhop','baby','cute',0,0,""),('Malletary','mid','tough',0,1,""),('Rattlebub','baby','cute',0,0,""),('Polyshroom','baby','cute',0,0,""),
+ ('Starcap','baby','cute',0,0,""),('Medushroom','mid','pretty',0,0,""),('Morelkin','baby','cute',0,0,""),('Truffapir','mid','cute',1,0,""),('Nymphane','baby','cute',0,0,""),
+ ('Rosedart','final','pretty',0,0,""),('Gambitfin','mid','sleek',0,0,"the gold bands are gold ring markings of its own carved body, not collars"),('Checkmare','final','majestic',0,0,""),
+ ('Pebblamb','baby','cute',0,1,""),('Reelacine','mid','sleek',0,1,""),('Scoopsy','baby','cute',0,1,""),('Sundormouse','mid','cute',0,1,""),('Bonsolith','final','majestic',0,0,""),
+ ('Chiptero','baby','cute',0,0,""),('Pickadactyl','final','tough',0,0,""),('Harvantis','final','sleek',0,0,""),('Mumblet','baby','cute',0,0,""),('Klaxada','mid','cute',0,0,""),
+ ('Narfoil','baby','cute',0,0,""),('Pagodito','baby','cute',0,0,""),('Pavonazar','final','majestic',0,1,""),('Quivertoad','final','tough',0,0,"no dripping slime"),
+ ('Shinobant','mid','sleek',0,0,"the dark band across its eyes and neck is a marking of its own shell, not cloth"),('Cetorgan','final','majestic',0,0,""),('Ghoulamari','final','creepy',1,0,""),
+ ('Sphinxblight','final','majestic',1,1,""),('Wayshell','final','majestic',0,0,"the compass and the gears are grown from its own shell"),('Glacione','baby','cute',0,0,"nothing under it: no pedestal and no ground"),
+ ('Cairnback','final','majestic',0,0,""),('Hivara','final','sleek',0,0,""),('Zephyrak','final','majestic',0,0,"")]
+for _n,_st,_ar,_dk,_fu,_fx in _BT4:
+    SPECS.append({'id':'v2c_'+_n.lower(),'name':_n+' (V2 card, batch 4, text-only style)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD_TEXT(_n,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_fx)})
+# OWNER 00:35: "is it weird Anchorbill and Harpwhal are evo connected? one's a bird, one isn't". Yes. The baby becomes a pup of the same sea animal.
+SPECS.append({'id':'on_anchorbill','name':'Anchorbill (owner note: a pup of Anchorhorn, V2)','refs':[_C%'Anchorhorn'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':("Draw one single character illustration of the BABY form of the sea creature in image 1. It is clearly the same species, newly hatched: a small, round, chubby pup about a third of the adult's size, "
+   "with a big head, four short stubby flippers, a short tail fluke, the same dark teal-grey hide with a few rust-orange patches, and big teal-green eyes. Where the adult has a long harpoon horn, the pup has a short, blunt, "
+   "anchor-shaped nose horn in the same rusty iron colour. It sits upright on its belly, looking up, friendly. No chain, no rope, nothing worn. It is not a bird: no feathers, no wings, no beak. "
+   "Ignore how image 1 is painted. The art style is described in words below, follow it exactly. "+STYLE_V2('baby','cute',True,False)+FRAME_V2)})
+# OWNER 00:35: "Thistlynx and Briarlynx look very similar, but their first evo looks different: make the difference more apparent" -> a bigger final.
+ON_CHANGE('Briarlynx',_C%'Briarlynx','final','tough',False,True,"it is a much bigger, heavier final form that no longer looks like the slim middle form: a broad, powerful lynx standing planted on all four legs, twice as bulky, with darker brown fur, a thick mane of green bramble leaves round its neck and shoulders dotted with a few dark red roses, two curved thorn branches growing back from its brow like antlers, big leaf ears, heavy paws with thorn claws, and a long thorny vine tail held high. A stern, proud face.",runs=4,tag='_big')

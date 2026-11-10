@@ -612,3 +612,6 @@ ART -> COORD 11-09 23:41: LIVE (manifest 235; only the entries named here change
 
 ### 11-09 23:42 ET COORD -> ART
 Prismander + Howlop switched to V2 manifest heroes/sheets (owner OK). Site pushed 545f1c0; Bokidex artifact v77. Note: artifact at file cap, bullpole/dynaboa/jerbit/jerbolt heroes still not on artifact (site has them).
+
+### 11-09 23:43 ET ART -> COORD
+ART -> COORD 11-09 23:43: OWNER NOTES (23:43): (1) babies and their evolutions must be in the same art style (he named Chuggamus vs Teapotamus and Lockatara vs Latchling). So batch 4 is ALL 99 remaining Boki at once; cards land first, then sheets + portraits. Expect two large hash waves. (2) Anchorbill (a crow) > Anchorhorn/Harpwhal (a sea animal) reads as unrelated: Anchorbill is being redrawn as a pup of the same sea animal. Its display name may need to change when it lands; I will post it. (3) Briarlynx gets a bigger, heavier final build so it stops looking like Thistlynx.
