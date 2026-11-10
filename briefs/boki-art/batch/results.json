@@ -84171,5 +84171,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_rimefang_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_teapotamus_b4",
+    "name": "Teapotamus (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_teapotamus_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_teapotamus_b4",
+    "name": "Teapotamus (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_teapotamus_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rimefang_b4",
+    "name": "Rimefang (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_rimefang_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rimefang_b4",
+    "name": "Rimefang (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_rimefang_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_selenwhale_b4",
+    "name": "Selenwhale (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_selenwhale_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_barokat_b4",
+    "name": "Barokat (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_barokat_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_barokat_b4",
+    "name": "Barokat (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_barokat_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_selenfin_b4",
+    "name": "Selenfin (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_selenfin_b4_1.jpg",
+    "ok": true
   }
 ]
