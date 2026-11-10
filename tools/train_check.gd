@@ -107,7 +107,7 @@ func run(main: Node) -> void:
 	ok(l3.x - l2.x > 0.4, "strafing moves you across the car: %.2fm" % (l3.x - l2.x))
 	var side := (st.cur[K] as Transform3D) * Vector3(SkyTrain.HALF_W + 1.0, 0, 0)
 	var over_void := m.world.is_void(side.x, side.z)
-	for i in 60:
+	for i in (60 if over_void else 0):      # (ground beside the car: pushing would walk off it, as it should)
 		P.inp["move"] = _right2(st, K)
 		m.step(Match.DT)
 	P.inp["move"] = Vector2.ZERO

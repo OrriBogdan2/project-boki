@@ -45,7 +45,8 @@ func _ready() -> void:
 		# the whole map at a slant from ANGLE_BACK map sides out, ANGLE_UP up, looking from the --map-yaw side
 		var mid := Vector3(w.w * 0.5, 0, w.h * 0.5)
 		var from := Vector3(sin(_yaw()), 0, cos(_yaw())) * w.w * ANGLE_BACK + Vector3(0, w.w * ANGLE_UP, 0)
-		cam.position = mid + from; cam.fov = 50
+		cam.position = mid + from
+		cam.fov = 50
 		cam.look_at_from_position(cam.position, mid)
 	else:
 		cam.projection = Camera3D.PROJECTION_ORTHOGONAL; cam.size = w.w + 6.0     # the whole map and a 3 m margin
