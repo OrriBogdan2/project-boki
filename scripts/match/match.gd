@@ -1806,9 +1806,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	h.cloak_t = 0.0
 	h.reload_t = 0.0
 	h.grap = {}
-	var credit: Ent = by
-	if by is Kin and by.owner_h:
-		credit = by.owner_h
+	var credit: Ent = KnockCredit.credited(by)
 	if h == player:
 		# getting knocked hits hard: slow time, flash red, pull the camera in
 		_slow(0.55, 0.3)
@@ -1822,16 +1820,13 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
 			credit.gain_xp(90.0)
-		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
 			_reward_moment(h.pos)
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
-	else:
-		add_feed("%s went down" % h.pname)
-	KnockCredit.settle(self, h, credit)      # the knocker's and the assisters' kits
+	KnockCredit.announce(self, "knock", h, credit, by, KnockCredit.settle(self, h, credit))      # kits, feed, CombatBus
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
 	UtilityMore.on_knock(self, h, credit)        # a Bounty Banner's timer
 	sfx("knock", h.pos, 0.0)
@@ -1839,7 +1834,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
 	Juice.knock(self, h, credit)
 	if net_on and not h.remote:
-		net_event(["knock", h.nid, credit.nid if credit else ""])
+		net_event(["knock", h.nid, credit.nid if credit else "", KnockCredit.boki_nid(by)])
 	if h.kin and h.kin.comp and h.kin.state != "downed":
 		h.kin.comp.on_owner_down()
 	if h == player:
@@ -1939,15 +1934,13 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
+	var credit: Ent = KnockCredit.credited(by)
 	if net_on and not h.remote:
-		net_event(["out", h.nid, by.nid if by else "", why])
-	var credit: Ent = by
-	if by is Kin and by.owner_h:
-		credit = by.owner_h
+		net_event(["out", h.nid, credit.nid if credit else "", why, KnockCredit.boki_nid(by)])
 	if credit is Hunter and credit != h and credit.team != h.team:
 		credit.kills += 1
 		DashReset.takedown(credit, h)
-	add_feed(out_text(h.pname, why))
+	KnockCredit.announce(self, "out", h, credit, by, [], why)
 	if why != "abyss": Juice.kill(self, h, credit)
 	h.set_meta("died_why", why)
 	h.set_meta("died_at", time)
@@ -5416,8 +5409,8 @@ func _net_ev(x, from: String) -> void:
 				who.downed = true
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
-				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
+				KnockCredit.announce(self, "knock", who, by, ents_by_id.get(String(x[3]), null), [])
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)
@@ -5430,7 +5423,7 @@ func _net_ev(x, from: String) -> void:
 				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
-				add_feed(out_text(who.pname, String(x[3])))
+				KnockCredit.announce(self, "out", who, by, ents_by_id.get(String(x[4]), null), [], String(x[3]))
 				if who.kin:
 					who.kin.dead = true
 					who.kin.visible = false

@@ -364,6 +364,7 @@ const CHECKS := {
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
 	# one knock/assist rule (KnockCredit)
 	"--knock-credit-check": ["res://tools/knock_credit_check.gd", "knock_credit_check", null],
+	"--summon-credit-check": ["res://tools/summon_credit_check.gd", "summon_credit_check", null],      # Boki credit
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]

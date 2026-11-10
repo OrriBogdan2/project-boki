@@ -14,3 +14,6 @@ signal dash_reset_cue(hunter: Node, source: String)
 signal bond_gained(hunter: Node, amount: float, reason: String)
 signal kin_thrown(kin: Node, owner: Node)
 signal kin_recalled(kin: Node, owner: Node)
+## A Hunter went down (kind "knock") or out ("out"): who is credited (null: nobody, a monster, the Blight), the Boki
+## whose blow it was (null if none; the Hunter it rides with is credited), and the rival Hunters who assisted.
+signal takedown(kind: String, victim: Node, hunter: Node, boki: Node, assists: Array)
