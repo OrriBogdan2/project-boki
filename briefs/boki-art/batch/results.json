@@ -98808,5 +98808,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/leg_wishwren_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_wishwren_a",
+    "name": "Cute legendary concept: wishwren a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_wishwren_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_starpup_a",
+    "name": "Cute legendary concept: starpup a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_starpup_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_cloverhare_b",
+    "name": "Cute legendary concept: cloverhare b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_cloverhare_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_cloverhare_a",
+    "name": "Cute legendary concept: cloverhare a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_cloverhare_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_cloverhare_b",
+    "name": "Cute legendary concept: cloverhare b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_cloverhare_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_wishwren_b",
+    "name": "Cute legendary concept: wishwren b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_wishwren_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_wishwren_b",
+    "name": "Cute legendary concept: wishwren b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_wishwren_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimekit",
+    "name": "Rimekit (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_rimekit_1.jpg",
+    "ok": true
   }
 ]
