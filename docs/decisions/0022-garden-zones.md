@@ -26,3 +26,8 @@ The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays
 later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
 Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
 (`KinBox.farm_room`) counts each zone on its own.
+
+Step 7b (Cinderstep) is the first zone with its own island: `GardenZones.enter` makes `Save.d["zones"][id]["layout"]`
+from the zone's `build` data, and `HomeLayout.of(Save.d)` returns it while that zone is shown. Troughs
+(`Econ.feeders`) follow the layout; the market stall stays with Bramblebank (and later the hub). No save
+version change: a missing layout is made on arrival.
