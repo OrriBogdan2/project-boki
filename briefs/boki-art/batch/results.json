@@ -89001,5 +89001,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fp_kestrike_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fs_kestrike",
+    "name": "Kestrike female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs_kestrike_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_kestrike",
+    "name": "Kestrike female (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fp_kestrike_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_lunowl",
+    "name": "Lunowl female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_lunowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_lunowl",
+    "name": "Lunowl female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_lunowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_kestrike",
+    "name": "Kestrike female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_kestrike_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_lunowl",
+    "name": "Lunowl female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs_lunowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_kestrike",
+    "name": "Kestrike female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_kestrike_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_lunowl",
+    "name": "Lunowl female (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fp_lunowl_2.jpg",
+    "ok": true
   }
 ]
