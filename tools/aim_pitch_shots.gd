@@ -47,8 +47,11 @@ func _shot(id: String, pitch: float, path: String) -> void:
 	for i in FRAMES:
 		an.update(1.0 / 60.0, s)
 		sync.call("_process", 1.0 / 60.0)
-	await RenderingServer.frame_post_draw
-	tree.root.get_texture().get_image().save_png(path)
+	for k in 3:
+		await tree.process_frame       # (frame_post_draw never fires on some workers: the 11-10 strip hung)
+	var img := tree.root.get_texture().get_image()
+	if img != null:
+		img.save_png(path)
 	m.free()
 
 func _stage(main: Node) -> void:
