@@ -108944,5 +108944,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/hb_cinder_calderoise_1.jpg",
     "ok": true
+  },
+  {
+    "id": "hb_meeko_starters",
+    "name": "Hunter + Boki splash (meeko_starters)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb_meeko_starters_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_nivi_glaciatee",
+    "name": "Hunter + Boki splash (nivi_glaciatee)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb_nivi_glaciatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_nivi_glaciatee",
+    "name": "Hunter + Boki splash (nivi_glaciatee)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb_nivi_glaciatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb_meeko_starters",
+    "name": "Hunter + Boki splash (meeko_starters)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb_meeko_starters_1.jpg",
+    "ok": true
   }
 ]
