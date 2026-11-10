@@ -4,20 +4,21 @@ extends Node
 ## zone and aegis mend, knock heals, belt items, Boki carry passives, a Fuse release): a short soft rise of
 ## light up the body for a heal, a thin shell flash for a shield, both tinted by the giver's ability colour,
 ## and a "+N" in the heal or shield colour through the damage-number path (Fx.number).
-## No particles, bursts or rings (a ground ring means gameplay): the cue is a pooled body-sized aura shell
-## (Models.aura_mat), so it costs the same at every quality and reads at Very Low.
+## No particles, bursts or rings (a ground ring means gameplay): the cue is a pooled body-sized shell
+## (shaders/receiver_cue.gdshader, mixed not added so it reads on bright ground), so it costs the same at
+## every quality and reads at Very Low.
 ## Sources call heal() / shield(); Hunter.heal and Effects._heal already do. Checked by --receiver-cue-check.
 
 const HEAL_COLOR := Color("8ff0a0")
 const SHIELD_COLOR := HudStyle.SHIELD
+const SHADER: Shader = preload("res://shaders/receiver_cue.gdshader")
 const SHIELD_PREFIX := "+ "      # (a shield number must not merge into a heal number: Fx.number matches the prefix)
 const POOL := 8                  # cues alive at once, shared by heals and shields
-const RISE_S := 0.55             # s a heal's rise lasts
-const RISE_LIFT := 0.55          # m the heal's glow climbs the body
+const RISE_S := 0.55             # s a heal's band takes to climb the body
 const FLASH_S := 0.22            # s a shield's flash lasts
 const GAP_S := 0.4               # s between two cues of one kind on one body (a zone ticking is one rise)
 const NUMBER_MIN := 1.0          # smallest gain that shows a number
-const TINT_WHITE := 0.35         # how far a heal's colour is lightened toward white
+const TINT_WHITE := 0.15         # how far a heal's colour is lightened toward white
 const SHIELD_WHITE := 0.5        # the same for a shield (paler, a thin bright shell)
 const BODY_H := 1.8              # m: the shell's height (a Hunter; others scale by radius)
 const BODY_R := 0.4              # m: the radius the shell is sized for
@@ -43,14 +44,16 @@ func _init(match_node: Match) -> void:
 
 func _ready() -> void:
 	for i in POOL:
-		var mat := Models.aura_mat(Color.WHITE, 1.0)
+		var mat := ShaderMaterial.new()
+		mat.shader = SHADER
+		mat.set_shader_parameter("body_h", BODY_H)
 		var mi := MeshInstance3D.new()
 		mi.mesh = Models.capsule(BODY_R, BODY_H)
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.visible = false
 		add_child(mi)
-		_slots.append({"mi": mi, "mat": mat, "e": null, "t": 0.0, "dur": 1.0, "rise": 0.0, "a": 1.0})
+		_slots.append({"mi": mi, "mat": mat, "e": null, "t": 0.0, "dur": 1.0, "rise": false, "a": 1.0})
 
 ## `e` just gained `n` health from a giver of ability colour `tint` (transparent: the receiver's own).
 static func heal(e: Ent, n: float, tint := Color.TRANSPARENT) -> void:
@@ -59,7 +62,7 @@ static func heal(e: Ent, n: float, tint := Color.TRANSPARENT) -> void:
 	var c := of(e.m as Match)
 	if n >= NUMBER_MIN:
 		e.m.fx.number(e.pos + Vector3(0, 1.6, 0), n, HEAL_COLOR, false, "+")
-	c._start(e, "heal", tint, RISE_S, RISE_LIFT, 0.5)
+	c._start(e, "heal", tint, RISE_S, true, 1.0)
 
 ## Raise `e`'s shield to at least `amount` (a Hunter or a Boki); a real gain flashes the shell.
 static func shield(e: Ent, amount: float, tint := Color.TRANSPARENT) -> void:
@@ -78,9 +81,9 @@ static func shield(e: Ent, amount: float, tint := Color.TRANSPARENT) -> void:
 	var c := of(e.m as Match)
 	if gained >= NUMBER_MIN:
 		e.m.fx.number(e.pos + Vector3(0, 1.9, 0), gained, SHIELD_COLOR, false, SHIELD_PREFIX)
-	c._start(e, "shield", tint, FLASH_S, 0.0, 1.1)
+	c._start(e, "shield", tint, FLASH_S, false, 1.0)
 
-func _start(e: Ent, kind: String, tint: Color, dur: float, rise: float, strength: float) -> void:
+func _start(e: Ent, kind: String, tint: Color, dur: float, rise: bool, strength: float) -> void:
 	var key := [e, kind]
 	if float(_gap.get(key, 0.0)) > 0.0:
 		return
@@ -133,8 +136,9 @@ func tick(dt: float) -> void:
 			live -= 1
 			continue
 		var fade := (1.0 - k) * minf(1.0, k * 8.0)         # a quick fade in, a long soft fade out
-		var up := float(s["rise"]) * (1.0 - pow(1.0 - k, 2.0))
 		var wide := e.r / BODY_R * (1.12 + 0.12 * k)
-		mi.global_position = e.pos + Vector3(0, BODY_H * 0.5 * e.r / BODY_R + up, 0)
+		mi.global_position = e.pos + Vector3(0, BODY_H * 0.5 * e.r / BODY_R, 0)
 		mi.scale = Vector3.ONE * wide
-		(s["mat"] as ShaderMaterial).set_shader_parameter("strength", float(s["a"]) * fade)
+		var mat: ShaderMaterial = s["mat"]
+		mat.set_shader_parameter("strength", float(s["a"]) * fade)
+		mat.set_shader_parameter("band", 0.1 + 0.9 * (1.0 - pow(1.0 - k, 2.0)) if s["rise"] else -1.0)
