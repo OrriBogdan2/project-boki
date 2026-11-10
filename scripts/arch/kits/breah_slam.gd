@@ -221,7 +221,7 @@ func slam(c: float, at_feet: bool) -> void:
 		f.hurt(d2, h, o)
 		if in_core: KitLooks.of(m).crown(f, float(o["stun"]))
 		if air:
-			m.displace.spike(f, -22.0)      # spiked down (after the hit, which would lift it)
+			m.displace.spike(f, -22.0, h)      # spiked down (after the hit, which would lift it)
 		gained = true
 	for w in m.verbs.walls.duplicate():
 		if not k.launchable(w): continue
