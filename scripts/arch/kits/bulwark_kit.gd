@@ -781,7 +781,8 @@ func _spin_hit(wd: Vector2) -> void:
 	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
 		ch_rmb = float(rmb_charges())          # rank 3: hitting foes with the dash refunds the Shield Charge
 		cd["rmb"] = 0.0
-	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
+	if h.grounded:
+		h.glide_cd = maxf(h.glide_cd, WINDDOWN)     # (a spin off a ledge ends in the air: the glider is free)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)

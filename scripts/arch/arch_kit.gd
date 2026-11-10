@@ -822,6 +822,13 @@ func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
 ## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
 func dash_vy(_dt: float) -> float: return 0.0
+
+## A ground dash ran off a ledge and ended in the air (HunterMove.dash_off_ledge): its ground pose stops there,
+## and so does its wind-down (the glider kept shut a beat after a dash is for a dash that stays on the ground).
+func on_dash_off_ledge() -> void:
+	if anim_at >= dash_press_at:
+		anim_id = ""
+	h.glide_cd = 0.0
 ## True while the model's facing is frozen (a statue): Hunter keeps `face` as it is, whatever the cursor does.
 func face_locked() -> bool: return false
 func fire_ok_rmb() -> bool: return true

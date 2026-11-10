@@ -489,7 +489,7 @@ func _rinkrun_end(into_rime := false) -> void:
 		var keep := HunterMove.dash_exit(h.roll_dir * h.roll_speed, h.base_speed)
 		h.vel.x = keep.x
 		h.vel.z = keep.y
-	play("tm_skate_stop")
+	play("tm_skate_stop" if h.grounded else "")      # the braced stop is a ground pose
 	dash_press_at = m.time           # the stop is the skate's own move: it never holds the glider shut (AirLimits)
 	m.sfx("rime_stop", h.pos, -4.0, 1.0)
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead

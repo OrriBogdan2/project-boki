@@ -743,6 +743,8 @@ func _tick_stop(dt: float) -> void:
 	if stop_t > 0.0 or h.roll_t > 0.0:
 		return
 	stop_t = 0.0
+	if not h.grounded:
+		return             # a barge off a ledge falls on with the shared dash exit
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(STOP_CARRY)
 	h.vel.x = flat.x
 	h.vel.z = flat.y

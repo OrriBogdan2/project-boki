@@ -299,6 +299,8 @@ func _skid_room(dir: Vector2) -> float:
 
 func _tick_skid(dt: float) -> void:
 	st["left"] = float(st["left"]) - dt
+	if not h.grounded:
+		return             # skidded off a ledge: the next hop and the crash wait for the ground below
 	if bool(st["press"]) and float(st["t"]) >= float(dd()["skid_min"]) and int(st["n"]) < int(dd()["hops"]):
 		if _aim_hop():
 			_kick()
