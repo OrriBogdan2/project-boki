@@ -88336,5 +88336,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fv2_murmuron_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fv2_hourachnid",
+    "name": "Hourachnid female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_sandwidow",
+    "name": "Sandwidow female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_sandwidow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_voltalon",
+    "name": "Voltalon female (V2 card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv2_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_murmuron",
+    "name": "Murmuron female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_murmuron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_pavonazar",
+    "name": "Pavonazar female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_hourachnid",
+    "name": "Hourachnid female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_hourachnid_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_voltalon",
+    "name": "Voltalon female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_voltalon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_tiltster_a",
+    "name": "Tiltster (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_tiltster_a_1.jpg",
+    "ok": true
   }
 ]
