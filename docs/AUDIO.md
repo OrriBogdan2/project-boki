@@ -45,3 +45,9 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## Opening a chest or a deathbox (`LootOpenSfx`, `content/sfx/loot.json`)
+- While the open channel runs (the chest hold, a bot's deathbox hold in `Match._update_interact`) a short keyed loop plays at the box: `loot_creak` (chest), `loot_latch` (deathbox). Each step of the hold re-asks for it; `LootOpenSfx.sweep` after the channels stops any loop nobody held that step, so a cancel cuts it the same step. It carries `Sfx.hear_range`, so a nearby squad hears the looting; at most `MAX_LOOPS` (3) at once, none from beyond hearing.
+- On completion one sting for the rarest thing inside (`Data.RARITY` step, the ground-loot colours): Rare `loot_rare`, Epic `loot_epic`, Legendary `loot_legend`; Common and Fine and an empty box are silent. A deathbox stings once (the player's instant loot window and a bot's hold both count as its open).
+- `--loot-open-sfx-check` asserts the loop, the cancel, the one sting and the limits.
+
