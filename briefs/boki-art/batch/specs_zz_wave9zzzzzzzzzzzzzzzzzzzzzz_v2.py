@@ -990,3 +990,12 @@ for _n,_extra in (('Olmlet',""),('Glazolm'," Its small horns become three pairs 
     for _k,(_c,_lab) in _OLM.items():
         SPECS.append({'id':'olm_'+_n.lower()+'_'+_k,'name':_n+' ('+_lab+' porcelain)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'2K',
           'prompt':_EDIT+"recolour it as "+_c+"."+_extra+" The pose, body, face, line and flat shading stay the same. No red anywhere."})
+
+# 06:20 ET 11-10 OWNER: "Cubwom line needs different poses" (Cubbat, Pipwom and Critwom all stand on all fours facing the same way).
+# Stance ladder: the baby sits, the middle moves, the final is planted.
+ON_POSE('Cubbat',_LM['Cubbat']['sheet'],'baby','cute',False,True,"sitting on its bottom like a plush toy, facing the viewer, short hind legs sticking out in front, front paws resting on its belly, sleepy contented smile.","a cube-shaped brown wombat with dark round pip spots, a big dark nose, small round ears")
+SPECS[-1]['id']='on_cubbat_sit'
+ON_POSE('Pipwom',_LM['Pipwom']['sheet'],'mid','tough',False,True,"mid-tumble, rolling forward like a thrown die, facing LEFT: body tipped up on one corner of its dice shell, hind legs in the air, front paws reaching for the ground, determined face.","a tan and cream wombat with dark spots, carrying a big cream dice shell with black pips on its back")
+SPECS[-1]['id']='on_pipwom_roll'
+ON_POSE('Critwom',_LM['Critwom']['sheet'],'final','tough',False,True,"reared up on its hind legs facing LEFT, front paws raised, spiked dice-dome shell towering behind its shoulders, tail knob planted on the ground, roaring.","brown wombat fur, a cream dice-dome shell with black pips and cream spikes, cream dice plates on its legs and tail knob")
+SPECS[-1]['id']='on_critwom_rear'
