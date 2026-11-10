@@ -36,6 +36,7 @@ const CHECKS := {
 	"--rimewright-combo-check": ["res://tools/support_check.gd", "support_check", "rimewright"],
 	"--telegraph-sync-check": ["res://tools/telegraph_sync_check.gd", "hero_pair_check", null],
 	"--zone-check": ["res://tools/hero_pair_check.gd", "hero_pair_check", null],
+	"--barrier-hit-check": ["res://tools/barrier_hit_check.gd", "hero_pair_check", null],      # barrier hit ripple; --shots-dir=<dir>
 	"--dolm-combo-check": ["res://tools/breah_combo_check.gd", "hero_pair_check", null],
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],      # docs/heroes/deployables.md
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
