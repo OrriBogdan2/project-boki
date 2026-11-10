@@ -12,14 +12,13 @@ const TEAL := Color("3fe0d0")        # neon edge, first side
 const MAGENTA := Color("ff3fd0")     # neon edge, second side and the spike
 const VOID := Color("2a1c40")        # an unlit cue
 const BRIGHT := 0.9                  # alpha of a lit cue
-const DIM := 0.3                     # alpha of an unlit cue
+const DIM := 0.55                    # alpha of an unlit cue
 
-## An unlit, additive, see-through material: it reads as a glow on any ground.
+## An unlit, see-through material: plain alpha, so the violet and teal read on bright day ground too.
 static func glow(c: Color, alpha: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	m.albedo_color = Color(c.r, c.g, c.b, alpha)
 	return m
@@ -80,8 +79,11 @@ class DashCue:
 			beam.bottom_radius = 0.05
 			beam.height = POST_H
 			GardenCues.piece(root, beam, m, at + Vector3(0, POST_H * 0.5, 0))
-		GardenCues.piece(root, GardenCues.box(Vector3(track_w, 0.03, LINE_DEPTH)),
-				GardenCues.glow(Color.WHITE, BRIGHT), finish + Vector3(0, 0.07, 0))
+		var line := finish + Vector3(0, 0.07, 0)
+		var base := GardenCues.box(Vector3(track_w, 0.03, LINE_DEPTH))
+		GardenCues.piece(root, base, GardenCues.glow(GardenCues.VOID, GardenCues.BRIGHT), line)
+		var stripe := GardenCues.box(Vector3(track_w, 0.03, LINE_DEPTH * 0.4))
+		GardenCues.piece(root, stripe, GardenCues.glow(Color.WHITE, GardenCues.BRIGHT), line + Vector3(0, 0.01, 0))
 
 	## `reached`: how many marks your Boki has passed; `next_open`: you can cheer at the next one now.
 	func update(reached: int, next_open: bool, d: float) -> void:
@@ -115,7 +117,7 @@ class ShoveCue:
 		root = GardenCues.root_in(parent, "ShoveCue")
 		root.position = stump_at + Vector3(0, HEIGHT, 0)
 		var track := GardenCues.box(Vector3(HALF * 2.0, THICK, THICK))
-		GardenCues.piece(root, track, GardenCues.glow(GardenCues.VOID, 0.55), Vector3.ZERO)
+		GardenCues.piece(root, track, GardenCues.glow(GardenCues.VOID, 0.8), Vector3.ZERO)
 		var middle := GardenCues.box(Vector3(0.04, THICK * 2.5, THICK * 1.4))
 		GardenCues.piece(root, middle, GardenCues.glow(Color.WHITE, 0.8), Vector3.ZERO)
 		fill_mat = GardenCues.glow(GardenCues.TEAL, BRIGHT)
@@ -140,9 +142,9 @@ class SeekCue:
 	extends RefCounted
 	const DOTS := 8                     # per hunter
 	const REACH := 4.0                  # m the trail runs from the scent at most
-	const DOT_R := 0.1                  # m
+	const DOT_R := 0.14                 # m
 	const DRIFT := 0.5                  # trail lengths per s the dots move out
-	const MAX_ALPHA := 0.6              # the trail of a perfect nose
+	const MAX_ALPHA := 0.85             # the trail of a perfect nose
 
 	var root: Node3D
 	var dots: Array = []                # per hunter: its DOTS meshes

@@ -64,6 +64,8 @@ func run(m: Node) -> void:
 ## One frame of the live view, centred on `at` and showing `span` metres either side, into column `col`.
 func _grab(home, sheet: Image, col: int, at: Vector3, span: float) -> void:
 	home.cam.snap(at)
+	await main.get_tree().process_frame
+	home.cam.snap(at)
 	await RenderingServer.frame_post_draw
 	var cam := main.get_viewport().get_camera_3d()
 	var img := main.get_viewport().get_texture().get_image()
@@ -119,7 +121,7 @@ func _shove(home) -> void:
 		else:
 			await main.get_tree().process_frame
 		if sh.cue != null:
-			await _grab(home, sheet, col, sh.stump.position, 1.6)
+			await _grab(home, sheet, col, sh.stump.position + Vector3(0, 1.0, 0), 2.2)
 	sheet.save_png(out.path_join("shove.png"))
 	_stop(home, sh)
 
