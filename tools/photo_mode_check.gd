@@ -24,6 +24,7 @@ func run(main: Node) -> void:
 	var pitch0 := cam.pitch
 	var zoom0 := cam.zoom_to
 	ok("farm has a photo mode", home.photo != null)
+	home._close_panel()      # the fresh farm opens on its welcome panel
 	ok("enter works at home", home.photo.enter())
 	ok("HUD hidden", not home.ui.visible)
 	var still := _kin_spots(home)
