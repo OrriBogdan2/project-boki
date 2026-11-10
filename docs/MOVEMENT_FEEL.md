@@ -229,6 +229,32 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Dashes on slopes, steps and crests (`--dash-slope-check`, 2026-11-10)
+[game data] A ground dash is walking movement: it keeps to the floor on walkable slopes (WalkableFloorAngle 50 deg; the floor-find reaches MaxStepHeight 45 uu down) and keeps its distance. It leaves the ground only off a ledge. Our terrain has no smooth slopes, only stair tiles (one 0.8 m tier per metre) and flat tiles, so the ramps are stair runs: "15 deg" is stair, flat, flat (14.9 deg mean) and "30 deg" is three stairs then a flat (31.0 deg mean). The step is one tier up. The crest is a flat top running into the 31 deg ramp going down. Every Hunter gets one Shift tap while holding the way it goes, on the Hollow Crown and the Training Area (both maps gave identical numbers). Distance is horizontal, from the press to the first step back on the ground at run speed. Pop is the most height over the ground under the body's footprint. Air is time off the ground in 2.5 s.
+
+What was wrong: once grounded, any drop over 0.05 m under you in one step made you airborne, and an air dash holds its height, so every dash flew off a crest. Uphill, the body's radius saw the stair ahead as a wall. The terrace step-up only ran with movement keys held, and only at walking speed. The lift onto the stair's lip then went airborne, and the ledge rise floated you up the ramp for about 1.3 s.
+
+Fix: `HunterMove.follows_floor` (shared by walking and every dash) keeps a grounded body on the floor when the ground under it drops less than `floor_snap` (0.45 m), or less than a 50 deg slope falls over the distance moved that step. The cap is under a whole tier, so a terrace edge stays a ledge. The model eases down by `step_vis`. The terrace step-up also runs during a dash, at the dash's own speed. Tarek's Rock Hop down a slope used to land back on the rock it sprang from. Its flight now lengthens so the arc clears that rock's end by 0.2 m (`BreahHop._flight_to`), and it still lands on the aimed spot.
+
+Each cell is distance vs flat, pop m, air s: main d255acbee / this branch.
+
+| Hunter | flat m | ramp 15 | ramp 30 | step | crest |
+|---|---|---|---|---|---|
+| gunslinger | 3.79 | +29% 0.42 1.40 / +0% 0 0 | +188% 0.42 1.35 / +0% 0 0 | -2% 0 0.05 / +0% 0 0.03 | +81% 2.03 1.45 / +0% 0 0 |
+| juggernaut | 3.66 | +35% 0.42 1.90 / +0% 0 0 | +51% 0.31 2.17 / +0% 0 0 | -7% 0.80 0.03 / +0% 0 0.02 | +74% 1.73 1.23 / +0% 0 0 |
+| ashwick | 3.42 | +44% 0.38 1.12 / +0% 0 0 | +243% 0.38 1.28 / +0% 0 0 | -5% 0.80 0.05 / +0% 0 0.03 | +77% 1.59 1.47 / +0% 0 0 |
+| tender | 3.64 | -6% 0.18 0.30 / +0% 0 0 | -7% 0.42 1.32 / +0% 0 0 | -6% 0.80 0.03 / +0% 0 0.03 | +74% 1.79 1.23 / +0% 0 0 |
+| dolm (hop) | 2.55 | -2% 1.54 1.13 / -2% 1.54 0.47 | +126% 0.66 1.93 / +0% 0.66 0.28 | -2% 1.16 0.57 / -2% 1.16 0.57 | -71% 0.81 1.53 / -1% 0.71 0.52 |
+| archer | 2.96 | +56% 0.41 1.75 / +0% 0 0 | +87% 0.26 1.85 / +0% 0 0 | -3% 0 0.03 / +0% 0 0.03 | +90% 1.27 1.42 / +0% 0 0 |
+| dredge | 2.79 | +71% 0.42 1.77 / +0% 0 0 | +111% 0.38 1.98 / +0% 0 0 | -6% 0 0.03 / +0% 0 0.03 | +55% 0.80 1.52 / +0% 0 0 |
+| rimewright | 1.79 | +199% 0.42 1.23 / +0% 0 0 | +184% 0.31 1.78 / +0% 0 0 | -5% 0.80 0.05 / +0% 0 0.03 | +114% 0.23 1.55 / +0% 0 0 |
+| mage | 7.61 | -84% 0 0 / -1% 0 0 | -84% 0 0 / -1% 0 0 | -91% 0 0 / +0% 0 0.02 | +42% 4.09 0.97 / +0% 0 0 |
+| bulwark | 2.86 | +68% 0.41 1.80 / +0% 0 0 | +87% 0.35 1.82 / +0% 0 0 | -6% 0 0.03 / +0% 0 0.02 | +88% 1.10 1.38 / +0% 0 0 |
+| thief | 4.37 | -52% 0.43 1.10 / +0% 0 0 | -52% 0.48 2.00 / +0% 0 0 | -3% 0.80 0.03 / +0% 0 0.03 | +77% 2.31 1.33 / +0% 0 0 |
+| ostra (trade) | 13.18 | -2% 0 0.37 / -1% 0 0 | +0% 0 0.37 / -2% 0 0 | -2% 0 0.30 / -3% 0.80 0.33 | -6% 0.79 1.00 / -3% 0.13 0.18 |
+
+How to read the before numbers: a distance far over flat means the dash took off and flew on. The step's 0.03 s of air after the fix is the lip lift before your centre is over the upper tier, the same as walking. The pass bar is distance within 10% of flat, and pop and air no more than flat plus 0.15 m and 0.1 s. A hop to higher ground may peak higher by that rise. Rock Hop down a slope may stay up as long as the extra drop takes to fall. Sable's Lantern Trade hovers him in place and then swaps him to the lantern, so it is not a ground dash and only its distance is held. Controls still pass: a dash and a walk off a one-tier ledge leave the ground (0.70 s and 0.33 s of air, the same as main), and a walk still goes up the step.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
