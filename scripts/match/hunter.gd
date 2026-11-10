@@ -11,6 +11,7 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
+const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
@@ -2278,7 +2279,10 @@ func _physics(dt: float) -> void:
 	StoneStand.mover = null
 	var g := ground()
 	if spirit_t > 0.0 and g > pos.y + World.STEP:
-		g = minf(last_gy, pos.y)     # Phase Walk inside terrain: her floor is the one she walked in on
+		# Phase Walk into a ledge face: she climbs it (no wall stops her), and walking off the top drops her
+		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
+		grounded = true
+		vel.y = 0.0
 	if grounded and g < pos.y - 0.05:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
