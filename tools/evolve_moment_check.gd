@@ -1,6 +1,7 @@
 extends RefCounted
 ## --evolve-moment-check: the evolve moment at home (EvolveMoment): about 2.2 s: the old form curls up in
-## the type colour, a silhouette morph to the new form, which does its pose, the glow fades, the camera eases in, soft sparkles, Boki nearby
+## the type colour, a silhouette morph to the new form, which does its pose, the glow fades, the camera eases in,
+## soft sparkles, Boki nearby
 ## turn to watch, no burst or ring, and a Boki off screen gets no moment. Works headless.
 ## --evolve-moment-shots --shots-dir=<dir>: one sheet per type (needs a renderer, xvfb with opengl3).
 
@@ -114,7 +115,8 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	ok(len_s >= 1.8 and len_s <= 2.6, "the moment is about 2 s (%.2f)" % len_s)
 	ok(peak >= 1.1 and peak <= 1.2, "the silhouette swells to %.2fx" % peak)
 	var curl_clip := String(m.old.get_meta("kstate", ""))
-	ok(curled_y < 0.9 and curl_clip == "sleep", "the old form curls up (squash %.2f, kstate %s)" % [curled_y, curl_clip])
+	var curl_msg := "the old form curls up (squash %.2f, kstate %s)" % [curled_y, curl_clip]
+	ok(curled_y < 0.9 and curl_clip == "sleep", curl_msg)
 	ok(posed and cam_in > 0.9 and cam_zoom < 1.0 and m.look < 0.01, "the new form poses, the camera eases in and back")
 	ok(wash_peak >= 0.8 and wash_mid >= 0.8, "the type colour washes over it to %.2f" % wash_peak)
 	ok(absf(swap_t - swap_at) <= STEP + 0.01, "the morph to the new form starts (%.2f s)" % swap_t)
@@ -144,7 +146,8 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	var bodied := Node3D.new()
 	bodied.add_child(MeshInstance3D.new())
 	(bodied.get_child(0) as MeshInstance3D).mesh = BoxMesh.new()
-	ok(EvolveMoment.has_model(m.fresh) and not EvolveMoment.has_model(plain) and EvolveMoment.has_model(bodied), "a form with no model never plays the moment")
+	var modelled := EvolveMoment.has_model(m.fresh) and EvolveMoment.has_model(bodied)
+	ok(modelled and not EvolveMoment.has_model(plain), "a form with no model never plays the moment")
 	plain.free()
 	bodied.free()
 	var kins := [{"node": w}, {"node": m.fresh, "indoors": true}, {"node": m.old, "busy": true}]
