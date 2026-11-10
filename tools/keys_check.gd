@@ -176,21 +176,24 @@ func _cap_and_belt(m: Match, P: Hunter, R: Hunter) -> void:
 	for other in m.hunters:
 		if other != R:
 			other.teleport(R.pos + Vector3(30, 0, 30))     # (nobody else in grabbing range of the key)
-	var np := m.pickups.size()
+	var spot := R.pos
+	# only the key dropped here counts: a monster dying nearby in the wait drops its own loot (and key)
+	var ours := func() -> Array:
+		return m.pickups.filter(func(p):
+			return String(p["kind"]) == "ckey" and Vector3(p["pos"]).distance_to(spot) < 2.0)
 	m.drop("ckey", R.pos + Vector3(0.2, 0.6, 0), 1, "", "", Vector3.ZERO)      # (no random toss: it stays in reach)
 	step(m, 1.5)
-	var still_there := m.pickups.size() == np + 1
+	var still_there: bool = ours.call().size() == 1
 	var held := R.chest_keys
 	ok("a full stack (%d) leaves the key on the ground" % cap, still_there and held == cap, "keys %d" % held)
 	ok("belt adapter: count", KeyChest.count(R, "chest") == cap and KeyChest.count(R, "rift") == R.rift_keys)
 	ok("belt adapter: take spends keys", KeyChest.take(R, "chest", 2) == 2 and R.chest_keys == cap - 2)
 	ok("belt adapter: take never goes below zero", KeyChest.take(R, "chest", 9) == cap - 2 and R.chest_keys == 0)
 	R.belt = UtilityBelt.empty()      # a free belt slot too: a key type takes one (BeltKeys)
-	for pk in m.pickups:
-		if String(pk["kind"]) == "ckey":
-			R.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
+	for pk in ours.call():
+		R.teleport(pk["pos"] - Vector3(0, 0.3, 0))     # (the dropped key can roll out of reach while it waits)
 	step(m, 1.5)
-	ok("with room again it picks the key up", R.chest_keys == 1 and m.pickups.size() == np, "keys %d" % R.chest_keys)
+	ok("with room again it picks the key up", R.chest_keys == 1 and ours.call().is_empty(), "keys %d" % R.chest_keys)
 	P.chest_keys = 0
 	var box := Life.drop_box(m, P, "test")
 	box["chest_keys"] = cap + 2

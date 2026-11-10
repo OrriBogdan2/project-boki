@@ -127,6 +127,12 @@ static var _look = null         # content/rules/warden_look.json, read once (loo
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
+## Starts reading every Warden model a match may dress a Hunter in (as the loading screen comes up): the first
+## load of each was 200-450 ms on the main thread, a dozen of them in a 40-hunter build.
+static func fetch_all() -> void:
+	for a in Arch.ORDER:
+		fetch(a)
+
 static func path(arch: String) -> String:
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]

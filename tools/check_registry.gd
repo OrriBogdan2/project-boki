@@ -203,6 +203,7 @@ const CHECKS := {
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
+	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
