@@ -189,6 +189,8 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   `_drop_holds()`. (KinMerge, which is reserved, calls `_drop_holds()` directly; the gate covers it.)
 - **Who sees it.**
   - Aim reticles (lanes, Vs, lines) stay at the default `all: false`.
+  - A kit that draws its own aim line returns true from `own_aim_line()`, so the shared weapon line hides
+    (two lines read as two aims). The per-hero audit is docs/AIM_PREVIEWS.md.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
   - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
     runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
