@@ -51,21 +51,22 @@ func _setup() -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 
-## Glides P forward with the heat pinned for 1.5 s, then takes the shot.
+## Glides P sideways (east, so a trail lies across the screen; the camera looks north) with the heat pinned for
+## 1.5 s, then takes the shot.
 func _state(file: String, fuel: float, lip: bool, caption: String) -> void:
 	P.teleport(m.world.random_ground() + Vector3(0, 14, 0))
 	P.grounded = false
 	P.gliding = true
-	P.vel = Vector3(0, 0, -9.0)
+	P.vel = Vector3(9.0, 0, 0)
 	for i in 90:
 		P.inp["glide"] = true
-		P.inp["move"] = Vector2(0, -1)
+		P.inp["move"] = Vector2(1, 0)
 		P.glide_fuel = fuel
 		m.step(DT)
 		P.glide_fuel = fuel
 		P.below_lip = lip
 		m.cam.zoom = 0.5
-		m.cam.snap(P.pos + Vector3(0, 1.0, -2.0))
+		m.cam.snap(P.pos + Vector3(-1.5, 1.0, -2.0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
