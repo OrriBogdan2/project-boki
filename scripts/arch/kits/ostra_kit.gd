@@ -104,8 +104,6 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("SWOLLEN", "")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
 

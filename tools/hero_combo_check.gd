@@ -271,6 +271,9 @@ func _mage() -> void:
 	ok("Storm Rod held: a fixed 13m double-rail lane (no growth)",
 			absf(l1 - 13.0) < 0.01 and absf(l2 - 13.0) < 0.01 and bool(AimKit.entry(P, "rmb").get("rails", false)),
 			"%.1f / %.1f" % [l1, l2])
+	ok("Storm Rod held: the lane is as wide as the rod hits (its shot radius + a foe's hit radius a side)",
+			absf(float(AimKit.entry(P, "rmb").get("width", 0.0)) - 2.0 * (MageKit.ROD_SIZE + T.hit_radius())) < 0.01,
+			"width %.2f" % float(AimKit.entry(P, "rmb").get("width", 0.0)))
 	ok("Storm Rod full at 1s: the body flash", K.rod_full and K.charge_fulls >= 1)
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = false

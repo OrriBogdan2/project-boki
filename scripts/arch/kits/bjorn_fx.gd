@@ -35,7 +35,6 @@ const SWIRL_IN := 0.55         # the spin ring's inner edge as a share of the hi
 const WAKE_T := 0.28
 const WAKE_POOL := 6
 const WAKE_EVERY := 0.06
-## the Bash's gold fan: half its angle (rad) and its reach scale over the Bash's radius
 const CHAIN_LINKS := 18
 const CHAIN_SAG := 0.5        # m at its deepest, once the hammer is far out
 const WRIST := "Rig/Torso/ArmRPivot/Elbow/Hand"
@@ -322,13 +321,13 @@ func _place_glint(pv: Node3D) -> void:
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
 # ------------------------------------------------------------------ slam crescent and smash swirl
-## The Crushing Blow's crescent: 180 degrees in front of him toward `dir` (the blow's hit area), bigger with the
-## charge k. It rides with him through the slam's carry, so it stays in front instead of being left behind.
-func slam(dir: Vector2, k: float) -> void:
+## The Crushing Blow's crescent: 180 degrees in front of him toward `dir`, its outer edge at the blow's `reach`
+## (the hit area). It rides with him through the slam's carry, so it stays in front instead of being left behind.
+func slam(dir: Vector2, reach: float) -> void:
 	crescent.visible = true
 	crescent.global_position = _cres_at()
 	crescent.rotation = Vector3(0, atan2(-dir.x, -dir.y), 0)
-	crescent.scale = Vector3.ONE * lerpf(0.85, 1.0, k)
+	crescent.scale = Vector3.ONE * reach / CRES_OUT
 	cres_t = CRES_HOLD + CRES_FADE
 
 ## Where the crescent is drawn this frame: on him, so it rides through the carry.

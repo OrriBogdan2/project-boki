@@ -482,7 +482,7 @@ func _smash() -> void:
 		launch.start(dv)
 	else:
 		_carry(dv, k)
-	fx.slam(dv, k)
+	fx.slam(dv, float(md["smash_reach"]))
 	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)

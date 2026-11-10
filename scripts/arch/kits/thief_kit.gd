@@ -672,7 +672,8 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			var catch_r: float = o.r + float(bd["reach"])
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < catch_r and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o
