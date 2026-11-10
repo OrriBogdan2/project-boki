@@ -14,7 +14,7 @@ extends ArchKit
 ## - Dash: 360 Smash, a short dash that ends in one full spin hit around him; with the aegis raised it's
 ##   the Shield Charge (the Bash: invulnerable for its length, a heavier knock) on the RMB slot's own cooldown.
 ## - Passive, Crushed: any knock of his (the hammer thrown or called back, Crushing Blow, 360 Smash, Shield
-##   Charge) that drives a foe into a wall stuns them (T4, pay_slam). No resource.
+##   Charge) that drives a foe into a wall or another foe stuns them (T4, pay_slam). No resource.
 ## - E, Mending Ground: a green column comes down for 1 s, then a zone round the hammer (on you when the hammer
 ##   is in hand) heals a little every 0.5 s for 4 s and ends in a burst that also mends a raised aegis.
 ## - X, Faultline (level 6, BjornUlt): planted, a slam, and the ground erupts cell by cell down a lane.
@@ -261,6 +261,14 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if String(o.get("src", "")) == "burn" or (o.get("tags", []) as Array).has("crushed"):
 		return
 	_try_crush(t, Vector2(t.pos.x - h.pos.x, t.pos.z - h.pos.z).normalized())
+
+## Another foe within `reach` behind `t` along `dir`.
+func foe_behind(t: Ent, dir: Vector2, reach: float) -> bool:
+	var at := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + reach * 0.5)
+	for o in foes_in(at, reach * 0.5):
+		if o != t:
+			return true
+	return false
 
 func _try_crush(t: Ent, dir: Vector2) -> void:
 	if dir.length() < 0.1:
