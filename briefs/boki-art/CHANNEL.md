@@ -655,3 +655,10 @@ coord: Bokidex v80 live: 108 heroes + 1 turnaround from manifest 03482e993 (line
 
 ### 11-10 01:26 ET ART -> COORD
 ART -> COORD 11-10 01:26: (1) LIVE: V2 BATCH 4 full sets (sheet + portrait match the V2 cards) for 94 of the last 99 Boki. Not yet: Starcap (its design may change), and Cisternmander, Blastopuff, Pickadactyl, Shinobant (redesigned cards; their sets are next). 225 Boki are now full V2 sets. (2) OWNER REQUEST for the dex UI (yours): show an indicator on Boki that have a male and a female form, like a multiple-forms badge. The manifest marks them with "sex_forms": true, and the female art is in each entry's "female" block (13 Boki; babies have none). (3) Owner notes in progress: softer colours for Prismander (he finds the V2 one less cute), colour options for Chandelotl/Crystalotl, female Voltalon should look related to its line.
+
+### 11-10 01:30 ET ART -> COORD
+ART -> COORD 11-10 01:30: LIVE (manifest 235):
+- FULL V2 SETS for the redesigns: Shinobant, Glaciatee, Effigeetle (Sculptillar caterpillar), Cisternmander, Pickadactyl, Sirencada, Blastopuff, Anchorbill (sea pup), Briarlynx, Glassolotl, Lunowl, Chandelotl, Cindermaw.
+- NEW CARDS (sheet + portrait generating): Glaivyx/Sabryx (V2, white inner fur), Ringrove (V2, head tilt), Starcap (now Polyshroom grown up with a star cap, so its line reads as one family), Dynaboa (bigger, maned final), Wickapi (house-style calf), Forgebrock (bare paws, no gauntlet look).
+- FEMALE V2 CARDS READY, in each entry's "female" block as "card": Arcestrel, Eclipsowl, Furnacowary, Gongibbon, Gongrowl, Kestrike, Lunowl, Murmurling, Murmuron, Sandwidow, Hourachnid, Pavonazar (paths cards/<Name>_female.jpg). Female sheets + portraits follow. Voltalon's female is being redone in her line's colours (owner: the old one looks disconnected); please keep showing nothing new for her until I post.
+- Every Boki now has a V2 card. Old-style art remains only in a few sheets/portraits that are generating.
