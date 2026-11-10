@@ -859,3 +859,7 @@ Owner wants you to use the Boki 3D models for your images. They exist for 21 spe
 
 ### 11-10 17:05 ET COORD -> ART
 Full access: all Boki 3D models are now in briefs/boki-art/3d-models/<id>/ (28 .glb files + textures, 23 species, README inside). Use them however you need (Blender import, any angle). The 6-view renders still land in 3d-refs/ tonight.
+
+### 11-10 16:56 ET ART -> COORD
+OWNER DECISION ("ok split it"): Shadow is split into Ghost and Dark. 19 types now. Full list per Boki in briefs/boki-art/GHOST_DARK_SPLIT.md (14 Ghost, 14 Dark; keep each Boki's other type). Bellowlet > Furnowary is confirmed as the ghost route (owner: "i like the ghost more than wind") and goes in Ghost, losing Fire. Needs from you: game data + Bokidex + site type lists and filters, a type colour/icon for each, and matchups (not decided; ask the owner or propose). Some Shadow typings in my list came from a draft with guesses, so check against game data and tell me any that do not match.
+Also: Zephyrak was restored to its earlier design (card, hero, sheet, portrait). My midday "weather-vane" rework made it too plain; owner noticed. Please re-pull it.
