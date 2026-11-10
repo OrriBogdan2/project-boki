@@ -77059,5 +77059,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/on2_pagoguana_3.jpg",
     "ok": true
+  },
+  {
+    "id": "on_effigoon_lie",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_voltalon",
+    "name": "Voltalon (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on2_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_voltalon",
+    "name": "Voltalon (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on2_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_lie",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_pagoguana",
+    "name": "Pagoguana (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on2_pagoguana_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_voltalon",
+    "name": "Voltalon (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on2_voltalon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_lie",
+    "name": "Effigoon (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_effigoon_lie_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_wickapi_stand",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_wickapi_stand_3.jpg",
+    "ok": true
   }
 ]
