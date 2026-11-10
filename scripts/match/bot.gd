@@ -108,6 +108,12 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
 		elif not h.grounded and a.get("cross_go", false) and not (m.world.is_void(h.pos.x, h.pos.z) and h.pos.y < land.y - 4.0 and h.vel.y < 0.0):
 			inp["move"] = tol.normalized()
+			# look the way we're flying: the aim left from the walk-up ends up beside us mid-glide, and
+			# facing it whipped a gliding bot round on the spot (over the landing, keep the last look)
+			if tol.length() > ARRIVE_R:
+				var fly := tol.normalized() * 3.0
+				inp["aim"] = Vector3(h.pos.x + fly.x, h.pos.y + 0.9, h.pos.z + fly.y)
+				inp["aim_y"] = h.pos.y
 			# over the landing: fold the glider and drop onto it
 			inp["glide"] = tol.length() > 1.6 or m.world.is_void(h.pos.x, h.pos.z)
 			# (only to open the glider: a press near the ground buffers a jump, and over the landing
