@@ -38,6 +38,12 @@ Extraction load in mind (10 trios, 30 Hunters, their Boki, monsters and VFX).
 Numbers live in `content/rules/tuning.json` ("perf"), the one shared tuning file. Visual trades are behind the
 quality preset (`Settings.QUALITY` `anim_lod`): Ultra keeps everything at full rate.
 
+## Slow frames
+Offline, one drawn frame advances the match by at most `DashPace.CATCH_UP_S` (three 1/60 s steps). Under 20 fps
+the game runs slower instead of each slow frame queueing up to six steps that make the next frame slower still
+(the catch-up spiral). A dash of your own gets two steps a frame (`MAX_FRAME_S`). Online the clock is shared, so a
+frame takes all of its time. `--perf-throttle-check` asserts both.
+
 ## Hot-path rules
 - Test the cheap things first (range, then score), the costly ones (line of sight, a walk test, `can_see`) last
   and only for a candidate that would win.
