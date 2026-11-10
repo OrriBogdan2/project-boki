@@ -101790,5 +101790,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/halo_pharoheron_1.jpg",
     "ok": true
+  },
+  {
+    "id": "halo_pharoheron",
+    "name": "Pharoheron (legendary halo crown)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_pharoheron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_palloth",
+    "name": "Palloth (legendary halo crown, bright)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_palloth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_palloth",
+    "name": "Palloth (legendary halo crown, bright)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/halo_palloth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_pharoheron",
+    "name": "Pharoheron (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_pharoheron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_palloth",
+    "name": "Palloth (legendary halo crown, bright)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_palloth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_glaciammoth",
+    "name": "Glaciammoth (legendary halo crown)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_glaciammoth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_glaciammoth",
+    "name": "Glaciammoth (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_glaciammoth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pinguin_nl",
+    "name": "Pinguin (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pinguin_nl_2.jpg",
+    "ok": true
   }
 ]
