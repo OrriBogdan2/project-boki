@@ -102504,5 +102504,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_wayshell_halo_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_wayshell_halo",
+    "name": "Wayshell (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_wayshell_halo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_halo",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_halo_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_wayshell_halo",
+    "name": "Wayshell (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_wayshell_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_wayshell_halo",
+    "name": "Wayshell (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_wayshell_halo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_halo",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_halo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_halo",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ghoulamari_halo",
+    "name": "Ghoulamari (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ghoulamari_halo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_wayshell_halo",
+    "name": "Wayshell (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_wayshell_halo_2.jpg",
+    "ok": true
   }
 ]
