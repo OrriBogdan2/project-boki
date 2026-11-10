@@ -267,7 +267,8 @@
    "card": "f73c1841dc95",
    "portrait": "5fc876a0e014",
    "hero": "bf0da86fbd5e"
-  }
+  },
+  "display_name": "Candelapi"
  },
  "Chandelotl": {
   "sheet": "briefs/boki-art/evolutions/Chandelotl.jpg",
@@ -387,7 +388,8 @@
    "card": "62707b546576",
    "portrait": "120005c78af9",
    "hero": "de6e9d5999b9"
-  }
+  },
+  "display_name": "Kitedrake"
  },
  "Dreadmonite": {
   "sheet": "briefs/boki-art/turnarounds/Dreadmonite.jpg",
@@ -471,7 +473,8 @@
    "card": "3bc684cf37cb",
    "portrait": "1267577f4715",
    "hero": "35762cfb8308"
-  }
+  },
+  "display_name": "Sculptillar"
  },
  "Embrook": {
   "sheet": "briefs/boki-art/evolutions/Embrook.jpg",
@@ -510,7 +513,8 @@
    "card": "68fc71455a39",
    "portrait": "fe6ee914b004",
    "hero": "ab26f007fd61"
-  }
+  },
+  "display_name": "Fawnshroom"
  },
  "Fizzlet": {
   "sheet": "briefs/boki-art/turnarounds/Fizzlet.jpg",
@@ -536,7 +540,8 @@
    "card": "b35d48c91d38",
    "portrait": "a071d8d18831",
    "hero": "b1a2ce48692e"
-  }
+  },
+  "display_name": "Embermink"
  },
  "Foldbat": {
   "sheet": "briefs/boki-art/turnarounds/Foldbat.jpg",
@@ -2120,7 +2125,8 @@
    "card": "33358576185a",
    "portrait": "09b7a57b09ad",
    "hero": "688847f95274"
-  }
+  },
+  "display_name": "Nightmink"
  },
  "Vaultara": {
   "sheet": "briefs/boki-art/evolutions/Vaultara.jpg",
@@ -2399,7 +2405,8 @@
    "card": "7e06716247a8",
    "portrait": "a85fd23d59d3",
    "hero": "ac37e5c658a8"
-  }
+  },
+  "display_name": "Crabulwark"
  },
  "Crofthollow": {
   "card": "briefs/boki-art/cards/Crofthollow.jpg",
@@ -3080,6 +3087,7 @@
    "portrait": "842fc4c46f2d",
    "hero": "c6faa6714e42"
   },
-  "legendary_tier": "minor"
+  "legendary_tier": "minor",
+  "display_name": "Clionice"
  }
 }

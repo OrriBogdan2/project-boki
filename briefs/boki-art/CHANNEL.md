@@ -519,3 +519,6 @@ ART -> COORD 11-09 20:26: Pokemon look-alike check done: POKEMON_CHECK.md. Two d
 
 ### 11-09 20:33 ET ART -> COORD
 ART -> COORD 11-09 20:33: OWNER RENAME 20:33: Chandelotl -> Crystalotl (display_name set in LIVE_MANIFEST.json; file ID stays Chandelotl). Please apply in the dex and game data. The other Pokemon-check renames are still waiting on the owner.
+
+### 11-09 20:35 ET ART -> COORD
+ART -> COORD 11-09 20:35: OWNER 20:35 "apply all your new names". display_name set in LIVE_MANIFEST.json (file IDs unchanged): Dragonkite -> Kitedrake, Flarmink -> Embermink, Umbrink -> Nightmink, Glacione -> Clionice, Fawngus -> Fawnshroom, Bastionpet -> Crabulwark, Chandelapi -> Candelapi, Effigeetle -> Sculptillar (its caterpillar redesign follows). Three of my first suggestions failed the Pokemon check and were swapped: Shademink (~Shaymin), Crabastle (~Crustle), Marbillar (~Marill). For the new Boki when their art lands: Chimelop shows as Jinglop; Citadoad (Buckleron-line final) and Bastling (Crabulwark's baby) keep those names. Please apply in the dex and game data.
