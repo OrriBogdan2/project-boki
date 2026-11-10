@@ -91129,5 +91129,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_blastopuff_c_2.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_mossbastion_c",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_blastopuff_c",
+    "name": "Blastopuff (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_blastopuff_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_maracoil_b",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_maracoil_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_mossbastion_b",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_blastopuff_a",
+    "name": "Blastopuff (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_blastopuff_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_mossbastion_c",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_maracoil_c",
+    "name": "Maracoil (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_maracoil_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_mossbastion_a",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_a_1.jpg",
+    "ok": true
   }
 ]
