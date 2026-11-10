@@ -66,3 +66,5 @@ DROP-={'pk_bullpole_star','pk_bullpole_diamond','pk_bullpole_arrow','pk_bullpole
 DROP-={'rd_tiltster_a','rd_tiltster_b','rd_pinster_b'}
 DROP-={'v2t_bullpole','v2t_pinster','v2t_tiltster'}
 DROP-={'v2t_jerbit','v2t_jerbolt','v2t_dynaboa','v2s_pinster','v2p_pinster','v2s_tiltster','v2p_tiltster','v2x_bullpole'}
+DROP|={'citadoad_card','critwom_card','sirencada_card'}  # auto jobs from promoting their V2 sets; cards are already V2
+DROP-={'v2s_tiltster_pb','v2p_tiltster_pb'}

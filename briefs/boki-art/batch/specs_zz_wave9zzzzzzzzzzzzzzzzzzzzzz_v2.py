@@ -431,3 +431,8 @@ for _n,_s,_pose in (('Pinster','v2t_pinster_4',"uncurling from its ball, peeking
     _r=_B2D[_n]; V2SHEET_NEW(_n,_O+_s+'.jpg',_r[6],_r[7]); V2PORT_NEW(_n,_O+_s+'.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_pose)
 SPECS.append({'id':'v2x_bullpole','name':'Bullpole (V2 card, remove board tiles)','refs':[_O+'v2t_bullpole_2.jpg'],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':_EDIT+"remove the six square picture tiles in the corners and along the top and bottom edges (an eye, a purple shape, spines, black coils, feathers, pink ribs); the background behind the tadpole is one plain flat pale grey everywhere. The tadpole itself stays exactly the same. Do not add anything else."})
+# Tiltster's V2 sheet/portrait ids were already used by the old hamster run: new ids for the pill bug.
+_r=_B2D['Tiltster']
+for _j in [s for s in SPECS if s['id'] in ('v2s_tiltster','v2p_tiltster')]: pass
+_n0=len(SPECS); V2SHEET_NEW('Tiltster',_O+'v2t_tiltster_4.jpg',_r[6],_r[7]); V2PORT_NEW('Tiltster',_O+'v2t_tiltster_4.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],"rearing its front up with both flipper claws raised, the playfield on its back tilted toward the viewer")
+SPECS[_n0]['id']='v2s_tiltster_pb'; SPECS[_n0+1]['id']='v2p_tiltster_pb'
