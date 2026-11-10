@@ -1,0 +1,116 @@
+{
+	"grammar": 1,
+	"id": "gongrowl",
+	"name": "Gongrowl",
+	"animals": [
+		"Roaring gibbon"
+	],
+	"theme": "echo",
+	"flavor": "Roaring gibbon with a gong crest grown from its skull.",
+	"colors": {
+		"body": "#9d9597",
+		"belly": "#dbd2cf",
+		"glow": "#dec0a9"
+	},
+	"look": {
+		"ears": "wisp",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "rings"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 6.8,
+			"hop_height": 0.1,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 6,
+		"kin_damage": 2,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.58,
+		"loyalty": 0.56,
+		"temper": 0.55,
+		"curiosity": 0.74
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Morning Song",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "stun",
+				"duration": 0.6
+			}
+		]
+	},
+	"active": "chain_spark",
+	"auto": "echolocate",
+	"merge": "stormcoat",
+	"evolution": {
+		"root": "Gong",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "loud and musical, sings its answers",
+		"syllables": [
+			"Gong",
+			"rowl"
+		]
+	},
+	"egg": {
+		"name": "Gongrowl Egg",
+		"temper": "Joyful",
+		"desc": "Something joyful is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

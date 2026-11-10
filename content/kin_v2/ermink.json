@@ -1,0 +1,114 @@
+{
+	"grammar": 1,
+	"id": "ermink",
+	"name": "Ermink",
+	"animals": [
+		"Stoat"
+	],
+	"theme": "bloom",
+	"flavor": "Stoat whose tail is a calligraphy brush, cream coat like a blank page.",
+	"colors": {
+		"body": "#e6d8d2",
+		"belly": "#fef3ee",
+		"glow": "#ddc9b1"
+	},
+	"look": {
+		"ears": "none",
+		"body": "cloud",
+		"tail": "none",
+		"feet": "none",
+		"aura": "leaves"
+	},
+	"body": {
+		"size": "small",
+		"reach": 1.3,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 6.0,
+			"hop_height": 0.08,
+			"pace": 0.85
+		}
+	},
+	"stats": {
+		"kin_hp": 7,
+		"kin_damage": 1,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.51,
+		"loyalty": 0.8,
+		"temper": 0.04,
+		"curiosity": 0.49
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "shoulder",
+		"name": "Cushion",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.8
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Ermi",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "slow and sleepy, very calm",
+		"syllables": [
+			"Erm",
+			"ink"
+		]
+	},
+	"egg": {
+		"name": "Ermink Egg",
+		"temper": "Unbothered",
+		"desc": "Something unbothered is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}

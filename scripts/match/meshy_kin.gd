@@ -1,7 +1,8 @@
 class_name MeshyKin
 extends Node
 ## A Boki drawn from a game-ready Meshy model: a static mesh (tools/blender/meshy_gameready.py, about 8k triangles, feet
-## on y=0, front toward -Z) wearing its baked colour atlas under the Boki toon light and ink outline. It has no skeleton:
+## on y=0, front toward -Z) wearing its baked colour atlas under the Boki toon light and
+## ink outline. It has no skeleton:
 ## KinPuppet's squash, lean and hop (and Flex) move it. Which species wear one, and where the files are, lives in
 ## content/kin_models.json, one row per kin id, so a model is swapped by changing its row (or deleting the row to
 ## fall back to the old rig or primitives). A row's "redo" marks a model queued for a Meshy redo.
