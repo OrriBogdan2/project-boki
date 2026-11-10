@@ -6,7 +6,7 @@ extends Node3D
 ## A kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) draws over it.
 
 const LIFE := 0.2        # s a ribbon piece takes to fade out
-const WIDTH := 0.6       # m across, about a body wide, so it reads at match zoom; narrows to half as it fades
+const WIDTH := 0.5       # m across, about a body wide, so it reads at match zoom; narrows to half as it fades
 const ALPHA := 0.8       # a piece's opacity when laid
 const LIFT := 0.9        # m above the feet (times the Hunter's scale): the body anchor
 const MIN_LEN := 0.05    # m the Hunter must move before the next piece is laid
@@ -39,6 +39,7 @@ func _ready() -> void:
 		var mat := StandardMaterial3D.new()
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED      # (written depth tints the frame)
 		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 		var mi := MeshInstance3D.new()
 		mi.mesh = quad
@@ -85,7 +86,7 @@ func _feed(h: Hunter) -> void:
 		return
 	_last[h] = at
 	if dist <= MAX_LEN:
-		_lay(from, at, dist, h.accent())
+		_lay(from, at, dist, Arch.color(h.arch))
 
 func _lay(from: Vector3, to: Vector3, dist: float, col: Color) -> void:
 	var z := (to - from) / dist

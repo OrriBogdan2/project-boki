@@ -76,7 +76,7 @@ func _case(main: Node, m: Match, hero: String, ev: String, n: int) -> void:
 		flow._lift()
 	var st := DashStreak.of(m)
 	var made := st.get_child_count()
-	var want := h.accent().lerp(Color.WHITE, 0.2)
+	var want := Arch.color(h.arch).lerp(Color.WHITE, 0.2)
 	var all_ran := true
 	var all_laid := true
 	var peaks: Array = []
