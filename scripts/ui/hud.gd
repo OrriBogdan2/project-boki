@@ -1264,7 +1264,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var st := ""
 	match k.state:
 		"shoulder":
-			st = ({"mount": "riding", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
+			st = ({"mount": "at your side", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
 			if not k.giant.is_empty(): st = "GIANT"
 			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
 		"flying", "flying_home": st = "in the air"

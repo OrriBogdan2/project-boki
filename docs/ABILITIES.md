@@ -207,7 +207,7 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 
 ### Lunowl (Owl + Luna moth, perch)
 
-- **E: Moon Swap** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
+- **E: Moon Mark** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - **Auto: Moonlift** (burst, 14s): On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - **Throw (C)**: stuns what it hits; also push.
 - **Merge: Eclipse** (7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
@@ -234,7 +234,7 @@ Several verbs appear in more than one element, tuned to fit it:
 - **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bracewall (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
 - **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries melee), Refraction (prism, auto when hurt), Prism Wall (reflecting wall).
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
-- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).
+- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits).
 - **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
 
 ## Readability

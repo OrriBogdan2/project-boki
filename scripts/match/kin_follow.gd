@@ -4,7 +4,8 @@ extends RefCounted
 ##   follow  (default) walks at your side, fights what you fight, comes back between fights
 ##   guard   holds the spot it was told to (Kin.hold_at) and fights what comes near
 ##   chase   sticks to one target (Kin.chase_target) until it falls
-##   return  on you: the shoulder, the pack, or you ride a mount; safe, and its carried passives are on
+##   return  on you (shoulder or pack), or a big Boki guards at your side, never under or in you;
+##           its carried passives are on
 ## The body states are still Kin.state (active, flying, returning, flying_home, shoulder...).
 ## Walking is steering on top of an A* path (KinPath): arrive slowing, separation from you, a path
 ## recomputed on a timer. A Boki that is stuck for stuck_s, or beyond the leash, leaps back to your side
@@ -15,6 +16,7 @@ extends RefCounted
 const CMD_IDS := ["guard", "follow", "chase", "return"]       # the index is what goes over the network (KinNet)
 const NAMES := {"guard": "Guard", "follow": "Follow", "chase": "Chase", "return": "Return"}
 const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place Boki closes on its side spot, on top of your pace
+const GUARD_PULL := 14.0   # 1/s: how fast a big Boki on the Return order closes on its guard spot beside you
 
 static func rules() -> Dictionary:
 	return KinCommand.rules()["follow"]
@@ -118,12 +120,12 @@ static func set_cmd(k: Kin, cmd: String, target: Ent = null) -> bool:
 			k.cmd = "return"; k.hold_at = Vector3.INF; k.chase_target = null; k.target = null
 			if k.state in ["active", "returning"]:
 				if k.flat_dist(o) <= float(KinCommand.rules()["recall_range"]):
-					leap(k, o.pos + Vector3(0, 1.5, 0), "shoulder")
+					leap(k, onto(k), "shoulder")
 				else:
 					k.state = "returning"         # too far to leap: it runs back (and hops when it cannot)
 			elif k.state == "flying_home" and not k.fly.is_empty():
 				k.fly["dest"] = "shoulder"          # already leaping to your side: carry on up onto you
-				k.fly["to"] = o.pos + Vector3(0, 1.5, 0)
+				k.fly["to"] = onto(k)
 			# (a Sic in the air: it lands, then Kin._sim_active sends it up onto you)
 		_:
 			return false
@@ -174,7 +176,7 @@ static func hop_back(k: Kin) -> void:
 	if k.owner_h == null:
 		return
 	if k.cmd == "return":
-		leap(k, k.owner_h.pos + Vector3(0, 1.5, 0), "shoulder")
+		leap(k, onto(k), "shoulder")
 		return
 	var s := side_spot(k)
 	if k.cmd == "guard":
@@ -195,6 +197,11 @@ static func land_side(k: Kin) -> void:
 	k.state = "active"
 	k.m.fx.dust(k.pos, 8)
 
+## Off you at once, onto your side spot (a carried Boki's own dash or leap starts from there).
+static func drop_beside(k: Kin) -> void:
+	k.fly = {"to": side_spot(k)}
+	land_side(k)
+
 ## Off your shoulder to your side.
 static func hop_off(k: Kin) -> void:
 	if k.owner_h == null:
@@ -207,12 +214,51 @@ static func hop_on(k: Kin) -> void:
 	if k.owner_h != null:
 		leap(k, k.owner_h.pos + Vector3(0, 1.5, 0), "shoulder")
 
-## You jumped while riding it: you come off into a normal jump, the Boki curls up on your back until you land.
-static func on_jump(h: Hunter) -> void:
-	var k: Kin = h.kin
-	if k != null and k.state == "shoulder" and k.cmd == "return" and k.carry_style() == "mount" and k.giant.is_empty():
-		k.cmd = "follow"
-		KinNet.event(k.m, "cmd", k, k.pos, "follow")
+## Where the Return order sends it: onto your shoulder or pack, or a big Boki to its guard spot beside you.
+static func onto(k: Kin) -> Vector3:
+	var o := k.owner_h
+	if k.big() and k.cmd == "return" and not need_carry(k):
+		var s := guard_spot(k)
+		if s != Vector3.INF:
+			return s
+	return o.pos + Vector3(0, 1.5, 0)
+
+## The guard spot of a Boki too big for your shoulder: beside you at guard_side_m, on the flank it holds
+## (the other one if that is blocked), never under or in you. Vector3.INF: no room on either flank.
+static func guard_spot(k: Kin) -> Vector3:
+	var o := k.owner_h
+	var W: World = k.m.world
+	var y0: float = o.pos.y if o.grounded else W.ground_at(o.pos.x, o.pos.z)
+	var fwd := Vector2(-sin(o.face), -cos(o.face))
+	for s: float in [k.guard_side, -k.guard_side]:
+		var off := Vector2(-fwd.y, fwd.x) * s * _r("guard_side_m")
+		var p := o.pos + Vector3(off.x, 0, off.y)
+		if W.is_void(p.x, p.z) or W.is_block(p.x, p.z) or absf(W.ground_at(p.x, p.z) - y0) > KinPath.STEP:
+			continue
+		k.guard_side = s
+		# it hops with your jumps: never below your feet
+		return Vector3(p.x, maxf(W.ground_at(p.x, p.z), o.pos.y), p.z)
+	return Vector3.INF
+
+## One step of a big Boki on the Return order, beside you. False: it curls up on your back
+## this step instead (you glide or cross a gap, or both flanks are blocked).
+static func guard_tick(k: Kin, dt: float) -> bool:
+	var o := k.owner_h
+	var want := guard_spot(k) if not need_carry(k) else Vector3.INF
+	if want == Vector3.INF:
+		return false
+	var p := k.pos.lerp(want, minf(1.0, dt * GUARD_PULL)) if k.beside else want
+	var rel := Vector2(p.x - o.pos.x, p.z - o.pos.z)
+	var near := _r("guard_min_m")
+	if rel.length() < near:
+		if rel.length() < 0.01:
+			rel = Vector2(want.x - o.pos.x, want.z - o.pos.z)
+		rel = rel.normalized() * near
+		p = Vector3(o.pos.x + rel.x, p.y, o.pos.z + rel.y)
+	p.y = maxf(p.y, o.pos.y)
+	k.vel = (p - k.pos) / maxf(dt, 0.001)
+	k.pos = p
+	return true
 
 # ------------------------------------------------------------------ traversal: carry and drop
 ## Do you have to be carried over this (a glide, a pad, a drop off a ledge, a gap)?

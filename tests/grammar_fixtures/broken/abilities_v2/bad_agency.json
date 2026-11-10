@@ -1,0 +1,36 @@
+{
+	"grammar": 1,
+	"id": "bad_agency",
+	"name": "Broken Agency",
+	"flavor": "Every way a Boki may not move its hunter (KinFence): a blink of the hunter and a lift with no abyss cue.",
+	"from": "owner",
+	"trigger": {
+		"type": "on_cast"
+	},
+	"stages": [
+		{
+			"delivery": {
+				"type": "blink",
+				"origin": "owner"
+			},
+			"then": {
+				"on_end": [
+					{
+						"delivery": {
+							"type": "burst",
+							"origin": "owner",
+							"radius": 0
+						},
+						"effects": [
+							{
+								"type": "lift",
+								"target": "owner",
+								"strength": 10
+							}
+						]
+					}
+				]
+			}
+		}
+	]
+}
