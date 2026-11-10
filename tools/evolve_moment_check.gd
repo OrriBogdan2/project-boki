@@ -44,8 +44,8 @@ func _stage(main: Node, rendered: bool) -> Dictionary:
 		main.add_child(host)
 	var cam := Camera3D.new()
 	host.add_child(cam)
-	cam.position = Vector3(0, 3.2, 5.0)
-	cam.look_at_from_position(cam.position, Vector3(0, 0.6, 0), Vector3.UP)
+	cam.position = Vector3(0, 1.7, 2.6)
+	cam.look_at_from_position(cam.position, Vector3(0, 0.5, 0), Vector3.UP)
 	cam.current = true
 	var sun := DirectionalLight3D.new()
 	host.add_child(sun)
@@ -204,7 +204,7 @@ func _shots(main: Node, stage: Dictionary) -> void:
 				await RenderingServer.frame_post_draw
 			var img: Image = (stage["vp"] as SubViewport).get_texture().get_image()
 			img.convert(Image.FORMAT_RGBA8)
-			var c: Vector2 = (stage["cam"] as Camera3D).unproject_position(Vector3(0, 0.6, 0))
+			var c: Vector2 = (stage["cam"] as Camera3D).unproject_position(Vector3(0, 0.5, 0))
 			sheet.blit_rect(img, Rect2i(int(c.x) - CROP / 2, int(c.y) - CROP / 2, CROP, CROP), Vector2i(CROP * i, 0))
 		sheet.save_png("%s/evolve_%s_%s.png" % [dir, type, spk])
 		print("SHOT evolve %s %s" % [type, spk])
