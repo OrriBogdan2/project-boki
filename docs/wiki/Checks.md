@@ -41,7 +41,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
-| `--train-check` | Riding the sky train (moving with the car, its edges hold you) and being hit by its front |
+| `--train-check` | Riding the sky train (moving with the car, walking off its side) and being hit by its front |
+| `--train-ride-check` | Leaving a moving car (jump, dash off the back, walk off the side, glider) keeps its speed with normal air drag; a glide landing on one has no jolt |
 | `--perch-check` | Each perch can be reached from its updraft chain |
 | `--mapcheck` | Generated maps: every island reachable from every other (200 small, 40 big) |
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
