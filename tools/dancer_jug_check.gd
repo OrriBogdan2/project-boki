@@ -516,9 +516,9 @@ func juggernaut(a) -> void:
 	P.inp["fire"] = false
 	A.step(m, 0.1)
 	var chord := 0.0
-	for r in DJFx.of(m).riders:
-		if r["kind"] == "crescent_bolt":
-			chord = DJFx.CRESCENT_CHORD * ((r["node"] as Node3D).get_node("Head") as Node3D).scale.x
+	for rider in DJFx.of(m).riders:
+		if rider["kind"] == "crescent_bolt":
+			chord = DJFx.CRESCENT_CHORD * ((rider["node"] as Node3D).get_node("Head") as Node3D).scale.x
 	var wave_w := 2.0 * float(K.lmb_def()["wave_size"][1])        # held to full
 	A.step(m, 0.5)
 	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
