@@ -229,6 +229,14 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Run start and stop poses (`WardenStride`, `--stride-check`, `--stride-shots`)
+Decision 0020 gave every Hunter the source's acceleration and a 0.3-0.5 m stop slide; the clips still snapped from idle to a run and back. `WardenStride` (scripts/heroes, called at the end of `WardenClips.step`, nothing in hunter.gd) adds both on top of the walk/run loops, from the speed and the brake state, never a timer:
+- **Start:** the hips lean along the way he goes by `lean_deg`, scaled by how far the *shown* speed (it climbs to the real one over 0.3 s) still lags it, so the lean settles as speed builds and is gone at a steady run.
+- **Stop:** a let-go (speed falling under its peak from a walk or run) shifts the weight back by `settle_deg` over the slide (`HunterMove.slide`). Two-bone foot pins: the trailing foot swings to its idle spot as the body halts, the leading foot stays where it was planted, then steps in over `step_s`, then the idle loop. The planted foot slides 0.7-1.8 cm in the stop (the loops alone: 20-90 cm; limit 3 cm). The idle spots are read off the standing pose; the drawn body's lead over the physics is learned off each stop.
+- **Skips:** a dash, a cast or keyed move, a hit or stun, the air, a crouch dip, a knock or kit step (speed over 1.15x run that nothing keyed) show neither, in that frame, with no ease-out.
+- **Per Hero** (content/rules/warden_stride.json): Kael, Albert and Tenzo lean less, settle 9-10 degrees and step in over 0.28-0.3 s; Vex, Neve, Sable and Pip lean 10-12 degrees, settle 3.5-4 and step in over 0.16-0.17 s.
+- `--stride-check` covers all 12 Hunters; `--stride-shots` films a stop from a run with the stride on and off (docs/shots/anim-run-start-stop/).
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
