@@ -1283,3 +1283,8 @@ for _k,_d in (('f1',"a great dragon whose wings are two enormous diamond kites, 
               ('f3',"a storm-kite colossus seen from below as it soars: one vast delta-shaped kite wing span with a cross-frame across its whole back and arms, cream belly toward the viewer, long whiskers and horns, two long ribbon tails with bows whipping behind.")):
     SPECS.append({'id':'kite_dragonkite_'+_k,'name':'Dragonkite/Kitedrake (kite rework '+_k+')','refs':[_C%'Kitlet'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Draw one single character illustration of the FINAL evolution of the creature in image 1, big and impressive: "+_d+_KITE+" Ignore how image 1 is painted. "+_TXT+STYLE_V2('final','majestic',False,False)+FRAME_V2})
+
+# 11-10 OWNER: "these are good, your choices" -> Kitlet line rework live: Ribbonwyrm = kite_ribbonwyrm_r1_2, Dragonkite = kite_dragonkite_f1_2. Sets.
+for _n,(_st,_ar,_pose) in {'Ribbonwyrm':('mid','pretty',"rising in a steep climb, facing RIGHT, kite fins fanned, bow tail trailing below"),'Dragonkite':('final','majestic',"gliding side-on, facing LEFT, both kite wings spread flat, kite-chain tail streaming behind")}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,False,False,_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_kite'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_kite'; SPECS[_n0+1]['runs']=2
