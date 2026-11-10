@@ -5,7 +5,8 @@ extends RefCounted
 ## strength (clamped) and the owner loses it; one stolen summon at half the window; at most two stolen wisps
 ## ("Hands full"); a thief going down scatters them; the owner takes theirs back once revived; an ungrabbed wisp
 ## goes home and stays; match end sends every stolen wisp home with a soul echo in the Field Book; the kin
-## snapshot carries the carrier. Prints PASS/FAIL.
+## snapshot carries the carrier. A killed summon stays linked and flies home while its hunter is up, and breaks
+## loose where it fell when they are downed. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -28,6 +29,7 @@ func run(main_node: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 	_frames(0.3)
 	_steal()
+	_killed_summon()
 	m.queue_free()
 	print("WISPSTEAL %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -49,6 +51,33 @@ func _hold(h: Hunter, k: Kin, secs: float) -> void:
 	h.inp["interact"] = true
 	_frames(secs)
 	h.inp["interact"] = false
+
+## A summoned Boki killed: linked (not stealable) while its hunter is up, loose where it fell once they are downed.
+func _killed_summon() -> void:
+	var p: Hunter = m.player
+	var f: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team and h.kin != null)[0]
+	var fk: Kin = f.kin
+	m.revive_hunter(f, null)
+	_frames(0.1)
+	fk.summon.cd = 0.0
+	ok(KinSummon.press(f) and not fk.wisp, "killed summon: a rival summons their Boki")
+	fk.hurt(fk.max_hp * 5.0, null)
+	ok(fk.wisp and fk.summon.homing and not KinSteal.loose(fk) and fk.owner_h == f,
+		"...killed with its hunter up: the wisp stays linked and flies home")
+	ok(not KinSteal.grab(fk, p), "...nobody can grab it")
+	_frames(1.0)
+	ok(not fk.summon.homing and not KinSteal.taken(fk) and fk.pos.distance_to(f.pos + Vector3(0, 1.5, 0)) < 0.05,
+		"...home on its hunter's shoulder")
+	fk.summon.cd = 0.0
+	m.knock(f, p, {})
+	f.down_hp = 1e6
+	_frames(0.1)
+	var fell := fk.pos
+	fk.hurt(fk.max_hp * 5.0, null)
+	ok(KinSteal.loose(fk) and not fk.summon.homing and absf(fk.flat_dist(fell) - KinSteal.POP_M) < 0.1,
+		"...killed guarding its downed hunter: the wisp breaks loose where it fell")
+	ok(KinSteal.grab(fk, p) and KinSteal.stolen(fk), "...and a rival can grab it")
+	KinSteal.match_end(m)
 
 func _steal() -> void:
 	var p: Hunter = m.player

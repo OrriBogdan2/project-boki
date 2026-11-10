@@ -11,8 +11,9 @@ extends RefCounted
 ## orbiting its hunter at shoulder height, carry passives on, no orders or hits, the AI not ticking, and the
 ## snapshot flag turns a remote Boki into a wisp and back. The summon (KinSummon): every species has a window
 ## and cooldown in the uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash,
-## damage never ends it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a
-## shrink back to a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
+## damage never ends it, a kill turns it back into a wisp with the longer cooldown that flies home at 25 m/s from
+## where it fell (its hunter shown for 2 s), the window ends in a shrink back to a dim wisp, a resting summon
+## refuses, the snapshot carries it and the homing flag. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -276,6 +277,26 @@ func _ground_away(from: Vector3, dist: float) -> Vector3:
 			return Vector3(to.x, m.world.ground_at(to.x, to.z), to.z)
 	return from + Vector3(dist, 0, 0)
 
+## A killed summon's wisp (KinSummon.fly_home): from where it fell, linked, home at 25 m/s, its hunter shown for 2 s.
+func _homing(k: Kin, fell: Vector3) -> void:
+	var p: Hunter = m.player
+	var home := func() -> float: return k.pos.distance_to(p.pos + Vector3(0, 1.5, 0))
+	ok(k.summon.homing and k.pos.distance_to(fell + Vector3(0, KinWisp.SHOULDER_Y, 0)) < 0.01 and not KinSteal.loose(k),
+		"home: its hunter up, the wisp stays linked and starts home from where it fell")
+	ok(absf(p.reveal_t - 2.0) < 0.01, "...showing its hunter through walls for 2 s (%.1f)" % p.reveal_t)
+	var gap: float = home.call()
+	for i in 12:
+		m.step(DT)
+	var flown: float = gap - home.call()
+	ok(k.summon.homing and absf(flown - 5.0) < 0.05, "...flying at 25 m/s (%.2f m in 0.2 s)" % flown)
+	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]
+	var row: Array = []
+	row.resize(KinNet.KIN_AT)
+	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
+	ok(other.summon.homing and other.wisp, "online: the snapshot carries the homing flag (KinNet.HOME_AT)")
+	_frames(gap / 25.0)
+	ok(not k.summon.homing and home.call() < 0.05, "...then it rides at its hunter's shoulder again")
+
 ## The summon itself, on the player's Cindle with Boki wisps on.
 func _summon() -> void:
 	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
@@ -324,13 +345,17 @@ func _summon() -> void:
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
 	s.cd = 0.0
 	KinSummon.press(p)
+	k.teleport(_ground_away(p.pos, 12.0))
+	var fell := k.pos
+	p.reveal_t = 0.0
 	k.hurt(k.max_hp * 5.0, null)
 	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: knocked down, it turns back into a wisp, 75 s cooldown")
+		"summon: killed, it turns back into a wisp, 75 s cooldown (knocked_cd_mult)")
 	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding from where it fell up to the shoulder")
+	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding into its wisp where it fell")
 	pop._process(BokiWispPop.DURATION + 0.01)
-	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp rides on")
+	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp shows")
+	_homing(k, fell)
 	s.cd = 0.0
 	KinSummon.press(p)
 	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]
