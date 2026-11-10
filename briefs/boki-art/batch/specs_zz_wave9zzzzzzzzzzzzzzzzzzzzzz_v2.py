@@ -1643,3 +1643,29 @@ for _a in (('Stamproo','baby','cute',0,1),('Postroo','mid','cute',0,1),('Pillaro
 for _n in ('Sarcobra','Pavonazar','Wayshell','Ghoulamari','Cetorgan','Cindermaw','Aurostag','Sphinxblight','Hydrangor','Siegephant','Glaciammoth','Pharoheron','Palloth','Luckhop','Twinklup','Lockwren','Glacione','Cometail','Calderoise'):
     _st,_ar,_dk,_fu=_R4.get(_n,('final','majestic',0,0)) if _n in _R4 else (('baby','cute',0,1) if _n in ('Luckhop','Twinklup','Lockwren','Glacione') else ('final','majestic',0,0))
     SETOF(_n,_st,_ar,_dk,_fu,_GP+", its halo ring floating above its head",'halo')
+
+# ===== 11-10 night OWNER: "change a mushroom family to something else, run a bunch of options. No camel. Review everything again and try alts for
+# the ones you think need it." Fourth pass over all 259.
+# GLOMWORT > GLOMBULUS stops being a mushroom line: same mustard-yellow blob creature and face, new idea. 4 ideas x (baby, final) x 2 runs. ids glom_<idea>_<b|f>.
+_GL={'honey':("a honey creature: a round amber-gold blob of honey with a small dipper-shaped curl on its head and a few hexagon honeycomb cells showing through its back, a drip-shaped tail",
+              "a great honey beast: a tall heap of amber honey with big honeycomb plates along its back, two dipper-spiral horns, a wide happy grin, and thick slow arms of honey, all one body"),
+     'wax':("a candle-wax creature: a round cream-yellow blob of soft wax with a tiny wick curl on its head and two melted drips down its sides like little arms",
+            "a great wax beast: a towering heap of layered melted wax in cream and mustard with three wick horns (no flames), drip-shaped fringes all round, and a calm sleepy face"),
+     'paint':("a paint creature: a round blob of thick yellow paint with a swirl of two other colours (teal and coral) folded into its back like marbling, a brush-tip-shaped tail",
+              "a great paint beast: a tall swirling heap of thick paint in marbled yellow, teal, coral and violet bands, with a broad brush-stroke crest and big splat-shaped paws"),
+     'custard':("a pudding creature: a wobbly round custard blob with a darker caramel top like a cap of its own body and a little curl like whipped cream, mid-jiggle",
+                "a great pudding beast: a tall tiered wobbling custard with a glossy caramel crown running down in three points, a wide grin, short stout legs")}
+for _k,(_b,_f) in _GL.items():
+    ON_CHANGE('Glomwort',_C%'Glomwort','baby','cute',False,False,"the same small mustard-yellow blob creature with the same face, eyes and stubby legs, but it is no longer a mushroom creature: no mushrooms anywhere. It is "+_b+".",runs=2,tag='_x'); SPECS[-1]['id']='glom_'+_k+'_b'
+    ON_CHANGE('Glomworth',_C%'Glomworth','final','creepy',False,False,"the same big yellow blob creature with the same face and eyes, but it is no longer a mushroom creature: no mushrooms anywhere and no drips falling off it. It is "+_f+".",runs=2,tag='_x'); SPECS[-1]['id']='glom_'+_k+'_f'
+# ALTS for designs that read as worn or built after the last round (edits of the live card, 3 runs each; ids alt_<name>).
+def ALT(n,text): SPECS.append({'id':'alt_'+n.lower(),'name':n+' (alt)','refs':['briefs/boki-art/cards/'+n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K','prompt':_EDIT+text})
+ALT('Kindlewren',"the red cap on its head reads as a beret: replace it with a small rounded crest of red-tipped feathers shaped like a match head, clearly growing from its head feathers, the same red.")
+ALT('Blotlet',"it sits in a pot that looks like a separate object: remove the pot. It is one round black ink-drop body sitting on the ground, with a wider, flatter base like a blot, keeping the quill-shaped curl on its head.")
+ALT('Sloggoth',"its arms end in roller drums and it has tank-like treads, which look built: its forearms become thick, heavy arms of the same dark ink body with broad flat paws, and its lower body is a plain heavy seated mass. It keeps the raised letter shapes on its chest and the paper-curl mane.")
+ALT('Dreadnoyak',"it looks built: remove the smoking chimneys, the smoke and the anchor. Its horns are tall, plain ice horns swept back, its chest is a broad wedge of blue ice like an icebreaker's bow, and one row of round frost marks runs along its flank.")
+ALT('Kingpinguin',"the pins on its head read as a headdress: replace them with a tall natural penguin crest of white feathers tipped red, like a rockhopper's, fanned in a row of ten. Everything else stays the same.")
+ALT('Pillaroo',"it reads as a postbox, not an animal: give it a real kangaroo head with a longer muzzle, a clear neck, strong hind legs and a thick tail it leans on, and remove the postbox cap from its head, replacing it with a small rounded tuft of red fur. It keeps its red coat, stamp-edged ears and letter-slot pouch.")
+ALT('Tesselamb',"the stack of flat stones on its head reads as a hat: remove it, leaving a soft tuft of pebble wool between its ears.")
+# Sawshark line: all three stages swim the same way. New pose for the final.
+_n0=len(SPECS); ON_POSE('Sawright',_LM['Sawright']['sheet'] if 'Sawright' in _LM else 'briefs/boki-art/cards/Sawright.jpg','final','tough',False,False,"breaching straight up, body vertical, saw nose pointing to the sky, tail curled, seen from the side facing LEFT.",_KEEPALL); SPECS[_n0]['id']='alt_sawright_pose'
