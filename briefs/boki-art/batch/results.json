@@ -75092,5 +75092,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pk_bullpole_diamond_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pk_bullpole_cross",
+    "name": "Bullpole (chest mark: cross)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_cross_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_chevron",
+    "name": "Bullpole (chest mark: chevron)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_chevron_2.jpg",
+    "ok": true
   }
 ]
