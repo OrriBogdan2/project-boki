@@ -174,12 +174,12 @@ func _mage() -> void:
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
 	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
-	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 10.0 and e2 > 11.5, "%.1f -> %.1f" % [e1, e2])
+	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 7.5 and e2 > 8.6, "%.1f -> %.1f" % [e1, e2])
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
 	ac.step(m, 0.7)
-	ok("Wirerun: a full hold streaks at least 12.5 m", _flat(P.pos, home) >= 12.5, "%.1f m" % _flat(P.pos, home))
+	ok("Wirerun: a full hold streaks at least 9.4 m", _flat(P.pos, home) >= 9.4, "%.1f m" % _flat(P.pos, home))
 	var short_v := 7.5 / K.run_time(7.5)
 	var long_v := 13.0 / K.run_time(13.0)
 	ok("Wirerun: a constant speed (40 m/s under the global dash feel), so a short run is quicker",
