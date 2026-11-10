@@ -92,7 +92,7 @@ func _ready() -> void:
 		holder.add_child(nest)
 		var egg := EggHatch.new(d["species"], fx, 0.32, 0.42, 1.1)
 		if d.get("mystery", false):
-			egg.shell_col = Color("c4bcd6"); egg.spot_col = Color("6a5a8a")
+			egg.shell_col = Color("c4bcd6"); egg.spot_col = Color("6a5a8a"); egg.mystery = true
 		egg.hop_out = 0.35
 		egg.position = Vector3(0, 0.12, 0)
 		holder.add_child(egg)
