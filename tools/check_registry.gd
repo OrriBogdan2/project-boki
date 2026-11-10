@@ -90,6 +90,7 @@ const CHECKS := {
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
+	"--pickup-reach-check": ["res://tools/pickup_reach_check.gd", "pickup_reach_check", null],      # ground pickup reach
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
