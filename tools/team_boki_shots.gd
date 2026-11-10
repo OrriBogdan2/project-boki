@@ -1,7 +1,8 @@
 extends RefCounted
 ## --team-boki-shots --shots-dir=<dir> [--size=WxH]: the squad rows with their Boki icons in the hudref demo
 ## (needs a renderer), 3 squads of 3: one frame with every Boki healthy, one with a hurt and a resting Boki, one with
-## a teammate knocked (a wisp: bleed timer, violet Boki tint) beside a dead Boki, one after that wisp bled out (deathbox).
+## a teammate knocked (a wisp: bleed timer, violet Boki tint) beside a dead Boki, one after that wisp bled out
+## (deathbox).
 
 var main: Node
 
