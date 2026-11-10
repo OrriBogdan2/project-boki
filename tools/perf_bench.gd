@@ -8,6 +8,7 @@ extends RefCounted
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium] [--bench-stress]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ## --bench-stress: the 60-actor load (10 trios = 30 Hunters, every Boki kept out beside its Hunter, no fight).
+## --bench-brawl: the ten-trio fight on the Hollow Crown instead (tools/perf_brawl.gd)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 ## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
 ## tools/perf_baseline.json exits 1 (BENCH GATE FAIL). Record a new baseline by editing that file from a run.
@@ -38,8 +39,11 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	setup(main_node)
-	await _match()
-	await _farm()
+	if "--bench-brawl" in OS.get_cmdline_user_args():
+		await preload("res://tools/perf_brawl.gd").new().run(self, main, secs)
+	else:
+		await _match()
+		await _farm()
 	_finish()
 
 ## Reads the --bench-* arguments and sizes the window; --perf-budget-check shares it.
@@ -111,11 +115,7 @@ func _match() -> Array:
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
 	print("BENCH match build (ms): " + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	_hook_hud(m)
-	main.get_tree().node_added.connect(func(n: Node):
-		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1
-		if fought:
-			created[k] = int(created.get(k, 0)) + 1)
+	main.get_tree().node_added.connect(count_node)
 	Match.prof_on = true
 	Match.prof.clear()
 	Match.vprof.clear()
@@ -252,6 +252,16 @@ func _farm() -> void:
 		t += DT
 	_summary("farm", fl)
 	_meshes()
+
+func count_node(n: Node) -> void:
+	var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+	added[k] = int(added.get(k, 0)) + 1
+	if fought:
+		created[k] = int(created.get(k, 0)) + 1
+
+## One frame's row in the CSV (the brawl's frames too).
+func add_row(part: String, i: int, wall: float, script_ms: float) -> void:
+	_frame(part, i, wall, script_ms)
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
