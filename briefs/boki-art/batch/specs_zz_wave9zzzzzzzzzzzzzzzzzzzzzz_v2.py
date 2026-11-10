@@ -1634,3 +1634,12 @@ SPECS.append({'id':'new_postroo_baby2','name':'Postbox kangaroo baby (reads as a
   'prompt':"Draw one single character illustration of a baby kangaroo in exactly the colours and finish of image 1: the same postbox-red fur, cream belly, big stamp-edged ears and letter-slot-shaped pouch. But it is clearly a little KANGAROO: a small head with a soft muzzle, short front paws held up, big long hind feet, and a thick tail it leans on. Sitting upright, cute. "+STYLE_V2('baby','cute',False,True)+FRAME_V2})
 NEXT('new_xylocroc_mid2','new_xylocroc_a_2','mid','sleek',"a young crocodile twice the baby's length, long and low with a narrower snout and real teeth showing, eight xylophone bars down its back, its tail split into two mallet tips held up over its back like drumsticks, mid-stride. Not round and not baby-faced.")
 NEXT('new_carousel_mid2','new_carousel_a_2','mid','pretty',"a leggy young horse, twice the foal's height with long slim legs and a longer neck, its canopy mane grown into two scalloped tiers down its neck, a longer twisted striped horn, a long ribbon tail, cantering. Not chubby and not baby-faced.")
+
+# 11-10: halo crown live on all 19 legendaries. Three more new lines saved as cards: Stamproo > Postroo > Pillaroo (postbox kangaroo),
+# Xylogator > Marimbite > Glockodile (xylophone crocodile), Foalaround > Canopony > Carrousteed (carousel horse). Sets for the new lines and for
+# the legendaries whose card changed with the halo (sheet + portrait must show it too).
+for _a in (('Stamproo','baby','cute',0,1),('Postroo','mid','cute',0,1),('Pillaroo','final','tough',0,1),('Xylogator','baby','cute',0,0),('Marimbite','mid','sleek',0,0),('Glockodile','final','tough',0,0),
+           ('Foalaround','baby','cute',0,1),('Canopony','mid','pretty',0,1),('Carrousteed','final','majestic',0,1)): SETOF(*_a,_GP,'nl')
+for _n in ('Sarcobra','Pavonazar','Wayshell','Ghoulamari','Cetorgan','Cindermaw','Aurostag','Sphinxblight','Hydrangor','Siegephant','Glaciammoth','Pharoheron','Palloth','Luckhop','Twinklup','Lockwren','Glacione','Cometail','Calderoise'):
+    _st,_ar,_dk,_fu=_R4.get(_n,('final','majestic',0,0)) if _n in _R4 else (('baby','cute',0,1) if _n in ('Luckhop','Twinklup','Lockwren','Glacione') else ('final','majestic',0,0))
+    SETOF(_n,_st,_ar,_dk,_fu,_GP+", its halo ring floating above its head",'halo')

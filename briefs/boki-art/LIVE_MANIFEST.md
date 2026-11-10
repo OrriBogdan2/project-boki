@@ -1,7 +1,7 @@
 # Boki art live manifest (regenerated 02:31 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-244 Boki, 244 with all three. Missing something: 
+250 Boki, 250 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -34,6 +34,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Cairnback | ✓ | ✓ | ✓ |
 | Calderoise | ✓ | ✓ | ✓ |
 | Canvastross | ✓ | ✓ | ✓ |
+| Carpenjaw | ✓ | ✓ | ✓ |
 | Cetorgan (Organwhal) | ✓ | ✓ | ✓ |
 | Chainipede | ✓ | ✓ | ✓ |
 | Chandelapi (Candelapi) | ✓ | ✓ | ✓ |
@@ -68,6 +69,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Ermink | ✓ | ✓ | ✓ |
 | Fanpire | ✓ | ✓ | ✓ |
 | Fawngus (Fawnshroom) | ✓ | ✓ | ✓ |
+| Filefin | ✓ | ✓ | ✓ |
 | Fizzlet | ✓ | ✓ | ✓ |
 | Flarmink (Embermink) | ✓ | ✓ | ✓ |
 | Foldbat | ✓ | ✓ | ✓ |
@@ -113,6 +115,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Kerchick | ✓ | ✓ | ✓ |
 | Kestrike | ✓ | ✓ | ✓ |
 | Kindlewren | ✓ | ✓ | ✓ |
+| Kingpinguin | ✓ | ✓ | ✓ |
 | Kintsuwyrm (Gildwyrm) | ✓ | ✓ | ✓ |
 | Kitlet | ✓ | ✓ | ✓ |
 | Klaxada | ✓ | ✓ | ✓ |
@@ -171,6 +174,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Pharoheron | ✓ | ✓ | ✓ |
 | Phonodrake | ✓ | ✓ | ✓ |
 | Pickadactyl | ✓ | ✓ | ✓ |
+| Pinguin | ✓ | ✓ | ✓ |
 | Pinster | ✓ | ✓ | ✓ |
 | Pipeworth | ✓ | ✓ | ✓ |
 | Pipewurm | ✓ | ✓ | ✓ |
@@ -195,9 +199,11 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Rimink | ✓ | ✓ | ✓ |
 | Ringrove | ✓ | ✓ | ✓ |
 | Rippmink | ✓ | ✓ | ✓ |
+| Rollguin | ✓ | ✓ | ✓ |
 | Rosedart | ✓ | ✓ | ✓ |
 | Sandwidow | ✓ | ✓ | ✓ |
 | Sarcobra | ✓ | ✓ | ✓ |
+| Sawright | ✓ | ✓ | ✓ |
 | Scarabit | ✓ | ✓ | ✓ |
 | Scoopsy | ✓ | ✓ | ✓ |
 | Scopeleon | ✓ | ✓ | ✓ |
