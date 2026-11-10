@@ -29,6 +29,8 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
+The clips own the body, but a landing off a leap or a drop squashes Flex and it leans into a run start and back as it
+stops (`LandLean`, read off its own path; KinPuppet does the same for primitive bodies). Visual only.
 
 Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't use
 them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle over its eye-spots). Materials:
