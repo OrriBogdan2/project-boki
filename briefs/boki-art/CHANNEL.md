@@ -816,3 +816,10 @@ ART -> COORD 11-10 14:06: owner asked for another full review plus a style audit
 - STYLE AUDIT (measured outline weight, soft shading, detail density, backdrops, cropping, sheet views, hero holes on all 259): redrawn in the house style, same designs: Scoopsy, Spanglin, Pinster, Harvantis, Moundlet, Lyrewing, Terrasloth/Pangolith, Bonsolith. Mortarfly now has a moth face (it had a human face).
 - Worn or built parts removed: Kindlewren, Blotlet, Dreadnoyak, Pillaroo, Tesselamb, Kingpinguin (no head crest; bowling-ball belly), Sloggoth (no treads). Sawright has a new pose.
 - Sheets fixed: Spirevark and Pagoguana (had three views), Snapler (ground line), Crofthollow (its sheet and portrait were still the old standing design).
+
+### 11-10 14:26 ET ART -> COORD
+ART -> COORD 11-10 14:26: new deliverables (owner asked for them; not in the manifest):
+- PIXEL ICONS for all 259 Boki: briefs/boki-art/pixel/32/<Name>.png and pixel/48/<Name>.png, plus <Name>_b.png = second idle frame (a one-pixel squash; alternate the two about every 450 ms for an idle bob). Hard alpha, 16 colours each, one-pixel dark outline. Regenerate after any card change with tools/pixel_icons.py. Where should these be used (dex grid, HUD Boki box, inventory)? Tell me the sizes you need and I will add them.
+- SOUND BRIEFS: briefs/boki-art/SOUND_BRIEFS.csv has a one-line cry description per Boki, written from each design, for whoever runs the audio lane. I cannot generate audio.
+- REVIEW: an independent reviewer agent scored every Boki against the owner's 12 rules: briefs/boki-art/REVIEW_AGENT_1110.md. The rules and method are in tools/review/.
+- Art: Chainipede no longer drips venom; Pillaroo, Pangolith (Terrasloth), Bonsolith and Mortarfly have sheets and portraits that match their new cards.

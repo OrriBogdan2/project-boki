@@ -1341,9 +1341,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Mortarfly.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Mortarfly.png",
   "hash": {
-   "sheet": "8e344e17e048",
+   "sheet": "4b5280b03ef1",
    "card": "e4becc17fa8e",
-   "portrait": "4ce563195751",
+   "portrait": "60039df5c331",
    "hero": "c42f8d165078"
   }
  },
@@ -2058,9 +2058,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Terrasloth.png",
   "display_name": "Pangolith",
   "hash": {
-   "sheet": "f1c467060fbb",
+   "sheet": "8e3f253fbdff",
    "card": "a05523ba3f4b",
-   "portrait": "8c43970fa13a",
+   "portrait": "1a1589d953fe",
    "hero": "98aacf8b7bcf"
   }
  },
@@ -2680,9 +2680,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Bonsolith.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Bonsolith.png",
   "hash": {
-   "sheet": "e4a51d26dd0b",
+   "sheet": "17ee93b08e19",
    "card": "511120fef847",
-   "portrait": "a4226e8ab03c",
+   "portrait": "8aedb4307d17",
    "hero": "d91ac6f13496"
   }
  },
@@ -2720,9 +2720,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Chainipede.png",
   "hash": {
    "sheet": "bcfbb93cc0bb",
-   "card": "abeb4f09156b",
+   "card": "5380189d425a",
    "portrait": "64c7748c61da",
-   "hero": "fae13985330b"
+   "hero": "966041a19c30"
   }
  },
  "Chiptero": {
@@ -3562,9 +3562,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Pillaroo.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Pillaroo.png",
   "hash": {
-   "sheet": "240575d7c278",
+   "sheet": "e0280694dc9d",
    "card": "3672650a5227",
-   "portrait": "fa4ad59e6364",
+   "portrait": "6b619493835e",
    "hero": "fbeb6b9745a0"
   }
  },
