@@ -96,16 +96,17 @@ func _chase() -> void:
 	var lsh := k.brain.leash()
 	ok(lsh == k.summon.leash(k.brain.aggression), "chase: out, its leash is the summon one (%.1f m)" % lsh)
 	var foe := _foe()
-	foe.pos = p.pos + Vector3(lsh + 6.0, 0, 0)
-	foe.prev = foe.pos
+	var stay := Vector3(lsh + 2.0, 0, 0)      # a foe just past the leash, the Boki already near it
+	k.teleport(p.pos + Vector3(lsh - 2.0, 0, 0))
 	var far := 0.0
 	var turned := false
 	for _i in 240:
-		foe.pos = p.pos + Vector3(lsh + 6.0, 0, 0)
+		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
 		far = maxf(far, k.flat_dist(p))
 		turned = turned or k.state == "returning" or (k.fly.get("leap", false) as bool)
+	ok(far > lsh - 1.5, "chase: it goes for a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])
 	ok(turned, "chase: past the leash it turns back")
 	ok(far < lsh + 4.0 and k.summon.out(), "...and never strays far past it (%.1f m of %.1f)" % [far, lsh])
 	foe.pos = p.pos + Vector3(0, 0, 200)
