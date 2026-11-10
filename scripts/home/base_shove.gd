@@ -127,6 +127,7 @@ var card: Control = null
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var creaked := false           # the lean creak has played this bout
+var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bout runs
 
 func _init(home) -> void:
 	h = home
@@ -189,6 +190,7 @@ func use() -> void:
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
 	_place_pair()
 	creaked = false
+	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
 	Sfx.play("garden_start", stump.position, BaseRace.GARDEN_DB)
 
 ## A press: true when the bout took it.
@@ -223,6 +225,7 @@ func tick(d: float) -> void:
 	if not run.shoved:
 		bar.step(d)
 	_place_pair()
+	cue.update(run.balance)
 	_hear_strain()
 	if run.over():
 		_end(true)
@@ -256,6 +259,8 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 		BaseRace.act(k, "")
 	bar.close()
+	cue.clear()
+	cue = null
 	stump.rotation.z = 0.0
 	Sfx.loop_stop("shove_strain")
 	if finished:

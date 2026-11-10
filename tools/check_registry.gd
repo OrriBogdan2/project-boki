@@ -96,6 +96,7 @@ const CHECKS := {
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets
 	"--garden-motion-shots": ["res://tools/garden_motion_shots.gd", "garden_motion_shots", null],  # strips
+	"--garden-cue-shots": ["res://tools/garden_cue_shots.gd", "garden_cue_shots", null],  # the four games' world cues
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],

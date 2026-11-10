@@ -241,6 +241,7 @@ var card: Control = null
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
+var cue: GardenCues.DashCue = null   # the cheer marks and finish line while a lap runs
 
 func _init(home) -> void:
 	h = home
@@ -368,6 +369,10 @@ func _begin(ks: Array) -> void:
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
 	_bar_label("")
 	_place_runners()
+	var marks: Array = []
+	for i in range(1, 4):
+		marks.append(_corner(i) + Vector3(0, _ground(_corner(i)), 0))
+	cue = GardenCues.DashCue.new(h, marks, _corner(0) + Vector3(0, _ground(_corner(0)), 0), TRACK_W)
 	heard = []
 	heard.resize(runners.size())
 	heard.fill(0)
@@ -411,6 +416,8 @@ func tick(d: float) -> void:
 	run.step(d)
 	bar.step(d)
 	_place_runners()
+	var home_done: bool = float(run.done_t[run.backed]) >= 0.0
+	cue.update(3 if home_done else int(run.stretch[run.backed]), run.can_cheer(), d)
 	_hear_laps()
 	if run.over():
 		_end(true)
@@ -464,6 +471,8 @@ func _end(finished: bool) -> void:
 		k["t"] = 1.5
 		gait(k, "")
 	bar.close()
+	cue.clear()
+	cue = null
 	if finished:
 		if solo_rec.is_empty():
 			_race_card(res)

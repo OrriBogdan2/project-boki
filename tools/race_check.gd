@@ -9,7 +9,9 @@ extends RefCounted
 ##   5. on the base: no race post with base_mode off; with it on, a race runs to a result card
 ##   6. the Training post on the base is a solo lap of the loop: perfect cheers add Speed (and a journal
 ##      line), missed ones add none, a Boki at its cap or too tired does not start
-##   7. the Training post drill still runs on the shared timing bar: three presses, then it ends
+##   7. the cues: three cheer marks and the finish line appear with the lap, light as your Boki passes them
+##      (all three by the last stretch) and are gone when it ends
+##   8. the Training post drill still runs on the shared timing bar: three presses, then it ends
 ## Never touches the real save.
 
 const RACES := 20
@@ -187,6 +189,7 @@ func _on_base() -> void:
 			k.erase("indoors")
 		race.use()
 		ok(race.run != null and race.runners.size() >= 2, "on: a race starts with %d Boki" % race.runners.size())
+		ok(race.cue != null and race.cue.mats.size() == 3 and race.cue.lit == 0, "cue: three unlit cheer marks and a finish line with the lap")
 		if race.run != null:
 			race.bar.m = race.bar.zone        # a press right on the gold
 			var press := InputEventAction.new()
@@ -195,10 +198,14 @@ func _on_base() -> void:
 			race.input(press)
 			ok(home.verbs.act == "cheer", "on: a good race cheer plays your Hunter's cheer (%s)" % home.verbs.act)
 		var t := 0.0
+		var peak := 0
 		while race.run != null and t < MAX_S:
 			race.tick(0.1)
 			t += 0.1
+			if race.cue != null:
+				peak = maxi(peak, race.cue.lit)
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
+		ok(peak == 3 and race.cue == null, "cue: the marks lit one by one (%d of 3) and cleared at the end" % peak)
 		await _solo(home)
 	await _drill(home)
 	rules["base_mode"] = false
@@ -231,6 +238,7 @@ func _solo(home) -> void:
 	rec["stats"]["speed"] = 10
 	var perfect: int = int(BaseRace.rules()["train"]["great"]) * 3
 	await _lap(home, false)
+	ok(home.hrace.cue == null, "cue: a solo lap clears its marks")
 	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card),
 			"solo: a lap of missed cheers adds no Speed")
 	rec["needs"]["energy"] = 90.0
