@@ -77801,5 +77801,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_skidlet_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_skateron",
+    "name": "Skateron (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_skateron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ermink",
+    "name": "Ermink (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_ermink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_skateron",
+    "name": "Skateron (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_skateron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ermink",
+    "name": "Ermink (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_ermink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ermink",
+    "name": "Ermink (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_flarmink",
+    "name": "Flarmink (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_flarmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_skateron",
+    "name": "Skateron (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_skateron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_flarmink",
+    "name": "Flarmink (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_flarmink_3.jpg",
+    "ok": true
   }
 ]
