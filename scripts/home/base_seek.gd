@@ -156,6 +156,7 @@ var hunt: Hunt = null
 var pair: Array = []           # the home's kin entries: a, b
 var card: Control = null
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
+var cue: GardenCues.SeekCue = null   # the scent trail while a hunt runs
 
 func _init(home) -> void:
 	h = home
@@ -296,6 +297,11 @@ func _move_pair(d: float) -> void:
 		var want := atan2(hunt.head[i].x, hunt.head[i].y)
 		n.rotation.y = lerp_angle(n.rotation.y, want, minf(1.0, TURN * d))
 		pair[i]["pos"] = n.position
+
+## Each hunter's trail runs from the scent toward it, brighter the better its nose (best for night types at night).
+func _lay_trails(d: float) -> void:
+	for i in 2:
+		cue.update(i, hunt.item, hunt.pos[i], right_p(hunt.recs[i], hunt.night), _ground, d)
 
 func _end(finished: bool) -> void:
 	var res := settle(hunt) if finished else {}
