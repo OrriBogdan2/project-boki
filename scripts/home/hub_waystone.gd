@@ -34,6 +34,7 @@ func place() -> void:
 			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": GardenZones.is_open(id)})
 		node = FarmModels.waystone(stones)
 		node.position = HUB_AT
+		HubHorizon.place(h, HUB_AT)
 	else:
 		node = FarmModels.return_pad(String(GardenZones.info(here()).get("colour", "c9c2b2")))
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)

@@ -168,6 +168,7 @@ func _travel_part(m: Node) -> void:
 	ok(hub.hway.node.name == "Waystone" and off < HubWaystone.ARRIVE_OFF.length() + 0.5,
 		"you arrive beside the Waystone")
 	ok(hub.toys.toys().is_empty() and hub.hrace == null, "no toys or games in the hub")
+	_horizon_part(hub)
 	hub.hway.use()
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
@@ -189,6 +190,18 @@ func _travel_part(m: Node) -> void:
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() and (Save.d["roster"] as Array).size() == 3,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
+
+## The five sky islands: one mesh and one surface each, within the draw budget, lit only for open zones.
+func _horizon_part(hub) -> void:
+	var isles: Array = hub.get_children().filter(func(c): return String(c.name).begins_with("Horizon_"))
+	var draws := 0
+	var lit := 0
+	for isle in isles:
+		draws += (isle as MeshInstance3D).mesh.get_surface_count()
+		lit += 1 if isle.get_meta("open") else 0
+	ok(isles.size() == GardenZones.ids().size(), "the hub sky holds one island per zone (%d)" % isles.size())
+	ok(draws <= int(GardenZones.rules()["horizon_draws"]), "the islands cost %d draws" % draws)
+	ok(lit == 1 and hub.get_node("Horizon_%s" % GardenZones.start()).get_meta("open"), "only the open zone's island is lit")
 
 func _move_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true

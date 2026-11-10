@@ -16,6 +16,10 @@
 	"ask_chance_doc": "Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load).",
 	"ask_s": 25.0,
 	"ask_s_doc": "Seconds it waits at the pad with its bubble before it gives up and wanders off.",
+	"hub_draws": 200,
+	"hub_draws_doc": "Draw calls the hub may cost (GARDEN.md 10.6; --perf-bench hub part).",
+	"horizon_draws": 5,
+	"horizon_draws_doc": "Of those, what the five sky islands may cost: one mesh and one material each (HubHorizon).",
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
 		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "biomes": ["frost"], "game": "Spark Volley"},
