@@ -78,7 +78,9 @@ func _dash_try(hero: String, s: Dictionary, ang: float) -> void:
 	var ok := length > 0.5 and absf(along - length * table) <= length * table * KEEP_TOL
 	if KIT_STOPS.has(hero):
 		how = "kit"
+		StoneStand.mover = P      # (his own rocks count as he walks them, as BreahHop._lands asks)
 		ok = w.occupy(P.pos.x, P.pos.z, P.r, P.pos.y, false) == 0.0      # it ends free, not in the wall
+		StoneStand.mover = null
 	if not ok: bad += 1
 	print("DWALL %-10s %-12s a%-2d dash %4.1fm  kept %3d%% (table %3d%%)  along %4.1fm  out %5.2fm  %-6s  %s" % [
 		hero, s["name"], int(ang), length, roundi(along / maxf(0.01, length) * 100.0), roundi(table * 100.0), along,
