@@ -1,7 +1,7 @@
 class_name HudVitals
 extends RefCounted
 ## The bottom-left vitals block: your portrait framed in your class colour with the XP tracker (run
-## level and a bar toward the next level) along its bottom, then to its right your health as a big
+## level and a bar toward the next level) along its top edge, then to its right your health as a big
 ## number over a thick segmented bar, armour as a strip under it with its number and
 ## tier, shields past the end of health, the merged form's shell, and the archetype resource under
 ## that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
@@ -98,7 +98,7 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 
-## The XP tracker along the bottom of the block, under the ability row: LV and the run level, then a
+## The XP tracker on the block's top edge, just above the health number: LV and the run level, then a
 ## thin bar toward Hunter.XP_TO. XP landing (camp or kill) pops the number, brightens the bar and
 ## fills it smoothly (through a level-up too); unspent skill points pulse the whole bar gold, and a
 ## level-up bursts a gold ring round the portrait.
@@ -117,10 +117,10 @@ static func xp_row(H, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 	var fill := xp_step(H, p, dt)
 	var pop: float = H.xp_pop / XP_POP
 	var sc := 1.0 + 0.35 * sin((1.0 - pop) * PI) if pop > 0.0 else 1.0
-	var base_y := pr.end.y - 1.0
+	var base_y := pr.position.y - 5.0
 	HudStyle.text(c, Vector2(x0, base_y), "LV", 11, HudStyle.MUTED)
 	var num_col := HudStyle.INK.lerp(gold, maxf(pop, 1.0 - lk if H.lvl_pop > 0.0 else 0.0))
-	HudStyle.text(c, Vector2(x0 + 19.0, base_y), lvl_text(p), int(18.0 * sc), num_col)
+	HudStyle.text(c, Vector2(x0 + 19.0, base_y), lvl_text(p), int(16.0 * sc), num_col)
 	var bar_x := x0 + BAR_X
 	var rank_ready := p.skill_pts > 0 and Hunter.SLOT_MAX.keys().any(func(s): return p.can_level(s))
 	var pip_w := 22.0 if rank_ready else 0.0
