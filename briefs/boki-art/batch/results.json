@@ -97758,5 +97758,12 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/leg_blightmoth_c_2.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_blightmoth_c",
+    "name": "Legendary concept: blightmoth c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_blightmoth_c_1.jpg",
+    "ok": true
   }
 ]
