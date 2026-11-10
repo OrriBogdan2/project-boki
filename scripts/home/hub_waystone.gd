@@ -76,6 +76,24 @@ func hop(id: String) -> bool:
 func _go() -> void:
 	Game.goto("home", {"zone": hopping})
 
+## Wakes a locked zone with both keys (GardenZones.open_with): the stone lights up, the founder moves in.
+func attune(id: String) -> void:
+	var founder := GardenZones.open_with(id)
+	if founder.is_empty():
+		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id)["name"])
+		return
+	var k: Dictionary = h._kin_entry(founder)
+	if not k.is_empty() and GardenZones.zone_of(founder) != here():
+		_vanish(k, id)
+	h._close_panel()
+	if here() == GardenZones.HUB:      # the stone's look is the hub's; a return pad does not change
+		node.queue_free()
+		place()
+	h.fx.burst(node.position + Vector3(0, 0.6, 0), Color(String(GardenZones.info(id)["colour"])), 30, 3.5, 0.8, -1.0)
+	Sfx.play("unlock")
+	Save.save_game()
+	h._toast("%s woke %s" % [founder["name"], GardenZones.info(id)["name"]])
+
 # ------------------------------------------------------------------ moving a Boki to another zone
 ## Sends `k` to zone `id`: it walks to the pad (k["zone_go"]; BaseLife leaves it alone meanwhile).
 ## Returns "" or why not.
@@ -103,12 +121,16 @@ func _blink_out(k: Dictionary) -> void:
 	if why != "":
 		h._toast(why)       # the zone filled up while it walked
 		return
+	_vanish(k, id)
+	Save.save_game()
+	h._toast("%s went to live in %s" % [k["rec"]["name"], GardenZones.info(id)["name"]])
+
+## `k` blinks out of this zone in the colour of the one it goes to.
+func _vanish(k: Dictionary, id: String) -> void:
 	var n: Node3D = k["node"]
 	h.fx.burst(n.position + Vector3(0, 0.5, 0), Color(String(GardenZones.info(id)["colour"])), 18, 2.5, 0.6, -1.5)
 	n.queue_free()
 	h.kins.erase(k)
-	Save.save_game()
-	h._toast("%s went to live in %s" % [k["rec"]["name"], GardenZones.info(id)["name"]])
 
 ## E on a Boki waiting at the pad (BaseLife's ask): send it where it wants to go. True if it was asking.
 func answer(k: Dictionary) -> bool:

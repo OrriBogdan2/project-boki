@@ -26,3 +26,8 @@ The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays
 later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
 Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
 (`KinBox.farm_room`) counts each zone on its own.
+
+Step 6 (unlock) adds one optional key, `Save.d["zones"][id]["founder"]` (the uid of the Boki that woke
+the zone), so no migration. A Wayseed is a `Loot.VALUABLES` item (`wayseed_<zone>`) that a lair drops
+into the pack; at home `Econ._store` keeps it in `Save.d["items"]`, never in the treasure to sell. The
+Drift Trader's weekly Wayseed is derived (week number, locked zones), only `black.seed_week` is saved.

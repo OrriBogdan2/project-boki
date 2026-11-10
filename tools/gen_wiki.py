@@ -494,7 +494,7 @@ def gen_gear():
         body += "\n\n## Weapon elements\n\n" + table(["Element", "On hit"], [[v["name"], v.get("rider", "")] for v in el.values()])
     va = gd_const("core/loot.gd", "VALUABLES") or {}
     if va:
-        body += "\n\n## Valuables\n\n" + table(["Item", "Worth (gems)", "Notes"], [[v["name"], num(v["value"]), v.get("desc", "")] for v in va.values()])
+        body += "\n\n## Valuables\n\n" + table(["Item", "Worth (gems)", "Notes"], [[v["name"], num(v["value"]), v.get("desc", "")] for k, v in va.items() if not k.startswith("wayseed_")])
     pk = gd_const("core/data.gd", "PERKS") or {}
     if pk:
         body += "\n\n## Run perks\n\nFound as glowing perk orbs during an expedition: walk into one to take it. Chests drop one, shrines one or two, and bosses a fan of three (taking one fades the other two for you only). Shrines favour stat perks; chests and bosses favour weapon perks. They last the run.\n\n"

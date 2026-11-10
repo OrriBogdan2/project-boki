@@ -94,9 +94,16 @@ static func wants(rec: Dictionary) -> String:
 			return id
 	return ""
 
-## The bag item that is a zone's first key (GARDEN.md 10.3; the item itself comes with the unlock step).
+## The Wayseed that is a zone's first key (GARDEN.md 10.3): a Loot valuable that keeps in Save.d["items"] at home.
 static func wayseed(id: String) -> String:
 	return "wayseed_" + id
+
+## The still-locked zone whose Wayseed a lair in this run region drops, or "" (open, or one already in the bag).
+static func seed_zone(biome: String) -> String:
+	for id in ids():
+		if info(id).get("biomes", []).has(biome) and not is_open(id) and not keys_for(id)["seed"]:
+			return id
+	return ""
 
 ## A Boki out on the base that leans far enough toward the zone to wake it (the second key), or {}.
 static func leaner(id: String) -> Dictionary:
@@ -110,3 +117,24 @@ static func leaner(id: String) -> Dictionary:
 ## The two keys of a locked zone: {"seed": have the Wayseed, "lean": have a Boki leaning toward it}.
 static func keys_for(id: String) -> Dictionary:
 	return {"seed": int(Save.d.get("items", {}).get(wayseed(id), 0)) > 0, "lean": not leaner(id).is_empty()}
+
+## Wakes a locked zone with both keys: the Wayseed is planted, the zone opens and the Boki that leaned
+## toward it is its founder (it moves in, unless it is your partner) with a memory and a journal line.
+## Returns the founder, or {} if a key is missing.
+static func open_with(id: String) -> Dictionary:
+	var keys := keys_for(id)
+	if is_open(id) or not keys["seed"] or not keys["lean"]:
+		return {}
+	var rec := leaner(id)
+	var nm: String = info(id)["name"]
+	Save.add_item(wayseed(id), -1)
+	Save.d["zones"][id] = {"open": true, "founder": rec["uid"]}
+	if not is_partner(rec):
+		rec["zone"] = id
+	Save.remember(rec, "zone", "the day I woke %s" % nm, 4.0)
+	CareJournal.note(rec, "woke %s" % nm)
+	return rec
+
+## The Boki that woke a zone (it is out on the base), or {} for the start zone and any without one.
+static func founder(id: String) -> Dictionary:
+	return Save.kin(String(Save.d.get("zones", {}).get(id, {}).get("founder", "")))

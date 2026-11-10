@@ -7,7 +7,7 @@ class_name MarketSave
 ##   auction   {lots: [Lot], log: [text]}                                                         (Auction)
 ##   shelter   {day, stock: [{id, rec, price, from, t}], gave: [uid]}                             (Shelter)
 ##   transfer  {out: [{id, rec, to, fee, t}], sent: [t]}                                          (Transfer)
-##   black     {day, stock: [{id, key, price}]}                                                   (BlackMarket)
+##   black     {day, stock: [{id, key, price}], seed_week}                                   (BlackMarket)
 ## Save.d["goods"] holds market goods (Goods). Every section is filled in on first use too, so a
 ## save that skipped the migration (a test, a hand-made save) still works.
 
@@ -18,7 +18,7 @@ static func fresh() -> Dictionary:
 		"auction": {"lots": [], "log": []},
 		"shelter": {"day": "", "stock": [], "gave": []},
 		"transfer": {"out": [], "sent": []},
-		"black": {"day": "", "stock": []},
+		"black": {"day": "", "stock": [], "seed_week": -1},
 	}
 
 ## One section of the market save, filled in if it is missing or damaged.

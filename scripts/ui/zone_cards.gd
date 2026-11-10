@@ -25,7 +25,9 @@ static func open(h, here: String) -> void:
 		else:
 			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
 			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, func(): h.hway.hop(id), "Locked", false))
+			var ready: bool = GardenZones.keys_for(id).values().all(func(k): return k)
+			var wake := func(): h.hway.attune(id)
+			row.add_child(_card(String(z["name"]), UI.FAINT, lines, wake, "Wake it" if ready else "Locked", ready))
 
 ## "Move to..." on a Boki's card: only for one out in this zone, not your partner, with another zone open.
 static func add_move_link(h, row: Control, rec: Dictionary) -> void:
@@ -71,6 +73,9 @@ static func _open_lines(id: String) -> Array:
 		out.append(UI.para("Nobody lives here yet.", 12, UI.MUTED))
 	for rec in res:
 		out.append(UI.para("%s, %s" % [rec["name"], _mood(rec)], 12, UI.MUTED))
+	var founder := GardenZones.founder(id)
+	if not founder.is_empty():
+		out.append(UI.para("Woken by %s" % founder["name"], 12, UI.MUTED))
 	out.append(UI.para("Today: " + String(GardenZones.info(id)["game"]), 12, UI.INK))
 	return out
 

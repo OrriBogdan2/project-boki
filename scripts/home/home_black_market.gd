@@ -91,6 +91,8 @@ func _rare(v: VBoxContainer) -> void:
 	var intro := "A few rare pieces a day, never cheap. What you buy is gone until tomorrow's stock."
 	v.add_child(UI.para(intro, 13, UI.MUTED))
 	var stock := BlackMarket.stock()
+	if BlackMarket.wayseed_zone() != "":
+		v.add_child(_wayseed_card())
 	if stock.is_empty():
 		v.add_child(UI.empty_state("shop", "Sold out", "Come back tomorrow."))
 	var g := GridContainer.new()
@@ -100,6 +102,34 @@ func _rare(v: VBoxContainer) -> void:
 	for e in stock:
 		g.add_child(_rare_card(e))
 	v.add_child(g)
+
+## This week's Wayseed, for a zone still locked (BlackMarket.wayseed_zone).
+func _wayseed_card() -> Control:
+	var it := Loot.valuable(GardenZones.wayseed(BlackMarket.wayseed_zone()))
+	var card := UI.card(UI.CARD, 10, 12)
+	var hr := UI.hbox(10)
+	card.add_child(hr)
+	var b := UI.badge(Loot.icon_of(it), Loot.col_of(it), 32.0, UI.R_CTRL)
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hr.add_child(b)
+	var nv := UI.vbox(0)
+	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	nv.add_child(UI.label(Loot.name_of(it), UI.T_BODY, UI.INK, UI.semi))
+	var why := "This week only. One key to wake a sleeping zone; it also needs a Boki leaning its way."
+	nv.add_child(UI.label(why, 12, UI.MUTED))
+	hr.add_child(nv)
+	var price := int(Goods.rules()["black_market"]["wayseed_price"])
+	var buy := UI.button(str(price), func():
+		var r := BlackMarket.buy_wayseed()
+		Sfx.play("unlock" if r["ok"] else "ui_deny")
+		h._toast("%s is yours" % Loot.name_of(it) if r["ok"] else String(r["why"]))
+		h._refresh_top()
+		open(), 76, "gem")
+	buy.add_theme_color_override("font_color", UI.GOLD)
+	buy.disabled = int(Save.d["gems"]) < price
+	buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hr.add_child(buy)
+	return card
 
 func _rare_card(e: Dictionary) -> Control:
 	var key := String(e["key"])

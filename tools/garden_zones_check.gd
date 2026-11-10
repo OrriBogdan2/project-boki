@@ -8,7 +8,10 @@ extends RefCounted
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
-## opens its cards.
+## opens its cards. Unlock (step 6): a lair in a matching region drops a Wayseed for a locked zone, it
+## comes home into the bag; the Wayseed plus a Boki at the lean key opens the zone, either alone does
+## not; the founder moves in with a memory and a journal line; the trader's weekly Wayseed is never
+## for an open zone, is bought once a week, and is paid for.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 
@@ -22,8 +25,10 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_save_part()
 	_keys_part()
+	_unlock_part()
 	await _travel_part(m)
 	await _move_part(m)
+	await _attune_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -56,6 +61,72 @@ func _keys_part() -> void:
 	var lines := ZoneCards.key_lines("glasswater")
 	ok(lines.size() == 2 and "[x] A Wayseed" in lines[0] and "[x] A Boki leaning Water, Ice or Crystal" in lines[1],
 		"the card lists both keys: %s" % " / ".join(lines))
+
+func _unlock_part() -> void:
+	Save.d = Save.fresh()
+	var rec := Save.new_kin("zapple", "Pip")
+	var other := Save.new_kin("cindle", "Ash")
+	Save.d["roster"] = [rec, other]
+	Save.d["active"] = rec["uid"]
+	var seed_id := GardenZones.wayseed("glasswater")
+	ok(GardenZones.seed_zone("frost") == "glasswater" and GardenZones.seed_zone("meadow") == "",
+		"a frost lair drops Glasswater's Wayseed, a meadow one drops none")
+	Econ._store(Loot.valuable(seed_id))
+	ok(int(Save.d["items"].get(seed_id, 0)) == 1 and not Save.d["valuables"].has(seed_id),
+		"a Wayseed comes home into the bag, not the treasure to sell")
+	ok(GardenZones.seed_zone("frost") == "", "no second Wayseed for a zone whose key is in the bag")
+	ok(GardenZones.open_with("glasswater").is_empty() and not GardenZones.is_open("glasswater"),
+		"a Wayseed alone does not open the zone")
+	Save.d["items"][seed_id] = 0
+	other["lean"] = {"ice": float(GardenZones.rules()["lean_key"])}
+	ok(GardenZones.open_with("glasswater").is_empty() and not GardenZones.is_open("glasswater"),
+		"a Boki leaning Ice alone does not open it")
+	Save.d["items"][seed_id] = 1
+	var founder := GardenZones.open_with("glasswater")
+	ok(founder == other and GardenZones.is_open("glasswater") and int(Save.d["items"][seed_id]) == 0,
+		"both keys open it and use the Wayseed up")
+	ok(other["zone"] == "glasswater" and GardenZones.founder("glasswater") == other
+		and GardenZones.zone_of(rec) == GardenZones.start(), "the founder moves in and is named; the others stay")
+	var line := "woke Glasswater Shallows"
+	ok(other["memory"].any(func(e): return line in String(e["text"]))
+		and other["journal"].any(func(e): return line in CareJournal.text(e)),
+		"the founder has its memory and journal lines")
+	Save.d["gems"] = 1000
+	for zone in GardenZones.ids():
+		var offer := BlackMarket.wayseed_zone()
+		ok(offer == "" or not GardenZones.is_open(offer), "the trader's pick (%s) is a locked zone" % offer)
+		if offer == "": break
+		var before := int(Save.d["gems"])
+		var price := int(Goods.rules()["black_market"]["wayseed_price"])
+		ok(BlackMarket.buy_wayseed()["ok"] and int(Save.d["items"][GardenZones.wayseed(offer)]) == 1
+			and before - int(Save.d["gems"]) == price, "buying %s's Wayseed costs gems and fills the bag" % offer)
+		ok(BlackMarket.wayseed_zone() == "" and not BlackMarket.buy_wayseed()["ok"], "only one a week")
+		Save.d["market"]["black"]["seed_week"] = -1
+		Save.d["zones"][offer] = {"open": true}
+	ok(BlackMarket.wayseed_zone() == "", "with every zone open the trader has none")
+
+## At the Waystone in the hub: the card's button wakes a zone once both keys are held, and its stone lights.
+func _attune_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	var was = Game.main.current
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = await _arrived(m, was)
+	if hub == null:
+		ok(false, "the hub loads")
+		return
+	var stone := func(i: int) -> bool: return hub.hway.node.get_node("Stone%d" % i).get_meta("open")
+	ok(not stone.call(2), "Cinderstep's stone is dark and grown over")
+	hub.hway.attune("cinderstep")
+	ok(not GardenZones.is_open("cinderstep"), "the stone stays dark with no keys")
+	var pyro: Dictionary = Save.d["roster"][1]
+	pyro["lean"] = {"fire": float(GardenZones.rules()["lean_key"])}
+	Save.d["items"][GardenZones.wayseed("cinderstep")] = 1
+	hub.hway.attune("cinderstep")
+	ok(GardenZones.is_open("cinderstep") and GardenZones.founder("cinderstep") == pyro,
+		"both keys wake Cinderstep for %s" % pyro["name"])
+	ok(stone.call(2), "its stone is lit")
+	Content.rules("farm_build")["base_mode"] = false
 
 func _new_save() -> void:
 	var d := Save.fresh()

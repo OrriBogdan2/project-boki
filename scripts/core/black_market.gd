@@ -5,6 +5,8 @@ class_name BlackMarket
 ## over what they're worth (a gem sink). Never keys, shards or anything found only in matches.
 ## A stock entry is {id, key ("good:..", "wear:.." or "egg:<species>"), price}.
 
+const WEEK_S := 7.0 * 86400.0     # s; the trader's Wayseed changes weekly
+
 static func _st() -> Dictionary:
 	return MarketSave.section("black")
 
@@ -32,6 +34,30 @@ static func _roll(day: String) -> Array:
 		var species := String(rares[rng.randi_range(0, rares.size() - 1)])
 		out.append({"id": MarketSave.next_id(), "key": "egg:" + species, "price": int(_rules()["egg_price"])})
 	return out
+
+## This week's Wayseed: one, for a zone that is still locked (so never an open zone's), until it is bought.
+## Returns the zone's id, or "" (all open, one bought this week, or you already hold the pick).
+static func wayseed_zone() -> String:
+	var week := int(MarketSave.now() / WEEK_S)
+	var locked: Array = GardenZones.ids().filter(
+			func(z): return not GardenZones.is_open(z) and not GardenZones.keys_for(z)["seed"])
+	if locked.is_empty() or int(_st()["seed_week"]) == week:
+		return ""
+	return locked[absi(hash("wayseed|%d|%s" % [week, Save.profile().get("id", "")])) % locked.size()]
+
+## Buys this week's Wayseed. {ok, why}.
+static func buy_wayseed() -> Dictionary:
+	var zone := wayseed_zone()
+	var price := int(_rules()["wayseed_price"])
+	if zone == "":
+		return {"ok": false, "why": "That's gone"}
+	if int(Save.d.get("gems", 0)) < price:
+		return {"ok": false, "why": "You need %d more gems" % (price - int(Save.d.get("gems", 0)))}
+	Save.d["gems"] = int(Save.d["gems"]) - price
+	Save.add_item(GardenZones.wayseed(zone), 1)
+	_st()["seed_week"] = int(MarketSave.now() / WEEK_S)
+	Save.save_game()
+	return {"ok": true, "why": ""}
 
 static func name_of(key: String) -> String:
 	if key.begins_with("egg:"):

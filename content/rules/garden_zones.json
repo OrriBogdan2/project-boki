@@ -1,9 +1,11 @@
 {
-	"desc": "The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from).",
+	"desc": "The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), biomes (run regions whose lairs drop its Wayseed), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from).",
 	"start": "bramblebank",
 	"start_doc": "The zone open from the start and the home of every Boki in an older save.",
 	"lean_key": 12,
 	"lean_key_doc": "Lean points (of Evo.LEAN_FULL 24) a Boki needs in one of a zone's types to wake it: about two meals.",
+	"seed_chance": 0.6,
+	"seed_chance_doc": "Chance a lair boss in a matching region drops a Wayseed for a still-locked zone (one a run at most).",
 	"hop_fade_s": 0.5,
 	"hop_fade_s_doc": "Seconds the Waystone lights up and fades before the zone loads under the ink wipe.",
 	"hop_max_s": 2.0,
@@ -16,10 +18,10 @@
 	"ask_s_doc": "Seconds it waits at the pad with its bubble before it gives up and wanders off.",
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
-		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"},
-		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"},
-		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"},
-		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}
+		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "biomes": ["frost"], "game": "Spark Volley"},
+		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "biomes": ["ember"], "game": "Stump Shove"},
+		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "biomes": ["gloom", "bloom"], "game": "Seek"},
+		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "biomes": ["storm"], "game": "The Dash, ridge track"}
 	},
 	"wayseed_from": "a lair of a matching type on a run, or the Drift Trader once a week"
 }

@@ -55,6 +55,7 @@ const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood
 var m: Match
 var list: Array = []
 var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
+var wayseed_given := false     # a Wayseed has dropped this run (one at most)
 var _prev := {}                # hunter nid -> was interact held last tick
 var _told := {}
 var music_on := false
@@ -704,6 +705,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
+	_drop_wayseed(L, at)
 	# XP for everyone who fought it: the most for the killer's squad
 	for h in m.hunters:
 		if h.out or h.extracted or not inside(L, h.pos, 4.0):
@@ -937,6 +939,16 @@ func _floor_spot(L: Dictionary, p: Vector3, margin: float) -> Vector3:
 	q = m.world.free_spot_near(q, [], 0.8, 0.5, 4.0)
 	q.y = m.world.ground_at(q.x, q.z)
 	return q
+
+## A Wayseed (the first key of a still-locked zone, GardenZones) beside the pile, if the lair stands in a
+## region that zone matches. At most one a run.
+func _drop_wayseed(L: Dictionary, at: Vector3) -> void:
+	var id := GardenZones.seed_zone(m.world.biome_at(at.x, at.z))
+	if wayseed_given or id == "" or m.rng.randf() >= float(GardenZones.rules()["seed_chance"]):
+		return
+	wayseed_given = true
+	m.spawn_val(Loot.valuable(GardenZones.wayseed(id)), _floor_spot(L, at + Vector3(1.4, 0, 0.2), 0.8))
+	m.add_feed("A Wayseed dropped at %s" % L["name"])
 
 ## Puts a Rare Egg on the ground (a boss's, or one spilled from a pack), loud.
 func drop_egg(L: Dictionary, item: Dictionary, at: Vector3) -> Dictionary:
