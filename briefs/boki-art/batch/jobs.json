@@ -43076,6 +43076,19 @@
     "prompt": "Edit image 1: keep the picture the same: same woman, same pose, same vault, lighting, colours and background, same lizard design and face. Fix the lizard's anatomy only. Right now a long tail with a key on its tip grows out of the lizard's shoulder and neck near its head, which is wrong, and its hind end also trails away behind the woman's leg, so it seems to have two tails. Correct it: remove the tail that comes out of the shoulder and neck completely, so the neck and shoulder are just smooth green scales with the row of back spikes. The lizard has ONE tail, growing from its rump at the BACK end of its body (the end behind the woman's legs, on the left). That single tail sweeps up from the rump in a big arc behind the woman and over her back, across to the vault door on the right, and its tip is the big key turning in the lock. One continuous tail, clearly joined to the rump. Change nothing else."
   },
   {
+    "id": "hb5_sable_escape",
+    "name": "Sable + Lockatara splash: the escape",
+    "refs": [
+      "briefs/art-refs/sable_v2/sable_v2_splash.jpg",
+      "briefs/art-refs/sable_v2/sable_v2_master_sheet.jpg",
+      "briefs/boki-art/cards/Lockatara.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Epic splash art for a hero-and-creature adventure game. Image 1 is the hunter's finished splash: match its rich painterly style, lighting quality and finish exactly. Image 2 is the hunter's locked design sheet and is the authority for the hunter: same person, face, hair, body, outfit, colours, companions and weapons as on the sheet, nothing added or removed, drawn in a NEW pose for this scene. The remaining images are creatures called Boki: keep each one on-model (same design, colours, face and signature parts) but paint them in the same painterly style as the hunter so they belong in the same world, each appearing once. The hunter and the Boki are partners working together, both clearly visible, the Boki given as much presence as the hunter. Wide 16:9, dynamic composition, dramatic light, detailed environment. No text, no logo, no border, no UI. Hunter: Sable, the Silver Thief: grey-lilac skin, fuzzy moth antennae, white braid, long buckled coat with moth-wing tails, twin enchanted flintlock pistols. Scene: THE ESCAPE. Sable and the key-tailed lizard are INSIDE a dim stone treasure vault piled with gold, breaking OUT. The huge round vault door on the right is their way out: it is cracking open and brilliant golden daylight bursts in through the gap from outside, lighting them both. Both face the door and the light. Sable leans forward eagerly, one boot up on the lizard's back, pistol in hand, grinning, her pockets and belt heavy with loot. The lizard strides toward the door, looking back at her with a happy grin. TAIL (get this right): the lizard has exactly ONE tail. It grows from its rump at the back end of its body, sweeps up in a big arc over its own back and past Sable, and its tip is a large key that is turning in the lock at the centre of the vault door. Nothing grows from its neck or shoulders, and no second tail lies on the floor. RENDERING OF THE BOKI (most important): the Boki must NOT look like flat 2D cartoon drawings or stickers. Render every Boki exactly like the Hunters: as a solid three-dimensional creature with real volume and form, soft painted shading that wraps round the body, visible material (fur, feathers, scales, skin) and the scene's own light, rim light and cast shadows on it, as if it were a high-quality 3D character model painted into the same picture. No black cartoon outlines, no flat colour fills. Keep each Boki's design, proportions, colours, face and signature parts from its reference; only the rendering changes. Hunters and Boki share one consistent style. "
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

@@ -2125,3 +2125,11 @@ SPECS.append({'id':'hb2_sable_tailfix','name':'Sable + Lockatara splash: tail fr
    "Right now a long tail with a key on its tip grows out of the lizard's shoulder and neck near its head, which is wrong, and its hind end also trails away behind the woman's leg, so it seems to have two tails. "
    "Correct it: remove the tail that comes out of the shoulder and neck completely, so the neck and shoulder are just smooth green scales with the row of back spikes. The lizard has ONE tail, growing from its rump at the BACK end of its body (the end behind the woman's legs, on the left). "
    "That single tail sweeps up from the rump in a big arc behind the woman and over her back, across to the vault door on the right, and its tip is the big key turning in the lock. One continuous tail, clearly joined to the rump. Change nothing else."})
+# Owner on why the first Sable picture works: they are breaking OUT, the vault door is the way out and the light is beyond it. Fresh takes of
+# that exact idea with the tail anatomy written in, in case the edit (hb2_sable_tailfix) cannot hold the picture.
+_SBO=[s for s in SPECS if s['id']=='hb3_sable_lockatara'][0]
+SPECS.append({'id':'hb5_sable_escape','name':'Sable + Lockatara splash: the escape','refs':_SBO['refs'],'runs':4,'aspect':'16:9','size':'2K',
+  'prompt':_HS2+"Hunter: Sable, the Silver Thief: grey-lilac skin, fuzzy moth antennae, white braid, long buckled coat with moth-wing tails, twin enchanted flintlock pistols. "
+   "Scene: THE ESCAPE. Sable and the key-tailed lizard are INSIDE a dim stone treasure vault piled with gold, breaking OUT. The huge round vault door on the right is their way out: it is cracking open and brilliant golden daylight bursts in through the gap from outside, lighting them both. "
+   "Both face the door and the light. Sable leans forward eagerly, one boot up on the lizard's back, pistol in hand, grinning, her pockets and belt heavy with loot. The lizard strides toward the door, looking back at her with a happy grin. "
+   "TAIL (get this right): the lizard has exactly ONE tail. It grows from its rump at the back end of its body, sweeps up in a big arc over its own back and past Sable, and its tip is a large key that is turning in the lock at the centre of the vault door. Nothing grows from its neck or shoulders, and no second tail lies on the floor. "+_B3D})
