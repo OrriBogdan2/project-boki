@@ -16,7 +16,7 @@ const KIN := [
 	"Chai", "Sesame", "Rune", "Quince", "Lentil", "Noodle", "Bonbon", "Wasabi", "Almond", "Alder", "Cardamom",
 	"Apricot", "Caramel", "Strudel", "Nougat", "Muffin", "Radish", "Butter", "Blossom", "Lime", "Fig", "Echo",
 	"Zest", "Toast", "Mochi", "Copper", "Cactus", "Gumdrop", "Umber", "Honey", "Rowan", "Toffee", "Shortcake",
-	"Plum", "Flurry", "Oak", "Pip", "Comet", "Caper", "Raspberry", "Heather", "Candle", "Flint", "Berry",
+	"Plum", "Flurry", "Oak", "Pudding", "Comet", "Caper", "Raspberry", "Heather", "Candle", "Flint", "Berry",
 	"Linden", "Mulberry", "Crumb", "Willow", "Guava", "Oat", "Crumpet", "Hazel", "Slate", "Tansy", "Tapioca",
 	"Fudge", "Fernando", "Rhubarb", "Nutmeg", "Sapling", "Cotton", "Persimmon", "Chestnut", "Tulip", "Nettle",
 	"Rain", "Melon", "Gnocchi", "Date", "Anise", "Pumpkin", "Tumble", "Saffron", "Star", "Cobble", "Dumpling",
@@ -217,7 +217,7 @@ const KIN := [
 const BOT := [
 	"Slate", "Mako", "Jinx", "Fen", "Kite", "Hex", "Drift", "Vale", "Kestrel", "Hollow", "Ivy", "Scythe",
 	"Frost", "Thorn", "Dagger", "Mara", "Tarn", "Echo", "Quill", "Nim", "Shade", "Ash", "Orin", "Cobalt",
-	"Nova", "Warden", "Volt", "Wraith", "Juno", "Raven", "Moss", "Rust", "Spike", "Gale", "Cato", "Storm",
+	"Nova", "Marlow", "Volt", "Wraith", "Juno", "Raven", "Moss", "Rust", "Spike", "Gale", "Cato", "Storm",
 	"Blaze", "Crow", "Ghost", "Zephyr", "Hawk", "Grim", "Reef", "Wick", "Jolt", "Cinder", "Flint", "Vexa",
 	"Talon", "Viper", "Lynx", "Pike", "Riot", "Lux", "Rook", "Zed", "Briar", "Rho", "Onyx", "Bryn", "Ember",
 	"Bolt", "Sable", "Moys", "Zardyn", "Skusor", "Stickia", "Vixa", "Nexo", "Faevri", "Dramar", "Jithie",

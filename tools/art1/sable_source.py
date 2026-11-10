@@ -1,6 +1,6 @@
-"""ART-1 Sable, stage A: the Meshy scan of the owner's A-pose turnaround (antennae, braid, wings, coat tails, pistols and belt hangers edited out) -> the contract's rest pose.
-Recipe: kael_source.py / claire_source.py (soft weights by distance to the bones, then each bone moves its vertices onto the rig). Her own: the scan's head came out turned 30 degrees and with a
-stray bun at the nape, so the head is turned back about its centre by the ears' line and the bun pressed into the skull; the white and lilac head is told from the dark high collar by its paint.
+"""ART-1 Sable v2, stage A: the Meshy scan of the owner's sable_v2 A-pose turnaround (antennae, braid, wings, coat tails, pistols, sheaths and keys edited out; the gem and midriff chains stay) -> the contract's rest pose.
+Recipe: kael_source.py / claire_source.py (soft weights by distance to the bones, then each bone moves its vertices onto the rig). Her own: the scan's head is squared up by the ears' line and its crown and
+nape buns are pressed into the skull; the white and lilac head is told from the dark high collar by its paint.
 Run: blender -b --factory-startup --python tools/art1/sable_source.py -- <scan.glb> <small base colour.png> <rig.json> <out.blend>"""
 import sys, os, json
 import bpy, bmesh
@@ -12,14 +12,14 @@ from meshkit import smooth
 
 a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, TEX, RIG, OUT = a[0], a[1], a[2], a[3]
-LOW_TRIS, FACE_TRIS = 11000, 2600
+LOW_TRIS, FACE_TRIS = 10300, 2600
 SOLE = -0.95                    # the scan's sole (z)
 K_ = 0.92                       # scan metres -> rig metres, where a bone's length doesn't set it
 SOLE_Z, ANKLE = 0.0, 0.145      # the rig: the boot's sole, the foot bone
 S_J = {"neck": (0, 0, 1.60), "pelvis": (0, 0, 1.02), "crown": (0, 0, 1.92)}
 for sd, sg in (("R", 1.0), ("L", -1.0)):
     S_J.update({"shoulder." + sd: (sg * 0.165, 0, 1.515), "elbow." + sd: (sg * 0.335, 0, 1.27), "wrist." + sd: (sg * 0.515, 0, 1.01), "hip." + sd: (sg * 0.105, 0, 0.955),
-                "knee." + sd: (sg * 0.185, 0, 0.625), "ankle." + sd: (sg * 0.25, 0, 0.16), "sole." + sd: (sg * 0.26, 0, 0.0)})
+                "knee." + sd: (sg * 0.165, 0, 0.64), "ankle." + sd: (sg * 0.25, 0, 0.16), "sole." + sd: (sg * 0.26, 0, 0.0)})
 rig = json.load(open(RIG))["bones"]
 
 
@@ -78,19 +78,14 @@ bright = lum > 0.38
 
 # ---- the head: turned back to the front, by the line through the ear tips
 hd = bright & (P[:, 2] > 1.6)
-upper = hd & (P[:, 2] > 1.74)
+upper = hd & (P[:, 2] > 1.70) & (P[:, 2] < 1.84) & (P[:, 1] > -0.12)      # (the buns behind would pull the centre back)
 cen = P[upper].mean(0)
 print("skull", cen.round(3))
-band = hd & (P[:, 2] > 1.70) & (P[:, 2] < 1.84)
-d2 = P[band][:, :2] - cen[:2]
-rr = np.linalg.norm(d2, axis=1)
-t1 = d2[np.argmax(rr)]
-oth = d2 @ t1 < 0
-t2 = d2[oth][np.argmax(rr[oth])]
+band = hd & (P[:, 2] > 1.70) & (P[:, 2] < 1.78)
+pb = P[band]
+t1, t2 = pb[np.argmax(pb[:, 0])][:2], pb[np.argmin(pb[:, 0])][:2]
 ax = t1 - t2
-if ax[0] < 0:
-    ax = -ax
-YAW = -np.arctan2(ax[1], ax[0]) + np.radians(5.0)     # (the ears sit a little off the face's own line)
+YAW = -np.arctan2(ax[1], ax[0])
 print("ears", t1.round(3), t2.round(3), "yaw deg", round(float(np.degrees(YAW)), 1))
 E_C, E_R = np.array([0, cen[1], 1.75]), np.array([0.135, 0.15, 0.165])
 inside = (np.linalg.norm((P - E_C) / E_R, axis=1) < 1.2) & (P[:, 2] > 1.66)       # the dark eyes and lashes turn with the head
@@ -101,11 +96,11 @@ q = P[:, :2] - cen[:2]
 SKY = -0.015
 shift = np.array([-cen[0], SKY - cen[1]])
 P[:, 0], P[:, 1] = q[:, 0] * c_ - q[:, 1] * s_ + cen[0] + shift[0] * ramp, q[:, 0] * s_ + q[:, 1] * c_ + cen[1] + shift[1] * ramp
-# the bun: everything bright or metal behind the skull's ellipsoid below the crown is pressed onto it (the braid's root covers the place)
-E_C, E_R = np.array([0, SKY, 1.75]), np.array([0.135, 0.15, 0.165])
+# the buns: everything white behind the skull's ellipsoid is pressed onto it; those faces go, sable_pieces.hairback closes the skull (the braid's root sits in it)
+E_C, E_R = np.array([0, SKY, 1.735]), np.array([0.135, 0.128, 0.122])
 e = (P - E_C) / E_R
 er = np.linalg.norm(e, axis=1)
-bun = (P[:, 2] > 1.42) & (P[:, 1] < -0.05) & (er > 0.98) & (np.abs(P[:, 0]) < 0.2) & (lum > 0.3)
+bun = (P[:, 2] > 1.54) & ((P[:, 1] < -0.05) | ((P[:, 2] > 1.82) & (P[:, 1] < 0.04))) & (er > 0.98) & (np.abs(P[:, 0]) < 0.2) & (lum > 0.5)
 P[bun] = E_C + e[bun] / er[bun, None] * 0.98 * E_R
 print("bun verts", int(bun.sum()))
 
@@ -170,6 +165,9 @@ for i, (nm, j0, j1, rad, girth) in enumerate(SEG):
     ax_ = r @ u
     rad_v = (r - ax_[:, None] * u) * girth
     Q += W[:, i, None] * (q0 + ax_[:, None] * sa * v + rad_v @ R.T)
+# the collar's back: the scan's cut braid drags it into a spike; it stands up behind the neck on the sheet
+m_ = np.clip((Q[:, 2] - 1.42) / 0.05, 0, 1) * (Q[:, 1] < -0.1)
+Q[:, 1] += m_ * (-0.1 - Q[:, 1]) * 0.85
 print("fitted", Q.min(0).round(3), Q.max(0).round(3))
 me.vertices.foreach_set("co", Q.ravel())
 me.update()
@@ -215,7 +213,7 @@ hand_w = GROUP["hand.R"] + GROUP["hand.L"]
 bm = bmesh.new()
 bm.from_mesh(low.data)
 bm.faces.ensure_lookup_table()
-# the hands go (rebuilt); the bun's crumpled patch goes too (left in, its folds take the whole decimate budget); the holes are capped after the decimate, which stalls on caps
+# the hands go (rebuilt); the buns' crumpled patch goes too (left in, its folds take the whole decimate budget); the hands' holes are capped after the decimate, which stalls on caps
 kill = [f for f in bm.faces if max(hand_w[v.index] for v in f.verts) > 0.5 or any(bun[v.index] for v in f.verts)]
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")

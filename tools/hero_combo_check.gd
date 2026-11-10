@@ -1,5 +1,5 @@
 extends RefCounted
-## --mage-combo-check / --gunslinger-combo-check: Ryzz's and Vex's kits against their reference
+## --mage-combo-check / --gunslinger-combo-check: Sparkle's and Vex's kits against their reference
 ## sheets and the owner notes (docs/heroes/mage.md and gunslinger.md, "Combinations"): where every shot
 ## and placement lands (max range vs cursor), the telegraph shown while aiming or holding (AimKit), the
 ## charge timings, and each payoff. Prints HCHECK PASS/FAIL and a DONE line.
@@ -90,7 +90,7 @@ func _growth() -> void:
 			d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 			"L1 %.2f L10 %.2f" % [d1, d10])
 
-# ------------------------------------------------------------------ Ryzz
+# ------------------------------------------------------------------ Sparkle
 func _mage() -> void:
 	var r: Array = ac.setup("mage", 4.0, "", true)
 	var m: Match = r[0]
@@ -297,6 +297,21 @@ func _mage() -> void:
 	ok("Wirerun through an orb: picked up, no Static, the dash is back",
 			K.orb_bursts == ob0 + 1 and K.spark_n(T) == 0 and P.dashes >= P.max_dashes(),
 			"picked %d sparks %d dashes %.2f" % [K.orb_bursts - ob0, K.spark_n(T), P.dashes])
+	# 7b. walking over a resting orb picks it up too and resets the dash; one a few metres off stays
+	P.teleport(home)
+	ac.step(m, 0.1)
+	P.dashes = 0.0
+	K.motes.clear()
+	K.motes.append({"pos": home + Vector3(4, 0, 0), "t": 4.0, "node": K.own_node(), "owner": P})
+	ac.step(m, 0.2)
+	ok("Orb: out of reach it stays, the dash stays spent", K.motes.size() == 1 and P.dashes < 1.0,
+			"orbs %d dashes %.2f" % [K.motes.size(), P.dashes])
+	P.teleport(home + Vector3(4, 0, 0))
+	ob0 = K.orb_bursts
+	ac.step(m, 0.2)
+	ok("Walking over an orb: picked up, the dash is back",
+			K.orb_bursts == ob0 + 1 and K.motes.is_empty() and P.dashes >= P.max_dashes(),
+			"picked %d orbs %d dashes %.2f" % [K.orb_bursts - ob0, K.motes.size(), P.dashes])
 	# 8. Storm Rod into a wall: stun; into another foe: both stunned
 	ac.fresh(T)
 	K.sparks.clear()
@@ -344,7 +359,7 @@ func _mage() -> void:
 	P.ak.use_e()
 	ok("Skycall: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
 	ac.step(m, 0.05)
-	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Ryzz
+	ac.aim_at(P, T.pos + Vector3(-3.0, 0, 0))           # the drag: back toward Sparkle
 	ac.step(m, 0.55)
 	var ce := AimKit.entry(P, "e0")
 	ok("Skycall held 0.6s (data: hold and drag, release): still dragging, the arrow + a rim chevron on the circle",
@@ -405,20 +420,17 @@ func _mage() -> void:
 	var n_di := P.shot_n
 	P.do_dash()
 	m.step(DT)
-	ok("dash table: Wirerun is rolling and DashFlow says LMB buffers, E fires",
-			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "buffer" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
+	ok("dash table: Wirerun is rolling and DashFlow says LMB fires (the source is silent), E fires",
+			P.roll_t > 0.0 and String(DashFlow.row_of("mage", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("mage", "e", false)["mode"]) == "fire"
 			and absf(DashFlow.BUFFER_S - 0.15) < 0.001)
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
 	P.ak.use_e()
 	ok("dash table: E is cast mid-dash (not dropped)", not K.strikes.is_empty())
-	ok("dash table: the tapped bolt does not fire inside the dash", P.shot_n == n_di and P.roll_t > 0.0)
-	ac.step(m, 0.5)      # (under one interval: a check's key stays down, Match reads the real one every frame)
-	ok("dash table: the bolt tapped inside the dash goes off when it ends", P.shot_n == n_di + 1, "%d -> %d" % [n_di, P.shot_n])
-	P.inp["fire"] = false       # DashFlow's replayed tap leaves the key down in this harness (a real frame rewrites it)
+	ok("dash table: the tapped bolt fires inside the dash", P.shot_n == n_di + 1 and P.roll_t > 0.0, "%d -> %d" % [n_di, P.shot_n])
 	var n_di2 := P.shot_n
-	ac.step(m, 0.9)
+	ac.step(m, 0.5)
 	ok("dash table: and only once", P.shot_n == n_di2)
 	K.strikes.clear()
 	# dash animation: Wirerun and Slipstep keep their own moves, none shared
@@ -465,7 +477,7 @@ func _mage() -> void:
 	T2.hp = 0.0
 	T2.downed = true
 	K.on_deal(T2, 5.0, {"src": "shot"})
-	ok("small: Ryzz's kit gives no Wirerun on a knock (the game-wide takedown reset is DashReset's)", P.dashes < 0.5)
+	ok("small: Sparkle's kit gives no Wirerun on a knock (the game-wide takedown reset is DashReset's)", P.dashes < 0.5)
 	T2.downed = false
 	T2.hp = T2.max_hp
 	T2.teleport(home + Vector3(30, 0, 0))
@@ -554,7 +566,7 @@ func _gunslinger() -> void:
 	var K: GunslingerKit = P.ak
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
-	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "Hired Gun")
+	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
 	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))

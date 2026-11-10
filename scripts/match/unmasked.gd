@@ -2,11 +2,12 @@ class_name Unmasked
 extends RefCounted
 ## The Empty (lore: the Wyrm stole everyone's essence, so people are born without faces): your own character.
 ## A person whose whole head is a void (a starfield seen with parallax), with a glowing socket shaped for a
-## Mask floating on it and faint ghosts of the features that should be there, and whose body is wrapped in a
+## Relic floating on it and faint ghosts of the features that should be there, and whose body is wrapped in a
 ## shroud (no skin shows). The body (sex, height, build) shapes the silhouette under the shroud; the hollow
 ## (shape, glow, ghost features), the aura and the shroud (style, colour) are the rest.
-## Masks fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
-## Mask left on you. Built by Models.hunter on the hunter rig, so every HunterAnim animation plays on it.
+## Relics fill you in: in a match you are the Hunter (mask_look); look["marks"] holds features a
+## Relic left on you. Built by Models.hunter on the hunter rig, so every HunterAnim animation plays on it.
+# "mask" in code = "Relic" in game, owner 2026-11-07 (Unmasked = the Empty, you before a Relic)
 
 const SEXES := ["Female", "Male"]
 const HEIGHTS := ["Short", "Average", "Tall"]
@@ -14,7 +15,7 @@ const HEIGHT_SCALE := [0.9, 1.0, 1.1]       # x the hunter's size: the whole bod
 const BUILDS := ["Slight", "Average", "Sturdy"]
 const BUILD_WIDTH := [0.86, 1.0, 1.16]      # Models.hunter's body width for each build
 const BUILD_BULK := [0.9, 1.0, 1.14]        # and the race bulk on top: thicker limbs, a fuller torso
-const HOLLOWS := ["Oval", "Mask", "Torn", "Crescent"]
+const HOLLOWS := ["Oval", "Relic", "Torn", "Crescent"]
 const GLOWS := [Color("8ae8ff"), Color("ff9a5a"), Color("b48cff"), Color("ff7ab0"), Color("ffd36a"), Color("7affc4")]
 const GHOSTS := ["None", "Eyes", "Whole face", "Stitched"]
 const AURA := ["None", "Faint", "Strong"]
@@ -151,7 +152,7 @@ static func mask_look() -> Dictionary:
 	out["glider"] = String(lk.get("glider", "classic"))
 	return out
 
-## How much of you shows through a worn Mask (the Hunter is the rest).
+## How much of you shows through a worn Relic (the Hunter is the rest).
 const SHOW := 0.1
 
 ## The put-on blend on a built hero: your body colour tinted into every surface and your height and build
@@ -186,7 +187,7 @@ static func colour(lk: Dictionary) -> Color:
 
 # ------------------------------------------------------------------------------------------ the hollow
 ## The void head: a shell of the head (Head's own mesh, a hair larger) that is void all the way round, with the
-## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Mask marks.
+## hollow's socket, rim and ghost features floating on it; the aura drifting round you; any kept Relic marks.
 static func face(torso: Node3D, lk: Dictionary) -> void:
 	var u := clean(lk)
 	var head := torso.get_node("Head") as MeshInstance3D

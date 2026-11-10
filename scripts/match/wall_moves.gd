@@ -1,21 +1,28 @@
 class_name WallMoves
 extends RefCounted
 ## A hunter's wall kick and wall bounce (one instance per hunter, hooked from Hunter).
-## Kick: in the air against a wall, a jump kicks you off it, once per airtime. Pressing into the wall
-## adds KICK_RISE of height to the jump you are on (so a four-terrace wall is climbable with a mantle
-## on top and a five-terrace one stays sheer); pressing away pushes you off it. Bounce: hitting a
+## Kick (item 149, SUPERVIVE's wall dance): in the air touching or facing a wall, a jump hops you off it,
+## again and again, no glider and no cooldown, with a stone scuff everyone near hears. Keys into the wall or
+## none add KICK_RISE of height to the jump you are on; keys away push you off it. A hop only starts up to
+## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
+## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
+## opens the glider: the glide button or a held glide still does). Bounce: hitting a
 ## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
 ## head-on you just stop, as ever, and a jump there kicks.
 
 const KICK_RISE := 0.8          # m of extra jump height: one terrace (World.LEVEL)
+const HOP_CLIMB_CAP := 1.6      # m above the take-off ground a hop may still start (a plain jump's apex)
+const FACE_REACH := 0.4         # m past the body a wall you face (not touching) still answers a hop
+const FACE_RISE := 0.5          # m of ground above your feet that counts as a wall to hop on
 const KICK_PRESS := 0.4         # keys this far into the wall (dot, ~66 degrees) climb it
 const KICK_AWAY := 0.4          # keys this far away from the wall (dot) push off it
 const KICK_KEYS_MIN := 0.3      # stick deflection that counts as pressing a direction
 const KICK_PUSH := 7.5          # m/s away from the wall for a push-off
 const KICK_SLIDE_KEEP := 0.6    # share of the speed along the wall a push-off keeps
 const KICK_PUSH_JUMP := 0.9     # share of JUMP_V a push-off jumps with
-const KICK_VOL := -4.0          # dB
-const KICK_PITCH := 1.4
+const KICK_VOL := -5.0          # dB: the scuff
+const KICK_PITCH_MIN := 0.85    # each hop's scuff a little different
+const KICK_PITCH_MAX := 1.2
 const BOUNCE_VOL := -6.0        # dB
 const BOUNCE_PITCH := 1.5
 const BOUNCE_KEEP := 0.85       # share of the speed that survives the rebound
@@ -28,39 +35,56 @@ const BOUNCE_DUST := 3          # dust puffs
 const FX_OFFSET := 0.3          # m the spark sits in front of the wall face
 const FX_HEIGHT := 0.8          # m above the feet
 
-var kicked := false             # this airtime's kick is used
+static var scuffs := 0          # (tests) hop scuffs played
 var bounce_t := 0.0
 var _rebound := Vector2.ZERO
 var _rebound_speed := 0.0
 
-## Landing gives the kick back.
+## Landing ends a rebound.
 func land() -> void:
-	kicked = false
 	bounce_t = 0.0
 
-## A jump pressed in the air against a wall: kicks you up it or off it. True if it did.
+## A jump pressed in the air at a wall: hops you up it or off it. True if the press is the wall's (it hopped,
+## or the hop is capped), so it never falls through to opening the glider.
 func try_kick(h: Hunter) -> bool:
-	if kicked or h.wall_touch_t <= 0.0 or h.dropping or h.remote or h.wall_n.length() < 0.1:
+	if h.dropping or h.remote or not _at_wall(h):
 		return false
+	if h.pos.y > h.last_gy + HOP_CLIMB_CAP:
+		return true
 	var keys: Vector2 = h.inp.get("move", Vector2.ZERO)
-	if keys.length() < KICK_KEYS_MIN:
-		return false
-	var toward := keys.normalized().dot(h.wall_n)
-	if toward < -KICK_PRESS:
-		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
-		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
-	elif toward > KICK_AWAY:
+	var toward := keys.normalized().dot(h.wall_n) if keys.length() >= KICK_KEYS_MIN else -1.0
+	if toward > KICK_AWAY:
 		var push := h.wall_n * KICK_PUSH + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
 		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP, push.y)
 	else:
-		return false
-	kicked = true
+		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
+		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
 	h.wall_touch_t = 0.0
 	# no glider until the rise is done, so a held jump keeps the kick's height
 	h.glide_cd = maxf(h.glide_cd, h.vel.y / Hunter.H_GRAV)
 	h.stats["wall_kicks"] = int(h.stats.get("wall_kicks", 0)) + 1
-	h.m.sfx("jump", h.pos, KICK_VOL, KICK_PITCH)
+	var pitch := randf_range(KICK_PITCH_MIN, KICK_PITCH_MAX)
+	scuff(h.m, h.pos, pitch)
+	h.m.net_fx(["whop", Match._r(h.pos.x), Match._r(h.pos.y), Match._r(h.pos.z), snappedf(pitch, 0.01)])
 	h.m.fx.burst(_fx_at(h), Color("e6dccb"), 8, 2.5, 0.3)
+	return true
+
+## The hop's sound: a footstep on stone, at `pitch`. Played in every game (Match "fx" "whop").
+static func scuff(m: Match, at: Vector3, pitch: float) -> void:
+	scuffs += 1
+	m.sfx("step_stone", at, KICK_VOL, pitch)
+
+## Touching a wall (the last 0.2 s), or facing one (keys, else your aim) within FACE_REACH: sets wall_n to its normal.
+func _at_wall(h: Hunter) -> bool:
+	if h.wall_touch_t > 0.0 and h.wall_n.length() > 0.1:
+		return true
+	var keys: Vector2 = h.inp.get("move", Vector2.ZERO)
+	var dir := keys.normalized() if keys.length() >= KICK_KEYS_MIN else h.aim_dir()      # (you face your aim)
+	var probe := Vector2(h.pos.x, h.pos.z) + dir * (h.r + FACE_REACH)
+	var w: World = h.m.world
+	if not w.is_block(probe.x, probe.y) and w.ground_at(probe.x, probe.y) < h.pos.y + FACE_RISE:
+		return false
+	h.wall_n = -dir
 	return true
 
 ## Called the step a wall stopped you in the air, with the velocity you hit it at and the wall's top.

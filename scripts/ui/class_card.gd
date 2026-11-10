@@ -44,7 +44,7 @@ static func challenge_block(id: String, width := 190.0) -> VBoxContainer:
 	var needed := ClassUnlock.open_needed(id)
 	var tier_line := "%s challenge" % ClassUnlock.tier(id).capitalize()
 	if needed > ClassUnlock.open_ids().size():
-		tier_line += "  ·  opens once %d Masks are open" % needed
+		tier_line += "  ·  opens once %d Relics are open" % needed
 	v.add_child(UI.label(tier_line, 12, UI.MUTED))
 	return v
 
@@ -106,7 +106,7 @@ static func results_strip(s: Dictionary) -> Control:
 		ml.set_meta("mastery_done", String(m["id"]))
 		v.add_child(ml)
 	if int(cu.get("new", 0)) > 0:
-		var nl := UI.label("Mask challenge done! Hold to unlock it on the Masks screen at home.", UI.T_SMALL,
+		var nl := UI.label("Relic challenge done! Hold to unlock it on the Relics screen at home.", UI.T_SMALL,
 				GOAL_COL, UI.semi)
 		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
 		v.add_child(nl)

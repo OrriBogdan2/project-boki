@@ -4,7 +4,7 @@
 		"ground": {
 			"lmb": {
 				"mode": "buffer",
-				"source": "Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it. Ours: a slash pressed in the crouch or the drive swings as the drive ends."
+				"source": "Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends."
 			},
 			"rmb": {
 				"mode": "fire",

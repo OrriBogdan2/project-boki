@@ -1,14 +1,14 @@
-# Claire (rimewright), ART-1: import note
+# Claire (rimewright), ART-1 v2: import note
 
-The owner's final design: `briefs/art-refs/claire_FINAL_sheet.png` (master), `claire_turnaround_apose.png`, `claire_weapons.png` (ext/agent-briefs). A grown woman on skates; sincere and shy.
+The owner's v2 redesign: `briefs/art-refs/claire_v2/nivi_v2_turnaround.jpg` (master) and `nivi_v2_main_design.jpg` (ext/agent-briefs; index.md there). A youthful adult (18) on skates: real frost-white rabbit ears (her right one upright, her left one folded by the candy-cane bow), a white-to-ice braid over her left shoulder with a snowflake clasp, a small puff tail, lilac gloves. No horns, wings or devil tail. The older `explorations/old_claire_v2_turnaround.jpg` was not used.
 
-Scan: the four A-pose views cropped, Meshy image-to-image (9 credits a view) with the horns, ears, wings, tail, bow and blades out and the neckline closed up to the collarbones, then one multi-image run (40 credits, 2x upscaled inputs). Work dir `~/meshy/claire_f`; `build.sh source` reruns everything.
+Scan: the turnaround's four views cropped, Meshy image-to-image (nano-banana-pro, 9 credits a view) with the ears, braid, scarf ends, tail and blades out and the sheer skirt made opaque, then one multi-image run (meshy, ultra, 40 credits). Prompts in `art/wardens/src/claire_recipe.json`, task ids in PIPELINE.md's run log. Work dir `~/meshy/claire_v2`; `tools/art1/claire_build.sh source` reruns everything (`INSTALL=1` copies the glb here).
 
-- `tools/art1/claire_source.py`: the scan onto the rig. Head, hood and face stay the scan's sculpt on the head bone (2.2k tris on the face). The face is a little longer and slimmer below the eyes. The skirt is lengthened to mid-thigh, hung from the pelvis, its hem following the thighs a little. The capelet stays on the torso.
-- `claire_pieces.py`: gloved hands, ears, ice horns, wings, tail, bow and ribbons, blades, the candy-striped spear (skinned to hand.R, item 76b).
-- `claire_finish.py`, `claire_paint.py`: one 2048 atlas, 7 surfaces, texel-space paint; lids, slit-pupil glowing iris (hot-keyed), fur held under pure white so it survives the match camera. Bare thigh under the skirt is repainted as stocking and dark shorts.
-- Face: the owner's `claire_head.png` (front, hood up) warped onto the sculpt's landmarks (`claire_paint.py` SHEET_X/Z), hair and inner hood in its ice blue, a soft blue slit in each iris. The skirt's side pits are covered by `skirt_panel`.
-- `claire_clips.py`: 41 clips at 30 fps on the kit's tm_ timings.
+- `tools/art1/claire_source.py`: the scan onto the rig. Head, hair, face and scarf wrap stay the scan's sculpt on the head bone; the skirt hangs from the pelvis.
+- `claire_pieces.py`: gloved hands, the two ears (rigid shells on 3-bone chains `spring_earR/L_*`), the puff tail (rigid on the root), the braid (`spring_scarftail_braid_0..4`, on the head) and its snowflake, blades, the candy-striped spear (skinned to hand.R).
+- `claire_finish.py`, `claire_paint.py`: one 2048 atlas, 7 surfaces, texel-space paint; the face is the scan's own paint; lids; ears white with a pink front and frosted tips; fur held under pure white so it survives the match camera.
+- `claire_clips.py`: 49 clips at 30 fps on the kit's tm_ timings.
 
-Budget: S1's 15k tris including the spear, 7 surfaces, VRAM-compressed atlas, LODs on.
-Rig: archetype body legs 2.04, torso 0.96, shoulder 0.84, neck -0.04, size 1.1, then `--warden-rig-json --warden=rimewright`.
+Budget: 13.6k tris including the spear (S1 cap 15k), 7 surfaces, VRAM-compressed atlas, LODs on.
+Rig: archetype body legs 2.04, torso 0.96, shoulder 0.84, neck -0.04, size 1.1, then `--warden-rig-json --warden=rimewright` (unchanged by v2).
+Anchors kept by name: `anchor_tail_tip` now sits on the puff (its bloom dropped from warden_look.json), `anchor_clasp` on the braid's snowflake, `anchor_head_top` over the ears' base.

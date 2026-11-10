@@ -29,12 +29,13 @@ func gravity_scale() -> float:
 
 ## The glider's sink rate (m/s) this step: above HunterMove.glide_height over the ground (or over the
 ## lip, above the abyss) it pulls you down at HunterMove.glide_pull_vy instead, and the drop past the
-## usual sink becomes glide speed (swoop_ratio of it), fading over HunterMove.swoop_fade.
+## usual sink becomes glide speed (swoop_ratio of it, up to Hunter.GLIDE_MAX), fading over HunterMove.swoop_fade.
 func sink(h: Hunter, usual: float) -> float:
 	var under := h.lip_y if h.over_void() else h.ground()
 	if h.pos.y - under <= HunterMove.glide_height:
 		return usual
 	var gain := maxf(0.0, -h.vel.y - Hunter.GLIDE_SINK) * HunterMove.swoop_ratio
+	gain = minf(gain, Hunter.GLIDE_MAX - Hunter.GLIDE_SPEED)     # pulling out of a dive tops out at the glide's max
 	if gain > swoop:
 		swoop = gain
 		_swoop_drain = gain / HunterMove.swoop_fade

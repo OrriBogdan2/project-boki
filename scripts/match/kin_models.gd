@@ -72,6 +72,8 @@ static func eyes(flex: Node3D, center: Vector3, radii: Vector3, spread: float, u
 		Models.part(eye, Models.sphere(size * 0.15, 8), m_white, Vector3(-size * 0.3, -size * 0.32, -size * 0.92))
 
 static func build(species: String, flex: Node3D, c: Dictionary, mats: Array) -> Dictionary:
+	if BokiRig.has(species):
+		return BokiRig.build(species, flex, c, mats)
 	match species:
 		"cindle": return _vespyx(flex, c, mats)
 		"puddlet": return _prismander(flex, c, mats)

@@ -1,6 +1,6 @@
 class_name KMovesCare
 extends RefCounted
-## Keyed full-body moves of Pip (tender, "mm_") and Claire (rimewright, "tm_"): same format and
+## Keyed full-body moves of Meeko (tender, "mm_") and Neve (rimewright, "tm_"): same format and
 ## channels as HunterAnim.KMOVES, looked up by HunterAnim.km_sample. Timed to the reference sheets'
 ## beats (docs/heroes/tender.md, rimewright.md: Animation moves): anticipation, the release on the
 ## kit's hit time, an overshoot past the key pose, then the settle. Channels used here besides the

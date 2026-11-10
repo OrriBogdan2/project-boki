@@ -109,6 +109,9 @@ func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 		return [0.0, o]
 	return [dmg, o]
 
+func hovering() -> bool:
+	return not swap.is_empty()
+
 ## He drifts slowly (dash.fly_slow of run speed) while the Trade is in flight; the Snap's wind-up slows him.
 func move_k() -> float:
 	if well.locked:
@@ -600,7 +603,7 @@ func _pop(hit: bool) -> void:
 		return
 	pops += 1
 	play("ostra_pop")
-	var mult := 1.0 + (float(ed["dmg_max_k"]) - 0.5) * k
+	var mult := 1.0 + (float(ed["dmg_max_k"]) - 1.0) * k
 	var dmg := float(ed["dmg"]) * mult * power("kin")
 	# an implosion: the rim snaps inward to a bright point, then dark shards fly out
 	for i in 3:

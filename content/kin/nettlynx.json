@@ -1,0 +1,19 @@
+{
+	"id": "nettlynx",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/nettlynx.json.",
+	"size": {
+		"cm": 32,
+		"kg": 2.5,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#465f9e",
+		"belly": "#c0dbe8",
+		"glow": "#794aff"
+	},
+	"work": {
+		"ember": 3,
+		"mend": 2,
+		"forage": 1
+	}
+}

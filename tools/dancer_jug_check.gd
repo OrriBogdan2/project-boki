@@ -38,7 +38,7 @@ func thief(a) -> void:
 	T2.teleport(home + Vector3(0, 0, 5.5))
 	A.ok("dancer: kit, model, Arc Bolts",
 			K != null and P.model.get_meta("arch") == "thief" and P.wid == "arc_bolts"
-			and Arch.name_of("thief") == "Silver Thief",
+			and Arch.name_of("thief") == "The Silver Thief",
 			P.wid)
 	A.ok("dancer: her moves are keyed (KMovesDJ)",
 			["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola", "thf_knife",

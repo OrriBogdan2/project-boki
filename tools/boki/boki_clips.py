@@ -1,6 +1,7 @@
 """Clips every four-legged Boki shares. A clip is a function of t (0..1) returning bone -> (rx, ry, rz) in the creature's
 own axes: rx lifts the nose (or swings a limb forward), ry turns it toward its left, rz rolls.
-Keys: "root_at" / "hips_at" (metres), "root_sc" (squash), and prop bones set to "on". Bones a species lacks are ignored."""
+Keys: "root_at" / "hips_at" (metres; any other bone without a parent takes one too), "root_sc" (squash), and prop
+bones set to "on". Bones a species lacks are ignored."""
 import math
 
 from vespyx_sides import SIDES

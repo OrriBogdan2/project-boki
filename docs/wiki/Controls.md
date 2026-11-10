@@ -2,7 +2,7 @@
 
 Every key can be rebound in **Settings > Controls**. Some keys mean different things at home and in a
 match: **B** is build mode at home and "base to a teammate" in a squad; **T** talks to a Boki at home
-is Merge in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
+is Fusion in a match (the emote wheel is **Y**); **C** opens a Boki's details at home and casts your Boki's
 ability in a match; **R** turns a piece in build mode and reloads in a match.
 
 ## In a match
@@ -20,7 +20,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | E | Your class's utility |
 | R | Reload (it also reloads on its own after a short idle) |
 | X | Your hunter's own ultimate (from level 6; no hero has one yet) |
-| T | Merge with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
+| T | Fuse with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
 | C | Your Boki's own ability: it hops off, casts and hops back |
 | G | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | Middle mouse | Ping for your squad: on an enemy hunter a red "Enemy" ping, on loot "Loot", anywhere else the spot. With the map open, or while dropping in, it pings the point under the cursor |
@@ -89,7 +89,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
 | H | Whistle | `whistle` | no |
-| J | Masks: change Mask (at home and in practice areas) | `hero` | yes |
+| J | Relics: change your Relic (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
 | R | Turn a piece (build mode) | `rotate` | yes |

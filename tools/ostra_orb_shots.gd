@@ -1,6 +1,6 @@
 extends "res://tools/vv_shots.gd"
 ## --ostra-orb-shots --shots-dir=<dir>: items 60 and 117's review shots in a live Arena match (xvfb with a renderer),
-## on the Ryzz/Vex shot rig. Strips crop round the orb (or Motley, for the glow) at gameplay zoom;
+## on the Sparkle/Vex shot rig. Strips crop round the orb (or Motley, for the glow) at gameplay zoom;
 ## <dir>/MANIFEST_ostra.txt gets one line per file. The rock row is a real blocking row with a box drawn on it.
 
 const ROW_X := 4.0           # m east of Ostra: the rock row

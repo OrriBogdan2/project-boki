@@ -1,0 +1,118 @@
+{
+	"grammar": 1,
+	"id": "gloamshell",
+	"name": "Gloamshell",
+	"animals": [
+		"Garden snail",
+		"Smoked obsidian"
+	],
+	"theme": "shadow",
+	"flavor": "A snail whose shell is smoked obsidian glass. It drinks the light around it and leaves a trail of dusk behind.",
+	"colors": {
+		"body": "#3a3448",
+		"belly": "#b8a8c8",
+		"glow": "#8a6aff"
+	},
+	"look": {
+		"ears": "none",
+		"body": "cloud",
+		"tail": "none",
+		"feet": "none",
+		"aura": "none"
+	},
+	"body": {
+		"size": "small",
+		"reach": 1.3,
+		"mass": 0.8,
+		"gait": {
+			"hop_rate": 6.0,
+			"hop_height": 0.08,
+			"pace": 0.85
+		}
+	},
+	"stats": {
+		"kin_hp": 6,
+		"kin_damage": 2,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.3,
+		"loyalty": 0.6,
+		"temper": 0.35,
+		"curiosity": 0.55
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "shoulder",
+		"name": "Dusk Trail",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		}
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "mark",
+				"mode": "reveal",
+				"duration": 3
+			}
+		]
+	},
+	"active": "puffcap_mines",
+	"auto": "thorn_patch",
+	"merge": "thornwake",
+	"evolution": {
+		"root": "Gloam",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "slow, smug, speaks in whispers",
+		"syllables": [
+			"Gloam",
+			"shell"
+		]
+	},
+	"egg": {
+		"name": "Gloamshell Egg",
+		"temper": "Private",
+		"desc": "Something private is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

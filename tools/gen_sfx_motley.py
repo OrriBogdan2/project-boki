@@ -2,7 +2,7 @@
 
     cd tools && python3 gen_sfx_motley.py      (then: godot --headless --import)
 
-Motley is the Tyrant's court jester sealed in his own grinning mask: a floating jack-in-the-box of a man
+Motley is Malgrave's court jester sealed in his own grinning mask: a floating jack-in-the-box of a man
 from the Void. His palette is a worn music box (steel comb tines, slightly out of true), a coiled spring,
 the bells on his cap (which ring only when he swaps) and the Void under it all (dark swells, a hollow
 low drone). His voice is a man's behind a mask: hollow, eerie, playful, a giggle where a groan should be.

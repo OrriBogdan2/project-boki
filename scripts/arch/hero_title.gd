@@ -4,7 +4,7 @@ extends RefCounted
 ## "gender", "personality"), so renaming is a data edit. A hunter in a match reads "<player> the <title>".
 
 static func title(archetype: String) -> String:
-	return Arch.name_of(archetype)
+	return Arch.bare_title(archetype)
 
 static func base_name(archetype: String) -> String:
 	return String(Arch.def(archetype).get("base_name", ""))
@@ -19,10 +19,7 @@ static func personality(archetype: String) -> String:
 static func label(player_name: String, archetype: String) -> String:
 	if not Arch.exists(archetype):
 		return player_name
-	var t := title(archetype)
-	if t.begins_with("The "):   # "Orri the Unbroken", not "Orri the The Unbroken"
-		t = t.substr(4)
-	return "%s the %s" % [player_name, t]
+	return "%s the %s" % [player_name, title(archetype)]   # titles are stored without "the"
 
 static func of_hunter(hunter: Hunter) -> String:
 	return label(hunter.pname, hunter.arch)

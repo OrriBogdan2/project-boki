@@ -8,8 +8,9 @@ def hx(s):
     return np.array([int(s[i:i + 2], 16) / 255.0 for i in (0, 2, 4)], np.float32)
 
 
-BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("150f1c", "261b30", "45305f", "62428f", "7f5db0", "a877e0", "e0aaff"))
-RUFF_D, RUFF_M, RUFF_L = map(hx, ("3e3a48", "7b7686", "b4afbb"))
+# (v2 sheet, sampled from motley_v2_turnaround.jpg: a magenta-violet light side, a plum dark side, a lilac ruff)
+BLACK, PLUM, DUSK, VIOLET, VIOLET_HI, TRIM, HOT = map(hx, ("1e1224", "3a2440", "5b2e6d", "6d3b82", "9b65b3", "b58ad0", "e0aaff"))
+RUFF_D, RUFF_M, RUFF_L = map(hx, ("6a4c7a", "a98cb9", "d7bedf"))
 BLUE = hx("3a2f7c")
 
 
@@ -88,12 +89,12 @@ def edges(S, T, w=0.02):
 
 
 # ---------------------------------------------------------------------------- pieces
-WOOD_D, WOOD_M, WOOD_L = map(hx, ("4a2d1e", "7c5235", "a9825a"))
-IRON = hx("3a2a2c")
-GOLD_D, GOLD_M, GOLD_L = map(hx, ("6e4a1e", "b5873a", "f0d48a"))
-RED, SLATE = hx("b23a34"), hx("3e4a78")
-WHITE_D, WHITE_M, WHITE_L = map(hx, ("9a93ad", "dcd8e6", "fbf9ff"))
-BLACK2 = hx("261c30")
+# (v2 sheet: dusty mauve panels in plum-brown frames, muted bronze brass, plum spades, wine diamonds)
+WOOD_D, WOOD_M, WOOD_L = map(hx, ("6a5468", "8c7488", "a8929f"))
+IRON = hx("6a3a4c")
+GOLD_D, GOLD_M, GOLD_L = map(hx, ("6e4a3a", "b08868", "e8c49a"))
+RED, SLATE = hx("7f3d49"), hx("543756")
+BLACK2 = hx("4e3053")
 
 
 def suit(kind, x, y):
@@ -128,7 +129,7 @@ def wall(kind, col, seed):
     def fn(S, T):
         c = wood(S, T, seed)
         pan = M.sm(0.09, 0.12, S) * M.sm(0.91, 0.88, S) * M.sm(0.09, 0.12, T) * M.sm(0.91, 0.88, T)
-        c = c * (0.62 + 0.38 * (1 - pan))[..., None] + mix(c, hx("c7b48e"), 0.5) * 0.38 * pan[..., None]
+        c = c * (0.62 + 0.38 * (1 - pan))[..., None] + mix(c, hx("b89aae"), 0.5) * 0.38 * pan[..., None]
         sm_ = suit(kind, (S - 0.5) * 1.5, (0.5 - T) * 1.5)
         wear = 0.82 + 0.18 * fbm(S, T, 18, 18, seed + 3, 3)
         c = mix(c, col * wear[..., None], np.clip(sm_, 0, 1))
@@ -137,7 +138,7 @@ def wall(kind, col, seed):
 
 
 def p_rail(S, T):
-    return ramp(0.45 + 0.4 * np.cos(S * 6.283) + 0.2 * (fbm(S, T, 8, 8, 5) - 0.5), [hx("24181a"), IRON, hx("6a4a3a")])
+    return ramp(0.45 + 0.4 * np.cos(S * 6.283) + 0.2 * (fbm(S, T, 8, 8, 5) - 0.5), [hx("2e1826"), IRON, hx("7a4a60")])
 
 
 def p_lid(S, T):
@@ -149,12 +150,8 @@ def p_brass(S, T):
     return ramp(0.5 + 0.48 * np.cos(S * 6.283 * 2 + 0.6), [GOLD_D, GOLD_M, GOLD_L])
 
 
-def p_knob(S, T):
-    return ramp(T * 0.7 + 0.2, [hx("3a1e10"), hx("6e3a20"), hx("a06a3a")])
-
-
 def p_bell(S, T):
-    c = ramp(0.5 + 0.48 * np.cos(S * 6.283 + 0.9), [hx("5e4a30"), hx("a88a58"), hx("ecd9a8")])
+    c = ramp(0.5 + 0.48 * np.cos(S * 6.283 + 0.9), [hx("5e403c"), hx("a07870"), hx("e2bfa8")])
     return mix(c * (0.75 + 0.35 * np.sin(np.clip(T, 0, 1) * 3.1))[..., None], hx("20140c"), M.sm(0.72, 0.76, T) * M.sm(0.92, 0.88, T))
 
 
@@ -168,8 +165,7 @@ def p_torso(S, T):
     q = (S % 1.0)
     dark = ((q >= 0.0) & (q < 0.25)) | ((q >= 0.5) & (q < 0.75))
     c = harlequin(S, T, dark.astype(np.float32), None, 3)
-    belt = M.sm(0.74, 0.76, T) * M.sm(0.88, 0.86, T)
-    c = mix(c, BLACK2, belt * 0.8)
+    c = c * (1 - 0.25 * np.exp(-((T - 0.8) / 0.012) ** 2))[..., None]      # (v2 sheet: a waist seam, no belt)
     return c * (0.72 + 0.28 * M.sm(0.05, 0.3, T))[..., None]
 
 
@@ -201,7 +197,7 @@ def sleeve_paint(dark, seed):
 
 
 def p_glove(S, T):
-    return ramp(0.62 + 0.3 * np.cos(S * 6.283) + 0.1 * (fbm(S, T, 5, 5, 8) - 0.5), [WHITE_D, WHITE_M, WHITE_L])
+    return ramp(0.62 + 0.3 * np.cos(S * 6.283) + 0.1 * (fbm(S, T, 5, 5, 8) - 0.5), [hx("9072a0"), hx("c4abd2"), hx("e2d2ea")])     # (v2 sheet: lilac gloves)
 
 
 def p_hood(S, T):
@@ -229,9 +225,9 @@ def p_ruff(S, T):
     wall = M.sm(0.32, 0.42, T) * M.sm(0.68, 0.58, T)
     ph = S * 29 * 6.283 + 2.2 * np.cos((T - 0.5) * 3.14 * 3.0) * 0 + 7.0 * (T - 0.5) * wall
     fold = 0.5 + 0.5 * np.cos(ph + 1.0)
-    c = ramp(fold * 0.7 + 0.32, [WHITE_D, WHITE_M, WHITE_L], [0, 0.5, 1])
+    c = ramp(fold * 0.7 + 0.32, [RUFF_D, RUFF_M, RUFF_L], [0, 0.5, 1])     # (v2 sheet: a lilac ruff)
     line = np.exp(-((np.abs(((ph + 1.0) / 6.283) % 1.0 - 0.5)) / 0.06) ** 2)
-    c = mix(c, hx("8e889c"), line * (0.2 + 0.45 * wall))
+    c = mix(c, hx("6a4c7a"), line * (0.2 + 0.45 * wall))
     return c * (0.66 + 0.34 * M.sm(0.03, 0.22, T) * M.sm(0.97, 0.78, T))[..., None]
 
 
@@ -294,8 +290,8 @@ def p_flame(S, T):
     return ramp(T, [hx("7a2a60"), hx("e0622a"), hx("ffb060")])
 
 
-PAINTERS = {"flame": p_flame, "wall_s": wall("spade", SLATE, 11), "wall_d": wall("diamond", RED, 12), "wall_c": wall("club", SLATE, 13), "wall_h": wall("heart", RED, 14), "rail": p_rail,
-            "lid": p_lid, "brass": p_brass, "knob": p_knob, "bell": p_bell, "torso": p_torso, "peplum": p_peplum, "lining": p_lining,
+PAINTERS = {"flame": p_flame, "wall_s": wall("spade", SLATE, 11), "wall_d": wall("diamond", RED, 12), "wall_sb": wall("spade", SLATE, 13), "wall_db": wall("diamond", RED, 14), "rail": p_rail,
+            "lid": p_lid, "brass": p_brass, "bell": p_bell, "torso": p_torso, "peplum": p_peplum, "lining": p_lining,
             "tail_v": tail_paint(False, 41), "tail_k": tail_paint(True, 43), "sleeve_k": sleeve_paint(True, 13), "sleeve_v": sleeve_paint(False, 15), "glove": p_glove,
             "hood": p_hood, "hornR": horn_paint(False), "hornL": horn_paint(True), "ruff": p_ruff, "collar_v": collar_paint(VIOLET, VIOLET_HI, 71), "collar_k": collar_paint(BLACK, PLUM, 73),
             "wisp": p_wisp, "card": p_card, "cardback": p_cardback, "cardburn": p_cardburn}
@@ -358,7 +354,7 @@ def blur(a, r):
     return a
 
 
-RELIEF = {"wall_s": 1.3, "wall_d": 1.3, "wall_c": 1.3, "wall_h": 1.3, "lid": 1.3, "rail": 1.0, "brass": 0.7, "bell": 0.7, "knob": 0.6, "torso": 0.8, "peplum": 0.9,
+RELIEF = {"wall_s": 1.3, "wall_d": 1.3, "wall_sb": 1.3, "wall_db": 1.3, "lid": 1.3, "rail": 1.0, "brass": 0.7, "bell": 0.7, "torso": 0.8, "peplum": 0.9,
           "tail_v": 0.9, "tail_k": 0.9, "sleeve_k": 0.8, "sleeve_v": 0.8, "glove": 0.5, "hood": 0.8, "hornR": 0.9, "hornL": 0.9, "ruff": 0.8, "collar_v": 0.9, "collar_k": 0.9}
 
 

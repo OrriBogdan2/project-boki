@@ -54,8 +54,7 @@ var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
-var hob: FarmHob = null            # Hob the builder: blueprints, and a hammer for sites (farm_hob.gd)
-var masks: MaskOffer = null         # the second Mask, waiting by the portal (mask_offer.gd)
+var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
@@ -1021,7 +1020,7 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
-	cam.follow(masks.frame(focus) if masks else focus, d, panel_open == "" and train.is_empty())
+	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
@@ -1190,7 +1189,7 @@ func _move_player(d: float) -> void:
 	if dash_t > 0.0:
 		dash_t -= d
 		hv = dash_v
-		if dash_t <= 0.0: hv = dash_v * (Hunter.DASH_CARRY_AIR if air else Hunter.DASH_CARRY_GROUND)
+		if dash_t <= 0.0: hv = HunterMove.dash_exit(dash_v, SPEED)
 	else:
 		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
@@ -1998,7 +1997,6 @@ func _find_interact() -> void:
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
-	if masks and not masks.find(p2).is_empty(): best = masks.find(p2)
 	if hg and visit.is_empty() and (best.is_empty() or bd > 1.2):
 		# a wild tree or boulder in reach: chop or mine it (with the right tool)
 		var wt := hg.find(p2)
@@ -2147,7 +2145,6 @@ func _label_for(it: Dictionary) -> String:
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
 		"hob", "site": return hob.label(it)
 		"feeder", "grave", "graveyard", "place": return hecon.label(it)
-		"mask": return masks.label(it)
 		"station": return "Job Board" if it["id"] == "job_board" else "%s: assign a Boki" % HomeLayout.CATALOG[it["id"]]["name"]
 		"wild": return hg.label(it)
 	return ""
@@ -2184,7 +2181,6 @@ func _use(it: Dictionary) -> void:
 		"burrow": _open_burrow()
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
-		"mask": masks.use(it)
 		"station":
 			if it["id"] == "job_board" or not hw: open_job_board()
 			else: hw.open_station(it["e"])
@@ -2335,7 +2331,7 @@ func hub_items() -> Array:
 	if has_method("open_build"):
 		items.append(["build", "Build", "hammer", func(): call("open_build")])
 	items.append(["settings", "Settings", "gear", func(): Overlay.ctx = "home"; Overlay.open_settings()])
-	items.append(["hero", "Masks", "swap", func(): HomeHero.open(self)])
+	items.append(["hero", "Relics", "swap", func(): HomeHero.open(self)])
 	return items
 
 func _build_hub() -> void:
@@ -2939,8 +2935,6 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
 	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
-	var rdt := KinText.rider(kspec)
-	if rdt != "": lines.append(["%s (your dodge): %s" % [String(kspec.dodge_rider.get("name", "")), rdt], UI.MUTED])
 	for ln in lines:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])

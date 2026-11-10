@@ -1,5 +1,5 @@
-"""ART-1 Ryzz, stage A: the Meshy scan of the owner's A-pose turnaround (pigtails, rods, harness, wires, chain edited out) -> the contract's rest pose.
-Recipe: kael_source.py / claire_source.py. Her own: the skirt hangs from the pelvis, its hem following the thighs a little; heads cut at the jaw; hands rebuilt.
+"""ART-1 Sparkle, stage A: the Meshy scan of the owner's v2 A-pose turnaround (pigtails, backpack, rods and cables edited out) -> the contract's rest pose.
+Recipe: kael_source.py / claire_source.py. Her own: the tied jacket hangs from the pelvis as a skirt, its hem following the thighs a little; hands rebuilt.
 Run: blender -b --factory-startup --python tools/art1/ryzz_source.py -- <scan.glb> <rig.json> <out.blend>"""
 import sys, os, json
 import bpy, bmesh
@@ -13,11 +13,11 @@ a = sys.argv[sys.argv.index("--") + 1:]
 SCAN, RIG, OUT = a[0], a[1], a[2]
 LOW_TRIS = 8900
 FACE_TRIS = 2000
-SOLE = -0.946
+SOLE = -0.9498
 K_ = 0.90
 ANKLE = 0.135
-S_J = {"neck": (0, 0, 1.596), "pelvis": (0, 0, 0.99), "shoulder.R": (0.17, 0, 1.476), "elbow.R": (0.33, 0, 1.256), "wrist.R": (0.456, 0, 1.122),
-       "hip.R": (0.09, 0, 0.95), "knee.R": (0.146, 0, 0.646), "ankle.R": (0.23, 0, 0.15), "sole.R": (0.25, 0, 0.0), "crown": (0, 0, 1.894)}
+S_J = {"neck": (0, 0, 1.596), "pelvis": (0, 0, 0.99), "shoulder.R": (0.17, 0, 1.47), "elbow.R": (0.332, 0, 1.254), "wrist.R": (0.44, 0, 1.10),
+       "hip.R": (0.09, 0, 0.95), "knee.R": (0.12, 0, 0.646), "ankle.R": (0.145, 0, 0.15), "sole.R": (0.16, 0, 0.0), "crown": (0, 0, 1.894)}
 for k_ in list(S_J):
     if k_.endswith(".R"):
         x, y, z = S_J[k_]
@@ -71,28 +71,11 @@ def seg_d(p, a0, a1):
 
 
 rt = np.minimum(seg_d(P, S_J["hip.R"], S_J["knee.R"]), seg_d(P, S_J["hip.L"], S_J["knee.L"]))
-sk = smooth(0.088, 0.104, rt) * smooth(0.82, 0.86, P[:, 2]) * smooth(1.2, 1.1, P[:, 2]) * (np.abs(P[:, 0]) < 0.34)
+sk = smooth(0.088, 0.104, rt) * smooth(0.68, 0.72, P[:, 2]) * smooth(1.2, 1.1, P[:, 2]) * (np.abs(P[:, 0]) < 0.34)
 for s_ in (1.0, -1.0):
     sk *= smooth(0.075, 0.1, seg_d(P, S_J["elbow.R"] if s_ > 0 else S_J["elbow.L"], S_J["wrist.R"] if s_ > 0 else S_J["wrist.L"]))
     sk *= smooth(0.07, 0.09, seg_d(P, S_J["wrist.R"] if s_ > 0 else S_J["wrist.L"], (s_ * 0.6, 0, 0.98)))
 
-# ... and by paint: the pleat valleys dip to the thigh, so distance alone gives them to the leg and they tear. The skirt is dark, the fishnets are not.
-sys.path.insert(0, os.path.join(HERE, "..", "meshy"))
-import imgio, subprocess
-_t = OUT + "_col.png"
-subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", os.path.join(os.path.dirname(SCAN), "tex0_base_color.png"), "-vf", "scale=1024:1024", _t], check=True)
-_c = imgio.load(_t)[::-1].mean(2)
-os.remove(_t)
-_uv = np.zeros(len(me.loops) * 2)
-me.uv_layers.active.data.foreach_get("uv", _uv)
-_uv = _uv.reshape(-1, 2)
-_vi = np.zeros(len(me.loops), np.int64)
-me.loops.foreach_get("vertex_index", _vi)
-_L = np.ones(n)
-_L[_vi] = _c[np.clip((_uv[:, 1] % 1 * 1024).astype(int), 0, 1023), np.clip((_uv[:, 0] % 1 * 1024).astype(int), 0, 1023)]
-dark = (_L < 0.24) & (P[:, 2] > 0.862) & (P[:, 2] < 1.02) & (rt < 0.16)      # (only beside the thighs: the valleys, nothing of the torso)
-print("skirt by distance", int((sk > 0.5).sum()), "by paint adds", int((dark & (sk <= 0.5)).sum()))
-sk = np.maximum(sk, dark * 1.0)
 names = [s[0] for s in SEG]
 D = np.zeros((n, len(SEG)))
 z, x = P[:, 2].copy(), P[:, 0]
@@ -205,25 +188,14 @@ def past_wrist(f):
 all_arm = arm_w + GROUP["upper_arm.R"] + GROUP["upper_arm.L"]
 
 
-# the thighs under the skirt go: drawn in from the A-pose they push through its pleat valleys, and they'd feed the skirt their paint
-thigh_w = GROUP["thigh.R"] + GROUP["thigh.L"]
-under = (thigh_w > 0.5) & (sk < 0.5) & (P[:, 2] > 0.885) & (rt < 0.12)
-
-
-def hidden_thigh(f):
-    return all(under[v.index] for v in f.verts)
-
-
-
-
 def bridge(f):
     """A face from the arm to the body (the scan's sleeve or cuff touches the hip at rest): it stretches as a blade whenever the arm moves."""
     w_ = [all_arm[v.index] for v in f.verts]
     return max(w_) > 0.5 and min(w_) < 0.08 and f.calc_center_median().z < 1.08
 
 
-kill = [f for f in bm.faces if past_wrist(f) or hidden_thigh(f) or bridge(f)]
-print("under the skirt", int(under.sum()), "verts;", len(kill), "faces cut")
+kill = [f for f in bm.faces if past_wrist(f) or bridge(f)]
+print(len(kill), "faces cut")
 bmesh.ops.delete(bm, geom=kill, context="FACES")
 bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
 # (welded per side of the arm: at rest the forearms touch the skirt, and one weld across would stretch hip to hand in every raised-arm pose)
@@ -264,9 +236,4 @@ def is_face(c):
 decimate(is_face, FACE_TRIS)
 decimate(lambda c: ~is_face(c), LOW_TRIS - FACE_TRIS)
 print("Low tris", sum(len(p.vertices) - 2 for p in low.data.polygons))
-bs = bmesh.new()
-bs.from_mesh(src.data)
-bmesh.ops.delete(bs, geom=[f for f in bs.faces if all(under[v.index] for v in f.verts)], context="FACES_ONLY")
-bs.to_mesh(src.data)
-bs.free()
 bpy.ops.wm.save_as_mainfile(filepath=OUT)

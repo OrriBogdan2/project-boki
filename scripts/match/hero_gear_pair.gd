@@ -242,59 +242,10 @@ static func _ashwick(c: Dictionary) -> void:
 static func _undersuit(c: Dictionary) -> void:
 	HeroGear._undersuit(c)
 
-## The Torch Lance, held low at the hip: a ribbed brass barrel with a flared bell nozzle and heat-shield fins,
-## a riveted fuel canister slung under it, a hose looping back to the pack, a front grip, and the cyan
-## pilot flame (a cool nozzle against warm fire) burning in a little cage at the tip.
-static func flamer(gun: Node3D, m_gun: Material, m_dark: Material, m_acc: Material) -> void:
-	var brass := Models.toon(Color("c89a3c"), true)
-	brass.set_shader_parameter("gloss", 0.6)
-	var soot := Models.toon(Color("3a3430"), true)
-	_gp(gun, Models.box(0.11, 0.13, 0.32), m_gun, Vector3(0, 0, -0.06))
-	_gp(gun, Models.cyl(0.045, 0.05, 0.52, 14), brass, Vector3(0, 0.03, -0.46), Vector3(PI / 2, 0, 0))
-	for k in 4:
-		_gp(
-			gun, HeroKit.band("lw_rib", 0.056, 0.056, 0.022, 0.012), soot, Vector3(0, 0.03, -0.3 - k * 0.09),
-			Vector3(PI / 2, 0, 0)
-		)
-	_gp(
-		gun,
-		HeroKit.loft(
-			"lw_bell", [Vector3(0, 0.03, -0.72), Vector3(0, 0.03, -0.8), Vector3(0, 0.03, -0.86)],
-			[Vector2(0.05, 0.05), Vector2(0.075, 0.075), Vector2(0.105, 0.105)], 16, Vector3.UP, 0.9
-		),
-		brass
-	)
-	for k in 3:
-		var a := TAU * k / 3.0
-		_gp(gun, Models.box(0.012, 0.012, 0.12), soot, Vector3(cos(a) * 0.08, 0.03 + sin(a) * 0.08, -0.92))
-	var pilot := Models.toon(Color("6fe8ff"), false, 2.2)
-	_gp(gun, Models.sphere(0.03, 8), pilot, Vector3(0, 0.03, -0.96), Vector3.ZERO, Vector3(1, 1, 1.8))
-	for sx in [-1.0, 1.0]:
-		_gp(gun, Models.box(0.012, 0.09, 0.2), soot, Vector3(0.055 * sx, 0.09, -0.5))
-	# the fuel canister under the barrel, two straps and a valve wheel
-	_gp(gun, Models.cyl(0.065, 0.065, 0.3, 14), m_acc, Vector3(0, -0.1, -0.24), Vector3(PI / 2, 0, 0))
-	for k in 2:
-		_gp(
-			gun, HeroKit.band("lw_strap", 0.07, 0.07, 0.025, 0.01), brass, Vector3(0, -0.1, -0.15 - k * 0.18),
-			Vector3(PI / 2, 0, 0)
-		)
-	_gp(
-		gun, HeroKit.band("lw_valve", 0.035, 0.035, 0.012, 0.01), brass, Vector3(0.07, -0.1, -0.08),
-		Vector3(0, 0, PI / 2)
-	)
-	_gp(gun, Models.cyl(0.024, 0.024, 0.16, 8), m_dark, Vector3(0, -0.12, -0.52))
-	# the hose back to the pack and the grips
-	_gp(
-		gun,
-		HeroKit.loft(
-			"lw_hose",
-			[Vector3(0, -0.06, 0.08), Vector3(0.05, -0.2, 0.18), Vector3(0.1, -0.12, 0.34), Vector3(0.12, 0.08, 0.42)],
-			[Vector2(0.022, 0.022), Vector2(0.024, 0.024), Vector2(0.024, 0.024), Vector2(0.02, 0.02)], 8, Vector3.UP,
-			1.0
-		),
-		m_dark
-	)
-	_gp(gun, Models.cyl(0.022, 0.022, 0.2, 8), m_dark, Vector3(0, -0.11, 0.02))
+## Cinder carries no weapon: the fire comes from her hands (docs/heroes/ashwick.md), so there is no gun
+## to build (no barrel, canister or hose). The weapon id stays "flamethrower" for the kit and its stats.
+static func flamer(_gun: Node3D, _m_gun: Material, _m_dark: Material, _m_acc: Material) -> void:
+	pass
 
 ## Dredge's harbour scattergun: a short, fat iron barrel ending in a flared brass bell, a pump wrapped in
 ## tarred rope, a riveted receiver, a drum of slugs on top and a stubby hook-shaped stock, with a hot

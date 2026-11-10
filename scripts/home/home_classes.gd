@@ -7,7 +7,7 @@ extends RefCounted
 ## or the challenge it still needs. Rules and numbers: content/rules/class_unlock.json, logic:
 ## ClassUnlock. (Internal names keep "class": the file, the save key and the ids.)
 
-const TITLE := "Masks"
+const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
 const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3
@@ -41,15 +41,29 @@ static func open(home: Node, sel := "") -> void:
 		grid.add_child(_tile(home, String(id), String(id) == sel))
 	home.set_meta("classes_grid", grid)
 	home.set_meta("hero_grid", grid)
-	left.add_child(ClassCard.mastery_list(sel, LEFT_W))
-	left.add_child(_glider_pick(home, sel))
+	var details := UI.vbox(10)
+	left.add_child(details)
 	var right := UI.vbox(10)
 	cols.add_child(right)
+	var acts := UI.vbox(0)      # (above the viewer: the hold is the first thing you see)
+	right.add_child(acts)
 	var viewer := HunterViewer.make(sel, STAGE, CLIP, 3)
-	right.add_child(_actions(home, sel, viewer))      # (above the viewer: the hold is the first thing you see)
 	right.add_child(viewer)
 	home.set_meta("hunter_viewer", viewer)
-	UI.footer_left(v).add_child(UI.ghost("Kit card (K)", func(): HomeHero.kit(home, sel), 0))
+	home.set_meta("hunters_parts", [details, acts])
+	_fill(home, sel, viewer)
+	var kit := func(): HomeHero.kit(home, String(home.get_meta("hunters_sel")))
+	UI.footer_left(v).add_child(UI.ghost("Kit card (K)", kit, 0))
+
+## The picked Hunter's mastery goals and glider (left) and what you can do with it (over the viewer).
+static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:
+	var details: Control = home.get_meta("hunters_parts")[0]
+	var acts: Control = home.get_meta("hunters_parts")[1]
+	for c in details.get_children() + acts.get_children():
+		c.queue_free()
+	details.add_child(ClassCard.mastery_list(id, LEFT_W))
+	details.add_child(_glider_pick(home, id))
+	acts.add_child(_actions(home, id, viewer))
 
 ## Every Hunter: ready ones first, then open, in progress and locked; each group in the usual order.
 static func ordered() -> Array:
@@ -68,7 +82,7 @@ static func _first_ready() -> String:
 static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	var st := ClassUnlock.status(id)
 	var col := Arch.color(id)
-	var card := UI.tile_card(on, func(): _show(home, id), 6, col)
+	var card := UI.tile_card(on, func(): _show.call_deferred(home, id), 6, col)      # (deferred: it swaps this tile)
 	card.custom_minimum_size = Vector2(TILE_W, 0)
 	card.set_meta("arch", id)
 	card.set_meta("class_status", st)
@@ -106,12 +120,12 @@ static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
 	match ClassUnlock.status(id):
 		"open":
 			if id == Arch.of_save():
-				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id),
+				var pl := UI.label("You're playing %s. Your expeditions start with it." % Arch.name_of(id, true),
 						UI.T_SMALL, UI.GOOD, UI.semi)
 				pl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				box.add_child(pl)
 			else:
-				var b := UI.primary("Play %s" % Arch.name_of(id), func(): HomeHero.pick(home, id), 260)
+				var b := UI.primary("Play %s" % Arch.name_of(id, true), func(): HomeHero.pick(home, id), 260)
 				b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 				box.add_child(b)
 		"ready":
@@ -137,9 +151,30 @@ static func _revealed(home: Node, id: String) -> void:
 		var rv := ClassReveal.show_for(home, id)
 		rv.closed.connect(func(played): if not played and is_instance_valid(home): open(home, id)))
 
+## Picks another Hunter on the open screen: only its two tiles, the viewer and the details change (the rest
+## stays, so a click never rebuilds the whole screen).
 static func _show(home: Node, id: String) -> void:
 	Sfx.play("hover", null, -6.0)
-	open(home, id)
+	var viewer = home.get_meta("hunter_viewer", null)
+	var grid = home.get_meta("classes_grid", null)
+	if home.panel_open != TITLE or not is_instance_valid(viewer) or not is_instance_valid(grid):
+		open(home, id)
+		return
+	var was := String(home.get_meta("hunters_sel", ""))
+	home.set_meta("hunters_sel", id)
+	home.set_meta("hero_hover", id)
+	for old in (grid as GridContainer).get_children():
+		var aid := String(old.get_meta("arch"))
+		if aid == id or aid == was:
+			var at := old.get_index()
+			grid.remove_child(old)
+			old.queue_free()
+			var tile := _tile(home, aid, aid == id)
+			(grid as GridContainer).add_child(tile)
+			(grid as GridContainer).move_child(tile, at)
+	_fill(home, id, viewer)
+	home.get_tree().process_frame.connect(func():      # (the viewer next frame: one frame doesn't do both)
+		if is_instance_valid(viewer): (viewer as HunterViewer).set_hunter(id), CONNECT_ONE_SHOT)
 
 ## Your glider: every skin you own as a chip (a click glides on it from now on), and the one this
 ## Hunter's mastery gives, with how to earn it. Gliders are looks only (Gliders).
