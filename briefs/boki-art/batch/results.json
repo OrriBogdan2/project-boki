@@ -101027,5 +101027,26 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/palloth_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fur_briarlynx",
+    "name": "Briarlynx (fur matches its line)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fur_briarlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fur_briarlynx",
+    "name": "Briarlynx (fur matches its line)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fur_briarlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fur_briarlynx",
+    "name": "Briarlynx (fur matches its line)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fur_briarlynx_2.jpg",
+    "ok": true
   }
 ]
