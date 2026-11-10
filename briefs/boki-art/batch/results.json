@@ -95455,5 +95455,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_checkmare_a",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_dragonkite_b",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_b_2.jpg",
+    "ok": true
   }
 ]
