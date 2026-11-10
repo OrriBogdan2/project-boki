@@ -6,7 +6,7 @@ extends RefCounted
 
 const Check := preload("res://tools/wisp_proc_check.gd")
 const DT := 1.0 / 60.0
-const CROP := Vector2i(360, 300)    # px cut out round the screen centre for the strip
+const CROP := Vector2i(240, 200)    # px cut out round the screen centre for the strip (shown at 2x)
 const KINDS := ["heal", "shield", "damage", "speed", "rival", "shiny"]
 
 var main: Node
@@ -41,9 +41,9 @@ func run(main_node: Node) -> void:
 	await _go(0.4)
 	for kind in KINDS:
 		await _kind(kind, rival)
-	var strip := Image.create(CROP.x * crops.size(), CROP.y, false, Image.FORMAT_RGBA8)
+	var strip := Image.create(CROP.x * 2 * crops.size(), CROP.y * 2, false, Image.FORMAT_RGBA8)
 	for i in crops.size():
-		strip.blit_rect(crops[i], Rect2i(Vector2i.ZERO, CROP), Vector2i(CROP.x * i, 0))
+		strip.blit_rect(crops[i], Rect2i(Vector2i.ZERO, CROP * 2), Vector2i(CROP.x * 2 * i, 0))
 	strip.save_png(dir.path_join("strip.png"))
 	print("WISPPROCSHOTS %d in %s" % [crops.size(), dir])
 	main.get_tree().quit(0)
@@ -61,8 +61,11 @@ func _kind(kind: String, rival: Hunter) -> void:
 	await _go(0.1)
 	var img := main.get_viewport().get_texture().get_image()
 	img.save_png(dir.path_join("proc_%s.png" % kind))
+	img.convert(Image.FORMAT_RGBA8)
 	var mid := Vector2i(img.get_size()) / 2
-	crops.append(img.get_region(Rect2i(mid - CROP / 2, CROP)))
+	var crop := img.get_region(Rect2i(mid - CROP / 2 - Vector2i(0, 20), CROP))
+	crop.resize(CROP.x * 2, CROP.y * 2, Image.INTERPOLATE_NEAREST)
+	crops.append(crop)
 	chk._carry(k, "")
 
 func _go(secs: float) -> void:
