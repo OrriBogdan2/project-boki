@@ -80202,5 +80202,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_umbrink_b3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_blossmink_b3",
+    "name": "Blossmink (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_blossmink_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lunink_b3",
+    "name": "Lunink (V2 sheet, batch 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_lunink_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_voltmink_b3",
+    "name": "Voltmink (V2 sheet, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_voltmink_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lunink_b3",
+    "name": "Lunink (V2 sheet, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_lunink_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lunink_b3",
+    "name": "Lunink (V2 sheet, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_lunink_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_voltmink_b3",
+    "name": "Voltmink (V2 portrait, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_voltmink_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_blossmink_b3",
+    "name": "Blossmink (V2 sheet, batch 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_blossmink_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_blossmink_b3",
+    "name": "Blossmink (V2 portrait, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_blossmink_b3_2.jpg",
+    "ok": true
   }
 ]
