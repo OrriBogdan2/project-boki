@@ -34,6 +34,20 @@ func _ticks(gl: Node3D, fuel: float, secs: float) -> int:
 	var pool: int = m.fx.bursts.size()      # a ring: one slot per puff
 	return (int(m.fx.bi) - b0 + pool) % pool
 
+## Shared fx spawned over 0.5 s that starts with the glider open or not (`was`) and then is open or not (`now`).
+func _spawned(was: bool, now: bool) -> int:
+	h.gliding = was
+	for i in 30:
+		m.time += DT
+		h.render(DT, 1.0)
+	var b0: int = m.fx.bi
+	h.gliding = now
+	for i in 30:
+		m.time += DT
+		h.render(DT, 1.0)
+	var pool: int = m.fx.bursts.size()
+	return (int(m.fx.bi) - b0 + pool) % pool
+
 func _canopy() -> MeshInstance3D:
 	return h.model.get_node("Rig/Torso/Glider/Canopy") as MeshInstance3D
 
@@ -70,6 +84,13 @@ func run(main: Node) -> void:
 	ok(puffs >= 6, "overheated: a smoke trail (%d puffs in a second)" % puffs)
 	ok(m.fx.radial == radial, "the heat cues are smoke only: no burst of the shared kind")
 	ok(_ticks(gl, 0.5, 1.0) == 0, "heated but not overheated: no smoke")
+	# opening and closing add nothing: an open spawns no more than the same time of steady glide (its wind
+	# streak), and a fold spawns nothing (a cool glider)
+	h.glide_fuel = 1.0
+	var steady := _spawned(true, true)
+	var opened := _spawned(false, true)
+	var folded := _spawned(true, false)
+	ok(opened <= steady and folded == 0, "opening (%d vs %d gliding) and closing (%d) add no puff or burst" % [opened, steady, folded])
 	var burn := _look(0.0, true)
 	ok(burn[0] == 1.0 and burn[1] == 1.0, "overheated over the abyss, lifting at half strength: it flickers")
 	h.gliding = false
