@@ -77129,5 +77129,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_wickapi_stand_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_vespox",
+    "name": "Vespox (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_vespox_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mothlet",
+    "name": "Mothlet (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_mothlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mycroll",
+    "name": "Mycroll (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_mycroll_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gravitank",
+    "name": "Gravitank (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_gravitank_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gravitank",
+    "name": "Gravitank (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_gravitank_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gravadillo",
+    "name": "Gravadillo (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_gravadillo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mycroll",
+    "name": "Mycroll (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_mycroll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_prismander",
+    "name": "Prismander (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_prismander_3.jpg",
+    "ok": true
   }
 ]
