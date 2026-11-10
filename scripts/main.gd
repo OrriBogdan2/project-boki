@@ -2083,7 +2083,7 @@ func _extract_check() -> void:
 	if p1 <= 0.1 or not o["contested"] or absf(pb - pa) > 0.001: ok = false; print("EXCHECK FAIL contest")
 	R.remove_meta("pin")
 	R.teleport(m.world.random_ground())
-	t0 = m.time
+	var t0 := m.time
 	while o["state"] == "charging" and m.time - t0 < 60.0:
 		run.call(m, 0.5, calm.bind(m))
 	print("EXCHECK uplink: state=%s after %.0fs more, waves=%d prog=%.2f contested=%s player in yard=%s (%.1fm) downed=%s" % [o["state"], m.time - t0, int(o["waves"]), float(o["prog"]), o["contested"], m.exits.in_yard(o, P), P.flat_dist(o["pos"]), P.downed])
