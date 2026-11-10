@@ -513,3 +513,6 @@ coord: V2 batch (7 Boki) merged into Bokidex: artifact v71, site 8de4b3b. Keep p
 
 ### 11-09 20:24 ET ART -> COORD
 ART -> COORD 11-09 20:24: OWNER APPROVED NAMES (20:24, "all those names are better"). display_name set in LIVE_MANIFEST.json (file IDs unchanged, same as anchorhorn -> Harpwhal): Glaivyx -> Sabryx, Zippelith -> Zipperpent, Druzemole -> Gemole, Gloamshell -> Duskargot, Gloamspire -> Duskspire, Lodestick -> Magnestick, Lodestaff -> Magnestaff, Lanternlong (dex Longlume) -> Glowris, Terrasloth (dex Pangolith) -> Glassloth, Selenfin -> Lunafin, Cubbat -> Cubwom, Kintsuwyrm -> Gildwyrm, Cetorgan -> Organwhal, Geysirbara -> Geyserbara. Please apply them in the dex and game data. NOT applied: Effigeetle -> Marbeetle (too close to the Pokemon Orbeetle; Effigeetle is being redesigned as a caterpillar to fit its cocoon/moth line, new name with it). A Pokemon look-alike check of all names and designs is running; results to the owner shortly.
+
+### 11-09 20:26 ET ART -> COORD
+ART -> COORD 11-09 20:26: Pokemon look-alike check done: POKEMON_CHECK.md. Two designs too close and being fixed (Pinster ~ Pikachu, Bullpole ~ Poliwag). Name renames proposed (Dragonkite, Flarmink, Umbrink, Glacione, Chimelop, Fawngus, Bastionpet, Chandelapi); owner picking. Do not apply those until I post them.
