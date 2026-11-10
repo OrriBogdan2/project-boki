@@ -351,3 +351,11 @@ SPECS.append({'id':'pk_bullpole','name':'Bullpole (move away from Poliwag)','ref
     "Same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
 # Chimelop: the bleed-removal edit kept Chandelotl in all 3; the style-board run 3 is clean -> its card. Sheet + portrait from it.
 _r=_B1D['Chimelop']; V2SHEET_NEW('Chimelop',_O+'v2t_chimelop_3.jpg',_r[6],_r[7]); V2PORT_NEW('Chimelop',_O+'v2t_chimelop_3.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_B1POSE['Chimelop'])
+
+# 20:34 ET 11-09 owner on Bullpole: "distinct enough, just make his circle not a circle in the middle so it's even more distinct; other options in the middle
+# of his chest but the same; don't make him a fish". Keep the round tadpole exactly; swap the two green spiral circles for other marks.
+for _k,_m in (('star',"a bold green four-point star"),('diamond',"a bold green diamond with a smaller dark diamond inside it"),('arrow',"a bold green dart-arrow shape pointing forward, like a dart's flight seen from the side"),
+              ('cross',"a bold green crosshair: a plus sign with short gaps in the middle, no circle"),('chevron',"two bold stacked green chevrons pointing forward, like dart fletching")):
+    SPECS.append({'id':'pk_bullpole_'+_k,'name':'Bullpole (chest mark: '+_k+')','refs':['briefs/boki-art/cards/Bullpole.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':_EDIT+"replace each of the two green spiral circles on its body with "+_m+", the same size, the same green and the same places, one in the middle of its chest and one on its side. "
+        "Keep its round body, face, eyes, tail fin, colours and pose exactly the same. No circles or spirals anywhere on its body. Do not add anything else."})
