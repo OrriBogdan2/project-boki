@@ -328,7 +328,7 @@ func _vireo_rmb() -> void:
 	_aim(home + Vector3(3.0, 0, 0))
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	K.press_rmb()
-	await _go(0.9, Callable(), [[0.42, "full", "rmb_fizzle", "RMB miss: the coin spent at the lane's end, a wisp of smoke",
+	await _go(0.9, Callable(), [[0.42, "full", "rmb_fizzle", "RMB miss: the coin spent at the lane's end",
 			func() -> Vector3: return home + Vector3(10.5, 1.0, 0)]], 5.0)
 
 func _wall(kind: int) -> void:

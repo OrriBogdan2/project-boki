@@ -14,7 +14,7 @@ const DROP_T := 0.8              # s: the shell is seen falling for the last par
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const FALL_FX_GAP := 0.05       # s between the falling shell's flicker of green fire and embers
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
-const BURN_ALPHA := 0.6          # the burning patch's dark fill and rim at the start (fades to half): reads on pale sand, still see-through
+const BURN_ALPHA := 0.6          # the burning patch's dark fill and rim at first (fades to half): reads on pale sand
 const BRONZE := Color("b9732f")   # the shell's metal (a material, not an effect)
 
 var kit: GunslingerKit
