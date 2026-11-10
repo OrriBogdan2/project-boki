@@ -30,8 +30,8 @@ const WARDENS := {
 	"ostra": {"hit_r": 0.412, "height": 1.18, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
 	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
-	# (Cinder v2: her built lizard horns stand over her head; the chart's taller Cinder is wider by as much)
-	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.22, "width": [0.7, 1.75], "moves": "as_"},
+	# (Cinder v95 appeal3 b: short curled horns, lower than v2's; the chart's taller Cinder is wider by as much)
+	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
 	"juggernaut": {"hit_r": 0.428, "height": 1.31, "height_3d": 1.32, "width": [1.0, 2.0], "moves": "jug"},
 	# (Grimble: the head at his old height, the hoard towers over it)

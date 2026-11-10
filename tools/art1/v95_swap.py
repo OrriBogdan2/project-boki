@@ -96,7 +96,7 @@ def kept_parts(old, bones):
     ob.data.uv_layers.new(name="UVMap", do_init=True)
     ob.data.uv_layers["UVMap"].active = True
     ob.data.uv_layers["UVMap"].active_render = True
-    ob["slots"] = ",".join(ob.data.materials[p.material_index].name.split("-")[0] for p in ob.data.polygons)
+    ob["slots"] = ",".join(ob.data.materials[p.material_index].name for p in ob.data.polygons)     # (whole: "flame-jet")
     return ob
 
 
@@ -113,10 +113,11 @@ def uv_density(ob):
     return np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]).sum() / max(a3, 1e-9), uv
 
 
-def lay_kept(old, kept, body, tex):
-    """The old atlas baked onto the kept parts' new UVs, laid over the body's pixels (in place)."""
-    src = old.data.materials[0].node_tree.nodes
-    old_img = next(n for n in src if n.type == "TEX_IMAGE").image
+def lay_kept(old, kept, body, tex, socket="Base Color"):
+    """The old atlas (or the image on its `socket`) baked onto the kept parts' new UVs, laid over the body's pixels (in place)."""
+    old_img = BW.base_image(old, socket)
+    if old_img is None:
+        return
     ks = kept.copy()
     ks.data = kept.data.copy()
     bpy.context.scene.collection.objects.link(ks)
@@ -176,17 +177,25 @@ def bake():
                             shape_method="CONCAVE")
     bpy.ops.object.mode_set(mode="OBJECT")
     tex = int(SPEC.get("tex", 2048))
-    img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX)
-    body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
-    if kept.data.polygons:      # the kept parts: the old atlas onto their new UVs, on an image of their own, laid over the body's
-        lay_kept(old, kept, body, tex)
-    body[..., 3] = 1
-    img.pixels = body.ravel()
-    img.filepath_raw = os.path.join(WORK, "atlas.png")
-    img.file_format = "PNG"
-    img.save()
-    img.pack()
-    img.use_fake_user = True
+    layers = [("atlas", "Base Color", None)]
+    if SPEC.get("emit"):        # the master's emission map (Cinder's lava seams) on a second image, the game's emissive texture
+        layers.append(("emit", "Emission Color", BW.base_image(high, "Emission Color")))
+    for name, socket, src in layers:
+        low.data.materials.clear()
+        img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX, src)
+        body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
+        if kept.data.polygons:  # the kept parts: the old image onto their new UVs, on an image of their own, laid over the body's
+            lay_kept(old, kept, body, tex, socket)
+        body[..., 3] = 1
+        img.pixels = body.ravel()
+        if name in bpy.data.images:     # (the game glb's own image of that name: Cinder's "atlas" and "emit")
+            bpy.data.images[name].name = name + "-game"
+        img.name = name
+        img.filepath_raw = os.path.join(WORK, name + ".png")
+        img.file_format = "PNG"
+        img.save()
+        img.pack()
+        img.use_fake_user = True
     for o in list(bpy.data.objects):
         if o not in (low, kept):
             bpy.data.objects.remove(o)
@@ -593,7 +602,7 @@ def main():
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
     move_bones(arm, kept)
-    slots = list(tri_slots(low, img, top, P)) + (kept["slots"].split(",") if kept["slots"] else [])
+    slots = [s + "-atlas" for s in tri_slots(low, img, top, P)] + (kept["slots"].split(",") if kept["slots"] else [])
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]
     gname = {g.index: g.name for g in kept.vertex_groups}
@@ -612,14 +621,22 @@ def main():
     a[3::4] = vals
     me.color_attributes["Col"].data.foreach_set("color", a)
     names = sorted(set(slots))
+    emit = bpy.data.images.get("emit")
     for s in names:
-        m = bpy.data.materials.new(s + "-atlas")
+        if s in bpy.data.materials:     # (the game glb's own, a kept part's: "flame-jet")
+            bpy.data.materials[s].name = s + "-game"
+        m = bpy.data.materials.new(s)
         m.use_nodes = True
         b = m.node_tree.nodes["Principled BSDF"]
         t = m.node_tree.nodes.new("ShaderNodeTexImage")
         t.image = img
         m.node_tree.links.new(t.outputs[0], b.inputs[0])
         b.inputs["Roughness"].default_value = 0.8
+        if emit:
+            e = m.node_tree.nodes.new("ShaderNodeTexImage")
+            e.image = emit
+            m.node_tree.links.new(e.outputs[0], b.inputs["Emission Color"])
+            b.inputs["Emission Strength"].default_value = 1.0
         me.materials.append(m)
     me.polygons.foreach_set("material_index", np.array([names.index(s) for s in slots], np.int32))
     ntri = sum(len(p.vertices) - 2 for p in me.polygons)
