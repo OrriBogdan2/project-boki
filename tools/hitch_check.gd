@@ -1,8 +1,10 @@
 extends Node
 ## --hitch-check: one seeded expedition the way a player gets it (loading screen and warm-up, the
 ## planning map, the skyship ride, the jump, the glide down, landing and the first seconds on the
-## ground), timing every drawn frame and failing if one in the start/drop/landing stretch stalls.
+## ground, with a mob pack of every roaming kind a second after landing), timing every drawn frame and
+## failing if one in the start/drop/landing stretch stalls.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-driver opengl3 --audio-driver Dummy -- --hitch-check
+##   [--load-check | --load-check=home | --load-check=training]
 ##   [--hitch-out=/path/report.txt] [--hitch-squad=3] [--hitch-seed=4101] [--hitch-budget=ms] [--quality=...]
 ## Also runs headless (--headless): then nothing is drawn and only the script side is timed.
 ##
@@ -60,6 +62,7 @@ var squad := 3
 var load_only := false     # --load-check: stop at the reveal and judge the loading screen
 var home_only := false     # --load-check=home: the title-to-home swap instead (see _home_check)
 var trace := false
+var training := false      # --load-check=training: the Training Area's load instead of an expedition's
 var shots_dir := ""        # --load-shots=dir: a screenshot of the loading screen every half second (skews timings)
 var _shot_t := 0.0
 
@@ -73,6 +76,9 @@ func _ready() -> void:
 		if a.begins_with("--load-shots="): shots_dir = a.substr(13)
 		if a == "--load-check": load_only = true
 		if a == "--load-check=home": load_only = true; home_only = true
+		if a == "--load-check=training":
+			load_only = true
+			training = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	software = not headless and (adapter.contains("llvmpipe") or adapter.contains("softpipe") or adapter.contains("swiftshader") or adapter.contains("swrast"))
@@ -105,7 +111,13 @@ func _ready() -> void:
 	if home_only:
 		_home_check()
 		return
+	_cache_count()      # what an earlier launch left in the cache is not this run's compiles
 	# "probe" keeps the loading screen and the warm-up, as a real expedition has them
+	if training:
+		var opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_v}
+		opts.merge({"no_drop": true, "autoplay": true, "probe": true})
+		Game.main.show_screen("match", opts)
+		return
 	Game.main.show_screen("match", {"teams": 6, "squad": squad, "tier": 0, "seed": seed_v, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0})
 
 func _process(_delta: float) -> void:
@@ -209,11 +221,29 @@ func _next_phase() -> void:
 				_set_phase("land")
 				landed_at = m.time
 		"land":
+			if phase_t >= 1.0 and not _pack_done:
+				_pack_done = true
+				_bring_pack()
 			if phase_t >= 3.0:
 				_finish()
 	if m.time > 200.0 and not _end:
 		print("HITCH stuck in phase ", phase)
 		_finish()
+
+## A second on the ground, one of each roaming mob kind spawns round you (a fight's pack): a kind's first
+## model mid-play compiled its materials then, unless the warm-up built one (WarmUp._mob_stand_ins).
+var _pack_done := false
+func _bring_pack() -> void:
+	var P: Hunter = m.player
+	var kinds: Array = []
+	for k in Data.MOBS:
+		if not Data.MOBS[k].get("boss", false) and not Data.MOBS[k].get("ward", false):
+			kinds.append(k)
+	for i in kinds.size():
+		var a := TAU * i / kinds.size()
+		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 7.0, [], 1.0, 0.5, 6.0)
+		m.spawn_mob(kinds[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	print("HITCH pack: %d mobs (%s) at t=%.2f" % [kinds.size(), ",".join(kinds), m.time])
 
 ## Materials in the camera's view this frame that weren't in view on any frame before (from the
 ## first judged frame on). A first draw is where shaders compile, so these name what a stall drew.
@@ -366,6 +396,11 @@ func _finish_load() -> void:
 			up += 1
 			if sp > prev: drawn += 1
 		prev = sp
+	var walls: Array = fl.map(func(f): return float(f["wall"]))
+	walls.sort()
+	if not walls.is_empty():
+		var p95: float = walls[mini(walls.size() - 1, int(walls.size() * 0.95))]
+		lines.append("LOAD frame ms p50 %.1f p95 %.1f max %.1f" % [walls[walls.size() / 2], p95, walls[-1]])
 	lines.append("LOAD spinner drew on %d of %d loading-screen frames" % [drawn, up])
 	var ranked := fl.duplicate()
 	ranked.sort_custom(func(a, b): return float(a["cpu" if cpu_only else "wall"]) > float(b["cpu" if cpu_only else "wall"]))

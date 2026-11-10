@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8frqthvbp7lj"
-path="res://.godot/imported/kael_emit.jpg-2f1027390a75e56037a63703f74f964f.ctex"
+path.bptc="res://.godot/imported/kael_emit.jpg-2f1027390a75e56037a63703f74f964f.bptc.ctex"
+path.astc="res://.godot/imported/kael_emit.jpg-2f1027390a75e56037a63703f74f964f.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bd6525f144613a0c62fdf3931d02c5e5"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/kael/kael_emit.jpg"
-dest_files=["res://.godot/imported/kael_emit.jpg-2f1027390a75e56037a63703f74f964f.ctex"]
+dest_files=["res://.godot/imported/kael_emit.jpg-2f1027390a75e56037a63703f74f964f.bptc.ctex", "res://.godot/imported/kael_emit.jpg-2f1027390a75e56037a63703f74f964f.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

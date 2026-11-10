@@ -1,7 +1,8 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and back,
+## --only=creator|viewer|mask|shroud|feet|farm|eggs to take one group (eggs: the egg pick, then the black
+## mystery egg picked; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
 ## farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check --shots-dir=.
 
@@ -43,6 +44,8 @@ func run(main_node: Node) -> void:
 		await _feet(tree)
 	if only in ["", "farm"]:
 		await _farm(tree)
+	if only in ["", "eggs"]:
+		await _eggs(tree)
 	print("EMPTYSHOTS done in %s" % dir)
 	tree.quit(0)
 
@@ -62,6 +65,19 @@ func _creator(tree: SceneTree) -> void:
 		hx.preview_yaw = PI
 		hx._show_create()
 		await _shot(tree, file, 0.8)
+	hx.queue_free()
+	await tree.process_frame
+
+func _eggs(tree: SceneTree) -> void:
+	_fresh()
+	Save.d["look"] = Unmasked.default_look()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	await tree.process_frame
+	hx._looks_good()
+	await _shot(tree, "hatch_eggs", 2.5)
+	hx._pick(3)
+	await _shot(tree, "hatch_mystery_picked", 1.2)
 	hx.queue_free()
 	await tree.process_frame
 
