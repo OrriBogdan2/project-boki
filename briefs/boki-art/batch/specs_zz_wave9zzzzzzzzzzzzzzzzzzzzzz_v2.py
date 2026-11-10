@@ -1051,3 +1051,21 @@ for _n,_st,_ar,_dk,_fu,_pose in (
  ('Stormit','mid','cute',0,0,"scuttling sideways toward the LEFT with both claws raised high over its head, legs mid-step, the storm dome on its back tilted."),
  ('Dynaboa','final','sleek',0,1,"crouched low on all fours facing LEFT, spring legs coiled tight under it, copper fins fanned wide and raised, tail whipping, about to launch.")):
     _n0=len(SPECS); ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,bool(_dk),bool(_fu),_pose,_KEEPALL); SPECS[_n0]['id']='pose_'+_n.lower()
+
+# ===== 07:50 ET 11-10 OWNER on Mossbastion, Maracoil, Blastopuff: "all 3 evolutions can be better and more interesting and tie into their earlier one better".
+# Options built FROM THE BABY's card (image 1), so the tie is real. 3 directions x 2 runs.
+def OPTB(n,baby,stage,arch,dark,furry,opts):
+    for _k,_d in zip('abc',opts):
+        ON_CHANGE(n,_C%baby,stage,arch,dark,furry,"this is the evolved form of the creature in image 1, clearly the same animal grown up, keeping its colours, face and signature idea: "+_d,runs=2,tag='_'+_k); SPECS[-1]['id']='opt_'+n.lower()+'_'+_k
+OPTB('Mossbastion','Mossgrade','final','majestic',False,False,[
+ "a giant water-bear the size of a hill, the same eight stubby legs and round snout, its fuzzy moss back grown into a whole little landscape: a small hill with one tree, a pond and a few standing stones, sprouts turned into saplings. Slow, gentle, immense, walking.",
+ "a huge armoured water-bear whose moss has thickened into overlapping mossy stone plates like a fortress wall along its back, with the same round snout poking out under a mossy brow ledge and the same pebbles now boulders set in the moss. Braced low and wide, facing the viewer.",
+ "a towering water-bear reared up on its back four legs like a living standing stone, its belly pale cream as in image 1, its back a cloak of long hanging moss and ferns, the same round snout raised to the sky, small sprouts on its head grown into a crown of ferns."])
+OPTB('Maracoil','Rattlebub','final','tough',False,False,[
+ "a big festival serpent mid-strike, body stretched out long and low in a lunge toward the left, the same cream scales with red and teal diamond patterns, its tail split into two large painted maraca rattles held up behind it, a feathered-looking frill of bright scales round its neck instead of a plain hood.",
+ "a large snake dancing upright like a charmed cobra but swaying in a big S, the same diamond-pattern scales, with a row of rattle beads down its spine and four maraca rattles on a fanned tail, eyes half closed, a showman's grin.",
+ "a heavy coiled drum-snake: its coils are stacked into a round drum shape with the same painted diamond bands, its head resting on top looking at the viewer, and its tail raised beside it ending in one huge maraca like a drumstick."])
+OPTB('Blastopuff','Puffuse','final','tough',True,False,[
+ "a big sea-mine pufferfish seen from the side, swimming left: the same charcoal body with glowing yellow cracks and cream belly, now covered in short thick contact-horn spikes like a naval mine, its fuse tail longer and lit, small angry eyes, cheeks puffed.",
+ "a long torpedo-shaped pufferfish, no longer a ball: the same charcoal back with yellow cracks and cream belly stretched into a sleek rocket body with fin-like tail vanes, the fuse now a sparking crest along its back, darting forward with a fierce grin.",
+ "a huge pufferfish mid-explosion pose: fully inflated and rearing back, spikes shot out long like a firework burst, the yellow cracks blazing wide across its charcoal skin, fuse burnt down to a stub, eyes wide and furious. All spikes attached to its body."])
