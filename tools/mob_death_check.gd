@@ -6,6 +6,7 @@ extends RefCounted
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
 const BOSSES := ["colossus", "serpent", "brood"]
 const DT := 1.0 / 60.0
+const ASH_WIPE_MAX := 72      # ash particles a wiped 6-camp may emit in all (12 per body)
 
 var bad := 0
 
@@ -35,6 +36,7 @@ func run(main: Node) -> void:
 		_kill_one(m, k)
 	_boss(m)
 	_wipe(m)
+	_particles(m)
 	_low(m)
 	m.queue_free()
 	print("MOBDEATH DONE, failures: %d" % bad)
@@ -120,15 +122,37 @@ func _wipe(m: Match) -> void:
 	var last_lag: float = MobDissolve.STAGGER_S * MobDissolve.STAGGER_MAX
 	var ripple := rising and float(lags[0]) == 0.0 and float(lags[5]) == last_lag
 	ok(ripple, "six wiped together queue 0 .. %.2f s behind each other (%s)" % [last_lag, str(lags)])
-	_frames(m, 0.5)
-	var mats := {}
-	for mb in pack:
-		if mb.has_meta("dis_mat"): mats[mb.get_meta("dis_mat")] = true
-	var used := mats.size()
-	var pooled := used > 1 and used <= MobDissolve.POOL
-	ok(pooled, "the dissolve materials are pooled (%d for 6 bodies, pool %d)" % [used, MobDissolve.POOL])
+	var shared := false
+	for f in 30:
+		_frames(m, DT)
+		var mats := {}
+		for mb in pack:
+			if mb.has_meta("dis_mat") and not mb.has_meta("dis_done"):
+				shared = shared or mats.has(mb.get_meta("dis_mat"))
+				mats[mb.get_meta("dis_mat")] = true
+	ok(not shared, "no two bodies dissolve on the same material at once")
 	_frames(m, 1.0)
+	var made := MobDissolve.made
+	for i in 6:
+		m.spawn_mob("skitter", m.player.pos + Vector3(-6.0 - i * 0.8, 0, 2.0)).hurt(999.0, m.player, {"src": "shot"})
+	_frames(m, 1.0)
+	ok(MobDissolve.made == made, "a second wipe reuses the pooled materials (%d built in all)" % made)
 	ok(pack.all(func(mb): return not mb.visible), "the whole camp is gone after the ripple")
+
+## The particles row: the ash is the only particle cost of a death, small per body, none on Low.
+func _particles(m: Match) -> void:
+	var ash0 := m.fx.ash
+	for i in 6:
+		m.spawn_mob("skitter", _spot(m, i)).hurt(999.0, m.player, {"src": "shot"})
+	_frames(m, 1.0)
+	var wipe := m.fx.ash - ash0
+	ok(wipe > 0 and wipe <= ASH_WIPE_MAX, "particles: a 6-camp wipe emits %d ash (budget %d)" % [wipe, ASH_WIPE_MAX])
+	Settings.v["quality"] = "low"
+	ash0 = m.fx.ash
+	m.spawn_mob("brute", _spot(m, 2)).hurt(999.0, m.player, {"src": "shot"})
+	_frames(m, 1.0)
+	ok(m.fx.ash == ash0, "particles: Low emits no ash")
+	Settings.v.erase("quality")
 
 ## The Low preset: no shader swap and no ash, a shorter fade, the drops still spill.
 func _low(m: Match) -> void:

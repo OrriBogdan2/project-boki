@@ -10,6 +10,8 @@ const BOSS_GEM_DROPS := 4     # a lair boss's gems come as this many big drops (
 static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:
 	if not is_instance_valid(mb):
 		return
+	if not is_instance_valid(credit):
+		credit = null      # (whoever landed it left during the dissolve)
 	KeyCarry.on_mob_dead(m, mb)
 	var big_one: bool = mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote
 	if big_one and (mb.mkind == "warden" or m.rng.randf() < 0.5):

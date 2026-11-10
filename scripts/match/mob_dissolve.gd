@@ -17,11 +17,10 @@ const STAGGER_S := 0.12         # s of lag per creature already dying nearby
 const STAGGER_MAX := 3          # at most this many queued behind each other
 const STAGGER_NEAR := 8.0       # m, how close counts as the same wipe
 const STAGGER_WINDOW := 0.5     # s, how recent a nearby death counts
-const POOL := 8                 # dissolve materials shared by everything dying at once
 const ASH_PER_M := 8.0          # ash particles per metre of radius (before the quality factor)
 
-static var _pool: Array[ShaderMaterial] = []
-static var _next := 0
+static var _pool: Array[ShaderMaterial] = []      # dissolve materials free for the next death
+static var made := 0                              # materials ever built: the most dying at once (checks read it)
 
 static func _low() -> bool:
 	return float(Settings.q("fx")) < LOW_FX
@@ -50,6 +49,9 @@ static func step(mb: Mob, delta: float) -> bool:
 	var dur := duration(mb.r)
 	var t := mb.death_t - float(mb.get_meta("dis_lag", 0.0))
 	if t >= dur:
+		if mb.has_meta("dis_mat") and not mb.has_meta("dis_done"):
+			mb.set_meta("dis_done", true)
+			_pool.append(mb.get_meta("dis_mat"))
 		return false
 	var u := maxf(t, 0.0) / dur
 	if t >= 0.0 and not mb.has_meta("dis_on"):
@@ -80,10 +82,9 @@ static func _start(mb: Mob) -> void:
 			if mt is ShaderMaterial: mt.set_shader_parameter("flash", 0.6)
 
 static func _take() -> ShaderMaterial:
-	if _pool.is_empty():
-		for i in POOL:
-			var mt := ShaderMaterial.new()
-			mt.shader = SHADER
-			_pool.append(mt)
-	_next = (_next + 1) % POOL
-	return _pool[_next]
+	if not _pool.is_empty():
+		return _pool.pop_back()
+	made += 1
+	var mt := ShaderMaterial.new()
+	mt.shader = SHADER
+	return mt
