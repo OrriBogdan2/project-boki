@@ -689,11 +689,11 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(pts, Color(1, 1, 1, 0.07))
 	if m.exits:
 		for x in m.exits.list:
-			var pv: Vector2 = to_map.call(x.get("berth", x["pos"]))
-			var busy: bool = String(x["state"]) in ["called", "boarding", "charging", "open"]
+			var pv: Vector2 = to_map.call(x["pos"])
+			var busy: bool = String(x["state"]) in ["charging", "open"]
 			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a called skiff, a charging uplink, an open lift)
-				if busy and x["kind"] != "hatch": _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
+				if busy: _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
 				continue
 			_draw_exit_icon(pv, x, 1.0 if not riding else 0.8)
 	if m.lairs:
@@ -898,40 +898,24 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, an outpost's banner
-## post (OutpostGlyph). Bright when it's usable, grey when not; a pulsing ring while it's going.
+## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
+## when not; a pulsing ring while it's going.
 func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var col: Color = Exits.color_of(x)
 	var usable: bool = m.exits.live(x)
 	var st := String(x["state"])
 	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var dark := Color(0, 0, 0, 0.7)
-	match String(x["kind"]):
-		"dock":
-			var hull := PackedVector2Array([pv + Vector2(-6, 1) * k, pv + Vector2(6, 1) * k, pv + Vector2(4, 5) * k, pv + Vector2(-4, 5) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-7, 0) * k, pv + Vector2(7, 0) * k, pv + Vector2(5, 6) * k, pv + Vector2(-5, 6) * k]), dark)
-			c.draw_colored_polygon(hull, col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 0) * k]), col)
-			c.draw_line(pv + Vector2(0, -7) * k, pv + Vector2(0, 1) * k, dark, 1.5)
-			if st == "closed":
-				c.draw_line(pv + Vector2(-6, -6) * k, pv + Vector2(6, 6) * k, Color(BAD, 0.8), 2.0)
-		"hatch":
-			var dm := PackedVector2Array([pv + Vector2(0, -5) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 5) * k, pv + Vector2(-5, 0) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6.5) * k, pv + Vector2(6.5, 0) * k, pv + Vector2(0, 6.5) * k, pv + Vector2(-6.5, 0) * k]), dark)
-			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
-			c.draw_circle(pv, 1.6 * k, dark)
-		"outpost":
-			var held := OutpostLook.held(x)
-			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-			OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
-			if st == "charging":
-				_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["called", "boarding", "charging", "open", "unlocking"]:
+	var held := OutpostLook.held(x)
+	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
+	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
+	if st == "charging":
+		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
+	if st in ["charging", "open"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
-## Over each exit nearby: its name and what it's doing. Your squad's own exit (a skiff you called, an
-## uplink you're charging) gets a waypoint from anywhere on the map.
+## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
+## anywhere on the map.
 func _draw_exit_labels() -> void:
 	if m.exits == null or m.player == null or m.player.out or m.player.extracted:
 		return
@@ -944,37 +928,21 @@ func _draw_exit_labels() -> void:
 		var d := p.flat_dist(at)
 		var st := String(x["state"])
 		var line := ""
-		match String(x["kind"]):
-			"dock":
-				match st:
-					"called": line = "Skiff inbound  %s" % _fmt(x["t"])
-					"boarding": line = "BOARDING  %ds" % int(ceil(x["t"]))
-					"gone": line = "Skiff away"
-					"closed": line = "Closed"
-					_: line = "Call skiff" if m.exits.callable(x) else ("Opens %s" % _fmt(float(x["open_at"]) - m.time) if m.time < float(x["open_at"]) else "")
-			"hatch":
-				match st:
-					"unlocking": line = "OPENING  %ds" % int(ceil(float(x["t"])))
-					"open": line = "OPEN  ·  %d/%d left" % [int(x["uses"]), Exits.HATCH_USES]
-					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
-			"outpost":
-				match st:
-					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
-					"fizzling": line = "Shutting off"
-					"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
-					"spent": line = "Cooling down"
-					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
-		var reach := 26.0 if x["kind"] == "hatch" else 44.0
-		if st in ["boarding", "open", "unlocking"]: reach = 70.0
+		match st:
+			"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+			"fizzling": line = "Shutting off"
+			"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
+			"spent": line = "Cooling down"
+			_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
+		var reach := 70.0 if st == "open" else 44.0
 		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)     # the prompt already says it
 		if d < reach and not cam.is_position_behind(at) and not prompted:
-			var lp := cam.unproject_position(at + Vector3(0, 3.4 if x["kind"] != "hatch" else 1.6, 0))
+			var lp := cam.unproject_position(at + Vector3(0, 3.4, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
 			if line != "":
-				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open", "unlocking"] else 16, INK if st not in ["boarding", "open", "unlocking"] else col, big)
+				_ctext(lp + Vector2(0, 17), line, 16 if st == "open" else 12, col if st == "open" else INK, big)
 		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
-			var tgt: Vector3 = x.get("berth", at)
-			_draw_waypoint(tgt, "Skiff" if x["kind"] == "dock" else ("Hatch" if x["kind"] == "hatch" else ("Lift" if st == "open" else "Uplink")), col)
+			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
 func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:

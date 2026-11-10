@@ -6,7 +6,7 @@ extends RefCounted
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
-##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
+##   3 extraction    the squad holds an uplink's yard as it finishes charging, then rides the lift out
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
@@ -14,7 +14,7 @@ const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps v
 const FRAME := 2.0 * STEP        # s per rendered frame
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
-const BOARD_LEFT := 6.5          # s of the skiff's boarding window left when the clip starts
+const CHARGE_LEFT := 2.5         # s of the uplink's charge left when the clip starts
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
 
 var main: Node
@@ -228,33 +228,26 @@ func _boki_combat(secs: float) -> void:
 func _extraction(secs: float) -> void:
 	await _start("ashwick", "cindle")
 	var P := m.player
-	var d: Dictionary = m.exits.of_kind("dock")[0]
-	var berth: Vector3 = d["berth"]
-	var out3 := Vector3(d["out"].x, 0, d["out"].y)
-	m.time = float(d["open_at"]) + 1.0
-	m.exits.act(d, "call", P)
-	m.exits._arrive(d)
-	d["t"] = BOARD_LEFT
-	d["wave_t"] = 1e9       # no monster waves at the berth
-	var side := Vector3(-out3.z, 0, out3.x)
-	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", berth), _hunter("a2", 0, "gunslinger", "zapple", berth)]
+	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var mast: Vector3 = o["pos"]
+	m.time = float(o["open_at"]) + 1.0
+	m.exits.act(o, "start", P)
+	o["prog"] = 1.0 - CHARGE_LEFT * Exits.crew_rate(3) / m.exits.uplink_time(o)
+	o["wave_t"] = 1e9       # no monster waves at the yard
+	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", mast), _hunter("a2", 0, "gunslinger", "zapple", mast)]
 	for i in squad_a.size():
 		var h: Hunter = squad_a[i]
 		h.ctrl = "idle"
-		h.teleport(_ground(berth - out3 * (9.0 + 1.5 * i) + side * (i - 1) * 2.0))
+		var ang := TAU * i / squad_a.size()
+		h.teleport(_ground(mast + Vector3(cos(ang), 0, sin(ang)) * (Exits.OUTPOST_R - 1.0)))
 	_zoom(0.55)
 	still_at = secs * 0.6
 	await _go(secs, func(_t: float):
-		if String(d["state"]) == "boarding":
-			for i in squad_a.size():
-				var h: Hunter = squad_a[i]
-				var spot := berth + side * (i - 1) * 1.1 - out3 * 0.2
-				var to := spot - h.pos
-				h.inp["move"] = Vector2(to.x, to.z).normalized() if to.length() > 0.4 else Vector2.ZERO
-		else:
-			for h in squad_a:
-				h.inp["move"] = Vector2.ZERO,
-		func(_t: float): return berth + Vector3(0, 0, 0))
+		for h in squad_a:
+			var to: Vector3 = mast - h.pos
+			var go := String(o["state"]) == "open" and to.length() > 0.4
+			h.inp["move"] = Vector2(to.x, to.z).normalized() if go else Vector2.ZERO,
+		func(_t: float): return mast)
 
 # ------------------------------------------------------------------ 4: hatch
 ## The real hatch screen: the egg is picked, knocked on (auto_warm), cracks, hatches, and KinReveal shows the Boki.
