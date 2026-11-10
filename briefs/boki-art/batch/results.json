@@ -101370,5 +101370,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/bosssheet_brood_r3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mark_luckhop_s",
+    "name": "Luckhop (legendary mark s)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_luckhop_s_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_glacione_s",
+    "name": "Glacione (legendary mark s)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_glacione_s_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_luckhop_h",
+    "name": "Luckhop (legendary mark h)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_luckhop_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_cometail_s",
+    "name": "Cometail (legendary mark s)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_cometail_s_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_lockwren_h",
+    "name": "Lockwren (legendary mark h)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_lockwren_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_calderoise_h",
+    "name": "Calderoise (legendary mark h)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_calderoise_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_luckhop_s",
+    "name": "Luckhop (legendary mark s)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_luckhop_s_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_glacione_h",
+    "name": "Glacione (legendary mark h)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_glacione_h_2.jpg",
+    "ok": true
   }
 ]
