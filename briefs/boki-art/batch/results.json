@@ -95686,5 +95686,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_snapler_m3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fs5_mothlet",
+    "name": "Mothlet female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs5_mothlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_scopeleon_q",
+    "name": "Scopeleon (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_scopeleon_q_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_grammite_q",
+    "name": "Grammite (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_grammite_q_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_grammite_q",
+    "name": "Grammite (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_grammite_q_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_grammite_q",
+    "name": "Grammite (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_grammite_q_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_grammite_q",
+    "name": "Grammite (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_grammite_q_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_snapler_q",
+    "name": "Snapler (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_snapler_q_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_snapler_q",
+    "name": "Snapler (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_snapler_q_1.jpg",
+    "ok": true
   }
 ]
