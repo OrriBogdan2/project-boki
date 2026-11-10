@@ -1,6 +1,7 @@
 extends RefCounted
 ## --team-boki-shots --shots-dir=<dir> [--size=WxH]: the squad rows with their Boki icons in the hudref demo
-## (needs a renderer): one frame with every Boki healthy, one with a hurt and a resting Boki, one with a dead Boki and a teammate down (wisp).
+## (needs a renderer): one frame with every Boki healthy, one with a hurt and a resting Boki, one with a dead Boki
+## and a teammate down (a wisp).
 
 var main: Node
 
