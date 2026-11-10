@@ -193,8 +193,13 @@ static func _gate_open(h: Hunter) -> bool:
 	return not _gate_of(h).is_empty()
 
 static func _gate_armed(h: Hunter) -> bool:
+	return gate_wait(h) == 0.0
+
+## Seconds until this hunter's open Twin Gates can be swapped by a second press: 0 once armed,
+## -1 when none are open (BeltHud's cue reads it).
+static func gate_wait(h: Hunter) -> float:
 	var g := _gate_of(h)
-	return not g.is_empty() and h.m.time - float(g["t0"]) >= float(g["arm"])
+	return -1.0 if g.is_empty() else maxf(0.0, float(g["arm"]) - (h.m.time - float(g["t0"])))
 
 ## The second press of a Twin Gate whose gates are armed: everyone in each gate swaps and both close, with
 ## no charge spent. False when this item is not a gate or none is armed (the press opens a new pair).

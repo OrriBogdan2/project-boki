@@ -356,6 +356,8 @@ const CHECKS := {
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
+	"--belt-hud-check": ["res://tools/belt_hud_check.gd", "belt_hud_check", null],      # six-slot belt on the HUD
+	"--belt-hud-shots": ["res://tools/belt_hud_shots.gd", "belt_hud_shots", null],      # --shots-dir=<dir>
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	"--utility-sfx-check": ["res://tools/utility_sfx_check.gd", "utility_sfx_check", null],  # belt item sounds
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
