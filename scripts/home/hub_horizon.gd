@@ -7,7 +7,7 @@ extends RefCounted
 
 const RING_R := 40.0       # m from the hub's middle to each island
 const ARC := 3.6           # rad of sky the five spread over, centred on the far side (north, -z)
-const RISE := -7.0         # m an island floats from the hub's ground (below it: the camera looks down), plus RISE_STEP for each odd one
+const RISE := -7.0         # m from the hub's ground (below: the camera looks down), plus RISE_STEP on each odd one
 const RISE_STEP := -4.0
 const TOP_R := 8.0         # m, an island's top radius
 const DEPTH := 7.0         # m, how far its rocky underside hangs
