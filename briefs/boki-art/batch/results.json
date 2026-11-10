@@ -76611,5 +76611,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_scythant_on_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_parrywhal_on",
+    "name": "Parrywhal (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_parrywhal_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_loafhopper_on",
+    "name": "Loafhopper (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_loafhopper_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_parrywhal_on",
+    "name": "Parrywhal (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_parrywhal_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_parrywhal_on",
+    "name": "Parrywhal (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_parrywhal_on_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_parrywhal_on",
+    "name": "Parrywhal (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_parrywhal_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_maracoil_on",
+    "name": "Maracoil (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_maracoil_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_maracoil_on",
+    "name": "Maracoil (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_maracoil_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_parrywhal_on",
+    "name": "Parrywhal (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_parrywhal_on_1.jpg",
+    "ok": true
   }
 ]
