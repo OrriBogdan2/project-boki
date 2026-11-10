@@ -582,7 +582,7 @@ def gen_rules():
     rules = content("rules")
     for rid, r in rules.items():
         if rid == "lore": continue   # the Lore page
-        body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight"}.get(rid, rid), rid, r.get("desc", ""))
+        body += "\n\n## %s (`content/rules/%s.json`)\n\n%s\n\n" % ({"bond": "Bond meter", "kin_ai": "How Boki fight", "boki_hit": "How kit hits land on a Boki"}.get(rid, rid), rid, r.get("desc", ""))
         body += table(["Setting", "Value"], [[k, num(v) if not isinstance(v, (dict, list)) else json.dumps(v)] for k, v in r.items() if k != "desc"])
     co = content("combos")
     body += "\n\n## Combos\n\nOne fighter sets a foe up with a status, the partner pays it off (`content/combos/`).\n\n"

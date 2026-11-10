@@ -597,7 +597,7 @@ func ability_aim(m: Match, h: Hunter, def: AbilityDef, tgt: Ent) -> Vector3:
 		"clumped":
 			if d <= mx:
 				var n := 0
-				for f in m.foes_of(h.team):
+				for f in m.foes_of(h.team, false):
 					if f.flat_dist(tgt) < 3.0: n += 1
 				if n >= 2 or (tgt is Hunter and randf() < 0.35):
 					return tgt.pos

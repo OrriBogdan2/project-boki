@@ -144,7 +144,7 @@ func bot_use(_tgt: Ent, _dist: float, _los: bool) -> void: pass
 ## The nearest foe a bot can hit within 12 m (the bot paths of the kits that run their own attack key).
 func _bot_target() -> Ent:
 	var best: Ent = null; var bd := 12.0
-	for f in m.foes_of(h.team):
+	for f in m.foes_of(h.team, false):
 		if f.hittable() and h.flat_dist(f) < bd: bd = h.flat_dist(f); best = f
 	return best
 func describe_rmb_variant(c: Dictionary) -> String:

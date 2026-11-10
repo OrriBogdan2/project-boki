@@ -2029,13 +2029,14 @@ func _mouse_aim() -> Vector3:
 func ground_grip(p: Vector3) -> float:
 	return biomes.grip(p) if biomes else 1.0
 
-func foes_of(team: int) -> Array:
+## wilds: wild Boki count (every hit does, BokiHit); target picking and danger sensing pass false.
+func foes_of(team: int, wilds := true) -> Array:
 	var out: Array = []
 	for h in hunters:
 		if h.team != team and h.hittable() and not h.downed:
 			out.append(h)
 	for k in kins:
-		if k.dead or k.is_wild():
+		if k.dead or (k.is_wild() and (not wilds or team == -2)):
 			continue
 		if k.team != team and k.hittable():
 			out.append(k)

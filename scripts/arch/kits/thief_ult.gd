@@ -131,7 +131,7 @@ func _volley(d: Dictionary) -> void:
 	beat += 1
 	pulse = 1.0
 	for f in k.foes_in(h.pos, r):
-		if f is Kin or not k.sees(f):
+		if not k.sees(f):
 			continue
 		var key: int = f.get_instance_id()
 		var got := int((st["hits"] as Dictionary).get(key, 0))

@@ -177,6 +177,9 @@ func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
 	return (ks.mass if ks else 0.8) * g * g
 
+func impulse(kb: Vector2, lift := -1.0) -> void:
+	BokiHit.knock(self, kb, lift)
+
 ## How it's carried: "shoulder", "perch" or "mount" (KinSpec carry.style).
 func carry_style() -> String:
 	return ks.carry_style if ks else "shoulder"
@@ -219,7 +222,7 @@ func courage() -> float:
 
 func danger_at(p: Vector3) -> float:
 	var d := (1.0 - hp / max_hp) * 2.0
-	for f in m.foes_of(team):
+	for f in m.foes_of(team, false):
 		var dist: float = Vector2(f.pos.x - p.x, f.pos.z - p.z).length()
 		if dist < 4.5:
 			var w := 0.6
@@ -629,7 +632,7 @@ func sim(dt: float) -> void:
 				pos = owner_h.pos; prev = pos
 			if hp < max_hp:
 				hp = minf(max_hp, hp + max_hp * 0.02 * dt)   # resting in your satchel
-	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain:
+	if owner_h and not owner_h.out and state in ["shoulder", "active"] and brain and not BokiHit.held(self):
 		brain.think_abilities(dt)
 	KinRegen.tick(self, dt)
 	if comp:
@@ -817,9 +820,7 @@ func _sim_active(dt: float) -> void:
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
-	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
-	if root_t > 0.0 or stun_t > 0.0:
-		spd = 0.0
+	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if target:
 		var to := Vector2(target.pos.x - pos.x, target.pos.z - pos.z)
 		var d := to.length()
@@ -834,7 +835,7 @@ func _sim_active(dt: float) -> void:
 				ignore_until[target] = m.time + 5.0
 				target = null
 				wish = Vector2.ZERO
-		if target and d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5:
+		if target and d < reach and atk_cd <= 0.0 and absf(target.pos.y - pos.y) < 1.5 and not BokiHit.held(self):
 			atk_cd = 0.95
 			lunge_t = 0.15
 			vel.x += to.normalized().x * 5.0; vel.z += to.normalized().y * 5.0
@@ -986,7 +987,7 @@ func _sim_wild(dt: float) -> void:
 		else:
 			if to.length() > 1.2:
 				wish = to.normalized() * speed * 0.85
-			elif atk_cd <= 0.0:
+			elif atk_cd <= 0.0 and not BokiHit.held(self):
 				atk_cd = 1.1
 				lunge_t = 0.15
 				angry_at.hurt(dmg * 0.8, self, {"kb": to.normalized() * 2.0, "src": "kin"})
@@ -999,7 +1000,7 @@ func _sim_wild(dt: float) -> void:
 		if wander_to != Vector3.INF:
 			var to := Vector2(wander_to.x - pos.x, wander_to.z - pos.z)
 			wish = to.normalized() * speed * 0.35
-	_ground_move(wish, dt)
+	_ground_move(wish * BokiHit.move_k(self, 0.6), dt)
 
 func _daze() -> void:
 	burn_t = 0.0
@@ -1025,6 +1026,9 @@ func _sim_dazed(dt: float) -> void:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if state in ["dazed", "bench", "fused", "downed"]:
 		return 0.0
+	var bh := BokiHit.take(self, d, opts)
+	d = float(bh[0])
+	opts = bh[1]
 	if is_wild() and by and by is Hunter:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
