@@ -1606,3 +1606,13 @@ SPECS.append({'id':'fur_briarlynx','name':'Briarlynx (fur matches its line)','re
 SPECS[:]=[s for s in SPECS if s['id'] not in ('v2s_briarlynx_r4','v2p_briarlynx_r4')]
 for _a in (('Briarlynx','final','tough',0,1,_GP),('Tesselamb','final','majestic',0,1,"standing up and walking, head turned to the viewer"),('Twinklup','baby','cute',0,1,"rolling on its back, paws up, star tail wagging"),('Lockwren','baby','cute',0,1,"fluttering just off the ground, wings open like a locket")):
     SETOF(*_a,'r5')
+
+# ===== 11-10 OWNER: "not all these legendaries are clearly legendary: they need something that makes them clearly unique, even as cute Boki".
+# A shared LEGENDARY MARK that every legendary carries, cute or epic, so the tier reads at a glance. Two candidate marks, tried on the seven weakest
+# (ids mark_<name>_<h|s>, 2 runs each). h = halo crown, s = star mark and gold. The owner picks one mark; then all 19 get it.
+_MARKS={'h':"give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape.",
+        's':"give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body."}
+for _n in ('Luckhop','Twinklup','Lockwren','Glacione','Cometail','Calderoise','Palloth'):
+    for _k,_t in _MARKS.items():
+        SPECS.append({'id':'mark_'+_n.lower()+'_'+_k,'name':_n+' (legendary mark '+_k+')','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+          'prompt':_EDIT+_t+" It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."})

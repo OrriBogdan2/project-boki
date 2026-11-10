@@ -37612,6 +37612,160 @@
     "prompt": "POSE FIRST: fluttering just off the ground, wings open like a locket. Official encyclopedia portrait of exactly the creature in image 1: Lockwren. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
   },
   {
+    "id": "mark_luckhop_h",
+    "name": "Luckhop (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Luckhop.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_luckhop_s",
+    "name": "Luckhop (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Luckhop.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_twinklup_h",
+    "name": "Twinklup (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Twinklup.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_twinklup_s",
+    "name": "Twinklup (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Twinklup.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_lockwren_h",
+    "name": "Lockwren (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Lockwren.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_lockwren_s",
+    "name": "Lockwren (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Lockwren.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_glacione_h",
+    "name": "Glacione (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Glacione.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_glacione_s",
+    "name": "Glacione (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Glacione.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_cometail_h",
+    "name": "Cometail (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Cometail.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_cometail_s",
+    "name": "Cometail (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Cometail.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_calderoise_h",
+    "name": "Calderoise (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_calderoise_s",
+    "name": "Calderoise (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_palloth_h",
+    "name": "Palloth (legendary mark h)",
+    "refs": [
+      "briefs/boki-art/cards/Palloth.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a HALO CROWN, a ring shape floating just behind and above its head, made of the same material as its own signature part (leaves, ice, feathers, flame, stone), with five small points on the ring; plus thin gold line markings on its brow and limbs, and eyes whose white highlight is a four-point star shape. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
+    "id": "mark_palloth_s",
+    "name": "Palloth (legendary mark s)",
+    "refs": [
+      "briefs/boki-art/cards/Palloth.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: give it the mark every legendary creature has: a glowing four-point STAR MARK on its forehead in pale gold, the same star shape repeated small on its chest, gold tips on its ears, horns, wings or tail, and three small pieces of its own element (leaves, ice shards, sparks, embers, feathers) floating in a slow ring round its body. It stays the same creature in the same pose, as cute or as fierce as it is now, and the whole creature with its mark fits inside the frame."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
