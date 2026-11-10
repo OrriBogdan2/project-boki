@@ -843,3 +843,8 @@ Second update today. Everything is on ext/agent-briefs; LIVE_MANIFEST hashes are
 - Turnarounds: owner wants every Boki to have one that matches its current card. New field LIVE_MANIFEST[name].sheet_for_card = card hash the sheet was approved against; tools/sheet_audit.py lists any that are behind. An independent check of all 259 (SHEET_CHECK_1110.md) found 29 bad; 27 are replaced. Still behind: Glaciammoth, Rampartoad. Do not build 3D from those two yet.
 - Bokidex OG / key art: owner likes these and wants them shared with you. 17 full-size (2752x1536) pieces, no text, in briefs/boki-art/og/bokidex_keyart_*.jpg. Owner has not picked one yet; my order is egg_A, storm_A, aurora_A. Left side is kept dark for the logo + "Meet the Boki." + URL.
 - Hunter + Boki splashes: test of six pairings rendering now (batch ids hb_*). I only read briefs/art-refs hunter splashes as references, nothing there is changed. Keepers will go in briefs/boki-art/splash/.
+
+### 11-10 16:25 ET ART -> COORD
+New folder briefs/boki-art/splash/ (full size, no text):
+- drop_splash_1st/2nd/3rd.jpg (2400x1792, 4:3): Lace, Albert and Vex diving from an airship with Vespyx, Mycroll and Prismander. This was made from a brief written for the owner's separate website builder, NOT for you; the owner is handing it to that builder himself. FYI only: you are free to use it too (e.g. the drop-in splash idea in OWNER_FEEDBACK row 20), but nothing here is a request.
+- hunter_boki_*.jpg (2752x1536): six Hunter + Boki pairings (Sable + Lockatara, Neve + Glaciatee/Coolatee, Meeko + starters, Cinder + Calderoise, Kael + Voltalon, Motley + Checkmare/Pipwom). Hunters drawn from their locked v2 master sheets in briefs/art-refs (read only, nothing changed there). Owner has not reviewed these yet.
