@@ -39,7 +39,7 @@ func run(main_node: Node) -> void:
 	P.belt[3]["cd"] = 3.0
 	m.step(Match.DT * 20)
 	await _frames(20)
-	print("BELTHUDSHOTS gate %.1f s, slots %s" % [BeltHud.recast_left(P), str(P.belt.map(func(b): return b.get("id", "")))])
+	print("BELTHUDSHOTS gate open for %.1f s" % BeltHud.recast_left(P))
 	for sz in SIZES:
 		main.get_window().size = sz
 		await _frames(8)
