@@ -309,7 +309,7 @@ static func _pop(m, h: Hunter, k: Kin) -> void:
 	var col: Color = Data.KIN[k.species]["color"]
 	m.sfx("scan_pop", k.pos, 0.0)
 	m.fx.burst(k.pos + Vector3(0, 0.6, 0), Color.WHITE, 20, 5.0, 0.5, -2.0, 1.2)
-	m.fx.burst(k.pos + Vector3(0, 0.6, 0), col, 16, 3.5, 0.6)
+	m.fx.burst(k.pos + Vector3(0, 0.6, 0), KinTypeTrail.colour(String(k.sp.get("type", "")), col), 16, 3.5, 0.6)
 	m.fx.ring(k.pos, 1.8, Color(BEAM_COL, 0.9), 0.45)
 	var cap := MeshInstance3D.new()
 	var sm := SphereMesh.new()
