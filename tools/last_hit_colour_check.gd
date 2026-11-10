@@ -7,6 +7,7 @@ extends RefCounted
 ## Runs with a temporary XDG_DATA_HOME (it writes user://settings.cfg). Never touches the save.
 
 var bad := 0
+var last_mob: Mob
 
 func ok(what: String, cond: bool, extra := "") -> void:
 	print("LASTHIT %s %s %s" % ["ok  " if cond else "FAIL", what, extra])
@@ -41,10 +42,17 @@ func run(main: Node) -> void:
 			ok(tag + "your mate's kill: one flash, squad colour", by_mate.size() == 1 and _same(by_mate[0], p["ally"]))
 			ok(tag + "a rival's kill: one flash, rival colour", by_foe.size() == 1 and _same(by_foe[0], p["foe"]))
 			ok(tag + "the two sides differ", by_you.size() == 1 and by_foe.size() == 1 and not _same(by_you[0], by_foe[0]))
+			ok(tag + "the dissolving body glows in the rival colour", _body_glow(last_mob, p["foe"]))
 	var own := _kill(m, me.pos, null, false)
 	ok("no Hunter behind it: one flash in the monster's own colour", own.size() == 1 and not _same(own[0], SideColor.ally()) and not _same(own[0], SideColor.foe()))
 	print("LASTHIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _body_glow(mb: Mob, col: Color) -> bool:
+	for mt in mb.mats:
+		if mt is ShaderMaterial and _same(mt.get_shader_parameter("flash_color"), col):
+			return true
+	return false
 
 func _same(a: Color, b: Color) -> bool:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length() < 0.02
@@ -52,6 +60,7 @@ func _same(a: Color, b: Color) -> bool:
 ## Kills a fresh monster beside `at` for `by` (through the path that pays the kill) and returns the colours of the flashes it made.
 func _kill(m: Match, at: Vector3, by: Hunter, boss: bool) -> Array:
 	var mb := m.spawn_mob("skitter", at + Vector3(2, 0, 0))
+	last_mob = mb
 	m.fx.flashes.clear()
 	if boss:
 		Juice.boss_dead(m, mb, by)      # (a lair boss's death; Boss needs a lair, so the bare Juice call stands in)
