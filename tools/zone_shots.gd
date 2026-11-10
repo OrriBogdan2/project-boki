@@ -1,7 +1,8 @@
 extends RefCounted
-## --ridge-shots --shots-dir=<dir>: Kitewind Ridge (GARDEN.md 10.2, theme "ridge") for review. ridge_day.png and
-## ridge_night.png show the demo base on the ridge (post, two updraft vents, the ripe snack patch); ridge_track.png
-## shows a Dash on the ridge course (glide gaps, updraft climb). Needs a renderer. Never touches the real save.
+## --zone-shots --shots-dir=<dir>: the built garden zones (GARDEN.md 10.2) for review. <theme>_day.png and
+## <theme>_night.png show the demo base on each zone theme (BASES: its toys and the ripe snack patch); ridge_track.png
+## shows a Dash on the ridge course (glide gaps, updraft climb) and glasswater_volley.png a Spark Volley over the
+## shallows. Needs a renderer. Never touches the real save.
 
 const DAY := 0.42           # day_t for the day shot
 const NIGHT := 0.97         # day_t for the night shot
@@ -10,13 +11,17 @@ const ZOOM_TRACK := 0.75
 const WIPE_S := 1.2           # s for the ink wipe to clear before a shot
 const RACE_SECS := 6.0      # s of racing before the course shot
 const WAIT_FRAMES := 900    # frames to wait at most for the home to build
+const VOLLEY_SECS := 3.0    # s into the Spark Volley match before its shot
+## Each zone theme's demo base: the toys on it (BaseDemo.ZONE_TOYS) and where the camera looks (from the landing).
+const BASES := {"ridge": [["toy_post", "toy_vent", "toy_vent"], Vector3(-2.5, 0, -2.5)],
+	"glasswater": [["toy_tub", "toy_tub"], Vector3(0.0, 0, 1.5)]}
 
 var bad := 0
 var main: Node
-var dir := "/tmp/ridge_shots"
+var dir := "/tmp/zone_shots"
 
 func ok(cond: bool, what: String) -> void:
-	print("RIDGE %s %s" % ["ok  " if cond else "FAIL", what])
+	print("ZONE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
@@ -33,7 +38,7 @@ func _shot(home, shot: String) -> void:
 	home.prompt_box.visible = false
 	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png("%s/%s.png" % [dir, shot])
-	print("RIDGE shot %s" % shot)
+	print("ZONE shot %s" % shot)
 
 func _ready(home) -> void:
 	for i in WAIT_FRAMES:
@@ -54,30 +59,49 @@ func run(m: Node) -> void:
 		if a.begins_with("--shots-dir="): dir = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	await _base()
+	for theme in BASES:
+		await _base(theme)
 	await _track()
 	FarmUnlocks.rules()["base_mode"] = false
-	print("RIDGE DONE, failures: %d" % bad)
+	print("ZONE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## The demo base on the ridge, by day and by night.
-func _base() -> void:
-	Save.d = BaseDemo.save("ridge")
+## The demo base on a zone theme, by day and by night.
+func _base(theme: String) -> void:
+	Save.d = BaseDemo.save(theme)
 	var home = await main._hb_home()
 	await _ready(home)
 	BaseDemo.new().stage(home)
 	var ids: Array = home.toys.toys().map(func(t): return t["id"])
 	ids.sort()
-	ok(ids == ["toy_post", "toy_vent", "toy_vent"] and HomeLayout.count_of(SnackPatch.ID, Save.d) == 1,
-			"the ridge base has its post, two vents and a snack patch (%s)" % str(ids))
-	_look(home, HomeLayout.LANDING + Vector3(-2.5, 0, -2.5), ZOOM_BASE)
+	ok(ids == BASES[theme][0] and HomeLayout.count_of(SnackPatch.ID, Save.d) == 1,
+			"the %s base has its toys and a snack patch (%s)" % [theme, str(ids)])
+	_look(home, HomeLayout.LANDING + BASES[theme][1], ZOOM_BASE)
 	home.day_t = DAY
-	await _shot(home, "ridge_day")
+	await _shot(home, theme + "_day")
 	home.day_t = NIGHT
 	await main.get_tree().create_timer(0.5).timeout
-	await _shot(home, "ridge_night")
+	await _shot(home, theme + "_night")
+	if theme == "glasswater":
+		await _volley(home)
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## A Spark Volley over the shallows, a few seconds in.
+func _volley(home) -> void:
+	var vb: BaseVolley = home.hvolley
+	for k in home.kins:
+		k.erase("indoors")
+	vb.use()
+	var t := 0.0
+	while vb.run != null and t < VOLLEY_SECS:
+		vb.tick(0.1)
+		t += 0.1
+	ok(vb.run != null, "the Spark Volley is running after %.0f s" % VOLLEY_SECS)
+	vb.bar.card.visible = false
+	home.day_t = DAY
+	_look(home, vb.log_node.position + Vector3(-2.5, 0, 0), ZOOM_TRACK)
+	await _shot(home, "glasswater_volley")
 
 ## A Dash on the ridge course, a few seconds in.
 func _track() -> void:

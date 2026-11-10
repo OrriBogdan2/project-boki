@@ -13,7 +13,7 @@ const WANT_DIST := 0.5         # m: a goal farther than this is a wish to move
 const OVERLAP_K := 0.6         # of the two body radii: closer than this is overlapping
 const CAST := ["zapple", "burrlet", "cindle", "pebbit", "lodestick", "marchleaf"]
 const SEED := 5
-const THEMES := ["meadow", "ridge"]     # the start garden and Kitewind Ridge (GARDEN.md 10.2)
+const THEMES := ["meadow", "ridge", "glasswater"]     # the start garden and the built zones (GARDEN.md 10.2)
 
 var bad := 0
 var main: Node

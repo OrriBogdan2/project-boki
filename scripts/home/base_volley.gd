@@ -26,6 +26,7 @@ const HALF := 1.5                            # m from the log to each player
 const ARC := 1.0                             # m the seed rises on a normal hit
 const SPIKE_ARC := 0.35                      # m the seed rises on a spike
 const SEED_R := 0.1                          # m, the seed's radius
+const SPLASH_COL := "bfe8ff"                 # the spray of a missed seed over the shallows
 const REACH := 1.8                           # m from the log to start a match
 
 static func rules() -> Dictionary:
@@ -185,16 +186,28 @@ var card_t := 0.0
 func _init(home) -> void:
 	h = home
 
-## The log and the seed beside the Training post (none without one); called when fixtures move.
+## The log's spot on this island's zone theme (base_volley.json "zone_at"), [x, z] from the landing, or [].
+func _zone_at() -> Array:
+	return rules()["zone_at"].get(String(HomeLayout.of(h._d())["theme"]), [])
+
+## Where the log stands: at its zone's spot, over the shallows, or beside the Training post. Vector3.INF with neither.
+func _spot() -> Vector3:
+	var at := _zone_at()
+	if not at.is_empty():
+		return HomeLayout.LANDING + Vector3(float(at[0]), 0.0, float(at[1]))
+	return h.YARD_AT + LOG_OFF if h.YARD_AT.x > -100.0 else Vector3.INF
+
+## The log and the seed (none without a spot); called when fixtures move.
 func place() -> void:
 	if is_instance_valid(log_node):
 		log_node.queue_free()
 	log_node = null
-	if h.YARD_AT.x < -100.0:
+	var spot := _spot()
+	if spot == Vector3.INF:
 		return
 	log_node = Node3D.new()
 	log_node.name = "VolleyLog"
-	log_node.position = h.YARD_AT + LOG_OFF
+	log_node.position = spot
 	h.add_child(log_node)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()
@@ -275,6 +288,8 @@ func tick(d: float) -> void:
 		bar.step(d)
 	if run.score[0] + run.score[1] != points:
 		h._emote(pair[run.last_miss], "!", true)
+		if not _zone_at().is_empty():
+			_splash()
 		h._toast("%s %d : %d %s" % [run.recs[0]["name"], run.score[0], run.score[1], run.recs[1]["name"]])
 	_place()
 	if run.over():
@@ -307,6 +322,12 @@ func _seed_at() -> Vector3:
 	if run.state == Run.S.POINT:
 		return Vector3(0, SEED_R, _side_z(run.last_miss, 0.9))
 	return Vector3(0, 0.6, _side_z(run.server, 1.0))
+
+## Over the shallows a missed seed drops into the water: a spray and a plop where it lands.
+func _splash() -> void:
+	var at: Vector3 = log_node.position + _seed_at()
+	h.fx.burst(at, Color(SPLASH_COL), 8, 1.6, 0.6, -1.0)
+	Sfx.play("splash", at, -10.0, 0.08, 1.15)
 
 func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}

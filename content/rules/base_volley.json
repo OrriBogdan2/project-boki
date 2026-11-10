@@ -1,5 +1,7 @@
 {
 	"desc": "Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5.4, scripts/home/base_volley.gd). Only with farm_build.json base_mode on. Two Boki bat a glowing seed over a log, first to to_win points; a miss gives the other side the point. You back your partner and call one spike on the training drill's bar. Units: seconds, joy and trust are 0-100 points.",
+	"zone_at": {"glasswater": [5.0, 4.0]},
+	"zone_at_doc": "Where the log stands on a zone theme (home_layout.gd THEMES id): [x, z] metres from the landing, over the shallows, so a missed seed splashes. A theme not listed keeps the log beside the Training post.",
 	"to_win": 5,
 	"base_return": 0.7,
 	"base_doc": "Chance a Boki returns a seed hit by an equal Boki. The real chance is base_return times its own strength over the hitter's, kept between min_return and max_return.",

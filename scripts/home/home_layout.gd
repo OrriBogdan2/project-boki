@@ -27,7 +27,8 @@ const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
 ## Ground colours for every home island. region is the world's region look (trees, rocks) to use. A "zone"
 ## theme belongs to a garden zone (briefs/design/GARDEN.md 10.2) and is not sold in the Island tab: style is
-## the flora set its scatter uses (Flora.STYLES) and track the Dash course there (base_race.json "tracks").
+## the flora set its scatter uses (Flora.STYLES) and track the Dash course there (base_race.json "tracks"). pools:
+## how many shallow pools the island's wild gives instead of its one pond or stream or cliff.
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
@@ -35,6 +36,8 @@ const THEMES := {
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
 	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
 		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
+	"glasswater": {"name": "Glasswater Shallows", "gems": 0, "zone": true, "region": 2, "style": "frost", "pools": 3,
+		"top": "8cccc4", "top2": "6ab0b4", "side": "6a8aa0", "deep": "24405a", "leaf": "9fe0e8"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -647,9 +650,9 @@ static func _fs_in(p: Vector2, sh: Array, pad := 0.0) -> bool:
 ## boulder field, plus a scatter of lone trees and rocks. Laid out on the unexpanded island (so
 ## growing it keeps them where they were) away from the landing by the portal; kept tiles are left
 ## out. Returns {tile index: "tree" | "rock" | "water" | "cliff"}.
-static func wild_fs(world: World, seed: int, sk: float, keep: Dictionary) -> Dictionary:
+static func wild_fs(world: World, seed: int, sk: float, keep: Dictionary, pools := 0) -> Dictionary:
 	var out := {}
-	var plan := fs_plan(seed, sk)
+	var plan := fs_plan(seed, sk, pools)
 	for f in plan:
 		for t in f["tiles"]:
 			var v: Vector2i = t
@@ -664,8 +667,9 @@ static func wild_fs(world: World, seed: int, sk: float, keep: Dictionary) -> Dic
 
 static var _plans := {}
 ## A farm-start island's features (cached): [{kind, at: Vector2, tiles: [Vector2i], what: String or {Vector2i: String}}].
-static func fs_plan(seed: int, sk: float) -> Array:
-	var ck := "%d:%.3f" % [seed, sk]
+## pools > 0 (a zone theme's "pools") swaps the two random extras for that many ponds.
+static func fs_plan(seed: int, sk: float, pools := 0) -> Array:
+	var ck := "%d:%.3f:%d" % [seed, sk, pools]
 	if _plans.has(ck):
 		return _plans[ck]
 	var sh := fs_shape(0, seed, sk)
@@ -678,6 +682,8 @@ static func fs_plan(seed: int, sk: float) -> Array:
 		while kinds.count(pick) >= (1 if pick in ["pond", "stream"] else 2) or (pick == "stream" and kinds.has("pond")) or (pick == "pond" and kinds.has("stream")):
 			pick = extra[r.randi_range(0, extra.size() - 1)]
 		kinds.append(pick)
+	if pools > 0:
+		kinds = ["grove", "rocks"] + range(pools).map(func(_k): return "pond")
 	var plan: Array = []
 	var used: Array = [land]
 	for kd in kinds:

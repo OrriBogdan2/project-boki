@@ -13,9 +13,12 @@ const JOY := 60.0                # joy need: under toys.json joy_below, so a Bok
 const SNACKS := {"emberberry": 3, "tidebloom": 3, "sunroot": 2, "puffcorn": 2}
 const TOYS := {"toy_ball": Vector3(-3.5, 0, -3.0), "toy_post": Vector3(4.0, 0, -4.0), "toy_tub": Vector3(-6.0, 0, 2.0)}
 ## A zone theme's own playthings instead of TOYS (GARDEN.md 10.2), as [id, offset from the landing]: Kitewind
-## Ridge's post, two vents and its snack patch (ripe).
+## Ridge's post, two vents and its snack patch (ripe); Glasswater's two splash tubs and its patch (its Spark
+## Volley log stands at base_volley.json "zone_at").
 const ZONE_TOYS := {"ridge": [["toy_post", Vector3(4.0, 0, -4.0)], ["toy_vent", Vector3(-3.5, 0, -3.0)],
-	["toy_vent", Vector3(-6.0, 0, 2.0)], ["snack_patch", Vector3(-7.0, 0, -6.0)]]}
+	["toy_vent", Vector3(-6.0, 0, 2.0)], ["snack_patch", Vector3(-7.0, 0, -6.0)]],
+	"glasswater": [["toy_tub", Vector3(-3.5, 0, -3.0)], ["toy_tub", Vector3(-6.0, 0, 2.0)],
+	["snack_patch", Vector3(4.0, 0, -4.0)]]}
 const NOOK_AT := Vector3(8.0, 0, -8.0)
 const EGG_SPECIES := "burrlet"
 ## name -> [species, offset from the landing, temper]. Moss and Pip are friends, Ash and Rocky rivals.

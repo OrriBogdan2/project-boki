@@ -8,6 +8,7 @@ extends RefCounted
 ##   4. the machine: no move is refused, a match ends at 5 with a winner, and a TABLE-less move is counted
 ##   5. a settled match: the winner's joy and trust go up, the loser's joy down, both remember it, gems
 ##   6. on the base: no log with base_mode off; with it on, a match runs to a result card
+##   7. on Glasswater the log stands at its base_volley.json zone spot and a match runs there too
 ## Never touches the real save.
 
 const MATCHES := 50
@@ -36,6 +37,7 @@ func run(m: Node) -> void:
 	_machine()
 	_settle()
 	await _on_base()
+	await _on_zone()
 	print("VOLLEY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -156,8 +158,7 @@ func _settle() -> void:
 			"settle: both remember it")
 	ok(int(Save.d["gems"]) > gems and res["backed_won"], "settle: you get gems for backing the winner")
 
-func _on_base() -> void:
-	var rules: Dictionary = FarmUnlocks.rules()
+func _save_for(theme: String) -> void:
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 10, 70.0, 50.0)
@@ -168,7 +169,26 @@ func _on_base() -> void:
 	d["tutorial"] = {"hatched": true, "intro": true}
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
-	HomeLayout.ensure(Save.d)
+	HomeLayout.ensure(Save.d)["theme"] = theme
+
+## Starts a match on the home's log and plays it out to its result card.
+func _play(home, what: String) -> void:
+	var vb: BaseVolley = home.hvolley
+	var at := Vector2(vb.log_node.position.x, vb.log_node.position.z)
+	ok(is_instance_valid(vb.log_node) and vb.find(at) == {"kind": "volley"}, "%s: the log offers a match" % what)
+	for k in home.kins:
+		k.erase("indoors")
+	vb.use()
+	ok(vb.run != null and vb.pair.size() == 2, "%s: a match starts with two Boki" % what)
+	var t := 0.0
+	while vb.run != null and t < float(BaseVolley.rules()["max_s"]) + 5.0:
+		vb.tick(0.1)
+		t += 0.1
+	ok(vb.run == null and is_instance_valid(vb.card), "%s: the match ends with a result card (%.1f s)" % [what, t])
+
+func _on_base() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	_save_for("meadow")
 	var off = await main._hb_home()
 	ok(off.hvolley == null, "off: no volley log on the farm")
 	off.queue_free()
@@ -182,18 +202,29 @@ func _on_base() -> void:
 	home._close_panel()
 	ok(home.hvolley != null, "on: the base has Spark Volley")
 	if home.hvolley != null:
-		var vb: BaseVolley = home.hvolley
-		var at := Vector2(vb.log_node.position.x, vb.log_node.position.z)
-		ok(is_instance_valid(vb.log_node) and vb.find(at) == {"kind": "volley"}, "on: the log offers a match")
-		for k in home.kins:
-			k.erase("indoors")
-		vb.use()
-		ok(vb.run != null and vb.pair.size() == 2, "on: a match starts with two Boki")
-		var t := 0.0
-		while vb.run != null and t < float(BaseVolley.rules()["max_s"]) + 5.0:
-			vb.tick(0.1)
-			t += 0.1
-		ok(vb.run == null and is_instance_valid(vb.card), "on: the match ends with a result card (%.1f s)" % t)
+		_play(home, "on")
+	rules["base_mode"] = false
+	home.queue_free()
+	await main.get_tree().process_frame
+
+## Glasswater: the log stands over the shallows at its zone spot (base_volley.json), with or without a Training post.
+func _on_zone() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = true
+	_save_for("glasswater")
+	var home = await main._hb_home()
+	for f in SETTLE_FRAMES:
+		if is_instance_valid(home.root_ui):
+			break
+		await main.get_tree().process_frame
+	home._close_panel()
+	var spot: Array = BaseVolley.rules()["zone_at"]["glasswater"]
+	var want := HomeLayout.LANDING + Vector3(float(spot[0]), 0.0, float(spot[1]))
+	var vb: BaseVolley = home.hvolley
+	ok(vb != null and is_instance_valid(vb.log_node) and vb.log_node.position.is_equal_approx(want),
+			"glasswater: the log stands at its zone spot %s" % str(want))
+	if vb != null and is_instance_valid(vb.log_node):
+		_play(home, "glasswater")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

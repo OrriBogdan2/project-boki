@@ -4,6 +4,8 @@ extends RefCounted
 ## (zone_snacks). The new snacks are real foods tinted by their type; the start garden's patch rotates through
 ## all of them; a zone's patch grows its own list. Never touches the real save.
 
+const ZONE_THEMES := ["ridge", "glasswater"]      # the built zones: their patch grows only their own list
+
 var bad := 0
 var main: Node
 
@@ -75,8 +77,10 @@ func _patch() -> void:
 			seen[s] = true
 	var unseen: Array = Lean.rules()["foods"].keys().filter(func(s): return not seen.has(s))
 	ok(unseen.is_empty(), "the start patch grew every snack within 24 ripenings (never: %s)" % str(unseen))
-	Save.d["layout"]["theme"] = "ridge"
-	e["rot"] = 0
-	var ridge: Array = SnackPatch.harvest(Save.d, 3.0e9)
-	var own: Array = SnackPatch.rules()["zone_snacks"]["ridge"]
-	ok(ridge == own, "a ridge patch grows exactly its zone's list (%s)" % str(ridge))
+	for n in ZONE_THEMES.size():
+		var theme: String = ZONE_THEMES[n]
+		Save.d["layout"]["theme"] = theme
+		e["rot"] = 0
+		var got: Array = SnackPatch.harvest(Save.d, 3.0e9 + n * 1.0e4)
+		var own: Array = SnackPatch.rules()["zone_snacks"][theme]
+		ok(got == own, "a %s patch grows exactly its zone's list (%s)" % [theme, str(got)])

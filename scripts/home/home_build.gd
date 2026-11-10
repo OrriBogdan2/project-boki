@@ -83,7 +83,8 @@ func fs() -> bool:
 ## The wild a seed gives this island, from the farm-start generator or the older procedural one.
 func _wild_of(w: World) -> Dictionary:
 	if fs():
-		return HomeLayout.wild_fs(w, _seed(), float(L().get("sk", 1.0)), _wild_keep())
+		var pools := int(HomeLayout.THEMES.get(String(L()["theme"]), {}).get("pools", 0))
+		return HomeLayout.wild_fs(w, _seed(), float(L().get("sk", 1.0)), _wild_keep(), pools)
 	return HomeLayout.wild(w, _seed(), _wild_keep())
 
 func _wild_keep() -> Dictionary:
