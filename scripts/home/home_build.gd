@@ -1945,6 +1945,8 @@ func _open_ui() -> void:
 
 func _tabs() -> Array:
 	var out: Array = []
+	if FarmUnlocks.base_mode():
+		return ["Buildings", "Garden", "Island"]
 	for ct in HomeLayout.CATS:
 		if FarmBuilder.tab_shown(self, ct):
 			out.append(ct)
