@@ -3,7 +3,9 @@ extends RefCounted
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); every cancel the kit's
+## Cancels table lists (the file's "cancels" rows) hands over with no pop and settles within a frame of the source
+## footage, and a move the kit cuts leaves the hunter's state at once (no frozen pose). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -12,9 +14,12 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 const DT := 1.0 / 30.0
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
+const SPIKE := 1.5             # a pop is this much more than the frames either side of it: a jump, not a fast blend
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+const SOURCE_FRAME := 0.2      # s: one frame of the 5 fps footage: a cancel's blend is done inside it
+const LEAD := 0.5              # s: the legs run this long before a sequence's first move (past any landing)
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -23,9 +28,18 @@ const STAND_OPEN := {
 	"ostra:stance": "x_fing seams 12-16 deg",
 	"dolm:stance": "0.8 s long (a bounce, not a stance)",
 }
+## Cancels found open: "<id> <from>@<at>><to>" -> what. The hand's speed through a blend of two far-apart arm poses
+## peaks mid-arc (a hammer's lever, a cartwheel cut upside down); a cut as the source does would snap the whole
+## difference in one frame. Each needs an art pass (a nearer first key on the second clip) that then drops its entry.
+const CANCEL_OPEN := {
+	"bulwark bul_smash_wind@0.50>bul_ult_wind": "hammer from the wind-up hold to overhead, 0.64 m in a frame",
+	"thief thf_vault_f@0.20>thf_encore": "cartwheel cut upside down into the Encore pose, 0.46 m in a frame",
+}
 
 var bad := 0
 var holder: Node3D
+var own := {}                # a clip's own hand path per frame (this Hero), the measure a hand-over is held to
+var pops: Array = []         # [pop m, "hero from@t>to"] of every cancel row, worst first (--clip-shots --cancels picks)
 
 func ok(cond: bool, what: String) -> void:
 	print("CLIP %s %s" % ["ok  " if cond else "FAIL", what])
@@ -38,14 +52,22 @@ func run(main: Node) -> void:
 	main.add_child(holder)
 	for id in OWN_MODELS:
 		_own_model(String(id), String(OWN_MODELS[id]))
+	var only := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--only="):
+			only = a.substr(7)        # (one Hero, while iterating on its clips)
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if WardenClips.data(art_name).is_empty():
+		if WardenClips.data(art_name).is_empty() or (only != "" and String(id) != only):
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
+	pops.sort_custom(func(a, b): return a[0] > b[0])
+	for i in mini(pops.size(), 10):
+		print("CLIP worst-cancel %d: %.3f m %s" % [i + 1, pops[i][0], pops[i][1]])
+	await _feed_state(main)
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -107,7 +129,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		var want := float(dd["bone_scale"][nm])
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
+	own = {}
 	await _handover(id, m, sync, clips, dd)
+	await _cancels(id, m, sync, clips, dd)
 	m.free()
 
 func _named(dd: Dictionary) -> Array:
@@ -259,19 +283,99 @@ func _sliders(id: String, sync: Node) -> void:
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
 
-## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand
-## moving further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.
-func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
-	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
+## The anim state a sequence step asks for: a kit move at `t` s, "" the legs, "stun", "glide". A move or a stun out of
+## the glider closes it and plays in the fall (the source casts from the air); the legs are the ground.
+static func feed(s: Dictionary, st: String, t: float) -> void:
+	s.erase("kmove")
+	s["stun"] = st == "stun"
+	s["gliding"] = st == "glide"
+	if st == "glide" or st == "":
+		s["grounded"] = st == ""
+	if st != "" and st != "stun" and st != "glide":
+		s["kmove"] = st
+		s["kmove_t"] = t
+
+## A "cancels" row [from, cut at s, to] as a sequence: the legs, the move to its cut, then what cuts it.
+static func cancel_seq(row: Array) -> Array:
+	return [["", LEAD], [String(row[0]), float(row[1])], [String(row[2]), 2.0 * SOURCE_FRAME]]
+
+## The clip a sequence step shows, "" when it is the legs or the glider.
+static func clip_of(dd: Dictionary, st: String) -> String:
+	if st == "stun":
+		return String(dd.get("states", {}).get("stun", ""))
 	var moves: Dictionary = dd.get("kmoves", {})
+	return String(moves[st]["clip"]) if moves.has(st) else ""
+
+## The kit's own flow (data "flow") handed over as the game does: no pop, then the clips own the body.
+func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var seq: Array = [["", 0.4]]
 	seq.append_array(dd.get("flow", []))
 	seq.append(["", 0.4])
-	var own := {}
+	var r := await _run_seq(m, sync, clips, dd, seq)
+	var height := 1.6 * absf(m.scale.y)
+	ok(float(r[0]) <= POP * height,
+			"%s: moves hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
+			% [id, r[0], r[1], POP * height])
+	ok(clips.proc_w <= 0.0, "%s: the clips own the body after the run" % id)
+	var s: Dictionary = m.get_meta(WardenClips.STATE)
+	s["kmove"] = "no_such_move"
+	for k in 12:
+		sync.call("_process", DT)
+	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+
+## Every cancel of the kit's Cancels table (data "cancels": [from, cut at s, to]): the cut move hands over with no pop,
+## and the next state owns the body within one frame of the source footage: nothing held, nothing half-faded.
+func _cancels(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var rows: Array = dd.get("cancels", [])
+	if rows.is_empty():
+		return
+	var height := 1.6 * absf(m.scale.y)
+	var worst := 0.0
+	var where := ""
+	var late: Array = []
+	for row in rows:
+		var r := await _run_seq(m, sync, clips, dd, cancel_seq(row), 2)
+		var what := "%s %s@%.2f>%s" % [id, row[0], row[1], row[2] if row[2] != "" else "legs"]
+		pops.append([float(r[0]), what])
+		print("CLIP pop %.3f m %s (%s)" % [r[0], what, r[1]])
+		if CANCEL_OPEN.has(what):
+			var stale := " (now passes: drop it from CANCEL_OPEN)" if float(r[0]) <= POP * height else ""
+			print("CLIP open %s %.3f m [%s]%s" % [what, r[0], CANCEL_OPEN[what], stale])
+			ok(float(r[0]) > POP * height, "%s: CANCEL_OPEN entry still needed" % what)
+		elif float(r[0]) > worst:
+			worst = float(r[0])
+			where = what
+		if not bool(r[2]):
+			late.append(what)
+	ok(worst <= POP * height,
+			"%s: %d cancels hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
+			% [id, rows.size(), worst, where, POP * height])
+	ok(late.is_empty(), "%s: every cancel's blend is done within %.1f s of the cut (late: %s)"
+			% [id, SOURCE_FRAME, str(late)])
+
+## True when the layers show `st` alone: the legs (or the glider) with no action left, or the move at full weight.
+func _settled(clips: WardenClips, dd: Dictionary, st: String) -> bool:
+	if st == "" or st == "glide":
+		var off := clips.act_w <= 0.001 and clips.up_w <= 0.001
+		return off and (st == "" or clips.glide_w >= 0.999 and clips.air_w >= 0.999)
+	var mv: Dictionary = dd.get("kmoves", {}).get(st, {})
+	var layer: WardenClips.Layer = clips.up if mv.get("upper", false) else clips.act   # (the run: "moving" is upper)
+	var w := clips.up_w if layer == clips.up else clips.act_w
+	var clips_of: Array = [clip_of(dd, st), mv.get("alt", "")]
+	return w >= 0.999 and absf(layer.xf - layer.chan) < 0.001 and layer.cur in clips_of
+
+## A sequence [[state, s], ...] fed frame by frame as the game does: [worst pop m, where (with the frames either side),
+## settled]. A strike is meant
+## to snap, so a pop is the hand moving further in a frame than the clip alone moves it there (the clip's own path,
+## sampled once) and further than in the frames either side (SPIKE): a jump, where a fast blend carries on. Pops
+## count from step `judge` on (a cancel: the cut itself; the move's own start and loop are the flow's business).
+## Settled: each step's state after the lead-in owns the body SOURCE_FRAME after it begins.
+func _run_seq(m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary, seq: Array, judge := 1) -> Array:
+	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
 	for st in seq:
-		if st[0] == "" or own.has(st[0]):
+		var clip := clip_of(dd, String(st[0]))
+		if clip == "" or own.has(clip):
 			continue
-		var clip := String(moves[st[0]]["clip"])
 		clips.force = {"clip": clip, "t": 0.0}
 		for k in 10:
 			sync.call("_process", DT)
@@ -286,41 +390,66 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 			path.append(hand.global_position.distance_to(last_p))
 			last_p = hand.global_position
 			t += DT
-		own[st[0]] = path
+		own[clip] = path
 	clips.force = {}
 	var s := {"vel": Vector3(0, 0, -4.0), "face": 0.0, "grounded": true}
 	m.set_meta(WardenClips.STATE, s)
 	var last := Vector3.INF
-	var worst := 0.0
-	var where := ""
-	for st in seq:
+	var overs: Array = []       # per frame: how far past the clip's own step the hand moved (0: not measured)
+	var at: Array = []
+	var settled := true
+	for k in seq.size():
+		var st: Array = seq[k]
+		var clip := clip_of(dd, String(st[0]))
 		var t := 0.0
 		var i := 0
+		var judged: bool = k == 0
 		while t < float(st[1]):
-			s["kmove"] = st[0]
-			s["kmove_t"] = t
-			if st[0] == "":
-				s.erase("kmove")
+			feed(s, String(st[0]), t)
 			sync.call("_process", DT)
 			await holder.get_tree().process_frame
-			var p := hand.global_position
-			if last != Vector3.INF and clips.proc_w <= 0.0 and own.has(st[0]):
-				var path: Array = own[st[0]]
-				var clip_step := 0.0
-				for j in range(maxi(i - 2, 0), mini(i + 3, path.size())):      # (a frame or two either way: the fade)
-					clip_step = maxf(clip_step, float(path[j]))
-				var over := p.distance_to(last) - clip_step
-				if over > worst:
-					worst = over
-					where = "%s @%.2f" % [st[0], t]
-			last = p
 			t += DT
 			i += 1
-	var height := 1.6 * absf(m.scale.y)
-	ok(worst <= POP * height, "%s: moves hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
-			% [id, worst, where, POP * height])
-	ok(clips.proc_w <= 0.0, "%s: the clips own the body after the run" % id)
-	s["kmove"] = "no_such_move"
-	for k in 12:
-		sync.call("_process", DT)
-	ok(clips.proc_w >= 1.0, "%s: a move with no clip hands back to the rig" % id)
+			if not judged and t >= SOURCE_FRAME - 0.0001:
+				judged = true
+				settled = settled and _settled(clips, dd, String(st[0]))
+			var p := hand.global_position
+			var over := 0.0
+			# (to the clip's end only: past it the move fades to the legs, the clip's own path can't say how far)
+			if last != Vector3.INF and clips.proc_w <= 0.0 and own.has(clip) and i <= (own[clip] as Array).size() \
+					and t <= clips.lib.get_animation(clip).length and k >= judge:
+				var path: Array = own[clip]
+				var clip_step := 0.0
+				for j in range(maxi(i - 3, 0), mini(i + 2, path.size())):      # (a frame or two either way: the fade)
+					clip_step = maxf(clip_step, float(path[j]))
+				over = maxf(p.distance_to(last) - clip_step, 0.0)
+			overs.append(over)
+			at.append("%s @%.2f" % [st[0], t])
+			last = p
+	var worst := 0.0
+	var where := ""
+	for i in overs.size():
+		var before := float(overs[i - 1]) if i > 0 else 0.0
+		var after := float(overs[i + 1]) if i + 1 < overs.size() else 0.0
+		if float(overs[i]) > worst and float(overs[i]) > SPIKE * maxf(before, after):
+			worst = float(overs[i])
+			where = "%s, %.3f before, %.3f after" % [at[i], before, after]
+	return [worst, where, settled]
+
+## The hunter's own feed: a kit move the kit cuts (its anim_id emptied) leaves the state the same frame, so no clip
+## freezes on its cut frame (DECISIONS 2026-11-07: a hold animation never shows without the hold input).
+func _feed_state(main: Node) -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	var r: Array = ac.setup("bulwark", 6.0)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	P.ak.play("bul_guard")
+	P._anim_state(1.0)
+	var shown := String(P.anim_s.get("kmove", "")) == "bul_guard"
+	P.ak.anim_id = ""
+	P._anim_state(1.0)
+	ok(shown and not P.anim_s.has("kmove"),
+			"a kit move the kit cuts leaves the hunter's anim state at once (shown %s, left %s)"
+			% [shown, P.anim_s.has("kmove")])
+	await ac.done(m)

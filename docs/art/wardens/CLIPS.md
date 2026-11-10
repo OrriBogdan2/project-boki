@@ -21,8 +21,12 @@ Hero live in `tools/art1/` (Kael is the pilot).
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
+- `cancels`: [from move, cut at s, to] rows, one per second press the hero's docs/heroes Cancels table lists (to: a move,
+  `""` the legs, `stun`, `glide`). `--clip-check` hands each over as the game does and asserts no pop and a blend done
+  within one footage frame (0.2 s); `--clip-shots --cancels` shoots the frames around each cut.
 
 ## The tree
-loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
-channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
+loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2) > `full` (Blend2), each of the last two onto a
+Layer of two crossfaded seek channels: a new clip, or the same one started over, takes the channel with less weight
+on screen, so a cancel inside a fade never snaps. Built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.

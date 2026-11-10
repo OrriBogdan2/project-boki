@@ -24,5 +24,18 @@
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["thf_lmb_r", 0.45], ["thf_lmb_l", 0.45], ["thf_vault_r", 0.48], ["thf_primed", 0.3], ["thf_vault_f", 0.48], ["thf_lmb_r", 0.3], ["thf_vault_twist", 0.48], ["thf_bola", 0.75], ["thf_knife", 0.45], ["thf_encore", 0.4], ["thf_encore_dance", 1.6], ["thf_reset", 0.4]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"],
+	"cancels": [
+		["thf_bola", 0.2, "stun"],
+		["thf_bola", 0.2, "thf_lmb_r"],
+		["thf_bola", 0.2, "thf_knife"],
+		["thf_bola", 0.2, "thf_encore"],
+		["thf_bola", 0.2, ""],
+		["thf_encore_dance", 0.8, ""],
+		["thf_encore_dance", 0.8, "thf_vault_r"],
+		["thf_encore_dance", 0.8, "thf_lmb_l"],
+		["thf_knife", 0.3, "thf_arrive"],
+		["thf_lmb_r", 0.1, "thf_lmb_l"],
+		["thf_vault_f", 0.2, "thf_encore"]
+	]
 }

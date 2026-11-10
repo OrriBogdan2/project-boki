@@ -25,5 +25,15 @@
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
-	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw"]
+	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "fingers.R", "thumb.R", "brow.L", "brow.R", "lid.L", "lid.R", "jaw"],
+	"cancels": [
+		["as_lance", 0.6, "lw_jet"],
+		["lw_jet", 0.6, "lw_land"],
+		["lw_jet", 0.6, "lw_jump"],
+		["as_aim", 0.4, ""],
+		["as_lance", 0.6, ""],
+		["glide", 0.4, "as_shot"],
+		["glide", 0.4, "lw_jet"],
+		["as_leap", 0.2, "lw_jet"]
+	]
 }
