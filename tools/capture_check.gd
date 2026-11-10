@@ -250,6 +250,8 @@ func _book() -> void:
 	Save.d["dex"] = {}
 	var k := wild("pebbit", false)
 	run_for(1.5)
+	P.inp["aim"] = k.pos            # in view: it wanders for 1.5 s and may end up behind her
+	run_for(0.1)
 	FieldBook.scan_sights(m)
 	var e: Dictionary = Care.dex_entry("pebbit")
 	ok(bool(e.get("seen", false)) and not bool(e.get("caught", false)), "a wild Boki in view is logged as seen, not caught")
