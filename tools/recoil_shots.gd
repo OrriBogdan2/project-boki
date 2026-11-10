@@ -23,11 +23,11 @@ func run(main: Node) -> void:
 	_stage(main)
 	cam.fov = 30.0
 	for id in ids:
-		await _hunter(String(id), out.path_join(String(id)))
+		await _film(String(id), out.path_join(String(id)))
 	print("RECOIL_SHOTS_DONE ", ids.size())
 	tree.quit()
 
-func _hunter(id: String, dir: String) -> void:
+func _film(id: String, dir: String) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
