@@ -78536,5 +78536,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_bellowlet_b2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_bellowlet_b2",
+    "name": "Bellowlet (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_bellowlet_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_snuffapi_b2",
+    "name": "Snuffapi (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_snuffapi_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_snuffapi_b2",
+    "name": "Snuffapi (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_snuffapi_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bellowlet_b2",
+    "name": "Bellowlet (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_bellowlet_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_snuffapi_b2",
+    "name": "Snuffapi (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_snuffapi_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_snuffapi_b2",
+    "name": "Snuffapi (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_snuffapi_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_snuffapi_b2",
+    "name": "Snuffapi (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_snuffapi_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chandelapi_b2",
+    "name": "Chandelapi (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_chandelapi_b2_1.jpg",
+    "ok": true
   }
 ]
