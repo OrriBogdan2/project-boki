@@ -138,7 +138,7 @@ const CHECKS := {
 	"--boki-anim-shots": ["res://tools/boki_anim_shots.gd", "boki_anim_shots", null],      # rigged Boki gait strips
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
-	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],      # Kael tap strike, live aim, tether, ult momentum
+	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],      # Kael tap strike
 	"--kael-tap-clip": ["res://tools/kael_tap_clip.gd", "kael_tap_clip", null],      # Kael tap/hold/ult clips (GPU)
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
@@ -201,10 +201,10 @@ const CHECKS := {
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
-	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],      # item 27, 28, 31 of PLAYTEST-1108
+	"--farm-place-check": ["res://tools/farm_place_check.gd", "farm_place_check", null],      # PLAYTEST-1108 27/28/31
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],      # fresh save to first run
-	"--hob-cam-strip": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],      # =<dir>: talk camera frames
+	"--hob-cam-strip": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],      # talk camera
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
@@ -246,7 +246,7 @@ const CHECKS := {
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
-	"--demo-quick-check": ["res://tools/demo_quick_check.gd", "demo_quick_check", null],      # quick starts; --shots-dir=
+	"--demo-quick-check": ["res://tools/demo_quick_check.gd", "demo_quick_check", null],      # quick starts
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 }
 
