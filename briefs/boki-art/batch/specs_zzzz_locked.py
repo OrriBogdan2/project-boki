@@ -78,3 +78,4 @@ DROP|={'fs_furnacowary','fp_furnacowary','fv2_furnacowary','fem_furnacowary'}  #
 DROP-={'v2s_glaivyx_k','v2p_glaivyx_k','v2s_ringrove_k','v2p_ringrove_k'}
 DROP-={'opt_ringrove_a','opt_ringrove_b','opt_ringrove_c'}
 DROP-={'v2s_ringrove_p2','v2p_ringrove_p2'}
+DROP|={'fs2_lunowl','fp2_lunowl'}

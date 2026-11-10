@@ -942,3 +942,10 @@ for _k,_d in (('d',"a lanky, long-legged adolescent porcupine standing tall on a
               ('g',"an upright, long-armed climber like a young sloth-bear, standing on its hind legs, long quills hanging down its back like a spiky cloak, a cluster of mint mushroom caps growing from each shoulder, big clawed hands held ready. Wiry, not chubby.")):
     SPECS.append({'id':'opt_sporcupine_'+_k,'name':'Sporcupine (new body, option '+_k+')','refs':[_C%'Mycroll',_C%'Ringrove'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Draw one single character illustration of the MIDDLE evolution of a creature line: "+_d+_SP2+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('mid','sleek',False,True)+FRAME_V2})
+
+# 05:20 ET 11-10 OWNER: "female and male Lunowl look way too different / not related" (he is dusk lilac and gold now, she was still pink and mint).
+# Female = the male's own design and palette, one step lighter, with silver where he has gold.
+SPECS.append({'id':'fv4_lunowl','name':'Lunowl female (same family as the dusk male)','refs':['briefs/boki-art/cards/Lunowl.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. She is unmistakably the same species: the same moth-winged owl, the same wing shape and tails, the same pose and view, "
+   "the same dusk colour family, drawn the same way. She differs only like this: her body feathers are a paler lavender-grey with a cream chest; her wings keep the mint centre and violet edges but one step lighter; "
+   "every marking that is gold on him (the crescents and the small crest) is silver on her; her body is a little rounder and her wing tails a little shorter."+_FEMFACE+" No pink. "+STYLE_V2('mid','pretty',False,True)+FRAME_V2)})
