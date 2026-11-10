@@ -112,6 +112,7 @@ const CHECKS := {
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
+	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null],      # ability cards = the data
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
