@@ -106116,5 +106116,12 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/og_book_2.jpg",
     "ok": true
+  },
+  {
+    "id": "og_lineup",
+    "name": "Bokidex OG image (lineup)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/og_lineup_1.jpg",
+    "ok": true
   }
 ]
