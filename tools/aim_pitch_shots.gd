@@ -30,7 +30,8 @@ func run(main: Node) -> void:
 		await tree.process_frame       # (past the title's fade)
 	for id in ids:
 		for step in STEPS:
-			await _shot(String(id), AimPitch.rise(float(STEPS[step]) * TIER, AIM_DIST), out.path_join("%s_%s.png" % [id, step]))
+			var pitch := AimPitch.rise(float(STEPS[step]) * TIER, AIM_DIST)
+			await _shot(String(id), pitch, out.path_join("%s_%s.png" % [id, step]))
 	print("AIM_PITCH_SHOTS_DONE")
 	tree.quit()
 
