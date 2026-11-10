@@ -21,11 +21,11 @@ func run(main: Node) -> void:
 	_stage(main)
 	cam.fov = 30.0
 	for id in ids:
-		await _hunter(String(id), out.path_join(String(id)))
+		await _film(String(id), out.path_join(String(id)))
 	print("IDLE_BREAK_SHOTS_DONE ", ids.size())
 	tree.quit()
 
-func _hunter(id: String, dir: String) -> void:
+func _film(id: String, dir: String) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.rotation.y = deg_to_rad(YAW)
 	holder.add_child(model)
