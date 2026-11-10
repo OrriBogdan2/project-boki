@@ -108573,5 +108573,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/ogs_storm_1.jpg",
     "ok": true
+  },
+  {
+    "id": "ogs_dawn",
+    "name": "Bokidex key art, style dawn",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogs_dawn_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_pixel",
+    "name": "Bokidex key art, style pixel",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogs_pixel_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_poster",
+    "name": "Bokidex key art, style poster",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogs_poster_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_pixel",
+    "name": "Bokidex key art, style pixel",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogs_pixel_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_pixel",
+    "name": "Bokidex key art, style pixel",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogs_pixel_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_anime",
+    "name": "Bokidex key art, style anime",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/ogs_anime_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_dawn",
+    "name": "Bokidex key art, style dawn",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/ogs_dawn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "ogs_clay",
+    "name": "Bokidex key art, style clay",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/ogs_clay_2.jpg",
+    "ok": true
   }
 ]
