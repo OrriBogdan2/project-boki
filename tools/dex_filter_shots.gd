@@ -4,6 +4,8 @@ extends RefCounted
 ## dex_f2_caught, dex_f3_more (the "Thrives in" row open on a zone), dex_f4_none (nothing passes).
 ## <dir>/captions.txt gets "file: caption" per file.
 
+const BOOT_S := 5.0      # seconds the title screen needs before a menu can open over it
+
 var lines: Array = []
 
 func run(main: Node) -> void:
@@ -15,6 +17,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_fixture()
 	var ids: Array = DexView.TYPES.keys()
+	await main.get_tree().create_timer(BOOT_S).timeout
+	await main.fade.reveal(0.01)
 	await _shot(main, dir, "dex_f0_all", "No filter: every species, legendaries at the end")
 	DexFilter.types = [ids[0], ids[1]]
 	await _shot(main, dir, "dex_f1_types", "Two type chips on: a species of either type")
@@ -56,6 +60,6 @@ func _fixture() -> void:
 
 func _shot(main: Node, dir: String, file: String, caption: String) -> void:
 	Overlay.shot_demo(PackedStringArray(["inventory", "Field Book"]))
-	await main.get_tree().create_timer(1.0).timeout
+	await main.get_tree().create_timer(1.5).timeout
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	lines.append("%s.png: %s" % [file, caption])

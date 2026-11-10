@@ -7,7 +7,7 @@ extends RefCounted
 ## statics, never written to the save.
 
 const STATUSES := [["", "All"], ["seen", "Seen"], ["caught", "Caught"], ["owned", "Owned now"]]
-const CHIP_PX := 34.0       # a type chip's width (its icon is drawn inside)
+const CHIP_PX := 28.0       # a type chip's width (its icon is drawn inside); 18 of them fit one row
 const COLUMNS := 6          # tiles per row
 
 static var types: Array = []     # the type ids picked (empty = every type)
@@ -83,30 +83,41 @@ class Browser extends VBoxContainer:
 		if hits.is_empty():
 			_bar.add_child(UI.para("No Boki match these filters."))
 
-	## The one row: type chips, the status picks, More, Clear and the count.
+	## The bar: the seen/caught counts and the status picks, then the type chips, More, Clear and the count.
 	func _row() -> Control:
+		var col := UI.vbox(8)
+		var head := UI.hbox(10)
+		var c := DexView.counts()
+		head.add_child(UI.chip("eye", "Seen %d" % c.x, UI.INK))
+		head.add_child(UI.chip("paw", "Caught %d" % c.y, UI.INK))
+		head.add_child(UI.fill())
+		for s in DexFilter.STATUSES:
+			head.add_child(UI.choice(s[1], DexFilter.status == s[0], _pick_status.bind(s[0])))
+		col.add_child(head)
 		var row := HFlowContainer.new()
-		row.add_theme_constant_override("h_separation", 6)
+		row.add_theme_constant_override("h_separation", 4)
 		row.add_theme_constant_override("v_separation", 6)
 		var tc := DexView.type_counts()
 		for t in DexView.TYPES:
 			row.add_child(_type_chip(t, tc.get(t, Vector2i.ZERO)))
-		for s in DexFilter.STATUSES:
-			row.add_child(UI.choice(s[1], DexFilter.status == s[0], _pick_status.bind(s[0])))
 		if not DexFilter.zones().is_empty():
 			row.add_child(UI.choice("More", DexFilter.more_open or DexFilter.zone != "", _toggle_more))
 		if DexFilter.active():
 			row.add_child(UI.ghost("Clear", _clear))
 		row.add_child(UI.chip("", "%d of %d" % [DexFilter.species().size(), Data.KIN.size()], UI.INK, "Species shown"))
-		return row
+		col.add_child(row)
+		return col
 
 	func _type_chip(t: String, seen_caught: Vector2i) -> Button:
 		var b := UI.choice("", DexFilter.types.has(t), _toggle_type.bind(t), DexFilter.CHIP_PX)
 		b.tooltip_text = "%s: seen %d, caught %d" % [DexView.type_name(t), seen_caught.x, seen_caught.y]
+		var middle := CenterContainer.new()
+		middle.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		middle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		var icon := DexView.TypeIcon.new(t, 18.0)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		icon.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-		b.add_child(icon)
+		middle.add_child(icon)
+		b.add_child(middle)
 		return b
 
 	## "Thrives in": the garden zones, each matching the types its Boki live best in.

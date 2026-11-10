@@ -88,20 +88,10 @@ static func type_counts() -> Dictionary:
 		out[type_of(spk)] = c
 	return out
 
-## The grid, under a "Seen N · Caught N" line and the filter bar (DexFilter). on_open(species) opens a tile's page.
+## The grid, under the filter bar (DexFilter: Seen N · Caught N, status, types). on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	Care.dex_sync()
 	demo()
-	var c := counts()
-	var head := UI.hbox(14)
-	head.add_child(UI.chip("eye", "Seen %d" % c.x, UI.INK))
-	head.add_child(UI.chip("paw", "Caught %d" % c.y, UI.INK))
-	var hint := UI.label("Field notes on every Boki you've met. Click one to read its page.", UI.T_SMALL, UI.MUTED)
-	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	head.add_child(hint)
-	v.add_child(head)
 	v.add_child(DexFilter.Browser.new(tree, on_open))
 
 ## One numbered tile.
