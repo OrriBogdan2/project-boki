@@ -126,8 +126,9 @@ func _fewer() -> void:
 		m.queue_free()
 		await main.get_tree().process_frame
 	var tr: Match = await build(5, {"training": true, "teams": 1})
-	ok("training: chest.keep of its generated map's chests", tr.chests.size() == KeyChest.kept(tr.world.chest_spots.size()),
-			"%d of %d spots" % [tr.chests.size(), tr.world.chest_spots.size()])
+	var tr_spots: int = tr.world.chest_spots.size()
+	ok("training: chest.keep of its generated map's chests", tr.chests.size() == KeyChest.kept(tr_spots),
+			"%d of %d spots" % [tr.chests.size(), tr_spots])
 	tr.queue_free()
 	var tu: Match = await build(5, {"tutorial": true, "teams": 1})
 	ok("tutorial: exactly one chest, the chest step's", tu.chests.size() == 1 and tu.chests[0].get("tut", false),
