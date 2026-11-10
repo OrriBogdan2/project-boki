@@ -179,6 +179,7 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 ## Hot Streak: a knock gives Slipstep back (the takedown heal is DashReset's); rank 3 also resets the Burr Charge.
 func _on_knock(t: Ent) -> void:
 	knocked[t.get_instance_id()] = true
+	CombatBus.tech.emit(h, "gunslinger")
 	h.dashes = h.max_dashes()
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())

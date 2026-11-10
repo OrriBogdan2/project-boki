@@ -142,6 +142,7 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		if m.time - _stab_at > 1.2:
 			_stab_at = m.time
 			backstabs += 1
+			CombatBus.tech.emit(h, "dredge")
 			m.fx.word(t.pos + Vector3(0, 2.2, 0), "BEHIND", res_col(), false)
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg

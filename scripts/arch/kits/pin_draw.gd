@@ -93,6 +93,7 @@ func bonus(t: float) -> float:
 
 func _perfect() -> void:
 	perfects += 1
+	CombatBus.tech.emit(h, "archer")
 	quick = true
 	perfect_now = true
 	k.fx.fletch_burst(bow_at(), 1.1, PinFx.GOLD, 0.13, 0.07, 1.0)

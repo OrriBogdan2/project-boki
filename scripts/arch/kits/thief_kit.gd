@@ -562,6 +562,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
+	CombatBus.tech.emit(h, "thief")
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0

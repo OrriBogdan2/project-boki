@@ -495,6 +495,7 @@ func _blowout(f: Ent) -> void:
 	var dmg := (float(rd["blow_dmg"]) + float(rd["blow_pct"]) * f.max_hp) * power("dash")
 	clear_sparks(f)
 	blowouts += 1
+	CombatBus.tech.emit(h, "mage")
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
