@@ -1,7 +1,8 @@
 extends RefCounted
 ## --first-hints-check: the one-time match hints in a real first expedition (MatchHints, FirstTimeHint,
 ## content/rules/hints.json). A fresh save lands in a match with bots; the check drives each moment (a ledge
-## over the void, gear, a key, a skill point, 40 s of open ground, a fight, an outpost, the way out) and asserts
+## over the void, gear, a key, a skill point, 40 s of open ground, a jump into a tall wall, a fight, an
+## outpost, the way out) and asserts
 ##   1. each hint shows once, within a second of its moment, and not before it
 ##   2. never in the first 2 s of a fight (a foe close or targeting you)
 ##   3. never more than one hint line on screen
@@ -11,6 +12,10 @@ extends RefCounted
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
 const SETTLE_S := 3.0         # s of quiet between moments (the last line leaves, the gap passes)
 const FIGHT_M := 9.0          # m: a foe this close, or one targeting you, is a fight
+const WALL_MOMENT_S := 2.0    # s: the jump up to the wall, then the hint's 0.3 s of hanging on it
+const TAP_S := 0.1           # s the jump key is down
+const OUTPOST_CLEAR_M := 25.0  # m the wall keeps from outposts (the outpost moments put the player there)
+const WALL_UPS := 6           # terraces (0.8 m each): a wall too tall for the ledge rise from a jump's apex
 const QUIET_TIME := 12.0      # s on the match clock for the moments that are not about time
 
 var bad := 0
@@ -134,6 +139,14 @@ func _expedition(first: bool) -> void:
 	_check("rank", "a level-up skill point", _moment(func(): p.gain_xp(float(Hunter.XP_TO[1]))), "rank")
 	_check("crouch", "match time 41 s on open ground", _moment(func(): _pin = 41.0), "crouch")
 	_check("orders", "Boki sent 14 m out", _moment(_send_boki), "orders")
+	var wall := _wall_moment(false)
+	_check("wallkick", "jumped into a 6-terrace wall, no second press", wall, "wallkick")
+	var again := _wall_moment(false)
+	_check("wallkick-after", "same again: never twice", again, "")
+	Save.d["tutorial"]["hints"].erase("wallkick")
+	var own := _wall_moment(true)
+	_check("wallkick-own", "it kicked off the wall itself: no hint", own, "")
+	ok(FirstTimeHint.seen("wallkick"), "a kick on its own marks the hint seen")
 	_check("utility", "foe close: nothing for 2 s, then the line", _fight(), "utility")
 	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
@@ -183,6 +196,53 @@ func _over_void() -> void:
 	_secs(0.7)
 	p.teleport(back)
 	p.vel = Vector3.ZERO
+
+## The player jumps into a tall wall (_jump_wall) and holds the keys into it for WALL_MOMENT_S, then lets go.
+func _wall_moment(kicked: bool) -> Array:
+	var got := _moment(_jump_wall.bind(kicked), WALL_MOMENT_S)
+	p.inp["move"] = Vector2.ZERO
+	return got
+
+## Raises a WALL_UPS-terrace block on open ground, stands the player 1 m off its face and jumps them into it.
+func _jump_wall(kick: bool) -> void:
+	var w: World = m.world
+	var at := Vector2.INF
+	for x0 in range(5, w.w - 8, 3):      # a scan of the map; no random draws, so the match plays on as before
+		for z0 in range(4, w.h - 5, 3):
+			if at == Vector2.INF and _flat_for_wall(x0, z0):
+				var lv := int(w.level[w.idx(x0, z0)])
+				for dz in range(-2, 3):
+					for dx in range(1, 4):
+						w.level[w.idx(x0 + dx, z0 + dz)] = lv + WALL_UPS
+				at = Vector2(x0 + 1.0 - p.r - 1.0, z0 + 0.5)
+				p.teleport(Vector3(at.x, lv * World.LEVEL, at.y))
+	ok(at != Vector2.INF, "flat ground for a wall")
+	p.vel = Vector3.ZERO
+	p.last_gy = p.pos.y
+	p.wall_moves.land()
+	p.inp["move"] = Vector2(1, 0)
+	p.inp["jump"] = true      # one tap: a held jump would climb the wall
+	_secs(TAP_S)
+	p.inp["jump"] = false
+	if kick:
+		p.stats["wall_kicks"] = 1
+
+## Open ground, one level, 5 tiles either side of (x0, z0) along x and 4 along z: room for a wall and a run-up.
+func _flat_for_wall(x0: int, z0: int) -> bool:
+	var w: World = m.world
+	var lv := int(w.level[w.idx(x0, z0)]) if w.inb(x0, z0) else -1
+	for dz in range(-4, 5):
+		for dx in range(-5, 8):
+			var i := w.idx(x0 + dx, z0 + dz)
+			if not w.inb(x0 + dx, z0 + dz) or w.kind[i] != World.T_GROUND or int(w.level[i]) != lv:
+				return false
+			if w.stairs.has(i) or w.walls.has(i) or w.sheer.has(i):
+				return false
+	var site := Vector2(x0 + 1.0, z0 + 0.5)
+	var clear := true
+	for x in m.exits.of_kind("outpost"):
+		clear = clear and site.distance_to(Vector2(x["pos"].x, x["pos"].z)) > OUTPOST_CLEAR_M
+	return lv >= 0 and clear
 
 func _send_boki() -> void:
 	p.kin.cmd = "chase"

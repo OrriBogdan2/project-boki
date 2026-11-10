@@ -37,7 +37,7 @@ static func text(id: String) -> String:
 		raw = raw.replace("{rank}", TutorialText.rank_combo())
 	if raw.contains("{boki}"):
 		raw = raw.replace("{boki}", String(Save.active_kin().get("name", "your Boki")))
-	for action in ["dash", "crouch", "interact", "throw", "secondary", "build"]:
+	for action in ["dash", "jump", "crouch", "interact", "throw", "secondary", "build"]:
 		raw = raw.replace("{%s}" % action, Settings.key_cap(action))
 	return raw
 

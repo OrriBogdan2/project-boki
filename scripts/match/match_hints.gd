@@ -6,11 +6,12 @@ extends RefCounted
 
 const COL := Color("8fe3c7")
 ## Hints the tutorial match leaves for a real one (its outpost opens by itself and the course is short).
-const REAL_ONLY := ["crouch", "uplink", "defend", "goexit"]
+const REAL_ONLY := ["crouch", "uplink", "defend", "goexit", "wallkick"]
 
 var m: Match
 var _poll_t := 0.0
 var _void_t := 0.0
+var _wall_t := 0.0        # s in the air against a wall that a kick could use
 var _fight_t := -1.0      # s since a foe came close (-1: none close)
 var _last := ""           # the line of the hint shown last, while it may still be on screen
 
@@ -22,6 +23,9 @@ func tick(dt: float) -> void:
 	if m.hud == null or p == null or p.out or p.extracted or p.dropping or p.downed:
 		return
 	var r := FirstTimeHint.rules()
+	_wall_t = _wall_t + dt if _at_kick_wall(p) else 0.0
+	if int(p.stats.get("wall_kicks", 0)) > 0:
+		FirstTimeHint.mark("wallkick")      # it found the kick on its own
 	var over_void: bool = not p.grounded and not p.gliding and m.world.is_void(p.pos.x, p.pos.z)
 	_void_t = _void_t + dt if over_void else 0.0
 	if not _fight_on(p, float(r["near_m"]) * 1.5):
@@ -58,8 +62,14 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"key": return p.chest_keys > 0
 		"uplink": return _outpost(p, "idle", float(r["outpost_m"]))
 		"defend": return _outpost(p, "charging", float(r["outpost_m"]))
+		"wallkick": return _wall_t >= float(r["wall_s"]) and _fight_t < 0.0
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
 	return false
+
+## Airborne against a wall the ledge rise won't take you up, within a hop's climb: a jump press here would kick.
+func _at_kick_wall(p: Hunter) -> bool:
+	var in_reach: bool = p.pos.y <= p.last_gy + WallMoves.HOP_CLIMB_CAP
+	return not p.grounded and p.wall_touch_t > 0.0 and p.lfloat.is_empty() and not p.mantling() and in_reach
 
 ## The last hint is still on the lane, or something waits behind it (a hint never stacks on another).
 func _hint_up() -> bool:

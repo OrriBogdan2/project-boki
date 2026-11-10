@@ -10,7 +10,8 @@
   "key": "A key! Hold {interact} at a chest to open it",
   "uplink": "Stand in the outpost's circle to start the uplink",
   "defend": "Stay in the circle until the lift opens",
-  "goexit": "Outposts get you off the island. Look for one"
+  "goexit": "Outposts get you off the island. Look for one",
+  "wallkick": "Press {jump} again against the wall to kick off"
  },
  "farm": {
   "stone": "The house needs stone too: hold {interact} at a rock",
@@ -31,6 +32,7 @@
   "uplink": "you walk near an outpost that can start",
   "defend": "an uplink of yours is charging",
   "goexit": "a few minutes into a match with no outpost close",
+  "wallkick": "you jump into a wall too tall to climb, hang on it 0.2 s with no kick yet, and no foe is close",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
   "task": "the house stands and no Boki has a job",
@@ -43,6 +45,7 @@
  "goexit_s": 150.0,
  "crouch_s": 40.0,
  "void_s": 0.35,
+ "wall_s": 0.2,
  "sight_m": 40.0,
  "fight_quiet_s": 2.0,
  "poll_s": 0.25
