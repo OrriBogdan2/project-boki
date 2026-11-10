@@ -109056,5 +109056,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hb2_motley_checkmare_2.jpg",
     "ok": true
+  },
+  {
+    "id": "drop_splash",
+    "name": "Site drop-in splash (Lace, Albert, Vex + Boki)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_splash_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash",
+    "name": "Site drop-in splash (Lace, Albert, Vex + Boki)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/drop_splash_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash",
+    "name": "Site drop-in splash (Lace, Albert, Vex + Boki)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_splash_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "drop_splash",
+    "name": "Site drop-in splash (Lace, Albert, Vex + Boki)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/drop_splash_4.jpg",
+    "ok": true
   }
 ]
