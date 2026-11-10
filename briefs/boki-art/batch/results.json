@@ -89267,5 +89267,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fp_pavonazar_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_ringrove_k",
+    "name": "Ringrove (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_ringrove_k_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_hourachnid",
+    "name": "Hourachnid female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_sandwidow",
+    "name": "Sandwidow female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_eclipsowl",
+    "name": "Eclipsowl female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_eclipsowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_hourachnid",
+    "name": "Hourachnid female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_eclipsowl",
+    "name": "Eclipsowl female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_eclipsowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ringrove_k",
+    "name": "Ringrove (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ringrove_k_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaivyx_k",
+    "name": "Glaivyx (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glaivyx_k_1.jpg",
+    "ok": true
   }
 ]
