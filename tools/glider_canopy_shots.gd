@@ -66,7 +66,7 @@ func _state(file: String, fuel: float, lip: bool, caption: String) -> void:
 		P.glide_fuel = fuel
 		P.below_lip = lip
 		m.cam.zoom = 0.5
-		m.cam.snap(P.pos + Vector3(-1.5, 1.0, -2.0))
+		m.cam.snap(P.pos + Vector3(1.0, 1.0, -2.0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
