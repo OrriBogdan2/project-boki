@@ -41,10 +41,12 @@ var night := false
 var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
+var pad: ZonePad           # the return pad and the Waystone: Boki sent to another zone, or asking to go
 
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
+	pad = ZonePad.new(home)
 
 static func nocturnal(rec: Dictionary) -> bool:
 	return Work.NOCTURNAL.has(String(rec["species"]))
@@ -114,6 +116,7 @@ func step(d: float) -> void:
 			_seen[uid] = true
 	for k in h.kins:
 		_tick(k, dt)
+	pad.step(dt)
 
 ## Separation scale for two Boki (home.gd _separate_kin): napping friends lie close in a pile.
 func pile(a: Dictionary, b: Dictionary) -> float:
@@ -166,6 +169,8 @@ func choose(k: Dictionary) -> void:
 		if bond(rec, o["rec"]) <= float(R["rival_at"]) and randf() < 0.3 + float(traits.get("temper", 0.5)) * 0.5:
 			_watch(k, o, "rival")
 			return
+	if pad.ask(k):
+		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
 	var mate := _mate(k, near)
@@ -190,6 +195,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 	if _taken(k):
 		return
 	m.tick(dt)
+	if k.has("zone_ask") and not m.is_in(S.ROAM):
+		k.erase("zone_ask")      # something else took it on the way to the pad: it forgets the ask
 	if not _awake(k) and not m.is_in(S.NAP):
 		_nap(k, "night")
 	elif float(k.get("nap_t", 0.0)) > 0.0 and not m.is_in(S.NAP):
@@ -200,6 +207,9 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
+			elif k.has("zone_ask") and pad.asking_arrived(k, dt) and m.go(S.WATCH, "zone"):
+				k["life_at"] = pad.target      # waiting at the return pad: the pad is what it watches
+				pad.wait(k)
 		S.EAT:
 			if k.has("life_eat"):
 				if not BaseFeed.tick(h, k, m.since) or m.since >= float(R["max"]["eat"]):
@@ -276,7 +286,9 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 		k["goal"] = k["pos"]
 		(k["node"] as Node3D).rotation.y = atan2(-to.x, -to.y)
 	var cap := float(R["max"]["watch" if m.is_in(S.WATCH) else "react"])
+	if k.has("zone_wait"): cap = float(k["life_for"])       # an ask outlasts a stare
 	if m.since >= minf(float(k["life_for"]), cap):
+		k.erase("zone_wait")
 		m.go(S.ROAM, "looked")
 
 # ------------------------------------------------------------------ entering states
@@ -372,7 +384,8 @@ func _awake(k: Dictionary) -> bool:
 ## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors or leaping).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.get("nap_go", false) or float(k.get("hold_t", 0.0)) > 0.0
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) \
+		or float(k.get("hold_t", 0.0)) > 0.0
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()

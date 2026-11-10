@@ -103,7 +103,7 @@ static func farm_cap() -> int:
 	return int(FARM_CAPS[farm_lvl()])
 
 static func farm_room() -> int:
-	return farm_cap() - farm().size()
+	return GardenZones.room(GardenZones.here)      # each zone holds the cap
 
 static func pages() -> int:
 	return PAGES
@@ -163,6 +163,7 @@ static func _box(rec: Dictionary, slot: int) -> void:
 static func _unbox(rec: Dictionary) -> void:
 	rec.erase("boxed")
 	rec.erase("box_slot")
+	rec["zone"] = GardenZones.here      # it wakes in the zone you are in
 	Care.ensure(rec)
 	# it wakes up as it went to sleep: no time passed for it in the box
 	rec["needs_t"] = Time.get_unix_time_from_system()
@@ -195,7 +196,7 @@ static func to_farm(rec: Dictionary) -> String:
 	ensure()
 	if not is_boxed(rec): return ""
 	if farm_room() <= 0:
-		return "The farm is full (%d/%d). Box someone first%s" % [farm().size(), farm_cap(), " or expand the cottages" if farm_lvl() < FARM_CAPS.size() - 1 else ""]
+		return "The farm is full (%d/%d). Box someone first%s" % [farm_cap() - farm_room(), farm_cap(), " or expand the cottages" if farm_lvl() < FARM_CAPS.size() - 1 else ""]
 	_unbox(rec)
 	return ""
 

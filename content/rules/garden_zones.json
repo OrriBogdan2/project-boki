@@ -1,0 +1,22 @@
+{
+	"desc": "Garden zones (briefs/design/GARDEN.md section 10, scripts/home/garden_zones.gd). zones: id -> name and the Boki types (lean.json keys) that live there, in the order the Waystone lists them. Bramblebank is always open; the rest open when Save.d['zones'] has their id. A Boki's zone is rec['zone'] (missing means Bramblebank). Times are seconds, distances metres.",
+	"zones": {
+		"bramblebank": {"name": "Bramblebank", "types": ["normal", "grass", "bug", "spore"]},
+		"glasswater": {"name": "Glasswater Shallows", "types": ["water", "ice", "crystal"]},
+		"cinderstep": {"name": "Cinderstep", "types": ["fire", "rock", "steel", "dragon"]},
+		"hushwood": {"name": "Hushwood", "types": ["dark", "psychic", "poison"]},
+		"kitewind": {"name": "Kitewind Ridge", "types": ["flying", "electric", "fairy", "sound"]}
+	},
+	"ask_lean": 0.5,
+	"ask_lean_doc": "Evo.lean strength (0..1) a Boki needs in one of another open zone's types before it asks to go there (12 of 24, the unlock bar).",
+	"ask_chance": 0.1,
+	"ask_chance_doc": "chance a roaming Boki that would thrive elsewhere walks to the return pad and asks, per think; at most once per visit to the zone.",
+	"ask_secs": 30.0,
+	"ask_secs_doc": "s a Boki waits at the return pad with its bubble before it gives up.",
+	"walk_secs": 25.0,
+	"walk_secs_doc": "s a Boki gets to reach the return pad (to ask, or sent by 'Move to...') before it gives up asking or blinks out where it stands.",
+	"pad_r": 1.3,
+	"pad_r_doc": "m from the pad's centre that counts as standing on it.",
+	"waystone_r": 1.8,
+	"waystone_r_doc": "m from the Waystone's centre where a Boki you set down opens the zone cards."
+}
