@@ -1,4 +1,4 @@
-extends "res://tools/clip_shots.gd"
+extends "res://tools/idle_shots.gd"
 ## --recoil-shots --shots-dir=<dir> [--wardens=gunslinger,thief,dredge] [--size=320]: the shot kick on the keyed
 ## Heroes (warden_anim "recoil"), as before/after strips. Per Hero, in <dir>/<id>/: before_<view>/ and after_<view>/,
 ## frames f000 (aiming, before the shot) to f005 (0.15 s on), the same clip held still; "before" runs with the
@@ -7,7 +7,6 @@ extends "res://tools/clip_shots.gd"
 const VIEWS := {"side": 90.0, "front": 155.0}     # model yaw, degrees
 const AIMED := {"gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r", "dredge": "dr_shot"}     # the clip held up
 const AT := [-1.0, 0.0, 0.03, 0.06, 0.09, 0.15]     # s from the shot (-1: before it)
-const DT := 1.0 / 30.0
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -34,8 +33,9 @@ func _hunter(id: String, dir: String) -> void:
 	holder.add_child(model)
 	for k in 30:
 		await tree.process_frame
-	cam.position = Vector3(0, 0.9, 3.4)
-	cam.look_at(Vector3(0, 0.85, 0))
+	var tall := _height(model)
+	cam.position = Vector3(0, tall * 0.52, tall * 2.15)
+	cam.look_at(Vector3(0, tall * 0.5, 0))
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")

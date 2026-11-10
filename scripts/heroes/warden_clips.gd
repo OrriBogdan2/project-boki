@@ -408,7 +408,8 @@ func _recoil(s: Dictionary, dt: float) -> void:
 	if k < 0.01:
 		return
 	# (a turn about the model's right axis, so a forward arm tips up)
-	var right := (skel.global_basis.orthonormalized().inverse() * (root.global_basis.orthonormalized() * Vector3.RIGHT)).normalized()
+	var right_world := root.global_basis.orthonormalized() * Vector3.RIGHT
+	var right := skel.global_basis.orthonormalized().inverse() * right_world
 	for bone in RECOIL_BONES:
 		var bi := WardenSkeleton.find(skel, bone)
 		if bi < 0:
