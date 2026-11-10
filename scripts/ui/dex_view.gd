@@ -4,8 +4,8 @@ extends RefCounted
 ## numbered tiles (#001...): a Boki you've caught shows in full colour, one you've only seen is a dark
 ## silhouette, one you've never met is a "?". Each tile carries a small type badge, and a soft
 ## sparkle when you've found its shimmer form. Clicking a tile opens its page: the Boki turning on a
-## stand, its number, name and type, a field note, its size range, the forms you've found, where it
-## lives and the ones you're raising.
+## stand, its number, name and type, a field note, its size range, where it lives, its quirk and how
+## its sexes work (BokiQuirks), the forms you've found and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
 ## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
@@ -198,6 +198,10 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	if BokiQuirks.quirk(spk) != "":
+		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
+	if BokiQuirks.sex_note(spk) != "":
+		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
