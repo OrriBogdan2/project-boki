@@ -125,8 +125,8 @@ func detect_quality() -> String:
 ## from the skyship; whole frames where the driver can't time the GPU). Too slow for 60 fps steps the
 ## preset down once (twice when far too slow) and remembers it. A preset only changes what the GPU draws,
 ## so the CPU's share of a frame (the sim, the loading itself) is left out.
-const BENCH_SLOW_MS := 12.0     # ms of GPU a frame: slower steps the preset down one (the CPU needs the rest of 16.7)
-const BENCH_FAR_MS := 24.0      # ms of GPU a frame: slower than this steps it down two
+const BENCH_SLOW_MS := 14.0     # ms of GPU a frame: slower steps the preset down one (60 fps is 16.7, less headroom)
+const BENCH_FAR_MS := 28.0      # ms of GPU a frame: slower than this steps it down two
 const BENCH_WALL_K := 1.75      # whole frames (no GPU timer) carry the CPU's share too: the limits x this
 func note_benchmark(ms: float, gpu_timed := true) -> void:
 	if String(v.get("quality", "auto")) != "auto" or String(v.get("quality_found", "")) != "":

@@ -131,7 +131,12 @@ func run(progress := Callable()) -> void:
 			% [t_first - t0, t_views - t_first, t_end - t_views, stamped, seen.size()])
 	WarmStamp.save(seen)
 	PerfLog.mark("build.warm_up")
-	# the benchmark: a few frames of the opening view, timed on the GPU (whole frames if the driver can't)
+	# the benchmark: a few frames timed on the GPU (whole frames if the driver can't), of the ground at play's
+	# camera height (not the skyship's view of the whole map, the heaviest in the game: an RTX 4070 SUPER took
+	# 17.6 ms there and stepped down to Low)
+	var gv: Array = views[1]
+	m.cam.global_transform = Transform3D(Basis.looking_at(gv[1] - (gv[0] as Vector3), Vector3.UP), gv[0])
+	m.cam.fov = gv[2]
 	var times: Array = []
 	var gpu_timed := true
 	var vp := m.get_viewport().get_viewport_rid()
@@ -145,6 +150,8 @@ func run(progress := Callable()) -> void:
 			times.append(gpu if gpu > 0.0 else (now - last) / 1000.0)
 			gpu_timed = gpu_timed and gpu > 0.0
 		last = now
+	m.cam.global_transform = keep[0]
+	m.cam.fov = keep[1]
 	times.sort()
 	if not times.is_empty():
 		var setup := WarmStamp.setup_id()
