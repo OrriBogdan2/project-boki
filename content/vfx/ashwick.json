@@ -93,7 +93,8 @@
 			{"p": "ember", "y": 1.0, "n": 34, "speed": 7.0, "spread": 0.7, "grav": -2.0, "drag": 1.8, "life": 0.8,
 				"size": 0.09, "c": "main", "c2": "white", "c3": "red"},
 			{"p": "scorch", "size": 1.4, "life": 1.8, "c": "main", "c2": "hot", "c3": "char"},
-			{"p": "smoke", "y": 1.6, "n": 8, "speed": 1.4, "spread": 0.6, "grav": -1.5, "life": 1.3, "size": 0.39,
+			{"p": "ring", "size": 2.0, "life": 0.5, "c": "main", "c2": "white", "c3": "red"},
+			{"p": "smoke", "y": 1.6, "delay": 0.15, "n": 5, "speed": 1.4, "spread": 0.6, "grav": -1.5, "life": 1.1, "size": 0.3,
 				"c": "smoke", "c3": "soot", "near": true}
 		]},
 		"char_drift": {"net": false, "fx": [
