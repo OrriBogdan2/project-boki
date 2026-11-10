@@ -90814,5 +90814,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pose_furnacowary_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_canvastross",
+    "name": "Canvastross (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_canvastross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_latchling",
+    "name": "Latchling (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_latchling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_fawngus",
+    "name": "Fawngus (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_fawngus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_wickapi",
+    "name": "Wickapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_wickapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_prowyak",
+    "name": "Prowyak (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_prowyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_canvastross",
+    "name": "Canvastross (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_canvastross_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_bastling",
+    "name": "Bastling (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_bastling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_prowyak",
+    "name": "Prowyak (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_prowyak_3.jpg",
+    "ok": true
   }
 ]
