@@ -105962,5 +105962,19 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/car3_canopony_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "car3_carrousteed_c",
+    "name": "Carrousteed (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/car3_carrousteed_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "car3_carrousteed_a",
+    "name": "Carrousteed (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/car3_carrousteed_a_2.jpg",
+    "ok": true
   }
 ]
