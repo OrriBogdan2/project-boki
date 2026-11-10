@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 28,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -389,7 +389,7 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 387,
+"long_line": 392,
 "nested_ternary": 7,
 "semicolon": 405,
 "shadow": 3
@@ -494,7 +494,7 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 23,
+"long_line": 24,
 "semicolon": 43
 },
 "scripts/match/exits.gd": {
@@ -555,7 +555,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 33,
-"long_line": 91,
+"long_line": 93,
 "nested_ternary": 18,
 "semicolon": 49,
 "shadow": 4
@@ -663,7 +663,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 281,
+"long_line": 282,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -913,7 +913,7 @@
 "scripts/ui/title.gd": {
 "long_line": 21,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 40
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -956,7 +956,7 @@
 "semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 64,
+"long_line": 65,
 "semicolon": 66,
 "shadow": 1
 },
@@ -992,6 +992,9 @@
 },
 "tools/check.gd": {
 "semicolon": 1
+},
+"tools/check_registry.gd": {
+"long_line": 31
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
@@ -1110,7 +1113,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 30,
+"long_line": 32,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {

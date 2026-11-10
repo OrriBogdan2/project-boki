@@ -1,10 +1,10 @@
 class_name FarmGuide
 extends RefCounted
-## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot
-## (GoalTracker, from the end of the tutorial on), and while the tutorial runs, one prompt in the world over what to do next and one
-## line reminding you of the current goal, with a Skip button always on show (Hob explains each step face to
-## face: HobTalk). The rules are FarmTutorial; the one-time hints for what the steps no longer teach are
-## FarmHints. None of it shows when visiting. Skipping puts the house up, so a skipper isn't stuck.
+## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot (GoalTracker, from the
+## end of the tutorial on), and while the tutorial runs, one prompt in the world over what to do next and one line
+## reminding you of the current goal, with a Skip button always on show (Hob explains each step face to face:
+## HobTalk). The rules are FarmTutorial; the one-time hints for what the steps no longer teach are FarmHints. None
+## of it shows when visiting. Skipping puts the house up, so a skipper isn't stuck.
 
 const PLACE_RINGS := 24       # tiles out from the suggested spot that the search for free ground goes
 const PLACE_STEPS := 24.0     # tries round each ring
