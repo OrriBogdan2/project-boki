@@ -23,8 +23,8 @@ const ATTACKS := AnimShots.ATTACKS
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
-const MAX_STEP_CM := 30.0     # cm: a planted foot's slide over one step, any way he runs (the clips hold 24 at most)
-const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const MAX_STEP_CM := 5.0      # cm: a planted foot's slide over one step, any way he runs (FootPlant's foot lock)
+const NO_LEGS := ["ostra", "rimewright"]     # no steps by design: Motley hovers on his box, Neve skates (loco "glide")
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -56,6 +56,10 @@ func _hero(main: Node, id: String) -> void:
 		await main.get_tree().process_frame
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
+	var feet := FootPlant.new()       # flat ground, near the camera: the game's foot lock on (Hunter.render's plant)
+	feet.on = true
+	feet.weight = 1.0
+	m.set_meta(FootPlant.META, feet)
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
@@ -131,9 +135,7 @@ func _read(sk: Skeleton3D) -> Dictionary:
 	for side in ["L", "R"]:
 		var shin := WardenSkeleton.find(sk, "shin." + side)
 		var thigh := WardenSkeleton.find(sk, "thigh." + side)
-		var gs := sk.get_bone_global_pose(shin)
-		var leg := (sk.get_bone_global_rest(shin).origin - sk.get_bone_global_rest(thigh).origin).length()
-		out["foot." + side] = xf * (gs.origin + gs.basis.y.normalized() * leg)
+		out["foot." + side] = xf * FootPlant.ankle(sk, thigh, shin)     # (the foot bone: what FootPlant holds)
 	return out
 
 func _height(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String) -> float:
@@ -166,15 +168,23 @@ func _clip_frames(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, 
 ## A gait at speed s along ang off the facing (0 forward, +PI/2 right, PI back), as the game plays it: the state carries
 ## the velocity, facing -Z.
 func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float, ang: float) -> Dictionary:
-	m.set_meta(WardenClips.STATE, {"vel": Vector3(sin(ang), 0, -cos(ang)) * s, "face": 0.0, "grounded": true})
+	var vel := Vector3(sin(ang), 0, -cos(ang)) * s
+	m.set_meta(WardenClips.STATE, {"vel": vel, "face": 0.0, "grounded": true})
 	clips.loco_pos = Vector2.ZERO
 	for k in int(WARM_S / DT):
+		m.position += vel * DT
 		sync.call("_process", DT)
 	var fr: Array = []
 	for k in int(SAMPLE_S / DT):
+		m.position += vel * DT        # he really runs, so FootPlant's foot lock holds feet on the ground
 		sync.call("_process", DT)
-		fr.append(_read(sk))
+		var at := _read(sk)
+		for b in at:
+			at[b] -= m.position     # model frame: the ground goes by at -vel
+		fr.append(at)
 	m.set_meta(WardenClips.STATE, {})
+	m.position = Vector3.ZERO
+	(m.get_meta(FootPlant.META) as FootPlant).last = Vector3.INF
 	var out := _slide(fr, s, Vector2(sin(ang), -cos(ang)))
 	out.merge(_swing(fr))
 	return out
@@ -194,15 +204,19 @@ func _slide(fr: Array, s: float, m: Vector2) -> Dictionary:
 		for p in fr:
 			lo = minf(lo, (p[f] as Vector3).y)
 			hi = maxf(hi, (p[f] as Vector3).y)
+		var band := lo + PLANT_BAND * maxf(hi - lo, 0.02)
 		for i in range(1, fr.size() - 1):
-			if (fr[i][f] as Vector3).y > lo + PLANT_BAND * maxf(hi - lo, 0.02):
+			if (fr[i][f] as Vector3).y > band:
 				run_drift = Vector2.ZERO
 				continue
 			var dv: Vector3 = ((fr[i + 1][f] as Vector3) - (fr[i - 1][f] as Vector3)) / (2.0 * DT)
 			var v := -Vector2(dv.x, dv.z).dot(m)       # how fast the foot goes back along his way
 			var err := (Vector2(dv.x, dv.z) + m * s).length()
 			slide += err
-			run_drift += (Vector2(dv.x, dv.z) + m * s) * DT
+			# the step's drift: the foot's own moves while down (frame to next down frame, not the swing either side)
+			if (fr[i + 1][f] as Vector3).y <= band:
+				var d: Vector3 = (fr[i + 1][f] as Vector3) - (fr[i][f] as Vector3)
+				run_drift += Vector2(d.x, d.z) + m * s * DT
 			step_cm = maxf(step_cm, 100.0 * run_drift.length())
 			peak = maxf(peak, err)
 			back += v

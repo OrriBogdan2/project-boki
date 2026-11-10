@@ -14,6 +14,12 @@ the feet used to float or sink. `scripts/match/foot_plant.gd` now plants them af
 - **Which body:** a .glb Hunter is planted on its bones (root, thighs, shins) by `FootPlant.bones` from WardenGlb's
   Sync, once the clips have posed. The procedural body (Settings: Warden models off) is planted on the rig nodes.
   Motley's clips hover (`rig_root`), so his feet are left alone.
+- **Foot lock (.glb bodies on the move):** a foot in the lowest 40 % of its own height range (`DOWN_SHARE`) is held
+  on the spot it came down on until the clip lifts it, whatever way the Hunter runs against his facing (back-run,
+  strafe), so the clip's own slide never shows. A lifted foot eases back onto the clip (`CATCH`). It fades in from
+  `MOVE_MIN` to `MOVE_FULL` (0.4 to 1.2 m/s), a held foot further than `PULL_SHARE` (0.45 legs) drags along, and the
+  hips dip (`stretch`) rather than overstretch a leg. It eases out on uneven ground (`FLAT`: the step plant above
+  owns stairs and stones). Off for Neve (`loco.glide`: she skates) and Motley (no legs); the procedural body has no lock.
 - **Who:** only the local Hunter and those within `NEAR` (14 m) of them, and never under animation LOD (a Hunter
   posed every 3rd or 6th frame). Off, nothing is sampled and the pose stays exactly the clip's.
 - **Wiring:** one line in `Hunter.render` (`anim.feet.plant`), one in the Sync, one `feet` var on HunterAnim.
@@ -22,7 +28,7 @@ the feet used to float or sink. `scripts/match/foot_plant.gd` now plants them af
 
 `godot --headless --path . -- --foot-plant-check` runs every Hunter on a two-tile flight of stairs
 (the slope) and at its foot (the tier step: one foot on the flat, one on the flight), standing and walking up. A flat
-twin gives the clip's own ankle height. Per frame the planted ankle's height over the ground under it is held
+twin gives the clip's own ankle height (the lock eases out there: uneven ground). Per frame the planted ankle's height over the ground under it is held
 against the twin's, scored only while that foot is down and the ground is in reach. It passes within 0.035 m, and
 planting off must leave the pose exactly the clip's.
 

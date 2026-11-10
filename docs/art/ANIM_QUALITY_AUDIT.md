@@ -23,13 +23,16 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open. It also runs the back and both strafes (the Hunter turned 180, -90, +90 degrees off his
-  run, `step_cm`: a planted foot's slide over one step) with the same share gate and a 30 cm step cap.
+  run, `step_cm`: a planted foot's slide over one step, summed only between frames the foot is down) with the same
+  share gate and a 5 cm step cap. The audit runs `FootPlant`'s foot lock, as a match does.
 - **`--anim-shots --dirs`**: adds run_back, run_strafe_l and run_strafe_r strips; the result per Hunter is
   docs/art/anim_audit/strafe_<id>.jpg (rows: forward, back, strafe left, strafe right).
 - Strafe and back-run (ext/anim-strafe-back): `dir_foot` per Hunter, `side_legs` for `dolm`, `rate_max` 1.6 for `thief` and
-  `tender`. Planted-foot slide is 11 to 24 % of the speed in every direction; per step 13 to 24 cm for `thief` and `dolm`,
-  under 15 cm elsewhere. Owner's 5 cm per step needs foot IK or stride-matched clips (a Blender pass: `thief` and `dolm`
-  strafe, `ostra` and `rimewright` legs).
+  `tender`. The clips alone slid 11 to 24 % of the speed (13 to 24 cm a step). `FootPlant`'s foot lock
+  (docs/art/FOOT_PLANT.md) now holds a foot that is down on its spot: 0 to 3 cm a step in every direction for all 10
+  Hunters with legs (slide share 2 to 25 %, the share counts the lift-off frames). `ostra` and `rimewright` have no
+  steps by design (a hovering box, blade skates; `loco.glide` turns the lock off for Neve); skate-stride clips would
+  be a Blender pass.
 
 ## What is wrong with all of them
 
@@ -171,8 +174,8 @@ posts scroll at the move speed).
 
 Split into backlog items per Hunter (role build):
 
-- `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
-- `rimewright`: a gait clip with a real stride (skate now).
+- `ostra`: an attack arm that is not a T-pose (he hovers on his box by design: no steps).
+- `rimewright`: skates by design (no steps); a skate-stride clip, if wanted, is a Blender pass.
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.

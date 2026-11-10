@@ -903,6 +903,7 @@ class Sync extends Node:
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 	var leg_bones := PackedInt32Array()     # LEG_BONES' indices, for FootPlant.bones
+	var pin_feet := true          # FootPlant's foot lock; off for a skater (data loco "glide": Neve)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -941,6 +942,7 @@ class Sync extends Node:
 		for b in dd.get("hide_while_chain", []):
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
+		pin_feet = not bool((dd.get("loco", {}) as Dictionary).get("glide", false))
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
 		if clips:
 			_look_pose()
@@ -976,7 +978,7 @@ class Sync extends Node:
 		else:
 			apply()
 			apply_blade()
-		FootPlant.bones(root, skel, leg_bones, dt)
+		FootPlant.bones(root, skel, leg_bones, dt, pin_feet)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)

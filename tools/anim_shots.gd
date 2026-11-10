@@ -7,7 +7,7 @@ extends "res://tools/clip_shots.gd"
 ## forced).
 ## --dirs: only the run, run_back, run_strafe_l and run_strafe_r strips: the body keeps its facing while he moves
 ## back or sideways (the strips turn the model so the way he moves is screen right), for the strafe audit.
-## Needs a renderer.
+## The body runs with FootPlant (its foot lock) as in a match. Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
@@ -87,6 +87,10 @@ func _hunter(id: String, dir: String, frames: int, dirs_only: bool) -> void:
 		await tree.process_frame
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
+	var feet := FootPlant.new()       # the foot lock and plant as in a match (flat ground: nothing to plant)
+	feet.on = true
+	feet.weight = 1.0
+	model.set_meta(FootPlant.META, feet)
 	var clips: WardenClips = sync.get("clips")
 	if clips == null:
 		model.queue_free()
@@ -115,15 +119,29 @@ func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, ang:
 	model.rotation.y = SIDE_YAW + ang
 	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW + ang, "grounded": true})
 	for k in int(WARM_S / DT):
-		sync.call("_process", DT)
+		_step(model, sync, fw * mps * DT)
 		_scroll(mps, DT)
 	var steps := int(round(1.0 / (LOCO_FPS * DT)))
 	for i in frames:
 		for k in steps:
-			sync.call("_process", DT)
+			_step(model, sync, fw * mps * DT)
 			_scroll(mps, DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
+	(model.get_meta(FootPlant.META) as FootPlant).last = Vector3.INF
+
+## One pose step moving by d: the body moves (so FootPlant's foot lock sees the speed), then all it holds shifts back
+## by d with it, so the camera keeps him in frame and the floor posts scroll instead.
+func _step(model: Node3D, sync: Node, d: Vector3) -> void:
+	model.position += d
+	sync.call("_process", DT)
+	model.position -= d
+	var fp := model.get_meta(FootPlant.META) as FootPlant
+	if fp.last != Vector3.INF:
+		fp.last -= d
+	for i in 2:
+		if fp.pin[i] != Vector3.INF:
+			fp.pin[i] -= d
 
 ## A keyed clip, `frames` even steps from its start to just before its end (a loop's seam is the step after the last).
 func _keyed(model: Node3D, sync: Node, clips: WardenClips, dir: String, clip: String, frames: int) -> void:

@@ -21,7 +21,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   back and strafe clips' foot speed over the forward one's, weighted by the stick's direction, so the planted foot keeps pace
   going any way; `side_legs` (true) swaps a poor strafe for the forward or back run on legs turned onto the heading (the
   torso keeps the aim; Dolm); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
-  swing of its own side's leg. No key: the clip plays as keyed.
+  swing of its own side's leg; `glide` (true) turns off FootPlant's foot lock for a body that skates (Neve,
+  docs/art/FOOT_PLANT.md). No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running; `"moving"`: only while he moves, standing the clip owns the body), `fade` (s into the move), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
