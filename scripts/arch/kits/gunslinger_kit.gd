@@ -27,6 +27,7 @@ const SKID_SECONDS := 0.45
 const ECHO_GAP := 0.05               # s between her after-images on a slide or the air dash
 const ECHO_ALPHA := 0.35             # see-through, so the trail never covers her live body
 const ECHO_BACK := 0.35              # m behind her along her travel: the echoes trail, not overlap
+const HIT_HOLD := 0.3                # s a struck foe's body stays lit (the generic hit flash is 0.12 s)
 const PIP_LIFT := 0.9                # m up the screen the Fever pips sit, clear of her cap and face
 const TUBE_UP := 0.16                # m above the gun's muzzle: the launcher tube, on a model without its empties
 const TUBE_FIRE := "launcher_fire"   # fixed on the cannon at the bell's firing spot: the charge leaves from here
@@ -532,6 +533,16 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
 	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
 	daze(victim, float(bd["cone_rattle"]))
+	_confirm_hit(victim, at)
+
+## Only a Burr Charge that strikes a foe does this, so a hit can't be mistaken for a miss (which sticks in
+## terrain with the dust puff): a hot ring round the foe, its body held lit, and for the thrower a gold hitmarker and a ping.
+func _confirm_hit(victim: Ent, at: Vector3) -> void:
+	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
+	m.fx.ring(victim.pos + Vector3(0, 0.1, 0), victim.r + 0.9, HOT, 0.3)
+	if h == m.player and m.hud:
+		m.hud.hitmarker(true)
+		m.sfx("crit", at, -2.0, 0.8)
 
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
@@ -560,6 +571,7 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["out"] = -(b["dir"] as Vector2)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
+	m.fx.burst(at, SCRAPE, 6, 2.5, 0.4, 6.0, 0.8)       # the miss: a dull dust puff, no flash, nothing on a foe
 
 func _detonate(b: Dictionary) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
