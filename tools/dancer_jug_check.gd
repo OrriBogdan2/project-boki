@@ -122,6 +122,26 @@ func thief(a) -> void:
 			absf(float(vault_ranks[0][0]) - 1.0) < 0.001 and absf(float(vault_ranks[1][0]) - 1.2) < 0.001
 			and absf(float(vault_ranks[2][0]) - 1.4) < 0.001 and absf(float(vault_ranks[1][1]) - 0.18) < 0.001
 			and absf(float(vault_ranks[2][1]) - 0.27) < 0.001, str(vault_ranks))
+	# upgrade parity (docs/heroes/thief.md): the source's tier II / III+IV numbers per slot
+	var tp: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["sec"] = rk
+		P.slot_lv["dash"] = rk
+		P.slot_lv["kin"] = rk
+		tp.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.power("sec"), K.dash_def()["cd"] * K.dash_k(),
+				K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin")])
+	P.slot_lv["sec"] = 1
+	P.slot_lv["dash"] = 1
+	P.slot_lv["kin"] = 1
+	A.ok("upgrade parity: Bola damage +50% from rank 2 and the cooldown 7 -> 4.8 only at rank 3",
+			absf(float(tp[1][1]) / float(tp[0][1]) - 1.5) < 0.01
+			and absf(float(tp[2][1]) / float(tp[0][1]) - 1.5) < 0.01
+			and absf(float(tp[1][0]) - 7.0) < 0.01 and absf(float(tp[2][0]) - 4.85) < 0.05, str(tp))
+	A.ok("upgrade parity: Vault recharge stays 4.5 (the source has no Quickflip cooldown upgrade)",
+			absf(float(tp[1][2]) - 4.5) < 0.01 and absf(float(tp[2][2]) - 4.5) < 0.01, str(tp))
+	A.ok("upgrade parity: Shadow Knife cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step",
+			absf(float(tp[1][3]) - 10.71) < 0.05 and absf(float(tp[2][3]) - 10.71) < 0.05
+			and absf(float(tp[2][4]) / float(tp[0][4]) - 1.0) < 0.01, str(tp))
 	# Vault: a cartwheel, speed, the next bolt empowered; it lands for 3.5x and the Vault comes back
 	A.fresh(T)
 	P.teleport(home)
