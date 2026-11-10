@@ -742,12 +742,12 @@ func _tick_slam(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
 		return
-	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
+	# the magenta strike cone ahead of him, the hit's own shape, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(slam_w["t0"]), 0.0, 1.0)
-	var lane := {"len": float(sl["radius"]) * float(slam_w["rk"]), "width": 1.9, "fill": wk, "col": SLASH_OUT,
-			"all": true, "chevrons": 2}
-	AimKit.lane(h, "slam", lane)
+	var cone := {"len": float(sl["radius"]) * float(slam_w["rk"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk,
+			"col": SLASH_OUT, "all": true}
+	AimKit.cone(h, "slam", cone)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		var tap: Dictionary = slam_w

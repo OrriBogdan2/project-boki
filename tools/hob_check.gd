@@ -3,15 +3,15 @@ extends RefCounted
 ## (item 87). FarmHob, HobModel, HobTalk, HobOffer, TalkBox; lines in content/rules/farm_builder.json "talk".
 ##   1. a new farm: Hob (the HobModel) waits by the market stall with his name over him; the first goal is to
 ##      meet him and the reminder line names him
-##   2. the first arrival: the camera swings over to him while he waves and calls out, then comes back
+##   2. the first arrival: he waves and calls out and the camera does not move
 ##   3. talking: the talk box with his portrait and name, one line at a time; you stand still; he points at the
-##      stall and the camera looks there; after the last line he is met (no name tag) and the axe is next
+##      stall; the camera holds one framing for every line and only drifts to an off-screen "show"; after the last line he is met (no name tag) and the axe is next
 ##   4. the second Mask: no second Mask on a fresh save after the first expedition; not offered before the house
 ##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
-## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_camera_intro, hob_3_dialogue_box,
+## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_waves, hob_3_dialogue_box,
 ## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks,
 ## hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
 
@@ -79,19 +79,19 @@ func _first_arrival() -> void:
 			"the first goal: meet him (%s)" % home.guide.hint_lbl.text)
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["gunslinger"],
 			"after the first expedition no second Mask is owned yet")
-	# 2. the camera swing
+	# 2. the first arrival: no camera move
+	var zoom0: float = home.cam.zoom_to
 	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
 	var focus: Vector3 = home.ppos
-	var framed: Vector3 = hob.chat.frame(focus)
-	var him: Vector3 = hob.node.position
-	ok(Vector2(framed.x - him.x, framed.z - him.z).length() < 0.5 and hob.node.pose == "wave"
+	ok(hob.chat.frame(focus) == focus and is_equal_approx(home.cam.zoom_to, zoom0) and hob.node.pose == "wave"
 			and hob.node.bubble.visible and hob.node.bubble.text == String(hob.chat.rules()["call"]),
-			"first arrival: the camera swings over to him while he waves and calls '%s'" % hob.node.bubble.text)
+			"first arrival: he waves and calls '%s', the camera stays on you" % hob.node.bubble.text)
 	await _shot("hob_1_calls_you_over", 0.3)
-	await _shot("hob_2_camera_intro", 0.4)
+	await _shot("hob_2_waves", 0.4)
 	await _wait(func(): return hob.chat.intro_t < 0.0, 20.0)
-	ok(hob.chat.frame(focus) == focus and bool(Save.d["tutorial"].get("hob_intro", false)),
-			"then it comes back to you, once")
+	ok(hob.chat.frame(focus) == focus and is_equal_approx(home.cam.zoom_to, zoom0)
+			and bool(Save.d["tutorial"].get("hob_intro", false)),
+			"the wave ends, once, with the camera where it was")
 	# 3. talking
 	_stand_by(hob.node.position)
 	var it: Dictionary = hob.find(Vector2(home.ppos.x, home.ppos.z))
@@ -105,6 +105,10 @@ func _first_arrival() -> void:
 	var intro: Array = hob.chat.rules()["intro"]
 	ok(_texts(box).has(FarmBuilder.full_name()) and box.find_children("*", "TextureRect", true, false).size() > 0
 			and box.text.text == String(intro[0]["text"]), "his portrait, his name and his first line")
+	var talk_at: Vector3 = hob.chat.frame(home.ppos)
+	var drawn_m := talk_at.distance_to(home.ppos)
+	ok(is_equal_approx(home.cam.zoom_to, zoom0) and drawn_m <= 1.2,
+			"one gentle framing for the talk (zoom kept at %.2f, focus %.1f m from you)" % [home.cam.zoom_to, drawn_m])
 	await _shot("hob_3_dialogue_box", 0.9)
 	for i in 4:      # (each line: one click finishes typing it, the next moves on)
 		box.advance()
@@ -114,8 +118,15 @@ func _first_arrival() -> void:
 			"line by line; on the stall line he points at it")
 	await main.get_tree().create_timer(0.5).timeout
 	await _shot("hob_4_points_at_stall", 0.1)
-	var mid: Vector3 = hob.chat.frame(home.ppos)
-	ok(Vector2(mid.x - home.ppos.x, mid.z - home.ppos.z).length() > 1.0, "and the camera looks over there")
+	ok(not hob.chat.show_far and hob.chat.frame(home.ppos).is_equal_approx(talk_at)
+			and is_equal_approx(home.cam.zoom_to, zoom0), "the camera does not move for a stall that is on screen")
+	var off: Vector3 = home.ppos + Vector3(60.0, 0, 0)      # (well off screen)
+	hob.chat._on_line(0, {"text": "", "at": off})
+	hob.chat.show_t = 1.2
+	var far_at: Vector3 = hob.chat.frame(home.ppos)
+	ok(hob.chat.show_far and far_at.x > talk_at.x + 2.0 and far_at.x < off.x - 4.0
+			and is_equal_approx(home.cam.zoom_to, zoom0),
+			"only an off-screen show drifts it, part of the way, with no zoom change")
 	for i in intro.size() * 2:
 		if hob.chat.talking():
 			box.advance()
