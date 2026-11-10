@@ -35,6 +35,8 @@ func _case(trough: bool) -> void:
 	Save.d = Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
 	Care.ensure(k)
+	if k["likes"]["hates"] == "kibble":
+		k["likes"]["hates"] = k["likes"]["food"]     # likes come from the random uid; a kibble-hater refuses
 	k["starter"] = true
 	Save.d["roster"].append(k)
 	Save.d["active"] = k["uid"]
