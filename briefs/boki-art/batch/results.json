@@ -74938,5 +74938,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rd_effigeetle_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pk_pinster",
+    "name": "Pinster (move away from Pikachu)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/pk_pinster_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_pinster",
+    "name": "Pinster (move away from Pikachu)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_pinster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole",
+    "name": "Bullpole (move away from Poliwag)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole",
+    "name": "Bullpole (move away from Poliwag)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole",
+    "name": "Bullpole (move away from Poliwag)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole",
+    "name": "Bullpole (move away from Poliwag)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_pinster",
+    "name": "Pinster (move away from Pikachu)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_pinster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_pinster",
+    "name": "Pinster (move away from Pikachu)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pk_pinster_3.jpg",
+    "ok": true
   }
 ]
