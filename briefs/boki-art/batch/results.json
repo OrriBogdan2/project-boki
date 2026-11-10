@@ -98640,5 +98640,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_barokit_n1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_barokit_n1",
+    "name": "Barokit (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_barokit_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_barokit_n1",
+    "name": "Barokit (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_barokit_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_sphinxblight_a",
+    "name": "Sphinxblight (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_sphinxblight_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_aurostag_b",
+    "name": "Aurostag (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_aurostag_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_aurostag_a",
+    "name": "Aurostag (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_aurostag_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_aurostag_b",
+    "name": "Aurostag (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_aurostag_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_sphinxblight_a",
+    "name": "Sphinxblight (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_sphinxblight_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_aurostag_a",
+    "name": "Aurostag (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_aurostag_a_1.jpg",
+    "ok": true
   }
 ]
