@@ -1112,3 +1112,21 @@ for _k,_d in (('u1',"rearing up on its hind legs like a great bear, front paws r
               ('u3',"seated upright like a guardian statue facing the viewer, broad chest forward, front paws planted, a wide halo of mint mushroom caps fanned behind its head and shoulders like a ring, long quills sweeping down its back to the ground, calm noble eyes.")):
     SPECS.append({'id':'opt_ringrove_'+_k,'name':'Ringrove (upgrade '+_k+')','refs':[_C%'Ringrove',_C%'Sporcupine'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Draw one single character illustration of an upgraded version of the creature in image 1, the final evolution of the creature in image 2: the same cream face, warm brown quills, mint mushroom caps with cream spots and teal eyes, bigger and more impressive. NEW STANCE AND UPGRADE (the whole point): "+_d+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('final','majestic',False,True)+FRAME_V2})
+
+# ===== 09:40 ET 11-10: owner asleep, "rank your own choices and try to finish for morning". My picks, live as cards: Mossbastion = a_1 (water-bear
+# carrying a little landscape), Blastopuff = c_2 (spike burst in family colours), Ringrove = u1_1 (rearing, mane of quills, cap tail), Checkmare = fix 1,
+# Knotwyrm = fix 2, Glaciammoth = merge 2 (ice musk-ox, one blade horn). Maracoil: no option beat the live card (all read as the baby again) -> kept.
+# Pangolith portrait = v2p_terrasloth_new_a_2 (ring lying on its side). Rankings are in LINE_REVIEW_1110.md for the owner's morning review.
+_PM={'Mossbastion':('final','majestic',0,0,"walking slowly toward the viewer, the little landscape on its back tilted with each step"),'Blastopuff':('final','tough',1,0,"seen from the side, puffed up, spikes out, glaring"),
+ 'Ringrove':('final','majestic',0,1,"standing on all fours side-on, head turned to the viewer, cap tail held high"),'Checkmare':('final','majestic',0,0,"coiled upright like a chess knight on its base, head high"),
+ 'Knotwyrm':('final','majestic',0,0,"uncoiling, head raised from the knot, looking at the viewer"),'Glaciammoth':('final','majestic',0,0,"head lowered, blade horn forward, icicle hair swaying, about to charge")}
+for _n,(_st,_ar,_dk,_fu,_pose) in _PM.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_m'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_m'; SPECS[_n0+1]['runs']=2
+# COORD 03:07 ET, owner order: the olm line is now typed Water/Crystal and must read as both: keep blue-and-white porcelain, gold seams and gills;
+# add Water (fins, flowing frill and tail) and Crystal (clear faceted growths), more on each stage.
+for _n,_d in (('Olmlet',"add a small soft water-blue fin along its back and tail tip, and two tiny clear crystal nubs on its head"),
+              ('Glazolm',"add a flowing translucent water-blue fin frill along its back and a wide fan tail fin, and a few clear faceted crystals growing along its spine and at its elbows"),
+              ('Kintsuwyrm',"add a tall flowing water-blue sail fin from neck to tail and a broad fan tail, and big clear faceted crystal clusters on its shoulders, back and tail tip, with crystal-tipped gills")):
+    SPECS.append({'id':'wc_'+_n.lower(),'name':_n+' (Water/Crystal read)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':_EDIT+_d+". The crystals are a handful of large flat-shaded facets with one highlight each; the fins are flat shapes. Its blue-and-white porcelain pattern, gold seams, gills, face and pose stay the same. No red."})

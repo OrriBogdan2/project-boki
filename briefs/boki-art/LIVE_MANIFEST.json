@@ -127,9 +127,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hash": {
    "sheet": "fe0bacab88b9",
-   "card": "dbb4e3d5291e",
+   "card": "2dc8c1b82047",
    "portrait": "40446b19a535",
-   "hero": "d24a18920c87"
+   "hero": "378bfbf05b15"
   }
  },
  "Blossmink": {
@@ -658,9 +658,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png",
   "hash": {
    "sheet": "a201b4c31c14",
-   "card": "418da87d5710",
+   "card": "7fd2a64f6c37",
    "portrait": "fb1467bfc649",
-   "hero": "b9e5807f8f1a"
+   "hero": "be8a20470e93"
   },
   "legendary_tier": "boss"
  },
@@ -1040,9 +1040,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Knotwyrm.png",
   "hash": {
    "sheet": "7c8c6d5d8b0e",
-   "card": "a17532bc7dd4",
+   "card": "0f1333040402",
    "portrait": "6fa954f56501",
-   "hero": "f54483afbd3d"
+   "hero": "fb155c93e8ac"
   }
  },
  "Lanceron": {
@@ -1720,9 +1720,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Ringrove.png",
   "hash": {
    "sheet": "57712165b99b",
-   "card": "7562d7ed24d4",
+   "card": "335496b540dc",
    "portrait": "048677c26bd0",
-   "hero": "27b29df5de28"
+   "hero": "6ab0894c35f7"
   }
  },
  "Rippmink": {
@@ -2009,7 +2009,7 @@
   "hash": {
    "sheet": "f1c467060fbb",
    "card": "353a87928f01",
-   "portrait": "5a02625b0eb0",
+   "portrait": "8c43970fa13a",
    "hero": "c706fd196ace"
   }
  },
@@ -2359,9 +2359,9 @@
   "display_name": "Mosstodon",
   "hash": {
    "sheet": "8e22dfb09e3e",
-   "card": "1a6104c27e26",
+   "card": "25cd3147099f",
    "portrait": "78c5e6aa7043",
-   "hero": "0052a5d4a0b4"
+   "hero": "d932b7db18cb"
   }
  },
  "Rimefang": {
@@ -2951,9 +2951,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Checkmare.png",
   "hash": {
    "sheet": "c5dbd039916a",
-   "card": "439795b92f49",
+   "card": "0a9a8dbeb01e",
    "portrait": "99b65ab0e07c",
-   "hero": "9ac3fd384465"
+   "hero": "7d99d78c96be"
   }
  },
  "Cindermaw": {

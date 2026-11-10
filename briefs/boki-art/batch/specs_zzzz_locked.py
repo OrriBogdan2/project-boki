@@ -80,3 +80,4 @@ DROP-={'opt_ringrove_a','opt_ringrove_b','opt_ringrove_c'}
 DROP-={'v2s_ringrove_p2','v2p_ringrove_p2'}
 DROP|={'fs2_lunowl','fp2_lunowl'}
 DROP-={'opt_ringrove_u1','opt_ringrove_u2','opt_ringrove_u3','v2s_ringrove_p2','v2p_ringrove_p2'}
+DROP-={'v2s_ringrove_m','v2p_ringrove_m'}
