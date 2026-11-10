@@ -47,6 +47,8 @@ static func set_wisp(k: Kin, on: bool) -> void:
 static func ride(k: Kin, dt: float) -> bool:
 	if not k.wisp:
 		return false
+	if k.summon and k.summon.fly_home(dt):
+		return true
 	if KinSteal.ride(k, dt):
 		return true
 	if k.owner_h == null or KinLoss.guarding(k) or k.state == "dazed":
@@ -69,6 +71,9 @@ static func render(k: Kin) -> bool:
 		k.summon.render()
 	if k.wisp and KinSteal.loose(k) and k.model:
 		KinSteal.render(k)
+		return true
+	if k.wisp and k.summon and k.summon.homing and k.model:
+		BokiWispLook.pose(k.model, k.m.time)          # flying home where Ent.render put it
 		return true
 	var o := k.owner_h
 	if not k.wisp or k.state != "shoulder" or o == null or o.model == null:

@@ -3,13 +3,15 @@ extends RefCounted
 ## The Boki summon (DECISIONS 2026-11-09, briefs/boki-art/WISP_DESIGN_OPEN.md Q1/Q3/Q5/Q7, decision 0039).
 ## With Boki riding as wisps (KinWisp) the Summon key bursts the wisp into the full Boki for its species'
 ## window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
-## never ends the window; being knocked down does: it turns straight back into a wisp with a longer cooldown.
+## never ends the window; being killed does: it turns straight back into a wisp with a longer cooldown. With
+## its hunter up the wisp flies home to them (home_mps), which shows them through walls for home_reveal_s; with
+## them downed or dead it breaks loose where it fell (KinSteal.can_break).
 ## The burst out of the wisp and the fold back in are BokiWispPop (soft light only: no explosion, ring or disc).
 ## At the end it folds back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
 ## Guardian window (KinGuardian): the same out-of-the-wisp form, started by the Hunter going down.
-## Online: the kin snapshot carries the seconds and the guardian flag (KinNet); the wisp flag swaps the form.
+## Online: the kin snapshot carries the seconds, the guardian and homing flags (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
@@ -23,6 +25,7 @@ var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
 var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
+var homing := false   # killed while summoned: its wisp flies back to its hunter (fly_home)
 var beat := -1        # the last guardian ring pulse drawn (drawing only)
 
 func _init(kin: Kin) -> void:
@@ -91,12 +94,43 @@ func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
 
-## Knocked down while summoned (Kin.go_down): back into a wisp at once, the longer cooldown. True if it was out.
+## Killed while summoned (Kin.go_down): back into a wisp where it fell, the longer cooldown. It flies home to a
+## hunter who is up and breaks loose from one who is downed or dead (a guard left behind keeps the loss rules,
+## KinLoss). True if it was out.
 func knocked() -> bool:
 	if not out():
 		return false
-	KinCommand.say(k.owner_h, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
+	var fell := k.pos
+	var o := k.owner_h
+	var linked := o != null and not KinLoss.guarding(k)
+	guardian = false          # (beaten: it no longer protects its hunter)
+	var loose := linked and KinSteal.can_break(o)
+	KinCommand.say(o, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
+	homing = linked and not loose
 	_back(cd_base * float(rules()["knocked_cd_mult"]))
+	if loose:
+		KinSteal.break_loose(k, fell)
+	elif homing:
+		k.pos = fell + Vector3(0, KinWisp.SHOULDER_Y, 0)
+		k.prev = k.pos
+		o.reveal_t = maxf(o.reveal_t, float(rules()["home_reveal_s"]))
+	return true
+
+## The step of a killed summon's wisp flying home at home_mps to its hunter's shoulder (KinWisp.ride; another
+## game follows the snapshot). True while it flies.
+func fly_home(dt: float) -> bool:
+	if not homing:
+		return false
+	if k.remote:
+		k.net_follow(dt)
+		return true
+	var o := k.owner_h
+	if o == null or o.out:
+		homing = false
+		return false
+	var to := o.pos + Vector3(0, 1.5, 0)
+	k.pos = k.pos.move_toward(to, float(rules()["home_mps"]) * dt)
+	homing = not k.pos.is_equal_approx(to)
 	return true
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
@@ -143,6 +177,8 @@ func _pop(burst: bool, stowing: bool) -> void:
 	var pop := BokiWispPop.new(k.species, k.rec)
 	pop.name = POP
 	var shoulder := o.pos + Vector3(0, 1.5, 0) - k.pos
+	if homing:
+		shoulder = Vector3(0, KinWisp.SHOULDER_Y, 0)    # (it folds into a wisp where it fell, then flies home)
 	pop.position = Vector3.ZERO if stowing else shoulder
 	pop.stand = -shoulder
 	pop.rotation.y = k.model.rotation.y

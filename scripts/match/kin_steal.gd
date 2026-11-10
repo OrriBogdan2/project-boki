@@ -8,6 +8,9 @@ extends RefCounted
 ##     rest at the carry cap, Hunter._refresh_kin_stats) and one summon this match (summon_k of its window, at
 ##     least summon_min_s) on the Summon key while their own Boki is resting or not riding with them.
 ##   - A thief who goes down or dies scatters what they carry: loose again where they fell.
+##   - Never while the carrier's own Boki guards them (KinGuardian): their wisps scatter once it is beaten or done.
+##   - A summoned Boki that is killed breaks loose where it fell only if its rider is downed or dead (can_break);
+##     otherwise it flies home to them (KinSummon.fly_home).
 ##   - Grabbing someone else's wisp leaves a soul echo: its species in your Field Book (Care "echo").
 ##   - At match end every loose or stolen wisp goes home (match_end). The save never moved it: nothing is lost.
 ## The Kin keeps its own hunter in home_h; owner_h is whoever it rides with now (the thief while stolen), so the
@@ -66,13 +69,18 @@ static func ride(k: Kin, dt: float) -> bool:
 	var o := k.owner_h
 	if k.remote or o == null or k.home_h == null or k.state != "shoulder":
 		return false
-	if stolen(k) and (o.downed or o.out or o.extracted):
+	if stolen(k) and (o.extracted or can_break(o)):
 		break_loose(k, o.pos)          # the thief fell: what they carry scatters
-	elif not stolen(k) and o.downed and not k.back_home:
+	elif not stolen(k) and o.downed and not k.back_home and can_break(o):
 		break_loose(k, o.pos)
 	elif not (o.downed or o.out):
 		k.back_home = false
 	return loose(k)
+
+## May the wisps riding with this hunter break loose? Only once they are downed or dead, and never while their
+## own Boki is out guarding them (KinGuardian.protecting): up, or guarded, the wisps stay linked.
+static func can_break(h: Hunter) -> bool:
+	return h != null and (h.downed or h.out) and not KinGuardian.protecting(h)
 
 ## Its wisp breaks loose at shoulder height, popping off its fallen rider (the Boki's own game).
 static func break_loose(k: Kin, at: Vector3) -> void:
