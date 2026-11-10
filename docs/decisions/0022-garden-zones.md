@@ -26,7 +26,10 @@ that it lands in Bramblebank, where the tutorial runs. The garden's own house, N
 stay until the zones are rebuilt (steps 7 and 11).
 
 ## Consequences
-The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays open: the move is a
+Step 10: the profile doc gains "hub_layout" and "zones" ({id: layout} for each open zone that has one) and each
+Boki its "zone" (`VisitZones`). A visitor lands in the friend's hub and hops through the same Waystone; an older
+doc has neither and stays one island. Home is not synced through `Net`, so `Net.VERSION` stays. The away card
+catches up the zone you arrive in (`Econ.catch_up_all(zone)`) and groups its journal lines by zone (`ZoneAway`). Option 1 stays open: the move is a
 later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
 Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
 (`KinBox.farm_room`) counts each zone on its own.

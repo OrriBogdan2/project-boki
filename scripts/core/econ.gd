@@ -311,9 +311,11 @@ static func serve_any(rec: Dictionary) -> Dictionary:
 ## The time you were away, for every kin at once: the usual catch-up (Care.catch_up) for up to half
 ## a day, then for longer absences food runs down slowly, hour by hour, and hungry kin eat from the
 ## feeders in turn. Kin with nothing left to eat start to starve (Care's starve clock).
-## Returns what happened: [{kind: "died"|"starving", rec, ...}].
-static func catch_up_all() -> Array:
-	var roster: Array = Save.d["roster"]
+## Only `zone`'s Boki (and your partner and the Burrow's) when given: the others catch up when you
+## arrive there (GARDEN.md 10.4). Returns what happened: [{kind: "died"|"starving", rec, ...}].
+static func catch_up_all(zone := "") -> Array:
+	var roster: Array = Save.d["roster"].filter(
+		func(r): return zone == "" or KinBox.is_boxed(r) or GardenZones.walks_in(r, zone))
 	var extra := {}
 	for rec in roster:
 		if KinBox.is_boxed(rec):

@@ -8,7 +8,9 @@ extends RefCounted
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
-## opens its cards.
+## opens its cards. Visits (step 10): your profile doc carries the hub and each open zone's layout and
+## each Boki's zone; a visitor lands in the friend's hub and hops to their zones, seeing only that zone's
+## Boki; an older doc stays one island; a hostile layout is cut down to what the island needs.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 
@@ -24,6 +26,7 @@ func run(m: Node) -> void:
 	_keys_part()
 	await _travel_part(m)
 	await _move_part(m)
+	await _visit_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -216,3 +219,54 @@ func _cap_part() -> void:
 	ok(GardenZones.move(next, "glasswater") != "" and GardenZones.zone_of(next) == "bramblebank",
 		"with %d out in Glasswater, the next move is refused" % cap)
 	ok(GardenZones.room("bramblebank") > 0, "Bramblebank still has room of its own")
+
+func _island(seed: int) -> Dictionary:
+	var L := HomeLayout.fresh()
+	L["seed"] = seed
+	L["fs"] = 1
+	L["sk"] = 0.55
+	return L
+
+## A friend's garden through the profile doc (the JSON round trip a real doc takes), then in the real scene.
+func _visit_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	var ash: Dictionary = Save.d["roster"][1]
+	ash["zone"] = "glasswater"
+	Save.d["layout"] = _island(11)
+	Save.d["zones"]["glasswater"] = {"open": true, "layout": _island(22)}
+	var doc: Dictionary = JSON.parse_string(JSON.stringify(Social.profile_doc()))
+	var snap := Social.clean_island(doc)
+	ok(VisitZones.has(snap) and snap["zones"].keys() == ["bramblebank", "glasswater"]
+			and int(snap["zones"]["glasswater"]["seed"]) == 22,
+		"the snapshot carries the hub and both open zones' layouts")
+	ok(GardenZones.landing({"visit": snap}) == GardenZones.HUB, "a visitor lands in the hub")
+	var gw := VisitZones.view(snap, "glasswater")
+	ok(gw["roster"].map(func(r): return r["name"]) == ["Ash"]
+			and VisitZones.view(snap, GardenZones.HUB)["roster"].is_empty(),
+		"a zone shows only its own Boki, the hub none")
+	var old := doc.duplicate()
+	old.erase("zones")
+	old.erase("hub_layout")
+	ok(not VisitZones.has(Social.clean_island(old)) and GardenZones.landing({"visit": Social.clean_island(old)}) == "",
+		"an older doc is the single island it was")
+	var junk := {"theme": "<b>", "grow": 99, "deco": []}
+	for i in 500:
+		junk["deco"].append({"id": "lamp_post" if i % 2 == 0 else "nope", "x": 9999, "z": -5})
+	var cut := VisitZones.clean_layout(junk)
+	ok(cut["deco"].size() == VisitZones.DECO_MAX and cut["theme"] == "meadow"
+			and cut["grow"] == HomeLayout.EXPAND.size() and cut["deco"][0]["x"] == VisitZones.TILE_MAX,
+			"a hostile layout is cut to the catalog, the tiles, a cap")
+	Game.goto("home", {"visit": snap, "visit_id": "t"})
+	var hub = await _arrived(m, null)
+	ok(hub != null and hub.zone == GardenZones.HUB and hub.hway.is_open("glasswater")
+			and not hub.hway.is_open("hushwood"),
+		"the visitor stands in the friend's hub")
+	if hub == null:
+		return
+	ok(hub.kins.is_empty() and hub.hway.board == null, "nobody lives in their hub, and their games board is not yours")
+	ok(hub.hway.hop("glasswater"), "the visitor hops to their Glasswater")
+	var zone = await _arrived(m, hub)
+	ok(zone != null and zone._visiting() and zone.zone == "glasswater" and _uids(zone) == [String(ash["uid"])],
+		"and finds only Ash there, still a visit")
+	Content.rules("farm_build")["base_mode"] = false
