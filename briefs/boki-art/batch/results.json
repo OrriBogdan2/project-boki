@@ -106263,5 +106263,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_pavonazar_e1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_sarcobra_e1",
+    "name": "Sarcobra (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_sarcobra_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pavonazar_e1",
+    "name": "Pavonazar (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pavonazar_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pavonazar_e1",
+    "name": "Pavonazar (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_pavonazar_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hydrangor_e1",
+    "name": "Hydrangor (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_hydrangor_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_aurostag_e1",
+    "name": "Aurostag (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_aurostag_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pavonazar_e1",
+    "name": "Pavonazar (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pavonazar_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glaciammoth_e1",
+    "name": "Glaciammoth (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_glaciammoth_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glaciammoth_e1",
+    "name": "Glaciammoth (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_glaciammoth_e1_2.jpg",
+    "ok": true
   }
 ]
