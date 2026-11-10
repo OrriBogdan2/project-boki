@@ -320,7 +320,7 @@ gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees a
 `jug_chainlunge`, `jug_haul_wind` / `jug_haulslam`, `jug_roar` (Enraged). Strips: `--arena-demo=anim_<move>`
 (scripts/arch/dj_demo.gd).
 
-## Animation timing (Nov 9: parity pass against the 5 fps footage)
+## Animation timing (Nov 9-10: parity pass against the 5 fps footage)
 
 Kael's v2 clips are the v1 clips retargeted by bone name, so each strike is a one-frame snap off frame 0 followed by an
 eased follow-through. Measured offline through `WardenClips` (kael.glb clips swept at 60 Hz; the "strike" is the blade
@@ -344,6 +344,9 @@ holds the first frame (docs/art/wardens/CLIPS.md). Kit numbers untouched.
 | `jug_haul_wind` (held) / `jug_haulslam` | - | pose only once armed; 0.02 / 0.000 / 0.47 | same | no source; asserted |
 | `jug_guard` (held) / `jug_riposte` | guard 0.4-1.0 s, then the crescent [f425-439] | guard 0.65; strike 0.02 / 0.117 (after the 0.1 s step) / 0.47 | lead -0.08: the dropped blade holds the step, cleave 0.10 | fixed; asserted |
 | `jug_spin` `jug_chainlunge` `jug_exdash` | spin on arrival [f333-336] | spin runs on the press (0.000); chainlunge 0.03 / 0.20 | same | left alone (the chain lunge is unlisted) |
+| `jug_lunge` perfect release (owner) | no source (the owner's window, not on film) | first window at 0.80 s of hold, the wind-up pose still from 0.75 s; thrust 0.20 / hit 0.217 | same | matches; asserted (pose still before the window, strike on the hit) |
+| Riposte phases | guard 0.4-1.0 s [f425-436]; strike and recover not on film (0.2 s frames) | guard 0.65 / strike 0.117 / recover 0.35; clip ends 0.08 s after the hand-off | same, the tail plays under the 0.16 s blend to the legs | matches the card; asserted per phase |
+| Run cadence (`run_f`) | stride ~2.26 Hz, ~4.5 footfalls/s [f12-17] | `run_f` 0.67 s loop, 2 plants: 3.0 footfalls/s (1.5 Hz) at 4.55 m/s | `loco.cadence` 1.5 (blended in over walk-to-run): 4.5/s (2.25 Hz) | fixed; asserted 4.0-5.0/s. The stride shortens to ~1.0 m, so the feet may slide a little at top speed (hero-ref §2 asks for the faster cadence anyway) |
 
 Left alone: the tap-RMB overhead strike (ext/kael-tap-ult-1108 is unmerged; the Finishing Slam above is main's tap).
 An Enrage on a hit plays `jug_roar` over the move's clip (`_enrage_fx`), so a hit that fills Rage shows the roar, not
