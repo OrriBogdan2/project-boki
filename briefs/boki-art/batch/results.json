@@ -81805,5 +81805,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_lyrewing_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_latchling",
+    "name": "Latchling (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_latchling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lyrewing",
+    "name": "Lyrewing (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_lyrewing_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_latchling",
+    "name": "Latchling (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_latchling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lyrewing",
+    "name": "Lyrewing (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_lyrewing_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_thrumbird",
+    "name": "Thrumbird (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_thrumbird_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_thrumbird",
+    "name": "Thrumbird (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_thrumbird_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_parasolth",
+    "name": "Parasolth (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_parasolth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_umbrathere",
+    "name": "Umbrathere (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_umbrathere_1.jpg",
+    "ok": true
   }
 ]
