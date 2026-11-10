@@ -73629,5 +73629,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/fem_hourachnid_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fem_hourachnid",
+    "name": "Hourachnid (female look)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fem_hourachnid_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_pavonazar",
+    "name": "Pavonazar (female look)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fem_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_hourachnid",
+    "name": "Hourachnid (female look)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fem_hourachnid_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_arcestrel",
+    "name": "Arcestrel (female look)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fem_arcestrel_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_hourachnid",
+    "name": "Hourachnid (female look)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fem_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_arcestrel",
+    "name": "Arcestrel (female look)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fem_arcestrel_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_arcestrel",
+    "name": "Arcestrel (female look)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fem_arcestrel_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_pavonazar",
+    "name": "Pavonazar (female look)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fem_pavonazar_3.jpg",
+    "ok": true
   }
 ]
