@@ -99872,5 +99872,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_hydrangor_r4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_hydrangor_r4",
+    "name": "Hydrangor (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_hydrangor_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_aurostag_r4",
+    "name": "Aurostag (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_aurostag_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sphinxblight_r4",
+    "name": "Sphinxblight (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_sphinxblight_r4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hydrangor_r4",
+    "name": "Hydrangor (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_hydrangor_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sphinxblight_r4",
+    "name": "Sphinxblight (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_sphinxblight_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sphinxblight_r4",
+    "name": "Sphinxblight (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_sphinxblight_r4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_aurostag_r4",
+    "name": "Aurostag (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_aurostag_r4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pavonazar_r4",
+    "name": "Pavonazar (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pavonazar_r4_2.jpg",
+    "ok": true
   }
 ]
