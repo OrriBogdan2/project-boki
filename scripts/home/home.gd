@@ -9,6 +9,7 @@ var world: World
 ## reveal until then.
 var building := false
 var cam: CamRig
+var evolving: EvolveMoment      # the form change in play, while it plays (the camera leans toward it)
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
@@ -3674,7 +3675,7 @@ func _play_evolutions() -> void:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
 		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED))
 	if seen:
-		EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
+		evolving = EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
 	else:
 		nn.position = at
 		nn.rotation = n.rotation
