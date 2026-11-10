@@ -9,6 +9,7 @@ var world: World
 ## reveal until then.
 var building := false
 var cam: CamRig
+var evolving: EvolveMoment      # the form change in play, while it plays (the camera leans toward it)
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
@@ -1020,6 +1021,8 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
+	if evolving:
+		focus = evolving.frame(cam, focus, HOME_ZOOM)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -3546,7 +3549,7 @@ func _play_evolutions() -> void:
 		n.remove_child(k["say"]); nn.add_child(k["say"])
 	k.erase("bubble")
 	k["node"] = nn
-	var seen := EvolveMoment.on_screen(cam, at)
+	var seen := EvolveMoment.on_screen(cam, at) and EvolveMoment.has_model(nn)
 	var watchers: Array = EvolveMoment.watchers_of(kins, k, at) if seen else []
 	for w in watchers: w["busy"] = true
 	var end := func() -> void:
@@ -3554,6 +3557,8 @@ func _play_evolutions() -> void:
 		k["busy"] = false
 		k["t"] = 3.0
 		building_now = false
+		evolving = null
+		cam.zoom_to = HOME_ZOOM
 		Sfx.play("kin_happy")
 		_emote(k, "★")
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
@@ -3561,7 +3566,7 @@ func _play_evolutions() -> void:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
 		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED))
 	if seen:
-		EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
+		evolving = EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
 	else:
 		nn.position = at
 		nn.rotation = n.rotation
