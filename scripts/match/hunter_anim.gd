@@ -1680,6 +1680,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   loot     crouched over a deathbox, rummaging
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
+##   feed, pat, toss, cheer   the garden moves (HunterVerbs)
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
@@ -1698,6 +1699,8 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 func _act_legs() -> Vector4:
 	if HunterTool.ACTS.has(act_kind):
 		return HunterTool.legs(act_kind, tool_ph)
+	if HunterVerbs.ACTS.has(act_kind):
+		return HunterVerbs.legs(act_kind, act_t)
 	var w := sin(act_t * 3.0)
 	match act_kind:
 		"scan", "revive", "key", "loot", "offer":
@@ -1719,6 +1722,8 @@ func _act_legs() -> Vector4:
 func _act_pitch() -> float:
 	if HunterTool.ACTS.has(act_kind):
 		return HunterTool.pitch(act_kind, tool_ph)
+	if HunterVerbs.ACTS.has(act_kind):
+		return HunterVerbs.pitch(act_kind, act_t)
 	match act_kind:
 		"scan": return 0.25 + 0.04 * sin(act_t * 1.6)
 		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
@@ -1737,6 +1742,8 @@ func _act_pitch() -> float:
 func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 	if HunterTool.ACTS.has(act_kind):
 		return HunterTool.hands(act_kind, tool_ph, sh_l, sh_r)
+	if HunterVerbs.ACTS.has(act_kind):
+		return HunterVerbs.hands(act_kind, act_t, sh_l, sh_r)
 	var t := act_t
 	match act_kind:
 		"scan":
