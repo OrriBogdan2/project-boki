@@ -103946,5 +103946,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/sty_spanglin_3.jpg",
     "ok": true
+  },
+  {
+    "id": "sty_spanglin",
+    "name": "Spanglin (house style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sty_spanglin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_chainipede",
+    "name": "Chainipede (house style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sty_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_terrasloth",
+    "name": "Terrasloth (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sty_terrasloth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_scoopsy",
+    "name": "Scoopsy (house style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sty_scoopsy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_moundlet",
+    "name": "Moundlet (house style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sty_moundlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_pinster",
+    "name": "Pinster (house style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sty_pinster_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_chainipede",
+    "name": "Chainipede (house style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sty_chainipede_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_pinster",
+    "name": "Pinster (house style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sty_pinster_2.jpg",
+    "ok": true
   }
 ]
