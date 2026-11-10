@@ -99256,5 +99256,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/evo_pebblamb_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_hivara",
+    "name": "Hivara (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_hivara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "evo_pebblamb_b",
+    "name": "Pebblamb evolution b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/evo_pebblamb_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_hivara",
+    "name": "Hivara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_hivara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_hivara",
+    "name": "Hivara (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_hivara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "evo_pebblamb_a",
+    "name": "Pebblamb evolution a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/evo_pebblamb_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "evo_pebblamb_b",
+    "name": "Pebblamb evolution b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/evo_pebblamb_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_fawngus",
+    "name": "Fawngus (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_fawngus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_hatstag",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_hatstag_1.jpg",
+    "ok": true
   }
 ]
