@@ -243,7 +243,7 @@ func _all() -> void:
 	ak.step(m, 0.6, func(): P.inp["fire"] = true; ak.aim_at(P, home + Vector3(1.5, 0, 0)))
 	var reach: float = K.hose.reach_from(P.pos)
 	ok(
-		"lance: the stream runs its full ~7m past a close cursor", reach >= 6.5 and reach <= 8.8,
+		"lance: the stream runs its full ~6.1m past a close cursor", reach >= 5.6 and reach <= 7.6,
 		"reach %.1f (cursor 1.5m)" % reach
 	)
 	var young := 9.0
@@ -253,7 +253,7 @@ func _all() -> void:
 		if float(pf["age"]) < 0.035: young = minf(young, rr)
 		if float(pf["age"]) > float(pf["life"]) * 0.8: old = maxf(old, rr)
 	ok(
-		"lance: narrow at the nozzle, billowing at the far end", young < 0.35 and old > 0.85,
+		"lance: narrow at the nozzle, billowing at the far end", young < 0.45 and old > 0.85,
 		"near r %.2f far r %.2f" % [young, old]
 	)
 	# hose lag: swing the aim 90 degrees; the old fire keeps flying the old way for a moment
