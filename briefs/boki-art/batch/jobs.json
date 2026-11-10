@@ -10902,6 +10902,61 @@
     "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster): a big final-form seal whose whole back is a sloped pinball playfield with glass bumpers and lane lights, its two front flippers are big pinball flippers, silver-white and electric-blue, a chrome ball balanced on its nose. Every part grows from its body; one head, clearly attached. Electric type: its electricity shows as white-blue sparks inside glass bumpers or along chrome edges, never as yellow fur, lightning-bolt markings or glowing cheeks. Draw it in the same rendering style as image 1, never copying its creature. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
   },
   {
+    "id": "c_jerboa_baby",
+    "name": "Jerboa line (baby, no pinball)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinline_jerboa_baby_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: remove the chrome ball and the metal rod from its tail: the tail is now a long thin furry tail ending in a fluffy white tuft that crackles with small white-blue sparks. Keep the steel-blue and white fur, the big ears, the face, the coiled-spring hind legs and the pose exactly the same. Do not add anything else."
+  },
+  {
+    "id": "c_jerboa_final_coil",
+    "name": "Jerboa line (final, back: coil)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinline_jerboa_baby_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster), Electric type: the grown-up form of the baby jerboa in image 1. The same steel-blue and white fur, big ears and face, now bigger, leaner and confident, standing upright on long powerful coiled-spring hind legs, with a long tail ending in a white tuft that crackles with sparks. On its back: a tall copper coil grown along its spine like a ridge of rings, topped by a small glowing white-blue orb between its shoulders. Everything grows from its body; nothing is strapped or worn. No pinball parts, no chrome balls, no yellow fur, no lightning-bolt markings, no glowing cheeks. Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_jerboa_final_cells",
+    "name": "Jerboa line (final, back: cells)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinline_jerboa_baby_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster), Electric type: the grown-up form of the baby jerboa in image 1. The same steel-blue and white fur, big ears and face, now bigger, leaner and confident, standing upright on long powerful coiled-spring hind legs, with a long tail ending in a white tuft that crackles with sparks. On its back: three rounded glass battery cells grown into its back in a row along the spine, each glowing white-blue, with copper caps. Everything grows from its body; nothing is strapped or worn. No pinball parts, no chrome balls, no yellow fur, no lightning-bolt markings, no glowing cheeks. Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_jerboa_final_crest",
+    "name": "Jerboa line (final, back: crest)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinline_jerboa_baby_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster), Electric type: the grown-up form of the baby jerboa in image 1. The same steel-blue and white fur, big ears and face, now bigger, leaner and confident, standing upright on long powerful coiled-spring hind legs, with a long tail ending in a white tuft that crackles with sparks. On its back: a big crest of stiff, static-charged white fur standing up along its back like a dandelion puff, crackling with small white-blue sparks. Everything grows from its body; nothing is strapped or worn. No pinball parts, no chrome balls, no yellow fur, no lightning-bolt markings, no glowing cheeks. Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
+    "id": "c_jerboa_final_vanes",
+    "name": "Jerboa line (final, back: vanes)",
+    "refs": [
+      "briefs/boki-art/batch/out/c_pinline_jerboa_baby_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Single character illustration of one final-form Boki (a stylised creature-collector monster), Electric type: the grown-up form of the baby jerboa in image 1. The same steel-blue and white fur, big ears and face, now bigger, leaner and confident, standing upright on long powerful coiled-spring hind legs, with a long tail ending in a white tuft that crackles with sparks. On its back: two broad fan-like copper fins on its back, like a wind turbine's blades, that spin and throw sparks. Everything grows from its body; nothing is strapped or worn. No pinball parts, no chrome balls, no yellow fur, no lightning-bolt markings, no glowing cheeks. Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text."
+  },
+  {
     "id": "canvastross_card83",
     "name": "Canvastross (hero card)",
     "refs": [

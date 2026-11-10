@@ -400,3 +400,19 @@ _B2=[('Bullpole','cards/Bullpole.jpg','baby','cute',False,False,"glossy red skin
 for _n,_i,_st,_ar,_dk,_fu,_co,_ct,_fx in _B2:
     SPECS.append({'id':'v2t_'+_n.lower(),'name':_n+' (V2 card, style board)','refs':['briefs/boki-art/'+_i,SRB],'runs':4,'aspect':'1:1','size':'2K',
                   'prompt':RS_CARD_BOARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx)+" Never paste the board's square samples into the picture."})
+
+# 20:43 ET 11-09 owner: "make the pill bug just Steel and something else, and also include the jerboa, I like it a lot; it can lose the pinball concept,
+# make the last one an Electric type with a thing on its back, maybe something different on its back". Jerboa = a new Electric line (baby + final).
+_JB=_O+'c_pinline_jerboa_baby_1.jpg'
+SPECS.append({'id':'c_jerboa_baby','name':'Jerboa line (baby, no pinball)','refs':[_JB],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"remove the chrome ball and the metal rod from its tail: the tail is now a long thin furry tail ending in a fluffy white tuft that crackles with small white-blue sparks. "
+    "Keep the steel-blue and white fur, the big ears, the face, the coiled-spring hind legs and the pose exactly the same. Do not add anything else."})
+for _k,_b in (('coil',"a tall copper coil grown along its spine like a ridge of rings, topped by a small glowing white-blue orb between its shoulders"),
+              ('cells',"three rounded glass battery cells grown into its back in a row along the spine, each glowing white-blue, with copper caps"),
+              ('crest',"a big crest of stiff, static-charged white fur standing up along its back like a dandelion puff, crackling with small white-blue sparks"),
+              ('vanes',"two broad fan-like copper fins on its back, like a wind turbine's blades, that spin and throw sparks")):
+    SPECS.append({'id':'c_jerboa_final_'+_k,'name':'Jerboa line (final, back: '+_k+')','refs':[_JB],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':("Single character illustration of one final-form Boki (a stylised creature-collector monster), Electric type: the grown-up form of the baby jerboa in image 1. "
+        "The same steel-blue and white fur, big ears and face, now bigger, leaner and confident, standing upright on long powerful coiled-spring hind legs, with a long tail ending in a white tuft that crackles with sparks. "
+        "On its back: "+_b+". Everything grows from its body; nothing is strapped or worn. No pinball parts, no chrome balls, no yellow fur, no lightning-bolt markings, no glowing cheeks. "
+        "Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})

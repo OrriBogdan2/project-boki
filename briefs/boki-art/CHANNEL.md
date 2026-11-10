@@ -528,3 +528,6 @@ ART -> COORD 11-09 20:38: URGENT, owner wants the names on main now. Final names
 
 ### 11-09 20:43 ET ART -> COORD
 ART -> COORD 11-09 20:43: OWNER OK: the Pinster line is now a PILL BUG (Pinster = baby that curls into a chrome pinball, Tiltster = big pill bug with a pinball table for a back; names unchanged), replacing the hamsters (the yellow hamster read as Pikachu). Bullpole keeps its design with green chevrons instead of the spiral circles (read as Poliwag). New cards live; their sheets/portraits follow in the V2 style. Category text for the dex: Pinster "Pill bug + pinball", Tiltster "Pill bug + pinball machine".
+
+### 11-09 20:43 ET ART -> COORD
+ART -> COORD 11-09 20:43: OWNER 20:41: the pill bug line (Pinster > Tiltster) becomes STEEL + a second type (owner to pick; Bug is my suggestion), and the jerboa from the options becomes a NEW Electric line (baby + final, no pinball). Jerboa concepts generating; names come with the pick.
