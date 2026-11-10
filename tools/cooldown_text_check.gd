@@ -60,12 +60,31 @@ func _dash(P: Hunter, hud) -> void:
 	var pips: Array = sh.get("pips", [])
 	ok(String(sh.get("text", "")) == HudSlot.cd_text(left) and pips.size() == int(P.max_dashes()),
 		"dash empty, %.2f s to the next charge: '%s' and %d pips" % [left, sh.get("text", ""), pips.size()])
+	# the source keeps the countdown on the slot while one charge is ready
+	# and the next comes back (DASH_UI.md)
+	var lent := P.max_dashes() < 2.0
+	if lent:
+		P.perks.append("secondwind")   # a second charge, as the multi-charge dashes in the source
+	ok(P.max_dashes() >= 2.0, "the dash has %d charges for the partial case" % int(P.max_dashes()))
+	if P.max_dashes() >= 2.0:
+		P.dashes = 1.5
+		await _drawn(hud)
+		left = 0.5 * P.dash_regen()
+		sh = DashSlot.shown.get(hud.get_instance_id(), {})
+		pips = sh.get("pips", [])
+		var lit: bool = pips.size() >= 2 and float(pips[0]) >= 1.0 and absf(float(pips[1]) - 0.5) < 0.01
+		ok(String(sh.get("text", "")) == HudSlot.cd_text(left) and lit,
+			"dash 1 of %d ready, next back in %.2f s: '%s', pips %s"
+			% [int(P.max_dashes()), left, sh.get("text", ""), pips])
 	P.dashes = P.max_dashes()
 	await _drawn(hud)
 	sh = DashSlot.shown.get(hud.get_instance_id(), {})
 	pips = sh.get("pips", [])
 	ok(String(sh.get("text", "")) == "" and pips.all(func(f): return float(f) >= 1.0),
 		"dash full: no seconds, every pip full")
+	if lent:
+		P.perks.erase("secondwind")
+	P.dashes = P.max_dashes()
 
 ## The Boki's G slot: it counts its wait down in tenths and clears when it is over.
 func _throw(P: Hunter, hud) -> void:
