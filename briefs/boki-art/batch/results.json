@@ -92179,5 +92179,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_mossbastion_b_3.jpg",
     "ok": true
+  },
+  {
+    "id": "fv5_arcestrel",
+    "name": "Arcestrel female (clean legs)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv5_arcestrel_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv5_arcestrel",
+    "name": "Arcestrel female (clean legs)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fv5_arcestrel_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_canvastross_b",
+    "name": "Canvastross (rework b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_canvastross_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv5_arcestrel",
+    "name": "Arcestrel female (clean legs)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv5_arcestrel_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_canvastross_a",
+    "name": "Canvastross (rework a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_canvastross_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_canvastross_c",
+    "name": "Canvastross (rework c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_canvastross_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_canvastross_c",
+    "name": "Canvastross (rework c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_canvastross_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv5_arcestrel",
+    "name": "Arcestrel female (clean legs)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv5_arcestrel_3.jpg",
+    "ok": true
   }
 ]
