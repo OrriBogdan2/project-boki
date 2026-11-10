@@ -80048,5 +80048,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_terrasloth_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_rimekit",
+    "name": "Rimekit (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_rimekit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_terrasloth",
+    "name": "Terrasloth (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_terrasloth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimekit",
+    "name": "Rimekit (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_rimekit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimeshrew",
+    "name": "Rimeshrew (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_rimeshrew_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimeshrew",
+    "name": "Rimeshrew (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_rimeshrew_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimekit",
+    "name": "Rimekit (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_rimekit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_terrasloth",
+    "name": "Terrasloth (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_terrasloth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimeshrew",
+    "name": "Rimeshrew (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_rimeshrew_3.jpg",
+    "ok": true
   }
 ]
