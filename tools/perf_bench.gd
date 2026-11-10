@@ -155,6 +155,7 @@ func _base() -> void:
 	var t := 0.0
 	var raced := false
 	hud_us = 0
+	var slow := PackedStringArray()
 	while t < base_secs:      # real seconds: the garden runs on the frame's own delta
 		if not raced and t >= BASE_RACE_AT:
 			home.hrace.use()
@@ -164,17 +165,19 @@ func _base() -> void:
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("base", fl.size(), (now - last) / 1000.0, 0.0))
 		if fl[-1]["wall"] > SLOW_MS and t > WARM_S:
-			print("BENCH base slow frame t=%.1f s: %.0f ms" % [t, fl[-1]["wall"]])
+			slow.append("%.1fs %.0fms" % [t, fl[-1]["wall"]])      # (printed at the end: a print can stall a frame)
 		last = now
 		t += fl[-1]["wall"] / 1000.0
 	_summary("base", fl)
+	print("BENCH base slow frames after warm-up: ", ", ".join(slow.slice(0, 24)))
 	await _sections(home)
 	_meshes()
 
 ## The costliest per-frame steps of the garden: home._process off, its steps timed by hand for SECTION_FRAMES.
 func _sections(home) -> void:
 	var steps := {"sky": home._update_sky, "hover": func(_d): home._update_hover(), "move_kin": home._move_kin,
-		"care": home._care_tick, "econ": home.hecon.tick, "race": home.hrace.tick, "shove": home.hshove.tick,
+		"care": home._care_tick, "separate": home._separate_kin, "life": home.life.step, "econ": home.hecon.tick,
+		"race": home.hrace.tick, "shove": home.hshove.tick,
 		"seek": home.hseek.tick, "volley": home.hvolley.tick, "bubbles": home._update_bubbles, "gather": home.hg.tick,
 		"snack": home.hsp.tick, "work": home.hw.tick, "incub": home.hinc.tick}
 	var us := {}
@@ -236,7 +239,7 @@ func _summary(part: String, fl: Array) -> void:
 		part, fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w[-1], SLOW_MS, slow])
 	print("BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, render cpu %.2f ms" % [
 		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
-	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d" % [
+	print("BENCH %s scene: draws %.0f, tris %.0fk, objs %.0f, nodes %.0f, fx %d, lights %d, shadowed %d, casters %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights(), _casters()])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,

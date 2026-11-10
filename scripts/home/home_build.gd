@@ -533,6 +533,7 @@ func _sync_deco() -> void:
 			var n := make_deco(e)
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
+			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)
 			h.add_child(n)
 			nodes[u] = n
 			for l in _lights_of(n): h.lamps.append(l)
@@ -645,6 +646,7 @@ func _sync_water() -> void:
 				var s := MeshInstance3D.new(); s.mesh = stone; s.material_override = rim
 				s.position = Vector3(c.x + 0.5 + dv.x * 0.5, 0.07, c.y + 0.5 + dv.y * 0.5) + side
 				s.scale = Vector3(1.2, 0.6, 1.0)
+				s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 				water_root.add_child(s)
 
 ## Kin beds you've put down are slept in by kin that don't have one of the six by the house.
