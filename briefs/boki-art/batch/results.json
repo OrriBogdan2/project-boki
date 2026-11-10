@@ -95952,5 +95952,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/pose3_spirevark_d_1.jpg",
     "ok": true
+  },
+  {
+    "id": "fur_wickapi",
+    "name": "Wickapi (fur matches its line)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fur_wickapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_checkmare_k3",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose3_checkmare_k3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "older_snapler",
+    "name": "Snapler (a bit less baby)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/older_snapler_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "base_scopeleon",
+    "name": "Scopeleon (scope attached to its eye)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/base_scopeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_coolatee_z",
+    "name": "Coolatee (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_coolatee_z_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fur_wickapi",
+    "name": "Wickapi (fur matches its line)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fur_wickapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_spirevark_e",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose3_spirevark_e_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_checkmare_k1",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose3_checkmare_k1_2.jpg",
+    "ok": true
   }
 ]
