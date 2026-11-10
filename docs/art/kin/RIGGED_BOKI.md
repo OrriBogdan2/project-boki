@@ -39,6 +39,13 @@ stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids l
 
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
+Hit flinch: the glbs carry no hit clip. Every damage event to a Boki (owned, wild, summoned; not burn or other
+damage-over-time ticks) reaches `Oomph.react`, which calls `KinFlinch.hit` (meta "hit" on the model root). `KinFlinch`
+springs Flex (tilt, shove away from the attacker, squash), and `BokiRig._keep_flex` adds it, as `KinPuppet` does for
+the primitive bodies. Size of the jolt follows the hit's share of max health and falls with mass; the time to settle
+grows with mass (0.20 s light to 0.38 s heavy); each body plan jolts its own way (`KinFlinch.PLAN`). Checks:
+`--boki-react-check`; `--boki-flinch-shots --shots-dir=<dir>` (GPU strip of 6 species).
+
 Eyes: a visible eye about 18-20% of the head's width (the owner asked for smaller eyes in game). The dome is bigger
 than what shows: the head covers its rim. Past that the high cameras and `CamRig.char_lean` make it take the face.
 
