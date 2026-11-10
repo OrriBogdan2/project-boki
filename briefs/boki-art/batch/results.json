@@ -106165,5 +106165,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/hat_fix1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "og_nightline",
+    "name": "Bokidex OG image (nightline)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/og_nightline_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_nightline",
+    "name": "Bokidex OG image (nightline)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/og_nightline_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_night",
+    "name": "Bokidex OG image (night)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/og_night_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_night",
+    "name": "Bokidex OG image (night)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/og_night_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_night",
+    "name": "Bokidex OG image (night)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/og_night_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_nightline",
+    "name": "Bokidex OG image (nightline)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/og_nightline_2.jpg",
+    "ok": true
   }
 ]
