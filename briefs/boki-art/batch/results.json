@@ -106060,5 +106060,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/hs_kingpinguin_h_2.jpg",
     "ok": true
+  },
+  {
+    "id": "og_hill",
+    "name": "Bokidex OG image (hill)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/og_hill_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_book",
+    "name": "Bokidex OG image (book)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/og_book_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_book",
+    "name": "Bokidex OG image (book)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/og_book_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_hill",
+    "name": "Bokidex OG image (hill)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/og_hill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_lineup",
+    "name": "Bokidex OG image (lineup)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/og_lineup_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_lineup",
+    "name": "Bokidex OG image (lineup)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/og_lineup_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_hill",
+    "name": "Bokidex OG image (hill)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/og_hill_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "og_book",
+    "name": "Bokidex OG image (book)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/og_book_2.jpg",
+    "ok": true
   }
 ]
