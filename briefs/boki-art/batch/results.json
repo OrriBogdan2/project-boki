@@ -82085,5 +82085,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_lanternmit_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_lanternmit",
+    "name": "Lanternmit (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_lanternmit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_terrarimit",
+    "name": "Terrarimit (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_terrarimit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_terrarimit",
+    "name": "Terrarimit (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_terrarimit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bathilus",
+    "name": "Bathilus (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_bathilus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lanternmit",
+    "name": "Lanternmit (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_lanternmit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_torpecone",
+    "name": "Torpecone (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_torpecone_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_torpecone",
+    "name": "Torpecone (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_torpecone_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_dreadmonite",
+    "name": "Dreadmonite (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_dreadmonite_1.jpg",
+    "ok": true
   }
 ]
