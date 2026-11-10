@@ -1288,3 +1288,44 @@ for _k,_d in (('f1',"a great dragon whose wings are two enormous diamond kites, 
 for _n,(_st,_ar,_pose) in {'Ribbonwyrm':('mid','pretty',"rising in a steep climb, facing RIGHT, kite fins fanned, bow tail trailing below"),'Dragonkite':('final','majestic',"gliding side-on, facing LEFT, both kite wings spread flat, kite-chain tail streaming behind")}.items():
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,False,False,_pose)
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_kite'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_kite'; SPECS[_n0+1]['runs']=2
+
+# ===== 11-10 OWNER: "do a review of everything and see if any can be improved". Second full pass over all 235 by line. Options only (rv_*); nothing
+# changes unless an option clearly wins and the owner agrees. Recolours are edits (3 runs); redesigns are 3 directions x 2 runs built from the baby.
+def RV_EDIT(n,tag,text,ref2=None,runs=3):
+    SPECS.append({'id':'rv_'+n.lower()+'_'+tag,'name':n+' (review: '+tag+')','refs':['briefs/boki-art/cards/'+n+'.jpg']+([ref2] if ref2 else []),'runs':runs,'aspect':'1:1','size':'2K','prompt':_EDIT+text})
+def RV_NEW(n,baby,stage,arch,dark,furry,opts):
+    for _k,_d in zip('abc',opts):
+        ON_CHANGE(n,_C%baby,stage,arch,dark,furry,"this is the evolved form of the creature in image 1, clearly the same animal grown up, keeping its colours, face and signature idea: "+_d,runs=2,tag='_'+_k); SPECS[-1]['id']='rv_'+n.lower()+'_'+_k
+# 1. Polyshroom > Starcap > Medushroom: three unrelated bodies and palettes. Both later stages rebuilt from Polyshroom.
+RV_NEW('Starcap','Polyshroom','mid','cute',False,False,[
+ "the same cream slug body and sleepy face, now lifted off the ground and floating like a small jellyfish: its mint dome cap has grown wider and scalloped into five soft lobes, with long lilac gill ribbons trailing below. Drifting.",
+ "the same creature grown taller, rearing up on its cream body like a little walking mushroom, with its mint dome cap doubled in size and a second smaller cap budding beside it, lilac gills frilled like a collar. Awake, curious eyes.",
+ "the same creature swimming through the air on its side, body stretched long, its mint dome cap pulsing open like a jellyfish bell with lilac frilled edges and four short tentacle gills. Half-open eyes, a small smile."])
+RV_NEW('Medushroom','Polyshroom','final','pretty',False,False,[
+ "a large graceful mushroom-jellyfish: a wide mint and lilac dome bell with cream spots, the same cream face under its rim grown calm and elegant, and a long curtain of lilac and cream tentacle gills flowing below. Floating upright, serene.",
+ "a tall queenly form: three tiers of mint dome caps stacked like a pagoda, the same cream face in the lowest tier, long lilac gill ribbons trailing like a gown, two ribbon arms held out. Floating.",
+ "a big drifting bloom: one huge mint dome cap with a ring of smaller caps round its edge like a crown, the cream body below it long and tapering into a spiral of lilac tentacles. Gentle half-lidded eyes."])
+# 2. Dynaboa: its fins read as planks stuck on, and it looks smaller than the middle stage.
+RV_NEW('Dynaboa','Jerbit','final','sleek',False,True,[
+ "a big powerful jerboa standing tall on long spring legs, twice the baby's size, with a fan of four copper fins grown from its spine like a turbine, each fin curved and joined to the fur by a copper ridge, a thick static mane, and a long whip tail ending in a sparking tuft.",
+ "a long-legged racer on all fours like a hare at full stretch, with a low row of six small copper fins down its back like a dynamo, huge ears swept back, static sparks along its tail. Lean and fast.",
+ "a heavy-shouldered jerboa crouched to spring, with two broad copper fins folded back along its sides like a beetle's wing-cases, a ruff of white static fur, and big coiled hind legs."])
+# 3. Bellowlet > Furnowary is the same bird, bigger.
+RV_NEW('Furnacowary','Bellowlet','final','tough',True,False,[
+ "a towering cassowary with a deep barrel chest that is an open furnace: glowing orange between dark rib bars, a tall bronze casque shaped like a chimney with one flat flame, heavy scaled legs with big claws, a long neck. Twice the height of a middle stage, planted.",
+ "a broad, low forge-bird built like a boiler on two thick legs: round furnace belly glowing through rib bars, short wings held out like bellows, a wide bronze casque, tail feathers like tongues of flat flame.",
+ "a lean running cassowary mid-stride, neck stretched forward, its rib firebox streaming a ribbon of flat flame behind it, a swept-back bronze casque, long powerful legs."])
+# 4. Fizzlet (copper-coil songbird) barely ties to Boltstrich/Thundrich (storm-cloud ostriches), and those two share a pose.
+RV_EDIT('Fizzlet','cloud',"so it is clearly the chick of a storm-cloud ostrich: its body becomes a small round puff of dark grey cloud feathers with one tiny yellow lightning mark, on two long thin copper-brown legs, with a longer pale pink-grey neck. It keeps its copper coil crest and big eyes.")
+_n0=len(SPECS); ON_POSE('Thunderstrich',_LM['Thunderstrich']['sheet'],'final','tough',True,True,"running flat out, facing LEFT, neck stretched low and forward, one leg kicked far back, storm-cloud body streaming behind it.",_KEEPALL); SPECS[_n0]['id']='rv_thunderstrich_run'
+# 5-7. Colour breaks inside a line (edits).
+RV_EDIT('Voltalon','family',"recolour it so it belongs with the rust-red kestrels it evolves from (image 2): rust-red head and back, slate-blue wings, a cream chest with dark barring, copper-coloured legs and crest. No navy and no black. The body and pose stay the same.",ref2='briefs/boki-art/cards/Arcestrel.jpg')
+RV_EDIT('Phonodrake','family',"recolour it so it belongs with the tan frilled lizards it evolves from (image 2): warm sandy-tan scales with brown spots and a cream belly, brass horn-frills, amber eyes. Keep only a little dark red on its back spines. The body and pose stay the same.",ref2='briefs/boki-art/cards/Gramofrill.jpg')
+RV_EDIT('Pickadactyl','family',"recolour it so it belongs with the baby it evolves from (image 2): slate-blue hide with amber-orange rock plates and wing membranes and a pale tan beak and crest. The body and pose stay the same.",ref2='briefs/boki-art/cards/Chiptero.jpg')
+# 8. Forgebrock still has fists that read as iron gauntlets (worn parts).
+RV_EDIT('Forgebrock','paws',"its two big grey fists become bare furry bear paws in the same orange-brown fur as its arms, with dark iron-grey claws. No gloves, plates or bands on its arms. Everything else stays the same.")
+# 9. Hydrangor is an Ultra legendary but reads as a friendly mid-tier Boki.
+RV_NEW('Hydrangor','Hydrangor','final','majestic',False,False,[
+ "the same three-headed hydrangea hydra made legendary: far larger and older, three long necks rising high with proud horned heads, great domes of blue and violet hydrangea blooms covering its shoulders and back like storm clouds, a long tail, calm ancient eyes.",
+ "the same hydrangea hydra with five heads fanned out like a bouquet, each crowned with a different colour of bloom (blue, violet, pink, white, lilac), a heavy planted body wrapped in leaves, petals drawn as big flat clusters.",
+ "the same hydrangea hydra coiled like a great serpent with no legs, three heads rearing from a mound of blooms, bodies wound together like stems, leaves like frills behind each head."])
