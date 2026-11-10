@@ -35,8 +35,8 @@ const SWEEP_INNER := 0.35      # the arc mesh's inner radius, as a share of its 
 const SCORCH_LIFT := 0.06       # m a ground look floats, clear of the ground mesh
 const PREWARM_LIFE := 30.0     # s a loading-screen stand-in particle lives (it must outlast the slowest loading frames)
 const SHEEN_LIFE := 0.4        # s the armour tier-up sheen takes to sweep up the body
-const SHEEN_TALL := 1.9        # m the sheen climbs (a Hunter's height)
-const SHEEN_PAD := 0.12        # m the sheen stands off the body, so it reads at match zoom
+const SHEEN_SIZE := 2.2        # m square, facing the camera: the band climbs a body-shaped capsule inside it
+const SHEEN_LIFT := 0.95       # m above the feet the square is centred (a Hunter's mid-body)
 const SEED_MAX := 8.0          # a look's noise offset (small: the sine hash loses precision on big inputs)
 
 static var _data := {}         # arch -> its content/vfx data ({} when the Hero has none yet)
@@ -212,8 +212,8 @@ func tier_up(h: Hunter, tier: int) -> void:
 	mt.set_shader_parameter("col2", col.lerp(Color.WHITE, 0.6))
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))
-	var s := Vector3(h.r + SHEEN_PAD, SHEEN_TALL, h.r + SHEEN_PAD)
-	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos)
+	var s := Vector3.ONE * SHEEN_SIZE
+	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos + Vector3(0, SHEEN_LIFT, 0))
 	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s,
 			"follow": h})
 
@@ -329,9 +329,9 @@ func _surface_node(kind: String) -> Node3D:
 			var plane := PlaneMesh.new()
 			plane.size = Vector2.ONE
 			mi.mesh = plane
-		"skirt", "sheen":
+		"skirt":
 			mi.mesh = _cylinder()
-		"flare":
+		"flare", "sheen":
 			var quad := QuadMesh.new()
 			quad.size = Vector2.ONE
 			mi.mesh = quad
@@ -758,7 +758,7 @@ func _process(delta: float) -> void:
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
 		if e.has("follow") and is_instance_valid(e["follow"]):
-			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos
+			(e["node"] as Node3D).global_position = (e["follow"] as Hunter).pos + Vector3(0, SHEEN_LIFT, 0)
 		if e["s0"] != e["s1"]:
 			var ease_out := 1.0 - (1.0 - u) * (1.0 - u)
 			var now_scale: Vector3 = (e["s0"] as Vector3).lerp(e["s1"], ease_out)

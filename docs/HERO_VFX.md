@@ -47,8 +47,8 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
 ## Armour tier-up
-`HeroVfx.tier_up(h, tier)` (called from `Match._armor_up`) is the one look that is not a recipe: a `sheen` (a band of light on
-a cylinder round the body) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
+`HeroVfx.tier_up(h, tier)` (called from `Match._armor_up`) is the one look that is not a recipe: a `sheen` (a band of light climbing a
+body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
 everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
 
 ## Rules

@@ -13,7 +13,7 @@ const int M_FLARE = 3;      // a ragged burst, facing the camera
 const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y across
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
-const int M_SHEEN = 8;      // a band of light climbing a cylinder round the body: UV.x round it, UV.y foot (0) to top (1)
+const int M_SHEEN = 8;      // a band of light climbing a body-shaped capsule, facing the camera: UV.y top (0) to foot (1)
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 
 uniform int mode = 0;
@@ -159,12 +159,13 @@ vec4 skirt(vec2 uv) {
 }
 
 vec4 sheen(vec2 uv) {
-	float at = life * 1.25 - 0.1;                               // the band climbs from below the feet to above the head
-	float d = uv.y - at;
+	vec2 p = uv * 2.0 - 1.0;
+	float body = 1.0 - smoothstep(0.7, 1.0, length(vec2(p.x / 0.5, p.y)));   // the capsule the band is seen through
+	float d = (1.0 - uv.y) - (life * 1.25 - 0.1);                // the band climbs from below the feet to above the head
 	float band = exp(-d * d / 0.012);
-	float trail = (d < 0.0 ? exp(d * 7.0) : 0.0) * 0.3;         // a faint wash left behind it
+	float trail = (d < 0.0 ? exp(d * 7.0) : 0.0) * 0.3;          // a faint wash left behind it
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
-	float a = clamp(band + trail, 0.0, 1.0) * fade;
+	float a = clamp(band + trail, 0.0, 1.0) * body * fade;
 	return vec4(mix(col.rgb, col2.rgb, band) * a, a);
 }
 
