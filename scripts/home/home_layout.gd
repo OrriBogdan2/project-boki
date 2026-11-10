@@ -25,12 +25,15 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use. zone: a garden
+## zone's own ground (GardenZones), never for sale.
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	"hushwood": {"name": "Hushwood", "gems": 0, "region": 0, "zone": true, "top": "4a6a52", "top2": "3a5848",
+		"side": "4a3d52", "deep": "20202e", "leaf": "6f8f9c"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -248,9 +251,12 @@ static func ensure(d: Dictionary) -> Dictionary:
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
 	SnackPatch.grant(d)
-	return L
+	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
+	var Z := ZoneLook.layout_of(d)       # a zone's own island, while you are in it
+	if not Z.is_empty():
+		return Z
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 

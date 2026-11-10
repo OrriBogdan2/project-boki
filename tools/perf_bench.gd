@@ -5,7 +5,8 @@ extends RefCounted
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-farm=20] [--bench-zone=<garden zone id>: a "zone" part on it]
+##   [--bench-out=/path/frames.csv] [--quality=medium]
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -17,6 +18,7 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var zone := ""           # a garden zone to bench after the farm (GARDEN.md 10.6 budget)
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -29,6 +31,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-zone="): zone = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -38,6 +41,12 @@ func run(main_node: Node) -> void:
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
 	await _match()
 	await _farm()
+	if zone != "":
+		FarmUnlocks.rules()["base_mode"] = true
+		Save.d["zones"][zone] = {"open": true}
+		for rec in Save.d["roster"]:
+			rec["zone"] = zone
+		await _farm("zone", {"zone": zone})
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
@@ -115,8 +124,8 @@ func _bring_fight(m: Match) -> void:
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
-func _farm() -> void:
-	Game.goto("home")
+func _farm(part := "farm", opts := {}) -> void:
+	Game.goto("home", opts)
 	for i in 30:
 		await main.get_tree().process_frame
 	var fl: Array = []
@@ -127,9 +136,9 @@ func _farm() -> void:
 		var now := Time.get_ticks_usec()
 		var wall := (now - last) / 1000.0
 		last = now
-		fl.append(_frame("farm", fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		fl.append(_frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
-	_summary("farm", fl)
+	_summary(part, fl)
 	_meshes()
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:

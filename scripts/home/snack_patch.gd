@@ -17,6 +17,10 @@ func _init(home) -> void:
 static func rules() -> Dictionary:
 	return Content.rules("snack_patch")
 
+## The snacks the patch in this zone grows (ZoneLook patch, else the garden's four).
+static func snacks() -> Array:
+	return ZoneLook.look(GardenZones.current()).get("patch", rules()["snacks"])
+
 ## base_mode saves keep one patch: a missing one waits in storage to be put down.
 static func grant(d: Dictionary) -> void:
 	if FarmUnlocks.base_mode() and HomeLayout.count_of(ID, d) == 0:
@@ -38,7 +42,7 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if not ripe(e, now):
 		return []
 	e["t"] = now
-	var got: Array = (rules()["snacks"] as Array).duplicate()
+	var got: Array = snacks().duplicate()
 	for s in got:
 		d["crops"][s] = int(d["crops"].get(s, 0)) + 1
 	return got
@@ -52,13 +56,13 @@ static func model(e: Dictionary) -> Node3D:
 	var n := Node3D.new()
 	var is_ripe := ripe(e, Time.get_unix_time_from_system())
 	Models.part(n, Models.box(1.9, 0.08, 1.9), Models.toon(Color("7a5a3a"), false), Vector3(0, 0.04, 0))
-	var snacks: Array = rules()["snacks"]
-	for i in snacks.size():
+	var grown := snacks()
+	for i in grown.size():
 		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45)
 		var leaf := Models.toon(Color("5f9a45"))
 		Models.part(n, Models.sphere(0.2, 8), leaf, at + Vector3(0, 0.22, 0), Vector3(1, 0.7, 1))
 		if is_ripe:
-			var col: Color = Data.CROPS[snacks[i]]["color"]
+			var col: Color = Data.CROPS[grown[i]]["color"]
 			Models.part(n, Models.sphere(0.13, 8), Models.toon(col), at + Vector3(0, 0.5, 0))
 	return n
 

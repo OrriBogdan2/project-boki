@@ -393,6 +393,7 @@ func _ready_rest() -> void:
 	if building: world.stage_cb = func(_l: String) -> void: pass
 	await world.build_meshes()
 	world.stage_cb = Callable()
+	ZoneLook.dress(self)
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
@@ -1003,7 +1004,7 @@ func _on_new_track(name: String) -> void:
 func _update_sky(d: float) -> void:
 	_update_music(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
-	var sun_h := sin((day_t - 0.25) * TAU)            # 1 at noon, -1 at midnight
+	var sun_h := sin((ZoneLook.sky_t(zone, day_t) - 0.25) * TAU)            # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
 	var dusk := clampf(1.0 - absf(sun_h) * 3.0, 0.0, 1.0)
 	weather_t -= d
@@ -1122,6 +1123,7 @@ func _see_through() -> void:
 
 func _exit_tree() -> void:
 	SeeThrough.off()
+	if Game.main == null or Game.main.current == self: GardenZones.here = ""      # no zone's island once Home is gone
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
