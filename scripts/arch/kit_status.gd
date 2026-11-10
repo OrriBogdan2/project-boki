@@ -26,6 +26,9 @@ static func clear_rattled(e: Ent) -> void:
 static func grounded(e: Ent) -> bool:
 	return e != null and is_instance_valid(e) and e.has_meta("gnd_until") and e.m != null and float(e.m.time) < float(e.get_meta("gnd_until"))
 
+static func grounded_left(e: Ent) -> float:
+	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
+
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
