@@ -206,8 +206,10 @@ func _block_hit(x: float, z: float, rb: float, y: float) -> float:
 func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 	var rb := r * BLOCK_BODY
 	var p := Vector2(x, z)
-	for it in 3:
-		var moved := false
+	# the deepest overlap first, then again: a face pushes you straight out before the next tile's corner can
+	# (scan order let that corner push you back along a row of tiles, and a dash along it caught at each seam)
+	for it in 4:
+		var push := Vector2.ZERO
 		for tz in range(int(floor(p.y - rb)), int(floor(p.y + rb)) + 1):
 			for tx in range(int(floor(p.x - rb)), int(floor(p.x + rb)) + 1):
 				if not inb(tx, tz) or kind[idx(tx, tz)] != T_BLOCK:
@@ -217,21 +219,19 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 				var c := Vector2(clampf(p.x, tx, tx + 1.0), clampf(p.y, tz, tz + 1.0))
 				var d := p - c
 				var l := d.length()
-				if l >= rb:
-					continue
+				var out := d / l * (rb - l) if l >= 0.0001 else Vector2.ZERO
 				if l < 0.0001:
 					# the centre is inside the tile: out through the nearest side
 					var ex := [p.x - tx, tx + 1.0 - p.x, p.y - tz, tz + 1.0 - p.y]
 					var k := 0
 					for j in 4:
 						if ex[j] < ex[k]: k = j
-					d = [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)][k]
-					p += d * (float(ex[k]) + rb)
-				else:
-					p += d / l * (rb - l)
-				moved = true
-		if not moved:
+					out = [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)][k] * (float(ex[k]) + rb)
+				if l < rb and out.length_squared() > push.length_squared():
+					push = out
+		if push == Vector2.ZERO:
 			break
+		p += push
 	return p
 
 ## Line of sight at height y between two points (rocks and higher ground block it).

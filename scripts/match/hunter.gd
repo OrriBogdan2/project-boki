@@ -2200,7 +2200,7 @@ func _physics(dt: float) -> void:
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
 	dash_rest = Vector2.ZERO
-	var pw := Vector3(tgt.x, tgt.y, 0.0) if spirit_t > 0.0 else HunterMove.push_out_walls(self, m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y))
+	var pw := Vector3(tgt.x, tgt.y, 0.0) if spirit_t > 0.0 else HunterMove.push_out_swept(self, tgt)
 	var po := Vector2(pw.x, pw.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
