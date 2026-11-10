@@ -371,6 +371,14 @@ func _statue_locks() -> void:
 
 ## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
 ## skates straight out at speed instead of stopping.
+## The held Rink Wall look's slab, or null when no wall look is up.
+func _wall_slab(K: RimewrightKit) -> MeshInstance3D:
+	var e: Dictionary = K.lk().held.get("wall", {})
+	if e.is_empty() or not is_instance_valid(e["n"]):
+		return null
+	return (e["n"] as Node3D).get_node_or_null("Slab") as MeshInstance3D
+
+
 func _rime_glide_skate() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)
 	var m: Match = r[0]
@@ -1638,6 +1646,11 @@ func rimewright() -> void:
 			and K.lk().showing("wall")
 			and not (w0["node"] as Node3D).visible,
 			"at %.1f len %.1f" % [mid0.x - P.pos.x, float(w0.get("len", 0.0))])
+	var slab := _wall_slab(K)
+	ok(
+			"tm E: a solid ice slab spans the pillars, the barricade itself",
+			slab != null and slab.visible and absf(slab.scale.x - (float(w0.get("len", 0.0)) - 0.2)) < 0.3,
+			"slab %s" % ("none" if slab == null else str(slab.scale)))
 	var tx := T.pos.x
 	step(m, 1.4)
 	var w1: Dictionary = K.wall["w"]
