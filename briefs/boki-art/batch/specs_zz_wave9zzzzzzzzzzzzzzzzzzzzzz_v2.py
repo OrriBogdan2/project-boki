@@ -1217,3 +1217,16 @@ for _k,_d in (('m1',"the baby's round dark body grown longer, with the baby's bi
               ('m3',"a hunched little prowler: the baby's dark round head on a longer body carried on two front legs, dragging a finned tail behind it, mouth half open with a faint purple glow inside like the final form's, eyes still big and round, lure hook swinging in front.")):
     SPECS.append({'id':'opt_snapler_'+_k,'name':'Snapler (middle-stage rework '+_k+')','refs':[_C%'Lurklet',_C%'Maulangler'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Draw one single character illustration of the MIDDLE evolution between the baby in image 1 and the final form in image 2, so the three read as one line: the same dark purple-grey body colour, purple glow and lure. THE DESIGN: "+_d+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('mid','creepy',True,False)+FRAME_V2})
+
+# ===== 11-10 afternoon picks (1st of each, shown to the owner with 2nd/3rd): cards live for Wickapi (y1_2), Candelapi (pose a_2), Dribbara (a_1),
+# Spirevark (a_1), Pipwom (sit_2), Kitedrake (dive a_2), Checkmare (lunge a_2), Scopeleon (squint 1), Snapler (m1_2), Grammite (detail 1);
+# female cards Mothlet (2), Grainspin (3). NOT changed, owner to choose: Coolatee line (cool_*), Canvastross sea look, Dobsabre simpler.
+for _n,(_st,_ar,_dk,_fu,_pose) in {'Wickapi':('baby','cute',1,1,"sitting with its short legs folded, head tilted, candle flame wobbling"),'Snapler':('mid','creepy',1,0,"swimming forward through the air, lure held out in front, grinning"),
+                                   'Grammite':('baby','cute',1,0,"uncurled and trundling forward, sabre mandibles raised"),'Scopeleon':('baby','cute',1,0,"sitting with its tail curled under it, squinting through its telescope eye up at the viewer")}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_q'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_q'; SPECS[_n0+1]['runs']=2
+_FEMPOSE['Mothlet']="perched, head tilted, wings tucked"; _FEMPOSE['Grainspin']="scuttling forward, front legs raised"
+for _n in ('Mothlet','Grainspin'):
+    _st,_ar,_dk,_fu=_FEMST[_n]; _cd='briefs/boki-art/cards/'+_n+'_female.jpg'; _n0=len(SPECS)
+    V2SHEET_NEW(_n+' female',_cd,_GC,_GN); V2PORT_NEW(_n+' female',_cd,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_FEMPOSE[_n])
+    SPECS[_n0]['id']='fs5_'+_n.lower(); SPECS[_n0+1]['id']='fp5_'+_n.lower(); SPECS[_n0+1]['runs']=2

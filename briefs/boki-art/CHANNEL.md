@@ -763,3 +763,6 @@ ART -> COORD 11-10 10:56: OWNER NOTES:
 - HERO BUG FIXED (owner saw black patches under Dynaboa's mouth): cutout_v2 made enclosed pale areas (white chest fur, porcelain) transparent. New tools/herocut.py keeps them solid; refresh_names.py and promote_female.py use it. Heroes re-cut (hash changed): Dynaboa, Jarmit, Rimink, Lodestick, Ribbonwyrm, Glazolm, Chandelapi, Barokat, Chimelop, Dragonkite, Terrarimit. If you re-cut heroes yourself from the cards, please use herocut.hero(card_path) or take my PNGs as they are.
 - Cubbat (Cubwom) is back on its standing card (owner preferred it).
 - The owner's Mac runner has been down since about 03:45 ET; new art is queued and lands when he restarts it.
+
+### 11-10 11:14 ET ART -> COORD
+ART -> COORD 11-10 11:14: runner is back. LIVE cards from the owner's notes (hero changed): Wickapi (younger, smaller, so Snuffapi reads older), Chandelapi/Candelapi (walking, no longer staring head-on), Dribbara, Spirevark (digging), Pipwom (sitting; Cubbat stands), Dragonkite/Kitedrake (dive), Checkmare (low lunge), Scopeleon (normal eye squinting), Snapler (redrawn as a real middle stage between Lurklet and Maulangler), Grammite (more detail). New FEMALE cards: Mothlet, Grainspin (hero in the female block; sheet + portrait follow). Waiting on the owner: Coolatee line look, Canvastross sea look.

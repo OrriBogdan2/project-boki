@@ -273,9 +273,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Chandelapi.png",
   "hash": {
    "sheet": "28a575a818f7",
-   "card": "601b468178c1",
+   "card": "5cfaa1d10a01",
    "portrait": "cd2af138f655",
-   "hero": "c81bd827aad7"
+   "hero": "5908cc71d759"
   },
   "display_name": "Candelapi"
  },
@@ -394,9 +394,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dragonkite.png",
   "hash": {
    "sheet": "b0ac64fef9cc",
-   "card": "9ce94ba3beb8",
+   "card": "55025cfb5ed7",
    "portrait": "8e1ae5a6f950",
-   "hero": "bc2a2d48c2b7"
+   "hero": "a23524eded8a"
   },
   "display_name": "Kitedrake"
  },
@@ -434,9 +434,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dribbara.png",
   "hash": {
    "sheet": "8d812b40a438",
-   "card": "ffceb6f2bfa8",
+   "card": "b88a8e86efd1",
    "portrait": "044f01db53c3",
-   "hero": "1c5736a04ce5"
+   "hero": "1b6f3106923c"
   }
  },
  "Echolop": {
@@ -818,7 +818,16 @@
    "hero": "04c801c12ab5"
   },
   "sex_forms": true,
-  "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
+  "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
+  "female": {
+   "card": "briefs/boki-art/cards/Grainspin_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Grainspin_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Grainspin_female.png",
+   "hash": {
+    "card": "9075f931b909",
+    "hero": "41ea5d90ec8f"
+   }
+  }
  },
  "Grammite": {
   "sheet": "briefs/boki-art/turnarounds/Grammite.jpg",
@@ -828,9 +837,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Grammite.png",
   "hash": {
    "sheet": "cef57cc46302",
-   "card": "b9aea712d4e2",
+   "card": "e86da4d31de2",
    "portrait": "bdf9a182d386",
-   "hero": "db893de060af"
+   "hero": "ff9949b86bc2"
   }
  },
  "Gramofrill": {
@@ -1360,7 +1369,16 @@
    "hero": "d9f57c014d5b"
   },
   "sex_forms": true,
-  "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
+  "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
+  "female": {
+   "card": "briefs/boki-art/cards/Mothlet_female.jpg",
+   "hero": "briefs/boki-art/portraits/cutout_v2/Mothlet_female.png",
+   "cutout": "briefs/boki-art/portraits/cutout_v2/Mothlet_female.png",
+   "hash": {
+    "card": "2b018e119842",
+    "hero": "1f9d0be8a5e4"
+   }
+  }
  },
  "Murmurling": {
   "sheet": "briefs/boki-art/turnarounds/Murmurling.jpg",
@@ -1810,9 +1828,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Scopeleon.png",
   "hash": {
    "sheet": "1c494debfb67",
-   "card": "5149e3203047",
+   "card": "1043ae8f7582",
    "portrait": "957f6b0f90fb",
-   "hero": "449c202a8da7"
+   "hero": "917740eb6da7"
   }
  },
  "Seamwyrm": {
@@ -1902,9 +1920,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Snapler.png",
   "hash": {
    "sheet": "3d96f1bebc65",
-   "card": "13b2e082c401",
+   "card": "5cea21b1d7bb",
    "portrait": "b3fda74a3ebc",
-   "hero": "661bbb7d90fb"
+   "hero": "bab131108575"
   }
  },
  "Snuffapi": {
@@ -1941,9 +1959,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Spirevark.png",
   "hash": {
    "sheet": "21c2ff9d7d18",
-   "card": "32d477e1e1c3",
+   "card": "4a328a6aee2d",
    "portrait": "4001cc58fa6d",
-   "hero": "bb3cc9224ac5"
+   "hero": "3a36dcc16a8a"
   }
  },
  "Sporcupine": {
@@ -2265,9 +2283,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Wickapi.png",
   "hash": {
    "sheet": "90d9e53329e7",
-   "card": "d7a6158dfd00",
+   "card": "7ecc0e41e8ae",
    "portrait": "774695875e57",
-   "hero": "f84869795673"
+   "hero": "6f42f86a547a"
   }
  },
  "Wyrmink": {
@@ -2988,9 +3006,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Checkmare.png",
   "hash": {
    "sheet": "04cb4cf898fc",
-   "card": "0a9a8dbeb01e",
+   "card": "028a9c7c7746",
    "portrait": "e12dcd9bd338",
-   "hero": "7d99d78c96be"
+   "hero": "23649c8131fe"
   }
  },
  "Cindermaw": {
@@ -3068,9 +3086,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Pipwom.png",
   "hash": {
    "sheet": "70636c11bf24",
-   "card": "35279387b54a",
+   "card": "5f06fe1c0dc7",
    "portrait": "5922f17278ca",
-   "hero": "f10e69c2c68f"
+   "hero": "300069845653"
   }
  },
  "Siegephant": {
