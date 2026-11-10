@@ -289,8 +289,8 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 | ring_doc | Metres from the stump to the ring's middle (clear of the stump's reach). |
 | reach_m | 1.6 |
 | step_m | 0.35 |
-| gap_m | 0.5 |
-| charge_m | 0.25 |
+| gap_m | 0.6 |
+| charge_m | 0.3 |
 | slide_rate | 4 |
 | geometry_doc | Metres from the ring's middle to start a bout; a step moves the pair step_m; each Boki stands gap_m from the contact point, charge_m closer while it charges in; the shown push catches up with the real one at slide_rate a second. |
 | energy | 8 |

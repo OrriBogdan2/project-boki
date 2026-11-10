@@ -17,6 +17,8 @@ const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
 const BOARD_LEFT := 6.5          # s of the skiff's boarding window left when the clip starts
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
+const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
+const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer than the usual 1.0)
 
 var main: Node
 var m: Match
@@ -309,8 +311,10 @@ func _tumble(secs: float) -> void:
 	var tb: BaseTumble = home.htumble
 	for e in home.kins:
 		e.erase("indoors")
-	home.ppos = tb.ring.position + Vector3(0.0, 0.0, 3.2)
+	home.ppos = tb.ring.position + Vector3(0.0, 0.0, TUMBLE_STAND)
 	home.player.position = home.ppos
+	home.cam.zoom = TUMBLE_ZOOM
+	home.cam.zoom_to = TUMBLE_ZOOM
 	home.cam.snap(home.ppos)
 	tb.use()
 	tb.run.left = FRAME
