@@ -665,3 +665,9 @@ _BT3=[ # name, stage, arch, dark, furry, cols, counts, fix
 for _n,_st,_ar,_dk,_fu,_co,_ct,_fx in _BT3:
     SPECS.append({'id':'v2c_'+_n.lower(),'name':_n+' (V2 card, batch 3, text-only style)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
                   'prompt':RS_CARD_TEXT(_n,_st,_ar,_co,_ct,_dk,_fu,_fx)})
+
+# 23:40 ET 11-09 owner: "you have permission to change anything". Portraits redone from the V2 cards so they match them: Echolop without the
+# floating rings, Anchorhorn without the loose chain.
+_bt2={r[0]:r for r in _BT2}
+for _n,_pose in (('Echolop',"hopping forward mid-bounce, big bat-wing ears spread wide, looking at the viewer"),('Anchorhorn',"swimming through the air in a rising arc, harpoon horn pointed up and forward, flippers swept back")):
+    _r=_bt2[_n]; _n0=len(SPECS); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_r[1],_r[2],_r[5],_r[6],_r[3],_r[4],_pose); SPECS[_n0]['id']='v2p_'+_n.lower()+'_fix'
