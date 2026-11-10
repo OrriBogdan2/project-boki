@@ -535,8 +535,8 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	daze(victim, float(bd["cone_rattle"]))
 	_confirm_hit(victim, at)
 
-## Only a Burr Charge that strikes a foe does this, so a hit can't be mistaken for a miss (which sticks in
-## terrain with the dust puff): a hot ring round the foe, its body held lit, and for the thrower a gold hitmarker and a ping.
+## Only a charge that strikes a foe does this, so a hit can't be mistaken for a miss (a stick in terrain,
+## with a dust puff): a hot ring round the foe, its body held lit, and for the thrower a gold hitmarker and a ping.
 func _confirm_hit(victim: Ent, at: Vector3) -> void:
 	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
 	m.fx.ring(victim.pos + Vector3(0, 0.1, 0), victim.r + 0.9, HOT, 0.3)
