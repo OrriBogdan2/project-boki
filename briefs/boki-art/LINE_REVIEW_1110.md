@@ -35,3 +35,23 @@ Also: Glassolotl, Chandelotl and Cindermaw get straight flat-style cards (`v2c_<
 
 ## Lines that read well as they are
 Vespyx, Mycroll, Zipling, Kayak, Glintmole, Skidlet, the nine Ermink branches, Kestrike, Kindlewren, Dribbara (after tonight's fix), Marchleaf > Scythant > Harvantis, Latchling, Kerchick, Kitlet, Jarmit's three branches, Bathilus, Cubbat, Lensling, Olmlet, Gravigrub, Lurklet, Morelkin, Pawnfry, Mumblet > Klaxada, Pagodito, Pinster, and the legendaries.
+
+## Overnight decisions, 11-10 (owner asleep: "rank your own choices and try to finish for morning")
+Everything below is live; old files are kept as `*_old*`, so any of it can be put back. Job ids are in `batch/out/` for looking at the alternatives.
+
+| Boki | Made live (1st) | 2nd | 3rd | Why |
+|---|---|---|---|---|
+| Mossbastion | `opt_mossbastion_a_1`: water-bear carrying a little landscape | `b_1`: mossy stone-plated | `c_2`: reared up, moss cloak | Only A is clearly Mossgrade grown up (same snout, legs, fuzz). |
+| Blastopuff | `opt_blastopuff_c_2`: spike burst, Puffuse's colours | `b_1`: torpedo-shaped | live olive one | Same fish and colours as the baby, new silhouette. B is striking but stops being a puffer. |
+| Maracoil | kept the live card | `opt_maracoil_b_2` | none | Every option read as Rattlebub again. `a_1` drew a feathered war-bonnet: do not use. |
+| Ringrove | `opt_ringrove_u1_1`: rearing, quill mane, cap tail | `u3_2`: seated guardian | `u1_2` | Its tail matches the new Sporcupine's, so the line connects. |
+| Checkmare | `fix_checkmare_1` | 2, 3 (near identical) | | Clean-up the owner agreed to, beak needle removed. |
+| Knotwyrm | `fix_knotwyrm_2` | `fix_knotwyrm_4` (lighter rope) | | Owner asked for contrast after the wood was removed. Its SHEET is the weakest tonight (views disagree): redo. |
+| Glaciammoth | `fix_glaciammoth_2`: ice musk-ox, one blade horn | 4 | 3 (kept curled horns too) | The merge the owner asked for. |
+| Pangolith portrait | `v2p_terrasloth_new_a_2`: ring lying on its side | `new_b_1`: walking in profile | | Card-as-reference kept the old pose 6 of 6; the sheet as reference worked. |
+| Olm line (Water/Crystal) | `wc_olmlet_2`, `wc_glazolm_2`, `wc_kintsuwyrm_2` | Glazolm 3 (bigger fan tail) | | Fins and clear crystals, more at each stage, per the coordinator's owner order. |
+| Lunowl female | `fv4_lunowl_2` | 1, 3 | | Male's palette one step lighter, silver for gold. |
+| Murmuron female | `fv4_murmuron_4` | 3 | | Darkest of the four, so she stays the same dark bird with a bronze sheen. |
+| Poses (22) | see CHANNEL 03:38 and `tools/../batch` ids `pose_*`, `on_*` | | | Latchling kept its old pose (the sitting ones lost its latch). |
+
+Not done, for the owner: Parrywhal/Coolatee-type Pokemon checks are by eye only; Kestrike and Pavonazar females still use their own colour scheme (flagged, not changed); Stormit's sheet needs a manual look; the 20 re-posed Boki keep their old portraits (portrait pose differs from the card on purpose).
