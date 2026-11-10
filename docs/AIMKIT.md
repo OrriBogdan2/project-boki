@@ -13,6 +13,8 @@ cursor state plus `MANIFEST.txt`).
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
 
+Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
+
 Scale: 1 body height (bh) = 1.8 m (`AimKit.BH`). The hero sheets measure in bh.
 
 ## 1. Aim modes
@@ -42,6 +44,8 @@ Membership tests (flat XZ), so a kit's hit test matches what it draws:
 `AimMode.in_lane(from, dir, len, width, p)`, `in_cone(from, dir, len, deg, p, inner)`,
 `in_arc(center, dir, radius, deg, thick, p)` and `in_circle(at, r, p)`. Each takes an optional `pad`
 (for example a target's radius).
+
+**Cursor on your own body:** `Hunter.aim_dir()` (the one direction every shot, cast and the facing read) ignores a cursor within two body radii (`AIM_MIN_BODIES`, a body width) and keeps the last good direction, so crossing the model never spins the body or sends rounds sideways. `--aim-near-check` sweeps the cursor across and around the body.
 
 ## 2. Telegraphs
 
@@ -169,9 +173,11 @@ drag arrow.
 ```gdscript
 AimKit.charge(h, k)                  # every step while charging: a thin ring fills round the cursor
                                      # crossing k = 1 fires the flare once (pass "flare": false to skip)
+                                     # "at": "body" draws the same ring round the hunter instead (44 px),
+                                     # where the source shows its charge arc on the hero (Kael's blast)
 AimKit.flare(h)                      # the full-charge flare now: a ring snaps out, a glint (0.28 s)
 AimKit.perfect(h)                    # the perfect-window star: gold 4-point star and ring, 0.12 s
-AimKit.reticle(h)                    # {charge, flare, perfect}, for checks
+AimKit.reticle(h)                    # {charge, flare, perfect, at}, for checks
 ```
 Params: `col` (charge ring colour, default the hero colour), `col2` (flare colour), and `col` on
 `perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
@@ -189,10 +195,36 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   `_drop_holds()`. (KinMerge, which is reserved, calls `_drop_holds()` directly; the gate covers it.)
 - **Who sees it.**
   - Aim reticles (lanes, Vs, lines) stay at the default `all: false`.
+  - A kit that draws its own aim line returns true from `own_aim_line()`, so the shared weapon line hides
+    (two lines read as two aims). The per-hero audit is docs/AIM_PREVIEWS.md.
   - Areas a foe must read or dodge (slam circles, a stuck grenade's cone, a placed nuke) use `all: true`.
   - None of this is synced over Net. A remote player sees your `all` telegraphs only if their machine
     runs your kit. Today remote hunters are puppets, so add a Net event if a sheet needs foes online
     to see one (see Open questions in the branch report).
+- **A delayed hit and its telegraph share one clock.** The fill (`fill`, 0..1) is the kit's own elapsed time over
+  its delay, read from the same timer that fires the damage, and the damage step runs before the telegraph is
+  drawn so a fill reaches 1 on the frame the hit lands (never off a frame count). A kit that hides the telegraph
+  on the hit frame is fine: the last drawn frame is one step short of full. The cue other players get (the Net fx
+  ring) goes out on the cast frame. `--telegraph-sync-check` casts each hit at 30, 60 and 144 fps and asserts
+  fill end within one frame of the damage. The delays come from the kit JSON:
+
+| Hero | Hit | Delay (JSON) | Telegraph |
+|---|---|---|---|
+| Vex | Cinderfall (X) | `x.delay` 1.6 s | disc fill |
+| Vex | Burr Charge | `rmb.burr.fuse` 0.9 s | cone fill |
+| Sparkle | Skycall | `e.delay` 0.8 s | ring fill |
+| Sparkle | Eye of the Storm landing | `x.drop` 0.2 s | marker fill (was a full ring, now fills over the drop) |
+| Neve | Ice Spear blast | `rmb.lance.delay` 1.8 s | ring fill |
+| Meeko | Burrseed root | `rmb.seed.delay` 0.7 s | ring fill |
+| Motley | Nightwell | `x.tell` 1.0 s | dome fill; the first catch now lands on the frame it completes (was one frame later) |
+| Kael | Finishing Slam, Meteor Drop | `rmb.windup` 0.6 s, `rmb.drop.hang` 0.2 s | lane / marker fill |
+| Grimble | Anchor slam | `e.windup` 0.38 s | cone fill |
+| Albert | Faultline | `x.windup` 0.4 s + `x.lead` 0.2 s | cell fills on the frame its slab hits (was drawn a step before) |
+| Tenzo | Basalt Spine (X) | `x.tell` 0.2 s | cracks, no fill in the source; they end with the first rise |
+| Lace | Hail Wall | `e.tell` 0.35 s | arc, no fill in the source; it runs out with the tell |
+
+Not covered: Tenzo's Quakefall (its circle is the charge, not a countdown; ext/vfx-telegraph-lead keeps it up
+through the hop) and Sable's Encore ring (an aura with a grow-in, no delayed hit).
 - **Colour.**
   - Pass `col` for the hero's own look. The default is the archetype colour.
   - Use `col2` for the accent, and `col_full` for a lane that changes colour at full charge.
@@ -205,3 +237,61 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   `AimKit.entry(h, id)` for the length, width, k or radius you expect.
 - **The old helpers.** `ArchKit.tele_circle` and `tele_lane` (one tweened node per telegraph) still work.
   Move your kit's calls to AimKit as you touch them (docs/DEBT.md).
+
+## 5. Cursor past max range: source rule vs ours (parity audit, 2026-11-09)
+
+Three outcomes: **clamp** (lands at the cursor, at most max range), **full** (always flies the whole range
+in the aim direction) or **refuse** (no cast). Source = the hero-ref sheet on `ext/agent-briefs`
+(`briefs/hero-ref/<id>.md`) and the wiki rows in `docs/heroes/<id>.md`. Ours = `AimMode` and the kit.
+"?" = the sources don't record it (the footage never aimed past range), so ours is a guess.
+Shared rule, fixed in this audit: **a ground-placed zone, nuke or lob lands exactly at the cursor with no
+minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blank click still travels.
+
+| Hunter (sheet) | Slot | Source rule | Ours | Verdict |
+|---|---|---|---|---|
+| Lace (pin) | LMB stage 1 | clamp; lands at the cursor | clamp, 12 m | match |
+| | LMB stage 2 | full, past the cursor, longer range | full, 16 m | match |
+| | RMB Heavy Shot | skillshot toward the cursor; range ? | full, 14 m | match (?) |
+| | E Hail Wall | arc at the cursor distance, clamped | clamp 2..9 m radius | match (the 2 m floor is ours) |
+| | X Starpiercer | beam, fixed length | full, 18 m | match |
+| Cinder (linwick) | LMB | stream runs its full length | full, 7 m | match |
+| | RMB Cinder Shot | sheet: one miss ended near the cursor (?); owner note: always full | full, 14 m | owner note, kept |
+| | Shift | toward the cursor, stops on impact | fixed dash along the aim | match |
+| | X Flue Flight | flies forward along the aim | fixed flight, steers with the aim | match |
+| Albert (bjorn) | LMB throw | clamp; lands at the cursor, max range ? (seen to 7 bh = 12.6 m) | clamp, 2.5..9 m (owner: 2.5 m floor) | match on the rule; **9 m is below the 12.6 m seen, left for the owner** |
+| | E | at the planted hammer, not the cursor | the hammer | match |
+| | R | lane along the aim, not cursor-clamped | full lane | match |
+| | Shift | fixed-length dash, not to the cursor | fixed | match |
+| Tenzo (breah) | LMB boulder | cursor or max range: **unrecorded** | full, 11 m | ? (sheet open question) |
+| | RMB slam | a short hop ahead toward the cursor | fixed hop | match |
+| | Shift Rock Hop | toward the cursor, length ? | clamp, 1.2..2.4 m a hop (owner item) | owner note |
+| | X Basalt Spine | centre at the cursor, clamped | clamp 11 m, **now no minimum** | fixed |
+| Grimble (dredge) | LMB | fixed range, does not stop at the cursor | full | match |
+| | RMB Grasp | full range, to the first foe | full, 11.5 m | match |
+| | R | cone, fixed | fixed | match |
+| Vex (venator) | LMB | full, past the cursor | full | match |
+| | RMB Burr | along the aim to max range, not the cursor | full, 10.5 m | match |
+| | E Longneedle | fixed long lane | full, 18 m | match |
+| | X Mini Nuke | cursor-placed | clamp 14 m, **now no minimum** | fixed |
+| Kael (juggernaut) | LMB blast | full, past the cursor | full, by charge | match |
+| | RMB Meteor Drop | cursor-placed, clamped about 5 m | clamp 5 m, no minimum | match |
+| | E Warchain | hook toward the cursor, length ? | full, 13 m | match (?) |
+| Sparkle (vireo) | LMB, RMB | full range | full | match |
+| | E Skycall | ground spot at the cursor | clamp 11 m, **now no minimum** | fixed |
+| | X Kitefall | at the cursor, clamped inside a ring | clamp 14.4 m, backed off to standable ground | match |
+| Motley (ostra) | LMB, RMB Snap | full, past the cursor | full | match |
+| | Shift Swap | lands at the cursor (lob) | clamp 12 m, no minimum | match |
+| | E Brimseed | at the cursor | clamp 9 m; refuses with no ground | match (?) |
+| | X Nightwell | at the cursor, clamped (10 m) | clamp 10 m; refuses with no ground | match |
+| Neve (tamsin) | LMB darts | homing toward the cursor | full, homing | match |
+| | RMB Ice Spear | lands at the cursor | clamp 1.5..12 m | match (the 1.5 m floor is ours) |
+| | E Rink Wall | slides toward the cursor and stops there | clamp 4.5..16.2 m | match |
+| Meeko (mooshmoosh) | LMB, RMB | full range | full | match |
+| | E Hearth | thrown to the cursor | clamp 9 m, no minimum | match |
+| Sable (dancer) | LMB | ends at the cursor, clamped | clamp 1.5..12 m | match |
+| | RMB Bola | fixed-length lane toward the cursor | fixed | match |
+| | E Shadow Knife | skillshot; with no target lands at the cursor or the end of range | clamp 14 m | match (?) |
+
+Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
+1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
+footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.

@@ -23,13 +23,6 @@ static func dash_name(h: Hunter) -> String:
 	var in_air := (h.pos.y - h.ground() > Match.HOP_STAND) if h.remote else not h.grounded
 	return of(h, "dash_air", ground_name) if in_air else ground_name
 
-## The cue of a press that did nothing: a soft tick for a dash with no charge, else the shared buzz.
-static func deny(m: Match, slot: String) -> void:
-	if slot == "dash":
-		m.sfx("dash_empty", null, -10.0)
-	else:
-		m.sfx("warn", null, -16.0, 1.6)
-
 ## Plays `h`'s own sound for `kind` at the hunter (nothing if it has none): the wordless voice lines.
 static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 	var sname := of(h, kind, "")

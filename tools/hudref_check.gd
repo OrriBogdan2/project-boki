@@ -1,11 +1,12 @@
 extends RefCounted
 ## --hudref-check: the overhead plates and the bottom bar read like the reference HUD (hero-ref/HUD.md).
-##   1. segments follow max health (HudStyle.seg_step: 25 each, doubling past 12)
+##   1. segments follow max health (HudStyle.seg_step: 17 each, doubling past 12)
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip under health) and shields (past the end of health) are drawn
 ##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
+##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -28,10 +29,10 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	# ---------------------------------------------------------------- 1. segments follow max health
-	var counts := [HudStyle.seg_count(100.0), HudStyle.seg_count(145.0), HudStyle.seg_count(300.0)]
-	ok(counts == [4, 6, 12], "25 health a segment: 100 -> 4, 145 -> 6, 300 -> 12 (%s)" % str(counts))
-	ok(HudStyle.seg_count(600.0) == 12 and HudStyle.seg_step(600.0) == 50.0,
-		"a huge pool doubles the segment size instead of crowding (600 -> 12 of 50)")
+	var counts := [HudStyle.seg_count(124.0), HudStyle.seg_count(145.0), HudStyle.seg_count(193.0)]
+	ok(counts == [8, 9, 12], "17 health a segment: the classes' 124 -> 8, 145 -> 9, 193 -> 12 (%s)" % str(counts))
+	ok(HudStyle.seg_count(600.0) == 9 and HudStyle.seg_step(600.0) == 68.0,
+		"a huge pool doubles the segment size instead of crowding (600 -> 9 of 68)")
 	var m := Match.new()
 	main.add_child(m)
 	var opts := HudRefDemo.opts("--hudref-demo=plates")
@@ -49,11 +50,11 @@ func run(main_node: Node) -> void:
 	var sh: Dictionary = hud.plates.shown.get(full.nid, {})
 	ok(int(sh.get("segs", -1)) == HudStyle.seg_count(full.max_hp),
 		"the drawn plate has one segment per 25 health (%s for %d)" % [str(sh.get("segs")), int(full.max_hp)])
-	full.max_hp = 300.0
-	full.hp = 300.0
+	full.max_hp = 193.0
+	full.hp = 193.0
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 300: the plate redraws with 12 segments")
+	ok(int(_shown(hud, full).get("segs", -1)) == 12, "max health raised to 193: the plate redraws with 12 segments")
 	# ---------------------------------------------------------------- 2. the chip holds, then drains
 	var hp := HudPlate.new()
 	var dt := 1.0 / 60.0
@@ -159,6 +160,29 @@ func run(main_node: Node) -> void:
 	P.arch = ""
 	ok(HudPlate.plate_offset(P) == HudPlate.PLATE_OFFSET, "a hunter with no archetype falls back too")
 	P.arch = arch_was
+	# ---------------------------------------------------------------- 4d. each squad row wears its Boki's icon
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and x.kin != null)
+	await hud.panels.draw
+	ok(mates.size() >= 1 and mates.all(func(x): return TeamBoki.shown.has(x.nid)),
+		"each of the %d teammates' squad rows draws its Boki icon" % mates.size())
+	if mates.size() >= 1:
+		var mate: Hunter = mates[0]
+		mate.downed = false        # (the demo downs one rival)
+		mate.kin.hp = mate.kin.max_hp * 0.5
+		await hud.panels.draw
+		ok(absf(float(TeamBoki.shown[mate.nid]["frac"]) - 0.5) < 0.05 and TeamBoki.shown[mate.nid]["state"] == "",
+			"a half-health Boki's icon shows half a bar, untinted (%s)" % str(TeamBoki.shown[mate.nid]))
+		mate.kin.state = "downed"      # (the kin's own update would stand it up again before a draw)
+		ok(TeamBoki.state_of(mate, mate.kin) == "down", "a downed Boki's icon is tinted down")
+		mate.kin.state = "active"
+		mate.kin.rest_t = 5.0
+		await hud.panels.draw
+		ok(TeamBoki.shown[mate.nid]["state"] == "rest", "a resting Boki's icon is tinted resting")
+		mate.kin.rest_t = 0.0
+		mate.downed = true
+		await hud.panels.draw
+		ok(TeamBoki.shown[mate.nid]["state"] == "wisp", "a Boki whose owner is a wisp is tinted wisp")
+		mate.downed = false
 	# ---------------------------------------------------------------- 5. cooldown text
 	P.slot_lv["kin"] = 1
 	P.ak.cd["e"] = 6.4
@@ -171,6 +195,7 @@ func run(main_node: Node) -> void:
 	ok(HudSlot.cd_text(0.42) == "0.4" and HudSlot.cd_text(3.2) == "4", "whole seconds, tenths under one second")
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
+	_check_deny(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -208,6 +233,41 @@ func _check_keys(P: Hunter) -> void:
 	ok(not bool(P.slot_info("x")["locked"]) and xt == HudSlot.cd_text(float(P.ak.cd["x"])),
 		"level %d: the X tile shows its cooldown ('%s')" % [P.lvl, xt])
 	P.ak.cd["x"] = 0.0
+
+## 7. A refused press (hero-ref/HUD.md section 2): E on cooldown pulses its slot and ticks once, and a second press
+## inside PressDeny.THROTTLE_S adds nothing. E pressed mid-dash on a hero whose row buffers it (Cinder) is held by
+## DashFlow and raises nothing, nor while it waits out DashFlow.BUFFER_S past the dash's end. Runs in one frame.
+func _check_deny(P: Hunter) -> void:
+	var hud = P.m.hud
+	PressDeny.last.clear()
+	hud.slot_fx.erase("k1")
+	P.ak.cd["e"] = 6.0
+	var n0 := PressDeny.raised
+	P.ak.use_e()
+	ok(PressDeny.raised == n0 + 1 and String(hud.slot_fx.get("k1", {}).get("kind", "")) == "deny",
+		"E pressed on cooldown: one deny on the k1 slot (%d)" % (PressDeny.raised - n0))
+	P.ak.use_e()
+	ok(PressDeny.raised == n0 + 1, "pressed again inside %.1fs: still one deny" % PressDeny.THROTTLE_S)
+	P.cls = Arch.weight("ashwick")
+	P.set_arch("ashwick")
+	P.unlock_all()
+	var flow := P.ak.flow
+	ok(P.ak.id == "ashwick" and String(DashFlow.row_of("ashwick", "e", false)["mode"]) == "buffer",
+		"Cinder's ground dash buffers E (its row)")
+	PressDeny.last.clear()
+	P.ak.cd["e"] = 6.0
+	P.move_kind = "dash"
+	P.roll_t = 0.3
+	P.inp["sig"] = true
+	flow.route(Match.DT)
+	var held_mid := flow.held.has("e") and not bool(P.inp["sig"])
+	P.roll_t = 0.0
+	P.stun_t = 0.1           # the dash is over but she can't act yet: the press keeps waiting
+	flow.route(Match.DT)
+	ok(held_mid and flow.held.has("e") and PressDeny.raised == n0 + 1,
+		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
+	P.stun_t = 0.0
+	flow.held.clear()
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
