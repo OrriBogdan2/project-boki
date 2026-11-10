@@ -477,7 +477,8 @@ func on_dash(use_ex: bool) -> bool:
 	var dir := h.aim_dir() if from_slam else dash_dir()
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
-	h.glide_cd = maxf(h.glide_cd, wind + float(dd["time"]) + 0.35)    # its wind-down: no glider straight out
+	# its wind-down: no glider straight out of the dash's end (a glide pressed during it opens at once, owner 11-08)
+	m.later(wind + float(dd["time"]), func(): if is_instance_valid(h) and not h.gliding: h.glide_cd = maxf(h.glide_cd, 0.35))
 	if from_slam or in_hang:
 		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
 		return true

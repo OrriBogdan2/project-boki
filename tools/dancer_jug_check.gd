@@ -1085,6 +1085,10 @@ func combos(a) -> void:
 	A.aim_at(P, home + Vector3(6.0, 0, 0))
 	P.do_dash()
 	A.step(m, 0.05)
+	for i in 30:
+		if P.roll_t <= 0.0:
+			break
+		A.step(m, 0.05)
 	A.ok("combo jug: Rampage winds down (no instant glide)", P.glide_cd > 0.2, "%.2f" % P.glide_cd)
 	# rooted: no chain; a stun breaks it; Enraged speeds every cooldown
 	A.step(m, 1.0)
