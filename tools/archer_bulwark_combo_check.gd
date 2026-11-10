@@ -939,6 +939,9 @@ func _bulwark_combos() -> void:
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
+	ok("bjorn telegraph: the crescent's outer edge is the blow's reach (the hit area), whatever the charge",
+			absf(K.fx.crescent.scale.x * BjornFx.CRES_OUT - float(K.lmb_def()["smash_reach"])) < 0.01,
+			"drawn %.2f vs reach %.2f" % [K.fx.crescent.scale.x * BjornFx.CRES_OUT, float(K.lmb_def()["smash_reach"])])
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
@@ -1161,6 +1164,16 @@ func _bulwark_combos() -> void:
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
 		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
+	var sl: Dictionary = K.rmb_def()["slam"]
+	# the slam's look is HeroVfx data (content/vfx/bulwark.json shield_slam): its sweep is sized to the slam's
+	# radius ("r", passed by the kit) and spans the cone's angle
+	var sweep: Dictionary = {}
+	for layer in HeroVfx.data("bulwark")["moves"]["shield_slam"]["fx"]:
+		if layer.get("p", "") == "sweep":
+			sweep = layer
+	ok("bulwark telegraph: the Shield Slam's fan is the cone it hits (its radius, its angle)",
+			sweep.get("size", "") == "r" and absf(float(sweep.get("arc", 0.0)) - float(sl["angle"])) < 0.01,
+			"sweep %s, cone %.0f" % [sweep, float(sl["angle"])])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()

@@ -104,8 +104,6 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("SWOLLEN", "")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
 		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
 
@@ -318,8 +316,6 @@ func _swap_cast() -> void:
 	}
 	swap_peak = 0.0
 	play(swap_move())
-	m.fx.ring(h.pos, float(dd["radius"]), TRADE_COL, 0.35)
-	m.fx.ring(land, float(dd["radius"]), TRADE_EDGE, 0.35)
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), SMOKE, 12, 1.6, 0.7, -1.5, 2.0 * TRADE_LOOK_K)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), TRADE_EDGE)

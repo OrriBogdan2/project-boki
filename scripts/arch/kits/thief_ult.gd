@@ -102,7 +102,8 @@ func _keep_dancing(d: Dictionary) -> void:
 		k.anim_at = k.m.time - into
 
 ## The ring everyone sees: a thin line that grows out from her, then rides with her, its outer edge exactly the
-## radius the blades reach; a finer line marks the outer band. It brightens on every beat.
+## radius the blades reach (its size never changes: it is the hit area); a finer line marks the outer band. It
+## brightens on every beat.
 func _draw_ring(d: Dictionary) -> void:
 	var r := radius()
 	AimKit.circle(k.h, "ult", {"self": true, "r": r, "band": RING_W, "col": RING_COL, "col2": RIM_COL, "all": true,

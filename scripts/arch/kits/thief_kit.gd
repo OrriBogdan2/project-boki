@@ -618,9 +618,10 @@ func _throw_bola() -> void:
 	bola = {"pos": h.pos + Vector3(dv.x * 0.5, 1.0, dv.y * 0.5), "dir": dv, "left": float(bd["range"]), "first": null,
 			"bounces": int(bd["bounces"]), "stg": stg}
 	m.sfx("dj_bola_throw", h.pos, -3.0, 1.0)
-	# the lane stays up for the flight, a strip with chevrons in the Bola's violet (the source's is white)
-	AimKit.lane(h, "rmb", {"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": 1.0,
-			"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
+	# the lane stays up for the flight, a strip with chevrons in the Bola's violet (the source's is white); its
+	# width is the catch corridor for a foe of her own size (a catch is within "reach" of the foe's body)
+	AimKit.lane(h, "rmb", {"len": lane_len(), "width": 2.0 * (float(bd["reach"]) + h.r), "chevrons": 4, "tip": true,
+			"fill": 1.0, "col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
 	Feel.cast_sound(m, "projectile", "control", h.pos, h)
 	# the yellow flash of the throw
 	fx().star(h.pos + Vector3(dv.x * 0.6, 1.2, dv.y * 0.6), col_of(rmb_def()), 0.8, 0.12)
@@ -672,7 +673,8 @@ func _tick_bola(dt: float) -> void:
 					break
 		for o in m.foes_of(h.team):
 			if o == first or not o.hittable(): continue
-			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < o.r + 0.45 and absf(o.pos.y + 0.9 - p.y) < 1.6:
+			var catch_r: float = o.r + float(bd["reach"])
+			if Vector2(o.pos.x - p.x, o.pos.z - p.z).length() < catch_r and absf(o.pos.y + 0.9 - p.y) < 1.6:
 				if first == null:
 					_wrap(o)
 					bola["first"] = o

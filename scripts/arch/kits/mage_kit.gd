@@ -18,6 +18,10 @@ const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the r
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
+## m: the Storm Rod's shot radius; its lane is drawn as wide as it hits (this + a foe's hit radius each side)
+const ROD_SIZE := 0.22
+## m: the run's hit width over the data's "width" (the dash pass counts both bodies on top)
+const WIRE_PAD := 0.6
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
@@ -349,6 +353,11 @@ func grant_reset() -> void:
 	reset_dash_boost = true
 	reset_boost_t = float(dash_def()["reset_window"])
 
+## The Wirerun lane's drawn width: the corridor a foe's centre can be in to be crossed, for a foe of her size
+## (the dash pass: both bodies' radii plus half the run's hit width on each side).
+func wire_corridor() -> float:
+	return float(dash_def()["width"]) + WIRE_PAD + 4.0 * h.r
+
 ## Seconds to a full charge: the running one's, or the next one's.
 func wire_hold() -> float:
 	var dd := dash_def()
@@ -439,10 +448,10 @@ func _tick_wire(dt: float) -> void:
 	wire["end"] = end
 	wire["len"] = L
 	var full_len := float(dd["dist"][1]) * wire_reach()
-	var lane := {"len": full_len, "width": 0.35, "rails": true, "chevrons": 5, "fill": L / full_len, "col": col_of(dd)}
+	var lane := {"len": full_len, "width": wire_corridor(), "rails": true, "chevrons": 5, "fill": L / full_len,
+			"col": col_of(dd)}
 	AimKit.lane(h, "dash", lane)
 	var ring := {"at": end, "r": float(dd["end_r"]), "ticks": true, "star": true, "col": col_of(dd), "col2": GLOW}
-	ring["all"] = true
 	ring["hot"] = k * 0.6
 	AimKit.circle(h, "dash_end", ring)
 	AimKit.charge(h, k, {"col": col_of(dd), "col2": GLOW})
@@ -472,7 +481,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	last_dash_kind = "wire"
 	play("mage_dash_go")
 	var dmg := float(dd["dmg"]) * run_rank_k()
-	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + 0.6, "kx": func(f: Ent): _wire_hit(f, dmg)}
+	h.dash_pass = {"hit": {}, "w": float(dd["width"]) + WIRE_PAD, "kx": func(f: Ent): _wire_hit(f, dmg)}
 	var b := a + Vector3(v.x, 0, v.y) * time
 	fx().arc(a, b, PINK, GLOW, 1.1, time + 0.25)
 	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), GLOW, GLOW.lightened(0.5), 0.5, time + 0.15)
@@ -605,7 +614,8 @@ func _tick_rod() -> void:
 		rod.global_position = _rod_hand() + up * 0.25
 		rod.look_at(rod.global_position + up, Vector3(d.x, 0, d.y))
 		HeroVfx.of(m).hold(h, "rmb_hold", k)          # the tip crackling
-	var lane := {"len": float(cd_["range"]), "width": 0.3, "rails": true, "chevrons": 4, "k": k}
+	var lane := {"len": float(cd_["range"]), "width": 2.0 * (ROD_SIZE + h.hit_radius()), "rails": true,
+			"chevrons": 4, "k": k}
 	lane["col"] = col_of(rmb_def())
 	lane["col_full"] = GLOW
 	AimKit.lane(h, "rmb", lane)
@@ -644,7 +654,7 @@ func _coil(k: float) -> void:
 	var rng := float(cd_["range"])                       # a fixed lane: the charge never changes the range
 	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
 	last_push = push
-	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
+	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": ROD_SIZE}
 	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
 	var stg := stage("rmb", {"delivery": delivery, "effects": effects})
 	var done := {"hit": false}
@@ -705,9 +715,9 @@ func _drop_mote(at: Vector3) -> void:
 	var mote := {"pos": at, "t": float(cd_["mote_life"]), "node": n, "owner": h}
 	mote["arc"] = 0.0
 	motes.append(mote)
-	fx().ring(at, float(cd_["mote_r"]) + 0.3, GLOW, PINK, 0.3)
+	fx().ring(at, float(cd_["mote_r"]), GLOW, PINK, 0.3)
 	m.sfx("vv_orb", at, -5.0)
-	net_ring(at, 1.0, GLOW)
+	net_ring(at, float(cd_["mote_r"]), GLOW)
 
 ## A charge orb: a pale core in a pink shell wound with two pink bands (it spins), its own light; short
 ## arcs crackle off it in _tick_motes. Solid colours, so it reads pink and pale pink, not a white glow.
