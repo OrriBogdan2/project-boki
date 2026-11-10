@@ -90926,5 +90926,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pose_furnacowary_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_sandwidow",
+    "name": "Sandwidow (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_sandwidow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_chandelapi",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_chandelapi_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_chandelapi",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_chandelapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_sandwidow",
+    "name": "Sandwidow (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_chandelapi",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_chandelapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_sandwidow",
+    "name": "Sandwidow (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_sandwidow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scarabit",
+    "name": "Scarabit (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_scarabit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scarabit",
+    "name": "Scarabit (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_scarabit_2.jpg",
+    "ok": true
   }
 ]
