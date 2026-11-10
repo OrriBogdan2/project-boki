@@ -3,6 +3,7 @@
  "master": "~/meshy/v95/Albert/r2/appeal3/albert_v95_body.glb",
  "game": "art/wardens/breaker/breaker.glb",
  "tris": 13000,
+ "max_tris": 13000,
  "head": {"centre": [0.0, 0.08, 1.27], "r": 0.25},
  "head_tris": 3000,
  "head_uv": 2.0,

@@ -40,8 +40,11 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
 is, much shorter: the torso squashes ~0.76), masts and sails on `hips`, the fish and its spring chain moved to his
 left mast (`move_bones` "to"/"chain"), the cracks from the emission map (`emit`), the porthole glass a flat disc for
 warden_mood's face (`screen`). `relax` with no cuts: with cuts it took 5.4k of 13.8k triangles (the rigid-piece clips
-swing the shoulders and hips hard); left without cuts the worst edge is 7.7x (shoulders, hips; 2.6k edges over 1.3).
-Shots: docs/shots/albert-appeal/.
+swing the shoulders and hips hard); left without cuts the worst edge is 8.0x (shoulders, hips; 2.5k edges over 1.3).
+`max_tris` 13000: the kept hammer and shield add ~1.8k, so the .glb stays under warden_glb_check's 15000 (14.7k).
+`--stretch-check --wardens=bulwark` fails every clip (worst 9.45x, fuse; hips and right arm); the in-game shots of
+fuse, x_wind and run_f show no tear at match size. He stands 2.47x a medium (the helmet and masts; was 1.9x).
+Shots: docs/shots/albert-appeal/ (game/: in-engine, moods_sheet.png = calm, happy, angry, determined, sad, flare).
 
 ## Status (2026-11-10): Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
