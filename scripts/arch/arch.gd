@@ -78,10 +78,10 @@ static func of_save() -> String:
 static func pick_for(cls: String, key: String, taken := []) -> String:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
-	var free := of_class(cls).filter(func(a): return not taken.has(a))
-	if free.is_empty():
+	var pool := of_class(cls).filter(func(a): return not taken.has(a))
+	if pool.is_empty():
 		return pick(cls, r)
-	return String(free[r.randi_range(0, free.size() - 1)])
+	return String(pool[r.randi_range(0, pool.size() - 1)])
 
 ## A random archetype of a class (bots).
 static func pick(cls: String, rng: RandomNumberGenerator) -> String:

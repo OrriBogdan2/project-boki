@@ -62,17 +62,18 @@ static func deal_mates(o: Dictionary) -> void:
 ## A random Hunter not in `taken` (any Hunter if every one is taken).
 static func free_arch(taken: Array, r: RandomNumberGenerator, only_open := false) -> String:
 	var ids := Arch.ids()
-	var free := ids.filter(func(a): return not taken.has(a) and (not only_open or ClassUnlock.is_open(a)))
-	if free.is_empty():
-		free = ids.filter(func(a): return not taken.has(a))
-	if free.is_empty():
-		free = ids
-	return String(free[r.randi_range(0, free.size() - 1)])
+	var pool := ids.filter(func(a): return not taken.has(a) and (not only_open or ClassUnlock.is_open(a)))
+	if pool.is_empty():
+		pool = ids.filter(func(a): return not taken.has(a))
+	if pool.is_empty():
+		pool = ids
+	return String(pool[r.randi_range(0, pool.size() - 1)])
 
 ## Your squad as [{name, peer, arch, you, bot}] (you first): online the roster entries on your team,
 ## else you and the dealt bot mates. `mine` is your Hunter (the lobby's pick, else your saved one).
 static func squad_of(o: Dictionary, mine: String) -> Array:
-	var out: Array = [{"name": String(Save.d.get("name", "Hunter")), "peer": Net.me, "arch": mine, "you": true, "bot": false}]
+	var me := String(Save.d.get("name", "Hunter"))
+	var out: Array = [{"name": me, "peer": Net.me, "arch": mine, "you": true, "bot": false}]
 	if o.has("net"):
 		out.clear()
 		var roster: Array = o["net"].get("roster", [])

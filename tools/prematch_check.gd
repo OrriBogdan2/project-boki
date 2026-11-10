@@ -65,7 +65,8 @@ func _turns() -> void:
 	ok(goes == 1, "after the lock hold the match loads, exactly once (%d)" % goes)
 	var lo := pm.launch_opts()
 	var mates_kept: bool = lo["mates"].map(func(m): return m["arch"]) == archs.slice(1)
-	ok(lo["arch"] == "gunslinger" and Save.d["arch"] == "gunslinger" and mates_kept, "the match starts with the picks, yours saved")
+	var started: bool = lo["arch"] == "gunslinger" and Save.d["arch"] == "gunslinger" and mates_kept
+	ok(started, "the match starts with the picks, yours saved")
 	var idle := Prematch.new({"teams": 10, "squad": 1, "tier": 0, "seed": 3})
 	idle.tick(0.01)
 	idle.tick(Prematch.TURN + 0.01)
@@ -85,7 +86,8 @@ func _online() -> void:
 	var pm := Prematch.new(o)
 	var again := Prematch.new(o.duplicate(true))
 	var order: Array = pm.squad.map(func(m): return m["peer"])
-	ok(order.size() == 3 and order == again.squad.map(func(m): return m["peer"]), "the pick order is the same on every client (%s)" % [order])
+	var same: bool = order.size() == 3 and order == again.squad.map(func(m): return m["peer"])
+	ok(same, "the pick order is the same on every client (%s)" % [order])
 	pm.tick(5.0)
 	ok(pm.turn == -1 and pm.loaded_count() == Vector2i(1, 4), "picking waits until everyone loads (1/4)")
 	ok(pm.mark_loaded("1") and not pm.mark_loaded("1"), "a player's load is counted once")
@@ -100,7 +102,8 @@ func _online() -> void:
 		pm.choose("gunslinger")
 		pm.tick(Prematch.TURN)
 	else:
-		ok(pm.remote_pick(String(first["peer"]), "gunslinger", false) and pm.turn == 0, "a live pick shows, the turn goes on")
+		var live := pm.remote_pick(String(first["peer"]), "gunslinger", false)
+		ok(live and pm.turn == 0, "a live pick shows, the turn goes on")
 		ok(pm.remote_pick(String(first["peer"]), "gunslinger", true) and pm.turn == 1, "a final pick ends the turn")
 	ok(pm.taken().has("gunslinger"), "the first pick is taken")
 	var second: Dictionary = pm.picker()
@@ -129,12 +132,14 @@ func _online() -> void:
 		late.mark_loaded(p)
 	late.tick(0.01)
 	late.tick(Prematch.TURN + Prematch.GRACE + 0.01)
-	ok(late.turn == 1 and late.squad[0]["done"], "a teammate whose final pick never comes is picked for after the grace")
+	var picked_for: bool = late.turn == 1 and late.squad[0]["done"]
+	ok(picked_for, "a teammate whose final pick never comes is picked for after the grace")
 	var mate := String(late.picker().get("peer", ""))
 	ok(not late.remote_pick(mate, String(late.squad[0]["arch"]), true), "a teammate can't take a taken Hunter")
 	var lo := pm.launch_opts()
 	var in_roster: Array = lo["net"]["roster"].map(func(r): return r["arch"])
-	ok(in_roster.slice(0, 3).all(func(a): return archs.has(a)) and in_roster[3] == "gunslinger", "the roster carries the picks, the rival may mirror")
+	var carried: bool = in_roster.slice(0, 3).all(func(a): return archs.has(a)) and in_roster[3] == "gunslinger"
+	ok(carried, "the roster carries the picks, the rival may mirror")
 	Net.me = was_me
 	Net.peers = was_peers
 
@@ -142,7 +147,8 @@ func _bot_fill() -> void:
 	var taken := ["gunslinger", "ostra", "tender"]
 	var got := Arch.pick_for("medium", "b7|99", taken)
 	ok(got == "dolm", "a bot filling a squad skips Hunters the squad already has (%s)" % got)
-	ok(Arch.pick_for("medium", "b7|99") == Arch.pick("medium", _seeded("b7|99")), "with nothing taken the pick is unchanged")
+	var unchanged := Arch.pick_for("medium", "b7|99") == Arch.pick("medium", _seeded("b7|99"))
+	ok(unchanged, "with nothing taken the pick is unchanged")
 
 func _seeded(key: String) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()
@@ -207,9 +213,11 @@ func _screen(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shots = a.substr(12)
 	if shots != "":
+		if main.fade != null:
+			main.fade.reveal(0.05)      # (the boot splash would cover the screenshot)
 		view.pm.tick(3.4)
 		view._choose("bulwark")
-		for i in 8:
+		for i in 30:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(shots + "/prematch_turn.png")
 	view.chat_in.text = "hello"

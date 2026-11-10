@@ -40,10 +40,13 @@ func _ready() -> void:
 	head.add_child(titles)
 	titles.add_child(UI.section("Before the drop", UI.GOLD))
 	titles.add_child(UI.title("Pick your Hunter", 34))
+	var turn_row := UI.hbox(14)       # the turn countdown beside whose turn it is
+	titles.add_child(turn_row)
+	timer_label = UI.label("", 34, UI.INK, UI.big)
+	turn_row.add_child(timer_label)
 	hint = UI.para("")
-	titles.add_child(hint)
-	timer_label = UI.label("", 56, UI.INK, UI.big)
-	head.add_child(timer_label)
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	turn_row.add_child(hint)
 	var cols := UI.hbox(24)
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.add_child(cols)
@@ -188,7 +191,8 @@ func _fill_squad() -> void:
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		h.add_child(nm)
 		var state := "Picking..." if m == now else "Waiting to pick"
-		h.add_child(UI.label(Arch.label(ak) if Arch.exists(ak) else state, 14, UI.GOLD if m == now else UI.MUTED))
+		var shown_ak := Arch.label(ak) if Arch.exists(ak) else state
+		h.add_child(UI.label(shown_ak, 14, UI.GOLD if m == now else UI.MUTED))
 		squad_box.add_child(row)
 	if squad_box.get_child_count() == 1 and int(pm.opts.get("squad", 1)) <= 1:
 		squad_box.add_child(UI.para("A solo drop: nobody to plan with, but everyone else is out there."))
