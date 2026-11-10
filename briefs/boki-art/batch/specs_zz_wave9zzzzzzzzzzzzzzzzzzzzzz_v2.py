@@ -1076,3 +1076,13 @@ _POSED="Oarter Ribbonwyrm Cubbat Pipwom Critwom Sirencada Quivertoad Canvastross
 for _n in ('Canvastross','Jibbatross'):
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg','final' if _n=='Canvastross' else 'mid','majestic' if _n=='Canvastross' else 'sleek',_GC,_GN,False,True,"standing on the ground, wings folded, grumpy sideways look at the viewer")
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_face'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_face'; SPECS[_n0+1]['runs']=2
+
+# 08:40 ET 11-10: Lunowl female (fv4_2) and Murmuron female (fv4_4) cards live: same palette as the male, one step apart. Their sheets + portraits.
+for _n in ('Lunowl','Murmuron'):
+    _st,_ar,_dk,_fu=_FEMST[_n]; _cd='briefs/boki-art/cards/'+_n+'_female.jpg'; _n0=len(SPECS)
+    V2SHEET_NEW(_n+' female',_cd,_GC,_GN); V2PORT_NEW(_n+' female',_cd,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_FEMPOSE[_n])
+    SPECS[_n0]['id']='fs3_'+_n.lower(); SPECS[_n0+1]['id']='fp3_'+_n.lower(); SPECS[_n0+1]['runs']=2
+# Pangolith portrait: the card as reference kept the card's pose 6 of 6. Retry from the SHEET with the pose first.
+for _k,_pose in (('a',"curled into a ring lying flat on its side, seen from a low side angle so the ring looks like a wide oval, head resting on its tail, one eye open"),
+                 ('b',"walking on all fours in a side view facing RIGHT, back arched, long scaled tail trailing, head turned to the viewer")):
+    ON_POSE('Terrasloth',_LM['Terrasloth']['sheet'],'mid','cute',False,False,_pose+". It is small in the frame, with about 20 percent empty margin on every side.",_KEEPALL); SPECS[-1]['id']='v2p_terrasloth_new_'+_k; SPECS[-1]['runs']=2
