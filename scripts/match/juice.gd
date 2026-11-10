@@ -137,7 +137,15 @@ static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	if credit == m.player and h != m.player:
 		m.freeze_frame(0.045)
 
-## A monster dying (Match.on_mob_dead): a flash and a spray in its colour, a ring for the big ones.
+## The flash colour of a kill: the colour of the side that got it (your squad or a rival squad), as
+## the player sees it, so a steal reads on the spot. `credit` is the same Hunter Match.on_mob_dead pays.
+## No credit (a fall, the Blight) or no player to be relative to: the monster's own colour.
+static func kill_col(m: Match, credit: Ent, own: Color) -> Color:
+	if not credit is Hunter or m.player == null:
+		return own
+	return SideColor.of_team(m.player.team, credit.team)
+
+## A monster dying (Match.on_mob_dead): a flash in the killer side's colour and a spray in its own, a ring for the big ones.
 static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 	if m == null or m.fx == null:
 		return
@@ -149,7 +157,7 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	m.fx.flash(c, col.lerp(Color.WHITE, 0.5), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	m.fx.flash(c, kill_col(m, credit, col.lerp(Color.WHITE, 0.5)), 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.3), 12 if not big else 22, 8.0 if not big else 11.0, 80.0, 0.3, 14.0, 1.0 if not big else 1.4)
 	if big:
 		m.fx.ring(mb.pos, 3.0, Color(col, 0.85), 0.4)
@@ -164,7 +172,7 @@ static func boss_dead(m: Match, b: Mob, credit: Ent) -> void:
 		return
 	var col: Color = b.md.get("color", Color("ffb070"))
 	var c := b.pos + Vector3(0, 1.4, 0)
-	m.fx.flash(c, Color(1, 0.96, 0.88), 2.4, 0.3)
+	m.fx.flash(c, kill_col(m, credit, Color(1, 0.96, 0.88)), 2.4, 0.3)
 	m.fx.spark(c, Vector3.UP, col.lerp(Color.WHITE, 0.35), 40, 15.0, 70.0, 0.7, 12.0, 2.0)
 	m.fx.spark(c, Vector3.UP, Color(1, 0.95, 0.8), 24, 9.0, 180.0, 0.5, 6.0, 1.4)
 	m.fx.ring(b.pos, 7.5, Color(col, 0.9), 0.6)
