@@ -72,14 +72,14 @@ static func render_hit(h: Hunter, delta: float) -> void:
 static func shot_look(m: Node, by: Ent, col: Color, size: float) -> Array:
 	if legacy:
 		var p0 = m.get("player")
-		if p0 and by.team != p0.team: return [Color(col.lerp(Color("ff5a3a"), 0.35), 1.0), size * 2.6, 0.0]
+		if p0 and by.team != p0.team: return [Color(col.lerp(SideColor.foe(), 0.35), 1.0), size * 2.6, 0.0]
 		return [Color(col, 0.5), size * 1.7, 0.0]
 	var vis_col := col
 	var vis_size := size * 2.0
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
-		vis_col = col.lerp(Color("ff5a3a"), 0.35)
+		vis_col = col.lerp(SideColor.foe(), 0.35)
 		vis_col.a = 1.0
 		vis_size *= 1.3
 		halo = 0.4

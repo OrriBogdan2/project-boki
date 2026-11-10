@@ -30,6 +30,6 @@ static func fall_vy(vy: float, sink: float, rate: float, above: float, dt: float
 static func land(m: Match, h: Hunter) -> void:
 	m.fx.dust(h.pos, 22)
 	m.fx.ring(h.pos, 3.4, Color(1, 1, 1, 0.8), 0.4)
-	m.fx.ring(h.pos, 1.8, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 0.25)
+	m.fx.ring(h.pos, 1.8, SideColor.of(m, h), 0.25)
 	m.sfx("land", h.pos, -2.0, 0.8)
 	h.squash = LAND_SQUASH
