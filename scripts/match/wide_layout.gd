@@ -73,6 +73,7 @@ static func widen(L: Dictionary) -> Dictionary:
 	if W.has("train"): W["train"]["center"] = sh2.call(W["train"]["center"])
 	for k in ["docks", "outposts", "hatches", "portals"]:
 		if W.has(k): W[k] = (W[k] as Array).map(func(a): return sh2.call(a))
+	if W.has("heart"): W["heart"] = sh2.call(W["heart"])
 	for LD in W.get("lairs", []):
 		LD["at"] = sh2.call(LD["at"])
 	for cat in W.get("spawn_points", {}):
