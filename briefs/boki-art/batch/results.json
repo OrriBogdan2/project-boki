@@ -102112,5 +102112,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/new_carousel_mid2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_xylogator_nl",
+    "name": "Xylogator (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_xylogator_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_xylogator_nl",
+    "name": "Xylogator (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_xylogator_nl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pillaroo_nl",
+    "name": "Pillaroo (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_pillaroo_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_xylogator_nl",
+    "name": "Xylogator (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_xylogator_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_postroo_nl",
+    "name": "Postroo (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_postroo_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_stamproo_nl",
+    "name": "Stamproo (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_stamproo_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_marimbite_nl",
+    "name": "Marimbite (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_marimbite_nl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_stamproo_nl",
+    "name": "Stamproo (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_stamproo_nl_3.jpg",
+    "ok": true
   }
 ]
