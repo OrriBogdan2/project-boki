@@ -219,3 +219,26 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+## Boots and charms (gear parity, `--gear-parity-check`)
+Loadout is 2 gloves, 2 charms, boots (DECISIONS). Searched briefs/supervive-data and briefs/hero-ref
+(origin/ext/agent-briefs, 2026-11-10) for boots actives, cooldowns and passive move speed: the source data
+has no boots or charm items at all (no item tables; PHYSICS_PARITY only says gear scales move speed at
+runtime, with no numbers). So no piece has a source match and nothing was changed; the list below goes to
+the owner. The check pins these values so any change goes through this list.
+
+| Kind | Piece | Cooldown | Stats (Common) | Source match |
+|---|---|---|---|---|
+| boots | Springheel Boots (`boots`) | none (passive) | +8% move speed | none |
+| boots | Quickstep Boots (`quickstep_boots`) | none | dash back 15% sooner, +3% move speed | none |
+| boots | Skylark Boots (`skylark_boots`) | none | +35% glider heat | none |
+| boots | Windstep Boots (`windstep_boots`) | none | +10% glide speed, +15% glider heat | none |
+| charm* | `booster` | none | +20% glide speed, +20% glider heat | none |
+| charm* | `focus` | none | 18% cooldown reduction | none |
+| charm* | `heat_sink` | none | +45% glider heat | none |
+| charm* | `power_core` | none | +12% damage | none |
+
+\* Charms are not built yet (note 0005): there is no charm gear kind, and these passive gloves are the
+pieces meant to become charms. No boots piece has an active, so none needs a key: the HUD boots cell
+(GearPanel) shows the icon and rarity with no key and no cooldown, and its hover reads "Boots" plus the
+stat line; the check asserts both for every boots piece.
