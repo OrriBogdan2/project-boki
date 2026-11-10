@@ -983,7 +983,8 @@ func armed_fx(word: String, slot := "sec") -> void:
 ## burst and a flash, the kit's own sound over a crit, the T4 shake, a camera punch toward it and a HUD
 ## flash for whoever landed it; everyone online gets a ring and a column. The hitstop comes from the
 ## hit itself (payoff: true is tier 4).
-func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null, rings := true) -> void:
+func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector2.ZERO, victim: Ent = null,
+		rings := true) -> void:
 	m.fx.word(at + Vector3(0, 2.7, 0), word, col, true)
 	if rings:
 		m.fx.ring(at, 2.4, col, 0.38)

@@ -747,7 +747,8 @@ func _feel() -> void:
 	ok("feel: the Finishing Slam lands after a 0.5s wind-up", float(Arch.def("juggernaut")["rmb"]["windup"]) >= 0.3)
 	# the hero ultimates on X run their own wind-ups (a growing ring, a guard), on the source's cooldown ratios
 	var ults: Array = Arch.ids().filter(func(a): return Arch.def(a).has("x"))
-	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown (the game data runs to 80s; Gil's Tidal Wave 90s)",
+	ok("feel: every X ultimate has its own wind-up (no generic fuse) and a 15-90s cooldown"
+			+ " (the game data runs to 80s; Gil's Tidal Wave 90s)",
 			ults.all(func(a): return _ult_shaped(Arch.def(a)["x"])))
 	# hitstop tiers
 	var dummy := Hunter.new(); dummy.max_hp = 145.0
