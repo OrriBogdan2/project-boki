@@ -3524,6 +3524,7 @@ func _play_evolutions() -> void:
 		if kk["rec"].get("pending_evo", []).size() > 0 and not kk.has("indoors"):
 			k = kk; break
 	if k.is_empty():
+		EvolveCard.tell_waiting(self, kins)
 		return
 	building_now = true
 	var rec: Dictionary = k["rec"]
@@ -3534,9 +3535,6 @@ func _play_evolutions() -> void:
 	var at: Vector3 = n.position
 	k["goal"] = Vector3.INF
 	k["busy"] = true
-	var big := false
-	for e in evs:
-		if e["kind"] == "form": big = true
 	Sfx.play("skill")
 	music_hold = 25.0
 	Sfx.play_music("lullaby", 1.0)
@@ -3561,10 +3559,7 @@ func _play_evolutions() -> void:
 		cam.zoom_to = HOME_ZOOM
 		Sfx.play("kin_happy")
 		_emote(k, "★")
-		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
-		for e in evs:
-			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
-		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED))
+		EvolveCard.show(self, rec, evs)
 	if seen:
 		evolving = EvolveMoment.play(self, fx, n, nn, DexView.type_col(DexView.type_of(rec["species"])), watchers, end)
 	else:
