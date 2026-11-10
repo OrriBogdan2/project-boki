@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://crpet2wxd60i2"
-path="res://.godot/imported/breaker_scan_albedo_key.jpg-a99eb672ec7beeb05a16380427e2716b.ctex"
+path.bptc="res://.godot/imported/breaker_scan_albedo_key.jpg-a99eb672ec7beeb05a16380427e2716b.bptc.ctex"
+path.astc="res://.godot/imported/breaker_scan_albedo_key.jpg-a99eb672ec7beeb05a16380427e2716b.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "abc92c83de88b220af4660e7ab71fff3"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/breaker/breaker_scan_albedo_key.jpg"
-dest_files=["res://.godot/imported/breaker_scan_albedo_key.jpg-a99eb672ec7beeb05a16380427e2716b.ctex"]
+dest_files=["res://.godot/imported/breaker_scan_albedo_key.jpg-a99eb672ec7beeb05a16380427e2716b.bptc.ctex", "res://.godot/imported/breaker_scan_albedo_key.jpg-a99eb672ec7beeb05a16380427e2716b.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
