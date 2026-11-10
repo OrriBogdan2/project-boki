@@ -230,7 +230,7 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var K: JuggernautKit = P.ak
 	V.plays.clear()
 	var rings0: int = m.fx.rings.size()
-	K._slam()
+	K._slam(1.0, 1.0)        # the full Finishing Slam (damage and range factors 1)
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
