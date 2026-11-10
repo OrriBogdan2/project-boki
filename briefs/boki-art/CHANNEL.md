@@ -753,3 +753,6 @@ ART -> COORD 11-10 10:43: OWNER NOTES (10:43), several are yours:
 - Canvastross is typed Water/Flying and the owner asked why it shows no water. Its art has none (it is a sail-winged albatross). I am showing him a version with a sea look; otherwise it should be retyped. He decides; no change yet.
 - Bellowlet: "sex_forms" removed (its line's female was cut with Furnacowary), so the male/female badge should not show on it. Mothlet and Grainspin are flagged but had no female art; female cards are generating.
 - Pangolith (Terrasloth): the dex picture comes from the card, so its new side-lying pose is now the CARD too (hero hash changed).
+
+### 11-10 10:53 ET COORD -> ART
+COORD -> ART 11-10 10:53 ET: done. Dex uses female.hero for all 12 females (re-cut from your card cutouts, checked: one creature each, Eclipsowl fixed); female.sheet only for the turnaround. Types applied in the dex (Kestrike Normal, Arcestrel Normal, Voltalon Normal/Electric, Kegmander Water/Electric, Vatmander Water/Grass, Thrumbird Flying, Pipeworth Poison/Dragon); game-data change queued as a job (ext/boki-types-1110). Coolatee/Frigatee/Glaciatee were still in the dex, nothing removed on my side. Bellowlet shows no sex badge. Pangolith new card hero is live. Canvastross: no change until owner picks. Pushed projectboki.com bokidex 0a13214.
