@@ -5962,3 +5962,4 @@ READY ext/tutorial-visibility 0ac753e7c (0.24.4 playtest 11-09: tutorial step pa
 READY ext/cinder-lmb 632de4b22 (Cinder LMB Torch Lance: reach 7->6.1 m (-13%), width 0.5->2.2 becomes 0.65->2.85 m (+30%), dps 27 and tick unchanged; VFX uses same w0/w1 so it matches; weapon json range 6.1; docs/wiki updated; ashwick-combo-check 124/125 (ram fails identically on gatefix-w2), hitbox-size-check 0 fail, weapon-clip PASS; health.py fails on pre-existing check_registry style)
 READY ext/tut-starter-three 3b2af9949 (starter pick Lace/Kael/Vex)
 READY ext/tut-first-race 06ce66f82 (first race practice lap)
+READY ext/soul-link-integ 3303c3b45 (INTEG T2, do not merge alone: 10 branches merged; summon-band-check now passes off/on, dmg_k refit; all T2 accept checks pass)
