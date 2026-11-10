@@ -1263,3 +1263,7 @@ for _n,(_st,_ar,_dk,_fu,_pose) in {'Wickapi':('baby','cute',1,1,"sitting with it
                                    'Scopeleon':('baby','cute',1,0,"sitting with its tail curled under it, squinting through its telescope eye up at the viewer")}.items():
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_r2'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_r2'; SPECS[_n0+1]['runs']=2
+
+# 11-10 OWNER: Grammite portrait 1 "has 2 heads" (two faces, four sabres). Portrait 2 live for now; clean retries with the head count spelled out.
+_n0=len(SPECS); V2PORT_NEW('Grammite','briefs/boki-art/cards/Grammite.jpg','baby','cute',_GC,"exactly ONE head with one face and two eyes, exactly TWO sabre mandibles crossed in front of the face, one segmented body, short legs",True,False,"uncurled and trundling forward to the left, head up, its two sabre mandibles raised")
+SPECS[_n0]['id']='v2p_grammite_one'; SPECS[_n0]['runs']=3
