@@ -286,9 +286,9 @@ func _horizon_part(hub, open_ids: Array) -> void:
 func _in_frame(cam: Camera3D, p: Vector3) -> bool:
 	if cam.is_position_behind(p):
 		return false
-	var size := cam.get_viewport().get_visible_rect().size
-	var s := (cam.unproject_position(p) - size * 0.5) / (size * 0.5)
-	return absf(s.x * (size.x / size.y) / (16.0 / 9.0)) < FRAME_MARGIN and absf(s.y) < FRAME_MARGIN
+	var vs := cam.get_viewport().get_visible_rect().size
+	var s := (cam.unproject_position(p) - vs * 0.5) / (vs * 0.5)
+	return absf(s.x * (vs.x / vs.y) / (16.0 / 9.0)) < FRAME_MARGIN and absf(s.y) < FRAME_MARGIN
 
 ## Opening a zone lights its island the next time the hub loads.
 func _reload_part(m: Node) -> void:
