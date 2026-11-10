@@ -10,6 +10,8 @@ extends RefCounted
 ## --bench-stress: the 60-actor load (10 trios = 30 Hunters, every Boki kept out beside its Hunter, no fight).
 ## --bench-real: each frame hands the match the last frame's wall time, so its own catch-up decides the steps
 ## (as in play; the default steps once a frame, which hides the catch-up).
+## --bench-warm: the loading screen's warm-up first (every shader built, the auto-quality benchmark run), as a
+## player's match has it; without it, first draws compile mid-run.
 ## --bench-brawl: the ten-trio fight on the Hollow Crown instead (tools/perf_brawl.gd)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 ## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
@@ -112,6 +114,8 @@ func _match() -> Array:
 		if cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null:
 			m = cur
 	m.set_process(false)
+	if "--bench-warm" in OS.get_cmdline_user_args():
+		await m.warm_up()
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
