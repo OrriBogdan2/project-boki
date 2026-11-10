@@ -460,11 +460,13 @@ func buff(stat: String) -> float:
 func mass() -> float:
 	return float(cdat.get("mass", 1.0))
 
+## A downed Hunter is a Wisp (decision 0019): shots and areas pass through it. Stomps, executes and revives
+## reach it by their own rules (Life), not through here.
 func hittable() -> bool:
-	return not dead and not out and not extracted and not riding
+	return not dead and not out and not extracted and not riding and not downed
 
 func targetable() -> bool:
-	return hittable() and not downed and cloak_t <= 0.0 and not dropping
+	return hittable() and cloak_t <= 0.0 and not dropping
 
 func is_local() -> bool:
 	return ctrl == "local"

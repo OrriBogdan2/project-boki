@@ -146,7 +146,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			return
 	# ---- combat
 	var finishing: bool = tgt is Hunter and tgt.downed and not tgt.out
-	if tgt and not tgt.dead and tgt.hittable() and (finishing or not (tgt is Hunter and not tgt.targetable())):
+	if tgt and not tgt.dead and (finishing or (tgt.hittable() and not (tgt is Hunter and not tgt.targetable()))):
 		var d := h.flat_dist(tgt)
 		var to := h.dir_to(tgt)
 		var pref: float = {"light": 4.5, "medium": 7.0, "heavy": 5.5}[h.cls]
