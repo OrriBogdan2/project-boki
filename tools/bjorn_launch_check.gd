@@ -120,7 +120,8 @@ func _window() -> void:
 	_ready_swing(m, P, T, home)
 	var opened := -1.0
 	var shut := -1.0
-	var flash_ringless := false
+	var flashed := false
+	var fulls := int(HeroVfx.of(m).plays.get("full", 0))
 	var hot := false
 	var held := 0.0
 	while held < full + 0.38:
@@ -130,14 +131,13 @@ func _window() -> void:
 		var now := K.launch.in_window(K.lmb_t)
 		if now and opened < 0.0:
 			opened = K.lmb_t
-			var ring = K.fx.flare.material_override.get_shader_parameter("ring")      # unset: the shader's 0
-			flash_ringless = K.fx.flare_t > 0.0 and (ring == null or float(ring) == 0.0)
+			flashed = int(HeroVfx.of(m).plays.get("full", 0)) == fulls + 1      # the full flare (content/vfx/bulwark.json)
 			hot = K.fx.hot
 		if not now and opened >= 0.0 and shut < 0.0:
 			shut = K.lmb_t
-	ok("bjorn #49 window: it opens at full charge (%.2f s) with the ring-free flash and the hot glint" % full,
-		absf(opened - full) < 0.03 and K.flared and flash_ringless and hot,
-		"opens at %.2f flash %s hot %s" % [opened, flash_ringless, hot])
+	ok("bjorn #49 window: it opens at full charge (%.2f s) with the one full flare and the hot glint" % full,
+		absf(opened - full) < 0.03 and K.flared and flashed and hot,
+		"opens at %.2f flash %s hot %s" % [opened, flashed, hot])
 	ok("bjorn #49 window: it shuts %.2f s after full" % win, absf(shut - (full + win)) < 0.03,
 		"shuts at %.2f (want %.2f)" % [shut, full + win])
 	step(m, 2.0, press_at.bind(P, home + Vector3(9.0, 0, 0)))

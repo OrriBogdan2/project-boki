@@ -27,6 +27,7 @@ const SETTLE := 6             # frames a reset target stands before the next slo
 const TAIL := 0.6             # s the last slot gets to finish (a held punch lands on release)
 
 var main: Node
+var gil_bag: Array = []         # Gil's bag as first dealt, put back before each of his trials
 var ak: RefCounted
 var bad := 0
 var n := 0
@@ -114,6 +115,9 @@ func _reset(m: Match, P: Hunter, t: Ent, home: Vector3, spot: Vector3, hp_k: flo
 	if t is Kin:
 		(t as Kin).state = "wild" if (t as Kin).is_wild() else "active"
 		(t as Kin).shield = 0.0
+	if P.ak is GilKit:      # (Gil's bag is shuffled: every trial throws the same next potion)
+		if gil_bag.is_empty(): gil_bag = (P.ak as GilKit).bag.duplicate()
+		(P.ak as GilKit).bag = gil_bag.duplicate()
 	ak.aim_at(P, spot)
 	for i in SETTLE:      # both feet down again (a dummy left in the air takes Tenzo's Dunk)
 		_still(t)
