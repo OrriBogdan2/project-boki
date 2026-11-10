@@ -416,3 +416,18 @@ for _k,_b in (('coil',"a tall copper coil grown along its spine like a ridge of 
         "The same steel-blue and white fur, big ears and face, now bigger, leaner and confident, standing upright on long powerful coiled-spring hind legs, with a long tail ending in a white tuft that crackles with sparks. "
         "On its back: "+_b+". Everything grows from its body; nothing is strapped or worn. No pinball parts, no chrome balls, no yellow fur, no lightning-bolt markings, no glowing cheeks. "
         "Draw it in the same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
+
+# 21:02 ET 11-09 owner: jerboa line = baby (c_jerboa_baby_3) > static fur crest (c_jerboa_final_crest_2) > copper fins (c_jerboa_final_vanes_2), Electric; "you can name it":
+# Jerbit > Jerbolt > Dynaboa. V2 cards with the style board, 4 runs. Pinster/Tiltster (pill bug, Steel/Bug) V2 picks clean -> sheets + portraits.
+# Bullpole: all 4 board runs pasted the board's tiles -> remove-tiles edit.
+_B3=[('Jerbit','batch/out/c_jerboa_baby_3.jpg','baby','cute',False,True,"steel-blue and white fur, big pale-pink inner ears, teal eyes, a long thin tail with a fluffy white tuft crackling with white-blue sparks","two big hind feet with coiled-spring legs, two small front paws, two big ears, one tail",""),
+ ('Jerbolt','batch/out/c_jerboa_final_crest_2.jpg','mid','sleek',False,True,"steel-blue and white fur, a big crest of static-charged white fur along its back, teal eyes, a white tail tuft crackling with white-blue sparks","two coiled-spring hind legs, two front paws, two big ears, one fur crest, one tail",""),
+ ('Dynaboa','batch/out/c_jerboa_final_vanes_2.jpg','final','sleek',False,True,"steel-blue and white fur, two broad copper turbine fins on its back, teal eyes, a white tail tuft crackling with white-blue sparks","two coiled-spring hind legs, two front paws, two big ears, two copper fins, one tail","")]
+for _n,_i,_st,_ar,_dk,_fu,_co,_ct,_fx in _B3:
+    SPECS.append({'id':'v2t_'+_n.lower(),'name':_n+' (V2 card, style board)','refs':['briefs/boki-art/'+_i,SRB],'runs':4,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD_BOARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx)+" Never paste the board's square samples into the picture."})
+_B2D={r[0]:r for r in _B2}
+for _n,_s,_pose in (('Pinster','v2t_pinster_4',"uncurling from its ball, peeking out with its antennae up"),('Tiltster','v2t_tiltster_4',"rearing its front up with both flipper claws raised, the playfield on its back tilted toward the viewer")):
+    _r=_B2D[_n]; V2SHEET_NEW(_n,_O+_s+'.jpg',_r[6],_r[7]); V2PORT_NEW(_n,_O+_s+'.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_pose)
+SPECS.append({'id':'v2x_bullpole','name':'Bullpole (V2 card, remove board tiles)','refs':[_O+'v2t_bullpole_2.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"remove the six square picture tiles in the corners and along the top and bottom edges (an eye, a purple shape, spines, black coils, feathers, pink ribs); the background behind the tadpole is one plain flat pale grey everywhere. The tadpole itself stays exactly the same. Do not add anything else."})
