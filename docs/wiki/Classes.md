@@ -143,6 +143,8 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Void Jester | Revive 3 teammates | 3 | Banner: Tidelight |
 | the Novice Mage | Stun 8 enemies | 8 | Colourway: Deep Tide |
 | the Novice Mage | Hit 3 enemies at once with one ability, twice | 2 | Emote: Flop |
+| the Novice Mage | Open 6 chests | 6 | Banner: Tide Pool |
+| the Novice Mage | Your Boki lands 40 hits | 40 | Title: Fishmonger |
 
 ### Run levels
 
