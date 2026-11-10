@@ -105822,5 +105822,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/saw3_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_glockodile_xyb",
+    "name": "Glockodile (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_glockodile_xyb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_xylogator_xya",
+    "name": "Xylogator (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_xylogator_xya_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_xylogator_xyb",
+    "name": "Xylogator (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_xylogator_xyb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_marimbite_xyb",
+    "name": "Marimbite (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_marimbite_xyb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glockodile_xyb",
+    "name": "Glockodile (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_glockodile_xyb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_marimbite_xyb",
+    "name": "Marimbite (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_marimbite_xyb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_xylogator_xya",
+    "name": "Xylogator (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_xylogator_xya_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glockodile_xya",
+    "name": "Glockodile (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_glockodile_xya_2.jpg",
+    "ok": true
   }
 ]
