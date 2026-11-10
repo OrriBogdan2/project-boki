@@ -294,32 +294,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
 	var km := String(s.get("kmove", ""))
 	var moves: Dictionary = d.get("kmoves", {})
+	# (a move that has played out leaves the states below showing: a hit, a stun, a landing)
 	if moves.has(km):
-		var mv: Dictionary = moves[km]
-		var tt := float(s.get("kmove_t", 0.0))
-		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
-		if km != alt_km or tt < alt_t:
-			alt_on = not alt_on
-		alt_km = km
-		alt_t = tt
-		var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
-		var length := lib.get_animation(clip).length
-		if mv.has("hold_from") and root.has_meta(PHASE):
-			var start := float(mv["hold_from"])
-			tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
-		elif tt >= length:
-			if not mv.has("hold_from"):
-				return {}
-			var from := float(mv["hold_from"])
-			tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
-		# ("upper": true, or "moving": the legs keep walking only while he walks)
-		var up = mv.get("upper", false)
-		if up is String:
-			var vel: Vector3 = s.get("vel", Vector3.ZERO)
-			up = Vector2(vel.x, vel.z).length() >= STILL
-		return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
-				"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
-	if km != "":
+		var r := _move_clip(km, moves[km], s)
+		if not r.is_empty():
+			return r
+	elif km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
@@ -339,6 +319,32 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
+
+## A keyed move's clip and time ({} once a move that does not hold has played out).
+func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
+	var tt := float(s.get("kmove_t", 0.0))
+	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
+	if km != alt_km or tt < alt_t:
+		alt_on = not alt_on
+	alt_km = km
+	alt_t = tt
+	var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
+	var length := lib.get_animation(clip).length
+	if mv.has("hold_from") and root.has_meta(PHASE):
+		var start := float(mv["hold_from"])
+		tt = start + float(root.get_meta(PHASE)) * (length - start - 0.001)
+	elif tt >= length:
+		if not mv.has("hold_from"):
+			return {}
+		var from := float(mv["hold_from"])
+		tt = from + fmod(tt - from, maxf(length - from, 0.01)) if length > from + 0.02 else length - 0.001
+	# ("upper": true, or "moving": the legs keep walking only while he walks)
+	var up = mv.get("upper", false)
+	if up is String:
+		var vel: Vector3 = s.get("vel", Vector3.ZERO)
+		up = Vector2(vel.x, vel.z).length() >= STILL
+	return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+			"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false))}
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
