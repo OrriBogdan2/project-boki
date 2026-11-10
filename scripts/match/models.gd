@@ -824,7 +824,9 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
 	var gset := _glider_set(gskin)
-	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()], [gset[1], toon(Color("5a4636"), false)]]:
+	var glider_parts := [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()],
+		[gset[1], toon(Color("5a4636"), false)]]
+	for pc in glider_parts:
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = pc[0]
 		gmi.material_override = pc[1]

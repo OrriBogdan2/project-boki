@@ -63,7 +63,6 @@ const DEPLOY_H := 8.0         # the glider opens by itself this high above the g
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
 const ARMOR_DR := 0.2
 const ARMOR_DUR := 2.2        # durability as a multiple of max health
-const ARMOR_WAIT := 4.0
 const CONSUME_VULN := 1.2     # you take this much more damage while drinking, repairing or reviving a box
 
 var pname := "Hunter"
@@ -174,7 +173,6 @@ var muzzle_t := 0.0
 var regen_wait := 0.0
 var armor := 0.0
 var max_armor := 50.0
-var armor_wait := 0.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
 var crouch := false           # slower, steadier aim, and much harder to spot
 var crouch_k := 0.0
@@ -456,11 +454,19 @@ func targetable() -> bool:
 func is_local() -> bool:
 	return ctrl == "local"
 
+## A cursor closer than this many body widths (2 r) says nothing about a way to face: aim_dir keeps the last good one.
+const AIM_MIN_BODIES := 2.0
+var aim_good := Vector2.ZERO      # the last aim direction taken from a cursor outside that circle
+
 func aim_dir() -> Vector2:
 	if ak and ak.aim_lock() != Vector2.ZERO:
 		return ak.aim_lock()
 	var d := Vector2(inp["aim"].x - pos.x, inp["aim"].z - pos.z)
-	return d.normalized() if d.length() > 0.05 else Vector2(sin(face), cos(face)) * -1.0
+	if d.length() > r * AIM_MIN_BODIES:
+		aim_good = d.normalized()
+	elif aim_good == Vector2.ZERO:
+		aim_good = Vector2(sin(face), cos(face)) * -1.0
+	return aim_good
 
 # ------------------------------------------------------------------ damage
 func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
@@ -504,8 +510,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		d *= 0.35
 	d *= 1.0 - owner_stat("damage_reduction")
 	if downed:
-		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
-		return 0.0
+		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
 	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
@@ -521,8 +526,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
-	regen_wait = 5.0
-	armor_wait = ARMOR_WAIT
+	regen_wait = float(KinRegen.rules()["owner_shield_delay_s"])
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
@@ -1858,8 +1862,7 @@ func sim(dt: float) -> void:
 	var regen := owner_stat("regen") + kin_pt("owner_regen")
 	if regen > 0.0 and not downed and hp < max_hp:
 		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
-	if kin_pt("owner_shield") > 0.0 and regen_wait <= 0.0 and kin_shield < kin_pt("owner_shield"):
-		kin_shield = minf(kin_pt("owner_shield"), kin_shield + kin_pt("owner_shield") * 0.5 * dt)
+	KinRegen.owner_shield_tick(self, dt)
 	if owner_stat("dodge_regen") >= 0.99:
 		dashes = max_dashes()
 	for bk in kbuffs.keys():
@@ -1868,7 +1871,6 @@ func sim(dt: float) -> void:
 	if grounded:
 		air_jumps = 0
 		air_dashed = false
-	armor_wait = maxf(0.0, armor_wait - dt)
 	# shots spread more while you move, jump or have just dashed, and settle when you stand still
 	if not remote:
 		crouch = bool(inp.get("crouch", false)) and grounded and not downed and roll_t <= 0.0 and not gliding and not dropping and not riding and charge.is_empty()
@@ -2243,7 +2245,7 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
+		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
@@ -3074,6 +3076,7 @@ func _anim_state(stretch: float) -> void:
 				em = String(e["id"]); et = float(e["t"])
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
+	s["extract_t"] = WardenClips.leave_t(self)
 	s["emote"] = em
 	s["emote_t"] = et
 	if not grounded and not gliding and not downed:
@@ -3114,7 +3117,7 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) and not riding and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)

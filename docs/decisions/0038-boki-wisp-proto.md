@@ -13,7 +13,7 @@ Summon, steal and the ult wait on briefs/boki-art/WISP_DESIGN_OPEN.md.
 1. A new wisp entity next to Kin. Duplicates the kin's record, stats, carry passives and net path.
 2. A `wisp` flag on Kin, handled by a focused `KinWisp` module: the kin stays in state "shoulder" with the
    Return order (so `carried()` and the carry passives need no change), the sim returns before the state
-   machine, KinTactics and KinCompanion, and render draws the `BokiWispLook` model on an orbit.
+   machine, KinTactics and KinCompanion, and render draws the `BokiWispLook` model on its keep-clear arc (BokiWispClear, note 0019).
 
 ## Decision
 Option 2. Setting `boki_wisps` (default off; Settings > Gameplay > Boki), read per game for its own Boki and

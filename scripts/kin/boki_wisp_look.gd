@@ -8,6 +8,7 @@ extends RefCounted
 
 const SHADER := preload("res://shaders/boki_wisp.gdshader")
 const DOT_SHADER := preload("res://shaders/fx_dot.gdshader")      # the soft round dots Fx bursts use
+const DRAW_PRIORITY := -1     # drawn before the aim telegraphs (priority 2), so they lie over the wisp
 const BODY_RADIUS := 0.15     # m; the head-and-body blob, about a third of a Boki's height
 const EYE_COL := Color("1c1a26")
 const TRAIL_AMOUNT := 24      # sparkles alive per wisp: ten wisps stay under 300
@@ -146,6 +147,7 @@ static func material() -> ShaderMaterial:
 	if _body_mat == null:
 		_body_mat = ShaderMaterial.new()
 		_body_mat.shader = SHADER
+		_body_mat.render_priority = DRAW_PRIORITY
 	return _body_mat
 
 ## The idle: quick hops with a squash as it lands and a little dart side to side. t is seconds; call it
@@ -161,13 +163,13 @@ static func pose(wisp: Node3D, t: float) -> void:
 	body.rotation.z = -dart * DART_LEAN
 	(wisp.get_node("Trail") as Node3D).position = body.position
 
-## Dim with no sparkles while its summon rests, bright when it is ready. Cheap to call every frame.
+## Dim while its summon rests, bright when it is ready (its sparkles go off too: KinWisp.render). Cheap to call
+## every frame.
 static func dim(wisp: Node3D, resting: bool) -> void:
-	var trail := wisp.get_node("Trail") as CPUParticles3D
-	if trail.emitting != resting:
-		return
-	trail.emitting = not resting
-	(wisp.get_node("Body") as GeometryInstance3D).set_instance_shader_parameter("dim", DIM if resting else 1.0)
+	var body := wisp.get_node("Body") as GeometryInstance3D
+	var v := DIM if resting else 1.0
+	if body.get_instance_shader_parameter("dim") != v:
+		body.set_instance_shader_parameter("dim", v)
 
 ## Adds the left twin of every part off the middle line (x > 0), with its tilt turned the other way.
 static func _mirrored(parts: Array) -> Array:
@@ -180,9 +182,12 @@ static func _mirrored(parts: Array) -> Array:
 	return out
 
 ## All parts baked into one mesh, each in its colour (sRGB vertex colours; the shader makes them linear).
+## The wisp blends with no depth, so the faces of a feature that lie inside the body are left out (they
+## would paint over the body's far side).
 static func _mesh(parts: Array, cols: Dictionary) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var body_radii: Vector3 = parts[0][1]
 	for part in parts:
 		var extent: Vector3 = part[1]
 		if part[0] == "cone":
@@ -193,10 +198,17 @@ static func _mesh(parts: Array, cols: Dictionary) -> ArrayMesh:
 		var arrays := _unit(String(part[0]))
 		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
-		for i in arrays[Mesh.ARRAY_INDEX]:
-			st.set_color(col)
-			st.set_normal((normal_basis * normals[i]).normalized())
-			st.add_vertex(xform * verts[i])
+		var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		for tri in idx.size() / 3:
+			var at: Array[Vector3] = []
+			for i in idx.slice(tri * 3, tri * 3 + 3):
+				at.append(xform * verts[i])
+			if part != parts[0] and at.all(func(v: Vector3): return (v / body_radii).length_squared() < 1.0):
+				continue
+			for k in 3:
+				st.set_color(col)
+				st.set_normal((normal_basis * normals[idx[tri * 3 + k]]).normalized())
+				st.add_vertex(at[k])
 	return st.commit()
 
 ## The surface arrays of a unit shape (radius 1 ball, cone of base radius 1 and height 1, or 1 m box).
@@ -245,6 +257,7 @@ static func _trail(col: Color) -> CPUParticles3D:
 	if _dot_mat == null:
 		_dot_mat = ShaderMaterial.new()
 		_dot_mat.shader = DOT_SHADER
+		_dot_mat.render_priority = DRAW_PRIORITY
 	p.material_override = _dot_mat
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return p

@@ -40,6 +40,10 @@ A wisp breaks loose only from a hunter who is downed or dead (`KinSteal.can_brea
   own game. Net.VERSION 0.31.1: kin snapshot 32 = the homing flag (KinNet.HOME_AT, a killed summon's wisp flying home).
 - With 0040: a down with the summon ready brings the guardian out (no loose wisp); with it resting the wisp breaks
   loose (KinGuardian.on_down runs first; KinSteal.ride only takes a wisp at the shoulder).
-- Numbering: ext/combat-summon-band also wrote a 0041 (0041-summon-band.md); it becomes 0042 when it lands (T2).
+- Numbering: ext/combat-summon-band also wrote a 0041; it landed as 0042-summon-band.md (T2).
 - match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it; `--wisp-check` the flight home,
   `--wisp-guardian-check` the guardian x steal rule.
+- HUD (ext/ui-stolen-wisps): up to two rows above the Boki box (`BokiHud.stolen_wisps`): the critter in its colours inside
+  an ally-blue thief ring, its carry passive at `passive_k`, the summon key while ready / "OUT 4s" / "USED". A teammate's
+  squad row wears a count badge (`TeamBoki`). It sits on the Boki box's group, so the HUD stays at five groups.
+  `--stolen-hud-check` covers it.

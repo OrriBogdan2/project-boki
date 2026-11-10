@@ -10,7 +10,7 @@ extends RefCounted
 ##     games get the state and play the moment.
 
 ## Kin snapshot index table (absolute row indices, each with one meaning; kin_extra writes them in order and
-## apply_kin reads them; Net 0.31.1, docs/decisions/0040 and 0041):
+## apply_kin reads them; Net 0.31.1, 0.31.3 on the integ line, docs/decisions/0040 and 0041):
 ##   19 order (KinFollow.CMD_IDS index), 20 down s left, 21 rescue progress, 22 fell in the abyss, 23 rest s left
 ##   24 1 when it rides as a wisp (KinWisp)
 ##   25 summon window s left, 26 shrink s left, 27 cooldown s left (KinSummon)
