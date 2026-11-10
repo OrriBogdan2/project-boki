@@ -97478,5 +97478,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/leg_lighthouse_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_lighthouse_b",
+    "name": "Legendary concept: lighthouse b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_lighthouse_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_lighthouse_b",
+    "name": "Legendary concept: lighthouse b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_lighthouse_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_loom_a",
+    "name": "Legendary concept: loom a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_loom_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_lighthouse_c",
+    "name": "Legendary concept: lighthouse c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_lighthouse_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_lighthouse_a",
+    "name": "Legendary concept: lighthouse a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_lighthouse_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_loom_a",
+    "name": "Legendary concept: loom a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_loom_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_loom_b",
+    "name": "Legendary concept: loom b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_loom_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_lighthouse_c",
+    "name": "Legendary concept: lighthouse c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_lighthouse_c_1.jpg",
+    "ok": true
   }
 ]
