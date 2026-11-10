@@ -88000,5 +88000,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_starcap_c_2.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_galleotter_c",
+    "name": "Galleotter (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_galleotter_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_galleotter_a",
+    "name": "Galleotter (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_galleotter_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_galleotter_a",
+    "name": "Galleotter (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_galleotter_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_galleotter_c",
+    "name": "Galleotter (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_galleotter_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_a",
+    "name": "Buckleron (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_galleotter_b",
+    "name": "Galleotter (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_galleotter_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_galleotter_b",
+    "name": "Galleotter (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_galleotter_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_a",
+    "name": "Buckleron (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_a_2.jpg",
+    "ok": true
   }
 ]
