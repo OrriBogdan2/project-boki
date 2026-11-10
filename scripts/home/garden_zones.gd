@@ -53,10 +53,14 @@ static func current() -> String:
 static func is_partner(rec: Dictionary) -> bool:
 	return String(rec.get("uid", "")) == str(Save.d.get("active", ""))
 
-## Who walks the zone you are in: its residents, and your partner wherever it lives.
+## Who walks the zone you are in: its residents, your partner wherever it lives and a wild visitor (GardenVisitor).
 static func out_here() -> Array:
 	var z := current()
-	return KinBox.farm().filter(func(r): return zone_of(r) == z or is_partner(r))
+	var out := KinBox.farm().filter(func(r): return zone_of(r) == z or is_partner(r))
+	var wild := GardenVisitor.in_zone(z)
+	if not wild.is_empty():
+		out.append(wild)
+	return out
 
 ## How many more Boki can be out in a zone.
 static func room(id: String) -> int:

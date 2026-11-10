@@ -956,26 +956,31 @@ func _spawn_kin() -> void:
 	var ri := 0
 	var farm_kin := _farm_kin()          # kin asleep in the Kin Burrow stay there
 	for rec in farm_kin:
-		var n := Models.kin(rec["species"], rec)
-		add_child(n)
 		var isl: int = 0 if rec["uid"] == _d().get("active", "") else open_isles[ri % open_isles.size()]
 		ri += 1
-		# somewhere open, not wedged against a building and not on top of another kin
-		var taken: Array = kins.map(func(o): return o["pos"])
-		taken.append(ppos)
-		var at := world.free_spot_near(world.random_ground(isl), taken, 1.3)
-		n.position = at
-		var lbl := Label3D.new()
-		lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
-		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
-		lbl.position.y = 1.25; lbl.visible = false
-		n.add_child(lbl)
-		var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
-		var ri2: int = farm_kin.find(rec)
-		if isl == 0 and ri2 >= 0 and ri2 < 6:
-			kd["bed"] = Vector3(32.9 + (ri2 % 3) * 1.6, 0, 27.2 + (ri2 / 3) * 1.6)
-		kins.append(kd)
+		add_kin(rec, isl, farm_kin.find(rec))
 	if hb and hb.astar: hb.assign_beds()
+
+## One kin on the farm: its model, mood label and entry in kins, on island `isl`; `slot` (its place in the
+## roster, -1 for none) picks its bed.
+func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
+	var n := Models.kin(rec["species"], rec)
+	add_child(n)
+	# somewhere open, not wedged against a building and not on top of another kin
+	var taken: Array = kins.map(func(o): return o["pos"])
+	taken.append(ppos)
+	var at := world.free_spot_near(world.random_ground(isl), taken, 1.3)
+	n.position = at
+	var lbl := Label3D.new()
+	lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
+	lbl.position.y = 1.25; lbl.visible = false
+	n.add_child(lbl)
+	var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
+	if isl == 0 and slot >= 0 and slot < 6:
+		kd["bed"] = Vector3(32.9 + (slot % 3) * 1.6, 0, 27.2 + (slot / 3) * 1.6)
+	kins.append(kd)
+	return kd
 
 # ------------------------------------------------------------------ loop
 ## Sun, sky, lamps and the occasional rain shower.
@@ -2851,6 +2856,9 @@ func _face(at: Vector3) -> void:
 func _kin_act(k: Dictionary) -> void:
 	if hway and hway.answer(k): return      # it waits at the pad asking to move: E sends it
 	var rec: Dictionary = k["rec"]
+	if rec.has("visitor"):
+		_open_feed(rec)      # a wild visitor: only a meal of its favourite (GardenVisitor)
+		return
 	match KinWants.action(rec, POND_EDGE.x > -100.0):
 		"feed": _care_feed(rec, KinWants.best_food(rec))
 		"nap": _care_nap(rec)
@@ -4324,6 +4332,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	add_child(food)
 	(k["node"] as Node3D).rotation.y = atan2(-(fp.x - at.x), -(fp.z - at.z))
 	var res := Care.feed(rec, f)
+	GardenVisitor.fed(self, rec, res)
 	if res["ok"]:
 		# taken out of the pantry now, so two quick feeds can't both use the last one
 		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1

@@ -33,3 +33,9 @@ open, `HomeLayout.of(Save.d)` answers with it, so no reader of the layout change
 but the snack patch's ripening timer (`Save.d["zones"][id]["patch"]`, a key that is simply missing on an
 older save); build mode is off there. `ZoneDress` adds the shallows and a MultiMesh scatter; `BaseVolley`
 reads the zone's court from `base_volley.json`.
+
+Wild visitors (GARDEN_MODERN.md 5 rank 6, `GardenVisitor`) add one lazy key, `Save.d["visitor"]` (the wild
+Boki's record, its zone, arrival time, favourite meals given, away-card notes and the earliest next
+arrival); an older save simply lacks it and no version changes. The visitor is not on the roster: it joins
+the zone's kins through `GardenZones.out_here()` for one garden day, and only becomes a roster Boki (or
+leaves an egg) after three favourite meals. Suit data: `content/rules/garden_visitor.json`.
