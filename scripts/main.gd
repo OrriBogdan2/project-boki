@@ -704,14 +704,14 @@ func _ready() -> void:
 
 ## --arena=<archetype> (with --record for filming): straight into the arena with that archetype
 ## picked. The arena provides `static func arena_opts(pick: String) -> Dictionary` on Match; until it
-## does, this opens the training area instead and says so.
+## does, this opens the Training Grounds instead and says so.
 func _open_arena(pick: String) -> void:
 	Save.d["tutorial"]["home"] = true
 	var ms: Script = load("res://scripts/match/match.gd")
 	if ms.get_script_method_list().any(func(md): return String(md["name"]) == "arena_opts"):
 		show_screen("match", ms.call("arena_opts", pick))
 		return
-	push_warning("--arena=%s: no arena in this build (Match.arena_opts); opening the training area" % pick)
+	push_warning("--arena=%s: no arena in this build (Match.arena_opts); opening the Training Grounds" % pick)
 	show_screen("match", {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 
 ## Menu screens sit on their own layer so they fill the window.

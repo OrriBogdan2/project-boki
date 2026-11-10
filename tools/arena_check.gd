@@ -1,7 +1,7 @@
 extends RefCounted
 ## --arena-check: the Arena boots on its own map with its practice tools, dummies take damage and
 ## show it, reset works, archetype / weapon / Boki / glove swaps apply, the toggles work, the kit
-## card builds for all six archetypes, the expedition loadout shows the card, and the training area
+## card builds for all six archetypes, the expedition loadout shows the card, and the Training Grounds
 ## gets the same tools. Prints ARENACHECK PASS/FAIL.
 
 var main: Node
