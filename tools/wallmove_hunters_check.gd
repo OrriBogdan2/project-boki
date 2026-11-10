@@ -23,6 +23,10 @@ const COMMITS := {
 	# which never bounces), so there is no angled hit to rebound. Open: see docs/MOVEMENT_FEEL.md.
 	"rimewright": ["bounce:sig/hold", "bounce:skill@"],
 }
+## Placed casts (not moves), tapped, per Hunter: the bounce sweep aims them back the way she came (at a chaser),
+## not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as columns: aimed
+## at the wall it stood just in front of it, and she met her own ice side-on instead of the wall at an angle.
+const CAST_BACK := {"rimewright": ["sig"]}
 const SETTLE := 2                   # steps a kick or bounce is given to show
 
 var main: Node
@@ -273,7 +277,8 @@ func _sweeps() -> void:
 				var lead := BOUNCE_V * maxf(t, 0.1)      # (it reaches the wall `t` after the button)
 				_fresh(Vector3(face - P.r - 0.02 - lead.x, low + START_UP, z0 - lead.y), false,
 						Vector3(BOUNCE_V.x, 0.0, BOUNCE_V.y))
-				P.inp["aim"] = P.pos + Vector3(ang.x, 0.0, ang.y) * 6.0  # (moves go where you aim)
+				var aim_k := -1.0 if tag in CAST_BACK.get(arch, []) else 1.0
+				P.inp["aim"] = P.pos + Vector3(ang.x, 0.0, ang.y) * 6.0 * aim_k  # (moves go where you aim)
 				P.inp[key] = true
 				if key == "sec" and hold:
 					P.inp["sec_hold"] = true
