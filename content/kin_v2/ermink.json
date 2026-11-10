@@ -65,7 +65,7 @@
 			}
 		]
 	},
-	"active": "moon_swap",
+	"active": "moon_mark",
 	"auto": "updraft",
 	"merge": "tempest",
 	"evolution": {
