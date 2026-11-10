@@ -96862,5 +96862,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_medushroom_rv_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_medushroom_rv",
+    "name": "Medushroom (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_medushroom_rv_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_hydrangor_rv",
+    "name": "Hydrangor (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_hydrangor_rv_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary_rv",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_rv_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_medushroom_rv",
+    "name": "Medushroom (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_medushroom_rv_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_starcap_rv",
+    "name": "Starcap (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_starcap_rv_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dynaboa_rv",
+    "name": "Dynaboa (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dynaboa_rv_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_starcap_rv",
+    "name": "Starcap (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_starcap_rv_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_medushroom_rv",
+    "name": "Medushroom (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_medushroom_rv_1.jpg",
+    "ok": true
   }
 ]
