@@ -338,3 +338,14 @@ for _k,_v in (('a',"plump and round, inching forward with its front half raised"
         "Six short stubby gold legs at the front and soft marble prolegs behind, two tiny gold antenna nubs, and one small gold spiral on its tail that matches the cocoon's spiral. "
         "Pose: "+_v+". Clearly a baby: small, round, simple shapes, a slightly oversized head. Draw it in the same rendering style as images 1 and 2. Never copy the cocoon or the moth themselves; only one creature. "
         "Whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
+
+# 20:25 ET 11-09 owner: "run a check none are same as pokemon". Two designs read too close and get fixed now:
+# Pinster = yellow electric rodent with a lightning-bolt stripe and glowing cheeks (reads as Pikachu); Bullpole = round tadpole with a spiral on its belly (reads as Poliwag).
+SPECS.append({'id':'pk_pinster','name':'Pinster (move away from Pikachu)','refs':['briefs/boki-art/cards/Pinster.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"recolour its fur to a warm cinnamon-orange with a cream belly and face (no yellow anywhere on its fur), remove the lightning-bolt stripe completely, and give it plain fur cheeks with no glow and no red circles. "
+    "Its electric power now shows only in two round pinball bumpers grown into its back, which glow white-blue, and a small silver ball-bearing tail tip. Same hamster body, pose and style. Do not add anything else."})
+SPECS.append({'id':'pk_bullpole','name':'Bullpole (move away from Poliwag)','refs':['briefs/boki-art/cards/Bullpole.jpg','briefs/boki-art/cards/Bullsfrog.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':("Single character illustration of one baby Boki: Bullpole, the tadpole baby of the dart frog in image 2. Redesign the tadpole in image 1 so it is shaped like a throwing dart: "
+    "a slim, pointed, bullet-shaped head and body (not round), the same glossy red with black markings, and a long tail ending in three red-and-green flight fins like a dart's fletching. "
+    "The dartboard target rings appear only as small ring markings on its tail fins, never on its belly or body; its belly is plain red. Big friendly green eyes, a tiny smile. "
+    "Same rendering style as image 1. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text.")})
