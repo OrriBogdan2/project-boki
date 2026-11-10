@@ -347,7 +347,8 @@ func _pick_clip(dt: float) -> void:
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
-	var stride: float = (STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0] * model.global_basis.z.length()
+	var row: Array = STRIDE.get(species, [1.5, 2.9])
+	var stride: float = row[1 if want == "run" else 0] * model.global_basis.z.length()
 	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:
