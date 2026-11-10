@@ -8,6 +8,7 @@ extends RefCounted
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
+##   [--bench-ab] (one process, one GPU: the match part as walking pets, wisps, pets again; no farm part)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -21,6 +22,9 @@ var farm_secs := 20.0
 var out_path := ""
 var hunters := 6
 var wisps := false
+var ab := false
+var part := "match"      # the label on this run's rows and BENCH lines
+const WARMUP_S := 5.0     # --bench-ab: share of the run (this many s of --bench-secs) left out of its numbers
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -29,8 +33,11 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	setup(main_node)
-	await _match()
-	await _farm()
+	if ab:
+		await _ab()
+	else:
+		await _match()
+		await _farm()
 	_finish()
 
 ## Reads the --bench-* arguments and sizes the window; --perf-budget-check shares it.
@@ -45,6 +52,7 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-hunters="): hunters = maxi(2, int(a.substr(16)))
 		if a == "--boki-wisps": wisps = true
+		if a == "--bench-ab": ab = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -63,6 +71,29 @@ func _finish() -> void:
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
 	main.get_tree().quit()
+
+## Walking pets, wisps, walking pets again: the same seed and autoplay path each time, the repeat shows run-order drift.
+func _ab() -> void:
+	var runs := [["pets_1", false], ["wisps", true], ["pets_2", false]]
+	for r in runs:
+		part = r[0]
+		wisps = r[1]
+		_ab_line(await _match())
+
+## Mean, p95, worst wall ms and draws after the warm-up, and the count of frames over 50 ms.
+func _ab_line(fl: Array) -> void:
+	var w: Array = []
+	var draws := 0.0
+	for f in fl.slice(int(fl.size() * WARMUP_S / secs)):
+		w.append(float(f["wall"]))
+		draws += float(f["draws"])
+	var mean := 0.0
+	for x in w: mean += x / maxf(1.0, w.size())
+	w.sort()
+	var over := w.filter(func(x): return x > 50.0).size()
+	var line := "BENCH AB %s boki_wisps=%s after %.0f s warm-up: %d frames, mean %.2f ms, p95 %.2f ms, worst %.2f ms, "
+	print((line + "draws %.0f, over 50 ms: %d") % [part, wisps, WARMUP_S, w.size(), mean,
+		w[int((w.size() - 1) * 0.95)], w[-1], draws / maxf(1.0, w.size()), over])
 
 func _match() -> Array:
 	var o := Match.demo_opts()
@@ -106,14 +137,14 @@ func _match() -> Array:
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
+		fl.append(_frame(part, fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
 		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
 			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
 				added])
 		added.clear()
 		last = now
-	_summary("match", fl)
+	_summary(part, fl)
 	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
