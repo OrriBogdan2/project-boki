@@ -27,11 +27,12 @@ KS = 1.63 / 1.9              # scan metres -> rig metres (ear tip to sole)
 TAIL_LIFT = math.radians(48)  # the tail swung back and up about its root
 F = np.float32
 # scan joints, read off grid_front and grid_right (x her right, y forward, z up, raw metres)
-S_J = {"pelvis": (0, 0.17, -0.46), "neck": (0, 0.22, 0.30), "hip.R": (0.10, 0.16, -0.46), "knee.R": (0.17, 0.08, -0.66), "ankle.R": (0.205, 0.10, -0.86),
-       "hip.L": (-0.10, 0.16, -0.46), "knee.L": (-0.17, 0.08, -0.66), "ankle.L": (-0.205, 0.10, -0.86)}
-ARM = {"R": ((0.23, 0.20, 0.12), (0.39, 0.20, -0.01), (0.50, 0.2, -0.12), (0.60, 0.2, -0.21))}
+X0 = 0.04                    # the scan's centre line, off the origin (the fit shifts it onto the rig)
+S_J = {"pelvis": (0, 0.15, -0.46), "neck": (0, 0.15, 0.20), "hip.R": (0.10, 0.15, -0.46), "knee.R": (0.135, 0.12, -0.68), "ankle.R": (0.14, 0.14, -0.88),
+       "hip.L": (-0.10, 0.15, -0.46), "knee.L": (-0.135, 0.12, -0.68), "ankle.L": (-0.14, 0.14, -0.88)}
+ARM = {"R": ((0.18, 0.15, 0.10), (0.31, 0.13, -0.04), (0.41, 0.16, -0.17), (0.50, 0.20, -0.29))}
 ARM["L"] = tuple((-p[0], p[1], p[2]) for p in ARM["R"])
-TAIL = np.array(((0.0, 0.0, -0.36), (-0.05, -0.14, -0.52), (-0.14, -0.24, -0.68), (-0.22, -0.30, -0.82), (-0.27, -0.33, -0.93)))
+TAIL = np.array(((-0.04, -0.05, -0.40), (-0.16, -0.22, -0.68), (-0.34, -0.28, -0.84), (-0.51, -0.30, -0.76), (-0.60, -0.30, -0.62)))
 J = K.J
 T = {"pelvis": J["hips"], "neck": J["head"]}
 for sd in "RL":
@@ -52,6 +53,7 @@ n = len(me.vertices)
 co = np.zeros(n * 3)
 me.vertices.foreach_get("co", co)
 P = co.reshape(-1, 3) * (-1, -1, 1)
+P[:, 0] -= X0
 print("scan", n, P.min(0).round(3), P.max(0).round(3))
 # the paint per vertex, for what is cloth, leaf, leather or fur
 tex = next(nd for nd in me.materials[0].node_tree.nodes if nd.type == "BSDF_PRINCIPLED").inputs[0].links[0].from_node.image
@@ -70,11 +72,12 @@ vuv = np.zeros((n, 2))
 vuv[lv] = uvl
 C = px[np.clip((vuv[:, 1] * th).astype(int), 0, th - 1), np.clip((vuv[:, 0] * tw).astype(int), 0, tw - 1)]
 r_, g_, b_ = C.T
-GREEN = g_ > r_ * 0.98
-BROWN = (b_ / np.maximum(r_, 0.01) < 0.62) & (g_ / np.maximum(r_, 0.01) < 0.78) & (r_ < 0.72) & ~GREEN
-CREAM = (g_ / np.maximum(r_, 0.01) > 0.78) & (r_ > 0.72) & ~GREEN & (P[:, 2] < 0.08) & (P[:, 1] > 0.08)
-FUR = ~(GREEN | BROWN | CREAM)
-print("classes", GREEN.sum(), BROWN.sum(), CREAM.sum(), FUR.sum())
+rr = np.maximum(r_, 0.01)
+CAPE = (g_ / rr > 0.8) & (b_ / rr > 0.8) & (r_ > 0.7) & (P[:, 2] > -0.12)          # the white capelet and its lace
+BROWN = (b_ / rr < 0.58) & (g_ / rr < 0.8) & (r_ < 0.75) & ~CAPE                      # strap, satchel, pouches
+CREAM = (g_ / rr > 0.72) & (b_ / rr < 0.8) & (r_ > 0.75) & ~CAPE & (P[:, 1] > 0.0)     # belly, tail tip
+FUR = ~(CAPE | BROWN | CREAM)
+print("classes", CAPE.sum(), BROWN.sum(), CREAM.sum(), FUR.sum())
 
 def seg(a0, a1, p=P):
     a0, a1 = np.asarray(a0, float), np.asarray(a1, float)
@@ -84,16 +87,17 @@ def seg(a0, a1, p=P):
 
 
 # the arms come off: all fur near their line, outside the torso (scripted arms hang there); the head comes off at the collar
-kill = (P[:, 2] > 0.415)
+kill = (P[:, 2] > 0.27)
 for sd in "RL":
     pts = ARM[sd]
     d = np.minimum.reduce([seg(pts[i], pts[i + 1])[0] for i in range(3)])
     s = 1.0 if sd == "R" else -1.0
-    kill |= FUR & (d < 0.105) & (P[:, 0] * s > 0.20)
-    kill |= (P[:, 0] * s > 0.40) & (P[:, 2] < 0.02) & ~GREEN & ~CREAM
+    kill |= FUR & (d < 0.09) & (P[:, 0] * s > 0.17)
+    kill |= (P[:, 0] * s > 0.40) & (P[:, 2] < 0.02) & ~CAPE & ~BROWN
 # the tail
 dt = np.min([seg(TAIL[i], TAIL[i + 1])[0] for i in range(len(TAIL) - 1)], 0)
 tail_w = (FUR & (P[:, 1] < 0.0) & (P[:, 2] < -0.26) & (dt < 0.34)).astype(F) * smooth(0.0, -0.05, P[:, 1]).astype(F)
+kill &= ~(tail_w > 0.02)                 # (the tail curls out past the arm's reach: the arm cut leaves it whole)
 # weights
 Wn = {}
 torso_w = np.ones(n, F)
@@ -159,7 +163,6 @@ Q = Q * (1 - tail_w[:, None]) + qr * tail_w[:, None]
 TP = lerp_move(np.array(TAIL), "pelvis", "neck") - root
 TP = np.stack([TP[:, 0], TP[:, 1] * c + TP[:, 2] * s, -TP[:, 1] * s + TP[:, 2] * c], 1) + root
 TP = catmull(TP, 16)
-Q[:, 1] += CREAM * smooth(0.78, 0.56, Q[:, 2]) * 0.024      # the apron stands off the thighs, or a stride pokes through
 print("fitted", Q[~kill].min(0).round(3), Q[~kill].max(0).round(3))
 me.vertices.foreach_set("co", Q.ravel())
 me.update()
@@ -170,23 +173,15 @@ g.add(ids, 1.0, "REPLACE")
 # weights of the kept mesh, as vertex groups, carried through the decimation
 hips_k = smooth(0.50, 0.72, Q[:, 2]) * (1 - legsum) * (1 - tail_w)
 root_k = (1 - hips_k - legsum - tail_w).clip(0, 1)
-apron = (CREAM * smooth(0.72, 0.56, Q[:, 2])).astype(F)
-# (its hem follows the pelvis, not the chest's twist; the bone adds the swing)
-hem = smooth(0.8, 0.6, Q[:, 2]) * CREAM
-root_k = root_k + hips_k * hem
-hips_k = hips_k * (1 - hem)
-root_k *= (1 - apron * 0.45)
-hips_k *= (1 - apron * 0.45)
-apron = apron * 0.45
-cape_back = (GREEN | (FUR & (Q[:, 2] > 0.68))) & (Q[:, 1] < -0.1) & (Q[:, 2] < 1.0)
-WG = {"root": root_k, "hips": hips_k, "apron": apron, "tailw": tail_w, "capew": cape_back.astype(F) * smooth(0.98, 0.85, Q[:, 2])}
+cape_back = CAPE & (Q[:, 1] < -0.03) & (Q[:, 2] < 1.0)
+WG = {"root": root_k, "hips": hips_k, "apron": np.zeros(n, F), "tailw": tail_w, "capew": cape_back.astype(F) * smooth(1.0, 0.92, Q[:, 2])}
 for k_ in list(Wn):
     WG[k_] = Wn[k_]
 for b, w in WG.items():
     vg = hi.vertex_groups.new(name=b)
     for v_, ww in zip(np.nonzero(w > 0.01)[0].tolist(), w[w > 0.01].tolist()):
         vg.add([v_], float(ww), "REPLACE")
-for name, m_ in (("green", GREEN), ("brown", BROWN), ("cream", CREAM)):
+for name, m_ in (("cape", CAPE), ("brown", BROWN), ("cream", CREAM)):
     vg = hi.vertex_groups.new(name=name)
     vg.add(np.nonzero(m_)[0].tolist(), 1.0, "REPLACE")
 
