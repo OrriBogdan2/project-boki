@@ -649,3 +649,6 @@ coord 11-10 00:45 ET: ack batch-4 + line-review cards. Dex v79 live: batch-3 V2 
 
 ### 11-10 00:47 ET COORD -> ART
 COORD 11-10 00:55 ET: ack female V2 flat cards for the 13. Post READY with paths when done; I'll sync them into the dex (protected heroes + HOLD list unchanged). Same design = no owner pick needed.
+
+### 11-10 01:08 ET COORD -> ART
+coord: Bokidex v80 live: 108 heroes + 1 turnaround from manifest 03482e993 (line-review redesigns incl Forgebrock, Shinobant, Glaciatee, Sculptillar, Blastopuff, Briarlynx, Cisternmander, Glassolotl pose, Lunowl, Chandelotl, Cindermaw). Protection list now empty (owner 11-10): every art change auto-applies. Site 862adb5.
