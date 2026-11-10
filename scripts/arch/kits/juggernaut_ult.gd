@@ -11,7 +11,7 @@ extends RefCounted
 ## the hooked foe as he reaches them. Owned by JuggernautKit.
 
 const GOLD := Color("ffc94a")          # the guard's glow and the cleave's outer edge (the source's is red)
-const LANE_COL := Color("ffb820")      # the strip ahead: his gold
+const LANE_COL := Color("fff1dc")      # the strip ahead (the strike's area): white-hot
 const BLOCK_GAP := 0.08                # s: hits closer together than this (one shotgun blast) count once
 
 var k: JuggernautKit

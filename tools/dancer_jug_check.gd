@@ -514,7 +514,15 @@ func juggernaut(a) -> void:
 	var midk := K.wave_k()
 	A.step(m, 0.6, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
-	A.step(m, 0.6)
+	A.step(m, 0.1)
+	var chord := 0.0
+	for r in DJFx.of(m).riders:
+		if r["kind"] == "crescent_bolt":
+			chord = DJFx.CRESCENT_CHORD * ((r["node"] as Node3D).get_node("Head") as Node3D).scale.x
+	var wave_w := 2.0 * float(K.lmb_def()["wave_size"][1])        # held to full
+	A.step(m, 0.5)
+	A.ok("juggernaut LMB hold: the wave's crescent is as wide as its hit (a wave of 2 x size across)",
+			chord > 0.3 and absf(chord - wave_w) < 0.35, "crescent %.2f wave %.2f" % [chord, wave_w])
 	A.ok("juggernaut LMB hold: Searing Wave (ranged, fills Rage fast)",
 			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
 			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])

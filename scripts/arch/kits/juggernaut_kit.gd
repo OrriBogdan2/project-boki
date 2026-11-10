@@ -20,13 +20,14 @@ extends ArchKit
 ##   upward cleave that heals 80% of its damage; a knock with it makes it ready again. The Boki Merge has its own key.
 ## Matched to the footage in briefs/hero-ref/juggernaut.md; docs/heroes/juggernaut.md.
 
-const SLASH_OUT := Color("ff3df0")     # the Slam's magenta strike lane
-const LUNGE_RED := Color("ff4a3a")     # the Lunge lane while charging
-const LUNGE_FULL := Color("ff3df0")    # ... at full
+const SLASH_OUT := Color("ffe9cc")     # the Slam's white-hot strike lane
+const LUNGE_RED := Color("ff2238")     # the Lunge lane while charging (the curse's crimson)
+const LUNGE_FULL := Color("fff1dc")    # ... at full: white-hot
 const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
-const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent
-const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
-const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
+const WAVE_RED := Color("ff2238")      # the Searing Wave's flame crescent
+const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
+const WAVE_FULL := Color("ffffff")     # ... white at full charge
+const LUNGE_REACH := 0.6               # m: how far past his body a foe's body can be and still be struck (_tick_lunge)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
 
 var enraged_t := 0.0
@@ -134,12 +135,6 @@ func _drop_aura() -> void:
 	if aura and is_instance_valid(aura):
 		aura.queue_free()
 	aura = null
-
-## Spending the Rage: the shell bursts outward and the hunter shrinks back.
-func _spend_fx() -> void:
-	var rc := res_col()
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), rc, 26, 7.0, 0.5, 4.0, 1.3)
-	_drop_aura()
 
 func _tick_look(dt: float) -> void:
 	var want := 1.0 if enraged_t > 0.0 else 0.0
@@ -440,7 +435,7 @@ func _wave() -> void:
 	var sd: Variant = _my_last_shot()
 	if sd != null:
 		sd["col"] = WAVE_RED              # its sparks along the way are red too
-		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 3.6)
+		fx().ride(sd, "crescent_bolt", WAVE_RED, WAVE_EDGE if not full else WAVE_FULL, 1.6, wave_size * 2.0)
 	vfx("wave_fire", from, dv, {"k": k, "full": full, "len": rng, "w": wave_size * 2.0})
 	h.swing_t = 0.18
 	h.swing_n += 1
@@ -779,7 +774,8 @@ func _lunge(k: float, perfect: bool) -> void:
 	lunge = {"end": m.time + t * float(dash_feel()["time"]) + 0.02, "dir": dv, "k": k}
 	play("jug_lunge")
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "LUNGE", col_of(rmb_def()), false)
-	vfx("lunge_go", h.pos, dv, {"k": k, "len": dist * float(dash_feel()["dist"]), "perfect": perfect})
+	vfx("lunge_go", h.pos, dv,
+			{"k": k, "len": dist * float(dash_feel()["dist"]), "perfect": perfect, "w": 2.0 * (h.r + LUNGE_REACH)})
 	if perfect:
 		perfects += 1
 		AimKit.perfect(h, {"col": LUNGE_FULL})
@@ -788,7 +784,7 @@ func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
 	for f in m.foes_of(h.team):
-		if f.hittable() and h.flat_dist(f) < h.r + f.r + 0.6 and absf(f.pos.y - h.pos.y) < 1.6:
+		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
 			var was_chain: bool = lunge.get("chain", false)
 			lunge = {}
@@ -899,7 +895,7 @@ func _tick_tells() -> void:
 	var air_ready := float(cd["air"]) <= 0.0 and not meteor.running() and not warchain.spin_window()
 	if not h.grounded and air_ready and not h.gliding and not rmb_down:
 		AimKit.circle(h, "drop_aim", {"at": meteor.point(), "r": float(rmb_def()["drop"]["radius"]),
-				"col": JuggernautDrop.PURPLE, "alpha": 0.7, "ticks": true})
+				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
 		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
