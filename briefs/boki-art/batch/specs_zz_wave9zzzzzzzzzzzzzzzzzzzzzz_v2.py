@@ -1599,3 +1599,10 @@ NEXT('new_carousel_final','new_carousel_a_2','final','majestic',"a grand stallio
 # 11-10 OWNER: "Briarlynx's fur colour is a bit too different from its line" (it is dark brown; Nettlynx and Thistlynx are warm tan).
 SPECS.append({'id':'fur_briarlynx','name':'Briarlynx (fur matches its line)','refs':['briefs/boki-art/cards/Briarlynx.jpg','briefs/boki-art/cards/Thistlynx.jpg'],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':_EDIT+"recolour its fur to the same warm sandy-tan as the lynx in image 2, with the same cream muzzle, chest and paws and the same green eyes, in place of the dark brown. Take only the fur colours from image 2. Its body, hedge-maze mane, roses, thorn antlers and pose stay exactly the same."})
+
+# 11-10 OWNER: Briarlynx fur -> tan like its line (fur_briarlynx_1, live). Pebblamb's evolution = the pebble MOSAIC ewe (evo_pebblamb_c_1), named
+# Tesselamb; he does not want more "rocks/trees on a creature" designs (we have many). The not-changed ones stay not changed (Prowyak, Fawnshroom line).
+# More cute legendaries are welcome: Twinklup (star pup, leg_starpup_a_2) and Lockwren (locket bird, leg_wishwren_b_2) join Luckhop.
+SPECS[:]=[s for s in SPECS if s['id'] not in ('v2s_briarlynx_r4','v2p_briarlynx_r4')]
+for _a in (('Briarlynx','final','tough',0,1,_GP),('Tesselamb','final','majestic',0,1,"standing up and walking, head turned to the viewer"),('Twinklup','baby','cute',0,1,"rolling on its back, paws up, star tail wagging"),('Lockwren','baby','cute',0,1,"fluttering just off the ground, wings open like a locket")):
+    SETOF(*_a,'r5')
