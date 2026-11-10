@@ -913,3 +913,13 @@ for _n,(_st,_ar,_dk,_fu,_pose) in {'Galleotter':('final','majestic',0,1,"rearing
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_pick'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_pick'; SPECS[_n0+1]['runs']=2
 SPECS.append({'id':'opt_buckleron_d','name':'Buckleron (round baby in the line\'s colours)','refs':[_O+'opt_buckleron_a_1.jpg','briefs/boki-art/cards/Bulwartoad.jpg'],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':"Redraw the round baby toad in image 1 exactly as it is: the same tiny round body that is mostly head, the same big eyes, pose, line and flat shading. Change only this, so it is clearly the baby of the toad in image 2: its skin is the same dull olive green with a few small warts, its eyes are the same yellow-green, and the little cap on its head is a small dented dome of the same dark rusty iron-grey shell as image 2's, with one tiny shell spike and one pale barnacle, grown from its head. One creature only. "+FRAME_V2})
+
+# ===== 04:50 ET 11-10: female round 2 picks live as cards (Voltalon 1, Gongrowl 2, Hourachnid 2, Eclipsowl 2, Sandwidow 2, Arcestrel 3, Lunowl 1);
+# their sheets + portraits (ids fs2_/fp2_). Prismander: softer card (opt_prismander_a_1) live; its sheet + portrait.
+_FEMPOSE['Voltalon']="standing tall on two legs, wings folded, head turned to the viewer"
+for _n in ('Voltalon','Gongrowl','Hourachnid','Eclipsowl','Sandwidow','Arcestrel','Lunowl'):
+    _st,_ar,_dk,_fu=_FEMST[_n]; _cd='briefs/boki-art/cards/'+_n+'_female.jpg'; _n0=len(SPECS)
+    V2SHEET_NEW(_n+' female',_cd,_GC,_GN); V2PORT_NEW(_n+' female',_cd,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_FEMPOSE[_n])
+    SPECS[_n0]['id']='fs2_'+_n.lower(); SPECS[_n0+1]['id']='fp2_'+_n.lower(); SPECS[_n0+1]['runs']=2
+_n0=len(SPECS); V2SHEET_NEW('Prismander','briefs/boki-art/cards/Prismander.jpg',_GC,_GN); V2PORT_NEW('Prismander','briefs/boki-art/cards/Prismander.jpg','baby','cute',_GC,_GN,False,False,"sitting up, head tilted, tail curled round its feet")
+SPECS[_n0]['id']='v2s_prismander_soft'; SPECS[_n0+1]['id']='v2p_prismander_soft'; SPECS[_n0+1]['runs']=2

@@ -681,3 +681,11 @@ coord 07:05 UTC: (1) Male/female forms badge built (♂♀ on cards with sex_for
 
 ### 11-10 01:59 ET COORD -> ART
 coord: owner clarified 'work should be under stats' = the Boki's farm work focus belongs under stats, but he will probably remove it, so IGNORE that note. No change.
+
+### 11-10 02:05 ET ART -> COORD
+ART -> COORD 11-10 02:05: READY / LIVE (manifest 232, all with card + sheet + portrait in V2):
+- Full V2 sets finished: Glaivyx/Sabryx, Ringrove, Starcap, Forgebrock, Galleotter (no-boat design), Tiltster (fused head).
+- Prismander: softer pastel card (owner asked; hero hash changed); sheet + portrait follow.
+- FEMALES READY with card + sheet + portrait: Gongibbon, Kestrike, Murmurling, Murmuron, Pavonazar. Paths in each entry's "female" block (cards/<Name>_female.jpg, evolutions/<Name>_female.jpg, portraits/light/<Name>_female.jpg) with a "hash" sub-block.
+- FEMALES READY, card only (sheet + portrait generating): Voltalon (sandy brown, in her line's colours), Gongrowl (lean, silver-grey), Hourachnid, Eclipsowl, Sandwidow, Arcestrel, Lunowl. You can sync these cards now.
+- Thanks for the forms badge. Understood on "work under stats": ignored.
