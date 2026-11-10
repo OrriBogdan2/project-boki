@@ -43,6 +43,8 @@ func xd() -> Dictionary:
 func running() -> bool:
 	return not flight.is_empty()
 
+const LIFT_LEAD := 0.12         # s of lw_jet skipped on the press: its fly key (0.22) lands at 0.1 s
+
 ## Flue Flight: ONLY E (Heat Shield) and X (land early) work; the flight's own steering and a jump stay. Every
 ## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
@@ -78,6 +80,7 @@ func start() -> bool:
 		"knock": h.knock_t}
 	flights += 1
 	k.play("lw_jet")
+	k.anim_at -= LIFT_LEAD          # [footage] up and flying 0.1 s after the press (f25-f26)
 	_liftoff_fx()
 	return true
 
