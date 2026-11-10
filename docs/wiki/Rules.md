@@ -198,6 +198,8 @@ Seek, the Boki base's third minigame (briefs/design/GARDEN.md section 5.3, scrip
 | friend_sulk_doc | A friend who loses sulks only this fraction of lose_joy (and the pair grow closer, base_race friend_step). |
 | gems | 4 |
 | gems_doc | Gems to you when the hunt ends. |
+| calm | 0.5 |
+| calm_doc | The practice round's calm partner (the Boki you do not back): its walking speed is multiplied by this. |
 | card_s | 6 |
 
 ## base_shove (`content/rules/base_shove.json`)
@@ -238,6 +240,8 @@ Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.
 | gems_win | 4 |
 | gems_ran | 1 |
 | gems_doc | Gems to you when your backed Boki wins, or for any other bout. |
+| calm | 0.5 |
+| calm_doc | The practice round's calm partner (the Boki you do not back): its push is multiplied by this. |
 | card_s | 6 |
 
 ## base_volley (`content/rules/base_volley.json`)
@@ -276,6 +280,8 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | gems_win | 4 |
 | gems_ran | 1 |
 | gems_doc | Gems to you when your backed Boki wins, or for any other match. |
+| calm | 0.5 |
+| calm_doc | The practice round's calm partner (the Boki you do not back): its chance to return the seed is multiplied by this. |
 | card_s | 6 |
 
 ## boki_lines (`content/rules/boki_lines.json`)

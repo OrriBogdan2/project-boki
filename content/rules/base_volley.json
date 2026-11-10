@@ -30,5 +30,7 @@
 	"gems_win": 4,
 	"gems_ran": 1,
 	"gems_doc": "Gems to you when your backed Boki wins, or for any other match.",
+	"calm": 0.5,
+	"calm_doc": "The practice round's calm partner (the Boki you do not back): its chance to return the seed is multiplied by this.",
 	"card_s": 6.0
 }

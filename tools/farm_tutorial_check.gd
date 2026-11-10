@@ -171,13 +171,13 @@ func _first_race() -> void:
 	var race: BaseRace = home.hrace
 	ok(not Save.d["tutorial"].has(BaseRace.FIRST), "first race: a fresh save has not been offered a practice lap")
 	race.use()
-	ok(is_instance_valid(race.offer) and race.run == null, "first race: walking up offers a practice lap")
-	var lines: Array = race.offer.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(is_instance_valid(race.first.offer) and race.run == null, "first race: walking up offers a practice lap")
+	var lines: Array = race.first.offer.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	ok(lines.size() == 2 and not String(lines[1]).contains("\n") and String(lines[1]).contains("gold"),
 			"first race: one explaining line about the cheers and the glowing gold")
-	race._answer(false)
+	race.first.answer(false)
 	race.use()
-	ok(race.offer == null and Save.d["tutorial"][BaseRace.FIRST], "first race: skipped, it does not come back")
+	ok(race.first.offer == null and Save.d["tutorial"][BaseRace.FIRST], "first race: skipped, it does not come back")
 	home.queue_free()
 	await main.get_tree().process_frame
 

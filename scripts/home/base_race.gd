@@ -239,7 +239,7 @@ var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
-var offer: Control = null      # the first-visit practice lap offer
+var first: FirstRound          # the first-visit practice lap offer
 var guide := false             # this run is the practice lap: the gold glows at each mark, the card explains
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
@@ -247,6 +247,9 @@ var heard: Array = []          # per runner: the stretch last heard, plus the st
 
 func _init(home) -> void:
 	h = home
+	first = FirstRound.new(home, FIRST, "", "A practice lap with your Boki?",
+			"You back a Boki and cheer it on with %s at three marks: press when the gold glows." \
+			% Settings.key_cap("interact"), "Practice lap")
 
 ## The post and loop beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -335,13 +338,8 @@ func entrants() -> Array:
 
 func use() -> void:
 	release()
-	if is_instance_valid(offer):
-		return
-	if Save.d["tutorial"].get(FIRST, false):
+	if not first.ask(func(): _start(true)):
 		_start(false)
-	else:
-		Save.d["tutorial"][FIRST] = true      # offered once, taken or skipped
-		_offer()
 
 ## The race, or the solo lap with your Boki when it is the only one out. The practice lap glows and explains itself.
 func _start(practice: bool) -> void:
@@ -354,30 +352,6 @@ func _start(practice: bool) -> void:
 	else:
 		h._toast("The Dash needs two rested Boki out on the base")
 	guide = guide and run != null
-
-## The first walk up to the post: a one-line card with Practice lap and Skip.
-func _offer() -> void:
-	var c := UI.card(Color(0.06, 0.07, 0.1, 0.92), 14, 14)
-	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	c.offset_top = 90
-	var v := UI.vbox(8)
-	c.add_child(v)
-	v.add_child(UI.label("A practice lap with your Boki?", 18, UI.ACCENT_HI))
-	v.add_child(UI.label("You back a Boki and cheer it on with %s at three marks: press when the gold glows." \
-			% Settings.key_cap("interact"), 14))
-	var row := UI.hbox(10)
-	row.add_child(UI.primary("Practice lap", func(): _answer(true)))
-	row.add_child(UI.ghost("Skip", func(): _answer(false)))
-	v.add_child(row)
-	h.root_ui.add_child(c)
-	offer = c
-
-func _answer(practice: bool) -> void:
-	offer.queue_free()
-	offer = null
-	if practice:
-		_start(true)
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
@@ -420,8 +394,7 @@ func _bar_label(last: String) -> void:
 
 ## A press: true when the race took it.
 func input(event: InputEvent) -> bool:
-	if is_instance_valid(offer) and event.is_action_pressed("menu"):
-		_answer(false)
+	if first.skip(event):
 		return true
 	if run == null:
 		return false
@@ -537,7 +510,7 @@ func _race_card(res: Dictionary) -> void:
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
 		["+%d gems%s" % [res["gems"], why], UI.GOLD]]
-			+ _explain("Joy and trust move with the result, and backing the winner pays gems"))
+			+ _explain(FirstRound.RESULT))
 
 func _solo_card(gained: int) -> void:
 	var speed := int(solo_rec["stats"]["speed"])

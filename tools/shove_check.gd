@@ -141,7 +141,7 @@ func _on_base() -> void:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, BaseShove.FIRST: true}
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)

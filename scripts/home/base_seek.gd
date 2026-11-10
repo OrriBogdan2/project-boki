@@ -27,6 +27,7 @@ const BASKET_H := 0.3                         # m, its height
 const SCENT_R := 0.14                         # m, the hidden scent's glow
 const REACH := 1.6                            # m from the basket to pick the scent up
 const TURN := 6.0                             # rad/s a hunter turns to its heading
+const FIRST := "first_seek"                   # Save.d.tutorial: the practice hunt was offered
 
 static func rules() -> Dictionary:
 	return Content.rules("base_seek")
@@ -64,6 +65,7 @@ class Hunt:
 	var night: bool
 	var rng: RandomNumberGenerator
 	var can_walk: Callable          # (Vector2) -> bool: is this ground walkable (empty: everywhere)
+	var calm := -1                  # the hunter of a practice hunt's calm partner, -1 in a real hunt
 	var t := 0.0
 	var found := -1                 # index of the hunter that reached it, -1 while nobody has
 
@@ -106,6 +108,8 @@ class Hunt:
 	func step(dt: float) -> void:
 		t += dt
 		var rate: Array = [BaseSeek.speed(recs[0]), BaseSeek.speed(recs[1])]
+		if calm >= 0:
+			rate[calm] *= float(R["calm"])
 		if rivals() and pos[0].distance_to(pos[1]) < float(R["rival_near"]):
 			rate[0 if rate[0] < rate[1] else 1] *= float(R["rival_slow"])
 		for i in 2:
@@ -153,9 +157,12 @@ var scent: MeshInstance3D = null
 var hunt: Hunt = null
 var pair: Array = []           # the home's kin entries: a, b
 var card: Control = null
+var first: FirstRound          # the first-visit practice hunt offer
+var guide := false             # this hunt is the practice: a calm partner, the card explains
 
 func _init(home) -> void:
 	h = home
+	first = FirstRound.new(home, FIRST, "seek", "Practice once?", "Hide it where your Boki will look last")
 
 ## The only writer of `state`: false (and counted) when the TABLE lacks the move.
 func go(to: S) -> bool:
@@ -164,6 +171,7 @@ func go(to: S) -> bool:
 		return false
 	state = to
 	state_t = 0.0
+	guide = guide and to != S.IDLE
 	return true
 
 ## The scent basket beside the Training post (none without one); called when fixtures move.
@@ -217,10 +225,15 @@ func use() -> void:
 		if h.hrace.entrants().size() < 2:
 			h._toast("Seek needs two rested Boki out on the base")
 			return
-		go(S.CARRY)
-		h._toast("You hold the scent: walk anywhere on the base and hide it")
+		if not first.ask(func(): _take(true)):
+			_take(false)
 	elif state == S.CARRY:
 		_hide(Vector2(h.ppos.x, h.ppos.z))
+
+func _take(practice: bool) -> void:
+	if go(S.CARRY):
+		guide = practice
+		h._toast(first.line if practice else "You hold the scent: walk anywhere on the base and hide it")
 
 func _hide(at: Vector2) -> void:
 	var ks: Array = h.hrace.entrants()
@@ -242,6 +255,8 @@ func _hide(at: Vector2) -> void:
 	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, HomeWork.is_night(h.day_t),
 			RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
+	if guide:
+		hunt.calm = 1 - maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
 	Sfx.play("whoosh", null, -8.0)
@@ -255,6 +270,8 @@ func _ground(p: Vector2) -> float:
 
 ## True when the hunt took the key (menu calls it off, or puts the scent back).
 func input(event: InputEvent) -> bool:
+	if first.skip(event):
+		return true
 	if state != S.CARRY and state != S.HUNT:
 		return false
 	if not event.is_action_pressed("menu"):
@@ -316,4 +333,5 @@ func _card(res: Dictionary) -> void:
 		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]])
+		["+%d gems" % res["gems"], 14, UI.GOLD]]
+			+ FirstRound.row(guide, "Joy and trust move with the result, and the hunt pays you gems"))

@@ -18,6 +18,7 @@ const SLIDE := 0.5                            # m the pair slides along the push
 const TILT := 0.5                             # rad the stump leans at full balance
 const CREAK_AT := 0.5                         # balance (0..1) at which the stump first creaks
 const REACH := 1.6                            # m from the stump to start a bout
+const FIRST := "first_shove"                  # Save.d.tutorial: the practice bout was offered
 
 static func rules() -> Dictionary:
 	return Content.rules("base_shove")
@@ -62,13 +63,15 @@ class Run:
 	var boost_t := 0.0              # s of boost left
 	var base: Array = []            # each side's push over the other's hold
 
-	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
+	## calm: the index of a practice bout's calm partner, -1 in a real bout.
+	func _init(pair: Array, back: int, r: RandomNumberGenerator, calm := -1) -> void:
 		R = BaseShove.rules()
 		recs = pair
 		backed = back
 		rng = r
 		for i in 2:
-			base.append(BaseShove.push(recs[i], recs[1 - i]) / BaseShove.hold(recs[1 - i]))
+			base.append(BaseShove.push(recs[i], recs[1 - i]) / BaseShove.hold(recs[1 - i])
+					* (float(R["calm"]) if i == calm else 1.0))
 
 	func can_shove() -> bool:
 		return not shoved and not over()
@@ -127,9 +130,15 @@ var card: Control = null
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var creaked := false           # the lean creak has played this bout
+var first: FirstRound          # the first-visit practice bout offer
+var guide := false             # this bout is the practice: a calm partner, the gold glows, the card explains
 
 func _init(home) -> void:
 	h = home
+	first = FirstRound.new(home, FIRST, "shove", "Practice once?", _tip())
+
+func _tip() -> String:
+	return "Press %s as the stump tips" % Settings.key_cap("interact")
 
 ## The stump beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -173,19 +182,28 @@ func label() -> String:
 
 func use() -> void:
 	h.hrace.release()
-	var ks: Array = h.hrace.entrants()
-	if ks.size() < 2:
+	if h.hrace.entrants().size() < 2:
 		h._toast("The Stump Shove needs two rested Boki out on the base")
 		return
+	if not first.ask(func(): _begin(true)):
+		_begin(false)
+
+func _begin(practice: bool) -> void:
+	var ks: Array = h.hrace.entrants()
+	if ks.size() < 2:
+		return
+	guide = practice
 	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
 		BaseRace.act(k, "push")
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
-	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
+	var calm := 1 - back if practice else -1
+	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new(), calm)
 	run.rng.randomize()
 	bar = TimingBar.new()
-	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact"))
+	var plain := "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact")
+	bar.open(h.root_ui, _tip() if practice else plain)
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
 	_place_pair()
 	creaked = false
@@ -193,6 +211,8 @@ func use() -> void:
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
+	if first.skip(event):
+		return true
 	if run == null:
 		return false
 	if event.is_action_pressed("menu"):
@@ -222,6 +242,7 @@ func tick(d: float) -> void:
 	run.step(d)
 	if not run.shoved:
 		bar.step(d)
+		bar.glow = guide and bar.in_gold()
 	_place_pair()
 	_hear_strain()
 	if run.over():
@@ -269,6 +290,7 @@ func _end(finished: bool) -> void:
 		Save.save_game()
 	run = null
 	pair = []
+	guide = false
 
 func _card(res: Dictionary) -> void:
 	var win: Dictionary = res["win"]
@@ -280,5 +302,5 @@ func _card(res: Dictionary) -> void:
 		["%s holds the stump!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost the Stump Shove to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + FirstRound.row(guide))
 	card_t = float(rules()["card_s"])

@@ -59,6 +59,10 @@ func step(d: float) -> void:
 	if is_instance_valid(canvas):
 		canvas.queue_redraw()
 
+## The marker is inside the gold.
+func in_gold() -> bool:
+	return absf(m - zone) < GOOD
+
 ## Grades this press, then speeds the marker up and moves the gold.
 func press() -> String:
 	var off := absf(m - zone)

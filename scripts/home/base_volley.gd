@@ -27,6 +27,7 @@ const ARC := 1.0                             # m the seed rises on a normal hit
 const SPIKE_ARC := 0.35                      # m the seed rises on a spike
 const SEED_R := 0.1                          # m, the seed's radius
 const REACH := 1.8                           # m from the log to start a match
+const FIRST := "first_volley"                # Save.d.tutorial: the practice match was offered
 
 static func rules() -> Dictionary:
 	return Content.rules("base_volley")
@@ -78,12 +79,14 @@ class Run:
 	var called := false             # your one call is used
 	var last_miss := -1             # the side that dropped the last seed, -1 before the first point
 	var rally := 0                  # hits since the serve
+	var calm := -1                  # the side of a practice match's calm partner, -1 in a real match
 
-	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
+	func _init(pair: Array, back: int, r: RandomNumberGenerator, calm_side := -1) -> void:
 		R = BaseVolley.rules()
 		recs = pair
 		backed = back
 		rng = r
+		calm = calm_side
 
 	## The only writer of `state`: false (and counted) when the TABLE lacks the move.
 	func go(next: S) -> bool:
@@ -145,7 +148,7 @@ class Run:
 		rally += 1
 
 	func _arrive() -> void:
-		var p := BaseVolley.p_return(recs[to], recs[hitter]) * hard
+		var p := BaseVolley.p_return(recs[to], recs[hitter]) * hard * (float(R["calm"]) if to == calm else 1.0)
 		if rng.randf() < p:
 			_hit(to)
 			return
@@ -181,9 +184,15 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var first: FirstRound          # the first-visit practice match offer
+var guide := false             # this match is the practice: a calm partner, the gold glows, the card explains
 
 func _init(home) -> void:
 	h = home
+	first = FirstRound.new(home, FIRST, "volley", "Practice once?", _tip())
+
+func _tip() -> String:
+	return "Press %s to spike when it glows" % Settings.key_cap("interact")
 
 ## The log and the seed beside the Training post (none without one); called when fixtures move.
 func place() -> void:
@@ -229,18 +238,27 @@ func label() -> String:
 	return "Play Spark Volley (back %s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
-	var ks: Array = h.hrace.entrants()
-	if ks.size() < 2:
+	if h.hrace.entrants().size() < 2:
 		h._toast("Spark Volley needs two rested Boki out on the base")
 		return
+	if not first.ask(func(): _begin(true)):
+		_begin(false)
+
+func _begin(practice: bool) -> void:
+	var ks: Array = h.hrace.entrants()
+	if ks.size() < 2:
+		return
+	guide = practice
 	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
-	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
+	var calm := 1 - back if practice else -1
+	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new(), calm)
 	run.rng.randomize()
 	bar = TimingBar.new()
-	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to call a spike" % Settings.key_cap("interact"))
+	var plain := "Press %s once, with the marker in the gold, to call a spike" % Settings.key_cap("interact")
+	bar.open(h.root_ui, _tip() if practice else plain)
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
 	seed_node.visible = true
 	_place()
@@ -248,6 +266,8 @@ func use() -> void:
 
 ## A press: true when the match took it.
 func input(event: InputEvent) -> bool:
+	if first.skip(event):
+		return true
 	if run == null:
 		return false
 	if event.is_action_pressed("menu"):
@@ -273,6 +293,7 @@ func tick(d: float) -> void:
 	run.step(d)
 	if not run.called:
 		bar.step(d)
+		bar.glow = guide and bar.in_gold()
 	if run.score[0] + run.score[1] != points:
 		h._emote(pair[run.last_miss], "!", true)
 		h._toast("%s %d : %d %s" % [run.recs[0]["name"], run.score[0], run.score[1], run.recs[1]["name"]])
@@ -322,6 +343,7 @@ func _end(finished: bool) -> void:
 		Save.save_game()
 	run = null
 	pair = []
+	guide = false
 
 func _card(res: Dictionary) -> void:
 	var win: Dictionary = res["win"]
@@ -333,5 +355,5 @@ func _card(res: Dictionary) -> void:
 		["%s wins Spark Volley, %d to %d!" % [win["name"], res["score"][0], res["score"][1]], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost Spark Volley to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]])
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + FirstRound.row(guide))
 	card_t = float(rules()["card_s"])

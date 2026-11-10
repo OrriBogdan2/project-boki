@@ -274,20 +274,20 @@ func _first_visit(home) -> void:
 		Care.change(k["rec"], "food", 100.0)
 	Save.d["tutorial"].erase(BaseRace.FIRST)
 	race.use()
-	ok(is_instance_valid(race.offer) and race.run == null and Save.d["tutorial"][BaseRace.FIRST],
+	ok(is_instance_valid(race.first.offer) and race.run == null and Save.d["tutorial"][BaseRace.FIRST],
 			"first: the first walk-up offers a practice lap instead of starting")
 	var esc := InputEventAction.new()
 	esc.action = "menu"
 	esc.pressed = true
-	ok(race.input(esc) and race.offer == null and race.run == null, "first: Esc skips the offer")
+	ok(race.input(esc) and race.first.offer == null and race.run == null, "first: Esc skips the offer")
 	race.use()
-	ok(race.offer == null and race.run != null and not race.guide, "first: after a skip it is a plain race")
+	ok(race.first.offer == null and race.run != null and not race.guide, "first: after a skip it is a plain race")
 	race.tick(0.1)
 	ok(not race.bar.glow, "first: a plain race has no glowing gold")
 	_finish(race)
 	Save.d["tutorial"].erase(BaseRace.FIRST)
 	race.use()
-	race._answer(true)
+	race.first.answer(true)
 	ok(race.run != null and race.guide, "first: Practice lap starts the guided race")
 	while race.run != null and not race.run.can_cheer():
 		race.tick(DT)
@@ -297,7 +297,7 @@ func _first_visit(home) -> void:
 	var text := _card_text(race)
 	ok(text.contains("Joy and trust") and text.contains("gems"), "first: the result card explains joy, trust and gems")
 	race.use()
-	ok(race.offer == null and race.run != null and not race.guide, "first: the offer never comes back")
+	ok(race.first.offer == null and race.run != null and not race.guide, "first: the offer never comes back")
 	_finish(race)
 	ok(not _card_text(race).contains("Joy and trust move"), "first: a later race's card has no explainer")
 	Save.d["tutorial"].erase(BaseRace.FIRST)
@@ -305,7 +305,7 @@ func _first_visit(home) -> void:
 	for k in out:
 		k["indoors"] = true
 	race.use()
-	race._answer(true)
+	race.first.answer(true)
 	ok(race.run != null and race.runners.size() == 1 and race.guide, "first: alone, the practice lap is a solo lap")
 	_finish(race)
 	ok(_card_text(race).contains("trains Speed"), "first: the solo practice card explains Speed and joy")

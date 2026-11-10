@@ -35,5 +35,7 @@
 	"friend_sulk_doc": "A friend who loses sulks only this fraction of lose_joy (and the pair grow closer, base_race friend_step).",
 	"gems": 4,
 	"gems_doc": "Gems to you when the hunt ends.",
+	"calm": 0.5,
+	"calm_doc": "The practice round's calm partner (the Boki you do not back): its walking speed is multiplied by this.",
 	"card_s": 6.0
 }
