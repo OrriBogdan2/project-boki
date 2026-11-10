@@ -7,7 +7,7 @@
 	"weight": "light",
 	"color": "#4aa8ff",
 	"plate_offset": 2.1,
-	"body": {"size": 1.0, "head": 0.66, "legs": 1.9, "torso": 0.95, "shoulder": 0.9, "hit_r": 0.38},
+	"body": {"size": 1.0, "head": 0.71, "legs": 1.03, "torso": 1.0, "shoulder": 1.14, "arms": 0.92, "hit_r": 0.38},
 	"fantasy": "The fish out of water. Fences with a swordfish, throws whatever bottle comes out of the bag, and chains crowd control until a foe is Beached.",
 	"silhouette": "the floppy polka-dot wizard hat, the swordfish rapier and the potion bag on his hip",
 	"clip": {"lines": {"dash": "Dive into the ground and swim.", "lmb": "Three rapier thrusts, stepping in.", "rmb": "Throw the next potion from the bag.", "e": "Spin, then send a waterspout.", "x": "Surf a tidal wave down a line."}},
