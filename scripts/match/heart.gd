@@ -45,7 +45,7 @@ static func enabled(opts: Dictionary) -> bool:
 static func tide_r(m: Match) -> float:
 	if m.heart == null:
 		return 0.0
-	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
+	var t := (m.time - r("tide_start_s")) / r("tide_close_s")
 	if t < 0.0:
 		return 0.0
 	return lerpf(r("tide_r0"), r("tide_r1"), clampf(t, 0.0, 1.0))

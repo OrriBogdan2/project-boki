@@ -464,8 +464,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 24,
-"nested_ternary": 1,
+"long_line": 23,
 "semicolon": 49
 },
 "scripts/match/bot_kin.gd": {
@@ -635,7 +634,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 222,
+"long_line": 215,
 "nested_ternary": 19,
 "semicolon": 146,
 "shadow": 9
@@ -751,11 +750,6 @@
 "scripts/match/weapon_ups.gd": {
 "long_line": 1
 },
-"scripts/match/wide_layout.gd": {
-"long_line": 7,
-"semicolon": 3,
-"shadow": 1
-},
 "scripts/match/world.gd": {
 "long_line": 78,
 "nested_ternary": 9,
@@ -800,9 +794,9 @@
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 36,
+"long_line": 34,
 "nested_ternary": 4,
-"semicolon": 10,
+"semicolon": 8,
 "shadow": 1
 },
 "scripts/ui/gear_panel.gd": {
@@ -829,7 +823,7 @@
 "history_comment": 2,
 "long_line": 190,
 "nested_ternary": 39,
-"semicolon": 52,
+"semicolon": 51,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -905,10 +899,6 @@
 "nested_ternary": 1,
 "semicolon": 8,
 "shadow": 1
-},
-"scripts/ui/session_row.gd": {
-"long_line": 4,
-"semicolon": 1
 },
 "scripts/ui/title.gd": {
 "long_line": 21,

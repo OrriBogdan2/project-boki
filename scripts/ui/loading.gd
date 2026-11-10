@@ -105,11 +105,8 @@ func setup(opts: Dictionary) -> void:
 		var squads := "%d squads of %d" % [int(opts.get("teams", Data.SQUADS)), int(opts.get("squad", Data.SQUAD_SIZE))]
 		mode_line = "%s  •  skyship drop" % squads
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
-		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % squads
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
-		if opts.get("rolling", false):
-			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
