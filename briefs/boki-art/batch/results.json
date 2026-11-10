@@ -99200,5 +99200,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/idea_dreadnoyak_3.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_prowyak",
+    "name": "Prowyak (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_prowyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_zephyrak",
+    "name": "Zephyrak (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_zephyrak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_prowyak",
+    "name": "Prowyak (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_selenfin",
+    "name": "Selenfin (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_selenfin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_dreadnoyak",
+    "name": "Dreadnoyak (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_dreadnoyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_zephyrak",
+    "name": "Zephyrak (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_zephyrak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_dreadnoyak",
+    "name": "Dreadnoyak (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_dreadnoyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "evo_pebblamb_a",
+    "name": "Pebblamb evolution a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/evo_pebblamb_a_1.jpg",
+    "ok": true
   }
 ]
