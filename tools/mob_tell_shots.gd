@@ -9,7 +9,8 @@ const STEPS := [0.25, 0.6, 1.0]
 const CROP := Vector2i(900, 560)        # px of each frame kept, round the monster
 
 func take(main_node: Node, out: String) -> void:
-	main = main_node; dir = out
+	main = main_node
+	dir = out
 	DirAccess.make_dir_recursive_absolute(dir)
 	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 	o.merge(Match.arena_opts("gunslinger"), true)
@@ -40,7 +41,8 @@ func _strip(kind: String) -> void:
 	var at := home + Vector3(2, 0, 0)
 	var mb := m.spawn_mob(kind, at)
 	mb.teleport(at)
-	P.teleport(at + Vector3(3.0, 0, 0)); P.vel = Vector3.ZERO
+	P.teleport(at + Vector3(3.0, 0, 0))
+	P.vel = Vector3.ZERO
 	var attacks: bool = mb.md["attack"] != "none"
 	mb.tgt = P
 	if attacks:
@@ -67,7 +69,8 @@ func _strip(kind: String) -> void:
 	strip.resize(strip.get_width() / 2, strip.get_height() / 2, Image.INTERPOLATE_BILINEAR)
 	var file := "mob_tell_%s.png" % kind
 	strip.save_png(dir.path_join(file))
-	lines.append("mobtell|%s|%s: wind-up at 25 / 60 / 100 %%%s" % [file, mb.md["name"], "" if attacks else " (it never attacks: no tell)"])
+	var note := "wind-up at 25 / 60 / 100 %" if attacks else "it never attacks: no tell"
+	lines.append("mobtell|%s|%s: %s" % [file, mb.md["name"], note])
 	MobTell.clear(mb)
 	mb.dead = true
 	mb.visible = false

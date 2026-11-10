@@ -31,7 +31,9 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	ak.main = main
 	var r: Array = ak.setup("gunslinger", 12.0, "", false)
-	m = r[0]; T = r[2]; home = r[4]
+	m = r[0]
+	T = r[2]
+	home = r[4]
 	var P: Hunter = r[1]
 	P.teleport(home + Vector3(-6, 0, 9))        # off every lane
 	for k in MOBS:
@@ -54,10 +56,12 @@ func _wind(kind: String, at: Vector3) -> Mob:
 	ak.fresh(T)
 	var mb := m.spawn_mob(kind, home + Vector3(2, 0, 0))
 	mb.teleport(home + Vector3(2, 0, 0))
-	T.teleport(mb.pos + Vector3(3, 0, 0)); T.vel = Vector3.ZERO
+	T.teleport(mb.pos + Vector3(3, 0, 0))
+	T.vel = Vector3.ZERO
 	mb.tgt = T
 	mb._begin_attack()
-	T.teleport(at); T.vel = Vector3.ZERO
+	T.teleport(at)
+	T.vel = Vector3.ZERO
 	mb.tgt = null                       # the aim stays east: the test moves the stand-in, not the mob
 	return mb
 
@@ -71,7 +75,8 @@ func _seen(mb: Mob) -> Array:
 		if node.has_meta("len"):
 			var d := Vector2(-sin(yaw), -cos(yaw))
 			var c := node.global_position
-			out.append({"lane": true, "dir": d, "len": sz.y, "width": sz.x, "from": c - Vector3(d.x, 0, d.y) * sz.y * 0.5})
+			var from := c - Vector3(d.x, 0, d.y) * sz.y * 0.5
+			out.append({"lane": true, "dir": d, "len": sz.y, "width": sz.x, "from": from})
 		else:
 			out.append({"lane": false, "at": node.global_position, "r": sz.x * 0.5})
 	return out
@@ -82,15 +87,19 @@ func _hurts(kind: String, at: Vector3) -> bool:
 	var secs := float(mb.md["windup"]) + 1.6
 	var t := 0.0
 	while t < secs:
-		m.step(DT); t += DT
+		m.step(DT)
+		t += DT
 	return ak.dmg(T) > 0.0
 
 func _probes(sh: Dictionary) -> Array:
 	## [point, should it hit?, label]
 	var out: Array = []
 	if sh["lane"]:
-		var d: Vector2 = sh["dir"]; var nv := Vector2(-d.y, d.x)
-		var s: Vector3 = sh["from"]; var L: float = sh["len"]; var hw: float = sh["width"] * 0.5
+		var d: Vector2 = sh["dir"]
+		var nv := Vector2(-d.y, d.x)
+		var s: Vector3 = sh["from"]
+		var L: float = sh["len"]
+		var hw: float = sh["width"] * 0.5
 		for sd in [-1.0, 1.0]:
 			for f in [[NEAR, true], [FAR, false]]:
 				var q: Vector2 = Vector2(s.x, s.z) + d * L * 0.9 + nv * hw * f[0] * sd
@@ -111,12 +120,14 @@ func _mob(kind: String) -> void:
 	m.step(DT)
 	var seen := _seen(mb)
 	var want := MobTell.shapes(mb, mb.atk_pad).size()
-	ok("%s: one ground tell per shape of its attack" % kind, seen.size() == want and want > 0, "%d of %d" % [seen.size(), want])
+	var made := seen.size() == want and want > 0
+	ok("%s: one ground tell per shape of its attack" % kind, made, "%d of %d" % [seen.size(), want])
 	var base: Color = MobTell.TELL_COL[mb.md["attack"]]
 	var col := Color.BLACK
 	if not mb.tele.is_empty():
 		col = (mb.tele[0] as MeshInstance3D).material_override.get_shader_parameter("color")
-	ok("%s: the tell wears the rival tint" % kind, Color(col, 1.0).is_equal_approx(Feel.hostile(base)) and _gap(col, Feel.RIM_ENEMY) < _gap(base, Feel.RIM_ENEMY))
+	var tinted := Color(col, 1.0).is_equal_approx(Feel.hostile(base))
+	ok("%s: the tell wears the rival tint" % kind, tinted and _gap(col, Feel.RIM_ENEMY) < _gap(base, Feel.RIM_ENEMY))
 	# 1) the tell's shape against where the attack really lands
 	var bad := 0
 	var probes := 0
@@ -125,8 +136,11 @@ func _mob(kind: String) -> void:
 			probes += 1
 			if _hurts(kind, pr[0]) != pr[1]:
 				bad += 1
-				print("MOBTELL   %s %s probe at %.2f,%.2f expected %s (pad %.2f, T.r %.2f, shape %s)" % [kind, pr[2], pr[0].x - home.x, pr[0].z - home.z, "hit" if pr[1] else "miss", mb.atk_pad, T.r, sh])
-	ok("%s: the tell equals the hit shape within 5%% (%d probes)" % [kind, probes], bad == 0 and probes > 0, "%d wrong" % bad)
+				var rel := pr[0] - home
+				var verdict := "hit" if pr[1] else "miss"
+				print("MOBTELL   %s %s probe at %.2f,%.2f expected %s" % [kind, pr[2], rel.x, rel.z, verdict])
+	var what := "%s: the tell equals the hit shape within 5%% (%d probes)" % [kind, probes]
+	ok(what, bad == 0 and probes > 0, "%d wrong" % bad)
 	# 2) the fill and the glow end on the hit frame
 	mb = _wind(kind, home + Vector3(2, 0, 9))
 	var fills: Array = []
@@ -146,19 +160,24 @@ func _mob(kind: String) -> void:
 			break
 	var f_last: float = fills.back() if not fills.is_empty() else -1.0
 	var f_prev: float = fills[fills.size() - 2] if fills.size() > 1 else -1.0
-	ok("%s: the fill reaches 1 on the hit frame, not before" % kind, struck and f_last >= 0.999 and f_prev >= 1.0 - 3.0 * DT / windup and (fills.size() < 3 or fills[fills.size() - 3] < 0.999), "%.3f -> %.3f" % [f_prev, f_last])
+	var lands := struck and f_last >= 0.999 and f_prev >= 1.0 - 3.0 * DT / windup
+	lands = lands and (fills.size() < 3 or fills[fills.size() - 3] < 0.999)
+	ok("%s: the fill reaches 1 on the hit frame, not before" % kind, lands, "%.3f -> %.3f" % [f_prev, f_last])
 	ok("%s: the tell stays up on the hit frame" % kind, kept)
 	var rising := true
 	for i in range(1, glows.size() - 1):
 		if glows[i] < glows[i - 1]: rising = false
-	ok("%s: the body glow brightens to its peak on the hit frame" % kind, rising and glows.size() > 3 and glows[0] < 0.1 and glows[glows.size() - 2] >= MobTell.GLOW_MAX * 0.9, "%.2f -> %.2f" % [glows[0], glows[glows.size() - 2]])
+	var peak: float = glows[glows.size() - 2] if glows.size() > 1 else -1.0
+	var bright := rising and glows.size() > 3 and glows[0] < 0.1 and peak >= MobTell.GLOW_MAX * 0.9
+	ok("%s: the body glow brightens to its peak on the hit frame" % kind, bright, "%.2f -> %.2f" % [glows[0], peak])
 	# 3) an instant blow can be stepped out of while its shape is fixed (the aim locks for the last 40% of a lunge)
 	if mb.md["attack"] in ["lunge", "slam", "fuse"]:
 		var locked := windup * (0.4 if mb.md["attack"] == "lunge" else 1.0)
 		var out_m := 0.0
 		for sh in seen:
 			out_m = maxf(out_m, sh["width"] * 0.5 if sh["lane"] else float(sh["r"]))
-		ok("%s: a hunter on foot steps out before it lands" % kind, locked * WALK >= out_m, "%.2f m in %.2f s, needs %.2f" % [locked * WALK, locked, out_m])
+		var info := "%.2f m in %.2f s, needs %.2f" % [locked * WALK, locked, out_m]
+		ok("%s: a hunter on foot steps out before it lands" % kind, locked * WALK >= out_m, info)
 
 func _gap(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
@@ -168,4 +187,5 @@ func _glow(mb: Mob) -> float:
 
 func _glimmer() -> void:
 	var mb := m.spawn_mob("glimmer", home + Vector3(2, 0, 0))
-	ok("glimmer: never attacks, so it has no tell to show", mb.md["attack"] == "none" and MobTell.shapes(mb, 0.4).is_empty() and not MobTell.TELL_COL.has("none"))
+	var quiet: bool = mb.md["attack"] == "none" and MobTell.shapes(mb, 0.4).is_empty()
+	ok("glimmer: never attacks, so it has no tell to show", quiet and not MobTell.TELL_COL.has("none"))

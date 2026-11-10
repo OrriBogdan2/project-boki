@@ -18,7 +18,10 @@ const SLAM_R := 2.3             # m, a slam's default radius (md "slam_r" overri
 const LINGER := 0.15            # s the filled tell stays up after the hit frame
 const GLOW_MAX := 0.55          # body glow at the hit frame (the flash mix, 0..1)
 const HIT_DY := {"lunge": 1.2, "slam": 1.5, "fuse": 1.6}                # m of height a blow still reaches
-const TELL_COL := {"lunge": Color("ff6a4a"), "spit": Color("ffb04a"), "slam": Color("ff4a3a"), "fuse": Color("ff8a2a"), "volley": Color("6ad8ff")}
+const TELL_COL := {
+	"lunge": Color("ff6a4a"), "spit": Color("ffb04a"), "slam": Color("ff4a3a"), "fuse": Color("ff8a2a"),
+	"volley": Color("6ad8ff"),
+}
 
 ## The reach of this mob's attack for a target of radius `pad`: [] for a mob that does not attack.
 static func shapes(mb: Mob, pad: float) -> Array:
@@ -26,7 +29,8 @@ static func shapes(mb: Mob, pad: float) -> Array:
 	var o := mb.pos if mb.st == "windup" else mb.atk_at
 	match String(mb.md["attack"]):
 		"lunge":
-			return [_lane(o, d, -mb.r, LUNGE_SPEED * LUNGE_T + 2.0 * mb.r, 2.0 * mb.r, pad)]   # the body swept along the dash
+			# the body swept along the dash
+			return [_lane(o, d, -mb.r, LUNGE_SPEED * LUNGE_T + 2.0 * mb.r, 2.0 * mb.r, pad)]
 		"spit":
 			return [_bolt(o, d, SPIT, pad)]
 		"volley":
@@ -39,13 +43,14 @@ static func shapes(mb: Mob, pad: float) -> Array:
 	return []
 
 ## A lane from `start` m ahead of `o`, `len` long, `width` wide, grown by `pad` all round.
-static func _lane(o: Vector3, d: Vector2, start: float, len: float, width: float, pad: float) -> Dictionary:
+static func _lane(o: Vector3, d: Vector2, start: float, length: float, width: float, pad: float) -> Dictionary:
 	var from := o + Vector3(d.x, 0.0, d.y) * (start - pad)
-	return {"lane": true, "from": from, "dir": d, "len": len + 2.0 * pad, "width": width + 2.0 * pad}
+	return {"lane": true, "from": from, "dir": d, "len": length + 2.0 * pad, "width": width + 2.0 * pad}
 
 ## The path of a bolt: it hits what comes within its radius (and the hit slack) of its centre line.
 static func _bolt(o: Vector3, d: Vector2, bolt: Dictionary, pad: float) -> Dictionary:
-	return _lane(o, d, MUZZLE, float(bolt["speed"]) * float(bolt["life"]), 2.0 * (float(bolt["size"]) + Match.HIT_SLACK), pad)
+	var reach := float(bolt["speed"]) * float(bolt["life"])
+	return _lane(o, d, MUZZLE, reach, 2.0 * (float(bolt["size"]) + Match.HIT_SLACK), pad)
 
 static func contains(sh: Dictionary, p: Vector3) -> bool:
 	if sh["lane"]:
@@ -64,7 +69,9 @@ static func hits(mb: Mob, e: Ent) -> bool:
 ## The mob goes where it aims: where a slam or burst will land, and the radius it draws for.
 static func begin(mb: Mob) -> void:
 	mb.atk_pad = mb.tgt.r if mb.tgt else REF_R
-	mb.atk_at = mb.pos + (Vector3(mb.atk_dir.x, 0.0, mb.atk_dir.y) * SLAM_FWD if mb.md["attack"] == "slam" else Vector3.ZERO)
+	mb.atk_at = mb.pos
+	if mb.md["attack"] == "slam":
+		mb.atk_at += Vector3(mb.atk_dir.x, 0.0, mb.atk_dir.y) * SLAM_FWD
 
 ## Each step of a wind-up: draw the tell, aimed attacks following the aim, filled to the hit frame.
 static func update(mb: Mob) -> void:
@@ -73,7 +80,10 @@ static func update(mb: Mob) -> void:
 	if mb.tele.is_empty():
 		var col := Feel.hostile(TELL_COL[mb.md["attack"]])
 		for s in sh:
-			mb.tele.append(fx.telegraph_rect(s["from"], s["dir"], s["len"], s["width"], col) if s["lane"] else fx.telegraph_circle(s["at"], s["r"], col))
+			if s["lane"]:
+				mb.tele.append(fx.telegraph_rect(s["from"], s["dir"], s["len"], s["width"], col))
+			else:
+				mb.tele.append(fx.telegraph_circle(s["at"], s["r"], col))
 	for i in sh.size():
 		if sh[i]["lane"]:
 			fx.aim_telegraph(mb.tele[i], sh[i]["from"], sh[i]["dir"])
