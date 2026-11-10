@@ -98143,5 +98143,54 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/epic_blightmoth_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "epic_lightheron_a",
+    "name": "Lightheron (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_lightheron_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_lightheron_a",
+    "name": "Lightheron (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_lightheron_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_lightheron_b",
+    "name": "Lightheron (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_lightheron_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_lightheron_b",
+    "name": "Lightheron (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_lightheron_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_blightmoth_a",
+    "name": "Blightmoth (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_blightmoth_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_blightmoth_b",
+    "name": "Blightmoth (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_blightmoth_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_blightmoth_b",
+    "name": "Blightmoth (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_blightmoth_b_2.jpg",
+    "ok": true
   }
 ]
