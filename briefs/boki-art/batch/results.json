@@ -81154,5 +81154,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_nettlynx_b3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_nettlynx_b3",
+    "name": "Nettlynx (V2 portrait, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_nettlynx_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_mirrolin_b3",
+    "name": "Mirrolin (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_mirrolin_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_nettlynx_b3",
+    "name": "Nettlynx (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_nettlynx_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_nettlynx_b3",
+    "name": "Nettlynx (V2 sheet, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_nettlynx_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_thistlynx_b3",
+    "name": "Thistlynx (V2 sheet, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_thistlynx_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mirrolin_b3",
+    "name": "Mirrolin (V2 sheet, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_mirrolin_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_thistlynx_b3",
+    "name": "Thistlynx (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_thistlynx_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_thistlynx_b3",
+    "name": "Thistlynx (V2 portrait, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_thistlynx_b3_2.jpg",
+    "ok": true
   }
 ]
