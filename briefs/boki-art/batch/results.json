@@ -88056,5 +88056,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_buckleron_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_buckleron_b",
+    "name": "Buckleron (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_b",
+    "name": "Buckleron (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_c",
+    "name": "Buckleron (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_buckleron_c",
+    "name": "Buckleron (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_buckleron_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_a",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_b",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_a",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_b",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_b_2.jpg",
+    "ok": true
   }
 ]
