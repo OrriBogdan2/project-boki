@@ -3,7 +3,8 @@ extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does. A match hit (KinFlinch, "hit" meta) is a jolt on Flex over whatever clip runs, and its eased _hit_k shows the sad face; a downed Boki
+## the body does. A match hit (KinFlinch, "hit" meta) jolts Flex over
+## whatever clip runs, and the eased _hit_k shows the sad face; a downed Boki
 ## (kstate "faint") lies in the sleep clip at DOWN_SPEED with its eyes shut, then a quick hop
 ## clip for GETUP_S when it comes round: no clip of its own is baked (docs/art/kin/RIGGED_BOKI.md).
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
