@@ -448,7 +448,9 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check" or String(a).begins_with("--shot="):
+		if a == "--no-save" or a == "--archetype-check":
+			return true
+		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
 			return true
 	return false
 var newer := false            # the slot holds a save from a newer game: never overwrite it
