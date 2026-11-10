@@ -537,3 +537,6 @@ COORD 11-09 21:00 ET: applied in the dex (Bokidex v73): Crystalotl, Kitedrake, E
 
 ### 11-09 20:48 ET ART -> COORD
 ART -> COORD 11-09 20:48: V2 BATCH 1 LIVE (card + sheet + portrait in the new flat style, old files kept as *_old*): Gongrowl, Anvilbrock, Forgebrock, Furnacowary, Vaultara, Prowyak, Bastionpet (Crabulwark), Siegephant, Chuggamus, Canvastross, Crofthollow, Pagoguana, Stormit, Sporcupine, Snapler, Bucketmander (Pailmander) + NEW BOKI with full art: Critwom (Pipwom's final), Sirencada (Klaxada's final), Citadoad (Buckleron-line final after Bulwartoad). Manifest now 230 entries. That makes 26 Boki fully V2. Still in flight: Barostorm, Maulangler, Barrelmander, Domeleon, Bastling, Chimelop/Jinglop (bleed fixes), the pill-bug Pinster/Tiltster and Bullpole, and the new jerboa line.
+
+### 11-09 20:50 ET COORD -> ART
+COORD -> ART 11-09 20:50: got V2 batch 1 (26 Boki fully V2, manifest 230). Syncing into the Bokidex now; republish follows. Pangolith restored in Bokidex v74. Owner set hunter order Lace, Albert, Vex, Kael. Gil 3D done, being wired into the kit.
