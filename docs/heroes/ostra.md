@@ -48,7 +48,7 @@ Our own design, written before modelling; nothing below is modelled yet. He is m
   level; the portrait framing gets redone once the cap's height is known.
 
 ## Scaling used (ratios from the source)
-- Orb 9 dmg / 0.6s, 30 m/s, full 14m range, through walls (owner, item 60); a full charge is +34% (owner's data 353 vs 263; was +30%), x1.4 speed, +90% size, 10% slow 1.5s (wiki).
+- Orb 9 dmg / 0.6s, 30 m/s, full 12.25m range (owner 11-10: -12.5% from 14m), through walls (owner, item 60); a full charge is +34% (owner's data 353 vs 263; was +30%), x1.4 speed, +90% size, 10% slow 1.5s (wiki).
 - Snap 9.5, about 1.05x an orb (data pass: owner's data 277 vs the orb's 263), stun 0.8-1.8s by distance (card), one charge, 10s.
 - Trade 1.8s (the owner's "about 1.8-2s per the sheet"; wiki 1.7), 1.25s Swollen, 12m (the wiki's 40% slow on swapped foes is not built: the game data has none).
 - Seed grows 6.5s (card) to 3.2m (4.2m Swollen, +30% as the wiki's Empowered size), damage 12.5 up to 3.5x (wiki; data pass: 365 vs the orb's 263 is 1.39x of 9), no Ground on the pop.
@@ -79,12 +79,12 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Void
 
 | Slot | Source | Ours | Asserted (`--ostra-combo-check`) |
 |---|---|---|---|
-| LMB cadence and reach | an orb about every 0.6s (0031 -> 0034), flying past the cursor to max range [footage] | 0.6s, the full 14m | `lmb parity: held, an orb every 0.6 s ...`, `lmb: a plain orb flies past the cursor ...` |
+| LMB cadence and reach | an orb about every 0.6s (0031 -> 0034), flying past the cursor to max range [footage] | 0.6s, the full 12.25m (was 14m) | `lmb parity: held, an orb every 0.6 s ...`, `lmb: a plain orb flies past the cursor ...` |
 | LMB tracking and animation | he turns to the aim; one-hand flicks, the body barely moves [footage] | `ostra_orb` (0.04 cock, 0.09 flick, 0.3), every orb along the current aim, also while drifting with the cursor swinging round him | `lmb parity: every orb leaves at the cursor ...` |
 | LMB charge | after not firing, the next orb is stronger (353 vs 263) [data]; binary since a patch (wiki) | continuous (owner item 60): plain at 0.6s to full at 1.4s, +34%, x1.4 speed, +90% size; full also slows | `item 60: ...`, `item 117: ...`, `charge: ...`, `slow: ...`, `held fire: ...`, `glow: ...`, `chime: ...` |
 | LMB spam penalty | "firing faster lowers projectile speed and damage" (card, footage) | none: the fixed 0.6s cadence can't be beaten, so there is nothing to penalise | (not built) |
 | RMB | a 0.2s black-orb wind-up, one crystal-spear cluster, stun 0.8-1.8s by distance [footage] | 0.32s wind-up (owner item 40: slower), one bundle, 0.8-1.8s | `item 40: ...`, `rmb: ...` |
-| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 35% (owner, item 75; 11-08 +17%) | `item 17: ...`, `owner: ...` |
+| Shift | a lob, about 1.8s, rings at both ends [footage] | 1.8s, both ends marked; he drifts at 67.5% (owner, item 75; 11-08 35%; 11-10 slow halved: 65% -> 32.5%) | `item 17: ...`, `owner: ...` |
 | E | grows 6.5s, recast from 0.3s, an implosion pop [footage, data] | as the source: it waits for the recast (a 10s fizzle cap at full) | `combo: ...`, seed rows |
 | X | a 1.0s dome telegraph with his cast held, then a 3.5s pull while he acts freely [footage f23-f50] | locked for the 1.0s dome only, then free (owner 18:20) | `lock: ...`, `release: ...` (ult check) |
 
@@ -117,7 +117,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Swollen Snap / Trade | +44% / 1.25s | `combo: Swollen Snap hits 44% harder`, `combo: Swollen Trade is quicker` |
 | Wait, then fire | the longer the wait, the bigger and harder the orb; full, it slows; held fire stays plain | `item 60: ...`, `charge: ...`, `slow: ...`, `held fire: ...` |
 | Spam Shift | no travel, no second lob; no charge = refused | `owner: spamming Shift in flight never dashes`, `owner: with no charge Shift is refused` |
-| Trade in the air, over the abyss | he drifts at 35% speed at his height until it lands (a knock still shoves him), then arrives at that height | `item 17: ...` (drift at `dash.fly_slow`, constant height over the abyss, origin at resolve, knock), `far cast: ...` |
+| Trade in the air, over the abyss | he drifts at 67.5% speed at his height until it lands (a knock still shoves him), then arrives at that height | `item 17: ...` (drift at `dash.fly_slow`, constant height over the abyss, origin at resolve, knock), `far cast: ...` |
 | Trade into a crowd | a foe and an ally in the circle both end up at his origin, apart; a remote body is moved by its own game | `owner: two units in the circle ...`, `small: each keeps its place ...`, `net: a body another game owns ...` |
 | Merge start | Trade, its aim, the Snap wind-up and the prime drop; a placed Nightwell keeps going | `merge hold: ...`, `merge: a merge doesn't take the placed well down` |
 | Nightwell, then Seed on the middle, then pop | everyone caught sits stunned at the centre for the seed to grow on them | `ult open: ...`, `ult: the caught foe is drawn to the middle` |
@@ -210,7 +210,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
   (cast in the air it plays his own sling-and-drift move, `ostra_swap_air`; the footage shows no air cast, and the
   sheet's build note asks for a smooth drift with no tumble and the hem streaming), and any dash he does get (a merge's dodge) leaves a streak of violet motes instead of the shared pill.
 - Swollen lasts 9s and fills as before (the source does not show what fills it).
-- Snap range 13m; the orb's range stays 14m.
+- Snap range 13m; the orb range is 12.25m (11-10, was 14m).
 - Nightwell range 10m (the footage only shows a 2-3 bh cast), placed like the seed: on ground short of walls.
 - A foe behind a wall from the well's centre is not caught (the source doesn't show one).
 - A caught foe is stunned until the well closes, without stun diminishing returns (it is the ult; the card says 3.5s).
