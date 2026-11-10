@@ -14,6 +14,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   launcher 0.9, cannon 0.55 of her height as on the sheet.
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
+- `hide_while_chain`: bones that shrink away while a kit sets the root meta `chain_out` (a runtime piece of the weapon).
 - `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
   Gait layer (WardenGait, docs/art/ANIM_QUALITY_AUDIT.md), after the tree has advanced: `stride` [walk, run] stretches the
   thighs about their running mean; `foot_mps` [walk, run] is the clips' foot speed at rate 1 (m/s, `--anim-audit` prints it),
