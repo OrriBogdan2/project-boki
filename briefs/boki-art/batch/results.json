@@ -79264,5 +79264,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_kayak_b2n_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_kestrike",
+    "name": "Kestrike (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_kestrike_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blossmink",
+    "name": "Blossmink (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_blossmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rippmink",
+    "name": "Rippmink (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_rippmink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lunink",
+    "name": "Lunink (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_lunink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lunink",
+    "name": "Lunink (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_lunink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blossmink",
+    "name": "Blossmink (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_blossmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_umbrink",
+    "name": "Umbrink (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_umbrink_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_umbrink",
+    "name": "Umbrink (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_umbrink_1.jpg",
+    "ok": true
   }
 ]
