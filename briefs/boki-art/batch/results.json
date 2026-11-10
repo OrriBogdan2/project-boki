@@ -75967,5 +75967,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/on_loafhopper_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_voltalon",
+    "name": "Voltalon (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dreadnoyak",
+    "name": "Dreadnoyak (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_dreadnoyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_scythant",
+    "name": "Scythant (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_scythant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_gloamspire",
+    "name": "Gloamspire (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_gloamspire_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthollow",
+    "name": "Crofthollow (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_crofthollow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_voltalon",
+    "name": "Voltalon (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_voltalon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_voltalon",
+    "name": "Voltalon (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_voltalon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon",
+    "name": "Effigoon (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_effigoon_3.jpg",
+    "ok": true
   }
 ]
