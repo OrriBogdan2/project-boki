@@ -101566,5 +101566,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/mark_palloth_s_2.jpg",
     "ok": true
+  },
+  {
+    "id": "halo_pavonazar",
+    "name": "Pavonazar (legendary halo crown)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/halo_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_cindermaw",
+    "name": "Cindermaw (legendary halo crown)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_cindermaw_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_wayshell",
+    "name": "Wayshell (legendary halo crown)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/halo_wayshell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_cetorgan",
+    "name": "Cetorgan (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_cetorgan_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_wayshell",
+    "name": "Wayshell (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_wayshell_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_sarcobra",
+    "name": "Sarcobra (legendary halo crown)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_aurostag",
+    "name": "Aurostag (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_aurostag_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_aurostag",
+    "name": "Aurostag (legendary halo crown)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/halo_aurostag_1.jpg",
+    "ok": true
   }
 ]
