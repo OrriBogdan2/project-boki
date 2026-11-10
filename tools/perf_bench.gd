@@ -305,6 +305,8 @@ func _avg(fl: Array, key: String) -> float:
 	return s / maxf(1.0, fl.size())
 
 func _summary(part: String, fl: Array) -> void:
+	if fl.is_empty():
+		return          # a part run for 0 s (--bench-farm=0)
 	var w: Array = fl.map(func(f): return float(f["wall"]))
 	w.sort()
 	var cut := maxi(1, w.size() / 100)

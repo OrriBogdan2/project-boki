@@ -730,11 +730,12 @@ func _render_balloon(delta: float) -> void:
 		string.scale = Vector3(1, len, 1)
 
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
-## stack with whatever you were doing), you slide for a fixed moment without control, and it never
-## pops you into the air unless the attack says so.
+## stack with whatever you were doing) and never pops you into the air unless the attack says so.
+## Then the source's physics carry it (HunterMove.knock_step); dash and abilities stay usable.
 var knock_t := 0.0
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
+var knock_slide := false       # a real knock is sliding; without it a kit's or tow's knock_t only holds the keys off
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
@@ -751,12 +752,14 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s > 4.0:
 		kb_t = m.time
 	var dir := k / k.length()
+	if s > 2.5:
+		s *= HunterMove.knock_launch
+		knock_t = HunterMove.knock_max
+		knock_slide = true
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(dir)
 	hv += dir * (maxf(along, s) - along)
 	vel.x = hv.x; vel.z = hv.y
-	if s > 2.5:
-		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 	if lift >= 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
@@ -889,6 +892,7 @@ func _open_glider() -> void:
 		return
 	gliding = true
 	_glide_armed = false
+	knock_t = 0.0                 # the glider's own rules take over from a knock
 	grounded = false
 	_glider_sfx("open")
 	vel.y = Loco.glide_start(vel.y)
@@ -2071,13 +2075,9 @@ func _physics(dt: float) -> void:
 				hv = HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
 	elif fly_t > 0.0:
 		fly_t -= dt
-	elif knock_t > 0.0:
+	elif knock_t > 0.0 and not gliding:
 		knock_t -= dt
-		hv = hv.move_toward(Vector2.ZERO, 6.0 * dt)
-		# directional influence: hold a key to bend the knockback, never to cancel it
-		if mv.length() > 0.1:
-			var spd0 := hv.length()
-			hv = (hv + mv * spd0 * knock_steer * 4.0 * dt).limit_length(spd0)
+		hv = HunterMove.knock_step(self, hv, mv, spd, dt)
 	elif gliding:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
@@ -2268,7 +2268,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - 0.05:
+	if grounded and g < pos.y - World.STEP:     # down a slope or a step your feet stay on it; more is a fall
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12
