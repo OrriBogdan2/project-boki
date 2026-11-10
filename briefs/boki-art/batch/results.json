@@ -108286,5 +108286,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_glaciammoth_f1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_f1",
+    "name": "Hourachnid (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_f1",
+    "name": "Hourachnid (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_f1",
+    "name": "Hourachnid (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_polyshroom_f1",
+    "name": "Polyshroom (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_polyshroom_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_polyshroom_f1",
+    "name": "Polyshroom (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_polyshroom_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_polyshroom_f1",
+    "name": "Polyshroom (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_polyshroom_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_f1",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chandelapi_f1",
+    "name": "Chandelapi (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_chandelapi_f1_3.jpg",
+    "ok": true
   }
 ]
