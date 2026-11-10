@@ -101272,5 +101272,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/bosssheet_colossus_r2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "tesselamb_card",
+    "name": "Tesselamb (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tesselamb_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tesselamb_card",
+    "name": "Tesselamb (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tesselamb_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "twinklup_card",
+    "name": "Twinklup (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/twinklup_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "luckhop_card",
+    "name": "Luckhop (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/luckhop_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockwren_card",
+    "name": "Lockwren (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/lockwren_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "luckhop_card",
+    "name": "Luckhop (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/luckhop_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "twinklup_card",
+    "name": "Twinklup (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/twinklup_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "lockwren_card",
+    "name": "Lockwren (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/lockwren_card_1.jpg",
+    "ok": true
   }
 ]
