@@ -40,18 +40,23 @@ const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board"
 ## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
 ## decides every FAR_EVERY sim steps (20 Hz) instead of every step, with the skipped time added in; its
 ## last inputs carry on in between. A big match has most of its bots roaming far away: item 94, script
-## time grew with the Hunter count. (Fights and revives stay every step: at 20 Hz they turned in place.)
+## time grew with the Hunter count. Past FAR2_M it decides every FAR2_EVERY steps (10 Hz). (Fights and revives
+## stay every step: at 20 Hz they turned in place.)
 const FAR_M := 45.0            # m from the local player
 const FAR_EVERY := 3           # sim steps per decision when that far
+const FAR2_M := 90.0           # m: past this (another island) it decides at 10 Hz
+const FAR2_EVERY := 6          # sim steps per decision past FAR2_M (10 Hz)
 
 func tick(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
 	var acc := float(a.get("far_dt", 0.0)) + dt
 	var me := m.player
 	var busy: bool = a.get("tgt") != null or String(a.get("goal_kind", "")) in URGENT_GOALS
-	# (each far bot on its own step of the FAR_EVERY: all of them deciding on the same step was a spike)
-	var off_beat := (int(m.time / Match.DT) + h.get_instance_id()) % FAR_EVERY != 0
-	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and off_beat and acc < dt * FAR_EVERY:
+	var d := h.flat_dist(me) if me != null and not me.out and not busy else 0.0
+	var every := FAR2_EVERY if d > FAR2_M else FAR_EVERY
+	# (each far bot on its own step of its beat: all of them deciding on the same step was a spike)
+	var off_beat := (int(m.time / Match.DT) + h.get_instance_id()) % every != 0
+	if d > FAR_M and off_beat and acc < dt * every:
 		a["far_dt"] = acc
 		return
 	a["far_dt"] = 0.0
