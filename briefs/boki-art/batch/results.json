@@ -75036,5 +75036,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_chimelop_3.jpg",
     "ok": true
+  },
+  {
+    "id": "pk_bullpole_arrow",
+    "name": "Bullpole (chest mark: arrow)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_arrow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_cross",
+    "name": "Bullpole (chest mark: cross)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_cross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_arrow",
+    "name": "Bullpole (chest mark: arrow)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_arrow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_star",
+    "name": "Bullpole (chest mark: star)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_star_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_star",
+    "name": "Bullpole (chest mark: star)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_star_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_chevron",
+    "name": "Bullpole (chest mark: chevron)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_chevron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_diamond",
+    "name": "Bullpole (chest mark: diamond)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_diamond_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pk_bullpole_diamond",
+    "name": "Bullpole (chest mark: diamond)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pk_bullpole_diamond_2.jpg",
+    "ok": true
   }
 ]
