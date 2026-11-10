@@ -814,6 +814,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | perf | {"bot_replan_s": 0.1, "boki_retarget_s": 0.2, "actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0}, "anim_far_every": 2, "anim_off_every": 10, "hero_anim_near_m": 48.0, "hero_anim_far_every": 2, "hero_anim_off_every": 4, "bot_belt_s": 0.1} |
 | vex | {"_note": "Vex's feel (GunslingerKit, GunslingerUlt). R: the Cinderfall fire beat and shake.", "x_fire_s": 0.2, "x_shake": 0.35, "x_shake_per_hit": 0.15, "x_shake_centre": 0.3} |
 | clip_warp | {"_note": "WardenClips: a kit move's clip retimed with no rebake, per art name and kit move: [s into the move, s into the clip] knots.", "vex": {"gunslinger_x": [[0.0, 0.0], [0.2, 0.1], [0.24, 0.14], [0.46, 0.3], [0.9, 0.6]], "gunslinger_rmb": [[0.0, 0.0], [0.045, 0.07], [0.16, 0.2], [0.38, 0.5]]}} |
+| vex_air_dash | {"_note": "Vex's air dash look (GunslingerKit): the lime fire ribbon her body draws through the barrel roll, and the burst of sparks it leaves from. Distance and timing stay her dash data's.", "fire_width_m": 0.34, "fire_life_s": 0.3, "fire_rise_m": 0.9, "fire_col": "b8f03c", "fire_hot_col": "eaffa8", "burst_sparks": 12} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
