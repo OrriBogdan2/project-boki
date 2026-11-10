@@ -108,8 +108,10 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# lift under the lip carries it up; at 1.2 m a bot bailed mid-glide and never crossed a climbing gap)
 		elif not h.grounded and a.get("cross_go", false) and not (m.world.is_void(h.pos.x, h.pos.z) and h.pos.y < land.y - 4.0 and h.vel.y < 0.0):
 			inp["move"] = tol.normalized()
-			# over the landing: fold the glider and drop onto it
-			inp["glide"] = tol.length() > 1.6 or m.world.is_void(h.pos.x, h.pos.z)
+			# over the landing: fold the glider and drop onto it. Rising off the take-off jump, not yet: a held
+			# glide opens the glider GLIDE_ENGAGE into the jump, and that low a glide came down short of the landing
+			var past_top := h.gliding or h.vel.y < 1.0
+			inp["glide"] = past_top and (tol.length() > 1.6 or m.world.is_void(h.pos.x, h.pos.z))
 			# (only to open the glider: a press near the ground buffers a jump, and over the landing
 			# that bounced the bot on the spot every time it touched down, never counting as landed)
 			if inp["glide"] and not h.gliding and h.vel.y < 1.0 and h.can_glide():
