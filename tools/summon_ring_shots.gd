@@ -1,7 +1,8 @@
 extends RefCounted
 ## --summon-ring-shots --shots-dir=<dir> (needs a renderer): the match-zoom picture --summon-ring-check proves.
 ## Three of your squad's summons at full, half and 1 s of their window (the last one flickers), and a rival's
-## stolen summon dimmed. Writes <dir>/summon_ring.png (the screen) and <dir>/summon_ring_crop.png (the fight).
+## stolen summon dimmed. Writes <dir>/summon_ring.png (the screen), <dir>/summon_ring_crop.png (the fight) and
+## <dir>/summon_ring_close.png (the four set apart in a row, sim paused, camera pulled in, no HUD).
 
 const DT := 1.0 / 60.0
 const SPOTS := [Vector3(0, 0, 0), Vector3(3.4, 0, 0.8), Vector3(-3.0, 0, 3.6), Vector3(-5.8, 0, 3.0),
@@ -84,6 +85,18 @@ func run(main_node: Node) -> void:
 	var box := Rect2i(Vector2i(c) - half, half * 2)
 	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
 	crop.save_png(dir.path_join("summon_ring_crop.png"))
+	# Close-up: full, half, 1 s (flickering) and stolen, left to right, with the sim paused so nothing fights.
+	for i in rung.size():
+		rung[i].teleport(m.world.free_spot_near(focus + Vector3(-4.5 + 3.0 * i, 0, 0), [], 0.6, 0.5, 2.0))
+	if m.hud:
+		m.hud.visible = false
+	m.cam.dist_mul = 0.4
+	for f in 20:
+		for k in rung:
+			k.render(DT, 1.0)
+		m.cam.snap(focus)
+		await main.get_tree().process_frame
+	vp.get_texture().get_image().save_png(dir.path_join("summon_ring_close.png"))
 	print("SUMMONRINGSHOTS ", dir)
 	main.get_tree().quit(0)
 
