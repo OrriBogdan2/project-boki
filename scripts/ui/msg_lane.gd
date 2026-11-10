@@ -205,7 +205,7 @@ func _bump(e: Dictionary) -> void:
 
 ## The label as wide as its line, up to WIDE of the screen (past that it wraps).
 func _fit(l: Label, px: int) -> void:
-	var natural := UI.big.get_string_size(l.text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+	var natural := TextCache.width(UI.big, l.text, px)
 	var widest := get_viewport_rect().size.x * WIDE if is_inside_tree() else 600.0
 	l.custom_minimum_size.x = minf(natural + 2.0, widest)
 
