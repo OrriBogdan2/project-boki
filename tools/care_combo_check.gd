@@ -5,6 +5,11 @@ extends RefCounted
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
+## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
+const RELEASE_BEAT := {
+	"mm_shot_r": 0.08, "mm_shot_l": 0.08, "mm_shot_emp": 0.14, "mm_seed": 0.07, "mm_hearth": 0.18, "mm_call": 0.1}
+const BEAT_TOL := 0.05          # s: how near the kit's effect frame the beat sits (a source frame is 0.2 s)
+const SRC_WIND := 0.07          # s: the source's cast wind before the hand releases (footage 716.3 s, 30 fps)
 
 var sc        # the SupportCheck running us (setup, step, ok, aim_at)
 
@@ -761,6 +766,20 @@ func _moon_shot_parity(m: Match, P: Hunter, K: TenderKit) -> void:
 	ok("mm LMB: each ember leaves at the cursor as it swings round her (within 8 deg)", worst < 8.0, "%.1f deg" % worst)
 	var unwind := absf(float(KMovesCare.MOVES["mm_shot_r"]["keys"][2][1]["y"]))
 	ok("mm LMB: the push unwinds the torso about 45 degrees (footage)", unwind >= 0.7, "%.2f rad" % unwind)
+	_release_beats()
+
+## The clip's release beat lands on the frame the kit's effect fires (every effect starts at its move's t 0), so the
+## hand and the ember, the seed, the plus and the thrust read as one frame, as in the source.
+func _release_beats() -> void:
+	var km: Dictionary = WardenClips.data("pip")["kmoves"]
+	var worst := 0.0
+	for id in RELEASE_BEAT:
+		worst = maxf(worst, absf(float(RELEASE_BEAT[id]) - float((km[id] as Dictionary).get("lead", 0.0))))
+	ok("mm clips: each release beat lands on the kit's effect frame (within %.2f s)" % BEAT_TOL,
+			worst <= BEAT_TOL, "%.3f s" % worst)
+	var wind := float(RELEASE_BEAT["mm_shot_r"]) - float((km["mm_shot_r"] as Dictionary)["lead"])
+	ok("mm LMB: the hand releases within the source's %.2f s wind of the ember" % SRC_WIND,
+			wind <= SRC_WIND, "%.3f s" % wind)
 
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
