@@ -67,6 +67,8 @@ same name wins over the built one. `--boki-rig-check` has the 1 m and puddle row
 across a stream; `--boki-swim-shots` draws three species afloat (GPU). Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
+The clips own the body, but a landing off a leap or a drop squashes Flex and it leans into a run start and back as it
+stops (`LandLean`, read off its own path; KinPuppet does the same for primitive bodies). Visual only.
 
 Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't use
 them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle over its eye-spots). Materials:

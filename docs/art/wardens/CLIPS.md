@@ -47,6 +47,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   `--foot-slide-check`). No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
+  Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
+  the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `fade` / `fade_out` (s: the blend into the clip and back to the legs when WardenClips' 0.1 / 0.16 s are too short for the gap the pose jumps; `--cast-pop-check` measures the gaps and asks for them)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}. The `hit` clip plays only on a stagger (`hit_k` at
