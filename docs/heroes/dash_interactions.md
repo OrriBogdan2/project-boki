@@ -7,6 +7,8 @@ One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlo
 
 The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions/0015-combo-flow.md): every ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot with no hold row keeps through every move.
 
+LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; the 'hold LMB through' rows below note where a hero's kit has its own say.
+
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
 | gunslinger | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |
@@ -65,6 +67,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | juggernaut | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | juggernaut | hold RMB through an air dash |  | the hold carries through and lets go there |
 | juggernaut | hold RMB through a jump |  | the hold carries through and lets go there |
+| juggernaut | hold LMB through any slot | Data: nothing ends a held Molten Greatsword charge; the key is a held input. Footage card: 'Dash while attacking'. | A cast that stops the blade (E, RMB, the ult, a glove) drops the Searing Wave charge with nothing thrown; the key still down starts a fresh hold the step he is free (--held-fire-resume-check: 0 frames). |
 | ashwick | ground dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | ashwick | ground dash -> RMB | Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands. | buffered to the dash's end |
 | ashwick | ground dash -> E | Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends. | buffered to the dash's end |
@@ -96,6 +99,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ashwick | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | ashwick | hold RMB through an air dash |  | the hold carries through and lets go there |
 | ashwick | hold RMB through a jump |  | the hold carries through and lets go there |
+| ashwick | hold LMB through ult (X) | Data: reactivating ends the flight early; LMB is off for the whole flight. | Held through Flue Flight, the lance lights the step the flight ends (pilot, then the roar), no relight gap (0 frames). E, RMB and a glove never stop the hose. |
 | tender | ground dash -> LMB | Data: Lunar Dash is a plain short dash. Footage: the ground dash is never shown cleanly. Ours: the ember goes the step the 0.2s skip ends (held to the dash end, the default: nothing in the source shows otherwise). | buffered to the dash's end |
 | tender | ground dash -> RMB | Data: Darkside Binding has no dash rule. Footage: not cast from a dash. Ours: the seed is thrown from the skip (its own small hop and push). | fires mid-dash |
 | tender | ground dash -> E | Data: Moonlight Blessing is a zone on herself that follows her. Footage: not cast from a dash. Ours: the light goes up on her mid-skip and moves with her. | fires mid-dash |
@@ -155,6 +159,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | dolm | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | dolm | hold RMB through an air dash |  | the hold carries through and lets go there |
 | dolm | hold RMB through a jump |  | the hold carries through and lets go there |
+| dolm | hold LMB through any slot | Data: Quake Fist is hold and release, no timeout; the key is a held input. | A cast that stops the fists drops the charge with no punch; the key still down starts a fresh hold the step she is free (0 frames). |
 | archer | ground dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | archer | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
 | archer | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
@@ -186,6 +191,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | archer | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | archer | hold RMB through an air dash |  | the hold carries through and lets go there |
 | archer | hold RMB through a jump |  | the hold carries through and lets go there |
+| archer | hold LMB through any slot | Footage: the bow is drawn and loosed on the release; nothing shows a re-press after a cast. | A cast that stops the bow drops the draw with no arrow; the key still down redraws the step she is free (0 frames). Starpiercer owns LMB while it runs; the draw is back the step it ends. |
 | dredge | ground dash -> LMB | Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | dredge | ground dash -> RMB | Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is). | fires mid-dash |
 | dredge | ground dash -> E | Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it. | fires mid-dash |
@@ -267,6 +273,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | mage | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | mage | hold RMB through an air dash |  | the hold carries through and lets go there |
 | mage | hold RMB through a jump |  | the hold carries through and lets go there |
+| mage | hold LMB through ult (X) | briefs/hero-ref/vireo.md:19: 'The ult is PRESS, then reactivate.' LMB is not the source's way down. | LMB held from before the cast does not bring her down (a fresh press or X does, MageUlt fire_free); the hang runs its 1.7 s and the held key fires again the step she lands (0 frames). |
 | bulwark | ground dash -> LMB | data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair) | buffered to the dash's end |
 | bulwark | ground dash -> RMB | data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash) | fires mid-dash |
 | bulwark | ground dash -> E | data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair) | fires mid-dash |
@@ -296,6 +303,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | bulwark | hold LMB through an air dash | Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is) | the hold carries through and lets go there |
 | bulwark | hold LMB through a jump |  | the hold carries through and lets go there |
 | bulwark | hold LMB through a mantle | Owner item 30; the source has no mantle rule. | **exception:** the move ends the hold (owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)) |
+| bulwark | hold LMB through any slot | Hero sheet bjorn.md:69: 'Hold to charge. Release swings.' No button-up rule anywhere in the data or footage. | Another ability ends the Crushing Blow's hold with no swing; the key still down starts a fresh hold the step he is free (0 frames). Before: the button had to come up first (owner item 30's cancel rule), so a held LMB never came back after an RMB, E or glove. |
 | thief | ground dash -> LMB | Data: Quickflip dashes and empowers the next Arcslinger (+214 damage); landing it resets Quickflip. Footage 0193: the Cartwheel and the empowered shot leave on the same frame, so the bolt goes mid-flip. | fires mid-dash; variant: empowered |
 | thief | ground dash -> RMB | Data says nothing on casting during Quickflip. Footage never shows Trickshot mid-flip; kept firing: the 0.4s lane starts mid-flip and the throw lands after it. | fires mid-dash |
 | thief | ground dash -> E | Data: Farstep Dagger has no dash rule. Footage never shows it mid-flip. Ours: the throw goes mid-flip; the recast blink ends the cartwheel (she arrives standing). | fires mid-dash |
