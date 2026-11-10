@@ -75603,5 +75603,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_tiltster_pb_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_maulangler",
+    "name": "Maulangler (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_maulangler_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_barrelmander",
+    "name": "Barrelmander (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_barrelmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_barrelmander",
+    "name": "Barrelmander (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_barrelmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_maulangler",
+    "name": "Maulangler (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_maulangler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bastling",
+    "name": "Bastling (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_bastling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_barostorm",
+    "name": "Barostorm (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_barostorm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_barrelmander",
+    "name": "Barrelmander (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_barrelmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_maulangler",
+    "name": "Maulangler (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_maulangler_3.jpg",
+    "ok": true
   }
 ]
