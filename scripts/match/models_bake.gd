@@ -37,9 +37,35 @@ static func vtoon_outlined() -> ShaderMaterial:
 	m.next_pass = ModelsBase._outline_mat
 	return m
 
+## A skin's glider merged once (merge_static): [the canopy's arrays, colour weights still in them (Gliders.paint
+## colours each Hunter's), the strings' mesh (one for all)]. Merging both per Hunter was ~3.5 ms each.
+static var _glider_sets := {}
+static func _glider_set(gskin: String) -> Array:
+	if not _glider_sets.has(gskin):
+		var g := Node3D.new()
+		var canopy := MeshInstance3D.new()
+		var sheet := ArrayMesh.new()
+		sheet.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, Gliders.sheet(gskin))
+		canopy.mesh = sheet
+		canopy.material_override = vtoon_outlined()
+		canopy.position = Vector3(0, 1.05, 0.02)
+		g.add_child(canopy)
+		var m_line := ModelsBase.toon(Color("5a4636"), false)
+		for sx in [-1.0, -0.4, 0.4, 1.0]:
+			var at := Vector3(0.42 * sx, 0.55, 0)
+			ModelsBase.part(g, ModelsBase.cyl(0.008, 0.008, 1.0, 4), m_line, at, Vector3.ONE, Vector3(0, 0, -0.62 * sx))
+		merge_static(g)
+		var got := {}
+		for ch in g.get_children():
+			got[(ch as MeshInstance3D).material_override == m_line] = (ch as MeshInstance3D).mesh
+		_glider_sets[gskin] = [(got[false] as Mesh).surface_get_arrays(0), got[true]]
+		g.free()
+	return _glider_sets[gskin]
+
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-static func merge_static(node: Node3D) -> void:
+## `discard`: those parts are only freed (a body nothing will draw).
+static func merge_static(node: Node3D, discard := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -49,20 +75,19 @@ static func merge_static(node: Node3D) -> void:
 		var mat: Material = mi.material_override
 		if mat == null or mi.mesh == null:
 			continue
+		if discard:
+			drop.append(mi)
+			continue
 		var key := _mat_key(mat)
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "st": SurfaceTool.new(), "n": 0}
-			(groups[key]["st"] as SurfaceTool).begin(Mesh.PRIMITIVE_TRIANGLES)
-		var st: SurfaceTool = groups[key]["st"]
-		var pm := _with_part_y(mi.mesh, mi.transform)
-		for si in pm.get_surface_count():
-			st.append_from(pm, si, mi.transform)
-		groups[key]["n"] = int(groups[key]["n"]) + 1
+			groups[key] = {"mat": mat, "parts": []}
+		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
+			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
 	for key in groups:
 		var g: Dictionary = groups[key]
 		var mi := MeshInstance3D.new()
-		mi.mesh = (g["st"] as SurfaceTool).commit()
+		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
 		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
 		node.add_child(mi)
@@ -73,18 +98,22 @@ static func merge_static(node: Node3D) -> void:
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
 static func _with_part_y(mesh: Mesh, xf := Transform3D.IDENTITY) -> ArrayMesh:
+	return MeshArrays.build(_part_y_surfaces(mesh, xf))
+
+## A mesh's surfaces as arrays with that height range in UV2 (and plain white colours when it has none).
+static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 	var ab := xf * mesh.get_aabb()
-	var am := ArrayMesh.new()
+	var out: Array = []
 	for si in mesh.get_surface_count():
-		var arrs := mesh.surface_get_arrays(si)
+		var arrs: Array = MeshArrays.of(mesh, si)
 		var n: int = (arrs[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		var uv2 := PackedVector2Array(); uv2.resize(n); uv2.fill(Vector2(ab.position.y, ab.end.y))
 		arrs[Mesh.ARRAY_TEX_UV2] = uv2
 		if arrs[Mesh.ARRAY_COLOR] == null:
 			var cw := PackedColorArray(); cw.resize(n); cw.fill(Color.WHITE)     # no baked occlusion: plain white
 			arrs[Mesh.ARRAY_COLOR] = cw
-		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+		out.append(arrs)
+	return out
 
 static var _part_y_cache := {}
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).

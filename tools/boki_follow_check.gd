@@ -6,7 +6,8 @@ extends RefCounted
 ##   4. Sic and Call back (G tap)
 ##   5. the wheel: pick by direction, no slow-motion; Chase, Guard, Return, Follow
 ##   6. carried bonuses are on only while it is on you (Return), and the tooltip says what you lose
-##   7. mounts: Return = you ride it, Sic = you come off and it charges, a jump = you come off
+##   7. a big Boki on Return guards at your side, never under or in you (run, jump, turn, blocked flank,
+##      glide); Sic = it charges
 ##   8. in a fight it never refuses an order; out of one, its personality still can
 ##   9. bots use the orders; the net carries the order
 ##  10. Return ordered in the air still ends up on you; a giant-form merge from Follow is ridden
@@ -97,7 +98,9 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokifollow-only="): only = a.substr(18)
-	for part in ["default", "leash", "traverse", "sic_call", "wheel", "carried", "mount", "no_refusal", "bots", "net", "air_orders", "path_cost", "disengage"]:
+	var parts := ["default", "leash", "traverse", "sic_call", "wheel", "carried", "guard_side", "no_refusal", "bots", "net",
+		"air_orders", "path_cost", "disengage"]
+	for part in parts:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -313,32 +316,84 @@ func _carried() -> void:
 	k.stow()
 	ok(P.kin_carry_on(), "...and on while it is on you")
 
-# ------------------------------------------------------------------ 7. mounts
-func _mount() -> void:
+# ------------------------------------------------------------------ 7. a big Boki guards at your side
+## Owner 11-08: on the Return order a Boki too big for your shoulder is never under or in you. Every step
+## of a run, a jump, a turn and a glide: on its flank it stays at least guard_min_m from you with its feet
+## never below yours; off its flank it is up on your back. A blocked flank sends it to the other one.
+func _guard_watch(P: Hunter, k: Kin, st: Dictionary) -> void:
+	var near := KinFollow._r("guard_min_m")
+	if k.state != "shoulder":
+		return
+	st["n"] += 1
+	if k.beside:
+		st["side"] += 1
+		st["min"] = minf(st["min"], P.flat_dist(k))
+		if P.flat_dist(k) < near - 0.01 or k.pos.y < P.pos.y - 0.01:
+			st["bad"] += 1
+	elif k.seen_pos().y < P.pos.y + 1.0:
+		st["bad"] += 1
+
+func _guard_run(P: Hunter, dir: Vector2, secs: float, watch: Callable) -> void:
+	run_for(secs, func() -> void:
+		P.inp["move"] = dir
+		watch.call())
+
+func _guard_side() -> void:
 	_fresh("pebbit")
 	var P := m.player
 	var k: Kin = P.kin
-	ok(k.carry_style() == "mount", "setup: a mount")
-	ok(not P.mounted(), "following: you walk, it walks")
+	ok(k.big() and not P.mounted(), "setup: a big Boki, following")
 	KinCommand.order(P, "return")
 	run_for(1.8)
-	ok(P.mounted(), "Return: you ride it")
+	var guarding := k.state == "shoulder" and k.beside and not P.mounted() and P.kin_carry_on()
+	ok(guarding, "Return: it guards at your side, its carried bonuses on (state %s, %.1f m)" % [k.state, P.flat_dist(k)])
+	var st := {"n": 0, "side": 0, "bad": 0, "min": 99.0}
+	var watch := func() -> void: _guard_watch(P, k, st)
+	_guard_run(P, Vector2(1, 0), 1.2, watch)
+	var side0 := k.guard_side
+	P.do_jump()
+	_guard_run(P, Vector2(1, 0), 1.0, watch)
+	_guard_run(P, Vector2(0, 1), 1.0, watch)
+	_guard_run(P, Vector2(-1, 0), 0.6, watch)
+	var seen := "%d of %d steps beside you, closest %.2f m, %d bad" % [st["side"], st["n"], st["min"], st["bad"]]
+	ok(st["bad"] == 0 and st["side"] >= st["n"] - 6, "running, jumping, turning: never under or in you (%s)" % seen)
+	ok(k.guard_side == side0, "it keeps its flank while you move")
+	P.inp["move"] = Vector2.ZERO
+	run_for(0.4)
+	var fwd := Vector2(-sin(P.face), -cos(P.face))
+	var flank := Vector2(-fwd.y, fwd.x) * k.guard_side * KinFollow._r("guard_side_m")
+	var W: World = m.world
+	var bi: int = W.idx(int(floor(P.pos.x + flank.x)), int(floor(P.pos.z + flank.y)))
+	W.kind[bi] = World.T_BLOCK
+	run_for(0.4, watch)
+	ok(k.beside and k.guard_side == -side0, "its flank blocked: it takes the other one (side %d)" % int(k.guard_side))
+	W.kind[bi] = World.T_GROUND
+	P.gliding = true
+	for i in 20:
+		k.sim(Match.DT)
+		watch.call()
+	var on_back := not k.beside and k.seen_pos().y > P.pos.y + 1.0
+	ok(on_back and st["bad"] == 0, "gliding: it curls up on your back, above your feet (%d bad)" % st["bad"])
+	P.gliding = false
+	_fresh("zapple")
+	KinCommand.order(m.player, "return")
+	run_for(1.8)
+	var small: Kin = m.player.kin
+	ok(not small.big() and not small.beside and small.state == "shoulder", "a small Boki rides your shoulder")
+	_fresh("pebbit")
+	P = m.player
+	k = P.kin
+	KinCommand.order(P, "return")
+	run_for(1.8)
 	var land := P.pos + Vector3(6.0, 0, 0)
 	var rad: float = float(KinCommand.rules()["land_stagger"]["radius"])
 	var mb := mob_at("skitter", land)
 	mb.teleport(land + Vector3(rad + mb.r + 0.3, 0, 0))     # outside a plain landing's reach, inside a charge's
 	aim_at(P, land)
 	KinCommand.tap(P)
-	ok(k.state == "flying" and not P.mounted() and k.fly.get("charge", false), "Sic: you hop off and it charges (state %s, mounted %s)" % [k.state, P.mounted()])
+	ok(k.state == "flying" and k.fly.get("charge", false), "Sic: it leaves your side and charges (state %s)" % k.state)
 	run_for(1.2)
 	ok(int(tags_seen.get("land", 0)) >= 1, "...its charge lands harder than a throw: it reached a foe just past a plain landing's reach (hits %d)" % int(tags_seen.get("land", 0)))
-	_fresh("pebbit")
-	P = m.player
-	k = P.kin
-	KinCommand.order(P, "return")
-	run_for(1.8)
-	P.do_jump()
-	ok(k.cmd == "follow" and not P.mounted(), "a jump while mounted: you come off it (order %s, mounted %s)" % [k.cmd, P.mounted()])
 
 # ------------------------------------------------------------------ 8. no refusal in a fight
 func _no_refusal() -> void:

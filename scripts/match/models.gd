@@ -65,8 +65,8 @@ static func _spike(n: Node3D, m: Material, at: Vector3, dir: Vector3, r: float, 
 	return ModelsHair._spike(n, m, at, dir, r, h, flat)
 static func vtoon_outlined() -> ShaderMaterial:
 	return ModelsBake.vtoon_outlined()
-static func merge_static(node: Node3D) -> void:
-	ModelsBake.merge_static(node)
+static func merge_static(node: Node3D, discard := false) -> void:
+	ModelsBake.merge_static(node, discard)
 static func bake_part_y(n: Node) -> void:
 	ModelsBake.bake_part_y(n)
 static func painted(m: ShaderMaterial, surface := 0, grad := 0.22, crease_k := 0.26, edge := 0.24) -> ShaderMaterial:

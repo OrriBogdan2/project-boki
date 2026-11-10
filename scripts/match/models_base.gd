@@ -167,9 +167,7 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_NORMAL] = norms
 	arrs[Mesh.ARRAY_TEX_UV] = uvs
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+	return MeshArrays.build([arrs])
 
 static var _lathes := {}
 

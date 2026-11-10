@@ -29,4 +29,4 @@ func fall_vy(vy: float, dt: float) -> float:
 
 ## Horizontal steering in the plunge: the glide's own steering at dive_steer of its force.
 func steer(hv: Vector2, wish: Vector2, gs: float, dt: float) -> Vector2:
-	return hv.lerp(Hunter.glide_steer(hv, wish, gs, dt), HunterMove.dive_steer)
+	return hv.lerp(Loco.glide_step(hv, wish, gs, Loco.glide_max, dt), HunterMove.dive_steer)
