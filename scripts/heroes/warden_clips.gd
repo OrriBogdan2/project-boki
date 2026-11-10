@@ -369,7 +369,6 @@ func step(dt: float) -> void:
 	var proc := bool(want.get("proc", false))
 	var fade := float(want.get("fade", FADE))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
-	var fade := float(want.get("fade", FADE))
 	if not proc and bool(want.get("upper", false)):
 		var clip_u := String(want["clip"])
 		if clip_u != cur_u:
