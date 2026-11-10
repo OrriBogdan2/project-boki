@@ -11,9 +11,9 @@ extends Node3D
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
-##   orb        Motley's Gravity Orb: a violet glass teardrop with a magenta tail; skin_orb grows and
+##   orb        Motley's Gravity Orb: a teal glass teardrop with a teal tail; skin_orb grows and
 ##              brightens it with its charge
-##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
+##   spear      Shard Snap: a long bundle of dark teal crystal prisms with bright rims
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
@@ -28,11 +28,15 @@ const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 static var vis_rng := RandomNumberGenerator.new()
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
 const TRAIL_DT := 0.016       # s: a skinned shot leaves its trail every frame
-const ORB_CORE := [Color("3a0d5c"), Color("8a3fe0")]      # the orb's glass core, plain and at full charge
-const ORB_RIM := [Color("e070ff"), Color("ffeaff")]       # its rim, the same
+const ORB_CORE := [Color("0a3a36"), Color("2fb8a8")]      # the orb's glass core, plain and at full charge
+const ORB_RIM := [Color("5fd8c8"), Color("f0fffc")]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
-const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
+const BOMB_R := 0.3           # m: the pop marker's orb radius at its planted size
+const BOMB_PULSE := 0.08      # how far the pop marker swells and shrinks round its size
+const BOMB_PULSE_HZ := 7.0    # rad/s of that pulse
+const BOMB_TAG_LIFT := 0.4    # m the recast tag floats above the orb
+const SIGIL_SEGS := 16       # arc segments in Ostra's rune sigil ring
 
 var m: Node
 var pools := {}               # kind -> Array[Node3D] (hidden, free)
@@ -96,9 +100,9 @@ func _build(kind: String) -> Node3D:
 			_build_void_shot(n, kind)
 		"aura":
 			Models.part(
-				n, Models.sphere(1.25, 20), glass_mat(Color("7a1a68"), Color("ff4fd8"), 0.6, 0.12), Vector3(0, 1.0, 0)
+				n, Models.sphere(1.25, 20), glass_mat(Color("0e4a44"), Color("7fe0d0"), 0.6, 0.12), Vector3(0, 1.0, 0)
 			)
-			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(0.75, 0.12, 0.6, 0.45)), Vector3(0, 0.05, 0))
+			Models.part(n, Models.cyl(1.3, 1.3, 0.03, 28), shade_mat(Color(0.2, 0.85, 0.78, 0.4)), Vector3(0, 0.05, 0))
 		"crown":
 			_build_crown(n)
 		"burst", "crater":
@@ -107,7 +111,7 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, lump(0.13), rock_mat(0.7, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.7, 1.3))
 		"column":
 			Models.part(
-				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("20003a"), Color("b06bff"), 0.75, 0.3),
+				n, Models.cyl(0.35, 0.55, 6.0, 16), glass_mat(Color("04201e"), Color("7fe0d0"), 0.75, 0.3),
 				Vector3(0, 3.0, 0)
 			)
 		"well_dome":
@@ -127,6 +131,8 @@ func _build(kind: String) -> Node3D:
 			Models.part(n, Models.sphere(0.22, 16), glass_mat(Color("0a0012"), Color("f2eaff"), 1.0, 1.0), Vector3.ZERO)
 		"star":
 			_build_star(n)
+		"bomb":
+			_build_bomb(n)
 		"sigil":
 			_build_sigil(n)
 	for c2 in n.find_children("*", "MeshInstance3D", true, false):
@@ -156,20 +162,20 @@ func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
 	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
 
-## Ostra's shots: dark violet glass with bright rims, each with its own length and tail (the tail points
+## Ostra's shots: dark teal glass with bright rims, each with its own length and tail (the tail points
 ## back along the flight, -Z being forward after look_at).
 func _build_void_shot(n: Node3D, kind: String) -> void:
 	match kind:
 		"orb":
 			var o := Models.part(
-				n, Models.sphere(0.28, 12), glass_mat(Color("3a0d5c"), Color("e070ff"), 1.0, 0.75), Vector3.ZERO,
+				n, Models.sphere(0.28, 12), glass_mat(Color("0a3a36"), Color("5fd8c8"), 1.0, 0.75), Vector3.ZERO,
 				Vector3(1.0, 1.0, 1.45)
 			)
 			o.name = "Spin"
-			var hot := Models.glow_mat(Color("ffd6ff"))
+			var hot := Models.glow_mat(Color("e6fffa"))
 			hot.render_priority = 1      # always over the glass (same-node alpha sorting flickers in flight)
 			Models.part(n, Models.sphere(0.09, 8), hot, Vector3(0, 0, -0.12)).name = "Hot"
-			_tail(n, 0.22, 1.2, Color(0.88, 0.25, 0.85, 0.55))
+			_tail(n, 0.22, 1.2, Color(0.3, 0.85, 0.78, 0.55))
 		"spear":
 			var b := Node3D.new()
 			b.name = "Spin"
@@ -179,7 +185,7 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 				var off := Vector3(cos(a), sin(a), 0.0) * (0.0 if i == 0 else 0.2)
 				var len_ := 2.7 if i == 0 else 2.0
 				Models.part(
-					b, PrismMesh.new(), glass_mat(Color("240838"), Color("d8a8ff"), 1.0, 0.85),
+					b, PrismMesh.new(), glass_mat(Color("06201f"), Color("9be8dc"), 1.0, 0.85),
 					off + Vector3(0, 0, 0.15 * float(i % 2)), Vector3(0.26, len_, 0.26), Vector3(-PI * 0.5, 0, a)
 				)
 
@@ -262,19 +268,38 @@ func _build_sigil(n: Node3D) -> void:
 		Models.part(n, Models.box(0.05, 0.015, 0.16), seg_mat, tick_at, Vector3.ONE, Vector3(0, -a2, 0))
 	Models.part(n, Models.box(0.14, 0.015, 0.14), star_mat, Vector3.ZERO, Vector3.ONE, Vector3(0, PI * 0.25, 0))
 
-## The Trade's lobbed star-orb: a dark indigo glass orb with short violet spikes, turning.
+## The Trade's lobbed star-orb: a dark teal glass orb with short teal spikes, turning.
 func _build_star(n: Node3D) -> void:
 	var spin := Node3D.new()
 	spin.name = "Spin"
 	n.add_child(spin)
-	Models.part(spin, Models.sphere(0.3, 14), glass_mat(Color("120838"), Color("8a6bff"), 1.0, 0.9), Vector3.ZERO)
+	Models.part(spin, Models.sphere(0.3, 14), glass_mat(Color("06241f"), Color("7fe0d0"), 1.0, 0.9), Vector3.ZERO)
 	for i in 6:
 		var a := TAU * i / 6.0
 		Models.part(
-			spin, PrismMesh.new(), shade_mat(Color(0.62, 0.42, 1.0, 0.95)), Vector3(cos(a), sin(a), 0.0) * 0.36,
+			spin, PrismMesh.new(), shade_mat(Color(0.5, 0.88, 0.82, 0.95)), Vector3(cos(a), sin(a), 0.0) * 0.36,
 			Vector3(0.12, 0.3, 0.06), Vector3(0, 0, a - PI * 0.5)
 		)
-	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("d8c8ff")), Vector3.ZERO)
+	Models.part(n, Models.sphere(0.08, 8), Models.glow_mat(Color("d8fff8")), Vector3.ZERO)
+
+## The seed's pop marker, hung over the bomb: a teal glass orb whose size is the damage a pop would do now (1x
+## at the plant, the full multiplier when grown) and the recast tag, which draws over everything.
+func _build_bomb(n: Node3D) -> void:
+	var orb := Node3D.new()
+	orb.name = "Orb"
+	n.add_child(orb)
+	Models.part(orb, Models.sphere(BOMB_R, 16), glass_mat(Color("04201e"), Color("7fe0d0"), 0.95, 0.8), Vector3.ZERO)
+	Models.part(orb, Models.sphere(BOMB_R * 0.35, 10), Models.glow_mat(Color("e6fffa")), Vector3.ZERO)
+	var tag := Label3D.new()
+	tag.name = "Tag"
+	tag.font_size = 56
+	tag.pixel_size = 0.009
+	tag.outline_size = 14
+	tag.outline_modulate = Color("04201e")
+	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	tag.no_depth_test = true
+	tag.render_priority = 10
+	n.add_child(tag)
 
 ## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
 ## on it, small black orbs riding the rim, and a pink core shown when she cast it Swollen.
@@ -515,6 +540,18 @@ func hold_on(key: String, kind: String, ent: Node3D, at: Vector3, scl := 1.0, co
 		var core := (n.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
 		core.set_shader_parameter("color", Color(col.lightened(0.45), 0.9))
 	return n
+
+## The bomb marker (refresh every step): the orb at `scl` times its planted size with a slow pulse, the tag
+## `words` over it (only when `show_tag` is on: the owner's recast prompt), `col` its colour.
+func bomb_mark(key: String, ent: Node3D, at: Vector3, scl: float, words: String, col: Color, show_tag: bool) -> void:
+	var n := hold_on(key, "bomb", ent, at)
+	var pulse := 1.0 + BOMB_PULSE * sin(float(m.time) * BOMB_PULSE_HZ)
+	(n.get_node("Orb") as Node3D).scale = Vector3.ONE * scl * pulse
+	var lbl := n.get_node("Tag") as Label3D
+	lbl.visible = show_tag
+	lbl.text = words
+	lbl.modulate = col
+	lbl.position = Vector3(0, BOMB_R * scl + BOMB_TAG_LIFT, 0)
 
 ## Ends a held effect now instead of after KEEP.
 func release(key: String) -> void:

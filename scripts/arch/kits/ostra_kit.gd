@@ -12,13 +12,15 @@ extends ArchKit
 ## abyss) and synced over Net as ["zone", "seed" | "pop", ...]. Looks: KitLooks (pooled).
 
 const PAY := "COLLAPSE"
-const TEAL := Color("7fe0d0")
-const VOID_COL := Color("b06bff")
-const PINK := Color("ff4fd8")
+const TEAL := Color("7fe0d0")             # his Hunter colour: every light he throws
+const VOID_COL := Color("2fb8a8")         # the deeper teal of what he throws (the Trade's landing end, the Snap)
+const HOT := Color("c9fff6")              # a hit's and the Swollen flash's white-hot teal
 const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
-const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
-const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
-const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
+const RECAST_WARN := 2.0                  # s left in the pop window when its tag turns to NOW and blinks
+const MARK_LIFT := 1.5                    # m above the ground the pop marker hangs (over the drum's top)
+const ORB_FULL_COL := Color("e6fffa")      # the orb's shot colour at full charge (what other games draw)
+const GLOW_COL := Color("1f8f86")          # the charge glow at his hand, starting...
+const GLOW_FULL_COL := Color("b8fff2")     # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
 
 var swollen_t := 0.0
@@ -90,9 +92,7 @@ func add_swell(v: float) -> void:
 		swells += 1
 		armed_fx("SWOLLEN", "")
 		play("ostra_empower")
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 2.2, Color("4a1068"), 0.45)      # the vortex disc under him
-		m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, PINK, 0.3)
-		m.fx.flash(h.pos + Vector3(0, 1.0, 0), PINK, 1.6, 0.1)
+		m.fx.flash(h.pos + Vector3(0, 1.0, 0), HOT, 1.6, 0.1)      # (the sphere round him is the look; no ring)
 		m.sfx("os_empower", h.pos, -2.0, 1.0)
 
 func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
@@ -230,7 +230,7 @@ func _orb_fired() -> void:
 	if full:
 		settled_shots += 1
 		m.sfx("os_orb_hot", h.pos, -4.0, 1.0)      # (the plain orb's sound is the weapon's own)
-		m.fx.burst(_hand(), Color(0.8, 0.6, 1.0, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
+		m.fx.burst(_hand(), Color(0.7, 1.0, 0.95, 0.9), 8, 3.0, 0.2, 0.0, 1.0)
 
 ## A seed now waits for its recast, so a kit swapped out (practice, the Arena) takes its seed with it.
 func teardown() -> void:
@@ -293,9 +293,9 @@ func _swap_cast() -> void:
 	}
 	swap_peak = 0.0
 	play(swap_move())
-	m.fx.ring(h.pos, float(dd["radius"]), TEAL, 0.35)
-	m.fx.ring(land, float(dd["radius"]), VOID_COL, 0.35)
 	m.sfx("os_swap_lob", h.pos, -3.0, 1.0)
+	# the landing, for both teams (online too)
+	vfx("swap_mark", land, null, {"r": float(dd["radius"]), "t": swap_time()})
 	net_bolt(h.pos + Vector3(0, 1.2, 0), land + Vector3(0, 0.6, 0), Color("b8f5ea"))
 	CombatBus.ability_used.emit(h, String(dd.get("id", "swap")), "dodge")
 
@@ -330,7 +330,7 @@ func _tick_swap(dt: float) -> void:
 	swap_peak = maxf(swap_peak, lift)
 	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
 	KitLooks.of(m).hold_on("os_star", "star", h, p, 1.0)
-	m.fx.burst(p, Color(0.5, 0.3, 1.0, 0.75), 1, 0.8, 0.35, 0.0, 1.1)
+	m.fx.burst(p, Color(0.3, 0.8, 0.72, 0.75), 1, 0.8, 0.35, 0.0, 1.1)
 	var r := float(dd["radius"])
 	AimKit.swap(h, "swap_fly", {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TEAL, "col2": VOID_COL})
 	KitLooks.of(m).sigil("os_sigil_from", h, AimMode.ground(m, from), r, u, TEAL)
@@ -347,7 +347,7 @@ func charge_orb() -> bool:
 	return false
 
 func dash_afterimage() -> bool:
-	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(0.55, 0.3, 0.95, 0.75), 3, 0.8, 0.4, -0.5, 1.2)
+	m.fx.burst(h.pos + Vector3(0, 0.6, 0), Color(0.3, 0.8, 0.72, 0.75), 3, 0.8, 0.4, -0.5, 1.2)
 	return true
 
 ## A Boki merge ends the Trade in flight (nobody is sent), its aim, the Snap's wind-up and the Settled
@@ -431,14 +431,12 @@ func _arrive(land: Vector3, from: Vector3, from_void: bool) -> void:
 	if arrive_y - gy > 0.05: h.grounded = false
 	play("ostra_arrive")
 	_fold_in(land, VOID_COL)
-	m.fx.flash(land + Vector3(0, 1.0, 0), Color("b06bff"), 0.9, 0.08)
 	m.sfx("os_swap", land, -2.0, 1.0)
-	net_ring(land, 1.6, TEAL)
 
 ## Both ends of a Trade fold in on themselves (motes drawn inward, no ring or blast: the dash rule).
 func _fold_in(at: Vector3, col: Color) -> void:
 	m.fx.burst(at + Vector3(0, 1.0, 0), Color(col, 0.9), 20, -6.0, 0.3, 0.0, 1.3)
-	m.fx.burst(at + Vector3(0, 1.0, 0), Color(0.08, 0.02, 0.14, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
+	m.fx.burst(at + Vector3(0, 1.0, 0), Color(0.01, 0.1, 0.09, 0.9), 8, -3.0, 0.25, 0.0, 1.8)
 
 # ------------------------------------------------------------------ RMB: Shard Snap
 func fire_rmb(c: Dictionary) -> void:
@@ -481,15 +479,15 @@ func _snap_release() -> void:
 	KitLooks.of(m).skin(m.shots[-1], "spear")
 	m.sfx("os_snap", h.pos, -2.0, 1.0)
 	_boost(float(sn["boost"]["cast"]))
-	m.fx.flash(start, Color("b06bff"), 0.7, 0.07)
-	m.fx.burst(start, Color(0.45, 0.15, 0.7, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
+	m.fx.flash(start, VOID_COL, 0.7, 0.07)
+	m.fx.burst(start, Color(0.04, 0.22, 0.2, 0.9), 10, 4.0, 0.25, 0.0, 1.1, Vector3(dir.x, 0, dir.y), 40.0)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on
 ## anyone (the training dummy too): stars over the head for as long as it lasts.
 func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
-	m.fx.burst(at, Color(0.45, 0.15, 0.7, 0.9), 14, 5.0, 0.3, 0.0, 1.2)
-	m.fx.flash(at, PINK, 0.7, 0.08)
+	m.fx.burst(at, Color(0.04, 0.22, 0.2, 0.9), 14, 5.0, 0.3, 0.0, 1.2)
+	m.fx.flash(at, HOT, 0.7, 0.08)
 	if e == null:
 		return
 	var sn: Dictionary = rmb_def()["snap"]
@@ -553,6 +551,7 @@ func _tick_seed(dt: float) -> void:
 			"dashed": seed_k() < 1.0
 		}
 	)
+	_pop_marker(p, ed)
 	if seed_k() >= float(ed["tell_k"]) and seed.get("col") == null:
 		seed["col"] = KitLooks.of(m).column(p, 30.0)
 		m.sfx("ostra_music_box", p, -6.0, 1.0)      # the crank's tune: the box is about to pop
@@ -564,6 +563,15 @@ func _tick_seed(dt: float) -> void:
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
 		_pop(false)
+
+## The pop marker over the bomb: its size is the damage a pop does now; for its owner a tag says which key,
+## and "NOW" blinks when the window is about to close (the seed fizzles at e_t 0, never silently).
+func _pop_marker(p: Vector3, ed: Dictionary) -> void:
+	var mult := 1.0 + (float(ed["dmg_max_k"]) - 1.0) * seed_k()
+	var closing := e_t < RECAST_WARN and int(m.time * 4.0) % 2 == 0
+	var text := "%s %s  x%.1f" % [Settings.key_cap("signature"), "NOW" if e_t < RECAST_WARN else "AGAIN", mult]
+	var at := p + Vector3(0, MARK_LIFT + KitLooks.BOMB_R * mult, 0)
+	KitLooks.of(m).bomb_mark("os_bomb", h, at, mult, text, HOT if closing else TEAL, h.is_local())
 
 ## The source detonates only on the recast: a seed left at full size this long (e.hold_full) fizzles out
 ## with no damage, so it can't be parked forever.
@@ -596,6 +604,7 @@ func _pop(hit: bool) -> void:
 	seed = {}
 	e_t = 0.0
 	AimKit.hide(h, "seed")
+	KitLooks.of(m).release("os_bomb")
 	HeroZones.seed_pop(m, sid, TEAL)
 	if (m.net_on or HeroZones.capture) and not h.remote:
 		HeroZones.tx(m, ["zone", "pop", sid])
@@ -613,7 +622,7 @@ func _pop(hit: bool) -> void:
 	m.later(
 		0.12,
 		func(): m.fx.spark(
-			p + Vector3(0, 0.6, 0), Vector3.UP, Color("2a0a3a"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
+			p + Vector3(0, 0.6, 0), Vector3.UP, Color("062624"), int(10 + 12 * k), 8.0, 90.0, 0.4, 8.0, 1.2
 		)
 	)
 	m.fx.flash(p + Vector3(0, 0.8, 0), Color("f2eaff"), 1.0 + k, 0.1)

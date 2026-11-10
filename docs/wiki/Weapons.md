@@ -26,7 +26,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | SMG | none | light | 4.6 | 0.12s | 22 | 1.4s | 7m | Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end. |
 | Sniper | none | light | 36 | 1.5s | 5 | 2.2s | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | 12 | 1.4s | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
-| Tether Lantern | the Void Jester | medium | 9 | 0.6s | none | none | 14m | A quick violet orb every 0.6s, flying its full 14m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows. |
+| Tether Lantern | the Void Jester | medium | 9 | 0.6s | none | none | 14m | A quick teal orb every 0.6s, flying its full 14m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows. |
 | War Hammer & Aegis | the Barnacle Knight | heavy | 11 | 0.55s | none | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock, stun 0.4): a flaming crescent in front that carries you forward. Right click raises the aegis. |
 | Twin Blades | none | light | 7 | 0.3s | none | none | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 

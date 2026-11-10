@@ -81,7 +81,7 @@ func _ostra() -> void:
 	for i in 40: K.on_deal(T, 10.0, {})
 	m.step(DT)
 	ok(
-		"passive: full Swell = Swollen for 9s, wrapped in the pink sphere",
+		"passive: full Swell = Swollen for 9s, wrapped in the teal sphere",
 		K.is_swollen() and K.swells == 1 and absf(
 			float(K.res_def()["swollen_t"]) - 9.0
 		) < 0.01 and KitLooks.of(m).holding("os_aura"),
@@ -100,7 +100,7 @@ func _ostra() -> void:
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
 	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
-	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
+	ok("lmb: the orb is his own teal teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
 	reset.call()
@@ -336,8 +336,17 @@ func _ostra() -> void:
 		"e: the seed grows for 6.5s to 3.2m", K.seed_k() >= 0.99 and absf(K.seed_radius() - 3.2) < 0.05,
 		"k %.2f r %.2f" % [K.seed_k(), K.seed_radius()]
 	)
+	var bomb: Node3D = KitLooks.of(m).held["os_bomb"]["n"]
+	var bomb_tag := bomb.get_node("Tag") as Label3D
+	var bomb_k: float = (bomb.get_node("Orb") as Node3D).scale.x
+	ok(
+		"e: the pop marker's orb is 3.5x its planted size when full, its tag says the key and the multiplier",
+		absf(bomb_k - 3.5) < 0.35 and bomb_tag.visible and bomb_tag.text.ends_with("AGAIN  x3.5"),
+		"orb %.2f tag '%s'" % [bomb_k, bomb_tag.text]
+	)
 	K.e_recast()
 	step(m, 0.2)
+	ok("e: the pop marker goes with the seed", not KitLooks.of(m).holding("os_bomb"))
 	var late := dmg(T)
 	ok(
 		"e: a full pop hits up to 3.5x an early one", late > early * 2.5 and K.pops >= 2,
@@ -367,7 +376,10 @@ func _ostra() -> void:
 	K.cd["e"] = 0.0
 	var hp_fizz := T.hp
 	K.cast_e()
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
+	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) - 1.0)
+	var closing := ((KitLooks.of(m).held["os_bomb"]["n"] as Node3D).get_node("Tag") as Label3D).text
+	ok("e: a closing window turns the tag to NOW (the seed never fizzles silently)", closing.contains("NOW"), closing)
+	step(m, 1.2)
 	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
