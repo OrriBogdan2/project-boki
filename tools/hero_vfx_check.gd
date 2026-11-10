@@ -315,7 +315,8 @@ func _net(m: Match, V: HeroVfx, P: Hunter) -> void:
 func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
 	_clear(V)
 	V.plays.clear()
-	var sheens := func() -> Array: return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
+	var sheens := func() -> Array:
+		return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
 	P.armor_xp = 0.0
 	P.armor_tier = 0
 	ok(P.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
@@ -327,7 +328,9 @@ func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
 		m._armor_up(P)
 		var made: Array = sheens.call()
 		ok(made.size() == 1 and int(V.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
-		var col: Color = (made[0].material_override as ShaderMaterial).get_shader_parameter("col") if made.size() == 1 else Color.BLACK
+		var col := Color.BLACK
+		if made.size() == 1:
+			col = (made[0].material_override as ShaderMaterial).get_shader_parameter("col")
 		ok(col.is_equal_approx(Hunter.ARMOR_TIERS[tier][1]), "tier %d: the new tier's colour" % tier)
 	ok(V.live.size() == 1 and is_equal_approx(float(V.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
 	_clear(V)

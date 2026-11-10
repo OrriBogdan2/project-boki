@@ -13,12 +13,13 @@ extends Node3D
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
-const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7, "sheen": 8}
+const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
+	"sheen": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
-const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4, "sheen": 6,
-	"ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
+const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
+	"sheen": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -200,7 +201,8 @@ func net_in(x: Array) -> void:
 func tier_up(h: Hunter, tier: int) -> void:
 	plays["armor_up"] = int(plays.get("armor_up", 0)) + 1
 	if m.get("net_on") and not h.remote:
-		m.net_fx(["hvfx", h.nid, "armor_up", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 0.0, 0.0, tier, 0.0, 0.0])
+		m.net_fx(["hvfx", h.nid, "armor_up", m._r(h.pos.x), m._r(h.pos.y), m._r(h.pos.z), 0.0, 0.0, tier, 0.0,
+				0.0])
 	if lod_at(h.pos) <= 0.0 or (h.unseen and h != m.get("player")):
 		return
 	var mi: MeshInstance3D = _take("sheen", _surface_node.bind("sheen"))
@@ -212,7 +214,8 @@ func tier_up(h: Hunter, tier: int) -> void:
 	mt.set_shader_parameter("gain", view_k(h))
 	var s := Vector3(h.r + SHEEN_PAD, SHEEN_TALL, h.r + SHEEN_PAD)
 	mi.global_transform = Transform3D(Basis.from_scale(s), h.pos)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s, "follow": h})
+	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": SHEEN_LIFE, "b": Basis.IDENTITY, "s0": s, "s1": s,
+			"follow": h})
 
 ## Only the move's sounds (a grunt, a step of a move that draws nothing).
 func _sounds(rec: Dictionary, h: Hunter, at: Vector3, o: Dictionary) -> void:

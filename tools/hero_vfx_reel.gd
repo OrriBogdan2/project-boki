@@ -162,7 +162,9 @@ func _part_tierup() -> void:
 				P.armor_gain(float(Hunter.ARMOR_TIERS[int(up[1])][2]) - P.armor_xp)
 				m._armor_up(P)
 		_aim(T.pos)
-	await _go(2.2, ups, _sheet("tierup", "armour tier-up: Rare, then Legendary", [0.18, 0.28, 0.36, 0.44, 0.52, 1.38, 1.48, 1.58, 1.68]), 1.5)
+	var marks := _sheet("tierup", "armour tier-up: Rare, then Legendary",
+		[0.18, 0.28, 0.36, 0.44, 0.52, 1.38, 1.48, 1.58, 1.68])
+	await _go(2.2, ups, marks, 1.5)
 	await _go(GAP)
 
 # ------------------------------------------------------------------ Kael
