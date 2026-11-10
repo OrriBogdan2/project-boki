@@ -95623,5 +95623,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/eye_scopeleon_1.jpg",
     "ok": true
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_snapler_m1",
+    "name": "Snapler (middle-stage rework m1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_snapler_m2",
+    "name": "Snapler (middle-stage rework m2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_snapler_m1",
+    "name": "Snapler (middle-stage rework m1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_snapler_m2",
+    "name": "Snapler (middle-stage rework m2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_snapler_m3",
+    "name": "Snapler (middle-stage rework m3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m3_2.jpg",
+    "ok": true
   }
 ]
