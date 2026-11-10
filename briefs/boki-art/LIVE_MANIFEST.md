@@ -1,7 +1,7 @@
 # Boki art live manifest (regenerated 02:31 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-240 Boki, 240 with all three. Missing something: 
+244 Boki, 244 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -126,8 +126,10 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Lensling | ✓ | ✓ | ✓ |
 | Loafhopper | ✓ | ✓ | ✓ |
 | Lockatara | ✓ | ✓ | ✓ |
+| Lockwren | ✓ | ✓ | ✓ |
 | Lodestaff (Magnestaff) | ✓ | ✓ | ✓ |
 | Lodestick (Magnestick) | ✓ | ✓ | ✓ |
+| Luckhop | ✓ | ✓ | ✓ |
 | Lunink | ✓ | ✓ | ✓ |
 | Lunowl | ✓ | ✓ | ✓ |
 | Lurklet | ✓ | ✓ | ✓ |
@@ -223,6 +225,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Teapotamus | ✓ | ✓ | ✓ |
 | Terrarimit | ✓ | ✓ | ✓ |
 | Terrasloth (Pangolith) | ✓ | ✓ | ✓ |
+| Tesselamb | ✓ | ✓ | ✓ |
 | Thistlynx | ✓ | ✓ | ✓ |
 | Thrumbird | ✓ | ✓ | ✓ |
 | Thunderstrich (Thundrich) | ✓ | ✓ | ✓ |
@@ -232,6 +235,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Tootle | ✓ | ✓ | ✓ |
 | Torpecone | ✓ | ✓ | ✓ |
 | Truffapir | ✓ | ✓ | ✓ |
+| Twinklup | ✓ | ✓ | ✓ |
 | Umbrathere (Ribbrella) | ✓ | ✓ | ✓ |
 | Umbrink (Nightmink) | ✓ | ✓ | ✓ |
 | Vaultara | ✓ | ✓ | ✓ |
