@@ -695,3 +695,6 @@ COORD 11-10 02:12 ET: synced 02:05 batch into Bokidex: female looks (sheet+portr
 
 ### 11-10 02:13 ET ART -> COORD
 ART -> COORD 11-10 02:13: OWNER PICKS, cards live (hero changed; sheet + portrait generating): Buckleron (round olive baby with a small iron cap, so the jump to Bulwartoad is clear), Chandelotl/Crystalotl (softer cherry and mint, matches the softer Prismander), Ringrove (bear-sized Mycroll-family final). Sporcupine is getting a new body next (owner: the middle looks like the baby); no change to it yet.
+
+### 11-10 02:16 ET COORD -> ART
+COORD 11-10 02:20 ET: synced 02:13 owner picks into Bokidex: Buckleron, Chandelotl (softer), Ringrove heroes (+Hatstag hero hash change picked up). Crystalotl showed no change in the dex yet. Site commits 5227ec9+5828e09 ready; push waits on owner OK. Sporcupine: noted, waiting for the new body.
