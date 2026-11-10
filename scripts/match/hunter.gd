@@ -785,8 +785,9 @@ func do_jump() -> void:
 			_open_glider()
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
-		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
-		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
+		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too);
+		# a no-carry kit (DashExit) keeps at most its cap x run
+		var keep := DashExit.carry(self, Vector2(vel.x, vel.z) * Loco.dash_jump_keep)
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
@@ -865,7 +866,9 @@ func _dash_into_glide() -> bool:
 		return false
 	roll_t = 0.0
 	shove = {}
-	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
+	var hv := DashExit.carry(self, Vector2(vel.x, vel.z))     # a no-carry kit glides off at most cap x run
+	vel.x = hv.x; vel.z = hv.y
+	if hv.length() > GLIDE_SPEED * 1.25:
 		_glide_boost_fx()
 	return true
 
@@ -2066,8 +2069,8 @@ func _physics(dt: float) -> void:
 		if not dash_pass.is_empty():
 			_pass_along()
 		if roll_t <= 0.0:
-			if grounded:
-				hv = HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+			if grounded or not DashExit.rule(self).is_empty():
+				hv = DashExit.leave(self, hv, spd)     # no hard stop: the run carries on (in the air, air drag)
 	elif fly_t > 0.0:
 		fly_t -= dt
 	elif knock_t > 0.0:
