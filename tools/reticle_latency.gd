@@ -3,7 +3,7 @@ extends RefCounted
 ## A live match (nothing else moving) gets one scripted mouse sample per frame, taken before the match's
 ## own _process, going round a circle at a fixed step per frame. After each frame is drawn the tool finds the
 ## reticle's dot in the rendered image and projects the player's aim with the camera that was drawn, then
-## converts both to frames behind the cursor from their angle on the circle. 0 means same-frame.
+## converts both to frames behind the cursor from where they fall along the engine's cursor samples (0 = same frame).
 ##   godot -- --reticle-latency [--frames=300] [--step=20 (px per frame)] [--shots-dir=<dir>] [--expect-max=<frames>]
 ## Runs the four cases (60 and 144 fps cap, vsync on and off) and prints "LATENCY" lines; with
 ## --expect-max it fails when either trails the cursor by more than that at the 95th percentile.
@@ -74,7 +74,6 @@ func run(main_node: Node) -> void:
 	shots_dir = _arg("--shots-dir", "")
 	expect_max = float(_arg("--expect-max", "-1"))
 	main.get_window().size = VIEW
-	Input.use_accumulated_input = false      # a sample reaches the match the moment it is parsed, as the OS flush does
 	Settings.set_v("reticle_shape", "dot")
 	Settings.set_v("reticle_size", 2.0)
 	Settings.set_v("reticle_outline", false)
@@ -108,21 +107,20 @@ func run(main_node: Node) -> void:
 	print("LATENCY %s" % ["FAIL" if bad else "PASS"])
 	main.get_tree().quit(1 if bad else 0)
 
-## Called by the rig first thing in each frame: this frame's cursor sample.
+## Called by the rig first thing in each frame, before the match's _process: warps the OS cursor to this
+## frame's sample (the engine has it at once, as it has the real mouse after the frame's input flush) and
+## notes where the engine now has it: what the reticle and the aim should be drawn from.
 func sample() -> void:
-	var p := _cursor_at(n)
-	var ev := InputEventMouseMotion.new()
-	ev.position = p
-	ev.global_position = p
-	Input.parse_input_event(ev)
-	hist.append(main.get_viewport().get_mouse_position())
 	n += 1
+	main.get_viewport().warp_mouse(_cursor_at(n))
+	hist.append(main.get_viewport().get_mouse_position())
 
 func _after_draw() -> void:
 	if n >= WARMUP and n < WARMUP + frames and m.player != null and hist.size() == n:
 		var img := main.get_viewport().get_texture().get_image()
-		var at := _find_dot(img, hist[n - 1])
-		if at.x >= 0.0:
+		var ui := main.get_window().content_scale_factor      # the UI scales with the window: image px = view px * ui
+		var at := _find_dot(img, hist[n - 1] * ui) / ui
+		if at.x > -100.0:
 			ret_lag.append(_frames_behind(at))
 		else:
 			missed += 1
@@ -134,7 +132,7 @@ func _after_draw() -> void:
 		if not m.cam.is_position_behind(far):
 			aim_lag.append(_frames_behind(m.cam.unproject_position(far)))
 
-## The dot's centre: the mean of the dot-coloured pixels around `near`, or (-1, -1).
+## The dot's centre: the mean of the dot-coloured pixels around `near`, or far off screen.
 func _find_dot(img: Image, near: Vector2) -> Vector2:
 	var sum := Vector2.ZERO
 	var cnt := 0
@@ -146,7 +144,7 @@ func _find_dot(img: Image, near: Vector2) -> Vector2:
 			if absf(c.r - DOT_COL.r) + absf(c.g - DOT_COL.g) + absf(c.b - DOT_COL.b) < DOT_TOL * 3.0:
 				sum += Vector2(x + 0.5, y + 0.5)
 				cnt += 1
-	return sum / float(cnt) if cnt > 0 else Vector2(-1, -1)
+	return sum / float(cnt) if cnt > 0 else Vector2(-1000, -1000)
 
 func _stats(a: PackedFloat32Array) -> Array:
 	if a.is_empty():
@@ -163,7 +161,7 @@ func _report() -> void:
 	var a := _stats(aim_lag)
 	var live := maxf(1.0, Engine.get_frames_per_second())
 	var frame_ms := 1000.0 / live
-	print("LATENCY cursor sample %d: injected %s, engine %s" % [WARMUP, _cursor_at(WARMUP), hist[WARMUP]])
+	print("LATENCY cursor sample %d: sent %s, engine %s" % [WARMUP, _cursor_at(WARMUP), hist[WARMUP]])
 	print("LATENCY cap=%d vsync=%s step=%.0fpx/frame measured_fps=%.1f dot_missed=%d" % [fps, "on" if vsync else "off",
 		step_px, live, missed])
 	print("LATENCY reticle  mean %.2f  p95 %.2f frames (%.1f ms)  n=%d" % [r[0], r[1], r[0] * frame_ms, r[2]])
