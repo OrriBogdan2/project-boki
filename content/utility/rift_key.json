@@ -14,5 +14,7 @@
  ],
  "price": 0,
  "key": true,
- "desc": "Opens a sealed rift hatch: a quiet way out. Press its key beside a hatch to unlock it, or anywhere else to ping the nearest one on your map. Found in the match only; lost in your deathbox if you go down."
+ "desc": "Opens a sealed rift hatch: a quiet way out. Press its key beside a hatch to unlock it, or anywhere else to ping the nearest one on your map. Found in the match only; lost in your deathbox if you go down.",
+ "move": "read",
+ "cast": 0.5
 }

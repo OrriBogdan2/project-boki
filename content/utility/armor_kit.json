@@ -13,5 +13,6 @@
   4
  ],
  "price": 40,
- "desc": "Repairs your armor to full. You are open while you repair."
+ "desc": "Repairs your armor to full. You are open while you repair.",
+ "move": "place"
 }

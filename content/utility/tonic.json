@@ -13,5 +13,6 @@
   5
  ],
  "price": 30,
- "desc": "Drink to heal 40% of your health. You are open while you drink."
+ "desc": "Drink to heal 40% of your health. You are open while you drink.",
+ "move": "drink"
 }
