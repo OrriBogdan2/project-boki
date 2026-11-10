@@ -616,10 +616,6 @@
 "scripts/match/kin_strike.gd": {
 "long_line": 4
 },
-"scripts/match/kin_voice.gd": {
-"long_line": 21,
-"semicolon": 2
-},
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
