@@ -18,7 +18,7 @@ Factions are lore only (voice lines, banter, key art): a squad in a match stays 
 | The Odd Jobs | Vex, Sparkle, Tenzo | The young, scrappy ones who grew up with nothing in the ruins after the Hollowing and look out for each other. Vex is the first Relic players meet, so this is the first crew they meet. | A world where nobody has to scrape by. |
 | The Fallen Court | Kael, Cinder, Lace | Malgrave's arena champion, her court alchemist and her seamstress. They knew her best and know what she really is, which makes them the most dangerous crew. They don't trust each other. | Each wants something different: Kael freedom from the demon, Cinder the throne, Lace the last loyalist dead. |
 | The Hearthguard | Albert, Neve, Meeko | The ones who saved people the night everything broke. | To heal the world. |
-| Moth & Hook | Sable, Grimble | A duo in it for the treasure. | Malgrave's vault, all of it. |
+| Moth & Hook | Sable, Grimble, Gil | A duo in it for the treasure. | Malgrave's vault, all of it. |
 | The Void Jester | Motley | He belongs to no one and plays every side against the others. | Nobody knows. The joke, probably. |
 
 ### Relics
@@ -39,6 +39,7 @@ Each fallen Hunter's self is held in the object they were most bound to. Wearing
 | Sparkle, the Storm Chaser | The lightning rod | From the top of the spire where Rink, the boy she loved, fell. The storm struck them both there. | locked |
 | Sable, the Silver Thief | Her moth-wing knife | In her hand when she touched the Wyrmheart. | locked |
 | Motley, the Void Jester | His jack-in-the-box | Malgrave sealed him in it and threw it into the Void. | locked |
+| Gil, the Novice Mage | His old fishbowl pebble | The one thing he took from the bowl. He still isn't sure what it is for. | locked |
 
 ### Banter pairs
 

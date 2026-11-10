@@ -364,7 +364,7 @@ func _ease(cur: float, want: float, rate: float, dt: float) -> float:
 func _setup_weapon(w: String) -> void:
 	wid = w
 	match w:
-		"longsword": hold = "sword"
+		"longsword", "swordfish": hold = "sword"
 		"greatsword": hold = "great"
 		"twin_blades", "arc_bolts": hold = "twin"
 		"coilcaster": hold = "finger"

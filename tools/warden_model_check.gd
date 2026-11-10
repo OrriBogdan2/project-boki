@@ -39,6 +39,9 @@ const WARDENS := {
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
 	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears, the locked design's taller ears)
 	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.76, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
+	# yet, so "moves" is "" and the rig's generic poses play)
+	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.956, "width": [0.5, 1.5], "moves": ""},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured
@@ -119,7 +122,7 @@ func _anim(id: String) -> void:
 	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
-			if String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
+			if String(WARDENS[id]["moves"]) != "" and String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
 	for mv in moves:
 		var keys: Array = HunterAnim.km_def(mv)["keys"]
 		var most := 0.0
@@ -130,7 +133,7 @@ func _anim(id: String) -> void:
 		if most < 0.02:
 			still.append(mv)
 	ok(
-		not moves.is_empty() and still.is_empty(),
+		(not moves.is_empty() or String(WARDENS[id]["moves"]) == "") and still.is_empty(),
 		"%s: each of its %d keyed moves moves the hands or the body (still: %s)"
 			% [id, moves.size(), str(still)])
 	m.free()

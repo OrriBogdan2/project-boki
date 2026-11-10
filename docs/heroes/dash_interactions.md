@@ -346,6 +346,31 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ostra | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | ostra | ult (X) -> jump | Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once. | **exception:** the move is refused while it runs (owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once) |
 | ostra | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| gil | ground dash -> LMB |  | buffered to the dash's end |
+| gil | ground dash -> RMB |  | buffered to the dash's end |
+| gil | ground dash -> E |  | buffered to the dash's end |
+| gil | ground dash -> ult (X) |  | buffered to the dash's end |
+| gil | ground dash -> Q glove |  | buffered to the dash's end |
+| gil | air dash -> LMB |  | buffered to the dash's end |
+| gil | air dash -> RMB |  | buffered to the dash's end |
+| gil | air dash -> E |  | buffered to the dash's end |
+| gil | air dash -> ult (X) |  | buffered to the dash's end |
+| gil | air dash -> Q glove |  | buffered to the dash's end |
+| gil | LMB -> dash |  | the kit's own handling (no row yet) |
+| gil | RMB -> dash |  | the kit's own handling (no row yet) |
+| gil | E -> dash |  | the kit's own handling (no row yet) |
+| gil | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| gil | Q glove -> dash |  | the kit's own handling (no row yet) |
+| gil | jump -> LMB |  | fires mid-jump (default) |
+| gil | jump -> RMB |  | fires mid-jump (default) |
+| gil | jump -> E |  | fires mid-jump (default) |
+| gil | jump -> ult (X) |  | fires mid-jump (default) |
+| gil | jump -> Q glove |  | fires mid-jump (default) |
+| gil | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| gil | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| gil | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| gil | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| gil | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
 ## Air dash against ground dash (owner item 183)
 
 Every Hunter's air dash is its ground dash or a special one the source has, never the generic long dash on a charged press. "same" = the same move, clip and charge; "special" = a sourced difference.

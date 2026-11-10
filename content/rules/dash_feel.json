@@ -3,6 +3,7 @@
 	"default": {"dist": 0.85, "time": 1.15},
 	"mage": {"dist": 1.0, "time": 1.15},
 	"thief": {"dist": 1.0, "time": 1.0},
+	"gil": {"dist": 1.0, "time": 1.0},
 	"ashwick": {"dist": 1.0, "time": 1.0},
 	"gunslinger": {"dist": 0.85, "time": 1.15, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]},
 	"juggernaut": {"dist": 0.85, "time": 1.15, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]},
