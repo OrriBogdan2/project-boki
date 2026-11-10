@@ -89491,5 +89491,19 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/fv3_lunowl_3.jpg",
     "ok": true
+  },
+  {
+    "id": "fv3_lunowl",
+    "name": "Lunowl female (V2 card, round 2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fv3_lunowl_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_lunowl",
+    "name": "Lunowl female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_lunowl_2.jpg",
+    "ok": true
   }
 ]
