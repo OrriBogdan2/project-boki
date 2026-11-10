@@ -75,8 +75,8 @@ func _base_mode() -> void:
 	ok(kept and HomeGather.shop_goods().size() == 2,
 			"off: Work and Upgrades tabs, axe and pickaxe, the Exchange all stay")
 	rules["base_mode"] = true
-	ok(home.hb._tabs() == ["Buildings", "Garden", "Island"],
-			"on: build mode shows only Base, Garden and Island: %s" % str(home.hb._tabs()))
+	ok(home.hb._tabs() == ["Buildings", "Base", "Garden", "Island"],
+			"on: build mode shows only Buildings, Base, Garden and Island: %s" % str(home.hb._tabs()))
 	var tools_on: Array = home.hmk._farm_goods().filter(func(g): return String(g[0]).begins_with("tool:"))
 	ok(HomeGather.shop_goods().is_empty() and tools_on.is_empty(), "on: no axe or pickaxe at the market")
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
