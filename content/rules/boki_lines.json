@@ -767,6 +767,33 @@
 				]
 			}
 		},
+		"rain_soon": {
+			"direct": true,
+			"feel": "question",
+			"word": "Rain",
+			"acts": [
+				"(sniffs the sky)",
+				"(fluffs up, uneasy)",
+				"(stares at the clouds)",
+				"(paces in a circle)"
+			],
+			"lines": {
+				"_": [
+					"Rain's coming, I can tell.",
+					"I can smell rain.",
+					"Clouds are on their way.",
+					"Get the washing in!",
+					"I feel it in my bones.",
+					"Storm on the way.",
+					"The air feels heavy.",
+					"Rain's nearly here.",
+					"Better find some cover.",
+					"Wet weather coming, trust me.",
+					"The wind just turned.",
+					"Here comes the rain."
+				]
+			}
+		},
 		"rain": {
 			"feel": "question",
 			"word": "Rain",
@@ -2006,6 +2033,33 @@
 					"Even better now!",
 					"That felt amazing!",
 					"Pick something cool!"
+				]
+			}
+		},
+		"bond_up": {
+			"direct": true,
+			"feel": "love",
+			"word": "Yours",
+			"acts": [
+				"(hops into your arms)",
+				"(won't leave your side)",
+				"(nuzzles your chin)",
+				"(wiggles all over)"
+			],
+			"lines": {
+				"_": [
+					"You're my favourite.",
+					"I'm yours, you know.",
+					"We're a real team now.",
+					"I trust you.",
+					"Stay close, okay?",
+					"I like us a lot.",
+					"Best keeper ever.",
+					"Never leaving your side.",
+					"You always come back.",
+					"My heart goes warm.",
+					"You get me.",
+					"I'd follow you anywhere."
 				]
 			}
 		},

@@ -12,13 +12,13 @@ const DEFAULTS := {
 	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
-	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
 	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
 	"boki_wisps": false,
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
-	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false,
+	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
 	"reticle_shape": "default", "reticle_size": 1.0, "reticle_col": "white", "reticle_alpha": 1.0,
 	"reticle_outline": true,
@@ -162,6 +162,7 @@ const ACTIONS := [
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
+	["move_readout", "Movement readout (tuning)"],
 ]
 
 var v: Dictionary = {}
@@ -497,9 +498,13 @@ func rebind(action: String, ev: InputEvent, slot := 0) -> void:
 	if s == "":
 		return
 	var sl := slots(action)
-	sl[slot] = s
-	if sl[1 - slot] == s: sl[1 - slot] = ""
+	_put(sl, slot, s)
 	_set_slots(action, sl)
+
+## Puts a key in one slot of a slots() pair, emptying the other slot if it held the same key.
+func _put(sl: Array, slot: int, code: String) -> void:
+	sl[slot] = code
+	if code != "" and sl[1 - slot] == code: sl[1 - slot] = ""
 
 ## Empties one binding slot.
 func clear_bind(action: String, slot: int) -> void:
@@ -528,15 +533,21 @@ func _shared_ok(a: String, b: String) -> bool:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
 	return false
 
-## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
-## `action` had there.
-func swap_bind(action: String, slot: int, ev: InputEvent, other: String, other_slot: int) -> void:
+## Gives `action` this key in `slot`; every action that had it (owners, from conflicts()) takes
+## what `action` had there instead, so none of them loses a key.
+func swap_bind(action: String, slot: int, ev: InputEvent, owners: Array) -> void:
 	var mine := slots(action)
-	var theirs := slots(other)
-	theirs[other_slot] = mine[slot]
-	mine[slot] = ev_code(ev)
-	_set_slots(other, theirs)
+	var old: String = mine[slot]
+	_put(mine, slot, ev_code(ev))
+	for o in owners:
+		var theirs := slots(o[0])
+		_put(theirs, o[1], old)
+		_set_slots(o[0], theirs)
 	_set_slots(action, mine)
+
+## True when an action has no key at all (the Controls page marks it red).
+func unbound(action: String) -> bool:
+	return slots(action) == ["", ""]
 
 func code_text(s: String) -> String:
 	var parts := s.split(":")

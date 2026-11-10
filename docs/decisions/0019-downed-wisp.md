@@ -42,7 +42,7 @@ every entry, including the outline rule (round body with a head, team rim, white
 ## Consequences
 - The local player's Wisp look is not sent to other players (they see `default`, tinted by their side colour, SideColor). Sending it
   needs a join-kit field and a Net.VERSION bump: see docs/DEBT.md.
-- `HunterAnim`'s downed crawl code is dead and can go.
+- (done) HunterAnim's downed crawl code is removed; the clip files stay.
 - Check: `--wisp-check`.
 
 ## Boki wisps (the other outline, DECISIONS 2026-11-09)

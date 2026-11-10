@@ -44,6 +44,13 @@ lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `po
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
 
+**Drawing other players' Hunters** (`scripts/match/net_smooth.gd`, decision 0039): each remote Hunter keeps
+its last six snapshots on its owner's clock (the `st` header) and is drawn 0.15 s behind the quickest
+arrival, on a Hermite curve between the two snapshots around that moment. Past the newest it runs on its
+last velocity for at most 0.25 s. A move faster than 40 m/s between two snapshots is a teleport and is drawn
+as one jump. `--remote-smooth-check` measures it over a relay with 80 ms ping, 20 ms jitter and 2% loss.
+Boki and monsters still chase their newest snapshot (`Ent.net_follow`).
+
 ## Net.VERSION
 
 `const VERSION` in `scripts/core/net.gd` (now **0.7.0**). Online play only matches players on the same
