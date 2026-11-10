@@ -201,6 +201,9 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
 	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
+	if id == "rimewright":          # the sheet's gait: a wide split every 0.17 s, so a two-leg cycle of 0.34 s
+		var run_len := clips.lib.get_animation(String(dd["loco"]["run"]["f"])).length
+		ok(absf(run_len - 0.34) < 0.01, "rimewright: the run cycle matches the sheet's 0.17 s split (%.3f s)" % run_len)
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:

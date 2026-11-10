@@ -168,7 +168,7 @@ def crouch_set():
 def clips():
     out = [FnClip("idle", 4.2, idle), FnClip("stance", 4.0, stance)]
     out += crouch_set()
-    for nm, sk, stroke, lift, T in (("walk", 0.0, 0.26, 0.012, 1.5), ("run", 1.0, 0.42, 0.03, 1.0)):
+    for nm, sk, stroke, lift, T in (("walk", 0.0, 0.26, 0.012, 1.5), ("run", 1.0, 0.42, 0.03, 0.34)):
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stroke * (0.8 if tag in "lr" else 1.0), lift)))
 
@@ -195,10 +195,10 @@ def clips():
     lo = dict(ai, G=(0.055, 0.30, 1.1), pel=(0, -0.06, -0.075))
     pu = dict(AIM_G, G=(0.055, 0.62, 1.15), BE=spr(0, 1, (0.1, -0.5, -0.86)), prt=(0.26, 0.0, 0), tor=(0.16, 0.0, 0), hed=(-0.3, 0, 0), pel=(0, 0.14, -0.1), FR=(0.1, -0.3, A_Z), FL=(-0.08, 0.24, A_Z), FRy=-0.45, FLy=0.05, skirt=0.5, brow=0.2, lid=0.08, smile=0.3)
     out.append(C("spear", 0.55, [(0.0, ai), (0.05, lo, "out"), (0.1, pu, "out"), (0.28, dict(pu, pel=(0, 0.11, -0.09), G=(0.055, 0.57, 1.14), skirt=0.2)), (0.55, END)]))
-    # E (tm_wall: 0.1-0.2 the tell, 0.27 out, 0.42 held, 0.7): a dip, the spear lifted; then its butt driven down into the ice while the left palm presses out at the wall
+    # E (tm_wall: 0.1 the tell dip, 0.2 out = the wall erupting (e.tell), 0.35 held, 0.7): a dip, the spear lifted; then its butt driven down into the ice while the left palm presses out at the wall
     wl0 = {"pel": (0, -0.02, -0.11), "prt": (0.12, 0.1, 0), "tor": (0.14, 0, 0), "hed": (0.02, 0, 0), "G": (0.24, 0.26, 1.18), "BE": spr(0, 86, (-0.3, -0.9, -0.2)), "LP": (-0.24, 0.0, 0.96), "LH": (0.3, 0, 0), "fing": 0.5, "brow": 0.2, "FR": (0.12, 0.1, A_Z), "FL": (-0.1, -0.06, A_Z), "skirt": -0.15}
     wl1 = dict(wl0, pel=(0, 0.09, -0.15), prt=(0.28, -0.05, 0), tor=(0.12, 0.05, 0), hed=(-0.28, 0, 0), G=(0.24, 0.4, 0.95), LP=(-0.2, 0.58, 1.02), LH=(-1.1, 0, 0), fing=0.0, FR=(0.12, 0.2, A_Z), FL=(-0.1, -0.22, A_Z), skirt=0.5, smile=0.3, lid=0.1)
-    out.append(C("wall", 0.7, [(0.0, END), (0.1, wl0), (0.2, dict(wl0, pel=(0, -0.03, -0.13))), (0.27, wl1, "out"), (0.42, dict(wl1, pel=(0, 0.08, -0.14))), (0.7, END)]))
+    out.append(C("wall", 0.7, [(0.0, END), (0.1, wl0), (0.2, wl1, "out"), (0.35, dict(wl1, pel=(0, 0.08, -0.14))), (0.7, END)]))
     # E again (tm_freeze: 0.07 knee up, 0.13 stamp, 0.42): the toe pick tapped into the ice, a small closing of the left hand
     fz0 = {"pel": (0, 0, 0.0), "tor": (-0.03, 0.05, 0), "FL": (-0.08, 0.1, A_Z + 0.13), "FLp": 0.5, "LP": (-0.2, 0.2, 1.16), "LH": (-0.2, 0, 0), "fing": 0.3, "smile": 0.3}
     fz1 = dict(fz0, pel=(0, 0.03, -0.09), tor=(0.12, 0, 0), hed=(0.2, 0, 0), FL=(-0.09, 0.2, A_Z - 0.01), FLp=0.0, LP=(-0.2, 0.16, 0.98), fing=1.0, skirt=0.3)

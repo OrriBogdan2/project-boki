@@ -127,7 +127,7 @@ In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 | RMB release | `tm_spear` | 0.05 load deeper, 0.1 both palms fully out (the spear leaves them), 0.28 held through the recoil, 0.55 | a two-palm push into a lunge after it (owner 19:50: no arm-back wind-up, no throwing release) |
 | RMB detonation | `tm_clench` | 0.05 / 0.1 / 0.34 | a sharp clench of the free hand |
 | LMB large dart | `tm_dart_heavy` | 0.04 wound away, both hands back to the hip; 0.08 both arms sling forward, the fan snapping open; 0.18 | the barrage's 3 large darts |
-| E | `tm_wall` | 0.1-0.2 the tell (a deep crouch, both palms drawn back to the hips), 0.27 both palms shoved out low and wide as the ice erupts, 0.42 held into the slide, 0.7 | footage: "both hands pushed forward" |
+| E | `tm_wall` | 0.1 the tell (a deep crouch, both palms drawn back to the hips), 0.2 both palms shoved out low and wide as the ice erupts (= `e.tell`), 0.35 held into the slide, 0.7 | footage: "both hands pushed forward" |
 | E again | `tm_freeze` | 0.07 knee up, 0.13 stamp, 0.42 | a stamp of the blade, a fist pulled down |
 | Shift start | `tm_skate_go` | 0.08 push, 0.16 into the stride | a crouch and a hard push off the back blade |
 | Shift held | `tm_skate` (looped by the kit every 0.56s) | 0 / 0.28 / 0.56 | low and leaning hard, knees deep, long pushes one leg then the other, the arms and fan swinging against them, the body rocking |
@@ -142,6 +142,39 @@ In `scripts/match/kmoves_care.gd` ("tm_"), played with `play()` / `play_soft()`.
 The skate leaves a ribbon of ice chips, ice plates under her blades (CareLook "slab") that fade behind her, and spray off the outside edge on a carve; not the shared after-image pill. No ring or burst on the push-off.
 
 Strips: `--arena=thief --arena-demo=care_rimewright_<lmb|heavy|shatter|payoff|skatefire|rmb|e|dash|air|walk|pose|ultaim|ultkey|ult|ultskate|skateult> --arena-shot=<dir>/x.png [--care-close]`.
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured through the kit's move clock (`kmove_t`, `WardenClips` seeking claire.glb; blend in 0.1 s, out to locomotion
+0.16 s) and `--rimewright-combo-check`. "Hit" is the release/contact key, "end" when the pose settles. Our times are the
+KMovesCare keys, which `--clip-check` pins to the glb clips (the headless pose-speed sampling was too noisy to add to them).
+Source times from briefs/hero-ref/tamsin.md (one frame = 0.2 s; the ult 0.1 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `tm_dart_r` `tm_dart_l` | one dart a frame, no pause (~0.2 s) | wind 0.03 / flick 0.07 / 0.16; a dart every 0.18 s (game data) | same | matches (under one frame; the dart leaves at the press, the hand flicks inside the 0.1 s blend) |
+| `tm_dart_heavy` | no visible pattern at 5 fps; 3 large darts at the end [data] | 0.04 wind / 0.08 fling / 0.18, after 4 plain | same | matches (the data's barrage; the fling is ours) |
+| `tm_spear_aim` `tm_spear` | lands at the cursor, bursts 1.8-2.0 s after [f-by-f] | gather 0.12; load 0.05 / palms out 0.1 (spear leaves, `PUSH_T`) / 0.55; bursts 1.8 s | same | matches |
+| `tm_wall` | ~0.2 s sparkle tell, then it erupts [0301-] | tell dip 0.1 / shove 0.27 / held 0.42 / 0.7; wall erupts at 0.2 (the shove 0.07 s late) | dip 0.1 / shove 0.2 / held 0.35 / 0.7: the shove lands as it erupts | fixed; asserted |
+| wall slide and push | slides 2.5 h/s, carries foes; ~3 s [ambiguous] | slide 4.5 m/s, 3.6 s | same | matches |
+| `tm_freeze` (E again) | no re-press in the footage | 0.07 / 0.13 / 0.42 | same | no source |
+| `tm_rime` | zone snaps f25-f27 (0.2 s at 10 fps) | 0.06 / 0.12 rink snaps / 0.2 into the seal | same | matches |
+| `tm_rime_hold` | sealed f27-f55 (~3.2-3.4 s) | hold to the 3.5 s crack | same | matches |
+| `tm_rime_crash` | burst f57-f59, recovery f61 (0.4 s) | shell and pillar at 0, crouch 0.04 / arms wide 0.1 / settle 0.2 / 0.4 | same | matches (the body opens mid-burst; recovery 0.4 s) |
+| `tm_rime_break` | no early break in the footage | 0.08 / 0.3 | same | no source |
+| `tm_skate_go` | full speed within 0.2 s | push 0.08 / stride 0.16 | same | matches |
+| `tm_skate` | long pushes, wide split | stride push every 0.28 s (0.56 loop) | same | matches |
+| `tm_skate_stop` | stops 0.1-0.2 s after letting go | speed x0.3 at the release; braced 0.07 / 0.22 / 0.5 | same | matches |
+| run gait (`run_*`) | wide split every ~0.17 s (cycle 0.34 s), cadence ~1.4x, stride ~0.85, 4.8 m/s | cycle 1.0 s at 4.6 m/s: a split every 0.5 s (3x slower) | cycle 0.34 s: a split every 0.17 s | fixed; asserted (`--clip-check`) |
+| `walk_*` | no walk in the footage | 1.5 s cycle | same | no source |
+| `tm_clench` `tm_shatter` | the payoff has no readable pose at 5 fps | 0.05 / 0.1 / 0.34; 0.06 / 0.13 / 0.24 / 0.45 | same | no source |
+
+Clip re-keys (tools/art1/claire_clips.py, `claire_build.sh clips`, installed to art/wardens/claire/claire.glb):
+- `wall`: the 0.2 held-crouch key is gone and the palm shove ("out") moves 0.27 -> 0.2, the held key 0.42 -> 0.35; the clip
+  still lasts 0.7 s. The KMovesCare `tm_wall` keys match.
+- `run_f/b/l/r`: period 1.0 -> 0.34 s.
+
+Suggestions (ours, not built): the dart leaves at the press and the hand flicks 0.07 s later, so a dart can appear before
+the throw; spawning it on the flick key would show the throw. The footage cannot resolve that.
 
 ## Look and sound
 - Pooled looks (`care_look.gd`, shaders `care_ice`, `care_disc`, `care_glow`, all mixed rather than additive so they keep their colour on bright ground): the ice dart (an ice-blue four-sided crystal with dark teal edges, tip first, with a frost streak), the 0.3 m skating beam with its cyan core, the star-headed spear (held in her hand while aiming, then thrown) with its long pale-cyan trail, the slow-zone flake disc with its spinning crystal, the detonation dome, the Shatter spikes, the ice shell, the frost glow, the skate's ice chips, and the Rink Wall's ice pillars (the shared wall node is hidden). Rimelock (`UltLook`, `ult_look.gd`): the rink (care_disc pattern 4: a ragged ice edge and a crack network whose glow is the countdown, a fringe of crystals), her frost bud, the light pillar and the ice block on each stunned foe; the shard burst reuses the Shatter spikes.
