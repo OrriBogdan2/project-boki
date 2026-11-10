@@ -31,3 +31,10 @@ heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.g
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
 No save change. Check: --heart-check (both seats, every edge of the state table, rush, Net).
+
+Task 3 (open extraction gone): skiff docks, rift hatches and Rift Keys are deleted from the code, the maps and
+both generators; `Exits` is uplink outposts only and `MATCH.portal_open` is gone. Net.VERSION 0.25.3 (the exit
+list and its "xc" index are outposts only; no "key" pickup). Save: the v5 migration that refunds market Rift Keys
+as gems stays; a live h.rift_keys never reached the save. Outposts stay as they are (the tutorial's uplink step)
+until task 4 reworks them; alternative considered: switch off non-tutorial outposts now. --extract-check keeps
+only its uplink sections.
