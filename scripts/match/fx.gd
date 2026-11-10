@@ -234,6 +234,10 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	p.restart()
 	p.emitting = true
 
+## A few slow soft dots that drift up and settle: a quiet moment (a Boki growing). Not a burst: `radial` stays.
+func sparkles(at: Vector3, col: Color, amount := 6) -> void:
+	_emit(at, col, amount, 0.9, 1.1, -0.3, 0.8, Vector3.UP, 180.0)
+
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8) -> void:
 	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
