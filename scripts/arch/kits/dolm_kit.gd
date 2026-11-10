@@ -23,6 +23,7 @@ var dive := false              # a Quakefall in the air (the hop, a leap, an air
 var dive_k := 0.0              # ...with this much charge
 var dive_fall := false         # ...plunging straight down (pressed in the air), not riding an arc
 var dive_glide := false        # ...pressed in a glide: the glider folded and stays shut until she lands
+var dive_t := 0.0              # ...how long the plunge has run (it hangs, then speeds up: tenzo.rmb in tuning.json)
 var sight_t := 0.0
 var sneak_t := 0.0             # how long she has been sneaking (the cone widens)
 var shield_stacks := 0         # Molten Guard stacks
@@ -212,7 +213,7 @@ func _tick(dt: float) -> void:
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
 	if dive:
-		_tick_dive()
+		_tick_dive(dt)
 	hop.tick(dt)
 	slam.tick(dt)
 	spine.tick(dt)
@@ -236,7 +237,7 @@ func _tick_stones(dt: float) -> void:
 			best = f
 	h.model.set_meta(WardenGlb.ORBIT_LOOK, best.pos + Vector3.UP if best else Vector3.INF)
 
-func _tick_dive() -> void:
+func _tick_dive(dt: float) -> void:
 	if dive_glide:
 		h.glide_cd = maxf(h.glide_cd, 0.1)
 	if h.downed:
@@ -247,7 +248,13 @@ func _tick_dive() -> void:
 		dive_glide = false
 		slam.land(dive_k)
 	elif dive_fall:
-		h.vel.y = minf(h.vel.y, -dive_speed())
+		# a readable plunge: a beat hanging at the top, then it gathers speed up to its cap
+		dive_t += dt
+		var fd := slam.feel()
+		if dive_t < float(fd["dive_hang"]):
+			h.vel.y = 0.0
+		else:
+			h.vel.y = maxf(-dive_speed(), minf(h.vel.y, 0.0) - float(fd["dive_acc"]) * dt)
 
 ## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
 func dive_speed() -> float:
