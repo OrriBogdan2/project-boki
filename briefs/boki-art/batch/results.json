@@ -78256,5 +78256,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_howlop_b2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_howlop_b2",
+    "name": "Howlop (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_howlop_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_howlop_b2",
+    "name": "Howlop (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_howlop_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_moatpole_b2",
+    "name": "Moatpole (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_moatpole_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_moatpole_b2",
+    "name": "Moatpole (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_moatpole_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_moatpole_b2",
+    "name": "Moatpole (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_moatpole_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_moatpole_b2",
+    "name": "Moatpole (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_moatpole_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_moatpole_b2",
+    "name": "Moatpole (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_moatpole_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rampartoad_b2",
+    "name": "Rampartoad (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_rampartoad_b2_2.jpg",
+    "ok": true
   }
 ]
