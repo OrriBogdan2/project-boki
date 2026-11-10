@@ -26,3 +26,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+
+## The aim lead
+`WardenAimLead` (scripts/heroes/warden_aim_lead.gd) runs in `WardenGlb.Sync` after the clips. The model already faces
+the cursor, so the layer turns the parts back: the leg line (bone `root`) lags the cursor, the chest (`hips`) leads it
+by up to 30 degrees and the head (`head`) by up to 60, each a damped follower (rates are consts in the file). It is
+off under a full-body clip (`act_w`), a procedural pose (mantle, ledge: `proc_w`), dead and downed; a move keyed
+`"upper"` (even standing: Vex's LMB) keeps it on. `--aim-lead-check` measures the splits and checks clamp, jitter at
+30 fps and the off cases; `--shots-dir=<dir>` draws the sweep strips (GPU).
