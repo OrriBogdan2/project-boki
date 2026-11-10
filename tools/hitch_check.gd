@@ -187,6 +187,7 @@ func _process(_delta: float) -> void:
 	var t2 := Time.get_ticks_usec()
 	Match.prof_on = true
 	Match.vprof.clear()
+	m.acc -= DT if k == 1 else 0.0      # the steps above were this frame's: _process only draws (it stepped again)
 	m._process(DT if k == 1 else 0.0)
 	Match.prof_on = false
 	var vsecs: Dictionary = Match.vprof.duplicate()
