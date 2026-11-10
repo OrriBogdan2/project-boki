@@ -14,6 +14,9 @@ The current model is **owner-authoritative per entity**, not server-authoritativ
   the rest to the host.
 - Owners send **snapshots** of what they own. Anyone who hits something they don't own sends the hit to
   its owner, which applies it. One-off happenings (effects, catches, chests, hexes) go as events.
+- So shots are the shooter's call: the shooter's game flies the shot against its own view of the target,
+  and a hit there is a hit. Other games only draw a copy, spawned when the event arrives (about 0.2 s late
+  at 100/150 ms pings). `--lagcomp-check` proves no hit is lost over a slow line (lag relay, two games).
 
 A move to a server-authoritative model (clients send inputs only) is planned in
 `docs/ARCHITECTURE_PLAN.md` on the `design` branch. Nothing of it is built yet.
