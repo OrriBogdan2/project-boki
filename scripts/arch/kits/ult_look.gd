@@ -5,7 +5,7 @@ extends CareLook
 ##   Claire, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
 ##   crystals on its edge), the light pillar of the crash and the ice block on each stunned foe. Her
 ##   body is IceBody's while sealed.
-## keep(key, "tether", from, {b, k}), keep(key, "rink", at, {r, crack, a}),
+## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted), keep(key, "rink", at, {r, crack, a}),
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
 
 const FRINGE := 18            # crystals round the rink's edge
@@ -118,7 +118,7 @@ func _place_tether(n: Node3D, from: Vector3, p: Dictionary) -> void:
 	if tw:
 		tw.rotation.z = m.time * 7.0
 	var pulse := 0.75 + 0.25 * sin(m.time * 9.0)
-	_tint(n, Color.WHITE, pulse * float(p.get("a", 1.0)))
+	_tint(n, p.get("col", Color.WHITE), pulse * float(p.get("a", 1.0)))
 
 
 func _place_rink(n: Node3D, p: Dictionary) -> void:
