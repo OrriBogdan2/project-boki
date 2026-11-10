@@ -154,8 +154,8 @@ const CHECKS := {
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
 	"--clarity-check": ["res://tools/clarity_check.gd", "clarity_check", null],      # colour rule, downed, Boki
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # side palettes, settings
-	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],      # monster death flash = killer side colour
-	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],      # --shots-dir=<dir>
+	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
+	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=

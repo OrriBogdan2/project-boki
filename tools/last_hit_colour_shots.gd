@@ -40,7 +40,8 @@ func _die(kind: String, side: String, by: Hunter) -> void:
 	mb.hp = 0.0
 	mb._on_zero(by, {})
 	await _go(0.05)
-	_take("hit_%s_%s_a" % [kind, side], "A %s dies to %s: the flash is the killer side's colour" % [kind, "your squad" if side == "yours" else "a rival squad"])
+	var who := "your squad" if side == "yours" else "a rival squad"
+	_take("hit_%s_%s_a" % [kind, side], "A %s dies to %s: the flash is the killer side's colour" % [kind, who])
 	await _go(0.1)
 	_take("hit_%s_%s_b" % [kind, side], "The same death a beat later: dissolve and spray")
 	await _go(0.6)

@@ -37,19 +37,21 @@ func run(main: Node) -> void:
 			var by_you := _kill(m, me.pos, me, boss)
 			var by_mate := _kill(m, me.pos, mate, boss)
 			var by_foe := _kill(m, me.pos, foe, boss)
-			ok(tag + "your kill: one flash, squad colour", by_you.size() == 1 and _same(by_you[0], p["ally"]))
-			ok(tag + "your mate's kill: one flash, squad colour", by_mate.size() == 1 and _same(by_mate[0], p["ally"]))
-			ok(tag + "a rival's kill: one flash, rival colour", by_foe.size() == 1 and _same(by_foe[0], p["foe"]))
-			ok(tag + "the two sides differ", by_you.size() == 1 and by_foe.size() == 1 and not _same(by_you[0], by_foe[0]))
+			ok(tag + "your kill: one squad-colour flash", by_you.size() == 1 and _same(by_you[0], p["ally"]))
+			ok(tag + "your mate's kill: one squad-colour flash", by_mate.size() == 1 and _same(by_mate[0], p["ally"]))
+			ok(tag + "a rival's kill: one rival-colour flash", by_foe.size() == 1 and _same(by_foe[0], p["foe"]))
+			var apart := by_you.size() == 1 and by_foe.size() == 1 and not _same(by_you[0], by_foe[0])
+			ok(tag + "the two sides differ", apart)
 	var own := _kill(m, me.pos, null, false)
-	ok("no Hunter behind it: one flash in the monster's own colour", own.size() == 1 and not _same(own[0], SideColor.ally()) and not _same(own[0], SideColor.foe()))
+	var plain := own.size() == 1 and not _same(own[0], SideColor.ally()) and not _same(own[0], SideColor.foe())
+	ok("no Hunter behind it: one flash in the monster's own colour", plain)
 	print("LASTHIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _same(a: Color, b: Color) -> bool:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length() < 0.02
 
-## Kills a fresh monster beside `at` for `by` (through the path that pays the kill) and returns the colours of the flashes it made.
+## Kills a fresh monster beside `at` for `by` (the path that pays the kill); returns the colours of the flashes.
 func _kill(m: Match, at: Vector3, by: Hunter, boss: bool) -> Array:
 	var mb := m.spawn_mob("skitter", at + Vector3(2, 0, 0))
 	m.fx.flashes.clear()
