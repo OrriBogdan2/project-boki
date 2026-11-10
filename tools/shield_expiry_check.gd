@@ -7,10 +7,12 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const PULSE_SEEN := 0.03       # the shell this far above the share left counts as pulsing
+const PULSE_LATE := 0.08       # s: how late into the window the pulse may first show
 const FOLLOW_TOL := 0.1       # the shell value may be this far from the share of the shield left
 
 var bad := 0
 var _dir := ""
+var _base := {}      # the body's materials and their own ink, before any shield
 
 func ok(cond: bool, what: String) -> void:
 	print("SHIELDEXPIRY %s %s" % ["ok  " if cond else "FAIL", what])
@@ -46,6 +48,8 @@ func run(main: Node) -> void:
 	P.inp["aim"] = rival.pos + Vector3(0, 0.9, 0)
 	P.face = PI
 	await _settle(main, m, P, 0.3)
+	for mt in P.mats:
+		_base[mt] = (mt as Material).next_pass
 	await _punch_shield(main, m, P, rival)
 	await _effects_shield(main, m, P)
 	print("SHIELDEXPIRY done, %d failures" % bad)
@@ -56,17 +60,19 @@ func _punch_shield(main: Node, m: Match, P: Hunter, rival: Hunter) -> void:
 	(P.ak as DolmKit).guard_stack()
 	await _settle(main, m, P, 0.2)
 	var full := P.shield
-	ok(ShieldLook.shown(P) and absf(ShieldLook.shell_of(P) - 1.0) <= FOLLOW_TOL, "punch shield: a fresh shell reads full")
+	ok(ShieldLook.shown(P) and absf(ShieldLook.shell_of(P) - 1.0) <= FOLLOW_TOL, "punch shield: a fresh shell is full")
 	await _shot(main, m, P, "1_full")
 	P.hurt(full * 0.5, rival, {})
 	await _settle(main, m, P, 0.1)
 	var want := P.shield / full
-	ok(absf(ShieldLook.shell_of(P) - want) <= FOLLOW_TOL, "punch shield: half left, the shell is %.2f (want %.2f)" % [ShieldLook.shell_of(P), want])
+	var shell := ShieldLook.shell_of(P)
+	ok(absf(shell - want) <= FOLLOW_TOL, "punch shield: half left, the shell is %.2f (want %.2f)" % [shell, want])
 	await _shot(main, m, P, "2_half")
 	P.hurt(P.shield * 0.6, rival, {})
 	await _settle(main, m, P, 0.1)
 	want = P.shield / full
-	ok(absf(ShieldLook.shell_of(P) - want) <= FOLLOW_TOL, "punch shield: %.0f%% left, the shell is %.2f" % [want * 100.0, ShieldLook.shell_of(P)])
+	shell = ShieldLook.shell_of(P)
+	ok(absf(shell - want) <= FOLLOW_TOL, "punch shield: %.0f%% left, the shell is %.2f" % [want * 100.0, shell])
 	await _shot(main, m, P, "3_thin")
 	await _expire(main, m, P, "punch shield")
 	_gone(P, "punch shield")
@@ -90,16 +96,16 @@ func _expire(main: Node, m: Match, P: Hunter, what: String) -> void:
 			shot = true
 			await _shot(main, m, P, "4_pulse")
 	ok(pulses == 1, "%s: the shell pulsed %d time(s) (want 1)" % [what, pulses])
-	ok(first_left <= ShieldLook.PULSE_S + DT * 2.0 and first_left >= ShieldLook.PULSE_S - 0.08, "%s: the pulse began %.2f s before the end (want %.1f)" % [what, first_left, ShieldLook.PULSE_S])
+	var early := first_left - ShieldLook.PULSE_S
+	ok(early <= DT * 2.0 and early >= -PULSE_LATE, "%s: pulse began %.2f s before the end" % [what, first_left])
 	await _settle(main, m, P, 0.2)
 
 func _gone(P: Hunter, what: String) -> void:
-	var left := 0
-	for mt in P.mats:
-		var np := (mt as Material).next_pass as ShaderMaterial if mt is Material else null
-		if np != null and np.get_shader_parameter("shell") != null:
-			left += 1
-	ok(not ShieldLook.shown(P) and left == 0, "%s: gone, no shell material left on the body (%d)" % [what, left])
+	var changed := 0
+	for mt in _base:
+		if (mt as Material).next_pass != _base[mt]:
+			changed += 1
+	ok(not ShieldLook.shown(P) and changed == 0, "%s: gone, the body's own ink is back (%d changed)" % [what, changed])
 
 ## Another source (the shared Effects shield) reads the same.
 func _effects_shield(main: Node, m: Match, P: Hunter) -> void:
