@@ -109252,5 +109252,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/drop_land_3.jpg",
     "ok": true
+  },
+  {
+    "id": "drop_down",
+    "name": "Site drop splash, new angle (down)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/drop_down_2.jpg",
+    "ok": true
   }
 ]
