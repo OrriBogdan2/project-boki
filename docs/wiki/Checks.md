@@ -28,8 +28,12 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--ability-check` | Gloves, weapon utilities, Boki abilities and dashes do what they say (drags, walls, reflects, parries, knock-ups, tethers, roots, swaps, pierces...), every ability runs without errors, and rank 3 is stronger and faster than rank 1 |
 | `--archetype-check` | Every class kit in a flat arena: each dash, passive and resource, RMB variants, E, R (locked until level 6), the bonded R, controls, weapon locks, Boki infusion, feel |
 | `--kit-combo-check` | The cross-ability interactions (E + RMB chains, resets, refunds); also runs inside `--archetype-check` |
-| `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
+| `--arena-check` | The Training Grounds boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the Practice Wing works |
+| `--hunter-parity-check` | Every Hunter in the Training Grounds (started as them, or swapped in place from another, with no save, a fresh one, and after the title screen) is the one a real match builds: model file, kit script, node tree, bone scales, and every mesh surface's shader, uniforms, visibility range and shadow setting |
+| `--training-area-shots [--shots-dir=<dir>]` (GPU, not in the suite) | Screenshots of every Hunter in the Training Grounds, front and back, as the title screen opens it (default `user://training_area_shots`) |
+| `--dummy-move-shots [--shots-dir=<dir>]` (GPU, not in the suite) | Frames of the Training Grounds station dummy strafing, then dodging, for a clip (default `user://dummy_move_shots`) |
 | `--hunter-unlock-check` (alias `--class-unlock-check`) | Hunter unlocks and mastery: Vex as the one starter and the second Relic (Kael, Cinder or Meeko) after the first expedition (offered by Hob: `--hob-check`), no Relic pick before the egg, challenge-only Hunters never offered, each Hunter's challenge (tier, target, measurable stat) making it ready and hold to unlock opening it (a partial hold cancels, the reveal plays), mastery goals counted per Hunter with cosmetic-only rewards (no stat or ability anywhere in the progression data), glider skins changing no handling, the feats HunterFeats records, save migration keeping every Hunter a save had unlocked or played, the viewer showing every ability as a clip of it working (keys from the bindings, one short line each, no story or gender text), the glider pick, locked Hunters playable in the Arena (its Training dummy) and practice picker |
+| `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, foe marks/stacks/Daze reach the badges |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
 | `--weapon-clip-check` | No held weapon dips into the ground in any pose, on any class |
 | `--pickup-check` | A picked-up weapon arrives with a full magazine and no reload running, from any source |
@@ -41,7 +45,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--abyss-check` | Islands are solid all the way down and the abyss is short: you catch ledges falling or knocked in |
 | `--obstacle-check` | Walking past and round trees and rocks slides cleanly with no sticking or pull |
 | `--airheal-check` | Heals and abilities work in the air; drinking in the drop folds the glider and is a risk |
-| `--train-check` | Riding the sky train (moving with the car, its edges hold you) and being hit by its front |
+| `--train-check` | Riding the sky train (moving with the car, walking off its side) and being hit by its front |
+| `--train-ride-check` | Leaving a moving car (jump, dash off the back, walk off the side, glider) keeps its speed with normal air drag; a glide landing on one has no jolt |
 | `--perch-check` | Each perch can be reached from its updraft chain |
 | `--mapcheck` | Generated maps: every island reachable from every other (200 small, 40 big) |
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
@@ -62,11 +67,14 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
+| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
+| `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |
 | `--economy-check` | Full backpack swaps, smart loot, extracting fills the armory, feeders feed (also while away), starving to a grave, the Soul Shrine |
 | `--work-check` | Boki at work: knacks, mutation bonuses, old saves, jobs from the farm's state, priorities and pins, real output |
 | `--farm-start-check` | A new save's farm start: placing the essentials, chopping and mining, materials paying for buildings, assigned Boki working, old saves |
+| `--demo-check` | The recording presets (docs/DEMO_PRESETS.md): each `--demo=` name boots and runs a few seconds, the farm and care presets at home with six grown Boki, the match presets in a full bot lobby with the `--hunter` pick, the demo save never written and the player's save file untouched |
 | `--hob-check` | Hob in person (items 87, 89): he waits by the market stall with his name over him, the first-arrival camera swing while he waves and calls you over, the talk box (portrait, name, one line at a time, you stand still, he points at the stall and the camera looks), the step explanations, the second Mask only after the house is down, the offer of exactly Kael, Pip and Cinder (portrait, name and title, role, one clip in focus), taking one opens only it and plays the short Mask moment with no reveal after, Not now, old saves keep theirs; `--shots-dir=` (*window*) |
 | `--mask-moment-check` | The put-on Mask moment (item 83, `MaskBeat`): every Hunter has a whisper and a sting key, the sounds exist, 4-6 s with 0.6-0.8 s of black; build-up camera, the Mask rising with the ghost face, black and silence on contact with the Hunter swapped in behind it, a memory frame and the whisper, the snap back with a ripple, the name and title, the scene camera back; skippable once seen; `--shots-dir=` (*window*) |
 | `--mask-lag-check` | Frame times with Mask cards on screen and on accept (item 88): the Masks screen, switching, the reveal, Hob's offer, a focus move, taking one; headless no frame over 33 ms outside a frame that builds a Mask model (one a frame), and at most 2 (Masks screen) or 1 3D previews rendering; under xvfb it reports |

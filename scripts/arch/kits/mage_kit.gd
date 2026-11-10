@@ -18,6 +18,7 @@ const TEAL := Color("1fc6dc")        # the lightning's body: a saturated teal th
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
+const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 
 var sparks := {}               # foe id -> {e, n, t}
@@ -93,6 +94,18 @@ func ult_running() -> bool:
 func ult_recast() -> bool:
 	return ult.recast()
 
+func recast_window() -> Dictionary: return ult.window()
+
+## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var rd := res_def()
+	for key in sparks:
+		var sp: Dictionary = sparks[key]
+		if is_instance_valid(sp["e"]):
+			var n := int(sp["n"])
+			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
+
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -158,6 +171,13 @@ func add_spark(f: Ent, n := 1) -> void:
 		net_bolt(top, f.position, TEAL)
 	elif int(s["n"]) > was:
 		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+
+func combo_read(f: Ent) -> Dictionary:
+	var s = sparks.get(f.get_instance_id())
+	if s == null:
+		return {}
+	return {"icon": "shock", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
+			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -468,6 +488,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	fx().arc(a + Vector3(0, 0.3, 0), b + Vector3(0, 0.2, 0), PINK, PINK.lightened(0.5), 0.5, time + 0.15)
 	net_bolt(a, b, col_of(dd))
 	m.sfx("vv_surge_go", h.pos, -1.0)
+	m.fx.word(h.pos + Vector3(0, 2.2, 0), "INVULNERABLE", PINK, false)   # the source labels the streak
 	if h.model: h.model.visible = false
 	m.later(time, _arrive)
 
@@ -505,6 +526,7 @@ func _blowout(f: Ent) -> void:
 	var dmg := (float(rd["blow_dmg"]) + float(rd["blow_pct"]) * f.max_hp) * power("dash")
 	clear_sparks(f)
 	blowouts += 1
+	ComboMark.payoff(m, h, f)
 	f.hurt(dmg, h, {"src": "abil", "ab": "dodge", "tags": ["dodge", "blowout"], "payoff": true, "crit": true})
 	grant_reset()                             # the dash comes straight back: the only reset
 	h.dash_buf = 0.0
@@ -615,10 +637,6 @@ func fire_rmb(c: Dictionary) -> void:
 	else:
 		_coil(k)
 
-## Rank 3 of the Storm Rod: its throw hits harder (rmb.rank3_mult).
-func rod_rank_k() -> float:
-	return float(rmb_def()["rank3_mult"]) if rank("sec") >= 3 else 1.0
-
 ## Rank 3 of Wirerun: the run's own hit hits harder; the Blowout is the passive's and does not grow (dash.rank3_mult).
 func run_rank_k() -> float:
 	return float(dash_def()["rank3_mult"]) if rank("dash") >= 3 else 1.0
@@ -630,7 +648,6 @@ func _coil(k: float) -> void:
 	var rng := float(cd_["range"])                       # a fixed lane: the charge never changes the range
 	var push := lerpf(float(cd_["push"][0]), float(cd_["push"][1]), k)
 	last_push = push
-	dmg *= rod_rank_k()
 	var delivery := {"type": "projectile", "speed": float(cd_["speed"]), "range": rng, "size": 0.22}
 	var effects := [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]
 	var stg := stage("rmb", {"delivery": delivery, "effects": effects})
@@ -671,7 +688,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		if o != f:
 			other = o
 			break
-	if other != null or terrain_behind(f, dir, reach):
+	if other != null or KnockWall.behind(m, f, dir, reach):
 		slams += 1
 		var stn := float(cd_["stun"])
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}

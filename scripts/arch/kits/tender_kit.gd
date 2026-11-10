@@ -215,7 +215,8 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
+		# the source's triggers: a stun, or damage (on_take); a root or hex holds
+		if h.stun_t > 0.0:
 			drop_all(true)
 			return
 		var down := bool(h.inp.get(SETDOWN, false))
@@ -480,12 +481,20 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
+## RecastCue: the light is the marker; left alone it flares by itself (no "EXPIRED").
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = hearth_center()
+		w["auto"] = true
+	return w
+
 ## E again: the light is thrown to the cursor (clamped to its reach) almost at once.
 func e_recast() -> bool:
 	if hearth.is_empty() or hearth.get("tossed", false):
 		return true
 	var ed := e_def()
-	var to := AimMode.point(h, float(ed["reach"]), AimMode.CURSOR, 0.0)
+	var to := AimMode.place(h, float(ed["reach"]))
 	# carrying someone: a toss aimed at yourself lands on them
 	var cs := carrying()
 	if not cs.is_empty() and Vector2(to.x - h.pos.x, to.z - h.pos.z).length() < 2.0:
@@ -786,8 +795,7 @@ func _call_end(done: bool) -> void:
 		ult_look.drop("tether")
 	if not done or who == null:
 		stats["broken"] += 1
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -8.0, 1.5)
+		_call_snap(who)
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
@@ -804,6 +812,16 @@ func _call_end(done: bool) -> void:
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)
 	play("mm_call_end")
+
+
+## The tether snaps where everyone can see it: coral sparks at her hand and at the far end, and the word.
+func _call_snap(who: Hunter) -> void:
+	var snap := Color("ff8a6a")
+	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	if who != null:
+		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", snap, false)
+	m.sfx("knock", h.pos, -8.0, 1.5)
 
 
 ## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online
