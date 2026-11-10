@@ -48,7 +48,8 @@ func _match_course() -> void:
 		if tu.step >= 0 and tu.step < Tutorial.steps().size() and not seen.has(tu.step):
 			seen[tu.step] = true
 			_idle_step(m, tu)
-	ok(seen.size() >= Tutorial.steps().size() - 1, "the idle window ran on %d of %d steps" % [seen.size(), Tutorial.steps().size()])
+	var n := Tutorial.steps().size()
+	ok(seen.size() >= n - 1, "the idle window ran on %d of %d steps" % [seen.size(), n])
 	m.queue_free()
 
 ## Does nothing for IDLE_S s (or until the step ends by itself) and judges what the player saw.
