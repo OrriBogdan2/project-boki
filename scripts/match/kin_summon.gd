@@ -14,6 +14,12 @@ extends RefCounted
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CHIRP_EVERY := Vector2(14.0, 26.0)   # s: how often a riding wisp chirps (min, max): a critter by ear
+# s before the window ends: the soft two-note warning (own: in your ear; others: positional)
+const WARN_S := 2.0
+const WARN_GAP_S := 0.18   # s between the two notes
+const WARN_UP := 1.26      # x pitch of the second note (a rising third: "going soon")
+# dB of a note: your own Boki's (not positional), then anyone else's (positional)
+const WARN_DB := Vector2(-8.0, -20.0)
 const READY_FLASH_S := 1.5  # s: the Boki box says READY after the cooldown ends (once), then just shows the key
 
 var k: Kin
@@ -25,6 +31,7 @@ var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
 var chirp_in := 8.0   # s until the riding wisp chirps again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var warned := false   # the end warning has played for this window (drawing only)
 var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
 var beat := -1        # the last guardian ring pulse drawn (drawing only)
 var hit_k := 1.0      # x its damage while out: this species' place in the summon band (Ent.hurt)
@@ -71,6 +78,19 @@ func cue(what: String, chirp_db: float) -> void:
 	k.m.sfx("summon_%s_%s" % [what, k.ks.size if k.ks else "small"], k.pos, -4.0)
 	k.m.sfx(chirp_name(k.ks), k.pos, chirp_db, Unique.voice(k.rec))
 
+## The end warning: two soft notes of the species chirp (its own voice), rising. The owner hears them in the
+## ear; everyone else gets a quieter one from where the Boki stands. The second note is dropped if it was
+## knocked down or sent back in the gap (that has its own cue).
+func warn() -> void:
+	var own: bool = k.owner_h != null and k.owner_h == k.m.player
+	var at = null if own else k.pos
+	var db := WARN_DB.x if own else WARN_DB.y
+	var voice := Unique.voice(k.rec)
+	k.m.sfx(chirp_name(k.ks), at, db, voice)
+	k.get_tree().create_timer(WARN_GAP_S).timeout.connect(func() -> void:
+		if is_instance_valid(k) and left > 0.0:
+			k.m.sfx(chirp_name(k.ks), at, db, voice * WARN_UP))
+
 ## The one-word tag for a window: Burst (short and strong) or Steady (long and supportive).
 static func tag(window: float) -> String:
 	return "Steady" if window >= float(rules()["steady_from"]) else "Burst"
@@ -116,6 +136,7 @@ func burst(window := dur, guard := false) -> void:
 	k.fly = {}
 	k.vel = Vector3.ZERO
 	left = window
+	warned = window <= WARN_S
 	guardian = guard
 
 ## The window is over (timer or sent back early): the shrink starts.
@@ -167,6 +188,7 @@ func tick(dt: float) -> void:
 ## playing through the shrink carries on; one that never shrank (knocked down, or a late snapshot) folds from here.
 func popped(to_wisp: bool) -> void:
 	if not to_wisp:
+		warned = left <= WARN_S        # (a re-bloom late in the window does not warn twice)
 		_pop(true, false)
 		cue("burst", -4.0)
 	elif _folding:
@@ -221,6 +243,9 @@ func _back(cool: float) -> void:
 ## The fold starts with the shrink (here, so other games start it from the snapshot too), and the wisp is dim
 ## while it rests.
 func render() -> void:
+	if left > 0.0 and left <= WARN_S and not warned:
+		warned = true
+		warn()
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
