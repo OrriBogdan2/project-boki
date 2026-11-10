@@ -1245,11 +1245,16 @@ func dash_with(e: Dictionary) -> void:
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
+## Where this frame's dash step ends, short of a block: the segment a dash hit tests (Swept).
+func _dash_end(dt: float) -> Vector3:
+	return Swept.clip(m.world, pos, pos + Vector3(roll_dir.x, 0, roll_dir.y) * roll_speed * dt)
+
 ## A grammar dash you perform (or a kit's dash that hits): what you dash through gets its effects.
-func _pass_along() -> void:
+func _pass_along(dt: float) -> void:
+	var end := _dash_end(dt)
 	for f in m.foes_of(team):
 		if dash_pass.is_empty(): return
-		if dash_pass["hit"].has(f.get_instance_id()) or flat_dist(f) > r + f.r + float(dash_pass.get("w", 0.8)) * 0.5 or absf(f.pos.y - pos.y) > 1.4:
+		if dash_pass["hit"].has(f.get_instance_id()) or Swept.dist(f.pos, pos, end) > r + f.r + float(dash_pass.get("w", 0.8)) * 0.5 or absf(f.pos.y - pos.y) > 1.4:
 			continue
 		dash_pass["hit"][f.get_instance_id()] = true
 		if dash_pass.get("kx") is Callable:
@@ -1262,10 +1267,11 @@ func _pass_along() -> void:
 		f.hurt(maxf(0.1, float(po.get("dmg", 0.0))) * m.dmg_mult(self), self, o)
 		m.fx.burst(f.pos + Vector3(0, 0.8, 0), Color(String(po.get("color", "#a6ff3a"))), 8, 3.0, 0.3)
 
-func _shove_along() -> void:
+func _shove_along(dt: float) -> void:
+	var end := _dash_end(dt)
 	for f in m.foes_of(team):
 		if shove.is_empty(): return
-		if shove["hit"].has(f.nid) or flat_dist(f) > r + f.r + 0.35 or absf(f.pos.y - pos.y) > 1.4:
+		if shove["hit"].has(f.nid) or Swept.dist(f.pos, pos, end) > r + f.r + 0.35 or absf(f.pos.y - pos.y) > 1.4:
 			continue
 		shove["hit"][f.nid] = true
 		var side := Vector2(f.pos.x - pos.x, f.pos.z - pos.z).normalized()
@@ -2172,9 +2178,9 @@ func _physics(dt: float) -> void:
 		hv = roll_dir * roll_speed
 		_last_burst = {"dir": roll_dir, "speed": roll_speed}
 		if not shove.is_empty():
-			_shove_along()
+			_shove_along(dt)
 		if not dash_pass.is_empty():
-			_pass_along()
+			_pass_along(dt)
 		if roll_t <= 0.0:
 			hv = HunterMove.dash_exit(roll_dir * roll_speed, spd)     # no hard stop: the run carries on
 			glide_handoff(roll_dir, roll_speed)     # (movefeel) open the glider now and it keeps the burst
@@ -2283,6 +2289,9 @@ func _physics(dt: float) -> void:
 	# corner); the axis moves below then only meet terrain, edges and walls.
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
+	if spirit_t <= 0.0 and tgt.distance_to(Vector2(pos.x, pos.z)) > 2.0 * Swept.STEP:
+		var stop := Swept.clip(m.world, pos, Vector3(tgt.x, pos.y, tgt.y))      # a step longer than a block is thick
+		tgt = Vector2(stop.x, stop.z)
 	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
