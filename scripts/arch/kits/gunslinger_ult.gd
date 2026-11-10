@@ -14,9 +14,10 @@ const DROP_T := 0.8              # s: the shell is seen falling for the last par
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const FALL_FX_GAP := 0.05       # s between the falling shell's flicker of green fire and embers
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
-const BURN_FILL_A := 2.4         # the burning patch's dark fill: AimShapes' quiet 0.18 telegraph fill x this (fades to
+const BURN_FILL_A := 3.0         # the burning patch's dark fill: AimShapes' quiet 0.18 telegraph fill x this (fades to
                                  # half), so the patch reads as a dark disc on pale sand (source: dark disc, lit rim)
-const BURN_DARK := Color("17260a")  # the patch's charred floor: Vex's green burnt near black
+const BURN_DARK := Color(0.0086, 0.0194, 0.003)  # the charred floor, #17260a (Vex's green burnt near black) given
+                                 # linear: the aim layer reads vertex colours as linear
 const BRONZE := Color("b9732f")   # the shell's metal (a material, not an effect)
 
 var kit: GunslingerKit
@@ -190,7 +191,7 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	burnt["alpha"] = BURN_FILL_A * left
 	AimKit.circle(kit.h, "xf%d" % int(s["n"]), burnt)
 	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.HOT, "lw": 0.12}
-	rim.merge({"core": float(xd["core_r"]), "hot": 0.5, "alpha": left})
+	rim.merge({"hot": 0.5, "alpha": left})
 	AimKit.circle(kit.h, "xz%d" % int(s["n"]), rim)
 	_flames(at, r, dt)
 	s["tick"] = float(s["tick"]) + dt

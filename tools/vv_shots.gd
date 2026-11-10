@@ -149,11 +149,27 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		m.cam.snap(cam_at if cam_at != Vector3.ZERO else P.pos + Vector3(lead, 0, 0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		_place_shots()
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()
 			var focus: Callable = mk[4] if mk.size() > 4 else Callable()
 			_take(String(mk[1]), String(mk[2]), String(mk[3]), focus)
+
+## The paused match never runs its render pass, so rounds would sit at the muzzle: put each round's node where
+## the round is (as Match._process does), so its tracer ribbon follows it in the shots.
+func _place_shots() -> void:
+	for s: Dictionary in m.shots:
+		var mi: MeshInstance3D = s["node"]
+		if mi == null:
+			continue
+		mi.global_position = s["pos"]
+		var v: Vector2 = s["vel"]
+		if v.length() > 1.0:
+			mi.look_at(mi.global_position + Vector3(v.x, 0, v.y), Vector3.UP)
+			var r: float = s.get("vr", s["r"])
+			var tl := Oomph.tracer_len(r, v.length(), float((s["x"] as Dictionary).get("tracer", 1.0)))
+			mi.scale = Vector3(r * 2.0, r * 2.0, tl)
 
 ## The Arena's moving dummies walk back toward the player; keep them parked far off so none ends up
 ## between the camera and the hero (that was the pink blob filling the last strip frames).
