@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Builds docs/TTK_MATRIX.md from a --ttk-matrix-check log and tools/ttk_matrix_source.json.
-Usage: godot --headless --path . -- --ttk-matrix-check > log; python3 tools/ttk_matrix.py log > docs/TTK_MATRIX.md"""
+Usage: godot --headless --path . -- --ttk-matrix-check > log; godot --headless --path . -- --summon-share-check > slog;
+python3 tools/ttk_matrix.py log slog > docs/TTK_MATRIX.md (slog adds the summon column, decision 0043)"""
 import json, os, re, sys
 R = os.path.join(os.path.dirname(__file__), "..")
 SRC = json.load(open(os.path.join(R, "tools/ttk_matrix_source.json")))
@@ -74,7 +75,7 @@ def main():
     p = print
     p("# Time to down: every Hunter's LMB into every other Hunter\n")
     p("Companion to docs/TTK.md (`--ttk-check`, ext/ttk-table): that table is the per-Hunter parity bar (LMB and combo, rank 0/max); this matrix is LMB only, attacker by defender.\n")
-    p("Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the combat area. `--ttk-matrix-check` puts a Training Area dummy at 8 m with the defender's base health and armour (124/145/193 hp, armour durability 2.2x, 20% off every hit while it lasts) and holds the attacker's LMB on it with perfect aim (aim dead on the dummy, shooter and dummy pinned, no dodging, no dash, no ability). It tries every LMB mode the weapon has (hold, taps, hold-to-charge) and keeps the fastest that reaches. An LMB that cannot reach 8 m (melee, short guns) is measured at 80% of its range and the cell carries a `~`. Cells are seconds to down; the check fails if a cell never downs the dummy in 20 s. Regenerate: `godot --headless --path . -- --ttk-matrix-check > log; python3 tools/ttk_matrix.py log > docs/TTK_MATRIX.md`.\n")
+    p("Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the combat area. `--ttk-matrix-check` puts a Training Area dummy at 8 m with the defender's base health and armour (124/145/193 hp, armour durability 2.2x, 20% off every hit while it lasts) and holds the attacker's LMB on it with perfect aim (aim dead on the dummy, shooter and dummy pinned, no dodging, no dash, no ability). It tries every LMB mode the weapon has (hold, taps, hold-to-charge) and keeps the fastest that reaches. An LMB that cannot reach 8 m (melee, short guns) is measured at 80% of its range and the cell carries a `~`. Cells are seconds to down; the check fails if a cell never downs the dummy in 20 s. Regenerate: `godot --headless --path . -- --ttk-matrix-check > log; godot --headless --path . -- --summon-share-check > slog; python3 tools/ttk_matrix.py log slog > docs/TTK_MATRIX.md`.\n")
     p("**Source figure.** Effective HP = Base HP / 0.8 (the source's Common armour is also 20% and its 2,500 durability outlasts any single life, so armour only ever scales HP; docs/SUPERVIVE_DATA.md section 3). Source seconds = that / the Hunter's LMB DPS from `tools/ttk_matrix_source.json` (kit text damage and cadence). Seconds are scale-free: our HP and damage are both about 1/8 of the source's, so the two columns compare directly. Cells show `ours / source`; a cell with no source figure shows ours only. **Bold** = ours off the source by more than 15%.\n")
     p("## Seconds to down (ours / source)\n")
     p(table(cell))
@@ -91,4 +92,21 @@ def main():
         p(f"| {H[a]['name']} / {H[a]['src']} | {'%.0f' % s if s else 'none'} ({basis}) | {c if c else 'no seconds figure'} | {H[a].get('why', 'no source cadence or damage number, so nothing to flag')} |")
     p("\nDefender HP shares (ours over source, from docs/KIT_PARITY.md Health): " + ", ".join(f"{H[d]['name']} x{(HP_O[d] / AVG_O) / (H[d]['hp'] / AVG_S):.2f}" for d in ORDER) + ". Armour is not a cause anywhere: both games take 20% off while it lasts and neither runs out in one life.")
 
+def summon(path):
+    """The summon column (decision 0043): per Boki species, its share of a 1v1 knock and how much sooner it lands."""
+    alone, rows = {}, []
+    for line in open(path):
+        m = re.match(r"SUMMONSHARE alone (\w+) ([\d.]+)", line)
+        if m: alone[m[1]] = float(m[2])
+        m = re.match(r"SUMMONSHARE (\w+) (\d+) ([\d.]+) ([\d.]+) (-?[\d.]+) ([\d.]+) k_now ([\d.]+)", line)
+        if m: rows.append(m)
+    lo, hi = SUMMON["knock_band"]
+    print("\n## Summon column: what one summoned Boki adds to a 1v1 knock\n")
+    print(f"`--summon-share-check`: Vex holding LMB at 6 m and Kael tapping at 2 m (decision 0042's \"a Hunter's LMB\") down a pinned dummy with a Medium Hunter's base health and armour, alone (Vex {alone.get('gunslinger', 0):.1f} s, Kael {alone.get('juggernaut', 0):.1f} s) and with the Boki burst out on the first frame, three seeded fights each. Share = the Boki's damage over all the knock's damage; faster = knock time saved. Band (decision 0043): {lo * 100:.0f}-{hi * 100:.0f}% of the knock. `dmg_k` = the species' tuning in content/rules/boki_summon.json.\n")
+    print("| Boki | Window s | Knock alone s | With summon s | Faster | Share of knock | dmg_k |\n|---|---|---|---|---|---|---|")
+    for m in sorted(rows, key=lambda m: -float(m[6])):
+        print(f"| {m[1]} | {m[2]} | {m[3]} | {m[4]} | {float(m[5]):.0f}% | {float(m[6]):.0f}% | {m[7]} |")
+
+SUMMON = json.load(open(os.path.join(R, "content/rules/boki_summon.json")))
 main()
+if len(sys.argv) > 2: summon(sys.argv[2])

@@ -2,7 +2,7 @@
 
 Companion to docs/TTK.md (`--ttk-check`, ext/ttk-table): that table is the per-Hunter parity bar (LMB and combo, rank 0/max); this matrix is LMB only, attacker by defender.
 
-Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the combat area. `--ttk-matrix-check` puts a Training Area dummy at 8 m with the defender's base health and armour (124/145/193 hp, armour durability 2.2x, 20% off every hit while it lasts) and holds the attacker's LMB on it with perfect aim (aim dead on the dummy, shooter and dummy pinned, no dodging, no dash, no ability). It tries every LMB mode the weapon has (hold, taps, hold-to-charge) and keeps the fastest that reaches. An LMB that cannot reach 8 m (melee, short guns) is measured at 80% of its range and the cell carries a `~`. Cells are seconds to down; the check fails if a cell never downs the dummy in 20 s. Regenerate: `godot --headless --path . -- --ttk-matrix-check > log; python3 tools/ttk_matrix.py log > docs/TTK_MATRIX.md`.
+Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the combat area. `--ttk-matrix-check` puts a Training Area dummy at 8 m with the defender's base health and armour (124/145/193 hp, armour durability 2.2x, 20% off every hit while it lasts) and holds the attacker's LMB on it with perfect aim (aim dead on the dummy, shooter and dummy pinned, no dodging, no dash, no ability). It tries every LMB mode the weapon has (hold, taps, hold-to-charge) and keeps the fastest that reaches. An LMB that cannot reach 8 m (melee, short guns) is measured at 80% of its range and the cell carries a `~`. Cells are seconds to down; the check fails if a cell never downs the dummy in 20 s. Regenerate: `godot --headless --path . -- --ttk-matrix-check > log; godot --headless --path . -- --summon-share-check > slog; python3 tools/ttk_matrix.py log slog > docs/TTK_MATRIX.md`.
 
 **Source figure.** Effective HP = Base HP / 0.8 (the source's Common armour is also 20% and its 2,500 durability outlasts any single life, so armour only ever scales HP; docs/SUPERVIVE_DATA.md section 3). Source seconds = that / the Hunter's LMB DPS from `tools/ttk_matrix_source.json` (kit text damage and cadence). Seconds are scale-free: our HP and damage are both about 1/8 of the source's, so the two columns compare directly. Cells show `ours / source`; a cell with no source figure shows ours only. **Bold** = ours off the source by more than 15%.
 
@@ -10,7 +10,7 @@ Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the co
 
 | Attacker \ defender | Vex | Mossy | Ryzz | Kael | Ravyl | Nivi | Grimble | Lumi | Cinder | Tarek | Motley | Sable |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Vex (hold) | **7.6 / 2.4** | **10.7 / 2.9** | **6.4 / 2.5** | **10.7 / 2.5** | **6.4 / 2.2** | **6.4 / 2.5** | **10.3 / 2.8** | **6.8 / 2.5** | **10.2 / 2.5** | **6.8 / 2.5** | **6.8 / 2.3** | **5.9 / 2.5** |
+| Vex (hold) | **7.3 / 2.4** | **10.0 / 2.9** | **6.2 / 2.5** | **10.0 / 2.5** | **6.2 / 2.2** | **6.2 / 2.5** | **9.0 / 2.8** | **7.0 / 2.5** | **9.0 / 2.5** | **6.6 / 2.5** | **6.6 / 2.3** | **5.6 / 2.5** |
 | Mossy (tap) | 6.2 / 6.6 | 8.4 / 7.9 | **4.8 / 6.9** | **8.4 / 6.9** | **4.8 / 5.9** | **5.2 / 6.9** | 7.2 / 7.8 | **5.5 / 6.9** | 7.8 / 6.9 | **5.5 / 6.9** | 5.5 / 6.2 | **4.7 / 6.9** |
 | Ryzz (hold) | **10.0 / 13.6** | **13.2 / 16.4** | **8.0 / 14.3** | 13.2 / 14.3 | **8.0 / 12.2** | **8.7 / 14.3** | **13.2 / 16.1** | **10.0 / 14.3** | 12.6 / 14.3 | **8.7 / 14.3** | **8.7 / 12.8** | **7.4 / 14.3** |
 | Kael (tap) | **~8.7 / 7.1** | **~11.1 / 8.6** | ~6.7 / 7.5 | **~11.5 / 7.5** | ~7.1 / 6.4 | ~7.1 / 7.5 | **~11.9 / 8.4** | ~8.3 / 7.5 | **~10.7 / 7.5** | ~7.5 / 7.5 | ~7.5 / 6.7 | **~6.3 / 7.5** |
@@ -21,7 +21,7 @@ Parity first (briefs/DECISIONS.md 2026-11-07): the owner asked for TTK in the co
 | Cinder (hold) | **5.0 / 5.9** | **5.4 / 7.1** | **4.0 / 6.2** | 5.4 / 6.2 | **3.9 / 5.3** | **4.0 / 6.2** | **5.2 / 7.0** | **4.3 / 6.2** | **5.2 / 6.2** | **4.2 / 6.2** | **4.3 / 5.6** | **3.9 / 6.2** |
 | Tarek (tap) | 14.4 | 18.6 | 12.3 | 20.0 | 12.3 | 12.3 | 18.6 | 14.4 | 20.0 | 14.4 | 14.4 | 12.3 |
 | Motley (hold) | 11.6 | 15.8 | 9.8 | 15.8 | 11.0 | 9.8 | 15.0 | 11.0 | 14.4 | 9.9 | 9.9 | 9.3 |
-| Sable (hold) | 4.4 | 5.3 | 3.9 | 5.3 | 3.9 | 3.9 | 5.3 | 4.4 | 5.3 | 4.1 | 4.1 | 3.7 |
+| Sable (hold) | 4.4 | 5.3 | 3.9 | 5.3 | 3.9 | 3.9 | 5.3 | 4.4 | 5.3 | 4.1 | 4.1 | 3.6 |
 
 Rows are the attacker (best LMB mode in brackets), columns the defender. `~` = measured near (80% of weapon range).
 
@@ -31,7 +31,7 @@ Cadence-free: defender effective HP over damage per hit (level-15 numbers scaled
 
 | Attacker \ defender | Vex | Mossy | Ryzz | Kael | Ravyl | Nivi | Grimble | Lumi | Cinder | Tarek | Motley | Sable |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Vex (hold) | **50 / 30.0** | **66 / 36.2** | **41 / 31.6** | **66 / 31.6** | **41 / 27.0** | **41 / 31.6** | **63 / 35.4** | **44 / 31.6** | **62 / 31.6** | **44 / 31.6** | **44 / 28.2** | **37 / 31.6** |
+| Vex (hold) | **55 / 30.0** | **75 / 36.2** | **47 / 31.6** | **75 / 31.6** | **47 / 27.0** | **47 / 31.6** | **68 / 35.4** | **53 / 31.6** | **68 / 31.6** | **50 / 31.6** | **50 / 28.2** | **42 / 31.6** |
 | Mossy (tap) | 16 / 14.7 | **21 / 17.6** | **13 / 15.4** | **21 / 15.4** | 13 / 13.2 | **13 / 15.4** | 19 / 17.3 | 14 / 15.4 | **20 / 15.4** | 14 / 15.4 | 14 / 13.8 | **12 / 15.4** |
 | Ryzz (hold) | 16 / 17.0 | 21 / 20.5 | **13 / 17.9** | **21 / 17.9** | 13 / 15.3 | **14 / 17.9** | 21 / 20.1 | 16 / 17.9 | 20 / 17.9 | **14 / 17.9** | 14 / 16.0 | **12 / 17.9** |
 | Kael (tap) | **23 / 35.6** | **29 / 42.9** | **18 / 37.5** | **30 / 37.5** | **19 / 32.0** | **19 / 37.5** | **31 / 42.0** | **22 / 37.5** | **28 / 37.5** | **20 / 37.5** | **20 / 33.4** | **17 / 37.5** |
@@ -42,7 +42,7 @@ Cadence-free: defender effective HP over damage per hit (level-15 numbers scaled
 
 | Attacker | Source DPS (basis) | Why ours differs |
 |---|---|---|
-| Vex / Ghost | 638 (51/round, ~12.5 rounds/s, 30-round magazine; cadence 0.08 s [F]) | ours/source seconds x3.13, DPS share x0.32, damage per hit x0.63, cadence x0.51 (6.3/s vs 12.5/s) | Cadence: ours 0.12 s a round against ~0.08 s [F, not D], and our sustain rule halves damage after round 10 (the wiki's fall-to-50% reading) with a 1 s refill gap after 30 rounds. Damage per hit is at parity for the first 10 rounds (51 = 3.97% of average HP, ours 6 = 3.9%). Not fixed: the cadence is not [D] and KIT_PARITY row LMB (Vex) calls it a match. |
+| Vex / Ghost | 638 (51/round, ~12.5 rounds/s, 30-round magazine; cadence 0.08 s [F]) | ours/source seconds x2.96, DPS share x0.34, damage per hit x0.56, cadence x0.60 (7.5/s vs 12.5/s) | Cadence: ours 0.12 s a round against ~0.08 s [F, not D], and our sustain rule halves damage after round 10 (the wiki's fall-to-50% reading) with a 1 s refill gap after 30 rounds. Damage per hit is at parity for the first 10 rounds (51 = 3.97% of average HP, ours 6 = 3.9%). Not fixed: the cadence is not [D] and KIT_PARITY row LMB (Vex) calls it a match. |
 | Mossy / Oath | 232 (hammer throw 192@15; cadence 0.45 s [card]) | ours/source seconds x0.89, DPS share x1.13, damage per hit x0.98, cadence x1.16 (2.6/s vs 2.2/s) | Within 15% on damage and cadence; the flags are the defender HP share (light Hunters x0.80 die sooner than the source's flat 1290). Different weapon: our tap is a shield throw/bash, the source's an Oath hammer throw (owner call, KIT_PARITY). |
 | Ryzz / Joule | 112 (Jolt 90; cadence 0.8 s [F]) | ours/source seconds x0.71, DPS share x1.42, damage per hit x1.10, cadence x1.29 (1.6/s vs 1.2/s) | Cadence: ours 0.648 s against the source's 0.8 s [F, not D] and damage per hit x1.10. The owner kept 0.648 (KIT_PARITY Ryzz LMB, items 70 and 116). Light defenders (x0.80) add to the flags. |
 | Kael / Brall | 215 (Caldera press 43, swings ~0.2 s apart; hold = fireblast 107; cadence 0.2 s [F]) | ours/source seconds x1.16, DPS share x0.87, damage per hit x1.63, cadence x0.53 (2.6/s vs 5.0/s) | Measured with the press combo (the source's 43-damage figure) at 2.7 m: it cannot reach 8 m, the 8 m LMB is the hold fireblast. Cadence 0.34 s against ~0.2 s [F]; damage per hit 11 against 43 [D], x1.63 after the HP scale. The two roughly cancel (DPS share x0.87), so halving the damage to match the [D] number would make Kael slower, not closer. Not changed. |
@@ -56,3 +56,60 @@ Cadence-free: defender effective HP over damage per hit (level-15 numbers scaled
 | Sable / Shiv | none (Arcslinger 160@15, no cadence) | no seconds figure | no source cadence or damage number, so nothing to flag |
 
 Defender HP shares (ours over source, from docs/KIT_PARITY.md Health): Vex x0.99, Mossy x1.09, Ryzz x0.80, Kael x1.25, Ravyl x0.94, Nivi x0.80, Grimble x1.11, Lumi x0.94, Cinder x1.25, Tarek x0.94, Motley x1.05, Sable x0.80. Armour is not a cause anywhere: both games take 20% off while it lasts and neither runs out in one life.
+
+## Summon column: what one summoned Boki adds to a 1v1 knock
+
+`--summon-share-check`: Vex holding LMB at 6 m and Kael tapping at 2 m (decision 0042's "a Hunter's LMB") down a pinned dummy with a Medium Hunter's base health and armour, alone (Vex 7.3 s, Kael 7.8 s) and with the Boki burst out on the first frame, three seeded fights each. Share = the Boki's damage over all the knock's damage; faster = knock time saved. Band (decision 0043): 15-25% of the knock. `dmg_k` = the species' tuning in content/rules/boki_summon.json.
+
+| Boki | Window s | Knock alone s | With summon s | Faster | Share of knock | dmg_k |
+|---|---|---|---|---|---|---|
+| zephyrak | 7 | 7.52 | 4.91 | 35% | 25% | 0.44 |
+| kestrike | 7 | 7.52 | 4.68 | 38% | 24% | 0.38 |
+| squalltross | 11 | 7.52 | 5.25 | 30% | 24% | 0.48 |
+| rimeshrew | 7 | 7.52 | 4.70 | 38% | 24% | 0.33 |
+| nacrolin | 16 | 7.52 | 5.83 | 22% | 23% | 0.61 |
+| kilnbadger | 16 | 7.52 | 5.78 | 23% | 23% | 0.43 |
+| wisplet | 8 | 7.52 | 4.21 | 44% | 23% | 0.79 |
+| gloamshell | 11 | 7.52 | 5.62 | 25% | 23% | 0.47 |
+| casquebill | 13 | 7.52 | 5.04 | 33% | 23% | 0.51 |
+| lodestick | 8 | 7.52 | 4.52 | 40% | 23% | 0.71 |
+| basaltoad | 16 | 7.52 | 5.09 | 32% | 23% | 0.34 |
+| hivara | 8 | 7.52 | 5.44 | 28% | 23% | 0.29 |
+| puddlet | 16 | 7.52 | 5.90 | 22% | 23% | 0.80 |
+| selenfin | 16 | 7.52 | 5.89 | 22% | 23% | 0.79 |
+| threadwyrm | 13 | 7.52 | 5.69 | 24% | 23% | 0.43 |
+| tuatrune | 16 | 7.52 | 5.06 | 33% | 23% | 0.34 |
+| mossgrade | 16 | 7.52 | 5.89 | 22% | 23% | 0.80 |
+| kindlewren | 7 | 7.52 | 5.05 | 33% | 22% | 0.34 |
+| glaciyak | 18 | 7.52 | 5.75 | 24% | 22% | 0.38 |
+| umbrathere | 18 | 7.52 | 5.77 | 23% | 22% | 0.36 |
+| nimbostrich | 11 | 7.52 | 4.95 | 34% | 22% | 0.35 |
+| marchleaf | 8 | 7.52 | 5.49 | 27% | 22% | 0.28 |
+| scaldamus | 18 | 7.52 | 5.82 | 23% | 22% | 0.35 |
+| pebbit | 18 | 7.52 | 5.82 | 23% | 22% | 0.35 |
+| opalisk | 8 | 7.52 | 4.37 | 42% | 22% | 0.70 |
+| glomwort | 11 | 7.52 | 5.78 | 23% | 22% | 0.42 |
+| burrlet | 11 | 7.52 | 5.83 | 22% | 22% | 0.41 |
+| hoarheron | 13 | 7.52 | 5.24 | 30% | 22% | 0.44 |
+| lilybara | 20 | 7.52 | 5.93 | 21% | 22% | 0.72 |
+| orchisloth | 18 | 7.52 | 5.89 | 22% | 22% | 0.78 |
+| floenatee | 20 | 7.52 | 5.94 | 21% | 21% | 0.72 |
+| zapple | 7 | 7.52 | 4.34 | 42% | 21% | 0.45 |
+| velvorm | 13 | 7.52 | 5.54 | 26% | 21% | 0.30 |
+| limpetor | 18 | 7.52 | 5.16 | 31% | 21% | 0.28 |
+| murmurling | 9 | 7.52 | 4.92 | 34% | 21% | 0.34 |
+| goliathite | 18 | 7.52 | 5.16 | 31% | 21% | 0.28 |
+| cindowary | 12 | 7.52 | 5.02 | 33% | 20% | 0.30 |
+| cairnback | 18 | 7.52 | 5.22 | 31% | 20% | 0.27 |
+| thrumbird | 16 | 7.52 | 5.14 | 32% | 20% | 0.79 |
+| spatewader | 18 | 7.52 | 5.01 | 33% | 20% | 0.27 |
+| cindle | 8 | 7.52 | 5.24 | 30% | 19% | 0.33 |
+| gibbelle | 13 | 7.52 | 4.69 | 38% | 19% | 0.42 |
+| moundvark | 18 | 7.52 | 5.82 | 23% | 19% | 0.24 |
+| glintmole | 11 | 7.52 | 5.23 | 30% | 19% | 0.47 |
+| heatherhorn | 18 | 7.52 | 5.36 | 29% | 18% | 0.24 |
+| nettlynx | 8 | 7.52 | 5.30 | 30% | 18% | 0.31 |
+| caecilith | 10 | 7.52 | 4.45 | 41% | 18% | 0.59 |
+| sentrikat | 18 | 7.52 | 4.69 | 38% | 18% | 0.39 |
+| duskapi | 12 | 7.52 | 4.39 | 42% | 18% | 0.60 |
+| moonloris | 18 | 7.52 | 4.76 | 37% | 17% | 0.61 |

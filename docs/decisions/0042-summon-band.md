@@ -16,7 +16,7 @@ Hunter's LMB over the same seconds.
 ## Decision
 Option 2. `content/rules/boki_summon.json`: `band` [0.25, 0.40] of a Hunter's LMB over the same window (the mean of
 Vex holding fire and Kael tapping body slashes on a pinned armourless dummy), each species aimed by its window
-along `aim` [0.28, 0.37] inside it: the shortest window at the top, the longest at the bottom (short and strong vs
+along `aim` [0.28, 0.34] (top lowered from 0.37 by 0043) inside it: the shortest window at the top, the longest at the bottom (short and strong vs
 long and supporting); `dmg_k` per species is what lands it there, `band_tol` how far a species may sit from its
 aim. A fight swings on the AI's rolls (Burrlet deals 80 or 210 in the same window), so the check averages six.
 Windows and cooldowns are untouched. `KinSummon.out_k` applies it in `Ent.hurt` on the Boki's own game only (a

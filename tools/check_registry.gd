@@ -283,6 +283,7 @@ const CHECKS := {
 	"--wisp-check": ["res://tools/wisp_check.gd", "wisp_check", null],      # docs/decisions/0019
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 	"--summon-band-check": ["res://tools/summon_band_check.gd", "summon_band_check", null],      # decision 0042
+	"--summon-share-check": ["res://tools/summon_share_check.gd", "summon_share_check", null],    # decision 0043
 	"--summon-side-shots": ["res://tools/summon_side_shots.gd", "summon_side_shots", null],      # --shots-dir=<dir>
 	"--summon-side-check": ["res://tools/summon_side_check.gd", "summon_side_check", null],  # side-colour rings
 	"--stolen-hud-check": ["res://tools/stolen_hud_check.gd", "stolen_hud_check", null],      # --shots-dir=<dir>

@@ -1,5 +1,5 @@
 {
-	"_doc": "steady_from: a window of this many s or more is Steady, a shorter one Burst (the Field Book tag). The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. band: what one window deals, as a share of a Hunter's LMB over the same seconds (decision 0042), aim: where each species is aimed inside it, the top for the shortest windows, the bottom for the longest; dmg_k: x each species' damage while summoned to land it there (--summon-band-check prints the fit); band_tol: how far a species may sit from its aim.",
+	"_doc": "steady_from: a window of this many s or more is Steady, a shorter one Burst (the Field Book tag). The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. band: what one window deals, as a share of a Hunter's LMB over the same seconds (decision 0042), aim: where each species is aimed inside it, the top for the shortest windows, the bottom for the longest; dmg_k: x each species' damage while summoned to land it there (--summon-band-check prints the fit); band_tol: how far a species may sit from its aim. knock_band: the summoned Boki's share of a 1v1 knock's damage (decision 0043, --summon-share-check).",
 	"table": {
 		"bruiser":    {"small": [8, 60],  "medium": [10, 65], "large": [12, 70]},
 		"skirmisher": {"small": [7, 55],  "medium": [9, 60],  "large": [11, 65]},
@@ -21,8 +21,9 @@
 		"loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0
 	},
 	"band": [0.25, 0.4],
-	"aim": [0.28, 0.37],
+	"aim": [0.28, 0.34],
 	"band_tol": 0.06,
+	"knock_band": [0.15, 0.25],
 	"dmg_k": {
 		"basaltoad": 0.34,
 		"burrlet": 0.41,
@@ -65,7 +66,7 @@
 		"selenfin": 0.79,
 		"sentrikat": 0.39,
 		"spatewader": 0.27,
-		"squalltross": 0.54,
+		"squalltross": 0.48,
 		"threadwyrm": 0.43,
 		"thrumbird": 0.79,
 		"tuatrune": 0.34,
@@ -73,6 +74,6 @@
 		"velvorm": 0.30,
 		"wisplet": 0.79,
 		"zapple": 0.45,
-		"zephyrak": 0.47
+		"zephyrak": 0.44
 	}
 }
