@@ -136,7 +136,7 @@ func _mob(kind: String) -> void:
 			probes += 1
 			if _hurts(kind, pr[0]) != pr[1]:
 				bad += 1
-				var rel := pr[0] - home
+				var rel: Vector3 = pr[0] - home
 				var verdict := "hit" if pr[1] else "miss"
 				print("MOBTELL   %s %s probe at %.2f,%.2f expected %s" % [kind, pr[2], rel.x, rel.z, verdict])
 	var what := "%s: the tell equals the hit shape within 5%% (%d probes)" % [kind, probes]
@@ -168,7 +168,7 @@ func _mob(kind: String) -> void:
 	for i in range(1, glows.size() - 1):
 		if glows[i] < glows[i - 1]: rising = false
 	var peak: float = glows[glows.size() - 2] if glows.size() > 1 else -1.0
-	var bright := rising and glows.size() > 3 and glows[0] < 0.1 and peak >= MobTell.GLOW_MAX * 0.9
+	var bright: bool = rising and glows.size() > 3 and glows[0] < 0.1 and peak >= MobTell.GLOW_MAX * 0.9
 	ok("%s: the body glow brightens to its peak on the hit frame" % kind, bright, "%.2f -> %.2f" % [glows[0], peak])
 	# 3) an instant blow can be stepped out of while its shape is fixed (the aim locks for the last 40% of a lunge)
 	if mb.md["attack"] in ["lunge", "slam", "fuse"]:
