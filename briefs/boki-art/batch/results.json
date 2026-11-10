@@ -76303,5 +76303,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/on_scopeleon_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_scopeleon",
+    "name": "Scopeleon (V2 card, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_scopeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lanceron",
+    "name": "Lanceron (owner note: back in its family, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_lanceron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lanceron",
+    "name": "Lanceron (owner note: back in its family, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_lanceron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_scopeleon",
+    "name": "Scopeleon (V2 card, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_scopeleon_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lanceron",
+    "name": "Lanceron (owner note: back in its family, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_lanceron_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_wickapi",
+    "name": "Wickapi (V2 card, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_wickapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_wickapi",
+    "name": "Wickapi (V2 card, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_wickapi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_wickapi",
+    "name": "Wickapi (V2 card, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_wickapi_3.jpg",
+    "ok": true
   }
 ]
