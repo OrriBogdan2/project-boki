@@ -5963,3 +5963,4 @@ READY ext/cinder-lmb 632de4b22 (Cinder LMB Torch Lance: reach 7->6.1 m (-13%), w
 READY ext/tut-starter-three 3b2af9949 (starter pick Lace/Kael/Vex)
 READY ext/tut-first-race 06ce66f82 (first race practice lap)
 READY ext/soul-link-integ 3303c3b45 (INTEG T2, do not merge alone: 10 branches merged; summon-band-check now passes off/on, dmg_k refit; all T2 accept checks pass)
+READY ext/step-smooth-rebased 0a96e4b98 (SUPERSEDES ext/step-smooth 0a96e4b98: branch already contains origin/main d255acbee, no conflicts remain; --step-smooth-check 0 failures, --check 0 failures, health --strict OK)
