@@ -56,11 +56,17 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 			var at := p.pos + Vector3(cos(a2), 0, sin(a2)) * 15.0
 			Sfx.play(CALLS[rng.randi() % CALLS.size()], at, 3.0, 0.05, rng.randf_range(0.45, 0.62))
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> Sfx.Muffle:
+	if p.downed or p.out:
+		return Sfx.Muffle.DOWN
+	return Sfx.Muffle.LOW_HP if LowHpCue.under_line(p) else Sfx.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
-	Sfx.set_muffle(p.downed or p.out)     # the world goes dull while you are down or out
+	Sfx.set_muffle(_muffle_for(p))
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
 	if not started:
