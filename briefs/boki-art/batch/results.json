@@ -99424,5 +99424,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/new_sawshark_b_2.jpg",
     "ok": true
+  },
+  {
+    "id": "new_sawshark_a",
+    "name": "New line baby: sawshark a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_sawshark_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_pinguin_b",
+    "name": "New line baby: pinguin b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_pinguin_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_pinguin_a",
+    "name": "New line baby: pinguin a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_pinguin_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_b",
+    "name": "New line baby: sawshark b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_sawshark_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_postroo_b",
+    "name": "New line baby: postroo b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_postroo_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_pinguin_b",
+    "name": "New line baby: pinguin b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_pinguin_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_xylocroc_a",
+    "name": "New line baby: xylocroc a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_a",
+    "name": "New line baby: sawshark a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_sawshark_a_1.jpg",
+    "ok": true
   }
 ]
