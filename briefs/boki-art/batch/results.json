@@ -77864,5 +77864,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_flarmink_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_effigoon_clean",
+    "name": "Effigoon (lying cocoon, no shadow)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_effigoon_clean_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_clean",
+    "name": "Effigoon (lying cocoon, no shadow)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_effigoon_clean_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_effigoon_clean",
+    "name": "Effigoon (lying cocoon, no shadow)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_effigoon_clean_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bastling_tide",
+    "name": "Bastling (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_bastling_tide_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bastling_tide",
+    "name": "Bastling (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_bastling_tide_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bastling_tide",
+    "name": "Bastling (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_bastling_tide_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bastling_tide",
+    "name": "Bastling (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_bastling_tide_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bastling_tide",
+    "name": "Bastling (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_bastling_tide_2.jpg",
+    "ok": true
   }
 ]
