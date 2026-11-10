@@ -104632,5 +104632,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px_b_xylogator_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px_b_sarcobra",
+    "name": "Sarcobra (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_sarcobra",
+    "name": "Sarcobra (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_calderoise",
+    "name": "Calderoise (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_calderoise",
+    "name": "Calderoise (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_sarcobra",
+    "name": "Sarcobra (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_sarcobra",
+    "name": "Sarcobra (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_calderoise",
+    "name": "Calderoise (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_aurostag",
+    "name": "Aurostag (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_aurostag_2.jpg",
+    "ok": true
   }
 ]
