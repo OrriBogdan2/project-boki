@@ -193,6 +193,9 @@ The armature and its meshes sit at the .glb's origin (no offset on the scene roo
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
   surface is on the hero toon shader with the atlas, the hit ring is unchanged, the budget holds, and the
   setting turns it procedural and back.
+- `--warden-rest-check`: the baked neutral rest (content/rules/warden_rest.json, WardenRest) equals the one
+  the procedural rig measures now, so a match builds the .glb without measuring it (0.15 to 0.7 s a Warden).
+  `-- --warden-rest-bake` rewrites the bake.
 - The Blender builds: `godot --headless -- --warden-rig-json --warden=<id>` writes the armature and landmarks
   (art/wardens/src/<name>_rig.json); `blender -b --factory-startup --python tools/blender/<name>.py` builds,
   bakes and exports (shared helpers in tools/blender/warden_kit.py; Vex first, see art/wardens/vex/IMPORT.md).
