@@ -194,6 +194,9 @@ func _carpet() -> void:
 	P.ak.use_e()
 	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
 	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
+	var card := String(K.x_def()["desc"])
+	ok("ult card: only the Furnace Cloak works in the flight",
+		card.contains("only the Furnace Cloak works") and not card.contains("Shift) speeds"))
 	K.ch_rmb = float(K.rmb_charges())
 	var em0: int = K.hose.emitted
 	var denied0: int = K.lmb_denied
