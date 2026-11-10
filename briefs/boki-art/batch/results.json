@@ -97919,5 +97919,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/epic_pavonazar_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "epic_ghoulamari_a",
+    "name": "Ghoulamari (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_ghoulamari_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthollow_b",
+    "name": "Crofthollow (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_crofthollow_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_sarcobra_a",
+    "name": "Sarcobra (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_sarcobra_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_pavonazar_a",
+    "name": "Pavonazar (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_pavonazar_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_sarcobra_b",
+    "name": "Sarcobra (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_sarcobra_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_t2",
+    "name": "Chuggamus (teapot hippo, toned down t2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_t2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_sarcobra_b",
+    "name": "Sarcobra (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_sarcobra_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_ghoulamari_a",
+    "name": "Ghoulamari (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_ghoulamari_a_2.jpg",
+    "ok": true
   }
 ]
