@@ -403,6 +403,22 @@ rest of the dash and resume it on top (more than the source's 0.6x would come ov
 
 The check asserts: a rim in reach is topped with at most 0.1 s stood at the face; a rim beyond reach never is.
 
+## Dash direction with no keys (`--move-feel-check` "standing dash" rows)
+The shared rule (`ArchKit.dash_dir`, `Hunter.dash_with`): the move keys held on the press tick, else the cursor (`aim_dir`; the body's facing only if the cursor sits on the hunter). Keys released a tick before Shift count as no keys. Mid-turn the dash takes the keys held on that tick. The "Dash toward the cursor" setting always uses the cursor. Moving = WASD is DECISIONS ("Dashes follow WASD by default"). Sources: briefs/hero-ref/<hero>.md, briefs/supervive-data/supervive_kits.md. [?] = the footage doesn't show it.
+| Hunter (source) | Source dash aim | Standing: ours / source | Moving: ours | Just released: ours / source |
+| Bjorn (Oath) | aim (bjorn.md:25) | cursor / cursor | WASD (Shield Charge: cursor) | cursor / [?] |
+| Breah (Tetra) | cursor (breah.md:156) | cursor / cursor | cursor (the hop aims) | cursor / cursor |
+| Dancer (Shiv) | "looks like" movement (dancer.md:116) | cursor / [?] | WASD | cursor / [?] |
+| Dredge (Kingpin) | cursor (dredge.md:103) | cursor / cursor | WASD (clamped after the Anchor) | cursor / [?] |
+| Juggernaut (Brall) | facing/aim (juggernaut.md:20) | cursor / cursor | WASD (after a Slam: cursor) | cursor / [?] |
+| Linwick (Felix) | cursor (linwick.md:75) | cursor / cursor | WASD | cursor / [?] |
+| Moosh Moosh (Elluna) | movement (mooshmoosh.md:85) | cursor / [?] | WASD | cursor / [?] |
+| Ostra (Void) | lands at the cursor (ostra.md:18) | cursor / cursor | cursor | cursor / cursor |
+| Pin (Myth) | movement (pin.md:22) vs cursor (supervive_kits.md:78, tested) | cursor / cursor | WASD [?] | cursor / [?] |
+| Tamsin (Celeste) | movement (tamsin.md:70) | cursor / [?] | WASD | cursor / [?] |
+| Venator (Ghost) | movement, "slide forward" (venator.md:89) | cursor / [?] | WASD | cursor / [?] |
+| Vireo (Joule) | cursor (vireo.md:28) | cursor / cursor | cursor | cursor / cursor |
+No row contradicts a source, so no code changed. The [?] rows keep the shared rule until footage shows a standing dash or a dash pressed right after letting go of the keys.
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
