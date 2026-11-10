@@ -97422,5 +97422,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rv_lanternlong_c_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_mossbastion_side",
+    "name": "Mossbastion (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_mossbastion_side_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_canvastross_side",
+    "name": "Canvastross (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_canvastross_side_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_knotwyrm_fix",
+    "name": "Knotwyrm (sheet redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_knotwyrm_fix_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_knotwyrm_fix",
+    "name": "Knotwyrm (sheet redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_knotwyrm_fix_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_mossbastion_side",
+    "name": "Mossbastion (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_mossbastion_side_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_canvastross_side",
+    "name": "Canvastross (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_canvastross_side_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_canvastross_side",
+    "name": "Canvastross (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_canvastross_side_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_lighthouse_a",
+    "name": "Legendary concept: lighthouse a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_lighthouse_a_2.jpg",
+    "ok": true
   }
 ]
