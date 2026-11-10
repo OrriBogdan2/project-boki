@@ -42,8 +42,12 @@
   "female": {
    "card": "briefs/boki-art/cards/Arcestrel_female.jpg",
    "hash": {
-    "card": "5c7eab79b482"
-   }
+    "card": "5c7eab79b482",
+    "sheet": "35852535528c",
+    "portrait": "0aff5c439942"
+   },
+   "sheet": "briefs/boki-art/evolutions/Arcestrel_female.jpg",
+   "portrait": "briefs/boki-art/portraits/light/Arcestrel_female.jpg"
   }
  },
  "Barokat": {
@@ -253,9 +257,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hash": {
    "sheet": "c1ab67ffe50e",
-   "card": "d6f0f1fd70a7",
+   "card": "36769e75be9a",
    "portrait": "dd552cd59ed5",
-   "hero": "e5f626b79ca3"
+   "hero": "fd2e5c656018"
   }
  },
  "Chandelapi": {
@@ -266,9 +270,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Chandelapi.png",
   "hash": {
    "sheet": "28a575a818f7",
-   "card": "ee00f2736930",
+   "card": "601b468178c1",
    "portrait": "cd2af138f655",
-   "hero": "7c5b2ecd16a7"
+   "hero": "9216b45c1adf"
   },
   "display_name": "Candelapi"
  },
@@ -347,9 +351,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Cubbat.png",
   "hash": {
    "sheet": "c0aa1e8ee2d5",
-   "card": "9ab4b804a0de",
+   "card": "e2f0f86c6daf",
    "portrait": "7f62ff025a3b",
-   "hero": "cf9d7f01ec27"
+   "hero": "a03773b3d940"
   },
   "display_name": "Cubwom"
  },
@@ -464,8 +468,10 @@
    "card": "briefs/boki-art/cards/Eclipsowl_female.jpg",
    "hash": {
     "card": "bc7710990f2b",
-    "sheet": "e1a35fe13620"
-   }
+    "sheet": "192c73d28686",
+    "portrait": "cc8ec96b950c"
+   },
+   "portrait": "briefs/boki-art/portraits/light/Eclipsowl_female.jpg"
   }
  },
  "Effigeetle": {
@@ -516,9 +522,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Fawngus.png",
   "hash": {
    "sheet": "2d2aca8a681c",
-   "card": "bc43d2becab9",
+   "card": "d0ab95e47b04",
    "portrait": "85361d83fd5c",
-   "hero": "d99119dda4f8"
+   "hero": "e1c91f09360a"
   },
   "display_name": "Fawnshroom"
  },
@@ -584,9 +590,9 @@
   "display_name": "Furnowary",
   "hash": {
    "sheet": "9743b454a9c5",
-   "card": "9f6028be7ca2",
+   "card": "e69882c240f7",
    "portrait": "77a8f33365dc",
-   "hero": "60fc21a0d25e"
+   "hero": "fbc729e36feb"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -779,8 +785,12 @@
   "female": {
    "card": "briefs/boki-art/cards/Gongrowl_female.jpg",
    "hash": {
-    "card": "c58f8851c045"
-   }
+    "card": "c58f8851c045",
+    "sheet": "75c29dd654df",
+    "portrait": "52de5aa7dfe6"
+   },
+   "sheet": "briefs/boki-art/evolutions/Gongrowl_female.jpg",
+   "portrait": "briefs/boki-art/portraits/light/Gongrowl_female.jpg"
   }
  },
  "Grainspin": {
@@ -1423,9 +1433,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Oarter.png",
   "hash": {
    "sheet": "e75d971cbc25",
-   "card": "dcfce321edad",
+   "card": "cbe9711f1c36",
    "portrait": "288e69e7fb43",
-   "hero": "3e877e664d0a"
+   "hero": "d1bf664c3e3d"
   }
  },
  "Olmlet": {
@@ -1539,9 +1549,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Prismander.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Prismander.png",
   "hash": {
-   "sheet": "1c74a0724bf4",
+   "sheet": "a080dd6265a9",
    "card": "ebe3c9eb5f73",
-   "portrait": "ce9295e5c941",
+   "portrait": "4980c7b808a7",
    "hero": "804e07c16656"
   }
  },
@@ -1579,9 +1589,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Prowyak.png",
   "hash": {
    "sheet": "15724a4b1a0b",
-   "card": "3398b64bbae7",
+   "card": "8a029ac3b6ea",
    "portrait": "f910a615af2f",
-   "hero": "fc8e9f2d39a8"
+   "hero": "2974dffe28f7"
   }
  },
  "Puffuse": {
@@ -1618,9 +1628,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Rampartoad.png",
   "hash": {
    "sheet": "0d1ca3c19eec",
-   "card": "999f373935b8",
+   "card": "c3dfda0868a0",
    "portrait": "fbc9c951c051",
-   "hero": "e5d499a6ff4c"
+   "hero": "9fcf9909f783"
   }
  },
  "Rattlebub": {
@@ -1670,9 +1680,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Ribbonwyrm.png",
   "hash": {
    "sheet": "09e217235d50",
-   "card": "568f45ac3998",
+   "card": "179359aff6bc",
    "portrait": "92cbd59bdcdd",
-   "hero": "dfa6c631e268"
+   "hero": "c8519d6337f6"
   }
  },
  "Rimeshrew": {
@@ -1735,9 +1745,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Sandwidow.png",
   "hash": {
    "sheet": "6acc609c779b",
-   "card": "15ae9b830b7e",
+   "card": "899f782c4fcf",
    "portrait": "f5e1ea27b4ac",
-   "hero": "113b04cd6b58"
+   "hero": "bd403a5322e4"
   },
   "sex_forms": true,
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
@@ -1746,8 +1756,10 @@
    "card": "briefs/boki-art/cards/Sandwidow_female.jpg",
    "hash": {
     "card": "41b6e0e8a57e",
-    "sheet": "c2fb05fcff27"
-   }
+    "sheet": "2c1d6938249d",
+    "portrait": "c0fa7c65a8b2"
+   },
+   "portrait": "briefs/boki-art/portraits/light/Sandwidow_female.jpg"
   }
  },
  "Sarcobra": {
@@ -1942,9 +1954,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Stormit.png",
   "hash": {
    "sheet": "7893d94f6633",
-   "card": "de239e0fabfd",
+   "card": "4e9e73210ecb",
    "portrait": "73a518e62c97",
-   "hero": "650248ee111d"
+   "hero": "91faeeecd484"
   }
  },
  "Sundormouse": {
@@ -2100,9 +2112,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Truffapir.png",
   "hash": {
    "sheet": "4f5c8fd12bc0",
-   "card": "8f113d6146fd",
+   "card": "4eebb9a9ffdf",
    "portrait": "cc10cd8dd52b",
-   "hero": "01eb827d6537"
+   "hero": "15fc72295c77"
   }
  },
  "Umbrathere": {
@@ -2197,8 +2209,10 @@
    "card": "briefs/boki-art/cards/Voltalon_female.jpg",
    "hash": {
     "card": "e6cd77fce06e",
-    "sheet": "f3783584c436"
-   }
+    "sheet": "48015a6ce551",
+    "portrait": "7a05755d4b17"
+   },
+   "portrait": "briefs/boki-art/portraits/light/Voltalon_female.jpg"
   }
  },
  "Voltmink": {
@@ -2222,9 +2236,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Wickapi.png",
   "hash": {
    "sheet": "90d9e53329e7",
-   "card": "9d6f9c8518e1",
+   "card": "d7a6158dfd00",
    "portrait": "774695875e57",
-   "hero": "62cc8cd3e95f"
+   "hero": "f84869795673"
   }
  },
  "Wyrmink": {
@@ -2582,9 +2596,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
   "hash": {
    "sheet": "fef62b4bc15c",
-   "card": "1a3922d36b9a",
+   "card": "01d1d9c233fd",
    "portrait": "23f0418bdfe9",
-   "hero": "2c02a972c5d0"
+   "hero": "1d10d40e6652"
   },
   "sheet": "briefs/boki-art/turnarounds/Jibbatross.jpg"
  },
@@ -2687,9 +2701,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Gambitfin.png",
   "hash": {
    "sheet": "5842a3c8b0e9",
-   "card": "27ab92633693",
+   "card": "009fd5449b94",
    "portrait": "2ae84ccd73ef",
-   "hero": "d27cc7897710"
+   "hero": "ffca54359a6c"
   }
  },
  "Harvantis": {
@@ -2722,8 +2736,12 @@
   "female": {
    "card": "briefs/boki-art/cards/Hourachnid_female.jpg",
    "hash": {
-    "card": "0e92e9df1c1d"
-   }
+    "card": "0e92e9df1c1d",
+    "sheet": "3e6909204862",
+    "portrait": "29fc8ac02f7f"
+   },
+   "sheet": "briefs/boki-art/evolutions/Hourachnid_female.jpg",
+   "portrait": "briefs/boki-art/portraits/light/Hourachnid_female.jpg"
   }
  },
  "Meteorab": {
@@ -2838,9 +2856,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Quivertoad.png",
   "hash": {
    "sheet": "51ef44f6d0cb",
-   "card": "b0c10e4ac8af",
+   "card": "df9415566aeb",
    "portrait": "b48a3f89d069",
-   "hero": "27e9de2db3a8"
+   "hero": "c6db1e04f4dd"
   }
  },
  "Rosedart": {
@@ -2864,9 +2882,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Scarabit.png",
   "hash": {
    "sheet": "5c1c834a8a2e",
-   "card": "e8d5c8dc7d1c",
+   "card": "c7504dc88ba6",
    "portrait": "5af2810e9682",
-   "hero": "b5d72f132cb4"
+   "hero": "618bb67c3a25"
   }
  },
  "Scoopsy": {
@@ -3012,9 +3030,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Pipwom.png",
   "hash": {
    "sheet": "70636c11bf24",
-   "card": "35279387b54a",
+   "card": "f0b1ee4013f3",
    "portrait": "5922f17278ca",
-   "hero": "f10e69c2c68f"
+   "hero": "3cf3374cf9a9"
   }
  },
  "Siegephant": {
@@ -3121,9 +3139,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Critwom.png",
   "hash": {
    "sheet": "b4707bbf5c00",
-   "card": "0656f6aae924",
+   "card": "dd42fa4165de",
    "portrait": "db1749513a3a",
-   "hero": "af9c26ff3f0d"
+   "hero": "da27b74e83a7"
   }
  },
  "Sirencada": {
@@ -3134,9 +3152,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Sirencada.png",
   "hash": {
    "sheet": "c6756dd6edae",
-   "card": "1849c0928347",
+   "card": "fb4d374d3993",
    "portrait": "968d370f07bd",
-   "hero": "5dd44bf4c5c9"
+   "hero": "4b6fe6748b3c"
   }
  },
  "Chimelop": {
@@ -3187,9 +3205,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dynaboa.png",
   "hash": {
    "sheet": "a534e13ee90e",
-   "card": "2dfc9a3f657e",
+   "card": "e28d6d3db2e6",
    "portrait": "83e33d0b9826",
-   "hero": "94e8f6d7da0d"
+   "hero": "a59df7d2b16c"
   }
  },
  "Bastling": {
@@ -3200,9 +3218,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Bastling.png",
   "hash": {
    "sheet": "e76848ff303e",
-   "card": "b33e2b0fb371",
+   "card": "5232e7abaa84",
    "portrait": "cb63d8552a2f",
-   "hero": "fcec4110c698"
+   "hero": "fbd0fc53e64b"
   }
  }
 }

@@ -698,3 +698,11 @@ ART -> COORD 11-10 02:13: OWNER PICKS, cards live (hero changed; sheet + portrai
 
 ### 11-10 02:16 ET COORD -> ART
 COORD 11-10 02:20 ET: synced 02:13 owner picks into Bokidex: Buckleron, Chandelotl (softer), Ringrove heroes (+Hatstag hero hash change picked up). Crystalotl showed no change in the dex yet. Site commits 5227ec9+5828e09 ready; push waits on owner OK. Sporcupine: noted, waiting for the new body.
+
+### 11-10 02:43 ET ART -> COORD
+ART -> COORD 11-10 02:43: LIVE / READY (manifest 232):
+- NEW POSES (owner: stages in a line must not share a pose; same designs, hero changed): Oarter, Ribbonwyrm, Cubbat, Pipwom, Critwom, Sirencada, Quivertoad, Rampartoad, Furnacowary, Prowyak, Bastling, Fawngus, Wickapi, Chandelapi, Sandwidow, Scarabit, Truffapir, Gambitfin, Stormit, Dynaboa. Their sheets are unchanged (a sheet is a neutral turnaround).
+- Canvastross and Jibbatross now have Kerchick's face (owner); sheet + portrait follow.
+- Prismander: soft-colour sheet + portrait (full set).
+- FEMALES READY, full sets (card + sheet + portrait in the "female" block): Voltalon, Gongrowl, Hourachnid, Eclipsowl, Sandwidow, Arcestrel, plus the earlier Gongibbon, Kestrike, Murmurling, Pavonazar. Still being redone, do not sync: Lunowl and Murmuron females (owner: too different from the males).
+- Crystalotl "showed no change": its file ID is Chandelotl; cards/Chandelotl.jpg changed at 02:13 (hero hash 'hero' in the manifest moved). Sheet + portrait in the new colours follow.

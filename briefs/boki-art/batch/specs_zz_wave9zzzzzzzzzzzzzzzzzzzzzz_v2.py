@@ -1069,3 +1069,10 @@ OPTB('Blastopuff','Puffuse','final','tough',True,False,[
  "a big sea-mine pufferfish seen from the side, swimming left: the same charcoal body with glowing yellow cracks and cream belly, now covered in short thick contact-horn spikes like a naval mine, its fuse tail longer and lit, small angry eyes, cheeks puffed.",
  "a long torpedo-shaped pufferfish, no longer a ball: the same charcoal back with yellow cracks and cream belly stretched into a sleek rocket body with fin-like tail vanes, the fuse now a sparking crest along its back, darting forward with a fierce grin.",
  "a huge pufferfish mid-explosion pose: fully inflated and rearing back, spikes shot out long like a firework burst, the yellow cracks blazing wide across its charcoal skin, fuse burnt down to a stub, eyes wide and furious. All spikes attached to its body."])
+
+# ===== 08:20 ET 11-10: pose/face picks live as cards (22 Boki, list below). Sheets (3 runs) from each new card so sheet and card agree; portraits keep
+# their current pose where the design did not change, so only Canvastross and Jibbatross (new face) get new portraits.
+_POSED="Oarter Ribbonwyrm Cubbat Pipwom Critwom Sirencada Quivertoad Canvastross Jibbatross Rampartoad Furnacowary Prowyak Bastling Fawngus Wickapi Chandelapi Sandwidow Scarabit Truffapir Gambitfin Stormit Dynaboa".split()
+for _n in ('Canvastross','Jibbatross'):
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg','final' if _n=='Canvastross' else 'mid','majestic' if _n=='Canvastross' else 'sleek',_GC,_GN,False,True,"standing on the ground, wings folded, grumpy sideways look at the viewer")
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_face'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_face'; SPECS[_n0+1]['runs']=2
