@@ -243,6 +243,8 @@ func dash_trail(h) -> void:
 	dust(h.pos, 7)
 
 var ghosts: Array = []
+const GLOW_DUR := 0.5      # s: a body glow's life
+const GLOW_RISE := 1.4     # m/s: how fast it drifts up
 var _ghost_mesh: Mesh
 
 ## A fading after-image of a dashing hunter.
@@ -257,7 +259,15 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.global_position = at + Vector3(0, 0.7 * scl, 0)
 	mi.rotation.y = yaw
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
-	ghosts.append({"node": mi, "t": 0.0, "col": col})
+	ghosts.append({"node": mi, "t": 0.0, "col": col, "dur": 0.26, "rise": 0.0})
+
+## The one world cue for a level-up or an ability coming ready: a short upward glow over the body
+## in `col`. No ground ring, no burst (a ground ring means gameplay).
+func body_glow(at: Vector3, col: Color) -> void:
+	ghost(at, 0.0, col, 1.15)
+	var g: Dictionary = ghosts[ghosts.size() - 1]
+	g["dur"] = GLOW_DUR
+	g["rise"] = GLOW_RISE
 
 func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
 	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
@@ -532,8 +542,9 @@ func _process(delta: float) -> void:
 			mi.visible = false; flashes.erase(f)
 	for g in ghosts.duplicate():
 		g["t"] += delta
-		var k: float = g["t"] / 0.26
+		var k: float = g["t"] / float(g["dur"])
 		var gm: MeshInstance3D = g["node"]
+		gm.global_position.y += float(g["rise"]) * delta
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
