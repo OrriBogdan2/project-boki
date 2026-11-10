@@ -489,7 +489,7 @@ def move_bones(arm, kept):
                 for cs in curves if len(cs) == 3]
         far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max())
         top = far[np.linalg.norm(far, axis=1).argmax()]
-        for cs in curves:
+        for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
             if len(cs) != 3:
                 continue
             cs = sorted(cs, key=lambda c: c.array_index)
