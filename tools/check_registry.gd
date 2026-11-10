@@ -213,6 +213,7 @@ const CHECKS := {
 	"--toy-check": ["res://tools/toy_check.gd", "toy_check", null],      # the base's ball, post and tub (GARDEN.md section 4)
 	"--race-check": ["res://tools/race_check.gd", "race_check", null],      # the Dash race (GARDEN.md 5)
 	"--home-verbs-check": ["res://tools/home_verbs_check.gd", "home_verbs_check", null],      # also --home-verbs-shots=<dir>
+	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],      # in-match shops, the map legend
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>

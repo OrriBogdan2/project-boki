@@ -19,14 +19,14 @@ Status: **have** = we have an equivalent. **differs** = we have one, but it work
 | Hypervive | Slows you by 60% and makes you Vulnerable for 5s, then fully restores HP and mana. Taking damage cancels it [W-Hypervive] | 1,000 gold (2,000 → 1,000 in Feb 2025) [W-Shops][P-Feb5], stacks to 1 | **Deep Draught** | **differs**. The closest we have is `medkit` (40 HP + 20 armor, instant). Proposal: add Deep Draught as a new item and keep the medkit. |
 | Pocket UAV / Pocket Oracle | Marks enemy hunters on your squad's map for a short time [W-PocketUAV]. Removed from shops in 2.02 [P-2.02] | 1,500 gold, stacks to 2 [W-PocketUAV] | **Hawk Whistle** | **differs**. `scanner` Seeker flare reveals rivals within 26 tiles for 3s, around you only. The source covers the whole map but shows map marks only. Duration [?]. |
 | Jump Pad | Placed pad. It arms after 2s and launches anything that steps on it. It lasts 30s, or 10s after its first use. Dashing into it keeps your momentum [W-JumpPad] | 3,000 gold (2,000 → 3,000 in Feb 2025) [W-JumpPad][P-Feb5]. Stack 1 → 2 in Season 2 [P-S2] | `jump_pad` Spring pad | **differs**. Ours lasts 20s, arms at once, and stacks to 3. Proposal: arm after 2s, last 30s or 10s after first use, stack to 2. |
-| Emergency Platform | Over open air or hazards only. Makes a platform for 30s that refills ally gliders and gives vision [W-EmPlatform]. From 1.03 it casts after 0.3s instead of at once, and floats you during the cast [P-1.03]. Things you place on it stay after it fades [W-EmPlatform] | Added to every shop in 1.01 [P-1.01]. Cost 500 → 1,500 in 1.02 [P-1.02]. Stack [?] | **Cloud Raft** | **missing** |
-| Deployable Fan | Builds a fan at a target spot that launches anyone who touches it. Lasts 60s, 2 charges. Fan HP is 750 or 3,000 (the wiki gives both) [W-Fan]. Launches stack [W-Fan] | 1,000 gold [W-Shops] (2,000 as a power [W-Fan]). In the final version [?] | **Gust Fan** | **missing** |
-| Two-Way Teleporter → "Group Teleport" | Opens a portal at a target spot and one at your feet. After 8s you can reactivate to swap everything standing in each portal [W-2Way] | 3,000 gold [W-Shops]. "Group Teleport" was re-enabled in 1.05 [P-1.05] and its stack raised to 2 in Season 2 [P-S2]. Group Teleport = Two-Way Teleporter renamed [?] | **Twin Gate** | **missing** |
-| Pocket Anomaly | Places a warp anomaly that works like the ones in the world: step in, channel briefly, then get teleported somewhere random. The world anomaly behaves like Anywhere But Here [W-ABH][P-Jan8]. A placed one disappears after a timer [P-1.02] | 3,000 gold, new in 1.02 [P-1.02]. Stack raised to 3 in Season 2 [P-S2]. Timer [?] | **Warp Seed** | **missing** |
-| Most Wanted | Starts a 2-minute timer and reveals you to every enemy. If you survive, all your allies are revived and gain XP, and you get a rare or epic reward. Knocks, kills and assists shorten the timer. If you are knocked while carrying it, you go straight to your deathbox and the team that knocked you takes the reward. One per team at a time. It also spawns in the world at night [W-MostWanted][S-data §10] | 3,000 gold [W-MostWanted][P-Feb5] | **Bounty Banner** | **missing** |
-| Mobile Respawn Beacon | Places a respawn beacon for your squad. It can be set on temporary terrain [W-Beacon]. Final revive time on a beacon: 6s, then 12s of resurrection sickness (−25% damage and healing) [P-1.0] | 8,000 gold [W-Beacon][P-Feb5] (25,000 in Jan 2025 [P-Jan8]) | **Hearth Lamp** | **missing** |
-| Tactical Nuke | Calls a warhead on a target spot. It lands after 5s, deals 5,000 damage, and leaves fire that deals 720/s for 3s. It hurts you and your allies too, and destroys beacons and basecamps [W-Nuke] | 3,000 gold [W-Shops]. Shop in the final version [?] | **Skyfall Charge** | **missing** |
-| Mass Heist | Target a spot and channel for 1.5s. Raccoons steal items and gold there, including 50% of a hunter's gold and loot from unopened vaults [W-MassHeist] | Shop, price unknown ("XXXX") [W-MassHeist] [?] | **Pilfer Pouch** | **missing** |
+| Emergency Platform | Over open air or hazards only. Makes a platform for 30s that refills ally gliders and gives vision [W-EmPlatform]. From 1.03 it casts after 0.3s instead of at once, and floats you during the cast [P-1.03]. Things you place on it stay after it fades [W-EmPlatform] | Added to every shop in 1.01 [P-1.01]. Cost 500 → 1,500 in 1.02 [P-1.02]. Stack [?] | **Cloud Raft** | **have** |
+| Deployable Fan | Builds a fan at a target spot that launches anyone who touches it. Lasts 60s, 2 charges. Fan HP is 750 or 3,000 (the wiki gives both) [W-Fan]. Launches stack [W-Fan] | 1,000 gold [W-Shops] (2,000 as a power [W-Fan]). In the final version [?] | **Gust Fan** | **have** |
+| Two-Way Teleporter → "Group Teleport" | Opens a portal at a target spot and one at your feet. After 8s you can reactivate to swap everything standing in each portal [W-2Way] | 3,000 gold [W-Shops]. "Group Teleport" was re-enabled in 1.05 [P-1.05] and its stack raised to 2 in Season 2 [P-S2]. Group Teleport = Two-Way Teleporter renamed [?] | **Twin Gate** | **have** |
+| Pocket Anomaly | Places a warp anomaly that works like the ones in the world: step in, channel briefly, then get teleported somewhere random. The world anomaly behaves like Anywhere But Here [W-ABH][P-Jan8]. A placed one disappears after a timer [P-1.02] | 3,000 gold, new in 1.02 [P-1.02]. Stack raised to 3 in Season 2 [P-S2]. Timer [?] | **Warp Seed** | **have** |
+| Most Wanted | Starts a 2-minute timer and reveals you to every enemy. If you survive, all your allies are revived and gain XP, and you get a rare or epic reward. Knocks, kills and assists shorten the timer. If you are knocked while carrying it, you go straight to your deathbox and the team that knocked you takes the reward. One per team at a time. It also spawns in the world at night [W-MostWanted][S-data §10] | 3,000 gold [W-MostWanted][P-Feb5] | **Bounty Banner** | **have** |
+| Mobile Respawn Beacon | Places a respawn beacon for your squad. It can be set on temporary terrain [W-Beacon]. Final revive time on a beacon: 6s, then 12s of resurrection sickness (−25% damage and healing) [P-1.0] | 8,000 gold [W-Beacon][P-Feb5] (25,000 in Jan 2025 [P-Jan8]) | **Hearth Lamp** | **have** |
+| Tactical Nuke | Calls a warhead on a target spot. It lands after 5s, deals 5,000 damage, and leaves fire that deals 720/s for 3s. It hurts you and your allies too, and destroys beacons and basecamps [W-Nuke] | 3,000 gold [W-Shops]. Shop in the final version [?] | **Skyfall Charge** | **have** |
+| Mass Heist | Target a spot and channel for 1.5s. Raccoons steal items and gold there, including 50% of a hunter's gold and loot from unopened vaults [W-MassHeist] | Shop, price unknown ("XXXX") [W-MassHeist] [?] | **Pilfer Pouch** | **have** |
 | Basecamp Recaller | After a 4s channel, pulls your basecamp and everyone standing on it to you [W-Basecamp] | 1,000 gold [W-Basecamp] | — | **skip**: Boki has no capturable basecamps |
 | Basecamp Deployment Beacon | Drops a basecamp your team owns. It deals 650 damage where it lands. You get it by packing up your camp for 800 gold [W-Basecamp] | 5,000 gold [W-Shops] | — | **skip**: no basecamps |
 
@@ -34,17 +34,17 @@ Status: **have** = we have an equivalent. **differs** = we have one, but it work
 
 | Source item | What it does (numbers) | Where found | Boki | Status |
 |---|---|---|---|---|
-| Anywhere But Here | Channel for 4s, then teleport to a random spot inside the next circle. Works inside the storm, so it can replace a recall [W-ABH] | World only, rare, stack 1 [W-ABH]. It made up 14% of Little Helper drops (pre-1.0) [P-Jan22] | **Lostway Scroll** | **missing** |
+| Anywhere But Here | Channel for 4s, then teleport to a random spot inside the next circle. Works inside the storm, so it can replace a recall [W-ABH] | World only, rare, stack 1 [W-ABH]. It made up 14% of Little Helper drops (pre-1.0) [P-Jan22] | **Lostway Scroll** | **have** |
 | Ethereal Smoke | You and nearby allies get stealth and +50 move speed for 30s. Stealth breaks in combat or within 1,500 units of an enemy hunter [W-EthSmoke], and on dash [P-Jan8] | World [W-EthSmoke] | `smoke` Smoke bomb | **differs**. Ours is a fixed cloud that hides everyone inside it for 8s. Keep ours; the source's is a moving team cloak. |
-| EMP / Disruption Grenade | Thrown. Bursts 0.3s after landing: shreds 1,600 armor and slows enemies by 30% for 2s. Neutralizes enemy basecamps [W-EMP] | World, common [W-EMP] | **Shatter Charge** | **missing** |
-| Storm/Death Circle Grenade | Makes a pocket of storm. It grows for 15s, holds for 10s and shrinks for 15s. Damage scales with the night [W-DeathCircle]. It blocks all healing inside it [P-2.0x] | World [W-DeathCircle] | **Blight Flask** | **missing** |
-| Scanner Ward (Scan Grenade) | Thrown ward. Gives vision for 60s and reveals stealthed enemies. Enemies stay visible for 3s after leaving its view. Anyone can pick one up, including enemy wards [W-ScanGren] | World, stacks to 4 [W-ScanGren] | **Lookout Lantern** | **missing**. Ours (`scanner`) is a short reveal pulse, not a ward. |
-| Spike Wall | You root yourself for 2s to build a wall (3s → 2s in Feb 2025 [P-Feb19]). The wall damages hunters who touch it, based on their speed [W-SpikeWall] | World, stacks to 10 [W-SpikeWall] | **Thorn Wall** | **missing** |
-| Prophet's Potion | Channel for 1s: your team sees future storm locations for 30s [W-Prophet] | World, uncommon [W-Prophet] | **Omen Draught** | **missing** |
-| Vive Packs | Throws a health pack that lasts up to 30s. Whoever picks it up heals 140 HP/s for 5s, until hit. If they're in the air, it also bounces them up. 2 charges [W-VivePacks] | World, epic [W-VivePacks] | **Toss Satchel** | **missing** |
+| EMP / Disruption Grenade | Thrown. Bursts 0.3s after landing: shreds 1,600 armor and slows enemies by 30% for 2s. Neutralizes enemy basecamps [W-EMP] | World, common [W-EMP] | **Shatter Charge** | **have** |
+| Storm/Death Circle Grenade | Makes a pocket of storm. It grows for 15s, holds for 10s and shrinks for 15s. Damage scales with the night [W-DeathCircle]. It blocks all healing inside it [P-2.0x] | World [W-DeathCircle] | **Blight Flask** | **have** |
+| Scanner Ward (Scan Grenade) | Thrown ward. Gives vision for 60s and reveals stealthed enemies. Enemies stay visible for 3s after leaving its view. Anyone can pick one up, including enemy wards [W-ScanGren] | World, stacks to 4 [W-ScanGren] | **Lookout Lantern** | **have** |
+| Spike Wall | You root yourself for 2s to build a wall (3s → 2s in Feb 2025 [P-Feb19]). The wall damages hunters who touch it, based on their speed [W-SpikeWall] | World, stacks to 10 [W-SpikeWall] | **Thorn Wall** | **have** |
+| Prophet's Potion | Channel for 1s: your team sees future storm locations for 30s [W-Prophet] | World, uncommon [W-Prophet] | **Omen Draught** | **have** |
+| Vive Packs | Throws a health pack that lasts up to 30s. Whoever picks it up heals 140 HP/s for 5s, until hit. If they're in the air, it also bounces them up. 2 charges [W-VivePacks] | World, epic [W-VivePacks] | **Toss Satchel** | **have** |
 | Gold Key | Points to the nearest golden chest and opens it. Can also open a vault instantly [W-GoldKey] | World, rare [W-GoldKey] | `chest_key` Chest Key | **have**. Ours pings and opens locked chests. It doesn't open vaults. |
 | Evil Key | Points to the nearest evil chest (exotic loot). Dropped by PvP combat [W-EvilKey] | PvP drop [W-EvilKey] | `rift_key` Rift Key (nearest) | **differs**. Ours opens an extraction hatch. Keep. |
-| Orb of Life / Orb of Revival | Revives your team; revives at full HP from 1.03 [P-1.03]. Final-boss reward from Season 2 [P-S2] | Boss only [P-S2] | **Revive Ember** | **missing** (boss reward, not shop) |
+| Orb of Life / Orb of Revival | Revives your team; revives at full HP from 1.03 [P-1.03]. Final-boss reward from Season 2 [P-S2] | Boss only [P-S2] | **Revive Ember** | **have** |
 | Tome of Knowledge / Codex of Mass Enlightenment | 1s channel. The Tome gives +20% of a level's XP (Academy only); the Codex gives the team +1 level [W-Tome][W-Codex] | World | — | **skip** [?]: only if Boki gets in-match levels |
 | Little Cook, Snowball, Chonker Cannon, Penguin Egg, Avalanche, Present, Tree Costume, Money Tree | Event and power-era fun items, e.g. Little Cook makes 8 consumables over 32s, cooldown 150s [W-LittleCook]. They are listed as consumables [W-Consumables], but the only final-version notes are Little Cook buffs in 1.02 [P-1.02] | Vaults, bosses, events | — | **skip for now**: seasonal; revisit for events |
 
@@ -106,6 +106,21 @@ Boki already gives each Hollow Crown region a `purpose` in content/maps/hollowcr
 - **Second-to-last car:** a box that grants circle (storm) immunity until endgame [W-Train]. **Rear car:** a revive Everbeacon [W-Train][W-2Way].
 - **Bullet Trains** storm shift: 3 shorter, much faster trains [W-Train].
 - **Boki (owner Nov 7):** the sky train *is* the fast travel, a winding loop with stops (scripts/match/sky_train.gd already stops at piers). The owner's choice wins. Worth copying: the storm-safe car and a beacon car [?: owner].
+
+## Built Nov 8 (ext/utilities-shops)
+
+Every row above marked missing is now an item in `content/utility/` (Boki names). Where a number
+changed on the way: Deep Draught, Jump Pad and Seeker use the numbers in their JSON. A few
+deviations:
+
+- No storm in Boki: Blight Flask is a Blight zone, Omen Draught shows the Blight Wardens (your team only),
+  Lostway Scroll warps you to a random spot on the map.
+- Twin Gate swaps by itself after its timer instead of by a second press.
+- Skyfall, Shatter and the others hit foes only (not allies, not beacons).
+- Pilfer Pouch destroys the gems; the thrower does not gain them. Bounty Banner has no knocked-while-carrying rule.
+- Revive Ember is never sold: a rare chest find only (no boss drop is wired).
+- Online, gates, seeds and pilfer move only the bodies this game owns, like the spring pads.
+- Each shop sells a fixed list (`sells` in content/rules/shops.json), the same every match.
 
 ## Sources
 
