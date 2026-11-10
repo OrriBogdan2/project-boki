@@ -168,10 +168,10 @@ func run(progress := Callable()) -> void:
 ## cheap and shrink when one costs more than FRAME_MS over a plain frame (a first draw is
 ## where a GPU compiles a shader), down to BATCH_MIN. Only how many frames the warm-up takes depends
 ## on it. From a cold shader cache a batch of 8 (one light setup) was a 400-560 ms frame on an RTX 4070; a
-## stand-in is four draws now, one per light setup, so batches start at 2 and go down to 1. An M5's warm-up is
-## mostly frames (each ~30 ms with the map loaded; item 33): a batch is one.
-const BATCH := 2
-const BATCH_MIN := 1
+## stand-in is four draws layered, one per light setup, so there batches are half as big. Toggled, an M5's
+## warm-up was mostly frames (eight a batch, each ~30 ms with the map loaded; item 33).
+const BATCH := 4
+const BATCH_MIN := 2
 const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
@@ -262,7 +262,8 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		return true
 	var cb := m.cam.global_transform.basis
 	var front := m.cam.global_position - cb.z * 6.0
-	var wl := _lights()
+	var layered := _layered()
+	var wl := _lights(layered)
 	# (a camera culls lights by their layers too: every light joins the stand-ins' layer meanwhile,
 	# or they'd all draw unlit)
 	# (and the sun lights and shadows only the stand-ins meanwhile: its shadow pass drew the whole map
@@ -283,10 +284,12 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	var plain := (Time.get_ticks_usec() - t0) / 1000.0
 	if not m.is_inside_tree():
 		return false
-	var n := BATCH
+	var n := BATCH / 2 if layered else BATCH       # (layered, a stand-in is four draws)
+	var n_min := BATCH_MIN / 2 if layered else BATCH_MIN
+	var setups: Array = [[true, true]] if layered else [[false, false], [true, false], [false, true], [true, true]]
 	var i := 0
 	var batches := 0
-	var held: Array = []      # the batch before this one: it stays for this batch's frame too
+	var held: Array = []      # layered, the batch before this one: it stays for this batch's frame too
 	while i < list.size():
 		var batch: Array = list.slice(i, mini(i + n, list.size()))
 		t0 = Time.get_ticks_usec()
@@ -295,32 +298,43 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		for k in batch.size():
 			if not is_instance_valid(batch[k]):
 				continue
-			var gx := (float(k % cols) / maxf(1.0, cols - 1) - 0.5) * 1.1
-			var gy := (float(k / cols) / maxf(1.0, cols - 1) - 0.5) * 0.6
-			# a copy under each light setup, in its own quarter of the grid
-			for li in SETUP_LAYERS.size():
+			var g := Vector2(float(k % cols), float(k / cols)) / maxf(1.0, cols - 1) - Vector2(0.5, 0.5)
+			# layered, a copy under each light setup, in its own quarter of the view
+			for li in (SETUP_LAYERS.size() if layered else 1):
 				var px := _proxy(batch[k])
 				if px == null:
 					break
 				m.add_child(px)
 				_to_layer(px, SETUP_LAYERS[li])
-				var at := front + cb.x * (gx + (li % 2 - 0.5) * 1.3) + cb.y * (gy + (li / 2 - 0.5) * 0.8)
+				var off := g * Vector2(2.4, 1.4)
+				if layered: off = g * Vector2(1.1, 0.6) + Vector2(li % 2 - 0.5, li / 2 - 0.5) * Vector2(1.3, 0.8)
+				var at := front + cb.x * off.x + cb.y * off.y
 				px.global_transform = Transform3D(cb.scaled(Vector3.ONE * 0.04), at)
 				pxs.append(px)
-		# each batch is drawn two frames, the second beside the next batch: a new stand-in meets its lights a
-		# frame late (drawn one frame, two thirds of the variants waited for play: --hitch-check, cold cache)
-		await m.get_tree().process_frame
-		if not m.is_inside_tree():
-			return false
-		var worst := (Time.get_ticks_usec() - t0) / 1000.0
+		# a new stand-in meets its lights a frame late: toggled, each setup gets two frames; layered, each batch
+		# is drawn two frames, the second beside the next batch (with one, two thirds of the variants waited
+		# for play: --hitch-check, cold cache)
+		var worst := 0.0
+		for setup in setups:
+			wl[0].visible = setup[0]
+			wl[1].visible = setup[1]
+			for _f in (1 if layered else 2):
+				await m.get_tree().process_frame
+				if not m.is_inside_tree():
+					return false
+				var now := Time.get_ticks_usec()
+				worst = maxf(worst, (now - t0) / 1000.0)
+				t0 = now
 		batches += 1
 		for px in held: (px as Node).queue_free()
-		held = pxs
+		held = pxs if layered else []
+		if not layered:
+			for px in pxs: (px as Node).queue_free()
 		i += batch.size()
 		progress.call(float(i) / list.size())
 		var extra := worst - plain
 		if extra > FRAME_MS:
-			n = maxi(BATCH_MIN, n / 2)
+			n = maxi(n_min, n / 2)
 		elif extra < FRAME_MS * 0.6:
 			n = mini(n * 2, 512)
 	await m.get_tree().process_frame
@@ -335,9 +349,9 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
 	return m.is_inside_tree()
 
-## The render layers warm_up's stand-ins draw on (nothing else in the game uses them): a copy of each stand-in
-## on each, lit by neither of _lights, the omni, the spot and both, so all four light setups compile in the same
-## frames (one setup at a time took 8 frames a batch: 368 frames, 16 s of an M5's loading)
+## The render layers warm_up's stand-ins draw on (nothing else in the game uses them). Layered, a copy of each
+## stand-in on each, lit by neither of _lights, the omni, the spot and both, so all four light setups compile in
+## the same frame; toggled, one copy on the first under each setup in turn, two frames each.
 const SETUP_LAYERS := [1 << 19, 1 << 18, 1 << 17, 1 << 16]
 const LAYERS := (1 << 19) | (1 << 18) | (1 << 17) | (1 << 16)
 func _to_layer(px: Node, layer: int) -> void:
@@ -519,16 +533,16 @@ func _proxy(src: Node3D) -> Node3D:
 	return px
 
 ## The lights a stand-in can be lit by in play: an omni like the muzzle flash and the lamps, and a
-## spot like the sky train's headlight, both covering the grid of stand-ins, each lighting only the copies on
-## its SETUP_LAYERS.
-func _lights() -> Array:
+## spot like the sky train's headlight, both covering the grid of stand-ins (layered, each lights only the
+## copies on its SETUP_LAYERS).
+func _lights(layered: bool) -> Array:
 	var cb := m.cam.global_transform.basis
 	var front := m.cam.global_position - cb.z * 6.0
 	var o := OmniLight3D.new()
 	o.omni_range = 4.0
 	o.light_energy = 0.05
 	o.shadow_enabled = false
-	o.light_cull_mask = SETUP_LAYERS[1] | SETUP_LAYERS[3]
+	if layered: o.light_cull_mask = SETUP_LAYERS[1] | SETUP_LAYERS[3]
 	m.add_child(o)
 	o.global_position = front - cb.z * 0.5
 	var sp := SpotLight3D.new()
@@ -536,7 +550,7 @@ func _lights() -> Array:
 	sp.spot_angle = 35.0
 	sp.light_energy = 0.05
 	sp.shadow_enabled = false
-	sp.light_cull_mask = SETUP_LAYERS[2] | SETUP_LAYERS[3]
+	if layered: sp.light_cull_mask = SETUP_LAYERS[2] | SETUP_LAYERS[3]
 	m.add_child(sp)
 	sp.global_transform = Transform3D(cb, m.cam.global_position)
 	return [o, sp]
@@ -551,3 +565,10 @@ static func _code_hash(sh: Shader) -> String:
 	if not _code_hashes.has(id):
 		_code_hashes[id] = sh.code.md5_text().substr(0, 12)
 	return _code_hashes[id]
+
+## Whether the stand-ins are drawn layered (all four light setups in one frame) or toggled (one setup at a
+## time, 8 frames a batch). Layered cut the RTX 4070 SUPER's first-launch warm-up from 7.4 s to 4.1 s with no
+## compile left for play. The Mac's GL over Metal keeps no shader cache and finishes compiles in play: layered,
+## its drop had 57-76 frames over 50 ms instead of 4-19 and the real match's p99 went from 43 to 56 ms.
+static func _layered() -> bool:
+	return OS.get_name() != "macOS"
