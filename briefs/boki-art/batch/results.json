@@ -72621,5 +72621,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_cindermaw_circle_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_cindermaw_circle",
+    "name": "Cindermaw (V2 new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_cindermaw_circle_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glassolotl_left",
+    "name": "Glassolotl (V2 new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_glassolotl_left_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_ringrove_tilt",
+    "name": "Ringrove (head tilt to camera)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2g_ringrove_tilt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glassolotl_back",
+    "name": "Glassolotl (V2 new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_glassolotl_back_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_glaivyx_white",
+    "name": "Glaivyx V2 (white inner fur)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2g_glaivyx_white_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_cindermaw_circle",
+    "name": "Cindermaw (V2 new pose)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2p_cindermaw_circle_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chandelotl_gold",
+    "name": "Chandelotl colour scheme: gold",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_chandelotl_gold_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glassolotl_pounce",
+    "name": "Glassolotl (V2 new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_glassolotl_pounce_1.jpg",
+    "ok": true
   }
 ]
