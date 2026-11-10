@@ -10,6 +10,7 @@ const WALL_S := 0.22          # s it lasts
 const RANGE_SIZE := 0.9       # m across the fade at max range
 const RANGE_S := 0.42         # s it lasts
 const RANGE_ALPHA := 0.55     # the max-range fade is fainter than a wall hit
+const WALL_BACK := 0.6        # m a wall puff sits back from where the shot stopped, so a rock doesn't hide it
 const LIFT := 0.1             # m above the point the shot ended
 const SPECK_WHITE := 0.6      # how much of white the puff's specks carry
 
@@ -24,7 +25,9 @@ static func shot_ended(m: Match, s: Dictionary, at: Vector3, why: String) -> voi
 	if by is Kin:
 		by = (by as Kin).owner_h
 	if by is Hunter:
-		puff(m, colour_of(by as Hunter), at, why == "wall")
+		var v: Vector2 = s["vel"]
+		var back := Vector3(v.x, 0, v.y).normalized() * (WALL_BACK if why == "wall" else 0.0)
+		puff(m, colour_of(by as Hunter), at - back, why == "wall")
 
 ## The Hunter's ability colour (their kit's colour; the class accent for one without a kit).
 static func colour_of(h: Hunter) -> Color:
