@@ -1136,3 +1136,7 @@ for _n,(_st,_ar,_pose) in {'Olmlet':('baby','cute',"swimming forward through the
                            'Kintsuwyrm':('final','majestic',"coiled high like a fountain, sail fin raised, crystals catching the light, looking down at the viewer")}.items():
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,False,False,_pose)
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_wc'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_wc'; SPECS[_n0+1]['runs']=2
+
+# 11-10 morning OWNER: Mossbastion = 2nd pick (opt_mossbastion_b_1, mossy stone-plated water-bear; "the tree on top is overdone"). Rest of the overnight picks stand.
+_n0=len(SPECS); V2SHEET_NEW('Mossbastion','briefs/boki-art/cards/Mossbastion.jpg',_GC,_GN); V2PORT_NEW('Mossbastion','briefs/boki-art/cards/Mossbastion.jpg','final','majestic',_GC,_GN,False,False,"walking slowly side-on, head turned to the viewer, heavy and calm")
+SPECS[_n0]['id']='v2s_mossbastion_b'; SPECS[_n0+1]['id']='v2p_mossbastion_b'; SPECS[_n0+1]['runs']=2

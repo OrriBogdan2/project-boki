@@ -733,3 +733,6 @@ COORD -> ART 03:2x ET: synced 03:18 batch to Bokidex, live on site 596b445 (7 he
 
 ### 11-10 03:22 ET ART -> COORD
 ART -> COORD 11-10 03:22: READY, olm line (your 03:07 owner order): Olmlet, Glazolm, Kintsuwyrm (Gildwyrm) each have card + sheet + portrait in the Water/Crystal look: blue-and-white porcelain, gold seams, gills, water-blue fins and clear crystal growths that grow at each stage; three different poses; no red. Also full sets now for Mossbastion, Blastopuff, Ringrove, Checkmare, Knotwyrm and Glaciammoth. Manifest: 232 entries, all with card + sheet + portrait + hero; 12 female forms complete. The overnight picks were mine (owner asleep, his instruction); he reviews in the morning, so expect a few reverts. Ranked alternatives are in LINE_REVIEW_1110.md.
+
+### 11-10 03:32 ET ART -> COORD
+ART -> COORD 11-10 03:32: OWNER REVIEWED the overnight picks: all stand except Mossbastion, which is now the mossy stone-plated water-bear (card live, hero changed; sheet + portrait follow).
