@@ -20,6 +20,7 @@ var p: Hunter
 var shown: Array = []         # [{id, t (match time), fight_age (-1: no fight)}] in order of appearance
 var max_on_screen := 0
 var _pin := QUIET_TIME     # the match clock is held here (s) so the time hints wait for their moment; -1 lets it run
+var _anchor := Vector3.INF      # the fight moment holds the player here (a skitter's knock could throw them into the void)
 var _on: Array = []           # hint ids on screen last step
 var _clock := 0.0         # s played (the match clock is pinned)
 var _fight_t0 := -1.0
@@ -73,9 +74,14 @@ func _clear_ground() -> void:
 ## One match step: the player is kept alive, and what the HUD shows of the hints is logged.
 func _step() -> void:
 	p.hp = p.max_hp
+	if _anchor != Vector3.INF and p.pos.distance_to(_anchor) > 0.5:      # a foe's knock must not throw the player off the island
+		p.teleport(_anchor)
+		p.vel = Vector3.ZERO
 	if _pin >= 0.0:
 		m.time = _pin
 	m.step(Match.DT)
+	if m.hud:
+		m.hud.msgs._process(Match.DT)      # the lane ages its lines as in play (the check steps the match by hand)
 	_clock += Match.DT
 	_log()
 
@@ -191,9 +197,11 @@ func _fight() -> Array:
 	mb.max_hp = 1e6
 	mb.teleport(p.pos + Vector3(7, 0, 0))
 	p.kin.state = "active"
+	_anchor = p.pos
 	_secs(1.9)
 	ok(shown.size() == n0, "nothing in the first 2 s of the fight")
 	_secs(8.0)
+	_anchor = Vector3.INF
 	mb.hp = 0.0
 	return shown.slice(n0).map(func(s): return s["id"])
 
@@ -204,7 +212,7 @@ func _outposts() -> void:
 	_check("uplink-early", "next to an outpost not open yet", _moment(_beside.bind(x, 60.0)), "")
 	var late := maxf(151.0, float(x["open_at"]) + 1.0)      # past go-to-exit time: an outpost in reach keeps it quiet
 	_check("uplink", "next to an idle outpost", _moment(_beside.bind(x, late)), "uplink")
-	_check("defend", "own uplink charging", _moment(_charge.bind(x), 4.0), "defend")
+	_check("defend", "own uplink charging", _moment(_charge.bind(x), 8.0), "defend")      # its foes come: 2 s of fight quiet, then the lane
 
 func _drop_gear() -> void:
 	m.spawn_gear(String(Gear.ALL.keys()[0]), 1, p.pos + Vector3(3, 0, 0))
