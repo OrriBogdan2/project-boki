@@ -1,12 +1,14 @@
 extends RefCounted
 ## --ways-out-vfx-shots --shots-dir=<dir>: the five looks of a way-out seat at match zoom (run under xvfb with a
 ## renderer). One outpost's uplink goes locked, open, in use, taken, lost (files seat_<n>_<state>.png), then the
-## Heart's ring open and held (heart_<state>.png). Each shot centres the seat; the hunters stand well away.
+## Heart's ring open and held (heart_<state>.png). Each shot centres the seat (the *_far ones look from
+## across the island, the seat near the frame's edge); the hunters stand well away.
 
 var main: Node
 var m: Match
 var dir := ""
 var focus := Vector3.ZERO
+const FAR := Vector3(-22.0, 1.5, 14.0)   # the far-read shots: the seat sits at the frame's top-right, across the island
 
 func _frames(n: int) -> void:
 	for i in n:
@@ -55,10 +57,16 @@ func run(main_node: Node) -> void:
 	await _grab("seat_1_locked")
 	x["open_at"] = 0.0
 	await _grab("seat_2_open")
+	focus = x["pos"] + FAR
+	await _grab("seat_2b_open_far")
+	focus = x["pos"] + Vector3(0, 1.5, 3.0)
 	x["state"] = "charging"
 	x["team"] = 1
 	x["prog"] = 0.6
 	await _grab("seat_3_in_use")
+	focus = x["pos"] + FAR
+	await _grab("seat_3b_in_use_far")
+	focus = x["pos"] + Vector3(0, 1.5, 3.0)
 	x["taken"] = true
 	await _frames(60)
 	await _grab("seat_4_taken")
