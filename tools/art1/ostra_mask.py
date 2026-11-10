@@ -28,25 +28,28 @@ def seg_dist(u, v, pts):
 
 
 def grin(u, v):
-    """0..1 inside the grin (ostra_head): one huge solid white crescent, the corners hooked up to points, a few small fangs cut down into its
-    top edge toward the corners; -> the shape, and the fangs' cuts"""
+    """0..1 inside the grin: one huge white crescent hooked up to points, a jagged seam through the middle (upper and lower fangs
+    meshing) and deep fangs cut into both edges; -> the shape, and the seam's cut"""
     au = np.abs(u)
-    top = -0.32 + 0.52 * (au / 0.80) ** 2.4
-    bot = -0.72 + 0.92 * (au / 0.80) ** 2.2
-    saw = np.abs(((u * 8.5) % 1.0) - 0.5) * 2.0
-    cut = 0.055 * saw * sm(0.22, 0.42, au) * sm(0.8, 0.6, au)
-    inside = sm(-0.012, 0.012, top - cut - v) * sm(-0.012, 0.012, v - bot) * (au < 0.80)
-    return inside, np.zeros_like(inside)
+    top = -0.26 + 0.50 * (au / 0.86) ** 2.3
+    bot = -0.76 + 0.92 * (au / 0.86) ** 2.1
+    saw = np.abs(((u * 5.0) % 1.0) - 0.5) * 2.0
+    env = sm(0.10, 0.30, au) * sm(0.86, 0.66, au)
+    cut_t = 0.15 * saw * env
+    cut_b = 0.13 * (1.0 - saw) * env
+    inside = sm(-0.012, 0.012, top - cut_t - v) * sm(-0.012, 0.012, v - bot - cut_b) * (au < 0.86)
+    seam = 0.5 * (top + bot) - 0.02 + 0.07 * (saw - 0.5) * env
+    gap = sm(0.034, 0.016, np.abs(v - seam)) * sm(0.10, 0.2, au + 0.05)
+    return inside * (1 - gap), gap
 
 
 def slits(u, v):
-    """the eyes: two crescents, thick in the middle, drawn to points, the outer tip high: a laughing, cruel squint"""
+    """the eyes: two slanted slits, the inner end low and blunt, the outer tip drawn high and long: a hungry, cruel squint"""
     au = np.abs(u)
-    x = (au - 0.40) / 0.30
-    mid = 0.27 + 0.09 * x
-    top = mid + 0.085 * (1.0 - x * x)
-    low = mid - 0.0 * x + 0.02 * (1.0 - x * x) - 0.05 * (1.0 - x * x)
-    return sm(0.012, -0.006, v - top) * sm(-0.012, 0.006, v - low) * (np.abs(x) < 1.0)
+    x = (au - 0.46) / 0.30
+    mid = 0.27 + 0.17 * x
+    h = 0.125 * np.clip(1.0 - x * x, 0, 1) ** 0.75
+    return sm(0.012, -0.006, v - (mid + h)) * sm(-0.012, 0.006, v - (mid - 0.35 * h)) * (np.abs(x) < 1.0)
 
 
 def textures(size=1024):
