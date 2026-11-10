@@ -127,15 +127,21 @@ func _course() -> void:
 	var tl := String(texts.get("throw", ""))
 	ok(tl.contains("call") or tl.contains("send"), "the Boki step says whether to call back or send ('%s')" % tl)
 
-## The marker's pin or arrow: a spot well ahead shows its pin, one behind the hunter gets the arrow.
+## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:
 	var cam := m.cam
 	var sz := m.get_viewport().get_visible_rect().size
 	var fwd := -cam.global_transform.basis.z
 	fwd = Vector3(fwd.x, 0.0, fwd.z).normalized()
 	var me := m.player.pos
-	var ahead := MarkerDir.off_dir(cam, sz, me + fwd * 2.0, me)
-	ok(ahead == Vector2.ZERO, "a target ahead of the hunter shows its pin (%s)" % str(ahead))
+	var near := MarkerDir.off_dir(cam, sz, me + fwd * 1.0, me)
+	ok(near == Vector2.ZERO, "a target at the hunter's feet shows its pin, not an arrow (%s)" % str(near))
+	var aim := sz * Vector2(0.5, 0.3)      # where the pin should land: in the play box, above the hunter
+	var o := cam.project_ray_origin(aim)
+	var ray := cam.project_ray_normal(aim)
+	var pin := o + ray * ((me.y + MarkerDir.PIN_UP - o.y) / ray.y)
+	var ahead := MarkerDir.off_dir(cam, sz, pin - Vector3(0, MarkerDir.PIN_UP, 0), me)
+	ok(ahead == Vector2.ZERO, "a target ahead whose pin is in the play box shows its pin (%s)" % str(ahead))
 	var back := MarkerDir.off_dir(cam, sz, me - fwd * 4.0, me)
 	ok(back != Vector2.ZERO and back.y > 0.0, "one behind the hunter gets an arrow pointing down (%s)" % str(back))
 

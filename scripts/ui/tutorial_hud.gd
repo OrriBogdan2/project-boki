@@ -59,11 +59,10 @@ static func draw(h, sz: Vector2) -> void:
 ## The step's line with its key cap on the left, and on the right the counter and, while the target's
 ## pin isn't on screen, an arrow pointing the way with the distance.
 static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
-	h._panel(r, PANEL, 14)
 	var glow := 1.0 - clampf(tu.card_t / GLOW_T, 0.0, 1.0)
 	if tu.nag_t > 0.0:
 		glow = maxf(glow, 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 8.0))
-	h.c.draw_rect(r, Color(MINT, 0.45 + 0.55 * glow), false, 2.0 + 2.0 * glow)
+	h._rounded(r, PANEL, 14, Color(MINT, 0.45 + 0.55 * glow), int(2.0 + 2.0 * glow))
 	var row := r.size.y / (DETAIL_K if tu.detail != "" else 1.0)     # the first line's height
 	var mid := r.position.y + row * 0.5
 	var px := int(row * 0.46)
