@@ -82197,5 +82197,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_pocketpus_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_bladypus",
+    "name": "Bladypus (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_bladypus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pocketpus",
+    "name": "Pocketpus (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_pocketpus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bladypus",
+    "name": "Bladypus (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_bladypus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bladypus",
+    "name": "Bladypus (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_bladypus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_puffuse",
+    "name": "Puffuse (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_puffuse_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_puffuse",
+    "name": "Puffuse (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_puffuse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_dragonkite",
+    "name": "Dragonkite (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_dragonkite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blotlet",
+    "name": "Blotlet (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_blotlet_2.jpg",
+    "ok": true
   }
 ]
