@@ -219,6 +219,7 @@ const CHECKS := {
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 	"--summon-band-check": ["res://tools/summon_band_check.gd", "summon_band_check", null],      # decision 0042
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
+	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # summon ring + tags on the Boki box; --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],  # decision 0040
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],      # bots press Summon (BotKin.summon)

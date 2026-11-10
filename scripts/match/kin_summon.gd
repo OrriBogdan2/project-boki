@@ -14,6 +14,7 @@ extends RefCounted
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CHIRP_EVERY := Vector2(14.0, 26.0)   # s: how often a riding wisp chirps (min, max): a critter by ear
+const READY_FLASH_S := 1.5  # s: the Boki box says READY after the cooldown ends (once), then just shows the key
 
 var k: Kin
 var dur := 10.0       # s: this species' window
@@ -27,6 +28,7 @@ var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down),
 var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
 var beat := -1        # the last guardian ring pulse drawn (drawing only)
 var hit_k := 1.0      # x its damage while out: this species' place in the summon band (Ent.hurt)
+var ready_flash := 0.0  # s of the READY flash left on the HUD (starts when the cooldown ends)
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -130,7 +132,9 @@ func knocked() -> bool:
 func tick(dt: float) -> void:
 	if cd > 0.0 and cd <= dt:
 		k.m.sfx("wisp_ready", k.pos, -6.0)      # the cooldown is over: the wisp brightens (BokiWispLook.dim)
+		ready_flash = READY_FLASH_S
 	cd = maxf(0.0, cd - dt)
+	ready_flash = maxf(0.0, ready_flash - dt)
 	if k.wisp and not out():
 		chirp_in -= dt
 		if chirp_in <= 0.0:
