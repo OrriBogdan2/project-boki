@@ -73685,5 +73685,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/fem_pavonazar_3.jpg",
     "ok": true
+  },
+  {
+    "id": "fem_gongrowl",
+    "name": "Gongrowl (female look)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fem_gongrowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_pavonazar",
+    "name": "Pavonazar (female look)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fem_pavonazar_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_pavonazar",
+    "name": "Pavonazar (female look)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fem_pavonazar_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_gongrowl",
+    "name": "Gongrowl (female look)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fem_gongrowl_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_furnacowary",
+    "name": "Furnacowary (female look)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fem_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_gongrowl",
+    "name": "Gongrowl (female look)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fem_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_gongrowl",
+    "name": "Gongrowl (female look)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fem_gongrowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_furnacowary",
+    "name": "Furnacowary (female look)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fem_furnacowary_2.jpg",
+    "ok": true
   }
 ]
