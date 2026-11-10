@@ -68,6 +68,8 @@ const CHECKS := {
 	"--warden-glb-check": ["res://tools/warden_glb_check.gd", "warden_glb_check", null],      # .glb loader
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
+	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],      # feet on stairs (FootPlant)
+	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],      # --shots-dir=<dir>
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run: legs keep stepping
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
