@@ -76723,5 +76723,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_frigatee_on_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_bulwartoad_on",
+    "name": "Bulwartoad (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_bulwartoad_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_frigatee_on",
+    "name": "Frigatee (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_frigatee_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_morelossus_on",
+    "name": "Morelossus (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_morelossus_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bulwartoad_on",
+    "name": "Bulwartoad (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_bulwartoad_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_frigatee_on",
+    "name": "Frigatee (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_frigatee_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_frigatee_on",
+    "name": "Frigatee (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_frigatee_on_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_frigatee_on",
+    "name": "Frigatee (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_frigatee_on_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bulwartoad_on",
+    "name": "Bulwartoad (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_bulwartoad_on_3.jpg",
+    "ok": true
   }
 ]
