@@ -1,11 +1,11 @@
 extends RefCounted
-## --evolve-moment-check: the evolve moment at home (EvolveMoment): about 1.5 s, the silhouette swells in
-## the type colour, the new form takes its place at the peak, the glow fades, soft sparkles, Boki nearby
+## --evolve-moment-check: the evolve moment at home (EvolveMoment): about 2.2 s: the old form curls up in
+## the type colour, a silhouette morph to the new form, which does its pose, the glow fades, the camera eases in, soft sparkles, Boki nearby
 ## turn to watch, no burst or ring, and a Boki off screen gets no moment. Works headless.
 ## --evolve-moment-shots --shots-dir=<dir>: one sheet per type (needs a renderer, xvfb with opengl3).
 
 const SHOT_TYPES := ["titan", "lunar", "prism"]    # three type colours: sand, pale blue, pink
-const SHOT_TIMES := [0.0, 0.35, 0.6, 0.85, 1.2, 1.5]
+const SHOT_TIMES := [0.0, 0.5, 0.8, 1.0, 1.4, 2.2]
 const CROP := 300          # px square around the Boki in a sheet cell
 const STEP := 0.05         # s per hand-driven step
 
@@ -87,9 +87,21 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	var wash_mid := 0.0
 	var swap_t := -1.0
 	var t := 0.0
+	var curled_y := 1.0
+	var posed := false
+	var cam_in := 0.0
+	var rig := CamRig.new()
+	var cam_zoom := 1.0
 	while t < EvolveMoment.LENGTH:
 		t += STEP
 		m.step(minf(t, EvolveMoment.LENGTH))
+		if not m.swapped:
+			curled_y = m.old.scale.y / m.base.y
+		posed = posed or (m.fresh.get_meta("kact", "") == "hop" and m.fresh.get_meta("face", "") == "happy")
+		cam_in = maxf(cam_in, m.look)
+		if absf(t - EvolveMoment.SWAP_AT) < STEP * 0.5:
+			m.frame(rig, Vector3.ZERO, 1.0)
+			cam_zoom = rig.zoom_to
 		var cur: Node3D = m.fresh if m.swapped else m.old
 		peak = maxf(peak, cur.scale.x / maxf(m.base.x, m.grown.x))
 		wash_peak = maxf(wash_peak, m.wash.albedo_color.a)
@@ -99,10 +111,13 @@ func _check(_main: Node, stage: Dictionary) -> void:
 			wash_mid = m.wash.albedo_color.a
 	var len_s := EvolveMoment.LENGTH
 	var swap_at := EvolveMoment.SWAP_AT
-	ok(len_s >= 1.2 and len_s <= 1.8, "the moment is about 1.5 s (%.2f)" % len_s)
+	ok(len_s >= 1.8 and len_s <= 2.6, "the moment is about 2 s (%.2f)" % len_s)
 	ok(peak >= 1.1 and peak <= 1.2, "the silhouette swells to %.2fx" % peak)
+	var curl_clip := String(m.old.get_meta("kstate", ""))
+	ok(curled_y < 0.9 and curl_clip == "sleep", "the old form curls up (squash %.2f, kstate %s)" % [curled_y, curl_clip])
+	ok(posed and cam_in > 0.9 and cam_zoom < 1.0 and m.look < 0.01, "the new form poses, the camera eases in and back")
 	ok(wash_peak >= 0.8 and wash_mid >= 0.8, "the type colour washes over it to %.2f" % wash_peak)
-	ok(absf(swap_t - swap_at) <= STEP + 0.01, "the new form takes over at the peak (%.2f s)" % swap_t)
+	ok(absf(swap_t - swap_at) <= STEP + 0.01, "the morph to the new form starts (%.2f s)" % swap_t)
 	ok(m.fresh.visible and not m.old.visible, "the new form is shown and the old one hidden")
 	var settled := absf(m.fresh.scale.x - m.grown.x) < 0.01
 	var played: bool = m.sparkled == EvolveMoment.SPARKLE_AT.size()
@@ -116,13 +131,22 @@ func _check(_main: Node, stage: Dictionary) -> void:
 	var grew := ratio > 1.1 and absf(ratio - want) < 0.01
 	ok(grew, "the hatchling ends at its grown size, home's own scale (%.2fx), no snap" % ratio)
 	m.finish()
+	rig.free()
 	var gone: bool = m.light.is_queued_for_deletion() and m.old.is_queued_for_deletion()
-	ok(not _washed(m.fresh) and gone, "the wash and light come off, the old model goes")
+	var no_pose := not m.fresh.has_meta("kact") and not m.fresh.has_meta("face")
+	ok(not _washed(m.fresh) and gone and no_pose, "the wash, light and pose come off, the old model goes")
 	var cam: Camera3D = stage["cam"]
 	var seen := EvolveMoment.on_screen(cam, Vector3.ZERO)
 	var far := EvolveMoment.on_screen(cam, Vector3(60, 0, 0))
 	var behind := EvolveMoment.on_screen(cam, Vector3(0, 0, 40))
 	ok(seen and not far and not behind, "in view gets the moment, off screen and behind the camera do not")
+	var plain := Node3D.new()
+	var bodied := Node3D.new()
+	bodied.add_child(MeshInstance3D.new())
+	(bodied.get_child(0) as MeshInstance3D).mesh = BoxMesh.new()
+	ok(EvolveMoment.has_model(m.fresh) and not EvolveMoment.has_model(plain) and EvolveMoment.has_model(bodied), "a form with no model never plays the moment")
+	plain.free()
+	bodied.free()
 	var kins := [{"node": w}, {"node": m.fresh, "indoors": true}, {"node": m.old, "busy": true}]
 	var near := EvolveMoment.watchers_of(kins, {}, Vector3.ZERO)
 	var self_only := EvolveMoment.watchers_of(kins, kins[0], Vector3.ZERO)
