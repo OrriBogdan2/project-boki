@@ -97702,5 +97702,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/leg_bell_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_bell_c",
+    "name": "Legendary concept: bell c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_bell_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_bell_c",
+    "name": "Legendary concept: bell c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_bell_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_bell_b",
+    "name": "Legendary concept: bell b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_bell_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_blightmoth_a",
+    "name": "Legendary concept: blightmoth a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_blightmoth_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_blightmoth_b",
+    "name": "Legendary concept: blightmoth b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_blightmoth_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_blightmoth_a",
+    "name": "Legendary concept: blightmoth a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_blightmoth_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_blightmoth_b",
+    "name": "Legendary concept: blightmoth b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_blightmoth_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_blightmoth_c",
+    "name": "Legendary concept: blightmoth c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_blightmoth_c_2.jpg",
+    "ok": true
   }
 ]
