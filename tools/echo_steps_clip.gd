@@ -68,6 +68,7 @@ func _stage() -> EchoSteps:
 	while not is_instance_valid(h.root_ui):
 		await main.get_tree().process_frame
 	h._close_panel()
+	main.fade.reveal(0.01)
 	var es: EchoSteps = h.hecho
 	for k in h.kins:
 		k.erase("indoors")
