@@ -110295,5 +110295,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/tent_sparkle_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_maracoil_L2",
+    "name": "Maracoil (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_maracoil_L2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_maracoil_L2",
+    "name": "Maracoil (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_maracoil_L2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pavonazar_L2",
+    "name": "Pavonazar (V2 sheet from card)",
+    "run": 5,
+    "file": "briefs/boki-art/batch/out/v2s_pavonazar_L2_5.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pavonazar_L2",
+    "name": "Pavonazar (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_pavonazar_L2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_maracoil_L2",
+    "name": "Maracoil (V2 sheet from card)",
+    "run": 5,
+    "file": "briefs/boki-art/batch/out/v2s_maracoil_L2_5.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_L2",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 5,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_L2_5.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_L2",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_L2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_L2",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_L2_1.jpg",
+    "ok": true
   }
 ]
