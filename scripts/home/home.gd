@@ -3038,7 +3038,7 @@ func _open_kin(rec: Dictionary) -> void:
 		var mt := UI.tag(Mutations.name_of(mid), UI.MUTED)      # plain: rarity shows on the Boki itself
 		mt.tooltip_text = Mutations.perk_text(mid)
 		hx.add_child(mt)
-	UI.shell_tabs(v, ["Care", "Training", "Growth", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
+	UI.shell_tabs(v, ["Care", "Training", "Growth", "Family", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
 	var row := func(parent: Control, label_txt: String, frac: float, c: Color, right := "", lw := 92.0) -> void:
 		var r := UI.hbox(10)
 		var l := UI.label(label_txt, UI.T_SMALL, UI.MUTED); l.custom_minimum_size.x = lw
@@ -3055,6 +3055,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var c2 := UI.vbox(8); c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(c1); cols.add_child(c2)
 	match kin_tab:
+		"Family": FamilyView.fill(rec, c1, c2, get_tree(), func(k): _open_kin(k))
 		"About":
 			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
 			c1.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))

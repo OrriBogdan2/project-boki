@@ -97,8 +97,12 @@ static func inherit_n(egg: Dictionary) -> int:
 	return int(egg.get("inherit", Care.IV_INHERIT))
 
 ## The baby is out: a Lullaby Shell parent's habit and strongest trait pass exactly (no wobble).
+## The items the egg was laid with are kept on the baby (lineage["nest"], shown on its Family tab).
 static func hatched(baby: Dictionary, egg: Dictionary, a: Dictionary, b: Dictionary) -> void:
 	var uid := String(egg.get("habit", ""))
+	var threads_used := (inherit_n(egg) - Care.IV_INHERIT) / int(item_of("gifts")["effect"]["n"])
+	if threads_used > 0 or egg.has("sp") or uid != "":
+		baby["lineage"]["nest"] = {"gifts": threads_used, "species": egg.has("sp"), "habit": uid != ""}
 	if uid == "":
 		return
 	var parent: Dictionary = a if a["uid"] == uid else b
