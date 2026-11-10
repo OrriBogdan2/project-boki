@@ -9,6 +9,7 @@ extends RefCounted
 ##   4. when the farm ones are due (FarmHints.due): out of seeds, holding a crop
 
 const LINE_MAX := 60        # characters: a hint is one short toast line
+const HEART_LINE_MAX := 80  # characters: the Heartspark's two lines say what it is worth, so they run longer
 
 var bad := 0
 var main: Node
@@ -39,13 +40,17 @@ func _data() -> void:
 	Save.d = _fresh()
 	var when: Dictionary = FirstTimeHint.rules().get("when", {})
 	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("farm")
+	var heart: Array = FirstTimeHint.ids("heart")
 	var nm := FirstTimeHint.ids("match").size()
 	var nf := FirstTimeHint.ids("farm").size()
 	ok(nm >= 8 and nf >= 5, "the cut steps are hints: %d match, %d farm" % [nm, nf])
 	ok(all.all(func(id): return when.has(id)), "every hint says when it shows")
 	var long := all.filter(func(id): return FirstTimeHint.text(String(id)).length() > LINE_MAX)
 	ok(long.is_empty(), "every line fits one toast (%s)" % str(long))
-	var raw := all.filter(func(id): return FirstTimeHint.text(String(id)).contains("{"))
+	var hlong := heart.filter(func(id): return FirstTimeHint.text(String(id)).length() > HEART_LINE_MAX)
+	ok(heart == ["spark", "carry"] and hlong.is_empty() and heart.all(func(id): return when.has(id)),
+			"the Heartspark has its two lines, each saying when it shows (%s)" % str(hlong))
+	var raw := (all + heart).filter(func(id): return FirstTimeHint.text(String(id)).contains("{"))
 	ok(raw.is_empty(), "every placeholder is filled (%s)" % str(raw))
 	var key := FirstTimeHint.text("key")
 	ok(key.contains(Settings.key_cap("interact")), "keys are the player's own: '%s'" % key)
@@ -76,6 +81,8 @@ func _migrate() -> void:
 	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("farm")
 	ok(all.all(func(id): return FirstTimeHint.seen(String(id))),
 			"past both old tutorials: no hints for what they taught")
+	ok(not FirstTimeHint.seen("spark") and not FirstTimeHint.seen("carry"),
+			"the old tutorials never taught the Heartspark: its lines still come")
 	var mid := _fresh()
 	mid["v"] = 11
 	mid["tutorial"] = {"hatched": true, "match": true, "ft": {"done": false, "did": {"chop": true}}}
