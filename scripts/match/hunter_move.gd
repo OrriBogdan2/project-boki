@@ -74,6 +74,7 @@ static func dash_k(curve: Array, u: float) -> float:
 		if u <= float(b[0]):
 			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
 	return float(curve[-1][1])
+
 ## The step a dash runs out in moves at the dash's velocity for the `left` seconds the dash still had and at
 ## `exit_v` for the rest, so a dash covers its distance at any step size (it used to drop its last part step,
 ## up to 15% of a dash at 30 fps). Returns that step's mean velocity and sets h.dash_end_k, the factor
@@ -90,14 +91,6 @@ static func settle_dash_end(h: Hunter) -> void:
 	h.vel.x *= h.dash_end_k
 	h.vel.z *= h.dash_end_k
 	h.dash_end_k = 0.0
-
-## Metres a let-go at v0 m/s slides on flat ground under brake() (dv/dt = -friction*v - brake_decel):
-## a kit step with a measured total takes this off its dash so the slide doesn't add to it.
-static func slide(v0: float) -> float:
-	var k := ground_friction
-	if k <= 0.0:
-		return v0 * v0 / (2.0 * brake_decel)
-	return v0 / k - brake_decel / (k * k) * log(1.0 + k * v0 / brake_decel)
 
 ## Metres speed v0 slides on flat ground under brake_rate before it falls to `to_speed` m/s (0: a let-go; the run
 ## speed: keys held). A kit step with a measured total takes this off its dash so the slide doesn't add to it.
