@@ -25,6 +25,7 @@ var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
+var _hot_hint := false         # this opening shows the hot zone's one-line explanation (first time per save)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -38,6 +39,7 @@ func open(by_plan := false) -> void:
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
+	_hot_hint = m.hot != null and HotZone.take_hint()
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
@@ -49,7 +51,7 @@ func close() -> void:
 # ------------------------------------------------------------------ coordinates
 func _layout(sz: Vector2) -> void:
 	var top := 76.0
-	var s := minf(sz.y - top - 22.0, sz.x - SIDE_W * 2.0 - 56.0)
+	var s := minf(sz.y - top - 40.0, sz.x - SIDE_W * 2.0 - 56.0)
 	s = maxf(s, 300.0)
 	rect = Rect2(Vector2(roundf(sz.x * 0.5 - s * 0.5), top), Vector2(s, s))
 
@@ -171,7 +173,8 @@ func draw(sz: Vector2) -> void:
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
-	if m.hot: m.hot.paint(hud, to_screen(m.hot.center()), m.hot.radius() * kk, true)
+	if m.hot:
+		m.hot.paint(hud, to_screen(m.hot.center()), m.hot.radius() * kk, true)
 	_labels(c, kk)
 	if m.skytrain:
 		hud._draw_map_train(rect, v, kk)
@@ -196,7 +199,19 @@ func draw(sz: Vector2) -> void:
 	_squad(c, team)
 	_legend(c, sz, team)
 	_side(c, sz)
+	_hot_text(c, kk)
 	_cursor(c)
+
+## The hot zone's words: one line under the map the first time it opens with a zone, then only a
+## tooltip when the cursor is on the zone.
+func _hot_text(c: Control, kk: float) -> void:
+	if not m.hot:
+		return
+	if _hot_hint:
+		var at := Vector2(rect.get_center().x, rect.end.y + 30.0)
+		hud._ctext(at, String(HotZone.rules()["hint"]), 15, HotZone.color(), hud.big)
+	else:
+		m.hot.paint_tip(hud, c.get_local_mouse_position(), to_screen(m.hot.center()), m.hot.radius() * kk)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:

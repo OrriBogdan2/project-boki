@@ -26,6 +26,32 @@ func _shot(main: Node, dir: String, file: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	print("HOTZONE shot ", file)
 
+## (d) the first-time line: the first drop map with a zone shows it and sets the save flag, the
+## second opening and a match without a zone do not.
+func _hint_rows(main: Node) -> void:
+	Save.d = Save.fresh()
+	var m := _match(main, {"seed": 31})
+	var fm: FullMap = m.hud.full_map
+	var want := String(HotZone.rules()["hint"])
+	ok(want == "Hot zone: better loot, more rivals.", "(d) the line reads: %s" % want)
+	ok(not bool(Save.d["tutorial"].get("hot_line", false)), "(d) a fresh save has not seen the line")
+	fm.open(true)
+	var marked := bool(Save.d["tutorial"].get("hot_line", false))
+	ok(fm._hot_hint and marked, "(d) the first opening shows the line and marks the save")
+	fm.close()
+	fm.open(false)
+	ok(not fm._hot_hint, "(d) the second opening shows no line (tooltip only)")
+	fm.close()
+	Save.d = Save.fresh()
+	var hot := m.hot
+	m.hot = null
+	fm.open(true)
+	marked = bool(Save.d["tutorial"].get("hot_line", false))
+	ok(not fm._hot_hint and not marked, "(d) no zone, no line, the flag stays unset")
+	fm.close()
+	m.hot = hot
+	m.queue_free()
+
 func shots(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -119,5 +145,6 @@ func run(main: Node, mode := "check") -> void:
 	m3.queue_free()
 	var m4 := _match(main, {"seed": 5, "hot": "no_such_area"})
 	ok(m4.hot == null, "(c) an unknown id leaves the match without a zone")
+	_hint_rows(main)
 	print("HOTZONE DONE, failures: ", bad)
 	main.get_tree().quit()

@@ -35,6 +35,15 @@ static func pick(layout_islands: Array, seed_val: int) -> String:
 	r.seed = hash("%d|hot_zone" % seed_val)
 	return ids[r.randi_range(0, ids.size() - 1)]
 
+## The first-time line under the drop map: true once per save (the flag is set as it is asked).
+static func take_hint() -> bool:
+	var tut: Dictionary = Save.d["tutorial"]
+	if bool(tut.get("hot_line", false)):
+		return false
+	tut["hot_line"] = true
+	Save.save_game()
+	return true
+
 func _init(w: World, region_id: String) -> void:
 	_w = w
 	for i in w.islands.size():
@@ -84,3 +93,13 @@ func paint_mini(hud, inner: Rect2, to_map: Callable, on_map: Callable, whole: bo
 		hud._edge_arrow(inner, inner.get_center(), pv, color())
 		return
 	paint(hud, pv, radius() * (inner.size.x / _w.w) if whole else 0.0, whole)
+
+## The hover tooltip on the full map: the same words as the first-time line, above the zone's disc.
+func paint_tip(hud, mouse: Vector2, at: Vector2, px_r: float) -> void:
+	if mouse.distance_to(at) > maxf(px_r, 10.0):
+		return
+	var txt := String(rules()["hint"])
+	var tw: float = hud.body.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 20.0
+	var r := Rect2(mouse + Vector2(14, -34), Vector2(tw, 26))
+	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.92), 8, Color(color(), 0.5), 1)
+	hud._text(r.position + Vector2(10, 18), txt, 13, FullMap.INK)

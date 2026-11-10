@@ -280,6 +280,8 @@ The hot drop zone (owner, Nov 7): each match picks one named area with better lo
 | tier_up_doc | Rarity steps added to chest and monster loot inside the zone (on top of the region's own bonus). |
 | color | ff6a3d |
 | label | HOT ZONE |
+| hint | Hot zone: better loot, more rivals. |
+| hint_doc | The one line under the drop map the first time it opens with a hot zone (once per save, flag tutorial.hot_line); after that the same words show as a hover tooltip on the zone. |
 
 ## hunter_move (`content/rules/hunter_move.json`)
 
