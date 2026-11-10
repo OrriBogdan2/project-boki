@@ -259,9 +259,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hash": {
-   "sheet": "ffad5cee8289",
+   "sheet": "4baefea09ef3",
    "card": "fce0e1678c49",
-   "portrait": "a05dd50b01e9",
+   "portrait": "a1e1d5184c9c",
    "hero": "07638c2dcc95"
   }
  },
@@ -825,8 +825,12 @@
    "cutout": "briefs/boki-art/portraits/cutout_v2/Grainspin_female.png",
    "hash": {
     "card": "9075f931b909",
+    "sheet": "01387bf99d05",
+    "portrait": "635fa64a7b8d",
     "hero": "41ea5d90ec8f"
-   }
+   },
+   "sheet": "briefs/boki-art/evolutions/Grainspin_female.jpg",
+   "portrait": "briefs/boki-art/portraits/light/Grainspin_female.jpg"
   }
  },
  "Grammite": {
@@ -836,9 +840,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Grammite.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Grammite.png",
   "hash": {
-   "sheet": "cef57cc46302",
+   "sheet": "ac2d430f024f",
    "card": "e86da4d31de2",
-   "portrait": "bdf9a182d386",
+   "portrait": "b4b33093a725",
    "hero": "ff9949b86bc2"
   }
  },
@@ -1376,8 +1380,12 @@
    "cutout": "briefs/boki-art/portraits/cutout_v2/Mothlet_female.png",
    "hash": {
     "card": "2b018e119842",
+    "sheet": "fd01a75387d1",
+    "portrait": "cac12cf1627a",
     "hero": "1f9d0be8a5e4"
-   }
+   },
+   "sheet": "briefs/boki-art/evolutions/Mothlet_female.jpg",
+   "portrait": "briefs/boki-art/portraits/light/Mothlet_female.jpg"
   }
  },
  "Murmurling": {
@@ -1827,9 +1835,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Scopeleon.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Scopeleon.png",
   "hash": {
-   "sheet": "1c494debfb67",
+   "sheet": "efcc7b74f522",
    "card": "02cab41302ab",
-   "portrait": "957f6b0f90fb",
+   "portrait": "617d6b5e435c",
    "hero": "8ad33b6c5f84"
   }
  },
@@ -1919,9 +1927,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Snapler.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Snapler.png",
   "hash": {
-   "sheet": "3d96f1bebc65",
+   "sheet": "b5ba4f470191",
    "card": "700214c021c4",
-   "portrait": "b3fda74a3ebc",
+   "portrait": "449781a1028e",
    "hero": "eee1e79a9eac"
   }
  },
@@ -2282,9 +2290,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Wickapi.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Wickapi.png",
   "hash": {
-   "sheet": "90d9e53329e7",
+   "sheet": "1d85105e0059",
    "card": "587fd7171fe0",
-   "portrait": "774695875e57",
+   "portrait": "6994fc075d44",
    "hero": "233eedb41584"
   }
  },
@@ -3287,9 +3295,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Coolatee.png",
   "hash": {
-   "sheet": "02f74cc5b0e4",
+   "sheet": "ddd9aeb85d40",
    "card": "fb05e0d66024",
-   "portrait": "62661c9fac9d",
+   "portrait": "62a41d05e219",
    "hero": "1d4e2f850867"
   }
  },
@@ -3300,9 +3308,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Frigatee.png",
   "hash": {
-   "sheet": "e11ee4577498",
+   "sheet": "9d1267e05698",
    "card": "218c6487c9a0",
-   "portrait": "a0c15ffdad4d",
+   "portrait": "d9ddad1a3c18",
    "hero": "4cf91ef78d35"
   }
  },
@@ -3313,9 +3321,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
   "hash": {
-   "sheet": "eaa2130bf9b1",
+   "sheet": "9386330f2763",
    "card": "5579745883ad",
-   "portrait": "35ff6c4ad9c0",
+   "portrait": "e71bfa27ee3f",
    "hero": "78bd61866907"
   }
  }

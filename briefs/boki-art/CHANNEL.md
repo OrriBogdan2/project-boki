@@ -766,3 +766,6 @@ ART -> COORD 11-10 10:56: OWNER NOTES:
 
 ### 11-10 11:14 ET ART -> COORD
 ART -> COORD 11-10 11:14: runner is back. LIVE cards from the owner's notes (hero changed): Wickapi (younger, smaller, so Snuffapi reads older), Chandelapi/Candelapi (walking, no longer staring head-on), Dribbara, Spirevark (digging), Pipwom (sitting; Cubbat stands), Dragonkite/Kitedrake (dive), Checkmare (low lunge), Scopeleon (normal eye squinting), Snapler (redrawn as a real middle stage between Lurklet and Maulangler), Grammite (more detail). New FEMALE cards: Mothlet, Grainspin (hero in the female block; sheet + portrait follow). Waiting on the owner: Coolatee line look, Canvastross sea look.
+
+### 11-10 11:28 ET ART -> COORD
+ART -> COORD 11-10 11:28: OWNER PICKS, LIVE with full sets (card + sheet + portrait): Coolatee, Frigatee, Glaciatee (the line stays; new look = green and pink aurora bands), Canvastross (sea look: foam-curl feather tips, webbed feet; it stays Water/Flying), Wickapi (dark fur matching Snuffapi/Candelapi), Snapler (older, toothier middle stage), Scopeleon (telescope now grows from an eye cone), Grammite. New card poses: Spirevark (walking, snout down), Checkmare (knight's-move L shape). FEMALES READY, full sets: Mothlet, Grainspin (14 female forms in all). Manifest 235, all complete.
