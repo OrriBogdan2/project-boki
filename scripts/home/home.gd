@@ -57,6 +57,7 @@ var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
+var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
@@ -1460,7 +1461,7 @@ func _move_kin(d: float) -> void:
 			aim = KinAvoid.around(kins, k, pos, aim, d)
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
-				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))
+				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0)) * wade.speed(k, pos)
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
 		var nx := pos.x + hv.x * d
@@ -1471,7 +1472,7 @@ func _move_kin(d: float) -> void:
 		k["pos"] = pos
 		var n: Node3D = k["node"]
 		n.position = pos
-		water.paddle(k, pos, n, d)
+		wade.step(k, pos, n, d)
 		if k.get("going_in", false) and Vector2(pos.x - _house_door().x, pos.z - _house_door().z).length() < 0.6:
 			k.erase("going_in")
 			var night_now := sin((day_t - 0.25) * TAU) < -0.2
