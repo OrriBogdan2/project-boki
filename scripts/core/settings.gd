@@ -128,8 +128,8 @@ func detect_quality() -> String:
 	if nm.contains("intel") and not nm.contains("arc"): return "low"
 	return "medium"
 
-## Auto quality only: GPU time a frame measured while the first expedition loads (ms, the world on screen
-## from the skyship; whole frames where the driver can't time the GPU). Too slow for 60 fps steps the
+## Auto quality only: GPU time a frame measured while the first expedition loads (ms, the landing ground at
+## play's camera height; whole frames where the driver can't time the GPU). Too slow for 60 fps steps the
 ## preset down once (twice when far too slow) and remembers it. A preset only changes what the GPU draws,
 ## so the CPU's share of a frame (the sim, the loading itself) is left out.
 const BENCH_SLOW_MS := 14.0     # ms of GPU a frame: slower steps the preset down one (60 fps is 16.7, less headroom)
