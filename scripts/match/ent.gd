@@ -270,9 +270,12 @@ func body_vertical(dt: float) -> void:
 func fall_out() -> void:
 	m.on_fell(self)
 
+var bump_top := 0.0          # top of what the last slide() ran into (KnockWall.tall: a wall, or just a step)
+
 ## Horizontal move with walls and rocks; returns true if it bumped something.
 func slide(dt: float, guard := false) -> bool:
 	var bumped := false
+	bump_top = 0.0
 	# rocks and trees: pushed straight out of them (sliding round), never caught on a corner
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
 	var po: Vector2 = m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
@@ -284,18 +287,21 @@ func slide(dt: float, guard := false) -> bool:
 			vel.x = hv.x; vel.z = hv.y
 		tgt = po
 		bumped = true
+		bump_top = pos.y + World.BLOCK_H
 	var nx := tgt.x
 	var b1: float = m.world.occupy(nx, pos.z, r, pos.y, guard)
 	if b1 == 0.0:
 		pos.x = nx
 	else:
 		vel.x *= -0.1; bumped = true
+		bump_top = maxf(bump_top, b1)
 	var nz := tgt.y
 	var b2: float = m.world.occupy(pos.x, nz, r, pos.y, guard)
 	if b2 == 0.0:
 		pos.z = nz
 	else:
 		vel.z *= -0.1; bumped = true
+		bump_top = maxf(bump_top, b2)
 	return bumped
 
 func tick_status(dt: float) -> void:
