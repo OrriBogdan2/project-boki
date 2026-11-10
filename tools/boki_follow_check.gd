@@ -184,12 +184,14 @@ func _traverse() -> void:
 	P.gliding = true
 	for i in 90:
 		k.sim(Match.DT)
+		m.time += Match.DT      # as the match step does (KinPace plans on the clock)
 	ok(k.state == "shoulder" and k.cmd == "follow", "you glide: it hops onto you (state %s)" % k.state)
 	ok(not P.kin_carry_on(), "...carried over the glide, but its bonuses stay off (not an order)")
 	P.gliding = false
 	P.grounded = true
 	for i in 90:
 		k.sim(Match.DT)
+		m.time += Match.DT      # as the match step does (KinPace plans on the clock)
 	ok(k.state == "active" and k.flat_dist(P) < 3.5, "you land: it hops off to your side (state %s, %.1fm)" % [k.state, k.flat_dist(P)])
 	# a drop off a ledge
 	var W = m.world
@@ -371,6 +373,7 @@ func _guard_side() -> void:
 	P.gliding = true
 	for i in 20:
 		k.sim(Match.DT)
+		m.time += Match.DT      # as the match step does (KinPace plans on the clock)
 		watch.call()
 	var on_back := not k.beside and k.seen_pos().y > P.pos.y + 1.0
 	ok(on_back and st["bad"] == 0, "gliding: it curls up on your back, above your feet (%d bad)" % st["bad"])
