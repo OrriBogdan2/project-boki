@@ -75225,5 +75225,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_pinline_seal_final_2.jpg",
     "ok": true
+  },
+  {
+    "id": "c_pinline_jerboa_baby",
+    "name": "Pinster line option: jerboa (baby)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pinline_jerboa_baby_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinline_jerboa_final",
+    "name": "Pinster line option: jerboa (final)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pinline_jerboa_final_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinline_roly_final",
+    "name": "Pinster line option: roly (final)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/c_pinline_roly_final_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "c_pinline_seal_final",
+    "name": "Pinster line option: seal (final)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/c_pinline_seal_final_1.jpg",
+    "ok": true
   }
 ]
