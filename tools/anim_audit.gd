@@ -205,14 +205,23 @@ func _swing(fr: Array) -> Dictionary:
 			"reach_R": reach_r,
 			"against_L": against_l, "against_R": against_r,
 			"counter": (reach_l * against_l + reach_r * against_r) / maxf(reach_l + reach_r, 0.01),
-			"steps_hz": _steps(leg["L"], span)}
+			"steps_hz": _steps(leg["L"])}
 
-func _steps(leg: Array, span: float) -> float:
+## Cadence (steps/s): one leg's forward crossings are its strides, two steps each; timed from the first crossing to
+## the last so a short sample does not round it to whole strides (2.4 s would quantise to 0.8 steps/s).
+func _steps(leg: Array) -> float:
+	var first := -1
+	var last := -1
 	var c := 0
 	for i in range(1, leg.size()):
 		if leg[i - 1] < 0.0 and leg[i] >= 0.0:
 			c += 1
-	return 2.0 * c / span
+			last = i
+			if first < 0:
+				first = i
+	if c < 2:
+		return 0.0
+	return 2.0 * (c - 1) / ((last - first) * DT)
 
 func _corr(a: Array, b: Array) -> float:
 	var ma := 0.0
