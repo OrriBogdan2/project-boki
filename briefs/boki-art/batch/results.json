@@ -74588,5 +74588,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_sporcupine_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_critwom",
+    "name": "Critwom (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_critwom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sirencada",
+    "name": "Sirencada (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_sirencada_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sirencada",
+    "name": "Sirencada (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_sirencada_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sirencada",
+    "name": "Sirencada (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_sirencada_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sirencada",
+    "name": "Sirencada (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_sirencada_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sirencada",
+    "name": "Sirencada (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_sirencada_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sirencada",
+    "name": "Sirencada (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_sirencada_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_citadoad",
+    "name": "Citadoad (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_citadoad_1.jpg",
+    "ok": true
   }
 ]
