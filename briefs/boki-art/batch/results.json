@@ -108720,5 +108720,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rv_druzemole_light_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_blastopuff_light",
+    "name": "Blastopuff (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_blastopuff_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_bulwartoad_light",
+    "name": "Bulwartoad (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_bulwartoad_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_torpecone_light",
+    "name": "Torpecone (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_torpecone_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_blastopuff_light",
+    "name": "Blastopuff (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_blastopuff_light_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_malletary_light",
+    "name": "Malletary (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_malletary_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_bulwartoad_light",
+    "name": "Bulwartoad (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_bulwartoad_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_torpecone_light",
+    "name": "Torpecone (review: light)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_torpecone_light_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_malletary_light",
+    "name": "Malletary (review: light)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_malletary_light_1.jpg",
+    "ok": true
   }
 ]
