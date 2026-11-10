@@ -88525,5 +88525,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_coolatee_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_prismander_c",
+    "name": "Prismander (softer colours c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_prismander_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_prismander_c",
+    "name": "Prismander (softer colours c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_prismander_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_chandelotl_sunset",
+    "name": "Chandelotl/Crystalotl (colour sunset)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_chandelotl_sunset_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_chandelotl_pastel",
+    "name": "Chandelotl/Crystalotl (colour pastel)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_chandelotl_pastel_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_chandelotl_ocean",
+    "name": "Chandelotl/Crystalotl (colour ocean)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_chandelotl_ocean_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_prismander_a",
+    "name": "Prismander (softer colours a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_prismander_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_chandelotl_frost",
+    "name": "Chandelotl/Crystalotl (colour frost)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_chandelotl_frost_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_prismander_a",
+    "name": "Prismander (softer colours a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_prismander_a_2.jpg",
+    "ok": true
   }
 ]
