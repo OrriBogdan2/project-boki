@@ -81693,5 +81693,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_kerchick_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_cisternmander",
+    "name": "Cisternmander (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_cisternmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cisternmander",
+    "name": "Cisternmander (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_cisternmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kerchick",
+    "name": "Kerchick (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_kerchick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cisternmander",
+    "name": "Cisternmander (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_cisternmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_teapotamus",
+    "name": "Teapotamus (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_teapotamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_barokat",
+    "name": "Barokat (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_barokat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_barokat",
+    "name": "Barokat (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_barokat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_selenwhale",
+    "name": "Selenwhale (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_selenwhale_2.jpg",
+    "ok": true
   }
 ]
