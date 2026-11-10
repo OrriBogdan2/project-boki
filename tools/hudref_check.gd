@@ -120,7 +120,7 @@ func run(main_node: Node) -> void:
 	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
 	var cc_row: Array = HudPlate.statuses(sl).map(func(ic): return String(ic[2]))
 	ok(sw == "STUNNED" and "SLOWED" in cc_row,
-		"a stunned, slowed rival's plate says STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
+		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
