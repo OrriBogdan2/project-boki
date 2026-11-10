@@ -390,7 +390,7 @@ func _mate(k: Dictionary, near: Array) -> Dictionary:
 	for o in near:
 		var b := bond(k["rec"], o["rec"])
 		var score := b + randf() * 0.6
-		if b > float(R["rival_at"]) and (o["life"] as Fsm).is_in(S.ROAM) and score > top:
+		if b > float(R["rival_at"]) and (o["life"] as Fsm).is_in(S.ROAM) and not o.has("play") and score > top:
 			top = score
 			best = o
 	return best
