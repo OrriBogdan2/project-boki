@@ -1,18 +1,19 @@
 extends RefCounted
 ## --reticle-latency: how many frames the drawn reticle and the aim point trail the cursor.
 ## A live match (nothing else moving) gets one scripted mouse sample per frame, taken before the match's
-## own _process, going round a circle at a fixed speed. After each frame is drawn the tool finds the
+## own _process, going round a circle at a fixed step per frame. After each frame is drawn the tool finds the
 ## reticle's dot in the rendered image and projects the player's aim with the camera that was drawn, then
 ## converts both to frames behind the cursor from their angle on the circle. 0 means same-frame.
-##   godot -- --reticle-latency [--frames=300] [--speed=1200 (px/s)] [--expect-max=<frames>]
+##   godot -- --reticle-latency [--frames=300] [--step=20 (px per frame)] [--shots-dir=<dir>] [--expect-max=<frames>]
 ## Runs the four cases (60 and 144 fps cap, vsync on and off) and prints "LATENCY" lines; with
 ## --expect-max it fails when either trails the cursor by more than that at the 95th percentile.
 
 const VIEW := Vector2i(960, 540)
 const WARMUP := 90                  # frames before measuring (the camera settles, shaders compile)
-const RADIUS := 180.0               # px: the circle the cursor goes round, about the view centre
+const RADIUS := 100.0               # px: the circle the cursor goes round (clear of the bottom bar)
 const DOT_COL := Color("ff5cd1")    # the reticle's colour for the run: nothing else on screen is this pink
 const DOT_TOL := 0.12               # colour distance that still counts as the dot
+const AIM_FAR := 60.0               # m: a point along the aim ray to project back onto the screen
 const FIND_R := 90                  # px: where to look for the dot around the cursor sample
 
 var main: Node
@@ -22,12 +23,14 @@ var fps := 60
 var vsync := true
 var bad := false
 var frames := 300
-var speed := 1200.0
+var step_px := 20.0                 # px the cursor moves per frame: 1200 px/s at 60 fps
 var expect_max := -1.0
 var n := 0
 var rig := Node.new()
 var ret_lag := PackedFloat32Array()
 var aim_lag := PackedFloat32Array()
+var missed := 0
+var shots_dir := ""
 
 func _arg(key: String, fallback: String) -> String:
 	for a in OS.get_cmdline_user_args():
@@ -39,7 +42,7 @@ func _centre() -> Vector2:
 	return Vector2(VIEW) * 0.5
 
 func _angle_step() -> float:
-	return speed / RADIUS / float(fps)
+	return step_px / RADIUS
 
 ## The cursor sample for frame i, in viewport pixels.
 func _cursor_at(i: int) -> Vector2:
@@ -55,7 +58,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Settings.reset_all()
 	frames = int(_arg("--frames", "300"))
-	speed = float(_arg("--speed", "1200"))
+	step_px = float(_arg("--step", "20"))
+	shots_dir = _arg("--shots-dir", "")
 	expect_max = float(_arg("--expect-max", "-1"))
 	main.get_window().size = VIEW
 	Input.use_accumulated_input = false      # a sample reaches the match the moment it is parsed, as the OS flush does
@@ -83,6 +87,7 @@ func run(main_node: Node) -> void:
 		n = 0
 		ret_lag.clear()
 		aim_lag.clear()
+		missed = 0
 		while n < WARMUP + frames:
 			await main.get_tree().process_frame
 		_report()
@@ -104,9 +109,15 @@ func _after_draw() -> void:
 		var at := _find_dot(img, _cursor_at(n))
 		if at.x >= 0.0:
 			ret_lag.append(_frames_behind(n, at))
-		var aim: Vector3 = m.player.inp["aim"]
-		if not m.cam.is_position_behind(aim):
-			aim_lag.append(_frames_behind(n, m.cam.unproject_position(aim)))
+		else:
+			missed += 1
+			if missed == 1 and shots_dir != "":
+				img.save_png("%s/miss_%d.png" % [shots_dir, n])
+		# the aim ray the kit's ground-targeted moves use, as it lands on the screen drawn this frame
+		var ray: Array = m.player.inp["aim_ray"]
+		var far: Vector3 = ray[0] + ray[1] * AIM_FAR
+		if not m.cam.is_position_behind(far):
+			aim_lag.append(_frames_behind(n, m.cam.unproject_position(far)))
 	n += 1
 
 ## The dot's centre: the mean of the dot-coloured pixels around `near`, or (-1, -1).
@@ -136,9 +147,10 @@ func _stats(a: PackedFloat32Array) -> Array:
 func _report() -> void:
 	var r := _stats(ret_lag)
 	var a := _stats(aim_lag)
-	var frame_ms := 1000.0 / float(fps)
-	print("LATENCY fps=%d vsync=%s speed=%.0fpx/s measured_fps=%.1f" % [fps, "on" if vsync else "off", speed,
-		Engine.get_frames_per_second()])
+	var live := maxf(1.0, Engine.get_frames_per_second())
+	var frame_ms := 1000.0 / live
+	print("LATENCY cap=%d vsync=%s step=%.0fpx/frame measured_fps=%.1f dot_missed=%d" % [fps, "on" if vsync else "off",
+		step_px, live, missed])
 	print("LATENCY reticle  mean %.2f  p95 %.2f frames (%.1f ms)  n=%d" % [r[0], r[1], r[0] * frame_ms, r[2]])
 	print("LATENCY aim      mean %.2f  p95 %.2f frames (%.1f ms)  n=%d" % [a[0], a[1], a[0] * frame_ms, a[2]])
 	bad = bad or r[2] == 0 or a[2] == 0
