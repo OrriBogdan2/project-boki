@@ -19,7 +19,8 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    a box; first match wins), `room` (ink room per bone), `anchors` (moved through the same fit), `keep` (bones
    whose old parts stay, with their old paint: Grimble's junk ball) and `move_bones` (such a bone's rest moved,
    its clips' translation keys corrected so they end where they did). The budget: `tris` + the kept parts +
-   skin_relax's caps <= 15k (RIG_CONTRACT.md).
+   skin_relax's caps <= 15k (RIG_CONTRACT.md). A master may be several meshes (Meeko's body and two back wings, each
+   on its own texture): they are joined and each material's own base colour is baked.
 3. **Swap**: `blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB`. The first run
    bakes (bake_warden.py's low mesh, UVs and Cycles bake, ~10 min) into WORK/bake.blend and copies the game .glb
    to WORK/game.glb; later runs start from those, so a spec change re-fits in ~15 min. WORK/fit.blend is the

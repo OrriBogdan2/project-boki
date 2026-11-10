@@ -44,20 +44,27 @@ def import_dense(path):
     for m in meshes:
         m.select_set(True)
     bpy.context.view_layer.objects.active = meshes[0]
+    names = [o.name for o in new]           # (the join frees the other meshes: look the rest up by name after it)
     if len(meshes) > 1:
         bpy.ops.object.join()
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    for o in new:
-        if o.name in bpy.data.objects and o is not ob:
+    for n in names:
+        o = bpy.data.objects.get(n)
+        if o is not None and o != ob:
             bpy.data.objects.remove(o)
     ob.name = "High"
     return ob
 
 
+def base_tex(mat):
+    """A material's base colour image node."""
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    return bsdf.inputs["Base Color"].links[0].from_node
+
+
 def base_image(ob):
-    bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
-    return bsdf.inputs["Base Color"].links[0].from_node.image
+    return base_tex(ob.data.materials[0]).image
 
 
 def tris(ob):
@@ -286,10 +293,9 @@ def _islands(bm, lay):
 
 def bake_colour(high, low, size, cage, ray, margin_px):
     """The dense mesh's base colour (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
-    src = base_image(high)
-    for m in high.data.materials:
+    for m in high.data.materials:       # (each its own image: a master joined from parts has one per part)
         nt = m.node_tree
-        tex = next(n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src)
+        tex = base_tex(m)
         tex.interpolation = "Cubic"
         em = nt.nodes.new("ShaderNodeEmission")
         nt.links.new(tex.outputs["Color"], em.inputs["Color"])
