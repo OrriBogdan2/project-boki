@@ -43,6 +43,16 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## blockers (`content/rules/blockers.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | One rule for what stops what (docs/ABILITIES.md 'Blockers and crossers', scripts/combat/blockers.gd, --blocker-check). Each crosser has a class; the class row says stop, pass or na (can't meet) per blocker kind. arch: the kit the check fires it from. |
+| classes | {"solid": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"}, "body": {"shield": "na", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "na"}, "pierce": {"shield": "stop", "rock": "pass", "ice": "stop", "wall": "stop", "guard": "stop"}, "phase": {"shield": "na", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "na"}, "lob": {"shield": "pass", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "pass"}} |
+| crossers | {"shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"}, "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Abyssal Hand (pierces terrain)"}, "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"}, "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"}, "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"}, "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"}, "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"}, "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"}, "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls and objects, not terrain ledges)"}, "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}} |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).

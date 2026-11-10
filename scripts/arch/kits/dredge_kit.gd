@@ -383,9 +383,9 @@ func _grab(f: Ent, ally := false) -> void:
 		hook_hold = null
 		return
 	var rdf := rmb_def()
-	if f.mass() >= 6.0:
+	if f.mass() >= 6.0 or Blockers.body_stops(f, h):
 		hook_hold = null
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY", Color("c0b0a0"), false)
+		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY" if f.mass() >= 6.0 else "BLOCKED", Color("c0b0a0"), false)
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:

@@ -269,6 +269,10 @@ func busy() -> bool:
 func no_glide() -> bool:
 	return rmb_down or (riposte != null and riposte.move_k() <= 0.0)
 
+## The guard stops pulls too (Blockers).
+func blocks_from(_by: Ent) -> bool:
+	return riposte.guarding()
+
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if riposte.block(by, o):
