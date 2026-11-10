@@ -1,7 +1,7 @@
 # Boki art live manifest (regenerated 02:31 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-233 Boki, 233 with all three. Missing something: 
+234 Boki, 234 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -55,6 +55,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Dreadnoyak | ✓ | ✓ | ✓ |
 | Dribbara | ✓ | ✓ | ✓ |
 | Druzemole (Gemole) | ✓ | ✓ | ✓ |
+| Dynaboa | ✓ | ✓ | ✓ |
 | Echolop | ✓ | ✓ | ✓ |
 | Eclipsowl | ✓ | ✓ | ✓ |
 | Effigeetle (Sculptillar) | ✓ | ✓ | ✓ |

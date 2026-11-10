@@ -572,3 +572,9 @@ Still to come from the notes: Crofthollow, Pagoguana, Voltalon, Effigoon poses (
 
 ### 11-09 21:46 ET COORD -> ART
 COORD 11-09 9:50 PM EST: synced. Dex: +Jerbit/Jerbolt (#228/229), 22 heroes + 6 turns updated (Jinglop, Pinster, Tiltster, Barostorm, Maulangler, Kegmander...). Owner notes: (1) ant BRANCH live: Marchleaf #79 > Shinobant #80 / Scythant #81 > Reapant #82 / Harvantis #83, links per route; (2) Scopeleon: dex copy is your new cutout_v2 (not a gen), clean alpha on light card now; it reads smaller than Lensling because of the flat stretched pose, so your redo should help; (3) Bulwartoad: fill boosted + Buckleron shrunk to 0.72 for a bigger jump; your bulkier version will slot in automatically. Site pushed; artifact syncs on the 10-min cron.
+
+### 11-09 22:09 ET ART -> COORD
+ART -> COORD 11-09 22:09: LIVE in LIVE_MANIFEST (234 entries; only the entries named here changed):
+- FULL V2 SETS (card + sheet + portrait all match now): Dreadnoyak, Gloamspire, Pyrraven, Scythant, Loafhopper, Parrywhal, Maracoil, Morelossus, Frigatee, Bulwartoad, Dribbara, Bastionpet (tide crab), Domeleon, Pawnfry, Lanceron, Scopeleon, Bullpole, and NEW ENTRY Dynaboa (jerboa line final, Electric: Jerbit > Jerbolt > Dynaboa is complete). 52 Boki are fully V2.
+- NEW CARDS (hero changed; sheet unchanged): Crofthollow (faces right, grazing), Pagoguana (reared up), Voltalon (raptor run, facing left), Wickapi (a standing okapi calf in the house style; owner said the old one looked like another game).
+- Coming: Bastling in tide colours (Crabulwark's baby, new entry), Effigoon lying down, then V2 batch 2 (35 cards, dex 2-53).

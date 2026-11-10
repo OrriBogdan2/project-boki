@@ -589,3 +589,13 @@ _BT2=[ # name, stage, arch, dark, furry, cols, counts, fix
 for _n,_st,_ar,_dk,_fu,_co,_ct,_fx in _BT2:
     SPECS.append({'id':'v2c_'+_n.lower(),'name':_n+' (V2 card, batch 2, text-only style)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
                   'prompt':RS_CARD_TEXT(_n,_st,_ar,_co,_ct,_dk,_fu,_fx)})
+
+# ===== 22:15 ET 11-09: picks. Full V2 sets live for the 16 owner-note Boki + Bullpole + Dynaboa (new). New cards: Crofthollow (on2_1),
+# Pagoguana (on2_1), Voltalon (on2_2), Wickapi (on_wickapi_stand_3). Bastling: tide card on_bastling_1 -> sheet + portrait. Effigoon: run 1 lies
+# down without a rope but has a cast shadow -> edit it out.
+_n0=len(SPECS)
+V2SHEET_NEW('Bastling',_O+'on_bastling_1.jpg',"blue-grey slate shell, pale barnacles, one pink coral sprig and green seaweed leaves on the shell, deep teal legs and claws with cream undersides, big green eyes","eight legs, two claws, one shell")
+V2PORT_NEW('Bastling',_O+'on_bastling_1.jpg','baby','cute',"blue-grey slate shell, pale barnacles, one pink coral sprig and green seaweed leaves on the shell, deep teal legs and claws with cream undersides, big green eyes","eight legs, two claws, one shell",False,False,"waving one claw happily")
+SPECS[_n0]['id']='v2s_bastling_tide'; SPECS[_n0+1]['id']='v2p_bastling_tide'; SPECS[_n0+1]['runs']=2
+SPECS.append({'id':'on_effigoon_clean','name':'Effigoon (lying cocoon, no shadow)','refs':[_O+'on_effigoon_lie_1.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"remove the grey cast shadow on the ground beside and under the cocoon, and remove the short piece of rope at the top edge of the picture. The background is one perfectly flat pale grey (#E8E8EE) everywhere. The cocoon itself stays exactly the same."})
