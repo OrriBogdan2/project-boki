@@ -15,35 +15,6 @@ func _key(k: int) -> InputEventKey:
 	var e := InputEventKey.new(); e.physical_keycode = k; e.pressed = true
 	return e
 
-## Binds R (the ultimate's, shared with turning a piece) to dash: the swap leaves every action
-## bound, and the saved file round-trips.
-func _dash_on_r(S) -> void:
-	var r := "key:%d" % KEY_R
-	var dash_old: String = S.slots("dash")[0]
-	var owners: Array = S.conflicts(_key(KEY_R), "dash")
-	ok(owners.any(func(o): return o[0] == "hunter_ult") and S.slots("hunter_ult")[0] == r,
-			"R is the hunter ultimate's: binding it to dash is a clash (%s)" % str(owners))
-	S.swap_bind("dash", 0, _key(KEY_R), owners)
-	ok(S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old and S.slots("rotate")[0] == dash_old,
-			"swap: dash on R, the ultimate and turn take dash's old key (%s / %s / %s)"
-			% [S.binding_text("dash"), S.binding_text("hunter_ult"), S.binding_text("rotate")])
-	var none: bool = S.unbound("dash") or S.unbound("hunter_ult") or S.unbound("rotate")
-	ok(not none and S.conflicts(_key(KEY_R), "dash").is_empty(), "nobody is left unbound, and R is only dash's")
-	var cf := ConfigFile.new()
-	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"][0] == r, "the swap is saved")      # (dash keeps Mouse 5 as its second key)
-	for a in ["dash", "hunter_ult", "rotate"]: InputMap.action_erase_events(a)
-	S.v["keys"] = (cf.get_value("s", "keys") as Dictionary).duplicate(true)
-	S.apply("keys")
-	var back: bool = S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old
-	ok(back and InputMap.action_get_events("dash").size() == 2, "the saved settings load back to the same bindings")
-	# dash with no key: its owners get nothing and read as unbound (the Controls page paints that red)
-	S.reset_all()
-	S.clear_bind("dash", 0)
-	S.clear_bind("dash", 1)
-	S.swap_bind("dash", 0, _key(KEY_R), S.conflicts(_key(KEY_R), "dash"))
-	ok(S.unbound("hunter_ult") and S.unbound("rotate") and not S.unbound("dash"), "an owner given no key reads unbound")
-	S.reset_all()
-
 const RX := "(?:is_action_(?:just_)?(?:pressed|released)|get_action_strength|get_axis)\\(\"(\\w+)\"(?:, \"(\\w+)\")?"
 
 ## Every action name a script reads (is_action_*, get_axis).
@@ -104,6 +75,37 @@ func _migration(S) -> void:
 	KeyMigrate.run(m)
 	ok(m["keys"] == before, "and it runs once")
 	ok(S.DEFAULTS.has("keys6_v"), "the settings carry the migration step")
+
+## Binds R (the ultimate's, shared with turning a piece) to dash: the swap leaves every action
+## bound, and the saved file round-trips.
+func _dash_on_r(S) -> void:
+	var r := "key:%d" % KEY_R
+	var dash_old: String = S.slots("dash")[0]
+	var owners: Array = S.conflicts(_key(KEY_R), "dash")
+	ok(owners.any(func(o): return o[0] == "hunter_ult") and S.slots("hunter_ult")[0] == r,
+			"R is the hunter ultimate's: binding it to dash is a clash (%s)" % str(owners))
+	S.swap_bind("dash", 0, _key(KEY_R), owners)
+	ok(S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old and S.slots("rotate")[0] == dash_old,
+			"swap: dash on R, the ultimate and turn take dash's old key (%s / %s / %s)"
+			% [S.binding_text("dash"), S.binding_text("hunter_ult"), S.binding_text("rotate")])
+	var none: bool = S.unbound("dash") or S.unbound("hunter_ult") or S.unbound("rotate")
+	ok(not none and S.conflicts(_key(KEY_R), "dash").is_empty(), "nobody is left unbound, and R is only dash's")
+	var cf := ConfigFile.new()
+	ok(cf.load(S.PATH) == OK and cf.get_value("s", "keys")["dash"][0] == r, "the swap is saved")
+	for a in ["dash", "hunter_ult", "rotate"]: InputMap.action_erase_events(a)
+	S.v["keys"] = (cf.get_value("s", "keys") as Dictionary).duplicate(true)
+	S.apply("keys")
+	var back: bool = S.slots("dash")[0] == r and S.slots("hunter_ult")[0] == dash_old
+	var n_keys: int = S.slots("dash").filter(func(c): return c != "").size()
+	ok(back and InputMap.action_get_events("dash").size() == n_keys,
+			"the saved settings load back to the same bindings")
+	# dash with no key: its owners get nothing and read as unbound (the Controls page paints that red)
+	S.reset_all()
+	S.clear_bind("dash", 0)
+	S.clear_bind("dash", 1)
+	S.swap_bind("dash", 0, _key(KEY_R), S.conflicts(_key(KEY_R), "dash"))
+	ok(S.unbound("hunter_ult") and S.unbound("rotate") and not S.unbound("dash"), "an owner given no key reads unbound")
+	S.reset_all()
 
 func run(main: Node) -> void:
 	var tree := main.get_tree()

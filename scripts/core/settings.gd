@@ -43,6 +43,7 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
 ##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
 ##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
+##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
 ##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
@@ -50,27 +51,27 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
-		"scale": 0.5, "fxaa": false,
+		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
 		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
-		"scale": 0.77, "fxaa": true,
+		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
 		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
-		"scale": 1.0, "fxaa": true,
+		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
 		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false,
+		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
 		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false,
+		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
 		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false},
@@ -155,9 +156,9 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["kin_attack", "Boki order: attack my target"], ["kin_return", "Boki order: come back to me"],
 	["kin_hold", "Boki order: hold this position"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
@@ -434,6 +435,8 @@ func _apply_quality() -> void:
 	var root := get_tree().root
 	_apply_render_scale()
 	root.mesh_lod_threshold = float(Q["lod"])
+	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
+	Engine.max_physics_steps_per_frame = int(Q["steps"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):

@@ -539,9 +539,10 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		elif Settings.unbound(an):
 			for c in ["font_color", "font_hover_color", "font_pressed_color"]: b.add_theme_color_override(c, UI.BAD)
 			b.tooltip_text = "No key: this action can't be used until you set one"
-		elif code != "" and not Settings.conflicts_of_code(code, an).is_empty():
+		var shared := Settings.conflicts_of_code(code, an)
+		if not shared.is_empty():
 			b.modulate = Color("ff8a7a")
-			var names := Settings.conflicts_of_code(code, an).map(func(c): return _action_name(String(c[0])))
+			var names := shared.map(func(c): return _action_name(String(c[0])))
 			b.tooltip_text = "Also used by: %s. Both fire on one press." % ", ".join(names)
 		b.pressed.connect(func():
 			listening = an
