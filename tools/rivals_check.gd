@@ -40,7 +40,8 @@ func _kin(sp: String, kname: String) -> Dictionary:
 	var k := Save.new_kin(sp, kname)
 	k["level"] = 5
 	Care.ensure(k)
-	k["needs"] = {"food": 90.0, "joy": 80.0, "energy": 90.0}
+	for need in ["food", "joy", "energy"]:
+		k["needs"][need] = 90.0 if need != "joy" else 80.0
 	k["trust"] = 50.0
 	return k
 
