@@ -215,7 +215,7 @@ static func release(m, h: Hunter, idx: int) -> bool:
 		return false
 	var rec: Dictionary = h.caught[idx]
 	h.caught.remove_at(idx)
-	m.sfx("kin_happy", h.pos, -4.0)
+	m.sfx(KinVoice.cue(String(rec["species"]), "happy"), h.pos, -4.0)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color(Data.KIN[String(rec["species"])]["color"]), 12, 3.0)
 	if h.is_local() and m.hud:
 		m.hud.toast("%s was let go" % rec.get("name", "The Boki"), Color("bfe9ff"))
