@@ -105360,5 +105360,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px5_calderoise_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px7_calderoise",
+    "name": "Calderoise (pixel sprite style 7)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px7_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_aurostag",
+    "name": "Aurostag (pixel sprite style 5)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px5_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_calderoise",
+    "name": "Calderoise (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_calderoise",
+    "name": "Calderoise (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_aurostag",
+    "name": "Aurostag (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_aurostag",
+    "name": "Aurostag (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_calderoise",
+    "name": "Calderoise (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_aurostag",
+    "name": "Aurostag (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_aurostag_2.jpg",
+    "ok": true
   }
 ]
