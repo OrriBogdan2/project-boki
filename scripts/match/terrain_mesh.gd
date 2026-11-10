@@ -6,11 +6,12 @@ extends RefCounted
 ## runs stay straight, one-tile staircases become clean diagonals and corners are rounded off instead
 ## of reading as stacked cubes. Each contour is extruded into a cliff with a profile that tells you
 ## what it is: a soft grassy bevel on terrace steps, a pale stone ledge that sticks out on rims you can
-## grab, and a smooth dark slate face on the sheer ones. Under each island hangs a tapered, faceted
-## rock cone instead of a slab, and stairs are drawn as carved stone flights with side walls.
+## grab, and a smooth dark slate face on the sheer ones. Under each island hangs a tall, tapered, faceted
+## rock cone instead of a slab (IslandDepth), and stairs are drawn as carved stone flights with side walls.
 
 const LEVEL := 0.8
-const RIM := 1.5           # how far an island's outer cliff drops before the rock underneath tapers in
+const RIM := IslandDepth.RIM
+const UNDER_FADE := 24.0   # m below the top where the underside reaches its deepest colour
 const ROWS := 6            # rows in every cliff profile (shared points must line up between cells)
 
 # style codes, passed to the terrain shader in UV.x (0 = legacy meshes that pick by normal)
@@ -30,7 +31,7 @@ var h := 0
 var pw := 0
 var vals := PackedInt32Array()     # padded grid of levels, -1 for the void (and plank bridges)
 var tops := PackedColorArray()     # per tile: the ground colour at its centre
-var under := PackedFloat32Array()  # per tile: the height of the island's underside below it
+var under := PackedFloat32Array()  # per tile: the height of the island's underside below it (IslandDepth)
 var rn := FastNoiseLite.new()
 var _s := {}
 var _x := {}
@@ -87,7 +88,7 @@ func _emit(chunk: int) -> void:
 	await W._slice()
 	_fill_colors()
 	await W._slice()
-	_fill_under()
+	under = W.under_heights()
 	_ranges.clear()
 	for cz in range(-1, h):
 		await W._slice()       # under the loading screen: a frame now and then (never waits in one-go builds)
@@ -191,65 +192,6 @@ func _fill_colors() -> void:
 			if wsum > 0.0:
 				col = col.lerp(pc / wsum, clampf(wsum / 1.2, 0.0, 1.0) * (0.85 + nv2 * 0.15))
 			tops[i] = col
-
-## The underside of each island: a cone of rock that tapers in from the rim, deepest under the
-## middle, as in a floating island.
-func _fill_under() -> void:
-	under.resize(w * h); under.fill(0.0)
-	var d := PackedFloat32Array(); d.resize(w * h)
-	var big := 1.0e6
-	for i in w * h:
-		d[i] = big if v(i % w, i / w) >= 0 else 0.0
-	var dg := 1.4142
-	# two-pass chamfer distance to the nearest void tile
-	for z in h:
-		for x in w:
-			var i: int = z * w + x
-			if d[i] == 0.0: continue
-			var best: float = d[i]
-			best = minf(best, (d[i - 1] if x > 0 else 0.0) + 1.0)
-			best = minf(best, (d[i - w] if z > 0 else 0.0) + 1.0)
-			best = minf(best, (d[i - w - 1] if x > 0 and z > 0 else 0.0) + dg)
-			best = minf(best, (d[i - w + 1] if x < w - 1 and z > 0 else 0.0) + dg)
-			d[i] = best
-	for z in range(h - 1, -1, -1):
-		for x in range(w - 1, -1, -1):
-			var i: int = z * w + x
-			if d[i] == 0.0: continue
-			var best: float = d[i]
-			best = minf(best, (d[i + 1] if x < w - 1 else 0.0) + 1.0)
-			best = minf(best, (d[i + w] if z < h - 1 else 0.0) + 1.0)
-			best = minf(best, (d[i + w + 1] if x < w - 1 and z < h - 1 else 0.0) + dg)
-			best = minf(best, (d[i + w - 1] if x > 0 and z < h - 1 else 0.0) + dg)
-			d[i] = best
-	# soften it, so diagonal coasts and thin necks don't alternate deep and shallow tile by tile
-	for _pass in 2:
-		var sm := d.duplicate()
-		for z in range(1, h - 1):
-			for x in range(1, w - 1):
-				var i: int = z * w + x
-				if d[i] <= 0.0: continue
-				var sum := 0.0
-				for o in [i - 1, i + 1, i - w, i + w, i - w - 1, i - w + 1, i + w - 1, i + w + 1]:
-					sum += d[o]
-				sm[i] = maxf(0.5, (d[i] * 2.0 + sum) / 10.0)
-		d = sm
-	var reach := {}
-	for i in w * h:
-		if d[i] > 0.0:
-			var ii: int = W.island[i]
-			reach[ii] = maxf(float(reach.get(ii, 1.0)), d[i] - 0.5)
-	for i in w * h:
-		if d[i] <= 0.0:
-			continue
-		var x := i % w; var z := i / w
-		var R: float = maxf(1.5, float(reach.get(W.island[i], 1.5)))
-		var dc := d[i] - 0.5
-		var deep := clampf(3.0 + R * 0.7, 4.0, 15.0)
-		var t := clampf(dc / R, 0.0, 1.0)
-		var taper := deep * pow(t, 0.62)
-		taper *= 1.0 + rn.get_noise_2d(x * 0.31 + 50.0, z * 0.31) * 0.28
-		under[i] = v(x, z) * LEVEL - _rim(Vector2(x + 0.5, z + 0.5)) - taper
 
 func _rim(p: Vector2) -> float:
 	return RIM + rn.get_noise_2d(p.x * 0.45, p.y * 0.45) * 0.35
@@ -518,7 +460,7 @@ func _under_tri(p: Array, _lv: Array, bio: Dictionary) -> void:
 	var cols: Array = []
 	for q in p:
 		var y: float = (q as Vector3).y
-		var k := clampf((-y - 0.5) / 14.0, 0.0, 1.0)
+		var k := clampf((-y - 0.5) / UNDER_FADE, 0.0, 1.0)
 		cols.append(side.darkened(0.12).lerp(deep.darkened(0.15), sqrt(k)))
 	_tri3(a, b, c, fn, cols[0], cols[1], cols[2], S_UNDER, false)
 
