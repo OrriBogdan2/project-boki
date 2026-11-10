@@ -77689,5 +77689,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_gloamshell_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_glomwort",
+    "name": "Glomwort (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_glomwort_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glomwort",
+    "name": "Glomwort (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_glomwort_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glomwort",
+    "name": "Glomwort (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_glomwort_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glomworth",
+    "name": "Glomworth (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_glomworth_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glomworth",
+    "name": "Glomworth (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_glomworth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gloamshell",
+    "name": "Gloamshell (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_gloamshell_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_crofthorn",
+    "name": "Crofthorn (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_crofthorn_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_mortarfly",
+    "name": "Mortarfly (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_mortarfly_1.jpg",
+    "ok": true
   }
 ]
