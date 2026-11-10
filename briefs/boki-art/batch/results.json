@@ -109609,5 +109609,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/gambit_p1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_postroo_compact",
+    "name": "Postroo (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_postroo_compact_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "carp2_a",
+    "name": "Carpenjaw (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/carp2_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_marimbite_compact",
+    "name": "Marimbite (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_marimbite_compact_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "carp2_b",
+    "name": "Carpenjaw (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/carp2_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose3_jerbolt",
+    "name": "Jerbolt (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose3_jerbolt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_vfan",
+    "name": "Pavonazar (review: vfan)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_vfan_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "carp2_b",
+    "name": "Carpenjaw (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/carp2_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_vfan",
+    "name": "Pavonazar (review: vfan)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_vfan_3.jpg",
+    "ok": true
   }
 ]
