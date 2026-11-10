@@ -96638,5 +96638,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rv_dynaboa_c_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_fizzlet_cloud",
+    "name": "Fizzlet (review: cloud)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_fizzlet_cloud_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_fizzlet_cloud",
+    "name": "Fizzlet (review: cloud)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_fizzlet_cloud_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_fizzlet_cloud",
+    "name": "Fizzlet (review: cloud)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_fizzlet_cloud_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_thunderstrich_run",
+    "name": "Thunderstrich (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_thunderstrich_run_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_thunderstrich_run",
+    "name": "Thunderstrich (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_thunderstrich_run_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_voltalon_family",
+    "name": "Voltalon (review: family)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_voltalon_family_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_thunderstrich_run",
+    "name": "Thunderstrich (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_thunderstrich_run_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_voltalon_family",
+    "name": "Voltalon (review: family)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_voltalon_family_2.jpg",
+    "ok": true
   }
 ]
