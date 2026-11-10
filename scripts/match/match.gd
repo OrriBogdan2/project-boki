@@ -685,7 +685,7 @@ func _start(o: Dictionary) -> void:
 	seed(seed_val)
 	# real expeditions happen on the big map and start from the skyship
 	big = not (o.get("tutorial", false) or o.get("training", false)) and o.get("big", true)
-	length = float(o.get("length", Data.MATCH["length"] * (1.7 if big else 1.0)))
+	length = float(o.get("length", Heart.r("match_s")))
 	if Rolling.enabled(o):
 		# a rolling session: the waves, which one you're in, who's out there already (sets length and sess_t0)
 		rolling = Rolling.new(self)
@@ -2525,8 +2525,9 @@ func _check_last() -> void:
 	for h in hunters:
 		if not h.out and not h.extracted:
 			teams[h.team] = true
-	if teams.size() <= 1 and exits and (rolling == null or rolling.waves_left() == 0):
-		exits.on_last_team()
+	if teams.size() <= 1 and (rolling == null or rolling.waves_left() == 0):
+		if exits: exits.on_last_team()
+		if heart: heart.on_last_team()
 
 func on_fell(e: Ent) -> void:
 	if e is Hunter and opts.get("autoplay", false):
@@ -5331,13 +5332,13 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		return
 	h.extracted = true
 	h.downed = false
-	var hb: Dictionary = heart.pay(h) if heart and how == "heart" else {}      # the Heartspark's reward bundle
+	var hb: Dictionary = heart.pay(h, how) if heart and how.begins_with("heart") else {}      # a Heart seat's reward
 	if heart: heart.on_leave(h, how)
 	if not h.stomp.is_empty(): Life.end_stomp(self, h, "extract")
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
-	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK, "heart": Heart.COL}.get(how, Color("8fe3c8"))
+	var col: Color = {"skiff": ExitModels.DOCK, "hatch": ExitModels.HATCH, "uplink": ExitModels.UPLINK, Heart.HOW_EARLY: Heart.COL, Heart.HOW_FINAL: Heart.COL}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, -4.0 if how == "hatch" else 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
 	Juice.extract(self, h, col)
