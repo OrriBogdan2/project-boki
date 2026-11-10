@@ -71,6 +71,10 @@ func cue(what: String, chirp_db: float) -> void:
 	k.m.sfx("summon_%s_%s" % [what, k.ks.size if k.ks else "small"], k.pos, -4.0)
 	k.m.sfx(chirp_name(k.ks), k.pos, chirp_db, Unique.voice(k.rec))
 
+## The one-word tag for a window: Burst (short and strong) or Steady (long and supportive).
+static func tag(window: float) -> String:
+	return "Steady" if window >= float(rules()["steady_from"]) else "Burst"
+
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
