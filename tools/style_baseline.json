@@ -638,10 +638,10 @@
 "semicolon": 3
 },
 "scripts/match/match.gd": {
-"history_comment": 4,
-"long_line": 222,
-"nested_ternary": 19,
-"semicolon": 146,
+"history_comment": 3,
+"long_line": 221,
+"nested_ternary": 18,
+"semicolon": 145,
 "shadow": 9
 },
 "scripts/match/merge_look.gd": {
