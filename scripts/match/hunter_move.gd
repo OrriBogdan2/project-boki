@@ -50,10 +50,14 @@ static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
 
 ## Ground speed after a step with no keys: UE's walking brake, ground_friction (share of the speed per
-## second) plus a constant brake_decel, so a let-go from a run slides ~0.3 m. Speed over `run` (a kit
-## step, a knock) first sheds at Hunter.GROUND_SHED. grip < 1 on ice.
-static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
+## second) plus a constant brake_decel, so a let-go from a run slides ~0.3 m. Speed over the run (a kit
+## step, a knock) first sheds at Hunter.GROUND_SHED. `walk` is the walk's cap this step; a cast's wind-up,
+## a slow or a crouch lowers it, and a let-go under one still brakes like the plain stop (UE brakes a
+## let-go the same whatever MaxWalkSpeed is), so only speed over the hunter's own run counts as over-run.
+## grip < 1 on ice.
+static func brake(h: Hunter, hv: Vector2, walk: float, grip: float, dt: float) -> Vector2:
 	var s := hv.length()
+	var run := maxf(walk, h.base_speed * (1.0 + h.gear_stat("speed")))
 	if s > run + 0.05:
 		return hv * (maxf(run, s - Hunter.GROUND_SHED * grip * dt) / s)
 	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)

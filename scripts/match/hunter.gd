@@ -2223,7 +2223,7 @@ func _physics(dt: float) -> void:
 			if (mv * spd).length() >= 0.001:
 				hv = accel2(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
 			else:
-				hv = HunterMove.brake(hv, spd, grip, dt)
+				hv = HunterMove.brake(self, hv, spd, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))
