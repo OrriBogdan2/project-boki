@@ -310,7 +310,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not KnockWall.behind(m, t, dir, float(res_def().get("crush_reach", 1.5))):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -515,6 +515,21 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 ## s the hammer stays in his hand after the throw starts; with the step it's queued on (~0.04 s) it leaves
 ## ~0.15 s after the press, as the arm comes through in bul_throw (its release key, 0.14 s; sheet 0033-0034)
 const THROW_WIND := 0.10
+
+## How far a tap throws the hammer: to the cursor, clamped to its range (m).
+func throw_dist() -> float:
+	var md := lmb_def()
+	return AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
+
+## His aim line (your screen only): out to where a tap lands the hammer, while it is in hand and not swinging.
+func _tick_aim_line() -> void:
+	if not h.is_local() or h.downed or h.wid != "tower_shield" or ult.planted():
+		return
+	if mace.is_empty() and lmb_t < 0.0:
+		AimKit.line(h, "aim", {"len": throw_dist(), "alpha": 0.7})
+
+func own_aim_line() -> bool:
+	return h.wid == "tower_shield"
 
 ## How far a tap throws the hammer: to the cursor, clamped to its range (m).
 func throw_dist() -> float:

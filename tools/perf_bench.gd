@@ -8,6 +8,7 @@ extends RefCounted
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium] [--bench-stress]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ## --bench-stress: the 60-actor load (10 trios = 30 Hunters, every Boki kept out beside its Hunter, no fight).
+##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 ## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
 ## tools/perf_baseline.json exits 1 (BENCH GATE FAIL). Record a new baseline by editing that file from a run.
@@ -23,8 +24,10 @@ var farm_secs := 20.0
 var out_path := ""
 var teams := 3            # --bench-teams / --bench-squad: 10 trios is the Extraction budget (30 Hunters)
 var squad := 2
+var hunters := 6          # --bench-hunters (squads of 2): teams x squad unless set
 var stress := false       # --bench-stress: 30 Hunters with all 30 Boki out, nothing brought to you
 const STRESS_OUT_S := 2.0           # s between sends: a Boki back on its Hunter's shoulder is sent out again
+var wisps := false
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -52,10 +55,16 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-teams="): teams = int(a.substr(14))
 		if a.begins_with("--bench-squad="): squad = int(a.substr(14))
+		if a.begins_with("--bench-hunters="):
+			hunters = maxi(2, int(a.substr(16)))
+			teams = ceili(hunters / 2.0); squad = 2
+		if a == "--boki-wisps": wisps = true
 	stress = "--bench-stress" in OS.get_cmdline_user_args()
 	if stress:
 		teams = 10
 		squad = 3
+	if stress or not OS.get_cmdline_user_args().any(func(a): return a.begins_with("--bench-hunters=")):
+		hunters = teams * squad
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -66,7 +75,8 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [hunters,
+		wisps, Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
 		win.size.y, win.scaling_3d_scale])
 	if out_path != "":
@@ -89,9 +99,8 @@ func _gate() -> int:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": teams, "squad": squad, "total": teams * squad, "raid": "ash", "blight": true, "no_drop": true,
-		"god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": teams, "squad": squad, "total": hunters, "raid": "ash", "blight": true, "no_drop": true,
+		"god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)

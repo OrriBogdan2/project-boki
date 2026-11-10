@@ -77,6 +77,7 @@ func _setup_input() -> void:
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
+	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("ping", [], MOUSE_BUTTON_XBUTTON1)   # Mouse 4 pings too
 	_key("kin_attack", [KEY_K])               # Boki order: attack my target (the Chase order)

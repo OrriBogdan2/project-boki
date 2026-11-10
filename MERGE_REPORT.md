@@ -1,74 +1,27 @@
-# Merge candidate 20261109-2230 (built by cron, no Claude usage)
+# Merge candidate 20261110-0230 (built by cron, no Claude usage)
 
-Headline: NEW-RED 14, WORSE 16, FIXED 22 of 216 checks; 199 merged, 434 skipped; release exports pass; GPU jobs not finished: 0 (GPU perf deferred: no GPU worker alive)
+Headline: NEW-RED 3, WORSE 2, FIXED 0 of 231 checks; 225 merged, 511 skipped; release exports FAIL; GPU jobs not finished: 1
 
 Base: origin/main d255acbe. Health: HEALTH FAIL: style ratchet (docs/STYLE.md) (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)
-Suite scope: affected checks only, 216 of 165 (smoke set always on; FULL_SUITE=1 for everything). Why: affected.why on the box.
-Capacity plan: alive=pc-MRROBOTO flags=216 cached=0 to_run=216 unknown=11 server_min=52 with_workers_min=26 decision=RUN
+Suite scope: affected checks only, 231 of 165 (smoke set always on; FULL_SUITE=1 for everything). Why: affected.why on the box.
+Capacity plan: alive=pc-MRROBOTO flags=231 cached=0 to_run=231 unknown=22 server_min=59 with_workers_min=29 decision=RUN
 - UNCOVERED scripts/arch/kits/ice_body.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/arch/kits/thief_spin.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/arch/ult_cue.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
+- UNCOVERED scripts/combat/knock_wall.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/core/boki_quirks.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/core/demo.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
+- UNCOVERED scripts/core/first_time_hint.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/core/fsm.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/core/locomotion.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/core/unstable_mix.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
-- UNCOVERED scripts/heroes/warden_free_arm.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
-- UNCOVERED scripts/heroes/warden_gait.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 
-## Suite vs main: NEW-RED 14, WORSE 16, FIXED 22 of 216 checks
-- NEW-RED --ability-check main=0/0 cand=0/126
-- WORSE --air-control-check main=124/0 cand=0/3
-- NEW-RED --airdash-glide-check main=0/0 cand=0/1
-- NEW-RED --airheal-check main=0/0 cand=0/1
-- NEW-RED --archetype-check main=0/0 cand=1/1
-- NEW-RED --arena-check main=0/0 cand=0/3
-- NEW-RED --ashwick-combo-check main=0/0 cand=1/5
-- NEW-RED --balloon-check main=0/0 cand=0/1
-- WORSE --boki-quirks-check main=124/0 cand=124/2
-- WORSE --boki-react-check main=124/0 cand=0/1
-- NEW-RED --boki-rig-check main=0/0 cand=0/3
-- NEW-RED --boss-check main=0/0 cand=0/3
-- WORSE --bot-names-check main=124/0 cand=0/3
-- NEW-RED --bot-sanity-check main=0/0 cand=1/0
-- NEW-RED --bulwark-combo-check main=0/0 cand=1/2
-- NEW-RED --capture-check main=0/0 cand=1/4
-- NEW-RED --check main=0/0 cand=0/3
-- NEW-RED --class-unlock-check main=0/0 cand=0/5
-- WORSE --clip-check main=127/0 cand=127/1
-- WORSE --clip-live-sable-check main=127/0 cand=127/1
-- FIXED --clutter-check main=127/ cand=0/0
-- WORSE --crouch-check main=127/0 cand=127/2
-- FIXED --dead-kmoves-check main=127/ cand=0/0
-- FIXED --evo-check main=127/ cand=0/0
-- FIXED --exit-signal-check main=127/ cand=0/0
-- FIXED --far-props-check main=127/ cand=0/0
-- FIXED --first-match-guide-check main=127/ cand=0/0
-- WORSE --hitch-check main=127/6 cand=127/13
-- FIXED --hold-pose-check main=127/ cand=0/0
-- FIXED --hot-zone-check main=127/ cand=0/0
-- FIXED --inventory-check main=127/ cand=0/0
-- FIXED --kit-drill-check main=127/ cand=0/0
-- WORSE --kit-parity-check main=127/0 cand=127/1
-- FIXED --ledge-walk-check main=127/ cand=0/0
-- FIXED --load-trim-check main=127/ cand=0/0
-- WORSE --mantle-check main=127/0 cand=127/1
-- WORSE --mantle-look-check main=127/2 cand=127/3
-- FIXED --mesh-arrays-check main=127/ cand=0/0
-- WORSE --motley-live-check main=127/0 cand=127/1
-- FIXED --mystery-egg-check main=127/ cand=0/0
-- FIXED --nook-check main=127/ cand=0/0
-- FIXED --quality-check main=127/ cand=0/0
-- FIXED --race-check main=127/ cand=0/0
-- WORSE --rank-ui-check main=127/0 cand=127/1
-- FIXED --recast-cue-check main=127/ cand=0/0
-- FIXED --revive-net-check main=127/ cand=0/0
-- WORSE --title-check main=127/8 cand=127/10
-- FIXED --tutorial-clean-check main=127/ cand=0/0
-- FIXED --tutorial-text-check main=127/ cand=0/0
-- FIXED --unstable-mix-check main=127/ cand=0/0
-- WORSE --warden-glb-check main=127/0 cand=127/1
-- WORSE --warden-model-check main=127/0 cand=127/3
+## Suite vs main: NEW-RED 3, WORSE 2, FIXED 0 of 231 checks
+- NEW-RED --ability-check main=0/0 cand=124/4
+- WORSE --aim-near-check main=124/0 cand=124/4
+- NEW-RED --aimkit-check main=0/0 cand=124/4
+- WORSE --air-control-check main=124/0 cand=124/4
+- NEW-RED --air-limits-check main=0/0 cand=124/4
 
 ## Branches
 - SKIPPED  ext/kit-kael-113 6e18b8be conflicts: scripts/match/hunter.gd tools/combo51_shots.gd
@@ -702,24 +655,189 @@ Capacity plan: alive=pc-MRROBOTO flags=216 cached=0 to_run=216 unknown=11 server
 - SKIPPED  ext/anim-strafe-back 5f53bb1c conflicts: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json docs/art/wardens/CLIPS.md scripts/heroes/warden_clips.gd scripts/match/hunter.gd tools/anim_shots.gd tools/move_feel_check.gd
 - SKIPPED  ext/hunter-revamp-af 73f39ab5 conflicts: art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/dredge/IMPORT.md art/wardens/dredge/dredge.glb tools/art1/cinder_source.py
 - SKIPPED  ext/sfx-mob-alert 30e6a701 conflicts: tools/match_audio_check.gd
-- merged   ext/ui-hold-charge 57edbbca
+- merged   ext/ui-hold-charge 4c80486b
 - SKIPPED  ext/vfx-meeko-kindle 2a913027 conflicts: tools/vfx_reel/tender.gd
 - SKIPPED  ext/ui-ability-text-one 603d2e4a conflicts: content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json content/archetypes/juggernaut.json content/archetypes/ostra.json content/archetypes/rimewright.json content/archetypes/thief.json scripts/ui/kit_card.gd tools/style_baseline.json
 - SKIPPED  ext/sfx-downed-muffle 4d04d2f5 conflicts: tools/match_audio_check.gd
+- merged   ext/vfx-capture-read 25fb0f10
+- SKIPPED  ext/anim-landing-weight 90263c8c conflicts: content/rules/warden_anim/ryzz.json docs/art/wardens/CLIPS.md
+- SKIPPED  ext/ui-stolen-wisps 57a87a33 conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- SKIPPED  ext/wisp-steal 1e433f87 conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- SKIPPED  ext/sfx-summon 29d9d520 conflicts: docs/AUDIO.md scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/sfx_set_check.gd tools/wisp_check.gd
+- SKIPPED  ext/boki3d-meshy-pilot f4aab630 conflicts: scripts/match/boki_rig.gd tools/boki_rig_check.gd
+- merged   ext/ui-market-declutter c61e9c1d
+- merged*  ext/garden-burrow-swap 449d7485 (registry/credits/generated auto-resolved)
+- merged*  ext/perf-visibility-ranges-rebased 4d8db78f (registry/credits/generated auto-resolved)
+- SKIPPED  ext/anim-result-poses 51f4c3eb conflicts: content/rules/warden_anim/cinder.json
+- SKIPPED  ext/feel-trigger-edge 06ef3f5b conflicts: scripts/arch/kits/archer_kit.gd
+- SKIPPED  ext/garden-only-pace f4fb599a conflicts: scripts/home/home.gd
+- SKIPPED  ext/vex-yawlock-1109-2248 128ff872 conflicts: content/archetypes/gunslinger.json docs/heroes/gunslinger.md scripts/arch/kits/gunslinger_kit.gd
+- SKIPPED  ext/tut-move-drills 2baf57c5 conflicts: docs/MOVEMENT_FEEL.md scripts/core/save.gd scripts/match/practice.gd
+- merged*  ext/feel-camera-fast cf558f02 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/anim-hunter-swim b254dfb8 conflicts: content/rules/warden_anim/cinder.json scripts/home/home.gd
+- SKIPPED  ext/sfx-reverb-zones 5d8b2e42 conflicts: tools/match_audio_check.gd
+- SKIPPED  ext/garden-save-trip 4d826d11 conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- merged*  ext/vfx-shot-min-size adc37e80 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/vfx-summon-side af2f8cb1 conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- SKIPPED  ext/boki-react-clips-rebased c2b0c9ff conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- SKIPPED  ext/tut-resume 2b62fae1 conflicts: scripts/core/save.gd scripts/match/tutorial.gd
+- SKIPPED  ext/vfx-revive-read a4cf0bda conflicts: docs/DEATH_AND_REVIVE.md scripts/match/box_revive.gd
+- SKIPPED  ext/feel-step-up 387615cf conflicts: content/rules/hunter_move.json
+- SKIPPED  ext/tut-context-tips 332e4000 conflicts: scripts/ui/loading.gd
+- SKIPPED  ext/garden-weekly-race 4c2dc566 conflicts: scripts/home/base_race.gd scripts/home/home.gd tools/race_check.gd
+- SKIPPED  ext/grimble-fist-vfx-rebased ae8ccc10 conflicts: MERGE_REPORT.md
+- SKIPPED  ext/mc-fix-1109b 4ff9e000 conflicts: MERGE_REPORT.md
+- SKIPPED  ext/tut-garden-first-day 71eb276c conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- SKIPPED  ext/solo-drop-20261109-2319 5f3dc384 conflicts: MERGE_REPORT.md
+- merged   ext/tut-controls-card d96d171a
+- SKIPPED  ext/combat-boss-tells 208907fe conflicts: scripts/core/data.gd scripts/match/boss.gd
+- SKIPPED  ext/feel-hitstop-input 137e3286 conflicts: tools/style_baseline.json
+- SKIPPED  ext/combat-cc-mobs 1325b983 conflicts: docs/KIT_PARITY.md scripts/arch/kits/mage_sky.gd
+- merged   ext/anim-extract-board 5194dee7
+- SKIPPED  ext/feel-cast-move aed44578 conflicts: content/archetypes/juggernaut.json docs/heroes/juggernaut.md scripts/arch/kits/juggernaut_kit.gd tools/dancer_jug_check.gd
+- merged   ext/sparkle-tooltip-parity cb98e3f8
+- SKIPPED  ext/soul-link-integ 6c5717ac conflicts: MERGE_REPORT.md docs/AUDIO.md scripts/core/settings.gd scripts/main.gd
+- SKIPPED  ext/cc-stacking-rule 864c4225 conflicts: scripts/combat/fields.gd scripts/match/hunter.gd scripts/ui/hudref_demo.gd
+- merged   ext/combat-wall-surfaces 356eb185
+- SKIPPED  ext/summon-killed-wisp 25e86351 conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- merged   ext/combat-deployable-hp e24b6c82
+- SKIPPED  ext/feel-same-frame 047b42a5 conflicts: scripts/match/hunter_keys.gd
+- merged   ext/feel-aim-steady 26303dbd
+- SKIPPED  ext/anim-rooted-legs ab8f843d conflicts: scripts/heroes/warden_clips.gd
+- merged*  ext/anim-emote-gestures c85072b2 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/feel-wall-slide 4de2100f conflicts: scripts/match/hunter.gd
+- merged*  ext/combat-glove-band eff2c4e6 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/soul-link-t3 37cb7333 conflicts: MERGE_REPORT.md scripts/core/settings.gd
+- merged   ext/feel-train-inertia c97932ba
+- SKIPPED  ext/soul-link-t4 410724c6 conflicts: MERGE_REPORT.md scripts/core/settings.gd
+- SKIPPED  ext/farm-sick-recover 541e99cf conflicts: answer.md scripts/core/care.gd scripts/home/home.gd scripts/main.gd
+- SKIPPED  ext/no-natural-death-1108 c6e446bd conflicts: answer.md scripts/core/care.gd scripts/main.gd
+- SKIPPED  ext/anim-carry-pose 2657f316 conflicts: content/rules/warden_anim/breaker.json content/rules/warden_anim/dredge.json content/rules/warden_anim/hem.json content/rules/warden_anim/vex.json docs/art/wardens/CLIPS.md scripts/heroes/warden_clips.gd
+- SKIPPED  ext/farm-favourite-toy d2e4e486 conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/clip_check.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- merged   ext/kael-lmb-chain 027b36e8
+- merged   ext/ui-rank-ready-beam c020f3e9
+- SKIPPED  ext/farm-home-hatch ec4b52a7 conflicts: scripts/home/home.gd
+- SKIPPED  ext/parity-bulwark-crush 26a64a5b conflicts: content/archetypes/bulwark.json docs/ABILITIES.md docs/heroes/bulwark.md scripts/arch/arch_kit.gd scripts/arch/kits/bjorn_fx.gd scripts/arch/kits/bulwark_kit.gd scripts/match/arena_demo.gd scripts/ui/hud.gd scripts/ui/hud_vitals.gd scripts/ui/kit_card.gd
+- SKIPPED  ext/mantle-press-rules 6b892567 conflicts: docs/heroes/dash_interactions.md scripts/match/hunter.gd tools/gen_wiki.py
+- SKIPPED  ext/farm-feed-bowl 747307b7 conflicts: scripts/core/evo.gd scripts/home/home.gd
+- merged   ext/ui-rebind-conflicts 042b12b3
+- SKIPPED  ext/feel-held-fire-resume 48ebdbd0 conflicts: docs/heroes/dash_interactions.md
+- SKIPPED  ext/combat-friendly-fire e77ba7f2 conflicts: docs/KIT_PARITY.md
+- SKIPPED  ext/anim-elim-beat 36964147 conflicts: scripts/match/hunter.gd scripts/match/hunter_wisp.gd tools/wisp_check.gd tools/wisp_shots.gd
+- SKIPPED  ext/anim-aim-lead 5ab86040 conflicts: docs/art/wardens/CLIPS.md scripts/heroes/warden_clips.gd
+- SKIPPED  ext/sfx-armour-break 5c57b691 conflicts: docs/AUDIO.md
+- SKIPPED  ext/ui-dex-legendary-order 29f0dcfa conflicts: scripts/ui/dex_view.gd
+- SKIPPED  ext/sfx-garden-ambience df4d4651 conflicts: docs/AUDIO.md scripts/home/home.gd tools/sfx_set_check.gd
+- SKIPPED  ext/sfx-heartspark aed05a9f conflicts: scripts/core/net.gd scripts/match/match.gd scripts/ui/full_map.gd scripts/ui/hud.gd
+- SKIPPED  ext/sfx-legendary-presence 7b5a26d6 conflicts: docs/AUDIO.md scripts/ui/dex_view.gd
+- SKIPPED  ext/ui-text-chat f22b4ca5 conflicts: docs/decisions/0019-prematch-lobby.md scripts/core/net.gd scripts/core/settings.gd scripts/ui/prematch_view.gd tools/prematch_check.gd
+- SKIPPED  ext/kael-lunge-length-rebased 00894cd1 conflicts: MERGE_REPORT.md docs/heroes/dash_interactions.md
+- merged   ext/vfx-dot-body b14f6e85
+- merged   ext/lace-hail-wisps-rebased 60ae89d1
+- SKIPPED  ext/tut-dodge-dummy 0d8f29eb conflicts: scripts/home/home.gd scripts/main.gd scripts/match/arena.gd scripts/ui/hud.gd scripts/ui/overlay.gd scripts/ui/title.gd tools/farm_start_check.gd tools/wall_size_check.gd
+- SKIPPED  ext/tut-station-goals 283401bb conflicts: scripts/home/home.gd scripts/main.gd scripts/match/arena.gd scripts/ui/hud.gd scripts/ui/overlay.gd scripts/ui/title.gd tools/farm_start_check.gd tools/wall_size_check.gd
+- SKIPPED  ext/anim-mob-states aabf4cfc conflicts: docs/art/ANIM_QUALITY_AUDIT.md scripts/match/mob.gd
+- SKIPPED  ext/tut-first-heartspark f6824586 conflicts: content/archetypes/tender.json content/rules/farm_tutorial.json content/rules/tutorial.json docs/ABILITIES.md docs/DEATH_AND_REVIVE.md docs/decisions/0022-knock-dash-refresh-assists.md docs/heroes/archer.md docs/heroes/dredge.md docs/heroes/tender.md scripts/arch/kits/pin_spirit.gd scripts/arch/kits/tender_kit.gd scripts/core/care.gd scripts/core/net.gd scripts/core/save.gd scripts/heroes/warden_clips.gd scripts/home/farm_tutorial.gd scripts/match/dash_reset.gd scripts/match/hunter.gd scripts/match/kin_voice.gd scripts/match/match.gd scripts/match/tutorial.gd server/README.md server/matchmaker/mm/config.py tools/archer_bulwark_combo_check.gd tools/hero_combo_check.gd tools/hob_check.gd tools/kill_reset_check.gd tools/support_check.gd
+- SKIPPED  ext/wisp-gpu-ab aa375b02 conflicts: MERGE_REPORT.md scripts/core/settings.gd
+- SKIPPED  ext/vfx-miss-impacts e922033b conflicts: docs/HERO_VFX.md scripts/arch/kits/dj_fx.gd
+- merged*  ext/train-moving-dummies-rebased 2bc9dff7 (registry/credits/generated auto-resolved)
+- already  ext/mc-20261109-2230
+- SKIPPED  ext/garden-nav-sweep d583ba44 conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/clip_check.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- SKIPPED  ext/wisp-passive-stack e293ad7c conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- SKIPPED  ext/wisp-merge-from-wisp b390a22d conflicts: scripts/core/net.gd scripts/core/settings.gd tools/boki_system_check.gd tools/perf_bench.gd tools/wisp_check.gd
+- merged   ext/feel-aim-near-body 368e36b0
+- SKIPPED  ext/anim-fusion-states a67fd5c0 conflicts: scripts/heroes/warden_clips.gd tools/style_baseline.json
+- SKIPPED  ext/summon-kill-credit 810a5976 conflicts: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/core/net.gd scripts/core/settings.gd scripts/match/ent.gd scripts/match/match.gd tools/hero_combo_check.gd tools/perf_bench.gd tools/style_baseline.json tools/wisp_check.gd
+- SKIPPED  ext/wisp-pve-pvp 1022d971 conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- SKIPPED  ext/wisp-summon-leash 3c8ebb0c conflicts: scripts/core/net.gd scripts/core/settings.gd tools/perf_bench.gd tools/wisp_check.gd
+- merged*  ext/vfx-stolen-wisps-rebased ac8f0a10 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/combat-revive-diminish e11e3f29 conflicts: docs/DEATH_AND_REVIVE.md
+- merged   ext/feel-dash-refill-order 0e4f2a72
+- SKIPPED  ext/wisp-summon-net 5d4c33fc conflicts: scripts/core/net.gd
+- SKIPPED  ext/wisp-cosmetics a65806c4 conflicts: scripts/core/save.gd
+- SKIPPED  ext/farm-perf-low be4e11fe conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/clip_check.gd tools/perf_bench.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- SKIPPED  ext/feel-summon-press 41059194 conflicts: docs/MOVEMENT_FEEL.md
+- SKIPPED  ext/feel-cast-predict e58e0979 conflicts: docs/MOVEMENT_FEEL.md
+- SKIPPED  ext/anim-additive-flinch 3874d8ed conflicts: scripts/heroes/warden_clips.gd
+- SKIPPED  ext/vfx-telegraph-lead 392e2685 conflicts: scripts/arch/kits/breah_slam.gd
+- SKIPPED  ext/combat-ranges-radii 58cbd4cd conflicts: content/archetypes/juggernaut.json content/rules/kit_parity.json docs/heroes/juggernaut.md docs/heroes/thief.md
+- merged   ext/ui-plate-parity b3622c8e
+- merged*  ext/tutorial-beats-7-8-rebased 50b76931 (registry/credits/generated auto-resolved)
 
 Exclusions: ~/bin/merge-exclude.txt on the hetzner box.
 
-## Real-GPU performance
+## Real-GPU performance (Mac GPU worker, main vs candidate)
 
-GPU perf deferred: no GPU worker alive (no heartbeat from the PC or Mac in the last 5 min), so no jobs were queued. It runs on the next candidate once a worker is back.
+**1 of 8 GPU jobs did not finish within 90 min** (no GPU worker took them, or they were still running); queued ones were withdrawn. Blank cells below = no result.
+
+| hook | main rc / FAIL / secs | candidate rc / FAIL / secs |
+|---|---|---|
+| `--hitch-check` | 1 / 4 / 122 (rp1-1) | no result |
+| `--load-check` | 1 / 1 / 54 (rp1-1) | 124 / 4 / 1539 (rp1-1) |
+| `--perf-bench` | 0 / 0 / 138 (rp1-1) | 124 / 4 / 1539 (rp1-0) |
+| `--title-check` | 124 / 8 / 1526 (rp1-0) | 124 / 4 / 1506 (rp1-1) |
+
+Frame-time lines from the logs (lines that mention ms or fps; first 12 per run):
+
+**`--hitch-check` main** (job 20261110-040142-10538)
+```
+Quality: auto picked low (load benchmark 68.0 ms a frame)
+HITCH loading screen 37124 ms over 250 frames, worst 4364 ms, 146 shader compiles; build steps: build.warm_up 10072, build.hunters 8696, build.spawns 2096, world.terrain 1034, build.mobs 909, build.ch
+HITCH phase first      16 frames  median     45 ms  worst    202 ms  shader compiles 0
+HITCH phase planning   25 frames  median     44 ms  worst     59 ms  shader compiles 0
+HITCH phase ride       98 frames  median     49 ms  worst    388 ms  shader compiles 2
+HITCH phase drop      256 frames  median     54 ms  worst    161 ms  shader compiles 0
+HITCH phase land      180 frames  median     71 ms  worst     93 ms  shader compiles 2
+HITCH landing stall (worst frame in the first 1.5 s on the ground, landed at t=17.52): 84 ms
+HITCH start-of-match stall (worst frame from the reveal to the first second of the ride): 202 ms
+HITCH       388 ms  ride     t= 5.42  sim 31.6 (+142.5 x6)  vis 5.9  other 6.5  render 187.6  rest 14.1  draws 2079  shader compiles 2  sim sections: bots 15.8, hunters 10.7, mobs 1.9, interact 0.8
+HITCH       236 ms  ride     t= 4.92  sim 31.4 (+164.0 x6)  vis 4.9  other 6.7  render 9.4  rest 19.7  draws 2009  shader compiles 0  sim sections: bots 25.3, mobs 1.8, hunters 1.1, interact 0.9
+HITCH       231 ms  ride     t= 5.02  sim 33.1 (+165.1 x6)  vis 4.5  other 6.8  render 8.6  rest 12.6  draws 1992  shader compiles 0  sim sections: bots 26.7, mobs 1.9, hunters 1.2, interact 1.0
+```
+
+**`--load-check` main** (job 20261110-040142-21591)
+```
+Quality: auto picked low (load benchmark 72.4 ms a frame)
+LOAD total 35452 ms over 232 frames; longest frame 4628 ms (1291 ms outside drawing); 44 frames over 100 ms
+LOAD      1297    1291       6    283     0  c0   Spawning                 [slice 1281 ms]
+LOAD      1178    1169       9    487     0  c6   Spawning                 [slice 1165 ms]
+LOAD      1032     999      33    487     0  c8   Spawning                 [slice 992 ms]
+LOAD       772     734      38   1287     0  c5   Spawning                 [slice 726 ms]
+LOAD       677     674       3    527     0  c0   Spawning                 [slice 666 ms]
+LOAD       631     591      40    527     0  c3   Spawning                 [slice 583 ms]
+LOAD       619     613       6    179     0  c1   Spawning                 [slice 600 ms]
+LOAD       484     480       4    252     0  c1   Spawning                 [slice 474 ms]
+```
+
+**`--perf-bench` main** (job 20261110-040142-00869)
+```
+BENCH hitch t=1.47 289 ms (script 55.9), new nodes: { "Node3D:ember": 1, "MeshInstance3D:@MeshInstance3D": 7, "Node3D:Tail": 1, "Node3D:HeroVfx": 1 }
+BENCH hitch t=1.50 341 ms (script 38.7), new nodes: {  }
+BENCH hitch t=1.53 431 ms (script 48.9), new nodes: { "MeshInstance3D:@MeshInstance3D": 1, "GPUParticles3D:@GPUParticles3D": 1 }
+BENCH hitch t=1.57 287 ms (script 64.7), new nodes: { "Node3D:@Node3D": 1, "MeshInstance3D:@MeshInstance3D": 12, "Node3D:VVFx": 1 }
+BENCH hitch t=8.07 281 ms (script 37.1), new nodes: { "Node3D:@Node3D": 13, "Node3D:Body": 6, "Node3D:JawL": 3, "MeshInstance3D:@MeshInstance3D": 117, "Node3D:Leg0-": 3, "Node3D:Leg1-": 3, "Node3D:Leg
+BENCH hitch t=8.77 222 ms (script 30.6), new nodes: { "Node3D:@Node3D": 1, "MeshInstance3D:Body": 1, "MeshInstance3D:@MeshInstance3D": 2 }
+BENCH hitch t=9.07 237 ms (script 34.3), new nodes: { "Node3D:DJFx": 1, "Node3D:@Node3D": 1, "Node3D:Head": 1, "MeshInstance3D:@MeshInstance3D": 4, "MeshInstance3D:Trail": 1 }
+BENCH hitch t=13.18 151 ms (script 128.9), new nodes: { "Node3D:@Node3D": 4, "Node3D:Body": 2, "Node3D:Puff": 1, "Node3D:FinL": 1, "MeshInstance3D:@MeshInstance3D": 35, "Node3D:FinR": 1, "Node3D:Spark
+BENCH hitch t=18.42 157 ms (script 127.2), new nodes: { "Node3D:@Node3D": 4, "Node3D:Body": 2, "Node3D:JawL": 2, "MeshInstance3D:@MeshInstance3D": 46, "Node3D:Leg0-": 2, "Node3D:Leg1-": 2, "Node3D:Leg
+BENCH hitch t=35.68 151 ms (script 129.1), new nodes: { "MeshInstance3D:@MeshInstance3D": 36, "Node3D:@Node3D": 4, "Node3D:Body": 2, "Node3D:Puff": 1, "Node3D:FinL": 1, "Node3D:FinR": 1, "Node3D:Spark
+BENCH hitch t=50.27 241 ms (script 220.7), new nodes: { "MeshInstance3D:@MeshInstance3D": 70, "Node3D:@Node3D": 7, "Node3D:Body": 3, "Node3D:Leaf": 4, "Node3D:Bulb": 1, "Node3D:Dress": 3, "Node3D:LegL
+BENCH match: 1811 frames, wall avg 48.7 ms, p99 87.5 ms (1% low 1.8 fps)
+```
+
+**`--title-check` main** (job 20261110-040143-27328)
+```
+TITLE ok   [high] frame budget: 3.49 ms average, 3.97 ms p95 (budget 12 ms)
+TITLE ok   [low] frame budget: 4.32 ms average, 3.62 ms p95 (budget 12 ms)
+```
 
 ## Release dry-run (Windows and macOS exports, release templates 4.6.2.stable)
 
 | project | preset | result | size / first ERROR |
 |---|---|---|---|
-| game | Windows | pass | 499M |
-| game | macOS | pass | 329M |
+| game | Windows | **FAIL** | `SCRIPT ERROR: Parse Error: Key "--perf-budget-check" was already used in this dictionary (at line 49).` |
+| game | macOS | pass | 330M |
 | launcher | Windows | pass | 101M |
 | launcher | macOS | pass | 63M |
 
-All exports passed.
+**1 export(s) failed.** Logs are not kept; re-run `release-dryrun TREE` on the server.

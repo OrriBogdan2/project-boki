@@ -465,6 +465,9 @@ func _ready() -> void:
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
+	if "--train-ride-check" in args:
+		load("res://tools/train_ride_check.gd").new().run(self)      # leaving and landing on the moving cars keeps your momentum
+		return
 	if "--balloon-check" in args:
 		load("res://tools/balloon_check.gd").new().run(self)      # the hit marker is the hitbox
 		return
@@ -693,7 +696,7 @@ func _ready() -> void:
 	elif "--arena" in args:
 		_open_arena("")
 	elif "--training" in args:
-		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+		show_screen("match", Match.arena_opts(Arch.of_save()).merged({"perk_demo": "--perk-demo" in args}, true))      # (the Training Grounds)
 	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:

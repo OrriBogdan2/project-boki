@@ -40,6 +40,8 @@ func chase_range() -> float:
 
 ## How far from you it will wander before coming back.
 func leash() -> float:
+	if k.summon and k.summon.out():
+		return k.summon.leash(aggression)
 	return maxf(5.0, _r("leash_base", 9.0) + aggression * _r("leash_per_aggression", 8.0) + loyalty * _r("leash_per_loyalty", -4.0))
 
 ## Below this share of its health it runs back to you.

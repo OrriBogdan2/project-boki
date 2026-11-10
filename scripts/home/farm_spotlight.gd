@@ -1,9 +1,9 @@
 class_name FarmSpotlight
 extends Control
 ## The tutorial spotlight: the screen darkens with a rounded cut-out round the one thing to do next (a bottom-bar
-## button and/or a Boki in the world), the cut-out flashes a few times with the hint beside it, then the dim eases
+## button), the cut-out flashes a few times with the hint beside it, then the dim eases
 ## to a light vignette and the ring keeps a soft pulse until the thing is clicked. FarmGuide drives it (sync, every
-## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id, "world": true}).
+## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id}).
 ## Only the opening beat swallows mouse clicks; after it nothing here takes a click, so the target is always clickable.
 ## A placing step ("tile" in its spot: the house, the trough) is modal instead: the screen stays dark and every click
 ## outside the cut-out does nothing, through three phases: the Build button, then the piece's tile on the build bar,
@@ -22,9 +22,10 @@ const FLASH_GROW_PX := 8.0       # px the ring swells at the top of a flash
 const RING_WIDTH_PX := 3
 const CORNER_PX := 14
 const SOFT_PULSE_HZ := 0.8       # pulses per second once settled
-const BOKI_HEIGHT_M := 1.7       # m, how tall the cut-out round a Boki is
-const BOKI_MIN_PX := 64.0        # px, the smallest cut-out round a Boki (one far off)
-## A placing step's feel (dim alpha, soft_px, pulse_hz, ramp_s, fade_s) lives in tuning.json "farm_spotlight".
+const DIM_MODAL := 0.72          # alpha of the dark in a placing step
+const SOFT_MODAL_PX := 60.0      # px the dark takes to build up outside the cut-out
+const MODAL_PULSE_HZ := 1.2      # ring pulses per second in a placing step
+const MODAL_RAMP_S := 0.2        # s the dark takes to come in
 const MODAL_MIN_PX := 56.0       # px, the smallest cut-out (one tile of ground is small on screen)
 const CARD_GAP_PX := 24.0        # px between the cut-out and the hint card
 const CARD_WIDTH_PX := 340.0
@@ -88,7 +89,7 @@ static func sync(home: Node, quiet: bool) -> void:
 		return
 	if phase == "tile" and home.hb.bar != null and home.hb.bar.tile_of(String(want["tile"])) == null:
 		home.guide.show_tile(String(want["tile"]))
-	if _rects(home, id, want, phase).is_empty():
+	if _rects(home, want, phase).is_empty():
 		return
 	_key = key
 	_node = FarmSpotlight.new(home, id, want, phase, not _seen.has(key))
@@ -132,9 +133,9 @@ static func _phase(home: Node, want: Dictionary) -> String:
 	var held := ("feeder_" if is_feeder else "") + String(hb.held.get("id", ""))
 	return "spot" if held == String(want["tile"]) else "tile"
 
-## The screen boxes to light: the named bottom-bar button, and the step's marker in the world (a Boki); in a
-## placing step the one thing for its phase (the button, the tile, the ground).
-static func _rects(home: Node, id: String, want: Dictionary, phase := "") -> Array[Rect2]:
+## The screen boxes to light: the named bottom-bar button; in a placing step the one thing for its phase (the
+## button, the tile, the ground).
+static func _rects(home: Node, want: Dictionary, phase := "") -> Array[Rect2]:
 	var out: Array[Rect2] = []
 	if phase == "tile":
 		var tile: Control = home.hb.bar.tile_of(String(want["tile"])) if home.hb.bar != null else null
@@ -146,10 +147,6 @@ static func _rects(home: Node, id: String, want: Dictionary, phase := "") -> Arr
 		if not cs.is_empty():
 			out.append(_ground_box(home.cam, cs))
 		return out
-	if bool(want.get("world", false)):
-		var box := _world_box(home, id)
-		if box.size.x > 0.0:
-			out.append(box)
 	var b: Control = home.hub_btns.get(String(want.get("hub", "")))
 	if b != null and is_instance_valid(b) and b.is_visible_in_tree():
 		out.append(b.get_global_rect())
@@ -170,16 +167,6 @@ static func _ground_box(cam: Camera3D, cells: Array) -> Rect2:
 	var box := Rect2(lo, hi - lo)
 	var grow := maxf(0.0, MODAL_MIN_PX - minf(box.size.x, box.size.y)) * 0.5
 	return box.grow(grow)
-
-static func _world_box(home: Node, id: String) -> Rect2:
-	var at: Vector3 = home.guide.target(id)
-	var cam: Camera3D = home.cam
-	if at.x == INF or cam.is_position_behind(at):
-		return Rect2()
-	var head := cam.unproject_position(at + Vector3.UP * BOKI_HEIGHT_M)
-	var feet := cam.unproject_position(at)
-	var tall := maxf(BOKI_MIN_PX, absf(feet.y - head.y))
-	return Rect2((head + feet) * 0.5 - Vector2(tall, tall) * 0.5, Vector2(tall, tall))
 
 func _init(home: Node, id: String, want: Dictionary, at_phase: String, with_beat: bool) -> void:
 	h = home
@@ -229,7 +216,7 @@ func _process(dt: float) -> void:
 		close()                  # the next part of a placing step: its spotlight starts now, not at the next poll
 		sync(h, h.guide.quiet)
 		return
-	_holes = _rects(h, step_id, spec, phase)
+	_holes = _rects(h, spec, phase)
 	if _holes.is_empty():
 		close()
 		return
@@ -268,7 +255,7 @@ func fade_out() -> void:
 		if phase == "spot" and h.hb != null:
 			h.hb.debug_m = Vector2.INF
 	var tw := create_tween()
-	tw.tween_property(self, "modulate:a", 0.0, float(Tuning.of("farm_spotlight")["fade_s"]))
+	tw.tween_property(self, "modulate:a", 0.0, 0.2)
 	tw.tween_callback(queue_free)
 
 ## 0 in the opening beat, easing to 1 as it settles (always 1 for a target that already had its beat).
@@ -280,10 +267,9 @@ func _settle() -> float:
 ## Sets the dim, the ring and the card for the moment: flashing in the beat, a soft pulse after.
 func _look(settle: float) -> void:
 	if modal:
-		var tune := Tuning.of("farm_spotlight")
-		var pulse := 0.5 + 0.5 * sin(TAU * float(tune["pulse_hz"]) * age)
-		_mat.set_shader_parameter("dim", float(tune["dim"]) * clampf(age / float(tune["ramp_s"]), 0.0, 1.0))
-		_mat.set_shader_parameter("soft", float(tune["soft_px"]))
+		var pulse := 0.5 + 0.5 * sin(TAU * MODAL_PULSE_HZ * age)
+		_mat.set_shader_parameter("dim", DIM_MODAL * clampf(age / MODAL_RAMP_S, 0.0, 1.0))
+		_mat.set_shader_parameter("soft", SOFT_MODAL_PX)
 		_ring_a = lerpf(0.55, 1.0, pulse)
 		_ring_pad = RING_PAD_PX + FLASH_GROW_PX * pulse
 		_place_card()

@@ -62,7 +62,7 @@ func start() -> void:
 		box.say(_offer_lines(), _show_offer)
 	elif first and FarmTutorial.active():
 		box.say(rules()["intro"], box.close)
-	elif FarmTutorial.current() != "" and FarmTutorial.current() != "hob":
+	elif FarmTutorial.current() != "":
 		box.say(_step_lines(FarmTutorial.current()), box.close)
 	else:
 		box.say(_blueprint_lines(ids, first), _menu_choice)

@@ -458,11 +458,19 @@ func targetable() -> bool:
 func is_local() -> bool:
 	return ctrl == "local"
 
+## A cursor closer than this many body widths (2 r) says nothing about a way to face: aim_dir keeps the last good one.
+const AIM_MIN_BODIES := 2.0
+var aim_good := Vector2.ZERO      # the last aim direction taken from a cursor outside that circle
+
 func aim_dir() -> Vector2:
 	if ak and ak.aim_lock() != Vector2.ZERO:
 		return ak.aim_lock()
 	var d := Vector2(inp["aim"].x - pos.x, inp["aim"].z - pos.z)
-	return d.normalized() if d.length() > 0.05 else Vector2(sin(face), cos(face)) * -1.0
+	if d.length() > r * AIM_MIN_BODIES:
+		aim_good = d.normalized()
+	elif aim_good == Vector2.ZERO:
+		aim_good = Vector2(sin(face), cos(face)) * -1.0
+	return aim_good
 
 # ------------------------------------------------------------------ damage
 func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
@@ -506,8 +514,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		d *= 0.35
 	d *= 1.0 - owner_stat("damage_reduction")
 	if downed:
-		# a wisp can't be shot: it's lost to stomps, an execute, or bleeding out
-		return 0.0
+		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
 	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
@@ -2251,7 +2258,7 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
+		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
@@ -3080,6 +3087,7 @@ func _anim_state(stretch: float) -> void:
 				em = String(e["id"]); et = float(e["t"])
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
+	s["extract_t"] = WardenClips.leave_t(self)
 	s["emote"] = em
 	s["emote_t"] = et
 	if not grounded and not gliding and not downed:
@@ -3120,7 +3128,7 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and (not extracted or WardenClips.leave_t(self) >= 0.0) and not riding and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
