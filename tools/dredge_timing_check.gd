@@ -42,8 +42,10 @@ func _throw_and_reel() -> void:
 			grab = t
 		elif grab >= 0.0 and K.pull.is_empty():
 			arrive = t
-	ok("timing throw: the arm reaches 5 bh and grabs 0.4 s after the cast (footage 0121-0124)",
-			grab > 0.0 and absf(grab - 0.4) <= FRAME, "%.2f s" % grab)
+	var rdf := K.rmb_def()
+	var want := float(rdf["windup"]) + 5.0 * BH / float(rdf["speed"])
+	ok("timing throw: coil, then 5 bh at hook speed (slowed from the footage 0.4 s on purpose, owner 11-10)",
+			grab > 0.0 and absf(grab - want) <= FRAME, "%.2f s, want %.2f" % [grab, want])
 	ok("timing reel: a 5 bh pull takes about 1.0 s (footage 0124-0129)",
 			arrive > 0.0 and absf(arrive - grab - 1.0) <= FRAME, "%.2f s" % (arrive - grab))
 	await ak.done(m)
