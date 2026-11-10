@@ -58,6 +58,7 @@ var hob: FarmHob = null            # Hob the builder: talks, blueprints, the sec
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hbreed: FirstBreed = null      # the first-breeding prompt: a Boki leads you to the Nook (first_breed.gd)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
@@ -1018,6 +1019,7 @@ func _process(delta: float) -> void:
 	if hg: hg.tick(d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	if hbreed: hbreed.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
@@ -4002,6 +4004,7 @@ func _setup_care() -> void:
 	if visit.is_empty():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
+		hbreed = FirstBreed.new(self)
 	if not visit.is_empty():
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
@@ -4771,6 +4774,8 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
 		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+		var gate := FirstBreed.missing_line(Save.d["roster"])
+		if gate != "": dv.add_child(UI.para(gate, UI.T_SMALL, UI.GOLD))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))

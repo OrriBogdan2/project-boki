@@ -10,10 +10,13 @@ const FRIEND_BOND := 50.0                   # a bond (or, with none recorded, tr
 static func can_pair(rec: Dictionary) -> String:
 	if not Save.d.get("egg", {}).is_empty(): return "There's already an egg in the nest"
 	if int(rec["level"]) < GROWN_LV: return "Needs to be Grown (level %d)" % GROWN_LV
-	var since_egg := Time.get_unix_time_from_system() - float(rec.get("bred_t", 0.0))
-	if since_egg < REST_SEC: return "Needs a rest after its last egg"
+	if not rested(rec): return "Needs a rest after its last egg"
 	if KinBox.full(): return "Your farm and the Boki Burrow are full"
 	return ""
+
+## Has this Boki rested long enough since its last egg?
+static func rested(rec: Dictionary) -> bool:
+	return Time.get_unix_time_from_system() - float(rec.get("bred_t", 0.0)) >= REST_SEC
 
 ## Friends: a bond of 50 or more either way. rec["bonds"] (uid -> bond) is not on every build yet; with
 ## none recorded on either, trust 50 or more on both stands in.
