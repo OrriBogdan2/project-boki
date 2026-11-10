@@ -77857,5 +77857,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_flarmink_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_flarmink",
+    "name": "Flarmink (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_flarmink_2.jpg",
+    "ok": true
   }
 ]
