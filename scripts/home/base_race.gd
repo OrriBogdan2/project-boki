@@ -22,6 +22,7 @@ const CLIMB_H := 0.7                         # m, the top of the climb
 const JUMP_H := 0.6                          # m, the top of the jump's arc
 const SWIM_DIP := 0.15                       # m the runners sink in the water stretch
 const TRACK_W := 1.4                         # m, the track's width (four lanes)
+const FIRST := "first_race"                  # Save.d.tutorial: the practice lap was offered
 const REACH := 1.6                           # m from the post to start a race
 const GARDEN_DB := -6.0                      # dB: the garden sounds sit under the Boki voices
 const SULK_DELAY := 0.7                      # s after the win sting until the loser huffs
@@ -238,6 +239,8 @@ var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
+var offer: Control = null      # the first-visit practice lap offer
+var guide := false             # this run is the practice lap: the gold glows at each mark, the card explains
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
@@ -332,11 +335,49 @@ func entrants() -> Array:
 
 func use() -> void:
 	release()
-	var ks := entrants()
-	if ks.size() < 2:
-		h._toast("The Dash needs two rested Boki out on the base")
+	if is_instance_valid(offer):
 		return
-	_begin(ks)
+	if Save.d["tutorial"].get(FIRST, false):
+		_start(false)
+	else:
+		Save.d["tutorial"][FIRST] = true      # offered once, taken or skipped
+		_offer()
+
+## The race, or the solo lap with your Boki when it is the only one out. The practice lap glows and explains itself.
+func _start(practice: bool) -> void:
+	var ks := entrants()
+	guide = practice
+	if ks.size() >= 2:
+		_begin(ks)
+	elif practice:
+		solo(Save.active_kin())
+	else:
+		h._toast("The Dash needs two rested Boki out on the base")
+	guide = guide and run != null
+
+## The first walk up to the post: a one-line card with Practice lap and Skip.
+func _offer() -> void:
+	var c := UI.card(Color(0.06, 0.07, 0.1, 0.92), 14, 14)
+	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.offset_top = 90
+	var v := UI.vbox(8)
+	c.add_child(v)
+	v.add_child(UI.label("A practice lap with your Boki?", 18, UI.ACCENT_HI))
+	v.add_child(UI.label("You back a Boki and cheer it on with %s at three marks: press when the gold glows." \
+			% Settings.key_cap("interact"), 14))
+	var row := UI.hbox(10)
+	row.add_child(UI.primary("Practice lap", func(): _answer(true)))
+	row.add_child(UI.ghost("Skip", func(): _answer(false)))
+	v.add_child(row)
+	h.root_ui.add_child(c)
+	offer = c
+
+func _answer(practice: bool) -> void:
+	offer.queue_free()
+	offer = null
+	if practice:
+		_start(true)
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
@@ -379,6 +420,9 @@ func _bar_label(last: String) -> void:
 
 ## A press: true when the race took it.
 func input(event: InputEvent) -> bool:
+	if is_instance_valid(offer) and event.is_action_pressed("menu"):
+		_answer(false)
+		return true
 	if run == null:
 		return false
 	if event.is_action_pressed("menu"):
@@ -409,6 +453,7 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	run.step(d)
+	bar.glow = guide and run.can_cheer()
 	bar.step(d)
 	_place_runners()
 	_hear_laps()
@@ -475,6 +520,7 @@ func _end(finished: bool) -> void:
 	run = null
 	runners = []
 	solo_rec = {}
+	guide = false
 
 ## The three marks' grades: a mark with no press is a miss.
 func _grades() -> Array:
@@ -490,7 +536,8 @@ func _race_card(res: Dictionary) -> void:
 	_card("%s wins the Dash!" % win["name"], [
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], UI.GOLD]])
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]]
+			+ _explain("Joy and trust move with the result, and backing the winner pays gems"))
 
 func _solo_card(gained: int) -> void:
 	var speed := int(solo_rec["stats"]["speed"])
@@ -500,7 +547,12 @@ func _solo_card(gained: int) -> void:
 	var line := "No gain this time. Try again after a rest"
 	if gained > 0:
 		line = "+%d Speed  (%d of %d)" % [gained, speed, Care.stat_cap(solo_rec)]
-	_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [line, UI.GOLD]])
+	_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [line, UI.GOLD]]
+			+ _explain("A lap trains Speed and lifts joy; a race with two Boki also pays gems"))
+
+## The practice lap's extra card row: what the result changed.
+func _explain(text: String) -> Array:
+	return [[text, UI.MUTED]] if guide else []
 
 ## The result card at the top of the screen: a headline and a coloured line each.
 func _card(title: String, lines: Array) -> void:

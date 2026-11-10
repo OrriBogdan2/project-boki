@@ -131,6 +131,7 @@ func _base_tutorial() -> void:
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
 	await _base_world()
+	await _first_race()
 	rules["base_mode"] = false
 
 func _berries() -> int:
@@ -161,6 +162,22 @@ func _base_world() -> void:
 	home.guide.skip()
 	ok(home.toys.toys().size() == 1 and _berries() == 3 and FarmHob.house_entry().is_empty(),
 			"Skip at the start: a toy placed, food in hand, no house site")
+	home.queue_free()
+	await main.get_tree().process_frame
+
+## The garden's first race: the first walk up to the race post offers a practice lap once, with one line.
+func _first_race() -> void:
+	var home = await _home(1)
+	var race: BaseRace = home.hrace
+	ok(not Save.d["tutorial"].has(BaseRace.FIRST), "first race: a fresh save has not been offered a practice lap")
+	race.use()
+	ok(is_instance_valid(race.offer) and race.run == null, "first race: walking up offers a practice lap")
+	var lines: Array = race.offer.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(lines.size() == 2 and not String(lines[1]).contains("\n") and String(lines[1]).contains("gold"),
+			"first race: one explaining line about the cheers and the glowing gold")
+	race._answer(false)
+	race.use()
+	ok(race.offer == null and Save.d["tutorial"][BaseRace.FIRST], "first race: skipped, it does not come back")
 	home.queue_free()
 	await main.get_tree().process_frame
 

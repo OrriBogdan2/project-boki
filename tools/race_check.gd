@@ -162,7 +162,7 @@ func _on_base() -> void:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, BaseRace.FIRST: true}
 	d["layout"] = HomeLayout.fresh()      # the full stock farm, with a Training post
 	Save.d = d
 	HomeLayout.ensure(Save.d)
@@ -200,6 +200,7 @@ func _on_base() -> void:
 			t += 0.1
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
 		await _solo(home)
+		_first_visit(home)
 	await _drill(home)
 	rules["base_mode"] = false
 	home.queue_free()
@@ -251,6 +252,65 @@ func _solo(home) -> void:
 	await _lap(home, true)
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == 10, "solo: a worn-out Boki does not start")
 	rec["needs"]["energy"] = 90.0
+
+## Rows over `card`'s labels, joined.
+func _card_text(race: BaseRace) -> String:
+	var out := ""
+	for l in race.card.find_children("*", "Label", true, false):
+		out += (l as Label).text + "\n"
+	return out
+
+func _finish(race: BaseRace) -> void:
+	var t := 0.0
+	while race.run != null and t < MAX_S:
+		race.tick(0.1)
+		t += 0.1
+
+## 8. the first walk up to the post offers a practice lap once; Skip and Practice both end the offer for good.
+func _first_visit(home) -> void:
+	var race: BaseRace = home.hrace
+	for k in home.kins:
+		Care.change(k["rec"], "energy", 100.0)
+		Care.change(k["rec"], "food", 100.0)
+	Save.d["tutorial"].erase(BaseRace.FIRST)
+	race.use()
+	ok(is_instance_valid(race.offer) and race.run == null and Save.d["tutorial"][BaseRace.FIRST],
+			"first: the first walk-up offers a practice lap instead of starting")
+	var esc := InputEventAction.new()
+	esc.action = "menu"
+	esc.pressed = true
+	ok(race.input(esc) and race.offer == null and race.run == null, "first: Esc skips the offer")
+	race.use()
+	ok(race.offer == null and race.run != null and not race.guide, "first: after a skip it is a plain race")
+	race.tick(0.1)
+	ok(not race.bar.glow, "first: a plain race has no glowing gold")
+	_finish(race)
+	Save.d["tutorial"].erase(BaseRace.FIRST)
+	race.use()
+	race._answer(true)
+	ok(race.run != null and race.guide, "first: Practice lap starts the guided race")
+	while race.run != null and not race.run.can_cheer():
+		race.tick(DT)
+	race.tick(DT)
+	ok(race.bar.glow, "first: the gold glows while a cheer counts")
+	_finish(race)
+	var text := _card_text(race)
+	ok(text.contains("Joy and trust") and text.contains("gems"), "first: the result card explains joy, trust and gems")
+	race.use()
+	ok(race.offer == null and race.run != null and not race.guide, "first: the offer never comes back")
+	_finish(race)
+	ok(not _card_text(race).contains("Joy and trust move"), "first: a later race's card has no explainer")
+	Save.d["tutorial"].erase(BaseRace.FIRST)
+	var out: Array = home.kins.slice(1)
+	for k in out:
+		k["indoors"] = true
+	race.use()
+	race._answer(true)
+	ok(race.run != null and race.runners.size() == 1 and race.guide, "first: alone, the practice lap is a solo lap")
+	_finish(race)
+	ok(_card_text(race).contains("trains Speed"), "first: the solo practice card explains Speed and joy")
+	for k in out:
+		k.erase("indoors")
 
 func _drill(home) -> void:
 	if home.yard == null:

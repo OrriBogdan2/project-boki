@@ -17,6 +17,7 @@ var zone := 0.5              # the gold's centre, 0..1
 var card: Control = null
 var lbl: Label = null
 var canvas: Control = null
+var glow := false            # practice lap: the gold glows while a press counts
 
 func _init() -> void:
 	zone = randf_range(0.3, 0.7)
@@ -82,5 +83,7 @@ func _draw() -> void:
 	var h := canvas.size.y
 	canvas.draw_rect(Rect2(0, h * 0.3, w, h * 0.4), Color(1, 1, 1, 0.1))
 	canvas.draw_rect(Rect2(w * (zone - GOOD), h * 0.3, w * GOOD * 2.0, h * 0.4), Color(UI.ACCENT, 0.45))
+	if glow:
+		canvas.draw_rect(Rect2(w * (zone - GOOD) - 4, 0, w * GOOD * 2.0 + 8, h), Color(UI.GOLD, 0.3))
 	canvas.draw_rect(Rect2(w * (zone - GREAT), h * 0.2, w * GREAT * 2.0, h * 0.6), UI.GOLD)
 	canvas.draw_rect(Rect2(w * m - 3, 0, 6, h), UI.INK)
