@@ -75106,5 +75106,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pk_bullpole_chevron_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_pinster_b",
+    "name": "Pinster (redesign option)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_pinster_b_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_b",
+    "name": "Tiltster (redesign)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_pinster_b",
+    "name": "Pinster (redesign option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_pinster_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_a",
+    "name": "Tiltster (redesign)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_b",
+    "name": "Tiltster (redesign)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_a",
+    "name": "Tiltster (redesign)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_a",
+    "name": "Tiltster (redesign)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_a_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_tiltster_b",
+    "name": "Tiltster (redesign)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_tiltster_b_3.jpg",
+    "ok": true
   }
 ]
