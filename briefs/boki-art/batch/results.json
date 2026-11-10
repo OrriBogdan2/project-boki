@@ -110064,5 +110064,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_maracoil_L1_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px8_ermink",
+    "name": "Ermink (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_ermink",
+    "name": "Ermink (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_ermink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_jerbit",
+    "name": "Jerbit (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_jerbit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_kitlet",
+    "name": "Kitlet (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_jerbit",
+    "name": "Jerbit (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_jerbit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_kitlet",
+    "name": "Kitlet (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_kitlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_sarcobra",
+    "name": "Sarcobra (pixel sprite 80, simplified)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px8_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_chainipede",
+    "name": "Chainipede (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_chainipede_2.jpg",
+    "ok": true
   }
 ]
