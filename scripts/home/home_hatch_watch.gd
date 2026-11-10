@@ -89,7 +89,8 @@ func _pick(egg: Dictionary) -> void:
 		var k: Dictionary = watchers[i]
 		var a := (float(i) / maxf(1.0, watchers.size() - 1.0) - 0.5) * 2.4 + PI * 0.5      # an arc on the front side
 		k["watch"] = h.NEST_AT + Vector3(cos(a), 0.0, sin(a)) * RING_R
-		k.erase("chase"); k.erase("task"); k.erase("fetch")
+		for busy_key in ["chase", "task", "fetch"]:
+			k.erase(busy_key)
 		h._emote(k, "!")
 
 func _can_watch(k: Dictionary, nest_isle: int, parents: Array) -> bool:
@@ -163,5 +164,6 @@ func _greet(baby: Dictionary) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _hatching == null or not is_instance_valid(_hatching):
 		return
-	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
+	var key: bool = event is InputEventKey and event.pressed and not event.echo
+	if key or (event is InputEventMouseButton and event.pressed):
 		_hatching.skip(SKIP_SPEED)

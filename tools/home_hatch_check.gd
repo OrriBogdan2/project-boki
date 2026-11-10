@@ -31,12 +31,14 @@ func _farm(secs: float) -> void:
 	var d := Save.fresh()
 	for n in ["Pip", "Drip", "Moss"]:
 		var k := Save.new_kin(["zapple", "puddlet", "burrlet"][d["roster"].size()], n)
-		k["level"] = 6; k["trust"] = 60.0
+		k["level"] = 6
+		k["trust"] = 60.0
 		d["roster"].append(k)
 	d["active"] = d["roster"][0]["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	d["matches"] = 0
-	d["egg"] = {"a": d["roster"][0]["uid"], "b": d["roster"][1]["uid"], "m": 99, "t": Time.get_unix_time_from_system() + secs}
+	var ready_at := Time.get_unix_time_from_system() + secs
+	d["egg"] = {"a": d["roster"][0]["uid"], "b": d["roster"][1]["uid"], "m": 99, "t": ready_at}
 	Save.d = d
 	HomeLayout.ensure(Save.d)
 	if home:
@@ -46,9 +48,6 @@ func _farm(secs: float) -> void:
 	home._close_panel()
 	await _wait(func(): return home.hwatch != null and home.kins.size() >= 3 and is_instance_valid(home.nest), 10.0)
 	home.ppos = home.NEST_AT + Vector3(0, 0, 4.0)
-
-func _near_egg() -> int:
-	return home.kins.filter(func(k): return Vector2(k["pos"].x - home.NEST_AT.x, k["pos"].z - home.NEST_AT.z).length() < 2.6).size()
 
 func _calm_then_wobble() -> void:
 	await _farm(120.0)
@@ -69,14 +68,17 @@ func _gather_and_hatch() -> void:
 	await _wait(func(): return home.hwatch._hatching != null, 25.0)
 	ok(home.hwatch._hatching != null, "a ready egg hatches by itself with you near")
 	ok(home.hwatch.gathered >= 2, "at least 2 of 3 Boki gathered before the hatch (%d)" % home.hwatch.gathered)
-	ok(Save.d["roster"].size() == roster0 + 1 and Save.d["egg"].is_empty(), "the baby joins the roster and the nest is empty")
+	var born: bool = Save.d["roster"].size() == roster0 + 1 and Save.d["egg"].is_empty()
+	ok(born, "the baby joins the roster and the nest is empty")
 	var ev := InputEventKey.new()
-	ev.keycode = KEY_SPACE; ev.pressed = true
+	ev.keycode = KEY_SPACE
+	ev.pressed = true
 	var t0 := Time.get_ticks_msec()
 	Input.parse_input_event(ev)
 	await _wait(func(): return home.panel_open == "reveal", 12.0)
 	var took := (Time.get_ticks_msec() - t0) / 1000.0
-	ok(home.panel_open == "reveal" and took < 4.5, "a key press rushes the hatching on, then the hatch card (%.1f s; unskipped it takes over 8)" % took)
+	var card: bool = home.panel_open == "reveal" and took < 4.5
+	ok(card, "a key press rushes the hatching on, then the card (%.1f s; unskipped over 8)" % took)
 
 func _player_away() -> void:
 	await _farm(0.0)
