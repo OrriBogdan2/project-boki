@@ -13,6 +13,8 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--shots-dir="): shots_dir = a.substr(12)
 	if shots_dir != "":
 		DirAccess.make_dir_recursive_absolute(shots_dir)
+		if main.get("fade") != null:
+			main.fade.reveal(0.01)      # lift the boot splash, or every shot is the logo
 	await _albert()
 	await _tenzo()
 	await _neve()
@@ -84,6 +86,7 @@ func _probe(who: String, m: Match, T: Hunter, wall: Dictionary, tag: String) -> 
 	var stronger := not m.verbs.walls.has(wall) and big > small * 1.5
 	ok("%s: the hit that breaks it is stronger" % who, stronger, "%.2f vs %.2f" % [big, small])
 	await _snap(m, tag + "_break")
+	await done(m)                   # one match on screen at a time
 
 ## Fired along x at the wall's middle from the far side; steps until the wall takes it. Whether it did.
 func _shoot(m: Match, T: Hunter, wall: Dictionary) -> bool:
