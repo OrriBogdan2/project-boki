@@ -1,6 +1,6 @@
 # 0023 - The Heartspark loop (prototype)
 
-Status: prototype on `ext/heartspark`. Owner decision of 2026-11-08: every expedition is a fight over the Heart.
+Status: prototype on `ext/heartspark`; the loop (steps 4, 6, 7) is superseded by 0051 (one Heartspark, the Gate takes the squad, the final ring). The look and the tide stand. Owner decision of 2026-11-08: every expedition is a fight over the Heart.
 Heart Night (the later all-night variant) is deliberately **not** built.
 
 ## The loop
