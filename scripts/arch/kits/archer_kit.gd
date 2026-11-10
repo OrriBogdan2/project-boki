@@ -219,6 +219,7 @@ func rmb_hold_tick(t: float) -> void:
 ## [est] down_hp a rival Wisp loses per point of Hail Wall tick damage. The source drain is unknown; this is the
 ## same multiplier a stomp puts on the bleed (Life.R stomp_mult), so a wall tick (5) takes 12.5 of the 100 pool.
 const WISP_DRAIN_K := 2.5
+
 ## The Heavy Shot held: a thick orchid bar out of the bow that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player). Reaching full flashes the bow and
 ## plays the taut-thread cue once.
