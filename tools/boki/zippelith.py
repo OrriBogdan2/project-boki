@@ -17,38 +17,90 @@ from boki_sdf import Cone, Ellipsoid, Shape, frame, v3
 from vespyx_paint import hexc, mixc, paint_shell, sat, tool_colour
 
 MESHY_DIR = os.path.expanduser("~/meshy/caecilith/run1")
-HEIGHT = 0.62            # the model's height in game metres, before SCALE
+HEIGHT = 0.62            # the Meshy model's height in game metres, before SCALE and the reshape below
 SCALE = 0.9
 BODY_TRIS = 3000
-HEAD_C = v3(0, 0.51, -0.145)
+# The reshape toward the sheet (owner 11-09: head and neck proportions): Meshy's head rises to a point and sits on a
+# neck as thick as itself; the sheet's is a round dome a size up. Heights in the Meshy model's metres.
+CROWN_Y = 0.47           # where the head is widest: above it the crown is squashed this much
+CROWN_K = 0.9
+HEAD_PIVOT = (0.0, 0.40, -0.14)     # the chin's level: the head grows about it
+HEAD_GROW = 1.1
+HEAD_FROM, HEAD_TO = 0.36, 0.45     # the neck, where the growth fades in
+NECK_Y, NECK_W, NECK_Z = 0.37, 0.05, -0.115    # the neck's thinnest height, the reach of its thickening, its axis
+NECK_GROW = 0.05
+# the zipper's teeth and stop over the crown (owner 11-09: the stray thing on top of the head): laid down onto this
+# dome (centre y, z; radii x, y, z) and painted as skin, so the zipper starts at the back of the head
+CROWN_DOME = (0.47, -0.15, 0.112, 0.14, 0.135)
+CROWN_FRONT = 0.0        # z: the crown's part forward of this (the back of the head)
+
+
+def smooth(a, b, x):
+    t = np.clip((x - a) / (b - a), 0.0, 1.0)
+    return t * t * (3 - 2 * t)
+
+
+def on_crown(p):
+    """1 on the crown forward of the back of the head (Meshy model metres), 0 elsewhere."""
+    return (smooth(0.50, 0.53, p[:, 1]) * smooth(CROWN_FRONT + 0.015, CROWN_FRONT - 0.015, p[:, 2])
+            * smooth(0.065, 0.045, np.abs(p[:, 0])))
+
+
+def lay_crown(p):
+    cy, zc, rx, ry, rz = CROWN_DOME
+    e = 1 - (p[:, 0] / rx) ** 2 - ((p[:, 2] - zc) / rz) ** 2
+    dome = cy + ry * np.sqrt(np.clip(e, 0.0, 1.0))
+    p[:, 1] -= np.maximum(p[:, 1] - dome, 0.0) * on_crown(p)
+    return p
+
+
+def reshape(p):
+    """The Meshy model's points (N, 3) in the sheet's proportions."""
+    p = lay_crown(np.array(p, float).reshape(-1, 3))
+    up = p[:, 1] > CROWN_Y
+    p[up, 1] = CROWN_Y + (p[up, 1] - CROWN_Y) * CROWN_K
+    k = 1 + NECK_GROW * np.exp(-((p[:, 1] - NECK_Y) / NECK_W) ** 2)
+    p[:, 0] *= k
+    p[:, 2] = NECK_Z + (p[:, 2] - NECK_Z) * k
+    w = smooth(HEAD_FROM, HEAD_TO, p[:, 1])[:, None]
+    return p + w * (HEAD_GROW - 1) * (p - np.array(HEAD_PIVOT))
+
+
+def at(x, y, z):
+    """A point placed on the Meshy model, where it lies after the reshape."""
+    return reshape([x, y, z])[0]
+
+
+HEAD_C = at(0, 0.51, -0.145)
 
 
 def hd(x, y, z):
-    """A point on the head, from its centre."""
-    return HEAD_C + v3(x, y, z)
+    """A point on the head, from its centre (offsets in the Meshy model's metres, grown with the head)."""
+    return HEAD_C + HEAD_GROW * v3(x, y, z)
 
 
-EYE_C = v3(0.057, 0.514, -0.241)
-EYE_R = v3(0.034, 0.037, 0.018)
+EYE_C = at(0.057, 0.514, -0.241)
+EYE_R = HEAD_GROW * v3(0.034, 0.037, 0.018)
 EYE_YAW = 0.48
 GLOW_PIECES = ()
 PALE_PIECES = ()
 BERRY_C = v3(0, 0.05, -0.40)
-FACE = {"mouth_w": 0.07, "mouth_y": 0.458, "mouth_z": -0.272, "cat_mouth": False,
-        "brow_x": 0.058, "brow_up": 0.014, "brow_k": 0.55, "fang_k": 0.0}
+_MOUTH = at(0, 0.458, -0.272)
+FACE = {"mouth_w": 0.07 * HEAD_GROW, "mouth_y": _MOUTH[1], "mouth_z": _MOUTH[2], "cat_mouth": False,
+        "brow_x": 0.058 * HEAD_GROW, "brow_up": 0.014, "brow_k": 0.55, "fang_k": 0.0}
 # the body chain, head to tail: the column up from the ground, then the tail flat behind; segment i rides BODY_BONES[i]
-SPINE = [v3(0, 0.42, -0.125), v3(0, 0.33, -0.125), v3(0, 0.24, -0.145), v3(0, 0.13, -0.12), v3(0, 0.095, -0.03),
+SPINE = [at(0, 0.42, -0.125), v3(0, 0.33, -0.125), v3(0, 0.24, -0.145), v3(0, 0.13, -0.12), v3(0, 0.095, -0.03),
          v3(0, 0.09, 0.04), v3(0, 0.088, 0.10), v3(0, 0.085, 0.15), v3(0, 0.08, 0.20), v3(0, 0.05, 0.25)]
 SPINE_R = [0.095, 0.095, 0.105, 0.11, 0.095, 0.09, 0.085, 0.07, 0.05, 0.03]
 BODY_BONES = ["neck", "spine", "hips", "tail1", "tail2", "tail3", "tail4", "tail5", "tail6"]
 TAIL_N = 6
-HEAD_TOP = v3(0, 0.62, -0.14)
-GRIP = v3(0, 0.455, -0.29)
+HEAD_TOP = at(0, 0.62, -0.14)
+GRIP = at(0, 0.455, -0.29)
 AXIS = np.array((0.0, 0.5, -0.866))
 # Meshy painted its own eyes and mouth; the Boki face (lids, brows, mouth that move) takes their place
-PAINTED_EYES = [v3(sx * 0.078, 0.512, -0.222) for sx in (1, -1)]
-PAINTED_MOUTH = (0.455, -0.27)
-BLUSH_AT = [v3(sx * 0.088, 0.474, -0.225) for sx in (1, -1)]
+PAINTED_EYES = [at(sx * 0.078, 0.512, -0.222) for sx in (1, -1)]
+PAINTED_MOUTH = tuple(at(0, 0.455, -0.27)[1:])
+BLUSH_AT = [at(sx * 0.088, 0.474, -0.225) for sx in (1, -1)]
 
 
 def eye_frame(sx):
@@ -62,7 +114,7 @@ def eye_frame(sx):
 def proxy_prims():
     out = [Cone("seg%d" % i, bone, SPINE[i], SPINE[i + 1], SPINE_R[i], SPINE_R[i + 1], k=0.03)
            for i, bone in enumerate(BODY_BONES)]
-    out.append(Ellipsoid("head", "head", HEAD_C, v3(0.105, 0.11, 0.135), k=0.04))
+    out.append(Ellipsoid("head", "head", HEAD_C, HEAD_GROW * v3(0.105, 0.11, 0.135), k=0.04))
     return out
 
 
@@ -95,6 +147,8 @@ class Meshy:
         g[:, 1] -= g[:, 1].min()
         g *= HEIGHT / g[:, 1].max()
         g[:, 0] -= (g[:, 0].max() + g[:, 0].min()) / 2
+        self.raw = g.copy()                                # where the texture's zipper and seam were painted
+        g = reshape(g)
         nt = len(me.loop_triangles)
         tv = np.zeros(nt * 3, dtype=np.int32)
         me.loop_triangles.foreach_get("vertices", tv)
@@ -110,6 +164,8 @@ class Meshy:
         px = np.zeros(4096 * 4096 * 4, dtype=np.float32)
         img.pixels.foreach_get(px)
         self.tex = px.reshape(4096, 4096, 4)[..., :3]
+        lum = self.tex[::16, ::16].reshape(-1, 3) @ np.array([0.3, 0.55, 0.15])
+        self.coat_lum = float(np.median(lum[(lum > 0.02) & (lum < 0.3)]))     # the coat's typical light
         for k, old in before.items():
             coll = getattr(bpy.data, k)
             for item in [i for i in coll if i not in old]:
@@ -127,6 +183,10 @@ class Meshy:
         return loc, nor, idx
 
     def colour(self, p):
+        return self.source(p)[0]
+
+    def source(self, p):
+        """The texture's colour at the surface points nearest p, and where they were before the reshape."""
         loc, _, idx = self.nearest(p)
         a, b, c = (self.v[self.t[idx, k]] for k in range(3))
         v0, v1, v2 = b - a, c - a, loc - a
@@ -135,10 +195,12 @@ class Meshy:
         den = np.maximum(d00 * d11 - d01 * d01, 1e-18)
         bv = (d11 * d20 - d01 * d21) / den
         bw = (d00 * d21 - d01 * d20) / den
-        uv = (self.tuv[idx] * np.stack([1 - bv - bw, bv, bw], -1)[..., None]).sum(1)
+        bary = np.stack([1 - bv - bw, bv, bw], -1)[..., None]
+        uv = (self.tuv[idx] * bary).sum(1)
+        raw = (self.raw[self.t[idx]] * bary).sum(1)
         x = np.clip((uv[:, 0] % 1.0) * 4095, 0, 4095).astype(int)
         y = np.clip((uv[:, 1] % 1.0) * 4095, 0, 4095).astype(int)
-        return self.tex[y, x]
+        return self.tex[y, x], raw
 
     def decimated(self, target):
         import bmesh
@@ -241,15 +303,29 @@ IRIS_DEEP = hexc("1c0c3a")
 SHELL_A = hexc("b8b4c4")
 SHELL_B = hexc("5f5b6b")
 SHELL_C = hexc("2a2730")
-DARKEN = 0.55          # Meshy's coat is lighter than the sheet's obsidian
+# the sheet's colours (owner 11-09: the body too grey-purple, the zipper and pull dark grey, all matte): Meshy baked a
+# glossy grey-violet coat with white teeth, so the coat is laid flat in the sheet's aubergine-black and Meshy's own
+# shading is kept only as soft light and dark (the ring grooves), its highlights clipped
+COAT = hexc("3a3040")
+ZIP = hexc("4a4a52")
+SEAM = hexc("b07ef0")
+SHADE = (0.8, 1.06)
 
 
 def paint_body(q, nn):
-    col = Meshy.get().colour(q)
-    lum = col @ np.array([0.3, 0.55, 0.15])
-    # the dark coat goes darker, the gunmetal teeth and the violet seam keep their light
-    keep = sat((lum - 0.35) / 0.2)
-    col = col * (DARKEN + (1 - DARKEN) * keep)[:, None]
+    me = Meshy.get()
+    tex, raw = me.source(q)
+    lum = tex @ np.array([0.3, 0.55, 0.15])
+    chroma = tex.max(1) - tex.min(1)
+    seam = sat((chroma - 0.12) / 0.08) * sat((tex[:, 2] - tex[:, 0]) / 0.05)
+    teeth = sat((lum - 0.32) / 0.1) * (1 - seam)
+    crown = on_crown(raw)
+    teeth *= 1 - crown
+    seam *= 1 - crown                  # the stop on the crown is gone: the zipper starts behind the head
+    shade = np.clip(lum / me.coat_lum, *SHADE)
+    col = COAT * shade[:, None]
+    col = mixc(col, np.tile(ZIP, (len(q), 1)) * np.clip(lum / 0.6, 0.85, 1.1)[:, None], teeth)
+    col = mixc(col, 0.5 * (tex + SEAM), seam)
     gone = np.zeros(len(q))
     for c in PAINTED_EYES:
         gone = np.maximum(gone, sat((0.05 - np.linalg.norm((q - c) * v3(1, 0.9, 1.2), axis=1)) / 0.012))
@@ -257,7 +333,7 @@ def paint_body(q, nn):
     mouth = (sat((0.022 - np.abs(q[:, 1] - my - 6 * q[:, 0] ** 2)) / 0.008) * sat((-0.2 - q[:, 2]) / 0.02)
              * sat((0.068 - np.abs(q[:, 0])) / 0.012))
     gone = np.maximum(gone, mouth)
-    col = mixc(col, np.tile(OBSIDIAN, (len(q), 1)), gone)
+    col = mixc(col, np.tile(COAT, (len(q), 1)), gone)
     blush = np.zeros(len(q))
     for c in BLUSH_AT:
         blush = np.maximum(blush, sat((0.024 - np.linalg.norm((q - c) * v3(0.8, 1.3, 1), axis=1)) / 0.014))
