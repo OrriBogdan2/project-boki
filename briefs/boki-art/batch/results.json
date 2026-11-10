@@ -79488,5 +79488,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_embrook_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_kindlewren",
+    "name": "Kindlewren (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_kindlewren_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_soakybara",
+    "name": "Soakybara (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_soakybara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kindlewren",
+    "name": "Kindlewren (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_kindlewren_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_embrook",
+    "name": "Embrook (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_embrook_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_soakybara",
+    "name": "Soakybara (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_soakybara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_soakybara",
+    "name": "Soakybara (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_soakybara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_embrook",
+    "name": "Embrook (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_embrook_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_geysirbara",
+    "name": "Geysirbara (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_geysirbara_2.jpg",
+    "ok": true
   }
 ]
