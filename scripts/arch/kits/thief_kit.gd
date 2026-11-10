@@ -429,21 +429,16 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 		m.fx.spark(at, Vector3.UP, BOLT_GOLD, 6, 6.0, 80.0)
 
 # ------------------------------------------------------------------ dash: Vault
-## The Cartwheel: a Vault charge on the ground; in the air (or out of charges) the long dash, flipped her way.
-## From a jump it carries its speed to the landing (the sheet's ~8m over ~0.95s).
+## The Cartwheel: a Vault charge, the same in the air as on the ground (item 183); out of charges, the class's
+## long dash, flipped her way. Both run down VAULT_CURVE and the air's drag carries her on to the landing like
+## every Hunter. The sheet's air cartwheel, 8.4m held flat over 0.95s, flew far past the cast.
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
-	if use_ex:
-		h.ex_next = false            # her own distance and time, not the class's long dash
-		travel(float(dd["air_dist"]), float(dd["air_time"]), {"invuln": 0.1})
-		h.dash_is_ex = true
-		h.vel.y = maxf(h.vel.y, 0.0)
-	else:
-		var dist := float(dd["air_dist"] if air else dd["dist"])
-		travel(dist, float(dd["air_time"] if air else dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
+	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
+	travel(float(dd["dist"]), float(dd["time"]), extra)
 	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
 	_vaulted(air, _empowers(use_ex))
 	return true
@@ -455,7 +450,7 @@ func _empowers(use_ex: bool) -> bool:
 		return false
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
-## The Cartwheel's speed curve on the ground; from the air it holds its speed and ends where she lands.
+## The Cartwheel's speed curve, on the ground and in the air; from the air it ends where she lands.
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -464,9 +459,8 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]):
-		if h.grounded and float(vault["t"]) > 0.12:
-			h.roll_t = 0.0
+	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+		h.roll_t = 0.0
 		return
 	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
 

@@ -208,7 +208,7 @@ func thief(a) -> void:
 			A.dmg(T) >= 18.0 and K.marks_on(T) == 2 and T.vuln_t <= 0.0 and K.move_k() <= 1.0
 			and P.dashes >= P.max_dashes() - 0.01 and K.primed_t <= 0.0 and K.primed_hits == 1,
 		"dealt %.0f marks %d vuln %.1f dashes %.2f" % [A.dmg(T), K.marks_on(T), T.vuln_t, P.dashes])
-	# from a jump the cartwheel holds its speed to the landing: much further than on the ground
+	# from a jump the cartwheel's speed carries on to the landing: further than on the ground
 	A.step(m, 0.5)
 	P.teleport(home)
 	P.dashes = P.max_dashes()
@@ -222,7 +222,7 @@ func thief(a) -> void:
 	var air_rings := _dancer_rings(m)
 	var landed := [false]
 	A.step(m, 2.4, func(): landed[0] = landed[0] or K.anim_id == "thf_land")
-	A.ok("dancer dash: from a jump the cartwheel carries its speed to the landing (about 1.7x the ground one)",
+	A.ok("dancer dash: from a jump the cartwheel carries its speed on to the landing (further than on the ground)",
 			P.flat_dist(home) > far * 1.35 and P.grounded and K.vault.is_empty(), "moved %.1f" % P.flat_dist(home))
 	A.ok("dancer air dash (items 32, 35): the air Cartwheel, empowered by its row, lands in thf_land, no ring",
 			air_move == "thf_exdash" and landed[0] and K.primed_t > 0.0
@@ -381,10 +381,9 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))
 	var ground_len := maxf(_move_len("thf_vault_r"), _move_len("thf_vault_l"))
 	var air_len := _move_len("thf_exdash")
-	A.ok("dancer dash moves (item 35): her own ids; the ground and air cartwheels fit inside their dashes",
-			own and ground_len <= float(dd["time"]) * feel_t + 0.005 and air_len <= float(dd["air_time"]) * feel_t,
-			"ground %.2f / %.2f air %.2f / %.2f" % [ground_len, float(dd["time"]) * feel_t, air_len,
-					float(dd["air_time"]) * feel_t])
+	A.ok("dancer dash moves (item 35): her own ids; the ground and air cartwheels fit inside their dash",
+			own and ground_len <= float(dd["time"]) * feel_t + 0.005 and air_len <= float(dd["time"]) * feel_t + 0.005,
+			"ground %.2f air %.2f / %.2f" % [ground_len, air_len, float(dd["time"]) * feel_t])
 
 func _move_len(mv: String) -> float:
 	var keys: Array = KMovesDJ.MOVES[mv]["keys"]

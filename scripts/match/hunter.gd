@@ -769,6 +769,8 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 
 # ------------------------------------------------------------------ actions
 func do_jump() -> void:
+	if ak and ak.cast_locked() and not grounded and not gliding:
+		_glide_armed = true      # a cast keeps the glider shut: held, it opens as the cast ends
 	if downed or stun_t > 0.0 or grap.size() > 0 or out or KitStatus.grounded(self) or (ak and ak.cast_locked()):
 		return
 	if not lfloat.is_empty():
@@ -805,14 +807,14 @@ func do_jump() -> void:
 		return
 	if wall_moves.try_kick(self):
 		return
-	# already in the air: a second press opens the glider straight away, rising or falling,
-	# unless you're about to land, where it buffers a jump instead
+	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
 	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
 	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
 	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
 		return
+	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
 	jump_buf = JUMP_BUFFER
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.

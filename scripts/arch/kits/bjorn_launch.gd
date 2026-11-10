@@ -5,8 +5,8 @@ extends RefCounted
 ## and the slam throws his whole weight forward: "perfect.dist" m over "perfect.time" s, feet off the ground
 ## (bul_launch), then a skid as he lands. The launch rides the dash plumbing (Hunter.dash_with), so a glide
 ## started from it carries its speed by the shared rules (Loco.glide_step): glide or jump pressed during it
-## jumps him out of it into a glide. Off a drop he falls on: the held swing never opens the glider by itself
-## (owner 11-09), a fresh glide press does.
+## jumps him out of it into a glide. Off a drop he falls on: the held swing never opens the glider by itself;
+## a fresh glide press does.
 
 var k: BulwarkKit
 var h: Hunter

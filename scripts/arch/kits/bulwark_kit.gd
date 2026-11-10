@@ -495,7 +495,8 @@ func _smash() -> void:
 ## a dash, the swing rides the move he's in.
 func _carry(dv: Vector2, k: float) -> void:
 	play("bul_smash")
-	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
+	if not h.gliding:      # swung under an open glider: it stays open
+		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	if not h.grounded or h.roll_t > 0.0:
 		return
 	var cr: Array = lmb_def().get("carry", [1.5, 1.8])
@@ -822,7 +823,8 @@ func _spin_hit(wd: Vector2) -> void:
 		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
-	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
+	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
+		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
 	fx.smash_ring(h.pos)
 	m.fx.dust(h.pos, 10)

@@ -238,7 +238,7 @@ func _glide_open(m: Match, P: Hunter, hold: bool) -> float:
 	return -1.0
 
 ## #49 off a ledge: the perfect launch carries him over the edge; the held swing never opens the glider by itself
-## (owner 11-09), a fresh glide press just after opens it at >= 70% of the launch's speed (the shared hand-off).
+## a fresh glide press just after opens it at >= 70% of the launch's speed (the shared hand-off).
 func _launch_glide() -> void:
 	var r := setup("bulwark", 7.0)
 	var m: Match = r[0]
