@@ -142,6 +142,50 @@ X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's E
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
 slot changes. R reloads and the Boki Merge is on its own key (T by default).
 
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured offline through `WardenClips` (ryzz.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s,
+blend out to locomotion 0.16 s, under one footage frame) by `tools/mage_anim_time_check.gd`, run inside
+`--mage-combo-check` (it prints `TIME ...` lines and asserts each fix). "Hit" is the release or contact key, "end" when
+the hand settles. Source times from briefs/hero-ref/vireo.md (one frame = 0.2 s). Rows marked "by reading" were
+worked out from the clip lengths and the kit's timers before the fix, not measured.
+
+| Move | Source (s) | Ours before | Ours after | Status |
+|---|---|---|---|---|
+| `mage_lmb` bolt | one arm fling per shot, a wide stance between [f3-15]; the source's rate is 0.8 | clip 0.35, release key 0.06; a bolt every 0.648 | same | matches (the cadence 0.648 is owner item 116, kept) |
+| `mage_rmb_hold` | spear up on the press, body flash at 1.0 s, throw at 1.2 s [f43-49] | hold pose in at 0.1, flash 1.0, auto throw 1.2 | same | matches |
+| `mage_rmb` release (held to the flash) | the throw one frame after the flash [f48-49] | release key 0.06 on the let-go | same | matches |
+| `mage_rmb` tap (let go before 0.33 s) | no tap in the footage; the throw leaves with the arm | by reading: throw clip played at the let-go, its release key (0.06) 0.23 s ahead of the bolt (min 0.33) | the clip starts so its release key lands on the bolt | fixed; asserted |
+| `mage_dash` Wirerun hold | crouch while the charge fills, full in ~0.6 s [f101-104] | crouch in 0.1, held on the crouch to the let-go (hold 0.6 s) | same | matches |
+| `mage_dash` travel | ~0.6 s at full length, ~0.4 s to re-form [f106-111]; about 29-37 m/s | 13 m at 40 m/s (owner): 0.33 s, `dash_go` 0.5, `dash_land` 0.42 | same | owner value (faster than the source), kept |
+| `mage_dash` tap | a player-driven hold (the source's crouch is 0.2 s) | crouch about 2 frames when tapped | same | idea, not built (see suggestions) |
+| Wirerun pass hit | 146 as the body crosses [f165, f300] | on `dash_go` through the pass, 20 damage | same | owner value (damage), timing matches |
+| `mage_e` Skycall | disc to strike 0.8 s [f186-190]; a one-arm sweep, no long wind-up | arm clip 1.4 s; a 1.0 s drag plus the 0.8 s count strike at 1.8 s: by reading, the arm dropped for 0.4 s before the snap | the arm clip held on its arm-up pose (0.9 s) while she waits | fixed; asserted |
+| `mage_e` tap | strike 0.8 s after the circle | arm up, strike 0.8 s after the cast | same | matches |
+| `sky_snap` | the strike flash [f190] | starts from the arm-up pose, 0.55 clip | same | matches |
+| `mage_x` Kitefall launch | crouch and take-off 0.3-0.4 s [f28-31]; ring first | crouch 0.3, rise 0.3 | same | matches (0.3 against about 0.4: within one frame) |
+| `mage_x` hover | 1.2-1.8 s airborne [f32-46] | 1.7 s hover | same | matches |
+| `mage_x` crash | marker 0.1 s, pillar on the next frame [f47-49]; free to shoot at f51 | drop 0.2, after 0.5 | same | matches |
+| `mage_dash_ex` (air) | not in the footage | 0.5 clip | same | no source |
+| `mage_live`, `mage_gum` | not in the footage | clip lengths unchanged | same | no source |
+| `mf_xform` | - | 0.33 / 0.8 | same | no source |
+| Jump, land | not in the footage | unchanged | same | no source |
+
+Run cadence (`TIME run`): the run clip `run_f` is 0.6 s and plays at `clamp(speed / gait, 0.6, 1.5)`, so a stride cycle
+is about 1.7 Hz at her speed (see the check's TIME line for the exact figure). The sheet measures about 2.3 Hz at about
+4.1 m/s with a shorter stride (vireo.md locomotion). Raising the rate by data alone would skate her feet on the
+ground, so it is a re-key, not a kit change.
+
+Clip re-keys for the model (tools/art1/ryzz_clips.py; Blender is not on the build box, so none were done here):
+- `run_f`: a gait period of about 0.43 s with the stride shortened to match, then re-measure the gait speed
+  (tools/anim_audit.gd), so the feet do not skate.
+- `sky`: if the arm should come down after the strike, key the drop at 1.2 s; today the kit holds the 0.5-1.15 s pose.
+
+Suggestions (ours, not built):
+- Wirerun tap: a 0.2 s minimum crouch before the dash (the source's crouch), at the cost of input delay.
+- RMB tap: the rod is hidden at the let-go, so a tap holds the arm on the hold pose without the rod for about 0.17 s;
+  keeping the rod up until the throw would close it.
+- Bolt cadence: the source is 0.8 s; ours is 0.648 (owner item 116), the card says so.
+
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
   moves `scripts/match/kmoves_vv.gd`; the finger-gun hold `"finger"` in `HunterAnim.HOLDS`; the wrist
