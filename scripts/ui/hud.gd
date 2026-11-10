@@ -301,9 +301,9 @@ func _draw_all() -> void:
 		_draw_glider_heat(p)
 	if p:
 		_draw_hurt_dirs(sz)
-		buffs.draw(self, p, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
+			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open():
 			_draw_ship_prompt(sz)
 		if p.dropping and not map_open():
