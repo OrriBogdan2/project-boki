@@ -7,6 +7,7 @@ extends RefCounted
 ##   3. the type edge: a theme in "beats" gives 10% push, never both ways between two themes
 ##   4. a settled bout: the winner's joy and trust go up, the loser's joy down, both remember it, gems
 ##   5. on the base: no stump with base_mode off; with it on, a bout runs to a result card
+##   6. in Cinderstep: the same bout, the stump on the zone's ledge, the zone's own layout
 ## Never touches the real save.
 
 const BOUTS := 50
@@ -33,7 +34,8 @@ func run(m: Node) -> void:
 	_press()
 	_edge()
 	_settle()
-	await _on_base()
+	await _on_base("")
+	await _on_base("cinderstep")
 	print("SHOVE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -132,25 +134,30 @@ func _settle() -> void:
 			"settle: both remember it")
 	ok(int(Save.d["gems"]) > gems and res["backed_won"], "settle: you get gems for backing the winner")
 
-func _on_base() -> void:
+func _on_base(zone: String) -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 10, 70.0, 50.0)
 		d["roster"].append(k)
+		if zone != "":
+			k["zone"] = zone
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	d["layout"] = HomeLayout.fresh()
+	if zone != "":
+		d["zones"][zone] = {"open": true}
 	Save.d = d
 	HomeLayout.ensure(Save.d)
-	var off = await main._hb_home()
-	ok(off.hshove == null, "off: no stump on the farm")
-	off.queue_free()
-	await main.get_tree().process_frame
+	if zone == "":
+		var off = await main._hb_home()
+		ok(off.hshove == null, "off: no stump on the farm")
+		off.queue_free()
+		await main.get_tree().process_frame
 	rules["base_mode"] = true
-	var home = await main._hb_home()
+	var home = await main._hb_home(zone)
 	for f in SETTLE_FRAMES:
 		if is_instance_valid(home.root_ui):
 			break
@@ -161,6 +168,14 @@ func _on_base() -> void:
 		var sh: BaseShove = home.hshove
 		var at := Vector2(sh.stump.position.x, sh.stump.position.z)
 		ok(is_instance_valid(sh.stump) and sh.find(at) == {"kind": "shove"}, "on: the stump offers a shove")
+		if zone != "":
+			var spot: Array = GardenZones.info(zone)["shove_at"]
+			ok(at.is_equal_approx(Vector2(spot[0], spot[1])), "%s: the stump stands on the zone's ledge" % zone)
+			var ids := (HomeLayout.of(Save.d)["deco"] as Array).map(func(e): return String(e["id"]))
+			var has_all := ["toy_stone", "toy_post", "snack_patch"].all(func(id): return ids.has(id))
+			ok(HomeLayout.of(Save.d)["theme"] == "cinder" and has_all,
+					"%s: its own layout, warm stone, post and snack patch" % zone)
+			ok(Save.d["layout"]["theme"] == "meadow", "%s: the start zone's layout is untouched" % zone)
 		for k in home.kins:
 			k.erase("indoors")
 		sh.use()

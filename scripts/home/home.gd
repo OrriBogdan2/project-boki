@@ -376,6 +376,7 @@ func _ready_rest() -> void:
 		HomeLayout.rescue_feeders(world)
 	# the layout's buildings, decorations, paths, ponds and colour theme
 	hb.prepare_world()
+	ZoneScatter.build(self)
 	if fs and visit.is_empty(): HomeStall.ensure(self)       # every save has a market stall
 	if fs and visit.is_empty() and _fs_arrivals():
 		hb._apply_blockers()
@@ -1121,6 +1122,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	GardenZones.here = ""
 	SeeThrough.off()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the

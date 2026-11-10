@@ -26,3 +26,8 @@ The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays
 later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
 Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
 (`KinBox.farm_room`) counts each zone on its own.
+
+Step 7 (zone builds) is the first to need a layout of its own: a zone whose garden_zones.json entry has a
+"layout" keeps it at `Save.d["zones"][id]["layout"]`, made on first read (`GardenZones.layout`), and
+`HomeLayout.of` returns it while that zone is the one loaded. No migration is needed: a save without the key
+gets the template when the zone is first entered. Cinderstep is the first.

@@ -38,7 +38,7 @@ static func harvest(d: Dictionary, now: float) -> Array:
 	if not ripe(e, now):
 		return []
 	e["t"] = now
-	var got: Array = (rules()["snacks"] as Array).duplicate()
+	var got: Array = GardenZones.snacks().duplicate()
 	for s in got:
 		d["crops"][s] = int(d["crops"].get(s, 0)) + 1
 	return got
@@ -52,7 +52,7 @@ static func model(e: Dictionary) -> Node3D:
 	var n := Node3D.new()
 	var is_ripe := ripe(e, Time.get_unix_time_from_system())
 	Models.part(n, Models.box(1.9, 0.08, 1.9), Models.toon(Color("7a5a3a"), false), Vector3(0, 0.04, 0))
-	var snacks: Array = rules()["snacks"]
+	var snacks: Array = GardenZones.snacks()
 	for i in snacks.size():
 		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45)
 		var leaf := Models.toon(Color("5f9a45"))

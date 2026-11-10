@@ -31,6 +31,9 @@ const THEMES := {
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	# a garden zone's ground (garden_zones.json theme): never in the theme shop
+	"cinder": {"name": "Cinder", "zone": true, "region": 3, "top": "a0624a", "top2": "7e4a3c", "side": "5a3a34",
+		"deep": "2a1a1c", "leaf": "c8663a"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -251,6 +254,9 @@ static func ensure(d: Dictionary) -> Dictionary:
 	return L
 
 static func of(d: Dictionary) -> Dictionary:
+	var zl := GardenZones.layout(d)
+	if not zl.is_empty():
+		return zl
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 

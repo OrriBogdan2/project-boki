@@ -50,6 +50,37 @@ static func residents(id: String) -> Array:
 static func current() -> String:
 	return here if here != "" and here != HUB else start()
 
+## The loaded zone's own layout. The start zone keeps Save.d["layout"]; any other zone keeps its own in
+## Save.d["zones"][id]["layout"], made from its garden_zones.json entry the first time it is read (so an
+## older save needs no migration). {} for the start zone, the hub, a visit and anything but the save.
+static func layout(d: Dictionary) -> Dictionary:
+	if here == "" or here == HUB or here == start() or not is_same(d, Save.d) or not info(here).has("layout"):
+		return {}
+	var z: Dictionary = d["zones"].get(here, {})
+	if z.is_empty():
+		return {}
+	if not z.has("layout"):
+		z["layout"] = _made(info(here))
+	return z["layout"]
+
+static func _made(def: Dictionary) -> Dictionary:
+	var spec: Dictionary = def["layout"]
+	var L := HomeLayout.fresh()
+	L["theme"] = def["theme"]
+	L["themes"] = [def["theme"]]
+	L["seed"] = int(spec["seed"])
+	L["fs"] = 1
+	L["fb"] = 1
+	L["sk"] = float(spec["sk"])
+	for s in spec["deco"]:
+		var e := {"u": HomeLayout._next_uid(L), "id": String(s[0]), "x": int(s[1]), "z": int(s[2]), "r": 0}
+		(L["deco"] as Array).append(e)
+	return L
+
+## What the snack patch grows in the zone you are in.
+static func snacks() -> Array:
+	return info(current()).get("snacks", SnackPatch.rules()["snacks"])
+
 static func is_partner(rec: Dictionary) -> bool:
 	return String(rec.get("uid", "")) == str(Save.d.get("active", ""))
 

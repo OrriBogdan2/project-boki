@@ -284,6 +284,13 @@ const CROPS := {
 		"use": "snack", "desc": "Snack: your partner gets +4 trust right away. Quick and cheap."},
 	"glowcap": {"name": "Glowcap", "grow": 2, "color": Color("b48cff"), "price": 30, "weight": 0.6,
 		"use": "treat_xp", "desc": "Treat: your partner learns half again as much next match."},
+	# Cinderstep's snack patch grows these for the Rock, Steel and Dragon lean (weight 0: never a drop or a work yield)
+	"gravelnut": {"name": "Gravelnut", "grow": 2, "color": Color("a39a86"), "price": 20, "weight": 0.0,
+		"use": "snack", "desc": "Snack: your partner gets +4 trust right away. Rock Boki love the crunch."},
+	"ironroot": {"name": "Ironroot", "grow": 2, "color": Color("8fa3b8"), "price": 20, "weight": 0.0,
+		"use": "snack", "desc": "Snack: your partner gets +4 trust right away. Steel Boki chew it for hours."},
+	"scalefig": {"name": "Scalefig", "grow": 3, "color": Color("b05ae0"), "price": 25, "weight": 0.0,
+		"use": "snack", "desc": "Snack: your partner gets +4 trust right away. Dragon Boki hoard them."},
 	"starfruit": {"name": "Starfruit", "grow": 4, "color": Color("fff07a"), "price": 60, "weight": 0.3,
 		"use": "levelup", "desc": "Rare. Your partner gains a level right away (once a day)."},
 }

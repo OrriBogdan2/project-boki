@@ -3967,9 +3967,10 @@ func _home_build_check() -> void:
 	print("HOMEBUILD done, failures: %d" % bad[0])
 	get_tree().quit(1 if bad[0] > 0 else 0)
 
-func _hb_home():
+func _hb_home(zone := ""):
 	var H = load("res://scripts/home/home.gd")
 	var hm = H.new()
+	hm.zone = zone
 	add_child(hm)
 	current = hm
 	await get_tree().process_frame

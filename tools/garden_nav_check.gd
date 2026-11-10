@@ -4,6 +4,7 @@ extends RefCounted
 ## has made no progress for 3 s), two Boki sitting on each other for 3 s, and any Boki standing inside the house,
 ## a toy, water or any other block it can't enter. Zero stuck and zero inside is the pass bar; overlaps are printed
 ## and counted (two Boki sharing a toy or a pile may brush), not failed. Never touches the real save.
+## With a zone id (--cinderstep-nav-check) the same sweep runs on that garden zone's own island.
 
 const SIM_SECS := 600.0        # s of game time (10 in-game minutes)
 const DT := 0.25               # s per step
@@ -27,18 +28,22 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func _save() -> void:
+func _save(zone: String) -> void:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
 	for i in CAST.size():
 		var rec := Save.new_kin(CAST[i], "B%d" % i)
 		Care.ensure(rec)
+		if zone != "":
+			rec["zone"] = zone
 		d["roster"].append(rec)
 	d["roster"][0]["starter"] = true
 	d["active"] = d["roster"][0]["uid"]
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	d["gems"] = 1000
 	HomeLayout.new_fs(d, SEED)
+	if zone != "":
+		d["zones"][zone] = {"open": true}
 	Save.d = d
 
 ## Every plaything and the house on the built farm, round the landing.
@@ -124,12 +129,12 @@ func _overlaps(t: float) -> int:
 				print("GARDENNAV OVERLAP t=%.0f %s at %s %s / %s" % [t, who, _xz(a["pos"]), _state(a), _state(b)])
 	return found
 
-func run(m: Node) -> void:
+func run(m: Node, zone := "") -> void:
 	main = m
 	Save.no_write = true
 	seed(SEED)
-	_save()
-	home = await main._hb_home()
+	_save(zone)
+	home = await main._hb_home(zone)
 	ok(home.kins.size() == CAST.size() and home.life != null, "%d Boki on a base_mode farm" % home.kins.size())
 	_stage()
 	var cases := 0

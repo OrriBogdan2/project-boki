@@ -145,4 +145,7 @@ A watered plant grows a stage every 90 seconds at home, and every expedition gro
 | Mindmint | 3 | 25 | Treat: +12 trust. Calm Boki follow risky orders. |
 | Puffcorn | 1 | 8 | Snack: your partner gets +4 trust right away. Quick and cheap. |
 | Glowcap | 2 | 30 | Treat: your partner learns half again as much next match. |
+| Gravelnut | 2 | 20 | Snack: your partner gets +4 trust right away. Rock Boki love the crunch. |
+| Ironroot | 2 | 20 | Snack: your partner gets +4 trust right away. Steel Boki chew it for hours. |
+| Scalefig | 3 | 25 | Snack: your partner gets +4 trust right away. Dragon Boki hoard them. |
 | Starfruit | 4 | 60 | Rare. Your partner gains a level right away (once a day). |
