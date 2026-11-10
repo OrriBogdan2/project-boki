@@ -101678,5 +101678,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/halo_sphinxblight_2.jpg",
     "ok": true
+  },
+  {
+    "id": "halo_ghoulamari",
+    "name": "Ghoulamari (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_ghoulamari_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_sphinxblight",
+    "name": "Sphinxblight (legendary halo crown)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/halo_sphinxblight_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_sarcobra",
+    "name": "Sarcobra (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_sarcobra_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_pavonazar",
+    "name": "Pavonazar (legendary halo crown)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_pavonazar_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_sphinxblight",
+    "name": "Sphinxblight (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_sphinxblight_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_ghoulamari",
+    "name": "Ghoulamari (legendary halo crown)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/halo_ghoulamari_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_ghoulamari",
+    "name": "Ghoulamari (legendary halo crown)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/halo_ghoulamari_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "halo_cindermaw",
+    "name": "Cindermaw (legendary halo crown)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/halo_cindermaw_3.jpg",
+    "ok": true
   }
 ]
