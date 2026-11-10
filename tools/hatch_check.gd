@@ -100,8 +100,8 @@ func run(m: Node) -> void:
 	ok(rv.met and not rv.name_btn.disabled, "after it looks at you, you can name it (%.1f s)" % ((Time.get_ticks_msec() - t0) / 1000.0))
 	var face := wrapf(rv.kin.rotation.y + rv.turn.rotation.y - PI, -PI, PI)
 	ok(absf(face) < 0.2, "it faces you (off by %.2f rad)" % face)
-	ok(rv.sub_lbl.text.to_lower().contains("looking at you") and not rv.sub_lbl.text.contains("!") and not rv.sub_lbl.text.contains("RARE"),
-		"quiet words: \"%s\"" % rv.sub_lbl.text)
+	ok(rv.sub_lbl.text.to_lower().contains("looking at you") and not rv.title_lbl.text.contains("!") and not rv.title_lbl.text.contains("RARE"),
+		"quiet words: \"%s\" / \"%s\"" % [rv.title_lbl.text, rv.sub_lbl.text])
 	var sparkle := rv.kin.get_node_or_null("FurSparkle") as CPUParticles3D
 	ok(sparkle != null and sparkle.amount <= 8, "a shimmer is a faint sparkle in its coat")
 	var labels: Array = rv.info.find_children("*", "Label", true, false)
