@@ -74896,5 +74896,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2t_maulangler_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rd_effigeetle_b",
+    "name": "Effigeetle (redesign: caterpillar baby)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_effigeetle_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_effigeetle_b",
+    "name": "Effigeetle (redesign: caterpillar baby)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_effigeetle_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_effigeetle_a",
+    "name": "Effigeetle (redesign: caterpillar baby)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rd_effigeetle_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_effigeetle_b",
+    "name": "Effigeetle (redesign: caterpillar baby)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_effigeetle_b_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_effigeetle_a",
+    "name": "Effigeetle (redesign: caterpillar baby)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rd_effigeetle_a_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rd_effigeetle_a",
+    "name": "Effigeetle (redesign: caterpillar baby)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rd_effigeetle_a_1.jpg",
+    "ok": true
   }
 ]
