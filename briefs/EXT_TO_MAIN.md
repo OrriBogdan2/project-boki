@@ -5938,3 +5938,4 @@ READY ext/stuck-integ-d4379965 d13794ed3 (supersedes: ext/fix-cinder-art-check, 
 READY ext/ui-boki-quick-keys bb73357c1 (Boki quick command keys)
 READY ext/ui-squad-rows 776e7e553 (squad rows to HUD.md)
 READY ext/vfx-telegraph-timing 0b8572c2d (telegraph fill synced to hits)
+READY ext/feel-cc-exit-buffer b0c7a0d27 (CC-exit press buffering, 12 kits)
