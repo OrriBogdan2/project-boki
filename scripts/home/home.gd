@@ -3041,9 +3041,7 @@ func _open_kin(rec: Dictionary) -> void:
 			if String(rec.get("title", "")) != "":
 				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
 		"Training":
-			c1.add_child(UI.section("Stats  ·  cap %d" % Care.stat_cap(rec), UI.FAINT.lightened(0.2)))
-			for st in Care.STATS:
-				row.call(c1, Care.STATS[st]["name"], float(rec["stats"][st]) / float(Care.stat_cap(rec)), Care.STATS[st]["col"], str(int(rec["stats"][st])))
+			StatCard.add(rec, c1)
 			c1.add_child(UI.para("Train at the yard to raise them. Higher bonds raise the cap.", 12, UI.FAINT))
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			_kin_match_rows(rec, c2, true)
@@ -4500,7 +4498,7 @@ func _finish_training() -> void:
 	var mult := 1.0
 	if Care.need(rec, "joy") >= 60.0: mult *= 1.25
 	if Care.need(rec, "energy") < 35.0: mult *= 0.7
-	var gained := Care.add_stat(rec, stat, int(round(pts * mult)))
+	var gained := StatCause.gain(rec, stat, int(round(pts * mult)), "drill")
 	Care.change(rec, "energy", -18.0)
 	Care.change(rec, "food", -6.0)
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)
