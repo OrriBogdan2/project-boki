@@ -746,3 +746,9 @@ ON_CHANGE('Blastopuff',_C%'Blastopuff','final','tough',True,False,"the same angr
 for _n,_st,_ar,_dk,_fu,_fx in (('Glaivyx','final','sleek',0,1,"no dripping slime"),('Glassolotl','mid','pretty',0,0,""),('Chandelotl','final','majestic',0,0,""),('Ringrove','final','majestic',0,1,""),('Cindermaw','final','creepy',1,1,"")):
     SPECS.append({'id':'v2c_'+_n.lower()+'_b4','name':_n+' (V2 card, text-only style)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
                   'prompt':RS_CARD_TEXT(_n,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_fx)})
+
+# 01:25 ET 11-10 OWNER: "Glassolotl needs a new pose" + "Lunowl should feel closer to Eclipsowl, it feels too far apart (some lines feel radically
+# different, others too similar)". Rule of thumb from this: the middle stage carries one thing forward from the baby and shows one thing of the final.
+ON_POSE('Glassolotl',_LM['Glassolotl']['sheet'],'mid','pretty',False,False,"reared up on its hind legs and tail, facing LEFT, front feet lifted, head turned to look at the viewer, its long glassy tail fins curling round in front of it.","pale pink glassy body with pastel rainbow fins, pink feathery gills, long ribbon tail fins")
+SPECS[-1]['runs']=4
+ON_CHANGE('Lunowl','briefs/boki-art/cards/Lunowl.jpg','mid','pretty',False,True,"the same moth-winged owl in flight, moved halfway toward its dark final form: its body feathers are dusk lilac-grey instead of cream, its big luna-moth wings shade from pale mint at the base to deep violet at the edges and tails, it carries bold gold crescent markings on the wings and chest and a small gold crescent crest between its ear tufts, and its two long wing tails are starting to curl like ribbons. A calmer, more serious face with gold eyes. A little bigger and stronger than a baby.",runs=4,tag='_dusk')
