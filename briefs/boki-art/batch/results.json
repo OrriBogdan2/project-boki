@@ -75309,5 +75309,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2t_tiltster_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2t_bullpole",
+    "name": "Bullpole (V2 card, style board)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_bullpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_pinster",
+    "name": "Pinster (V2 card, style board)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_pinster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_bullpole",
+    "name": "Bullpole (V2 card, style board)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_bullpole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_tiltster",
+    "name": "Tiltster (V2 card, style board)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_tiltster_2.jpg",
+    "ok": true
   }
 ]
