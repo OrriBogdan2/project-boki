@@ -60,14 +60,14 @@ func players(u: int) -> Array:
 	return h.kins.filter(func(o): return o.has("play") and int(o["play"]["u"]) == u)
 
 ## The element this Boki leans to: its strongest lean (Evo.lean), else its species' element.
-func _lean(rec: Dictionary) -> String:
+static func _lean(rec: Dictionary) -> String:
 	var top := String(Evo.lean(rec)[0])
 	if top == "":
 		top = BokiLines.element_of(String(rec.get("species", "")))
 	return top.to_lower()
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
-func weight(rec: Dictionary, toy_id: String) -> float:
+static func weight(rec: Dictionary, toy_id: String) -> float:
 	var R := rules()
 	var def: Dictionary = R["toys"][toy_id]
 	var w := 1.0 + float(R["trait_weight"]) * float(rec["traits"].get(String(def["trait"]), 0.5))
