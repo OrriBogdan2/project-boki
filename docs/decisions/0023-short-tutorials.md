@@ -18,3 +18,4 @@
 - Only 3 lines added to match.gd. No Net change.
 - New check: `--first-time-hint-check`. `--farm-tut-time` times the farm tutorial.
 - Headless timings of driven play: match 91.1 s for 22 steps -> 41.9 s for 8 (`--tutorial-hud-check`); farm 117.4 s for 11 -> 63.2 s for 5 (`--farm-tut-time`).
+- `--first-hints-check` plays a first expedition with bots and drives each match hint. It found and fixed: hints firing in the first 2 s of a fight (now held, `fight_quiet_s`), two hints on screen at once (the next waits for the lane), the uplink hint before the outpost opens, and go-to-exit with an outpost close (`sight_m`).
