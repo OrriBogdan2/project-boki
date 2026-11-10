@@ -90408,5 +90408,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/olm_kintsuwyrm_jade_1.jpg",
     "ok": true
+  },
+  {
+    "id": "tidy_scarabit",
+    "name": "Scarabit (clean-up option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidy_scarabit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_terrarimit",
+    "name": "Terrarimit (clean-up option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidy_terrarimit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_dragonkite",
+    "name": "Dragonkite (clean-up option)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidy_dragonkite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_scarabit",
+    "name": "Scarabit (clean-up option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidy_scarabit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_checkmare",
+    "name": "Checkmare (clean-up option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidy_checkmare_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_critwom_rear",
+    "name": "Critwom (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_critwom_rear_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_critwom_rear",
+    "name": "Critwom (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_critwom_rear_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_knotwyrm",
+    "name": "Knotwyrm (clean-up option)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidy_knotwyrm_3.jpg",
+    "ok": true
   }
 ]
