@@ -1,7 +1,7 @@
 # 0019: Pre-match lobby
 
 ## Problem
-Owner (Nov 7): before every match a 90 s lobby: pick your Hunter, meet your squad, plan by text and voice, then load. An admin setting skips it for a plain loading screen, which gets better too.
+Owner (Nov 7): before every match a lobby (90 s, since 11-08 30 s): pick your Hunter, meet your squad, plan by text and voice, then load. An admin setting skips it for a plain loading screen, which gets better too.
 
 ## Options
 1. Gate inside `Main.show_screen("match")`: grows a god file and every test path would hit it.
