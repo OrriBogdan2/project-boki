@@ -95,6 +95,7 @@
 		"icon": "cleave",
 		"col": "#cfe8ff",
 		"cd": 8.0,
+		"rank_cuts": [1.5, 1.5],
 		"whirl": 3.5,
 		"whirl_speed": 20.5,
 		"whirl_kb": 7.0,
@@ -224,13 +225,13 @@
 	},
 	"rank2": {
 		"sec": "Rank 2: shield HP +25% (160 -> 200), damage +15%.",
-		"dash": "Rank 2: recharge 8s -> 6.8s per charge; the Shield Charge cooldown 6s -> 4.5s.",
+		"dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.",
 		"kin": "Rank 2: healing +25% (burst 18 -> 22), damage +15%."
 	},
 	"rank_next": {
 		"sec": "Rank 3: shield HP +50% (240), damage +30%; regen 20 -> 30 per second, back up in 1.4s and 2s when broken.",
 		"kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.",
-		"dash": "Rank 3: recharge 8s -> 5.6s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
+		"dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it."
 	},
 	"tells": {
 		"half": "three rune pips over the helm light at 33 / 66 / 100 Guard",

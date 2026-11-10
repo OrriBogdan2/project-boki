@@ -376,8 +376,9 @@ func max_dashes() -> float:
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)
-	var base := float(ak.dash_def().get("cd", 9.0)) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN)
-	return base * (1.0 - 0.15 * float(maxi(0, int(slot_lv.get("dash", 1)) - 1))) * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
+	var lv := int(slot_lv.get("dash", 1))
+	var base := ak.dash_cd(lv) if ak else (dodge_def.cooldown if dodge_def else DASH_REGEN) * (1.0 - 0.15 * float(maxi(0, lv - 1)))
+	return base * (1.0 - minf(0.9, owner_stat("dodge_regen") + gear_stat("dodge")))
 
 ## Right click is always your weapon's ability, as left click is its attack.
 func _kit_from_weapon() -> void:

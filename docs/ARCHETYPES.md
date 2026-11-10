@@ -120,6 +120,8 @@ That's 10 points for 14 possible ranks, so choices matter.
 - Generic rank effects stay (ABILITIES.md): +15% damage per rank, −10% cooldown (dash −15%
   recharge), the verb's own numbers grow (`Effects.RANK_GROW`). Dash distances never grow. R rank 2:
   +30% duration and +15% cast effects. Each archetype adds **one rank-3 special** per slot, listed below.
+  A kit's JSON overrides two of them with the source's numbers: `dash.rank_cuts` [rank 2 s, rank 3 s further] replaces
+  the dash's -15%, and `rmb.rank_dmg` / `e.rank_dmg` [rank 2, rank 3] replace the +15% (`ArchKit.dash_cd`, `_rank_dmg_k`).
 
 ### 3.5 HUD: making the level obvious (SUPERVIVE-style portrait cluster)
 

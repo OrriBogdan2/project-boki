@@ -55,6 +55,7 @@
 		"icon": "shadowstep",
 		"col": "#b8f5ea",
 		"cd": 9.5,
+		"rank_cuts": [1.5, 1.5],
 		"reach": 12.0,
 		"time": 1.8,
 		"time_swollen": 1.25,
@@ -68,6 +69,7 @@
 		"fly_slow": 0.3
 	},
 	"rmb": {
+		"rank_dmg": [0.2, 0.2],
 		"delivery": "projectile",
 		"name": "Shard Snap",
 		"short": "Snap",
@@ -107,6 +109,7 @@
 		}
 	},
 	"e": {
+		"rank_dmg": [0.1, 0.1],
 		"delivery": "burst",
 		"name": "Brimseed",
 		"short": "Seed",
@@ -168,14 +171,14 @@
 		"kin": "the seed burns foes inside while it grows (8 a second)"
 	},
 	"rank2": {
-		"sec": "Rank 2: cooldown 10s -> 9s, damage +15%.",
-		"dash": "Rank 2: recharge 9.5s -> 8.1s per charge.",
-		"kin": "Rank 2: cooldown 10s -> 9s, damage +15%."
+		"sec": "Rank 2: cooldown 10s -> 9s, damage +20%.",
+		"dash": "Rank 2: recharge 9.5s -> 8s per charge.",
+		"kin": "Rank 2: cooldown 10s -> 9s, damage +10%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown 10s -> 8s, damage +30%; you speed up 11% on the cast and 22% when it hits, for 2s.",
-		"kin": "Rank 3: cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second.",
-		"dash": "Rank 3: recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s."
+		"sec": "Rank 3: cooldown 10s -> 8s, damage +40%; you speed up 11% on the cast and 22% when it hits, for 2s.",
+		"kin": "Rank 3: cooldown 10s -> 8s, damage +20%; the growing seed burns foes inside for 8 a second.",
+		"dash": "Rank 3: recharge 9.5s -> 6.5s; allies beside you or at your landing get a 26 shield for 3s."
 	},
 	"tells": {
 		"half": "a ring of teal motes closes around him",

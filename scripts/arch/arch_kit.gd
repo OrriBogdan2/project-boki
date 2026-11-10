@@ -83,7 +83,33 @@ func rank(slot: String) -> int:
 ## +15% damage per rank (Effects.level_k) on top of the hunter's own damage multiplier and the
 ## ability power their level gives (LevelGrowth.ap).
 func power(slot: String) -> float:
-	return m.dmg_mult(h) * Effects.level_k({"level": rank(slot)}) * LevelGrowth.ap(h)
+	return m.dmg_mult(h) * _rank_dmg_k(slot) * LevelGrowth.ap(h)
+
+## Damage factor for a slot's rank. A kit's JSON replaces the shared +15% with the source's own steps:
+## "rank_dmg": [rank 2 bonus, rank 3 bonus] on its rmb or e (Snap [0.2, 0.2], the seed [0.1, 0.1]).
+func _rank_dmg_k(slot: String) -> float:
+	var steps: Array = []
+	if slot == "sec":
+		steps = rmb_def().get("rank_dmg", [])
+	elif slot == "kin":
+		steps = e_def().get("rank_dmg", [])
+	if steps.is_empty():
+		return Effects.level_k({"level": rank(slot)})
+	var k := 1.0
+	for i in mini(rank(slot) - 1, steps.size()):
+		k += float(steps[i])
+	return k
+
+## The dash's cooldown at a rank before gear and stats. A kit's JSON replaces the shared -15% a rank
+## with the source's seconds: "rank_cuts": [taken off at rank 2, further off at rank 3] on its dash.
+func dash_cd(lv: int) -> float:
+	var cd := float(dash_def().get("cd", 9.0))
+	var cuts: Array = dash_def().get("rank_cuts", [])
+	if cuts.is_empty():
+		return cd * (1.0 - 0.15 * float(maxi(0, lv - 1)))
+	for i in mini(lv - 1, cuts.size()):
+		cd -= float(cuts[i])
+	return cd
 
 func cd_k(slot: String) -> float:
 	return h.rank_cd_k(slot)

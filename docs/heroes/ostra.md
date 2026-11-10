@@ -128,8 +128,7 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
   data).
 - Not done: items in the swap circle (the data says "all
   units"; pickups are each game's own copies); an ice patch's slide still takes him (ground grip is not his to change).
-- Rank paths that do not fit: the data's Snap +20% damage at ranks 2 and 3, the seed's +10% each and the Trade's -1.5s twice go
-  through the shared rank step (+15%/+30% damage, -10%/-20% cooldown on RMB and E, -15%/-30% recharge on the dash).
+- Rank paths from the data (kit JSON, not the shared steps): the Snap's damage is +20% at ranks 2 and 3 (`rmb.rank_dmg` [0.2, 0.2]: x1 / 1.2 / 1.4), the seed's +10% each (`e.rank_dmg` [0.1, 0.1]) and the Trade's -1.5s twice (`dash.rank_cuts` [1.5, 1.5]: 9.5 -> 8 -> 6.5s). Still the shared step: -10%/-20% cooldown on RMB and E. Checked by `--ostra-combo-check` (`rank row`).
 
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |

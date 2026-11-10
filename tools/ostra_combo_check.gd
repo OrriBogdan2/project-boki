@@ -499,6 +499,38 @@ func _ostra() -> void:
 	A.queue_free()
 	m.hunters.erase(A)
 	P.slot_lv["dash"] = 1
+	# ---- rank row (data: Snap +20% damage at ranks 2 and 3, the seed +10% each, the Trade -1.5s twice)
+	var rank_rows := []
+	for lv in [1, 2, 3]:
+		P.slot_lv["sec"] = lv
+		P.slot_lv["kin"] = lv
+		P.slot_lv["dash"] = lv
+		reset.call()
+		T.teleport(home + Vector3(2.5, 0, 0))
+		aim_at(P, T.pos)
+		tap(m, P)
+		step(m, 0.5)
+		rank_rows.append([dmg(T), K.power("kin"), P.dash_regen()])
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	P.slot_lv["dash"] = 1
+	ok(
+		"rank row: Snap damage x1 / x1.2 / x1.4 (rank 1 / 2 / 3)",
+		absf(rank_rows[1][0] / rank_rows[0][0] - 1.2) < 0.03 and absf(rank_rows[2][0] / rank_rows[0][0] - 1.4) < 0.03,
+		"%.1f / %.1f / %.1f" % [rank_rows[0][0], rank_rows[1][0], rank_rows[2][0]]
+	)
+	ok(
+		"rank row: the seed's power x1 / x1.1 / x1.2",
+		absf(rank_rows[1][1] / rank_rows[0][1] - 1.1) < 0.001 and absf(rank_rows[2][1] / rank_rows[0][1] - 1.2) < 0.001,
+		"%.2f / %.2f / %.2f" % [rank_rows[0][1], rank_rows[1][1], rank_rows[2][1]]
+	)
+	ok(
+		"rank row: the Trade recharges in 9.5 / 8 / 6.5 s",
+		absf(rank_rows[0][2] - 9.5) < 0.01 and absf(rank_rows[1][2] - 8.0) < 0.01 and absf(
+			rank_rows[2][2] - 6.5
+		) < 0.01,
+		"%.2f / %.2f / %.2f" % [rank_rows[0][2], rank_rows[1][2], rank_rows[2][2]]
+	)
 	# ---- merge start drops every hold
 	reset.call()
 	T.teleport(home + Vector3(8.0, 0, 0))

@@ -375,6 +375,22 @@ func _archer_combos() -> void:
 		) < 0.01,
 		"cds %s reaches %s" % [str(cds), str(reaches)]
 	)
+	# rank row: Spirit Walk 9.5 / 8.5 / 7.5 s (data -1 s twice, JSON rank_cuts); Heavy Shot damage x1 / 1.15 / 1.3
+	var regens: Array = []
+	var powers: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		regens.append(P.dash_regen())
+		powers.append(K.power("sec"))
+	ok(
+		"rank row archer: Spirit Walk recharge 9.5 / 8.5 / 7.5 s, Heavy Shot damage x1 / 1.15 / 1.3",
+		absf(regens[0] - 9.5) < 0.01 and absf(regens[1] - 8.5) < 0.01 and absf(regens[2] - 7.5) < 0.01 and absf(
+			powers[1] / powers[0] - 1.15
+		) < 0.001 and absf(powers[2] / powers[0] - 1.3) < 0.001,
+		"regen %s power %s" % [str(regens), str(powers)]
+	)
+	P.slot_lv["dash"] = 1
 	P.slot_lv["sec"] = 1
 	# Hail Wall, then a hold-only RMB: the old tap-snare root is gone
 	K.cd["e"] = 0.0
@@ -915,6 +931,21 @@ func _bulwark_combos() -> void:
 			shields[1] - 200.0
 		) < 0.01 and absf(shields[2] - 240.0) < 0.01,
 		"cds %s shields %s" % [str(cds), str(shields)]
+	)
+	# rank row: Spin Dash 8 / 6.5 / 5 s (data -1.5 s a rank, JSON rank_cuts); the Shield Charge follows the same rank
+	var regens: Array = []
+	var powers: Array = []
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		regens.append(P.dash_regen())
+		powers.append(K.power("sec"))
+	ok(
+		"rank row bulwark: Spin Dash recharge 8 / 6.5 / 5 s, Shield Charge 6 / 4.5 / 3 s, damage x1 / 1.15 / 1.3",
+		absf(regens[0] - 8.0) < 0.01 and absf(regens[1] - 6.5) < 0.01 and absf(regens[2] - 5.0) < 0.01 and absf(
+			cds[2] - 3.0
+		) < 0.01 and absf(powers[1] / powers[0] - 1.15) < 0.001 and absf(powers[2] / powers[0] - 1.3) < 0.001,
+		"regen %s cds %s power %s" % [str(regens), str(cds), str(powers)]
 	)
 	P.slot_lv["sec"] = 3
 	ok(
