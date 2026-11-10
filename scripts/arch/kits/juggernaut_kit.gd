@@ -12,8 +12,9 @@ extends ArchKit
 ##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
 ##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
-##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop onto a disc at
-##   the cursor (slows; the centre stunned), during the Warchain's pull a Cinder Spin.
+##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop straight down (everyone
+##   it lands on knocked down, the airborne spiked; while it rests, an air press is the ground Smash), during the
+##   Warchain's pull a Cinder Spin.
 ## - Dash, Rampage (Flame Step): 2 charges (3 at rank 2) of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
 ## - X, Gilded Riposte (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
@@ -44,6 +45,7 @@ var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
+var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
@@ -267,7 +269,12 @@ func busy() -> bool:
 ## Owner 113.2: a held Smash never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
 ## beat, the recovery, is open: a glide there ends the rest of it.
 func no_glide() -> bool:
-	return rmb_down or (riposte != null and riposte.move_k() <= 0.0)
+	return rmb_down or meteor.airborne() or (riposte != null and riposte.move_k() <= 0.0)
+
+## The Meteor Drop resting: a press in the air is the Smash as on the ground (a Slam, or a charge to pull into a
+## Haul Slam), never a dead press.
+func air_rmb() -> bool:
+	return super() and float(cd["air"]) <= 0.0
 
 ## The guard takes every hit (no damage, no crowd control) and counts it.
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
@@ -293,6 +300,7 @@ func _drop_holds() -> void:
 	meteor.cancel()
 	warchain.snap("")
 	rmb_queued_at = -9.0
+	e_held = false
 	dash_held = false
 	lunge_full = false
 	perfect_flashed = -1
@@ -635,7 +643,7 @@ func slot_info(slot: String) -> Dictionary:
 ## The Smash press. A press while a heavy move runs (the Slam's wind-up, a Lunge, a Meteor Drop) is kept for
 ## BUFFER and goes off when it ends; in the Warchain's pull (and just after) it spins at once.
 func press_rmb() -> void:
-	if _locked():
+	if smash_running():
 		rmb_queued_at = m.time
 		return
 	super.press_rmb()
@@ -643,15 +651,23 @@ func press_rmb() -> void:
 		_release_rmb()
 
 ## A heavy move owns the body: Smash and slash presses wait (BUFFER).
-func _locked() -> bool:
+func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
+
+## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
+## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
+func _pull_waits() -> bool:
+	return not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne()
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:
-	if not _locked() and rmb_queued_at > -9.0:
+	if not smash_running() and rmb_queued_at > -9.0:
 		var fresh: bool = m.time - rmb_queued_at <= BUFFER
 		rmb_queued_at = -9.0
 		if fresh and not rmb_down: press_rmb()
+	if e_held and not _pull_waits():
+		e_held = false
+		if warchain.hooked(): use_e()          # (a chain that broke meanwhile takes no new throw)
 	if dash_held and not _dash_waits():
 		dash_held = false
 		h.do_dash()
@@ -693,7 +709,7 @@ func _end_held_poses() -> void:
 ## The RMB variants by state: docs/heroes/juggernaut.md "RMB: the interaction table".
 func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c["variant"])
-	if _locked():
+	if smash_running():
 		return
 	var spin: bool = c.get("e", false)
 	var dropping: bool = c.get("air", false) and not spin
@@ -849,7 +865,7 @@ func _chain_lunge(k: float) -> void:
 
 ## The pull starting with the Lunge charging: the charge becomes a Haul Slam for the arrival.
 func arm_haul() -> void:
-	if not rmb_down or rmb_t <= 0.12 or rmb_ctx.get("air", false):
+	if not rmb_down or rmb_ctx.get("air", false):
 		return
 	var hk := lunge_k(rmb_t)
 	rmb_down = false
@@ -959,6 +975,9 @@ func use_e() -> void:
 		return
 	if busy():
 		h._ab_feedback("k1", "deny")
+		return
+	if warchain.hooked() and _pull_waits():
+		e_held = true                  # the pull waits for the Smash to land, then goes at once
 		return
 	warchain.press()
 

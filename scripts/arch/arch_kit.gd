@@ -266,6 +266,8 @@ func cast_locked() -> bool: return false
 func aim_lock() -> Vector2: return Vector2.ZERO
 ## A move that keeps the glider shut while it runs.
 func no_glide() -> bool: return false
+## An RMB press now is the airborne variant (it goes on the press).
+func air_rmb() -> bool: return not h.grounded or h.gliding
 
 func busy() -> bool:
 	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
@@ -283,7 +285,7 @@ func press_rmb() -> void:
 		return
 	rmb_down = true
 	rmb_t = 0.0
-	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "r": r_t > 0.0, "full": full_ready()}
+	rmb_ctx = {"air": air_rmb(), "e": in_e(), "r": r_t > 0.0, "full": full_ready()}
 	if float(rmb_def().get("hold", 0.0)) <= 0.0 or rmb_ctx["air"]:
 		_release_rmb()          # no hold variant (or in the air): it goes on the press
 
