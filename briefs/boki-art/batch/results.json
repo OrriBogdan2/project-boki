@@ -74826,5 +74826,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2t_mycroll_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2t_maulangler",
+    "name": "Maulangler (V2 card, style-board test)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_maulangler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_chimelop",
+    "name": "Chimelop (V2 card, style-board test)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_chimelop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_barrelmander",
+    "name": "Barrelmander (V2 card, style-board test)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_barrelmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_maulangler",
+    "name": "Maulangler (V2 card, style-board test)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_maulangler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_mycroll",
+    "name": "Mycroll (V2 card, style-board test)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_mycroll_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_chimelop",
+    "name": "Chimelop (V2 card, style-board test)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_chimelop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_barostorm",
+    "name": "Barostorm (V2 card, style-board test)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_barostorm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_bastling",
+    "name": "Bastling (V2 card, style-board test)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_bastling_2.jpg",
+    "ok": true
   }
 ]
