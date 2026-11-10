@@ -79096,5 +79096,54 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_ermink_b2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_ermink_b2",
+    "name": "Ermink (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_ermink_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_flarmink_b2",
+    "name": "Flarmink (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_flarmink_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ermink_b2",
+    "name": "Ermink (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ermink_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_flarmink_b2",
+    "name": "Flarmink (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_flarmink_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_flarmink_b2",
+    "name": "Flarmink (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_flarmink_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_flarmink_b2",
+    "name": "Flarmink (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_flarmink_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_flarmink_b2",
+    "name": "Flarmink (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_flarmink_b2_2.jpg",
+    "ok": true
   }
 ]
