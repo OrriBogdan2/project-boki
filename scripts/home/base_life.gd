@@ -41,10 +41,12 @@ var night := false
 var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
+var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
 
 func _init(home) -> void:
 	h = home
 	R = Content.rules("base_life")
+	whistle = BaseWhistle.new(home, R)
 
 static func nocturnal(rec: Dictionary) -> bool:
 	return Work.NOCTURNAL.has(String(rec["species"]))
@@ -94,6 +96,7 @@ func machine(k: Dictionary) -> Fsm:
 
 ## Moves every machine on; called each frame from home.gd _move_kin, ticks at 10 Hz.
 func step(d: float) -> void:
+	whistle.step(d)
 	_acc += d
 	if _acc < STEP:
 		return
