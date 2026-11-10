@@ -13,8 +13,8 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   (`""` → `in` → `on` → `out`) kept in the hunter's meta `wisp`, driven from `Hunter.render`. It reads
   `downed` and `out` only, so nothing new is replicated: remote players and bots get the Wisp from the
   state they already receive (flag bit 1 in the `st` snapshot, the `knock` and `up` events).
-- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive, the
-  hitbox and the revive UI are all as before. Only the picture changes. `Hunter._anim_state` now feeds
+- Gameplay is unchanged: the downed timers, the 40% crawl speed, the revive channel, who can revive and the
+  revive UI are all as before. The hitbox is not: shots and areas pass through a Wisp. Only the picture changes. `Hunter._anim_state` now feeds
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
@@ -39,3 +39,10 @@ species: its own palette (the shiny one when it shimmers), its ears and tail tip
 for the hand-built bodies), one baked mesh on one shared unlit material (`shaders/boki_wisp.gdshader`), a quick
 hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the wisp prototype wires it into
 matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
+
+## Hit rules (DECISIONS 2026-11-09)
+A downed Hunter (`Hunter.hittable()` is false while downed) and a Boki riding as a wisp (`Kin.hittable()` is
+false on the shoulder) are no target: they never block, absorb or trigger a shot or an area. What still
+touches a Wisp is data of the source: the Abyssal Hand scoop, Mending Ground's revive of an ally, stomps,
+executes, revives and steals (their own paths in Life and KinSteal). Hail Wall's drain and Lightning Strike's
+launch of Wisps are not built. Check: `--wisp-hit-rules-check` (12 Hunters, LMB/RMB/E, near and far).
