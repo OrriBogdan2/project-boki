@@ -158,11 +158,13 @@ func _chest_and_keys() -> void:
 	var K: KeyRun = m.keys
 	var car: Mob = K.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
 	var before := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+	var bonus0 := K.bonus_given      # (the death may also roll a bonus key: KeyBonus)
 	car.hurt(99999.0, P, {"src": "shot"})
 	var after := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
+	var bonus := K.bonus_given - bonus0
 	ok(
-			"a carrier drops its key when it dies", after == before + 1 and not KeyCarry.carries(car),
-			"%d -> %d" % [before, after])
+			"a carrier drops its key when it dies", after == before + 1 + bonus and not KeyCarry.carries(car),
+			"%d -> %d (+%d bonus)" % [before, after, bonus])
 	m.queue_free()
 	await main.get_tree().process_frame
 
