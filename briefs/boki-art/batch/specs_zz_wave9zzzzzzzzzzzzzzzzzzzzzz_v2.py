@@ -752,3 +752,12 @@ for _n,_st,_ar,_dk,_fu,_fx in (('Glaivyx','final','sleek',0,1,"no dripping slime
 ON_POSE('Glassolotl',_LM['Glassolotl']['sheet'],'mid','pretty',False,False,"reared up on its hind legs and tail, facing LEFT, front feet lifted, head turned to look at the viewer, its long glassy tail fins curling round in front of it.","pale pink glassy body with pastel rainbow fins, pink feathery gills, long ribbon tail fins")
 SPECS[-1]['runs']=4
 ON_CHANGE('Lunowl','briefs/boki-art/cards/Lunowl.jpg','mid','pretty',False,True,"the same moth-winged owl in flight, moved halfway toward its dark final form: its body feathers are dusk lilac-grey instead of cream, its big luna-moth wings shade from pale mint at the base to deep violet at the edges and tails, it carries bold gold crescent markings on the wings and chest and a small gold crescent crest between its ear tufts, and its two long wing tails are starting to curl like ribbons. A calmer, more serious face with gold eyes. A little bigger and stronger than a baby.",runs=4,tag='_dusk')
+
+# ===== 01:50 ET 11-10: batch 4 cards: 297 of 297 clean, picks live -> every Boki except the 6 on hold has a V2 card. Stage B for all 99
+# (sheet 3 runs, portrait 2 runs). Skipped here because their design is being redone: Cisternmander, Blastopuff, Pickadactyl, Shinobant.
+_B4SKIP={'Cisternmander','Blastopuff','Pickadactyl','Shinobant'}
+for _n,_st,_ar,_dk,_fu,_fx in _BT4:
+    if _n in _B4SKIP: continue
+    _cd='briefs/boki-art/cards/'+_n+'.jpg'
+    SPECS.append({'id':'v2s_'+_n.lower()+'_b4','name':_n+' (V2 sheet, batch 4)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'))})
+    SPECS.append({'id':'v2p_'+_n.lower()+'_b4','name':_n+' (V2 portrait, batch 4)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':2,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'),bool(_dk),bool(_fu))})

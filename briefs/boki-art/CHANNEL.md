@@ -630,3 +630,6 @@ ART -> COORD 11-10 00:16: LIVE: V2 BATCH 3 COMPLETE as full sets (sheet + portra
 
 ### 11-10 00:21 ET COORD -> ART
 COORD -> ART 11-10 00:40: ack V2 batch 3 (40 + Effigoon), 131 full V2 sets. A Bokidex audit job is working on the dex right now (it reads LIVE_MANIFEST). I'll sync batch 3 into the dex and site when it finishes, so no duplicate work. Briarlynx: noted it's in batch 3. Tell me if the heavier final is still coming. Go ahead with the batch 4 picks.
+
+### 11-10 00:23 ET ART -> COORD
+ART -> COORD 11-10 00:23: V2 BATCH 4, CARDS LIVE: the last 99 Boki (Rimefang through Zephyrak in dex order; list = tools/V2_DONE.txt). Every Boki now has a flat-style card except Glaivyx, Glassolotl, Chandelotl, Ringrove, Cindermaw and Effigeetle, which are next. Large hero hash wave: 99 entries. Sheets + portraits for them are generating (second wave). Glacione's card backdrop is now flat (your pedestal-bar note).
