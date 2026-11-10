@@ -12,6 +12,7 @@ var bad := 0
 var m: Match
 var p: Hunter
 var k: Kin
+var east := Vector3.RIGHT      # the way the scenes walk: solid ground out to 20 m (the map has abyss on some sides)
 
 func run(main: Node) -> void:
 	m = Match.new()
@@ -27,6 +28,7 @@ func run(main: Node) -> void:
 	p = m.player
 	k = p.kin
 	_frames(0.3)
+	east = _solid_dir()
 	_lane()
 	_leash_rules()
 	_chase()
@@ -35,6 +37,18 @@ func run(main: Node) -> void:
 	_knock()
 	print("SUMMONLEASH %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The first of 8 directions from the Hunter with no abyss within 20 m.
+func _solid_dir() -> Vector3:
+	for i in 8:
+		var d := Vector3.RIGHT.rotated(Vector3.UP, i * TAU / 8.0)
+		var clear := true
+		for r in range(2, 22, 2):
+			var q := p.pos + d * float(r)
+			clear = clear and not m.world.is_void(q.x, q.z)
+		if clear:
+			return d
+	return Vector3.RIGHT
 
 func ok(cond: bool, what: String) -> void:
 	print("SUMMONLEASH %s %s" % ["ok  " if cond else "FAIL", what])
@@ -97,15 +111,17 @@ func _chase() -> void:
 	var lsh := k.brain.leash()
 	ok(lsh == k.summon.leash(k.brain.aggression), "chase: out, its leash is the summon one (%.1f m)" % lsh)
 	var foe := _foe()
-	var stay := Vector3(lsh + 2.0, 0, 0)      # a foe just past the leash, the Boki already near it
-	k.teleport(p.pos + Vector3(lsh - 2.0, 0, 0))
+	var stay := east * (lsh + 2.0)      # a foe just past the leash, the Boki already near it
+	k.teleport(p.pos + east * (lsh - 2.0))
 	var far := 0.0
 	var turned := false
 	for _i in 360:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
-		if _i > RUSH_S * 60:      # (its own rush ability flies first and is not the leash's business)
+		if _i == int(RUSH_S * 60) + 20:      # (its own rush ability flew it home: back to the edge, the walk is what is measured)
+			k.teleport(p.pos + east * (lsh - 2.0))
+		if _i > RUSH_S * 60 + 20:
 			far = maxf(far, k.flat_dist(p))
 		turned = turned or k.state == "returning"
 	ok(far > lsh - 1.5, "chase: it walks out to a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])
@@ -123,7 +139,7 @@ func _settled(what: String) -> void:
 
 func _dash() -> void:
 	_out()
-	p.pos += Vector3(14, 0, 0)
+	p.pos += east * 14.0
 	p.prev = p.pos
 	_settled("dash")
 
@@ -132,7 +148,7 @@ func _glide() -> void:
 	for _i in 90:
 		p.gliding = true
 		p.grounded = false
-		p.pos += Vector3(0.12, 0, 0)
+		p.pos += east * 0.12
 		p.prev = p.pos
 		m.step(DT)
 	var d := k.flat_dist(p)
@@ -142,6 +158,6 @@ func _glide() -> void:
 
 func _knock() -> void:
 	_out()
-	p.vel = Vector3(28, 6, 0)
+	p.vel = east * 28.0 + Vector3(0, 6, 0)
 	_frames(1.0)
 	_settled("knock")
