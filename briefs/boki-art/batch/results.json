@@ -91990,5 +91990,54 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/wc_glazolm_1.jpg",
     "ok": true
+  },
+  {
+    "id": "wc_glazolm",
+    "name": "Glazolm (Water/Crystal read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wc_glazolm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wc_olmlet",
+    "name": "Olmlet (Water/Crystal read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wc_olmlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "wc_glazolm",
+    "name": "Glazolm (Water/Crystal read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wc_glazolm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "wc_kintsuwyrm",
+    "name": "Kintsuwyrm (Water/Crystal read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/wc_kintsuwyrm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "wc_kintsuwyrm",
+    "name": "Kintsuwyrm (Water/Crystal read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/wc_kintsuwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "wc_kintsuwyrm",
+    "name": "Kintsuwyrm (Water/Crystal read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wc_kintsuwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "wc_olmlet",
+    "name": "Olmlet (Water/Crystal read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/wc_olmlet_2.jpg",
+    "ok": true
   }
 ]
