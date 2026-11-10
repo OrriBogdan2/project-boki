@@ -109952,5 +109952,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_kingpinguin_L1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_kingpinguin_L1",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_kingpinguin_L1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_vhalo",
+    "name": "Pavonazar V fan + crown ring",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_vhalo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_maracoil_L1",
+    "name": "Maracoil (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_maracoil_L1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_carpenjaw_L1",
+    "name": "Carpenjaw (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_carpenjaw_L1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_L1",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_L1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kingpinguin_L1",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_kingpinguin_L1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pavonazar_vhalo",
+    "name": "Pavonazar V fan + crown ring",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_pavonazar_vhalo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_maracoil_L1",
+    "name": "Maracoil (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_maracoil_L1_2.jpg",
+    "ok": true
   }
 ]
