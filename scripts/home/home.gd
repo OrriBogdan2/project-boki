@@ -49,6 +49,8 @@ var emote_labels: Array = []
 var lots := {}                 # building id -> {node, built}
 var visit: Dictionary = {}     # when visiting someone: their island snapshot (see Social.publish_profile)
 var visit_id := ""
+var zone := ""               # the garden zone shown (GardenZones; "" the start zone, "hub" the hub)
+var hway: HubWaystone = null  # the Waystone or a zone's return pad (hub_waystone.gd), base_mode only
 var petted := {}
 var arrivals: ArrivalQueue = null   # the arrival modals, one at a time (arrival_queue.gd)
 var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd), base_mode only
@@ -81,7 +83,11 @@ var tw := ToolWork.new()           # your tool swing: axe, pickaxe, hammer (tool
 var hsp: SnackPatch = null           # the garden snack patch (snack_patch.gd)
 var hg: HomeGather = null           # chopping wild trees and mining boulders with your tools (home_gather.gd)
 
-## The island being shown: yours, or the one you're visiting.
+## Someone else's island (the hub is shown through the same path, but it is yours: HubLayout).
+func _visiting() -> bool:
+	return not visit.is_empty() and not HubLayout.is_hub(visit)
+
+## The island being shown: yours, the hub, or the one you're visiting.
 func _d() -> Dictionary:
 	return visit if not visit.is_empty() else Save.d
 
@@ -110,6 +116,7 @@ var weather_t := 40.0
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
+	if zone == GardenZones.HUB: visit = HubLayout.island()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
@@ -396,6 +403,9 @@ func _ready_rest() -> void:
 		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
 		var stall := StallModels.build(Stalls.level()); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
 	var portal := Models.portal(UI.TEAL); portal.position = spots["portal"]; add_child(portal)
+	if FarmUnlocks.base_mode() and not _visiting():
+		hway = HubWaystone.new(self)
+		hway.place()
 	if visit.is_empty():
 		rack_node = _glider_rack()
 		rack_node.position = spots["rack"]
@@ -431,6 +441,7 @@ func _ready_rest() -> void:
 		ppos = _house_door() + HomeLayout.facing(house_r) * 0.5
 	elif lots.has(spawn):
 		ppos = lots[spawn]["door"]
+	if hway: ppos = hway.arrive_at(ppos)
 	player.position = ppos
 	cam.snap(ppos)
 	if "--expedition-test" in dbg:
@@ -2036,6 +2047,7 @@ func _find_interact() -> void:
 	if hshove and best.is_empty(): best = hshove.find(p2)
 	if hseek and best.is_empty(): best = hseek.find(p2)
 	if hvolley and best.is_empty(): best = hvolley.find(p2)
+	if hway and best.is_empty(): best = hway.find(p2)
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2148,7 +2160,7 @@ func _update_hover() -> void:
 	hover_box.position = pos
 
 func _label_for(it: Dictionary) -> String:
-	if not visit.is_empty():
+	if _visiting():
 		match it["kind"]:
 			"kin": return ("Pet %s" % it["k"]["rec"]["name"]) if not petted.has(it["k"]["rec"]["uid"]) else "%s is happy you came" % it["k"]["rec"]["name"]
 			"house": return "Leave a gift"
@@ -2183,6 +2195,7 @@ func _label_for(it: Dictionary) -> String:
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
 		"race": return hrace.label()
+		"waystone": return hway.label()
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
@@ -2197,7 +2210,7 @@ func _label_for(it: Dictionary) -> String:
 
 func _use(it: Dictionary) -> void:
 	Sfx.play("click")
-	if not visit.is_empty():
+	if _visiting():
 		_use_visiting(it)
 		return
 	match it["kind"]:
@@ -2225,6 +2238,7 @@ func _use(it: Dictionary) -> void:
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
+		"waystone": hway.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -2433,7 +2447,7 @@ func open_build() -> void:
 		hb.toggle()
 
 func _refresh_top() -> void:
-	if not visit.is_empty():
+	if _visiting():
 		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
 		topbar.visible = true
 		return

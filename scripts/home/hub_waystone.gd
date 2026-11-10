@@ -1,0 +1,72 @@
+class_name HubWaystone
+extends RefCounted
+## Travel between the hub and the garden's zones (briefs/design/GARDEN.md 10.5). In the hub the
+## Waystone stands north of where you land; in a zone a return pad stands by the landing. Step on
+## either and press E: the zone cards (ZoneCards). Picking an open zone lights the stone up for
+## hop_fade_s, then Game.goto("home", {"zone": id}) loads it under the ink wipe and you arrive on its
+## pad (or beside the Waystone). A locked zone is refused. Your partner comes along: it is out in
+## every zone (HubLayout keeps it in the hub's snapshot). Tuning: content/rules/garden_zones.json.
+
+const HUB_AT := Vector3(38.5, 0, 31.5)     # the Waystone, the middle of the hub, north of the landing
+const PAD_NEAR := Vector3(40.5, 0, 36.5)   # a zone's return pad goes on open ground nearest this
+const REACH := 2.2                          # m from the ring's or pad's middle to press E
+const ARRIVE_OFF := Vector3(0, 0, 2.6)      # m from the Waystone to where you arrive in the hub
+
+var h                          # the Home screen
+var node: Node3D = null        # the Waystone or the return pad
+var hopping := ""              # the zone being travelled to, during the light-up
+
+func _init(home) -> void:
+	h = home
+
+## The zone this Home shows (GardenZones.HUB for the hub).
+func here() -> String:
+	return h.zone if h.zone != "" else GardenZones.start()
+
+func place() -> void:
+	if here() == GardenZones.HUB:
+		var stones: Array = []
+		for id in GardenZones.ids():
+			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": GardenZones.is_open(id)})
+		node = FarmModels.waystone(stones)
+		node.position = HUB_AT
+	else:
+		node = FarmModels.return_pad(String(GardenZones.info(here()).get("colour", "c9c2b2")))
+		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)
+	node.name = "Waystone"
+	h.add_child(node)
+
+## Where you stand after a hop: on the pad, or just south of the Waystone. Elsewhere: where you'd be.
+func arrive_at(p: Vector3) -> Vector3:
+	if h.zone == "" or node == null:
+		return p
+	return node.position + (ARRIVE_OFF if here() == GardenZones.HUB else Vector3.ZERO)
+
+func find(p2: Vector2) -> Dictionary:
+	if node == null or hopping != "" or p2.distance_to(Vector2(node.position.x, node.position.z)) > REACH:
+		return {}
+	return {"kind": "waystone"}
+
+func label() -> String:
+	return "The Waystone: travel" if here() == GardenZones.HUB else "Return pad: travel"
+
+func use() -> void:
+	ZoneCards.open(h, here())
+
+## Travel to a zone (or the hub). Returns false, with a toast, for a locked zone or where you are.
+func hop(id: String) -> bool:
+	if hopping != "" or id == here():
+		return false
+	if id != GardenZones.HUB and not GardenZones.is_open(id):
+		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id).get("name", id))
+		return false
+	hopping = id
+	h._close_panel()
+	var col := Color(String(GardenZones.info(id).get("colour", "c9c2b2")))
+	h.fx.burst(node.position + Vector3(0, 0.4, 0), col, 24, 3.0, 0.6, -2.0)
+	Sfx.play("whoosh")
+	h.get_tree().create_timer(float(GardenZones.rules()["hop_fade_s"])).timeout.connect(_go)
+	return true
+
+func _go() -> void:
+	Game.goto("home", {"zone": hopping})
