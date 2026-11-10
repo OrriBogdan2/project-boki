@@ -187,6 +187,7 @@ const CHECKS := {
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],      # measured reach, width and arc of every input
+	"--boki-hit-table-check": ["res://tools/boki_hit_table_check.gd", "boki_hit_table_check", null],      # kit hits on Boki (BokiHit)
 	"--hitbox-size-shots": ["res://tools/hitbox_size_shots.gd", "hitbox_size_shots", null],
 	"--toy-check": ["res://tools/toy_check.gd", "toy_check", null],      # the base's ball, post and tub (GARDEN.md section 4)
 	"--race-check": ["res://tools/race_check.gd", "race_check", null],      # the Dash race (GARDEN.md 5)

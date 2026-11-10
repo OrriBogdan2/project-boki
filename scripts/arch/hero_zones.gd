@@ -42,16 +42,20 @@ static func fits(m: Node, p: Vector3, y: float, bodies := true, skip: Ent = null
 		return false
 	if bodies:
 		for e in m.hunters:
-			if is_instance_valid(e) and e != skip and not e.dead and Vector2(
-				e.pos.x - p.x, e.pos.z - p.z
-			).length() < ROCK_R + e.r + 0.15 and absf(e.pos.y - g) < 2.0:
+			if is_instance_valid(e) and e != skip and not e.dead and _under(e, p, g):
 				return false
 		for mb in m.mobs:
-			if is_instance_valid(mb) and not mb.dead and Vector2(
-				mb.pos.x - p.x, mb.pos.z - p.z
-			).length() < ROCK_R + mb.r + 0.15 and absf(mb.pos.y - g) < 2.0:
+			if is_instance_valid(mb) and not mb.dead and _under(mb, p, g):
+				return false
+		for kn in m.kins:
+			# a Boki out in the world is a body too (BokiHit)
+			if is_instance_valid(kn) and kn.hittable() and _under(kn, p, g):
 				return false
 	return true
+
+static func _under(e: Ent, p: Vector3, g: float) -> bool:
+	var near := Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < ROCK_R + e.r + 0.15
+	return near and absf(e.pos.y - g) < 2.0
 
 ## Walk from `from` toward `aim` up to `reach` and return the last legal spot:
 ## {ok, pos, stopped: "" | "reach" | "wall" | "abyss", over_abyss: the aim itself is over the abyss}.

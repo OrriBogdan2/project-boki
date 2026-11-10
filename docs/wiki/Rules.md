@@ -43,6 +43,16 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## How kit hits land on a Boki (`content/rules/boki_hit.json`)
+
+How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the source's creeps and summons take every ability as written (one number per card, no creep scaling) and every crowd control on the cards works on them.
+
+| Setting | Value |
+|---|---|
+| dmg_k | {"summoned": 1.0, "wild": 1.0} |
+| cc | ["stun", "root", "slow", "burn", "blight"] |
+| execute | True |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).

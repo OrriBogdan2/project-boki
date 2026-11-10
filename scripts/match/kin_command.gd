@@ -151,7 +151,7 @@ static func chase_pick(h: Hunter) -> Ent:
 	var aim: Vector3 = h.inp.get("aim", h.pos)
 	var best: Ent = null
 	var bd := 1e9
-	for f in h.m.foes_of(h.team):
+	for f in h.m.foes_of(h.team, false):
 		if f.dead or not f.hittable() or (f is Hunter and f.downed) or Shrubling.hidden(f):
 			continue
 		if f.flat_dist(h) > float(rules()["follow"]["engage_range"]) * 2.0:
