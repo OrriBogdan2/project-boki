@@ -109840,5 +109840,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/hb2_sable_tailfix_3.jpg",
     "ok": true
+  },
+  {
+    "id": "hb5_sable_escape",
+    "name": "Sable + Lockatara splash: the escape",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/hb5_sable_escape_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb5_sable_escape",
+    "name": "Sable + Lockatara splash: the escape",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hb5_sable_escape_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb5_sable_escape",
+    "name": "Sable + Lockatara splash: the escape",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb5_sable_escape_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb5_sable_escape",
+    "name": "Sable + Lockatara splash: the escape",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb5_sable_escape_1.jpg",
+    "ok": true
   }
 ]
