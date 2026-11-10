@@ -55,6 +55,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Wirerun arrival ring (HIGH) | (a) | 6d054633 (and the press flash) |
 | Blowout ground ring (MED) | (b) | removed; the copper pillars stay |
 | Other cosmetic rings; strike rings bigger than the hit (MED) | (b) | rod summon, Live and take-off rings removed; Skycall's ring at its 1.5 m radius (was 2.3), Kitefall's at its 2.7 m (the 1.45x ring removed), the landing marker at the radius |
+| Kit VFX pass: bursts that are not gameplay (MED) | (b) | out: the per-shot ground sparks, the Static pop's second bolt and flash, the Wirerun pass burst (a crackle instead), the rod's end and hit bursts, the SLAMMED ring, Skycall's strike spray, Kitefall's take-off spray (dust). Kept: the source's rod shock ring, the strike rings at the hit size, the copper refund pillars |
 | E Static 2 vs 1 (MED) | (b) | 1 (data); asserted |
 | E numbers (-) | (a) | already per items 9/9b |
 | Shift pass damage 10 vs ~20 (MED) | (b) | 20 (1.7 bolts, the data's ratio); asserted |

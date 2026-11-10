@@ -139,8 +139,6 @@ func add_spark(f: Ent, n := 1) -> void:
 		# the 4th stack: a bolt drops out of the sky onto them
 		var top := f.position + Vector3(0, 9.0, 0)
 		fx().arc(top, f.position + Vector3(0, 0.2, 0), TEAL, PINK, 0.9, 0.28)
-		fx().arc(top + Vector3(0.4, 0, -0.3), f.position + Vector3(0, 1.0, 0), TEAL, PINK, 0.5, 0.2)
-		m.fx.flash(f.position + Vector3(0, 1.1, 0), PINK, 1.1, 0.1)
 		m.sfx("vv_static_full", f.pos, -2.0)
 		# the word goes above the marker so the two never print over each other
 		m.fx.word(f.pos + Vector3(0, _top(f) + MARK_LIFT, 0) + fx().screen_up() * 1.6, "LIVE", PINK, false)
@@ -281,11 +279,10 @@ func _tick_lmb() -> void:
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
 	# a teal thrust from the shoulder to the fingertip, then (at the release key, 0.06 s) the fingertip
-	# crackles; pink sparks pop at her feet, a jagged bolt rides the round
+	# crackles, a jagged bolt rides the round
 	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
 	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, PINK, 0.3, 0.12)
 	m.later(0.06, _fingertip.bind(left))
-	m.fx.spark(h.pos + Vector3(0, 0.1, 0), Vector3.UP, PINK, 4, 3.0, 80.0, 0.2, 6.0, 0.7)
 	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
@@ -486,7 +483,7 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	var was_live := live(f)
 	if was_live: dmg *= float(dash_def()["full_mult"])     # through a fully charged foe: double
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
-	m.fx.burst(f.pos + Vector3(0, 0.9, 0), TEAL, 10, 3.5, 0.3)
+	fx().crackle(f.pos + Vector3(0, 0.9, 0), TEAL, PINK, 0.8, 3, 0.12)       # a hit on the way, not a burst
 	if was_live and is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
@@ -641,7 +638,6 @@ func _coil(k: float) -> void:
 
 func _rod_end(at: Vector3) -> void:
 	fx().star(at, TEAL, PINK, 1.0, 0.16)
-	m.fx.burst(at, PINK, 14, 4.0, 0.35, 2.0, 1.4)
 
 func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	if not is_instance_valid(f) or f.dead:
@@ -649,9 +645,8 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 	var cd_ := rmb_def()["coil"] as Dictionary
 	add_spark(f)
 	m.sfx("mage_rod_hit", f.pos, -2.0)
-	# the pink blast, a teal crackle and a shock ring round them
+	# the pink flash, a teal crackle and the source's shock ring round them
 	m.fx.flash(f.position + Vector3(0, 1.0, 0), PINK, 1.6, 0.12)
-	m.fx.burst(f.position + Vector3(0, 1.0, 0), PINK, 18, 4.5, 0.45, 1.0, 1.8)
 	fx().crackle(f.position + Vector3(0, 1.0, 0), TEAL, PINK, 1.0, 5, 0.18)
 	fx().ring(ground(f.pos), 2.2, TEAL, PINK, 0.35)
 	# thrown into a wall or another foe: stunned (so is the one it hits)
@@ -667,7 +662,6 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
 		m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 1.0, "SLAMMED", PINK, false)   # over STUNNED
-		fx().ring(ground(f.pos), 1.6, PINK, COPPER, 0.25)
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
 		if other != null:
 			other.hurt(0.1, h, slam.duplicate(true))
