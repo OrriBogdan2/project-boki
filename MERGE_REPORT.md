@@ -5,6 +5,13 @@ Headline: NEW-RED 54, WORSE 34, FIXED 0 of 214 checks; 185 merged, 385 skipped; 
 Base: origin/main d255acbe. Health: HEALTH FAIL: style ratchet (docs/STYLE.md) (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)
 Suite scope: affected checks only, 214 of 165 (smoke set always on; FULL_SUITE=1 for everything). Why: affected.why on the box.
 Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server_min=53 with_workers_min=26 decision=RUN
+# Merge candidate 20261109-2230 (built by cron, no Claude usage)
+
+Headline: NEW-RED 14, WORSE 16, FIXED 22 of 216 checks; 199 merged, 434 skipped; release exports pass; GPU jobs not finished: 0 (GPU perf deferred: no GPU worker alive)
+
+Base: origin/main d255acbe. Health: HEALTH FAIL: style ratchet (docs/STYLE.md) (god files: move new logic into a focused module, see AGENTS.md; style: see docs/STYLE.md)
+Suite scope: affected checks only, 216 of 165 (smoke set always on; FULL_SUITE=1 for everything). Why: affected.why on the box.
+Capacity plan: alive=pc-MRROBOTO flags=216 cached=0 to_run=216 unknown=11 server_min=52 with_workers_min=26 decision=RUN
 - UNCOVERED scripts/arch/kits/ice_body.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/arch/kits/thief_spin.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 - UNCOVERED scripts/arch/ult_cue.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
@@ -17,6 +24,11 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - UNCOVERED scripts/heroes/warden_rest.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
 
 ## Suite vs main: NEW-RED 54, WORSE 34, FIXED 0 of 214 checks
+- UNCOVERED scripts/core/unstable_mix.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
+- UNCOVERED scripts/heroes/warden_free_arm.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
+- UNCOVERED scripts/heroes/warden_gait.gd (changed .gd/scene in no flag's deps; only the smoke set covers it)
+
+## Suite vs main: NEW-RED 14, WORSE 16, FIXED 22 of 216 checks
 - NEW-RED --ability-check main=0/0 cand=0/126
 - WORSE --air-control-check main=124/0 cand=0/3
 - NEW-RED --airdash-glide-check main=0/0 cand=0/1
@@ -105,6 +117,40 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - WORSE --warden-rest-check main=124/0 cand=1/1
 - WORSE --warm-stamp-check main=124/0 cand=1/1
 - WORSE --wisp-check main=0/1 cand=1/55
+- WORSE --clip-check main=127/0 cand=127/1
+- WORSE --clip-live-sable-check main=127/0 cand=127/1
+- FIXED --clutter-check main=127/ cand=0/0
+- WORSE --crouch-check main=127/0 cand=127/2
+- FIXED --dead-kmoves-check main=127/ cand=0/0
+- FIXED --evo-check main=127/ cand=0/0
+- FIXED --exit-signal-check main=127/ cand=0/0
+- FIXED --far-props-check main=127/ cand=0/0
+- FIXED --first-match-guide-check main=127/ cand=0/0
+- WORSE --hitch-check main=127/6 cand=127/13
+- FIXED --hold-pose-check main=127/ cand=0/0
+- FIXED --hot-zone-check main=127/ cand=0/0
+- FIXED --inventory-check main=127/ cand=0/0
+- FIXED --kit-drill-check main=127/ cand=0/0
+- WORSE --kit-parity-check main=127/0 cand=127/1
+- FIXED --ledge-walk-check main=127/ cand=0/0
+- FIXED --load-trim-check main=127/ cand=0/0
+- WORSE --mantle-check main=127/0 cand=127/1
+- WORSE --mantle-look-check main=127/2 cand=127/3
+- FIXED --mesh-arrays-check main=127/ cand=0/0
+- WORSE --motley-live-check main=127/0 cand=127/1
+- FIXED --mystery-egg-check main=127/ cand=0/0
+- FIXED --nook-check main=127/ cand=0/0
+- FIXED --quality-check main=127/ cand=0/0
+- FIXED --race-check main=127/ cand=0/0
+- WORSE --rank-ui-check main=127/0 cand=127/1
+- FIXED --recast-cue-check main=127/ cand=0/0
+- FIXED --revive-net-check main=127/ cand=0/0
+- WORSE --title-check main=127/8 cand=127/10
+- FIXED --tutorial-clean-check main=127/ cand=0/0
+- FIXED --tutorial-text-check main=127/ cand=0/0
+- FIXED --unstable-mix-check main=127/ cand=0/0
+- WORSE --warden-glb-check main=127/0 cand=127/1
+- WORSE --warden-model-check main=127/0 cand=127/3
 
 ## Branches
 - SKIPPED  ext/kit-kael-113 6e18b8be conflicts: scripts/match/hunter.gd tools/combo51_shots.gd
@@ -279,6 +325,7 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - SKIPPED  ext/grimble-stretch-v2 ba158402 conflicts: art/wardens/dredge/dredge.glb tools/art1/grimble_clips.py tools/art1/skin_relax.py
 - SKIPPED  ext/anim-time-sable-rebased 990e2874 conflicts: scripts/heroes/warden_clips.gd
 - SKIPPED  ext/agent-briefs-rebased 34783061 conflicts: briefs/CAMERA_DEPTH.md briefs/camera_depth/after_a_edge.png briefs/camera_depth/after_b_step.png briefs/camera_depth/after_c_low.png
+- SKIPPED  ext/agent-briefs-rebased b2ebf08c conflicts: briefs/CAMERA_DEPTH.md briefs/camera_depth/after_a_edge.png briefs/camera_depth/after_b_step.png briefs/camera_depth/after_c_low.png
 - merged   ext/dash-refresh-assist-rebased 5ef12c32
 - SKIPPED  ext/body-hitbox-parity-rebased 4988bb2e conflicts: art/wardens/breaker/IMPORT.md content/archetypes/gunslinger.json docs/ARCHETYPES.md
 - SKIPPED  ext/heal-knock-source-rebased 44f88a2c conflicts: docs/heroes/thief.md
@@ -576,6 +623,7 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - SKIPPED  ext/anim-hand-tenzo-rebased f3e36f0e conflicts: content/rules/warden_anim/tarek.json docs/art/ANIM_QUALITY_AUDIT.md
 - SKIPPED  ext/tutorial-combat-v2 6e32b64e conflicts: content/archetypes/tender.json content/rules/tutorial.json docs/ABILITIES.md docs/DEATH_AND_REVIVE.md docs/decisions/0022-knock-dash-refresh-assists.md docs/heroes/archer.md docs/heroes/dredge.md docs/heroes/tender.md scripts/arch/kits/pin_spirit.gd scripts/arch/kits/tender_kit.gd scripts/core/care.gd scripts/core/save.gd scripts/heroes/warden_clips.gd scripts/match/dash_reset.gd scripts/match/hunter.gd scripts/match/kin_voice.gd server/README.md server/matchmaker/mm/config.py tools/archer_bulwark_combo_check.gd tools/hero_combo_check.gd tools/kill_reset_check.gd tools/support_check.gd
 - SKIPPED  ext/grimble-fist-vfx c9330d01 conflicts: docs/heroes/dredge.md scripts/arch/kits/dredge_kit.gd tools/hero_vfx_reel.gd
+- SKIPPED  ext/grimble-fist-vfx 48466a85 conflicts: docs/heroes/dredge.md scripts/arch/kits/dredge_kit.gd tools/hero_vfx_reel.gd
 - SKIPPED  ext/parity-reel-a 3dad2970 conflicts: tools/hero_vfx_reel.gd
 - merged   ext/perf-multimesh e8fc401e
 - SKIPPED  ext/albert-size-boop-rebased dc95e0d1 conflicts: docs/heroes/bulwark.md tools/empty_shots.gd
@@ -633,6 +681,7 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - merged*  ext/parity-strip 4c8c2de5 (registry/credits/generated auto-resolved)
 - SKIPPED  ext/snag-audit 0ea71735 conflicts: docs/MOVEMENT_FEEL.md
 - SKIPPED  ext/step-smooth 71b5ec0d conflicts: docs/MOVEMENT_FEEL.md
+- SKIPPED  ext/step-smooth 0a96e4b9 conflicts: docs/MOVEMENT_FEEL.md
 - SKIPPED  ext/ult-ranks a48ec55a conflicts: content/archetypes/archer.json content/archetypes/ashwick.json content/archetypes/bulwark.json content/archetypes/dolm.json content/archetypes/gunslinger.json content/archetypes/juggernaut.json content/archetypes/mage.json content/archetypes/ostra.json content/archetypes/thief.json docs/decisions/0022-ult-ranks.md scripts/core/net.gd
 - SKIPPED  ext/boki-react-clips 5aa0b8d7 conflicts: scripts/home/base_race.gd scripts/home/home.gd tools/race_check.gd
 - SKIPPED  ext/lace-hail-wisps d93205aa conflicts: docs/heroes/archer.md docs/specs/DOWNED_ABILITIES.md scripts/arch/kits/archer_kit.gd
@@ -655,6 +704,7 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - SKIPPED  ext/vfx-stolen-wisps 1be7dce2 conflicts: scripts/core/net.gd tools/perf_bench.gd tools/wisp_check.gd tools/wisp_shots.gd
 - SKIPPED  ext/hit-spark-targets 01303bff conflicts: tools/sfx_set_check.gd
 - SKIPPED  ext/ui-base-hud e4610766 conflicts: scripts/ui/results.gd
+- SKIPPED  ext/ui-base-hud 467239ce conflicts: scripts/ui/results.gd
 - SKIPPED  ext/garden-chores 1f3b648c conflicts: scripts/core/fsm.gd scripts/home/home.gd
 - SKIPPED  ext/ui-dex-summon-row 51039565 conflicts: scripts/core/net.gd scripts/ui/dex_view.gd tools/perf_bench.gd tools/wisp_check.gd
 - SKIPPED  ext/ui-gear-reveal fbbb0f06 conflicts: tools/hudref_check.gd
@@ -679,10 +729,86 @@ Capacity plan: alive=pc-MRROBOTO flags=214 cached=0 to_run=214 unknown=15 server
 - SKIPPED  ext/anim-react-2 c7e87e4c conflicts: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb art/wardens/tarek/tarek.glb art/wardens/vex/vex.glb scripts/heroes/warden_clips.gd tools/anim_shots.gd
 - SKIPPED  ext/anim-downed 44555b46 conflicts: content/rules/wisp_looks.json scripts/match/hunter.gd scripts/match/hunter_wisp.gd tools/wisp_check.gd tools/wisp_shots.gd
 - merged   ext/vfx-sable-encore 5e9ea1d0
+- merged*  ext/home-verbs-anim c8bf505c (registry/credits/generated auto-resolved)
+- SKIPPED  ext/vfx-motley-nightwell a7c31da6 conflicts: tools/ostra_ult_check.gd
+- SKIPPED  ext/vfx-lace-impact 2199382e conflicts: content/vfx/archer.json docs/heroes/archer.md scripts/arch/kits/pin_fx.gd
+- SKIPPED  ext/parity-antiheal 55a5d0df conflicts: content/archetypes/juggernaut.json content/archetypes/thief.json scripts/arch/kit_status.gd scripts/arch/kits/dolm_kit.gd tools/hero_vfx_check.gd
+- SKIPPED  ext/vfx-meeko-weight 9c4ad780 conflicts: scripts/arch/kits/ult_look.gd
+- SKIPPED  ext/tutorial-garden-4 b67e1bc6 conflicts: scripts/core/evo.gd scripts/home/farm_tutorial.gd tools/style_baseline.json
+- merged   ext/tutorial-kit-drill d596a466
+- merged*  ext/boki-gait-audit ff954be2 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/creator-polish c35dcbe3 conflicts: scripts/ui/hatch.gd tools/empty_shots.gd
+- SKIPPED  ext/reset-cue-rebased 0fc62a45 conflicts: docs/heroes/bulwark.md scripts/arch/kits/bulwark_kit.gd scripts/ui/hud_slot.gd tools/empty_shots.gd
+- SKIPPED  ext/anim-react-2 2eea0e09 conflicts: art/wardens/breaker/breaker.glb art/wardens/claire/claire.glb art/wardens/hem/hem.glb art/wardens/ostra/ostra.glb art/wardens/ryzz/ryzz.glb art/wardens/sable/sable.glb art/wardens/tarek/tarek.glb art/wardens/vex/vex.glb scripts/heroes/warden_clips.gd tools/anim_shots.gd
+- SKIPPED  ext/anim-downed 44555b46 conflicts: content/rules/wisp_looks.json scripts/match/hunter.gd scripts/match/hunter_wisp.gd tools/wisp_check.gd tools/wisp_shots.gd
+- merged   ext/vfx-sable-encore 5e9ea1d0
+- SKIPPED  ext/ui-boki-box-summon b5c1b6fa conflicts: scripts/core/net.gd tools/perf_bench.gd tools/wisp_check.gd
+- merged   ext/vfx-cinder-flight d6d59184
+- SKIPPED  ext/first-hints-check 123f1800 conflicts: content/archetypes/tender.json content/rules/tutorial.json docs/ABILITIES.md docs/DEATH_AND_REVIVE.md docs/decisions/0022-knock-dash-refresh-assists.md docs/heroes/archer.md docs/heroes/dredge.md docs/heroes/tender.md scripts/arch/kits/pin_spirit.gd scripts/arch/kits/tender_kit.gd scripts/core/care.gd scripts/core/save.gd scripts/heroes/warden_clips.gd scripts/home/farm_tutorial.gd scripts/match/dash_reset.gd scripts/match/hunter.gd scripts/match/kin_voice.gd scripts/match/match.gd scripts/match/tutorial.gd server/README.md server/matchmaker/mm/config.py tools/archer_bulwark_combo_check.gd tools/hero_combo_check.gd tools/kill_reset_check.gd tools/support_check.gd
+- SKIPPED  ext/blight-edge-read 08afe2d7 conflicts: scripts/core/net.gd scripts/match/match.gd scripts/ui/full_map.gd scripts/ui/hud.gd
+- SKIPPED  ext/parity-knock-credit 846c1e17 conflicts: scripts/arch/kits/gunslinger_kit.gd scripts/arch/kits/juggernaut_kit.gd scripts/match/match.gd tools/hero_combo_check.gd tools/style_baseline.json
+- SKIPPED  ext/garden-snack-patch 50d7e539 conflicts: scripts/core/evo.gd
+- SKIPPED  ext/garden-trait-drift 04173974 conflicts: scripts/core/fsm.gd scripts/core/save.gd scripts/home/home.gd tools/style_baseline.json
+- SKIPPED  ext/sfx-kit-placeholders 7725b94d conflicts: scripts/arch/kits/tender_kit.gd
+- SKIPPED  ext/sfx-move-weight 366c29d3 conflicts: tools/sfx_set_check.gd
+- SKIPPED  ext/tut-skip-check 9eb47cc9 conflicts: scripts/home/farm_tutorial.gd scripts/match/practice.gd
+- SKIPPED  ext/cursor-confine 0610255d conflicts: scripts/core/settings.gd scripts/ui/overlay.gd
+- SKIPPED  ext/parity-downed-numbers daad5a0f conflicts: docs/DEATH_AND_REVIVE.md
+- SKIPPED  ext/feel-facing-turn d5333f96 conflicts: scripts/match/hunter.gd tools/move_feel_check.gd
+- SKIPPED  ext/feel-jump-forgive 6811e055 conflicts: docs/MOVEMENT_FEEL.md scripts/match/hunter.gd tools/move_feel_check.gd
+- SKIPPED  ext/feel-hurt-dir-wash 984776b9 conflicts: docs/HUD.md tools/hudref_check.gd
+- merged   ext/vfx-sparkle-storm e5680b9c
+- SKIPPED  ext/vfx-lowpreset-read e0dc7358 conflicts: content/rules/tuning.json content/vfx/archer.json docs/HERO_VFX.md scripts/core/settings.gd scripts/match/boki_rig.gd scripts/match/wisp_look.gd scripts/match/world.gd tools/hero_vfx_reel.gd tools/perf_bench.gd
+- SKIPPED  ext/vfx-neve-crash 23d17185 conflicts: docs/heroes/rimewright.md scripts/arch/kits/ult_look.gd tools/care_ult_check.gd
+- merged   ext/vfx-kael-chain 7b35a2e0
+- SKIPPED  ext/vfx-tenzo-impacts 7b34673d conflicts: scripts/arch/kits/breah_slam.gd scripts/arch/kits/breah_spine.gd scripts/arch/kits/dolm_kit.gd
+- SKIPPED  ext/tut-start-here 5bf8865d conflicts: scripts/home/hunter_pick_row.gd scripts/ui/prematch_view.gd tools/prematch_check.gd tools/prematch_shots.gd
+- SKIPPED  ext/anim-garden-actions 50869956 conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb
+- SKIPPED  ext/feel-first-cast-warm 27d6f01f conflicts: scripts/arch/kits/pin_fx.gd scripts/match/match.gd
+- merged   ext/vfx-albert-faultline a77a0657
+- SKIPPED  ext/stuck-integ-e2561d23 7e87fcf6 conflicts: scripts/arch/kits/bjorn_fx.gd
+- merged*  ext/mc-20261109-1352 3104d6c1 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/ui-extract-widget 67842fb4 conflicts: docs/HUD.md
+- SKIPPED  ext/garden-come-look 2b6c114d conflicts: scripts/home/farm_chatter.gd
+- SKIPPED  ext/garden-train-post f7a0c83b conflicts: scripts/home/base_race.gd scripts/home/home.gd tools/race_check.gd
+- merged   ext/garden-unstable-mix 4e7fd6a8
+- merged*  ext/garden-warm-dig d24422b9 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/no-dash-bursts-audit-rebased 76cd0bba conflicts: scripts/arch/kits/ostra_kit.gd scripts/match/hunter.gd
+- SKIPPED  ext/sfx-belt-items 4a9e8d6d conflicts: scripts/match/utility_use.gd tools/match_audio_check.gd tools/sfx_set_check.gd
+- SKIPPED  ext/sfx-extract-cues d8e785a5 conflicts: tools/sfx_set_check.gd
+- SKIPPED  ext/sfx-mix-pass 0591bb14 conflicts: tools/match_audio_check.gd
+- merged   ext/sfx-mob-attacks ceb82b27
+- SKIPPED  ext/sfx-step-surfaces 92976bde conflicts: docs/AUDIO.md tools/sfx_set_check.gd
+- SKIPPED  ext/sfx-weapon-fire 0efbf33a conflicts: docs/AUDIO.md
+- SKIPPED  ext/vfx-armour-break 5123a089 conflicts: docs/HERO_VFX.md scripts/match/ent.gd tools/hero_vfx_reel.gd
+- merged   ext/tut-pick-in-action 6d89d78b
+- SKIPPED  ext/meeko-rmb-verify-rebased 7c1762cf conflicts: scripts/arch/kits/bjorn_fx.gd
+- SKIPPED  ext/boki-downed-pose 8a2487d7 conflicts: scripts/match/boki_rig.gd scripts/match/kin.gd scripts/match/kin_puppet.gd
+- merged*  ext/tester-guide 106806a0 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/anim-boki-cast a9e410ab conflicts: scripts/match/kin.gd tools/boki_system_check.gd
+- SKIPPED  ext/anim-boki-idle 8a82fd24 conflicts: docs/art/kin/RIGGED_BOKI.md
+- merged   ext/anim-v2-audit-slice 8ea5dbb9
+- SKIPPED  ext/anim-boki-home 622d926f conflicts: content/rules/toys.json scripts/core/fsm.gd scripts/core/save.gd scripts/home/home.gd
+- SKIPPED  ext/split-models fc0129e7 conflicts: scripts/match/models.gd tools/style_baseline.json
+- SKIPPED  ext/utility-parity df96e53c conflicts: content/maps/hollowcrown.json content/utility/armor_kit.json content/utility/tonic.json scripts/arch/kits/ashwick_jet.gd scripts/combat/effects.gd scripts/core/net.gd scripts/match/hunter.gd scripts/match/utility_use.gd scripts/ui/hud.gd tools/equal_check.gd tools/make_hollowcrown.py tools/raid_check.gd
+- SKIPPED  ext/garden-integrated 58686d0b conflicts: art/wardens/cinder/cinder.glb art/wardens/hem/hem.glb art/wardens/kael/kael.glb art/wardens/vex/vex.glb docs/AUDIO.md scripts/core/care.gd scripts/core/evo.gd scripts/core/fsm.gd scripts/core/game.gd scripts/core/save.gd scripts/home/base_race.gd scripts/home/farm_chatter.gd scripts/home/farm_tutorial.gd scripts/home/home.gd scripts/ui/results.gd tools/race_check.gd tools/sfx_set_check.gd tools/style_baseline.json
+- SKIPPED  ext/hunter-revamp-pz fb240baa conflicts: art/wardens/pip/pip.glb art/wardens/pip/pip_atlas.jpg art/wardens/pip/pip_atlas.jpg.import art/wardens/pip/pip_body_emit.jpg art/wardens/pip/pip_body_emit.jpg.import art/wardens/pip/pip_body_lit.jpg art/wardens/pip/pip_body_lit.jpg.import art/wardens/pip/pip_body_normal.jpg art/wardens/pip/pip_body_normal.jpg.import art/wardens/pip/pip_face.jpg art/wardens/pip/pip_face.jpg.import art/wardens/pip/pip_face_emit.jpg art/wardens/pip/pip_face_emit.jpg.import art/wardens/pip/pip_face_normal.jpg art/wardens/pip/pip_face_normal.jpg.import art/wardens/ryzz/ryzz.glb art/wardens/ryzz/ryzz_nrm.png.import art/wardens/sable/sable.glb art/wardens/tarek/tarek.glb art/wardens/vex/vex.glb art/wardens/vex/vex_atlas.jpg art/wardens/vex/vex_atlas.jpg.import tools/warden_glb_check.gd
+- merged*  ext/tut-text-budget 326714a7 (registry/credits/generated auto-resolved)
+- SKIPPED  ext/hunter-revamp-go 4efad09e conflicts: art/wardens/hem/hem.glb art/wardens/hem/hem_atlas.jpg art/wardens/hem/hem_atlas.jpg.import art/wardens/kael/kael.glb art/wardens/ostra/IMPORT.md art/wardens/ostra/ostra.glb tools/warden_glb_check.gd
+- merged*  ext/warden-detail-pilot b73419fd (registry/credits/generated auto-resolved)
+- SKIPPED  ext/tut-try-relic 0a05c817 conflicts: scripts/home/hob_offer.gd scripts/match/practice.gd
+- SKIPPED  ext/farm-boki-sex e29a1672 conflicts: scripts/match/boki_rig.gd
+- SKIPPED  ext/anim-strafe-back 5f53bb1c conflicts: content/rules/warden_anim/breaker.json content/rules/warden_anim/cinder.json content/rules/warden_anim/hem.json content/rules/warden_anim/sable.json content/rules/warden_anim/vex.json docs/art/wardens/CLIPS.md scripts/heroes/warden_clips.gd scripts/match/hunter.gd tools/anim_shots.gd tools/move_feel_check.gd
+- SKIPPED  ext/hunter-revamp-af 73f39ab5 conflicts: art/wardens/cinder/cinder.glb art/wardens/claire/claire.glb art/wardens/dredge/IMPORT.md art/wardens/dredge/dredge.glb tools/art1/cinder_source.py
+- SKIPPED  ext/sfx-mob-alert 30e6a701 conflicts: tools/match_audio_check.gd
+- merged   ext/ui-hold-charge 57edbbca
+- SKIPPED  ext/vfx-meeko-kindle 2a913027 conflicts: tools/vfx_reel/tender.gd
+- SKIPPED  ext/ui-ability-text-one 603d2e4a conflicts: content/archetypes/ashwick.json content/archetypes/dolm.json content/archetypes/dredge.json content/archetypes/gunslinger.json content/archetypes/juggernaut.json content/archetypes/ostra.json content/archetypes/rimewright.json content/archetypes/thief.json scripts/ui/kit_card.gd tools/style_baseline.json
+- SKIPPED  ext/sfx-downed-muffle 4d04d2f5 conflicts: tools/match_audio_check.gd
 
 Exclusions: ~/bin/merge-exclude.txt on the hetzner box.
 
-## Real-GPU performance (Mac GPU worker, main vs candidate)
+## Real-GPU performance
 
 | hook | main rc / FAIL / secs | candidate rc / FAIL / secs |
 |---|---|---|
@@ -791,6 +917,7 @@ TITLE ok   [low] frame budget: 9.83 ms average, 16.56 ms p95 (budget 12 ms)
 TITLE ok   [high] frame budget: 4.25 ms average, 4.74 ms p95 (budget 12 ms)
 TITLE ok   [low] frame budget: 5.27 ms average, 4.95 ms p95 (budget 12 ms)
 ```
+GPU perf deferred: no GPU worker alive (no heartbeat from the PC or Mac in the last 5 min), so no jobs were queued. It runs on the next candidate once a worker is back.
 
 ## Release dry-run (Windows and macOS exports, release templates 4.6.2.stable)
 
@@ -798,6 +925,8 @@ TITLE ok   [low] frame budget: 5.27 ms average, 4.95 ms p95 (budget 12 ms)
 |---|---|---|---|
 | game | Windows | pass | 489M |
 | game | macOS | pass | 320M |
+| game | Windows | pass | 499M |
+| game | macOS | pass | 329M |
 | launcher | Windows | pass | 101M |
 | launcher | macOS | pass | 63M |
 

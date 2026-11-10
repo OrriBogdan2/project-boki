@@ -37,6 +37,7 @@ var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var hints: MatchHints = null    # one-time hints for what the tutorial no longer teaches
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
@@ -272,6 +273,7 @@ func _start(o: Dictionary) -> void:
 	WardenGlb.fetch_for(o)
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
+	hints = MatchHints.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
@@ -1766,7 +1768,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
-	DashReset.note(target, credit)
 	if target is Hunter and target != credit:
 		(target as Hunter).dmg_taken += d
 		if by is Blight: kstat["bl_dmg"] = float(kstat.get("bl_dmg", 0.0)) + d
@@ -1800,7 +1801,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if credit == player and target != player and src != "burn":
 		sfx("crit" if crit else "hit", target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08))
 		if hud: hud.hitmarker(crit, armor_hit)
-		if tut and by == player and target is Mob: tut.on_hit()
 	if target == player and by and hud:
 		hud.hurt_from(by.pos)
 	if target == player:
@@ -1840,7 +1840,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		killcam_text = ("Knocked down by %s" % credit.pname) if credit is Hunter and credit != h else "You're down"
 	if credit is Hunter and credit != h:
 		credit.knocks += 1
-		# the knock reward: a dash refresh for the knocker and assisters, a small heal (DashReset), armor and XP
+		# the knock reward: a dash back (all charges) and a small heal (DashReset), armor and XP
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
@@ -1958,7 +1958,6 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 		_lose_life(h, by, why)
 		return
 	cancel_abilities(h)
-	if h.ak: h.ak.drop_holds()      # an out hunter's kit no longer ticks: a channel (Hearth Call) would hang on
 	h.out = true
 	h.downed = false
 	if net_on and not h.remote:
@@ -2990,6 +2989,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	if e == null:
 		fx.burst(at, s["col"], 5, 2.0, 0.25, 6.0, 0.6)
 		return
+	if x.has("snd"): sfx(x["snd"], at, -4.0)      # a mob's own landing sound (mob.gd)
 	var by: Ent = s["by"]
 	var dmg: float = s["dmg"]
 	if x.has("swing"):
@@ -3486,8 +3486,8 @@ func step(dt: float) -> void:
 		if net_on:
 			Net.tick(dt)
 		return
-	if tut and tut.intro:
-		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
+	if tut and tut.holding():
+		tut.hold_wait(dt)      # (the intro card or Pell's talk: the match waits)
 		return
 	time += dt
 	if Game.god and player and not player.out:
@@ -3985,6 +3985,7 @@ func step(dt: float) -> void:
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
+	hints.tick(dt)
 	if opts.get("tutorial", false):
 		if opts.get("tut_test", false):
 			TutorialDrive.drive(self)
@@ -5429,9 +5430,9 @@ func _net_ev(x, from: String) -> void:
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
-				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
 				if by == player:
 					player.knocks += 1
+					DashReset.takedown(player, who)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5439,9 +5440,9 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.out:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.out = true
-				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
+					DashReset.takedown(player, who)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true

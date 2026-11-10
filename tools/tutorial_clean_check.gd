@@ -46,14 +46,21 @@ func _built(m: Match) -> void:
 	ok(wild == 0, "no wild kin (%d)" % wild)
 	ok(m.mobs.is_empty(), "no mobs before the course asks for them (%d)" % m.mobs.size())
 
-## Seconds left on a 10 s air-dash cooldown after `secs` of play.
+## Seconds left on a 10 s air-dash cooldown after `secs` of play (frames where the match holds for
+## Pell's line are not play, so they do not count).
 func _cd_after(m: Match, secs: float) -> float:
 	if m.tut:
 		m.tut.ack()          # (past the intro card, where the match waits, and the first step's own reset)
 		m.step(Match.DT)
 	m.player.ex_cd = 10.0
-	for i in int(secs / Match.DT):
+	var played := 0
+	for i in 2000:
+		if played >= int(secs / Match.DT):
+			break
+		var held: bool = m.tut != null and m.tut.holding()
 		m.step(Match.DT)
+		if not held:
+			played += 1
 	return m.player.ex_cd
 
 func _run_course(m: Match) -> void:

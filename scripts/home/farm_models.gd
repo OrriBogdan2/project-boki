@@ -184,8 +184,8 @@ static func _piece(n: Node3D, mesh: Mesh, col: String, at: Vector3, nm: String, 
 		rot := Vector3.ZERO) -> void:
 	Models.part(n, mesh, Models.toon(Color(col), outline), at, Vector3.ONE, rot, nm)
 
-## A ball, a climbing post or a splash tub (HomeToys), from simple parts. The ball is its own child
-## named "Ball" so HomeToys can roll it.
+## A ball, climbing post, splash tub, warm stone or dig patch (HomeToys), from simple parts. The ball
+## is its own child named "Ball" so HomeToys can roll it.
 static func toy(id: String) -> Node3D:
 	var n := Node3D.new()
 	match id:
@@ -209,4 +209,20 @@ static func toy(id: String) -> Node3D:
 			_piece(n, Models.cyl(0.52, 0.52, 0.03, 18), "8fd0ff", Vector3(0, 0.49, 0), "Water", false)
 			for bp in [Vector3(-0.2, 0.56, 0.1), Vector3(0.15, 0.6, -0.15), Vector3(0.25, 0.55, 0.2)]:
 				_piece(n, Models.sphere(0.07, 8), "e8f6ff", bp, "Bubble", false)
+		"toy_stone":
+			_piece(n, Models.box(1.1, 0.34, 0.9), "8d8579", Vector3(0, 0.17, 0), "Slab", true, Vector3(0, 0.3, 0))
+			_piece(n, Models.box(0.78, 0.2, 0.66), "a39a8c", Vector3(0, 0.44, 0), "Top", true, Vector3(0, 0.8, 0))
+			_piece(n, Models.box(0.5, 0.02, 0.07), "ff8a3a", Vector3(0.02, 0.55, 0.05), "Glow", false,
+					Vector3(0, 0.5, 0))
+			_piece(n, Models.box(0.3, 0.02, 0.06), "ffc05a", Vector3(-0.1, 0.555, -0.12), "Glow", false,
+					Vector3(0, 1.4, 0))
+		"toy_dig":
+			_piece(n, Models.cyl(0.7, 0.82, 0.12, 14), "6b4a2e", Vector3(0, 0.06, 0), "Soil")
+			_piece(n, Models.cyl(0.42, 0.46, 0.14, 12), "4a3320", Vector3(0.05, 0.09, 0), "Hole", false)
+			for cp in [Vector3(-0.5, 0.15, 0.2), Vector3(0.45, 0.15, -0.3), Vector3(-0.2, 0.15, -0.5)]:
+				_piece(n, Models.sphere(0.1, 8), "7d5a38", cp, "Clod")
+			_piece(n, Models.box(0.05, 0.3, 0.12), "6fae4a", Vector3(0.55, 0.3, 0.3), "Tuft", false,
+					Vector3(0, 0.4, 0.3))
+			_piece(n, Models.box(0.05, 0.26, 0.12), "8fcf5a", Vector3(0.6, 0.28, 0.35), "Tuft", false,
+					Vector3(0, 1.2, -0.3))
 	return n
