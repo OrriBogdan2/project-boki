@@ -4,6 +4,9 @@ extends Node3D
 ## The simulation runs at a fixed 60 steps per second; visuals interpolate between steps.
 
 const DT := 1.0 / 60.0
+## Sim steps one frame may run to catch up (offline). More fell behind a slow frame and made the next one slower
+## (the catch-up spiral); past this the game runs slower instead. Online keeps 6 so the clock stays the host's.
+const CATCHUP_STEPS := 3
 
 var opts := {}
 var world: World
@@ -3177,10 +3180,12 @@ func _process(delta: float) -> void:
 	_gather_input()
 	acc += d
 	var steps := 0
-	while acc >= DT and steps < 6:
+	var most := 6 if net_on else CATCHUP_STEPS
+	while acc >= DT and steps < most:
 		acc -= DT
 		steps += 1
 		step(DT)
+	if not net_on: acc = minf(acc, DT)
 	var alpha := acc / DT
 	_vprof("pre")
 	if opts.has("boki_demo"):

@@ -906,9 +906,7 @@ func _glide_boost_fx() -> void:
 
 ## The glider's open/close sound for this hunter's glider skin (quieter, and positional, for everyone else).
 func _glider_sfx(which: String) -> void:
-	var skin := "classic"
-	if model and model.has_node("Rig/Torso/Glider"):
-		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
+	var skin := Gliders.skin_of(model)
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
 	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
 

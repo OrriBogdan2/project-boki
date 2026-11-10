@@ -19,6 +19,7 @@ func run(progress := Callable()) -> void:
 	if DisplayServer.get_name() == "headless" or m.cam == null or m.world == null:
 		return
 	PerfLog.skip()
+	Gliders.warm_sounds(m.hunters.map(func(h: Hunter): return h.model))
 	var keep := [m.cam.global_transform, m.cam.fov, m.cam.far]
 	var ctr := Vector3(m.world.w * 0.5, 0.0, m.world.h * 0.5)
 	var ground := ctr

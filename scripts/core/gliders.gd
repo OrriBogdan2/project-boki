@@ -333,6 +333,18 @@ static func sound(id: String, which := "open") -> AudioStreamWAV:
 		_cache[key] = _make(set, which == "close")
 	return _cache[key]
 
+## The glider skin a Hunter's model wears ("classic" without one).
+static func skin_of(model: Node) -> String:
+	var g := model.get_node_or_null("Rig/Torso/Glider") if model else null
+	return String(g.get_meta("skin", "classic")) if g else "classic"
+
+## Makes the open and close sounds of the gliders these models wear now: each is synthesized in code (25-60 ms
+## on the owner's PC), so behind the loading screen rather than mid-drop on a Hunter's first glide.
+static func warm_sounds(models: Array) -> void:
+	for md in models:
+		sound(skin_of(md), "open")
+		sound(skin_of(md), "close")
+
 ## Made in code by Synth.glider: a soft airy whoosh flavoured by the set, never a snap.
 static func _make(set: String, close: bool) -> AudioStreamWAV:
 	return Synth.glider(set, close)

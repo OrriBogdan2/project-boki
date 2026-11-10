@@ -67,7 +67,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": ceili(total / 2.0), "squad": 2, "total": total, "raid": "ash", "blight": true, "no_drop": true, "god": true,
+	o.merge({"teams": ceili(total / 2.0), "squad": 2, "total": total, "raid": "ash", "blight": true, "no_drop": true,
+		"god": true,
 		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
