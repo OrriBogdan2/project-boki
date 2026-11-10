@@ -13,6 +13,7 @@ extends RefCounted
 const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match (the queue may hold it)
+const REPLY_S := 30.0        # s of real time for the guest to answer (a busy box starves it; sim time races ahead)
 const TOL := 0.5             # m: the player's own game puts it within this of where the bot went
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
@@ -323,10 +324,9 @@ func _ask() -> Vector3:
 	return await _reply()
 
 func _reply() -> Vector3:
-	var t := 0.0
-	while replies.is_empty() and t < 10.0:
+	var t0 := Time.get_ticks_msec()
+	while replies.is_empty() and Time.get_ticks_msec() - t0 < REPLY_S * 1000.0:
 		await _run(0.1)
-		t += 0.1
 	if replies.is_empty():
 		return Vector3.INF
 	return _v(replies[0]["pos"])
