@@ -44,8 +44,8 @@
    "card": "briefs/boki-art/cards/Arcestrel_female.jpg",
    "hash": {
     "card": "bb6f26b73df2",
-    "sheet": "35852535528c",
-    "portrait": "0aff5c439942"
+    "sheet": "10e0507c3a06",
+    "portrait": "4a646e33fbc3"
    },
    "sheet": "briefs/boki-art/evolutions/Arcestrel_female.jpg",
    "portrait": "briefs/boki-art/portraits/light/Arcestrel_female.jpg"
@@ -257,9 +257,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hash": {
-   "sheet": "3049fa7deb0e",
+   "sheet": "ffad5cee8289",
    "card": "78f668fda27e",
-   "portrait": "51a4b54c94bf",
+   "portrait": "a05dd50b01e9",
    "hero": "1f65758604e4"
   }
  },
