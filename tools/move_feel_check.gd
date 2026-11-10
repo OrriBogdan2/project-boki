@@ -35,7 +35,8 @@ const T := {
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
 	# slopes: the source keeps your horizontal speed on any walkable slope (UE), its MaxStepHeight 0.45 m keeps
 	# your feet down a slope and over its crest, and WalkableFloorAngle is 50 deg (nothing of ours is steeper)
-	"slope_speed_ratio_min":   ["~", [0.97, 1.03], "x", "[game data] 12 hunters on 10/25/40 deg ramps, a crest, the flights: slowest"],
+	"slope_speed_ratio_min":   ["~", [0.97, 1.03], "x",
+		"[game data] 12 hunters on 10/25/40 deg ramps, a crest, the flights: slowest"],
 	"slope_speed_ratio_max":   ["~", [0.97, 1.03], "x", "[game data] ...and the fastest (no speed-up downhill)"],
 	"slope_air_frames":        ["<=", 0.0, "frames", "[game data] no hop down a slope or off its crest"],
 	"slope_stop_dist_min":     ["~", [0.2, 0.5], "m", "[game data] the walking stop on a slope, the shortest"],
@@ -386,7 +387,8 @@ func _slope() -> void:
 			var foot := Vector3(flat.x - 6.0, flat.y, flat.z)
 			var side := Vector3(flat.x - 2.5, mid, flat.z - 1.5)
 			_slope_run("%s %2d up" % [id, deg], foot, Vector2(1, 0), flat.x - 5.0, flat.x - 2.5)
-			_slope_run("%s %2d down" % [id, deg], Vector3(flat.x + 1.5, top, flat.z), Vector2(-1, 0), flat.x, flat.x - 2.5)
+			_slope_run("%s %2d down" % [id, deg], Vector3(flat.x + 1.5, top, flat.z), Vector2(-1, 0), flat.x,
+				flat.x - 2.5)
 			_slope_run("%s %2d across" % [id, deg], side, Vector2(0, 1), flat.z - 1.0, flat.z + 1.0)
 		rw.deg = 25.0
 		rw.run = 4.0
