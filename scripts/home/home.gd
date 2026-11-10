@@ -2030,7 +2030,7 @@ func _find_interact() -> void:
 		for one in row.get_children():
 			var l: Label = one.get_child(one.get_child_count() - 1)
 			l.add_theme_font_override("font", UI.big)
-			l.add_theme_font_size_override("font_size", 18)
+			l.add_theme_font_size_override("font_size", UI.fs(18))
 			l.add_theme_color_override("font_color", UI.GOLD if one.get_index() == 0 else UI.INK)
 		prompt_box.add_child(row)
 		prompt_box.reset_size()
@@ -2054,8 +2054,8 @@ func _update_hover() -> void:
 		hover_lbl.bbcode_enabled = true; hover_lbl.fit_content = true; hover_lbl.scroll_active = false
 		hover_lbl.custom_minimum_size = Vector2(300, 0)
 		hover_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hover_lbl.add_theme_font_size_override("normal_font_size", 14)
-		hover_lbl.add_theme_font_size_override("bold_font_size", 19)
+		hover_lbl.add_theme_font_size_override("normal_font_size", UI.fs(14))
+		hover_lbl.add_theme_font_size_override("bold_font_size", UI.fs(19))
 		hover_lbl.add_theme_font_override("bold_font", UI.big)
 		hover_box.add_child(hover_lbl)
 		root_ui.add_child(hover_box)

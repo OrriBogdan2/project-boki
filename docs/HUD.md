@@ -46,6 +46,12 @@ drawn, the downed plate and status words show, cooldown text appears).
   toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
   2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
   --shots-dir=<dir>` takes the same screens with a real renderer.
+- **Text size** (Settings > Accessibility: 100, 125, 150%, `Settings.TEXT_SIZES`) scales every font through
+  `UI.fs(px)`: the menu theme, `UI.label`/`keycap`/`section`, and `TextCache` (so the HUD's `_text` and every
+  width measured through it). The check also runs 720p and 1080p at 125% and 150%, adds settings, inventory
+  and the Field Book, and `SafeArea.clipped` fails any label or button cut off by its box. Long one-line text
+  elides (`text_overrun_behavior = TRIM_ELLIPSIS`) or wraps; it never shrinks below the chosen size.
+  A new text-drawing call takes its size through `UI.fs` (or `TextCache`), never a bare number.
 
 ## Looting with a full inventory
 

@@ -44,6 +44,8 @@ func run(mn: Node, mode: String) -> void:
 	for k: float in Settings.TEXT_SIZES:
 		text_k = k
 		UI.set_text_size(k)
+		if is_instance_valid(home):
+			home.queue_free()      # (the last round's farm would show under this round's screens)
 		if k > 1.0 and not only_size:
 			sizes = TEXT_WINDOWS
 		await _hud()
@@ -87,9 +89,14 @@ func _hud() -> void:
 	m.hud.toast("Armor cracked: it held one more hit", Color.WHITE)
 	for win: Vector2i in sizes:
 		var sz := await _resize(win)
+		m.skydrop.planning = true
+		m.skydrop.plan_t = 20.0
+		m.hud.open_map(true)
 		await _hud_at(win, sz, "drop")
+		m.skydrop.planning = false      # the ship has gone: the map steps aside and the HUD you play with shows
 		m.player.riding = false
 		m.player.dropping = false
+		await _frames(2)
 		await _hud_at(win, sz, "hud")
 		Overlay.open_pause("match")
 		await main.get_tree().create_timer(0.8).timeout

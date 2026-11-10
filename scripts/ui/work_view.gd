@@ -164,7 +164,7 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 		if Work.pin(rec) == String(it[0]): sel = opt.item_count - 1
 	opt.select(sel)
 	opt.custom_minimum_size.x = 170
-	opt.add_theme_font_size_override("font_size", 13)
+	opt.add_theme_font_size_override("font_size", UI.fs(13))
 	opt.item_selected.connect(func(i: int):
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
@@ -267,7 +267,7 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 					if k.has("job") and String(k["job"]["el"]) == el and pi == 0: h.hw.drop(k)
 			Sfx.play("click")
 			open(h), 0)
-		b.add_theme_font_size_override("font_size", 12)
+		b.add_theme_font_size_override("font_size", UI.fs(12))
 		b.custom_minimum_size = Vector2(52, 26)
 		# a compact segmented control: the chosen one filled, the rest faint
 		var on := cur == i

@@ -54,7 +54,7 @@ static func pulse(c: Control, arrow: String) -> void:
 	box.add_child(ring)
 	var arr := Label.new()
 	arr.text = arrow
-	arr.add_theme_font_size_override("font_size", 24)
+	arr.add_theme_font_size_override("font_size", UI.fs(24))
 	arr.add_theme_color_override("font_color", GOLD)
 	arr.position = Vector2(-26, 0)
 	box.add_child(arr)
