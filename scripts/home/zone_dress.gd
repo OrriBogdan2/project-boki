@@ -11,12 +11,15 @@ const SHEET_Y := 0.03          # m above the ground: the water sheet
 const SHEET_COLOUR := Color(0.36, 0.78, 0.86, 0.55)
 const KEEP_OUT := 2.2          # m round the landing and the pad that scatter stays away from
 const TRIES := 40              # spots tried per prop before giving up on it
-const SHAPES := 2              # Flora shapes used per kind
+const SHAPES := 1              # Flora shapes used per kind (one batch each)
 
 ## Called once the zone's world is built; does nothing outside a built zone.
 static func place(h) -> void:
 	if ZoneLayout.live.is_empty():
 		return
+	for br in h.bridges.values():
+		for part in ["node", "sign", "label"]:
+			br[part].visible = false          # the side isles' bridge stubs and signs belong to Bramblebank
 	var B: Dictionary = GardenZones.info(h.zone)["build"]
 	var r: Array = B["shallow"]
 	_sheet(h, Rect2(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1))

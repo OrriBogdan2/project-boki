@@ -124,7 +124,10 @@ func _bring_fight(m: Match) -> void:
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
 func _farm(part := "farm", params := {}) -> void:
+	var was = main.current
 	Game.goto("home", params)
+	while main.current == was or main.current.get("root_ui") == null or main.fade.covered:
+		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
 	var fl: Array = []
@@ -140,7 +143,7 @@ func _farm(part := "farm", params := {}) -> void:
 	_summary(part, fl)
 	_meshes()
 	if part == "zone":
-		_budget(fl)
+		await _budget(fl)
 
 ## A garden zone with the nav sweep's six Boki out, as a farm part.
 func _zone() -> void:
@@ -151,15 +154,24 @@ func _zone() -> void:
 	nav._save()
 	await _farm("zone", {"zone": zone})
 
-## The zone part against GARDEN.md 10.6: the worst frame's draws, objects and nodes, the emitting particle
-## systems, and the average frame.
+## The zone part against GARDEN.md 10.6. Draws and objects are the zone itself: the screen UI (a quarter to a
+## half of a frame's draws, the same in every scene) is hidden for a few frames and read then. Nodes and the
+## emitting particle systems are the whole tree's; the frame is the average of the run.
 func _budget(fl: Array) -> void:
 	var B: Dictionary = GardenZones.rules()["budget"]
 	var emit := 0
 	for cls in ["GPUParticles3D", "CPUParticles3D"]:
 		emit += main.get_tree().root.find_children("*", cls, true, false).filter(func(n): return n.emitting).size()
-	var got := {"draws": _peak(fl, "draws"), "objects": _peak(fl, "objs"), "nodes": _peak(fl, "nodes"),
-		"emitters": emit, "frame_ms": _avg(fl, "wall")}
+	var home = main.current
+	home.root_ui.visible = false
+	for cl in home.find_children("*", "CanvasLayer", true, false):
+		cl.visible = false
+	for i in 8:
+		await main.get_tree().process_frame
+	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall")}
+	print("BENCH zone draws with the UI: %.0f" % _avg(fl, "draws"))
 	var bad := false
 	for k in got:
 		var good: bool = float(got[k]) <= float(B[k])

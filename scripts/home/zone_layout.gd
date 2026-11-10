@@ -34,6 +34,10 @@ static func layout(id: String) -> Dictionary:
 			e = _kept_patch(id, e)
 		e["u"] = HomeLayout._next_uid(L)
 		(L["deco"] as Array).append(e)
+	var c: Array = B["clear"]
+	for z in range(int(c[1]), int(c[3]) + 1):
+		for x in range(int(c[0]), int(c[2]) + 1):
+			L["cleared"][HomeLayout.key(x, z)] = 1
 	return L
 
 ## The snack patch's entry is the one kept on the save, so its timer survives leaving the zone.

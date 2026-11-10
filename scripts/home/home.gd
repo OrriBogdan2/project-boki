@@ -409,7 +409,6 @@ func _ready_rest() -> void:
 	if FarmUnlocks.base_mode() and not _visiting():
 		hway = HubWaystone.new(self)
 		hway.place()
-	ZoneDress.place(self)
 	if visit.is_empty():
 		rack_node = _glider_rack()
 		rack_node.position = spots["rack"]
@@ -436,6 +435,7 @@ func _ready_rest() -> void:
 		_build_burrow()
 	await _slice()
 	_build_bridges()
+	ZoneDress.place(self)
 	_build_plots()
 	await _slice()
 	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Unmasked.worn(), Arch.of_save())
