@@ -1,5 +1,5 @@
 extends RefCounted
-## --music-leave-check: the music and ambience follow the screen. Training area -> duel room -> back
+## --music-leave-check: the music and ambience follow the screen. Training Grounds -> duel room -> back
 ## out, a normal match -> title, and the farm -> title: after each change only that place's score is
 ## audible (no stem of the match's layered score, no abyss / ruins bed, and no stray player on the
 ## Music or Ambience bus left playing above silence). Inspects Sfx's players' `playing` and volume_db.
@@ -9,6 +9,7 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const AUDIBLE_DB := -45.0      # a player quieter than this (and fading) isn't heard
+const SETTLE_SPEED := 4.0      # time scale while settling
 const SETTLE := 6.0            # seconds: longer than the slowest crossfade (home 2.5s, layers 3s)
 
 func ok(name: String, cond: bool, info := "") -> void:
@@ -38,7 +39,9 @@ func audible() -> Dictionary:
 	return out
 
 func settle(secs := SETTLE) -> void:
+	Engine.time_scale = SETTLE_SPEED      # the fades are tweens on game time: the same game seconds in less wall time
 	await main.get_tree().create_timer(secs).timeout
+	Engine.time_scale = 1.0
 
 func step(m: Match, secs: float) -> void:
 	var t := 0.0
@@ -75,7 +78,7 @@ func start_match(opts: Dictionary, live := false) -> Match:
 	return m
 
 func _training_duel_leave() -> void:
-	var m := await start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	var m := await start_match(Match.arena_opts())
 	step(m, 3.0)
 	await settle(4.0)
 	var a := audible()
@@ -87,7 +90,7 @@ func _training_duel_leave() -> void:
 	ok("duel: a duel match is up", d.duel != null and d.duel.bot != null and d != m)
 	await settle(8.0)
 	a = audible()
-	ok("duel: the score is the training area's, one set of stems", a.keys().filter(func(k): return String(k).begins_with("layer:") or String(k).begins_with("music")).size() == training_music.size(), str(a))
+	ok("duel: the score is the Training Grounds's, one set of stems", a.keys().filter(func(k): return String(k).begins_with("layer:") or String(k).begins_with("music")).size() == training_music.size(), str(a))
 	# leaving the room (Esc > Leave: the match finishes and the game goes on to the farm)
 	d.result = {"extracted": true, "why": "left"}
 	d._finish()

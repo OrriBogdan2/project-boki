@@ -26,8 +26,8 @@ const WARDENS := {
 	# (lean; height_3d: the v2 locs hang down, no piled crown over the head)
 	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
-	# (Motley on his box: the hover came down to a hand's width, Nov 5, so his top is 0.14 m lower; the cards widen him)
-	"ostra": {"hit_r": 0.412, "height": 1.18, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
+	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
+	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.26, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
 	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
 	# (Cinder v2: her built lizard horns stand over her head; the chart's taller Cinder is wider by as much)
@@ -37,8 +37,8 @@ const WARDENS := {
 	# (Grimble: the head at his old height, the hoard towers over it)
 	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.7, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
-	# (Pip: body size 0.68, item 108; ART-1 model: 0.66 with the ears, waist-high on the sheet's silhouette)
-	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.66, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears, the locked design's taller ears)
+	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.76, "width": [0.5, 1.5], "moves": "mm_"},
 }
 const REF_WEAPON := "gunslinger"   # the reference medium hunter carries the class's default weapon
 const ANIM_SEED := 1          # one rest pose for every model measured

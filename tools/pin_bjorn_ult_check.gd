@@ -250,11 +250,21 @@ func bjorn() -> void:
 	ok("bjorn ult cast: planted, hammer up (bul_ult_wind)",
 		K.ult.phase == "wind" and K.anim_id == "bul_ult_wind" and K.move_k() == 0.0,
 		"%s %s move %.2f" % [K.ult.phase, K.anim_id, K.move_k()])
-	var c0 := AimKit.entry(P, "x0")
-	ok("bjorn ult telegraph: four 4x4m cells down the lane, shown to everyone",
-		AimKit.shown(P, "x0") and AimKit.shown(P, "x3") and bool(c0.get("all", false))
-			and absf(float(c0.get("len", 0.0)) - 4.0) < 0.01,
+	var c0 := AimKit.entry(P, "x")
+	ok("bjorn ult telegraph: one outlined 16x4.5m lane (the gameplay box) for everyone, with its crack",
+		AimKit.shown(P, "x") and bool(c0.get("all", false)) and absf(float(c0.get("len", 0.0)) - 16.0) < 0.01
+			and absf(float(c0.get("width", 0.0)) - float(xd["width"])) < 0.01 and K.ult._crack.visible,
 		str(c0.keys()))
+	var crack_mat := K.ult._crack.material_override as ShaderMaterial
+	var heat0: float = crack_mat.get_shader_parameter("power")
+	var t_now: float = K.ult.t
+	K.ult.t = 0.35                      # glance at the crack late in the wind-up, then put the clock back
+	K.ult._glow_crack()
+	var heat1: float = crack_mat.get_shader_parameter("power")
+	K.ult.t = t_now
+	K.ult._glow_crack()
+	ok("bjorn ult telegraph: the crack glows brighter as the slam nears",
+		heat1 > heat0 + 0.2, "%.2f -> %.2f" % [heat0, heat1])
 	ok("bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
 		"%.1f" % float(K.cd["x"]))
@@ -267,6 +277,8 @@ func bjorn() -> void:
 	ok("bjorn ult anim: the slam (bul_ult_slam) at 0.4s", K.ult.slams == 1 and K.anim_id == "bul_ult_slam", K.anim_id)
 	step(m, 0.35)
 	var hit_t := T.stun_t > 0.0 and T.slow_t > 0.0
+	ok("bjorn ult: a stun marker circles over each foe it stunned",
+		KitLooks.of(m).crowned(T), "stunned %s" % (T.stun_t > 0.0))
 	ok("bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
 		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
 	step(m, 0.3)
