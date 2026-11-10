@@ -57,7 +57,7 @@ body (not in the air, a crouch, or a move that owns the body):
 Data `"free_arm": {clip: "L"|"R"}` (content/rules/warden_anim/<art>.json) names the arm a move leaves unused. While that
 clip plays, its upper arm, forearm and hand ease (10/s) to their idle rotation over whatever the clip keys, so the free arm
 hangs relaxed instead of standing out. A runtime layer, like the gait: the glbs are not re-baked (no Blender on this worker; the
-clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `mage` (rmb: the left arm, which the clip keys out and forward while the right hand throws the rod).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
 
@@ -137,10 +137,12 @@ posts scroll at the move speed).
 
 **Sparkle (`mage`)**
 1. Feet slid 42 % at a run, 59 % at a walk (fixed: 9 %, 19 %).
-2. rmb (cast) holds an arm sideways for 62 % of the clip.
+2. rmb (cast) holds an arm sideways for 62 % of the clip (fixed for the left arm: 46 % to 0 %, its travel 0.76 to 0.38 body heights; the remaining 50 % is the throwing right arm winding up over the shoulder and releasing, the move itself). lmb_l (free arm sideways 21 %, not flagged) is left as keyed.
 3. Cadence 4.2 steps/s with a 0.27 first-pose gap into the walk.
 
 ![mage walk and run, before and after](anim_audit/mage.jpg)
+
+![mage rmb, before (top) and after (bottom): 8 frames, side view](anim_audit/mage_rmb.jpg)
 
 **Motley (`ostra`)**
 1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
@@ -177,7 +179,7 @@ Split into backlog items per Hunter (role build):
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
+- Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.2 m/s; the gate only reads the run.
