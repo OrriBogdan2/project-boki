@@ -492,3 +492,11 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - CLARIFIED 11-09 5:23 PM EST (owner, via art session): the gates are the 3D ORDER. The 2D Boki V2 restyle pass is NOT gated and runs now. Owner also approved the V2 style files (STYLE_CANON_V2, RERENDER_PROMPTS, REVIEW_CHECKLIST_V2, MARQUEE_HUMAN_PASS) and asked to redesign the whole s7 hold list as Fable suggests (concepts go to him first, with before/after text). No human artist.
 - Mobs get turnaround sheets in one consistent format for all mobs (docs/art/mobs/TURNAROUND_SPEC.md). Reference SUPERVIVE PvE creatures for readability/function only, never designs/names/art; extra or different archetypes welcome.
 - Animation: replaces the 11-09 "animation stays on rig-contract clips" line. Coordinator runs an animation-quality lane now (hunters first): AI auto-rig + motion pilots vs current clips, judged by Fable. Rig contract stays the integration target.
+
+## 2026-11-10 ~7:10 PM EST owner: LIMITED WAY OUTS, one mode (replaces 11-08 "normal extraction stays open" and the "Heart Night" variant)
+- One extraction mode, no variants: be aggressive with design, decide by logic, not by offering both.
+- Exits are limited and earned. No open/free extraction points.
+  - The Heart unlocks at a set match time. Once unlocked it allows ONE early extraction (any time after unlock) for a MINOR reward, and ONE extraction ONLY at the end for a MAJOR reward.
+  - Quest exits: ~2 per map; teams race to finish the quest, the winner gets out.
+  - Everyone else: last team standing as the Blight closes.
+- Spec (exit timeline, how many teams each exit releases, Boki/loot outcome for teams that never get out vs pet-loss tiers, bots, UI, build tasks) is queued as a deep job; it implements this as THE mode, not a toggle.
