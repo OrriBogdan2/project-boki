@@ -30,3 +30,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
 - **FX points:** weapon_muzzle, anchor_gun_root, anchor_claw, anchor_hook_tip, anchor_fist, anchor_ball, anchor_coins, anchor_hoard_top,
   anchor_lamp_r/l, anchor_head_top, anchor_eye (the big lens), anchor_chest.
 - **Import:** remove_immutable_tracks=false, LODs on, VRAM atlas with mipmaps.
+- **Stretch (no edge past 1.3x its rest length in any clip; `--stretch-check --wardens=dredge`):** the source weights are near-hard capsules,
+  so short edges stretched up to 25x (hook on thigh, wrist, waist). grimble_clips.py now calls tools/art1/skin_relax.py before the export:
+  it blends the weights of stretched vertices toward their neighbours' (400 passes), then deletes the triangles still over 1.25x and caps the
+  holes (about 2.4k of 14.9k triangles, mostly seams between the arms, hips and hook). Worst now 1.28. Spring chains and the junk ball's uniform growth are exempt.
+
