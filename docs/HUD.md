@@ -33,6 +33,20 @@ Rules of the look:
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, the downed plate and status words show, cooldown text appears).
 
+## Safe area
+
+- `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
+  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
+  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+- The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
+  the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
+  margin (4% of the height) for the countdown banner.
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
+  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
+  --shots-dir=<dir>` takes the same screens with a real renderer.
+
 ## Looting with a full inventory
 
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
