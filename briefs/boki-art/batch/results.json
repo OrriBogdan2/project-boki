@@ -98248,5 +98248,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_cetorgan_n1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_wayshell_n1",
+    "name": "Wayshell (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_wayshell_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ghoulamari_n1",
+    "name": "Ghoulamari (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_ghoulamari_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cetorgan_n1",
+    "name": "Cetorgan (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_cetorgan_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_wayshell_n1",
+    "name": "Wayshell (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_wayshell_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_n1",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_n1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fit_pavonazar",
+    "name": "Pavonazar (epic pick, whole creature in frame)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fit_pavonazar_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_cindermaw_n1",
+    "name": "Cindermaw (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_cindermaw_n1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ghoulamari_n1",
+    "name": "Ghoulamari (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_ghoulamari_n1_3.jpg",
+    "ok": true
   }
 ]
