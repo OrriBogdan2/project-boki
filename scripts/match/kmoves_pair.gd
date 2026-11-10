@@ -307,11 +307,11 @@ const MOVES := {
 			"p": 0.4, "sq": -0.35, "lift": 0.18, "fr": Vector3(0.85, 0.5, 0.1), "rw": 1.0,
 			"fl": Vector3(-0.85, 0.5, 0.1), "hw": 1.0, "lw": 1.0, "legs": [-0.1, -0.2, -0.1, -0.2], "gp": 1.45
 		}],
-		[0.13, {
+		[0.26, {
 			"p": 0.28, "sq": -0.12, "lift": 0.07, "fr": Vector3(0.75, 0.45, 0.05), "rw": 1.0,
 			"fl": Vector3(-0.75, 0.45, 0.05), "hw": 1.0, "gp": 1.35
 		}],
-		[0.24, {}]]},
+		[0.36, {}]]},
 	# Cinder's air poof (the air dash): balled up in the burst, one fast roll forward, then he sails out
 	# spread-eagled on the launch, arms and legs wide and the nozzle held out, until the speed bleeds off
 	"lw_hop": {"keys": [
