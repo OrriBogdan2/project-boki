@@ -370,8 +370,8 @@ func run(main: Node) -> void:
 	m.opts["god"] = true
 	_match_items()
 	_chain()
-	_jump_shift_reach()
 	await _parity(main)
+	_jump_shift_reach()      # after the parity: it re-classes the hunter through every Hunter
 	m.queue_free()
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()
