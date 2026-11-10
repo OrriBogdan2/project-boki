@@ -533,3 +533,5 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Garden direction: the CORE of the farming side must feel like a creature-raising garden (Chao-like genre pattern, our own names/looks): raise, pet, feed, play, race, breed, Boki living on their own in the garden. That core is the default for every player (base_mode on by default, not a hidden flag).
 - Base building and the farm-sim systems (crops, chopping, work stations, haul jobs, market/Exchange) are NOT the core. They stay as OPTIONAL upside: customise the garden, extra rewards, more ways to help your Boki. Never required to raise Boki. Fits the hub + zones decision (an optional workshop/fields zone is a fine home for them).
 - Coordinator: spec job turns this into GARDEN.md + a build list, then builds it for 0.24.4.
+
+- 2026-11-10 (owner): Shadow is split into Ghost and Dark (19 types; list in briefs/boki-art/GHOST_DARK_SPLIT.md). NO type matchups for now: types are labels for identity, filters and colour only, no strong/weak chart. Revisit only if the owner asks.
