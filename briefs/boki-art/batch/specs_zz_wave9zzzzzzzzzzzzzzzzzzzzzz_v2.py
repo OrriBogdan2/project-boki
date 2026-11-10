@@ -955,3 +955,11 @@ SPECS.append({'id':'fv4_murmuron','name':'Murmuron female (same family as the ma
   'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. She is unmistakably the same species: the same great starling with the same wings, pipe collar, flock tail, pose and view, "
    "drawn the same way. She differs only like this: her dark feathers carry a warm bronze-brown sheen where his is purple, with larger cream speckles on her chest and wings; her pan-pipe collar and wing tips are copper "
    "instead of gold and a little smaller; her body is slightly rounder and her head crest shorter."+_FEMFACE+" No red and no crimson: she stays a dark bird. "+STYLE_V2('final','majestic',True,True)+FRAME_V2)})
+
+# 05:35 ET 11-10 OWNER: "Pangolith (Terrasloth) looks too big in his portrait and I don't like the straight-up look: his circular pose but on the side".
+for _k,_pose in (('a',"curled into its ring shape and seen from the SIDE, lying on the ground like a wheel tipped over, nose tucked to its tail, one eye open looking at the viewer"),
+                 ('b',"half uncurled on its side, body in a loose C shape, head lifted and turned toward the viewer, tail curling round in front"),
+                 ('c',"rolling along as a ring seen in three-quarter side view, leaning into the roll, face peeking out at the front")):
+    _n0=len(SPECS); V2PORT_NEW('Terrasloth','briefs/boki-art/cards/Terrasloth.jpg','mid','cute',_GC,_GN,False,False,_pose)
+    SPECS[_n0]['id']='v2p_terrasloth_side_'+_k; SPECS[_n0]['runs']=2
+    SPECS[_n0]['prompt']=SPECS[_n0]['prompt'].replace("with about 8 percent empty margin on every side","small in the frame, with about 20 percent empty margin on every side")
