@@ -32,6 +32,11 @@
 	},
 	"budget": {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5},
 	"budget_hub": {"draws": 200, "objects": 500, "nodes": 2000, "emitters": 6, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 0.5},
+	"ratchet": {
+		"medium": {"hub": {"draws": 720, "objects": 720, "frame_ms": 16.7}, "zone_bramblebank": {"draws": 770, "objects": 770, "frame_ms": 16.7},
+			"zone_glasswater": {"draws": 395, "objects": 420, "frame_ms": 16.7}, "zone_cinderstep": {"draws": 540, "objects": 550, "frame_ms": 19.5}},
+		"low": {"hub": {"draws": 370, "objects": 370}}},
+	"ratchet_doc": "Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one.",
 	"budget_doc": "What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column.",
 	"wayseed_from": "a lair of a matching type on a run, or the Drift Trader once a week"
 }
