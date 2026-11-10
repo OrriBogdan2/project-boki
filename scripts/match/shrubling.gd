@@ -248,19 +248,25 @@ func _pick_hide() -> void:
 	var from := Vector2(pos.x, pos.z)
 	var tp := Vector2(threat.pos.x, threat.pos.z) if threat != null else from + Vector2(1, 0)
 	var scored: Array = []
+	var W: World = m.world
+	var my_lv: int = W.level[W.idx(int(floor(pos.x)), int(floor(pos.z)))]
 	for pt in run.patches:
 		var c: Vector2 = pt["c"]
 		var dme := c.distance_to(from)
 		if dme > 34.0 or dme < 1.5 or int(pt["island"]) < 0:
 			continue
-		# the patch tile farthest from the hunter
+		# the patch tile farthest from the hunter, on its own terrace (it walks flat: no stairs)
 		var bt := Vector2i.ZERO
 		var bd := -1.0
 		for t in pt["tiles"]:
+			if W.level[W.idx(t.x, t.y)] != my_lv:
+				continue
 			var dd := Vector2(t.x + 0.5, t.y + 0.5).distance_to(tp)
 			if dd > bd:
 				bd = dd
 				bt = t
+		if bd < 0.0:
+			continue
 		var tile := Vector3(bt.x + 0.5, m.world.ground_at(bt.x + 0.5, bt.y + 0.5), bt.y + 0.5)
 		var away := (c - from).normalized().dot((from - tp).normalized())
 		var hidden_from_threat: bool = threat != null and not m.world.los(threat.pos, tile, tile.y + 0.8)
