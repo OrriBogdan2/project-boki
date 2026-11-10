@@ -40,6 +40,7 @@ var rolled := false
 var legend_cfg := {}           # this map's legendary chance and eligible list (Legendary.config)
 var legend := ""               # the legendary species this match rolled, or "" (Legendary.roll)
 var legend_kin: Kin = null     # it, once it has turned up (Legendary.due)
+var presence := LegendPresence.new()   # its roar, loop and sting, on every game (LegendPresence)
 var _t := 0.0
 
 func _init(match_node: Match) -> void:
@@ -236,6 +237,7 @@ func tick(dt: float) -> void:
 	_t = 0.25
 	if Legendary.due(self):
 		legend_kin = Legendary.arrive(m, legend, of("rare_kin"))
+	presence.tick(m)
 	for c in cands:
 		if not c["taken"] and c["active"]:
 			c["taken"] = _is_taken(c)

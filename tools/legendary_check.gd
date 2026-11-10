@@ -8,6 +8,9 @@ extends RefCounted
 ##   5. a live match: nothing at the start, exactly one legendary once delay_s has passed, at a
 ##      Rare Boki point that isn't live
 ##   6. the Bokidex lists the legendaries last
+##   7. its sounds (LegendPresence): the roar plays once per spawn, the presence loop runs while it is
+##      wild and stops on capture or defeat with a sting; the roar takes the species' theme where there
+##      is a cue and the shared roar where there isn't
 
 const MATCHES := 2000
 const TOL := 0.03
@@ -115,8 +118,27 @@ func _live(main: Node) -> void:
 	for i in 60:
 		m.step(Match.DT)
 	ok("live match: still just one a second later", _legendaries(m).size() == 1)
+	_sounds(m, plan.presence, found[0] if one else null)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+func _sounds(m: Match, pres: LegendPresence, k: Kin) -> void:
+	ok("sounds: the roar played once when it turned up", pres.roars == 1, "%d roars" % pres.roars)
+	ok("sounds: the presence loop runs while it is wild", Sfx.loop_on(LegendPresence.LOOP_KEY))
+	for i in 120:
+		m.step(Match.DT)
+	ok("sounds: still one roar after four more seconds", pres.roars == 1, "%d roars" % pres.roars)
+	var sting_at := int(Sfx.last_played.get("leg_sting", -1))
+	k.dead = true      # what the "caught" event does, and a defeat
+	for i in 30:
+		m.step(Match.DT)
+	ok("sounds: capture stops the loop", not Sfx.loop_on(LegendPresence.LOOP_KEY))
+	ok("sounds: capture plays the sting", int(Sfx.last_played.get("leg_sting", -1)) != sting_at)
+	ok("sounds: still just the one roar", pres.roars == 1)
+	var themed: Array = Legendary.rules()["roster"].map(func(sp): return LegendPresence.roar_name(sp))
+	var all_there: bool = themed.all(func(r): return Sfx.ensure(r))
+	ok("sounds: each legendary's roar is its theme's or the shared one", all_there, str(themed))
+	ok("sounds: a theme with no roar falls back to the shared roar", LegendPresence.roar_name("cindle") == "leg_roar")
 
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
