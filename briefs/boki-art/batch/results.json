@@ -82029,5 +82029,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_dragonkite_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_jarmit",
+    "name": "Jarmit (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_jarmit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_jarmit",
+    "name": "Jarmit (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_jarmit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ribbonwyrm",
+    "name": "Ribbonwyrm (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_ribbonwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_ribbonwyrm",
+    "name": "Ribbonwyrm (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_ribbonwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_dragonkite",
+    "name": "Dragonkite (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_dragonkite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_jarmit",
+    "name": "Jarmit (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_jarmit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_terrarimit",
+    "name": "Terrarimit (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_terrarimit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lanternmit",
+    "name": "Lanternmit (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_lanternmit_1.jpg",
+    "ok": true
   }
 ]
