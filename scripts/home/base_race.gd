@@ -199,6 +199,7 @@ static func settle(run: Run) -> Dictionary:
 	Care.change(lose, "joy", float(R["lose_joy"]))
 	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
+	BaseBoard.record("race", win)
 	nudge_bond(win, lose, -float(R["rival_step"]))
 	for n in range(1, order.size()):
 		var a: Dictionary = run.recs[order[n - 1]]
@@ -310,6 +311,10 @@ func find(p2: Vector2) -> Dictionary:
 	if run != null or not is_instance_valid(post) or p2.distance_to(Vector2(post.position.x, post.position.z)) > REACH:
 		return {}
 	return {"kind": "race"}
+
+## True from the start until the game is over (the Games board starts none on top of it).
+func running() -> bool:
+	return run != null
 
 func label() -> String:
 	return "Start a Dash (back %s)" % Save.active_kin().get("name", "your partner")
