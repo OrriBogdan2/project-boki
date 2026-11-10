@@ -206,11 +206,18 @@ func warm_up(progress := Callable()) -> void:
 ## Tooling (--perf-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
 static var prof := {}
+static var prof_top := ""         # the last step's costliest section and its us (the hitch log, PerfOverlay)
+static var prof_top_us := 0
 var _prof_t := 0
 func _prof(lbl: String) -> void:
 	if prof_on:
 		var now := Time.get_ticks_usec()
-		if _prof_t > 0 and lbl != "pre": prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+		if lbl == "pre": prof_top_us = 0
+		elif _prof_t > 0:
+			prof[lbl] = int(prof.get(lbl, 0)) + now - _prof_t
+			if now - _prof_t > prof_top_us:
+				prof_top = lbl
+				prof_top_us = now - _prof_t
 		_prof_t = now
 
 ## Tooling (--hitch-check): microseconds per section of _process (the per-frame visuals).
@@ -223,6 +230,13 @@ func _vprof(lbl: String) -> void:
 		_vprof_t = now
 
 var _render_n := 0
+func _render_lod(e: Ent, delta: float, alpha: float, cf: Vector3, near2: float) -> void:
+	if _render_now(e, cf, near2):
+		e.render(delta + e.lod_dt, alpha)
+		e.lod_dt = 0.0
+	else:
+		e.lod_dt += delta
+
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 	if e.dead or e.lod_dt > 0.2:
 		return true
@@ -1632,7 +1646,8 @@ func ground_grip(p: Vector3) -> float:
 func foes_of(team: int, wilds := true) -> Array:
 	var out: Array = []
 	for h in hunters:
-		if h.team != team and h.hittable() and not h.downed:
+		# (Hunter.hittable written out: foes_of runs many times a step and the call cost more than the test)
+		if h.team != team and not h.dead and not h.out and not h.extracted and not h.riding and not h.downed:
 			out.append(h)
 	for k in kins:
 		if k.dead or (k.is_wild() and (not wilds or team == -2)):
@@ -2628,7 +2643,8 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		net_event(["drop", pid, kind_s, v, key, _r(at.x), _r(at.y), _r(at.z), _r(v0.x), _r(v0.y), _r(v0.z)])
 
 func _update_pickups(dt: float) -> void:
-	for p in pickups.duplicate():
+	for i in range(pickups.size() - 1, -1, -1):      # (backwards: a pickup collected or lost leaves the list)
+		var p: Dictionary = pickups[i]
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
 		var g := world.ground_at(pos.x, pos.z)
@@ -2643,12 +2659,14 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if net_on and not is_host and h != player:
 					continue
+				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
+				if d >= 2.2 or absf(h.pos.y - pos.y) >= 2.0:
+					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
 				if p["kind"] == "key" and h.rift_keys >= BeltKeys.cap("rift_key"):
 					continue      # one Rift Key at a time (BeltKeys); the next waits on the ground
-				var d: float = Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length()
-				if d < 2.2 and absf(h.pos.y - pos.y) < 2.0 and UtilityBelt.can_take(h, String(p["kind"])):
+				if UtilityBelt.can_take(h, String(p["kind"])):
 					var dir: Vector3 = (h.pos + Vector3(0, 0.6, 0) - pos)
 					v = dir.normalized() * (6.0 + (2.2 - d) * 6.0)
 					if dir.length() < 0.6:
@@ -3194,29 +3212,23 @@ func _process(delta: float) -> void:
 	if world.wall_mat:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
-	for e in hunters: e.render(delta, alpha)
-	_vprof("hunters")
-	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
-	# the time it skipped); near ones every frame
+	# hunters, monsters and kin well away from the view animate at a quarter rate (each catches up with
+	# the time it skipped); near ones every frame. Hunters only below Ultra (Settings.QUALITY anim_lod)
 	_render_n += 1
 	var cf := cam.focus
 	var near2 := pow(34.0 * maxf(1.0, cam.zoom), 2.0)
+	var hunter_near2: float = near2 if Settings.q("anim_lod") else INF
+	for e in hunters:
+		_render_lod(e, delta, alpha, cf, hunter_near2)
+		if e.unseen: e.visible = false
+	_vprof("hunters")
 	if raid_fx:
 		raid_fx.position = Vector3(cf.x, cf.y, cf.z)
 	for e in kins:
-		if _render_now(e, cf, near2):
-			e.render(delta + e.lod_dt, alpha)
-			e.lod_dt = 0.0
-		else:
-			e.lod_dt += delta
+		_render_lod(e, delta, alpha, cf, near2)
 		if e.unseen or (e.owner_h and (e.owner_h as Hunter).unseen and e.state == "shoulder"):
 			e.visible = false
-	for e in mobs:
-		if _render_now(e, cf, near2):
-			e.render(delta + e.lod_dt, alpha)
-			e.lod_dt = 0.0
-		else:
-			e.lod_dt += delta
+	for e in mobs: _render_lod(e, delta, alpha, cf, near2)
 	_vprof("kins_mobs")
 	if verbs: verbs.render(alpha)
 	for s in shots:
@@ -4257,6 +4269,13 @@ func _update_interact(dt: float) -> void:
 				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
+		if not want and h != player:
+			# a bot that isn't pressing interact: nothing to prompt, so the scans below wait for the press
+			h.box_t = 0.0
+			h.set_meta("loot_hold", false)
+			h.set_meta("box_broke", false)
+			if exits: exits.interact_for(h)      # (lets go of a dock or hatch hold)
+			continue
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
 		if best.is_empty():
 			for b in boxes:

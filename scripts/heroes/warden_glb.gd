@@ -997,7 +997,14 @@ class Sync extends Node:
 			WardenGlb._skinned_weapon(root)
 			WardenGlb._hide_shield(root)
 
+	var lod: AnimLod.Gate
+
 	func _process(dt: float) -> void:
+		if lod == null:
+			lod = AnimLod.Gate.new(root)
+		dt = lod.step(root.global_position, get_viewport(), dt)
+		if dt == 0.0:
+			return
 		_keep_one_weapon()
 		if clips:
 			_play(dt)
