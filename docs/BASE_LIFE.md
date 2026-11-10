@@ -63,6 +63,11 @@ check: `--base-life-check`.
   or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
   0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
   tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+- Tag (GARDEN.md section 4; `scripts/home/base_tag.gd`, `base_life.json` "tag", check `--garden-tag-check`): the PlayWith
+  state. Only friends (bond >= `friend_at`) start a game, 10-20 s; "it" chases, the runner flees `flee_s` then stands
+  `stand_s`, a touch swaps it (new "it" has `grace`) and adds `bond_tag`. A finished game gives each player `speed`
+  Speed (Care.add_stat) and a journal line, then a `rest` breather. A rival of either within `rival_gap` m ends the
+  game as a squabble: both huff, sulk (`sulk_joy`) and stand about `sulk_s`; no new state, existing clips only.
 - Rivals from the games (GARDEN.md sections 4 and 5; `scripts/home/base_rival.gd`, `content/rules/base_rival.json`,
   check `--garden-rivals-check`): extends the bonds, no second system. `BaseBoard.record(game, win, lose)` (every
   game's settle) calls `BaseRival.result`: a Boki that loses to the same Boki `lose_to_mark` (2) times in a row, in

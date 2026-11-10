@@ -156,6 +156,7 @@ const CHECKS := {
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
 	"--board-check": ["res://tools/board_check.gd", "board_check", null],      # the Games board, GARDEN.md 5
 	"--garden-rivals-check": ["res://tools/rivals_check.gd", "rivals_check", null],      # rivals, GARDEN.md 4-5
+	"--garden-tag-check": ["res://tools/tag_check.gd", "tag_check", null],      # tag, GARDEN.md 4
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
