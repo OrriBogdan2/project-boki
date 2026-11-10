@@ -436,6 +436,7 @@ func load_from(p: String) -> void:
 		if not migrate(parsed):
 			return
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
+	FirstCapture.migrate(parsed)      # likewise: no version step
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
