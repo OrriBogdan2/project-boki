@@ -28,6 +28,7 @@ var e_pressed_at := -9.0            # an E pressed while the hook flew (becomes 
 var pull_dir := Vector2.ZERO        # the pull's heading now (it turns toward the anchor, bent by input and facing)
 var pull_speed := 0.0               # m/s of the pull (the reel speed plus the slingshot)
 var pull_t := 0.0                   # s left before the pull gives up (a wall in the way)
+var pull_at := -9.0                 # when the pull started (a jump after it breaks off)
 var sling := 0.0                    # (tests) m/s the slingshot added to the last pull
 var line := Vector2.ZERO            # the chain's line when the pull started (the steer is sideways to it)
 var reach := 0.0                    # m of chain when the pull started (the swing is a share of it, so the arc's angle
@@ -91,7 +92,7 @@ func _throw() -> void:
 	var h := k.h
 	state = "throwing"
 	e_pressed_at = -9.0
-	if k.slam_w.is_empty() and k.lunge.is_empty():      # a heavy move keeps its own body (E goes on top of it)
+	if not k.smash_running():          # a heavy move keeps its own body (E goes on top of it)
 		k.play("jug_chain")
 	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
@@ -175,6 +176,7 @@ func pull() -> void:
 	var h := k.h
 	k.start_e_cd()
 	state = "pulling"
+	pull_at = k.m.time
 	if (k.busy() and k.riposte.move_k() > 0.0) or h.root_t > 0.0:
 		_stop("stopped", false)
 		return
@@ -365,8 +367,8 @@ func _tick_pull(dt: float) -> void:
 	if h.stun_t > 0.0 or h.root_t > 0.0 or h.knock_t > 0.0 or h.downed:
 		_stop("stopped", false)
 		return
-	if not h.grounded and h.vel.y > 0.5:
-		_jump_out()
+	if h.jump_at > pull_at:
+		_jump_out()                 # (a pull from the air, still rising from an earlier jump, carries on)
 		return
 	if h.roll_t <= 0.0 or h.move_kind != "rush":
 		_stop("stopped", false)     # something else took over the movement

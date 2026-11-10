@@ -747,18 +747,19 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
 			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
-	# air: the downward slam slows, the centre takes more and is stunned
+	# air: the slam drives straight down and knocks down everyone it lands on, the centre takes more and stays down
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
-	P.teleport(T.pos + Vector3(-4.0, 3.0, 0))
+	P.teleport(T.pos + Vector3(-0.8, 3.0, 0))
 	P.grounded = false
 	A.fresh(T)
-	A.aim_at(P, T.pos)
+	A.aim_at(P, T.pos + Vector3(4.0, 0, 0))
 	m.step(A.DT)
-	A.ok("juggernaut air: the landing disc shows under the cursor while the Smash is ready",
+	var press_at := P.pos
+	A.ok("juggernaut air: the landing disc shows under him (not the cursor) while the Smash is ready",
 			AimKit.shown(P, "drop_aim")
-			and Vector2(float(AimKit.entry(P, "drop_aim")["at"].x) - T.pos.x,
-					float(AimKit.entry(P, "drop_aim")["at"].y) - T.pos.z).length() < 0.6)
+			and Vector2(float(AimKit.entry(P, "drop_aim")["at"].x) - P.pos.x,
+					float(AimKit.entry(P, "drop_aim")["at"].y) - P.pos.z).length() < 0.2)
 	var da: Dictionary = K.meteor.data()
 	A.ok("juggernaut air: the aim disc is the damage radius %.1f, drawn = hit" % da["radius"],
 			is_equal_approx(float(AimKit.entry(P, "drop_aim").get("r", 0.0)), float(da["radius"])))
@@ -769,22 +770,24 @@ func juggernaut(a) -> void:
 			is_equal_approx(float(AimKit.entry(P, "drop").get("r", 0.0)), float(dd["radius"]))
 			and is_equal_approx(float(AimKit.entry(P, "drop_core").get("r", 0.0)), float(dd["core"])))
 	A.step(m, 1.1)
-	var off := Vector2(K.meteor.last_drop.x - T.pos.x, K.meteor.last_drop.z - T.pos.z).length()
-	A.ok("juggernaut RMB air: Meteor Drop lands at the cursor (disc everyone sees)",
-			disc and K.meteor.drops == 1 and off < 1.0, "landed %.1f from the cursor" % off)
-	A.ok("juggernaut RMB air: Meteor Drop slows, centre stunned",
-			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.slow_t > 0.0 and T.stun_t > 0.0,
-			"took %.0f slow %.2f stun %.2f" % [A.dmg(T), T.slow_t, T.stun_t])
+	var off := Vector2(K.meteor.last_drop.x - press_at.x, K.meteor.last_drop.z - press_at.z).length()
+	A.ok("juggernaut RMB air: Meteor Drop lands straight under the press (disc everyone sees)",
+			disc and K.meteor.drops == 1 and off < 0.15, "landed %.2f from under the press" % off)
+	A.ok("juggernaut RMB air: Meteor Drop knocks down, the centre takes more",
+			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.stun_t > 0.0,
+			"took %.0f stun %.2f" % [A.dmg(T), T.stun_t])
 	A.ok("juggernaut Meteor Drop: its own 7.2s slot, the Smash charge untouched",
 			float(K.cd["air"]) > 6.0 and float(K.cd["air"]) <= 7.2 and K.ch_rmb >= 1.0 and float(K.cd["rmb"]) <= 0.0,
 			"air cd %.2f smash charge %.1f cd %.2f" % [float(K.cd["air"]), K.ch_rmb, float(K.cd["rmb"])])
 	P.teleport(T.pos + Vector3(-4.0, 3.0, 0))
 	P.grounded = false
 	A.aim_at(P, T.pos)
-	P.ak.press_rmb()
+	A.tap(m, P)
 	A.step(m, 0.2)
-	A.ok("juggernaut Meteor Drop: a second one is denied while its slot rests", K.meteor.drops == 1,
-			"drops %d" % K.meteor.drops)
+	A.ok("juggernaut Meteor Drop: while its slot rests an air press is the ground Smash (a Slam), not a second drop",
+			K.meteor.drops == 1 and K.last_variant == "tap" and not K.slam_w.is_empty(),
+			"drops %d variant %s" % [K.meteor.drops, K.last_variant])
+	A.step(m, 1.0)
 	K.cd["air"] = 0.0
 	K.ch_rmb = 0.0
 	K.cd["rmb"] = 2.0

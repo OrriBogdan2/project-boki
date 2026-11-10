@@ -35,14 +35,14 @@ func meteor() -> void:
 	var K: JuggernautKit = P.ak
 	var dd: Dictionary = K.rmb_def()["drop"]
 	var D := K.meteor
-	# from about a jump's height, the cursor 9m off: it lands 5m out (the clamp), on T; T2 just outside the core
+	# from about a jump's height, the cursor 9m off: it lands straight under him, by T; T2 just outside the core
 	P.teleport(home + Vector3(0, 1.8, 0))
 	P.grounded = false
 	P.vel = Vector3.ZERO
 	A.fresh(T)
 	A.fresh(T2)
-	T.teleport(home + Vector3(5.0, 0, 0))
-	T2.teleport(home + Vector3(5.0, 0, float(dd["core"]) + T2.r + 0.4))
+	T.teleport(home + Vector3(0.6, 0, 0))
+	T2.teleport(home + Vector3(0.6, 0, float(dd["core"]) + T2.r + 0.4))
 	A.aim_at(P, home + Vector3(9.0, 0, 0))
 	var y0 := P.pos.y
 	P.ak.press_rmb()
@@ -75,13 +75,14 @@ func meteor() -> void:
 	A.ok("jug meteor: press to impact 0.4-0.7s (footage: apex 412.3s to impact 412.85s)",
 			D.last_air >= 0.4 and D.last_air <= 0.7, "%.2fs" % D.last_air)
 	var land_from := Vector2(D.last_drop.x - home.x, D.last_drop.z - home.z).length()
-	A.ok("jug meteor: it lands at the cursor clamped to its 5m reach",
-			absf(land_from - float(dd["reach"])) < 0.35 and absf(D.last_drop.z - home.z) < 0.3, "%.2fm out" % land_from)
-	A.ok("jug meteor: the shock ring is the stun's real radius; inside it stunned, just outside only slowed",
-			absf(D.last_shock_r - float(dd["core"])) < 0.001 and T.stun_t > 0.0 and T2.stun_t <= 0.0 and T2.slow_t > 0.0
+	A.ok("jug meteor: it drives straight down, landing under the press (the cursor 9m off plays no part)",
+			land_from < 0.15, "%.2fm out" % land_from)
+	A.ok("jug meteor: the shock ring is the stun's real radius; inside it stunned, just outside knocked down shorter",
+			absf(D.last_shock_r - float(dd["core"])) < 0.001 and T.stun_t > float(dd["down"]) + 0.1
+			and T2.stun_t > 0.0 and T2.stun_t <= float(dd["down"]) + 0.01
 			and D.stunned_at(D.last_drop + Vector3(float(dd["core"]) + 0.4, 0, 0), 0.5, D.last_drop)
 			and not D.stunned_at(D.last_drop + Vector3(float(dd["core"]) + 0.7, 0, 0), 0.5, D.last_drop),
-			"ring %.2f T stun %.2f T2 stun %.2f slow %.2f" % [D.last_shock_r, T.stun_t, T2.stun_t, T2.slow_t])
+			"ring %.2f T stun %.2f T2 stun %.2f" % [D.last_shock_r, T.stun_t, T2.stun_t])
 	A.step(m, 0.1)
 	var planted := K.move_k()
 	A.ok("jug meteor: planted at the start of the recovery", planted <= 0.0, "move_k %.2f" % planted)
@@ -127,7 +128,7 @@ func meteor() -> void:
 	A.step(m, 0.1)
 	A.ok("jug meteor: Shift early in the recovery goes within 0.1s and ends it (item 51)",
 			P.dashes < 2.5 and D.phase == "", "dashes %.1f phase %s" % [P.dashes, D.phase])
-	# Shift in the hang: the air dash goes at once, then the dive comes down onto the marker from where it took him
+	# Shift in the hang: the air dash goes at once and the marker under him goes with him; the dive comes down there
 	A.step(m, 1.0)
 	K.cd["air"] = 0.0
 	P.teleport(home + Vector3(0, 1.8, 0))
@@ -148,9 +149,11 @@ func meteor() -> void:
 	while D.phase != "recover" and t < 2.0:
 		m.step(A.DT)
 		t += A.DT
-	var off := Vector2(D.last_drop.x - marker.x, D.last_drop.z - marker.z).length()
-	A.ok("jug meteor: Shift in the hang air-dashes at once (the gather pose kept), then it dives onto the marker",
-			went and D.phase == "recover" and off < 0.3, "went %s phase %s %.2fm off the marker" % [went, D.phase, off])
+	var off := Vector2(D.last_drop.x - D.from.x, D.last_drop.z - D.from.z).length()
+	var moved := Vector2(D.from.x - marker.x, D.from.z - marker.z).length()
+	A.ok("jug meteor: Shift in the hang air-dashes at once (the gather pose kept), then it dives straight down there",
+			went and D.phase == "recover" and off < 0.15 and moved > 1.0,
+			"went %s phase %s, dashed %.2fm, %.2fm off in the dive" % [went, D.phase, moved, off])
 	await A.done(m)
 
 # ------------------------------------------------------------------ item 22: the Warchain's states
