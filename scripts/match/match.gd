@@ -5991,7 +5991,6 @@ func _net_ev(x, from: String) -> void:
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
-				sfx("scan_pop", player.pos, 0.0)
 				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null

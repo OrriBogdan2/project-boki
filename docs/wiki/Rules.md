@@ -122,6 +122,11 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | noise_every_s | 0.5 |
 | hear_range | 26 |
 | rise_pitch | [0.8, 1.6] |
+| pop_sounds | ["scan_pop", "scan_pop_fine", "scan_pop_rare"] |
+| pop_sounds_doc | The chime that ends a scan by the Boki's rarity: common, a mutated one, a shimmer or a rare species (Capture.rarity_tier). |
+| duck_s | 0.5 |
+| duck_db | -5 |
+| duck_doc | The music ducks this far (dB) for this long (s) under a catch within hearing. |
 | sight_range | 24 |
 | sight_places_kept | 3 |
 
