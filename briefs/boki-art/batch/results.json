@@ -84843,5 +84843,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_lanternmit_b4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_jarmit_b4",
+    "name": "Jarmit (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_jarmit_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_jarmit_b4",
+    "name": "Jarmit (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_jarmit_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_jarmit_b4",
+    "name": "Jarmit (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_jarmit_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lanternmit_b4",
+    "name": "Lanternmit (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_lanternmit_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lanternmit_b4",
+    "name": "Lanternmit (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_lanternmit_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_jarmit_b4",
+    "name": "Jarmit (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_jarmit_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_terrarimit_b4",
+    "name": "Terrarimit (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_terrarimit_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_lanternmit_b4",
+    "name": "Lanternmit (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_lanternmit_b4_2.jpg",
+    "ok": true
   }
 ]
