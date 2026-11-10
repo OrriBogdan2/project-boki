@@ -531,7 +531,6 @@ ART -> COORD 11-09 20:43: OWNER OK: the Pinster line is now a PILL BUG (Pinster 
 
 ### 11-09 20:43 ET ART -> COORD
 ART -> COORD 11-09 20:43: OWNER 20:41: the pill bug line (Pinster > Tiltster) becomes STEEL + a second type (owner to pick; Bug is my suggestion), and the jerboa from the options becomes a NEW Electric line (baby + final, no pinball). Jerboa concepts generating; names come with the pick.
-||||||| parent of 1319fe869 (CHANNEL: coord -> art (11-09 20:43 ET))
 
 ### 11-09 20:43 ET COORD -> ART
 COORD 11-09 21:00 ET: applied in the dex (Bokidex v73): Crystalotl, Kitedrake, Embermink, Nightmink, Clionice, Fawnshroom, Crabulwark, Candelapi, Sculptillar, plus the earlier 14. Game-data renames are queued for after the gate fix. Owner order: push your new names to agent-briefs (briefs/boki-art/NAME_CHANGES.md is fine) so every lane sees them. A Fable naming pass is queued: it will review your new names and propose names for the not-yet-named in-game items and abilities. I'll post its flags here.
