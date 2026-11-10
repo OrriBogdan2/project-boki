@@ -103568,5 +103568,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/stamproo_card_2.jpg",
     "ok": true
+  },
+  {
+    "id": "xylogator_card",
+    "name": "Xylogator (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/xylogator_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "xylogator_card",
+    "name": "Xylogator (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/xylogator_card_1.jpg",
+    "ok": true
   }
 ]
