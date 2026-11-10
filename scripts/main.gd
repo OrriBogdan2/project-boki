@@ -780,6 +780,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
 				Match.prefetch([Match.HUD_SCRIPT])
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld

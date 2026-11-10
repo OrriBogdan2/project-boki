@@ -14,8 +14,12 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 
 ## The drop
 
-The match opens with a short **planning phase**: the full map is up and everyone can ping where they
-want to land (bots ping too). Then the skyship crosses the map.
+The match opens on the skyship's deck: a short **squad intro** shows your three Hunters side by side
+with their Boki wisps, each striking a pose under their name ("Vex the Hired Gun"), then the camera
+cranes up into the ride view. Any key skips it after a second and a half, and the same lineup is not
+shown twice in a row. Then comes a short **planning phase**: the full map is up and everyone can ping
+where they want to land (bots ping too). Then the skyship crosses the map with your squad on deck,
+its engines droning and its shadow sweeping over the islands below.
 
 - Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
   **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
