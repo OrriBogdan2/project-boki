@@ -73916,5 +73916,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2p_gongrowl_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2x_bastling",
+    "name": "Bastling (V2 card, remove bleed)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2x_bastling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2x_maulangler",
+    "name": "Maulangler (V2 card, remove bleed)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2x_maulangler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gongrowl",
+    "name": "Gongrowl (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2x_bastling",
+    "name": "Bastling (V2 card, remove bleed)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2x_bastling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2x_barrelmander",
+    "name": "Barrelmander (V2 card, remove bleed)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2x_barrelmander_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2x_barostorm",
+    "name": "Barostorm (V2 card, remove bleed)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2x_barostorm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gongrowl",
+    "name": "Gongrowl (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_gongrowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2x_barrelmander",
+    "name": "Barrelmander (V2 card, remove bleed)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2x_barrelmander_2.jpg",
+    "ok": true
   }
 ]
