@@ -4,8 +4,7 @@ extends PanelContainer
 ## name, weight), then one row per ability (Passive, LMB, RMB, E, Dash, the hunter's ultimate, the Boki
 ## Fusion), each with its key cap, a big icon, its name and one short line. A row's "Details" opens that
 ## ability's page (preview, every rule) in the same frame (no scroll, no resizing: the card is always
-## SIZE). Used in the Arena / training (K) and on the expedition loadout (KitCard.strip, a compact row
-## that opens the full card).
+## SIZE). Used in the Arena / training (K). KitCard.strip is a compact row that opens the full card.
 
 const SIZE := Vector2(800, 620)
 const BODY_H := 468.0

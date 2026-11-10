@@ -381,13 +381,17 @@ static func tabs(names: Array, cur: String, cb: Callable, counts := {}, minw := 
 
 ## A selectable card (a tier, a skin, an item): lights up on hover and focus, the picked one wears
 ## an accent edge. Add your content to the returned container. Click, Enter or the pad's A pick it.
+## With no `cb` (a locked tile) it stays dark and silent on hover and takes no focus; its tooltip still shows.
 static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> PanelContainer:
 	var p := PanelContainer.new()
 	var n := _tile_face(on, false, col, pad)
 	var h := _tile_face(on, true, col, pad)
 	p.add_theme_stylebox_override("panel", n)
-	p.focus_mode = Control.FOCUS_ALL
 	p.mouse_filter = Control.MOUSE_FILTER_STOP
+	if not cb.is_valid():
+		p.focus_mode = Control.FOCUS_NONE
+		return p
+	p.focus_mode = Control.FOCUS_ALL
 	p.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	p.resized.connect(func(): p.pivot_offset = p.size * 0.5)
 	var lit := func(yes: bool) -> void:
@@ -405,7 +409,7 @@ static func tile_card(on: bool, cb: Callable, pad := 12, col := ACCENT) -> Panel
 	p.focus_entered.connect(p.queue_redraw); p.focus_exited.connect(p.queue_redraw)
 	p.gui_input.connect(func(ev):
 		var go: bool = (ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT) or ev.is_action_pressed("ui_accept")
-		if go and cb.is_valid():
+		if go:
 			p.accept_event()
 			Sfx.play("click")
 			cb.call())
