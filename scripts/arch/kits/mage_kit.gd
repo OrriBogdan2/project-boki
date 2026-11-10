@@ -166,7 +166,8 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.sfx("vv_static_full", f.pos, -2.0)
 		if swing: play("mage_live")
 	elif int(s["n"]) > was:
-		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+		StatusSfx.cue(f, "static", h, float(rd["dur"]), int(s["n"]), true)     # the zap climbs with each stack
+	StatusSfx.loop_static(f, h, func() -> int: return spark_n(f))
 
 func combo_read(f: Ent) -> Dictionary:
 	var s = sparks.get(f.get_instance_id())

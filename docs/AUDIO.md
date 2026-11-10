@@ -431,3 +431,6 @@ The grounds (opts `training`: the practice island, the Arena and the duel room) 
 - On completion one sting for the rarest thing inside (`Data.RARITY` step, the ground-loot colours): Rare `loot_rare`, Epic `loot_epic`, Legendary `loot_legend`; Common and Fine and an empty box are silent. A deathbox stings once (the player's instant loot window and a bot's hold both count as its open).
 - `--loot-open-sfx-check` asserts the loop, the cancel, the one sting and the limits.
 
+
+## Status cues
+`StatusSfx` (`scripts/match/status_sfx.gd`, numbers in `content/rules/status_sfx.json`) gives every status a short start cue on the affected body (Ignite, Chill, Static, Slow, Stun, Root, Ground, Daze, Anti-Heal) and a quiet loop for the long ones (Ignite's crackle, Static's buzz), stopped when the status runs out or is cleansed. Static's cue climbs per stack. Yours (on your body, or put there by you or your Boki) play `mine_db` louder. A refresh of a running status is silent. Voice caps: `cue_cap` cues per `cue_window_ms`, `loop_cap` loops at once. New sounds come from `tools/gen_status_sfx.py`; Ignite and Static reuse Cinder's `as_ignite` and Sparkle's `mage_zap`. `--status-sfx-check` covers it.

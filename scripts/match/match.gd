@@ -359,6 +359,7 @@ func _start(o: Dictionary) -> void:
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
 	recap = DeathRecap.new(self)         # the down/death card
 	add_child(recap)
+	add_child(StatusSfx.new(self))        # status cues and loops
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))

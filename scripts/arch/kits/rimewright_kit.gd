@@ -103,6 +103,7 @@ func add_chill(t: Ent) -> void:
 	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
+		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t):

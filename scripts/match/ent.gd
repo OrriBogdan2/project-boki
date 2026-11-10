@@ -183,6 +183,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		root_t = maxf(root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
 		blight_t = maxf(blight_t, float(opts["blight"]))
+		StatusSfx.cue(self, "antiheal", by, blight_t)
 	if opts.get("stun", 0.0) > 0.0:
 		stun_t = maxf(stun_t, float(opts["stun"]))
 		if use_dr: dr_stun = true

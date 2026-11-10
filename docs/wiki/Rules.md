@@ -2053,6 +2053,23 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | dash_speed | {"archer": 0.7} |
 | sources | {"doc": "Where each glide/air number comes from (SUPERVIVE_FEEL.md 'Footage pass', Nov 12 2026). Notes only, nothing here is read as a number. Trust order: owner > game data > wiki > footage.", "glide_cruise": "SETTLED 5.0 m/s (Hunter.GLIDE_SPEED): [game data] MaxGlide 500 uu/s; [footage] ~5 m/s, run pace. Agree.", "glide_base_speeds": "Not determinable (GlideInitial*/TargetXY* encrypted): glide.drag/drag_steer/max are ours. No player glide start in the hero-ref clips; Elluna 706.8 s dash-into-glide still decaying (11 -> 8 m/s) when the track ends.", "glide_gravity": "Not determinable (GlideGravityFactor encrypted): Hunter.GLIDE_SINK 1.4 m/s is ours; footage shows only the height hold (Tom Kick ~14 s level) and lift (Zik ~1 s back up).", "glide_braking": "Not determinable (GlideBraking* encrypted): glide.coast and glide.brake/brake_deg are ours. Tetra guide 300 s and showcase 1174 s frame-stepped: no player let-go or back-key brake.", "hoop_boost": "Not determinable (GlideBoost* encrypted): no hoop or jetstream in any hero-ref clip.", "jump_hold": "Not determinable: a key hold is not visible on screen. Owner: fixed jump, Space held never opens the glider.", "air_dash": "Per Hunter (AirDashSpeedMultiplier/Clamp encrypted): Shiv ~1.7x ground (8.4 m / 0.95 s, dancer.md 303.8-304.5 s, 0129-0134), carried to the landing; Elluna 11-15 m / 0.8-1.1 s (mooshmoosh.md 731.1/706.8/735.9/745.1 s) = tender dash.air; Kingpin card 'further', air_k 1.35 est; the other nine: Not determinable, no air dash in their clips."} |
 
+## status_sfx (`content/rules/status_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | StatusSfx (scripts/match/status_sfx.gd): a short start cue on the affected body for each status, a quiet loop for the long ones. Sounds from tools/gen_status_sfx.py, Cinder's as_ignite and Sparkle's mage_zap. Dbs are call-site volumes under the sound's own level; 'mine' (on your body, or put there by you or your Boki) adds mine_db. pitch_step: the cue climbs this much per stack (static). Voice caps: at most cue_cap cues start within cue_window_ms across all statuses, and at most loop_cap loops run at once. |
+| cue_db | -9 |
+| mine_db | 3 |
+| loop_db | -16 |
+| loop_reach_m | 14 |
+| cue_cap | 4 |
+| cue_window_ms | 200 |
+| loop_cap | 3 |
+| cues | {"ignite": {"sound": "as_ignite", "db": -6.0}, "chill": {"sound": "st_chill"}, "static": {"sound": "mage_zap", "db": -6.0, "pitch_base": 0.9, "pitch_step": 0.08}, "slow": {"sound": "st_slow"}, "stun": {"sound": "st_stun"}, "root": {"sound": "st_root"}, "ground": {"sound": "st_ground"}, "daze": {"sound": "st_daze"}, "antiheal": {"sound": "st_antiheal"}} |
+| loops | {"ignite": {"sound": "st_ignite_loop", "pitch_step": 0.0}, "static": {"sound": "st_static_loop", "pitch_step": 0.1}} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 
