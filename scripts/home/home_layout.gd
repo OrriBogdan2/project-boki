@@ -32,8 +32,8 @@ const THEMES := {
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
 	# a garden zone's ground (garden_zones.json theme): never in the theme shop
-	"cinder": {"name": "Cinder", "zone": true, "region": 3, "top": "a0624a", "top2": "7e4a3c", "side": "5a3a34",
-		"deep": "2a1a1c", "leaf": "c8663a"},
+	"cinder": {"name": "Cinder", "zone": true, "region": 3, "rocky": true, "top": "8a5442", "top2": "6c3f33",
+		"side": "5a3a34", "deep": "2a1a1c", "leaf": "c8663a"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and

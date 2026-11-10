@@ -19,7 +19,7 @@ static func build(h) -> void:
 	var r := RandomNumberGenerator.new()
 	r.seed = int(sc["seed"])
 	var theme: Dictionary = HomeLayout.THEMES[GardenZones.info(h.zone)["theme"]]
-	var top := Color(String(theme["top2"])).darkened(0.18)
+	var top := Color(String(theme["top2"])).lightened(0.3)
 	var slabs: Array[Transform3D] = []
 	for i in int(sc["terraces"]):
 		var at: Vector2 = open[r.randi() % open.size()]

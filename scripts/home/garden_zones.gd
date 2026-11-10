@@ -9,6 +9,7 @@ extends RefCounted
 ## own: you move them (move(), through HubWaystone.send) or answer when one asks (wants()).
 
 const HUB := "hub"
+const LEDGE_R := 2          # tiles each way round the Stump Shove stump kept free of wild
 
 static var here := ""      # the zone the open Home shows (home.gd sets it; "" before one loads)
 
@@ -76,6 +77,16 @@ static func _made(def: Dictionary) -> Dictionary:
 		var e := {"u": HomeLayout._next_uid(L), "id": String(s[0]), "x": int(s[1]), "z": int(s[2]), "r": 0}
 		(L["deco"] as Array).append(e)
 	return L
+
+## The tiles round the Stump Shove stump of the zone you are in (kept free of wild).
+static func ledge_tiles(w: World) -> Array[int]:
+	var out: Array[int] = []
+	var at: Array = info(current()).get("shove_at", [])
+	for dz in range(-LEDGE_R, LEDGE_R + 1):
+		for dx in range(-LEDGE_R, LEDGE_R + 1):
+			if not at.is_empty() and w.inb(int(at[0]) + dx, int(at[1]) + dz):
+				out.append(w.idx(int(at[0]) + dx, int(at[1]) + dz))
+	return out
 
 ## What the snack patch grows in the zone you are in.
 static func snacks() -> Array:

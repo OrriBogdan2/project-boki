@@ -83,7 +83,11 @@ func fs() -> bool:
 ## The wild a seed gives this island, from the farm-start generator or the older procedural one.
 func _wild_of(w: World) -> Dictionary:
 	if fs():
-		return HomeLayout.wild_fs(w, _seed(), float(L().get("sk", 1.0)), _wild_keep())
+		var wt := HomeLayout.wild_fs(w, _seed(), float(L().get("sk", 1.0)), _wild_keep())
+		if HomeLayout.THEMES[String(L()["theme"])].get("rocky", false):
+			for i in wt:
+				if wt[i] == "tree": wt[i] = "rock"      # a bare zone: stone where a grove would stand
+		return wt
 	return HomeLayout.wild(w, _seed(), _wild_keep())
 
 func _wild_keep() -> Dictionary:
@@ -95,6 +99,8 @@ func _wild_keep() -> Dictionary:
 		var rc := HomeLayout.rect_of(b, h._d())
 		for c in HomeLayout.cells_of([rc[0] - 1, rc[1] - 1, rc[2] + 1, rc[3] + 3]):
 			if w.inb(c.x, c.y): keep[w.idx(c.x, c.y)] = true
+	for i in GardenZones.ledge_tiles(w):
+		keep[i] = true
 	for f in Econ.feeders() if h.visit.is_empty() else []:
 		for dz in range(-2, 3):
 			for dx in range(-2, 3):
