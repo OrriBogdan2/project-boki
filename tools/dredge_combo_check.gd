@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
+	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -141,8 +142,10 @@ func _slam_tell() -> void:
 	var reach := float(ed["radius"])
 	# aim straight along +x; one foe inside the edge of the cone, one just past it (outside the angle)
 	ak.aim_at(P, home + Vector3(5.0, 0, 0))
-	T.teleport(home + Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4))
-	T2.teleport(home + Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4))
+	var in_off := Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4)
+	var out_off := Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4)
+	T.teleport(home + in_off)
+	T2.teleport(home + out_off)
 	ak.fresh(T)
 	ak.fresh(T2)
 	K.cd["e"] = 0.0
@@ -159,11 +162,16 @@ func _slam_tell() -> void:
 			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
 		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
 	)
-	ak.step(m, 0.3)
+	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	while K.wind > 0.03:
+		ak.step(m, ak.DT)
+	T.teleport(P.pos + in_off)
+	T2.teleport(P.pos + out_off)
+	ak.step(m, 0.1)
 	ok(
 		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
-		"inside %.0f, outside %.0f" % [ak.dmg(T), ak.dmg(T2)]
+		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
 	)
 	await ak.done(m)
 
@@ -446,8 +454,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(T) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: planted, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) < 0.3,
+		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) > 0.8 and P.flat_dist(at0) < 2.0,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
