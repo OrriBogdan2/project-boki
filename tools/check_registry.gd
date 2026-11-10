@@ -226,6 +226,7 @@ const CHECKS := {
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],  # decision 0040
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],      # bots press Summon (BotKin.summon)
+	"--wisp-clear-shots": ["res://tools/wisp_clear_shots.gd", "wisp_clear_shots", null],      # --shots-dir=<dir>: GPU shots
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
