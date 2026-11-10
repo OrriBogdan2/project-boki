@@ -613,7 +613,7 @@ static func lean_total(rec: Dictionary) -> float:
 static func stronger(a: Dictionary, b: Dictionary) -> Dictionary:
 	return b if lean_total(b) > lean_total(a) else a
 
-## One habit from each parent: the favourite food from one, the favourite play from the other.
+## One habit from each parent: the favourite food from one, the favourite play (and favourite toy) from the other.
 ## True if the food came from a.
 static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> bool:
 	ensure(a)
@@ -626,6 +626,8 @@ static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng:
 	if String(likes["hates"]) == food: likes["hates"] = likes["food"]
 	likes["food"] = food
 	likes["play"] = pp["likes"]["play"]
+	var toy := FavToy.of(pp) if FavToy.of(pp) != "" else FavToy.of(pf)     # the play habit carries its favourite toy
+	if toy != "": FavToy.inherit(baby, toy)
 	return a_food
 
 ## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).

@@ -963,6 +963,12 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | joy_gain | 10 |
 | stat_gain | 1 |
 | max_players | 2 |
+| fav_after | 3 |
+| fav_after_doc | Plays at toys before a Boki crowns its most-used toy as its favourite (FavToy). |
+| fav_weight | 6 |
+| fav_weight_doc | How many times likelier a Boki is to pick its favourite toy than a plain one. |
+| inherit_secs | 60 |
+| inherit_secs_doc | Seconds of play a baby's inherited favourite starts with, so a few other plays do not undo it. |
 | snack_item | kibble |
 | snack_item_doc | What a dig finds (a pantry item) when it turns something up; each toy's "snack" is the chance per dig. |
 | squabble_temper | 0.7 |
