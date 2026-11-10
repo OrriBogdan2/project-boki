@@ -800,6 +800,14 @@ func _bulwark_combos() -> void:
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
+	var hv := HeroVfx.of(m)
+	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
+	var sweep_arc := func(move: String) -> float:
+		return float(vmoves[move]["fx"].filter(func(l): return l["p"] == "sweep")[0]["arc"])
+	ok("bjorn vfx: the release plays the swing, its crescent drawn at the hit's arc",
+		int(hv.plays.get("swing", 0)) == 1
+		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
+		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -977,6 +985,10 @@ func _bulwark_combos() -> void:
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
 		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
+	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
+		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
+		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()

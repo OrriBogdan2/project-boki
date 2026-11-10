@@ -11,7 +11,7 @@ func _part_throw() -> void:
 	var tap := func(t: float):
 		P.inp["fire"] = _at(t, 0.2) or _at(t, 1.5)
 		_aim(home + Vector3(6.0, 0, 0))
-	await _go(2.4, tap, _sheet("throw", "LMB tap: the throw (0.2 s), the plant under its ray, LMB again: the recall (1.5 s)",
+	await _go(2.4, tap, _sheet("throw", "LMB tap: the throw, the plant under its ray, LMB again: the recall",
 		[0.3, 0.38, 0.46, 0.6, 1.0, 1.55, 1.7, 1.85, 2.1]), 2.5)
 	await _go(GAP)
 
@@ -20,7 +20,7 @@ func _part_charge() -> void:
 	var swing := func(t: float):
 		P.inp["fire"] = t > 0.2 and t < 1.7
 		_aim(T.pos)
-	await _go(2.4, swing, _sheet("charge", "LMB held: the whirl, the glint from 0.6 s, the full flare, the release at 1.7 s: crescent and impact",
+	await _go(2.4, swing, _sheet("charge", "LMB held: whirl, glint, full flare, then the release: crescent and impact",
 		[0.5, 0.9, 1.2, 1.35, 1.72, 1.76, 1.82, 1.95, 2.2]), 1.5)
 	await _go(GAP)
 
@@ -33,7 +33,8 @@ func _part_shield() -> void:
 			P.ak.press_rmb()
 		_aim(T.pos)
 		if _at(t, 1.2):
-			m.spawn_shot(T, T.pos + Vector3(-0.6, 1.0, 0), Vector2(-40, 0), 12.0, 0.3, 0.15, Color("ff6a4a"), {"kb": 0.0})
+			var from := T.pos + Vector3(-0.6, 1.0, 0)
+			m.spawn_shot(T, from, Vector2(-40, 0), 12.0, 0.3, 0.15, Color("ff6a4a"), {"kb": 0.0})
 	await _go(2.2, guard, _sheet("shield", "RMB held: the shield rises, a shot blocked at 1.2 s",
 		[0.25, 0.32, 0.45, 0.7, 1.25, 1.3, 1.4, 1.7, 2.1]), 2.0)
 	await _go(GAP)
@@ -79,10 +80,10 @@ func _rock() -> Vector3:
 		for x in range(6, W.w - 4):
 			if W.kind[W.idx(x, z)] != World.T_BLOCK or W.kind[W.idx(x + 1, z)] == World.T_VOID:
 				continue
-			var free := true
+			var open := true
 			for dx in range(1, 5):
-				free = free and W.kind[W.idx(x - dx, z)] == World.T_GROUND
+				open = open and W.kind[W.idx(x - dx, z)] == World.T_GROUND
 			var q := Vector3(x + 0.5, W.ground_at(x + 0.5, z + 0.5), z + 0.5)
-			if free and (best == Vector3.INF or q.distance_to(home) < best.distance_to(home)):
+			if open and (best == Vector3.INF or q.distance_to(home) < best.distance_to(home)):
 				best = q
 	return best
