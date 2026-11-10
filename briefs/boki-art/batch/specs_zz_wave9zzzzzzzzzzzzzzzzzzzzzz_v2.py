@@ -1104,3 +1104,11 @@ _PK={'Sporcupine':('mid','sleek',0,1,"trotting toward the viewer, head high, mus
 for _n,(_st,_ar,_dk,_fu,_pose) in _PK.items():
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_p3'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_p3'; SPECS[_n0+1]['runs']=2
+
+# 09:10 ET 11-10 OWNER: "Ringrove could get a bit of an upgrade too, and definitely a better way of standing / portrait".
+# Same bear-sized Mycroll-family final (image 1), upgraded and in a stronger stance; 3 directions x 2 runs. Image 2 = the new Sporcupine, so the line connects.
+for _k,_d in (('u1',"rearing up on its hind legs like a great bear, front paws raised, its quills flared out behind it like a lion's mane and a full ring of big mint mushroom caps crowning its shoulders and head; a longer tail ending in one huge cap, like the middle form's tail grown up. Powerful and proud."),
+              ('u2',"standing side-on on all fours, facing RIGHT, head turned to look at the viewer, one front paw raised on a step: longer legs than now, a thick cream chest ruff, a tall crest of quills from brow to tail with tiers of mint caps along it from small to huge, and a heavy cap-tipped tail held high."),
+              ('u3',"seated upright like a guardian statue facing the viewer, broad chest forward, front paws planted, a wide halo of mint mushroom caps fanned behind its head and shoulders like a ring, long quills sweeping down its back to the ground, calm noble eyes.")):
+    SPECS.append({'id':'opt_ringrove_'+_k,'name':'Ringrove (upgrade '+_k+')','refs':[_C%'Ringrove',_C%'Sporcupine'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of an upgraded version of the creature in image 1, the final evolution of the creature in image 2: the same cream face, warm brown quills, mint mushroom caps with cream spots and teal eyes, bigger and more impressive. NEW STANCE AND UPGRADE (the whole point): "+_d+" Ignore how the images are painted. "+_TXT.replace("There is only one image and no style image: the","The")+STYLE_V2('final','majestic',False,True)+FRAME_V2})
