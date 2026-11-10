@@ -101426,5 +101426,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/mark_glacione_h_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mark_glacione_s",
+    "name": "Glacione (legendary mark s)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_glacione_s_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_twinklup_h",
+    "name": "Twinklup (legendary mark h)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_twinklup_h_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_twinklup_h",
+    "name": "Twinklup (legendary mark h)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_twinklup_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_twinklup_s",
+    "name": "Twinklup (legendary mark s)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_twinklup_s_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_glacione_h",
+    "name": "Glacione (legendary mark h)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_glacione_h_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_twinklup_s",
+    "name": "Twinklup (legendary mark s)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_twinklup_s_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_lockwren_s",
+    "name": "Lockwren (legendary mark s)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_lockwren_s_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_lockwren_h",
+    "name": "Lockwren (legendary mark h)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_lockwren_h_1.jpg",
+    "ok": true
   }
 ]
