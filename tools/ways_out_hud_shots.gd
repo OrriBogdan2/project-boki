@@ -48,13 +48,13 @@ func run(main_node: Node) -> void:
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
 	var foe2: Hunter = m.hunters.filter(func(h): return h.team != P.team and h.team != foe.team)[0]
 	P.teleport(m.world.free_spot_near(H.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
-	m.time = 30.0 - m.sess_t0
+	m.sess_t0 = 30.0 - m.time
 	await _grab("strip_1_locked")
-	m.time = float(q["lair_open_s"]) + 40.0 - m.sess_t0
+	m.sess_t0 = float(q["lair_open_s"]) + 40.0 - m.time
 	H.charge = 40.0
 	H._force(Heart.S.CHARGING, "shots")
 	await _grab("strip_2_lair_open")
-	m.time = Heart.r("wake_s") + Heart.r("charge_s") + 20.0 - m.sess_t0
+	m.sess_t0 = Heart.r("wake_s") + Heart.r("charge_s") + 20.0 - m.time
 	H.charge = Heart.r("charge_s")
 	H._force(Heart.S.READY, "charged")
 	H.carrier = foe
@@ -64,12 +64,12 @@ func run(main_node: Node) -> void:
 	await _grab("strip_3_in_use")
 	H.carrier = null
 	H.early_team = foe.team
-	m.time = float(q["uplink_shut_s"]) + 10.0 - m.sess_t0
+	m.sess_t0 = float(q["uplink_shut_s"]) + 10.0 - m.time
 	await _grab("strip_4_taken_lost")
 	H._force(Heart.S.FINAL, "shots")
 	H.final_team = P.team
 	H.final_prog = 0.4
-	m.time = Heart.r("final_s") + 30.0 - m.sess_t0
+	m.sess_t0 = Heart.r("final_s") + 30.0 - m.time
 	await _grab("strip_5_late")
 	H.early_team = -1
 	H.final_team = -1
