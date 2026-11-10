@@ -80370,5 +80370,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_wyrmink_b3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_wyrmink_b3",
+    "name": "Wyrmink (V2 sheet, batch 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_wyrmink_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_wyrmink_b3",
+    "name": "Wyrmink (V2 portrait, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_wyrmink_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kestrike_b3",
+    "name": "Kestrike (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_kestrike_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kestrike_b3",
+    "name": "Kestrike (V2 sheet, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kestrike_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kestrike_b3",
+    "name": "Kestrike (V2 sheet, batch 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kestrike_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_wyrmink_b3",
+    "name": "Wyrmink (V2 sheet, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_wyrmink_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kestrike_b3",
+    "name": "Kestrike (V2 sheet, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kestrike_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_arcestrel_b3",
+    "name": "Arcestrel (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_arcestrel_b3_1.jpg",
+    "ok": true
   }
 ]
