@@ -31,7 +31,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
    it is held to a plausible cadence by the walk/run keys.
 2. **Arms pace.** On 6 Hunters an arm swings with its own side's leg (counter -0.65 to -0.96). The clips are authored
    in Blender with a hand-keyed IK swing and the sign differs per Hunter, so no single sign fixes all.
-3. **Held-weapon arms are static in a gait** (Lace's bow arm, Vex's pistol arm). That is deliberate and kept.
+3. **Held-weapon arms are near static in a gait** (Lace's bow arm, Vex's pistol arm). They keep their hold and get a small
+   sway (`arm_swing` gain 0.2: reach 0.05 to 0.15 and 0.06 to 0.13), not the 0.5 of a free arm.
 4. **No loop or blend pops.** Loop seams are under 0.005 body heights, contact walk to run is 0 and walk to run 0.14 at
    most. Nothing to fix there. Idle to walk first-pose gaps are 0.06 to 0.45 body heights, covered by the blend.
 5. **Attacks leave an arm out.** Six Hunters hold an arm sideways (T-pose) for over half an attack clip.
@@ -67,12 +68,12 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 
 | Hunter | Slide walk % | Slide run % | Clip speed m/s | Counter | Bob cm | Steps/s |
 |---|---|---|---|---|---|---|
-| `archer` | 65 → 29 | 46 → 13 | 2.5 → 4.7 | -0.95 → +0.61 | 5 | 3.3 |
+| `archer` | 65 → 29 | 46 → 13 | 2.5 → 4.7 | -0.95 → +0.87 | 5 | 3.3 |
 | `ashwick` | 6 → 5 | 18 → 12 | 5.1 → 4.6 | -0.93 → +0.80 | 9 | 2.5 |
-| `bulwark` | 22 → 18 | 25 → 19 | 4.0 → 4.6 | +0.17 → +0.64 | 4 | 5.0 |
+| `bulwark` | 22 → 18 | 25 → 15 | 4.0 → 4.6 | +0.17 → +0.66 | 4 | 4.2 |
 | `dolm` | 54 → 25 | 38 → 18 | 3.1 → 5.5 | -0.86 → +0.72 | 4 | 3.3 |
 | `dredge` | 42 → 30 | 28 → 12 | 3.9 → 4.5 | +0.92 → +0.91 | 17 | 2.5 |
-| `gunslinger` | 50 → 21 | 25 → 23 | 3.6 → 4.5 | +0.90 → +0.89 | 7 | 4.2 |
+| `gunslinger` | 50 → 21 | 25 → 13 | 3.6 → 4.5 | +0.90 → +0.90 | 7 | 3.3 |
 | `juggernaut` | 53 → 25 | 27 → 12 | 3.4 → 4.5 | -0.65 → +0.84 | 16 | 3.3 |
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
@@ -87,7 +88,7 @@ posts scroll at the move speed).
 
 **Lace (`archer`)**
 1. Feet slid 46 % of the run speed (fixed: 13 %); the right arm pumped with its own side's leg (fixed, counter +0.61).
-2. The bow arm hangs static in a gait (reach 0.05 body heights) by design; the free arm stands out sideways for 21 % of the loose clip.
+2. The bow arm (left) hung static in a gait (reach 0.05); a small sway (gain 0.2) gives it 0.15; the free arm stands out sideways for 21 % of the loose clip.
 3. Idle to walk first-pose gap 0.29 body heights (blend-covered).
 
 ![archer walk and run, before and after](anim_audit/archer.jpg)
@@ -100,8 +101,8 @@ posts scroll at the move speed).
 ![ashwick walk and run, before and after](anim_audit/ashwick.jpg)
 
 **Mossy (`bulwark`)**
-1. Cadence 5 steps/s on a 2 m giant (a shuffle); not changed.
-2. The left arm hung nearly still against the legs (counter +0.17, now +0.64). Slide only fell 25 % to 19 %: the nearest to the gate.
+1. Cadence was 5 steps/s on a 2 m giant (a shuffle); now 4.2 with the slower clip.
+2. The left arm hung nearly still against the legs (counter +0.17, now +0.66). Slide 25 % to 15 % (`foot_mps` 6.0, stride 1.3: a slower clip also eases the 5 steps/s).
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
@@ -121,8 +122,8 @@ posts scroll at the move speed).
 ![dredge walk and run, before and after](anim_audit/dredge.jpg)
 
 **Vex (`gunslinger`)**
-1. Right (pistol) arm hardly moves in a gait (reach 0.06): held-weapon arm, kept.
-2. Slide 25 % to 23 % at a run (walk 50 % to 21 %): the stride stretch is capped by the clip's own timing.
+1. Right (pistol) arm hardly moved in a gait (reach 0.06); now a small sway (gain 0.2, reach 0.13).
+2. Slide 25 % to 13 % at a run (walk 50 % to 21 %): a slower clip (`foot_mps` 5.0, rate 0.93) with a longer stride (1.3).
 3. Idle to walk first-pose gap 0.29 body heights.
 
 ![gunslinger walk and run, before and after](anim_audit/gunslinger.jpg)
@@ -179,5 +180,5 @@ Split into backlog items per Hunter (role build):
 - Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-- `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
+- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.2 m/s; the gate only reads the run.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
