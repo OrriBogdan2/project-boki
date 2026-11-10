@@ -11,6 +11,8 @@ var beats := {}            # clip -> {len, cock, peak, settle, v (speed per fram
 var leads := {}            # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
 var shown := {}            # kit anim_ids seen in a row
 var lane := 0              # each kit row on a fresh strip of ground (a Searing Wave's fire stays)
+var run_steps := 0         # footfalls in one loop of the forward run clip
+var wind_still := 0.0      # s into jug_lunge_wind where its pose holds (its hold_from)
 
 func run(a) -> void:
 	A = a
@@ -57,6 +59,8 @@ func clips() -> void:
 			v.append(pts[i].distance_to(pts[i - 1]) / DT)
 		beats[km] = _beats(v, length, pts)
 		leads[km] = float(mv.get("lead", 0.0))
+		if km == "jug_lunge_wind":
+			wind_still = float(mv["hold_from"])
 		beats[km]["p0"] = pts[0]
 		beats[km]["pend"] = pts[pts.size() - 1]
 		var b: Dictionary = beats[km]
@@ -66,7 +70,40 @@ func clips() -> void:
 	for pair in [["jug_lunge_wind", "jug_lunge"], ["jug_wave_wind", "jug_wave"]]:
 		var gap := (beats[pair[0]]["pend"] as Vector3).distance_to(beats[pair[1]]["p0"])
 		A.ok("kael anim: %s ends where %s starts" % [pair[0], pair[1]], gap < 0.1, "%.2f m apart" % gap)
+	run_steps = _footfalls(ap, sk, String(cl.d["loco"]["run"]["f"]))
 	m.free()
+
+## Footfalls in one loop of a run clip: each ankle's low point near the ground counts once (a plant). The rig has
+## no foot bone, so the ankle is the shin's far end, a thigh's length down its line (WardenSkeleton.CARRY_ON).
+func _footfalls(ap: AnimationPlayer, sk: Skeleton3D, clip: String) -> int:
+	var length := ap.get_animation(clip).length
+	var steps := 0
+	ap.play(clip)
+	for side in ["L", "R"]:
+		var bi := sk.find_bone("shin." + side)
+		var shin := sk.get_bone_rest(bi).origin.length()
+		var ys: Array[float] = []
+		var t := 0.0
+		while t < length:
+			ap.seek(t, true)
+			sk.force_update_all_bone_transforms()
+			var pose := sk.get_bone_global_pose(bi)
+			ys.append((pose.origin + pose.basis.y.normalized() * shin).y)
+			t += DT
+		var lo: float = ys.min()
+		var span := float(ys.max()) - lo
+		# (a plant: the ankle drops into the lowest 30% of its swing after lifting above 60%; two laps for the wrap)
+		var up := false
+		for i in ys.size() * 2:
+			var y := ys[i % ys.size()]
+			if y > lo + span * 0.6:
+				up = true
+			elif up and y < lo + span * 0.3:
+				up = false
+				if i >= ys.size():
+					steps += 1
+	print("RUN %s len %.2f footfalls %d" % [clip, length, steps])
+	return steps
 
 ## From the tip's speed per frame: cock (the last quiet frame before the fastest), peak, settle (quiet for 0.1 s).
 func _beats(v: Array[float], length: float, pts: Array[Vector3]) -> Dictionary:
@@ -159,6 +196,25 @@ func _hold(km: String, held: bool, what: String) -> void:
 	A.ok("kael anim: %s %s" % [km, "shows under the hold" if held else "never shows on a " + what],
 			shown.has(km) == held, ", ".join(shown.keys()))
 
+## Running flat out, the run clip steps at the source's cadence: a stride cycle at about 2.26 Hz, 4.5 footfalls a
+## second (briefs/hero-ref/juggernaut.md "Cadence"; 4.0-5.0 here, the footage is 5 fps).
+func _run(m: Match, P: Hunter, K: JuggernautKit, home: Vector3, T: Hunter) -> void:
+	_fresh(m, P, K, home, T)
+	T.teleport(home + Vector3(0, 0, 30.0))
+	var go := func(): P.inp["move"] = Vector2(0, -1)
+	A.step(m, 1.2, go)
+	var cl := P.model.get_node("Warden/Sync").get("clips") as WardenClips
+	var spd := Vector2(P.vel.x, P.vel.z).length()
+	# (headless, the visual never poses: feed the clips the run the kit just made)
+	cl._loco({"vel": P.vel, "face": P.face}, DT)
+	var rate := float(cl.tree.get("parameters/loco_rate/scale"))
+	var length := cl.lib.get_animation(String(cl.d["loco"]["run"]["f"])).length
+	var per_s := rate * run_steps / length
+	print("RUN at %.2f m/s: clip rate %.2f, %.2f footfalls/s (%.2f Hz stride)" % [spd, rate, per_s, per_s * 0.5])
+	A.ok("kael anim: running, 4.0-5.0 footfalls a second (source about 4.5)", per_s >= 4.0 and per_s <= 5.0,
+			"%.2f/s at %.2f m/s" % [per_s, spd])
+	P.inp["move"] = Vector2.ZERO
+
 func kit() -> void:
 	var g := _rig()
 	var m: Match = g["m"]
@@ -218,6 +274,24 @@ func kit() -> void:
 	_ev("lunge hit", r)
 	_strike("jug_lunge", r)
 	_ev("lunge stops", _until(m, K, func(): return K.lunge.is_empty(), 1.0))
+	# the perfect release (owner): let go in the first window, at full charge, the cocked pose already still
+	var sd := K.rmb_def()
+	var still_at := float(sd["hold"]) + wind_still
+	A.ok("kael anim: jug_lunge_wind is held still by the first perfect window", still_at <= K.rmb_charge_full(),
+			"still at %.2f s of hold, window at %.2f s" % [still_at, K.rmb_charge_full()])
+	_fresh(m, P, K, home, T)
+	T.teleport(P.pos + Vector3(5.0, 0, 0))
+	A.aim_at(P, T.pos)
+	var perfects0 := K.perfects
+	hs.call()
+	K.press_rmb()
+	A.step(m, K.rmb_charge_full() + 0.05, hs)
+	T.hp = T.max_hp
+	P.inp["sec_hold"] = false
+	r = _hit(m, K, T, 1.0)
+	_ev("perfect lunge hit", r)
+	A.ok("kael anim: a release in the window is a perfect Lunge", K.perfects == perfects0 + 1)
+	_strike("jug_lunge", r)
 	# air slam: a tap in the air
 	_fresh(m, P, K, home, T)
 	T.teleport(P.pos + Vector3(1.0, 0, 0))
@@ -319,10 +393,24 @@ func kit() -> void:
 	A.aim_at(P, T.pos)
 	HunterKeys.ult_pressed(P)
 	print("EVENT %-22s %s" % ["ult pressed", K.anim_id])
-	_ev("riposte strikes", _until(m, K, func(): return String(K.riposte.st.get("phase", "")) == "strike", 1.0))
+	var rd := K.riposte.data()
+	var guard := _until(m, K, func(): return String(K.riposte.st.get("phase", "")) == "strike", 1.0)
+	_ev("riposte strikes", guard)
 	r = _hit(m, K, T, 0.5)
 	_ev("riposte hit", r)
 	_strike("jug_riposte", r)
-	_ev("riposte recovers", _until(m, K, func(): return String(K.riposte.st.get("phase", "")) == "recover", 0.5))
-	_ev("riposte done", _until(m, K, func(): return not K.riposte.running(), 1.0))
+	var done := _until(m, K, func(): return not K.riposte.running(), 1.0)
+	_ev("riposte done", done)
+	# guard .65 / strike .1 / recover .35 (the source's Retaliation), each within a 60 Hz step and a half
+	var phases := [["guard", guard[2], rd["guard"]], ["strike", r[2], rd["strike_t"]],
+			["recover", done[2], rd["recover"]]]
+	for row in phases:
+		A.ok("kael anim: riposte %s runs %.2f s" % [row[0], row[2]], absf(float(row[1]) - float(row[2])) <= 0.025,
+				"%.3f s" % row[1])
+	var rl := float(beats["jug_riposte"]["len"]) - float(leads["jug_riposte"])
+	# (its tail past the hand-off plays out under the blend back to the legs)
+	A.ok("kael anim: jug_riposte ends within the hand-off blend",
+			float(done[0]) <= rl and rl - float(done[0]) <= WardenClips.FADE_LOCO,
+			"clip %.2f vs kit %.3f" % [rl, done[0]])
+	_run(m, P, K, home, T)
 	A.done(m)
