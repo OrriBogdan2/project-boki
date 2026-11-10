@@ -1,6 +1,7 @@
 extends RefCounted
 ## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
-## 2560x1080 ultrawide, 1024x640). At each, every group (a registered HUD panel, or a top-level control of a
+## 2560x1080 ultrawide, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
+## (Settings.TEXT_SIZES). At each, no text is clipped (SafeArea.clipped), every group (a registered HUD panel, or a top-level control of a
 ## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
 ## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
@@ -8,6 +9,7 @@ extends RefCounted
 
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080),
 		Vector2i(1024, 640)]
+const TEXT_WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080)]      # the windows that also run at 125% and 150%
 const RESULT := {"extracted": true, "gems": 42, "seeds": {"sunroot": 1}, "caught": [], "knocks": 3, "damage": 512,
 		"taken": 388, "kills": 1, "downs": 1, "deaths": 0, "revives": 2, "armor_tier": 3, "time": 201.0}
 
@@ -15,6 +17,7 @@ var main: Node
 var bad := 0
 var shots := ""
 var sizes: Array = SIZES.duplicate()
+var text_k := 1.0
 var m: Match
 var home
 
@@ -36,9 +39,16 @@ func run(mn: Node, mode: String) -> void:
 		DirAccess.make_dir_recursive_absolute(shots)
 	if main.fade:
 		await main.fade.reveal(0.01)
-	await _hud()
-	await _screens()
-	await _farm()
+	var only_size := sizes.size() == 1
+	for k: float in Settings.TEXT_SIZES:
+		text_k = k
+		UI.set_text_size(k)
+		if k > 1.0 and not only_size:
+			sizes = TEXT_WINDOWS
+		await _hud()
+		await _screens()
+		await _farm()
+	UI.set_text_size(1.0)
 	print("SAFEAREA DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -52,15 +62,16 @@ func _resize(win: Vector2i) -> Vector2:
 	await _frames(3)
 	return main.get_tree().root.get_visible_rect().size
 
-func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2) -> void:
-	var tag := "%dx%d %s" % [win.x, win.y, screen]
+func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root: Node) -> void:
+	var tag := "%dx%d %d%% %s" % [win.x, win.y, int(text_k * 100.0), screen]
 	var problems := SafeArea.problems(groups, sz)
+	problems.append_array(SafeArea.clipped(root))
 	var what := "%s: %d groups in the %d px margin, no overlap (logical %s) %s"
 	ok(not groups.is_empty() and problems.is_empty(),
 			what % [tag, groups.size(), int(SafeArea.MARGIN), sz, problems.slice(0, 4)])
 	if shots != "":
 		await _frames(2)
-		main.get_viewport().get_texture().get_image().save_png("%s/%dx%d_%s.png" % [shots, win.x, win.y, screen])
+		main.get_viewport().get_texture().get_image().save_png("%s/%dx%d_%d_%s.png" % [shots, win.x, win.y, int(text_k * 100.0), screen])
 
 func _hud() -> void:
 	m = Match.new()
@@ -80,7 +91,7 @@ func _hud() -> void:
 		await _hud_at(win, sz, "hud")
 		Overlay.open_pause("match")
 		await main.get_tree().create_timer(0.8).timeout
-		await _judge("pause", win, SafeArea.groups_of(Overlay.host, sz), sz)
+		await _judge("pause", win, SafeArea.groups_of(Overlay.host, sz), sz, Overlay.host)
 		Overlay.close()
 
 func _hud_at(win: Vector2i, sz: Vector2, screen: String) -> void:
@@ -90,17 +101,17 @@ func _hud_at(win: Vector2i, sz: Vector2, screen: String) -> void:
 	await _frames(4)
 	SafeArea.recording = false
 	SafeArea.seen["toasts"] = m.hud.msgs.rects()
-	await _judge(screen, win, SafeArea.seen.duplicate(), sz)
+	await _judge(screen, win, SafeArea.seen.duplicate(), sz, m.hud)
 
 func _screens() -> void:
 	for win: Vector2i in sizes:
 		var sz := await _resize(win)
 		main.show_screen("prematch", {"teams": 10, "squad": 3, "tier": 0})
 		await main.get_tree().create_timer(0.8).timeout
-		await _judge("pick", win, SafeArea.groups_of(main.current, sz), sz)
+		await _judge("pick", win, SafeArea.groups_of(main.current, sz), sz, main.current)
 		main.show_screen("results", RESULT)
 		await main.get_tree().create_timer(1.0).timeout
-		await _judge("results", win, SafeArea.groups_of(main.current, sz), sz)
+		await _judge("results", win, SafeArea.groups_of(main.current, sz), sz, main.current)
 
 func _farm() -> void:
 	home = await main._hb_home()
@@ -114,7 +125,22 @@ func _farm() -> void:
 		await main.get_tree().create_timer(0.6).timeout
 		home._close_panel()      # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
 		await _frames(2)
-		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz)
+		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz, home.root_ui)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout
-		await _judge("expedition", win, SafeArea.groups_of(home.panel_host, sz), sz)
+		await _judge("expedition", win, SafeArea.groups_of(home.panel_host, sz), sz, home.panel_host)
+		home._close_panel()
+		await _overlays(win, sz)
+
+## Settings, the inventory and the Field Book (an inventory tab), each opened over the farm.
+func _overlays(win: Vector2i, sz: Vector2) -> void:
+	for page: Array in [["settings", "Accessibility"], ["inventory", "Items"], ["field_book", "Field Book"]]:
+		if page[0] == "settings":
+			Overlay.tab = page[1]
+			Overlay.open_settings()
+		else:
+			Overlay.inv_tab = page[1]
+			Overlay.open_inventory()
+		await main.get_tree().create_timer(0.6).timeout
+		await _judge(page[0], win, SafeArea.groups_of(Overlay.host, sz), sz, Overlay.host)
+		Overlay.close()

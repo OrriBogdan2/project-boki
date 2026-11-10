@@ -140,15 +140,16 @@ static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") ->
 
 ## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
-	var kw := BIG.get_string_size(key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS).x
+	var kw := TextCache.width(BIG, key, KEY_FS)
 	var kr := Rect2(center - Vector2(kw * 0.5 + 6, 9), Vector2(kw + 12, 18))
 	c.draw_style_box(box(KEY_BG, 9, Color(col, 0.8), 1), kr)
-	c.draw_string(BIG, Vector2(kr.position.x + 6, kr.position.y + 14), key, HORIZONTAL_ALIGNMENT_LEFT, -1, KEY_FS, col)
+	var at := Vector2(kr.position.x + 6, kr.position.y + 14)
+	c.draw_string(BIG, at, key, HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(KEY_FS), col)
 
 ## A small count badge (charges, stack sizes) centred on `at`.
 static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	var s := str(n)
-	var w := maxf(16.0, BIG.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 8.0)
+	var w := maxf(16.0, TextCache.width(BIG, s, 11) + 8.0)
 	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
 	ctext(c, at + Vector2(0, 4.5), s, 11, col)
 
