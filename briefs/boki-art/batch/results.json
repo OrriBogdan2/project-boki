@@ -104912,5 +104912,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px_c_chainipede_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px_c_lockatara",
+    "name": "Lockatara (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_lockatara",
+    "name": "Lockatara (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_lockatara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_chuggamus",
+    "name": "Chuggamus (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_palloth",
+    "name": "Palloth (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_palloth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_chuggamus",
+    "name": "Chuggamus (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_chuggamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_palloth",
+    "name": "Palloth (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_palloth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_hydrangor",
+    "name": "Hydrangor (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_hydrangor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_hydrangor",
+    "name": "Hydrangor (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_hydrangor_2.jpg",
+    "ok": true
   }
 ]
