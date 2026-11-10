@@ -39,6 +39,7 @@ var running := false
 var shell_col := Color(0, 0, 0, 0)     # set to override the species colours
 var look_at_pos := Vector3.INF         # who it imprints on (default: the camera, i.e. you)
 var spot_col := Color(0, 0, 0, 0)
+var _tweens: Array[Tween] = []         # the hatching's own tweens, so skip() can speed them up
 
 func _init(sp_id: String, fx_ref: Fx, radius := 0.32, middle := 0.42, kin_size := 1.0, kin_rec := {}) -> void:
 	species = sp_id; fx = fx_ref; r = radius; cy = middle; kin_scale = kin_size; rec = kin_rec
@@ -137,6 +138,7 @@ func start() -> void:
 		return
 	running = true
 	var tw := create_tween()
+	_tweens.append(tw)
 	# 1: two curious wiggles
 	for dir in [1.0, -1.0]:
 		tw.tween_callback(_sfx.bind("hover", -8.0, 0.8 + 0.2 * dir))
@@ -182,6 +184,11 @@ func start() -> void:
 	_shiver(tw, 6, 0.07, 0.055)
 	tw.tween_property(body, "scale", Vector3(1.12, 0.84, 1.12), 0.16).set_trans(Tween.TRANS_SINE)
 	tw.tween_callback(_pop)
+
+## Plays the rest of the hatching faster (a key press); the kin still hops out and says hello.
+func skip(speed: float) -> void:
+	for t in _tweens:
+		if t.is_valid(): t.set_speed_scale(speed)
 
 func _hop(tw: Tween, h: float) -> void:
 	tw.tween_callback(_sfx.bind("jump", -10.0, 1.7))
@@ -286,6 +293,7 @@ func _pop() -> void:
 	kin_node.scale = Vector3.ONE * 0.8 * ks
 	var out := global_position + Vector3(0.0, 0.0, hop_out) * k * 1.3
 	var kt := create_tween()
+	_tweens.append(kt)
 	# 0.0: pops up, stretching, out of the cup and onto the ground
 	kt.tween_callback(_sfx.bind("jump", -10.0, 1.6))
 	kt.tween_property(kin_node, "scale", Vector3(0.95, 1.12, 0.95) * ks, 0.12).set_trans(Tween.TRANS_SINE)
