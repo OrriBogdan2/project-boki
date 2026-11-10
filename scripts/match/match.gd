@@ -3365,6 +3365,8 @@ func _gather_input() -> void:
 		player.inp["move"] = Vector2.ZERO
 	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
 		pending_input["throw"] = true
+	if KinKeys.poll(player, paused):       # the quick keys: the same orders and tap as the wheel and G
+		pending_input["throw"] = true
 	player.inp["interact"] = Input.is_action_pressed("interact")
 	if lairs and not lairs.puzzle_of(player).is_empty():
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
@@ -3889,6 +3891,7 @@ func step(dt: float) -> void:
 			pending_input["throw"] = false
 			KinCommand.tap(player)
 		KinCommand.apply_pick(player)
+		KinKeys.apply(player)
 	_prof("pre")
 	for h in hunters:
 		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:

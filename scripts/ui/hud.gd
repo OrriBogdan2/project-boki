@@ -1694,6 +1694,8 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var ud := KinMerge.def_for(k)
 		if ud: lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
 		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
+	if p.kin:
+		lines.append_array(KinKeys.card_lines(Data.KIN[p.kin.species]["color"]))
 	var dsi := p.slot_info("dash")
 	lines.append([Settings.key_cap("dash"), String(dsi["name"]), String(dsi["desc"]), dsi["col"]])
 	lines.append_array(GripHud.kit_lines(p))

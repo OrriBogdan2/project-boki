@@ -160,6 +160,9 @@ const ACTIONS := [
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
+	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
+	["kin_chase", "Boki quick key: Chase"], ["kin_guard", "Boki quick key: Guard"],
+	["kin_return", "Boki quick key: Return"], ["kin_follow", "Boki quick key: Follow"],
 ]
 
 var v: Dictionary = {}
