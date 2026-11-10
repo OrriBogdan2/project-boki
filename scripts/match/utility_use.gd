@@ -3,7 +3,8 @@ extends RefCounted
 ## What each belt item does when you press its key (UtilityBelt holds the charges). Item data is in
 ## content/utility/*.json; "use" picks the behaviour:
 ##   drink   a tonic: a short, open channel ("time" s, moving at "move" of your speed), then "heal_hp"
-##           health (flat), or "heal" of your max (default 40%); Deep Draught, Lostway Scroll (warp) and
+##           health (flat), or "heal" of your max (default 40%); a drink with "cleanse" first lifts anti-heal
+##           (blight); Deep Draught, Lostway Scroll (warp) and
 ##           Omen Draught (omen) are drinks too (UtilityMore.drank)
 ##   repair  an armor kit: the same channel, then "repair" of your armor by armor tier (a list, Common
 ##           first; the last entry serves the tiers past it)
@@ -12,7 +13,7 @@ extends RefCounted
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
 ##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
-##   fx      run the item's "effects" list through Effects (haste, shield, ...)
+##   fx      run the item's "effects" list through Effects (haste, shield, ...); "root_self" s holds the user still
 ##   field pilfer lamp ember   the source utilities (UtilityMore); pad and scan take their numbers from the item
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
@@ -41,6 +42,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	var col: Color = d.get("col", Color.WHITE)
 	if use_of(id) == "key":
 		return BeltKeys.use(h, id)       # the lock spends the key when it opens
+	if UtilityMore.regate(h, id):
+		return true                      # a Twin Gate's second press: no charge
 	BeltSfx.start(h, id)
 	match use_of(id):
 		"drink":
@@ -80,6 +83,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
+			h.root_t = maxf(h.root_t, float(d.get("root_self", 0.0)))
 	# the instant ones are spent now; the channelled ones when they finish (tick)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
@@ -120,6 +124,8 @@ static func tick(h: Hunter, dt: float) -> void:
 				Sfx.loop_stop(BeltSfx.loop_key(h, h.drink_id))
 				var dd := UtilityBelt.def(h.drink_id)
 				if UtilityBelt.take(h, h.drink_id, 1) > 0:
+					if dd.get("cleanse", false):
+						h.blight_t = 0.0        # before the heal, so it is not cut
 					var amount := heal_of(h, h.drink_id)
 					if amount > 0.0:
 						h.heal(amount * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))

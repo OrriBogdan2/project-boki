@@ -13,7 +13,7 @@
   1
  ],
  "price": 60,
- "desc": "Calls a blast down on the spot you aim at. It lands after 5s and kills whatever it catches, then the ground burns for 3s: leave.",
+ "desc": "Calls a blast down on the spot you aim at. It lands after 5s and kills whatever it catches, friend or foe, and wrecks revive beacons; then the ground burns for 3s: leave.",
  "effects": [
   {
    "type": "telegraph",
@@ -29,7 +29,9 @@
    "radius": 6.0,
    "dmg": 690.0,
    "kb": 8.0,
-   "color": "#ff7a3a"
+   "color": "#ff7a3a",
+   "friendly": true,
+   "raze": true
   },
   {
    "type": "zone",
@@ -43,5 +45,5 @@
    "color": "#ff5a2a"
   }
  ],
- "src": "docs/SOURCE_UTILITIES.md: 5 s fuse, 5000 dmg / 7.2, then 720 dmg/s for 3 s (100/s here as 50 every 0.5 s)"
+ "src": "docs/SOURCE_UTILITIES.md: 5 s fuse, 5000 dmg / 7.2, then 720 dmg/s for 3 s (100/s here as 50 every 0.5 s); the blast hurts allies and you, and destroys beacons"
 }

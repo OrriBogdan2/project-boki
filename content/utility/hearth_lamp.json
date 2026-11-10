@@ -13,5 +13,6 @@
   1
  ],
  "price": 110,
- "desc": "Sets a revive beacon where you stand. Any squad can use it, once."
+ "desc": "Sets a revive beacon where you stand. Any squad can use it, once. Those it brings back carry resurrection sickness for 12s: 25% less damage and healing.",
+ "src": "docs/SOURCE_UTILITIES.md: 12 s resurrection sickness, -25% damage and healing"
 }

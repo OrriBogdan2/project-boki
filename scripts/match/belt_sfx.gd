@@ -78,6 +78,15 @@ static func tick(m: Node, dt: float) -> void:
 			else:
 				Sfx.loop_hold(b["key"], cue(b["id"], "loop"), pos, VOL_DB)
 
+## A placed item taken back down before its time: its bed stops without the end cue.
+static func drop_bed(m: Node, id: String, at: Vector3) -> void:
+	for i in range(_beds.size() - 1, -1, -1):
+		var b: Dictionary = _beds[i]
+		if b["m"] == m and b["id"] == id and b["h"] == null and (b["at"] as Vector3).distance_to(at) < 1.0:
+			Sfx.loop_stop(b["key"])
+			_beds.remove_at(i)
+			return
+
 static func loop_key(h: Hunter, id: String) -> String:
 	return "belt%d_%s" % [h.get_instance_id(), id]
 

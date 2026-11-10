@@ -256,6 +256,7 @@ func _items(m: Match) -> void:
 	bot.downed = false
 	UtilityMore._swap(m, a, b, 2.0)
 	ok("a Twin Gate swaps what stands in each gate", bot.flat_dist(a) < 2.5 and h.flat_dist(b) < 2.5)
+	m.remove_meta("gate_%d" % h.get_instance_id())      # the item sweep above already opened a pair
 	var fl: int = m.fields.list.size()
 	_fresh(h, "twin_gate")
 	ok("and opens two gates", m.fields.list.size() == fl + 2)
@@ -282,6 +283,8 @@ func _items(m: Match) -> void:
 	bot.gems = 100
 	h.inp["aim"] = bot.pos
 	_fresh(h, "pilfer_pouch")
+	m.time += 2.0
+	m._run_later()
 	ok("a Pilfer Pouch takes half a rival's gems", bot.gems == 50, "%d" % bot.gems)
 	bot.armor = 100.0
 	var fx: Array = UtilityBelt.def("shatter_charge")["effects"].duplicate(true)

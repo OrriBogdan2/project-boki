@@ -66,6 +66,17 @@ static func pop(m: Match, at: Vector3, team: int) -> void:
 	m.net_event(["bcn", i, team, "used"])
 	_use(m, m.beacons[i], team)
 
+## Beacons inside a blast (Skyfall Charge) are destroyed: they never go off. Not synced online; each
+## game razes the beacons its own blast reaches.
+static func raze(m: Match, at: Vector3, r: float) -> void:
+	for bc in m.beacons:
+		if bc["used"] or Vector2(bc["pos"].x - at.x, bc["pos"].z - at.z).length() > r:
+			continue
+		_light(m, bc, false, int(bc["lit_team"]))
+		bc["used"] = true
+		(bc["node"] as Node3D).visible = false
+		m.fx.burst(bc["pos"] + Vector3(0, 0.8, 0), Color("ff7a3a"), 24, 5.0, 0.6)
+
 static func _clear(m: Match, spots: Array, p: Vector3) -> bool:
 	for s in spots:
 		if Vector2(s.x - p.x, s.z - p.z).length() < SPACING:

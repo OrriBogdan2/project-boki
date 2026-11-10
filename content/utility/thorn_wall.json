@@ -13,7 +13,7 @@
   3
  ],
  "price": 40,
- "desc": "Raises a wall of thorns in front of you for 20s. Rivals who touch it are cut and slowed.",
+ "desc": "Stand rooted for 2s, then the wall of thorns rises in front of you for 20s. Rivals who touch it are cut and slowed.",
  "effects": [
   {
    "type": "wall",
@@ -27,8 +27,10 @@
    "touch": {
     "dmg": 10.0,
     "slow": 1.0
-   }
+   },
+   "delay": 2.0
   }
  ],
- "src": "docs/SOURCE_UTILITIES.md: stack 10"
+ "src": "docs/SOURCE_UTILITIES.md: stack 10; you root yourself for 2 s to build it",
+ "root_self": 2.0
 }

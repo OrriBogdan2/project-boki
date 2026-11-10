@@ -13,8 +13,10 @@
   1
  ],
  "price": 60,
- "desc": "Raccoons raid the spot you aim at and carry off half the gems of every rival standing there.",
+ "desc": "Stand still for 1.5s while raccoons raid the spot you aim at: they carry off half the gems of every rival there and empty the locked chests.",
  "range": 8.0,
  "r": 4.0,
- "take": 0.5
+ "take": 0.5,
+ "channel": 1.5,
+ "src": "docs/SOURCE_UTILITIES.md: 1.5 s channel, 50% of a hunter's gold, loot from unopened vaults"
 }

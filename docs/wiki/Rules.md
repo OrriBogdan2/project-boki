@@ -42,6 +42,7 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
+| sickness_heal | 0.75 | -25% healing received |
 
 ## belt_sfx (`content/rules/belt_sfx.json`)
 

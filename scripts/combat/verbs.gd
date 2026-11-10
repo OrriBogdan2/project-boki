@@ -13,12 +13,13 @@ var _mirror_pool: Dictionary = {}   # key -> free reflect-window nodes (hidden),
 var mirrors: Array = []   # {ent, t, r, arc, team, k, riposte, node, col, front}
 var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
-var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
+var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, team, refill, spots, y}
 var drags: Array = []     # {ent, from, to, t, dur, h}
 var decoys: Array = []    # {pos, team, t, node, owner}
 
 const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
+const RAFT_REACH_H := 6.0  # m above or below a bridge that a glider is still refilled
 const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 
 func _init(match_node: Node) -> void:
@@ -256,7 +257,13 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 		n.free()
 		return 0
 	m.add_child(n)
-	terrain.append({"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0), "team": int(by.team)})
+	var spots := {}
+	for td in tiles:
+		spots[td[0]] = true
+	terrain.append({
+		"tiles": tiles, "t": float(e.get("time", 6.0)), "node": n, "col": col, "slow": e.get("slow", 0.0),
+		"team": int(by.team), "refill": float(e.get("refill", 0.0)), "spots": spots, "y": from.y,
+	})
 	m.sfx("shield", from, -2.0, 1.6)
 	return tiles.size()
 
@@ -303,10 +310,22 @@ func decoy_of(h: Hunter) -> Dictionary:
 			return dc
 	return {}
 
+## A bridge with "refill" (Cloud Raft) cools the gliders of the squad's hunters over it, on it or in
+## the air above it (RAFT_REACH_H), at "refill" glider per second.
+func _refill_gliders(tz: Dictionary, dt: float) -> void:
+	var w: World = m.world
+	for h in m.hunters:
+		if h.team == int(tz["team"]) and not h.out and h.glide_fuel < 1.0 \
+				and absf(h.pos.y - float(tz["y"])) < RAFT_REACH_H \
+				and tz["spots"].has(w.idx(int(floor(h.pos.x)), int(floor(h.pos.z)))):
+			h.glide_fuel = minf(1.0, h.glide_fuel + float(tz["refill"]) * dt)
+
 # ------------------------------------------------------------------ shots
 ## Called for every step of every shot. Returns "" (carry on), "end" (stopped by a wall) or
 ## "bounce" (reflected: it now belongs to the reflector).
 func shot_check(s: Dictionary, p: Vector3) -> String:
+	if not m.gpads.is_empty() and UtilityMore.fan_shot(m, s, p):
+		return "end"
 	if walls.is_empty() and mirrors.is_empty():
 		return ""
 	var x: Dictionary = s["x"]
@@ -510,6 +529,8 @@ func tick(dt: float) -> void:
 				break
 	for tz in terrain.duplicate():
 		tz["t"] = float(tz["t"]) - dt
+		if float(tz["refill"]) > 0.0:
+			_refill_gliders(tz, dt)
 		if float(tz["t"]) <= 0.0:
 			var w: World = m.world
 			for td in tz["tiles"]:

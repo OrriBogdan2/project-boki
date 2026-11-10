@@ -128,7 +128,7 @@ var down_hp := 0.0
 var revive := 0.0
 var out := false
 var gone := false              # dead for good: no box revive, no beacon (see Life)
-var sick_t := 0.0              # resurrection sickness after a beacon revive: -25% damage
+var sick_t := 0.0              # resurrection sickness after a beacon revive: -25% damage and healing
 var stolen_carry := false      # carrying someone else's kin: it struggles, slowing you a little
 var chase: Hunter = null       # whoever has your kin: you run faster toward them
 var box_t := 0.0               # holding interact at a deathbox
@@ -1889,6 +1889,8 @@ func heal(n: float) -> void:
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
+	if sick_t > 0.0:
+		n *= Life.R["sickness_heal"]
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	if hp - before > 1.0:

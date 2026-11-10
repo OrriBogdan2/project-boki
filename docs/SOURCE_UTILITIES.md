@@ -115,9 +115,7 @@ deviations:
 
 - No storm in Boki: Blight Flask is a Blight zone, Omen Draught shows the Blight Wardens (your team only),
   Lostway Scroll warps you to a random spot on the map.
-- Twin Gate swaps by itself after its timer instead of by a second press.
-- Skyfall, Shatter and the others hit foes only (not allies, not beacons).
-- Pilfer Pouch destroys the gems; the thrower does not gain them. Bounty Banner has no knocked-while-carrying rule.
+- Shatter and the other thrown items hit foes only. Pilfer Pouch destroys the gems; the thrower does not gain them.
 - Revive Ember is never sold: a rare chest find only (no boss drop is wired).
 - Online, gates, seeds and pilfer move only the bodies this game owns, like the spring pads.
 - Each shop sells a fixed list (`sells` in content/rules/shops.json), the same every match.
@@ -137,10 +135,33 @@ Behaviour brought in line with the source, each number in the item's JSON `src` 
 - Blight Flask: a 40 s patch that blights (healing in it barely takes) besides burning and slowing.
 - Checked by `--utility-parity-check` (banner, skyfall, blight) and `--equal-check` (slots, tonic, kit).
 
-Still ours, on purpose or for lack of a system: Twin Gate auto-swaps (no second press), Lostway has
-no circle to aim for, Thorn Wall does not root, Lantern cannot be picked back up, the fan has no HP,
-Pilfer has no 1.5 s channel and no vault loot, smoke does not cloak the team, Skyfall never hurts
-allies or beacons, prices and bring caps follow our economy.
+Still ours, on purpose or for lack of a system: Lostway has no circle to aim for, smoke does not cloak
+the team, prices and bring caps follow our economy.
+
+## Built Nov 10 (ext/utility-parity-2)
+
+The rest of the Nov 9 list, each number in the item's JSON `src` field (source numbers over the HP ratio 7.2):
+
+- Twin Gate: opens two gates for 30 s; once 8 s have passed, pressing the item again swaps everyone in
+  each gate and closes them (no second charge). One pair per hunter at a time. No auto swap any more.
+- Pilfer Pouch: a 1.5 s channel (you stand rooted; knocked meanwhile and nothing happens), then half the
+  gems of every rival in the circle go and every locked chest there is emptied (the loot is lost, not taken).
+  Our locked chests are the vaults.
+- Skyfall Charge: the blast hurts allies and the thrower too (`friendly`) and wrecks revive beacons (`raze`).
+- Gust Fan: 104 HP (750 / 7.2, the wiki gives 750 or 3000); a rival's bullet stops in it and hurts it.
+- Lookout Lantern: anyone who steps on it after 2 s takes it onto their belt (a rival's too, if there is room).
+- Toss Satchel: a body in the air within 4 m above the pack is thrown up (14 m/s) and the pack is used up.
+- Thorn Wall: you are rooted 2 s and the wall rises when the root ends.
+- Revive sickness: 12 s after any beacon revive (Hearth Lamp included) now cuts healing by a quarter as
+  well as damage (`sickness_heal` in Life).
+- Tonic: lifts anti-heal (blight) before its heal, so the heal is whole.
+- Bounty Banner: each knock the squad makes takes 15 s off the timer (the source gives no number; assists
+  and kills count only through the knock).
+- Cloud Raft: squadmates on it or gliding within 6 m of it get their glider cooled, 2 gliders' worth a second.
+- Checked by `--utility-parity-check` (one block per item).
+
+Online, as with the gates and seeds before: razed beacons, raided chests, fans shot down and lanterns
+taken are handled by the game that did it; the other games are not told (no Net change).
 
 ## Sources
 

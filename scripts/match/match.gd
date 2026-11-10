@@ -2241,6 +2241,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	else:
 		add_feed("%s went down" % HeroTitle.of_hunter(h))
 	if rolling: rolling.on_knock(h, credit)      # bounties, and XP by the level gap
+	UtilityMore.on_knock(self, h, credit)        # a Bounty Banner's timer
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)

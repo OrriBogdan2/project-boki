@@ -309,7 +309,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
-			for f in m.foes_of(caster.team):
+			if e.get("raze", false):
+				Beacons.raze(m, at, r)
+			for f in m.foes_of(-1 if e.get("friendly", false) else caster.team):
 				if _hits(f, at, r):
 					var rel := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 					var kb := rel.normalized() * float(e.get("kb", 0.0)) if rel.length() > 0.05 else Vector2.ZERO
