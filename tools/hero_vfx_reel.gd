@@ -163,7 +163,7 @@ func _part_tierup() -> void:
 				m._armor_up(P)
 		_aim(T.pos)
 	var marks := _sheet("tierup", "armour tier-up: Rare, then Legendary",
-		[0.18, 0.28, 0.36, 0.44, 0.52, 1.38, 1.48, 1.58, 1.68])
+		[0.22, 0.27, 0.32, 0.37, 0.42, 1.42, 1.47, 1.52, 1.57])
 	await _go(2.2, ups, marks, 1.5)
 	await _go(GAP)
 
