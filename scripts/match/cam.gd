@@ -90,7 +90,7 @@ func use_style(id: String) -> void:
 	rise = float(st.get("rise", 0.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
-## Training Grounds. Cheap enough to call every frame.
+## Training Area. Cheap enough to call every frame.
 func apply_settings() -> void:
 	follow_mode = String(Settings.get_v("cam_follow"))
 	var sty := String(Settings.get_v("cam_style"))

@@ -1,6 +1,6 @@
 extends RefCounted
-## --grounds-check: the Training Grounds (the --arena map). The floor is at least 3x the old Arena's, five sky
-## perches are joined to it by pads and glides, every Hunter, Boki, glove / armor / boot and belt item has a
+## --grounds-check: the Training Area (the --arena map). The floor is at least 3x the old Arena's, five sky
+## perches (and Cloud Isle, off the Movement Fields) are joined to it by pads and glides, every Hunter, Boki, glove / armor / boot and belt item has a
 ## pedestal that works, every Hunter can be spawned as a sparring bot, the duel ring is there, and a fall off the
 ## map brings you home. Prints GROUNDSCHECK PASS/FAIL.
 
@@ -33,6 +33,7 @@ func run(main_node: Node) -> void:
 	var G: Grounds = A.grounds
 	ok("grounds built on the arena map", G != null and m.world.layout_id == "arena" and not G.stations.is_empty())
 	_map(m)
+	_fields(m)
 	_counts(G)
 	_sites(m, G)
 	step(m, 0.3)
@@ -54,8 +55,59 @@ func _map(m: Match) -> void:
 			perches += 1
 	var info := "%d tiles vs %d" % [floor_tiles, OLD_FLOOR_TILES]
 	ok("floor is at least 3x the old arena", floor_tiles >= 3 * OLD_FLOOR_TILES, info)
-	ok("five sky perches", perches == 5, "%d" % perches)
+	ok("six sky perches (five stations, Cloud Isle)", perches == 6, "%d" % perches)
 	ok("training room walls kept (3 dummies)", m.arena.dummies.size() == 3)
+
+## The Movement Fields: two long flat dash lanes, tier steps you walk up, a cliff of 2 to 5 terraces, and a stair up to
+## the glide jump-off whose route lands on Cloud Isle.
+func _fields(m: Match) -> void:
+	var W: World = m.world
+	var P: Hunter = m.player
+	var lanes: Array = Grounds.data().get("lanes", [])
+	var shortest := 1e9
+	for lane in lanes:
+		var a := Vector2(float(lane[0]), float(lane[1]))
+		var b := Vector2(float(lane[2]), float(lane[3]))
+		var flat := 0.0
+		for d in int(a.distance_to(b)):
+			var p := a.lerp(b, float(d) / a.distance_to(b))
+			if W.is_void(p.x, p.y) or W.ground_at(p.x, p.y) > World.STEP:
+				break
+			flat += 1.0
+		shortest = minf(shortest, flat)
+	ok("two dash lanes, each 90 m of flat ground", lanes.size() == 2 and shortest >= 90.0, "shortest %.0f m" % shortest)
+	var tiles := 0
+	for isl in W.islands:
+		if String(isl.get("id", "")) in ["floor", "bench"]:
+			tiles += (isl["cells"] as Array).size()
+	ok("open ground with the fields is at least 3x the old arena", tiles >= 3 * OLD_FLOOR_TILES, "%d tiles" % tiles)
+	var faces: Array = []
+	for z in [146.5, 150.5, 154.5, 158.5]:
+		faces.append(roundi(W.ground_at(48.5, z) / World.LEVEL))
+	ok("cliff faces of 2, 3, 4 and 5 terraces", faces == [2, 3, 4, 5], "%s" % [faces])
+	P.teleport(Vector3(74.5, 0.0, 140.5))
+	P.vel = Vector3.ZERO
+	var top := _walk_up(m, P, Vector2(1, 0), 8.0)
+	ok("tier steps: walking east climbs 6 terraces", top > 4.7, "top %.1f m" % top)
+	var jump_off := false
+	for L in W.links:
+		if L.get("glide", false) and String(W.islands[L["to"]]["id"]) == "cloud":
+			jump_off = L["take"].y > 10.0
+	ok("a glide jump-off over 10 m up reaches Cloud Isle", jump_off)
+	P.teleport(m.arena.home)
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2.ZERO
+
+## Hold `move` until the player stands higher than the 6th terrace or `secs` pass; the highest ground reached.
+func _walk_up(m: Match, P: Hunter, move: Vector2, secs: float) -> float:
+	var top := 0.0
+	var t := 0.0
+	while t < secs and top < 6.0 * World.LEVEL:
+		P.inp["move"] = move
+		m.step(DT)
+		t += DT
+		top = maxf(top, P.pos.y)
+	return top
 
 ## Ride every pad up and every glide route down: each must land you on its island.
 func _rides(m: Match) -> void:
@@ -83,7 +135,7 @@ func _rides(m: Match) -> void:
 		_settle(m, P, dir, 20.0)
 		var to := String(W.islands[L["to"]]["id"])
 		if W.island_id(P.pos.x, P.pos.z) != to:
-			bad.append("%s>%s" % [W.islands[L["from"]]["id"], to])
+			bad.append("%s>%s ended (%.0f,%.0f) on %s, take %s land %s" % [W.islands[L["from"]]["id"], to, P.pos.x, P.pos.z, W.island_id(P.pos.x, P.pos.z), take, land])
 	var info := "%d routes %s" % [glides, " ".join(bad)]
 	ok("every glide route lands you on its island", bad.is_empty() and glides >= 5, info)
 	P.teleport(m.arena.home)

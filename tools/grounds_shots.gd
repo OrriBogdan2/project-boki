@@ -1,7 +1,7 @@
 extends RefCounted
-## --grounds-shots --shots-dir=<dir> [--perf-secs=4]: the Training Grounds (the --arena map) on a real GPU
+## --grounds-shots --shots-dir=<dir> [--perf-secs=4]: the Training Area (the --arena map) on a real GPU
 ## (jobq submit --needs gpu): a top-down overview, ground-level shots at the start, in the Training Room and on
-## each sky perch, and frame-time numbers at the start and on a perch (GROUNDSPERF lines: wall ms, GPU ms, CPU ms,
+## each sky perch and in the Movement Fields (lane, tier steps, cliff, glide jump-off), and frame-time numbers at the start and on a perch (GROUNDSPERF lines: wall ms, GPU ms, CPU ms,
 ## draws, tris, objects, nodes). Also runs on the old Arena for the before number (no stations then).
 ## Software GL is no judge of any of this: only read the numbers from a real GPU.
 
@@ -52,8 +52,20 @@ func run(main_node: Node) -> void:
 			await _ground("perch_" + String(s["kind"]))
 			if s["kind"] == "arch":
 				await _perf("perch")
+		await _fields()
 	print("GROUNDSSHOTS %d in %s" % [n, dir])
 	main.get_tree().quit(0)
+
+## Ground-level shots at the Movement Fields' lane, tier steps, cliff and glide jump-off, and a frame-time there.
+func _fields() -> void:
+	var spots := {"lane": Vector2(72.5, 120.5), "tiers": Vector2(80.5, 140.5), "cliff": Vector2(60.5, 152.5),
+		"jumpoff": Vector2(112.5, 180.5)}
+	for what in spots:
+		var at: Vector2 = spots[what]
+		m.player.teleport(Vector3(at.x, m.world.ground_at(at.x, at.y), at.y))
+		m.player.vel = Vector3.ZERO
+		await _ground("fields_" + String(what))
+	await _perf("fields")
 
 func _frames(k: int) -> void:
 	for i in k:
@@ -73,7 +85,7 @@ func _overview() -> void:
 	cam.near = 1.0
 	cam.far = 600.0
 	m.add_child(cam)
-	cam.global_position = Vector3(72, 175, 72.5)
+	cam.global_position = Vector3(108, 260, 108)
 	cam.rotation = Vector3(-PI / 2.0, 0, 0)
 	cam.current = true
 	await _frames(10)

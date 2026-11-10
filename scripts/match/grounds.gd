@@ -1,6 +1,6 @@
 class_name Grounds
 extends RefCounted
-## The Training Grounds' stations (the --arena map's "grounds" block, content/maps/arena.json).
+## The Training Area' stations (the --arena map's "grounds" block, content/maps/arena.json).
 ## Pedestals on the sky perches let you try every Hunter, Boki, glove/armor/boot and belt item, and spawn
 ## a sparring bot of any Hunter; a ring on the floor takes you to the duel room. Walk up, press interact.
 ## Cheap by design: every pedestal shares one mesh and a few materials, a label only shows when you are close,
@@ -25,7 +25,7 @@ var _belt_turn := 0            # which belt slot a full belt gives up next
 var prompt: Label = null
 var _layer: CanvasLayer = null
 
-## The map's "grounds" block ({} when this isn't the Training Grounds).
+## The map's "grounds" block ({} when this isn't the Training Area).
 static func data() -> Dictionary:
 	return World.load_layout("arena").get("grounds", {})
 
@@ -77,6 +77,7 @@ func build() -> void:
 		_ring(String(st["kind"]), v3(st["at"]), float(st["ring"]))
 	if g.has("duel"):
 		_duel(v3(g["duel"]))
+	GroundsLanes.build(m, g)
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
 	prompt = Label.new()
@@ -127,13 +128,13 @@ func _pedestal(kind: String, id: String, p: Vector3, c: Vector3) -> void:
 	mi.position = p + Vector3(0, 0.25, 0)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(mi)
-	var lb := _label(name_of(kind, id), col, 1.9)
+	var lb := label(name_of(kind, id), col, 1.9)
 	lb.position = p + Vector3(0, 1.2, 0)
 	lb.visible = false
 	m.add_child(lb)
 	stations.append({"kind": kind, "id": id, "at": p, "c": c, "label": lb})
 
-func _label(text: String, col: Color, scale_k := 1.0) -> Label3D:
+static func label(text: String, col: Color, scale_k := 1.0) -> Label3D:
 	var lb := Label3D.new()
 	lb.text = text
 	lb.font = UI.big
@@ -153,7 +154,7 @@ func _duel(at: Vector3) -> void:
 	var pad := Models.jump_pad(Color(String(KIND_COL["duel"])))
 	pad.position = at
 	m.add_child(pad)
-	var lb := _label("DUEL ROOM\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
+	var lb := label("DUEL ROOM\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
@@ -166,7 +167,7 @@ func tick() -> void:
 	if P.pos.y < FALL_Y and not P.downed:
 		P.teleport(a.home)
 		P.vel = Vector3.ZERO
-		if m.hud: m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
+		if m.hud: m.hud.toast_small("Back to the Training Area", Color("8fe3c8"))
 		return
 	var best := -1
 	var bd := ACT_R

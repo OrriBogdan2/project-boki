@@ -320,7 +320,7 @@ func _arena() -> void:
 				# one
 				B.hp = B.max_hp - 20.0
 			# step back every 5s: with no glove ranks its RMB is ready so often that it never leaves melee for an E
-			# (toward the ring's middle: on the Training Grounds' open floor, a step back to the far side of a
+			# (toward the ring's middle: on the Training Area' open floor, a step back to the far side of a
 			# wall, after the Thief swaps places with you, puts the bot out of sight and it wanders off)
 			if int(tb / DT) % int(5.0 / DT) == 2:
 				B.teleport(P.pos + Vector3(6.0 if P.pos.x < A.home.x + 3.0 else -6.0, 0, 0))
