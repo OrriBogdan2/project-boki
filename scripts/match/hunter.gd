@@ -82,7 +82,7 @@ var fire_cd := 0.0
 var dashes := 2.0
 var roll_t := 0.0
 var roll_dir := Vector2.ZERO
-var dash_end_k := 0.0           # the step a dash ran out in: its velocity is scaled by this once it has moved (HunterMove)
+var dash_end_k := 0.0           # the step a dash ran out in: its velocity times this once moved (HunterMove)
 var inv_t := 0.0
 var coyote := 0.0
 var jump_buf := 0.0
@@ -1362,7 +1362,7 @@ func _tick_weapon(dt: float) -> void:
 	if not strike_at_end.is_empty():
 		if roll_t > 0.0 and not downed and stun_t <= 0.0:
 			# the lunge curves to follow your aim
-			roll_dir = roll_dir.slerp(aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()     # (10% a 60 Hz step, at any step)
+			roll_dir = roll_dir.slerp(aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()     # (10% a 60 Hz step)
 		else:
 			var st: Dictionary = strike_at_end
 			strike_at_end = {}
@@ -1823,7 +1823,8 @@ func launch_to(target: Vector3, t: float) -> void:
 	roll_t = 0.0
 
 # ------------------------------------------------------------------ simulation
-const GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]  # _gate: input, slot, feedback
+## _gate: input, slot, feedback
+const GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]
 const GEAR_KEYS := ["gear1", "gear2"]       # the two gear slots' inputs (consts: no strings built per step)
 
 func sim(dt: float) -> void:

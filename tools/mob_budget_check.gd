@@ -1,6 +1,7 @@
 extends RefCounted
 ## --mob-budget-check: monsters and drops per graphics preset (MobBudget). High keeps today's counts,
-## each step down keeps no more, a camp always keeps its lead monster; gem nodes are reused; the lowest preset spawns fewer monsters than High.
+## each step down keeps no more, a camp always keeps its lead monster; gem nodes are reused; the lowest
+## preset spawns fewer monsters than High.
 
 var main: Node
 var fails := 0

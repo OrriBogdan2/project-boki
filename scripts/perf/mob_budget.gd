@@ -2,7 +2,8 @@ class_name MobBudget
 extends RefCounted
 ## Monsters per graphics preset (the performance pass). Fewer monsters alive means fewer skinned parts,
 ## shadow casters and AI ticks (gems already come as one pile, DropMerge). Medium keeps fights full (a
-## little off the biggest camps); Low and Very Low cut hard but keep each camp's lead monster. Camps, lair guards, exit waves and the Blight read it.
+## little off the biggest camps); Low and Very Low cut hard but keep each camp's lead monster. Camps, lair
+## guards, exit waves and the Blight read it.
 
 ## Share of the usual monster count kept (1 = as designed).
 const SPAWN_K := {"very_low": 0.35, "low": 0.55, "medium": 0.85, "high": 1.0, "ultra": 1.0}
