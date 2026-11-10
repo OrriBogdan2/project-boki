@@ -42,6 +42,7 @@ var marks := {}             # combo setups on this body: status -> {by, owner, u
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var combat_at := -99.0      # match time it last dealt or took fight damage (InCombat)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
@@ -112,6 +113,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 			mt.player_engaged = true
 		if mt.demo_shielded(self):
 			return 0.0
+	InCombat.on_hit(self, by, opts)
 	if remote:
 		# someone else's game owns this body: show the hit here, let the owner apply it
 		if m.net_send_hit(self, dmg, by, opts):

@@ -37,7 +37,8 @@ static func fresh(m: Match, o: Ent) -> bool:
 const STAY_GOALS := ["yard", "board", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "board", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
-## A bot this far from the local player, with no target and nothing urgent on (a revive, a lair, an exit),
+## A bot this far from the local player, with no target, out of combat and nothing urgent on (a revive,
+## a lair, an exit),
 ## decides every FAR_EVERY sim steps (20 Hz) instead of every step, with the skipped time added in; its
 ## last inputs carry on in between. A big match has most of its bots roaming far away: item 94, script
 ## time grew with the Hunter count. (Fights and revives stay every step: at 20 Hz they turned in place.)
@@ -48,7 +49,7 @@ func tick(m: Match, h: Hunter, dt: float) -> void:
 	var a := h.ai
 	var acc := float(a.get("far_dt", 0.0)) + dt
 	var me := m.player
-	var busy: bool = a.get("tgt") != null or String(a.get("goal_kind", "")) in URGENT_GOALS
+	var busy: bool = a.get("tgt") != null or InCombat.is_in(h) or String(a.get("goal_kind", "")) in URGENT_GOALS
 	if me != null and not me.out and not busy and h.flat_dist(me) > FAR_M and acc < dt * FAR_EVERY - dt * 0.5:
 		a["far_dt"] = acc
 		return

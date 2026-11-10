@@ -184,7 +184,6 @@ var armor_kits: int:
 	set(v): UtilityBelt.set_count(self, "armor_kit", v)
 var ai: Dictionary = {}
 var muzzle_t := 0.0
-var regen_wait := 0.0
 var armor := 0.0
 var max_armor := 50.0
 var bloom := 0.0              # extra spread from moving, jumping and dashing
@@ -534,7 +533,6 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 			flash_t = 0.06
 			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
-	regen_wait = float(KinRegen.rules()["owner_shield_delay_s"])
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
 		# drinking, repairing or reviving leaves you open: any real hit spills it (you keep the item)
@@ -1949,7 +1947,7 @@ func sim(dt: float) -> void:
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
-	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "regen_wait", "land_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
+	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "land_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
 		set(k, maxf(0.0, get(k) - dt))
 	if shield_t > 0.0:
 		shield_t -= dt
