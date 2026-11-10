@@ -17,38 +17,39 @@ const TIER_STEP := 100.0   # keeps tiers apart in rank(); larger than any distan
 var _held := {}            # hunter nid -> {id, t}: the last pick and when it was made
 
 ## A candidate: `it` is the prompt dict Match acts on, `id` the target (kept while it stays the best),
-## `rev` true when it revives a teammate. The prompt names the target, so one line says what and who.
+## `rev` true when it revives a teammate. The prompt (InteractPrompt) shows the verb and the target's name.
 static func cand(it: Dictionary, pos: Vector3, id: Variant, tname: String, rev := false) -> Dictionary:
-	var label := String(it["label"])
-	if tname != "" and not label.contains(tname):
-		it["label"] = "%s  ·  %s" % [tname, label]
+	it["who"] = tname
 	return {"it": it, "pos": pos, "id": id, "rev": rev}
 
 ## Everything in reach of h that interact could work on, except the wisps (Match adds those).
 static func gather(m: Match, h: Hunter) -> Array:
 	var out: Array = []
-	var key := Settings.key_cap("interact")
 	for b in m.boxes:
 		if h.flat_dist(b["pos"]) <= 1.5 and absf(h.pos.y - float(b["pos"].y)) <= 1.4:
-			out.append(_box(m, h, b, key))
+			out.append(_box(m, h, b))
 	out = out.filter(func(c): return not c.is_empty())
 	if not m.opts.get("training", false):       # practice kin go home with nobody
 		for k in m.kins:
 			if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
 				var kn := String(Data.KIN[k.species]["name"])
-				out.append(cand({"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}, k.pos, k, kn))
+				var scan := {"kind": "catch", "ent": k}
+				scan.merge(CaptureHud.prompt(h, k))
+				out.append(cand(scan, k.pos, k, kn))
 	for wp in m.wpicks:      # gear on the ground (tunings are taken by walking over them)
 		var takes: bool = wp.has("gear") or (wp.has("val") and h == m.player)
 		if takes and h.flat_dist(wp["pos"]) < 1.5 and absf(h.pos.y - float(wp["pos"].y)) < 1.2:
 			var gi := Pack.ground_item(wp)
-			var it := {"kind": "weapon", "wp": wp, "label": m._pickup_label(h, wp), "col": Loot.col_of(gi)}
+			var it := {"kind": "weapon", "wp": wp, "col": Loot.col_of(gi)}
+			it.merge(m.pickup_prompt(h, wp))
 			out.append(cand(it, wp["pos"], wp, Loot.name_of(gi)))
 	for c in m.chests:
 		if not c["open"] and h.flat_dist(c["pos"]) < 1.6:
 			out.append(cand(KeyChest.prompt(h, c), c["pos"], c, "Chest"))
 	for sh in m.shrines:
 		if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
-			var pray := {"kind": "shrine", "shrine": sh, "label": "Hold %s to pray: heal, a blessing and a perk" % key}
+			var pray := {"kind": "shrine", "shrine": sh, "verb": "Pray", "hold": true}
+			pray["note"] = "Heal, a blessing and a perk"
 			out.append(cand(pray, sh["pos"], sh, "Shrine"))
 	if m.exits:
 		var ex := m.exits.interact_for(h)
@@ -61,21 +62,22 @@ static func gather(m: Match, h: Hunter) -> Array:
 	return out
 
 ## A deathbox in reach: bring its teammate back (while their soul is there), or take what's in it.
-static func _box(m: Match, h: Hunter, b: Dictionary, key: String) -> Dictionary:
+static func _box(m: Match, h: Hunter, b: Dictionary) -> Dictionary:
 	var o: Hunter = b["owner"]
 	if o.team == h.team and o != h and Life.soul_here(m, b) and not o.remote:
-		var rev := {"kind": "boxrev", "box": b, "label": BoxRevive.prompt(h, o), "col": Color("9ee2a0")}
+		var rev := {"kind": "boxrev", "box": b, "col": Color("9ee2a0")}
+		rev.merge(BoxRevive.prompt(h, o))
 		return cand(rev, b["pos"], b, o.pname, true)
 	if b["empty"]:
 		return {}
-	var whose: String = "your box" if o == h else o.pname + "'s box"
-	var label := "Hold %s to loot %s" % [key, whose]
+	var whose: String = "Your box" if o == h else o.pname + "'s box"
+	var loot := {"kind": "loot", "box": b, "col": Life.box_color(b), "verb": "Loot", "hold": true}
 	if h == m.player:
 		var open_now: bool = m.hud != null and m.hud.loot_is(b)
-		label = "Press %s again to smart loot  ·  click items to take them" % key
-		if not open_now:
-			label = "Press %s to open %s  ·  twice to smart loot" % [key, whose]
-	return cand({"kind": "loot", "box": b, "label": label, "col": Life.box_color(b)}, b["pos"], b, whose)
+		loot["verb"] = "Smart loot" if open_now else "Open"
+		loot["hold"] = false
+		loot["note"] = "Click items to take them" if open_now else "Press again to smart loot"
+	return cand(loot, b["pos"], b, whose)
 
 static func _lair_pos(lx: Dictionary) -> Vector3:
 	match String(lx["what"]):

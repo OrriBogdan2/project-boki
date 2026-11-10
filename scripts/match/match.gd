@@ -1819,22 +1819,20 @@ func take_pick(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		_take_gear(h, wp, from_net)
 
 ## What pressing interact on a ground item will do, for the prompt.
-func _pickup_label(h: Hunter, wp: Dictionary) -> String:
+func pickup_prompt(h: Hunter, wp: Dictionary) -> Dictionary:
 	var it := Pack.ground_item(wp)
-	var k := Settings.key_cap("interact")
-	var nm := Loot.name_of(it)
 	var fill := "%d/%d" % [h.pack.size(), h.pack_cap]
 	var gid := String(it.get("id", ""))
 	var cur: Dictionary = h.gear[Gear.slot_on(h, gid)] if Gear.ALL.has(gid) else {}
 	var into_hand := Gear.ALL.has(gid) and (cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not Pack.wants(h, it))
 	if opts.get("training", false):
-		return "Press %s to take %s  ·  %s" % [k, nm, Loot.sub_of(it)]
+		return {"verb": "Take", "note": Loot.sub_of(it)}
 	if into_hand:
 		var swap_txt := ("  ·  yours goes in your pack (%s)" % fill) if not cur.is_empty() else ""
-		return "Press %s to wear %s  ·  %s%s" % [k, nm, Loot.sub_of(it), swap_txt]
+		return {"verb": "Wear", "note": Loot.sub_of(it) + swap_txt}
 	if Pack.room(h):
-		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
-	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
+		return {"verb": "Pack", "note": "%s  ·  %s" % [fill, Loot.sub_of(it)]}
+	return {"verb": "Swap", "note": "Backpack full (%s)  ·  swaps out something" % fill}
 
 func _update_wpicks(dt: float) -> void:
 	for wp in wpicks:
@@ -4628,7 +4626,7 @@ func _update_interact(dt: float) -> void:
 		if not h.stomp.is_empty():
 			if h == player:
 				var so: Hunter = h.stomp["o"]
-				interact = {"kind": "stomping", "label": "Stomping %s  ·  locked in" % so.pname, "col": Color("ff8a6a")}
+				interact = {"kind": "stomping", "note": "Stomping %s  ·  locked in" % so.pname, "col": Color("ff8a6a")}
 			continue
 		var want: bool = h.inp.get("interact", false)
 		if not want:
@@ -4645,10 +4643,12 @@ func _update_interact(dt: float) -> void:
 					o.revive += dt / Life.R["revive_time"]
 				if h == player:
 					# your own revive bar, so you know it's working (and when it's blocked)
-					var rl := "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname if o.get_meta("stomped", false) else "Reviving %s  ·  stay in the ring" % o.pname
-					cs.append(InteractPick.cand({"kind": "revive", "ent": o, "label": rl, "col": Color("ff6a5a") if o.get_meta("stomped", false) else Color("9ee2a0")}, o.pos, o, o.pname, true))
+					var blocked: bool = o.get_meta("stomped", false)
+					var rv := {"kind": "revive", "ent": o, "col": Color("ff6a5a") if blocked else Color("9ee2a0")}
+					rv.merge({"note": "An enemy is standing on them  ·  knock them off"} if blocked else {"verb": "Reviving", "hold": true, "note": "Stay in the ring"})
+					cs.append(InteractPick.cand(rv, o.pos, o, o.pname, true))
 			elif not o.remote:
-				cs.append(InteractPick.cand({"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}, o.pos, o, o.pname))
+				cs.append(InteractPick.cand({"kind": "finish", "ent": o, "verb": "Stomp", "hold": true, "note": "You'll be locked in", "col": Color("ff8a6a")}, o.pos, o, o.pname))
 		cs.append_array(InteractPick.gather(self, h))
 		var best := interact_pick.pick(h, cs, h.inp.get("aim") if h == player else null, want, time)
 		if not want or best.get("kind", "") != "finish":

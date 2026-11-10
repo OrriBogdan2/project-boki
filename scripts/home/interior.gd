@@ -26,8 +26,7 @@ var spots: Array = []           # {kind, pos, label}
 var interact: Dictionary = {}
 # ui
 var root_ui: Control
-var prompt_box: PanelContainer
-var prompt_lbl: Label
+var prompt := InteractPrompt.new()      # the one interact prompt
 var panel_host: CenterContainer
 var panel_open := ""
 var decorating := false         # Decorate.active, kept here for the tile checks
@@ -296,12 +295,8 @@ func _find_interact() -> void:
 		var dd := Vector2(k["pos"].x - ppos.x, k["pos"].z - ppos.z).length()
 		if dd < bd: bd = dd; best = {"kind": "kin", "k": k, "label": "Pet %s" % k["rec"]["name"]}
 	interact = best
-	prompt_box.visible = not best.is_empty() and panel_open == ""
-	if prompt_box.visible:
-		prompt_lbl.text = Settings.key_cap("interact") + "  " + String(best["label"])
-		prompt_box.reset_size()
-		var vp := get_viewport().get_visible_rect().size
-		prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, vp.y - 120.0)
+	prompt.show_for({} if best.is_empty() or panel_open != "" else {"verb": String(best["label"])})
+	prompt.place(get_viewport().get_visible_rect().size, get_viewport().get_visible_rect().size.y - 70.0)
 
 func _use(it: Dictionary) -> void:
 	Sfx.play("click")
@@ -369,11 +364,7 @@ func _build_ui() -> void:
 	sub.name = "Gems"
 	th.add_child(sub)
 	root_ui.add_child(top)
-	prompt_box = UI.glass(10, 16)
-	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
-	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	prompt_box.add_child(prompt_lbl)
-	root_ui.add_child(prompt_box)
+	root_ui.add_child(prompt)
 	if visit.is_empty():
 		deco_btn = UI.primary("Decorate  (%s)" % Settings.key_cap("build"), func(): dec.toggle(), 200)
 		deco_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)

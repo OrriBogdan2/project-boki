@@ -15,8 +15,7 @@ var root_ui: Control
 var panel_host: Control
 var topbar: Label
 var top_chips: HBoxContainer
-var prompt_box: PanelContainer
-var prompt_lbl: Label
+var prompt := InteractPrompt.new()      # the one interact prompt
 var hint: Label
 var player: Node3D
 var ppos := Vector3.ZERO
@@ -2009,38 +2008,14 @@ func _find_interact() -> void:
 			if sd < 1.7 and (best.is_empty() or sd < bd): bd = sd; best = {"kind": "station", "id": s["id"], "e": s["e"]}
 	interact = best
 	if panel_open != "" or best.is_empty() or building_now or chat_open or not train.is_empty() or (hb and hb.active):
-		prompt_box.visible = false
+		prompt.visible = false
 		return
-	prompt_box.visible = true
-	var pairs: Array = []
-	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
-	else:
-		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
-	# the prompt is keycaps and words, rebuilt only when what it says changes
-	var sig := str(pairs)
-	if String(prompt_box.get_meta("sig", "")) != sig:
-		prompt_box.set_meta("sig", sig)
-		prompt_lbl.visible = false
-		var old_row := prompt_box.get_node_or_null("Keys")
-		if old_row: old_row.free()
-		var row := UI.key_hints(pairs, 14, UI.INK)
-		row.name = "Keys"
-		row.add_theme_constant_override("separation", 22)
-		for one in row.get_children():
-			var l: Label = one.get_child(one.get_child_count() - 1)
-			l.add_theme_font_override("font", UI.big)
-			l.add_theme_font_size_override("font_size", 18)
-			l.add_theme_color_override("font_color", UI.GOLD if one.get_index() == 0 else UI.INK)
-		prompt_box.add_child(row)
-		prompt_box.reset_size()
-		prompt_box.modulate.a = 0.0
-		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
-	prompt_box.reset_size()
+	var more: Array = [["play", "Play fetch"], ["talk", "Talk"], ["details", "Details"]] if best["kind"] == "kin" and visit.is_empty() else []
+	var verb := KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0) if best["kind"] == "kin" and visit.is_empty() else _label_for(best)
+	prompt.show_for({"verb": verb, "more": more})
 	var vp := get_viewport().get_visible_rect().size
-	var py_at := vp.y - 110.0
-	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
-	_keep_off_hub(prompt_box)
+	prompt.place(vp, vp.y - 60.0)
+	_keep_off_hub(prompt)
 
 ## Point at a kin to see who it is, how it's doing and what you can do with it.
 var hover_k: Dictionary = {}
@@ -2279,11 +2254,7 @@ func _build_ui() -> void:
 	th.add_child(topbar)
 	root_ui.add_child(top)
 	# what F (and the kin keys) do with whatever is in front of you
-	prompt_box = UI.glass(10, 16)
-	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
-	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	prompt_box.add_child(prompt_lbl)
-	root_ui.add_child(prompt_box)
+	root_ui.add_child(prompt)
 	# bottom centre: the few keys you need to get about
 	var hint_box := UI.glass(6, 12)
 	hint_box.modulate.a = 0.85

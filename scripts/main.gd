@@ -2133,8 +2133,8 @@ func _extract_check() -> void:
 	# the prompt: with a key, "F: Unlock with Rift Key"
 	P.teleport(hp + Vector3(0.7, 0, 0.5))
 	var pr := m.exits.interact_for(P)
-	print("EXCHECK hatch: prompt with a key: %s" % pr.get("label", ""))
-	if String(pr.get("act", "")) != "open" or not String(pr.get("label", "")).contains("Unlock with Rift Key"): ok = false; print("EXCHECK FAIL hatch key prompt")
+	print("EXCHECK hatch: prompt with a key: %s %s" % [pr.get("verb", ""), pr.get("note", "")])
+	if String(pr.get("act", "")) != "open" or String(pr.get("verb", "")) != "Unlock": ok = false; print("EXCHECK FAIL hatch key prompt")
 	t0 = m.time
 	press.call(P, 0.3)
 	print("EXCHECK hatch: key pressed: state=%s keys left=%d opens in %.1fs player extracted=%s new map pings=%d" % [hx["state"], P.rift_keys, float(hx["t"]), P.extracted, m.pings.size() - pings0])
@@ -2797,9 +2797,9 @@ func _boss_check() -> void:
 			var it: Dictionary = m.lairs.interact_for(P)
 			run.call(0.1)
 			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(0.3)
-			ok.call(vic and held and String(it.get("what", "")) == "lever" and String(it.get("label", "")) == "%s: Open the gate" % Settings.key_cap("interact")
+			ok.call(vic and held and String(it.get("what", "")) == "lever" and String(it.get("verb", "")) == "Open gate"
 				and not L.get("locked", false) and gate_free.call(L) and not L.get("up_on", false) and String(L.get("opened_by_lever", "")) == P.pname,
-				"the lever: '%s'; pulled %.1fs after the kill, the gate opens and the updraft dies down" % [it.get("label", "?"), m.time - kill_t])
+				"the lever: '%s'; pulled %.1fs after the kill, the gate opens and the updraft dies down" % [it.get("verb", "?"), m.time - kill_t])
 		elif L == E:
 			# the updraft: anyone who wasn't sealed in gets no lift from it
 			var up: Vector3 = L["up"]

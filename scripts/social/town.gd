@@ -14,8 +14,7 @@ var root_ui: Control
 var panel_host: Control
 var panel_open := ""
 var topbar: Label
-var prompt_box: PanelContainer
-var prompt_lbl: Label
+var prompt := InteractPrompt.new()      # the one interact prompt
 var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
@@ -404,14 +403,8 @@ func _find_interact() -> void:
 		if dd < float(s["reach"]) and dd < bd:
 			bd = dd; best = s
 	interact = best
-	if panel_open != "" or best.is_empty():
-		prompt_box.visible = false
-		return
-	prompt_box.visible = true
-	prompt_lbl.text = Settings.key_cap("interact") + "  " + String(best["label"])
-	prompt_box.reset_size()
-	var vp := get_viewport().get_visible_rect().size
-	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, vp.y - 110.0)
+	prompt.show_for({} if panel_open != "" or best.is_empty() else {"verb": String(best["label"])})
+	prompt.place(get_viewport().get_visible_rect().size, get_viewport().get_visible_rect().size.y - 60.0)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu") and not Overlay.is_open():
@@ -436,11 +429,7 @@ func _build_ui() -> void:
 	topbar.autowrap_mode = TextServer.AUTOWRAP_OFF
 	th.add_child(topbar)
 	root_ui.add_child(top)
-	prompt_box = UI.card(Color(0.06, 0.07, 0.1, 0.85), 12, 12)
-	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
-	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	prompt_box.add_child(prompt_lbl)
-	root_ui.add_child(prompt_box)
+	root_ui.add_child(prompt)
 	var hint_box := UI.card(Color(0.06, 0.07, 0.1, 0.7), 8, 10)
 	var hint := UI.label("WASD walk   ·   Space jump   ·   " + Settings.key_cap("interact") + " use   ·   Scroll to zoom   ·   Esc menu", 14, UI.INK)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF

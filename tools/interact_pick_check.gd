@@ -2,7 +2,7 @@ extends RefCounted
 ## --interact-pick-check: when several things are in reach of F, one rule picks (InteractPick):
 ##  a teammate to revive first, then the target nearest the cursor, then the one nearest the body;
 ##  the pick holds for a moment (and while F is held) so the prompt does not flicker; the prompt
-##  names the target and the key. Overlapping cases are built in a real match. Never touches the save.
+##  names the target and the verb. Overlapping cases are built in a real match. Never touches the save.
 
 var bad := 0
 var m: Match
@@ -46,7 +46,6 @@ func run(main: Node) -> void:
 		if h != m.player: h.teleport(m.player.pos + Vector3(60, 0, 0))
 	var p := m.player
 	var g := p.pos
-	var key := Settings.key_cap("interact")
 	var near := _chest(g + Vector3(0.6, 0, 0))      # nearest the body
 	var far := _chest(g + Vector3(-1.2, 0, 0))      # still in reach (< 1.6 m), further from the body
 	_tick(1.0)
@@ -60,8 +59,8 @@ func run(main: Node) -> void:
 	it = _pick(g + Vector3(-1.2, 0, 0))
 	_tick(0.4)
 	it = _pick(g + Vector3(-1.2, 0, 0))
-	var shown := String(it["label"])
-	ok(shown.contains(key) and shown.contains("Chest"), "the prompt names the target and the key: '%s'" % shown)
+	var shown := "%s %s" % [it["verb"], it["who"]]
+	ok(shown == "Open Chest", "the prompt names the target and the verb: '%s'" % shown)
 	_tick(0.4)
 	ok(is_same(_pick(g + Vector3(0.6, 0, 0), true)["chest"], far), "F held: the target never changes mid-hold")
 	_pick(null)
@@ -86,24 +85,24 @@ func run(main: Node) -> void:
 	_tick(0.4)
 	it = _pick(g + Vector3(0.6, 0, 0))
 	ok(it["kind"] == "revive" and is_same(it["ent"], mate), "a teammate to revive beats the target under the cursor")
-	ok(String(it["label"]).contains(mate.pname), "the revive prompt names the teammate")
+	ok(String(it["who"]) == mate.pname, "the revive prompt names the teammate")
 	mate.downed = false
 	mate.teleport(g + Vector3(60, 0, 0))
 	# a deathbox of a teammate whose soul is here is a revive too
 	var box := {"pos": g + Vector3(0.2, 0, 0), "owner": mate, "empty": true}
-	var rev := {"kind": "boxrev", "box": box, "label": "Hold %s to bring %s back" % [key, mate.pname]}
-	var opn := {"kind": "chest", "chest": near, "label": "Hold %s to open" % key}
+	var rev := {"kind": "boxrev", "box": box, "verb": "Revive"}
+	var opn := {"kind": "chest", "chest": near, "verb": "Open"}
 	var cs := [InteractPick.cand(rev, box["pos"], box, mate.pname, true)]
 	cs.append(InteractPick.cand(opn, near["pos"], near, "Chest"))
 	var pk := InteractPick.new()
 	ok(pk.pick(p, cs, near["pos"], false, 0.0)["kind"] == "boxrev", "pick(): a box revive beats a chest at the cursor")
 	# an info line (a closed dock) never beats something you can do
-	var info := InteractPick.cand({"kind": "exit", "x": {}, "label": "This dock has closed"}, g, "dock", "")
+	var info := InteractPick.cand({"kind": "exit", "x": {}, "note": "This dock has closed"}, g, "dock", "")
 	ok(pk.pick(p, [info, cs[1]], null, false, 10.0)["kind"] == "chest", "pick(): an info line comes last")
 	ok(pk.pick(p, [info], null, false, 20.0)["kind"] == "exit", "pick(): an info line alone still shows")
 	# standing between two near-equal targets: a small step does not swap them, a real one does
-	var ca := {"kind": "chest", "label": "A %s" % key}
-	var cb := {"kind": "chest", "label": "B %s" % key}
+	var ca := {"kind": "chest", "verb": "A"}
+	var cb := {"kind": "chest", "verb": "B"}
 	var pm := InteractPick.new()
 	var two := func(da: float, db: float) -> Array:
 		var a := InteractPick.cand(ca, g + Vector3(da, 0, 0), "a", "A")

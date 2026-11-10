@@ -87,7 +87,7 @@ func _state() -> String:
 	var m = _match()
 	if m and is_instance_valid(m) and m.player:
 		var P: Hunter = m.player
-		return "t=%.1f lvl=%d hp=%d/%d pos=(%.0f,%.1f,%.0f) riding=%s drop=%s gr=%s int=%s" % [m.time, P.lvl, P.hp, P.max_hp, P.pos.x, P.pos.y, P.pos.z, P.riding, P.dropping, P.grounded, String(m.interact.get("label", ""))]
+		return "t=%.1f lvl=%d hp=%d/%d pos=(%.0f,%.1f,%.0f) riding=%s drop=%s gr=%s int=%s" % [m.time, P.lvl, P.hp, P.max_hp, P.pos.x, P.pos.y, P.pos.z, P.riding, P.dropping, P.grounded, String(m.interact.get("verb", m.interact.get("note", "")))]
 	var c := cur()
 	return "screen=%s" % (c.get_script().resource_path.get_file() if c and c.get_script() else "?")
 
@@ -576,7 +576,7 @@ func _scan(m) -> void:
 		if not is_instance_valid(k) or k.dead or P.caught.size() > caught0:
 			caught = true; break
 	Input.action_release("interact")
-	print("TOUR scan caught=%s interact='%s'" % [caught, String(m.interact.get("label", ""))])
+	print("TOUR scan caught=%s interact='%s'" % [caught, String(m.interact.get("verb", m.interact.get("note", "")))])
 	if not caught: note_bad("couldn't scan the dazed Boki")
 	await mwait(1.0)
 	await shot("scan_done")
@@ -719,7 +719,7 @@ func _extract(m) -> void:
 	await mwait(2.0)
 	Input.action_release("interact")
 	print("TOUR uplink state %s" % best["state"])
-	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("label", ""))])
+	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("verb", m.interact.get("note", "")))])
 	var i := 0
 	var ticks := 0
 	var w0 := Time.get_ticks_msec()

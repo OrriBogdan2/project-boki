@@ -15,7 +15,7 @@ func _shot(shot_name: String, caption: String, keep_prompt := false) -> void:
 	await main.get_tree().create_timer(0.3).timeout
 	if not keep_prompt:
 		home.set_process(false)
-		home.prompt_box.visible = false
+		home.prompt.visible = false
 	if home.hover_box:
 		home.hover_box.visible = false
 	await main.get_tree().process_frame

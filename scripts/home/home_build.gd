@@ -1008,7 +1008,7 @@ func close_ui() -> void:
 
 func _enter() -> void:
 	active = true
-	h.prompt_box.visible = false
+	h.prompt.visible = false
 	h.cam.zoom_to = maxf(h.cam.zoom_to, 1.35)
 	Placement.build_view(h.cam, true)
 	h.set_build_ui(true)

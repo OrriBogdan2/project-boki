@@ -311,10 +311,9 @@ func icon_state(L: Dictionary) -> String:
 
 # ------------------------------------------------------------------ interact
 func interact_for(h: Hunter) -> Dictionary:
-	var k := Settings.key_cap("interact")
 	for L in list:
 		if can_pull(L, h):
-			return {"kind": "lair", "what": "lever", "lair": L, "act": true, "col": color_of(L), "label": "%s: Open the gate" % k}
+			return {"kind": "lair", "what": "lever", "lair": L, "act": true, "col": color_of(L), "verb": "Open gate"}
 	for L in list:
 		if L["state"] != "sealed":
 			continue
@@ -322,16 +321,16 @@ func interact_for(h: Hunter) -> Dictionary:
 			var u = L["user"]
 			if is_same(u, h):
 				return {"kind": "lair", "what": "dial", "lair": L, "act": true, "col": color_of(L),
-					"label": "Press %s as the needle crosses a lit arc  ·  lock %d of %d" % [k, int(L["lock"]) + 1, int(L["locks"])]}
+					"verb": "Lock in", "note": "As the needle crosses a lit arc  ·  lock %d of %d" % [int(L["lock"]) + 1, int(L["locks"])]}
 			if u != null:
-				return {"kind": "lair", "what": "busy", "lair": L, "act": true, "col": color_of(L), "label": "%s is working the lock" % (u as Hunter).pname}
+				return {"kind": "lair", "what": "busy", "lair": L, "act": true, "col": color_of(L), "note": "%s is working the lock" % (u as Hunter).pname}
 			return {"kind": "lair", "what": "dial", "lair": L, "act": true, "col": color_of(L),
-				"label": "Press %s to work the lock of %s  ·  a miss rings a chime" % [k, L["name"]]}
+				"verb": "Work lock", "note": "A miss rings a chime"}
 		for rn in L["runes"]:
 			if not rn["lit"] and h.flat_dist(rn["pos"]) < 1.7 and absf(h.pos.y - float(rn["pos"].y)) < 1.5:
 				var lit: int = (L["runes"] as Array).filter(func(x): return x["lit"]).size()
 				return {"kind": "lair", "what": "rune", "lair": L, "rune": rn, "act": true, "col": color_of(L),
-					"label": "Hold %s to light the rune  (%d of %d lit)  ·  guards will come" % [k, lit, (L["runes"] as Array).size()]}
+					"verb": "Light rune", "hold": true, "note": "%d of %d lit  ·  guards will come" % [lit, (L["runes"] as Array).size()]}
 	return {}
 
 ## Can this hunter pull the lair's gate lever right now? (After the kill, from inside, standing at it.)
