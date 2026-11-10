@@ -1904,7 +1904,7 @@ func _grammar_runtime_check() -> void:
 	_grt("perch: its throw is a dive", dive and dive_y > 2.5 and T.stun_t > 0.0, "starts %.1fm up, target stun %.2f" % [dive_y, T.stun_t])
 	_ac_run(m, 1.0); _grt_reset(T)
 	k = _grt_kin(m, P, "cindle")
-	P.teleport(home); P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
+	P.teleport(home); T.teleport(home + Vector3(6, 0, 0)); P.inp["aim"] = T.pos + Vector3(0, 0.9, 0)
 	_ac_run(m, 0.1)
 	P._emit_shot()
 	_ac_run(m, 0.5)

@@ -104,7 +104,8 @@ func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
 	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
 		m.step(DT)
 		t += DT
-		out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+		if P.roll_t > 0.0:      # the dash itself: its exit (HunterMove.dash_exit) brakes on the ground, not in the air
+			out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
 	P.inp["move"] = Vector2.ZERO
 	return out
 
