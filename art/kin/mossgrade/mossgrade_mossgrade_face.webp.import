@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d30sgl70durb7"
-path="res://.godot/imported/mossgrade_mossgrade_face.webp-2266c98d6b9472d35848b555d007836d.ctex"
+path.bptc="res://.godot/imported/mossgrade_mossgrade_face.webp-2266c98d6b9472d35848b555d007836d.bptc.ctex"
+path.astc="res://.godot/imported/mossgrade_mossgrade_face.webp-2266c98d6b9472d35848b555d007836d.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a00d4115f9f1e80765ff431e076b4276"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/mossgrade/mossgrade_mossgrade_face.webp"
-dest_files=["res://.godot/imported/mossgrade_mossgrade_face.webp-2266c98d6b9472d35848b555d007836d.ctex"]
+dest_files=["res://.godot/imported/mossgrade_mossgrade_face.webp-2266c98d6b9472d35848b555d007836d.bptc.ctex", "res://.godot/imported/mossgrade_mossgrade_face.webp-2266c98d6b9472d35848b555d007836d.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

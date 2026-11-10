@@ -87,7 +87,7 @@ What the in-game kit card (K) says.
 **Smash (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.
-- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
+- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then slam straight down onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 4s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
@@ -101,9 +101,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 2s -> 1.8s, damage +15%; +20% damage on every Smash. | cooldown 2s -> 1.6s, damage +30%; +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less. |
-| Dash (Shift) | recharge 9s -> 7.6s per charge; a third charge. | recharge 9s -> 6.3s; a shot dodged through the Rampage feeds your Rage. |
-| E | cooldown 9.5s -> 8.3s, damage +15%. | cooldown 9.5s -> 5.9s, damage +30%. |
+| RMB | +20% damage on every Smash. | +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less (7.2s -> 4.8s). |
+| Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 6.4s per charge; a shot dodged through the Rampage feeds your Rage. |
+| E | cooldown 12.8s -> 11.2s. | cooldown 12.8s -> 8s. |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

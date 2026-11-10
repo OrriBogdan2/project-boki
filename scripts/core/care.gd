@@ -20,6 +20,7 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 ## three times as fast as it built up. Feeders keep it from ever starting. "dead" only counts while
 ## content/rules/care.json natural_death is on (off: neglect bottoms out at sick).
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
+const MEAL_H := 4.0       # h of starving one meal takes off the clock
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
@@ -136,8 +137,9 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 	rec["needs"][n] = clampf(before + amt, float(sulky().get(n, 0.0)), 100.0)      # the base: sulky at worst
 	return float(rec["needs"][n]) - before
 
-## Time passing at home. sleeping: curled up in bed or napping.
-static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
+## Time passing at home. sleeping: curled up in bed or napping (or indoors); raining: rain on the
+## farm, which some kinds love and some hate (BokiQuirks.rain_joy).
+static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -146,8 +148,9 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	var mins := secs / 60.0
 	var nd: Dictionary = rec["needs"]
 	var f0 := float(nd["food"])
-	var rate := DECAY["food"] / 60.0 * (0.5 if sleeping else 1.0)
-	nd["food"] = clampf(float(nd["food"]) - DECAY["food"] * mins * (0.5 if sleeping else 1.0), 0.0, 100.0)
+	var species := String(rec.get("species", ""))
+	var rate := DECAY["food"] * BokiQuirks.food_rate(species) / 60.0 * (0.5 if sleeping else 1.0)
+	nd["food"] = clampf(float(nd["food"]) - rate * secs, 0.0, 100.0)
 	var floors := sulky()
 	if floors.is_empty():
 		# the part of this stretch spent with nothing in it counts toward starving
@@ -160,6 +163,8 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	nd["joy"] = clampf(float(nd["joy"]) - DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0), 0.0, 100.0)
+	if raining and not sleeping:
+		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if floors.is_empty() and starve_h(rec) >= STARVE["sick"]:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
@@ -236,10 +241,10 @@ static func starve_cap() -> float:
 		return 0.0
 	return INF if bool(Content.rules("care")["natural_death"]) else STARVE["dead"] * 3600.0
 
-## It just ate: a meal takes four hours off the starve clock.
+## It just ate: a meal takes MEAL_H hours off the starve clock.
 static func fed(rec: Dictionary) -> void:
 	if rec.has("starve"):
-		var st := maxf(0.0, float(rec["starve"]) - 4.0 * 3600.0)
+		var st := maxf(0.0, float(rec["starve"]) - MEAL_H * 3600.0)
 		if st > 0.0: rec["starve"] = st
 		else: rec.erase("starve")
 
@@ -585,6 +590,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
 	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
 	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
+	BokiQuirks.set_sex(baby)
 	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}

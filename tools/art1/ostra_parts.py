@@ -12,7 +12,7 @@ HEAD_Z = 1.442
 HIPS_Z = 0.756
 SKIRT_Z = 0.826
 NECK = np.array((0.0, 0.0, 1.44))
-HEAD_K = 0.87       # v2 sheet: the head and hat 0.87 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
+HEAD_K = 0.82       # the head and hat 0.82 of v1's (the sheet's is ~0.65; kept larger so the grin reads at the match camera and he stands the line-up's 1.20x a hunter, warden_model_check)
 
 
 def headpt(p):
@@ -284,20 +284,20 @@ def lining(P):
     return Part("lining", "void-body", V, F, ST, rigid("hips", len(V)), "lining", (64, 64))
 
 
-TAILS = ((33, 0.50, 0.62), (92, 0.58, 0.66), (152, 0.52, 0.63), (-152, 0.52, 0.63), (-92, 0.58, 0.66), (-33, 0.50, 0.62))
+TAILS = ((30, 0.46, 0.72), (90, 0.56, 0.76), (150, 0.50, 0.73), (-150, 0.50, 0.73), (-90, 0.56, 0.76), (-30, 0.46, 0.72))   # sheet: the bells hang clear above the box, the spring shows
 
 
 def tails():
-    """the six long thin coat tails: broad at the flare, arcing out and down to a point with a brass bell; each swings on its spring chain"""
+    """the six coat tails: broad at the flare, flung out and hooked down to a point with a brass bell, ending above the box as on the sheet; each swings on its spring chain"""
     out, joints = [], []
     for i, (deg, reach, drop) in enumerate(TAILS):
         a = np.radians(deg)
         d = np.array((np.sin(a), np.cos(a), 0.0))
         side = np.array((np.cos(a), -np.sin(a), 0.0))
-        pts = [d * 0.17 + (0, 0, 0.99), d * 0.27 + (0, 0, 0.86), d * (reach * 0.72) + (0, 0, drop + 0.07), d * reach + (0, 0, drop - 0.03), d * (reach + 0.035) + (0, 0, drop - 0.1)]
+        pts = [d * 0.17 + (0, 0, 0.99), d * 0.27 + (0, 0, 0.90), d * (reach * 0.78) + (0, 0, drop + 0.08), d * reach + (0, 0, drop), d * (reach + 0.02) + (0, 0, drop - 0.08)]
         path = resample(pts, 15)
         t = np.linspace(0, 1, 15)
-        wd = rmp(t, [0, 0.3, 0.7, 1], [0.125, 0.092, 0.036, 0.004])
+        wd = rmp(t, [0, 0.3, 0.7, 1], [0.13, 0.10, 0.05, 0.004])
         P = np.zeros((15, 3, 3))
         for r in range(15):
             P[r, 0] = path[r] - side * wd[r]
@@ -426,7 +426,7 @@ def face():
     for f in F:
         corners.append([(pu[i] * 0.5 + 0.5, 0.5 - pv[i] * 0.5) for i in f])
     au = np.abs(pu)
-    top, bot = -0.32 + 0.52 * (au / 0.80) ** 2.4, -0.72 + 0.92 * (au / 0.80) ** 2.2
+    top, bot = -0.26 + 0.50 * (au / 0.86) ** 2.3, -0.76 + 0.92 * (au / 0.86) ** 2.1
     mid = top + (bot - top) * 0.5
     jaw = M.sm(mid + 0.02, mid - 0.06, pv) * M.sm(1.0, 0.7, au)
     W = {"x_jaw": jaw}
@@ -441,7 +441,7 @@ def face():
 def hood():
     """the cap's skull: a bag from the oval round the face to the back of the head"""
     C = headpt(HEAD_C)
-    R = np.array((0.15, 0.17, 0.215)) * HEAD_K
+    R = np.array((0.135, 0.17, 0.225)) * HEAD_K
     n = 44
     loop = []
     for k in range(n):
@@ -476,7 +476,7 @@ def hood():
 def horn(side):
     """a floppy horn, rising then drooping to its bell, swinging on a spring chain"""
     n = "R" if side > 0 else "L"
-    pts = np.array(((0.05, -0.05, 1.78), (0.115, -0.06, 1.865), (0.2, -0.07, 1.885), (0.275, -0.07, 1.82), (0.32, -0.06, 1.72), (0.338, -0.05, 1.61), (0.34, -0.045, 1.56)))
+    pts = np.array(((0.05, -0.05, 1.78), (0.115, -0.06, 1.93), (0.2, -0.07, 1.96), (0.275, -0.07, 1.89), (0.32, -0.06, 1.72), (0.338, -0.05, 1.61), (0.34, -0.045, 1.56)))
     pts[:, 0] *= side
     path = resample(headpt(pts), 22)
     t = np.linspace(0, 1, 22)
@@ -495,7 +495,7 @@ def chain_w(prefix, t, bones, start, parent):
     return {b: w / np.maximum(tot, 1e-6) for b, w in W.items()}
 
 
-RUFF_K = 0.85       # v2 sheet: the ruff a little narrower than v1's, with the smaller head
+RUFF_K = 0.80       # v2 sheet: the ruff a little narrower than v1's, with the smaller head
 
 
 def ruff():

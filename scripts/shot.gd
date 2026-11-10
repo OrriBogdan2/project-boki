@@ -15,6 +15,8 @@ func _ready():
 		elif a.begins_with("--frames="): frames = int(a.substr(9))
 		elif a.begins_with("--shot-every="): every = float(a.substr(13))
 		elif a.begins_with("--shot-time="): at_time = float(a.substr(12)); frames = 1000000
+		elif a.begins_with("--shot-size="):
+			get_window().size = Vector2i(int(a.get_slice("x", 0).substr(12)), int(a.get_slice("x", 1)))
 		elif a.begins_with("--shot-times="):
 			for x in a.substr(13).split(","): at_times.append(float(x))
 			at_time = float(at_times.back())
