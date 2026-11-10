@@ -1595,3 +1595,7 @@ NEXT('new_xylocroc_mid','new_xylocroc_a_2','mid','sleek',"a longer young crocodi
 NEXT('new_xylocroc_final','new_xylocroc_a_2','final','tough',"a huge crocodile with a double row of big tuned bar scutes down its back in deep rainbow colours, jaws lined with teeth like piano keys, a heavy mallet tail raised to strike its own back, planted.")
 NEXT('new_carousel_mid','new_carousel_a_2','mid','pretty',"a prancing young horse with a taller twisted candy-stripe horn, a scalloped canopy mane in pink and cream, a ribbon tail, gold hoof tips, one foreleg raised.")
 NEXT('new_carousel_final','new_carousel_a_2','final','majestic',"a grand stallion whose mane spreads into a full round carousel canopy over its back with small lantern-shaped tufts round the rim, a long twisted gold-and-pink pole horn, a streaming ribbon tail, rearing.")
+
+# 11-10 OWNER: "Briarlynx's fur colour is a bit too different from its line" (it is dark brown; Nettlynx and Thistlynx are warm tan).
+SPECS.append({'id':'fur_briarlynx','name':'Briarlynx (fur matches its line)','refs':['briefs/boki-art/cards/Briarlynx.jpg','briefs/boki-art/cards/Thistlynx.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"recolour its fur to the same warm sandy-tan as the lynx in image 2, with the same cream muzzle, chest and paws and the same green eyes, in place of the dark brown. Take only the fur colours from image 2. Its body, hedge-maze mane, roses, thorn antlers and pose stay exactly the same."})
