@@ -102070,5 +102070,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_sawright_nl_1.jpg",
     "ok": true
+  },
+  {
+    "id": "new_xylocroc_mid2",
+    "name": "new_xylocroc_mid2",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_mid2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_xylocroc_mid2",
+    "name": "new_xylocroc_mid2",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_mid2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_xylocroc_mid2",
+    "name": "new_xylocroc_mid2",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_mid2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_mid2",
+    "name": "new_carousel_mid2",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_carousel_mid2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_postroo_baby2",
+    "name": "Postbox kangaroo baby (reads as a kangaroo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/new_postroo_baby2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_mid2",
+    "name": "new_carousel_mid2",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_carousel_mid2_2.jpg",
+    "ok": true
   }
 ]
