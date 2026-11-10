@@ -15,8 +15,9 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `dash_slot.gd` | the dash as a normal ability slot (Shift): a pip per charge filling as it recharges, a countdown for the next one, a flash and tick when one returns, a diamond for the air dash; one component for the match bar and `home_dash_slot.gd` at home (no dash bar on plates) |
 | `recast_cue.gd` (`RecastCue`) | two-step abilities, one language for every hunter (see below) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
-| `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the ally alerts, never overlapping, repeats merged ("x3"), at most 3 at once, the most important first, short lives; world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
+| `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
+| `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -52,6 +53,28 @@ drawn, the downed plate and status words show, cooldown text appears).
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`).
+
+## Pop-up budget
+
+Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
+a fight covers the middle of the screen or stays more than 2 s; edge-anchored, small, merged, few. "In a
+fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are owned elsewhere
+(`ext/tutorial-visibility`) and not covered here.
+
+| Pop-up | Where, size | How long | Now |
+|---|---|---|---|
+| Ally knocked | was a 300x70 card top centre, pulsing red, portrait, timer, arrow | was all the time they were down | **gone.** Knocked mark on their squad row (left, under the minimap), row outlined steadily (pulses only while stomped), one faint 13 px line beside the row ("down", 60% opacity), the edge arrow toward them (`_draw_squad_markers`, only while they're off screen), "Revive Nm" only within 9 m (`DownedMarks`) |
+| Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
+| "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
+| Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
+| Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
+| Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
+| Level-up gold wash | full screen at 16% | ~0.3 s | unchanged (brief; `--level-hud-check` holds it); the line goes through the lane |
+| Kill / knock flashes (`Juice.kill`, you knocked) | full screen, 14-30% | 0.2-0.3 s | unchanged: brief, and about you |
+| "You're down" panel, killcam line | centre, 34 px | while you're down | unchanged: you can't fight then |
+| Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
+| Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
+| Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
 
 ## Looting with a full inventory
 

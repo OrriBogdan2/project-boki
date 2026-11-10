@@ -266,7 +266,7 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
 ## filling over it in green, a cross in place of the level, and what's happening under it. The
-## moment they go down a burst of rays and a "DOWN" word pop over them.
+## moment a rival goes down a burst of rays and a "DOWN" word pop over them.
 func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictionary, role: Color) -> void:
 	var stomped: bool = h.get_meta("stomped", false)
 	var pulse := 0.5 + 0.5 * sin(H.m.time * 14.0)
@@ -295,7 +295,8 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		line = "%s reviving  %d%%" % [(revs[0] as Hunter).pname, int(h.revive * 100.0)]
 		lcol = HudStyle.REVIVE
 	HudStyle.ctext(c, Vector2(sp.x, frame.end.y + 13.0), line, 11, lcol, 3)
-	_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)
+	if H.m.player == null or h.team != H.m.player.team:
+		_burst(c, sp + Vector2(0, -26), float(s["burst"]), bcol)      # (a teammate's fall stays quiet: MateAlerts)
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,
 		"word": line, "chip": 0.0, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 

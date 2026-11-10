@@ -12,6 +12,7 @@ var hit_t := 0.0
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
+var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
@@ -119,12 +120,12 @@ func flash(col: Color, strength := 0.35) -> void:
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
 
-## The message lane sits under the ally alerts (they take its first rows), or in the tutorial's own
-## lane while that runs (Tutorial holds it while its banner is up).
+## The message lane sits under the timer, or in the tutorial's own lane while that runs (Tutorial
+## holds it while its banner is up). In a fight it shows fewer, shorter lines (MsgLane.fight).
 func _place_msgs() -> void:
 	msgs.visible = not map_open()
-	msgs.reserved = alerts.size()
-	msgs.top = 84.0 + alerts_h
+	msgs.fight = m.player != null and m.time - m.player.hurt_at < MSG_FIGHT_S
+	msgs.top = 84.0
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## The lairs' name boards in the world (Label3D over each gate) fade back while a message prints over
@@ -149,6 +150,7 @@ func tip(text: String) -> void:
 		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
+const MSG_FIGHT_S := 4.0   # s after you were last hit that the message lane keeps to its fight budget
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -289,10 +291,6 @@ func _draw_all() -> void:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
 	if p and (p.out or p.downed) and m.killcam_text != "":
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
-	if p and not m.duel:
-		_draw_alerts(sz, p)
-	else:
-		alerts_h = 0.0
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
 	if p and not p.out and not p.extracted:
@@ -1041,7 +1039,7 @@ func glider_hit(amount: float) -> void:
 var _h_down := false
 
 func _hud_tick(delta: float) -> void:
-	_track_mates(m.player, delta)
+	mates.track(self, m.player, delta)
 	_loot_tick(delta)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
 	# H folds the training guide (G is send / recall your kin) and the kit panel away (and back)
@@ -1409,8 +1407,9 @@ func _bleed_left(h: Hunter) -> float:
 var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
 ## Your squad, stacked under the minimap: portrait, name, armor over segmented health, status icons.
-## A knocked teammate pulses red with their bleed-out timer; a dead one is greyed with an X and the
-## time left to bring them back from their deathbox; one who got out wears a check mark.
+## A knocked teammate's row is outlined, with a knocked mark (MateAlerts) and their bleed-out timer,
+## pulsing only while they're stomped; a dead one is greyed with an X and the time left to bring them
+## back from their deathbox; one who got out wears a check mark.
 func _draw_squad(sz: Vector2, p: Hunter) -> void:
 	var y := mm_bottom + 10.0
 	var w := 210.0
@@ -1422,7 +1421,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 		var r := Rect2(Vector2(16, y), Vector2(w, 60))
 		var down := lbl == "WISP"
 		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
-		_rounded(r, Color(0.05, 0.06, 0.09, 0.84), 10, Color(st[1], 0.35 + (0.5 * pulse if down else 0.0)), 2 if down else 1)
+		_rounded(r, Color(0.05, 0.06, 0.09, 0.84), 10, Color(st[1], 0.7 if down else 0.35), 2 if down else 1)
 		var pr := Rect2(r.position + Vector2(6, 6), Vector2(48, 48))
 		var pst := ""
 		match lbl:
@@ -1430,6 +1429,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			"DEATHBOX", "DEAD": pst = "dead"
 			"EXTRACTED": pst = "out"
 		_draw_portrait(pr, h, pst, SideColor.of(m, h))
+		mates.draw_row(self, r, pr, h, lbl)
 		var tx := pr.end.x + 8.0
 		var tw := r.end.x - 8.0 - tx
 		_text(Vector2(tx, r.position.y + 19), h.pname.substr(0, 13), 14, INK if lbl == "ALIVE" else Color(INK, 0.7), big)
@@ -1454,7 +1454,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
-				_bar(Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 6)), h.down_hp / Data.MATCH["down_hp"], (Color("ff2a1a") if stp else Color("ff6a4a")).lerp(Color.WHITE, (0.5 if stp else 0.25) * pulse))
+				_bar(Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 6)), h.down_hp / Data.MATCH["down_hp"], Color("ff2a1a").lerp(Color.WHITE, 0.5 * pulse) if stp else Color("ff6a4a"))
 				_text(Vector2(tx, r.position.y + 51), ("STOMPED  %ds" if stp else "KNOCKED  %ds") % int(ceil(left)), 13, Color("ff4a3a") if stp else Color("ff8a6a"), big)
 				if h.revive > 0.0:
 					_arc(Vector2(r.end.x - 16, r.position.y + 46), 8, h.revive, GOOD, 3.0)
@@ -1471,113 +1471,6 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 func _has_status(e: Ent) -> bool:
 	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
 		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
-
-## Ally alerts, top centre under the timer. A teammate getting knocked gets a big card (their face,
-## name, bleed-out countdown, and how far and which way); it turns green if they're picked up, red if
-## they're lost, then fades. Smaller cards for a teammate eliminated or revived from their deathbox.
-var mate_last := {}       # nid -> last squad state label
-var alerts: Array = []    # {h, kind, t}
-
-func _track_mates(p: Hunter, delta: float) -> void:
-	for a in alerts.duplicate():
-		a["t"] = float(a["t"]) + delta
-		var life := 999.0 if a["kind"] == "knocked" else 2.6
-		if float(a["t"]) > life or (a["kind"] == "knocked" and not is_instance_valid(a["h"])) or (a["kind"] == "knocked" and not (a["h"] as Hunter).downed and float(a["t"]) > 1.0):
-			alerts.erase(a)
-	if p == null:
-		return
-	for h in m.hunters:
-		if h == p or h.team != p.team:
-			continue
-		var now := String(_mate_state(h)[0])
-		var was := String(mate_last.get(h.nid, now))
-		mate_last[h.nid] = now
-		if now == was:
-			continue
-		var card = null
-		for a in alerts:
-			if a["h"] == h and a["kind"] == "knocked":
-				card = a
-		if now == "WISP":
-			if card == null:
-				alerts.append({"h": h, "kind": "knocked", "t": 0.0})
-			Sfx.play("warn", null, -4.0, 0.0, 0.8)
-		elif was == "WISP" and now == "ALIVE":
-			if card: card["kind"] = "revived"; card["t"] = 0.0
-			else: alerts.append({"h": h, "kind": "revived", "t": 0.0})
-			Sfx.play("revive", null, -6.0)
-		elif (now == "DEATHBOX" or now == "DEAD") and was in ["WISP", "ALIVE"]:
-			if card: card["kind"] = "eliminated"; card["t"] = 0.0
-			else: alerts.append({"h": h, "kind": "eliminated", "t": 0.0, "small": true})
-			Sfx.play("warn", null, -8.0, 0.0, 0.6)
-		elif was == "DEATHBOX" and now == "ALIVE":
-			alerts.append({"h": h, "kind": "revived", "t": 0.0, "small": true})
-			Sfx.play("revive", null, -6.0)
-		elif was == "DEATHBOX" and now == "DEAD":
-			alerts.append({"h": h, "kind": "lost", "t": 0.0, "small": true})
-	while alerts.size() > 3:
-		alerts.pop_front()
-
-var alerts_h := 0.0       # how much room the alerts take (the message lane sits below them)
-
-func _draw_alerts(sz: Vector2, p: Hunter) -> void:
-	var y := 82.0
-	alerts_h = 0.0
-	for a in alerts:
-		var h: Hunter = a["h"]
-		var kind := String(a["kind"])
-		var t := float(a["t"])
-		var fade := 1.0 if kind == "knocked" else clampf((2.6 - t) / 0.6, 0.0, 1.0)
-		var pop := clampf(t / 0.15, 0.0, 1.0)
-		var small: bool = a.get("small", false)
-		var w := 300.0 if not small else 236.0
-		var hh := 70.0 if not small else 44.0
-		var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, y + (1.0 - pop) * -10.0), Vector2(w, hh))
-		var col := Color("ff5a3a")
-		var title := "ALLY KNOCKED"
-		match kind:
-			"revived": col = GOOD; title = "ALLY REVIVED"
-			"eliminated": col = BAD; title = "ALLY ELIMINATED"
-			"lost": col = MUTED; title = "WISP LOST"
-		var pulse := 0.5 + 0.5 * sin(m.time * 8.0) if kind == "knocked" else 0.0
-		_rounded(r, Color(0.06, 0.03, 0.04, 0.9 * fade), 10, Color(col, (0.6 + 0.4 * pulse) * fade), 2)
-		var ps := hh - 12.0
-		var pr := Rect2(r.position + Vector2(6, 6), Vector2(ps, ps))
-		var pst := "down" if kind == "knocked" else ("dead" if kind in ["eliminated", "lost"] else "")
-		if fade > 0.05:
-			_draw_portrait(pr, h, pst, col)
-		var tx := pr.end.x + 10.0
-		if small:
-			_text(Vector2(tx, r.position.y + 19), title, 12, Color(col, fade), big)
-			_text(Vector2(tx, r.position.y + 36), h.pname.substr(0, 16), 14, Color(INK, fade), big)
-		else:
-			_text(Vector2(tx, r.position.y + 21), title, 13, Color(col, fade), big)
-			_text(Vector2(tx, r.position.y + 42), h.pname.substr(0, 16), 17, Color(INK, fade), big)
-			if kind == "knocked":
-				_text(Vector2(tx, r.position.y + 61), "%ds to revive" % int(ceil(_bleed_left(h))), 12, Color("ffb0a0"))
-				# which way, and how far
-				var dv := Vector2(h.pos.x - p.pos.x, h.pos.z - p.pos.z)
-				var ctr := Vector2(r.end.x - 34, r.position.y + 30)
-				var ang := _screen_dir(dv)
-				var tip := ctr + Vector2.from_angle(ang) * 13.0
-				var side := Vector2.from_angle(ang + PI * 0.5) * 7.0
-				var back := ctr - Vector2.from_angle(ang) * 6.0
-				c.draw_circle(ctr, 17.0, Color(0, 0, 0, 0.35))
-				c.draw_colored_polygon(PackedVector2Array([tip, back + side, back - side]), col)
-				_ctext(Vector2(ctr.x, r.position.y + 63), "%dm" % int(round(dv.length())), 12, INK, big)
-			else:
-				_text(Vector2(tx, r.position.y + 61), "Back on their feet" if kind == "revived" else "Get to their deathbox", 12, Color(MUTED, fade))
-		y += hh + 8.0
-		alerts_h += hh + 8.0
-
-## A ground direction as a screen angle, using the camera's view.
-func _screen_dir(dv: Vector2) -> float:
-	var cam := m.cam
-	if cam == null or m.player == null:
-		return dv.angle()
-	var a := cam.unproject_position(m.player.position)
-	var b := cam.unproject_position(m.player.position + Vector3(dv.x, 0, dv.y).normalized() * 3.0)
-	return (b - a).angle()
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -2928,10 +2821,8 @@ func _draw_wisp_rings() -> void:
 		var o2 = p.get_meta("standing_on")
 		if is_instance_valid(o2) and (o2 as Hunter).downed:
 			var sz := c.size
-			var s := "Standing on %s  ·  they drain %.1fx faster and can barely move" % [(o2 as Hunter).pname, Life.R["stomp_mult"]]
-			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
-			_rounded(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 14, sz.y * 0.5 + 70), Vector2(w + 28, 28)), Color(0.12, 0.02, 0.02, 0.85), 8, Color(1, 0.3, 0.2, 0.7), 2)
-			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 15, Color("ff8a7a"))
+			var s := "Standing on %s  ·  %.1fx drain" % [(o2 as Hunter).pname, Life.R["stomp_mult"]]
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 13, Color("ff8a7a", 0.85))
 	ReviveHud.revive_rings(self)       # deathbox revives in progress
 
 ## A soft coloured glow round the screen edges (danger to you).
