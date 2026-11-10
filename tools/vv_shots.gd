@@ -442,6 +442,8 @@ func _venator_lmb() -> void:
 			"full",
 			"lmb_aim",
 			"LMB: ember tracers through a near cursor out to full range, the bronze muzzle star, the firing brackets"])
+	for i in 2:      # rounds in flight (0.12 s apart, 0.15 s to full range): the ~1.5 bh bolt with its fading tail
+		marks.append([0.37 + 0.06 * i, "full", "lmb_tracer_%d" % i, "LMB: a round in flight, the thin ~1.5 bh bolt"])
 	await _go(1.2, string, marks)
 	P.inp["fire"] = false
 	await _reset(8.0)

@@ -14,7 +14,9 @@ const DROP_T := 0.8              # s: the shell is seen falling for the last par
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const FALL_FX_GAP := 0.05       # s between the falling shell's flicker of green fire and embers
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
-const BURN_ALPHA := 0.6          # the burning patch's dark fill and rim at first (fades to half): reads on pale sand
+const BURN_FILL_A := 2.4         # the burning patch's dark fill: AimShapes' quiet 0.18 telegraph fill x this (fades to
+                                 # half), so the patch reads as a dark disc on pale sand (source: dark disc, lit rim)
+const BURN_DARK := Color("17260a")  # the patch's charred floor: Vex's green burnt near black
 const BRONZE := Color("b9732f")   # the shell's metal (a material, not an effect)
 
 var kit: GunslingerKit
@@ -183,9 +185,12 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	var xd := data()
 	var at: Vector3 = s["at"]
 	var r := float(xd["radius"])
-	var left := 1.0 - float(s["t"]) / float(xd["zone_t"])
-	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.DEEP, "lw": 0.1}
-	rim.merge({"fill": 1.0, "core": float(xd["core_r"]), "hot": 0.3, "alpha": BURN_ALPHA * (0.5 + 0.5 * left)})
+	var left := 0.5 + 0.5 * (1.0 - float(s["t"]) / float(xd["zone_t"]))
+	var burnt := {"at": at, "r": r, "all": true, "col": BURN_DARK, "col2": BURN_DARK, "lw": 0.0, "fill": 1.0}
+	burnt["alpha"] = BURN_FILL_A * left
+	AimKit.circle(kit.h, "xf%d" % int(s["n"]), burnt)
+	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.HOT, "lw": 0.12}
+	rim.merge({"core": float(xd["core_r"]), "hot": 0.5, "alpha": left})
 	AimKit.circle(kit.h, "xz%d" % int(s["n"]), rim)
 	_flames(at, r, dt)
 	s["tick"] = float(s["tick"]) + dt
@@ -194,6 +199,7 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 		_zone_hit(at, r, xd)
 	if float(s["t"]) >= float(xd["zone_t"]):
 		AimKit.hide(kit.h, "xz%d" % int(s["n"]))
+		AimKit.hide(kit.h, "xf%d" % int(s["n"]))
 		shells.erase(s)
 
 func _zone_hit(at: Vector3, r: float, xd: Dictionary) -> void:
@@ -219,6 +225,6 @@ func clear() -> void:
 		var n: Node3D = s["node"]
 		if is_instance_valid(n):
 			n.visible = false
-		for id in ["x%d", "xr%d", "xz%d"]:
+		for id in ["x%d", "xr%d", "xz%d", "xf%d"]:
 			AimKit.hide(kit.h, id % int(s["n"]))
 	shells.clear()
