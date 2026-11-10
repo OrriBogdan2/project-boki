@@ -2,10 +2,10 @@ class_name HudVitals
 extends RefCounted
 ## The bottom-left vitals block: your portrait framed in your class colour with the XP tracker (run
 ## level and a bar toward the next level) along its bottom, then to its right your health as a big
-## number over a thick segmented bar (same segments and chip as your overhead plate), armour as a strip under it with its number and
+## number over a thick segmented bar, armour as a strip under it with its number and
 ## tier, shields past the end of health, the merged form's shell, and the archetype resource under
 ## that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
-## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this file only draws.
+## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
 const BAR_W := 318.0       # px: health / armour width
 const HP_H := 16.0         # px: the health bar

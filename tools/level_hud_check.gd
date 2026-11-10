@@ -31,21 +31,23 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 2. XP bar follows the level's progress
 	P.lvl = 1; P.xp = 0.0; P.skill_pts = 1
 	for s in Hunter.SLOTS: P.slot_lv[s] = 0
-	hud.xp_seen = -1.0; hud.xp_shown = -1.0; hud.xp_pop = 0.0
+	hud.xp_seen = -1.0
+	hud.xp_shown = -1.0
+	hud.xp_pop = 0.0
 	ok(HudVitals.xp_step(hud, P, 10.0) == 0.0 and hud.xp_pop <= 0.0, "level 1, no XP: the bar is empty, no pop")
 	P.gain_xp((float(Hunter.XP_TO[1]) - float(Hunter.XP_TO[0])) * 0.5)
-	ok(P.lvl == 1 and absf(P.xp_frac() - 0.5) < 0.02, "half way to level 2: the bar is half full (%.2f)" % P.xp_frac())
+	ok(P.lvl == 1 and absf(P.xp_frac() - 0.5) < 0.02, "half way to level 2: half full (%.2f)" % P.xp_frac())
 	var fr := HudVitals.xp_step(hud, P, 0.0)
-	ok(hud.xp_pop > 0.0 and fr < 0.5, "XP landing pops once and the bar starts to fill (%.2f)" % fr)
+	ok(hud.xp_pop > 0.0 and fr < 0.5, "XP landing pops once, the bar starts to fill (%.2f)" % fr)
 	hud.xp_pop = 0.0
 	fr = HudVitals.xp_step(hud, P, 10.0)
-	ok(absf(fr - 0.5) < 0.02 and hud.xp_pop <= 0.0, "settled: the bar shows half (%.2f), no second pop without new XP" % fr)
+	ok(absf(fr - 0.5) < 0.02 and hud.xp_pop <= 0.0, "settled at half (%.2f), no pop without new XP" % fr)
 	P.gain_xp(7.0)
 	HudVitals.xp_step(hud, P, 0.0)
 	ok(hud.xp_pop > 0.0, "a second gain pops again")
 	hud.xp_pop = 0.0
 	fr = HudVitals.xp_step(hud, P, 10.0)
-	ok(absf(fr - P.xp_frac()) < 0.005, "the bar matches Hunter.xp_frac after the second gain (%.3f)" % fr)
+	ok(absf(fr - P.xp_frac()) < 0.005, "the bar matches xp_frac after a second gain (%.3f)" % fr)
 	# ---------------------------------------------------------------- 3. a level-up: pop, gold flash, sound
 	var ups0 := P.level_ups
 	var last0: int = int(Sfx.last_played.get("level_up", -1000))
@@ -56,9 +58,10 @@ func run(main: Node) -> void:
 	ok(hud.flash_t > 0.5 and hud.flash_col.g > hud.flash_col.b and hud.flash_col.a > 0.05, "the screen washes gold (%s)" % str(hud.flash_col))
 	ok(int(Sfx.last_played.get("level_up", -1000)) > last0, "the level-up sound plays")
 	HudVitals.xp_step(hud, P, 0.0)
-	ok(hud.xp_pop > 0.0 and HudVitals.lvl_text(P) == "2", "the level text follows the level ('%s') and the gain popped" % HudVitals.lvl_text(P))
+	var lt := HudVitals.lvl_text(P)
+	ok(hud.xp_pop > 0.0 and lt == "2", "the level text is '%s' and the gain popped" % lt)
 	fr = HudVitals.xp_step(hud, P, 10.0)
-	ok(absf(fr - P.xp_frac()) < 0.005 and P.lvl == 2, "past a level-up the bar settles on the new level's fraction (%.2f)" % fr)
+	ok(absf(fr - P.xp_frac()) < 0.005 and P.lvl == 2, "after a level-up the bar shows the new fraction (%.2f)" % fr)
 	# two levels in one go: each counts
 	P.gain_xp(float(Hunter.XP_TO[3]) - P.xp + 1.0)
 	ok(P.lvl == 4 and P.level_ups == ups0 + 3, "a big XP grant over two levels plays it for each (%d)" % (P.level_ups - ups0))
