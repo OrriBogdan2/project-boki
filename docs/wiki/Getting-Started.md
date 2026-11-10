@@ -17,17 +17,13 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 ## Your first hour
 
 1. **The story.** A short animated prologue about how Malgrave, the Wyrm in a queen's shape, broke Solmere. Hold Esc to skip it.
-2. **Your first egg.** Three starter eggs sit on a little island, plus a mystery egg:
-   the Venom Egg (Vespyx), the Prism Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
-   that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.
-3. **First Flight.** A short tutorial on four small islands, one line at a time: steer your landing and
-   walk to the beam, dash and glide the gap, shoot a monster dead, use your E on a group, send your
-   Boki at a monster, beat the pack, then knock down a rival Hunter and learn the two glows (a
-   round one is a Hunter and can't be taken, a critter one is a Boki: hold interact to grab it), open a
-   chest and step into the lift. Nothing is random and
-   nothing is lost if you fall (you go back to the last stop). A **Skip tutorial** button is on screen
-   the whole time: pressing it ends the course as finished, and the one-time hints in your first real
-   match cover what it would have shown (the chest key, the lift).
+2. **Your first egg.** Three starter eggs sit up front on a little island: the Venom Egg (Vespyx),
+   the Prism Egg (Prismander) and the Spore Egg (Mycroll). Look around the back for a black egg in
+   a basket: it can hatch almost any early wild species (rarely a rare one) and is more likely than
+   the starters to hatch with a mutation. Pick one, knock until it hatches, and name it.
+3. **First Flight.** A short tutorial on three small islands: steer your landing, walk, dash, glide,
+   long-dash in the air, shoot, use your E, have your Boki use its ability, throw your Boki at a
+   monster, open a chest, then start an outpost's uplink and hold its yard until the lift opens.
 4. **Your farm.** A new farm is nearly empty: you get 200 gems and place the essentials yourself in
    build mode (B): the house (90), a crop patch (30) and the cooking pot (20), then the market stall
    when you like. See [The farm](The-Farm.md).
@@ -44,5 +40,5 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
   locked ability spends a point on it. Your ultimate opens at level 6. See [Classes](Classes.md).
 - **The Meadow is safe for Boki.** The Dusk Isles and the Hollow put the Boki you bring at risk; the
   game warns you. See [Boki](Boki.md#losing-a-boki).
-- **The training area** (from the Expedition menu) has a checklist for every button.
+- **The Training Grounds** (from the Expedition menu) has a checklist for every button.
 - Every key can be rebound in Settings > Controls. See [Controls](Controls.md).

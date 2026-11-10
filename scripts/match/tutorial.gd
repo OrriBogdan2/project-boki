@@ -18,10 +18,11 @@ const KEYS := {"move": "move", "dash": "dash", "glide": "glide", "shoot": "fire"
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"move": "move", "dash": "glide"}
 const PADS := ["dash", "glide"]      # course stops left from a glowing pad on one island, landed on the next
+const FOE_STEPS := ["shoot", "sig", "throw", "fight", "rival"]     # the marker is the nearest monster
 const WALK_LEAD := ["move", "chest", "extract"]
 
 const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
-const NAG_T := 15.0        # s without progress before the pill pulses and the Boki says it once more
+const NAG_T := 8.0         # s without progress before the pill pulses and the Boki says it again
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const DONE_T := 0.9        # s of the step-done sting
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
@@ -48,6 +49,7 @@ var down_t := 0.0
 var kills := 0               # monsters you or your Boki beat
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
+var stall_got := 0            # got at the last look: a hit or a cast is progress too
 var best_d := 1e9            # closest you've been to this step's target
 var target := Vector3.INF    # where the marker points (INF for none)
 var label := ""
@@ -260,10 +262,13 @@ func _enter() -> void:
 		m.hud.msgs.clear()
 		m.hud.msgs.hold = true
 	stall_t = 0.0
+	nag_t = 0.0
+	flash_t = 0.0
 	best_d = 1e9
 	got = 0
 	got_seen = 0
 	falls = 0
+	stall_got = 0
 	_refresh(p)
 	recalled = false
 	need_back = false
@@ -450,16 +455,12 @@ func _lead_goal(sid: String) -> Vector3:
 		return goal(sid)
 	return Vector3.INF
 
-## The marker: from the first frame of a destination step to its last. A fight step only gets one
-## once the monsters are some way off.
+## The marker: from the first frame of a destination step to its last, monsters close by or not.
 func _point(sid: String) -> void:
 	target = Vector3.INF
 	label = ""
 	var at := goal(sid)
 	if at == Vector3.INF or m.player.out:
-		return
-	var foe_step := sid in ["shoot", "sig", "throw", "fight", "rival"]
-	if foe_step and Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length() <= 6.0:
 		return
 	target = at
 	label = String(Content.rules("tutorial")["labels"].get(stop_id(), "Monster"))
@@ -468,7 +469,10 @@ func _point(sid: String) -> void:
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt
-	if target != Vector3.INF:
+	if got != stall_got:
+		stall_got = got
+		stall_t = 0.0
+	if target != Vector3.INF and id() not in FOE_STEPS:      # (a monster walking up to you is not progress)
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 		if d < best_d - 1.0:
 			best_d = d
@@ -500,6 +504,10 @@ func _props() -> void:
 		var on: bool = pd["id"] == on_id
 		(pd["disc"] as Node3D).scale = Vector3.ONE * (pulse if on else 1.0)
 		(pd["label"] as Node3D).visible = on
+
+## Beams standing in the world right now (--tutorial-idle-check).
+func beams_on() -> int:
+	return _beams.filter(func(b: MeshInstance3D): return b.visible).size()
 
 func _make_beam() -> MeshInstance3D:
 	var n := MeshInstance3D.new()

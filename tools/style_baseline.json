@@ -616,10 +616,6 @@
 "scripts/match/kin_strike.gd": {
 "long_line": 4
 },
-"scripts/match/kin_voice.gd": {
-"long_line": 21,
-"semicolon": 2
-},
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
@@ -813,7 +809,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 30,
+"long_line": 29,
 "nested_ternary": 2,
 "semicolon": 66
 },

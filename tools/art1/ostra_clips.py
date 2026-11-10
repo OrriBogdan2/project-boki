@@ -8,7 +8,9 @@ TAU = 2 * math.pi
 
 ORB_UP = {"hR": (0.31, 0.20, 1.05), "fR": (0.05, 0.75, 0.65), "pR": (-0.25, -0.45, 0.85), "eR": (1.0, -0.7, -0.6), "cR": 0.3, "sR": 1.0}
 FAN_UP = {"hL": (-0.30, 0.18, 1.10), "fL": (-0.25, 0.25, 0.95), "pL": (0.15, -0.95, 0.2), "eL": (-1.0, -0.6, -0.5), "cL": 0.55, "sL": 0.6}
-STILL = dict(ORB_UP, **FAN_UP, spine=(8.0, -5.0, 2.0), head=(-14.0, 6.0, 12.0), brow=-0.5, cheek=0.3, lid=0.3)
+# the sheet's showman: arms flung wide, the open right hand and the fanned deck out past the ruff
+STILL = {**ORB_UP, **FAN_UP, "hR": (0.44, 0.12, 1.18), "hL": (-0.42, 0.14, 1.22), "spine": (8.0, -5.0, 2.0), "head": (-14.0, 6.0, 12.0),
+         "brow": -0.5, "cheek": 0.3, "lid": 0.3}
 
 # leaning out, both hands in it
 READY = dict(STILL, hR=(0.26, 0.32, 1.12), hL=(-0.26, 0.28, 1.14), spine=(18.0, -8.0, 0.0), head=(-22.0, 8.0, 8.0), brow=-1.0, cheek=0.6, lift=(0.0, 0.03, -0.05), box=(3.0, 0.0))

@@ -42,6 +42,7 @@ var needle := {}               # Longneedle's charge: {t}
 var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
+var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
 var needle_hits := 0
@@ -156,12 +157,20 @@ func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
+func combo_read(t: Ent) -> Dictionary:
+	if not KitStatus.rattled(t):
+		return {}
+	var bd := rmb_def()["burr"] as Dictionary
+	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
+			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
+
 ## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	if t is Hunter or t is Mob:
 		if String(o.get("src", "")) == "shot" and not o.has("ab") and KitStatus.rattled(t):
 			o["crit"] = true
 			dazed_hits += 1
+			ComboMark.payoff(m, h, t)
 			h.sus_n = maxi(0, h.sus_n - 1)
 			return dmg * (1.0 + float(res_def()["rattle_k"]))
 	return dmg
@@ -270,7 +279,7 @@ func on_dash(use_ex: bool) -> bool:
 	if not spend_dash(false):
 		return true
 	var start := h.position
-	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
+	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"]), "curved": true})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
 	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
@@ -295,27 +304,24 @@ func _slide_end() -> void:
 	if rank("dash") >= 3:
 		h.add_buff("move_speed", 0.25, 2.0)
 	var air := bool(slide.get("air", false))
-	if air:
-		h.vel.x *= 0.25          # an air slide stops short instead of carrying on
+	if air and not h.gliding:
+		h.vel.x *= 0.25          # an air slide stops short instead of carrying on (a glide press carries it, item 4)
 		h.vel.z *= 0.25
 	var kind := "slide" if bool(slide.get("held", false)) else "step"
 	st["last_dash"] = "air_slide" if air else kind
 	last_dash_kind = String(st["last_dash"])
 	slide = {}
 
-## A tap: a skid that starts fast and bleeds off to a run over roll_t, covering `roll` m (you shoot
-## through it); the speed falls linearly from the peak that covers the distance.
+## A tap: a skid on her fitted dash curve (content/rules/dash_feel.json, ArchKit.travel's "curved"), covering
+## `roll` m over roll_t (you shoot through it).
 func _skid(t: float, dd: Dictionary) -> void:
-	var feel := dash_feel()                 # the global dash feel, as travel() applies it
-	var dur := float(dd["roll_t"]) * float(feel["time"])
-	if t >= dur:
+	if t >= float(dd["roll_t"]) * float(dash_feel()["time"]):
 		_slide_end()
-		return
-	var run := float(h.cdat["speed"])
-	var peak := 2.0 * float(dd["roll"]) * float(feel["dist"]) / dur - run
-	h.roll_speed = lerpf(peak, run, t / dur)
 
 func _tick_slide(dt: float) -> void:
+	if h.gliding:
+		_slide_end()      # a glide press cancelled it (Hunter._dash_into_glide): the glide has its speed now
+		return
 	var dd := dash_def()
 	slide["t"] = float(slide["t"]) + dt
 	var t := float(slide["t"])
@@ -332,6 +338,7 @@ func _tick_slide(dt: float) -> void:
 		if t >= float(dd["tap_t"]) and not bool(slide.get("tap", false)):
 			if held("dash") and can_hold:
 				slide["held"] = true
+				curved = {}                              # the hold slide sets its own speed
 				slide["t0"] = t
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
@@ -504,14 +511,25 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	m.fx.flash(at, HOT, 1.2, 0.1)
 	m.fx.burst(at, EMBER, 12, 6.0, 0.35, 2.0, 1.0, spray, 70.0)
 	m.sfx("vn_blast", at, -4.0)
-	net_ring(at, 1.0, EMBER)
 	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
 	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
 	daze(victim, float(bd["cone_rattle"]))
 
+## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
+func combo_marks(out: Array) -> void:
+	super(out)
+	for key in daze_for.keys():
+		var f := instance_from_id(key) as Ent
+		var left: float = KitStatus.rattled_left(f) if f != null else 0.0
+		if left <= 0.0:
+			daze_for.erase(key)
+		elif not f.dead:
+			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), "DAZED", true))
+
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data) and is slowed.
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
+	daze_for[foe.get_instance_id()] = seconds
 	fx().swirl(foe, Color("ff4fb0"), HOT, seconds)
 
 ## It meets a wall (or the ground at the lane's end) and sticks: the cone points back the way it came.
@@ -524,7 +542,6 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["out"] = -(b["dir"] as Vector2)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
 	fx().star(at, EMBER, HOT, 0.6, 0.12)
-	net_ring(at, 1.0, EMBER)
 
 func _detonate(b: Dictionary) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
@@ -535,7 +552,6 @@ func _detonate(b: Dictionary) -> void:
 	var at: Vector3 = b["pos"]
 	rattles += 1
 	m.fx.flash(at, HOT, 1.6, 0.1)
-	fx().ring(ground(at), 1.8, EMBER, HOT, 0.35)
 	m.sfx("vn_blast", at, -1.0)
 	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
 
@@ -546,7 +562,6 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), EMBER, HOT, 0.35)
 	var spray := Vector3(out.x, 0.2, out.y)
 	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, EMBER, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
-	net_ring(at, 1.6, EMBER)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		if absf(f.pos.y - at.y) > 2.6: continue
@@ -656,7 +671,9 @@ func _fire_needle() -> void:
 		var rat := KitStatus.rattled(f)
 		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
-		if rat and f is Hunter: o["payoff"] = true
+		if rat:
+			ComboMark.payoff(m, h, f)
+			o["payoff"] = f is Hunter
 		f.hurt(dmg, h, o)
 		needle_hits += 1
 		m.fx.burst(f.pos + Vector3(0, 1.0, 0), EMBER, 14, 5.0, 0.3)

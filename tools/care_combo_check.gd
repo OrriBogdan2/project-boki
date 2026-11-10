@@ -366,6 +366,14 @@ func _statue_locks() -> void:
 
 ## Item 27: no glide while sealed in Rimelock (she falls; each press is refused), and Shift ends it and
 ## skates straight out at speed instead of stopping.
+## The held Rink Wall look's slab, or null when no wall look is up.
+func _wall_slab(K: RimewrightKit) -> MeshInstance3D:
+	var e: Dictionary = K.lk().held.get("wall", {})
+	if e.is_empty() or not is_instance_valid(e["n"]):
+		return null
+	return (e["n"] as Node3D).get_node_or_null("Slab") as MeshInstance3D
+
+
 func _rime_glide_skate() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)
 	var m: Match = r[0]
@@ -811,6 +819,7 @@ func tender() -> void:
 			AimKit.shown(P, "rmb")
 			and String(lane.get("kind", "")) == "dotted"
 			and absf(float(lane.get("len", 0.0)) - float(K.rmb_def()["wind_lane"])) < 0.1
+			and is_equal_approx(float(lane.get("width", 0.0)), 2.0 * float(K.rmb_def()["seed"]["hit_r"]))
 			and K.anim_id == "mm_seed_aim"
 			and absf(K.move_k() - float(K.rmb_def()["wind_move"])) < 0.01,
 			"%s len %.1f %s k %.2f" % [
@@ -850,6 +859,7 @@ func tender() -> void:
 			AimKit.shown(P, bid)
 			and bool(tele.get("all", false))
 			and absf(float(tele.get("r", 0.0)) - 2.2) < 0.05
+			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
 	var rooted_early := T.root_t > 0.0
@@ -1266,7 +1276,9 @@ func rimewright() -> void:
 			"tm: kit sounds load",
 			Sfx.streams.has("rime_shard") and Sfx.streams.has("rime_wall_tell") and Sfx.streams.has("rime_zone"))
 	step(m, 0.05)
-	ok("tm: the thin aim line to the cursor is always up", AimKit.shown(P, "aim"))
+	ok(
+			"tm: the thin aim line to the cursor is always up, the shared one hidden",
+			AimKit.shown(P, "aim") and K.own_aim_line())
 	# --- a steady stream (no pause) of slow darts that bow out and home, 4 plain then 3 large
 	var times: Array = []
 	var dmgs: Array = []
@@ -1358,6 +1370,40 @@ func rimewright() -> void:
 	ok(
 			"tm passive: knocking a Chilled foe Shatters them after a beat",
 			T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s" % str(T.downed))
+	var want: float = float(K.d["passive"]["splinter_dmg"]) * K.power("passive")
+	ok(
+			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
+			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
+	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
+	K.chill.erase(T2.get_instance_id())
+	K.fan_hits.clear()
+	# off to the side, clear of the downed foe
+	var ahead := (T.pos - P.pos).normalized().rotated(Vector3.UP, PI / 2.0)
+	T2.teleport(P.pos + ahead * 5.0)
+	T2.hp = 1.0       # one dart fells them, so nothing has Chilled them first
+	step(m, 0.05)
+	var s2 := K.splinter_log
+	sc.aim_at(P, T2.pos)
+	P.inp["fire"] = true
+	step(m, 0.8)
+	P.inp["fire"] = false
+	step(m, 0.8)
+	ok(
+			"tm passive: knocking a foe that is not Chilled does not Shatter", T2.downed and K.splinter_log == s2,
+			"downed %s, shatters %d" % [str(T2.downed), K.splinter_log - s2])
+	# --- Chill lasts 4 s, and a new hit refreshes it to the full 4 s
+	T.downed = false
+	T.hp = T.max_hp
+	K.add_chill(T)
+	step(m, 3.0)
+	var lasts_3 := K.chilled(T)
+	K.add_chill(T)
+	step(m, 3.0)
+	var refreshed := K.chilled(T)
+	step(m, 1.2)
+	ok(
+			"tm passive: Chill lasts 4s and a new hit refreshes it",
+			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
@@ -1544,6 +1590,11 @@ func rimewright() -> void:
 			and K.lk().showing("wall")
 			and not (w0["node"] as Node3D).visible,
 			"at %.1f len %.1f" % [mid0.x - P.pos.x, float(w0.get("len", 0.0))])
+	var slab := _wall_slab(K)
+	ok(
+			"tm E: a solid ice slab spans the pillars, the barricade itself",
+			slab != null and slab.visible and absf(slab.scale.x - (float(w0.get("len", 0.0)) - 0.2)) < 0.3,
+			"slab %s" % ("none" if slab == null else str(slab.scale)))
 	var tx := T.pos.x
 	step(m, 1.4)
 	var w1: Dictionary = K.wall["w"]

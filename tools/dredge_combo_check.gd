@@ -388,6 +388,32 @@ func _all() -> void:
 	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
+	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
+	var wear := []
+	var armor0: float = T.armor
+	var max_armor0: float = T.max_armor
+	for bloom0 in [0.0, 9.0]:
+		reset.call()
+		T.teleport(home + Vector3(0, 0, 1.6))
+		T.max_armor = 50.0
+		T.armor = 50.0
+		var hp0: float = T.hp
+		P.wbloom = bloom0
+		P.ammo = int(P.wpn["mag"])
+		ak.aim_at(P, T.pos)
+		P.inp["fire"] = true
+		ak.step(m, 0.1)
+		P.inp["fire"] = false
+		ak.step(m, 0.5)
+		wear.append([T.max_armor - T.armor, hp0 - T.hp])
+	T.armor = armor0
+	T.max_armor = max_armor0
+	ok(
+		"gun: zero bloom wears armor %.0f%% faster than a spread volley" % (float(K.gun_def()["armor_k"]) * 100.0),
+		K.armor_shreds > 0 and wear[1][1] > 0.0 and wear[0][1] > 0.0
+		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
+		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
+	)
 	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
@@ -502,6 +528,21 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
+	# --- owner rule (DECISIONS Kits): the Hand passes walls and cliffs, but a placed wall stops it
+	reset.call()
+	var wall_def := {"length": 8.0, "hp": 999.0, "time": 30.0, "block": "all"}
+	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4.0, 0, 0), Vector2(-1, 0), wall_def, 1.0)
+	var dm0: float = ak.dmg(T)
+	var gw0 := K.grapples
+	ak.tap(m, P)
+	ak.step(m, 0.6)
+	ok(
+		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
+		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
+		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+	)
+	m.verbs.walls.erase(wall)
+	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):

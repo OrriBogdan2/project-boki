@@ -23,11 +23,15 @@ about 14, held lower for the same cap) and slows 30%. Its cooldown follows the s
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
 slide tap 4.6 m and hold 7 m.
 
-## Ranks (kit data pass)
-Rank 2 is the shared step (cooldown -10%, damage +15%). Rank 3 is the hero's own and matches the source's rank IV:
-Burr Charge resets on a knock, Slipstep gives a speed burst when a slide ends, Longneedle takes 30% off its cooldown
-for every hunter it hits (the base is 20% once). The source's earlier upgrades (-1.5s twice on the grenade and the
-slide, +20% twice on the beam) collapse into the shared step.
+## Ranks: upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no longer applies to Vex: each slot reads
+`rank_cd` / `rank_dmg` in the JSON, and a slot the source gives no such upgrade stays at 1.0. Source: Ghost, `Upg:` lines.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Burr Charge | -1.5s cooldown x2, tier IV: resets on a knock | 5.85s / 5.2s, reset on a knock | 5.4s / 4.3s, reset on a knock at 3 |
+| Space Slipstep | -1.5s recharge x2, tier IV: +25% speed 2s after a slide | 7.65s / 6.0s, speed burst at 3 | 7.4s / 6.3s, +25% speed 2s at 3 |
+| E Longneedle | +20% damage x2, tier IV: 30% shave per hunter | cooldown 10.35s / 9.2s, damage +15% / +30%, shave at 3 | cooldown 11.5s flat, damage +20% / +40%, 30% shave per hunter at 3 |
 
 ## Audit (Nov 3 23:40)
 
@@ -101,6 +105,38 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
 | Cinderfall on an enemy hunter, then the Merge | the impact fills the bond (KinBond.from_ult, a hit); the merge straight after never one-shots a full-health light hunter | `--gunslinger-combo-check` (burst) |
 | Stepping off the disc | no damage and no bond | `--gunslinger-combo-check` |
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
+d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
+line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
+(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
+and the attack key does nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| E Longneedle, wind-up (0.6 s, standing still) | LMB | not shown: the rifle is braced through the cast bar, no round seen leaving | both: the rifle fires through the charge (3 rounds in 0.3 s) and the beam still goes | unsettled | [F] 0164-0169 |
+| E wind-up | RMB | not shown | both: the grenade leaves, the beam still goes | unsettled | |
+| E wind-up | jump | not shown (he stands still, no jump pressed in the clip) | both: a 0.9 m hop, the charge goes on (walking is 0 in the cast) | unsettled | [F] 555.8-556.4 s |
+| E wind-up | X | not shown | ignored, not buffered (`GunslingerUlt.cast` refuses while the needle charges) | unsettled | |
+| E wind-up | glide | not shown | the glider opens, the charge goes on | unsettled | |
+| E recovery (about 0.4 s after the recoil) | any | not shown | the cast is over at the beam: everything goes at once | unsettled | [F] 0170 |
+| X Cinderfall, after the shot (shell falling 1.6 s) | walk, jump, LMB | free: he walks and takes a jump pad while it falls | free: she moves, jumps and shoots | match | [F] ult f103 |
+| X | E, RMB | not shown | both | unsettled | |
+| LMB held (the string) | RMB, E, X | not shown | both: the string goes on through each | unsettled | |
+| LMB held | jump | not shown (he fires while walking) | both | unsettled | [F] 0007-0023 |
+| RMB (the launcher shot) | any | owner item 112: a tap, no hold and no throw, so there is no wind-up to cancel | instant: everything goes at once | owner | OWNER_REVIEW_1103 112 |
+| Glide | LMB | not shown | ignored | unsettled | |
+| Glide | RMB, E, X | not shown | each goes (RMB as its air variant) | unsettled | |
+
+Fixes made: none. No pair has a source frame or line that disagrees with ours. Timing note (not a cancel): the
+wiki's Railgun reads "Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the
+level-9 hunter).
+
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
 |---|---|---|---|
@@ -141,10 +177,53 @@ supervive_physics.md); [footage] is briefs/hero-ref/venator.md (5 fps); owner no
   the sheet's 0.8 for a centre hit or two hunters is not one of the bond kinds (hit, knock, kill), so every hit
   pays the hit share (see the report's owner questions).
 
+## Footage gaps, Nov 9 re-check
+The ranked gaps in briefs/hero-ref/venator.md section 4 (written before 22ceca1e1), checked on main d255acbee.
+Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tools/venator_parity_check.gd).
+
+| # | Gap | On main | Where |
+|---|---|---|---|
+| 1 | Daze payoff on the rifle | closed | 22ceca1e1: `rattle_k` 0.9, gold numbers, no string decay. Asserts `Dazed: the rifle does +90%`, `Dazed: big gold numbers`, `Dazed: the string's decay pauses` |
+| 2 | Wall cone has no pre-telegraph | closed; in flight to be cut | 22ceca1e1: `_tick_burrs` fills an `AimKit.cone` for everyone over the fuse, then `_detonate`. Assert `RMB: the cone shows back toward you, for everyone`. ext/vex-greenfire-1108 (owner 11-08 item 12) makes Coin Blast hit-only and deletes the stick, fuse and cone |
+| 2b | Cone length, knock | closed; in flight to be cut | 22ceca1e1: `cone_len` 6.0, `push` 11.0. Assert `RMB ground cone: damage + Dazed + shoved toward you`. Same greenfire note |
+| 3 | Fuse 0.9 | closed; in flight to be cut | 22ceca1e1: `burr.fuse` 0.9. Assert `RMB: 0.9s fuse`. Same greenfire note |
+| 4 | RMB held aim lane | owner override | OWNER_REVIEW_1103 item 112 (Nov 5, after the "side toss" line in DECISIONS): tap only, no hold; 04648e2a0. Assert `RMB tap: thrown on the press, nothing held, no lane shown`. The coin flick (ext/vex-coin-palm-1108) keeps the tap |
+| 5 | Fires on a tapped slide; cooldown | firing closed; cooldown open (row 9) | `ArchKit.fires_in_dash` reads the dash's LMB row (`fire`). Assert `Slipstep tap: the rifle keeps firing`. ext/vex-dash-parity-rebased: one Shift charge |
+| 6 | Passive: footage has only the knock reset | closed to the kit data | 65ffef1e7: the knock reset plus Fever, one flat 6% for 3.5 s (Combat Rush data, not ours). Asserts `Knock: Slipstep back ...`, `small: Fever is one flat level of 6%` |
+| 7 | Longneedle timing, recoil | closed | 22ceca1e1: `charge` 0.6, `self_slow` 1.0, `recoil` 6.0, `linger` 0.75; `gunslinger_e` brace in kmoves_vv.gd. Asserts `Longneedle: fires at 0.6s`, `Longneedle: the recoil shoves you back`. In flight: ext/vex-e-turn (turn cap), ext/vex-coin-palm-1108 (from the palm) |
+| 8 | Longneedle line narrows; muzzle orb | closed | 04648e2a0: `_tick_needle` `width_to` 12%; orb and flare in `_fire_needle`. Assert `Longneedle: the line narrows over the cast (18m)` |
+| 9 | Cooldowns | open | Rank 1 RMB 6.5, Shift 8.5, E 11.5; footage (level 9) 5.4 / 7.5 / 10; data (level 1) 9 / 11.5 / 12. Which level "source values" means is the owner's call (DECISIONS 11-07 default 1.0x) |
+| 10 | Slide identity | afterimage closed; ring owner override | 596288ff1 `_tick_echo` afterimages. Rings cut by DECISIONS "no bursts, rings or discs on dashes" and 1d5cdfd46. Assert `Vex audit: no ground ring, disc or column on a slide ...` |
+| 11 | Dazed reads for the whole window | in flight | KitStatus `rat` on main; ext/combo-marks-a b7353ee3a adds the overhead Daze tag with a time ring |
+| 12 | Grenade throw animation | owner override; in flight | Item 112: no throw, a cannon kick. Assert `Vex item 112: no throw pose ...`. ext/vex-coin-palm-1108 (owner 11-08): a coin flick from the cyborg hand |
+| 13 | Mini Nuke | closed | 96831d533: Cinderfall, her ultimate (`gunslinger_ult.gd`) |
+| 14 | Mana | no change | The sheet's own call: our kits have no mana |
+
+The per-slot table's "while held: a white lane" and the Shift "white ring" lines are stale (rows 4 and 10); they
+are left alone here because every in-flight Vex branch rewrites those rows.
+
 ## Ultimate choice
 X is her own ultimate, Cinderfall (owner decision, SERVER_UPDATE6): the source's Mini Nuke, built from the
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
 slot changes. The Boki Merge is on its own key.
+
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/hero_combo_check.gd` and `tools/vv_ult_check.gd` assert drawn size = hit size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Rifle (LMB) | two thin arcs flanking her, r 1.25 m (firing brackets) | none (hitscan rounds) | her screen only | thin brackets while firing | kept: a tell on her body, not an area |
+| Burr Charge (RMB), in flight | none | 0.72 m wide shot, 10.5 m | - | a shell, no ground shape | ok |
+| Burr stuck (RMB), 0.9 s fuse | cone, 6.0 m long, 100 deg, pointing back at her | same cone (`cone_len`, `cone_deg`) | everyone locally | a cone back toward her | ok, asserted. Online the cone shows as a fixed 5 m fan (the net event has no length); a real fix needs a Net change, so it is a suggestion only |
+| Burr hit / stuck / detonation | none (was a 1.0, 1.6 and 1.8 m ring) | the cone above | - | no ring on the burr | removed: cosmetic rings that matched no hit |
+| Longneedle (E) charge | line 18 m long, 1.8 m wide narrowing to a core over 0.6 s | beam 18 m, 1.8 m wide, at 0.6 s | everyone locally | wide line narrowing to a core | ok, asserted |
+| Slipstep (dash) | none | none | - | none | ok |
+| Cinderfall (X) fall | disc r 3.4 m filling over 1.6 s, hot core 1.2 m, rivet ring closing onto r | 3.4 m, core 1.2 m, at 1.6 s | everyone locally | disc fills to the impact | ok, asserted |
+| Cinderfall impact | one ring at r 3.4 m | the disc | everyone | impact ring | fixed: was two rings at 1.3x and 0.7x r |
+| Cinderfall burn, 3 s | rim r 3.4 m fading | ticks inside 3.4 m | everyone locally | burning patch | ok |
+
+Suggestion (not built): carry the burr cone length over the network so remote players see the true 6 m cone.
 
 ## Engine notes
 - Kit `scripts/arch/kits/gunslinger_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd`; moves
@@ -156,3 +235,14 @@ slot changes. The Boki Merge is on its own key.
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/gunslinger.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![gunslinger v2 strips](../art/anim_audit/v2_gunslinger.jpg)
+
+- Gait: run slide 23 % of speed (gate 25 %), arms against the legs +0.89, bob 6.9 cm: the Nov 8 numbers survive the retarget. T-pose share 0 % in both attacks; free-arm travel 0.10 / 0.14 body heights.
+- Gun on the hand: the pistol is skinned to `forearm.R`, so it moves rigidly with the arm (nothing to align in the clip map).
+- Idle to walk first-pose gap 0.29 body heights, unchanged (blend-covered).
+- Result: no regression; no clip or map edits needed.
+- Timing: the "Timing pass" frames (`tools/vex_anim_time_check.gd`, on `ext/anim-time-vex`) were re-run on the v2 clips in `--gunslinger-combo-check`: 109 checks, 0 failures; every move blends in within 0.12 s and hits on the press's frame.
