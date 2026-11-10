@@ -108972,5 +108972,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/hb_meeko_starters_1.jpg",
     "ok": true
+  },
+  {
+    "id": "hb2_sable_lockatara",
+    "name": "Hunter + Boki splash v2 (sable_lockatara)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_sable_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_kael_voltalon",
+    "name": "Hunter + Boki splash v2 (kael_voltalon)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_kael_voltalon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_cinder_calderoise",
+    "name": "Hunter + Boki splash v2 (cinder_calderoise)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_cinder_calderoise_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_meeko_starters",
+    "name": "Hunter + Boki splash v2 (meeko_starters)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_meeko_starters_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_meeko_starters",
+    "name": "Hunter + Boki splash v2 (meeko_starters)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_meeko_starters_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_neve_glaciatee",
+    "name": "Hunter + Boki splash v2 (neve_glaciatee)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb2_neve_glaciatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_cinder_calderoise",
+    "name": "Hunter + Boki splash v2 (cinder_calderoise)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_cinder_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb2_neve_glaciatee",
+    "name": "Hunter + Boki splash v2 (neve_glaciatee)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb2_neve_glaciatee_1.jpg",
+    "ok": true
   }
 ]
