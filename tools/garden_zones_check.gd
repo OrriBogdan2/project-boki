@@ -201,7 +201,8 @@ func _horizon_part(hub) -> void:
 		lit += 1 if isle.get_meta("open") else 0
 	ok(isles.size() == GardenZones.ids().size(), "the hub sky holds one island per zone (%d)" % isles.size())
 	ok(draws <= int(GardenZones.rules()["horizon_draws"]), "the islands cost %d draws" % draws)
-	ok(lit == 1 and hub.get_node("Horizon_%s" % GardenZones.start()).get_meta("open"), "only the open zone's island is lit")
+	var start_isle: Node = hub.get_node("Horizon_%s" % GardenZones.start())
+	ok(lit == 1 and start_isle.get_meta("open"), "only the open zone's island is lit")
 
 func _move_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true

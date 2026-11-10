@@ -61,6 +61,6 @@ static func island_mesh(seed_i: int, colour: Color, open: bool) -> ArrayMesh:
 	return st.commit()
 
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, col: Color) -> void:
-	st.set_color(col); st.add_vertex(a)
-	st.set_color(col); st.add_vertex(b)
-	st.set_color(col); st.add_vertex(c)
+	for v in [a, b, c]:
+		st.set_color(col)
+		st.add_vertex(v)
