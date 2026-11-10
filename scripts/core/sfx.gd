@@ -241,6 +241,36 @@ var layer_want := {}      # stem -> 0..1
 const LAYER_DB := -9.0    # a stem at full, the same level a single track plays at
 const LAYER_IN := 1.2     # seconds to fade a stem in, and out
 const LAYER_OUT := 3.0
+const LAYER_UNDER := 0.5  # seconds a stem takes to fall away while a sting plays over it
+const STING_DB := -6.0
+const STING_CUT := 0.15   # seconds: a sting still ringing when its scene ends fades this fast
+signal stung(which: String)      # a sting started ("extract", "out", "last", "home")
+var _sting_p: AudioStreamPlayer
+
+## A short musical sting (audio/sting_<name>.ogg, tools/compose.py) over the score, one at a time:
+## a new one replaces one still ringing. The layered stems fall away fast while it plays.
+func sting(which: String) -> void:
+	var path := "res://audio/sting_%s.ogg" % which
+	if not ResourceLoader.exists(path):
+		return
+	if _sting_p == null:
+		_sting_p = AudioStreamPlayer.new()
+		_sting_p.bus = "Music"
+		_sting_p.volume_db = STING_DB
+		add_child(_sting_p)
+	stung.emit(which)
+	_sting_p.stream = load(path)
+	_sting_p.volume_db = STING_DB
+	_sting_p.play()
+
+func sting_on() -> bool:
+	return _sting_p != null and _sting_p.playing
+
+func _cut_sting() -> void:
+	if sting_on():
+		var tw := create_tween()
+		tw.tween_property(_sting_p, "volume_db", -60.0, STING_CUT)
+		tw.tween_callback(_sting_p.stop)
 
 ## Starts a group's stems together (music_<group>_<stem>.ogg); `want` gives each stem's starting
 ## level. Crossfades out whatever was playing.
@@ -274,6 +304,7 @@ func set_layers(want: Dictionary) -> void:
 ## stops, and a pool voice still ringing is cut. The single tracks and the main ambience are left to the
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
+	_cut_sting()
 	if not layers.is_empty():
 		_stop_layers(fade)
 		music_name = ""
@@ -347,7 +378,10 @@ func _process(delta: float) -> void:
 		var p: AudioStreamPlayer = layers[st]
 		var cur := db_to_linear(p.volume_db)
 		var tgt := float(layer_want.get(st, 0.0)) * db_to_linear(LAYER_DB)
-		var rate := db_to_linear(LAYER_DB) * delta / (LAYER_IN if tgt > cur else LAYER_OUT)
+		var secs := LAYER_IN
+		if tgt <= cur:
+			secs = LAYER_UNDER if sting_on() else LAYER_OUT
+		var rate := db_to_linear(LAYER_DB) * delta / secs
 		cur = move_toward(cur, tgt, rate)
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
 

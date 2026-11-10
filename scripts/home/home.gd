@@ -106,6 +106,9 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
+	if not Game.last_result.is_empty():      # back from a run: the welcome-home sting, once
+		Sfx.sting("home")
+		Game.last_result = {}
 	var dbg := OS.get_cmdline_user_args()
 	for a in dbg:
 		if a.begins_with("--home-weapon="):
