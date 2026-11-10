@@ -25,8 +25,8 @@
 		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove",
 			"build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85,
 				"deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]],
-				"clear": [20, 22, 58, 48],
-				"scatter": {"seed": 23, "terrace": 16, "crack": 44, "pebble": 40}}},
+				"clear": [12, 14, 66, 58],
+				"scatter": {"seed": 23, "terrace": 16, "crack": 44}}},
 		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"},
 		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}
 	},
