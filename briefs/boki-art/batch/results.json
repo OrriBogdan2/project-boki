@@ -90380,5 +90380,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/olm_olmlet_blue_2.jpg",
     "ok": true
+  },
+  {
+    "id": "olm_kintsuwyrm_blue",
+    "name": "Kintsuwyrm (blue-and-white porcelain)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/olm_kintsuwyrm_blue_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "olm_glazolm_jade",
+    "name": "Glazolm (celadon porcelain)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/olm_glazolm_jade_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "olm_glazolm_jade",
+    "name": "Glazolm (celadon porcelain)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/olm_glazolm_jade_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "olm_kintsuwyrm_jade",
+    "name": "Kintsuwyrm (celadon porcelain)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/olm_kintsuwyrm_jade_1.jpg",
+    "ok": true
   }
 ]
