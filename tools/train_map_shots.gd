@@ -25,15 +25,18 @@ func run(main_node: Node) -> void:
 	await _setup()
 	var halts: Array = m.hud.train_map.halts(m.skytrain)
 	var at: Vector2 = halts[0]["pos"]
-	var arrive := m.skytrain.halt_eta(float(m.world.train_route["stations"][0]))
-	m.time += maxf(0.0, arrive - 24.0)
-	P.teleport(m.world.free_spot_near(Vector3(at.x, 0.0, at.y) + Vector3(4, 0, 4), [], 1.0, 0.5, 12.0))
+	m.time += m.skytrain.dwell + 1.0      # the train has pulled out of its first stop
+	m.time += m.skytrain.halt_eta(float(halts[0]["s"])) - 24.0      # 24 s from coming back to it
+	var deck := m.world.train_at(float(halts[0]["s"]))      # the pier is level with the deck
+	var spot := Vector3(at.x, deck.y + 0.3, at.y)
+	P.teleport(spot)
 	await _go(0.5)
+	print("TRAINMAPSHOTS halt %s player %s" % [at, P.pos])
 	_crop("mm_near", "The minimap beside a halt: the loop, the halt, the train, 'Next train: 0:24'")
 	_far_from_loop()
 	await _go(0.5)
 	_crop("mm_far", "Away from the loop the minimap shows no train")
-	P.teleport(m.world.free_spot_near(Vector3(at.x, 0.0, at.y) + Vector3(4, 0, 4), [], 1.0, 0.5, 12.0))
+	P.teleport(spot)
 	m.hud.full_map.open()
 	await _go(0.3)
 	_take("full_map", "The full map: the loop, every halt named, the train's marker, the countdown at the nearest halt")

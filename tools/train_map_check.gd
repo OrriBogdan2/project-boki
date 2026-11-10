@@ -28,9 +28,12 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	var with_train := 0
 	for map_id in ["", "skyreach"]:
+		var opts := {"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
+		if map_id != "":
+			opts["map"] = map_id
 		var m := Match.new()
 		main.add_child(m)
-		await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "map": map_id})
+		await m.start(opts)
 		m.set_process(false)
 		if m.skytrain != null:
 			with_train += 1
