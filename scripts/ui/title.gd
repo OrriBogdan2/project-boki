@@ -431,6 +431,7 @@ func _build_ui() -> void:
 	root.name = "TitleUI"
 	ui.add_child(root)
 	root.add_child(TitleBackdrop.new())
+	root.add_child(VoidSpecks.new())       # void specks drifting over the key art
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
