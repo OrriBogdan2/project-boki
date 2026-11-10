@@ -92235,5 +92235,19 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/fv5_arcestrel_3.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_canvastross_a",
+    "name": "Canvastross (rework a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_canvastross_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_canvastross_b",
+    "name": "Canvastross (rework b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_canvastross_b_2.jpg",
+    "ok": true
   }
 ]
