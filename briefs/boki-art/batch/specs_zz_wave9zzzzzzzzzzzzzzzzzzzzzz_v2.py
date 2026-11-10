@@ -1418,3 +1418,55 @@ for _k,_d in (('a',"a tiny round kitten sitting, with cream fur and pale blue sw
               ('c',"a sleepy kitten curled up with its tail round it, cream fur with pale blue swirl marks, a small grey cloud resting on its back like a blanket of its own fur, one amber eye open, a tiny dial mark on its flank.")):
     SPECS.append({'id':'baby_barostorm_'+_k,'name':'Barostorm baby kitten '+_k,'refs':[_C%'Barostorm'],'runs':2,'aspect':'1:1','size':'2K',
       'prompt':"Draw one single character illustration of the BABY form of the creature in image 1, clearly the same animal as a small kitten, with the same cream fur, pale blue swirl markings, grey storm-cloud fur and gold details in baby size: "+_d+" All parts are its own body. Ignore how image 1 is painted. "+_TXT+STYLE_V2('baby','cute',False,True)+FRAME_V2})
+
+# ===== 11-10 OWNER: Crofthollow = 2nd (rv_crofthollow_b_1, lying like a hillside with the cottage and tree) -> live. Chuggamus = 2nd (b_1, the teapot
+# idea) "but redo a bit more, it's a bit much". Legendaries: "they don't look nearly epic enough or distinctive; do a pass on the existing ones
+# too, like the snake, which don't look legendary enough either".
+_n0=len(SPECS); V2SHEET_NEW('Crofthollow','briefs/boki-art/cards/Crofthollow.jpg',_GC,_GN); V2PORT_NEW('Crofthollow','briefs/boki-art/cards/Crofthollow.jpg','final','majestic',_GC,_GN,False,True,"standing up on all four legs, side-on, the cottage and tree on its back tilting as it rises")
+SPECS[_n0]['id']='v2s_crofthollow_b'; SPECS[_n0+1]['id']='v2p_crofthollow_b'; SPECS[_n0+1]['runs']=2
+for _k,_d in (('t1',"tone it down: the big looping handle on its back becomes a low, thick, curved ridge of bone no taller than its ears, its nose horn becomes a short stubby spout-shaped horn with one small flat steam puff, and its body stays a plain round hippo in purple-brown. Keep its roar."),
+              ('t2',"simplify it: remove the tall handle entirely; instead its tail curls up into a small handle-shaped loop, its nose has one short spout horn puffing a single steam curl, and its round belly has one pale band like a teapot's glaze line. Calmer face, mouth closed, standing."),
+              ('t3',"make the teapot idea subtle: a round, heavy hippo with a small lid-shaped bump of bone on top of its head with a knob, a short spout horn on its snout, and a low curved back ridge; one small steam puff; purple-brown hide.")):
+    SPECS.append({'id':'rv_chuggamus_'+_k,'name':'Chuggamus (teapot hippo, toned down '+_k+')','refs':[_O+'rv_chuggamus_b_1.jpg'],'runs':2,'aspect':'1:1','size':'2K','prompt':_EDIT+_d})
+# LEGENDARY-GRADE look: allowed more than normal Boki. Used for an "epic pass" on existing legendaries and for new concepts.
+_EPIC=(" LEGENDARY PRESENCE (the whole point): it is seen from a low angle so it towers over the viewer; its signature part is enormous and makes a silhouette no other creature has; "
+       "it carries a second, brighter accent colour in bold flat shapes; behind its head or back its own body forms a crown, halo or fan shape; its pose is commanding and still, like a statue of a god. "
+       "It may have up to three effects drawn as flat hard-edged shapes attached to its body. Rich, deep colours; nothing cute; no pink cheeks. ")
+def EPIC(n,arch,dark,furry,opts,ref=None):
+    for _k,_d in zip('ab',opts):
+        SPECS.append({'id':'epic_'+n.lower()+'_'+_k,'name':n+' (legendary epic pass '+_k+')','refs':[ref or 'briefs/boki-art/cards/'+n+'.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+          'prompt':"Draw one single character illustration of a far more legendary version of the creature in image 1: the same animal, idea and colours, redesigned to look like the rarest and most powerful creature in its world. THE DESIGN: "+_d+_EPIC+"Every part is grown from its own body. Ignore how image 1 is painted. "+_TXT+STYLE_V2('final',arch,dark,furry).replace(FX_V2,"")+FRAME_V2})
+EPIC('Sarcobra','majestic',True,False,[
+ "a colossal black cobra reared to full height, its hood spread into a vast golden sun-disc fan patterned like a pharaoh's collar in gold, lapis blue and turquoise, a crown crest on its head, coils stacked like the steps of a pyramid, eyes glowing gold.",
+ "a great winged cobra: two huge golden falcon wings spread wide from behind its hood, a gold and blue striped hood like a royal headdress, its body rising from a spiral of coils, a forked tongue of gold, a small sun disc between two horn-like crests."])
+EPIC('Pavonazar','majestic',False,True,[
+ "a majestic peacock displaying a gigantic tail fan that fills the whole frame like a stained-glass window, each eye-feather a jewel in sapphire, emerald and gold, a tall crown crest, chest out, one foot raised.",
+ "a celestial peacock with a tail that sweeps round it in a full ring like a halo, feathers tipped with star-shaped eyes in gold and violet, long trailing ribbons, a calm regal face."])
+EPIC('Wayshell','majestic',False,False,[
+ "an ancient sea turtle the size of an island, its shell a great golden compass rose with eight long points extending past the shell like a star, engraved map lines in teal across its flippers, a wise bearded face, swimming up toward the viewer.",
+ "a towering turtle rearing its head high, its shell crowned with a ring of brass gear-teeth and a tall compass needle spire, star-map markings in gold on deep ocean-blue skin, heavy flippers planted."])
+EPIC('Ghoulamari','creepy',True,False,[
+ "a vast spectral octopus rising up, its mantle a tall crystal-ball dome with a swirling pale mist shape inside, eight long tentacles spread like a throne and ending in curled wisp tips, deep crimson and black with ghost-white accents, hollow glowing eyes.",
+ "a giant octopus seated like a fortune-teller on its own coiled tentacles, two tentacles raised holding nothing, a huge luminous orb grown from its head, rows of pale rune-like sucker marks, a wide dark cloak of webbing between its arms."])
+EPIC('Cetorgan','majestic',False,False,[
+ "a gigantic whale breaching straight up, its back grown into a full cathedral pipe organ of silver pipes rising like a crown from head to tail, baleen like golden grilles, long fins like sweeping cloaks, deep blue with silver and gold.",
+ "an immense whale seen from below gliding overhead, rows of tall silver organ pipes along both sides like wings, a gold keyboard-patterned jaw line, a tail like a great fan."])
+EPIC('Glacione','pretty',False,False,[
+ "a tall, serene frost sea angel, no longer a baby: a long translucent pale-blue body with a glowing silver heart shape inside, six wide wing-fins of clear ice spread like a seraph's, a crown of ice crystals, long trailing ribbons of frost. Calm, half-lidded eyes.",
+ "an elegant ice spirit sea angel hovering with four great snowflake-shaped wings, a slim white body, a halo ring of ice shards behind its head, a tail like a long icicle veil."])
+EPIC('Cindermaw','creepy',True,True,[
+ "a huge Blight hyena-wolf standing over the viewer, its ribcage open and glowing violet between bone bars, a towering mane of black smoke-shaped fur with bone spines, a bone skull mask with long fangs, tail like a burning brand in violet and white.",
+ "a gaunt giant Blight beast mid-howl, head thrown back, its whole back a ridge of tall bone spurs like a broken crown, violet fire shapes pouring from its jaws and eye sockets, long thin legs planted wide."])
+# New legendary concepts, epic versions of the four ideas that worked, starting from my first-round picks.
+EPIC('Cometfox','sleek',True,True,[
+ "a comet fox as a celestial spirit: larger and leaner, with NINE comet tails fanned out behind it like a peacock display, each a band of white, pale blue and gold, a crescent crown mark on its brow, midnight-blue fur scattered with a few star shapes, standing on nothing, head high.",
+ "a great star-fox leaping in an arc, its body trailing one enormous comet tail that curves all the way round it in a ring, a blazing white-gold chest, star-shaped eyes."],ref=_O+'leg_comet_a_1.jpg')
+EPIC('Volcatoise','tough',True,False,[
+ "a mountain-sized tortoise with a full erupting volcano for a shell, three peaks with flat lava rivers running down into channels along its legs, a crown of obsidian spikes round its head, a beard of cooled lava, eyes like embers.",
+ "a titan tortoise rearing up on its hind legs, its volcano shell split open down the middle with a blazing orange core inside, basalt column plates on its limbs, a long neck with a ridge of black glass spines."],ref=_O+'leg_volcano_a_1.jpg')
+EPIC('Lightheron','majestic',False,True,[
+ "a towering lighthouse heron: an immensely long red-and-white banded neck rising like a tower, wings spread wide like a storm cloak in white and navy, its crystal head crest blazing with a fan of flat golden light beams, standing on one leg above crashing wave-curl shapes that are its tail feathers.",
+ "a great beacon heron in flight seen from below, its eye a huge golden lamp, a crown of crystal lenses, wing feathers edged in gold like rays, long legs trailing."],ref=_O+'leg_lighthouse_a_2.jpg')
+EPIC('Blightmoth','creepy',True,True,[
+ "an enormous Blight moth with four wings spread, the pattern on its wings forming one huge staring eye in bone white and violet, a furred bone-white body with a ruff, antennae like great feathered horns, thin violet vein lines, long trailing wing tails.",
+ "a moth empress of the Blight: tall, upright, wings folded round her like a hooded cloak of purple-black with bone-white edges, a crown of feathered antennae, six thin arms, a pale mask-like face with pinpoint eyes."],ref=_O+'leg_blightmoth_a_2.jpg')
