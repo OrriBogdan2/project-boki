@@ -35,9 +35,10 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
-## Its number in the Field Book: the order species are listed in (Data.KIN: the starters first).
+## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
+## forms of a branching line share one.
 static func number(spk: String) -> int:
-	return Data.KIN.keys().find(spk) + 1
+	return FieldBook.entries().find(FieldBook.entry_key(spk)) + 1
 
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
@@ -46,19 +47,9 @@ static func entry(spk: String) -> Dictionary:
 	var dx: Dictionary = Save.d.get("dex", {})
 	return dx.get(spk, {})
 
-static func seen(spk: String) -> bool:
-	return bool(entry(spk).get("seen", false))
-
-static func caught(spk: String) -> bool:
-	return bool(entry(spk).get("caught", false))
-
-## [seen, caught] across every species (caught ones count as seen).
+## [seen, caught] across every entry (caught ones count as seen).
 static func counts() -> Vector2i:
-	var s := 0; var t := 0
-	for spk in Data.KIN:
-		if seen(spk) or caught(spk): s += 1
-		if caught(spk): t += 1
-	return Vector2i(s, t)
+	return Vector2i(FieldBook.seen_count(), FieldBook.caught_count())
 
 ## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
@@ -78,13 +69,14 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	g.columns = 6
 	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
 	v.add_child(g)
-	for spk in Data.KIN:
-		g.add_child(tile(spk, tree, on_open))
+	for key in FieldBook.entries():
+		g.add_child(tile(key, tree, on_open))
 
-## One numbered tile.
-static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
-	var is_caught := caught(spk)
-	var is_seen := is_caught or seen(spk)
+## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
+static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
+	var is_caught := FieldBook.entry_caught(key)
+	var is_seen := FieldBook.entry_seen(key)
+	var spk := FieldBook.face(key)
 	var t: PanelContainer
 	if is_seen:
 		var sk := spk
@@ -97,7 +89,7 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	var col := UI.vbox(2)
 	t.add_child(col)
 	var top := UI.hbox(4)
-	var nl := UI.label(num_text(spk), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
+	var nl := UI.label(num_text(key), 11, UI.MUTED if is_seen else UI.FAINT, UI.semi)
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
 	if is_seen:
@@ -120,6 +112,11 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 			sp.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			sp.tooltip_text = "Shimmer form found"
 			holder.add_child(sp)
+		if FieldBook.both_forms(key):
+			var star := UI.label("★", UI.T_SMALL, UI.GOLD)
+			star.position = Vector2(PORTRAIT - 14.0, PORTRAIT - 18.0)
+			star.tooltip_text = "Both forms found"
+			holder.add_child(star)
 		pic.add_child(holder)
 	else:
 		var q := UI.title("?", 40, Color(1, 1, 1, 0.16))
@@ -139,7 +136,7 @@ static func demo() -> void:
 	Save.d["dex"] = dx
 	var ids: Array = Data.KIN.keys()
 	for spk in ids:
-		if not caught(spk) and not dx.has(spk):
+		if not FieldBook.form_caught(spk) and not dx.has(spk):
 			dx[spk] = {"seen": true, "caught": false, "forms": [], "shimmer": false, "mutations": []}
 			break
 	if not ids.is_empty() and dx.has(ids[1]):
@@ -147,11 +144,13 @@ static func demo() -> void:
 		if not (dx[ids[1]]["forms"] as Array).has("Pudward"): dx[ids[1]]["forms"].append("Pudward")
 
 # ------------------------------------------------------------------ a Boki's page
-## The page for one species: picture on the left, field notes on the right.
-static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
+## The page for one species: picture on the left, field notes on the right. An entry with two forms
+## gets a switch between them (`pick(species)` opens the other form's page) and the "both forms" star.
+static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callable) -> void:
 	var sp: Dictionary = Data.KIN[spk]
 	var e := entry(spk)
-	var is_caught := caught(spk)
+	var is_caught := FieldBook.form_caught(spk)
+	var forms_here := FieldBook.forms_of(spk)
 	var row := UI.hbox(UI.GAP_BIG + 6)
 	v.add_child(row)
 	# the Boki turning on its stand (a silhouette if you've only seen it)
@@ -184,7 +183,16 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree) -> void:
 	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	trow.add_child(tchip)
 	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
+	if FieldBook.both_forms(spk):
+		trow.add_child(UI.tag("★ Both forms", UI.GOLD))
 	info.add_child(trow)
+	if forms_here.size() > 1:
+		var swr := UI.hbox(6)
+		for f in forms_here:
+			var fb := UI.button(String(Data.KIN[f]["name"]) if FieldBook.form_seen(f) else "???", func(): pick.call(f))
+			fb.disabled = f == spk
+			swr.add_child(fb)
+		info.add_child(swr)
 	var note := UI.para(_field_note(spk), UI.T_SMALL + 1, UI.INK)
 	note.custom_minimum_size.x = 360
 	info.add_child(note)
