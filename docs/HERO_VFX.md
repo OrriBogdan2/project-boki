@@ -6,6 +6,7 @@ moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file agains
 palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every move side by side (no Hero: one of every
 layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
 scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
+The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs/parity_reel/`) are `tools/parity_reel.gd`.
 
 ## From a kit
 - `vfx("move", at, dir, {...})` (ArchKit): a moment. Sounds and layers come from the recipe; online it goes to other
