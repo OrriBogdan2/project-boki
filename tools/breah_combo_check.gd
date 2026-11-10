@@ -537,15 +537,15 @@ func _breah() -> void:
 		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
-	# the dunk
+	# the spike: the tap slam only (the hop and dive landings are leaps: tools/spike_check.gd)
 	reset.call()
 	T.teleport(home + Vector3(1.3, 0, 0))
 	T.pos.y += 2.0
 	T.grounded = false
 	var dn0 := K.dunks
-	K._slam(0.5, true)
+	K._slam(0.0, false)
 	ok(
-		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
+		"rmb: a foe in the air is spiked by the tap slam", K.dunks == dn0 + 1 and T.vel.y < -10.0,
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
 	await _hop_glide(m, P, home, K, reset)

@@ -547,7 +547,7 @@ func _anchor() -> void:
 	var stun := _stun_t()
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, ed["spike"])
 	var aim_pt := h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"])
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
@@ -583,17 +583,20 @@ func _stun_t() -> float:
 func over_abyss(f: Ent) -> bool:
 	return m.world.ground_at(f.pos.x, f.pos.z) <= World.VOID + 1.0
 
-func _slammed(f: Ent, stun: float, amt: float) -> void:
+## `spike`: the ground slam's spike block (a foe in the air is driven down: Spike); {} for the dive's landing.
+func _slammed(f: Ent, stun: float, amt: float, spike: Dictionary) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	m.displace.spike(f, -16.0)
-	# ANCHORED says it all: no separate GROUNDED word over the stun
-	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	stunned.append({"e": f, "until": m.time + stun})
+	var spiked := Spike.after(m, f, h, spike)
+	# ANCHORED (or SPIKED) says it all: no separate GROUNDED word over the stun
+	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
+	if spiked:
+		return
+	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
@@ -665,7 +668,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, {})      # a dive: no spike
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	fx.anchor_drop(at + Vector3(d2.x, 0, d2.y) * 0.6, 0.0, 1.0)

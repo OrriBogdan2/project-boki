@@ -29,7 +29,7 @@
 					"kb": 3,
 					"lift": 8,
 					"spike": {
-						"dmg": 0.6,
+						"bonus": 0.6,
 						"stun": 1.0
 					},
 					"color": "#ffb070"

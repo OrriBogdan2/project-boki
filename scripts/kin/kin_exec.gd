@@ -761,14 +761,8 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	if kb.length() > 0.01:
 		o["kb"] = (o.get("kb", Vector2.ZERO) as Vector2) + kb
 	var spike := st.modifier("spike") if st else null
-	if spike and not f.grounded and f.pos.y > f.ground() + 0.35:
-		# airborne: slammed down, harder, and stunned if the spike says so
-		dmg *= 1.0 + float(spike.params["bonus"])
-		if float(spike.params["stun"]) > 0.0:
-			o["stun"] = maxf(float(o.get("stun", 0.0)), float(spike.params["stun"]))
-		o.erase("lift")
-		m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", KinRules.cat_color("control"), true)
-		f.vel.y = -16.0
+	if spike:
+		dmg *= Spike.arm(f, spike.params, o)      # airborne: driven down, harder (Spike)
 	# a hook's yank goes first (then the hit, so its stun lands on the way in)
 	for e in post:
 		if e.type == "pull" and float(e.params["gap"]) > 0.0:
@@ -776,6 +770,8 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	var has_status := o.has("burn") or o.has("slow") or o.has("root") or o.has("stun") or o.has("kb") or o.has("lift")
 	if dmg > 0.0 or has_status:
 		f.hurt(maxf(0.1, dmg), by, o)
+	if o.get("spiked", false):
+		Spike.drive(m, f, by)
 	for e in post:
 		if not (e.type == "pull" and float(e.params["gap"]) > 0.0):
 			_post(e, f, cx, center, k)

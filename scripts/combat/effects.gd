@@ -31,7 +31,7 @@ class_name Effects
 ##   bridge      length width time                        (abyss tiles along the aim become ground)
 ##   line        length width steps every dmg lift stun slow burn kb   (a fissure erupting along the aim)
 ##   cloak time      reveal radius time      decoy time      ally_area radius heal shield haste cleanse at
-##   area/cone   + spike:{dmg, stun} (extra on airborne foes, slammed down)   launch + dir:"back"
+##   area/cone   + spike:{bonus, stun} (extra on airborne foes, driven down: Spike)   launch + dir:"back"
 ## Any effect can carry "echo": {delay, k} (it repeats at the same spot, k times as strong) and
 ## "charged": {key: [lo, hi]} (numbers that grow with a held charge, ctx.charge 0..1).
 
@@ -316,13 +316,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					if float(e.get("kb", 0.0)) < 0.0 and rel.length() <= 0.05: kb = Vector2.ZERO
 					var o := _hit_opts(e, ctx, kb, caster)
 					var dmg := float(e.get("dmg", 0.0)) * pw
-					if e.has("spike") and not f.grounded and f.pos.y > f.ground() + 0.35:
-						dmg *= 1.0 + float(e["spike"].get("dmg", 0.5))
-						o["stun"] = maxf(float(o.get("stun", 0.0)), float(e["spike"].get("stun", 0.8)))
-						o.erase("lift")
-						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
-						m.displace.spike(f, -16.0)
+					dmg *= Spike.arm(f, e.get("spike", {}), o)
 					f.hurt(dmg, caster, o)
+					if o.get("spiked", false): Spike.drive(m, f, caster)
 		"cone":
 			var d := _aim_dir(caster, ctx)
 			var r := float(e.get("radius", 5.0))

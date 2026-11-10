@@ -74,7 +74,7 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 
 func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
-	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
+	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0; T.shot_down = false      # (a spike's landing stun left armed)
 	T.set_meta("marks", {})
 
 func dmg(T: Hunter) -> float:
