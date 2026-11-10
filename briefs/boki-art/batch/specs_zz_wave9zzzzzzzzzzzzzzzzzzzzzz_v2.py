@@ -1984,3 +1984,14 @@ _DREF=[_HR+'ravel_v2/ravel_v2_master_sheet.jpg',_HR+'mossy_v2/mossy_v2_master_sh
 _DHEAD=("REFERENCE IMAGES: image 1 is LACE's locked design sheet, image 2 is ALBERT's locked design sheet, image 3 is VEX's locked design sheet: each sheet is the authority for that Hunter's face, body, outfit, colours and weapons. "
  "Image 4 is a finished splash showing the painting style to match. Image 5 is Lace's Boki (purple scorpion-tailed fox), image 6 is Albert's Boki (mushroom hedgehog), image 7 is Vex's Boki (pink striped axolotl): keep each Boki's design exactly.\n\n")
 SPECS.append({'id':'drop_splash','name':'Site drop-in splash (Lace, Albert, Vex + Boki)','refs':_DREF,'runs':4,'aspect':'4:3','size':'2K','prompt':_DHEAD+_DROP})
+
+# 11-10 owner: the splashes mix flat 2D Boki with 3D-looking hunters. Boki must look 3D / fully rendered like the hunters (the Kael + Voltalon
+# one is the target). The site brief's line "The Boki keep their cute rounded cartoon look" caused it in the drop splash.
+_B3D=("RENDERING OF THE BOKI (most important): the Boki must NOT look like flat 2D cartoon drawings or stickers. Render every Boki exactly like the Hunters: as a solid three-dimensional creature with real volume and form, "
+ "soft painted shading that wraps round the body, visible material (fur, feathers, scales, skin) and the scene's own light, rim light and cast shadows on it, as if it were a high-quality 3D character model painted into the same picture. "
+ "No black cartoon outlines, no flat colour fills. Keep each Boki's design, proportions, colours, face and signature parts from its reference; only the rendering changes. Hunters and Boki share one consistent style. ")
+_DROP3=_DROP.replace("The Boki keep their\ncute rounded cartoon look from the references.","The Boki keep their cute rounded shapes and designs from the references but are painted in exactly the same rendered, three-dimensional style as the Hunters.")
+assert _DROP3!=_DROP
+SPECS.append({'id':'drop_splash3d','name':'Site drop-in splash, Boki rendered 3D like the hunters','refs':_DREF,'runs':4,'aspect':'4:3','size':'2K','prompt':_DHEAD+_B3D+"\n\n"+_DROP3})
+for _s in [s for s in SPECS if s['id'].startswith('hb2_')]:
+    SPECS.append({'id':_s['id'].replace('hb2_','hb3_'),'name':_s['name']+' 3D Boki','refs':_s['refs'],'runs':2,'aspect':'16:9','size':'2K','prompt':_s['prompt']+" "+_B3D})
