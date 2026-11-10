@@ -3,7 +3,7 @@ extends Node3D
 ## Where to wait for the sky train: a slim light post on each halt's pier (readable from the drop and
 ## from 40 m on the ground), and a soft glow on the pier's edge while the train stands at it. No rings
 ## and no bursts. All posts are merged into four meshes with shared materials (post, brass cage, lamp,
-## beam), the glow is two pooled blobs moved to the halt the train is at. The Low preset keeps the
+## beam and halo), the glow is two pooled blobs moved to the halt the train is at. The Low preset keeps the
 ## posts and drops the glow.
 
 const POST_H := 6.5           # m, the post's height above the pier
@@ -52,18 +52,25 @@ func _find_piers(W: World) -> void:
 			piers[-1].append({"at": Vector3(e.x, W.ground_at(e.x, e.y) + 0.06, e.y), "out": out})
 
 func _build_posts() -> void:
-	var post := []; var cage := []; var lamp := []; var beam := []
+	var post := []
+	var cage := []
+	var lamp := []
+	var beam := []
 	for b in beacons:
 		var p: Vector3 = b["pos"]
 		post.append([Models.cyl(0.09, 0.13, POST_H), Transform3D(Basis.IDENTITY, p + Vector3(0, POST_H * 0.5, 0))])
 		cage.append([Models.cyl(0.2, 0.2, 0.16), Transform3D(Basis.IDENTITY, p + Vector3(0, POST_H * 0.8, 0))])
 		cage.append([Models.cyl(0.3, 0.3, 0.1), Transform3D(Basis.IDENTITY, p + Vector3(0, POST_H, 0))])
 		lamp.append([Models.sphere(0.42, 12), Transform3D(Basis.IDENTITY, p + Vector3(0, POST_H + 0.4, 0))])
-		beam.append([Models.cyl(0.05, 0.22, BEAM_H, 8), Transform3D(Basis.IDENTITY, p + Vector3(0, POST_H + 0.8 + BEAM_H * 0.5, 0))])
+		var column := p + Vector3(0, POST_H + 0.8 + BEAM_H * 0.5, 0)
+		beam.append([Models.cyl(0.05, 0.22, BEAM_H, 8), Transform3D(Basis.IDENTITY, column)])
+		# a flat halo, so the post reads from straight above too
+		var crown := Basis.IDENTITY.scaled(Vector3(1.1, 0.3, 1.1))
+		beam.append([Models.sphere(1.0, 12), Transform3D(crown, p + Vector3(0, POST_H + 0.5, 0))])
 	_merged(post, Models.toon(Color("3f6fa8"), false), "Posts")
 	_merged(cage, Models.toon(Color("d6a85a"), false, 0.1), "Cages")
 	_merged(lamp, Models.glow_mat(Color("fff2b8")), "Lamps")
-	_merged(beam, Models.glow_mat(Color(1.0, 0.9, 0.66, 0.22)), "Beams")
+	_merged(beam, Models.glow_mat(Color(1.0, 0.9, 0.66, 0.3)), "Beams")
 
 ## One mesh from many [mesh, transform] parts, with one shared material.
 func _merged(parts: Array, mat: Material, node_name: String) -> void:
@@ -97,9 +104,10 @@ func _halt_of_train() -> int:
 	var best := -1
 	var best_d := INF
 	for i in (R["stations"] as Array).size():
-		var d := absf(fposmod(mid - float(R["stations"][i]) + train.loop_len * 0.5, train.loop_len) - train.loop_len * 0.5)
-		if d < best_d:
-			best_d = d; best = i
+		var off := fposmod(mid - float(R["stations"][i]) + train.loop_len * 0.5, train.loop_len) - train.loop_len * 0.5
+		if absf(off) < best_d:
+			best_d = absf(off)
+			best = i
 	return best
 
 func tick(dt: float) -> void:
@@ -126,4 +134,5 @@ func _place_glow() -> void:
 		g.set_meta("has", k < ends.size())
 		if k < ends.size():
 			var d: Vector2 = ends[k]["out"]
-			g.transform = Transform3D(Basis(Vector3(-d.y, 0, d.x) * 1.7, Vector3(0, 0.12, 0), Vector3(d.x, 0, d.y) * 0.6), ends[k]["at"])
+			var blob := Basis(Vector3(-d.y, 0, d.x) * 1.7, Vector3(0, 0.12, 0), Vector3(d.x, 0, d.y) * 0.6)
+			g.transform = Transform3D(blob, ends[k]["at"])

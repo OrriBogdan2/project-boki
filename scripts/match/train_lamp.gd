@@ -27,7 +27,9 @@ func setup(sky_train: SkyTrain, engine: Node3D, lamp_at: Vector3) -> void:
 	beam_mat = Models.glow_mat(Color(1.0, 0.9, 0.62, 0.0))
 	trail_mat = Models.glow_mat(Color(1.0, 0.7, 0.4, 0.0))
 	Models.part(self, Models.sphere(HALO_R, 12), halo_mat).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var cone := Models.part(self, Models.cyl(BEAM_R, 0.08, BEAM_LEN, 12), beam_mat, Vector3(0, -0.05, -BEAM_LEN * 0.5), Vector3.ONE, Vector3(-PI * 0.5, 0, 0))
+	var ahead := Vector3(0, -0.05, -BEAM_LEN * 0.5)
+	var cone := Models.part(self, Models.cyl(BEAM_R, 0.08, BEAM_LEN, 12), beam_mat, ahead)
+	cone.rotation.x = -PI * 0.5
 	cone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	trail = MultiMesh.new()
 	trail.transform_format = MultiMesh.TRANSFORM_3D
