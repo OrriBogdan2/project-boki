@@ -730,7 +730,7 @@ func _build_bridges() -> void:
 			_bridge_stub(k)
 		var lbl := Label3D.new()
 		lbl.font = UI.big; lbl.font_size = 64; lbl.pixel_size = 0.012; lbl.outline_size = 16
-		lbl.outline_modulate = Color(0.05, 0.04, 0.08, 0.9)
+		lbl.outline_modulate = Color(UI.NIGHT, 0.9)
 		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		lbl.text = "%s\n%d gems to bridge" % [isd["name"], int(isd["cost"])]
 		lbl.modulate = UI.GOLD
@@ -2894,7 +2894,7 @@ func _say(k: Dictionary, text: String, secs := 0.0, direct := true) -> void:
 	if not k.has("say"):
 		var l := Label3D.new()
 		l.font = UI.body; l.font_size = 34; l.pixel_size = BokiSpeech.FARM_PIXEL * BokiSpeech.SCALE; l.outline_size = 14
-		l.outline_modulate = Color(0.06, 0.05, 0.09, 0.95)
+		l.outline_modulate = Color(UI.NIGHT, 0.95)
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED; l.no_depth_test = true
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; l.width = 520
 		l.position = Vector3(0, 1.75, 0)
@@ -2977,6 +2977,7 @@ func _open_kin(rec: Dictionary) -> void:
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
+	hx.add_child(VoidPortrait.of(rec, get_tree(), 84.0))
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
 	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))
@@ -3004,25 +3005,25 @@ func _open_kin(rec: Dictionary) -> void:
 	match kin_tab:
 		"About":
 			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
-			c1.add_child(UI.section("Who it is", UI.FAINT.lightened(0.2)))
+			c1.add_child(UI.section("Who it is"))
 			AboutView.looks(rec, c1)
-			c2.add_child(UI.section("Where it's from", UI.FAINT.lightened(0.2)))
+			c2.add_child(UI.section("Where it's from"))
 			AboutView.history(rec, c2)
 		"Care":
 			var bd: Array = Care.bond(rec)
 			var nb: Array = Care.next_bond(rec)
-			c1.add_child(UI.section("Bond  ·  %s" % bd[1], col.lerp(UI.INK, 0.35)))
+			c1.add_child(UI.section("Bond  ·  %s" % bd[1]))
 			var lo := float(bd[0]); var hi := float(nb[0]) if nb.size() > 0 else 100.0
 			row.call(c1, "Trust", clampf((float(rec["trust"]) - lo) / maxf(1.0, hi - lo), 0.0, 1.0), Color("ffb3c6"), ("next: %s" % nb[1]) if nb.size() > 0 else "max")
 			c1.add_child(UI.para(String(bd[2]), 12, UI.MUTED))
 			c1.add_child(UI.spacer(4))
 			var starving := Care.starve_stage(rec) != ""
-			c1.add_child(UI.section(Care.condition_name(rec), Color("ff9a7a") if starving else UI.FAINT.lightened(0.2)))
+			c1.add_child(UI.section(Care.condition_name(rec), Color("ff9a7a") if starving else UI.PINK))
 			if starving:
 				c1.add_child(UI.para(String(Care.STARVE_INFO[Care.starve_stage(rec)][1]), 12, Color("ffb0a0")))
 			for n in Care.NEEDS:
 				row.call(c1, Care.NEED_INFO[n]["name"], Care.need(rec, n) / 100.0, Care.NEED_INFO[n]["col"], str(int(Care.need(rec, n))))
-			c2.add_child(UI.section("Likes", UI.FAINT.lightened(0.2)))
+			c2.add_child(UI.section("Likes"))
 			var known: Array = rec["known"]
 			var lk: Dictionary = rec["likes"]
 			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
@@ -3034,18 +3035,18 @@ func _open_kin(rec: Dictionary) -> void:
 			var mem: Array = rec.get("memory", [])
 			if mem.size() > 0:
 				c2.add_child(UI.spacer(4))
-				c2.add_child(UI.section("Remembers", UI.FAINT.lightened(0.2)))
+				c2.add_child(UI.section("Remembers"))
 				for i in range(maxi(0, mem.size() - 1), mem.size()):
 					var t := String(mem[i]["text"])
 					c2.add_child(UI.para("\u201c%s\u201d" % (t.substr(0, 1).to_upper() + t.substr(1)), 13, UI.INK.darkened(0.1)))
 			if String(rec.get("title", "")) != "":
 				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
 		"Training":
-			c1.add_child(UI.section("Stats  ·  cap %d" % Care.stat_cap(rec), UI.FAINT.lightened(0.2)))
+			c1.add_child(UI.section("Stats  ·  cap %d" % Care.stat_cap(rec)))
 			for st in Care.STATS:
 				row.call(c1, Care.STATS[st]["name"], float(rec["stats"][st]) / float(Care.stat_cap(rec)), Care.STATS[st]["col"], str(int(rec["stats"][st])))
 			c1.add_child(UI.para("Train at the yard to raise them. Higher bonds raise the cap.", 12, UI.FAINT))
-			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
+			c2.add_child(UI.section("In a match"))
 			_kin_match_rows(rec, c2, true)
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
 			more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -3056,13 +3057,13 @@ func _open_kin(rec: Dictionary) -> void:
 			var next_form := (lv / 4 + 1) * 4
 			var next_mut := lv + ((2 - lv % 4) + 4) % 4
 			if next_mut == lv: next_mut += 4
-			c1.add_child(UI.section("Growing toward", UI.FAINT.lightened(0.2)))
+			c1.add_child(UI.section("Growing toward"))
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("New form at level %d  ·  mutation at %d" % [next_form, next_mut], UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
-			c2.add_child(UI.section("Affinities", UI.FAINT.lightened(0.2)))
+			c2.add_child(UI.section("Affinities"))
 			for af in Evo.AFF:
 				row.call(c2, Evo.AFF[af]["name"], float(rec["aff"][af]) / maxf(tot, 1.0), Evo.AFF[af]["tint"], "%d%%" % int(round(100.0 * maxf(0.0, float(rec["aff"][af])) / maxf(tot, 1.0))))
 			c2.add_child(UI.spacer(4))
@@ -3158,7 +3159,7 @@ func _open_chat(rec: Dictionary) -> void:
 		_face(k["pos"])
 		if chat_log.size() == 1:
 			_say(k, _greeting(rec))
-	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
+	var bar := UI.card(Color(UI.NIGHT, 0.92), 12, 14)
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -4369,7 +4370,7 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 
 func _build_train_bar() -> void:
 	if is_instance_valid(train_bar): train_bar.queue_free()
-	var bar := UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
+	var bar := UI.card(Color(UI.NIGHT, 0.92), 12, 14)
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -4756,7 +4757,7 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 
 ## The side panel before you've picked: what the Nook is for, and what IVs are.
 func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
-	dv.add_child(UI.section("How it works", UI.FAINT.lightened(0.2)))
+	dv.add_child(UI.section("How it works"))
 	if egg_in:
 		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
