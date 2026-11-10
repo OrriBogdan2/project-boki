@@ -73573,5 +73573,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2a_chimelop_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2a_citadoad",
+    "name": "Citadoad (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_citadoad_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_citadoad",
+    "name": "Citadoad (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_citadoad_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_bastling",
+    "name": "Bastling (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_bastling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_citadoad",
+    "name": "Citadoad (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_citadoad_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_bastling",
+    "name": "Bastling (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_bastling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_arcestrel",
+    "name": "Arcestrel (female look)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fem_arcestrel_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_bastling",
+    "name": "Bastling (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_bastling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_hourachnid",
+    "name": "Hourachnid (female look)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fem_hourachnid_1.jpg",
+    "ok": true
   }
 ]
