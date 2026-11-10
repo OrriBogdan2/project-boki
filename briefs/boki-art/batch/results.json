@@ -79992,5 +79992,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_bubblisk_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_tidalisk",
+    "name": "Tidalisk (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_tidalisk_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_tidalisk",
+    "name": "Tidalisk (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_tidalisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_thunderstrich",
+    "name": "Thunderstrich (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_thunderstrich_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bubblisk",
+    "name": "Bubblisk (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_bubblisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_bubblisk",
+    "name": "Bubblisk (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_bubblisk_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_tidalisk",
+    "name": "Tidalisk (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_tidalisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_thunderstrich",
+    "name": "Thunderstrich (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_thunderstrich_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_terrasloth",
+    "name": "Terrasloth (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_terrasloth_1.jpg",
+    "ok": true
   }
 ]
