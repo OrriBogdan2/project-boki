@@ -92095,5 +92095,54 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_olmlet_wc_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_glazolm_wc",
+    "name": "Glazolm (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_glazolm_wc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kintsuwyrm_wc",
+    "name": "Kintsuwyrm (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kintsuwyrm_wc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glazolm_wc",
+    "name": "Glazolm (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glazolm_wc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glazolm_wc",
+    "name": "Glazolm (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_glazolm_wc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_olmlet_wc",
+    "name": "Olmlet (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_olmlet_wc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_olmlet_wc",
+    "name": "Olmlet (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_olmlet_wc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kintsuwyrm_wc",
+    "name": "Kintsuwyrm (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kintsuwyrm_wc_1.jpg",
+    "ok": true
   }
 ]
