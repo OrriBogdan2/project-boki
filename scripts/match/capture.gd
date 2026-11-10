@@ -176,7 +176,7 @@ static func interrupt_reason(h: Hunter, k: Kin) -> String:
 	if own != "":
 		return own
 	if h.flat_dist(k) > float(rules()["cancel_range"]):
-		return "cc"
+		return "far"
 	return ""
 
 static func cancel(m, h: Hunter, why: String) -> void:
