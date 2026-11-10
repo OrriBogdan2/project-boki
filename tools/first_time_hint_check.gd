@@ -4,7 +4,7 @@ extends RefCounted
 ##   1. the data: every hint has a "when" note and one short line in our words, the keys filled in
 ##   2. shown once: show() toasts it the first time and never again; mark() (doing the thing first) means
 ##      it never shows; the flags live in the save, so a reload keeps them
-##   3. the v11 -> v12 migration: a save past the old tutorials gets none of their hints, one mid-farm-
+##   3. the v12 -> v13 migration (run from v11): a save past the old tutorials gets none of their hints, one mid-farm-
 ##      tutorial keeps the farm ones
 ##   4. when the farm ones are due (FarmHints.due): out of seeds, holding a crop
 

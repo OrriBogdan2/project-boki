@@ -52,7 +52,7 @@ static func show(id: String, toast: Callable) -> bool:
 	toast.call(line)
 	return true
 
-## Save v11 -> v12: a save that finished (or skipped) a tutorial already met what that tutorial's cut
+## Save v12 -> v13: a save that finished (or skipped) a tutorial already met what that tutorial's cut
 ## steps taught, so it gets none of their hints; a save still in the farm tutorial keeps them.
 static func migrate(data: Dictionary) -> void:
 	var tut: Dictionary = data.get("tutorial", {})

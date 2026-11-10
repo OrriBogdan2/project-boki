@@ -4,7 +4,7 @@ extends ArchKit
 ## scaled to our health and TTK; only the names, art, sounds and on-screen text are ours. docs/heroes/thief.md.
 ##
 ## - LMB, Arc Bolts: a spinning bolt from alternating hands every 0.45s that flies to the cursor (clamped
-##   to 12m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
+##   to 8.5m) and fizzles there; a thin aim line ends at the cursor, gold while the next bolt is empowered.
 ## - Passive, Marks: every bolt that hits stacks a Mark on the target (gold diamonds over their head, up
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
