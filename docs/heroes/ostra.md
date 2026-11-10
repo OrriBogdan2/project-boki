@@ -102,6 +102,7 @@ Every row of briefs/specs/kit-audit/tarek_ostra_claire.md section 2 (audited on 
 | Spam penalty (footage card only) | LOW | (c) | not built: the fixed 0.6 s cadence can't be beaten, so there is nothing to penalise (parity table) |
 | Trade slows swapped foes 40% for 3 s (invented) | MED | (b) | 8e5c6340: removed; `dash: Trade trades places; the foe is only moved, not slowed ...` |
 | Shift hold-to-aim | LOW | (c) | kept: a tap behaves like the source; the hold shows both ends (owner Nov 2) |
+| Floating `[?]`: hover height, bob, foot-planting | LOW | (a) | the code hovered 0.15 m (half the source and this doc): now 0.3 m +-0.03 m; he has no foot to plant (Timing pass; `he floats about 0.3 m ...`, `he never plants a foot ...`) |
 | Shift radius 1.5 m | LOW | (c) | kept: the data has no number and the footage scale is about 2x uncertain |
 | Pronouns and the old lamplighter concept in his text | MED | (b) | 8e5c6340: fantasy, silhouette and tells rewritten for the Void Jester; he/him in this doc, the DashFlow rows, kit comments and check names |
 | Charged-orb ground ring (cosmetic) | LOW | (b) | 8e5c6340: removed (the hand glow stays) |
@@ -197,6 +198,29 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | E | `ostra_seed`, `ostra_pop` | `anim_os_seed`, `anim_os_pop` |
 | Passive proc | `ostra_empower` | `anim_os_empower` |
 | X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
+
+## Timing pass (`tools/ostra_anim_time_check.gd`, run inside `--ostra-combo-check`)
+Each keyed move played in a real match with the model rendered, read off the clips (s from the press). Source = briefs/hero-ref/ostra.md
+(5 fps: one footage frame is 0.2 s, so every source time is good to a frame). "Owns" = the move has the body (clip blend, WardenClips.FADE 0.1);
+"back" = the legs have the body again. Before = this branch's start (ext/anim-time-motley off origin/main), after = now.
+
+| Move | Source | Ours before | Ours after |
+|---|---|---|---|
+| LMB orb (`ostra_orb`) | one orb about every 0.6 s, a one-hand flick, the body barely moves | orb on the press frame, flick owns 0.12, back 0.50 (clip 0.30, upper body) | same |
+| LMB full orb (`ostra_orb_hot`) | a long blue-violet bolt, no extra pause read | orb on the press frame, owns 0.12, back 0.70 (clip 0.50) | same |
+| RMB wind-up to release (`ostra_snap_wind`) | black orb one frame, shards the next: 0.2-0.4 s | owns 0.10, released 0.33 (owner item 40: 0.32, longer than the source) | same (owner decision kept) |
+| Shift cast (`ostra_swap_aim`, `ostra_swap`) | cast 0158, teleport 0168: about 1.8 s | aim owns 0.10, lantern leaves on the key release (0.53), lands 1.80 s later, legs back 1.55 | same |
+| E seed (`ostra_seed`) | the orb drops in the cast's one frame (0352) | seed down 0.02, clip owns 0.10, palm key at 0.20, back 0.97 | same (inside the frame) |
+| E pop (`ostra_pop`) | a quick pop, 0.6-0.8 s after the recast | pops on the press frame, owns 0.10, back 0.77 | same |
+| Hover | about 0.3 m (0.25-0.35 m) up, "no bob readable"; the brief's build note: +-0.03 m at 0.6 Hz | 0.15 m +-0.015 m (a hand's width: HOVER_H 0.15; the doc said 0.3 and the code did not) | 0.30 m +-0.03 m (HOVER_H 0.3, HOVER_BOB 0.03): lowest bone 0.268-0.325 m up standing, 0.260-0.324 walking |
+
+Not timed (no source time beyond "a held cast"): `ostra_well*`, `ostra_empower`, `ostra_arrive`, `ostra_swap_air`.
+
+The clips were keyed to the kit's beats, so the only gap was the hover: the kit constant was half the source and the doc's own number. The check asserts the
+rows above (blend by 0.12 s, the beat inside its frame, the hand back by the clip's end + 0.2 s, the 1.8 s flight, the 0.3 m hover) and that he never plants a
+foot: the rig has thigh and shin bones but no foot, the robe covers them, and the lowest bone never drops under 0.2 m over the ground point, standing or walking.
+Suggestions, not built: a "firing faster lowers speed and damage" penalty (card text, still none: the 0.6 s cadence cannot be beaten); the unused `flurry` clip
+(`ostra_flurry`, nothing plays it); the footage's Snap flight speed reads about 30 h/s but the notes' "about 3 h" stun flight is ambiguous.
 
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
