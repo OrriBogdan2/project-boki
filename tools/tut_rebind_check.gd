@@ -1,9 +1,11 @@
 extends RefCounted
 ## --tut-rebind-check: the words a new player reads most follow the player's own keys (Settings.key_cap).
-## Every action is rebound to an unusual key (a few to mouse buttons), then every match tutorial step (banner,
+## Every action is rebound to an unusual key (a few to mouse buttons 4 and 5, every other one through its
+## alternate slot with the first slot cleared), then every match tutorial step (banner,
 ## second line, key cap, scout hint, the Boki's lines), every garden tutorial hint, every first-time hint
-## (TipText) and the home key row are read again. Any default key that should have changed fails, and so does
-## text built before the rebind that does not refresh. The glide steps say: jump, then press again in the air and hold.
+## (TipText), the Training Area drill rows, the Relic pick words and the home key row are read again.
+## A default key that should have changed fails, and so does text built before the rebind that does not
+## refresh. The glide steps say: jump, then press again in the air and hold.
 
 var bad := 0
 var main: Node
@@ -14,6 +16,7 @@ const UNUSUAL := [KEY_KP_0, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KE
 		KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F11, KEY_F12, KEY_F13, KEY_F14, KEY_F15,
 		KEY_F16, KEY_F17, KEY_F18, KEY_F19, KEY_F20, KEY_F21, KEY_F22, KEY_F23, KEY_F24, KEY_INSERT, KEY_HOME, KEY_END,
 		KEY_PAGEUP, KEY_PAGEDOWN, KEY_PAUSE, KEY_KP_ADD, KEY_KP_SUBTRACT, KEY_KP_MULTIPLY, KEY_KP_DIVIDE]
+const RELIC_FILES := ["match/practice_hero", "ui/class_reveal", "ui/class_card", "home/home_classes", "home/hob_offer"]
 const MOUSE_BOUND := {"fire": MOUSE_BUTTON_XBUTTON1, "throw": MOUSE_BUTTON_XBUTTON2}
 
 func ok(cond: bool, what: String) -> void:
@@ -55,6 +58,8 @@ func run(mn: Node) -> void:
 	_boki_lines(m)
 	_tips()
 	_garden()
+	_drill(m)
+	_relic_pick()
 	_kit_cards()
 	_sources()
 	Settings.reset_all()
@@ -85,14 +90,17 @@ func _rebind_everything(before: Dictionary) -> void:
 			ev = InputEventKey.new()
 			(ev as InputEventKey).physical_keycode = UNUSUAL[i]
 			i += 1
-		Settings.rebind(a[0], ev, 0)
+		var alt := i % 2 == 0 and not MOUSE_BOUND.has(a[0])       # every other key lives in the alternate slot
+		Settings.rebind(a[0], ev, 1 if alt else 0)
+		if alt:
+			Settings.clear_bind(a[0], 0)
 	ok(i < UNUSUAL.size(), "every action got its own unusual key (%d used of %d)" % [i, UNUSUAL.size()])
 	var now := []
 	for a in Settings.ACTIONS:
 		now.append(Settings.key_cap(a[0]))
 	for a in before:
 		var cap: String = before[a]
-		if cap not in now and cap not in stale_words and cap.length() > 0 and not cap.is_valid_int():
+		if cap not in now and cap not in stale_words and cap.length() > 0:
 			stale_words.append(cap)
 	ok(Settings.key_cap("fire") == "M4" and Settings.key_cap("throw") == "M5" and Settings.key_cap("jump") != before["jump"],
 			"the rebind took (fire %s, Boki %s, jump %s)" % [Settings.key_cap("fire"), Settings.key_cap("throw"), Settings.key_cap("jump")])
@@ -113,8 +121,8 @@ func stale_in(line: String, leftovers := true) -> Array:
 		found.append("leftover " + left.get_string())
 	return found
 
-func _clean(line: String, where: String) -> void:
-	var s := stale_in(line)
+func _clean(line: String, where: String, digits := true) -> void:
+	var s := stale_in(line).filter(func(w): return digits or not String(w).is_valid_int())
 	ok(s.is_empty(), "%s has no default key left %s: '%s'" % [where, str(s), line])
 
 # ------------------------------------------------------------------ the match tutorial
@@ -172,18 +180,52 @@ func _garden() -> void:
 		for stage in (st["hints"] as Dictionary):
 			n += 1
 			var raw := String(st["hints"][stage])
-			_clean(FarmTutorial.fill_hint(raw).replace("{secs}", "9"), "garden '%s/%s'" % [st["id"], stage])
+			var line := FarmTutorial.fill_hint(raw).replace("{secs}", "9")
+			_clean(line, "garden '%s/%s'" % [st["id"], stage], false)      # (number keys open the hub: fixed)
 	ok(n >= 20, "all %d garden hints read" % n)
 	var build := FarmTutorial.fill_hint("Press {build}")
-	ok(build == "Press " + Settings.key_cap("build"), "a garden hint is filled when read, so it follows a rebind ('%s')" % build)
+	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)
 
-## Class cards' own utility text (what the "use your ability" line is built from).
+## The Training Area checklist: no key in the words (the HUD prints the live cap beside each row).
+func _drill(m: Match) -> void:
+	for t in m.train_rows():
+		_clean(t[1], "training drill '%s'" % t[0])
+	var glide: Array = m.train_rows().filter(func(t): return t[0] == "glide")[0]
+	ok(glide[1].contains("press again in the air and hold"), "the glide drill is jump, again, hold ('%s')" % glide[1])
+	var ult: Array = m.train_rows().filter(func(t): return t[0] == "ult")[0]
+	ok(ult[1].contains(Settings.key_cap("ultimate")), "the Fuse drill names the rebound key ('%s')" % ult[1])
+
+## The Relic pick: the practice bar's Relics cap and the words around the pick follow the binding.
+func _relic_pick() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.set_process(false)
+	var bar: Array = Practice.of(m).items().filter(func(i): return i[0] == "hero")[0]
+	ok(bar[4] == Settings.key_cap("hero"), "the Relics button shows the bound key ('%s')" % bar[4])
+	for f in RELIC_FILES:
+		for line in FileAccess.get_file_as_string("res://scripts/%s.gd" % f).split("\n"):
+			if line.contains("UI.") or line.contains("_toast"):
+				_clean(_quoted_all(line), "%s: '%s'" % [f, line.strip_edges()], false)
+	m.queue_free()
+
+func _quoted_all(line: String) -> String:
+	var parts := line.split("\"")
+	var out := []
+	for i in range(1, parts.size(), 2):
+		out.append(parts[i])
+	return " ".join(out)
+
+## Every line of the class cards (the kit hints; the "use your ability" line is built from the E one).
 func _kit_cards() -> void:
 	var d := DirAccess.open("res://content/archetypes")
 	for f in d.get_files():
 		if f.ends_with(".json"):
 			var j: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/" + f))
-			_clean(String(j.get("card", {}).get("e", "")), "%s's ability card line" % f.get_basename())
+			var card: Dictionary = j.get("card", {})
+			for k in card:
+				if card[k] is String:
+					_clean(card[k], "%s's kit card '%s' line" % [f.get_basename(), k])
 
 ## No fixed key words in the source of the first-time hints or the home key row.
 func _sources() -> void:

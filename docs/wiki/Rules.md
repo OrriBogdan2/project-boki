@@ -476,6 +476,15 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## training_drill (`content/rules/training_drill.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The Training Area checklist (Match.train_rows, scripts/match/train_drill.gd): [id, what to do, the action whose key cap the HUD shows beside it ("" for none)]. Never write a key in the text: the HUD prints the live cap in front of each line; {key} puts that same cap inside a line. |
+| rows | [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press again in the air and hold to glide", "jump"], ["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your ability", "signature"], ["ult", "Fuse with your Boki ({key}: open from the start here)", "ultimate"], ["secondary", "Use your weapon's ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"], ["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"], ["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"], ["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"], ["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"], ["ledge", "Dash off an edge and float back up", ""]] |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

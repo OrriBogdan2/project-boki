@@ -4841,15 +4841,6 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- training area
-## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then hold Mouse 5 or Space in the air to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
-	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
-	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
-	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
-	["ledge", "Dash off an edge and float back up", ""]]
 var train := {}
 var train_t := 0.0
 
@@ -4932,7 +4923,7 @@ func _update_training(dt: float) -> void:
 			train[k] = true
 			Sfx.play("unlock", null, -8.0)
 			var left := train_rows().filter(func(t): return not train.has(t[0])).size()
-			if hud: hud.toast(("Done: %s" % _train_label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
+			if hud: hud.toast(("Done: %s" % TrainDrill.label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
 			if left == 0:
 				Save.d["tutorial"]["training"] = true
 	# keep a few target dummies around you
@@ -4944,16 +4935,8 @@ func _update_training(dt: float) -> void:
 
 ## The checklist for this hero: the secondary step only shows for heroes that have one.
 func train_rows() -> Array:
-	var rows := TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
-	return rows.map(func(t): return [t[0], _train_text(t), t[2]])
-
-func _train_text(t: Array) -> String:
-	return String(t[1]) % Settings.key_cap(String(t[2])) if String(t[1]).contains("%s") else String(t[1])
-
-func _train_label(k: String) -> String:
-	for t in TRAIN:
-		if t[0] == k: return _train_text(t)
-	return k
+	var rows := TrainDrill.rows().filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
+	return rows.map(func(t): return [t[0], TrainDrill.text(t), t[2]])
 
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
 ## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land
