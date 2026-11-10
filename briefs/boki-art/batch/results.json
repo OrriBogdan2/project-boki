@@ -83205,5 +83205,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_scoopsy_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_scoopsy",
+    "name": "Scoopsy (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_scoopsy_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_scoopsy",
+    "name": "Scoopsy (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_scoopsy_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sundormouse",
+    "name": "Sundormouse (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_sundormouse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_reelacine",
+    "name": "Reelacine (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_reelacine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sundormouse",
+    "name": "Sundormouse (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_sundormouse_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chiptero",
+    "name": "Chiptero (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_chiptero_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_chiptero",
+    "name": "Chiptero (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_chiptero_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_checkmare",
+    "name": "Checkmare (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_checkmare_2.jpg",
+    "ok": true
   }
 ]
