@@ -140,6 +140,10 @@ func _start_here(main: Node) -> void:
 	var d := Save.fresh()
 	d["name"] = "Tester"
 	Save.d = d
+	var kept := {}
+	for k in ["demo_all_masks", "mod_mode"]:   # a machine's own settings must not open every Relic under this check
+		kept[k] = Settings.get_v(k)
+		Settings.set_v(k, false, false)
 	ok(ClassUnlock.choose_starters(["gunslinger"]), "a fresh save makes its Vex pick")
 	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
 	view.setup(EXPEDITION.duplicate())
@@ -163,3 +167,5 @@ func _start_here(main: Node) -> void:
 	view.pm.left = 0.0
 	view.set_process(false)
 	view.queue_free()
+	for k in kept:
+		Settings.set_v(k, kept[k], false)
