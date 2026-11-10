@@ -1676,3 +1676,22 @@ for _a in (('Kindlewren','baby','cute',1,1),('Blotlet','baby','cute',1,0),('Drea
 # Second tries where the alt failed: Kingpinguin's alt became a feathered war bonnet (rejected), Sloggoth's kept its treads.
 ALT('Kingpinguin',"remove everything from the top of its head: it has a smooth round penguin head with two long yellow-and-red brow plumes sweeping back, like a macaroni penguin. Its bowling idea is carried by its body instead: a white chest with a red band and three dark round spots on its belly like a bowling ball's finger holes."); SPECS[-1]['id']='alt2_kingpinguin'
 ALT('Sloggoth',"its lower body must not look like a machine: remove the tank treads and roller drums completely. It sits on a broad, smooth, heavy slug-like base of its own dark body, with two thick soft arms ending in round paws. It keeps the raised letter shapes on its chest and its curled paper-ribbon mane."); SPECS[-1]['id']='alt2_sloggoth'
+
+# ===== 11-10 OWNER: Glomwort line = my pick (PAINT; glom_paint_b_1 / glom_paint_f_1 live). "Do a full review again and look for style breaks / any
+# other issues." Fifth pass = a MEASURED AUDIT of every card, sheet, portrait and hero (outline weight, soft shading, detail density, backdrop, cropping,
+# sheet view count, hero holes), then the flagged ones by eye. Found and fixed here:
+# (a) cards still drawn softer, glossier or more realistic than the roster -> same design, redrawn in the house style (ids sty_<name>, 3 runs).
+for _n,_st,_ar,_dk,_fu,_fx in (('Scoopsy','baby','cute',0,1,"a bold dark outline like the rest of the roster; flat fills"),('Spanglin','baby','cute',0,0,"a bold dark outline; each mirror tile one flat pale shape"),
+    ('Pinster','baby','cute',0,0,"no chrome gloss or reflections: flat silver-grey plates with one lighter band each"),('Harvantis','final','sleek',0,0,"flat cartoon finish, a simpler friendlier insect face with big eyes"),
+    ('Chainipede','final','creepy',1,0,"no dripping venom at all; flat fills; chain links drawn as a few big simple shapes"),('Moundlet','baby','cute',0,0,"drawn larger in the frame, with a bold dark outline"),
+    ('Lyrewing','final','majestic',0,1,"a bolder outline and flat fills; about eight harp strings per wing")):
+    SPECS.append({'id':'sty_'+_n.lower(),'name':_n+' (house style)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K','prompt':RS_CARD_TEXT(_n,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_fx)})
+# (b) too much fine detail for the style / a human face.
+ALT('Terrasloth',"its scales carry far too much tiny painted detail: each scale becomes one plain pale cream shape with a single small green leaf mark, and only every third scale has a pink dot. About twenty big scales, bold outline. Same pose and face."); SPECS[-1]['id']='sty_terrasloth'
+ALT('Bonsolith',"its scales carry far too much tiny painted detail: each scale becomes one plain pale cream-green shape, with about twenty big scales and a simple blossom tree drawn as five pink flower clusters. Bold outline. Same pose and face."); SPECS[-1]['id']='sty_bonsolith'
+ALT('Mortarfly',"its face is a human face, which breaks the rule that every creature has an animal face: give it a moth's face, a rounded furry marble-white head with two large gold compound eyes and feathery gold antennae. Its wings become simpler: clean marble panels in a gold frame with a few bold lines. Same pose."); SPECS[-1]['id']='sty_mortarfly'
+# (c) sheets: Spirevark and Pagoguana show three views, Snapler has a ground line.
+for _n in ('Spirevark','Pagoguana','Snapler'):
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[_n0]['id']='v2s_'+_n.lower()+'_fix5'
+# sets for this round's new cards
+for _a in (('Glomwort','baby','cute',0,0),('Glomworth','final','creepy',0,0),('Kingpinguin','final','tough',0,0),('Sloggoth','final','creepy',1,0)): SETOF(*_a,_GP,'r7')
