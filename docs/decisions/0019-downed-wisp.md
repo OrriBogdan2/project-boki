@@ -18,7 +18,7 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
-  scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
+  scales from 0.6 to full with a small squash. Death or a bleed-out plays a 0.6 s elimination beat: the core dims, the Wisp sinks into the deathbox as it grows in, and the core flickers once in the killer's side colour (no explosion).
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally (glow-shader core, halo, eyes, motes, trail). The id is `Save.d["look"]["wisp"]`, the same
   pattern as glider skins; unknown ids give `default`.
