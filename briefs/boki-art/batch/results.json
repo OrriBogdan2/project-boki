@@ -83597,5 +83597,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_glacione_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_hivara",
+    "name": "Hivara (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_hivara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hivara",
+    "name": "Hivara (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_hivara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cairnback",
+    "name": "Cairnback (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_cairnback_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hivara",
+    "name": "Hivara (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_hivara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cairnback",
+    "name": "Cairnback (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_cairnback_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_cairnback",
+    "name": "Cairnback (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_cairnback_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_zephyrak",
+    "name": "Zephyrak (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_zephyrak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_anchorbill",
+    "name": "Anchorbill (owner note: a pup of Anchorhorn, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_anchorbill_1.jpg",
+    "ok": true
   }
 ]
