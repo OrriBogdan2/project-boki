@@ -90982,5 +90982,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pose_scarabit_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_truffapir",
+    "name": "Truffapir (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_truffapir_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_gambitfin",
+    "name": "Gambitfin (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_gambitfin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_gambitfin",
+    "name": "Gambitfin (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_gambitfin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_truffapir",
+    "name": "Truffapir (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_truffapir_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_truffapir",
+    "name": "Truffapir (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_truffapir_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_gambitfin",
+    "name": "Gambitfin (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_gambitfin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scarabit",
+    "name": "Scarabit (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_scarabit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_dynaboa",
+    "name": "Dynaboa (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_dynaboa_3.jpg",
+    "ok": true
   }
 ]
