@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). need: how many times a step's action must land, shown as 1/3 on the pill. retry: the one line shown when you go down or fall and the step starts again (same tokens; default for steps with no line).",
  "steps": [
   [
    "land",
@@ -98,6 +98,19 @@
   "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.",
   "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
   "defend": "Stay inside the circle. Step out and the capture slips back!"
+ },
+ "retry": {
+  "default": "Back at your last stop. Try again",
+  "dash": "Back at your last stop. Dash from the glowing pad",
+  "exdash": "Back at your last stop. Jump, then dash from the pad",
+  "glide": "Back at your last stop. Jump, then hold %G over the gap",
+  "gkey": "Back up. Tap %T to send %s out",
+  "shoot": "Back up. Keep moving and %W the monster",
+  "sig": "Back up. Aim %E at the group and keep your distance",
+  "utility": "Back up. Use %A from a safe distance",
+  "throw": "Back up. Tap %T to send %s while you stay clear",
+  "kin1": "Back up. Stay clear and let %s do its move",
+  "fight": "Back up. Dash out of the way when a monster winds up"
  },
  "alt": {
   "utility_hold": "Tap, then hold, to use %A",

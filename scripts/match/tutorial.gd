@@ -33,6 +33,7 @@ const LOOKOUT_R := 4.2     # m: the lookout's top is 3.6 wide; any grounded heig
 const CROUCH_HOLD := 1.5   # s of crouching at the lookout
 const RANK_WAIT_T := 60.0  # s before the rank-up step moves on by itself
 const KEY_WAIT_T := 60.0   # s before the key step moves on by itself
+const DOWN_T := 3.0        # s a downed player waits before the beat starts again
 const KIN_WATCH_T := 12.0  # s to wait for your Boki to use its ability before moving on
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
@@ -171,9 +172,8 @@ func update(dt: float) -> void:
 		_enter()
 	if p.downed:
 		down_t += dt
-		if down_t > 3.0:
-			down_t = 0.0
-			m.revive_hunter(p, null)
+		if down_t > DOWN_T:
+			retry()
 	if p.kin and p.kin.state == "downed":
 		p.kin.down_t = minf(p.kin.down_t, 0.5)     # (a Boki that got knocked out here comes round at once)
 	t += dt
@@ -194,7 +194,7 @@ func update(dt: float) -> void:
 	if wait > 0.0:
 		wait -= dt
 		return
-	if done:
+	if done and not p.downed:      # (a downed player never passes a beat: the beat starts again instead)
 		_finish(sid)
 	if step < steps().size():
 		_words()
@@ -293,6 +293,40 @@ func _spawn_key() -> void:
 		at = m.player.pos + Vector3(2.0, 0.0, 0.0)
 	m.drop("ckey", at + Vector3(0, 0.6, 0), 1, "", "", Vector3.ZERO)
 
+## The player went down or fell: this beat starts again with a one-line tip. The step, the last stop, the
+## Boki, the items and the save stay as they were; the player is healed and put back at the last stop, the
+## beat's counters and monsters begin again.
+func retry() -> void:
+	var p := m.player
+	if p.downed:
+		m.revive_hunter(p, null)
+	p.hp = p.max_hp
+	p.armor = p.max_armor
+	p.vel = Vector3.ZERO
+	p.teleport(respawn())
+	var k := p.kin
+	if k != null and k.state == "downed":
+		KinDowned.come_round(k, false)
+	if k != null:
+		k.hp = k.max_hp
+	down_t = 0.0
+	moved = 0.0
+	if id() != "rank":
+		flag = false      # (the rank-up is given once)
+	_clear_foes()
+	wait = 0.0
+	_enter()
+	if m.hud:
+		var tips: Dictionary = Content.rules("tutorial")["retry"]
+		m.hud.toast(_fill(String(tips.get(id(), tips["default"]))), Color("f3eee2"))
+
+## The monsters of a beat go (the beat's own setup brings them back).
+func _clear_foes() -> void:
+	for mb in m.mobs:
+		if not mb.dead:
+			mb.dead = true
+			mb.visible = false
+
 ## Brings monsters in near the player for a step (only if none are left).
 func _foes(kinds: Array) -> void:
 	if m.mobs.any(func(x): return not x.dead):
@@ -368,7 +402,7 @@ func _is_done(sid: String, dt: float) -> bool:
 				return true
 			return false
 		"pickup": return ground_item().is_empty()
-		"gkey": return p.kin == null or p.kin.st_throws > throws0 or p.kin.state == "downed"
+		"gkey": return p.kin == null or p.kin.st_throws > throws0
 		"rank":
 			if not flag and t >= CARD_T:
 				flag = true      # (the level-up pop waits for the banner to settle, so the two never overlap)
@@ -388,12 +422,12 @@ func _is_done(sid: String, dt: float) -> bool:
 			return _rmb_done()
 		"throw":
 			_keep_foe("spitter")
-			return p.kin == null or p.kin.state == "downed" or _throw_done()
-		"orders": return p.kin == null or p.kin.state == "downed" or orders > 0
+			return p.kin == null or _throw_done()
+		"orders": return p.kin == null or orders > 0
 		"kin1":
 			_keep_foe("skitter")
 			var k: Kin = p.kin
-			return k == null or k.state == "downed" or k.st_skills > skills0 or t >= KIN_WATCH_T
+			return k == null or k.st_skills > skills0 or t >= KIN_WATCH_T
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
 		"fight": return kills >= fight_n and not m.mobs.any(func(x): return not x.dead)
 		"goexit":
