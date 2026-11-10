@@ -5,7 +5,8 @@ extends "res://tools/hero_pair_check.gd"
 ## extrapolated from the last two frames when the kit hides it on the hit frame) must be within one frame
 ## of the first damage on the dummy. A telegraph with no fill (the source draws cracks or a lane) must be
 ## refreshed to within one frame of the hit. Online, the cue other players get (the Net fx ring a kit sends) must
-## go out on the frame the telegraph first shows (a Net fx ring or a HeroVfx play: Skycall's e_count is one). The delays are in each kit's JSON (docs/TELEGRAPH_LEAD.md).
+## go out on the frame the telegraph first shows (a Net fx ring, or a HeroVfx play such as Skycall's e_count).
+## The delays are in each kit's JSON (docs/TELEGRAPH_LEAD.md).
 
 const FPS := [30, 60, 144]
 const FULL := 0.999         # a fill at or above this is full
