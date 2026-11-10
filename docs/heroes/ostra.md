@@ -252,6 +252,30 @@ foot: the rig has thigh and shin bones but no foot, the robe covers them, and th
 Suggestions, not built: a "firing faster lowers speed and damage" penalty (card text, still none: the 0.6 s cadence cannot be beaten); the unused `flurry` clip
 (`ostra_flurry`, nothing plays it); the footage's Snap flight speed reads about 30 h/s but the notes' "about 3 h" stun flight is ambiguous.
 
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Every slot measured three ways: the source from briefs/hero-ref/ostra.md (one frame = 0.2 s, the ult strip 0.1 s), the
+kit's own release (the code and content/archetypes/ostra.json, on the move clock `kmove_t`), and the v2 clip
+(art/wardens/ostra/ostra.glb, its clip map content/rules/warden_anim/ostra.json) swept at 60 Hz: "strike" is its
+fastest hand frame, "end" its length, the moment it hands back to the legs. `--ostra-combo-check` asserts each strike
+within 0.05 s of the kit's release (tools/clip_strike_check.gd, lines `ostra clip timing ...`). A `lead` starts the
+clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers untouched.
+| Slot | Source: wind-up / strike / active / recover | Ours before: release / clip strike / end | Ours after | Verdict |
+|---|---|---|---|---|
+| LMB tap (`ostra_orb`, `orb_l` hand after hand) | a one-hand flick inside one frame [0031] | 0.00 / 0.05 / 0.30 | same | matches; asserted |
+| LMB hold | an orb about every 0.6 s [0031-0034] | every 0.6 s, each with its flick | same | matches (`lmb parity` row) |
+| LMB full charge (`ostra_orb_hot`) | the same flick, a long bolt [0034] | 0.00 / 0.08 / 0.50 | lead 0.06: 0.02 / end 0.44 | fixed; asserted |
+| RMB wind-up (`ostra_snap_wind`) | a black orb at the hand for one frame (about 0.2 s) [0115, 0138] | 0.32 (owner item 40), held from 0.3 | same | owner note wins (item 40) |
+| RMB release (`ostra_snap`) | the spear the next frame [0116, 0139] | 0.00 / 0.02 / 0.50, slowed 0.15 s after | same | matches; asserted |
+| Shift ground (`ostra_swap`) | an underhand lob, the star leaves with the arm [0158, 0184], 1.8 s flight | 0.00 / 0.12 / 0.85 | lead 0.10: 0.02 / end 0.75 | fixed; asserted |
+| Shift held (`ostra_swap_aim`) | - (a tap in the source) | the lob's wind-up pose, held from 0.16 | same | no source; the held pose is the lead's skipped wind-up |
+| Air dash (`ostra_swap_air`) | not in the footage (the Swap is his only mobility) | 0.00 / 0.08 / 1.27, the drift loops | lead 0.06: 0.02 | fixed on our own release; asserted |
+| Arrival (`ostra_arrive`) | a jump-cut, under one frame [0168] | the pop 0.08-0.15 / 0.60 | same | matches |
+| E (`ostra_seed`) | a small orb drops onto the spot [0352] | 0.00 (at the cursor) / 0.08 / 0.80 | lead 0.06: 0.02 / end 0.74 | fixed; asserted |
+| E recast (`ostra_pop`) | the implosion, then shards [0385-0386] | rings close 0.00-0.08, shards 0.12 / 0.10 / 0.60 | same | matches; asserted |
+| X (`ostra_well`) | a hand thrust on the press, a 1.0 s dome [f23-f32] | arms out 0.13, held from 0.27, dome 1.0 s | same | matches |
+| X opens (`ostra_well_snap`) | the vortex opens, he is free [f33] | 0.00 / 0.03 / 0.57, free at the open | same | matches; asserted |
+| R | the Boki Merge (`mf_xform`, ours) | 0.80 | same | no source |
+Not in the slots: `ostra_flurry` has no caller on main; `ostra_empower` (Swollen, 0.9 s) has no source frame.
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
   HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.

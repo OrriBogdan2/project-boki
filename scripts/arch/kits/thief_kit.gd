@@ -42,6 +42,7 @@ const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance st
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
+const KNIFE_OUT := 0.12          # s after the press: the dagger leaves the hand (thf_knife's release key)
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
 var primed_t := 0.0            # Vault empowered the next bolt
@@ -792,7 +793,7 @@ func combo_marks(out: Array) -> void:
 
 func cast_e() -> bool:
 	play("thf_knife")
-	m.later(0.12, func():               # spun into a side-arm throw, released on the key pose
+	m.later(KNIFE_OUT, func():         # spun into a side-arm throw, released on the key pose
 		if not is_instance_valid(h) or busy(): return
 		_throw_knife())
 	return true

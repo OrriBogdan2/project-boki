@@ -26,6 +26,11 @@ func run(main_node: Node) -> void:
 	await ult_check.ult(main)
 	n += ult_check.n
 	fails += ult_check.fails
+	# his clip strikes on the kit's releases (anim timing): the orbs, Snap, both Trades and the well leave on the
+	# press, the seed lands at the cursor on the press, the pop's implosion rings close by 0.08 s
+	load("res://tools/clip_strike_check.gd").new().run(self, main, "ostra", {"ostra_orb": 0.0, "ostra_orb_hot": 0.0,
+			"ostra_snap": 0.0, "ostra_swap": 0.0, "ostra_swap_air": 0.0, "ostra_seed": 0.0, "ostra_pop": 0.08,
+			"ostra_well_snap": 0.0})
 	print("PAIRCHECK ostra DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
