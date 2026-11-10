@@ -74084,5 +74084,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2p_furnacowary_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_vaultara",
+    "name": "Vaultara (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_vaultara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_vaultara",
+    "name": "Vaultara (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_vaultara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_furnacowary",
+    "name": "Furnacowary (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vaultara",
+    "name": "Vaultara (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_vaultara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_vaultara",
+    "name": "Vaultara (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_vaultara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vaultara",
+    "name": "Vaultara (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_vaultara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_furnacowary",
+    "name": "Furnacowary (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_furnacowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vaultara",
+    "name": "Vaultara (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_vaultara_3.jpg",
+    "ok": true
   }
 ]
