@@ -90072,5 +90072,54 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_buckleron_p2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_sporcupine_d",
+    "name": "Sporcupine (new body, option d)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_sporcupine_d_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ringrove_p2",
+    "name": "Ringrove (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_ringrove_p2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chandelotl_p2",
+    "name": "Chandelotl (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_chandelotl_p2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ringrove_p2",
+    "name": "Ringrove (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_ringrove_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_sporcupine_d",
+    "name": "Sporcupine (new body, option d)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_sporcupine_d_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chandelotl_p2",
+    "name": "Chandelotl (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_chandelotl_p2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_sporcupine_g",
+    "name": "Sporcupine (new body, option g)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_sporcupine_g_2.jpg",
+    "ok": true
   }
 ]
