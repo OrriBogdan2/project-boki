@@ -2105,3 +2105,9 @@ SPECS.append({'id':'drop_up2_lacefix','name':'Drop splash from below: finish Lac
   'prompt':"Edit image 1: keep the whole picture exactly the same: same composition, same camera, same characters, same creatures, same lighting and background. Only finish the dark-haired doll woman in the centre foreground (Lace) so she matches her design sheet in image 2: "
    "her face has NO mask on it, just pale porcelain skin with the red stitched scar running diagonally across it and her calm smile; her black hair is gathered into a high bun pierced by two long silver sewing needles, with the rest of her hair still flowing long and loose; "
    "a cracked white mask is fastened on her LEFT SHOULDER like a shoulder guard, edged with red stitches; a thin black lace choker at her neck. Change nothing else about her and nothing else in the picture."})
+
+# 11-10 owner: the first Sable + Lockatara splash (hb2_sable_lockatara_2) is great but the lizard has two tails: the key tail in the lock and
+# a second green tail coiled on the floor at the bottom left. Remove the extra one only.
+SPECS.append({'id':'hb2_sable_onetail','name':'Sable + Lockatara splash: one tail','refs':['briefs/boki-art/batch/out/hb2_sable_lockatara_2.jpg'],'runs':3,'aspect':'16:9','size':'2K',
+  'prompt':"Edit image 1: keep the whole picture exactly the same: same composition, characters, lighting, colours and background. Only fix this: the green lizard has two tails. Keep the ONE tail that rises from its rump and ends in the key turning in the vault door lock. "
+   "Remove the second green scaly tail that lies coiled on the stone floor at the bottom left of the picture, near the barrel and behind the woman's boot, and paint plain stone floor with a few scattered gold coins there instead. The lizard has exactly one tail. Change nothing else."})
