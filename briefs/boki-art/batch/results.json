@@ -107915,5 +107915,40 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rv_kingpinguin_noband_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_kingpinguin_noband",
+    "name": "Kingpinguin (review: noband)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_kingpinguin_noband_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rollguin_noband",
+    "name": "Rollguin (review: noband)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_rollguin_noband_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rollguin_noband",
+    "name": "Rollguin (review: noband)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_rollguin_noband_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_hatstag_e3",
+    "name": "Hatstag (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_hatstag_e3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_hatstag_e3",
+    "name": "Hatstag (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_hatstag_e3_3.jpg",
+    "ok": true
   }
 ]
