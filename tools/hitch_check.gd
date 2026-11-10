@@ -35,6 +35,7 @@ const DT := 1.0 / 60.0
 const JUDGED := ["ride", "drop", "land"]
 
 var out_path := ""
+const SLOW_MS := 50.0        # ms: a phase line counts the frames over this (under 20 fps), catch-up steps included
 var m: Match = null
 var phase := "load"
 var phase_t := 0.0
@@ -597,7 +598,12 @@ func _finish() -> void:
 			if float(f["wall"]) > float(worst["wall"]): worst = f
 		var nc := 0
 		for f in fl: nc += int(f.get("compiles", 0))
-		lines.append("HITCH phase %-8s %4d frames  median %6.0f ms  worst %6.0f ms  shader compiles %d" % [ph, fl.size(), meds[ph], float(worst["wall"]), nc])
+		var walls: Array = fl.map(func(f): return float(f["wall"]))
+		walls.sort()
+		var p95: float = walls[mini(walls.size() - 1, int(walls.size() * 0.95))]
+		var over := walls.filter(func(w): return w > SLOW_MS).size()
+		lines.append("HITCH phase %-8s %4d frames  median %6.0f ms  p95 %6.0f ms  worst %6.0f ms  over %.0f ms %d  shader compiles %d" % [
+			ph, fl.size(), meds[ph], p95, float(worst["wall"]), SLOW_MS, over, nc])
 	if landed_at >= 0.0:
 		var after: Array = frames.filter(func(f): return f["phase"] == "land" and float(f["t"]) <= landed_at + 1.5)
 		var stall := 0.0
