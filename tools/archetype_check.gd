@@ -64,10 +64,6 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
 
-## On the dash's last step the ground hands over to the run (HunterMove.dash_exit) where the air keeps the dash's
-## speed, so the air reach is up to one step of a fast dash (15 m/s) longer; a short dash is 2.8 m, 5% is 0.14 m.
-const EXIT_SLACK := 15.0 * DT
-
 ## Item 183: with a charge in hand, a hero's air dash is its ground dash: the same kit move and clip, the same reach
 ## (within 5%), one charge spent and the long-dash slot (ex_cd) untouched. `home` is open ground; the match is
 ## left with the hunter back at home.
@@ -84,7 +80,7 @@ func air_dash_is_ground(m: Match, P: Hunter, home: Vector3) -> void:
 	var label := "item 183 %s: its air dash is its ground dash (%s, reach %.2f vs %.2f)"
 	ok(label % [P.arch, ground["anim"], air["reach"], ground["reach"]],
 		air["anim"] == ground["anim"] and air["spent"] == ground["spent"] and air["spent"] > 0.5 and air["ex_cd"] == 0.0
-		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"] + EXIT_SLACK, str([ground, air]))
+		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"], str([ground, air]))
 	P.teleport(home)
 
 func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
