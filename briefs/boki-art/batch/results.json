@@ -77297,5 +77297,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_eclipsowl_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_echolop",
+    "name": "Echolop (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_echolop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_howlop",
+    "name": "Howlop (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_howlop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_howlop",
+    "name": "Howlop (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_howlop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_echolop",
+    "name": "Echolop (V2 card, batch 2, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_echolop_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_moatpole",
+    "name": "Moatpole (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_moatpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_echolop",
+    "name": "Echolop (V2 card, batch 2, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_echolop_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_howlop",
+    "name": "Howlop (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_howlop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rampartoad",
+    "name": "Rampartoad (V2 card, batch 2, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_rampartoad_1.jpg",
+    "ok": true
   }
 ]
