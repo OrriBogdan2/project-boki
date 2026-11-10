@@ -118,9 +118,10 @@ func _prologue() -> void:
 	for s in pr.shots:
 		watched += float(s["dur"])
 	print("NPF the prologue runs %.0f s if watched" % watched)
-	var skips: Array = pr.find_children("*", "HoldSkip", true, false)
-	ok(skips.size() == 1, "it can be skipped (hold Esc)")
-	(skips[0] as HoldSkip).skipped.emit()
+	var key := InputEventKey.new()      # any key skips it (the prologue's first-press skip)
+	key.keycode = KEY_SPACE
+	key.pressed = true
+	pr._unhandled_input(key)
 	await _wait(func(): return _is_screen("hatch.gd"), "the skipped prologue lands on the hatch")
 	ok(bool(Save.d["tutorial"].get("prologue", false)), "and is remembered as seen")
 
