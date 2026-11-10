@@ -86859,5 +86859,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_chiptero_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_harvantis_b4",
+    "name": "Harvantis (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_harvantis_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_harvantis_b4",
+    "name": "Harvantis (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_harvantis_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_harvantis_b4",
+    "name": "Harvantis (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_harvantis_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_harvantis_b4",
+    "name": "Harvantis (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_harvantis_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_harvantis_b4",
+    "name": "Harvantis (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_harvantis_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mumblet_b4",
+    "name": "Mumblet (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_mumblet_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mumblet_b4",
+    "name": "Mumblet (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_mumblet_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_klaxada_b4",
+    "name": "Klaxada (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_klaxada_b4_1.jpg",
+    "ok": true
   }
 ]
