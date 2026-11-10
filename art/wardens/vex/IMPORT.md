@@ -1,5 +1,12 @@
 # Vex (gunslinger): import note, v2 design (2026-11-06)
 
+## v95 swap (2026-11-10, ext/sparkle-underbust2): the current vex.glb
+
+The mesh is now the v95 master with the owner-approved round-2 face (~/meshy/v95/Vex/r2/face_appeal2/cand_face.glb). It was put on this rig with `tools/art1/v95_swap.py` and `art/wardens/src/vex_v95.json` (docs/art/wardens/V95_SWAP.md). The skeleton, the clips, the anchors (moved through the fit) and the coin (`keep`) are unchanged. The minigun is rigid on forearm.R. The model is 13.1k tris with one embedded 2048 atlas and no normal map. vex_atlas.jpg and vex_normal.jpg belong to the v2 build below. Shots are in docs/shots/sparkle-underbust2/vex_*.jpg.
+Limits: the barrels no longer spin (the gatling bone has no mesh), and the braid is rigid on the head.
+
+## Previous build (v2)
+
 `vex.glb`: the owner's locked v2 redesign (briefs/art-refs/vex_v2/: index.md, master_sheet, turnaround), on the shared armature, under 15k
 triangles (10.7k), six material slots, one 2048 atlas plus its normal map, hand-keyed clips (docs/art/wardens/CLIPS.md, content/rules/warden_anim/vex.json).
 Raw files in ~/meshy/vex_v2 (never in git); the Meshy tasks and credits are in docs/art/wardens/PIPELINE.md.
