@@ -731,8 +731,9 @@ func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
 	step(m, 0.4)
 	K.spirit.end("time")
 	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
-	ok("pin dash: two presses back to back both roll; the first goes about 4 m",
-		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > 3.5, both)
+	var roll_m := float(K.dash_def()["roll"]) * float(K.dash_feel()["dist"])      # (the shared dash feel scales it)
+	ok("pin dash: two presses back to back both roll; the first goes its data roll",
+		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > roll_m * 0.9, both + " want %.1f m" % roll_m)
 	var x1 := P.pos.x
 	P.do_dash()
 	step(m, 0.4)
