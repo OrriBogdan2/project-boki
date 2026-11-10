@@ -1012,3 +1012,14 @@ _TIDY={'Checkmare':"its spikes: instead of dozens of thin spines all over, it ha
 for _n,_d in _TIDY.items():
     SPECS.append({'id':'tidy_'+_n.lower(),'name':_n+' (clean-up option)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
       'prompt':_EDIT+"simplify "+_d+". Everything is drawn as few, large, readable shapes with plain flat areas between them. The creature, pose, face, colours and size stay the same."})
+
+# 06:40 ET 11-10 OWNER: "are Siegephant and Glaciammoth legendaries? They don't seem it, and they seem the same with a typing change."
+# Both are Boss-tier legendaries and both are tusked giants. Options: Siegephant made legendary-grade; Glaciammoth moved off the elephant body.
+OPT('Siegephant','final','majestic',False,False,'briefs/boki-art/cards/Siegephant.jpg',[
+ "a true legendary war-beast, far grander than an ordinary elephant: a colossal ancient elephant whose whole back has grown into a ruined stone fortress with three towers and a gate arch, moss in the cracks, four long curved tusks like battering rams, a trunk plated like a drawbridge chain, glowing amber eyes, standing planted and calm like a walking castle.",
+ "a legendary siege titan: a towering elephant rearing on its hind legs, its skull grown into a stone battering-ram crown, two huge tusks crossed like gate bars, its back a single tall watchtower with a banner-shaped ear on each side, cracks of amber light in the stone.",
+ "an ancient living citadel: a huge kneeling elephant so old that a walled keep has grown over its shoulders and head like a helmet, only its amber eyes, tusks and trunk showing under the battlements, small stone bridges linking its towers."])
+OPT('Glaciammoth','final','majestic',False,False,'briefs/boki-art/cards/Glaciammoth.jpg',[
+ "no longer an elephant shape: a legendary glacier beast built like a giant musk-ox carved from blue ice, with a huge curtain of icicle hair hanging to the ground, two massive down-curved ice horns, and a frozen amber heart glowing inside its chest. Planted and immense.",
+ "no longer an elephant shape: a legendary woolly rhinoceros of ancient ice, with one enormous flat blade horn like an ice-breaker's prow, a shaggy frost mane, and small creatures frozen in amber inside its translucent blue flanks.",
+ "kept as a mammoth but made unmistakably legendary and unlike a stone elephant: a ghostly mammoth of clear glacier ice, its skeleton faintly visible inside, with four spiralling tusks sweeping forward like a sleigh, a trailing cloak of frozen fur, and drops of glowing amber set along its spine."])
