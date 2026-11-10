@@ -9,13 +9,18 @@ extends RefCounted
 ## reason as hitstop in Match._process).
 
 const MAX_FRAME_S := 1.0 / 30.0    # two sim steps
+## s of sim one drawn frame advances offline at most (three steps): under 20 fps the game slows down instead of
+## each slow frame queueing more steps that make the next frame slower (the catch-up spiral, owner 11-10)
+const CATCH_UP_S := 3.0 / 60.0
 const REHEARSE_QUIET := 12         # frames with no new pipeline end it (Forward+ builds them on background threads) ...
 const REHEARSE_MAX := 60           # ... and it's over after this many at most
 
 ## The sim time this drawn frame may advance.
 static func frame_dt(m: Match, d: float) -> float:
-	if m.net_on or m.player == null or m.player.roll_t <= 0.0:
+	if m.net_on:
 		return d
+	if m.player == null or m.player.roll_t <= 0.0:
+		return minf(d, CATCH_UP_S)
 	return minf(d, MAX_FRAME_S)
 
 ## The last of Match.warm_up, behind the loading screen: one of every effect a dash or Lunge draws, on the view and

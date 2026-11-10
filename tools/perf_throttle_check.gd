@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	_mob_naps()
 	_far_bots()
+	_catch_up()
 	_far_mobs()
 	_shadows()
 	await _occluders()
@@ -159,6 +160,14 @@ func _mob_naps() -> void:
 		k.pos = m.player.pos
 	_step(1.5)
 	ok(mb.st != "idle" or mb.pos != at, "a Hunter walking up wakes it (%s)" % mb.st)
+
+## A 100 ms frame offline advances DashPace.CATCH_UP_S of sim (three steps, not six); online the clock can't wait.
+func _catch_up() -> void:
+	m.player.roll_t = 0.0
+	ok(is_equal_approx(DashPace.frame_dt(m, 0.1), DashPace.CATCH_UP_S), "offline a slow frame advances three steps")
+	m.net_on = true
+	ok(is_equal_approx(DashPace.frame_dt(m, 0.1), 0.1), "online a slow frame advances its whole time")
+	m.net_on = false
 
 func _far_bots() -> void:
 	var b: Hunter = null
