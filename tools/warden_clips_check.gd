@@ -167,8 +167,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
 
-## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
-## the sun carrying her FX points.
+## Meeko's sun and moon (pip_v2 companions sheet; the moon wears the cloud's faces, item 24): two atlas faces off her
+## moods, all eight expressions reachable, the cast FX points on her shoulder and the sun's light on the sun.
 func _companions() -> void:
 	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
 			PlayerLook.neutral(), "tender")
@@ -182,10 +182,78 @@ func _companions() -> void:
 		for a in md.atlas:
 			seen[int((a[0] as ShaderMaterial).get_shader_parameter("to_cell"))] = true
 	ok(seen.size() == 8, "tender: her moods reach all eight faces (%d)" % seen.size())
-	for a in ["weapon_muzzle", "anchor_hang_lantern", "anchor_lantern_top"]:
+	for a in ["weapon_muzzle", "anchor_lantern_top"]:
 		var at := WardenGlb.anchor(m, a)
 		var bone := (at.get_parent() as BoneAttachment3D).bone_name if at else ""
-		ok(bone == "pauldron.L", "tender: %s rides the sun" % a)
+		ok(bone == "pauldron.L", "tender: %s stays on her shoulder" % a)
+	var lamp := WardenGlb.anchor(m, PipOrbit.LIGHT_ANCHOR)
+	ok(lamp != null and lamp.get_parent().name == "Sun", "tender: the sun's light rides the sun")
+	m.free()
+	_orbit()
+
+## Item 24: the sun and moon off her body mesh, circling her upper body on opposite sides, below her face when in
+## front of her, trailing a little when she moves, and flaring and spinning up when she casts.
+func _orbit() -> void:
+	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
+			PlayerLook.neutral(), "tender")
+	holder.add_child(m)
+	var w := m.get_node("Warden") as Node3D
+	var o: PipOrbit = (w.get_node("Sync") as WardenGlb.Sync).pals
+	ok(o != null and o.pals.size() == 2, "tender: a sun and a moon")
+	if o == null or o.pals.size() < 2:
+		m.free()
+		return
+	var left: Array = []
+	for mi in w.find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var nm := mesh.surface_get_material(si).resource_name if mesh.surface_get_material(si) else ""
+			if nm in PipOrbit.SUN + PipOrbit.GONE + [PipOrbit.MOON_FACE] and (mi as MeshInstance3D).skin:
+				left.append(nm)
+	ok(left.is_empty(), "tender: nothing of the sun or cloud is left on her skinned body %s" % str(left))
+	var sun := o.pals[0][0] as Node3D
+	var moon := o.pals[1][0] as Node3D
+	var d := Tuning.of("meeko")
+	for i in 30:
+		o.step(DT)
+	var c := o.pivot
+	var a := sun.global_position - c
+	var b := moon.global_position - c
+	var across := Vector2(a.x, a.z).normalized().dot(Vector2(b.x, b.z).normalized())
+	ok(across < -0.99, "tender: sun and moon on opposite sides")
+	var sk := WardenGlb.skeleton(w)
+	var sc := sk.global_transform.basis.get_scale().y
+	var head_y := (sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin).y
+	o.phase = PI      # the sun right in front of her (-Z)
+	o.step(DT)
+	var top := sun.global_position.y + 0.17 * sc
+	ok(top < head_y, "tender: in front of her the sun stays under her face (top %.2f, head %.2f)" % [top, head_y])
+	var p0 := sun.global_position
+	for i in 60:
+		o.step(DT)
+	var lap := TAU * float(d["orbit_hz"]) * 60.0 * DT
+	ok(
+			p0.distance_to(sun.global_position) > 0.05 * sc and lap < 0.5,
+			"tender: they circle slowly (%.2f rad a second)" % lap)
+	m.position += Vector3(1, 0, 0)
+	o.step(DT)
+	var want := sk.global_transform * (sk.get_bone_global_pose(o.hips).origin + Vector3.UP * float(d["lift_m"]))
+	var trail := o.pivot.distance_to(want)
+	var most := float(d["lag_max_m"]) * sc + 0.001
+	ok(trail > 0.05 * sc and trail <= most, "tender: they trail her move (%.2f m)" % trail)
+	for i in 60:
+		o.step(DT)
+	ok(o.pivot.distance_to(want) < 0.01, "tender: and catch up")
+	var rest := float((o.pals[0][1] as ShaderMaterial).get_shader_parameter("alpha"))
+	var s0 := o.spin
+	m.set_meta(WardenClips.STATE, {"kmove": "mm_shot_r"})
+	o.step(DT)
+	var lit := float((o.pals[0][1] as ShaderMaterial).get_shader_parameter("alpha"))
+	ok(o.kick > 0.9 and lit > rest + 0.4 and o.spin - s0 > TAU * float(d["spin_hz"]) * DT * 5.0,
+			"tender: a cast flares them (%.2f -> %.2f) and spins them up" % [rest, lit])
+	var warm := Color(String(d["sun_glow"]))
+	var cool := Color(String(d["moon_glow"]))
+	ok(warm.r > warm.b and cool.b > cool.r, "tender: the sun glows warm, the moon cool")
 	m.free()
 
 ## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.

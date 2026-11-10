@@ -258,6 +258,7 @@ func _snap() -> Dictionary:
 		"cd": k.cd.duplicate(), "ch": k.ch_rmb, "rmb_down": k.rmb_down, "e_t": k.e_t, "used": hunter.used.duplicate(),
 		"gear": float(hunter.gear_cd[0]), "fire_cd": hunter.fire_cd, "swing": hunter.swing_t, "draw": hunter.draw_t,
 		"mel": hunter.mel_hold, "ammo": hunter.ammo, "cast": cast_n.duplicate(), "shots": _last_shot(),
+		"wind": k.rmb_winding(),
 	}
 
 ## The id of the newest shot of the hunter's still in flight (a kit's own LMB, like darts, keeps no fire_cd).
@@ -280,7 +281,8 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 					or int(now["ammo"]) < int(b["ammo"]) or more.call("cast", "primary")
 		"rmb":
 			return more.call("used", "utility") or more.call("cd", "rmb") or more.call("cast", "secondary") \
-					or float(now["ch"]) < float(b["ch"]) or (bool(now["rmb_down"]) and not bool(b["rmb_down"]))
+					or float(now["ch"]) < float(b["ch"]) or (bool(now["rmb_down"]) and not bool(b["rmb_down"])) \
+					or (bool(now["wind"]) and not bool(b["wind"]))      # (a wind-up that throws by itself)
 		"e":
 			return more.call("used", "k1") or more.call("cd", "e") or up.call("e_t") or more.call("cast", "kin")
 		"x":
