@@ -95679,5 +95679,12 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_snapler_m3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_snapler_m3",
+    "name": "Snapler (middle-stage rework m3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m3_1.jpg",
+    "ok": true
   }
 ]
