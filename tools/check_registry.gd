@@ -114,6 +114,7 @@ const CHECKS := {
 	"--motley-live-check": ["res://tools/motley_live_check.gd", "motley_live_check", null],      # the jack, live
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],      # no clip stretches a skinned edge past 1.3x
+	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # all 12 Hunters in a row, true scale
