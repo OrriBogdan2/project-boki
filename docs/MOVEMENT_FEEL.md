@@ -189,6 +189,30 @@ Other checks:
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
   - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
+- **Camera lead (measured, Nov 2026):** the Supervive follow used to lean toward the cursor (42% of its distance from you after a
+  1.4 m deadzone, capped at 7.5 m). Nobody had checked that against the source, so it was measured from the reference clips in
+  `/home/boki/refs/supervive-mantle/` (hetzner): the cursor ring and the player's own health bar were tracked per frame, and the
+  ground's shift between frames read by phase correlation of the HUD-free centre of the picture.
+  - `sv_every_ability.mp4` (training ground, 1080p60): a cursor flick with the hunter standing moves the view by nothing. At
+    252.27 s (frame 15136) the cursor jumps 116 px of 480 (a quarter of the screen) and the ground shifts under 1 px over the next
+    4 s; at 293.53 s a 108 px flick gives 5 px; the flicks at 218.2, 220.3, 221.8, 247.6, 248.4, 249.1, 284.0, 285.2, 288.4 and
+    301.0 s all give 0-2 px. The hunter sits a fixed ~5% of the height below the centre whatever the cursor does.
+  - `sv_joule_1v4.mp4` (a fight, 1080p60): over the 1173 frames where both the bar and the cursor read, the hunter's screen offset
+    against the cursor's has a slope of -0.03 px/px (r = -0.1): no lean. From 2.0 to 4.25 s the cursor flips between (-240, +50)
+    and (+296, -130) px of 960x540 while the hunter stays at (-100 +-10, -30).
+  - `owner_mantle_clip.mp4` (a streamer's clip, webcam overlays): too noisy to read (weak slopes of -0.1 and -0.24), not used.
+  - So **the view stays on the hunter wherever the cursor is**: `CamRig.SUPERVIVE_LEAD_M` is 0 and there is no ease to time.
+    The lean survives as the Standard and Fully dynamic follow presets, which model the source's own camera options (deadzone,
+    maxzone, pan distance, quadratic easing; a Supervive guide recommends 0.5 / 0.8 / 100% on Fully dynamic).
+  - Dashes: the view trails and eases, never cuts. In the 1v4 clip at 4.37-4.80 s the hunter crosses 105 px (11% of the width)
+    while the ground moves at most 8.5 px per frame; the dredge sheet (frames 0187-0188, 493.2-493.8 s) saw ~0.5 s to catch up
+    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 0.5 s in (`--cam-lead-check`); a slower,
+    dash-only catch-up like the source's 0.4-0.5 s is not built (the tight 15/s follow is what keeps `cam_lag_m` under 0.4 m).
+  - Knocks and glides: no clean sample in these clips. With no cursor lean there is nothing to hold or recentre.
+  - `--cam-lead-check` asserts it in an expedition and in the Training Grounds: the lean with the cursor at the screen's edge is
+    under 0.35 m (the footage's noise floor, 1.5% of the view), the view drifts under 5 cm in the second after a flick, and a dash
+    moves it under 0.5 m in any frame, trails, and is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
+    a review frame (GPU).
 - **Settings:**
   - "Expedition camera" is now "Camera".
   - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`).
