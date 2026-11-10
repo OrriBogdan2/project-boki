@@ -369,8 +369,8 @@ func _slope() -> void:
 	var speeds := []
 	var own := [P.arch, P.base_speed, P.ground_accel]
 	for id in HunterMove.rules():
-		if id == "doc" or id == "physics" or id == "default":
-			continue
+		if id == "default" or not (HunterMove.rules()[id] is Dictionary and HunterMove.rules()[id].has("speed")):
+			continue      # (doc, physics, glide_spike: not a hunter's row)
 		for mb in m.mobs: mb.queue_free()      # the match respawns wildlife as it runs; a bite would knock the run
 		m.mobs.clear()
 		var row := HunterMove.of(id)
