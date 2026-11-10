@@ -799,39 +799,6 @@ func live(x: Dictionary) -> bool:
 		"outpost": return x["state"] in ["charging", "open"] or startable(x)
 	return false
 
-## The line under the minimap: what the exits are doing, from your point of view.
-func clock_line() -> Array:
-	var p := m.player
-	if p == null or list.is_empty():
-		return ["", Color.WHITE]
-	var mine := active_for(p.team)
-	if not mine.is_empty():
-		match String(mine["state"]):
-			"called": return ["SKIFF CALLED %s" % _cap(mine["t"]), ExitModels.DOCK]
-			"boarding": return ["SKIFF BOARDING %s" % _cap(mine["t"]), ExitModels.DOCK]
-			"charging":
-				if mine.get("draining", false):
-					# (short: it sits between the clock and your level under the minimap)
-					return ["DRAINING %s" % _cap(drain_left(mine)), ExitModels.UPLINK.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 7.0))]
-				if mine["contested"]:
-					return ["CONTESTED %d%%" % int(mine["prog"] * 100.0), Color("ff8a6a")]
-				return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), (" x%s" % String.num(crew_rate(int(mine.get("crew", 0))), 1)) if int(mine.get("crew", 0)) > 1 else ""]), ExitModels.UPLINK]
-			"open": return ["LIFT OPEN %s" % _cap(mine["t"]), ExitModels.UPLINK]
-	var docks := of_kind("dock")
-	var first := 1e9
-	for d in docks: first = minf(first, float(d["open_at"]))
-	if not docks.is_empty() and m.time < first:
-		return ["DOCKS IN %s" % _cap(first - m.time), Color(0.75, 0.75, 0.8)]
-	var open_docks := docks.filter(func(d): return d["state"] != "closed")
-	var next_close := 1e9
-	for d in open_docks:
-		if float(d["close_at"]) < 1e8: next_close = minf(next_close, float(d["close_at"]))
-	if next_close - m.time < 45.0:
-		return ["DOCK CLOSES %s" % _cap(next_close - m.time), Color("ffcf8a")]
-	if not docks.is_empty():
-		return ["%d DOCK%s OPEN" % [open_docks.size(), "" if open_docks.size() == 1 else "S"], ExitModels.DOCK]
-	return ["EXITS OPEN", Color("8fe3c8")]
-
 ## The big status line in the middle of the screen while you're in the middle of an exit, or {}.
 func status_for(p: Hunter) -> Dictionary:
 	if p == null or p.out or p.extracted:

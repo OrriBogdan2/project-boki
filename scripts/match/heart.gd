@@ -352,7 +352,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			var gneed := r("gate_hold_s")
 			return {"kind": "heart", "act": "leave", "need": gneed, "col": GATE_COL,
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
-				"label": "Hold %s to leave through the Heart Gate with your squad" % key}
+				"label": "Hold %s: leave now, small reward" % key}
 		return {"kind": "heart", "col": GATE_COL, "label": "The Heart Gate only opens for the Heartspark's bearer"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
