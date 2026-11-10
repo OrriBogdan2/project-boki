@@ -88,8 +88,102 @@ A 60-second clip: feed a Boki and watch it change; four Boki living with toys, t
 
 Order: 1, 5, 3 in parallel, then 2, 4, 6, 7, 8.
 
-## 10. Open questions for the owner (defaults in bold)
+## 10. Hub and zones (next garden milestone, owner 2026-11-10)
+
+Source: DECISIONS.md 2026-11-10 "the garden gets a hub with a teleporter and zones you unlock". The first slice (9) does not change: it becomes the first zone. Genre pattern, not a copy. The research's too-close list says no "three fixed gardens" and no garden that opens just because you own a creature of its kind. So here, zones follow our 18 types and four traits, and you open a zone yourself: you bring back a key from a run and a Boki you raised wakes the zone. All names, layouts and looks are ours. Code read at origin/ext/garden-integrated (58686d0).
+
+### 10.1 The hub
+
+A small round island, about 20 m across, that you arrive on. No toys and no resident Boki, so it stays light and every zone keeps a reason to exist. What's in it:
+- **The Waystone** (middle). The teleporter: a flat stone ring with five standing stones around it, one per zone. An open zone's stone glows in its colour and shows a tiny icon of who lives there. A locked one is dark and grown over, with its two keys drawn on it. Step on the ring and press E to get the destination cards (10.5).
+- **The nest corner** (west): the Nesting Nook, the Incubator and the Soul Shrine side by side. Pairing and hatching happen here, and mentors pass their gift here (3, 6). It is the one place Boki from different zones meet on purpose.
+- **The house** (north) and **the expedition portal with the glider rack** (south). Runs start and end in the hub, so loot always comes home past the Waystone.
+- **The Drift Trader's stall and the games board** (east). The board shows which zone hosts which game, this week's twist and the showcase wall. The stall sells snacks, toys and, once a week, one Wayseed (10.3).
+- **The Burrow door.** One Burrow shared by every zone.
+- **On the horizon:** the five zone islands float in the sky as cheap low-poly silhouettes. Open ones are lit; locked ones are misty. You can see where you are going before you can go there.
+
+Who is in the hub: your partner (following you) and an egg-minder doing its chore. Nobody else.
+
+### 10.2 The zones
+
+Five zones. The 18 types split into five groups with nothing left over, and each zone also matches one of the four traits (Care: bravery, loyalty, temper, curiosity). A Boki **thrives** in a zone when its strongest lean is one of the zone's types, or its matching trait is high (over 0.6). Thriving means joy falls half as fast and the zone's own toys train +25%. A Boki that doesn't thrive loses nothing: there are no penalties (2).
+
+| Zone | Feel | Types | Trait | Toys there | Game there |
+|---|---|---|---|---|---|
+| **Bramblebank** (open at start) | Soft green bank, a slow stream, a big nap tree. Today's garden. | Normal, Grass, Bug, Spore | loyalty: friends, nap piles, egg-minders | ball, dig patch, snack patch (today's four snacks) | The Dash (today's loop) |
+| **Glasswater Shallows** | Clear knee-deep pools, ice-edged rocks, crystal stacks catching light | Water, Ice, Crystal | low temper: calm, patient | splash tub, pools to wade | Spark Volley (over a shallow channel; a miss splashes) |
+| **Cinderstep** | Warm stepped terraces, glowing cracks, iron-red rock | Fire, Rock, Steel, Dragon | high temper: hot-headed rivals | warm stone, climbing post | Stump Shove (on a warm ledge) |
+| **Hushwood** | A dusky wood, always evening, lantern moss, soft echoes | Dark, Psychic, Poison | curiosity: seekers, night-owls | dig patch, lantern moss to sniff | Seek (night all day, so Dark and Spore track better) |
+| **Kitewind Ridge** | Windy high ridge, updrafts, humming stones | Flying, Electric, Fairy, Sound | bravery: daring jumpers | climbing post, updraft vents | The Dash, ridge track (glide gaps, an updraft climb) |
+
+Every zone has one snack patch growing its own types' snacks from lean.json (for example, Hushwood grows mindmint and glowcap). The patch also gives a way to lean a Boki toward zones whose snacks Bramblebank doesn't grow. Every game can be played by any Boki you bring; the zone's types simply get their lean edge on their home course. Each zone also nudges its matching trait upward very slowly, on top of the drift from friends (base_drift.json): +0.01 per in-game day. That is the "where you live shapes who you are" hook. It never moves a trait past 0.8.
+
+### 10.3 Unlocking
+
+Each locked zone needs two keys, and the locked stone and its card list both of them:
+1. **A Wayseed of the zone's group.** It drops from expedition lairs of a matching element (one per run at most), or the Drift Trader sells one for gems once a week. The trader only stocks a Wayseed for a zone that is still locked, so a player who never leaves the base still gets there.
+2. **A Boki that leans toward the zone.** Its lean in one of the zone's types must be at least half (12 of Evo.LEAN_FULL 24). That takes about two meals of the right snack.
+
+You carry or walk that Boki onto the Waystone with the Wayseed in your bag and press E on the dark stone. The Boki plants the seed, the stone lights up and the zone opens. That Boki becomes the zone's **founder**: it moves in, gets a memory line ("the day I woke Cinderstep") and a journal line, and the card names it from then on. Zones can be opened in any order. The suggested route, shown as a hint on the cards: Glasswater, Cinderstep and Kitewind can be leaned to with snacks the start garden grows. Hushwood needs mindmint or glowcap, which come from runs or the trader, so it tends to open last.
+
+Alternatives not taken: the lean alone (too close to the genre's "own one, garden opens"); gems alone (a shop gate, with no story); expedition loot only (would lock out base-only players, which goes against 2).
+
+### 10.4 How Boki move between zones
+
+- Every Boki has a home zone, rec["zone"]. An old save puts everyone in Bramblebank. Only the zone you are in is loaded and simulated.
+- **You decide; Boki ask.** Three ways to move one: carry it onto the Waystone and pick a zone; press "Move to..." on its Boki card (it walks to the zone's return pad and blinks out); or answer when it asks. A Boki that would thrive in another open zone sometimes waits at the return pad with a bubble ("Pip keeps looking at the ridge"). Press E to send it, or ignore it and nothing happens. Boki never change zone on their own, so you always know where everyone is.
+- Your partner follows you through every hop and stays a resident of its own zone.
+- **Up to 6 out per zone**, the same as today's cap (GARDEN.md 10, Q3). It is now per zone, so more zones means more Boki out, with no extra frame cost, because only one zone is loaded. The rest wait in the shared Burrow.
+- Friends in different zones keep their bond; now and then one asks to visit the other (the same bubble). To pair two Boki, you take both to the nest corner in the hub.
+- Zones you aren't in don't run frame by frame. When you arrive, the away-card catch-up runs once for that zone (bonds, joy, journal lines), so the "while you were away" card covers every zone.
+
+### 10.5 Travel feel
+
+Step on the Waystone: a row of five cards. Open ones show the zone's colour, who lives there with mood icons, and today's game. Locked ones are grey, with the two keys as ticks (Wayseed ☐, a Boki leaning Water, Ice or Crystal ☐) and where to get each. Pick one: a 0.5 s light-up and fade, then the zone loads with the fade covering it. You arrive on that zone's return pad. From any return pad you can go straight to the hub or to any open zone. It all uses the existing scene switch, Game.goto("home", {"zone": id}), the same way a visit passes {"visit": ...}.
+
+### 10.6 Performance budget (per loaded zone; the hub is lighter)
+
+Only one zone is in memory at a time, so each zone carries its own budget. These numbers are targets. Step 0 measures today's garden first and adjusts them.
+
+| | Zone | Hub |
+|---|---|---|
+| Boki animated | 6 residents + partner + 2 visitors = 9 max | partner + egg-minder |
+| Draw calls | ≤ 350 (match scene is 850-1000) | ≤ 200, the five horizon silhouettes ≤ 5 of them |
+| Objects / nodes | ≤ 800 / ≤ 3000 | ≤ 500 / ≤ 2000 |
+| Emitting particle systems | ≤ 12 | ≤ 6 (Waystone glow, portal) |
+| Frame | ≤ 16.7 ms on the M5 at Medium; ≤ 33 ms on rp1-0 at Very Low | same |
+| Script | base_life ≤ 1.5 ms for 9 Boki | ≤ 0.5 ms |
+| Hop | ≤ 2.0 s from pressing E to control, M5 | |
+
+Scatter (flora, crystals, lantern moss) uses MultiMesh, and each zone's props share one material per theme (GAMEDEV_CHECKLIST draw calls). The budget numbers live in content/rules/garden_zones.json "budget" so the check reads them.
+
+### 10.7 Build plan (in order; each step runs its own checks plus `python3 tools/health.py --strict`)
+
+0. **(S) Measure first.** Run `--perf-bench` on its home part with today's garden-integrated base, through `jobq submit --needs gpu` on the M5 and rp1-0. Record draws, objects, script ms and frame ms in briefs/PERF_AUDIT.md and set the 10.6 numbers from those results. Check: the bench rows exist for both machines.
+1. **(S) Design note** docs/decisions/NNNN-garden-zones.md: save shape (Save.d["zones"], rec["zone"]), one scene per zone through Game.goto, the visit snapshot, deleting the side isles. This is required because it touches the save format (AGENTS 1). Check: review only.
+2. **(M) Zone data and save migration.** content/rules/garden_zones.json (5 zones: name, types, trait, theme, toys, game, patch snacks, unlock, thrive, budget); new scripts/home/garden_zones.gd (is_open, keys_for, can_open, open_with, residents, move); scripts/core/save.gd migration: the current layout moves to zones["bramblebank"], every farm Boki gets rec["zone"] = "bramblebank", and the save version goes up. Check: new `--garden-zones-check` (the name `--zone-check` is taken by the match): an old save loads with everyone in Bramblebank and only Bramblebank open; the garden save round-trip check passes.
+3. **(L) The hub scene.** New scripts/home/hub_layout.gd (the fixed hub template built with the same HomeLayout/World code). Hub fixtures: house, portal and rack, nest corner, stall, games board, Burrow door. home.gd gets only wiring: it reads the "zone" param (default "hub") and builds either the hub or a zone; build mode in the hub offers only the Garden tab. Check: `--garden-zones-check` hub part (every fixture present, no toys, no residents); `--farmbuild`, `--arrival-check` and `--farm-tutorial-check` pass.
+4. **(M) Waystone and travel.** New scripts/home/hub_waystone.gd (ring, E prompt, fade, Game.goto); new scripts/ui/zone_cards.gd (open and locked cards with key ticks); Waystone, standing-stone and return-pad models in farm_models.gd; a return pad in every zone. Check: `--garden-zones-check` travel part: hub to Bramblebank and back keeps the partner and resident counts, a hop to a locked zone is refused and its card lists both keys, and `--load-check` shows a hop takes ≤ 2.0 s.
+5. **(M) Residents and moving.** Only rec["zone"] Boki spawn in the loaded zone (home.gd kin spawn wiring, base_life.gd); a 6-out cap per zone; "Move to..." on the Boki card (scripts/ui); a carry drop on the Waystone; the ask bubble at the return pad (a Watch target in base_life.gd, no new state). Check: `--garden-zones-check` moving part (a moved Boki is gone from the old zone and present in the new one after a reload; the 7th move is refused); `--base-life-check` and `--garden-nav-check` pass.
+6. **(M) Unlock path.** The Wayseed item (data.gd items, one per group) and its lair drop in the expedition loot rules; the Drift Trader's weekly Wayseed for a locked zone (home_black_market.gd, market.json); attuning at the Waystone (founder, memory line, journal line, toast); locked and lit stone looks. Check: `--garden-zones-check` unlock part: Wayseed plus a Boki at 12 lean opens the zone, either one alone does not, the founder moves in with its lines, and the trader never stocks a Wayseed for an open zone.
+7. **Four zone builds, one job each (M each).** For each: the THEMES entry in home_layout.gd, MultiMesh scatter, the zone's toys and patch snacks, its game placed there.
+   - 7a Glasswater: the splash tub and Spark Volley (base_volley.json position).
+   - 7b Cinderstep: the warm stone, the post and Stump Shove.
+   - 7c Hushwood: always-dusk lighting and Seek.
+   - 7d Kitewind: updraft vents and a second Dash track in base_race.json.
+   Check for each: `--garden-nav-check` in that zone (0 stuck, 0 inside), that game's check (`--volley-check`, `--shove-check`, `--seek-check`, `--race-check`), `--perf-bench` zone part through jobq gpu inside 10.6, and day and night shots.
+8. **(S) Thrive and the zone's trait pull.** "thrive" and "trait_pull" in garden_zones.json, read by base_life.gd (joy) and base_drift.gd (trait). Check: `--garden-zones-check` thrive part (a thriving Boki loses joy at half rate, a non-thriving one loses joy as today, the trait pull stops at 0.8); `--trait-drift-check` passes.
+9. **(S) Horizon silhouettes in the hub.** Five low-poly islands, lit or misty from Save.d["zones"]. Check: the hub stays inside its draw budget, and a hub shot shows lit and locked islands.
+10. **(M) Away card, journal and visits across zones.** The catch-up runs once per zone on arrival; the away card groups by zone. The visit snapshot (Social.publish_profile / clean_island) carries the open zones' layouts, so visitors land in the hub and can hop to the owner's open zones; old profile docs still load. Home is not synced through Net, so Net.VERSION stays. Check: `--journal-check`, `--arrival-check`, and the visit test path in main.
+11. **(S) Retire the bridged side isles.** Data.ISLES orchard, meadow, summit, grove and pines (their gem cost, bridges, signs, music) go behind base_mode and are deleted after sign-off, together with their checks. The 4-step tutorial gains one hint at the end: "the Waystone: one zone is open, here is how to wake the next". Check: `--farm-tutorial-check`, `health.py --strict`; then the full suite once, plus `--garden-soak` over two zones.
+
+Order: 0 and 1 first; then 2; then 3 and 4 (3 before 4); then 5 and 6 in parallel; then 7a-7d in parallel; then 8, 9, 10 and 11.
+
+## 11. Open questions for the owner (defaults in bold)
 
 1. Do crops survive? **Default: one snack patch growing four element snacks for feeding only, never sold.** Alternative: no patch; all food from runs and the stall.
 2. How deep is the element lean? **Default: a second element shown in look plus a 5% stat and minigame edge; it never changes the species type, but may pick the evolution branch where the roster has one.** Alternative: the lean can overwrite the type (risky for kits and roster).
 3. How many Boki out at once? **Default: 6 (today's cap), the rest in the Burrow, more with island expansion; safe for the 60-character perf budget.** Alternative: 10-12 with animation LOD after a real-GPU check.
+4. How many zones? **Default: 5 (the 18 types split cleanly, one per trait plus the start).** Alternative: 4 (merge Hushwood into Glasswater) or 6 (split Cinderstep into Fire/Dragon and Rock/Steel).
+5. Do visitors see all your open zones? **Default: yes, they land in your hub and hop like you.** Alternative: hub and Bramblebank only (smaller profile doc).
+6. Can toys go in the hub? **Default: no, toys belong to zones (keeps the hub light and the zones worth visiting).** Alternative: one toy slot in the hub.
