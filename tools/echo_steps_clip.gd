@@ -8,8 +8,8 @@ extends RefCounted
 const LATE := 0.03               # s after the beat the bot presses (inside every hit window)
 const DROP_EVERY := 5            # the bot leaves out every this many of your beats
 const STILL_AT := 12.0           # s into the dance the still is saved
-const ZOOM := 0.9                # the home camera's zoom on the stones
-const VIEW := Vector3(0, 0, 3.0)  # m from the stones' middle to where you stand
+const ZOOM := 0.45               # the home camera's zoom on the stones (distance multiplier: closer)
+const VIEW := Vector3(0, 0, -1.9)  # m from the stones' middle to where you stand: behind, clear of other fixtures
 
 var main: Node
 var dir := "/tmp/media"
