@@ -949,3 +949,9 @@ SPECS.append({'id':'fv4_lunowl','name':'Lunowl female (same family as the dusk m
   'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. She is unmistakably the same species: the same moth-winged owl, the same wing shape and tails, the same pose and view, "
    "the same dusk colour family, drawn the same way. She differs only like this: her body feathers are a paler lavender-grey with a cream chest; her wings keep the mint centre and violet edges but one step lighter; "
    "every marking that is gold on him (the crescents and the small crest) is silver on her; her body is a little rounder and her wing tails a little shorter."+_FEMFACE+" No pink. "+STYLE_V2('mid','pretty',False,True)+FRAME_V2)})
+
+# 05:25 ET 11-10 OWNER: "same with Murmuron" (male black with a purple sheen, female was crimson). Same rule: his design and palette, one step apart.
+SPECS.append({'id':'fv4_murmuron','name':'Murmuron female (same family as the male)','refs':['briefs/boki-art/cards/Murmuron.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. She is unmistakably the same species: the same great starling with the same wings, pipe collar, flock tail, pose and view, "
+   "drawn the same way. She differs only like this: her dark feathers carry a warm bronze-brown sheen where his is purple, with larger cream speckles on her chest and wings; her pan-pipe collar and wing tips are copper "
+   "instead of gold and a little smaller; her body is slightly rounder and her head crest shorter."+_FEMFACE+" No red and no crimson: she stays a dark bird. "+STYLE_V2('final','majestic',True,True)+FRAME_V2)})
