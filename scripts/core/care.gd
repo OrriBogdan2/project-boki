@@ -126,8 +126,9 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 	rec["needs"][n] = clampf(before + amt, 0.0, 100.0)
 	return float(rec["needs"][n]) - before
 
-## Time passing at home. sleeping: curled up in bed or napping.
-static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
+## Time passing at home. sleeping: curled up in bed or napping (or indoors); raining: rain on the
+## farm, which some kinds love and some hate (BokiQuirks.rain_joy).
+static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -136,8 +137,9 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	var mins := secs / 60.0
 	var nd: Dictionary = rec["needs"]
 	var f0 := float(nd["food"])
-	var rate := DECAY["food"] / 60.0 * (0.5 if sleeping else 1.0)
-	nd["food"] = clampf(float(nd["food"]) - DECAY["food"] * mins * (0.5 if sleeping else 1.0), 0.0, 100.0)
+	var species := String(rec.get("species", ""))
+	var rate := DECAY["food"] * BokiQuirks.food_rate(species) / 60.0 * (0.5 if sleeping else 1.0)
+	nd["food"] = clampf(float(nd["food"]) - rate * secs, 0.0, 100.0)
 	# the part of this stretch spent with nothing in it counts toward starving
 	starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
@@ -148,6 +150,8 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	nd["joy"] = clampf(float(nd["joy"]) - DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0), 0.0, 100.0)
+	if raining and not sleeping:
+		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if starve_h(rec) >= STARVE["sick"]:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
@@ -526,6 +530,7 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
 	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
 	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
+	BokiQuirks.set_sex(baby)
 	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
