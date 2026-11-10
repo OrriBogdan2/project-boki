@@ -115,6 +115,8 @@ func _follow() -> void:
 	P.inp["jump"] = true
 	_walk(P, Vector2(-1, 0), 0.12, watch)
 	P.inp["jump"] = false
+	while P.vel.y > 0.0 and not P.grounded:     # open at the top: the glider opens falling (decision 0027)
+		_walk(P, Vector2(-1, 0), Match.DT, watch)
 	P.inp["glide"] = true
 	_walk(P, Vector2(-1, 0), 1.4, watch)
 	P.inp["glide"] = false
