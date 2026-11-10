@@ -168,6 +168,8 @@ func run(m: Node) -> void:
 	seed(SEED)
 	_save()
 	home = await main._hb_home()
+	for i in 20:
+		await main.get_tree().process_frame      # a rendering display needs a few frames to finish building the farm
 	home.set_process(false)
 	home.life = null
 	var zc := _stream()
