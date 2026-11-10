@@ -96694,5 +96694,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rv_voltalon_family_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_phonodrake_family",
+    "name": "Phonodrake (review: family)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_phonodrake_family_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pickadactyl_family",
+    "name": "Pickadactyl (review: family)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_pickadactyl_family_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_phonodrake_family",
+    "name": "Phonodrake (review: family)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_phonodrake_family_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_voltalon_family",
+    "name": "Voltalon (review: family)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_voltalon_family_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pickadactyl_family",
+    "name": "Pickadactyl (review: family)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_pickadactyl_family_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_pickadactyl_family",
+    "name": "Pickadactyl (review: family)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_pickadactyl_family_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_forgebrock_paws",
+    "name": "Forgebrock (review: paws)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_forgebrock_paws_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_phonodrake_family",
+    "name": "Phonodrake (review: family)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_phonodrake_family_2.jpg",
+    "ok": true
   }
 ]
