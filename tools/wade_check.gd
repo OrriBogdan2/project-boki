@@ -135,14 +135,16 @@ func _paddle(zc: int) -> void:
 ## Six frames of the three Boki at the stream, one image across. Needs a rendering display (jobq --needs gpu).
 func _strip(dir: String, zc: int) -> void:
 	var x := HomeLayout.LANDING.x
-	_only(0, Vector3(x - 2.5, 0, zc + 4.0))
+	_only(0, Vector3(x - 2.5, 0, zc + 3.0))
 	_only(1, Vector3(x + 0.5, 0, zc + 0.5))
-	_only(2, Vector3(x + 2.5, 0, zc + 4.0))
+	_only(2, Vector3(x + 2.5, 0, zc + 3.0))
 	for k in home.kins:
 		k["busy"] = false
-	home.ppos = Vector3(x, 0, zc + 7.5)
+	home.ppos = Vector3(x, 0, zc + 3.0)
 	home.player.position = home.ppos
 	home.set_process(true)
+	home.cam.zoom_to = 0.55      # close in on the stream
+	home.cam.zoom = 0.55
 	if main.fade:
 		await main.fade.reveal(0.05)      # the boot splash stays up when a check builds the farm by hand
 	var frames: Array = []
