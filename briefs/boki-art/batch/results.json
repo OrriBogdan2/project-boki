@@ -79544,5 +79544,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_geysirbara_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_buckleron",
+    "name": "Buckleron (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_buckleron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lodestick",
+    "name": "Lodestick (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_lodestick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lodestick",
+    "name": "Lodestick (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_lodestick_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_buckleron",
+    "name": "Buckleron (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_buckleron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_buckleron",
+    "name": "Buckleron (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_buckleron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_geysirbara",
+    "name": "Geysirbara (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_geysirbara_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lodestick",
+    "name": "Lodestick (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_lodestick_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_geysirbara",
+    "name": "Geysirbara (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_geysirbara_1.jpg",
+    "ok": true
   }
 ]
