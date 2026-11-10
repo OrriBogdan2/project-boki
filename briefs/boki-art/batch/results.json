@@ -88833,5 +88833,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fp_arcestrel_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fs_arcestrel",
+    "name": "Arcestrel female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs_arcestrel_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_eclipsowl",
+    "name": "Eclipsowl female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs_eclipsowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_arcestrel",
+    "name": "Arcestrel female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_arcestrel_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_eclipsowl",
+    "name": "Eclipsowl female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_eclipsowl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_eclipsowl",
+    "name": "Eclipsowl female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_eclipsowl",
+    "name": "Eclipsowl female (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fp_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_gongibbon",
+    "name": "Gongibbon female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_gongibbon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_gongibbon",
+    "name": "Gongibbon female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_gongibbon_1.jpg",
+    "ok": true
   }
 ]
