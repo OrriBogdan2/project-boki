@@ -54,7 +54,10 @@ Nothing here comes from SUPERVIVE's files.
 | jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
 | jump_speed_vs_source (lift-off 6.8 m/s over 7.5) | n/a | 0.87 | 0.85–1.0 | [game data] JumpZVelocity 750 uu/s; the gap is the terrace call, plus one step of gravity |
 | jump_airtime | 0.633s | 0.900s | 0.85–1.05s | [game data] 1.02s |
-| air_carry_m (let go at take-off) | n/a | 3.4m | >= 3.0m | [game data] FallingLateralFriction 0.375 |
+| air_carry_vs_source (let go at take-off: metres / v0 (1 - e^(-0.75 t)) / 0.75) | n/a | 0.99x (2.89 m of 2.92) | 0.97–1.03x | [game data] FallingLateralFriction 0.375 x BrakingFrictionFactor 2 (was air_carry_m 3.4 m, a 0.375/s bleed) |
+| land_carry_hop / drop4 / glide _held (touchdown speed / run speed) | 0.93 / 0.89 / 1.14x | 1.00 / 1.00 / 1.00x | 0.98–1.02x | [game data] see "Landing carry" |
+| land_carry_hop / drop4 / glide _let (touchdown speed / source) | 1.15 / 1.28 / 1.24x | 1.00 / 1.00 / 1.00x | 0.97–1.03x | [game data] see "Landing carry" |
+| land_accept_frames (jump, dash, attack the step after touchdown, less standing) | 1 | 1 | <= 1 | [game data] no landing lock; [footage] Linwick casts as he lands |
 | air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
 | dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
 | dash_exit_slide_m (let go out of a dash) | ~0.02m | 0.33m | 0.2–0.5m | [game data] the walking stop |
@@ -147,7 +150,7 @@ Other checks:
 - **Feathering** [est] (tap the glider on and off instead of holding it). Constants: `FEATHER_*`, `lift_t`, `glide_off_t`.
   - Open and close are instant, with no penalty for rapid toggles. The glider reopens with 5% of its heat room left (was 15%).
   - While the glider is closed in the air its heat cools at 0.04 per second (was 0.06) (a full glider is 1.0). The ground still cools it fastest: [footage] "it only really cools on the ground".
-  - For 0.6s after you let go you keep the glide's speed and steering.
+  - After you let go you fall like any jump (`HunterMove.air_steer`, see "Landing carry"); `FEATHER_KEEP` 0.6 s now only counts as just off the glider for ledges and wall climbs. (It used to keep the glide's speed and steering for 0.6 s: feather_gain 2.55x -> 2.42x.)
   - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats at 0.4x a level glide (was 1x; lowered with the shorter glider so feathering still beats holding). Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
   - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
 - **Dash into glide** (`glide_handoff(dir, speed)`, `_take_glide_handoff()`):
@@ -228,6 +231,29 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
+
+## Landing carry against the source (`--move-feel-check` land_carry_*, land_accept_frames; ext/feel-landing-carry)
+
+Source [D] (supervive_physics.md): FallingLateralFriction 0.375, AirControl 0.015, BrakingDecelerationFalling not set
+(UE default 0), BrakingFrictionFactor UE default 2. UE's PhysFalling runs CalcVelocity with that friction: keys held
+under run speed only bend the velocity toward them (no bleed); keys off, or over run speed, brake at 0.375 x 2 = 0.75/s,
+and keys held over run speed stop the brake at run speed. Touchdown (ProcessLanded) zeroes only the fall, so the
+walk takes over at the speed you landed with. No landing-lag property exists; Moosh Moosh walks out of her touchdown
+and Linwick casts as he lands [F]. Method: run to speed on the flat, lift 1 m (hop), 3.2 m (4 terraces) or open the
+glider 2 m up and let go, keys held or let go; speed on the touchdown step.
+
+| Way down | Before | After | Source |
+|---|---|---|---|
+| 1 m hop, keys held / let go | 0.93x run / 1.15x source | 1.00x / 1.00x | run kept / e^(-0.75 t) |
+| 4-terrace drop, keys held / let go | 0.89x / 1.28x | 1.00x / 1.00x | as above |
+| Glide let go 2 m up, keys held / let go | 1.14x (glide speed for 0.6 s) / 1.24x | 1.00x / 1.00x | over run: brake to run / e^(-0.75 t) |
+| First jump/dash/attack after touchdown | 1 step | 1 step | at once |
+
+Fix (data + one function): `air_brake` 0.75 in hunter_move.json; `HunterMove.air_steer` is UE's falling CalcVelocity
+(was a 0.375/s bleed with keys held or not); the glider's 0.6 s speed-and-steering keep after a let-go is gone
+([est], the data has no such carry). Not touched: the glide dive's 3.5 m cancel, the landing clips, air_control
+0.015 (the owner's strong-air-control ruling is its own job; this keeps that knob separate). Landing lag for all 12
+hunters and 8 ways down is on ext/landing-recovery (land_*_lag rows).
 
 ## Not touched
 

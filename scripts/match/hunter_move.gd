@@ -11,6 +11,7 @@ static var ground_friction: float = _phys["ground_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]
 static var air_control: float = _phys["air_control"]
 static var air_friction: float = _phys["air_friction"]
+static var air_brake: float = _phys["air_brake"]
 static var fall_max: float = _phys["fall_cap"]
 static var abyss_fall_max: float = _phys["abyss_fall_cap"]
 static var abyss_slow_from: float = _phys["abyss_slow_from"]
@@ -26,6 +27,8 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+
+const OVER_RUN := 1.01     # UE IsExceedingMaxSpeed: speed past 1.01x the wanted speed counts as over it
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -71,17 +74,24 @@ static func slide(v0: float) -> float:
 		return v0 * v0 / (2.0 * brake_decel)
 	return v0 / k - brake_decel / (k * k) * log(1.0 + k * v0 / brake_decel)
 
-## Horizontal speed after a step in the air: your keys steer at air_control of your ground
-## acceleration and what you carry bleeds off at air_friction, so a jump keeps its run-up. Above
-## run speed (a dash, a pad, a knock) the keys turn the momentum without topping it up.
+## Horizontal speed after a step in the air, UE's falling CalcVelocity: with keys held under their speed
+## the carry doesn't bleed, air_friction (a share per second) only bends it toward the keys and the keys add
+## air_control of the ground accel, capped at their speed. Keys off, or over it (a dash, a pad, a knock),
+## it brakes at air_brake; keys held over it stop the brake at their speed. So you land with the run you
+## jumped with.
 static func air_steer(h: Hunter, hv: Vector2, wish: Vector2, dt: float) -> Vector2:
-	var kept := hv * maxf(0.0, 1.0 - air_friction * dt)
-	if wish.length() < 0.01:
-		return kept
-	var steer := h.ground_accel * air_control * dt
-	if kept.length() > wish.length():
-		return kept.move_toward(wish.normalized() * kept.length(), steer)
-	return kept.move_toward(wish, steer)
+	var run := wish.length()
+	var s := hv.length()
+	if run < 0.01 or s > run * OVER_RUN:
+		var braked := hv * maxf(0.0, 1.0 - air_brake * dt)
+		if run < 0.01:
+			return braked
+		if braked.length() < run and hv.dot(wish) > 0.0:
+			braked = hv / s * run
+		return (braked + wish / run * h.ground_accel * air_control * dt).limit_length(braked.length())
+	var dir := wish / run
+	var bent := hv - (hv - dir * s) * minf(air_friction * dt, 1.0)
+	return (bent + dir * h.ground_accel * air_control * dt).limit_length(run)
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's

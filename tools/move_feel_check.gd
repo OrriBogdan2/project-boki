@@ -36,8 +36,22 @@ const T := {
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
 	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
-	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
+	# let go at take-off: the run-up carries v0 (1 - e^(-0.75 t)) / 0.75 m
+	"air_carry_vs_source":     ["~", [0.97, 1.03], "x", "[game data] FallingLateralFriction 0.375 x 2"],
 	"air_reverse_dv":          ["~", [0.5, 1.1], "m/s", "[game data] AirControl 0.015: a jump keeps its run-up"],
+	# landing carry (_landing_carry): run speed at take-off, then a fall onto flat ground. *_held keeps the keys
+	# down (touchdown speed / run speed); *_let lets go at take-off (touchdown speed /
+	# the source's v0 * e^(-0.75 t) for the same airtime). UE PhysFalling -> CalcVelocity(FallingLateralFriction):
+	# keys under the run cap only turn you; keys off or over the cap brake at 0.375 x BrakingFrictionFactor 2.
+	# Touchdown keeps the horizontal speed (UE ProcessLanded zeroes only Z)
+	"land_carry_hop_held":     ["~", [0.98, 1.02], "x", "[game data] a 1 m hop, keys held: lands at run speed"],
+	"land_carry_hop_let":      ["~", [0.97, 1.03], "x", "[game data] a 1 m hop, let go: braking 0.75/s in the air"],
+	"land_carry_drop4_held":   ["~", [0.98, 1.02], "x", "[game data] a 4-terrace (3.2 m) drop, keys held: run speed"],
+	"land_carry_drop4_let":    ["~", [0.97, 1.03], "x", "[game data] a 4-terrace drop, let go: braking 0.75/s"],
+	"land_carry_glide_held":   ["~", [0.98, 1.02], "x", "[game data] glider let go 2 m up, keys held: brakes to run"],
+	"land_carry_glide_let":    ["~", [0.97, 1.03], "x", "[game data] glider let go 2 m up, keys off: braking 0.75/s"],
+	# jump, dash and attack pressed the step after touchdown act that step (worst of the 3 ways down)
+	"land_accept_frames":      ["<=", 1.0, "frames", "[game data] no landing lock; [footage] Linwick casts as he lands"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
@@ -289,6 +303,7 @@ func _jump() -> void:
 	rec("jump_speed_vs_source", v0 / SOURCE_JUMP_V)
 	rec("jump_airtime", air)
 	_air_control()
+	_landing_carry()
 	# coyote time: step off over open air (the walk-off path sets coyote), press jump k frames later
 	var best := 0
 	var rim := _find_rim()
@@ -338,16 +353,104 @@ func _air_control() -> void:
 		P.inp["move"] = Vector2(1, 0)
 		_steps(20)
 		var x0 := P.pos.x
+		var v0 := P.vel.x
 		P.inp["jump"] = true
 		P.inp["move"] = Vector2.ZERO if mode == "let_go" else Vector2(-1, 0)
+		var t := 0.0
 		for i in 90:
 			m.step(DT)
+			t += DT
 			if P.grounded and i > 2: break
 		if mode == "let_go":
-			rec("air_carry_m", P.pos.x - x0)
+			var src := v0 * (1.0 - exp(-SOURCE_AIR_BRAKE * t)) / SOURCE_AIR_BRAKE
+			print("MFEEL air carry %.3f m in %.3f s (source %.3f m)" % [P.pos.x - x0, t, src])
+			rec("air_carry_vs_source", (P.pos.x - x0) / src)
 			land_vx = P.vel.x
 		else:
 			rec("air_reverse_dv", land_vx - P.vel.x)
+
+## Ways down for the landing rows: a 1 m hop, a 4-terrace drop and a glide let go 2 m up (metres of fall).
+const CARRY_CASES := {"hop": 1.0, "drop4": 4.0 * World.LEVEL, "glide": 2.0}
+const SOURCE_AIR_BRAKE := 0.75     # 1/s, [game data] FallingLateralFriction 0.375 x UE BrakingFrictionFactor 2
+const ACCEPT_ACTS := ["jump", "dash", "fire"]
+
+## How much of a run survives each way down (land_carry_*), and how soon a jump, dash or attack pressed
+## the step after touchdown acts, less the same press standing (land_accept_frames).
+func _landing_carry() -> void:
+	for c in CARRY_CASES:
+		for held in [true, false]:
+			var run := _take_off(c)
+			var v0 := _hv(P).length()
+			P.inp["move"] = Vector2(1, 0) if held else Vector2.ZERO
+			var t := _fall_to_ground()
+			if held:
+				rec("land_carry_%s_held" % c, _hv(P).length() / run)
+			else:
+				rec("land_carry_%s_let" % c, _hv(P).length() / (v0 * exp(-SOURCE_AIR_BRAKE * t)))
+	var worst := 0
+	for act in ACCEPT_ACTS:
+		_reset(flat)
+		var still := _accept_in(act)
+		for c in CARRY_CASES:
+			_take_off(c)
+			_fall_to_ground()
+			worst = maxi(worst, _accept_in(act) - still + 1)
+	rec("land_accept_frames", worst)
+
+## Runs P up to speed on the flat, lifts it `CARRY_CASES[c]` metres into the air with the run (for the
+## glide: opened, then let go) and returns the run speed.
+func _take_off(c: String) -> float:
+	_reset(flat + Vector3(-4.0, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	_steps(20)
+	var run := _hv(P).length()
+	P.pos.y = flat.y + float(CARRY_CASES[c])
+	P.grounded = false
+	P.vel.y = 0.0
+	if c == "glide":
+		P.air_t = 1.0
+		P.gliding = true
+		P.vel.x = Hunter.GLIDE_SPEED
+		P.inp["glide"] = true
+		m.step(DT)
+		P.inp["glide"] = false
+		m.step(DT)
+	return run
+
+## Steps until P touches down; returns the time in the air.
+func _fall_to_ground() -> float:
+	var t := 0.0
+	for i in 180:
+		m.step(DT)
+		t += DT
+		if P.grounded: break
+	return t
+
+## Presses `act` once and counts the steps until it acts: lift-off, the dash spent, or a shot, swing,
+## wind-up or melee hold started (99 = not within 0.5 s).
+func _accept_in(act: String) -> int:
+	_clear_inp()
+	P.fire_cd = 0.0
+	P.warm_t = 0.0
+	P.mel_hold = 0.0
+	var s0 := P.shot_n
+	var w0 := P.swing_n
+	var d0 := P.dashes
+	var t0: float = m.time
+	P.inp["aim"] = P.pos + Vector3(3.0, 0.9, 0.0)
+	for i in 30:
+		P.inp[act] = i == 0
+		m.step(DT)
+		var done := false
+		match act:
+			"jump": done = P.vel.y > 1.0
+			"dash": done = P.dashes < d0 or P.roll_t > 0.0 or (P.ak != null and P.ak.dash_press_at >= t0)
+			"fire": done = P.shot_n > s0 or P.swing_n > w0 or P.fire_cd > 0.0 or P.warm_t > 0.0 or P.mel_hold > 0.0
+		if done:
+			_clear_inp()
+			return i + 1
+	_clear_inp()
+	return 99
 
 # ---------------------------------------------------------------- glide
 func _glide_at(h: float) -> void:
