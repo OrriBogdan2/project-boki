@@ -70,7 +70,8 @@ def import_game(path):
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path, bone_heuristic="BLENDER")
     new = [o for o in bpy.data.objects if o not in before]
-    return next(o for o in new if o.type == "ARMATURE"), next(o for o in new if o.type == "MESH")
+    meshes = [o for o in new if o.type == "MESH"]       # the body is the biggest (Hem's bow and arrow are meshes of their own)
+    return next(o for o in new if o.type == "ARMATURE"), max(meshes, key=lambda o: len(o.data.vertices))
 
 
 def kept_parts(old, bones):
@@ -112,6 +113,40 @@ def uv_density(ob):
     return np.abs(e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]).sum() / max(a3, 1e-9), uv
 
 
+def lay_kept(old, kept, body, tex):
+    """The old atlas baked onto the kept parts' new UVs, laid over the body's pixels (in place)."""
+    src = old.data.materials[0].node_tree.nodes
+    old_img = next(n for n in src if n.type == "TEX_IMAGE").image
+    ks = kept.copy()
+    ks.data = kept.data.copy()
+    bpy.context.scene.collection.objects.link(ks)
+    ks.data.uv_layers["old"].active_render = True
+    ks.data.materials.clear()
+    m = bpy.data.materials.new("kept_src")
+    m.use_nodes = True
+    nt = m.node_tree
+    t = nt.nodes.new("ShaderNodeTexImage")
+    t.image = old_img
+    em = nt.nodes.new("ShaderNodeEmission")
+    nt.links.new(t.outputs[0], em.inputs[0])
+    nt.links.new(em.outputs[0], nt.nodes["Material Output"].inputs["Surface"])
+    ks.data.materials.append(m)
+    over = bpy.data.images.new("kept", tex, tex, alpha=True)
+    over.generated_color = (0, 0, 0, 0)
+    km = bpy.data.materials.new("kept_dst")
+    km.use_nodes = True
+    kn = km.node_tree.nodes.new("ShaderNodeTexImage")
+    kn.image = over
+    km.node_tree.nodes.active = kn
+    kept.data.materials.clear()
+    kept.data.materials.append(km)
+    select([ks, kept], kept)
+    bpy.ops.object.bake(type="EMIT", use_selected_to_active=True, cage_extrusion=0.004, max_ray_distance=0.01, margin=2,
+                        margin_type="EXTEND", use_clear=False)
+    top = np.array(over.pixels[:], F).reshape(tex, tex, 4)
+    body[:] = np.where(top[..., 3:] > 0.5, top, body)
+
+
 def bake():
     """Step 1: WORK/bake.blend (Low in the master's frame, Kept in the game's, the atlas packed) and WORK/game.glb."""
     os.makedirs(WORK, exist_ok=True)
@@ -143,37 +178,8 @@ def bake():
     tex = int(SPEC.get("tex", 2048))
     img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX)
     body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
-    # the kept parts: the old atlas onto their new UVs, on an image of their own, laid over the body's
-    src = old.data.materials[0].node_tree.nodes
-    old_img = next(n for n in src if n.type == "TEX_IMAGE").image
-    ks = kept.copy()
-    ks.data = kept.data.copy()
-    bpy.context.scene.collection.objects.link(ks)
-    ks.data.uv_layers["old"].active_render = True
-    ks.data.materials.clear()
-    m = bpy.data.materials.new("kept_src")
-    m.use_nodes = True
-    nt = m.node_tree
-    t = nt.nodes.new("ShaderNodeTexImage")
-    t.image = old_img
-    em = nt.nodes.new("ShaderNodeEmission")
-    nt.links.new(t.outputs[0], em.inputs[0])
-    nt.links.new(em.outputs[0], nt.nodes["Material Output"].inputs["Surface"])
-    ks.data.materials.append(m)
-    over = bpy.data.images.new("kept", tex, tex, alpha=True)
-    over.generated_color = (0, 0, 0, 0)
-    km = bpy.data.materials.new("kept_dst")
-    km.use_nodes = True
-    kn = km.node_tree.nodes.new("ShaderNodeTexImage")
-    kn.image = over
-    km.node_tree.nodes.active = kn
-    kept.data.materials.clear()
-    kept.data.materials.append(km)
-    select([ks, kept], kept)
-    bpy.ops.object.bake(type="EMIT", use_selected_to_active=True, cage_extrusion=0.004, max_ray_distance=0.01, margin=2,
-                        margin_type="EXTEND", use_clear=False)
-    top = np.array(over.pixels[:], F).reshape(tex, tex, 4)
-    body = np.where(top[..., 3:] > 0.5, top, body)
+    if kept.data.polygons:      # the kept parts: the old atlas onto their new UVs, on an image of their own, laid over the body's
+        lay_kept(old, kept, body, tex)
     body[..., 3] = 1
     img.pixels = body.ravel()
     img.filepath_raw = os.path.join(WORK, "atlas.png")
@@ -587,7 +593,7 @@ def main():
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
     move_bones(arm, kept)
-    slots = list(tri_slots(low, img, top, P)) + kept["slots"].split(",")
+    slots = list(tri_slots(low, img, top, P)) + (kept["slots"].split(",") if kept["slots"] else [])
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]
     gname = {g.index: g.name for g in kept.vertex_groups}
