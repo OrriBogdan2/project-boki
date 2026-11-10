@@ -267,11 +267,11 @@ def clips():
     # the catch: he snatches the catch in and grins over it
     o.append(C("pullend", 0.36, [(0.0, r1), (0.08, dict(r2, G=(0.34, 0.42, 0.86), BE=be(-20, -30, FLAT), LP=(-0.30, 0.46, 0.80), jaw=0.9, lid=-0.3), "out"), (0.22, dict(r2, G=(0.36, 0.34, 0.80), hd=(0.04, 0, 0))), (0.36, END)]))
 
-    # E: the scrap fist: raised through the wind-up (0.38), slammed into the cone ahead, a long drag home
+    # E: the scrap fist: raised through the wind-up (0.38), slammed into the cone ahead, home by 0.8 (source settle)
     up = {"pel": (0.02, -0.06, -0.06), "prt": (-0.02, 0.26, 0), "tor": (-0.14, 0.34, 0.05), "hed": (-0.14, -0.40, 0.02), "LP": (-0.24, 0.10, 1.54), "Lh": (0.5, 0, 0), "fing": 1.0, "G": (0.46, -0.08, 0.84), "BE": be(-120, -6, FLAT), "brow": 1.0, "lid": -0.3, "jaw": 0.7, "FL": (-0.22, 0.28, A_Z), "FR": (0.22, -0.26, A_Z), "hd": (0.0, 0.0, 0.0)}
     up2 = dict(up, pel=(0.02, -0.09, -0.03), tor=(-0.24, 0.40, 0.06), LP=(-0.20, -0.02, 1.60), hd=(-0.10, 0, 0))
     hit = {"pel": (-0.04, 0.26, -0.27), "prt": (0.62, 0.0, 0.0), "tor": (0.52, -0.30, -0.06), "hed": (-0.86, 0.26, 0.08), "LP": (-0.14, 0.86, 0.21), "Lh": (0.0, 0, 0), "G": (0.50, -0.10, 0.92), "BE": be(-140, 0, FLAT), "FL": (-0.22, 0.44, A_Z), "FR": (0.26, -0.34, A_Z), "FRp": -0.5, "jaw": 1.0, "skirt": 0.5, "hd": (0.18, 0.0, 0.0)}
-    o.append(C("anchor", 1.0, [(0.0, END), (0.12, up), (0.30, up2), (0.38, hit, "out"), (0.48, dict(hit, pel=(-0.04, 0.24, -0.25), hd=(-0.06, 0, 0)), "out"), (0.75, dict(hit, pel=(0.0, 0.14, -0.18), prt=(0.36, 0, 0), tor=(0.38, 0, 0), LP=(-0.22, 0.64, 0.38), hd=(0.0, 0, 0), jaw=0.5)), (1.0, END)]))
+    o.append(C("anchor", 0.8, [(0.0, END), (0.12, up), (0.30, up2), (0.38, hit, "out"), (0.46, dict(hit, pel=(-0.04, 0.24, -0.25), hd=(-0.06, 0, 0)), "out"), (0.62, dict(hit, pel=(0.0, 0.14, -0.18), prt=(0.36, 0, 0), tor=(0.38, 0, 0), LP=(-0.22, 0.64, 0.38), hd=(0.0, 0, 0), jaw=0.5)), (0.8, END)]))
     # E in the air: the fist under him, legs flung up behind, held till the ground
     dv = {"pel": (0, 0.0, 0.10), "prt": (0.95, 0, 0), "tor": (0.32, 0, 0), "hed": (-0.95, 0, 0), "LP": (-0.10, 0.44, 0.30), "Lh": (0, 0, 0), "fing": 1.0, "G": (0.46, -0.02, 0.98), "BE": be(-150, 10, FLAT), "FL": (-0.14, -0.42, 0.50), "FR": (0.16, -0.52, 0.56), "FLp": 0.9, "FRp": 0.9, "brow": 1, "lid": -0.3, "jaw": 1.0, "hd": (-0.16, 0, 0)}
     o.append(C("dive", 0.3, [(0.0, END), (0.12, dv, "out"), (0.3, dict(dv, pel=(0.01, 0.0, 0.115)))]))
@@ -285,7 +285,7 @@ def clips():
     t1 = dict(t0, spin=2 * math.tau)
     t2 = dict(t0, spin=2.8 * math.tau)
     start = dict(END, hs=0.8, bs=2.0, bl=0.6, rel=0.5, pel=(0, 0, -0.12), tor=(0.5, 0, 0))
-    o.append(C("lunge", 0.38, [(0.0, start), (0.04, t0, "out"), (0.18, t1, "lin"), (0.30, t2, "out"), (0.38, dict(END, spin=3 * math.tau))]))
+    o.append(C("lunge", 0.44, [(0.0, start), (0.04, t0, "out"), (0.18, t1, "lin"), (0.30, t2, "out"), (0.38, dict(END, spin=3 * math.tau)), (0.44, dict(END, spin=3 * math.tau))]))
     # the pounce: the same ball in the air, a slower turn
     a0 = dict(t0, pel=(0, 0, 0.0))
     o.append(C("pounce", 0.38, [(0.0, start), (0.05, a0, "out"), (0.24, dict(a0, spin=1.5 * math.tau), "lin"), (0.38, dict(END, spin=2 * math.tau))]))

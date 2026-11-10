@@ -203,7 +203,9 @@ func _dash_moves() -> void:
 			if float((kf[1] as Dictionary).get("sq", 0.0)) >= 0.3 and float(kf[0]) > 0.0:
 				lands = float(kf[0])          # the squash he lands in
 				break
-		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap
+		# done by the next barge: dash + gap, plus the held squat that bridges the chained press's late frames
+		# (docs/heroes/dredge.md, "Animation timing")
+		fits = fits and lands > 0.0 and lands <= dash_t + 0.07 and float(keys[-1][0]) <= dash_t + gap + 0.06
 	ok(
 		"dash moves: his own low lunge and air pounce, no other hero's, each fitting the dash",
 		ground_move == "dr_lunge" and air_move == "dr_pounce" and not others.has(ground_move)

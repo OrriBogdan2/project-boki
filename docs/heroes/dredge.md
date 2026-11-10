@@ -189,13 +189,39 @@ Keyed full-body moves live in `scripts/match/kmoves_pair.gd` (`KMovesPair.MOVES`
 |---|---|---|
 | Scattergun (LMB, each shot) | `dr_shot` | the barrel kicks up, the torso rocks back and turns side-on, back to the aim in about 0.2s |
 | Abyssal Hand (RMB) | `dr_throw`, `dr_reel`, `dr_pullend` | the gun to the off side, the free arm coils back then punches out; side-on and braced, hauling hand over hand while reeling (held up to 3s); a last yank and a settle |
-| Barge (Shift) | `dr_lunge` | owner item 35: a monster's lunge, pitched low over the ground, both arms reaching far ahead and clawing the turf (0.04), hauling the bulk after them (0.11), landing on his knuckles in a squat at the dash's end (0.18), back up by 0.38 for the next barge |
+| Barge (Shift) | `dr_lunge` | owner item 35: a monster's lunge, pitched low over the ground, both arms reaching far ahead and clawing the turf (0.04), hauling the bulk after them (0.11), landing on his knuckles in a squat at the dash's end (0.18), back up by 0.38 and held to 0.44, so a chained barge (0.42 s apart) never drops to the legs between |
 | Plain jump / landing | `dr_jump`, `dr_land` | a deep heave with the arms out; a heavy squash onto bent knees |
 | Air dash (the class air dash) | `dr_pounce` | a beast's pounce: arms cocked up, raked forward with the claws out (0.05), dragged down through the air with the legs tucked (0.14), a heavy drop onto his feet (0.24-0.38) |
-| Anchor Drop (E) | `dr_anchor` | planted: the free fist raised high, shoulder turned away (0.12), up on the toes at the top (0.3), the fist driven down into the ground in front (0.38, the slam frame), a recoil bounce (0.48), a slow recovery (1.0) |
+| Anchor Drop (E) | `dr_anchor` | planted: the free fist raised high, shoulder turned away (0.12), up on the toes at the top (0.3), the fist driven down into the ground in front (0.38, the slam frame), a recoil bounce (0.46), the fist dragged back (0.62), home by 0.8 (the source's total) |
 | Anchor Drop in the air | `dr_dive` (hold), `dr_quake` | both fists locked overhead dropping like a stone; a huge squash on landing, a heave back up |
 | Salvage stack | `dr_flex` | chest out, both fists flexed, a stomp |
 | Brass Broadside (X) | `dr_blast` | hunched over the gun and his free fist through the 1.1s charge (deeper at the end), a shove with overshoot and a barrel kick at wave 1, a short rewind, the second shove at 1.7s, then he straightens up (2.1s) |
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured in a live match through `WardenClips` (dredge.glb clips seeked to the kit's move clock, `kmove_t`; blend in
+0.1 s, back to the legs 0.16 s) by `tools/dredge_anim_time_check.gd`, which runs inside `--dredge-combo-check` and
+asserts every row below. A clip's "hit" is read off the GLB: the frame its pose stops moving after its fastest swing.
+Source times from briefs/hero-ref/dredge.md (one frame = 0.2 s; the ult 0.1 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `dr_shot` (seven slugs) | kick on the shot frame, back on the aim ~1 frame later; a shot every 2-3 frames [0041-0047] | slugs and clip on the press, owns 0.12 / kick 0.07 / aim 0.17, stance 0.36; held every 0.52 (0.5 s cd on 60 Hz frames) | same | matches |
+| bloom | not readable in the footage | +4° a volley, capped 15°, gone 0.95 s after release | same | no source |
+| `dr_throw` | arm out over 0.4 s to 5 bh [f121-123] | arm leaves 0.02 / punch 0.17 / grab of a body 5 bh off at 0.30 | same | arm ~25% fast: ext/feel-grimble-reel (64a565f7f) owns the speed |
+| `dr_reel` `dr_pullend` | grab f124, pull ~1.0 s [f124-129] | reel clip on the grab's frame, pull 0.85 s, pull-end on arrival | same | hand-offs match; reel speed is ext/feel-grimble-reel's |
+| `dr_anchor` (E) | wind-up f1, hop f2, slam ~0.4, total ~0.8 [0221-0234] | windup 0.38 / slam 0.37 / clip 1.0, legs back 1.17 | clip 0.8, legs back 0.97 | fixed (re-key); asserted. No hop: owner item 33 |
+| `dr_blast` (X) | charge 1.1 [f22-33], wave 1 f34, wave 2 f40, done ~2.1 [f43] | waves 1.10 / 1.72 on shoves 1.10 / 1.70, clip 2.1, legs back 2.25 | same | matches |
+| `dr_lunge` x3 (Shift) | one dash ≤0.2 s, lands crouched, on the aim in 1 frame [0186-0189]; no chain in the footage | dash 0.18, presses 0.42 apart, clip 0.367: the body fell to 0.69 legs between barges | clip 0.433 (squat held 0.38-0.44): owned 1.0 through the chain | fixed (re-key); asserted |
+| `dr_pounce` (air Shift) | no air dash in the footage | owns 0.10 / drop 0.24 / legs back 0.53 | same | no source |
+| run cadence | no clean run in the footage; the sheet's "cadence ×0.9, stride 0.7" is a build note | 4.65 m/s, run_f at ×1.06: 3.3 steps/s, 1.40 m a step (Hem/Kael: 3.0, 1.53) | same | no source |
+
+Clip re-keys (tools/art1/grimble_clips.py, rebuilt from the 11-07 grimble_art1.blend; every other clip identical):
+- `anchor`: 1.0 → 0.8 s; the bounce 0.48 → 0.46, the drag back 0.75 → 0.62.
+- `lunge`: 0.38 → 0.44 s; the squat (END) held from 0.38, so the next press re-seeks from a held pose, not from the legs.
+
+Suggestions (ours, not built): the source's E hops ~1 bh forward on f2 (we stay planted, owner item 33); our run takes
+more, shorter steps than a medium, the opposite of the sheet's heavy note (run_f at 0.7 s would give ~2.9 steps/s);
+the barge covers 3.2 m (1.8 bh) against the source's 2.5-3 bh.
 
 ## Look and sound
 - Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
