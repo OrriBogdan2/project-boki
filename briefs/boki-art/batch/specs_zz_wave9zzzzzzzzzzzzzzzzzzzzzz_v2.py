@@ -1753,3 +1753,16 @@ _PX7=("Redraw the creature in image 1 as a tiny party-menu icon sprite from a cl
 for _n in ('Vespyx','Mycroll','Prismander','Ermink','Pinguin','Jerbit','Kitlet','Xylogator','Sarcobra','Calderoise','Aurostag','Chainipede'):
     for _k,_p in (('5',_PX5),('6',_PX6),('7',_PX7)):
         SPECS.append({'id':'px'+_k+'_'+_n.lower(),'name':_n+' (pixel sprite style '+_k+')','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_p+_PXTAIL})
+
+# 11-10 owner: "i dont like how all the legendaries have light up eyes, remove that". Plain eyes on all 19, nothing else changes.
+_NOGLOW=("the eyes. Remove the glowing white star-shaped eyes and every star sparkle or glint drawn on the eyes or between the eyes. "
+ "Draw ordinary living animal eyes instead: a coloured iris that suits the creature, a dark pupil and one small plain highlight dot, same eye size and position, same expression. No glow, no light, no stars in or around the eyes.")
+for _n in [k for k,v in _LM.items() if v.get('legendary_tier')]:
+    _x=''
+    if _n=='Siegephant': _x=" Also make all four legs easy to see: the far hind leg stands clearly apart from the near one, and the legs are a slightly lighter brown than the body shadow."
+    if _n=='Palloth': _x=" Keep the face eerie: dull pale eyes with small dark pupils."
+    if _n=='Cindermaw': _x=" Its skull face keeps dark eye sockets with a small dull purple iris, not a glowing light."
+    RV_EDIT(_n,'eyes',_NOGLOW+_x,runs=2)
+# Dreadnoyak: owner does not get the ice bowl under it, and it reads too close to Glaciammoth (both white shaggy ice beasts).
+ON_CHANGE('Dreadnoyak',_C%'Dreadnoyak','final','tough',True,True,"remove the ice bowl or boat shape under its belly completely: it stands on its own four legs on nothing. It is a battleship of a yak: its coat is now dark storm navy and gunmetal grey (not white), with a pale frost mane only along the spine. Its chest and brow carry a heavy pointed prow of dark horn like the bow of an icebreaker, and its two horns sweep forward. Thick, low and armoured, head down, pushing forward.",runs=3,tag='_d1')
+ON_CHANGE('Dreadnoyak',_C%'Dreadnoyak','final','tough',True,True,"remove the ice bowl or boat shape under its belly completely: it stands on its own four legs on nothing. Its coat is now deep slate blue with a pale icy underbelly (not white all over). Along its back grows a single tall row of blunt horn towers like the funnels and turrets of a warship, biggest in the middle, and its skull has a broad flat ram plate of horn across the forehead. Standing side-on, facing left, head raised, proud.",runs=3,tag='_d2')
