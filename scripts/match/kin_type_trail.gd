@@ -20,7 +20,7 @@ const GROUPS := {
 	"zap": {"types": ["electric", "steel", "crystal", "sound"],
 		"life": 0.16, "rise": 0.0, "drift": 4.5, "grav": 0.0, "size": 1.0, "streak": true},
 }
-const INTERVAL := 0.12        # s between particles of one moving Boki at full quality
+const INTERVAL := 0.07        # s between particles of one moving Boki at full quality
 const MIN_SPEED := 0.5        # m/s: slower than this is standing still
 const MAX_RANGE := 45.0       # m from the local player: further Boki leave no trail
 const POOL := 64              # live particles per group
@@ -46,7 +46,7 @@ static func colour(type: String, fallback: Color) -> Color:
 
 func _ready() -> void:
 	var dot := QuadMesh.new()
-	dot.size = Vector2(0.12, 0.12)
+	dot.size = Vector2(0.3, 0.3)
 	var dot_mat := ShaderMaterial.new()
 	dot_mat.shader = load("res://shaders/fx_dot.gdshader")
 	var streak := QuadMesh.new()
@@ -65,8 +65,8 @@ func _ready() -> void:
 		pm.color_ramp = fade
 		pm.particle_flag_align_y = def["streak"]
 		var sz := float(def["size"])
-		pm.scale_min = (0.03 if def["streak"] else 0.6) * sz
-		pm.scale_max = (0.05 if def["streak"] else 1.2) * sz
+		pm.scale_min = (0.06 if def["streak"] else 0.6) * sz
+		pm.scale_max = (0.1 if def["streak"] else 1.2) * sz
 		var p := GPUParticles3D.new()
 		p.emitting = false
 		p.amount = POOL

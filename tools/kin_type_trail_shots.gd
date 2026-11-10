@@ -3,8 +3,10 @@ extends RefCounted
 ## every type walks along its own lane at the match camera so its trail (KinTypeTrail) can be read by eye:
 ## <dir>/trail_<n>.png. Then each lane's Boki is captured (Capture pop in its type colour): <dir>/pop_0.png.
 
-const SPEED := 3.0            # m/s the Boki walk
+const SPEED := 2.0            # m/s the Boki walk
 const LANE := 2.2             # m between lanes
+const LANES := 5              # lanes per column
+const COLUMN := 9.0           # m between columns
 const SHOTS := [0.5, 1.0, 2.0]    # s of walking at each trail shot
 ## One species per type that has any (water, normal and dragon have none yet).
 const SPECIES := {"spore": "burrlet", "flying": "squalltross", "steel": "tuatrune", "poison": "velvorm",
@@ -30,9 +32,11 @@ func run(main: Node) -> void:
 	if m.hud: m.hud.visible = false
 	m.player.ctrl = "idle"
 	var kins: Array[Kin] = []
-	var start: Vector3 = m.player.pos + Vector3(-6.0, 0, -LANE * SPECIES.size() * 0.5)
+	var start: Vector3 = m.player.pos + Vector3(-COLUMN - 3.0, 0, -LANE * (LANES - 1) * 0.5)
 	for t: String in SPECIES:
-		var k := m.spawn_wild(Save.new_kin(SPECIES[t], t.capitalize()), start + Vector3(0, 0, LANE * kins.size()))
+		var col := floori(kins.size() / float(LANES))
+		var at := start + Vector3(COLUMN * col, 0, LANE * (kins.size() % LANES))
+		var k := m.spawn_wild(Save.new_kin(SPECIES[t], t.capitalize()), at)
 		k.state = "dazed"
 		kins.append(k)
 	m.cam.snap(m.player.pos + Vector3(0, 0, -1.0))

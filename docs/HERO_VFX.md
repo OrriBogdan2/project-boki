@@ -82,7 +82,7 @@ The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge t
 type's colour (`KinTypeFx.LOOKS`): embers and motes rise (Fire, Spore, Psychic, Fairy, Dark, Poison, Dragon), drips fall
 (Water, Ice, Rock), leaves flutter (Grass, Bug, Normal, Flying), Electric/Steel/Crystal/Sound crackle in short streaks.
 Budget: four shared `GPUParticles3D` (one per group, 64 live particles each), fed one particle at a time with
-`emit_particle`, one per 0.12 s per moving Boki at full quality (scaled by the `fx` preset); nothing for a Boki that is
+`emit_particle`, one per 0.07 s per moving Boki at full quality (scaled by the `fx` preset); nothing for a Boki that is
 standing still, parked, knocked out, out of sight or over 45 m from the local player. The capture pop's colour burst
 uses the same type colour. `--kin-type-trail-check` asserts group coverage and the cut-offs; `--kin-type-trail-shots`
 (GPU) walks one Boki per type and pops them.
