@@ -2057,3 +2057,13 @@ for _k,_d,_ms,_po,_b,_t in (
 # stage of the line, so a full leap with the tongue shot out like an arrow.
 ON_POSE('Bullsfrog',_LM['Bullsfrog']['sheet'],'mid','sleek',False,False,"caught at the top of a huge LEAP, seen side-on facing RIGHT: body stretched out long and airborne, back legs fully extended behind it with toes spread, front legs reaching forward, mouth open with its long tongue shot straight out ahead like an arrow in flight, the two fletching-shaped crest fins on its head swept back by the wind.","red skin with dark red-brown bands, green target-ring markings on its back, two green and red fletching-shaped crest fins, green eyes")
 SPECS[-1]['id']='pose_bullsfrog_leap'
+
+# 11-10 owner: Maracoil needs to look more like Rattlebub and be more interesting, "its just a snake". Built from the Rattlebub card: same
+# warm orange skin with red and teal diamond dots, cream belly, friendly golden eyes, maraca rattle. Third attempt at this one.
+_n0=len(SPECS)
+_MK=("It keeps the baby's look exactly: the same warm orange skin, the same red and teal diamond markings with dotted borders, the same cream belly, big golden eyes and a happy open-mouthed smile (not an angry cobra, no fangs bared). ")
+RV_NEW('Maracoil','Rattlebub','final','pretty',False,False,[
+ _MK+"Three times the size and a real showman: its body is coiled tight like a spring and it bounces on it. It now has TWO tails that end in big painted maraca rattles, held up high on either side of its head and shaking like a dancer's hands, with motion marks. A fan-shaped crest of bright red and teal feather-like scales stands up on its head like a festival headdress. Front three-quarter view, mid-dance.",
+ _MK+"Three times the size, long and powerful. Along its back runs a row of round gourd-shaped rattle bulbs, small at the neck and big at the tail, each painted with the diamond pattern, so its whole spine is a string of maracas; the tail ends in the largest one. Its neck spreads into a soft rounded frill shaped like the wide brim of a hat, patterned with diamonds. Rearing up in an S shape, head tilted, seen side-on facing left.",
+ _MK+"Three times the size. Its body is thick and banded like a stack of painted hand drums, and its long tail splits into a cluster of five small maraca rattles like a bunch of bells, raised over its back and shaking. Two long ribbon-like whisker fins in red and teal trail from its jaw. Coiled in a loose spiral with the head raised in the middle, three-quarter view facing right."])
+for _s in SPECS[_n0:]: _s['id']=_s['id'].replace('rv_maracoil_','mara3_')
