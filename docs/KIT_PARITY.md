@@ -83,7 +83,7 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | 2.5 s, r 2.6, throw, cd 11, self_k .33 (ours) | match |
 | R | Channel on ally/Wisp; revive and pull; cancels on stun, knock, range; 60 s [D] | Tether 5 s, range 12.6, cd 46 | match in shape; 0.77x cd |
 | Dash | Ground 7 s, air 14 s, separate [D] | 7 s and 14 s, raw 4.2/.174 and 13.3/.95, air steer (owner) | match |
-| Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | differ: shield ours. Drop lockout built (lock 4 s); which hits drop not traced |
+| Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | match: shield cut (owner 11-07). Drops on any damage (shot, DoT) or a stun, 4 s lock; root, slow, knock-back, heal hold them (traced and asserted, "mm carry" rows); "too much damage" has no figure [est] |
 | Anim | Footage poses | 16 moves, all on `pip.glb` (45) | match on coverage |
 
 ## Tarek (`dolm`, source Tetra)
