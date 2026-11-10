@@ -108503,5 +108503,19 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_rollguin_e4_1.jpg",
     "ok": true
+  },
+  {
+    "id": "gclean_sirencada",
+    "name": "Sirencada (sheet: erase ghost row)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gclean_sirencada_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gclean_rampartoad",
+    "name": "Rampartoad (sheet: erase ghost row)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gclean_rampartoad_1.jpg",
+    "ok": true
   }
 ]
