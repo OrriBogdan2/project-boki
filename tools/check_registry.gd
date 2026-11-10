@@ -6,6 +6,8 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
+	"--fuse-hud-check": ["res://tools/fuse_hud_check.gd", "fuse_hud_check", null],      # the Fusion on the Boki box
+	"--fuse-hud-shots": ["res://tools/fuse_hud_check.gd", "fuse_hud_check", "shots"],      # --shots-dir=<dir>
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
