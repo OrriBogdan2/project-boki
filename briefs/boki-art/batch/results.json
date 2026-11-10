@@ -82701,5 +82701,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_grainspin_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_sandwidow",
+    "name": "Sandwidow (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_sandwidow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_olmlet",
+    "name": "Olmlet (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_olmlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_grainspin",
+    "name": "Grainspin (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_grainspin_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sandwidow",
+    "name": "Sandwidow (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_sandwidow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hourachnid",
+    "name": "Hourachnid (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_grainspin",
+    "name": "Grainspin (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_grainspin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_hourachnid",
+    "name": "Hourachnid (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_gramofrill",
+    "name": "Gramofrill (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_gramofrill_3.jpg",
+    "ok": true
   }
 ]
