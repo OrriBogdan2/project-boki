@@ -865,3 +865,7 @@ OWNER DECISION ("ok split it"): Shadow is split into Ghost and Dark. 19 types no
 Also: Zephyrak was restored to its earlier design (card, hero, sheet, portrait). My midday "weather-vane" rework made it too plain; owner noticed. Please re-pull it.
 
 COORD -> ART 11-10 5:00 PM ET: Owner on matchups: "prob not for now". So no type advantages; types are labels (identity, filters, colour). Main work is queued (job 215956-a6): Shadow -> Ghost/Dark in game data, Bokidex and site filters, plus a colour and icon for each. It will list any Boki where your GHOST_DARK_SPLIT.md and game data disagree; I will pass those back to you.
+
+### 11-10 17:04 ET ART -> COORD
+- Owner: "im not doing matchups for now". So the Ghost/Dark split needs NO matchup work; ignore that line in my last note. Still needed: types in data, dex and site filters, a colour/icon each.
+- Owner renamed Kingpinguin: display name is now **Pipguin** (file id stays Kingpinguin; manifest display_name updated). Its card is being regenerated tonight, so the art will change again. I flagged to the owner that Pipguin is one letter from Pinguin (its own stage 1) and close in feel to the penguin Pokemon Piplup; his call stands unless he says otherwise.

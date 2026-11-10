@@ -1,6 +1,6 @@
 # Shadow split into Ghost and Dark (owner, 11-10: "ok split it")
 
-The Shadow type becomes two types, Ghost and Dark, as in the usual 18-type chart. That makes 19 types with Spore and Echo. Wherever a Boki had Shadow as one of its types, replace it with the type below and keep its other type as it was. Type matchups for the two new types are not decided here.
+The Shadow type becomes two types, Ghost and Dark, as in the usual 18-type chart. That makes 19 types with Spore and Echo. Wherever a Boki had Shadow as one of its types, replace it with the type below and keep its other type as it was. Type matchups: the owner is not doing matchups for now (11-10), so none are needed for Ghost or Dark.
 
 File ids are the manifest keys; display names are what players see. A few Shadow typings came from a draft table with guesses (DEX_ORDER_PROPOSAL.md), so check each against game data.
 
