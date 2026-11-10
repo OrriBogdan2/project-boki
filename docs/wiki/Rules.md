@@ -532,7 +532,7 @@ Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/de
 | week_s | 604800 |
 | week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
 | cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
-| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}} |
+| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}} |
 
 ## garden_trust (`content/rules/garden_trust.json`)
 
@@ -782,6 +782,59 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | tolerance_db | 3 |
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
+
+## show_ring (`content/rules/show_ring.json`)
+
+Show Ring, a judged show on a small stage near the Training post (briefs/design/GARDEN_MODERN.md 4.2 game 3, scripts/home/show_ring.gd). Only with farm_build.json base_mode on. Two rested Boki show: the one you back and a rival. Three rounds of up to 10 points each: Look (how it has been raised), Trick (three timed presses, the trick picked by its best stat) and Bond (it walks to you past a snack, a toy and the rival; you call as it passes each). Three judges post a taste for the week; each judge whose taste the Boki fits adds taste_bonus. Every score is worked out from the records and the presses only, so the same Boki and presses always score the same. Units: seconds, points, needs and trust 0-100, traits 0-1.
+
+| Setting | Value |
+|---|---|
+| look | {"joy": 2.0, "clean": 2.0, "lean": 2.0, "parts": 2.0, "aura": 1.0, "keepsakes": 1.0} |
+| look_doc | Most points each part of Look gives (10 in all). joy and clean: in proportion to the need. lean: full points at a full lean ('in full colour'), half at half a lean or more. parts: one point a grown part level (rec.muts). aura: worn (rec.aura set). keepsakes: one point a Cup Ribbon kind held (rec.ribbons). |
+| half_lean | 0.5 |
+| half_lean_doc | Lean strength (Evo.lean, 0..1) that earns half the lean points. |
+| tricks | {"power": {"name": "Log Lift", "line": "hoists a log three times"}, "guard": {"name": "Statue Stand", "line": "freezes in three proud poses"}, "speed": {"name": "Whirl Hop", "line": "spins through three quick hops"}, "focus": {"name": "Pebble Balance", "line": "balances three pebbles on its nose"}} |
+| tricks_doc | The trick a Boki shows, by its highest trained stat (Care.STATS order on a tie). |
+| press | {"great": 3.0, "good": 2.0, "miss": 0.0} |
+| press_doc | Trick points a timed press grades to; three presses, so 9 at most. |
+| stat_per_point | 0.02 |
+| stat_doc | Trick points a point of the trick's stat adds, up to 1 (50 points of it). |
+| trick_s | 25 |
+| trick_doc | Seconds for the three presses; presses not made by then are misses. |
+| lures | [{"id": "snack", "name": "a snack", "at": 0.25, "pull": 0.8}, {"id": "toy", "name": "a toy", "at": 0.5, "pull": 0.7}, {"id": "rival", "name": "its rival", "at": 0.75, "pull": 0.6}] |
+| lures_doc | What it walks past, in order. at: share of the walk where it is level with the lure. pull: how far it strays (0..1) with no trust, no loyalty and no call. |
+| trust_shrink | 0.5 |
+| loyal_shrink | 0.4 |
+| shrink_doc | Trust 100 takes trust_shrink off every pull, loyalty 1 takes loyal_shrink (shares of the pull, added). |
+| call | {"great": 0.0, "good": 0.4, "miss": 1.0} |
+| call_doc | Share of the pull left after your call for each lure. |
+| call_great | 0.3 |
+| call_good | 0.7 |
+| call_window_doc | Seconds from the moment it is level with a lure: a call this close is great, then good; later or never is a miss. |
+| walk_s | 42 |
+| walk_m | 8 |
+| walk_doc | The Bond walk: seconds and metres from the stage to you. |
+| look_s | 30 |
+| judge_s | 24 |
+| rounds_doc | Seconds the Look parade and the judging take; with the trick and the walk the show runs about 2 minutes. |
+| rival_press | {"great": 40, "good": 15} |
+| rival_doc | The rival's handler: each of its trick presses is great at this many points of its trick stat, good at this many, else a miss; its calls are good. |
+| judges | ["Old Bramwell", "Auntie Fennick", "Ludo Pebble"] |
+| judges_doc | Judges' names when you have no retired mentors to sit on the bench (mentors go first). |
+| tastes | [{"kind": "lean", "id": "grass", "text": "a Grass lean"}, {"kind": "trait", "id": "curiosity", "text": "a curious Boki"}, {"kind": "lean", "id": "water", "text": "a Water lean"}, {"kind": "trait", "id": "loyalty", "text": "a loyal Boki"}, {"kind": "lean", "id": "fire", "text": "a Fire lean"}, {"kind": "trait", "id": "bravery", "text": "a brave Boki"}, {"kind": "lean", "id": "electric", "text": "an Electric lean"}, {"kind": "trait", "id": "temper", "text": "a fiery Boki"}] |
+| tastes_doc | What the judges like. Each week the three judges take three tastes in a row from this list (week number times three). lean: its lean is that type at half_lean or more. trait: that trait is taste_trait or more. |
+| taste_trait | 0.6 |
+| taste_bonus | 1 |
+| min_energy | 20 |
+| energy | 6 |
+| energy_doc | A Boki needs min_energy to show and spends this much. |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -6 |
+| gems_win | 5 |
+| gems_ran | 1 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other show. |
+| card_s | 8 |
 
 ## snack_patch (`content/rules/snack_patch.json`)
 
