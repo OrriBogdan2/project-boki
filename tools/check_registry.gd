@@ -18,6 +18,7 @@ const CHECKS := {
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart loop (docs/decisions/0023)
+	"--photo-mode-check": ["res://tools/photo_mode_check.gd", "photo_mode_check", null],      # farm photo mode (GPU for the PNG)
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--tutorial-text-check": ["res://tools/tutorial_text_check.gd", "tutorial_text_check", null],
