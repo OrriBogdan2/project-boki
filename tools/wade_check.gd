@@ -3,12 +3,15 @@ extends RefCounted
 ## base_mode farm. A Boki crossing it walks at the wade speed in the shallow edge and the deep speed in the middle
 ## (never stopped), leaves a ripple and shakes off coming out; a Water type that goes in lingers playing the splash
 ## clip and gains joy; a Fire type dropped mid-stream is on dry ground within 2 s. Never touches the real save.
+## --shots-dir=<dir> adds a GPU strip (wade_strip.png): a Zapple wading across, a Puddlet paddling and a Kilnbadger
+## stepping out, six frames a second apart.
 ## (The nav sweep, --garden-nav-check, covers getting stuck with the whole base running.)
 
 const DT := 1.0 / 30.0         # s per step
 const OUT_SECS := 2.0          # s: a Fire Boki must be out by then
 const CAST := ["zapple", "kilnbadger", "puddlet"]
 const SEED := 11
+const FRAMES := 6              # frames in the GPU strip
 
 var bad := 0
 var main: Node
@@ -129,6 +132,36 @@ func _paddle(zc: int) -> void:
 	ok(lingered > 3.0 and played, "it lingered %.1f s in the water playing the splash clip" % lingered)
 	ok(Care.need(k["rec"], "joy") > joy0 + 2.0, "and its joy rose %.1f -> %.1f" % [joy0, Care.need(k["rec"], "joy")])
 
+## Six frames of the three Boki at the stream, one image across. Needs a rendering display (jobq --needs gpu).
+func _strip(dir: String, zc: int) -> void:
+	var x := HomeLayout.LANDING.x
+	_only(0, Vector3(x - 2.5, 0, zc + 4.0))
+	_only(1, Vector3(x + 0.5, 0, zc + 0.5))
+	_only(2, Vector3(x + 2.5, 0, zc + 4.0))
+	for k in home.kins:
+		k["busy"] = false
+	home.ppos = Vector3(x, 0, zc + 7.5)
+	home.player.position = home.ppos
+	home.set_process(true)
+	var frames: Array = []
+	var gap := 50
+	for i in gap * FRAMES:
+		home.kins[0]["goal"] = Vector3(x - 2.5, 0, zc - 5.0)
+		home.kins[2]["goal"] = Vector3(x + 2.5, 0, zc - 5.0) if i < gap else home.kins[2]["goal"]
+		for k in home.kins:
+			k["t"] = 999.0
+		await main.get_tree().process_frame
+		if i % gap == gap - 1:
+			frames.append(main.get_viewport().get_texture().get_image())
+	var w: int = frames[0].get_width()
+	var h: int = frames[0].get_height()
+	var strip := Image.create(w * FRAMES, h, false, frames[0].get_format())
+	for i in FRAMES:
+		strip.blit_rect(frames[i], Rect2i(0, 0, w, h), Vector2i(w * i, 0))
+	strip.resize(w * FRAMES / 2, h / 2)
+	strip.save_png(dir + "/wade_strip.png")
+	home.set_process(false)
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -143,6 +176,9 @@ func run(m: Node) -> void:
 	_cross(zc)
 	_fire(zc)
 	_paddle(zc)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir=") and DisplayServer.get_name() != "headless":
+			await _strip(a.substr(12), zc)
 	FarmUnlocks.rules()["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
