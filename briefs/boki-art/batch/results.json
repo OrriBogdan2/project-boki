@@ -104800,5 +104800,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px_c_jerbit_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px_c_pinguin",
+    "name": "Pinguin (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_xylogator",
+    "name": "Xylogator (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_xylogator_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_prismander",
+    "name": "Prismander (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_prismander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_sarcobra",
+    "name": "Sarcobra (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_mycroll",
+    "name": "Mycroll (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_mycroll_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_kitlet",
+    "name": "Kitlet (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_ermink",
+    "name": "Ermink (pixel sprite test c)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_c_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_c_aurostag",
+    "name": "Aurostag (pixel sprite test c)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_c_aurostag_2.jpg",
+    "ok": true
   }
 ]
