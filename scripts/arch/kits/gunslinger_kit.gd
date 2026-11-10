@@ -269,11 +269,10 @@ func on_dash(use_ex: bool) -> bool:
 	travel(float(dd["roll"]), float(dd["roll_t"]), {"invuln": float(dd["invuln"])})
 	slide = {"t": 0.0, "held": false, "dir": h.roll_dir, "fx": 0.0}
 	play("gunslinger_dash")
-	# where it began: her ember after-image standing there (0.6 s), dust, and two faint skid streaks.
-	# No rings or discs: those mean damage or an area in this game
+	# where it began: her ember after-image standing there (0.6 s) and two faint skid streaks; the scrape's dust
+	# trickles under her (_tick_slide). No puff, rings or discs: those mean damage or an area in this game
 	fx().echo(h, echo_col(), 0.6, ECHO_ALPHA, ECHO_BACK)
 	_skid_streaks(start, h.roll_dir)
-	m.fx.dust(h.pos, 10)
 	m.sfx("vn_slide", h.pos, -4.0)
 	return true
 
@@ -332,7 +331,6 @@ func _tick_slide(dt: float) -> void:
 				h.dashes -= float(dd["hold_cost"])       # the longer slide takes longer to come back
 				h.roll_dir = slide["dir"]
 				h.move_kind = "dash"
-				m.fx.dust(h.pos, 8)
 				return
 			slide["tap"] = true
 		_skid(t, dd)

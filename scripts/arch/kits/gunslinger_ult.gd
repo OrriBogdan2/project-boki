@@ -14,6 +14,7 @@ const DROP_T := 0.8              # s: the shell is seen falling for the last par
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const FALL_FX_GAP := 0.05       # s between the falling shell's flicker of green fire and embers
 const DISC_ALPHA := 0.45         # the countdown disc's fill share: a lit rim over a see-through centre, never a sheet
+const BURN_ALPHA := 0.6          # the burning patch's dark fill and rim at the start (fades to half): reads on pale sand, still see-through
 const BRONZE := Color("b9732f")   # the shell's metal (a material, not an effect)
 
 var kit: GunslingerKit
@@ -182,8 +183,9 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 	var xd := data()
 	var at: Vector3 = s["at"]
 	var r := float(xd["radius"])
-	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.HOT, "lw": 0.08}
-	rim["alpha"] = 1.0 - 0.5 * float(s["t"]) / float(xd["zone_t"])
+	var left := 1.0 - float(s["t"]) / float(xd["zone_t"])
+	var rim := {"at": at, "r": r, "all": true, "col": GunslingerKit.LIME, "col2": GunslingerKit.DEEP, "lw": 0.1}
+	rim.merge({"fill": 1.0, "core": float(xd["core_r"]), "hot": 0.3, "alpha": BURN_ALPHA * (0.5 + 0.5 * left)})
 	AimKit.circle(kit.h, "xz%d" % int(s["n"]), rim)
 	_flames(at, r, dt)
 	s["tick"] = float(s["tick"]) + dt
