@@ -77,6 +77,7 @@ var spark_pos := Vector3.ZERO  # where a ready Heartspark floats (the Heart, or 
 var deliveries := 0
 var drops := 0
 var events: Array = []         # every state change, for the check
+var audio: HeartSfx            # the hum, stings, heartbeat and gate cues
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
 var _sync_t := 0.0
 var _rng := RandomNumberGenerator.new()
@@ -91,6 +92,7 @@ var _gate_beam: MeshInstance3D
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	audio = HeartSfx.new(self)
 
 func host() -> bool:
 	return not m.net_on or m.is_host
@@ -154,6 +156,7 @@ func tick(dt: float) -> void:
 			cool = maxf(cool - dt, 0.0)
 	_apply_carrier()
 	_update_nodes()
+	audio.update()
 
 ## The slow and the reveal on whoever holds it (each game sets it on the Hunters it plays).
 func _apply_carrier() -> void:
@@ -189,7 +192,6 @@ func _pick(h: Hunter) -> void:
 	carrier = h
 	_enter("carried")
 	m.add_feed("%s took the Heartspark" % h.pname)
-	m.sfx("ping", h.pos, 0.0, 0.6)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
 
 func _drop(at: Vector3) -> void:

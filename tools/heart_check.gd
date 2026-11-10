@@ -44,6 +44,9 @@ func _hold_f(m: Match, h: Hunter, secs: float) -> void:
 	h.inp["interact"] = false
 	m.step(Match.DT)
 
+func _hum_pitch() -> float:
+	return (Sfx.loops["heart_charge"]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loop_on("heart_charge") else 0.0
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -90,10 +93,15 @@ func run(main: Node) -> void:
 	ok(H.state == "charging", "a Heartspark starts charging")
 	_run(m, float(rl["charge_s"]) * 0.5)
 	ok(H.state == "charging" and H.charge > 0.0, "still charging halfway")
+	var hum_pitch := _hum_pitch()
+	ok(Sfx.loop_on("heart_charge") and hum_pitch > HeartSfx.HUM_PITCH.x and hum_pitch < HeartSfx.HUM_PITCH.y,
+		"a hum plays at the Heart while it charges (pitch %.2f)" % hum_pitch)
+	_run(m, float(rl["charge_s"]) * 0.25)
+	ok(_hum_pitch() > hum_pitch, "...and rises as the charge fills")
 	_put(m, p, H.site + Vector3(3, 0, 0))
 	_hold_f(m, p, 3.0)
 	ok(H.carrier == null, "an uncharged Heartspark can't be taken")
-	_run(m, float(rl["charge_s"]) * 0.5 + 1.0)
+	_run(m, float(rl["charge_s"]) * 0.25 + 1.0)
 	ok(H.state == "ready", "the Heartspark is charged")
 	# ---- taking it
 	_put(m, p, H.site + Vector3(6, 0, 0))
@@ -104,6 +112,11 @@ func run(main: Node) -> void:
 	ok(H.carrier == null, "a short hold doesn't take it")
 	_hold_f(m, p, float(rl["pickup_hold_s"]) + 0.3)
 	ok(H.state == "carried" and H.carrier == p, "holding interact takes the Heartspark")
+	m.step(Match.DT)
+	ok(H.audio.cues.has("heart_take") and not H.audio.cues.has("heart_reveal"),
+		"the taker hears the pickup sting, not the reveal")
+	ok(H.audio.cues.has("heart_gate_open"), "the Gate's opening is cued")
+	ok(Sfx.loop_on("heart_beat"), "the carrier hears their own heartbeat")
 	ok(is_equal_approx(float(p.get_meta("heart_slow", 0.0)), float(rl["carrier_slow"])),
 		"the carrier is slowed by %.0f%%" % (float(rl["carrier_slow"]) * 100.0))
 	p.set_meta("heart_slow", 0.0)
@@ -151,6 +164,7 @@ func run(main: Node) -> void:
 	if kin0: trust0 = kin0.trust
 	_hold_f(m, p, float(rl["gate_hold_s"]) + 0.3)
 	ok(p.extracted, "holding at the Gate extracts the carrier")
+	ok(H.audio.cues.has("heart_extract"), "the extract is cued at the Gate")
 	ok(String(m.result.get("how", "")) == "heart", "...by the Heart Gate")
 	var hb: Dictionary = m.result.get("heart", {})
 	ok(not hb.is_empty() and Data.is_rare(String(hb["egg"]["sp"])),
@@ -169,6 +183,7 @@ func run(main: Node) -> void:
 	H3.state = "cooling"
 	H3.cool = 2.0
 	_run(m3, 2.5)
+	ok(H3.audio.cues.is_empty(), "the cooldown and the new charge make no cue of their own")
 	ok(H3.state == "charging" and H3.charge < 1.0, "after the cooldown a new Heartspark charges")
 	# ---- a carrier leaving by a normal exit drops it
 	H3.state = "ready"
@@ -195,6 +210,18 @@ func run(main: Node) -> void:
 	var H4: Heart = m4.heart
 	H4.state = "ready"
 	H4.spark_pos = H4.site
+	m4.step(Match.DT)
+	var taker4: Hunter = null
+	for o in m4.hunters:
+		if o != m4.player:
+			taker4 = o
+			break
+	H4._pick(taker4)
+	m4.step(Match.DT)
+	ok(H4.audio.cues.has("heart_reveal") and not H4.audio.cues.has("heart_take"),
+		"everyone else hears the short map-wide reveal, not the pickup sting")
+	H4.state = "ready"
+	H4.carrier = null
 	H4.net_in(["ht", "pick", m4.player.nid])
 	ok(H4.carrier == m4.player and H4.state == "carried", "the host takes a pick request")
 	H4.net_in(["ht", "drop", m4.player.nid, H4.site.x + 2.0, H4.site.y, H4.site.z])
