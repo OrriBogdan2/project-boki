@@ -30,3 +30,4 @@ Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus, H
   Boki's own game.
 - match.gd +3 (interact, match end), hunter.gd +2, KinLoss and KinCommand skip a Boki whose wisp is not with its
   own hunter. `--wisp-steal-check` covers it, including the stacking rows.
+- `--passive-stack-check` covers the Q8 stacking (own 100 %, stolen 50 %, clamp at the carry cap, 2 stolen, passives leave on escape or match end).
