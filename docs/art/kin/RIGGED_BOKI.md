@@ -58,6 +58,28 @@ crossfade; the flinch eases in over 0.125 s). `--boki-state-check --shots-dir=<d
 The 29 primitive species (`KinPuppet`): idle, walk, run, attack (`att_k`), nap and faint (`sleep_k`), perch (`perch_k`),
 play (`happy_k`), hit (a squash-and-ears jolt on the "hit" meta, as on its hunter's flinch; checked per species). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
 
+### A summoned Boki (out of the wisp)
+
+The Boki bursting out of its wisp (decision 0039) is the same `Kin` with the same rig, so it plays the clips above;
+nothing is a separate "summon animation". Which clip each thing the AI does asks for:
+
+| AI does | Code | Clip |
+|---|---|---|
+| chase, follow, return, flee | `_sim_active` moves it | `run` / `walk` from the rig's measured speed |
+| melee strike | `kin_strike` sets `lunge_t` | `kstate` attack: `attack`, restarted while the lunge lasts |
+| any ability (`_cast`: projectile, cone, beam, burst, zone, aura, summon, trap, wall, tether) | `Kin._cast` sets `pulse` | `ability` |
+| dash, leap (`start_rush`, `start_leap`) | `_cast` pulse, then state "flying" | `ability` (longer than the flight) |
+| blink, swap, burst out of the wisp, re-bloom beside you | `Kin.teleport` bumps the `tp` meta | none: the jump is not speed, so it stands (`idle`) |
+| takes a hit | `hit` / flinch layer | flinch over the running clip |
+| knocked down | `KinSummon.knocked`: `FAINT_S` 0.9 s lying | `sleep` (faint), laid over; then the 0.35 s shrink, then the wisp |
+
+`BokiRig._track_speed` skips the frame after a `tp` change, which is what stopped a wisp's burst and a 30 m re-bloom
+from reading as 100 m/s and running in place. While it lies fainted the Boki cannot be hit, targeted or act
+(`Kin.fainting`). `--boki-rig-check` runs `tools/boki_summon_clips.gd` for one species per body plan (hivara biped,
+cindle quadruped, wisplet flyer, zephyrak serpent) in a headless summoned fight: no speed spike, no run or walk on the
+spot, no slide, strike = attack, cast = ability, faint first. `--summon-clips-shots --shots-dir=<dir>` (GPU) draws
+`summon_<id>.png`: burst, run, attack, cast, hit, faint, shrink.
+
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
 Eyes: a visible eye about 18-20% of the head's width (the owner asked for smaller eyes in game). The dome is bigger

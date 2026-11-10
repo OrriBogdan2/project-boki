@@ -17,7 +17,7 @@ numbers (Q1), one summon at a time (Q3), damage never ending it but death doing 
 Option 2. `content/rules/boki_summon.json` holds the role x size table (window, cooldown) and the uptime band;
 every species takes its cell (no per-species override until one is needed). Summon: the kin bursts beside you
 whole, on its normal AI and orders, leash 10 m (+-2 m by aggression), re-blooming beside you past 20 m.
-Damage never ends it; a knock-down turns it back into a wisp with x1.25 cooldown. The window ends in a 0.35 s
+Damage never ends it; a knock-down faints it first (0.9 s lying untouchable, the faint clip), then the shrink back into a wisp with x1.25 cooldown. The window ends in a 0.35 s
 shrink; Summon while out sends it back early (full cooldown). The wisp is dim with no sparkles while resting;
 a ring and the seconds (or the Summon key) sit on the right-side Boki box (BokiHud.summon_ring).
 Left out on purpose: guardian summon, stealing, the reveal on a killed summon, bots summoning, mounts.
@@ -25,3 +25,4 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 ## Consequences
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
+- Faint is the existing `shrink` field running past `SHRINK_S` (no new Net field); every teleport goes through `Kin.teleport` so the rig ignores the jump (`tp` meta). `--boki-rig-check` audits the clips per body plan.

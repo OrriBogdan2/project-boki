@@ -3,7 +3,8 @@ extends RefCounted
 ## The Boki summon (DECISIONS 2026-11-09, briefs/boki-art/WISP_DESIGN_OPEN.md Q1/Q3/Q5/Q7, decision 0039).
 ## With Boki riding as wisps (KinWisp) the Summon key bursts the wisp into the full Boki for its species'
 ## window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
-## never ends the window; being knocked down does: it turns straight back into a wisp with a longer cooldown.
+## never ends the window; being knocked down does: it faints (FAINT_S, the home faint clip, inert and untouchable) and
+## then shrinks back into a wisp with a longer cooldown.
 ## At the end it shrinks back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
@@ -11,6 +12,7 @@ extends RefCounted
 
 const BURST_S := 0.3      # s: the bloom from wisp to full size
 const SHRINK_S := 0.35    # s: the shrink back into the wisp
+const FAINT_S := 0.9      # s: a knock-down lies there (the faint clip) before the shrink; it rides in `shrink` (Net)
 const BURST_FROM := 0.3   # its size at the start of the bloom and the end of the shrink (x its own)
 
 var k: Kin
@@ -21,6 +23,7 @@ var shrink := 0.0     # s of the shrink back left
 var grow := 0.0       # s of the bloom left (drawing only)
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var back_cd := 0.0    # s: the cooldown the wisp gets once a knock-down has fainted (own game only)
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -42,6 +45,10 @@ static func times(ks: KinSpec) -> Vector2:
 ## Out as the full Boki (the shrink back included)?
 func out() -> bool:
 	return left > 0.0 or shrink > 0.0
+
+## Lying knocked out before the shrink? (`shrink` runs FAINT_S + SHRINK_S, so the snapshot carries it unchanged.)
+func fainting() -> bool:
+	return shrink > SHRINK_S
 
 ## How far it may wander from its hunter while summoned: short and fixed, a little longer for bold ones.
 func leash(aggression: float) -> float:
@@ -80,13 +87,22 @@ func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
 
-## Knocked down while summoned (Kin.go_down): back into a wisp at once, the longer cooldown. True if it was out.
+## Knocked down while summoned (Kin.go_down): it faints where it stands, then shrinks into a wisp with the longer
+## cooldown (tick). True if it was out.
 func knocked() -> bool:
 	if not out():
 		return false
+	if fainting():
+		return true
+	k.hp = maxf(k.hp, 1.0)
+	k.fly = {}
+	k.vel = Vector3.ZERO
+	k.state = "active"
 	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
 	KinCommand.say(k.owner_h, "%s was knocked back into a wisp" % k.rec.get("name", "Your Boki"), Color("ffb0a0"))
-	_back(cd_base * float(rules()["knocked_cd_mult"]))
+	left = 0.0
+	shrink = FAINT_S + SHRINK_S
+	back_cd = cd_base * float(rules()["knocked_cd_mult"])
 	return true
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
@@ -107,8 +123,11 @@ func tick(dt: float) -> void:
 			return
 		if o == null or o.out or KinLoss.guarding(k):
 			shrink = 0.0          # left behind: the walking Boki's rules from here (KinWisp.ride)
+			if back_cd > 0.0:
+				k.hp = k.max_hp
+				back_cd = 0.0
 		else:
-			_back(cd_base)
+			_back(back_cd if back_cd > 0.0 else cd_base)
 
 ## The bloom (into the Boki) or the puff (back into the wisp), on every game (KinWisp.set_wisp).
 func popped(to_wisp: bool) -> void:
@@ -124,6 +143,7 @@ func popped(to_wisp: bool) -> void:
 func _back(cool: float) -> void:
 	left = 0.0
 	shrink = 0.0
+	back_cd = 0.0
 	cd = cool
 	cd_full = cool
 	k.hp = k.max_hp
@@ -137,7 +157,7 @@ func render() -> void:
 	if grow > 0.0:
 		f = lerpf(1.0, BURST_FROM, grow / BURST_S)
 	elif shrink > 0.0:
-		f = lerpf(BURST_FROM, 1.0, shrink / SHRINK_S)
+		f = lerpf(BURST_FROM, 1.0, minf(shrink, SHRINK_S) / SHRINK_S)
 	k.scale = Vector3.ONE * f
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)

@@ -272,8 +272,10 @@ func _summon() -> void:
 	s.cd = 0.0
 	KinSummon.press(p)
 	k.hurt(k.max_hp * 5.0, null)
-	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: knocked down, it turns back into a wisp, 75 s cooldown")
+	ok(not k.wisp and s.fainting(), "summon: knocked down, it faints first")
+	_frames(KinSummon.FAINT_S + KinSummon.SHRINK_S + 0.05)
+	ok(k.wisp and k.state == "shoulder" and absf(s.cd_full - 75.0) < 0.01,
+		"summon: ...then it turns back into a wisp, 75 s cooldown")
 	s.cd = 0.0
 	KinSummon.press(p)
 	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]

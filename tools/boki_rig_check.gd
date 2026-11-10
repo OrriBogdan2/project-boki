@@ -31,6 +31,8 @@ func run(main: Node) -> void:
 	for id in SPECIES_LIST:
 		kin_id = id
 		await _species(main)
+	## A wisp that bursts out plays the Boki's own state clips (tools/boki_summon_clips.gd).
+	await preload("res://tools/boki_summon_clips.gd").new().audit(main, Callable(self, "ok"))
 	print("BOKIRIG DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

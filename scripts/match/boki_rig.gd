@@ -164,7 +164,8 @@ var _now := {}                 # blend shape name -> weight
 var _want := {}
 var _face_name := "neutral"
 var _flex_y := 0.0
-var _pos_prev := Vector3.ZERO
+var _pos_prev := Vector3.INF      # (INF: not measured yet)
+var _tp := 0                   # the Kin's last teleport count seen (Kin.teleport)
 var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
@@ -223,7 +224,6 @@ func _ready() -> void:
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
-	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_copy_coat()
 	set_clip("idle")
 
@@ -285,6 +285,11 @@ func _keep_flex() -> void:
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
+	var tp := int(root.get_meta("tp", 0))
+	if _pos_prev == Vector3.INF or tp != _tp:
+		_tp = tp          # put somewhere (burst, re-bloom, blink, swap): not a run, so the speed stays as it was
+		_pos_prev = gp
+		return
 	var v := (gp - _pos_prev).length() / dt
 	_pos_prev = gp
 	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
