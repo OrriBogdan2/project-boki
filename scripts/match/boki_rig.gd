@@ -257,6 +257,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _rise := 0.0               # m/s up, eased: what pitches a leap
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -447,12 +448,17 @@ func _keep_flex() -> void:
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
+	if clip == "leap":
+		# nose up on the way up, then down
+		model.rotate_object_local(Vector3.RIGHT, atan2(_rise, maxf(_speed, 1.0)) * LEAP_PITCH)
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
 	var v := Vector2(gp.x - _pos_prev.x, gp.z - _pos_prev.z).length() / dt      # rising or sinking is no stride
 	_pos_prev = gp
-	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
+	var k := 1.0 - exp(-10.0 * dt)
+	_speed = lerpf(_speed, Vector2(step.x, step.z).length() / dt, k)
+	_rise = lerpf(_rise, step.y / dt, k)
 
 func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
@@ -555,6 +561,9 @@ func _state_clip() -> String:
 		return act
 	if _shot_left > 0.0:
 		return _shot
+	var gait := String(root.get_meta("kgait", ""))
+	if gait != "" and _speed >= WALK_SPEED:
+		return gait
 	if root.get_meta("happy", false):
 		return "hop"
 	if _speed >= RUN_SPEED or (_speed >= WALK_SPEED and String(root.get_meta("pose", "")) in CHASE_POSES):

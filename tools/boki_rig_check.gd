@@ -218,6 +218,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._speed = 1.2
 	rig._pick_clip(0.016)
 	ok(rig.clip == "walk", "slow walks")
+	_games(rig)
 	rig._speed = 0.0
 	k.set_meta("pulse", 123)
 	rig._pick_clip(0.016)
