@@ -48,7 +48,8 @@ func run(main_node: Node) -> void:
 	m.knock(mate, thief, {})
 	await _play(0.2)
 	thief.teleport(mate.kin.pos + Vector3(0.5, 0, 0))
-	KinSteal.grab(mate.kin, thief)
+	KinSteal.break_loose(mate.kin, mate.pos)    # (a downed mate keeps its Boki: shake it loose for the thief)
+	print("SUMMONRINGSHOTS grab=", KinSteal.grab(mate.kin, thief))
 	var own := [m.player.kin, m.hunters.filter(func(h: Hunter): return h.team != m.player.team and h != thief)[0].kin]
 	own.append(thief.kin)
 	for i in own.size():
@@ -68,8 +69,9 @@ func run(main_node: Node) -> void:
 	await _play(0.01)
 	var vp := main.get_viewport()
 	var img := vp.get_texture().get_image()
-	img.save_png(dir.path_join("summon_ring.png"))
-	var sc := Vector2(img.get_size()) / vp.get_visible_rect().size
+	if img:          # (headless: no picture, the log only)
+		img.save_png(dir.path_join("summon_ring.png"))
+	var sc := Vector2(img.get_size() if img else Vector2i(vp.get_visible_rect().size)) / vp.get_visible_rect().size
 	var lo := Vector2(1e9, 1e9)
 	var hi := -lo
 	for k in rung:
@@ -79,10 +81,16 @@ func run(main_node: Node) -> void:
 		hi = hi.max(q)
 		print("SUMMONRINGSHOTS kin ", k.name, " left=", snappedf(k.summon.left, 0.01),
 			" ring=", ring != null and ring.visible, " arc=",
-			ring.material_override.get_shader_parameter("arc") if ring else -1.0, " px=", Vector2i(q))
+			ring.material_override.get_shader_parameter("arc") if ring else -1.0, " px=", Vector2i(q),
+			" stolen=", KinSteal.stolen(k), " col=", SideColor.of(m, k).to_html(false), " rider_team=",
+			k.owner_h.team if k.owner_h else -1)
 	var c := (lo + hi) * 0.5
 	var half := Vector2i(((hi - lo) * 0.5 + Vector2(260, 200)).max(Vector2(420, 260)))
 	var box := Rect2i(Vector2i(c) - half, half * 2)
+	if img == null:
+		print("SUMMONRINGSHOTS ", dir)
+		main.get_tree().quit(0)
+		return
 	var crop := img.get_region(box.intersection(Rect2i(Vector2i.ZERO, img.get_size())))
 	crop.save_png(dir.path_join("summon_ring_crop.png"))
 	# Close-up: full, half, 1 s (flickering) and stolen, left to right, with the sim paused so nothing fights.
