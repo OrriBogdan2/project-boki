@@ -47,6 +47,14 @@ func run(main: Node) -> void:
 	ok(st != null, "the map has a sky train")
 	if st == null:
 		print("TRAIN CHECK DONE, failures: ", bad); main.get_tree().quit(); return
+	# every stop's deck is level with its pier (the lowest ground 1.6-3 m off the track), so you step off
+	for s in m.world.train_route["stations"]:
+		var at: Vector3 = m.world.train_at(float(s))
+		var pier := INF
+		for a in 24:
+			var q := at + Vector3(cos(a * TAU / 24.0), 0, sin(a * TAU / 24.0)) * 2.2
+			if not m.world.is_void(q.x, q.z): pier = minf(pier, m.world.ground_at(q.x, q.z))
+		ok(pier < INF and absf(pier - at.y) < 0.05, "the stop at %s: deck %.1f m, pier %.1f m" % [str(Vector2(at.x, at.z).snapped(Vector2.ONE)), at.y, pier])
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
@@ -204,7 +212,16 @@ func run(main: Node) -> void:
 	ok(Game._why("train") == "was hit by the Sky Train" and Match.out_text("X", "train") == "X was hit by the Sky Train", "the death recap names the train")
 	ok(st.hits.any(func(x): return x["e"] == Q), "the train recorded the hit")
 	var bx := Life.box_of(m, Q)
-	ok(not bx.is_empty() and Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() < 16.0, "the deathbox drops by where they were hit (%.1fm away)" % (Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() if not bx.is_empty() else -1.0))
+	# (over the abyss: on the nearest ground to the hit, give or take room for the box)
+	var land := hit_pos
+	var land_d := 0.0
+	while m.world.is_void(land.x, land.z) and land_d < Life.TRAIN_BOX_REACH:
+		land_d += 0.5
+		for a in 48:
+			var q := hit_pos + Vector3(cos(a * TAU / 48.0), 0, sin(a * TAU / 48.0)) * land_d
+			if not m.world.is_void(q.x, q.z): land = q; break
+	var box_d := Vector2(bx["pos"].x - hit_pos.x, bx["pos"].z - hit_pos.z).length() if not bx.is_empty() else -1.0
+	ok(not bx.is_empty() and box_d < maxf(16.0, land_d + 4.0), "the deathbox drops by where they were hit (%.1f m away, ground %.1f m)" % [box_d, land_d])
 	ok(Q.has_meta("fling"), "the body is flung")
 	# ---- 3. the cars' frames hit anything below the deck; nobody on top
 	var t2: Transform3D = st.cur[2]

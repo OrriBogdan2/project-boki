@@ -60,6 +60,7 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 	var n := line.size()
 	var names: Array = T.get("names", [])
 	var st_s: Array = []
+	var st_y: Array = []      # m: each stop's deck height, level with its (lowest) pier
 	var pier_below := int(T.get("pier_below", 4))     # terraces: a pier never runs onto ground this high (a plateau)
 	for st in T.get("stations", []):
 		var s0 := _station_s(W, T, line, st)
@@ -68,6 +69,7 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 		var on: Vector2 = line[k0]
 		var dir := _side(line, k0)
 		# piers: from the nearest ground on either side of the track, up to the track's edge
+		var pier_lv := -1
 		for side: float in [-1.0, 1.0]:
 			var found := -1.0
 			for k in 30:
@@ -81,6 +83,7 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 			var g0 := on + dir * side * found
 			var gi := W.idx(int(g0.x), int(g0.y))
 			var owner := W.island[gi]; var lv := W.level[gi]
+			pier_lv = lv if pier_lv < 0 else mini(pier_lv, lv)
 			var p0 := on + dir * side * (found - 2.0)
 			var p1 := on + dir * side * 1.7
 			for z in range(int(minf(p0.y, p1.y)) - 3, int(maxf(p0.y, p1.y)) + 4):
@@ -96,17 +99,20 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 					W.kind[i] = W.T_GROUND; W.island[i] = owner; W.level[i] = lv; W.depth[i] = -1.6
 					neck[i] = true
 					W.islands[owner]["cells"].append(Vector2i(x, z))
+		st_y.append(maxi(pier_lv, 0) * W.LEVEL)
 		if names.size() > st_s.size() - 1:
 			W.labels.append({"name": String(names[st_s.size() - 1]), "pos": Vector3(on.x, 0, on.y), "kind": "rail"})
-	# the deck height round the loop: level with the ground at the stops, under anything in the way
+	# the deck height round the loop: level with the pier at the stops, under anything in the way
 	var loop := n * W.TRAIN_STEP
 	var want := PackedFloat32Array(); want.resize(n)
+	var dive: Array[int] = []
 	for k in n:
 		var s := k * W.TRAIN_STEP
 		var q: Vector2 = line[k]
 		var near_stop := false
-		for ss in st_s:
-			if absf(fposmod(s - float(ss) + loop * 0.5, loop) - loop * 0.5) < 5.0: near_stop = true
+		for j in st_s.size():
+			if absf(fposmod(s - float(st_s[j]) + loop * 0.5, loop) - loop * 0.5) < 5.0:
+				near_stop = true; want[k] = st_y[j]
 		var blocked := false
 		if not near_stop:
 			for z in range(int(q.y - 3), int(q.y + 4)):
@@ -114,10 +120,17 @@ static func build(W: World, T: Dictionary, neck: Dictionary) -> void:
 					# (high perches float well clear of the cars)
 					if W.inb(x, z) and W.kind[W.idx(x, z)] != W.T_VOID and W.level[W.idx(x, z)] < 6 and Vector2(x + 0.5, z + 0.5).distance_to(q) < 2.9:
 						blocked = true
-		want[k] = W.TRAIN_DIVE if blocked else 0.0
-	# ramps: the deck never changes height faster than the dive over ~8 tiles
+		if blocked: dive.append(k)
+	# ramps: the deck never changes height faster than the dive over ~8 tiles; it climbs to a raised
+	# pier first, then dips under the bridges
 	var slope := absf(W.TRAIN_DIVE) / 8.0 * W.TRAIN_STEP
 	var y := want.duplicate()
+	for _pass in 2:
+		for k in range(1, n * 2):
+			y[k % n] = maxf(y[k % n], y[(k - 1) % n] - slope)
+		for k in range(n * 2 - 2, -1, -1):
+			y[k % n] = maxf(y[k % n], y[(k + 1) % n] - slope)
+	for k in dive: y[k] = W.TRAIN_DIVE
 	for _pass in 2:
 		for k in range(1, n * 2):
 			y[k % n] = minf(y[k % n], y[(k - 1) % n] + slope)
