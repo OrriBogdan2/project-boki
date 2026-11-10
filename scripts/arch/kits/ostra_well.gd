@@ -130,6 +130,7 @@ func _tick_tell(dt: float) -> void:
 	(dome.get_node("Core") as Node3D).visible = swollen
 	if phase_t >= tell:
 		_open()
+		_tick_open(0.0)       # the first catch is on the frame the fill completes
 
 func _open() -> void:
 	AimKit.hide(k.h, "x")
@@ -161,6 +162,8 @@ func _tick_open(dt: float) -> void:
 func _tick_catch(left: float) -> void:
 	ticks += 1
 	var dmg := float(xd()["tick_dmg"]) * k.power("x")
+	if swollen:
+		k.m.brk.hit_around(center + Vector3(0, 0.4, 0), radius, k.h)    # Empowered ticks are Explosive
 	for f in k.foes_in(center, radius):
 		if not k.m.world.los(center + Vector3(0, 0.6, 0), f.pos + Vector3(0, 0.6, 0), center.y + 0.6):
 			continue

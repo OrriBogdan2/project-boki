@@ -205,14 +205,23 @@ func _swing(fr: Array) -> Dictionary:
 			"reach_R": reach_r,
 			"against_L": against_l, "against_R": against_r,
 			"counter": (reach_l * against_l + reach_r * against_r) / maxf(reach_l + reach_r, 0.01),
-			"steps_hz": _steps(leg["L"], span)}
+			"steps_hz": _steps(leg["L"])}
 
-func _steps(leg: Array, span: float) -> float:
+## Cadence (steps/s): one leg's forward crossings are its strides, two steps each; timed from the first crossing to
+## the last so a short sample does not round it to whole strides (2.4 s would quantise to 0.8 steps/s).
+func _steps(leg: Array) -> float:
+	var first := -1
+	var last := -1
 	var c := 0
 	for i in range(1, leg.size()):
 		if leg[i - 1] < 0.0 and leg[i] >= 0.0:
 			c += 1
-	return 2.0 * c / span
+			last = i
+			if first < 0:
+				first = i
+	if c < 2:
+		return 0.0
+	return 2.0 * (c - 1) / ((last - first) * DT)
 
 func _corr(a: Array, b: Array) -> float:
 	var ma := 0.0
@@ -261,6 +270,7 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 	var fr := _clip_frames(sync, clips, sk, clip, 24)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
+	var out_side := {"L": 0, "R": 0}
 	var jump := 0.0
 	for i in fr.size():
 		for side in ["L", "R"]:
@@ -268,12 +278,16 @@ func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: 
 				var step := ((fr[i]["hand." + side] as Vector3) - (fr[i - 1]["hand." + side] as Vector3)).length()
 				path[side] += step
 				jump = maxf(jump, step)
+		for side in ["L", "R"]:
+			out_side[side] += int(_t_posed(fr[i], side))
 		if _t_posed(fr[i], "L") or _t_posed(fr[i], "R"):
 			out_frames += 1
 	var weapon := "R" if path["R"] >= path["L"] else "L"
+	var loose: String = "L" if weapon == "R" else "R"
 	var length := clips.lib.get_animation(clip).length
 	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
-			"free_travel": path["L" if weapon == "R" else "R"] / hgt, "t_pose": float(out_frames) / fr.size(),
+			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
+			"t_free": float(out_side[loose]) / fr.size(),
 			"jump": jump / hgt}
 
 func _t_posed(p: Dictionary, side: String) -> bool:

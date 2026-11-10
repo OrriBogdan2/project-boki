@@ -13,5 +13,11 @@
   5
  ],
  "price": 30,
- "desc": "Drink to heal 40% of your health. You are open while you drink."
+ "desc": "Drink for a second to heal. You are open while you drink.",
+ "channel": {
+  "time": 1.0,
+  "move": 1.0,
+  "heal": 42.0,
+  "src": "Vive Brew: restores 304 HP after 1s, vulnerable while drinking, cancelled on damage; no slow listed (Hypervive lists its 60% slow). 304 / 7.2 (source hero HP over ours) = 42. See docs/CONSUMABLES.md"
+ }
 }
