@@ -101328,5 +101328,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/lockwren_card_1.jpg",
     "ok": true
+  },
+  {
+    "id": "bosssheet_brood_r3",
+    "name": "Brood (turnaround sheet, regen 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bosssheet_brood_r3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bosssheet_colossus_r3",
+    "name": "Colossus (turnaround sheet, regen 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bosssheet_colossus_r3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bosssheet_brood_r3",
+    "name": "Brood (turnaround sheet, regen 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/bosssheet_brood_r3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "bosssheet_colossus_r3",
+    "name": "Colossus (turnaround sheet, regen 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/bosssheet_colossus_r3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "bosssheet_colossus_r3",
+    "name": "Colossus (turnaround sheet, regen 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bosssheet_colossus_r3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "bosssheet_brood_r3",
+    "name": "Brood (turnaround sheet, regen 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/bosssheet_brood_r3_2.jpg",
+    "ok": true
   }
 ]
