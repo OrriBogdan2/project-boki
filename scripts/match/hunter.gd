@@ -2301,12 +2301,12 @@ func _physics(dt: float) -> void:
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
-	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else vel.x * -0.1
+	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x)
 	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
-	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
+	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z)
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
 		step_vis -= step_up - pos.y
