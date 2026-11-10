@@ -476,6 +476,17 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## try_today (`content/rules/try_today.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The 'What to try today' card on the title screen (scripts/ui/try_card.gd). Change `id` with each new ask: a card the player has dismissed stays hidden until its id changes. Keep it to three lines. Names are display names; the full list is in docs/TESTER_GUIDE.md. |
+| id | 2026-11-09 |
+| title | What to try today |
+| lines | ["Play one full first match as Vex, from the drop to the exit.", "Try Kael, Lace and Cinder in the Arena.", "Leave a note on the rate card when you quit."] |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 
