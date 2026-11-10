@@ -5,6 +5,9 @@ extends "res://tools/abyss_check.gd"
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const SECS := 2.0       # how long each scenario runs
+## The fold scenario jumps from this much higher (m): the glider opens falling (decision 0027), so from a plain
+## jump the 0.4 s fold reaches the ground before it ends and there is nothing left to re-open.
+const FOLD_LIFT := 3.0
 
 ## One scenario: stand on flat ground, then step SECS with `script` (Callable(i) -> void) setting inputs each
 ## step. Returns the seconds the glider was open.
@@ -63,6 +66,8 @@ func run(main: Node) -> void:
 	var fold := {"closed": false, "reopened": false}
 	var refold := func(i: int) -> void:
 		double.call(i)
+		if i == 1:
+			h.pos.y += FOLD_LIFT
 		if i == 30:
 			h.glide_cd = 0.4            # a heal's fold: still held, it comes back
 		if i > 31 and h.glide_cd > 0.0:
