@@ -9,10 +9,11 @@ extends RefCounted
 
 const CAP := 1500              # lines kept per font and size before that bucket starts over
 static var _lines := {}        # font id * 256 + size -> {text: TextLine}
+static var world := false      # drawing world-hung text (the plates over heads): no Text size scaling
 static var shaped := 0         # lines shaped so far (checks and the probe read it)
 
 static func line(font: Font, s: String, design_fs: int) -> TextLine:
-	var fs := UI.fs(design_fs)      # Settings > Text size
+	var fs := design_fs if world else UI.fs(design_fs)      # Settings > Text size
 	var key := font.get_instance_id() * 256 + clampi(fs, 0, 255)
 	var bucket: Dictionary = _lines.get(key, {})
 	if bucket.is_empty():
