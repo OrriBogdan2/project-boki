@@ -31,3 +31,12 @@ heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.g
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
 No save change. Checks: --heart-check (early seat), new --heart-seats-check (squad take, final, order, rush, Net).
+
+## Seat looks (ext/vfx-ways-out-seats)
+Every seat reads from across the island with one of five looks: locked (dim stub, countdown glyph), open (tall clear
+beam in neutral light), in use (the using squad's colour, ring filling with the hold), taken (the beam sinks in 0.7 s,
+the seat goes dark), lost (low dark haze: the tide covers it or its window shut). `WaysOutLook` maps a seat's own state
+to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBeacon` draws it (one column shader
+`seat_beam.gdshader`, one ring, one glyph, two materials made once); `WaysOutVfx` owns the beacons. No bursts and no
+rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
+outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
