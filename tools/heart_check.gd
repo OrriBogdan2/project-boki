@@ -46,6 +46,7 @@ func _hold_f(m: Match, h: Hunter, secs: float) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	Game.god = false      # (the owner's mod mode makes everyone unkillable and revives the downed at once)
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var rl: Dictionary = Heart.rules()
