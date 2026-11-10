@@ -107530,5 +107530,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_hatstag_e2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "hs_pillaroo_h2",
+    "name": "Pillaroo (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hs_pillaroo_h2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_twinklup_leg2",
+    "name": "Twinklup (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_twinklup_leg2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "hs_pillaroo_h2",
+    "name": "Pillaroo (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hs_pillaroo_h2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_twinklup_leg2",
+    "name": "Twinklup (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_twinklup_leg2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_twinklup_leg2",
+    "name": "Twinklup (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_twinklup_leg2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lockwren_leg2",
+    "name": "Lockwren (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_lockwren_leg2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lockwren_leg2",
+    "name": "Lockwren (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_lockwren_leg2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_luckhop_leg2",
+    "name": "Luckhop (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_luckhop_leg2_2.jpg",
+    "ok": true
   }
 ]
