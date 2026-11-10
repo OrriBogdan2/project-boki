@@ -79600,5 +79600,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_geysirbara_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_lodestaff",
+    "name": "Lodestaff (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_lodestaff_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lodestaff",
+    "name": "Lodestaff (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_lodestaff_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_marchleaf",
+    "name": "Marchleaf (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_marchleaf_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_marchleaf",
+    "name": "Marchleaf (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_marchleaf_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_reapant",
+    "name": "Reapant (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_reapant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_lodestaff",
+    "name": "Lodestaff (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_lodestaff_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_marchleaf",
+    "name": "Marchleaf (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_marchleaf_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_reapant",
+    "name": "Reapant (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_reapant_3.jpg",
+    "ok": true
   }
 ]
