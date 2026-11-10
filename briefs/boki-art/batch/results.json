@@ -88168,5 +88168,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fv2_gongibbon_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fv2_gongrowl",
+    "name": "Gongrowl female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_furnacowary",
+    "name": "Furnacowary female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_c",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_arcestrel",
+    "name": "Arcestrel female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_arcestrel_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_furnacowary",
+    "name": "Furnacowary female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_furnacowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_gongibbon",
+    "name": "Gongibbon female (V2 card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv2_gongibbon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_eclipsowl",
+    "name": "Eclipsowl female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_eclipsowl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv2_gongrowl",
+    "name": "Gongrowl female (V2 card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv2_gongrowl_3.jpg",
+    "ok": true
   }
 ]
