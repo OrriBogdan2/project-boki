@@ -682,7 +682,8 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var m_wood := toon(Color("7a5236"))
 	var m_fur := toon(Color("4a3428").lerp(hero_col, 0.08))
 	var m_feather := toon(Color("f6f0e2"))
-	var m_cloak := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.06, 0.6), clampf(hero_col.v * 0.5, 0.3, 0.5)))
+	var m_cloak := toon(Color.from_hsv(hero_col.h, clampf(hero_col.s * 0.9, 0.06, 0.6),
+			clampf(hero_col.v * 0.5, 0.3, 0.5)))
 	var m_hat := toon(Color("6e4a30").lerp(hero_col, 0.1))
 	for mm in [m_body, m_shirt, m_hair, m_acc, m_hero, m_trim, m_cloak, m_hat, m_feather]:
 		(mm as ShaderMaterial).set_shader_parameter("rim_amount", 0.75)

@@ -61,7 +61,9 @@ func _ready() -> void:
 		elif a.begins_with("--title-t="):
 			t = float(a.substr(10))
 	_sky()        # the painted splashes (TitleBackdrop) cover the screen, so the 3D island, squad and sky props are off
-	cam = Camera3D.new(); cam.fov = 36.0; cam.far = 1600.0
+	cam = Camera3D.new()
+	cam.fov = 36.0
+	cam.far = 1600.0
 	add_child(cam)
 	cam.make_current()
 	_place_cam(0.0)
