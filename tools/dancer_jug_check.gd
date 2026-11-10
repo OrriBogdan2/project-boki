@@ -10,6 +10,7 @@ const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
+const DTIME := preload("res://tools/thief_anim_time_check.gd")   # her moves' start, hit and end on the move clock
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -312,6 +313,7 @@ func thief(a) -> void:
 	await _dancer_dash_flow(m, P, K, T, home)
 	await DFEEL.new().run(A, m, P, K, T, home)
 	DPARITY.new().run(A, m, P, K, T, home)
+	DTIME.new(A).run(m, P, K, T, home)
 	DLOOP.new().run(A, m, P, K, T, T2, home)
 	await A.done(m)
 	await _growth()
