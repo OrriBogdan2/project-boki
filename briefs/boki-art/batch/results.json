@@ -78928,5 +78928,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_glomworth_b2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_glomworth_b2",
+    "name": "Glomworth (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_glomworth_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mortarfly_b2",
+    "name": "Mortarfly (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_mortarfly_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_mortarfly_b2",
+    "name": "Mortarfly (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_mortarfly_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mortarfly_b2",
+    "name": "Mortarfly (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_mortarfly_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_mortarfly_b2",
+    "name": "Mortarfly (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_mortarfly_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_mortarfly_b2",
+    "name": "Mortarfly (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_mortarfly_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthorn_b2",
+    "name": "Crofthorn (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_crofthorn_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_skidlet_b2",
+    "name": "Skidlet (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_skidlet_b2_1.jpg",
+    "ok": true
   }
 ]
