@@ -99368,5 +99368,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/evo_pebblamb_c_1.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_fawngus",
+    "name": "Fawngus (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_fawngus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_jerbolt_a",
+    "name": "Jerbolt (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_jerbolt_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_jerbolt_a",
+    "name": "Jerbolt (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_jerbolt_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_jerbolt_b",
+    "name": "Jerbolt (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_jerbolt_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "line_glassolotl",
+    "name": "Glassolotl (line weight to match the roster)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/line_glassolotl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_jerbolt_b",
+    "name": "Jerbolt (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_jerbolt_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_pinguin_a",
+    "name": "New line baby: pinguin a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_pinguin_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_b",
+    "name": "New line baby: sawshark b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_sawshark_b_2.jpg",
+    "ok": true
   }
 ]
