@@ -185,10 +185,11 @@ func _card(e: Dictionary) -> PanelContainer:
 	l.add_theme_constant_override("outline_size", 4)
 	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long line wraps at a sane width, never word by word
+	if e["icon"] != "":
+		l.add_theme_stylebox_override("normal", _icon_gap())
 	_fit(l, px)
 	c.add_child(l)
 	if e["icon"] != "":
-		l.add_theme_stylebox_override("normal", _icon_gap())
 		var mark := Control.new()
 		mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		mark.draw.connect(func(): Icons.draw(mark, e["icon"], Vector2(14.0, mark.size.y * 0.5), px * 0.55, e["col"]))
