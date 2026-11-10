@@ -264,3 +264,8 @@ _FEM={'Arcestrel':"the female kestrel: a slightly bigger body, warmer brown plum
 for _n,_d in _FEM.items():
     SPECS.append({'id':'fem_'+_n.lower(),'name':_n+' (female look)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':4,'aspect':'1:1','size':'2K',
       'prompt':_EDIT+"turn it into "+_d+". Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."})
+# Retries: Ringrove's tilt came out too subtle; Glassolotl 'left' still faced right.
+SPECS.append({'id':'v2g_ringrove_tilt2','name':'Ringrove (strong head tilt)','refs':['briefs/boki-art/cards/Ringrove.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"tilt its whole head strongly to one side, about 30 degrees, so one ear is clearly lower than the other, like a puzzled, friendly dog. Its eyes look straight at the viewer, with a small lopsided smile. Its body, mushroom caps, colours and everything else stay exactly the same. Do not add anything else."})
+_POSE('v2p_glassolotl_left2','Glassolotl',_LM['Glassolotl']['sheet'],_O+'v2a2_glassolotl_3.jpg',
+  "the mirror image of image 2: its head is on the LEFT side of the picture and its tail on the right, swimming through the air toward the left edge, body in a long S-curve.",3)

@@ -22561,6 +22561,29 @@
     "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn it into the female cassowary: a slightly bigger body, a taller bronze casque, and brighter fire glowing between the ribs. Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."
   },
   {
+    "id": "v2g_ringrove_tilt2",
+    "name": "Ringrove (strong head tilt)",
+    "refs": [
+      "briefs/boki-art/cards/Ringrove.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: tilt its whole head strongly to one side, about 30 degrees, so one ear is clearly lower than the other, like a puzzled, friendly dog. Its eyes look straight at the viewer, with a small lopsided smile. Its body, mushroom caps, colours and everything else stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "v2p_glassolotl_left2",
+    "name": "Glassolotl (V2 new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glassolotl.jpg",
+      "briefs/boki-art/batch/out/v2a2_glassolotl_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: the mirror image of image 2: its head is on the LEFT side of the picture and its tail on the right, swimming through the air toward the left edge, body in a long S-curve. Draw one single character illustration of Glassolotl. Image 1 shows it from four sides: use it to understand its body from every angle. Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
