@@ -4,7 +4,9 @@ extends RefCounted
 ## clamped to 8-15 s, on a 6 m leash, fighting a stomper, taking +25 % damage, with no Summon key and the
 ## bond meter untouched. Beaten, or at the end of the window, it is a wisp on the cooldown and the hunter is
 ## no longer protected (the steal hook). On cooldown, nothing bursts. Revived inside the window it finishes
-## it as a plain summon. The snapshot carries the flag. Prints PASS/FAIL.
+## it as a plain summon. The snapshot carries the flag. Guardian x steal (decision 0041): a Boki whose wisp is
+## stolen never guards its own hunter; a downed thief's stolen wisps stay linked while their own Boki guards
+## them and scatter once it is beaten. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -23,6 +25,7 @@ func run(main_node: Node) -> void:
 	_cooling()
 	_revived()
 	_snapshot()
+	_steal()
 	m.queue_free()
 	print("GUARDCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -68,6 +71,34 @@ func _down(foe_at := Vector3.INF) -> void:
 		foe.prev = foe.pos
 	m.knock(p, foe, {})
 	p.down_hp = 1e6
+
+## Guardian x steal: the player steals the foe's wisp, then goes down with their own guardian out.
+func _steal() -> void:
+	_start(true)
+	var p: Hunter = m.player
+	var foe := _foe()
+	var fk: Kin = foe.kin
+	fk.summon.cd = 60.0
+	m.knock(foe, p, {})
+	foe.down_hp = 1e6
+	_frames(0.1)
+	ok(KinSteal.grab(fk, p) and KinSteal.stolen(fk), "steal: the player grabs the downed foe's loose wisp")
+	m.revive_hunter(foe, null)
+	fk.summon.cd = 0.0
+	m.knock(foe, p, {})
+	_frames(0.1)
+	ok(fk.wisp and not fk.summon.guardian and fk.owner_h == p, "...a stolen Boki never guards its own hunter")
+	m.revive_hunter(foe, null)
+	_frames(0.1)
+	_down()
+	_frames(0.1)
+	var k: Kin = p.kin
+	ok(KinGuardian.protecting(p) and KinSteal.stolen(fk) and not KinSteal.loose(fk) and not KinSteal.can_break(p),
+		"steal: the downed thief's own Boki guards them, the stolen wisp stays linked")
+	k.hurt(k.max_hp * 5.0, null)
+	_frames(0.1)
+	ok(KinSteal.loose(fk) and fk.owner_h == foe and KinSteal.loose(k),
+		"...the guardian beaten, both wisps break loose")
 
 func _off() -> void:
 	_start(false)

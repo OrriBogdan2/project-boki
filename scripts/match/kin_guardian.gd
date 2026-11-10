@@ -7,8 +7,9 @@ extends RefCounted
 ## cooldown starts when it ends. It never touches the bond meter. It takes more damage (damage_mult). A
 ## white ring pulses on the ground round the Hunter Wisp and the HUD ring turns white: round = Hunter, the
 ## critter = Boki. Revived inside the window, it finishes the window beside you as a plain summon.
-## Stealing (WISP_DESIGN_OPEN.md Q6, not built here): a downed Hunter's wisps may scatter only once
-## protecting(h) is false, i.e. the window ended, the guardian was beaten (KinSummon.knocked), or they died.
+## Stealing (KinSteal.can_break, decision 0041): a downed Hunter's wisps, the stolen ones they carry too, may
+## scatter only once protecting(h) is false: the window ended, the guardian was beaten (KinSummon.knocked), or
+## they died. A Boki whose wisp is loose or stolen never guards.
 ## Numbers: content/rules/boki_summon.json "guardian".
 
 static func rules() -> Dictionary:
@@ -21,7 +22,7 @@ static func protecting(h: Hunter) -> bool:
 ## The Hunter just went down (Match.knock): the Boki bursts out if its summon is ready. True if it did.
 static func on_down(h: Hunter) -> bool:
 	var k: Kin = h.kin
-	if k == null or k.summon == null or not k.wisp or k.dead or k.state != "shoulder" or h.out:
+	if k == null or k.summon == null or not k.wisp or k.dead or k.state != "shoulder" or h.out or KinSteal.taken(k):
 		return false
 	var s := k.summon
 	if s.cd > 0.0 or s.out():

@@ -11,10 +11,13 @@ extends RefCounted
 ## orbiting its hunter at shoulder height, carry passives on, no orders or hits, the AI not ticking, and the
 ## snapshot flag turns a remote Boki into a wisp and back. The summon (KinSummon): every species has a window
 ## and cooldown in the uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash,
-## damage never ends it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a
-## shrink back to a dim wisp, a resting summon refuses, the snapshot carries it. R from the wisp fuses it and it
-## rides as a wisp again (summon cooldown untouched; a mount grows giant); R while summoned ends the window with one
-## cooldown; E from the wisp casts through you, a moving ability waits for the summon. Prints PASS/FAIL.
+## damage never ends it, a kill turns it back into a wisp with the longer cooldown that flies home at 25 m/s from
+## where it fell (its hunter shown for 2 s), the window ends in a shrink back to a dim wisp, a resting summon
+## refuses, the snapshot carries it and the homing flag. R from the wisp fuses it and it rides as a wisp again
+## (summon cooldown untouched; a mount grows giant); R while summoned ends the window with one cooldown; E from the
+## wisp casts through you, a moving ability waits for the summon. The stolen-wisp looks (StolenWisp): loose wisps
+## bob and pulse, a grab puts a thin side-colour ring and a tether on it, a scatter sends each wisp its own way, the
+## flight home trails and arrives, all within the particle budget. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -36,6 +39,7 @@ func run(main_node: Node) -> void:
 	_summon()
 	_merge_from_wisp()
 	_ability_from_wisp()
+	_stolen()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -244,10 +248,12 @@ func _boki_wisps() -> void:
 	ok(k.state == "shoulder" and not KinFollow.set_cmd(k, "follow"), "...it takes no throw and no order")
 	ok(k.hurt(50.0, null) == 0.0, "...it takes no hits")
 	k.render(DT, 1.0)
-	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
+	var off := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z)
 	var high := k.global_position.y - p.position.y
-	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0
-	ok(orbit, "...orbiting at shoulder height (%.2f m out, %.2f m up)" % [flat, high])
+	var orbit: bool = absf(off.length() - BokiWispClear.ORBIT_R) < 0.05 and high > 0.9 and high < 2.0
+	ok(orbit, "...riding at shoulder height (%.2f m out, %.2f m up)" % [off.length(), high])
+	var off_aim := rad_to_deg(absf(off.angle_to(p.aim_dir())))
+	ok(off_aim > 80.0, "...on the side away from the aim (%.0f deg off it)" % off_aim)
 	var other: Kin = owned.filter(func(x: Kin): return x != k)[0]
 	var snap := KinNet.kin_extra(k)
 	var row: Array = []
@@ -271,6 +277,20 @@ func _summon_data() -> void:
 			bad_ids.append(id)
 	ok(bad_ids.is_empty(), "summon: every species has a role x size window in the uptime band %s" % [bad_ids])
 	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
+	_dex_row()
+
+## The Field Book card's summon row shows the numbers the summon uses, with the right tag.
+func _dex_row() -> void:
+	var ids: Array = KinLib.kin_ids().filter(func(id): return Data.KIN.has(id))
+	ids.sort_custom(func(a, b): return KinSummon.times(KinLib.kin(a)).x < KinSummon.times(KinLib.kin(b)).x)
+	for spk in ["cindle", ids[0], ids[-1]]:   # Cindle plus the shortest and the longest window
+		var t := KinSummon.times(KinLib.kin(spk))
+		var row := DexView.summon_row(spk)
+		var txt := (row.find_child("SummonText", true, false) as Label).text
+		ok(txt == "Summon %d s / rest %d s" % [int(t.x), int(t.y)], "dex: %s card reads '%s'" % [spk, txt])
+		var tag := (row.get_child(2).get_child(0) as Label).text
+		ok(row.get_child_count() == 3 and tag == KinSummon.tag(t.x).to_upper(), "dex: %s card tag is %s" % [spk, tag])
+		row.free()
 
 ## A spot on solid ground dist m from here (the first of 8 directions that is not over the abyss).
 func _ground_away(from: Vector3, dist: float) -> Vector3:
@@ -279,6 +299,26 @@ func _ground_away(from: Vector3, dist: float) -> Vector3:
 		if not m.world.is_void(to.x, to.z):
 			return Vector3(to.x, m.world.ground_at(to.x, to.z), to.z)
 	return from + Vector3(dist, 0, 0)
+
+## A killed summon's wisp (KinSummon.fly_home): from where it fell, linked, home at 25 m/s, its hunter shown for 2 s.
+func _homing(k: Kin, fell: Vector3) -> void:
+	var p: Hunter = m.player
+	var home := func() -> float: return k.pos.distance_to(p.pos + Vector3(0, 1.5, 0))
+	ok(k.summon.homing and k.pos.distance_to(fell + Vector3(0, KinWisp.SHOULDER_Y, 0)) < 0.01 and not KinSteal.loose(k),
+		"home: its hunter up, the wisp stays linked and starts home from where it fell")
+	ok(absf(p.reveal_t - 2.0) < 0.01, "...showing its hunter through walls for 2 s (%.1f)" % p.reveal_t)
+	var gap: float = home.call()
+	for i in 12:
+		m.step(DT)
+	var flown: float = gap - home.call()
+	ok(k.summon.homing and absf(flown - 5.0) < 0.05, "...flying at 25 m/s (%.2f m in 0.2 s)" % flown)
+	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]
+	var row: Array = []
+	row.resize(KinNet.KIN_AT)
+	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
+	ok(other.summon.homing and other.wisp, "online: the snapshot carries the homing flag (KinNet.HOME_AT)")
+	_frames(gap / 25.0)
+	ok(not k.summon.homing and home.call() < 0.05, "...then it rides at its hunter's shoulder again")
 
 ## The summon itself, on the player's Cindle with Boki wisps on.
 func _summon() -> void:
@@ -313,11 +353,13 @@ func _summon() -> void:
 		"summon: the window ends, it shrinks back into a wisp, the cooldown runs (%.1f s)" % s.cd)
 	k.render(DT, 1.0)
 	var trail := k.model.get_node("Trail") as CPUParticles3D
-	ok(not trail.emitting, "...the wisp is dim while it rests")
+	var body := k.model.get_node("Body") as GeometryInstance3D
+	var dim: float = body.get_instance_shader_parameter("dim")
+	ok(not trail.emitting and dim == BokiWispLook.DIM, "...the wisp is dim, no sparkles, while it rests")
 	ok(not KinSummon.press(p) and k.wisp, "...and Summon is refused until it is rested")
 	s.cd = 0.0
 	k.render(DT, 1.0)
-	ok((k.model.get_node("Trail") as CPUParticles3D).emitting, "...bright again when ready")
+	ok(float(body.get_instance_shader_parameter("dim")) == 1.0, "...bright again when ready")
 	KinSummon.press(p)
 	ok(KinSummon.press(p) and s.shrink > 0.0, "summon: Summon again sends it back early")
 	k.render(DT, 1.0)
@@ -328,13 +370,17 @@ func _summon() -> void:
 	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...and the wisp shows again after the fold")
 	s.cd = 0.0
 	KinSummon.press(p)
+	k.teleport(_ground_away(p.pos, 12.0))
+	var fell := k.pos
+	p.reveal_t = 0.0
 	k.hurt(k.max_hp * 5.0, null)
 	ok(k.wisp and k.state == "shoulder" and absf(s.cd - 75.0) < 0.01,
-		"summon: knocked down, it turns back into a wisp, 75 s cooldown")
+		"summon: killed, it turns back into a wisp, 75 s cooldown (knocked_cd_mult)")
 	pop = k.get_node_or_null(KinSummon.POP) as BokiWispPop
-	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding from where it fell up to the shoulder")
+	ok(pop != null and not pop.out and pop.stand.y < -0.5, "...folding into its wisp where it fell")
 	pop._process(BokiWispPop.DURATION + 0.01)
-	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp rides on")
+	ok(k.get_node_or_null(KinSummon.POP) == null and k.model.visible, "...then the wisp shows")
+	_homing(k, fell)
 	s.cd = 0.0
 	KinSummon.press(p)
 	var other: Kin = m.kins.filter(func(x: Kin): return x.owner_h != null and x != k)[0]
@@ -433,3 +479,86 @@ func _ability_from_wisp() -> void:
 		else:
 			ok(not cast and k.runner.is_ready("k1") and rode and KinCommand.c_deny_text(p) != "",
 				"E from the wisp [%s]: a moving ability waits for the summon (%s)" % [id, KinCommand.c_deny_text(p)])
+
+func _stolen() -> void:
+	_start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true})
+	var thief: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != thief.team)[0]
+	var at := thief.position + Vector3(6, 1.3, 0)
+	var a := StolenWisp.spawn(m, "cindle", {}, at)
+	var b := StolenWisp.spawn(m, "puddlet", {}, at)
+	var body := a.model.get_node("Body") as Node3D
+	var lo := 9.0
+	var hi := -9.0
+	for i in 240:
+		a.tick(1.0 / 60.0)
+		lo = minf(lo, body.position.y)
+		hi = maxf(hi, body.position.y)
+	ok(a.state == StolenWisp.State.LOOSE and a.position == at and hi - lo > StolenWisp.BOB_M,
+			"stolen: a loose wisp bobs in place (%.2f m)" % (hi - lo))
+	var dims := []
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		dims.append(float(body.get_instance_shader_parameter("dim")))
+	ok(dims.min() < StolenWisp.PULSE_LOW + 0.05 and dims.max() > 0.98 and dims.min() >= StolenWisp.PULSE_LOW - 0.01,
+			"...and pulses softly (%.2f to %.2f)" % [dims.min(), dims.max()])
+	a.grab(thief, 0)
+	b.grab(thief, 1)
+	for i in 120:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	ok(a.col.is_equal_approx(SideColor.of(m, thief)) and not a.col.is_equal_approx(SideColor.FOE),
+			"stolen: the ring takes the thief's side colour")
+	var torus := a._ring.mesh as TorusMesh
+	ok(torus.outer_radius - torus.inner_radius <= 0.03 and (a._tether.mesh as CylinderMesh).top_radius <= 0.02,
+			"...thin ring and thin tether")
+	var ring_body_y := (a.model.get_node("Body") as Node3D).global_position.y
+	ok(a.position.y - thief.position.y > 1.0 and absf(a._ring.global_position.y - ring_body_y) < 0.01,
+			"...round the wisp, up at shoulder height, never on the ground")
+	ok(a.position.distance_to(b.position) > 0.5, "...two stolen wisps float apart")
+	var run := thief.position
+	for i in 30:
+		thief.position += Vector3(0.3, 0, 0)
+		a.tick(1.0 / 60.0)
+	var chest := thief.position + Vector3(0, StolenWisp.CHEST_Y, 0)
+	var tl := a._tether.global_transform
+	var held_body := (a.model.get_node("Body") as Node3D)
+	ok(a._ring.position == held_body.position, "...the ring rides the body's bob")
+	ok(tl.basis.y.length() > 1.5 and tl.origin.distance_to((chest + held_body.global_position) * 0.5) < 0.05,
+			"...a running thief drags the tether out (%.1f m)" % tl.basis.y.length())
+	ok(a.get_children().all(func(n): return not n is CPUParticles3D),
+			"...no particles of its own beyond the body's sparkles")
+	thief.position = run
+	var from := a.global_position
+	m.fx.radial = 0
+	a.scatter(0, 2)
+	b.scatter(1, 2)
+	ok(a._ring == null or a._ring.is_queued_for_deletion(), "scatter: the ring and tether let go")
+	for i in int(StolenWisp.SCATTER_S * 60.0) + 2:
+		a.tick(1.0 / 60.0)
+		b.tick(1.0 / 60.0)
+	var da := a.position - from
+	var db := b.position - from
+	ok(a.state == StolenWisp.State.LOOSE and b.state == StolenWisp.State.LOOSE, "...each settles loose again")
+	ok(da.length() > 3.0 and db.length() > 3.0 and absf(da.angle_to(db)) > 0.6,
+			"...and darted its own way (%.0f deg apart)" % rad_to_deg(da.angle_to(db)))
+	ok(m.fx.radial >= 2, "...a small burst marks each")
+	var sparkles := 0
+	for w in [a, b]:
+		sparkles += (w.model.get_node("Trail") as CPUParticles3D).amount
+	ok(sparkles + 8 * BokiWispLook.TRAIL_AMOUNT < 300,
+			"particles: ten wisps stay under the 300 budget (%d now)" % sparkles)
+	var homed := [false]
+	a.arrived.connect(func(): homed[0] = true)
+	a.go_home(foe)
+	for i in 5:
+		a.tick(1.0 / 60.0)
+	ok(a._ribbon != null and (a._ribbon.mesh as ImmediateMesh).get_surface_count() == 1,
+			"home: a ribbon trails behind the flight")
+	for i in 400:
+		if homed[0]:
+			break
+		a.tick(1.0 / 60.0)
+	ok(homed[0] and a.is_queued_for_deletion(),
+			"...it arrives at its owner within %.1f s and folds in" % StolenWisp.HOME_S.y)
+	b.queue_free()

@@ -11,7 +11,8 @@ func _fades_on() -> bool:
 		return false
 	if _has_arg("--show-fade"):
 		return true
-	return not (_has_arg("--shot=") or _has_arg("--art-view=") or _has_arg("--rolling-shot=") or _has_arg("--autoplay") or _has_arg("--simtest"))
+	return not (_has_arg("--shot=") or _has_arg("--art-view=") or _has_arg("--rolling-shot=")
+		or _has_arg("--autoplay") or _has_arg("--simtest"))
 
 func _ready() -> void:
 	if "--relay" in OS.get_cmdline_user_args():
@@ -32,7 +33,8 @@ func _ready() -> void:
 	if "--no-save" in args or "--archetype-check" in args or "--kit-combo-check" in args or "--mage-combo-check" in args or "--gunslinger-combo-check" in args or "--zone-check" in args or "--dolm-combo-check" in args or "--ostra-combo-check" in args or "--hero-combo-check" in args or "--archer-combo-check" in args or "--bulwark-combo-check" in args or "--arena-check" in args or "--dredge-combo-check" in args or "--ashwick-combo-check" in args or Array(args).any(func(x): return String(x).begins_with("--shot=") or String(x).begins_with("--arena-shot=") or String(x).begins_with("--rolling-shot=")):
 		Save.no_write = true
 	var opts := {}
-	var demo := Demo.name_in(args)      # recording presets: a made-up save in memory, overlays hidden (docs/DEMO_PRESETS.md)
+	# recording presets: a made-up save in memory, overlays hidden (docs/DEMO_PRESETS.md)
+	var demo := Demo.name_in(args)
 	if demo != "": Demo.setup(demo)
 	for a in args:
 		if a.begins_with("--overlay="):
@@ -400,7 +402,12 @@ func _ready() -> void:
 		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
 		return
 	if "--nook-check" in args:
-		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding: friend gate, lean head start, habits
+		# Nesting Nook gate and breeding: friend gate, lean head start, habits
+		load("res://tools/nook_check.gd").new().run(self)
+		return
+	if "--unstable-mix-check" in args:
+		# Nook unstable mixes: 20 clashing, 20 calm couples
+		load("res://tools/unstable_mix_check.gd").new().run(self)
 		return
 	if "--incubator-check" in args:
 		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
@@ -462,6 +469,10 @@ func _ready() -> void:
 		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
+		return
+	if "--train-ride-check" in args:
+		# leaving and landing on the moving cars keeps your momentum
+		load("res://tools/train_ride_check.gd").new().run(self)
 		return
 	if "--balloon-check" in args:
 		load("res://tools/balloon_check.gd").new().run(self)      # the hit marker is the hitbox
@@ -699,7 +710,8 @@ func _ready() -> void:
 	elif "--arena" in args:
 		_open_arena("")
 	elif "--training" in args:
-		show_screen("match", {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": "--no-drop" in args, "perk_demo": "--perk-demo" in args})
+		# (the Training Grounds)
+		show_screen("match", Match.arena_opts(Arch.of_save()).merged({"perk_demo": "--perk-demo" in args}, true))
 	elif "--tutorial" in args or "--tut-test" in args:
 		show_screen("match", {"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tut_test": "--tut-test" in args})
 	elif args.is_empty() or "--title" in args:
@@ -1145,7 +1157,8 @@ func _economy_check() -> void:
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
 	var sick: Dictionary = Save.d["roster"][0]
-	ok.call(not died and Care.starve_stage(sick) == "sick", "natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
+	ok.call(not died and Care.starve_stage(sick) == "sick",
+		"natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
 	for meal in 12: Care.feed(sick, "kibble"); Care.feed(sick, "kibble"); Care.tick(sick, 1200.0)
 	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"], "four hours of regular meals bring it back from sick (%s, %.0fh)" % [Care.starve_stage(sick), Care.starve_h(sick)])
 	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
@@ -2080,7 +2093,8 @@ func _extract_check() -> void:
 	var pings_before := m.pings.size()
 	run.call(m, 2.5, func(): P.inp["interact"] = true)
 	P.inp["interact"] = false
-	var flare: bool = ExitSignal.phase(d, -1) == ExitSignal.ACTIVE and (d["node"] as Node3D).get_node("Signal").scale.y >= 1.0
+	var flare: bool = ExitSignal.phase(d, -1) == ExitSignal.ACTIVE \
+			and (d["node"] as Node3D).get_node("Signal").scale.y >= 1.0
 	print("EXCHECK skiff: state=%s after holding %.1fs, arrives in %.0fs; loud: map pings +%d, flare=%s" % [d["state"], m.time - t0, float(d["t"]), m.pings.size() - pings_before, flare])
 	if d["state"] != "called" or m.pings.size() <= pings_before or not flare: ok = false; print("EXCHECK FAIL skiff not called (or not loud)")
 	# the waves come in: hold everyone where they are (a brute could knock the idle test hunters
@@ -2410,7 +2424,8 @@ func _truce_check() -> void:
 	if answered == "no answer": ok = false; print("TCHECK FAIL no answer")
 	if not T.allied(0, 1):
 		print("TCHECK (making the truce by hand for the rest of the check)")
-		for h in m.hunters: h.ctrl = "idle"      # (a swing already under way would land on the new partner and break the truce)
+		# (a swing already under way would land on the new partner and break the truce)
+		for h in m.hunters: h.ctrl = "idle"
 		run.call(1.0)
 		for h in m.hunters: h.ctrl = "bot"
 		T.make(0, 1)

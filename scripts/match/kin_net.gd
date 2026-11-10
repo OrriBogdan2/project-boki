@@ -10,23 +10,27 @@ extends RefCounted
 ##     games get the state and play the moment.
 
 ## Kin snapshot index table (absolute row indices, each with one meaning; kin_extra writes them in order and
-## apply_kin reads them; Net 0.31.0, docs/decisions/0040 and 0041):
+## apply_kin reads them; Net 0.31.1, 0.31.3 on the integ line, docs/decisions/0040 and 0041):
 ##   19 order (KinFollow.CMD_IDS index), 20 down s left, 21 rescue progress, 22 fell in the abyss, 23 rest s left
 ##   24 1 when it rides as a wisp (KinWisp)
 ##   25 summon window s left, 26 shrink s left, 27 cooldown s left (KinSummon)
 ##   28 1 while it is out as a guardian (KinGuardian)
 ##   29 loose s left, 30 carrier nid or "", 31 its stolen summon used (KinSteal)
+##   32 1 while its killed summon's wisp flies home (KinSummon.homing)
 const KIN_AT := 19
 const WISP_AT := 24
 const SUMMON_AT := 25
 const GUARD_AT := 28
 const STEAL_AT := 29
-const KIN_END := 32     # the kin row's length
+const HOME_AT := 32
+const KIN_END := 33     # the kin row's length
 const HUNTER_AT := 26
 
 static func kin_extra(k: Kin) -> Array:
-	return [maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05),
+	var homing := int(k.summon != null and k.summon.homing)
+	return ([maxi(0, KinFollow.CMD_IDS.find(k.cmd)), snappedf(k.down_t, 0.1), snappedf(KinDowned.scoop_k(k), 0.05),
 		1 if k.down_void else 0, snappedf(k.rest_t, 0.1), int(k.wisp)] + _summon_extra(k) + KinSteal.net_extra(k)
+		+ [homing])
 
 static func apply_kin(k: Kin, it: Array) -> void:
 	if it.size() <= KIN_AT + 4:
@@ -45,6 +49,7 @@ static func apply_kin(k: Kin, it: Array) -> void:
 		k.summon.shrink = float(it[SUMMON_AT + 1])
 		k.summon.cd = float(it[SUMMON_AT + 2])
 		k.summon.guardian = int(it[GUARD_AT]) == 1
+		k.summon.homing = int(it[HOME_AT]) == 1
 	KinSteal.apply_net(k, float(it[STEAL_AT]), String(it[STEAL_AT + 1]), int(it[STEAL_AT + 2]) == 1)
 
 static func _summon_extra(k: Kin) -> Array:
