@@ -45,3 +45,9 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## Boki cries (`audio/cries/`)
+- One short call per Boki (0.4-1.4 s), `audio/cries/<file_id>.wav`, made by `tools/gen_boki_cries.py` from `tools/boki_cries_roster.tsv` (who is in which evolution line, at which stage, branch, type, and the one-line cry brief). The manifest `audio/cries/cries.json` maps id to file, line, stage and recipe.
+- A line shares one voice (seeded by the line id): source, vowel, flutter rate, texture and a motif unique to the line. The stage shapes it: first higher, shorter, squeakier; middle fuller; final lower, longer, with a growl and a low octave. Branch forms bend the last note and carry their own type's tint.
+- Levelled to the `boki` category. `python3 tools/cries_stats.py` measures loudness, clicks, length and the family rule (line-mates closer than unrelated cries, no unrelated near-twins); `--boki-cries-check` asserts every species in `Data.KIN` has a cry and the manifest is whole.
+- In game: `BokiCry.play(species_id)` (`scripts/ui/boki_cry.gd`), played when a Bokidex entry opens. Listening page: `python3 tools/cries_preview.py` writes `tools/cries_preview/index.html`.

@@ -1,0 +1,7764 @@
+{
+ "cries": {
+  "Mycroll": {
+   "file": "audio/cries/mycroll.wav",
+   "display_name": "Mycroll",
+   "line": "Mycroll",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal ah vib buzz",
+   "motif": [
+    0,
+    5,
+    -4
+   ],
+   "notes": [
+    0,
+    5,
+    -4
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "puff",
+    "air"
+   ],
+   "seconds": 0.56
+  },
+  "Sporcupine": {
+   "file": "audio/cries/sporcupine.wav",
+   "display_name": "Sporcupine",
+   "line": "Mycroll",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal ah vib buzz",
+   "motif": [
+    0,
+    5,
+    -4
+   ],
+   "notes": [
+    0,
+    5,
+    -4
+   ],
+   "shape": "mid",
+   "tint": [
+    "buzz",
+    "puff",
+    "rustle"
+   ],
+   "seconds": 0.67
+  },
+  "Ringrove": {
+   "file": "audio/cries/ringrove.wav",
+   "display_name": "Ringrove",
+   "line": "Mycroll",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore/Grass",
+   "voice": "vocal ah vib buzz",
+   "motif": [
+    0,
+    5,
+    -4
+   ],
+   "notes": [
+    0,
+    5,
+    -4
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "puff",
+    "rustle",
+    "clicks"
+   ],
+   "seconds": 1.1
+  },
+  "Vespyx": {
+   "file": "audio/cries/vespyx.wav",
+   "display_name": "Vespyx",
+   "line": "Vespyx",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal ee purr bubbles",
+   "motif": [
+    0,
+    -3,
+    -5
+   ],
+   "notes": [
+    0,
+    -3,
+    -5
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "bubbles_lo",
+    "clicks",
+    "chatter"
+   ],
+   "seconds": 0.56
+  },
+  "Vespox": {
+   "file": "audio/cries/vespox.wav",
+   "display_name": "Vespox",
+   "line": "Vespyx",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal ee purr bubbles",
+   "motif": [
+    0,
+    -3,
+    -5
+   ],
+   "notes": [
+    0,
+    -3,
+    -5
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "bubbles_lo",
+    "growl",
+    "clicks"
+   ],
+   "seconds": 0.72
+  },
+  "Glaivyx": {
+   "file": "audio/cries/glaivyx.wav",
+   "display_name": "Sabryx",
+   "line": "Vespyx",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison/Steel",
+   "voice": "vocal ee purr bubbles",
+   "motif": [
+    0,
+    -3,
+    -5
+   ],
+   "notes": [
+    0,
+    -3,
+    -5
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "bubbles_lo",
+    "clicks_hi",
+    "bell"
+   ],
+   "seconds": 1.03
+  },
+  "Prismander": {
+   "file": "audio/cries/prismander.wav",
+   "display_name": "Prismander",
+   "line": "Prismander",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Crystal",
+   "voice": "buzzy oh purr rustle",
+   "motif": [
+    0,
+    7,
+    -5
+   ],
+   "notes": [
+    0,
+    7,
+    -5
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "bell"
+   ],
+   "seconds": 0.41
+  },
+  "Glassolotl": {
+   "file": "audio/cries/glassolotl.wav",
+   "display_name": "Glassolotl",
+   "line": "Prismander",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Crystal",
+   "voice": "buzzy oh purr rustle",
+   "motif": [
+    0,
+    7,
+    -5
+   ],
+   "notes": [
+    0,
+    7,
+    -5
+   ],
+   "shape": "mid",
+   "tint": [
+    "rustle",
+    "bell",
+    "chatter"
+   ],
+   "seconds": 0.83
+  },
+  "Chandelotl": {
+   "file": "audio/cries/chandelotl.wav",
+   "display_name": "Crystalotl",
+   "line": "Prismander",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Crystal/Fairy",
+   "voice": "buzzy oh purr rustle",
+   "motif": [
+    0,
+    7,
+    -5
+   ],
+   "notes": [
+    0,
+    7,
+    -5
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "bell",
+    "shimmer",
+    "chatter"
+   ],
+   "seconds": 1.06
+  },
+  "Ermink": {
+   "file": "audio/cries/ermink.wav",
+   "display_name": "Ermink",
+   "line": "Ermink",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "chatter"
+   ],
+   "seconds": 0.43
+  },
+  "Flarmink": {
+   "file": "audio/cries/flarmink.wav",
+   "display_name": "Embermink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "a",
+   "types": "Fire",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "crackle",
+    "buzz",
+    "chatter"
+   ],
+   "seconds": 1.01
+  },
+  "Rippmink": {
+   "file": "audio/cries/rippmink.wav",
+   "display_name": "Rippmink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "b",
+   "types": "Water",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "bubbles",
+    "chatter"
+   ],
+   "seconds": 0.94
+  },
+  "Blossmink": {
+   "file": "audio/cries/blossmink.wav",
+   "display_name": "Blossmink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "c",
+   "types": "Grass",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    14
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "rustle",
+    "air",
+    "chatter"
+   ],
+   "seconds": 0.97
+  },
+  "Voltmink": {
+   "file": "audio/cries/voltmink.wav",
+   "display_name": "Voltmink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "d",
+   "types": "Electric",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    5
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "buzz",
+    "clicks",
+    "chatter"
+   ],
+   "seconds": 1.09
+  },
+  "Rimink": {
+   "file": "audio/cries/rimink.wav",
+   "display_name": "Rimink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "e",
+   "types": "Ice",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    17
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "bell_hi",
+    "chatter"
+   ],
+   "seconds": 0.9
+  },
+  "Umbrink": {
+   "file": "audio/cries/umbrink.wav",
+   "display_name": "Nightmink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "f",
+   "types": "Dark",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "growl",
+    "chatter"
+   ],
+   "seconds": 1.16
+  },
+  "Lunink": {
+   "file": "audio/cries/lunink.wav",
+   "display_name": "Lunink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "g",
+   "types": "Fairy",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    3
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "shimmer",
+    "bell",
+    "chatter"
+   ],
+   "seconds": 0.91
+  },
+  "Prismink": {
+   "file": "audio/cries/prismink.wav",
+   "display_name": "Prismink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "h",
+   "types": "Crystal",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    15
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "bell",
+    "chatter"
+   ],
+   "seconds": 0.93
+  },
+  "Wyrmink": {
+   "file": "audio/cries/wyrmink.wav",
+   "display_name": "Wyrmink",
+   "line": "Ermink",
+   "stage": 2,
+   "stages": 2,
+   "branch": "i",
+   "types": "Dragon",
+   "voice": "vocal ah trill shimmer",
+   "motif": [
+    0,
+    -4,
+    1,
+    10
+   ],
+   "notes": [
+    0,
+    -4,
+    1,
+    8
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "rumble",
+    "growl",
+    "chatter"
+   ],
+   "seconds": 0.91
+  },
+  "Kestrike": {
+   "file": "audio/cries/kestrike.wav",
+   "display_name": "Kestrike",
+   "line": "Kestrike",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh trill puff",
+   "motif": [
+    0,
+    -4,
+    3,
+    7
+   ],
+   "notes": [
+    0,
+    -4,
+    3,
+    7
+   ],
+   "shape": "first",
+   "tint": [
+    "puff",
+    "chatter",
+    "buzz"
+   ],
+   "seconds": 0.43
+  },
+  "Arcestrel": {
+   "file": "audio/cries/arcestrel.wav",
+   "display_name": "Arcestrel",
+   "line": "Kestrike",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh trill puff",
+   "motif": [
+    0,
+    -4,
+    3,
+    7
+   ],
+   "notes": [
+    0,
+    -4,
+    3,
+    7
+   ],
+   "shape": "mid",
+   "tint": [
+    "puff",
+    "chatter"
+   ],
+   "seconds": 0.73
+  },
+  "Voltalon": {
+   "file": "audio/cries/voltalon.wav",
+   "display_name": "Voltalon",
+   "line": "Kestrike",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal/Electric",
+   "voice": "vocal eh trill puff",
+   "motif": [
+    0,
+    -4,
+    3,
+    7
+   ],
+   "notes": [
+    0,
+    -4,
+    3,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "chatter",
+    "buzz"
+   ],
+   "seconds": 1.07
+  },
+  "Jerbit": {
+   "file": "audio/cries/jerbit.wav",
+   "display_name": "Jerbit",
+   "line": "Jerbit",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "whistle oh purr crackle",
+   "motif": [
+    0,
+    4,
+    1,
+    -1
+   ],
+   "notes": [
+    0,
+    4,
+    1,
+    -1
+   ],
+   "shape": "first",
+   "tint": [
+    "crackle",
+    "buzz",
+    "bell"
+   ],
+   "seconds": 0.6
+  },
+  "Jerbolt": {
+   "file": "audio/cries/jerbolt.wav",
+   "display_name": "Jerbolt",
+   "line": "Jerbit",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "whistle oh purr crackle",
+   "motif": [
+    0,
+    4,
+    1,
+    -1
+   ],
+   "notes": [
+    0,
+    4,
+    1,
+    -1
+   ],
+   "shape": "mid",
+   "tint": [
+    "crackle",
+    "buzz"
+   ],
+   "seconds": 0.89
+  },
+  "Dynaboa": {
+   "file": "audio/cries/dynaboa.wav",
+   "display_name": "Dynaboa",
+   "line": "Jerbit",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "whistle oh purr crackle",
+   "motif": [
+    0,
+    4,
+    1,
+    -1
+   ],
+   "notes": [
+    0,
+    4,
+    1,
+    -1
+   ],
+   "shape": "final",
+   "tint": [
+    "crackle",
+    "buzz"
+   ],
+   "seconds": 1.05
+  },
+  "Effigeetle": {
+   "file": "audio/cries/effigeetle.wav",
+   "display_name": "Sculptillar",
+   "line": "Effigeetle",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Bug",
+   "voice": "glassy oh trill buzz",
+   "motif": [
+    0,
+    -7,
+    -10,
+    -12
+   ],
+   "notes": [
+    0,
+    -7,
+    -10,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "clicks",
+    "buzz"
+   ],
+   "seconds": 0.45
+  },
+  "Effigoon": {
+   "file": "audio/cries/effigoon.wav",
+   "display_name": "Effigoon",
+   "line": "Effigeetle",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Bug",
+   "voice": "glassy oh trill buzz",
+   "motif": [
+    0,
+    -7,
+    -10,
+    -12
+   ],
+   "notes": [
+    0,
+    -7,
+    -10,
+    -12
+   ],
+   "shape": "mid",
+   "tint": [
+    "buzz",
+    "clicks",
+    "buzz"
+   ],
+   "seconds": 0.89
+  },
+  "Mortarfly": {
+   "file": "audio/cries/mortarfly.wav",
+   "display_name": "Mortarfly",
+   "line": "Effigeetle",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Bug",
+   "voice": "glassy oh trill buzz",
+   "motif": [
+    0,
+    -7,
+    -10,
+    -12
+   ],
+   "notes": [
+    0,
+    -7,
+    -10,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "clicks",
+    "buzz"
+   ],
+   "seconds": 1.13
+  },
+  "Marchleaf": {
+   "file": "audio/cries/marchleaf.wav",
+   "display_name": "Marchleaf",
+   "line": "Marchleaf",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Bug",
+   "voice": "buzzy oh none shimmer",
+   "motif": [
+    0,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -12,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.51
+  },
+  "Scythant": {
+   "file": "audio/cries/scythant.wav",
+   "display_name": "Scythant",
+   "line": "Marchleaf",
+   "stage": 2,
+   "stages": 3,
+   "branch": "a",
+   "types": "Bug",
+   "voice": "buzzy oh none shimmer",
+   "motif": [
+    0,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -12,
+    -12
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.73
+  },
+  "Harvantis": {
+   "file": "audio/cries/harvantis.wav",
+   "display_name": "Harvantis",
+   "line": "Marchleaf",
+   "stage": 3,
+   "stages": 3,
+   "branch": "a",
+   "types": "Bug",
+   "voice": "buzzy oh none shimmer",
+   "motif": [
+    0,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -12,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "buzz",
+    "clicks",
+    "rustle"
+   ],
+   "seconds": 0.97
+  },
+  "Shinobant": {
+   "file": "audio/cries/shinobant.wav",
+   "display_name": "Shinobant",
+   "line": "Marchleaf",
+   "stage": 2,
+   "stages": 3,
+   "branch": "b",
+   "types": "Bug",
+   "voice": "buzzy oh none shimmer",
+   "motif": [
+    0,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -12,
+    -15
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.72
+  },
+  "Reapant": {
+   "file": "audio/cries/reapant.wav",
+   "display_name": "Reapant",
+   "line": "Marchleaf",
+   "stage": 3,
+   "stages": 3,
+   "branch": "b",
+   "types": "Bug/Grass",
+   "voice": "buzzy oh none shimmer",
+   "motif": [
+    0,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -12,
+    -15
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "buzz",
+    "rustle"
+   ],
+   "seconds": 1.05
+  },
+  "Mumblet": {
+   "file": "audio/cries/mumblet.wav",
+   "display_name": "Mumblet",
+   "line": "Mumblet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Bug",
+   "voice": "buzzy ah trill rustle",
+   "motif": [
+    0,
+    -2,
+    -12,
+    -3
+   ],
+   "notes": [
+    0,
+    -2,
+    -12,
+    -3
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "buzz"
+   ],
+   "seconds": 0.59
+  },
+  "Klaxada": {
+   "file": "audio/cries/klaxada.wav",
+   "display_name": "Klaxada",
+   "line": "Mumblet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Bug",
+   "voice": "buzzy ah trill rustle",
+   "motif": [
+    0,
+    -2,
+    -12,
+    -3
+   ],
+   "notes": [
+    0,
+    -2,
+    -12,
+    -3
+   ],
+   "shape": "mid",
+   "tint": [
+    "rustle",
+    "buzz"
+   ],
+   "seconds": 0.85
+  },
+  "Sirencada": {
+   "file": "audio/cries/sirencada.wav",
+   "display_name": "Sirencada",
+   "line": "Mumblet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Sound/Bug",
+   "voice": "buzzy ah trill rustle",
+   "motif": [
+    0,
+    -2,
+    -12,
+    -3
+   ],
+   "notes": [
+    0,
+    -2,
+    -12,
+    -3
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "echo",
+    "buzz"
+   ],
+   "seconds": 1.06
+  },
+  "Dribbara": {
+   "file": "audio/cries/dribbara.wav",
+   "display_name": "Dribbara",
+   "line": "Dribbara",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Water",
+   "voice": "vocal uh vib shimmer",
+   "motif": [
+    0,
+    12,
+    8
+   ],
+   "notes": [
+    0,
+    12,
+    8
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "bubbles"
+   ],
+   "seconds": 0.58
+  },
+  "Soakybara": {
+   "file": "audio/cries/soakybara.wav",
+   "display_name": "Soakybara",
+   "line": "Dribbara",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Water",
+   "voice": "vocal uh vib shimmer",
+   "motif": [
+    0,
+    12,
+    8
+   ],
+   "notes": [
+    0,
+    12,
+    8
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "bubbles",
+    "air"
+   ],
+   "seconds": 0.75
+  },
+  "Geysirbara": {
+   "file": "audio/cries/geysirbara.wav",
+   "display_name": "Geyserbara",
+   "line": "Dribbara",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Grass/Water",
+   "voice": "vocal uh vib shimmer",
+   "motif": [
+    0,
+    12,
+    8
+   ],
+   "notes": [
+    0,
+    12,
+    8
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "rustle",
+    "bubbles",
+    "rumble"
+   ],
+   "seconds": 1.01
+  },
+  "Cubbat": {
+   "file": "audio/cries/cubbat.wav",
+   "display_name": "Cubwom",
+   "line": "Cubbat",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal uh trill shimmer",
+   "motif": [
+    0,
+    -4,
+    -7
+   ],
+   "notes": [
+    0,
+    -4,
+    -7
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "chatter"
+   ],
+   "seconds": 0.55
+  },
+  "Pipwom": {
+   "file": "audio/cries/pipwom.wav",
+   "display_name": "Pipwom",
+   "line": "Cubbat",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal uh trill shimmer",
+   "motif": [
+    0,
+    -4,
+    -7
+   ],
+   "notes": [
+    0,
+    -4,
+    -7
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "chatter",
+    "rumble"
+   ],
+   "seconds": 0.9
+  },
+  "Critwom": {
+   "file": "audio/cries/critwom.wav",
+   "display_name": "Critwom",
+   "line": "Cubbat",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal uh trill shimmer",
+   "motif": [
+    0,
+    -4,
+    -7
+   ],
+   "notes": [
+    0,
+    -4,
+    -7
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "chatter",
+    "growl"
+   ],
+   "seconds": 1.07
+  },
+  "Crofthorn": {
+   "file": "audio/cries/crofthorn.wav",
+   "display_name": "Crofthorn",
+   "line": "Crofthorn",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Grass/Normal",
+   "voice": "vocal oh vib rustle",
+   "motif": [
+    0,
+    -3,
+    -8
+   ],
+   "notes": [
+    0,
+    -3,
+    -8
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "rustle",
+    "chatter",
+    "bell"
+   ],
+   "seconds": 0.52
+  },
+  "Crofthollow": {
+   "file": "audio/cries/crofthollow.wav",
+   "display_name": "Crofthollow",
+   "line": "Crofthorn",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Grass/Normal",
+   "voice": "vocal oh vib rustle",
+   "motif": [
+    0,
+    -3,
+    -8
+   ],
+   "notes": [
+    0,
+    -3,
+    -8
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "rustle",
+    "chatter"
+   ],
+   "seconds": 0.91
+  },
+  "Kindlewren": {
+   "file": "audio/cries/kindlewren.wav",
+   "display_name": "Kindlewren",
+   "line": "Kindlewren",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal uh none bell",
+   "motif": [
+    0,
+    4,
+    -5
+   ],
+   "notes": [
+    0,
+    4,
+    -5
+   ],
+   "shape": "first",
+   "tint": [
+    "bell",
+    "crackle"
+   ],
+   "seconds": 0.44
+  },
+  "Embrook": {
+   "file": "audio/cries/embrook.wav",
+   "display_name": "Embrook",
+   "line": "Kindlewren",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal uh none bell",
+   "motif": [
+    0,
+    4,
+    -5
+   ],
+   "notes": [
+    0,
+    4,
+    -5
+   ],
+   "shape": "mid",
+   "tint": [
+    "bell",
+    "crackle"
+   ],
+   "seconds": 0.75
+  },
+  "Pyrraven": {
+   "file": "audio/cries/pyrraven.wav",
+   "display_name": "Pyrraven",
+   "line": "Kindlewren",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire/Flying",
+   "voice": "vocal uh none bell",
+   "motif": [
+    0,
+    4,
+    -5
+   ],
+   "notes": [
+    0,
+    4,
+    -5
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "crackle",
+    "air",
+    "growl"
+   ],
+   "seconds": 0.96
+  },
+  "Moatpole": {
+   "file": "audio/cries/moatpole.wav",
+   "display_name": "Moatpole",
+   "line": "Moatpole",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Rock/Water",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -7,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "clicks",
+    "bubbles"
+   ],
+   "seconds": 0.59
+  },
+  "Rampartoad": {
+   "file": "audio/cries/rampartoad.wav",
+   "display_name": "Rampartoad",
+   "line": "Moatpole",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Rock/Water",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -7,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "clicks",
+    "bubbles",
+    "rumble"
+   ],
+   "seconds": 1.19
+  },
+  "Echolop": {
+   "file": "audio/cries/echolop.wav",
+   "display_name": "Echolop",
+   "line": "Echolop",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle ah purr clicks",
+   "motif": [
+    0,
+    -5,
+    2
+   ],
+   "notes": [
+    0,
+    -5,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks",
+    "echo"
+   ],
+   "seconds": 0.54
+  },
+  "Howlop": {
+   "file": "audio/cries/howlop.wav",
+   "display_name": "Howlop",
+   "line": "Echolop",
+   "stage": 2,
+   "stages": 2,
+   "branch": "a",
+   "types": "Sound/Dark",
+   "voice": "whistle ah purr clicks",
+   "motif": [
+    0,
+    -5,
+    2
+   ],
+   "notes": [
+    0,
+    -5,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks",
+    "echo",
+    "growl",
+    "bell"
+   ],
+   "seconds": 0.99
+  },
+  "Chimelop": {
+   "file": "audio/cries/chimelop.wav",
+   "display_name": "Jinglop",
+   "line": "Echolop",
+   "stage": 2,
+   "stages": 2,
+   "branch": "b",
+   "types": "Sound/Fairy",
+   "voice": "whistle ah purr clicks",
+   "motif": [
+    0,
+    -5,
+    2
+   ],
+   "notes": [
+    0,
+    -5,
+    -1
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks",
+    "echo",
+    "shimmer",
+    "bell"
+   ],
+   "seconds": 1.16
+  },
+  "Nymphane": {
+   "file": "audio/cries/nymphane.wav",
+   "display_name": "Nymphane",
+   "line": "Nymphane",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug",
+   "voice": "buzzy oh none bell",
+   "motif": [
+    0,
+    -4,
+    3,
+    12
+   ],
+   "notes": [
+    0,
+    -4,
+    3,
+    12
+   ],
+   "shape": "first",
+   "tint": [
+    "bell",
+    "buzz"
+   ],
+   "seconds": 0.46
+  },
+  "Rosedart": {
+   "file": "audio/cries/rosedart.wav",
+   "display_name": "Rosedart",
+   "line": "Nymphane",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug/Crystal",
+   "voice": "buzzy oh none bell",
+   "motif": [
+    0,
+    -4,
+    3,
+    12
+   ],
+   "notes": [
+    0,
+    -4,
+    3,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "buzz",
+    "bell"
+   ],
+   "seconds": 1.02
+  },
+  "Bucketmander": {
+   "file": "audio/cries/bucketmander.wav",
+   "display_name": "Pailmander",
+   "line": "Bucketmander",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Water",
+   "voice": "vocal ah trill air",
+   "motif": [
+    0,
+    -9,
+    -12
+   ],
+   "notes": [
+    0,
+    -9,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "air",
+    "bubbles"
+   ],
+   "seconds": 0.5
+  },
+  "Barrelmander": {
+   "file": "audio/cries/barrelmander.wav",
+   "display_name": "Kegmander",
+   "line": "Bucketmander",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Electric",
+   "voice": "vocal ah trill air",
+   "motif": [
+    0,
+    -9,
+    -12
+   ],
+   "notes": [
+    0,
+    -9,
+    -12
+   ],
+   "shape": "mid",
+   "tint": [
+    "air",
+    "bubbles",
+    "buzz"
+   ],
+   "seconds": 0.72
+  },
+  "Cisternmander": {
+   "file": "audio/cries/cisternmander.wav",
+   "display_name": "Vatmander",
+   "line": "Bucketmander",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Grass",
+   "voice": "vocal ah trill air",
+   "motif": [
+    0,
+    -9,
+    -12
+   ],
+   "notes": [
+    0,
+    -9,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "bubbles",
+    "rustle"
+   ],
+   "seconds": 0.93
+  },
+  "Mothlet": {
+   "file": "audio/cries/mothlet.wav",
+   "display_name": "Mothlet",
+   "line": "Mothlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy",
+   "voice": "glassy ow vib shimmer",
+   "motif": [
+    0,
+    -4,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -4,
+    -12,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "shimmer",
+    "rustle"
+   ],
+   "seconds": 0.42
+  },
+  "Lunowl": {
+   "file": "audio/cries/lunowl.wav",
+   "display_name": "Lunowl",
+   "line": "Mothlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy/Flying",
+   "voice": "glassy ow vib shimmer",
+   "motif": [
+    0,
+    -4,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -4,
+    -12,
+    -12
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "shimmer",
+    "air"
+   ],
+   "seconds": 0.81
+  },
+  "Eclipsowl": {
+   "file": "audio/cries/eclipsowl.wav",
+   "display_name": "Eclipsowl",
+   "line": "Mothlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy/Dark",
+   "voice": "glassy ow vib shimmer",
+   "motif": [
+    0,
+    -4,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -4,
+    -12,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "shimmer",
+    "growl"
+   ],
+   "seconds": 1.03
+  },
+  "Glintmole": {
+   "file": "audio/cries/glintmole.wav",
+   "display_name": "Glintmole",
+   "line": "Glintmole",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock",
+   "voice": "buzzy oh purr bell",
+   "motif": [
+    0,
+    -12,
+    -8,
+    -3
+   ],
+   "notes": [
+    0,
+    -12,
+    -8,
+    -3
+   ],
+   "shape": "first",
+   "tint": [
+    "bell",
+    "clicks"
+   ],
+   "seconds": 0.44
+  },
+  "Geodemole": {
+   "file": "audio/cries/geodemole.wav",
+   "display_name": "Geodemole",
+   "line": "Glintmole",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock",
+   "voice": "buzzy oh purr bell",
+   "motif": [
+    0,
+    -12,
+    -8,
+    -3
+   ],
+   "notes": [
+    0,
+    -12,
+    -8,
+    -3
+   ],
+   "shape": "mid",
+   "tint": [
+    "bell",
+    "clicks"
+   ],
+   "seconds": 0.69
+  },
+  "Druzemole": {
+   "file": "audio/cries/druzemole.wav",
+   "display_name": "Gemole",
+   "line": "Glintmole",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Crystal",
+   "voice": "buzzy oh purr bell",
+   "motif": [
+    0,
+    -12,
+    -8,
+    -3
+   ],
+   "notes": [
+    0,
+    -12,
+    -8,
+    -3
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "clicks",
+    "bell",
+    "growl"
+   ],
+   "seconds": 1.18
+  },
+  "Nettlynx": {
+   "file": "audio/cries/nettlynx.wav",
+   "display_name": "Nettlynx",
+   "line": "Nettlynx",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison/Grass",
+   "voice": "vocal ow vib chatter",
+   "motif": [
+    0,
+    3,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    3,
+    12,
+    7
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "bubbles_lo",
+    "rustle"
+   ],
+   "seconds": 0.46
+  },
+  "Thistlynx": {
+   "file": "audio/cries/thistlynx.wav",
+   "display_name": "Thistlynx",
+   "line": "Nettlynx",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison/Grass",
+   "voice": "vocal ow vib chatter",
+   "motif": [
+    0,
+    3,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    3,
+    12,
+    7
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "bubbles_lo",
+    "rustle"
+   ],
+   "seconds": 0.88
+  },
+  "Briarlynx": {
+   "file": "audio/cries/briarlynx.wav",
+   "display_name": "Briarlynx",
+   "line": "Nettlynx",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison/Grass",
+   "voice": "vocal ow vib chatter",
+   "motif": [
+    0,
+    3,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    3,
+    12,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bubbles_lo",
+    "rustle",
+    "growl"
+   ],
+   "seconds": 1.14
+  },
+  "Stamproo": {
+   "file": "audio/cries/stamproo.wav",
+   "display_name": "Stamproo",
+   "line": "Stamproo",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh vib bubbles",
+   "motif": [
+    0,
+    -5,
+    -12
+   ],
+   "notes": [
+    0,
+    -5,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "chatter",
+    "buzz"
+   ],
+   "seconds": 0.48
+  },
+  "Postroo": {
+   "file": "audio/cries/postroo.wav",
+   "display_name": "Postroo",
+   "line": "Stamproo",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh vib bubbles",
+   "motif": [
+    0,
+    -5,
+    -12
+   ],
+   "notes": [
+    0,
+    -5,
+    -12
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "chatter"
+   ],
+   "seconds": 0.84
+  },
+  "Pillaroo": {
+   "file": "audio/cries/pillaroo.wav",
+   "display_name": "Pillaroo",
+   "line": "Stamproo",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh vib bubbles",
+   "motif": [
+    0,
+    -5,
+    -12
+   ],
+   "notes": [
+    0,
+    -5,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "chatter"
+   ],
+   "seconds": 0.96
+  },
+  "Mossgrade": {
+   "file": "audio/cries/mossgrade.wav",
+   "display_name": "Mossgrade",
+   "line": "Mossgrade",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Grass/Steel",
+   "voice": "glassy ee purr chatter",
+   "motif": [
+    0,
+    -5,
+    -9
+   ],
+   "notes": [
+    0,
+    -5,
+    -9
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "rustle",
+    "clicks_hi"
+   ],
+   "seconds": 0.4
+  },
+  "Mossbastion": {
+   "file": "audio/cries/mossbastion.wav",
+   "display_name": "Mosstodon",
+   "line": "Mossgrade",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Grass/Steel",
+   "voice": "glassy ee purr chatter",
+   "motif": [
+    0,
+    -5,
+    -9
+   ],
+   "notes": [
+    0,
+    -5,
+    -9
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "rustle",
+    "clicks_hi"
+   ],
+   "seconds": 0.99
+  },
+  "Murmurling": {
+   "file": "audio/cries/murmurling.wav",
+   "display_name": "Murmurling",
+   "line": "Murmurling",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug/Sound",
+   "voice": "glassy uh trill chatter",
+   "motif": [
+    0,
+    2,
+    -2
+   ],
+   "notes": [
+    0,
+    2,
+    -2
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "buzz",
+    "echo",
+    "air"
+   ],
+   "seconds": 0.59
+  },
+  "Murmuron": {
+   "file": "audio/cries/murmuron.wav",
+   "display_name": "Murmuron",
+   "line": "Murmurling",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug/Sound",
+   "voice": "glassy uh trill chatter",
+   "motif": [
+    0,
+    2,
+    -2
+   ],
+   "notes": [
+    0,
+    2,
+    -2
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "buzz",
+    "echo",
+    "air"
+   ],
+   "seconds": 1.15
+  },
+  "Oarlet": {
+   "file": "audio/cries/oarlet.wav",
+   "display_name": "Oarlet",
+   "line": "Oarlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Water",
+   "voice": "vocal uh trill buzz",
+   "motif": [
+    0,
+    5,
+    12
+   ],
+   "notes": [
+    0,
+    5,
+    12
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "bubbles"
+   ],
+   "seconds": 0.51
+  },
+  "Oarter": {
+   "file": "audio/cries/oarter.wav",
+   "display_name": "Oarter",
+   "line": "Oarlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Water",
+   "voice": "vocal uh trill buzz",
+   "motif": [
+    0,
+    5,
+    12
+   ],
+   "notes": [
+    0,
+    5,
+    12
+   ],
+   "shape": "mid",
+   "tint": [
+    "buzz",
+    "bubbles"
+   ],
+   "seconds": 0.69
+  },
+  "Galleotter": {
+   "file": "audio/cries/galleotter.wav",
+   "display_name": "Galleotter",
+   "line": "Oarlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Steel",
+   "voice": "vocal uh trill buzz",
+   "motif": [
+    0,
+    5,
+    12
+   ],
+   "notes": [
+    0,
+    5,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "bubbles",
+    "clicks_hi"
+   ],
+   "seconds": 1.03
+  },
+  "Scoopsy": {
+   "file": "audio/cries/scoopsy.wav",
+   "display_name": "Scoopsy",
+   "line": "Scoopsy",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy oh trill clicks_hi",
+   "motif": [
+    0,
+    2,
+    -5,
+    -8
+   ],
+   "notes": [
+    0,
+    2,
+    -5,
+    -8
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks_hi",
+    "bell_hi"
+   ],
+   "seconds": 0.47
+  },
+  "Sundormouse": {
+   "file": "audio/cries/sundormouse.wav",
+   "display_name": "Sundormouse",
+   "line": "Scoopsy",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Ice/Normal",
+   "voice": "glassy oh trill clicks_hi",
+   "motif": [
+    0,
+    2,
+    -5,
+    -8
+   ],
+   "notes": [
+    0,
+    2,
+    -5,
+    -8
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks_hi",
+    "bell_hi",
+    "chatter",
+    "clicks"
+   ],
+   "seconds": 1.12
+  },
+  "Gravadillo": {
+   "file": "audio/cries/gravadillo.wav",
+   "display_name": "Gravadillo",
+   "line": "Gravadillo",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Psychic/Bug",
+   "voice": "vocal uh trill bubbles",
+   "motif": [
+    0,
+    3,
+    0,
+    -2
+   ],
+   "notes": [
+    0,
+    3,
+    0,
+    -2
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "shimmer",
+    "buzz",
+    "rumble"
+   ],
+   "seconds": 0.44
+  },
+  "Gravitank": {
+   "file": "audio/cries/gravitank.wav",
+   "display_name": "Gravidon",
+   "line": "Gravadillo",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Psychic/Bug",
+   "voice": "vocal uh trill bubbles",
+   "motif": [
+    0,
+    3,
+    0,
+    -2
+   ],
+   "notes": [
+    0,
+    3,
+    0,
+    -2
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "shimmer",
+    "buzz",
+    "rumble"
+   ],
+   "seconds": 0.95
+  },
+  "Fizzlet": {
+   "file": "audio/cries/fizzlet.wav",
+   "display_name": "Fizzlet",
+   "line": "Fizzlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "buzzy ee vib air",
+   "motif": [
+    0,
+    12,
+    12
+   ],
+   "notes": [
+    0,
+    12,
+    12
+   ],
+   "shape": "first",
+   "tint": [
+    "air",
+    "buzz"
+   ],
+   "seconds": 0.49
+  },
+  "Boltstrich": {
+   "file": "audio/cries/boltstrich.wav",
+   "display_name": "Boltstrich",
+   "line": "Fizzlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "buzzy ee vib air",
+   "motif": [
+    0,
+    12,
+    12
+   ],
+   "notes": [
+    0,
+    12,
+    12
+   ],
+   "shape": "mid",
+   "tint": [
+    "air",
+    "buzz"
+   ],
+   "seconds": 0.77
+  },
+  "Thunderstrich": {
+   "file": "audio/cries/thunderstrich.wav",
+   "display_name": "Thundrich",
+   "line": "Fizzlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric/Flying",
+   "voice": "buzzy ee vib air",
+   "motif": [
+    0,
+    12,
+    12
+   ],
+   "notes": [
+    0,
+    12,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "buzz",
+    "air",
+    "rumble"
+   ],
+   "seconds": 1.12
+  },
+  "Bullpole": {
+   "file": "audio/cries/bullpole.wav",
+   "display_name": "Bullpole",
+   "line": "Bullpole",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal ah vib clicks_hi",
+   "motif": [
+    0,
+    2,
+    11
+   ],
+   "notes": [
+    0,
+    2,
+    11
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks_hi",
+    "bubbles_lo"
+   ],
+   "seconds": 0.48
+  },
+  "Bullsfrog": {
+   "file": "audio/cries/bullsfrog.wav",
+   "display_name": "Bullsfrog",
+   "line": "Bullpole",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison/Normal",
+   "voice": "vocal ah vib clicks_hi",
+   "motif": [
+    0,
+    2,
+    11
+   ],
+   "notes": [
+    0,
+    2,
+    11
+   ],
+   "shape": "mid",
+   "tint": [
+    "clicks_hi",
+    "bubbles_lo",
+    "chatter"
+   ],
+   "seconds": 0.7
+  },
+  "Quivertoad": {
+   "file": "audio/cries/quivertoad.wav",
+   "display_name": "Quivertoad",
+   "line": "Bullpole",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal ah vib clicks_hi",
+   "motif": [
+    0,
+    2,
+    11
+   ],
+   "notes": [
+    0,
+    2,
+    11
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks_hi",
+    "bubbles_lo",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.01
+  },
+  "Kerchick": {
+   "file": "audio/cries/kerchick.wav",
+   "display_name": "Kerchick",
+   "line": "Kerchick",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Flying",
+   "voice": "whistle ow vib shimmer",
+   "motif": [
+    0,
+    -12,
+    -8
+   ],
+   "notes": [
+    0,
+    -12,
+    -8
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "air"
+   ],
+   "seconds": 0.55
+  },
+  "Jibbatross": {
+   "file": "audio/cries/jibbatross.wav",
+   "display_name": "Jibbatross",
+   "line": "Kerchick",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Flying",
+   "voice": "whistle ow vib shimmer",
+   "motif": [
+    0,
+    -12,
+    -8
+   ],
+   "notes": [
+    0,
+    -12,
+    -8
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "air",
+    "clicks"
+   ],
+   "seconds": 0.74
+  },
+  "Canvastross": {
+   "file": "audio/cries/canvastross.wav",
+   "display_name": "Canvastross",
+   "line": "Kerchick",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Flying/Water",
+   "voice": "whistle ow vib shimmer",
+   "motif": [
+    0,
+    -12,
+    -8
+   ],
+   "notes": [
+    0,
+    -12,
+    -8
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "air",
+    "bubbles"
+   ],
+   "seconds": 1.13
+  },
+  "Tinbrock": {
+   "file": "audio/cries/tinbrock.wav",
+   "display_name": "Tinbrock",
+   "line": "Tinbrock",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    9,
+    4
+   ],
+   "notes": [
+    0,
+    9,
+    4
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "crackle"
+   ],
+   "seconds": 0.46
+  },
+  "Anvilbrock": {
+   "file": "audio/cries/anvilbrock.wav",
+   "display_name": "Anvilbrock",
+   "line": "Tinbrock",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    9,
+    4
+   ],
+   "notes": [
+    0,
+    9,
+    4
+   ],
+   "shape": "mid",
+   "tint": [
+    "rustle",
+    "crackle",
+    "growl"
+   ],
+   "seconds": 0.86
+  },
+  "Forgebrock": {
+   "file": "audio/cries/forgebrock.wav",
+   "display_name": "Forgebrock",
+   "line": "Tinbrock",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire/Steel",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    9,
+    4
+   ],
+   "notes": [
+    0,
+    9,
+    4
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "crackle",
+    "clicks_hi",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.15
+  },
+  "Proofhop": {
+   "file": "audio/cries/proofhop.wav",
+   "display_name": "Proofhop",
+   "line": "Proofhop",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal eh vib chatter",
+   "motif": [
+    0,
+    2,
+    4,
+    9
+   ],
+   "notes": [
+    0,
+    2,
+    4,
+    9
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "puff"
+   ],
+   "seconds": 0.43
+  },
+  "Loafhopper": {
+   "file": "audio/cries/loafhopper.wav",
+   "display_name": "Loafhopper",
+   "line": "Proofhop",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal eh vib chatter",
+   "motif": [
+    0,
+    2,
+    4,
+    9
+   ],
+   "notes": [
+    0,
+    2,
+    4,
+    9
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "puff",
+    "buzz"
+   ],
+   "seconds": 1.18
+  },
+  "Moundlet": {
+   "file": "audio/cries/moundlet.wav",
+   "display_name": "Moundlet",
+   "line": "Moundlet",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug",
+   "voice": "vocal uh trill buzz",
+   "motif": [
+    0,
+    -3,
+    -12
+   ],
+   "notes": [
+    0,
+    -3,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "buzz",
+    "clicks"
+   ],
+   "seconds": 0.59
+  },
+  "Spirevark": {
+   "file": "audio/cries/spirevark.wav",
+   "display_name": "Spirevark",
+   "line": "Moundlet",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug/Rock",
+   "voice": "vocal uh trill buzz",
+   "motif": [
+    0,
+    -3,
+    -12
+   ],
+   "notes": [
+    0,
+    -3,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "buzz",
+    "clicks"
+   ],
+   "seconds": 1.17
+  },
+  "Bubblisk": {
+   "file": "audio/cries/bubblisk.wav",
+   "display_name": "Bubblisk",
+   "line": "Bubblisk",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Crystal/Water",
+   "voice": "vocal eh none puff",
+   "motif": [
+    0,
+    -5,
+    -1
+   ],
+   "notes": [
+    0,
+    -5,
+    -1
+   ],
+   "shape": "first",
+   "tint": [
+    "puff",
+    "bell",
+    "bubbles"
+   ],
+   "seconds": 0.53
+  },
+  "Tidalisk": {
+   "file": "audio/cries/tidalisk.wav",
+   "display_name": "Tidalisk",
+   "line": "Bubblisk",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Crystal/Water",
+   "voice": "vocal eh none puff",
+   "motif": [
+    0,
+    -5,
+    -1
+   ],
+   "notes": [
+    0,
+    -5,
+    -1
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "bell",
+    "bubbles",
+    "air"
+   ],
+   "seconds": 1.08
+  },
+  "Coolatee": {
+   "file": "audio/cries/coolatee.wav",
+   "display_name": "Coolatee",
+   "line": "Coolatee",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy oh none bubbles",
+   "motif": [
+    0,
+    -9,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -9,
+    -7,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "bell_hi",
+    "bell"
+   ],
+   "seconds": 0.52
+  },
+  "Frigatee": {
+   "file": "audio/cries/frigatee.wav",
+   "display_name": "Frigatee",
+   "line": "Coolatee",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy oh none bubbles",
+   "motif": [
+    0,
+    -9,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -9,
+    -7,
+    2
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "bell_hi",
+    "bell"
+   ],
+   "seconds": 0.9
+  },
+  "Glaciatee": {
+   "file": "audio/cries/glaciatee.wav",
+   "display_name": "Glaciatee",
+   "line": "Coolatee",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy oh none bubbles",
+   "motif": [
+    0,
+    -9,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -9,
+    -7,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "bell_hi",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.09
+  },
+  "Thrumbird": {
+   "file": "audio/cries/thrumbird.wav",
+   "display_name": "Thrumbird",
+   "line": "Thrumbird",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Flying",
+   "voice": "whistle eh trill bell",
+   "motif": [
+    0,
+    7,
+    5,
+    12
+   ],
+   "notes": [
+    0,
+    7,
+    5,
+    12
+   ],
+   "shape": "first",
+   "tint": [
+    "bell",
+    "air",
+    "buzz"
+   ],
+   "seconds": 0.56
+  },
+  "Lyrewing": {
+   "file": "audio/cries/lyrewing.wav",
+   "display_name": "Lyrewing",
+   "line": "Thrumbird",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound/Flying",
+   "voice": "whistle eh trill bell",
+   "motif": [
+    0,
+    7,
+    5,
+    12
+   ],
+   "notes": [
+    0,
+    7,
+    5,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "echo",
+    "air"
+   ],
+   "seconds": 1.04
+  },
+  "Buckleron": {
+   "file": "audio/cries/buckleron.wav",
+   "display_name": "Buckleron",
+   "line": "Buckleron",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Water",
+   "voice": "vocal eh trill bubbles",
+   "motif": [
+    0,
+    7,
+    10
+   ],
+   "notes": [
+    0,
+    7,
+    10
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "clicks",
+    "bubbles"
+   ],
+   "seconds": 0.55
+  },
+  "Bulwartoad": {
+   "file": "audio/cries/bulwartoad.wav",
+   "display_name": "Bulwartoad",
+   "line": "Buckleron",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock",
+   "voice": "vocal eh trill bubbles",
+   "motif": [
+    0,
+    7,
+    10
+   ],
+   "notes": [
+    0,
+    7,
+    10
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "clicks"
+   ],
+   "seconds": 0.8
+  },
+  "Citadoad": {
+   "file": "audio/cries/citadoad.wav",
+   "display_name": "Citadoad",
+   "line": "Buckleron",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Water",
+   "voice": "vocal eh trill bubbles",
+   "motif": [
+    0,
+    7,
+    10
+   ],
+   "notes": [
+    0,
+    7,
+    10
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "clicks",
+    "bubbles",
+    "rumble"
+   ],
+   "seconds": 0.92
+  },
+  "Fawngus": {
+   "file": "audio/cries/fawngus.wav",
+   "display_name": "Fawnshroom",
+   "line": "Fawngus",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal ah trill clicks",
+   "motif": [
+    0,
+    12,
+    9
+   ],
+   "notes": [
+    0,
+    12,
+    9
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks",
+    "puff",
+    "air"
+   ],
+   "seconds": 0.48
+  },
+  "Hatstag": {
+   "file": "audio/cries/hatstag.wav",
+   "display_name": "Hatstag",
+   "line": "Fawngus",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore/Grass",
+   "voice": "vocal ah trill clicks",
+   "motif": [
+    0,
+    12,
+    9
+   ],
+   "notes": [
+    0,
+    12,
+    9
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks",
+    "puff",
+    "rustle",
+    "bell"
+   ],
+   "seconds": 0.97
+  },
+  "Pinster": {
+   "file": "audio/cries/pinster.wav",
+   "display_name": "Pinster",
+   "line": "Pinster",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Steel",
+   "voice": "buzzy uh none bubbles",
+   "motif": [
+    0,
+    -2,
+    -5
+   ],
+   "notes": [
+    0,
+    -2,
+    -5
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "clicks_hi"
+   ],
+   "seconds": 0.59
+  },
+  "Tiltster": {
+   "file": "audio/cries/tiltster.wav",
+   "display_name": "Tiltster",
+   "line": "Pinster",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Steel",
+   "voice": "buzzy uh none bubbles",
+   "motif": [
+    0,
+    -2,
+    -5
+   ],
+   "notes": [
+    0,
+    -2,
+    -5
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "clicks_hi"
+   ],
+   "seconds": 1.19
+  },
+  "Bastling": {
+   "file": "audio/cries/bastling.wav",
+   "display_name": "Bastling",
+   "line": "Bastling",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Water/Rock",
+   "voice": "vocal eh vib air",
+   "motif": [
+    0,
+    3,
+    1,
+    3
+   ],
+   "notes": [
+    0,
+    3,
+    1,
+    3
+   ],
+   "shape": "first",
+   "tint": [
+    "air",
+    "bubbles",
+    "clicks"
+   ],
+   "seconds": 0.55
+  },
+  "Bastionpet": {
+   "file": "audio/cries/bastionpet.wav",
+   "display_name": "Crabulwark",
+   "line": "Bastling",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Water/Rock",
+   "voice": "vocal eh vib air",
+   "motif": [
+    0,
+    3,
+    1,
+    3
+   ],
+   "notes": [
+    0,
+    3,
+    1,
+    3
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "bubbles",
+    "clicks"
+   ],
+   "seconds": 0.94
+  },
+  "Gongibbon": {
+   "file": "audio/cries/gongibbon.wav",
+   "display_name": "Gongibbon",
+   "line": "Gongibbon",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle uh vib crackle",
+   "motif": [
+    0,
+    -2,
+    1
+   ],
+   "notes": [
+    0,
+    -2,
+    1
+   ],
+   "shape": "first",
+   "tint": [
+    "crackle",
+    "echo"
+   ],
+   "seconds": 0.66
+  },
+  "Gongrowl": {
+   "file": "audio/cries/gongrowl.wav",
+   "display_name": "Gongrowl",
+   "line": "Gongibbon",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound/Steel",
+   "voice": "whistle uh vib crackle",
+   "motif": [
+    0,
+    -2,
+    1
+   ],
+   "notes": [
+    0,
+    -2,
+    1
+   ],
+   "shape": "final",
+   "tint": [
+    "crackle",
+    "echo",
+    "clicks_hi",
+    "growl"
+   ],
+   "seconds": 0.98
+  },
+  "Terrasloth": {
+   "file": "audio/cries/terrasloth.wav",
+   "display_name": "Pangolith",
+   "line": "Terrasloth",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Grass/Crystal",
+   "voice": "vocal oh purr rustle",
+   "motif": [
+    0,
+    -7,
+    -5
+   ],
+   "notes": [
+    0,
+    -7,
+    -5
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "rustle",
+    "bell",
+    "clicks"
+   ],
+   "seconds": 0.56
+  },
+  "Bonsolith": {
+   "file": "audio/cries/bonsolith.wav",
+   "display_name": "Bonsolith",
+   "line": "Terrasloth",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Grass",
+   "voice": "vocal oh purr rustle",
+   "motif": [
+    0,
+    -7,
+    -5
+   ],
+   "notes": [
+    0,
+    -7,
+    -5
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "rustle",
+    "rumble"
+   ],
+   "seconds": 1.0
+  },
+  "Rimekit": {
+   "file": "audio/cries/rimekit.wav",
+   "display_name": "Rimekit",
+   "line": "Rimekit",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy eh purr shimmer",
+   "motif": [
+    0,
+    -12,
+    -12,
+    -3
+   ],
+   "notes": [
+    0,
+    -12,
+    -12,
+    -3
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "bell_hi",
+    "bell"
+   ],
+   "seconds": 0.54
+  },
+  "Rimeshrew": {
+   "file": "audio/cries/rimeshrew.wav",
+   "display_name": "Rimeshrew",
+   "line": "Rimekit",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy eh purr shimmer",
+   "motif": [
+    0,
+    -12,
+    -12,
+    -3
+   ],
+   "notes": [
+    0,
+    -12,
+    -12,
+    -3
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "bell_hi",
+    "chatter"
+   ],
+   "seconds": 0.7
+  },
+  "Rimefang": {
+   "file": "audio/cries/rimefang.wav",
+   "display_name": "Rimefang",
+   "line": "Rimekit",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy eh purr shimmer",
+   "motif": [
+    0,
+    -12,
+    -12,
+    -3
+   ],
+   "notes": [
+    0,
+    -12,
+    -12,
+    -3
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "bell_hi"
+   ],
+   "seconds": 1.08
+  },
+  "Pocketpus": {
+   "file": "audio/cries/pocketpus.wav",
+   "display_name": "Pocketpus",
+   "line": "Pocketpus",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal oh trill buzz",
+   "motif": [
+    0,
+    12,
+    0
+   ],
+   "notes": [
+    0,
+    12,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "bubbles_lo"
+   ],
+   "seconds": 0.43
+  },
+  "Bladypus": {
+   "file": "audio/cries/bladypus.wav",
+   "display_name": "Bladypus",
+   "line": "Pocketpus",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal oh trill buzz",
+   "motif": [
+    0,
+    12,
+    0
+   ],
+   "notes": [
+    0,
+    12,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "bubbles_lo"
+   ],
+   "seconds": 1.06
+  },
+  "Barokit": {
+   "file": "audio/cries/barokit.wav",
+   "display_name": "Barokit",
+   "line": "Barokit",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "buzzy ah vib shimmer",
+   "motif": [
+    0,
+    4,
+    1
+   ],
+   "notes": [
+    0,
+    4,
+    1
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "buzz",
+    "rumble"
+   ],
+   "seconds": 0.47
+  },
+  "Barokat": {
+   "file": "audio/cries/barokat.wav",
+   "display_name": "Barokat",
+   "line": "Barokit",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric/Normal",
+   "voice": "buzzy ah vib shimmer",
+   "motif": [
+    0,
+    4,
+    1
+   ],
+   "notes": [
+    0,
+    4,
+    1
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "buzz",
+    "chatter",
+    "clicks"
+   ],
+   "seconds": 0.74
+  },
+  "Barostorm": {
+   "file": "audio/cries/barostorm.wav",
+   "display_name": "Barostorm",
+   "line": "Barokit",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Electric",
+   "voice": "buzzy ah vib shimmer",
+   "motif": [
+    0,
+    4,
+    1
+   ],
+   "notes": [
+    0,
+    4,
+    1
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 1.03
+  },
+  "Teapotamus": {
+   "file": "audio/cries/teapotamus.wav",
+   "display_name": "Teapotamus",
+   "line": "Teapotamus",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal ow trill shimmer",
+   "motif": [
+    0,
+    5,
+    3
+   ],
+   "notes": [
+    0,
+    5,
+    3
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "crackle",
+    "air"
+   ],
+   "seconds": 0.46
+  },
+  "Chuggamus": {
+   "file": "audio/cries/chuggamus.wav",
+   "display_name": "Chuggamus",
+   "line": "Teapotamus",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Fire/Steel",
+   "voice": "vocal ow trill shimmer",
+   "motif": [
+    0,
+    5,
+    3
+   ],
+   "notes": [
+    0,
+    5,
+    3
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "crackle",
+    "clicks_hi",
+    "growl",
+    "air"
+   ],
+   "seconds": 1.18
+  },
+  "Lodestick": {
+   "file": "audio/cries/lodestick.wav",
+   "display_name": "Magnestick",
+   "line": "Lodestick",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Psychic/Dark",
+   "voice": "glassy oh trill clicks_hi",
+   "motif": [
+    0,
+    4,
+    0,
+    -2
+   ],
+   "notes": [
+    0,
+    4,
+    0,
+    -2
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks_hi",
+    "shimmer",
+    "growl",
+    "clicks",
+    "buzz"
+   ],
+   "seconds": 0.45
+  },
+  "Lodestaff": {
+   "file": "audio/cries/lodestaff.wav",
+   "display_name": "Magnestaff",
+   "line": "Lodestick",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Psychic/Dark",
+   "voice": "glassy oh trill clicks_hi",
+   "motif": [
+    0,
+    4,
+    0,
+    -2
+   ],
+   "notes": [
+    0,
+    4,
+    0,
+    -2
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks_hi",
+    "shimmer",
+    "growl",
+    "rumble"
+   ],
+   "seconds": 1.2
+  },
+  "Pinguin": {
+   "file": "audio/cries/pinguin.wav",
+   "display_name": "Pinguin",
+   "line": "Pinguin",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice/Normal",
+   "voice": "glassy oh vib chatter",
+   "motif": [
+    0,
+    9,
+    12
+   ],
+   "notes": [
+    0,
+    9,
+    12
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "bell_hi",
+    "chatter"
+   ],
+   "seconds": 0.41
+  },
+  "Rollguin": {
+   "file": "audio/cries/rollguin.wav",
+   "display_name": "Rollguin",
+   "line": "Pinguin",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice/Normal",
+   "voice": "glassy oh vib chatter",
+   "motif": [
+    0,
+    9,
+    12
+   ],
+   "notes": [
+    0,
+    9,
+    12
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "bell_hi",
+    "chatter"
+   ],
+   "seconds": 0.79
+  },
+  "Kingpinguin": {
+   "file": "audio/cries/kingpinguin.wav",
+   "display_name": "Kingpinguin",
+   "line": "Pinguin",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice/Normal",
+   "voice": "glassy oh vib chatter",
+   "motif": [
+    0,
+    9,
+    12
+   ],
+   "notes": [
+    0,
+    9,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bell_hi",
+    "chatter"
+   ],
+   "seconds": 0.99
+  },
+  "Glomwort": {
+   "file": "audio/cries/glomwort.wav",
+   "display_name": "Glomwort",
+   "line": "Glomwort",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore/Poison",
+   "voice": "vocal eh purr air",
+   "motif": [
+    0,
+    -12,
+    -3,
+    2
+   ],
+   "notes": [
+    0,
+    -12,
+    -3,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "air",
+    "puff",
+    "bubbles_lo",
+    "bubbles"
+   ],
+   "seconds": 0.53
+  },
+  "Glomworth": {
+   "file": "audio/cries/glomworth.wav",
+   "display_name": "Glombulus",
+   "line": "Glomwort",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore/Poison",
+   "voice": "vocal eh purr air",
+   "motif": [
+    0,
+    -12,
+    -3,
+    2
+   ],
+   "notes": [
+    0,
+    -12,
+    -3,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "puff",
+    "bubbles_lo",
+    "bubbles"
+   ],
+   "seconds": 1.03
+  },
+  "Foldbat": {
+   "file": "audio/cries/foldbat.wav",
+   "display_name": "Foldbat",
+   "line": "Foldbat",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle eh purr bubbles",
+   "motif": [
+    0,
+    3,
+    -1
+   ],
+   "notes": [
+    0,
+    3,
+    -1
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "echo",
+    "clicks"
+   ],
+   "seconds": 0.69
+  },
+  "Fanpire": {
+   "file": "audio/cries/fanpire.wav",
+   "display_name": "Fanpire",
+   "line": "Foldbat",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle eh purr bubbles",
+   "motif": [
+    0,
+    3,
+    -1
+   ],
+   "notes": [
+    0,
+    3,
+    -1
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "echo",
+    "clicks",
+    "air"
+   ],
+   "seconds": 1.13
+  },
+  "Chiptero": {
+   "file": "audio/cries/chiptero.wav",
+   "display_name": "Chiptero",
+   "line": "Chiptero",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Rock",
+   "voice": "vocal ee trill puff",
+   "motif": [
+    0,
+    9,
+    7
+   ],
+   "notes": [
+    0,
+    9,
+    7
+   ],
+   "shape": "first",
+   "tint": [
+    "puff",
+    "clicks"
+   ],
+   "seconds": 0.4
+  },
+  "Pickadactyl": {
+   "file": "audio/cries/pickadactyl.wav",
+   "display_name": "Pickadactyl",
+   "line": "Chiptero",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Rock",
+   "voice": "vocal ee trill puff",
+   "motif": [
+    0,
+    9,
+    7
+   ],
+   "notes": [
+    0,
+    9,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "clicks"
+   ],
+   "seconds": 1.08
+  },
+  "Clinkpede": {
+   "file": "audio/cries/clinkpede.wav",
+   "display_name": "Clinkpede",
+   "line": "Clinkpede",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal oh purr bell",
+   "motif": [
+    0,
+    -2,
+    -11
+   ],
+   "notes": [
+    0,
+    -2,
+    -11
+   ],
+   "shape": "first",
+   "tint": [
+    "bell",
+    "bubbles_lo",
+    "clicks"
+   ],
+   "seconds": 0.45
+  },
+  "Chainipede": {
+   "file": "audio/cries/chainipede.wav",
+   "display_name": "Chainipede",
+   "line": "Clinkpede",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Poison/Bug",
+   "voice": "vocal oh purr bell",
+   "motif": [
+    0,
+    -2,
+    -11
+   ],
+   "notes": [
+    0,
+    -2,
+    -11
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "bubbles_lo",
+    "buzz",
+    "air"
+   ],
+   "seconds": 1.05
+  },
+  "Skidlet": {
+   "file": "audio/cries/skidlet.wav",
+   "display_name": "Skidlet",
+   "line": "Skidlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy ah purr crackle",
+   "motif": [
+    0,
+    -7,
+    -9
+   ],
+   "notes": [
+    0,
+    -7,
+    -9
+   ],
+   "shape": "first",
+   "tint": [
+    "crackle",
+    "bell_hi"
+   ],
+   "seconds": 0.52
+  },
+  "Skateron": {
+   "file": "audio/cries/skateron.wav",
+   "display_name": "Skateron",
+   "line": "Skidlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice/Flying",
+   "voice": "glassy ah purr crackle",
+   "motif": [
+    0,
+    -7,
+    -9
+   ],
+   "notes": [
+    0,
+    -7,
+    -9
+   ],
+   "shape": "mid",
+   "tint": [
+    "crackle",
+    "bell_hi",
+    "air"
+   ],
+   "seconds": 0.82
+  },
+  "Lanceron": {
+   "file": "audio/cries/lanceron.wav",
+   "display_name": "Lanceron",
+   "line": "Skidlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice/Flying",
+   "voice": "glassy ah purr crackle",
+   "motif": [
+    0,
+    -7,
+    -9
+   ],
+   "notes": [
+    0,
+    -7,
+    -9
+   ],
+   "shape": "final",
+   "tint": [
+    "crackle",
+    "bell_hi",
+    "air"
+   ],
+   "seconds": 1.1
+  },
+  "Anchorbill": {
+   "file": "audio/cries/anchorbill.wav",
+   "display_name": "Anchorpup",
+   "line": "Anchorbill",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Psychic/Water",
+   "voice": "vocal ee purr bubbles",
+   "motif": [
+    0,
+    4,
+    -5,
+    0
+   ],
+   "notes": [
+    0,
+    4,
+    -5,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "shimmer",
+    "bubbles",
+    "bell"
+   ],
+   "seconds": 0.59
+  },
+  "Anchorhorn": {
+   "file": "audio/cries/anchorhorn.wav",
+   "display_name": "Harpwhal",
+   "line": "Anchorbill",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Psychic/Water",
+   "voice": "vocal ee purr bubbles",
+   "motif": [
+    0,
+    4,
+    -5,
+    0
+   ],
+   "notes": [
+    0,
+    4,
+    -5,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "shimmer",
+    "bubbles",
+    "clicks",
+    "chatter"
+   ],
+   "seconds": 0.92
+  },
+  "Bellowlet": {
+   "file": "audio/cries/bellowlet.wav",
+   "display_name": "Bellowlet",
+   "line": "Bellowlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal ee none chatter",
+   "motif": [
+    0,
+    3,
+    8
+   ],
+   "notes": [
+    0,
+    3,
+    8
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "crackle",
+    "growl",
+    "bell"
+   ],
+   "seconds": 0.45
+  },
+  "Bellowary": {
+   "file": "audio/cries/bellowary.wav",
+   "display_name": "Bellowary",
+   "line": "Bellowlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire",
+   "voice": "vocal ee none chatter",
+   "motif": [
+    0,
+    3,
+    8
+   ],
+   "notes": [
+    0,
+    3,
+    8
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "crackle",
+    "growl",
+    "rumble"
+   ],
+   "seconds": 0.74
+  },
+  "Furnacowary": {
+   "file": "audio/cries/furnacowary.wav",
+   "display_name": "Furnowary",
+   "line": "Bellowlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Fire/Steel",
+   "voice": "vocal ee none chatter",
+   "motif": [
+    0,
+    3,
+    8
+   ],
+   "notes": [
+    0,
+    3,
+    8
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "crackle",
+    "clicks_hi",
+    "growl",
+    "rumble"
+   ],
+   "seconds": 1.01
+  },
+  "Xylogator": {
+   "file": "audio/cries/xylogator.wav",
+   "display_name": "Xylogator",
+   "line": "Xylogator",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Sound",
+   "voice": "vocal oh purr buzz",
+   "motif": [
+    0,
+    -4,
+    0
+   ],
+   "notes": [
+    0,
+    -4,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "bubbles",
+    "echo"
+   ],
+   "seconds": 0.57
+  },
+  "Marimbite": {
+   "file": "audio/cries/marimbite.wav",
+   "display_name": "Marimbite",
+   "line": "Xylogator",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Sound",
+   "voice": "vocal oh purr buzz",
+   "motif": [
+    0,
+    -4,
+    0
+   ],
+   "notes": [
+    0,
+    -4,
+    0
+   ],
+   "shape": "mid",
+   "tint": [
+    "buzz",
+    "bubbles",
+    "echo",
+    "clicks"
+   ],
+   "seconds": 0.92
+  },
+  "Glockodile": {
+   "file": "audio/cries/glockodile.wav",
+   "display_name": "Glockodile",
+   "line": "Xylogator",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Sound",
+   "voice": "vocal oh purr buzz",
+   "motif": [
+    0,
+    -4,
+    0
+   ],
+   "notes": [
+    0,
+    -4,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "bubbles",
+    "echo",
+    "growl"
+   ],
+   "seconds": 1.13
+  },
+  "Spanglin": {
+   "file": "audio/cries/spanglin.wav",
+   "display_name": "Spanglin",
+   "line": "Spanglin",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Crystal",
+   "voice": "glassy ah vib puff",
+   "motif": [
+    0,
+    -3,
+    -6
+   ],
+   "notes": [
+    0,
+    -3,
+    -6
+   ],
+   "shape": "first",
+   "tint": [
+    "puff",
+    "bell"
+   ],
+   "seconds": 0.43
+  },
+  "Mirrolin": {
+   "file": "audio/cries/mirrolin.wav",
+   "display_name": "Mirrolin",
+   "line": "Spanglin",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Crystal/Psychic",
+   "voice": "glassy ah vib puff",
+   "motif": [
+    0,
+    -3,
+    -6
+   ],
+   "notes": [
+    0,
+    -3,
+    -6
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "bell",
+    "shimmer"
+   ],
+   "seconds": 0.91
+  },
+  "Rattlebub": {
+   "file": "audio/cries/rattlebub.wav",
+   "display_name": "Rattlebub",
+   "line": "Rattlebub",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound",
+   "voice": "glassy eh trill buzz",
+   "motif": [
+    0,
+    -3,
+    -6,
+    -8
+   ],
+   "notes": [
+    0,
+    -3,
+    -6,
+    -8
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "echo",
+    "clicks",
+    "air"
+   ],
+   "seconds": 0.57
+  },
+  "Maracoil": {
+   "file": "audio/cries/maracoil.wav",
+   "display_name": "Maracoil",
+   "line": "Rattlebub",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Sound/Poison",
+   "voice": "glassy eh trill buzz",
+   "motif": [
+    0,
+    -3,
+    -6,
+    -8
+   ],
+   "notes": [
+    0,
+    -3,
+    -6,
+    -8
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "echo",
+    "bubbles_lo",
+    "air"
+   ],
+   "seconds": 1.14
+  },
+  "Filefin": {
+   "file": "audio/cries/filefin.wav",
+   "display_name": "Filefin",
+   "line": "Filefin",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Steel",
+   "voice": "vocal uh none crackle",
+   "motif": [
+    0,
+    4,
+    12,
+    5
+   ],
+   "notes": [
+    0,
+    4,
+    12,
+    5
+   ],
+   "shape": "first",
+   "tint": [
+    "crackle",
+    "bubbles",
+    "clicks_hi",
+    "rustle"
+   ],
+   "seconds": 0.59
+  },
+  "Carpenjaw": {
+   "file": "audio/cries/carpenjaw.wav",
+   "display_name": "Carpenjaw",
+   "line": "Filefin",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Steel",
+   "voice": "vocal uh none crackle",
+   "motif": [
+    0,
+    4,
+    12,
+    5
+   ],
+   "notes": [
+    0,
+    4,
+    12,
+    5
+   ],
+   "shape": "mid",
+   "tint": [
+    "crackle",
+    "bubbles",
+    "clicks_hi"
+   ],
+   "seconds": 0.87
+  },
+  "Sawright": {
+   "file": "audio/cries/sawright.wav",
+   "display_name": "Sawright",
+   "line": "Filefin",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Steel",
+   "voice": "vocal uh none crackle",
+   "motif": [
+    0,
+    4,
+    12,
+    5
+   ],
+   "notes": [
+    0,
+    4,
+    12,
+    5
+   ],
+   "shape": "final",
+   "tint": [
+    "crackle",
+    "bubbles",
+    "clicks_hi"
+   ],
+   "seconds": 1.1
+  },
+  "Lanterloris": {
+   "file": "audio/cries/lanterloris.wav",
+   "display_name": "Lanterloris",
+   "line": "Lanterloris",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Fairy/Fire",
+   "voice": "glassy eh trill rustle",
+   "motif": [
+    0,
+    4,
+    8,
+    10
+   ],
+   "notes": [
+    0,
+    4,
+    8,
+    10
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "shimmer",
+    "crackle"
+   ],
+   "seconds": 0.49
+  },
+  "Lanternlong": {
+   "file": "audio/cries/lanternlong.wav",
+   "display_name": "Glowris",
+   "line": "Lanterloris",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Fairy/Fire",
+   "voice": "glassy eh trill rustle",
+   "motif": [
+    0,
+    4,
+    8,
+    10
+   ],
+   "notes": [
+    0,
+    4,
+    8,
+    10
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "shimmer",
+    "crackle"
+   ],
+   "seconds": 0.91
+  },
+  "Kayak": {
+   "file": "audio/cries/kayak.wav",
+   "display_name": "Kayak",
+   "line": "Kayak",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy ow none buzz",
+   "motif": [
+    0,
+    7,
+    12,
+    9
+   ],
+   "notes": [
+    0,
+    7,
+    12,
+    9
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "bell_hi",
+    "bubbles"
+   ],
+   "seconds": 0.49
+  },
+  "Prowyak": {
+   "file": "audio/cries/prowyak.wav",
+   "display_name": "Prowyak",
+   "line": "Kayak",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice",
+   "voice": "glassy ow none buzz",
+   "motif": [
+    0,
+    7,
+    12,
+    9
+   ],
+   "notes": [
+    0,
+    7,
+    12,
+    9
+   ],
+   "shape": "mid",
+   "tint": [
+    "buzz",
+    "bell_hi"
+   ],
+   "seconds": 0.68
+  },
+  "Dreadnoyak": {
+   "file": "audio/cries/dreadnoyak.wav",
+   "display_name": "Dreadnoyak",
+   "line": "Kayak",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Ice/Steel",
+   "voice": "glassy ow none buzz",
+   "motif": [
+    0,
+    7,
+    12,
+    9
+   ],
+   "notes": [
+    0,
+    7,
+    12,
+    9
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "bell_hi",
+    "clicks_hi",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.07
+  },
+  "Puffuse": {
+   "file": "audio/cries/puffuse.wav",
+   "display_name": "Puffuse",
+   "line": "Puffuse",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Electric",
+   "voice": "buzzy uh trill chatter",
+   "motif": [
+    0,
+    -2,
+    0
+   ],
+   "notes": [
+    0,
+    -2,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "buzz",
+    "air"
+   ],
+   "seconds": 0.43
+  },
+  "Blastopuff": {
+   "file": "audio/cries/blastopuff.wav",
+   "display_name": "Blastopuff",
+   "line": "Puffuse",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Electric/Psychic",
+   "voice": "buzzy uh trill chatter",
+   "motif": [
+    0,
+    -2,
+    0
+   ],
+   "notes": [
+    0,
+    -2,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "buzz",
+    "shimmer",
+    "air"
+   ],
+   "seconds": 0.95
+  },
+  "Polyshroom": {
+   "file": "audio/cries/polyshroom.wav",
+   "display_name": "Polyshroom",
+   "line": "Polyshroom",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal eh none chatter",
+   "motif": [
+    0,
+    2,
+    12,
+    12
+   ],
+   "notes": [
+    0,
+    2,
+    12,
+    12
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "puff"
+   ],
+   "seconds": 0.5
+  },
+  "Starcap": {
+   "file": "audio/cries/starcap.wav",
+   "display_name": "Starcap",
+   "line": "Polyshroom",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal eh none chatter",
+   "motif": [
+    0,
+    2,
+    12,
+    12
+   ],
+   "notes": [
+    0,
+    2,
+    12,
+    12
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "puff",
+    "bell",
+    "buzz"
+   ],
+   "seconds": 0.74
+  },
+  "Medushroom": {
+   "file": "audio/cries/medushroom.wav",
+   "display_name": "Medushroom",
+   "line": "Polyshroom",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore/Poison",
+   "voice": "vocal eh none chatter",
+   "motif": [
+    0,
+    2,
+    12,
+    12
+   ],
+   "notes": [
+    0,
+    2,
+    12,
+    12
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "puff",
+    "bubbles_lo",
+    "air"
+   ],
+   "seconds": 1.16
+  },
+  "Pebblamb": {
+   "file": "audio/cries/pebblamb.wav",
+   "display_name": "Pebblamb",
+   "line": "Pebblamb",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Water/Crystal",
+   "voice": "vocal ah none rustle",
+   "motif": [
+    0,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    12,
+    7
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "bubbles",
+    "bell",
+    "clicks"
+   ],
+   "seconds": 0.49
+  },
+  "Tesselamb": {
+   "file": "audio/cries/tesselamb.wav",
+   "display_name": "Tesselamb",
+   "line": "Pebblamb",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Rock/Normal",
+   "voice": "vocal ah none rustle",
+   "motif": [
+    0,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    12,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "clicks",
+    "chatter",
+    "bell"
+   ],
+   "seconds": 1.2
+  },
+  "Latchling": {
+   "file": "audio/cries/latchling.wav",
+   "display_name": "Latchling",
+   "line": "Latchling",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Steel",
+   "voice": "vocal uh vib puff",
+   "motif": [
+    0,
+    5,
+    -2
+   ],
+   "notes": [
+    0,
+    5,
+    -2
+   ],
+   "shape": "first",
+   "tint": [
+    "puff",
+    "clicks_hi",
+    "clicks"
+   ],
+   "seconds": 0.43
+  },
+  "Lockatara": {
+   "file": "audio/cries/lockatara.wav",
+   "display_name": "Lockatara",
+   "line": "Latchling",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Steel",
+   "voice": "vocal uh vib puff",
+   "motif": [
+    0,
+    5,
+    -2
+   ],
+   "notes": [
+    0,
+    5,
+    -2
+   ],
+   "shape": "mid",
+   "tint": [
+    "puff",
+    "clicks_hi",
+    "air"
+   ],
+   "seconds": 0.89
+  },
+  "Vaultara": {
+   "file": "audio/cries/vaultara.wav",
+   "display_name": "Vaultara",
+   "line": "Latchling",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Steel",
+   "voice": "vocal uh vib puff",
+   "motif": [
+    0,
+    5,
+    -2
+   ],
+   "notes": [
+    0,
+    5,
+    -2
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "clicks_hi",
+    "rumble"
+   ],
+   "seconds": 0.98
+  },
+  "Jarmit": {
+   "file": "audio/cries/jarmit.wav",
+   "display_name": "Jarmit",
+   "line": "Jarmit",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Water",
+   "voice": "vocal oh none chatter",
+   "motif": [
+    0,
+    4,
+    7
+   ],
+   "notes": [
+    0,
+    4,
+    7
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "clicks",
+    "bell"
+   ],
+   "seconds": 0.6
+  },
+  "Lanternmit": {
+   "file": "audio/cries/lanternmit.wav",
+   "display_name": "Lanternmit",
+   "line": "Jarmit",
+   "stage": 2,
+   "stages": 2,
+   "branch": "a",
+   "types": "Water/Fire",
+   "voice": "vocal oh none chatter",
+   "motif": [
+    0,
+    4,
+    7
+   ],
+   "notes": [
+    0,
+    4,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "crackle",
+    "clicks",
+    "bell"
+   ],
+   "seconds": 1.07
+  },
+  "Stormit": {
+   "file": "audio/cries/stormit.wav",
+   "display_name": "Stormit",
+   "line": "Jarmit",
+   "stage": 2,
+   "stages": 2,
+   "branch": "b",
+   "types": "Water/Electric",
+   "voice": "vocal oh none chatter",
+   "motif": [
+    0,
+    4,
+    7
+   ],
+   "notes": [
+    0,
+    4,
+    4
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "buzz",
+    "clicks"
+   ],
+   "seconds": 1.14
+  },
+  "Terrarimit": {
+   "file": "audio/cries/terrarimit.wav",
+   "display_name": "Terrarimit",
+   "line": "Jarmit",
+   "stage": 2,
+   "stages": 2,
+   "branch": "c",
+   "types": "Water/Grass",
+   "voice": "vocal oh none chatter",
+   "motif": [
+    0,
+    4,
+    7
+   ],
+   "notes": [
+    0,
+    4,
+    11
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "rustle",
+    "clicks"
+   ],
+   "seconds": 1.11
+  },
+  "Tootle": {
+   "file": "audio/cries/tootle.wav",
+   "display_name": "Tootle",
+   "line": "Tootle",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle uh vib chatter",
+   "motif": [
+    0,
+    -7,
+    5
+   ],
+   "notes": [
+    0,
+    -7,
+    5
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "echo",
+    "air"
+   ],
+   "seconds": 0.63
+  },
+  "Gramofrill": {
+   "file": "audio/cries/gramofrill.wav",
+   "display_name": "Gramofrill",
+   "line": "Tootle",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle uh vib chatter",
+   "motif": [
+    0,
+    -7,
+    5
+   ],
+   "notes": [
+    0,
+    -7,
+    5
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "echo"
+   ],
+   "seconds": 0.94
+  },
+  "Phonodrake": {
+   "file": "audio/cries/phonodrake.wav",
+   "display_name": "Phonodrake",
+   "line": "Tootle",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Sound",
+   "voice": "whistle uh vib chatter",
+   "motif": [
+    0,
+    -7,
+    5
+   ],
+   "notes": [
+    0,
+    -7,
+    5
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "echo",
+    "growl"
+   ],
+   "seconds": 1.06
+  },
+  "Narfoil": {
+   "file": "audio/cries/narfoil.wav",
+   "display_name": "Narfoil",
+   "line": "Narfoil",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Ice",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    -9,
+    -5,
+    -7
+   ],
+   "notes": [
+    0,
+    -9,
+    -5,
+    -7
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "bell_hi"
+   ],
+   "seconds": 0.49
+  },
+  "Parrywhal": {
+   "file": "audio/cries/parrywhal.wav",
+   "display_name": "Parrywhal",
+   "line": "Narfoil",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Ice",
+   "voice": "vocal ah vib rustle",
+   "motif": [
+    0,
+    -9,
+    -5,
+    -7
+   ],
+   "notes": [
+    0,
+    -9,
+    -5,
+    -7
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "bell_hi",
+    "bell"
+   ],
+   "seconds": 1.05
+  },
+  "Foalaround": {
+   "file": "audio/cries/foalaround.wav",
+   "display_name": "Foalaround",
+   "line": "Foalaround",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy",
+   "voice": "glassy oh vib clicks_hi",
+   "motif": [
+    0,
+    2,
+    9,
+    0
+   ],
+   "notes": [
+    0,
+    2,
+    9,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks_hi",
+    "shimmer"
+   ],
+   "seconds": 0.51
+  },
+  "Canopony": {
+   "file": "audio/cries/canopony.wav",
+   "display_name": "Canopony",
+   "line": "Foalaround",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy",
+   "voice": "glassy oh vib clicks_hi",
+   "motif": [
+    0,
+    2,
+    9,
+    0
+   ],
+   "notes": [
+    0,
+    2,
+    9,
+    0
+   ],
+   "shape": "mid",
+   "tint": [
+    "clicks_hi",
+    "shimmer",
+    "bell"
+   ],
+   "seconds": 0.67
+  },
+  "Carrousteed": {
+   "file": "audio/cries/carrousteed.wav",
+   "display_name": "Carrousteed",
+   "line": "Foalaround",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy",
+   "voice": "glassy oh vib clicks_hi",
+   "motif": [
+    0,
+    2,
+    9,
+    0
+   ],
+   "notes": [
+    0,
+    2,
+    9,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks_hi",
+    "shimmer"
+   ],
+   "seconds": 1.0
+  },
+  "Morelkin": {
+   "file": "audio/cries/morelkin.wav",
+   "display_name": "Morelkin",
+   "line": "Morelkin",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal ee trill chatter",
+   "motif": [
+    0,
+    7,
+    3,
+    7
+   ],
+   "notes": [
+    0,
+    7,
+    3,
+    7
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "puff",
+    "clicks"
+   ],
+   "seconds": 0.48
+  },
+  "Truffapir": {
+   "file": "audio/cries/truffapir.wav",
+   "display_name": "Truffapir",
+   "line": "Morelkin",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal ee trill chatter",
+   "motif": [
+    0,
+    7,
+    3,
+    7
+   ],
+   "notes": [
+    0,
+    7,
+    3,
+    7
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "puff"
+   ],
+   "seconds": 0.68
+  },
+  "Morelossus": {
+   "file": "audio/cries/morelossus.wav",
+   "display_name": "Morelossus",
+   "line": "Morelkin",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Spore/Steel",
+   "voice": "vocal ee trill chatter",
+   "motif": [
+    0,
+    7,
+    3,
+    7
+   ],
+   "notes": [
+    0,
+    7,
+    3,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "puff",
+    "clicks_hi"
+   ],
+   "seconds": 1.06
+  },
+  "Grainspin": {
+   "file": "audio/cries/grainspin.wav",
+   "display_name": "Grainspin",
+   "line": "Grainspin",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock",
+   "voice": "whistle ah trill bubbles",
+   "motif": [
+    0,
+    5,
+    8
+   ],
+   "notes": [
+    0,
+    5,
+    8
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "clicks"
+   ],
+   "seconds": 0.47
+  },
+  "Sandwidow": {
+   "file": "audio/cries/sandwidow.wav",
+   "display_name": "Sandwidow",
+   "line": "Grainspin",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock",
+   "voice": "whistle ah trill bubbles",
+   "motif": [
+    0,
+    5,
+    8
+   ],
+   "notes": [
+    0,
+    5,
+    8
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "clicks",
+    "bell",
+    "air"
+   ],
+   "seconds": 0.74
+  },
+  "Hourachnid": {
+   "file": "audio/cries/hourachnid.wav",
+   "display_name": "Hourachnid",
+   "line": "Grainspin",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Rock/Fairy",
+   "voice": "whistle ah trill bubbles",
+   "motif": [
+    0,
+    5,
+    8
+   ],
+   "notes": [
+    0,
+    5,
+    8
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "clicks",
+    "shimmer",
+    "bell"
+   ],
+   "seconds": 0.92
+  },
+  "Parasolth": {
+   "file": "audio/cries/parasolth.wav",
+   "display_name": "Parasolth",
+   "line": "Parasolth",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Dark",
+   "voice": "vocal uh trill rustle",
+   "motif": [
+    0,
+    -4,
+    -9,
+    -12
+   ],
+   "notes": [
+    0,
+    -4,
+    -9,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "growl"
+   ],
+   "seconds": 0.49
+  },
+  "Umbrathere": {
+   "file": "audio/cries/umbrathere.wav",
+   "display_name": "Ribbrella",
+   "line": "Parasolth",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Dark/Flying",
+   "voice": "vocal uh trill rustle",
+   "motif": [
+    0,
+    -4,
+    -9,
+    -12
+   ],
+   "notes": [
+    0,
+    -4,
+    -9,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "growl",
+    "air"
+   ],
+   "seconds": 0.93
+  },
+  "Gravigrub": {
+   "file": "audio/cries/gravigrub.wav",
+   "display_name": "Gravigrub",
+   "line": "Gravigrub",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Psychic",
+   "voice": "whistle uh none bell",
+   "motif": [
+    0,
+    5,
+    0
+   ],
+   "notes": [
+    0,
+    5,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "bell",
+    "shimmer"
+   ],
+   "seconds": 0.52
+  },
+  "Orbitle": {
+   "file": "audio/cries/orbitle.wav",
+   "display_name": "Orbitle",
+   "line": "Gravigrub",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Psychic",
+   "voice": "whistle uh none bell",
+   "motif": [
+    0,
+    5,
+    0
+   ],
+   "notes": [
+    0,
+    5,
+    0
+   ],
+   "shape": "mid",
+   "tint": [
+    "bell",
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.65
+  },
+  "Scarabit": {
+   "file": "audio/cries/scarabit.wav",
+   "display_name": "Scarabit",
+   "line": "Gravigrub",
+   "stage": 3,
+   "stages": 3,
+   "branch": "a",
+   "types": "Psychic/Fairy",
+   "voice": "whistle uh none bell",
+   "motif": [
+    0,
+    5,
+    0
+   ],
+   "notes": [
+    0,
+    5,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "shimmer",
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.96
+  },
+  "Meteorab": {
+   "file": "audio/cries/meteorab.wav",
+   "display_name": "Meteorab",
+   "line": "Gravigrub",
+   "stage": 3,
+   "stages": 3,
+   "branch": "b",
+   "types": "Psychic/Rock",
+   "voice": "whistle uh none bell",
+   "motif": [
+    0,
+    5,
+    0
+   ],
+   "notes": [
+    0,
+    5,
+    -3
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "shimmer",
+    "clicks",
+    "rumble",
+    "air"
+   ],
+   "seconds": 1.18
+  },
+  "Wickapi": {
+   "file": "audio/cries/wickapi.wav",
+   "display_name": "Wickapi",
+   "line": "Wickapi",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark/Fire",
+   "voice": "vocal ee trill shimmer",
+   "motif": [
+    0,
+    5,
+    1
+   ],
+   "notes": [
+    0,
+    5,
+    1
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "growl",
+    "crackle"
+   ],
+   "seconds": 0.45
+  },
+  "Snuffapi": {
+   "file": "audio/cries/snuffapi.wav",
+   "display_name": "Snuffapi",
+   "line": "Wickapi",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark/Fire",
+   "voice": "vocal ee trill shimmer",
+   "motif": [
+    0,
+    5,
+    1
+   ],
+   "notes": [
+    0,
+    5,
+    1
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "growl",
+    "crackle"
+   ],
+   "seconds": 0.7
+  },
+  "Chandelapi": {
+   "file": "audio/cries/chandelapi.wav",
+   "display_name": "Candelapi",
+   "line": "Wickapi",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark/Fire",
+   "voice": "vocal ee trill shimmer",
+   "motif": [
+    0,
+    5,
+    1
+   ],
+   "notes": [
+    0,
+    5,
+    1
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "growl",
+    "crackle"
+   ],
+   "seconds": 1.03
+  },
+  "Pagodito": {
+   "file": "audio/cries/pagodito.wav",
+   "display_name": "Pagodito",
+   "line": "Pagodito",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Dragon",
+   "voice": "vocal eh none shimmer",
+   "motif": [
+    0,
+    4,
+    -8,
+    1
+   ],
+   "notes": [
+    0,
+    4,
+    -8,
+    1
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "rumble",
+    "growl",
+    "bell"
+   ],
+   "seconds": 0.44
+  },
+  "Pagoguana": {
+   "file": "audio/cries/pagoguana.wav",
+   "display_name": "Pagoguana",
+   "line": "Pagodito",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Dragon/Rock",
+   "voice": "vocal eh none shimmer",
+   "motif": [
+    0,
+    4,
+    -8,
+    1
+   ],
+   "notes": [
+    0,
+    4,
+    -8,
+    1
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "rumble",
+    "clicks",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.03
+  },
+  "Lensling": {
+   "file": "audio/cries/lensling.wav",
+   "display_name": "Lensling",
+   "line": "Lensling",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy",
+   "voice": "vocal oh vib rustle",
+   "motif": [
+    0,
+    7,
+    2
+   ],
+   "notes": [
+    0,
+    7,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "rustle",
+    "shimmer"
+   ],
+   "seconds": 0.45
+  },
+  "Scopeleon": {
+   "file": "audio/cries/scopeleon.wav",
+   "display_name": "Scopeleon",
+   "line": "Lensling",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy",
+   "voice": "vocal oh vib rustle",
+   "motif": [
+    0,
+    7,
+    2
+   ],
+   "notes": [
+    0,
+    7,
+    2
+   ],
+   "shape": "mid",
+   "tint": [
+    "rustle",
+    "shimmer",
+    "clicks"
+   ],
+   "seconds": 0.79
+  },
+  "Domeleon": {
+   "file": "audio/cries/domeleon.wav",
+   "display_name": "Domeleon",
+   "line": "Lensling",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Fairy/Crystal",
+   "voice": "vocal oh vib rustle",
+   "motif": [
+    0,
+    7,
+    2
+   ],
+   "notes": [
+    0,
+    7,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "rustle",
+    "shimmer",
+    "bell",
+    "buzz"
+   ],
+   "seconds": 1.07
+  },
+  "Blotlet": {
+   "file": "audio/cries/blotlet.wav",
+   "display_name": "Blotlet",
+   "line": "Blotlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "vocal oh trill shimmer",
+   "motif": [
+    0,
+    -2,
+    -6
+   ],
+   "notes": [
+    0,
+    -2,
+    -6
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "growl"
+   ],
+   "seconds": 0.48
+  },
+  "Slog": {
+   "file": "audio/cries/slog.wav",
+   "display_name": "Slog",
+   "line": "Blotlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "vocal oh trill shimmer",
+   "motif": [
+    0,
+    -2,
+    -6
+   ],
+   "notes": [
+    0,
+    -2,
+    -6
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "growl",
+    "clicks"
+   ],
+   "seconds": 0.87
+  },
+  "Sloggoth": {
+   "file": "audio/cries/sloggoth.wav",
+   "display_name": "Sloggoth",
+   "line": "Blotlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark/Psychic",
+   "voice": "vocal oh trill shimmer",
+   "motif": [
+    0,
+    -2,
+    -6
+   ],
+   "notes": [
+    0,
+    -2,
+    -6
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "growl",
+    "shimmer",
+    "bell"
+   ],
+   "seconds": 1.03
+  },
+  "Knotling": {
+   "file": "audio/cries/knotling.wav",
+   "display_name": "Knotling",
+   "line": "Knotling",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore",
+   "voice": "vocal oh trill shimmer",
+   "motif": [
+    0,
+    -7,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -7,
+    -12,
+    -12
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "puff"
+   ],
+   "seconds": 0.5
+  },
+  "Knotwyrm": {
+   "file": "audio/cries/knotwyrm.wav",
+   "display_name": "Knotwyrm",
+   "line": "Knotling",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Spore/Dragon",
+   "voice": "vocal oh trill shimmer",
+   "motif": [
+    0,
+    -7,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -7,
+    -12,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "puff",
+    "rumble"
+   ],
+   "seconds": 1.14
+  },
+  "Bathilus": {
+   "file": "audio/cries/bathilus.wav",
+   "display_name": "Bathilus",
+   "line": "Bathilus",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Psychic",
+   "voice": "vocal ow trill clicks_hi",
+   "motif": [
+    0,
+    5,
+    2
+   ],
+   "notes": [
+    0,
+    5,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks_hi",
+    "shimmer"
+   ],
+   "seconds": 0.53
+  },
+  "Torpecone": {
+   "file": "audio/cries/torpecone.wav",
+   "display_name": "Torpecone",
+   "line": "Bathilus",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Psychic",
+   "voice": "vocal ow trill clicks_hi",
+   "motif": [
+    0,
+    5,
+    2
+   ],
+   "notes": [
+    0,
+    5,
+    2
+   ],
+   "shape": "mid",
+   "tint": [
+    "clicks_hi",
+    "shimmer"
+   ],
+   "seconds": 0.78
+  },
+  "Dreadmonite": {
+   "file": "audio/cries/dreadmonite.wav",
+   "display_name": "Dreadmonite",
+   "line": "Bathilus",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Psychic/Water",
+   "voice": "vocal ow trill clicks_hi",
+   "motif": [
+    0,
+    5,
+    2
+   ],
+   "notes": [
+    0,
+    5,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks_hi",
+    "shimmer",
+    "bubbles"
+   ],
+   "seconds": 1.01
+  },
+  "Grammite": {
+   "file": "audio/cries/grammite.wav",
+   "display_name": "Grammite",
+   "line": "Grammite",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Bug",
+   "voice": "buzzy ow purr air",
+   "motif": [
+    0,
+    -12,
+    -12,
+    -8
+   ],
+   "notes": [
+    0,
+    -12,
+    -12,
+    -8
+   ],
+   "shape": "first",
+   "tint": [
+    "air",
+    "buzz"
+   ],
+   "seconds": 0.47
+  },
+  "Dobsabre": {
+   "file": "audio/cries/dobsabre.wav",
+   "display_name": "Dobsabre",
+   "line": "Grammite",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Dragon/Bug",
+   "voice": "buzzy ow purr air",
+   "motif": [
+    0,
+    -12,
+    -12,
+    -8
+   ],
+   "notes": [
+    0,
+    -12,
+    -12,
+    -8
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "rumble",
+    "buzz"
+   ],
+   "seconds": 1.06
+  },
+  "Gloamshell": {
+   "file": "audio/cries/gloamshell.wav",
+   "display_name": "Duskargot",
+   "line": "Gloamshell",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Dark/Fairy",
+   "voice": "glassy ee purr clicks_hi",
+   "motif": [
+    0,
+    3,
+    1,
+    4
+   ],
+   "notes": [
+    0,
+    3,
+    1,
+    4
+   ],
+   "shape": "first",
+   "tint": [
+    "clicks_hi",
+    "growl",
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.52
+  },
+  "Gloamspire": {
+   "file": "audio/cries/gloamspire.wav",
+   "display_name": "Duskspire",
+   "line": "Gloamshell",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Dark/Fairy",
+   "voice": "glassy ee purr clicks_hi",
+   "motif": [
+    0,
+    3,
+    1,
+    4
+   ],
+   "notes": [
+    0,
+    3,
+    1,
+    4
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks_hi",
+    "growl",
+    "shimmer",
+    "bell",
+    "buzz"
+   ],
+   "seconds": 0.95
+  },
+  "Olmlet": {
+   "file": "audio/cries/olmlet.wav",
+   "display_name": "Olmlet",
+   "line": "Olmlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Crystal",
+   "voice": "vocal ee vib chatter",
+   "motif": [
+    0,
+    4,
+    11
+   ],
+   "notes": [
+    0,
+    4,
+    11
+   ],
+   "shape": "first",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "bell"
+   ],
+   "seconds": 0.51
+  },
+  "Glazolm": {
+   "file": "audio/cries/glazolm.wav",
+   "display_name": "Glazolm",
+   "line": "Olmlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Crystal",
+   "voice": "vocal ee vib chatter",
+   "motif": [
+    0,
+    4,
+    11
+   ],
+   "notes": [
+    0,
+    4,
+    11
+   ],
+   "shape": "mid",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "bell"
+   ],
+   "seconds": 0.75
+  },
+  "Kintsuwyrm": {
+   "file": "audio/cries/kintsuwyrm.wav",
+   "display_name": "Gildwyrm",
+   "line": "Olmlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Water/Crystal",
+   "voice": "vocal ee vib chatter",
+   "motif": [
+    0,
+    4,
+    11
+   ],
+   "notes": [
+    0,
+    4,
+    11
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bubbles",
+    "bell"
+   ],
+   "seconds": 1.04
+  },
+  "Malletary": {
+   "file": "audio/cries/malletary.wav",
+   "display_name": "Malletary",
+   "line": "Malletary",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Normal/Steel",
+   "voice": "vocal eh purr shimmer",
+   "motif": [
+    0,
+    -3,
+    -6,
+    -12
+   ],
+   "notes": [
+    0,
+    -3,
+    -6,
+    -12
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "chatter",
+    "clicks_hi"
+   ],
+   "seconds": 0.72
+  },
+  "Lurklet": {
+   "file": "audio/cries/lurklet.wav",
+   "display_name": "Lurklet",
+   "line": "Lurklet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "whistle ee purr shimmer",
+   "motif": [
+    0,
+    -7,
+    -10,
+    2
+   ],
+   "notes": [
+    0,
+    -7,
+    -10,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "shimmer",
+    "growl",
+    "bubbles",
+    "buzz"
+   ],
+   "seconds": 0.46
+  },
+  "Snapler": {
+   "file": "audio/cries/snapler.wav",
+   "display_name": "Snapler",
+   "line": "Lurklet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "whistle ee purr shimmer",
+   "motif": [
+    0,
+    -7,
+    -10,
+    2
+   ],
+   "notes": [
+    0,
+    -7,
+    -10,
+    2
+   ],
+   "shape": "mid",
+   "tint": [
+    "shimmer",
+    "growl",
+    "clicks"
+   ],
+   "seconds": 0.73
+  },
+  "Maulangler": {
+   "file": "audio/cries/maulangler.wav",
+   "display_name": "Maulangler",
+   "line": "Lurklet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "whistle ee purr shimmer",
+   "motif": [
+    0,
+    -7,
+    -10,
+    2
+   ],
+   "notes": [
+    0,
+    -7,
+    -10,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "growl",
+    "buzz"
+   ],
+   "seconds": 0.91
+  },
+  "Pipewurm": {
+   "file": "audio/cries/pipewurm.wav",
+   "display_name": "Pipewurm",
+   "line": "Pipewurm",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Poison",
+   "voice": "vocal eh vib crackle",
+   "motif": [
+    0,
+    -2,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -2,
+    -7,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "crackle",
+    "bubbles_lo",
+    "air"
+   ],
+   "seconds": 0.51
+  },
+  "Pipeworth": {
+   "file": "audio/cries/pipeworth.wav",
+   "display_name": "Pipeworth",
+   "line": "Pipewurm",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Poison/Dragon",
+   "voice": "vocal eh vib crackle",
+   "motif": [
+    0,
+    -2,
+    -7,
+    2
+   ],
+   "notes": [
+    0,
+    -2,
+    -7,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "crackle",
+    "bubbles_lo",
+    "rumble",
+    "air",
+    "buzz"
+   ],
+   "seconds": 1.11
+  },
+  "Selenfin": {
+   "file": "audio/cries/selenfin.wav",
+   "display_name": "Lunafin",
+   "line": "Selenfin",
+   "stage": 1,
+   "stages": 2,
+   "branch": "",
+   "types": "Fairy/Water",
+   "voice": "buzzy ah none buzz",
+   "motif": [
+    0,
+    -7,
+    -4
+   ],
+   "notes": [
+    0,
+    -7,
+    -4
+   ],
+   "shape": "first",
+   "tint": [
+    "buzz",
+    "shimmer",
+    "bubbles",
+    "clicks"
+   ],
+   "seconds": 0.49
+  },
+  "Selenwhale": {
+   "file": "audio/cries/selenwhale.wav",
+   "display_name": "Lunarca",
+   "line": "Selenfin",
+   "stage": 2,
+   "stages": 2,
+   "branch": "",
+   "types": "Fairy/Water",
+   "voice": "buzzy ah none buzz",
+   "motif": [
+    0,
+    -7,
+    -4
+   ],
+   "notes": [
+    0,
+    -7,
+    -4
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "shimmer",
+    "bubbles"
+   ],
+   "seconds": 1.01
+  },
+  "Reelacine": {
+   "file": "audio/cries/reelacine.wav",
+   "display_name": "Reelacine",
+   "line": "Reelacine",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Dark/Normal",
+   "voice": "vocal eh vib puff",
+   "motif": [
+    0,
+    7,
+    12,
+    5
+   ],
+   "notes": [
+    0,
+    7,
+    12,
+    5
+   ],
+   "shape": "mid",
+   "tint": [
+    "puff",
+    "growl",
+    "chatter"
+   ],
+   "seconds": 0.84
+  },
+  "Pawnfry": {
+   "file": "audio/cries/pawnfry.wav",
+   "display_name": "Pawnfry",
+   "line": "Pawnfry",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh purr bubbles",
+   "motif": [
+    0,
+    -5,
+    0
+   ],
+   "notes": [
+    0,
+    -5,
+    0
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "chatter",
+    "clicks"
+   ],
+   "seconds": 0.6
+  },
+  "Gambitfin": {
+   "file": "audio/cries/gambitfin.wav",
+   "display_name": "Gambitfin",
+   "line": "Pawnfry",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Normal",
+   "voice": "vocal eh purr bubbles",
+   "motif": [
+    0,
+    -5,
+    0
+   ],
+   "notes": [
+    0,
+    -5,
+    0
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "chatter"
+   ],
+   "seconds": 0.72
+  },
+  "Checkmare": {
+   "file": "audio/cries/checkmare.wav",
+   "display_name": "Checkmare",
+   "line": "Pawnfry",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Dragon/Steel",
+   "voice": "vocal eh purr bubbles",
+   "motif": [
+    0,
+    -5,
+    0
+   ],
+   "notes": [
+    0,
+    -5,
+    0
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "rumble",
+    "clicks_hi"
+   ],
+   "seconds": 1.16
+  },
+  "Gilabacus": {
+   "file": "audio/cries/gilabacus.wav",
+   "display_name": "Gilabacus",
+   "line": "Gilabacus",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Poison/Fairy",
+   "voice": "vocal ee trill crackle",
+   "motif": [
+    0,
+    -5,
+    -7
+   ],
+   "notes": [
+    0,
+    -5,
+    -7
+   ],
+   "shape": "mid",
+   "tint": [
+    "crackle",
+    "bubbles_lo",
+    "shimmer",
+    "clicks",
+    "air"
+   ],
+   "seconds": 0.78
+  },
+  "Hivara": {
+   "file": "audio/cries/hivara.wav",
+   "display_name": "Hivara",
+   "line": "Hivara",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Bug/Steel",
+   "voice": "buzzy ow purr bell",
+   "motif": [
+    0,
+    -3,
+    -1
+   ],
+   "notes": [
+    0,
+    -3,
+    -1
+   ],
+   "shape": "mid",
+   "tint": [
+    "bell",
+    "buzz",
+    "clicks_hi"
+   ],
+   "seconds": 0.79
+  },
+  "Cairnback": {
+   "file": "audio/cries/cairnback.wav",
+   "display_name": "Cairnback",
+   "line": "Cairnback",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Steel/Rock",
+   "voice": "vocal eh vib buzz",
+   "motif": [
+    0,
+    -9,
+    3
+   ],
+   "notes": [
+    0,
+    -9,
+    3
+   ],
+   "shape": "mid",
+   "tint": [
+    "buzz",
+    "clicks_hi",
+    "clicks"
+   ],
+   "seconds": 0.68
+  },
+  "Zephyrak": {
+   "file": "audio/cries/zephyrak.wav",
+   "display_name": "Zephyrak",
+   "line": "Zephyrak",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Flying/Dragon",
+   "voice": "whistle eh none bell",
+   "motif": [
+    0,
+    -3,
+    9
+   ],
+   "notes": [
+    0,
+    -3,
+    9
+   ],
+   "shape": "mid",
+   "tint": [
+    "bell",
+    "air",
+    "rumble"
+   ],
+   "seconds": 0.68
+  },
+  "Zipling": {
+   "file": "audio/cries/zipling.wav",
+   "display_name": "Zipling",
+   "line": "Zipling",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "vocal uh vib air",
+   "motif": [
+    0,
+    9,
+    2
+   ],
+   "notes": [
+    0,
+    9,
+    2
+   ],
+   "shape": "first",
+   "tint": [
+    "air",
+    "growl"
+   ],
+   "seconds": 0.57
+  },
+  "Zippelith": {
+   "file": "audio/cries/zippelith.wav",
+   "display_name": "Zipperpent",
+   "line": "Zipling",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark",
+   "voice": "vocal uh vib air",
+   "motif": [
+    0,
+    9,
+    2
+   ],
+   "notes": [
+    0,
+    9,
+    2
+   ],
+   "shape": "mid",
+   "tint": [
+    "air",
+    "growl"
+   ],
+   "seconds": 0.7
+  },
+  "Seamwyrm": {
+   "file": "audio/cries/seamwyrm.wav",
+   "display_name": "Seamwyrm",
+   "line": "Zipling",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Dark/Dragon",
+   "voice": "vocal uh vib air",
+   "motif": [
+    0,
+    9,
+    2
+   ],
+   "notes": [
+    0,
+    9,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "growl",
+    "rumble"
+   ],
+   "seconds": 1.04
+  },
+  "Kitlet": {
+   "file": "audio/cries/kitlet.wav",
+   "display_name": "Kitlet",
+   "line": "Kitlet",
+   "stage": 1,
+   "stages": 3,
+   "branch": "",
+   "types": "Dragon",
+   "voice": "whistle ow none bubbles",
+   "motif": [
+    0,
+    -5,
+    7,
+    11
+   ],
+   "notes": [
+    0,
+    -5,
+    7,
+    11
+   ],
+   "shape": "first",
+   "tint": [
+    "bubbles",
+    "rumble",
+    "growl",
+    "rustle"
+   ],
+   "seconds": 0.55
+  },
+  "Ribbonwyrm": {
+   "file": "audio/cries/ribbonwyrm.wav",
+   "display_name": "Ribbonwyrm",
+   "line": "Kitlet",
+   "stage": 2,
+   "stages": 3,
+   "branch": "",
+   "types": "Dragon/Flying",
+   "voice": "whistle ow none bubbles",
+   "motif": [
+    0,
+    -5,
+    7,
+    11
+   ],
+   "notes": [
+    0,
+    -5,
+    7,
+    11
+   ],
+   "shape": "mid",
+   "tint": [
+    "bubbles",
+    "rumble",
+    "air",
+    "clicks"
+   ],
+   "seconds": 0.9
+  },
+  "Dragonkite": {
+   "file": "audio/cries/dragonkite.wav",
+   "display_name": "Kitedrake",
+   "line": "Kitlet",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Dragon/Flying",
+   "voice": "whistle ow none bubbles",
+   "motif": [
+    0,
+    -5,
+    7,
+    11
+   ],
+   "notes": [
+    0,
+    -5,
+    7,
+    11
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "rumble",
+    "air",
+    "growl"
+   ],
+   "seconds": 0.97
+  },
+  "Luckhop": {
+   "file": "audio/cries/luckhop.wav",
+   "display_name": "Luckhop",
+   "line": "Luckhop",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Grass/Fairy",
+   "voice": "whistle uh trill puff",
+   "motif": [
+    0,
+    4,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    4,
+    12,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "rustle",
+    "shimmer"
+   ],
+   "seconds": 1.1
+  },
+  "Twinklup": {
+   "file": "audio/cries/twinklup.wav",
+   "display_name": "Twinklup",
+   "line": "Twinklup",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Normal/Fairy",
+   "voice": "vocal ee purr shimmer",
+   "motif": [
+    0,
+    -5,
+    4,
+    -8
+   ],
+   "notes": [
+    0,
+    -5,
+    4,
+    -8
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "chatter",
+    "shimmer"
+   ],
+   "seconds": 1.07
+  },
+  "Lockwren": {
+   "file": "audio/cries/lockwren.wav",
+   "display_name": "Lockwren",
+   "line": "Lockwren",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Flying/Steel",
+   "voice": "whistle oh vib shimmer",
+   "motif": [
+    0,
+    7,
+    12,
+    7
+   ],
+   "notes": [
+    0,
+    7,
+    12,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "air",
+    "clicks_hi",
+    "clicks"
+   ],
+   "seconds": 1.16
+  },
+  "Glacione": {
+   "file": "audio/cries/glacione.wav",
+   "display_name": "Clionice",
+   "line": "Glacione",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Ice/Fairy",
+   "voice": "whistle oh purr chatter",
+   "motif": [
+    0,
+    2,
+    7
+   ],
+   "notes": [
+    0,
+    2,
+    7
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "bell_hi",
+    "shimmer",
+    "bell"
+   ],
+   "seconds": 1.02
+  },
+  "Cometail": {
+   "file": "audio/cries/cometail.wav",
+   "display_name": "Cometail",
+   "line": "Cometail",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Fairy/Psychic",
+   "voice": "glassy oh vib chatter",
+   "motif": [
+    0,
+    -7,
+    2,
+    11
+   ],
+   "notes": [
+    0,
+    -7,
+    2,
+    11
+   ],
+   "shape": "final",
+   "tint": [
+    "chatter",
+    "shimmer",
+    "shimmer"
+   ],
+   "seconds": 1.15
+  },
+  "Wayshell": {
+   "file": "audio/cries/wayshell.wav",
+   "display_name": "Wayshell",
+   "line": "Wayshell",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Water/Psychic",
+   "voice": "vocal ow purr air",
+   "motif": [
+    0,
+    -3,
+    -7,
+    -5
+   ],
+   "notes": [
+    0,
+    -3,
+    -7,
+    -5
+   ],
+   "shape": "final",
+   "tint": [
+    "air",
+    "bubbles",
+    "shimmer",
+    "clicks"
+   ],
+   "seconds": 0.97
+  },
+  "Pharoheron": {
+   "file": "audio/cries/pharoheron.wav",
+   "display_name": "Pharoheron",
+   "line": "Pharoheron",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Flying/Electric",
+   "voice": "whistle ah purr bell",
+   "motif": [
+    0,
+    -3,
+    -12,
+    -12
+   ],
+   "notes": [
+    0,
+    -3,
+    -12,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "air",
+    "buzz"
+   ],
+   "seconds": 0.97
+  },
+  "Ghoulamari": {
+   "file": "audio/cries/ghoulamari.wav",
+   "display_name": "Ghoulamari",
+   "line": "Ghoulamari",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Fairy/Dark",
+   "voice": "glassy ee none buzz",
+   "motif": [
+    0,
+    2,
+    9
+   ],
+   "notes": [
+    0,
+    2,
+    9
+   ],
+   "shape": "final",
+   "tint": [
+    "buzz",
+    "shimmer",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.13
+  },
+  "Pavonazar": {
+   "file": "audio/cries/pavonazar.wav",
+   "display_name": "Pavonazar",
+   "line": "Pavonazar",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Fairy/Crystal",
+   "voice": "glassy eh none bell",
+   "motif": [
+    0,
+    2,
+    4
+   ],
+   "notes": [
+    0,
+    2,
+    4
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "shimmer",
+    "bell"
+   ],
+   "seconds": 1.05
+  },
+  "Calderoise": {
+   "file": "audio/cries/calderoise.wav",
+   "display_name": "Calderoise",
+   "line": "Calderoise",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Fire/Rock",
+   "voice": "whistle ee vib bubbles",
+   "motif": [
+    0,
+    -4,
+    3
+   ],
+   "notes": [
+    0,
+    -4,
+    3
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "crackle",
+    "clicks",
+    "growl"
+   ],
+   "seconds": 0.99
+  },
+  "Siegephant": {
+   "file": "audio/cries/siegephant.wav",
+   "display_name": "Siegephant",
+   "line": "Siegephant",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Steel/Rock",
+   "voice": "vocal eh trill crackle",
+   "motif": [
+    0,
+    7,
+    2,
+    9
+   ],
+   "notes": [
+    0,
+    7,
+    2,
+    9
+   ],
+   "shape": "final",
+   "tint": [
+    "crackle",
+    "clicks_hi",
+    "clicks"
+   ],
+   "seconds": 0.92
+  },
+  "Glaciammoth": {
+   "file": "audio/cries/glaciammoth.wav",
+   "display_name": "Glaciammoth",
+   "line": "Glaciammoth",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Ice/Steel",
+   "voice": "vocal ah vib puff",
+   "motif": [
+    0,
+    7,
+    3
+   ],
+   "notes": [
+    0,
+    7,
+    3
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "bell_hi",
+    "clicks_hi",
+    "growl",
+    "bell"
+   ],
+   "seconds": 1.09
+  },
+  "Sarcobra": {
+   "file": "audio/cries/sarcobra.wav",
+   "display_name": "Sarcobra",
+   "line": "Sarcobra",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Dragon/Dark",
+   "voice": "vocal oh vib shimmer",
+   "motif": [
+    0,
+    9,
+    -3
+   ],
+   "notes": [
+    0,
+    9,
+    -3
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "rumble",
+    "growl",
+    "clicks",
+    "air"
+   ],
+   "seconds": 0.97
+  },
+  "Aurostag": {
+   "file": "audio/cries/aurostag.wav",
+   "display_name": "Aurostag",
+   "line": "Aurostag",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Ice/Fairy",
+   "voice": "buzzy ow vib bell",
+   "motif": [
+    0,
+    12,
+    7,
+    9
+   ],
+   "notes": [
+    0,
+    12,
+    7,
+    9
+   ],
+   "shape": "final",
+   "tint": [
+    "bell",
+    "bell_hi",
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.92
+  },
+  "Cetorgan": {
+   "file": "audio/cries/cetorgan.wav",
+   "display_name": "Organwhal",
+   "line": "Cetorgan",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Sound/Fairy",
+   "voice": "whistle ah trill puff",
+   "motif": [
+    0,
+    3,
+    -9,
+    -4
+   ],
+   "notes": [
+    0,
+    3,
+    -9,
+    -4
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "echo",
+    "shimmer",
+    "air"
+   ],
+   "seconds": 1.01
+  },
+  "Hydrangor": {
+   "file": "audio/cries/hydrangor.wav",
+   "display_name": "Hydrangor",
+   "line": "Hydrangor",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Grass/Dragon",
+   "voice": "glassy ee trill shimmer",
+   "motif": [
+    0,
+    -3,
+    4
+   ],
+   "notes": [
+    0,
+    -3,
+    4
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "rustle",
+    "rumble"
+   ],
+   "seconds": 1.16
+  },
+  "Cindermaw": {
+   "file": "audio/cries/cindermaw.wav",
+   "display_name": "Cindermaw",
+   "line": "Cindermaw",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Fire/Dark",
+   "voice": "buzzy eh vib clicks",
+   "motif": [
+    0,
+    3,
+    5
+   ],
+   "notes": [
+    0,
+    3,
+    5
+   ],
+   "shape": "final",
+   "tint": [
+    "clicks",
+    "crackle",
+    "growl",
+    "chatter"
+   ],
+   "seconds": 1.09
+  },
+  "Sphinxblight": {
+   "file": "audio/cries/sphinxblight.wav",
+   "display_name": "Enigmane",
+   "line": "Sphinxblight",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Poison/Psychic",
+   "voice": "vocal uh vib bubbles",
+   "motif": [
+    0,
+    -2,
+    -11,
+    -12
+   ],
+   "notes": [
+    0,
+    -2,
+    -11,
+    -12
+   ],
+   "shape": "final",
+   "tint": [
+    "bubbles",
+    "bubbles_lo",
+    "shimmer",
+    "growl"
+   ],
+   "seconds": 1.01
+  },
+  "Palloth": {
+   "file": "audio/cries/palloth.wav",
+   "display_name": "Palloth",
+   "line": "Palloth",
+   "stage": 1,
+   "stages": 1,
+   "branch": "",
+   "types": "Bug/Dark",
+   "voice": "buzzy uh vib shimmer",
+   "motif": [
+    0,
+    -2,
+    2
+   ],
+   "notes": [
+    0,
+    -2,
+    2
+   ],
+   "shape": "final",
+   "tint": [
+    "shimmer",
+    "buzz",
+    "growl"
+   ],
+   "seconds": 0.91
+  }
+ },
+ "lines": {
+  "Mycroll": [
+   "Mycroll",
+   "Sporcupine",
+   "Ringrove"
+  ],
+  "Vespyx": [
+   "Vespyx",
+   "Vespox",
+   "Glaivyx"
+  ],
+  "Prismander": [
+   "Prismander",
+   "Glassolotl",
+   "Chandelotl"
+  ],
+  "Ermink": [
+   "Ermink",
+   "Flarmink",
+   "Rippmink",
+   "Blossmink",
+   "Voltmink",
+   "Rimink",
+   "Umbrink",
+   "Lunink",
+   "Prismink",
+   "Wyrmink"
+  ],
+  "Kestrike": [
+   "Kestrike",
+   "Arcestrel",
+   "Voltalon"
+  ],
+  "Jerbit": [
+   "Jerbit",
+   "Jerbolt",
+   "Dynaboa"
+  ],
+  "Effigeetle": [
+   "Effigeetle",
+   "Effigoon",
+   "Mortarfly"
+  ],
+  "Marchleaf": [
+   "Marchleaf",
+   "Scythant",
+   "Harvantis",
+   "Shinobant",
+   "Reapant"
+  ],
+  "Mumblet": [
+   "Mumblet",
+   "Klaxada",
+   "Sirencada"
+  ],
+  "Dribbara": [
+   "Dribbara",
+   "Soakybara",
+   "Geysirbara"
+  ],
+  "Cubbat": [
+   "Cubbat",
+   "Pipwom",
+   "Critwom"
+  ],
+  "Crofthorn": [
+   "Crofthorn",
+   "Crofthollow"
+  ],
+  "Kindlewren": [
+   "Kindlewren",
+   "Embrook",
+   "Pyrraven"
+  ],
+  "Moatpole": [
+   "Moatpole",
+   "Rampartoad"
+  ],
+  "Echolop": [
+   "Echolop",
+   "Howlop",
+   "Chimelop"
+  ],
+  "Nymphane": [
+   "Nymphane",
+   "Rosedart"
+  ],
+  "Bucketmander": [
+   "Bucketmander",
+   "Barrelmander",
+   "Cisternmander"
+  ],
+  "Mothlet": [
+   "Mothlet",
+   "Lunowl",
+   "Eclipsowl"
+  ],
+  "Glintmole": [
+   "Glintmole",
+   "Geodemole",
+   "Druzemole"
+  ],
+  "Nettlynx": [
+   "Nettlynx",
+   "Thistlynx",
+   "Briarlynx"
+  ],
+  "Stamproo": [
+   "Stamproo",
+   "Postroo",
+   "Pillaroo"
+  ],
+  "Mossgrade": [
+   "Mossgrade",
+   "Mossbastion"
+  ],
+  "Murmurling": [
+   "Murmurling",
+   "Murmuron"
+  ],
+  "Oarlet": [
+   "Oarlet",
+   "Oarter",
+   "Galleotter"
+  ],
+  "Scoopsy": [
+   "Scoopsy",
+   "Sundormouse"
+  ],
+  "Gravadillo": [
+   "Gravadillo",
+   "Gravitank"
+  ],
+  "Fizzlet": [
+   "Fizzlet",
+   "Boltstrich",
+   "Thunderstrich"
+  ],
+  "Bullpole": [
+   "Bullpole",
+   "Bullsfrog",
+   "Quivertoad"
+  ],
+  "Kerchick": [
+   "Kerchick",
+   "Jibbatross",
+   "Canvastross"
+  ],
+  "Tinbrock": [
+   "Tinbrock",
+   "Anvilbrock",
+   "Forgebrock"
+  ],
+  "Proofhop": [
+   "Proofhop",
+   "Loafhopper"
+  ],
+  "Moundlet": [
+   "Moundlet",
+   "Spirevark"
+  ],
+  "Bubblisk": [
+   "Bubblisk",
+   "Tidalisk"
+  ],
+  "Coolatee": [
+   "Coolatee",
+   "Frigatee",
+   "Glaciatee"
+  ],
+  "Thrumbird": [
+   "Thrumbird",
+   "Lyrewing"
+  ],
+  "Buckleron": [
+   "Buckleron",
+   "Bulwartoad",
+   "Citadoad"
+  ],
+  "Fawngus": [
+   "Fawngus",
+   "Hatstag"
+  ],
+  "Pinster": [
+   "Pinster",
+   "Tiltster"
+  ],
+  "Bastling": [
+   "Bastling",
+   "Bastionpet"
+  ],
+  "Gongibbon": [
+   "Gongibbon",
+   "Gongrowl"
+  ],
+  "Terrasloth": [
+   "Terrasloth",
+   "Bonsolith"
+  ],
+  "Rimekit": [
+   "Rimekit",
+   "Rimeshrew",
+   "Rimefang"
+  ],
+  "Pocketpus": [
+   "Pocketpus",
+   "Bladypus"
+  ],
+  "Barokit": [
+   "Barokit",
+   "Barokat",
+   "Barostorm"
+  ],
+  "Teapotamus": [
+   "Teapotamus",
+   "Chuggamus"
+  ],
+  "Lodestick": [
+   "Lodestick",
+   "Lodestaff"
+  ],
+  "Pinguin": [
+   "Pinguin",
+   "Rollguin",
+   "Kingpinguin"
+  ],
+  "Glomwort": [
+   "Glomwort",
+   "Glomworth"
+  ],
+  "Foldbat": [
+   "Foldbat",
+   "Fanpire"
+  ],
+  "Chiptero": [
+   "Chiptero",
+   "Pickadactyl"
+  ],
+  "Clinkpede": [
+   "Clinkpede",
+   "Chainipede"
+  ],
+  "Skidlet": [
+   "Skidlet",
+   "Skateron",
+   "Lanceron"
+  ],
+  "Anchorbill": [
+   "Anchorbill",
+   "Anchorhorn"
+  ],
+  "Bellowlet": [
+   "Bellowlet",
+   "Bellowary",
+   "Furnacowary"
+  ],
+  "Xylogator": [
+   "Xylogator",
+   "Marimbite",
+   "Glockodile"
+  ],
+  "Spanglin": [
+   "Spanglin",
+   "Mirrolin"
+  ],
+  "Rattlebub": [
+   "Rattlebub",
+   "Maracoil"
+  ],
+  "Filefin": [
+   "Filefin",
+   "Carpenjaw",
+   "Sawright"
+  ],
+  "Lanterloris": [
+   "Lanterloris",
+   "Lanternlong"
+  ],
+  "Kayak": [
+   "Kayak",
+   "Prowyak",
+   "Dreadnoyak"
+  ],
+  "Puffuse": [
+   "Puffuse",
+   "Blastopuff"
+  ],
+  "Polyshroom": [
+   "Polyshroom",
+   "Starcap",
+   "Medushroom"
+  ],
+  "Pebblamb": [
+   "Pebblamb",
+   "Tesselamb"
+  ],
+  "Latchling": [
+   "Latchling",
+   "Lockatara",
+   "Vaultara"
+  ],
+  "Jarmit": [
+   "Jarmit",
+   "Lanternmit",
+   "Stormit",
+   "Terrarimit"
+  ],
+  "Tootle": [
+   "Tootle",
+   "Gramofrill",
+   "Phonodrake"
+  ],
+  "Narfoil": [
+   "Narfoil",
+   "Parrywhal"
+  ],
+  "Foalaround": [
+   "Foalaround",
+   "Canopony",
+   "Carrousteed"
+  ],
+  "Morelkin": [
+   "Morelkin",
+   "Truffapir",
+   "Morelossus"
+  ],
+  "Grainspin": [
+   "Grainspin",
+   "Sandwidow",
+   "Hourachnid"
+  ],
+  "Parasolth": [
+   "Parasolth",
+   "Umbrathere"
+  ],
+  "Gravigrub": [
+   "Gravigrub",
+   "Orbitle",
+   "Scarabit",
+   "Meteorab"
+  ],
+  "Wickapi": [
+   "Wickapi",
+   "Snuffapi",
+   "Chandelapi"
+  ],
+  "Pagodito": [
+   "Pagodito",
+   "Pagoguana"
+  ],
+  "Lensling": [
+   "Lensling",
+   "Scopeleon",
+   "Domeleon"
+  ],
+  "Blotlet": [
+   "Blotlet",
+   "Slog",
+   "Sloggoth"
+  ],
+  "Knotling": [
+   "Knotling",
+   "Knotwyrm"
+  ],
+  "Bathilus": [
+   "Bathilus",
+   "Torpecone",
+   "Dreadmonite"
+  ],
+  "Grammite": [
+   "Grammite",
+   "Dobsabre"
+  ],
+  "Gloamshell": [
+   "Gloamshell",
+   "Gloamspire"
+  ],
+  "Olmlet": [
+   "Olmlet",
+   "Glazolm",
+   "Kintsuwyrm"
+  ],
+  "Malletary": [
+   "Malletary"
+  ],
+  "Lurklet": [
+   "Lurklet",
+   "Snapler",
+   "Maulangler"
+  ],
+  "Pipewurm": [
+   "Pipewurm",
+   "Pipeworth"
+  ],
+  "Selenfin": [
+   "Selenfin",
+   "Selenwhale"
+  ],
+  "Reelacine": [
+   "Reelacine"
+  ],
+  "Pawnfry": [
+   "Pawnfry",
+   "Gambitfin",
+   "Checkmare"
+  ],
+  "Gilabacus": [
+   "Gilabacus"
+  ],
+  "Hivara": [
+   "Hivara"
+  ],
+  "Cairnback": [
+   "Cairnback"
+  ],
+  "Zephyrak": [
+   "Zephyrak"
+  ],
+  "Zipling": [
+   "Zipling",
+   "Zippelith",
+   "Seamwyrm"
+  ],
+  "Kitlet": [
+   "Kitlet",
+   "Ribbonwyrm",
+   "Dragonkite"
+  ],
+  "Luckhop": [
+   "Luckhop"
+  ],
+  "Twinklup": [
+   "Twinklup"
+  ],
+  "Lockwren": [
+   "Lockwren"
+  ],
+  "Glacione": [
+   "Glacione"
+  ],
+  "Cometail": [
+   "Cometail"
+  ],
+  "Wayshell": [
+   "Wayshell"
+  ],
+  "Pharoheron": [
+   "Pharoheron"
+  ],
+  "Ghoulamari": [
+   "Ghoulamari"
+  ],
+  "Pavonazar": [
+   "Pavonazar"
+  ],
+  "Calderoise": [
+   "Calderoise"
+  ],
+  "Siegephant": [
+   "Siegephant"
+  ],
+  "Glaciammoth": [
+   "Glaciammoth"
+  ],
+  "Sarcobra": [
+   "Sarcobra"
+  ],
+  "Aurostag": [
+   "Aurostag"
+  ],
+  "Cetorgan": [
+   "Cetorgan"
+  ],
+  "Hydrangor": [
+   "Hydrangor"
+  ],
+  "Cindermaw": [
+   "Cindermaw"
+  ],
+  "Sphinxblight": [
+   "Sphinxblight"
+  ],
+  "Palloth": [
+   "Palloth"
+  ]
+ }
+}
