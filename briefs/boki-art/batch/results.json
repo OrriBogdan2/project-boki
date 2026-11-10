@@ -102392,5 +102392,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_canopony_nl_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_sarcobra_halo",
+    "name": "Sarcobra (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_sarcobra_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_carrousteed_nl",
+    "name": "Carrousteed (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_carrousteed_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_carrousteed_nl",
+    "name": "Carrousteed (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_carrousteed_nl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_carrousteed_nl",
+    "name": "Carrousteed (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_carrousteed_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_carrousteed_nl",
+    "name": "Carrousteed (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_carrousteed_nl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_carrousteed_nl",
+    "name": "Carrousteed (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_carrousteed_nl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sarcobra_halo",
+    "name": "Sarcobra (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_sarcobra_halo_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sarcobra_halo",
+    "name": "Sarcobra (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_sarcobra_halo_1.jpg",
+    "ok": true
   }
 ]
