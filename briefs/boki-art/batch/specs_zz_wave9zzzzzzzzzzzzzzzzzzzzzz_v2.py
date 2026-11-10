@@ -1570,3 +1570,28 @@ for _i,_opts in (('pinguin',["a round penguin chick shaped like a bowling pin: w
     for _k,_d in zip('ab',_opts):
         SPECS.append({'id':'new_'+_i+'_'+_k,'name':'New line baby: '+_i+' '+_k,'refs':[],'runs':2,'aspect':'1:1','size':'2K',
           'prompt':"Draw one single character illustration of a new creature: "+_d+" A baby creature for a creature-collecting game: one single small animal with one clear idea, every part grown from its own body (nothing built, worn or carried), with an animal face. One creature only. The art style is described in words below, follow it exactly. "+STYLE_V2('baby','cute',False,False)+FRAME_V2})
+
+# ===== 11-10 late: picks from the big round are live as cards (list in CHANNEL). Sets for all of them; generic pose wording, since the card stays the hero.
+_GP="in a clearly different pose from image 1, turned to face the other way, caught mid-movement"
+_R4={'Sarcobra':('final','majestic',1,0),'Pavonazar':('final','majestic',0,1),'Aurostag':('final','majestic',1,1),'Sphinxblight':('final','majestic',1,1),'Hydrangor':('final','majestic',0,0),
+ 'Siegephant':('final','majestic',0,0),'Glaciammoth':('final','majestic',0,0),'Rimekit':('baby','cute',0,1),'Rimeshrew':('mid','cute',0,1),'Rimefang':('final','tough',0,1),
+ 'Kindlewren':('baby','cute',1,1),'Embrook':('mid','tough',1,1),'Pyrraven':('final','creepy',1,1),'Nettlynx':('baby','cute',0,1),'Thistlynx':('mid','sleek',0,1),'Briarlynx':('final','tough',0,1),
+ 'Selenfin':('baby','cute',0,0),'Selenwhale':('final','majestic',0,0),'Blotlet':('baby','cute',1,0),'Slog':('mid','creepy',1,0),'Sloggoth':('final','creepy',1,0),'Kayak':('baby','cute',0,1),
+ 'Dreadnoyak':('final','tough',0,1),'Zephyrak':('final','majestic',0,0),'Hivara':('final','sleek',0,0),'Glassolotl':('mid','pretty',0,0),'Luckhop':('baby','cute',0,1)}
+for _n,(_st,_ar,_dk,_fu) in _R4.items(): SETOF(_n,_st,_ar,_dk,_fu,_GP,'r4')
+_n0=len(SPECS); V2SHEET_NEW('Jerbolt','briefs/boki-art/cards/Jerbolt.jpg',_GC,_GN); SPECS[_n0]['id']='v2s_jerbolt_r4'
+_n0=len(SPECS); V2SHEET_NEW('Rampartoad','briefs/boki-art/cards/Rampartoad.jpg',_GC,_GN); SPECS[_n0]['id']='v2s_rampartoad_r4'
+# Pebblamb's evolution (pick a_1, the rock-garden ram) and the five new lines: later stages built FROM the picked baby, 3 runs each.
+def NEXT(idn,baby_stem,stage,arch,text):
+    SPECS.append({'id':idn,'name':idn,'refs':[_O+baby_stem+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of the "+("MIDDLE" if stage=='mid' else "FINAL")+" evolution of the creature in image 1, clearly the same animal grown up with the same colours, face and idea: "+text+" Every part is grown from its own body: nothing built, worn, tied on or carried. Draw it exactly the way image 1 is drawn. "+STYLE_V2(stage,arch,False,False)+FRAME_V2})
+NEXT('new_pinguin_mid','new_pinguin_a_1','mid','cute',"a bigger penguin with a round, glossy black belly like a bowling ball with three round spots like finger holes, the same red neck stripes, sliding forward on its belly.")
+NEXT('new_pinguin_final','new_pinguin_a_1','final','tough',"a tall proud emperor penguin with a crown of ten small pin-shaped crest feathers fanned on its head like a rack of pins, red neck stripes grown into a chest band, a round ball-shaped belly, one flipper swung back like a bowler mid-throw.")
+NEXT('new_sawshark_mid','new_sawshark_a_2','mid','sleek',"a sleek young sawshark with a longer, sharper saw nose, wood-grain stripes along its back, a dorsal fin shaped like a set-square, swimming fast.")
+NEXT('new_sawshark_final','new_sawshark_a_2','final','tough',"a great sawshark with a long two-edged saw blade nose, a back fin like a plane's handle, a broad chisel-shaped tail fin, sanded-wood colours with dark grain lines, a calm craftsman's stare.")
+NEXT('new_postroo_mid','new_postroo_a_2','mid','cute',"a young kangaroo standing upright, the same red coat, a wider letter-slot pouch with a small joey's ears peeking out, stamp-edged ears, a tail tip shaped like an envelope flap, mid-hop.")
+NEXT('new_postroo_final','new_postroo_a_2','final','tough',"a big strong kangaroo built like a pillar postbox: a tall rounded red body with a domed head crest like a postbox cap, a wide letter-slot pouch, heavy stamping feet, stamp-edged ears, arms crossed.")
+NEXT('new_xylocroc_mid','new_xylocroc_a_2','mid','sleek',"a longer young crocodile with eight coloured xylophone-bar scutes down its back from long to short, two mallet-shaped tail tips, mid-stride, grinning.")
+NEXT('new_xylocroc_final','new_xylocroc_a_2','final','tough',"a huge crocodile with a double row of big tuned bar scutes down its back in deep rainbow colours, jaws lined with teeth like piano keys, a heavy mallet tail raised to strike its own back, planted.")
+NEXT('new_carousel_mid','new_carousel_a_2','mid','pretty',"a prancing young horse with a taller twisted candy-stripe horn, a scalloped canopy mane in pink and cream, a ribbon tail, gold hoof tips, one foreleg raised.")
+NEXT('new_carousel_final','new_carousel_a_2','final','majestic',"a grand stallion whose mane spreads into a full round carousel canopy over its back with small lantern-shaped tufts round the rim, a long twisted gold-and-pink pole horn, a streaming ribbon tail, rearing.")

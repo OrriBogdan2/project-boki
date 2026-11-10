@@ -1,7 +1,7 @@
 # Boki art live manifest (regenerated 02:31 UTC 11-09)
 Card = main image, sheet = turnaround, portrait = Bokidex portrait. Bokidex hero = "hero" in LIVE_MANIFEST.json (portraits/cutout_v2, cut from the current card). Proposed new names in brackets (NAME_CHANGES.md). JSON: LIVE_MANIFEST.json.
 Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbeetle -> Orbitle; old Pyrraven art is now Embrook.
-235 Boki, 235 with all three. Missing something: 
+240 Boki, 240 with all three. Missing something: 
 
 | Boki | Sheet | Card | Portrait |
 |---|---|---|---|
@@ -11,6 +11,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Arcestrel | ✓ | ✓ | ✓ |
 | Aurostag | ✓ | ✓ | ✓ |
 | Barokat | ✓ | ✓ | ✓ |
+| Barokit | ✓ | ✓ | ✓ |
 | Barostorm | ✓ | ✓ | ✓ |
 | Barrelmander (Kegmander) | ✓ | ✓ | ✓ |
 | Bastionpet (Crabulwark) | ✓ | ✓ | ✓ |
@@ -31,6 +32,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Bullsfrog | ✓ | ✓ | ✓ |
 | Bulwartoad | ✓ | ✓ | ✓ |
 | Cairnback | ✓ | ✓ | ✓ |
+| Calderoise | ✓ | ✓ | ✓ |
 | Canvastross | ✓ | ✓ | ✓ |
 | Cetorgan (Organwhal) | ✓ | ✓ | ✓ |
 | Chainipede | ✓ | ✓ | ✓ |
@@ -44,6 +46,7 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Cisternmander (Vatmander) | ✓ | ✓ | ✓ |
 | Citadoad | ✓ | ✓ | ✓ |
 | Clinkpede | ✓ | ✓ | ✓ |
+| Cometail | ✓ | ✓ | ✓ |
 | Coolatee | ✓ | ✓ | ✓ |
 | Critwom | ✓ | ✓ | ✓ |
 | Crofthollow | ✓ | ✓ | ✓ |
@@ -157,11 +160,13 @@ Cut: Amanitusk, Bellowary, Frothisk, Geodelotl, Lashyx, Puffamus. Renamed: Orbee
 | Orbitle | ✓ | ✓ | ✓ |
 | Pagodito | ✓ | ✓ | ✓ |
 | Pagoguana | ✓ | ✓ | ✓ |
+| Palloth | ✓ | ✓ | ✓ |
 | Parasolth | ✓ | ✓ | ✓ |
 | Parrywhal | ✓ | ✓ | ✓ |
 | Pavonazar | ✓ | ✓ | ✓ |
 | Pawnfry | ✓ | ✓ | ✓ |
 | Pebblamb | ✓ | ✓ | ✓ |
+| Pharoheron | ✓ | ✓ | ✓ |
 | Phonodrake | ✓ | ✓ | ✓ |
 | Pickadactyl | ✓ | ✓ | ✓ |
 | Pinster | ✓ | ✓ | ✓ |
