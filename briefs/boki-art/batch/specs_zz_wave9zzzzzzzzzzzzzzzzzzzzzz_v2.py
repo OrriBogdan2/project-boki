@@ -1701,3 +1701,6 @@ for _a in (('Glomwort','baby','cute',0,0),('Glomworth','final','creepy',0,0),('K
 for _a in (('Terrasloth','mid','cute',0,0),('Bonsolith','final','majestic',0,0),('Mortarfly','final','majestic',0,0)): SETOF(*_a,_GP,'r8')
 SPECS.append({'id':'nodrip_chainipede','name':'Chainipede (no venom drips)','refs':['briefs/boki-art/cards/Chainipede.jpg'],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':_EDIT+"erase the green liquid dripping from its mouth and the drops below it completely; its mouth is closed and dry, with two clean fangs. Nothing else changes."})
+
+# 11-10: review upgrades (owner: "do all of this"). Sheet-vs-card colour check found Pillaroo's sheet and portrait still on the old postbox design.
+SETOF('Pillaroo','final','tough',0,1,_GP,'r9')
