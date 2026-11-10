@@ -90,7 +90,8 @@ func _process(dt: float) -> void:
 			mi.visible = false
 			continue
 		live = true
-		(mi.material_override as ShaderMaterial).set_shader_parameter("fade", clampf((LIFE - _age[i]) / (LIFE - HOLD), 0.0, 1.0))
+		var fade := clampf((LIFE - _age[i]) / (LIFE - HOLD), 0.0, 1.0)
+		(mi.material_override as ShaderMaterial).set_shader_parameter("fade", fade)
 	set_process(live)
 
 ## The attacker's hero colour (a Hunter or a Kin's owner); stone-pale for anything else.

@@ -55,7 +55,8 @@ func _source(src: String) -> void:
 		var at := wi.last_at
 		var placed_ok := wi.placed - decals0 == (1 if s in WALLS else 0)
 		if s in WALLS and placed_ok:
-			placed_ok = at.x > face - 0.3 and at.x < face + 1.0 and absf(at.z - spot.z) < 1.0 and wi.last_normal.is_equal_approx(Vector3(-1, 0, 0))
+			placed_ok = at.x > face - 0.3 and at.x < face + 1.0 and absf(at.z - spot.z) < 1.0
+			placed_ok = placed_ok and wi.last_normal.is_equal_approx(Vector3(-1, 0, 0))
 		ok("decal %s > %s" % [src, s], placed_ok, "decals %d at %s" % [wi.placed - decals0, at])
 	await done(m)
 
@@ -152,7 +153,8 @@ func _monsters() -> void:
 			stun = maxf(stun, mb.stun_t)
 		undo.call()
 		ok("wall monster > %s" % s, (stun > 0.4) == (s != "tier step"), "stun %.2f" % stun)
-		ok("decal monster > %s" % s, m.fx.wall_impact.placed - decals0 == (0 if s == "tier step" else 1), "decals %d" % (m.fx.wall_impact.placed - decals0))
+		var made: int = m.fx.wall_impact.placed - decals0
+		ok("decal monster > %s" % s, made == (0 if s == "tier step" else 1), "decals %d" % made)
 	await done(m)
 
 ## The sky train: a flat car you stand on is no wall, the engine is solid.
