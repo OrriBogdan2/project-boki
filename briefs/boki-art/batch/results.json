@@ -90576,5 +90576,47 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/on_critwom_rear_2.jpg",
     "ok": true
+  },
+  {
+    "id": "tidy_quivertoad",
+    "name": "Quivertoad (clean-up option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidy_quivertoad_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_lyrewing",
+    "name": "Lyrewing (clean-up option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidy_lyrewing_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_lyrewing",
+    "name": "Lyrewing (clean-up option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidy_lyrewing_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_quivertoad",
+    "name": "Quivertoad (clean-up option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidy_quivertoad_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_lyrewing",
+    "name": "Lyrewing (clean-up option)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidy_lyrewing_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_quivertoad",
+    "name": "Quivertoad (clean-up option)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidy_quivertoad_3.jpg",
+    "ok": true
   }
 ]
