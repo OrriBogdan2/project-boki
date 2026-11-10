@@ -107271,5 +107271,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_carrousteed_e1_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_dreadnoyak_e1",
+    "name": "Dreadnoyak (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_dreadnoyak_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_carrousteed_e1",
+    "name": "Carrousteed (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_carrousteed_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dreadnoyak_e1",
+    "name": "Dreadnoyak (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_dreadnoyak_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_carrousteed_e1",
+    "name": "Carrousteed (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_carrousteed_e1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_carrousteed_e1",
+    "name": "Carrousteed (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_carrousteed_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dreadnoyak_e1",
+    "name": "Dreadnoyak (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_dreadnoyak_e1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dreadnoyak_e1",
+    "name": "Dreadnoyak (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dreadnoyak_e1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rollguin_bands",
+    "name": "Rollguin (review: bands)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_rollguin_bands_1.jpg",
+    "ok": true
   }
 ]
