@@ -90464,5 +90464,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/tidy_knotwyrm_3.jpg",
     "ok": true
+  },
+  {
+    "id": "tidy_knotwyrm",
+    "name": "Knotwyrm (clean-up option)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/tidy_knotwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pipwom_roll",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_pipwom_roll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_terrarimit",
+    "name": "Terrarimit (clean-up option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidy_terrarimit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_cubbat_sit",
+    "name": "Cubbat (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_cubbat_sit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_dragonkite",
+    "name": "Dragonkite (clean-up option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidy_dragonkite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_knotwyrm",
+    "name": "Knotwyrm (clean-up option)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/tidy_knotwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_cubbat_sit",
+    "name": "Cubbat (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_cubbat_sit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "tidy_checkmare",
+    "name": "Checkmare (clean-up option)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/tidy_checkmare_3.jpg",
+    "ok": true
   }
 ]
