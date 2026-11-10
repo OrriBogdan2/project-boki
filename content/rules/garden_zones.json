@@ -24,7 +24,7 @@
 				"scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}},
 		"cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove",
 			"build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85,
-				"deco": [["toy_stone", 35, 33, 0], ["toy_stone", 42, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]],
+				"deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]],
 				"clear": [20, 22, 58, 48],
 				"scatter": {"seed": 23, "terrace": 16, "crack": 44, "pebble": 40}}},
 		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"},

@@ -21,7 +21,7 @@ const SHORE := ["crystal", "reed"]     # kinds that crowd the shallows' edge
 ## clear: m of free ground the prop needs.
 const KINDS_BOX := {
 	"terrace": {"size": Vector3(1.7, 0.12, 1.4), "steps": 2, "clear": 1.0, "colour": Color("a08c7c")},
-	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": Color(1.0, 0.48, 0.16, 0.0)},
+	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": Color(1.0, 0.36, 0.1, 0.0)},
 }
 const STEP_IN := 0.6           # a terrace's upper slab, as a fraction of the one under it
 

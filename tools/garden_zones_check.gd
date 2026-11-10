@@ -10,7 +10,7 @@ extends RefCounted
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
 ## opens its cards. Glasswater (step 7a): its own island from data (theme, tub, patch, shallow court
 ## and scatter), build mode off, the patch's timer on the save, and nothing of it left in Bramblebank.
-## Cinderstep (step 7b): its theme, two warm stones and a climbing post, a Fire/Rock/Steel/Dragon patch,
+## Cinderstep (step 7b): its theme, a warm stone and a climbing post, a Fire/Rock/Steel/Dragon patch,
 ## the Stump Shove stump on its own spot with no Training post, terraces and glowing cracks in batches.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
@@ -247,7 +247,7 @@ func _cinderstep_part(m: Node) -> void:
 		return
 	ok(HomeLayout.of(Save.d)["theme"] == "cinderstep", "its own cinder ground")
 	var ids: Array = cs.toys.toys().map(func(t): return t["id"])
-	ok(ids.count("toy_stone") == 2 and ids.has("toy_post"), "two warm stones and a climbing post (%s)" % ", ".join(ids))
+	ok(ids.has("toy_stone") and ids.has("toy_post"), "a warm stone and a climbing post (%s)" % ", ".join(ids))
 	var snacks := SnackPatch.snacks(Save.d)
 	var grown := {}
 	for f in snacks:
@@ -263,6 +263,8 @@ func _cinderstep_part(m: Node) -> void:
 	for mi in cs.find_children("*", "MultiMeshInstance3D", false, false):
 		kinds[mi.name] = (mi as MultiMeshInstance3D).multimesh.instance_count
 	var crack: MultiMeshInstance3D = cs.find_child("crack", false, false)
-	ok(kinds.get("terrace", 0) >= 2 and kinds.get("crack", 0) > 0 and crack.multimesh.get_instance_color(0).a == 0.0,
-		"terraces and glowing cracks, one batch each (%s)" % str(kinds))
+	var terrace: MultiMeshInstance3D = cs.find_child("terrace", false, false)
+	ok(kinds.get("terrace", 0) >= 2 and kinds.get("crack", 0) > 0 and crack.multimesh.use_colors
+		and crack.material_override == terrace.material_override,
+		"terraces and glowing cracks, one batch each on one material (%s)" % str(kinds))
 	Content.rules("farm_build")["base_mode"] = false
