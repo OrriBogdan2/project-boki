@@ -906,11 +906,24 @@ func _mend_burst() -> void:
 	net_ring(at, r, Feel.cat_color("sustain"))
 
 # ------------------------------------------------------------------ bots
+## The hammer: called back from where it landed, else thrown at a foe out of arm's reach.
+func _bot_hammer(dist: float, los: bool) -> void:
+	var reach := float(lmb_def()["throw_range"]) - 1.0
+	if not mace.is_empty():
+		h.inp["fire"] = String(mace["st"]) == "ground" and m.time - throw_at > 0.8
+	elif los and wall.is_empty() and dist > 3.6 and dist < reach and randf() < 0.7:
+		h.inp["fire"] = true
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
 	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and (h.hp < h.max_hp * 0.65 or shield_hp < shield_max() * 0.4) and randf() < 0.5:
 		h.inp["aim"] = h.pos; h.inp["sig"] = true; return
+	_bot_hammer(dist, los)
+	if HeroUlt.ready(self) and los and dist > 4.0 and dist < 13.0:
+		h.inp["aim"] = tgt.pos
+		HunterKeys.ult_pressed(h)
+		return
 	if int(h.slot_lv["sec"]) > 0:
 		var shot_at: bool = m.time - h.hurt_at < 0.6 and dist > 3.0
 		if shot_at and lock_t <= 0.0 and shield_hp > 30.0:
@@ -920,9 +933,11 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			bot_hold["rmb"] = 1.0
 		elif dist < 4.5 and rmb_ready() and not rmb_down:
 			h.inp["aim"] = tgt.pos; h.inp["sec"] = true
-			bot_hold["rmb"] = 0.6
+			bot_hold["rmb"] = 1.2
 	# close in: a Shield Charge from behind the shield, else a Whirl
-	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist < 4.5 and dist > 1.5 and randf() < 0.3:
+	# (behind the raised aegis the dash is the Shield Charge)
+	var odds := 0.8 if not wall.is_empty() and rmb_ready() else 0.3
+	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist < 4.5 and dist > 1.5 and randf() < odds:
 		h.inp["aim"] = tgt.pos
 		h.ai["dash_dir"] = h.dir_to(tgt)
 		h.inp["move"] = h.dir_to(tgt)
