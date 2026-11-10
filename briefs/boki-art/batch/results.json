@@ -81637,5 +81637,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2c_rimefang_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_rimefang",
+    "name": "Rimefang (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_rimefang_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_barokat",
+    "name": "Barokat (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_barokat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_teapotamus",
+    "name": "Teapotamus (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_teapotamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_selenwhale",
+    "name": "Selenwhale (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_selenwhale_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_teapotamus",
+    "name": "Teapotamus (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_teapotamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_rimefang",
+    "name": "Rimefang (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_rimefang_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_selenwhale",
+    "name": "Selenwhale (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_selenwhale_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kerchick",
+    "name": "Kerchick (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_kerchick_2.jpg",
+    "ok": true
   }
 ]
