@@ -94,7 +94,8 @@ static func render(k: Kin) -> bool:
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
 	var fade := BokiWispClear.alpha(_view, at, _line, _plates(k.m, at))
-	BokiWispClear.apply(k.model, fade, o.fire_cd > 0.0, _sparkly.has(k.get_instance_id()))
+	var resting := k.summon != null and k.summon.cd > 0.0       # no sparkles while its summon rests
+	BokiWispClear.apply(k.model, fade, o.fire_cd > 0.0, _sparkly.has(k.get_instance_id()) and not resting)
 	_thief_ring(k)
 	return true
 

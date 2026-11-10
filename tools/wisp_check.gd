@@ -329,11 +329,13 @@ func _summon() -> void:
 		"summon: the window ends, it shrinks back into a wisp, the cooldown runs (%.1f s)" % s.cd)
 	k.render(DT, 1.0)
 	var trail := k.model.get_node("Trail") as CPUParticles3D
-	ok(not trail.emitting, "...the wisp is dim while it rests")
+	var body := k.model.get_node("Body") as GeometryInstance3D
+	var dim: float = body.get_instance_shader_parameter("dim")
+	ok(not trail.emitting and dim == BokiWispLook.DIM, "...the wisp is dim, no sparkles, while it rests")
 	ok(not KinSummon.press(p) and k.wisp, "...and Summon is refused until it is rested")
 	s.cd = 0.0
 	k.render(DT, 1.0)
-	ok((k.model.get_node("Trail") as CPUParticles3D).emitting, "...bright again when ready")
+	ok(float(body.get_instance_shader_parameter("dim")) == 1.0, "...bright again when ready")
 	KinSummon.press(p)
 	ok(KinSummon.press(p) and s.shrink > 0.0, "summon: Summon again sends it back early")
 	k.render(DT, 1.0)

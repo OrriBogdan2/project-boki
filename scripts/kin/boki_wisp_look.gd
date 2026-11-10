@@ -163,13 +163,13 @@ static func pose(wisp: Node3D, t: float) -> void:
 	body.rotation.z = -dart * DART_LEAN
 	(wisp.get_node("Trail") as Node3D).position = body.position
 
-## Dim with no sparkles while its summon rests, bright when it is ready. Cheap to call every frame.
+## Dim while its summon rests, bright when it is ready (its sparkles go off too: KinWisp.render). Cheap to call
+## every frame.
 static func dim(wisp: Node3D, resting: bool) -> void:
-	var trail := wisp.get_node("Trail") as CPUParticles3D
-	if trail.emitting != resting:
-		return
-	trail.emitting = not resting
-	(wisp.get_node("Body") as GeometryInstance3D).set_instance_shader_parameter("dim", DIM if resting else 1.0)
+	var body := wisp.get_node("Body") as GeometryInstance3D
+	var v := DIM if resting else 1.0
+	if body.get_instance_shader_parameter("dim") != v:
+		body.set_instance_shader_parameter("dim", v)
 
 ## Adds the left twin of every part off the middle line (x > 0), with its tilt turned the other way.
 static func _mirrored(parts: Array) -> Array:
