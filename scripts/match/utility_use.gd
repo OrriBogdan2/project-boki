@@ -2,8 +2,8 @@ class_name UtilityUse
 extends RefCounted
 ## What each belt item does when you press its key (UtilityBelt holds the charges). Item data is in
 ## content/utility/*.json; "use" picks the behaviour:
-##   drink   a tonic: a short, open channel, then 40% of your health (Hunter.DRINK_TIME)
-##   repair  an armor kit: the same channel, then armor to full (Hunter.KIT_TIME)
+##   drink   a tonic: a short, open channel, then a flat heal (all in the item's "channel" data)
+##   repair  an armor kit: the same channel, then armor to full
 ##   mend    heal 40 and 20 armor at once
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
@@ -13,11 +13,20 @@ extends RefCounted
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
 
-const DRINK_HEAL := 0.4         # of max health
 const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
 const SCAN_RANGE := 26.0        # tiles
 const SCAN_TIME := 3.0          # seconds rivals stay revealed
+
+## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
+static func channel(id: String, key: String) -> float:
+	return float((UtilityBelt.def(id).get("channel", {}) as Dictionary).get(key, 1.0))
+
+## The speed multiplier for a hunter who is drinking or repairing (1.0 otherwise).
+static func channel_move(h: Hunter) -> float:
+	if h.drink_t > 0.0:
+		return channel("tonic", "move")
+	return channel("armor_kit", "move") if h.kit_t > 0.0 else 1.0
 
 static func use_of(id: String) -> String:
 	return String(UtilityBelt.def(id).get("use", "fx"))
@@ -40,14 +49,14 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	match use_of(id):
 		"drink":
 			h._fold_for_action()
-			h.drink_t = Hunter.DRINK_TIME
+			h.drink_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"repair":
 			h._fold_for_action()
-			h.kit_t = Hunter.KIT_TIME
+			h.kit_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
@@ -106,7 +115,7 @@ static func tick(h: Hunter, dt: float) -> void:
 			if h.drink_t <= 0.0:
 				h.drink_t = 0.0
 				if UtilityBelt.take(h, "tonic", 1) > 0:
-					h.heal(h.max_hp * DRINK_HEAL * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
+					h.heal(channel("tonic", "heal") * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
 					h.m.sfx("heal", h.pos, -2.0)
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:
