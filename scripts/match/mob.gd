@@ -274,13 +274,18 @@ func sim(dt: float) -> void:
 
 ## An idle monster with no Hunter or Boki within NAP_M stops simulating (no wandering, no physics) and
 ## looks again every NAP_CHECK seconds: most camps sit far from every fight, and nobody sees them wander.
+## One MobCap holds asleep (capped) sleeps regardless of who is near.
 const NAP_M := 36.0          # m: anyone this close keeps it awake (beyond the match camera's view)
 const NAP_CHECK := 0.5       # s between its looks around while asleep
 var _nap := 0.0
+var capped := false          # MobCap: too many awake near the local player, so this idle one sleeps
 func _napping(dt: float) -> bool:
 	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
 		return false
+	if capped:
+		_nap = NAP_CHECK
+		return true
 	if _nap > 0.0:
 		_nap -= dt
 		return true

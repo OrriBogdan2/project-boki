@@ -74,6 +74,7 @@ var muzzle_light: OmniLight3D
 var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
 var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
 var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
+var mob_cap := MobCap.new(self)    # monsters awake near you, capped by preset (MobCap)
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var collapse_warned := false
@@ -4319,6 +4320,7 @@ func step(dt: float) -> void:
 	_prof("drop")
 	for k in kins: k.sim(dt)
 	_prof("kins")
+	mob_cap.tick(dt)
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
 	_prof("mobs")
