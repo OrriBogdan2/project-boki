@@ -38,6 +38,7 @@ var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var hints: MatchHints = null    # one-time hints for what the tutorial no longer teaches
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
@@ -680,6 +681,7 @@ func _start(o: Dictionary) -> void:
 	_stage_done_ms = 0.0
 	opts = o
 	if o.get("tutorial", false): tut = Tutorial.new(self)
+	hints = MatchHints.new(self)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -3890,8 +3892,8 @@ func step(dt: float) -> void:
 		if net_on:
 			Net.tick(dt)
 		return
-	if tut and tut.intro:
-		tut.intro_wait(dt)      # (the intro card: the match waits for a key or two seconds)
+	if tut and tut.holding():
+		tut.hold_wait(dt)      # (the intro card or Pell's talk: the match waits)
 		return
 	time += dt
 	if Game.god and player and not player.out:
@@ -4389,6 +4391,7 @@ func step(dt: float) -> void:
 	_run_later()
 	if biomes: biomes.tick(dt)
 	_update_tracking(dt)
+	hints.tick(dt)
 	if opts.get("tutorial", false):
 		if opts.get("tut_test", false):
 			TutorialDrive.drive(self)

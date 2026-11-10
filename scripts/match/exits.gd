@@ -674,6 +674,12 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	var charging: bool = x["state"] == "charging"
 	OutpostLook.rings(n, near or x["contested"], x["contested"], charging, float(x["prog"]))
 
+## Opens an outpost's lift for a team at once, with no uplink (the tutorial's last step: the uplink and
+## holding its yard are one-time hints now).
+func open_now(x: Dictionary, team: int) -> void:
+	x["team"] = team
+	_open_lift(x)
+
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
 	x["t"] = 1e9 if x.get("tut", false) else LIFT_T
@@ -688,7 +694,7 @@ func _open_lift(x: Dictionary) -> void:
 		m.ping(x["pos"], ExitModels.UPLINK)
 		if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
 			m.add_feed("The lift is open at %s for %ds" % [x["name"], int(LIFT_T)])
-	if m.hud and m.player and int(x["team"]) == m.player.team and not m.player.out:
+	if m.hud and m.player and int(x["team"]) == m.player.team and not m.player.out and not x.get("tut", false):
 		m.hud.toast("Uplink complete! The lift is open: step into the light", ExitModels.UPLINK)
 
 # ------------------------------------------------------------------ monster waves

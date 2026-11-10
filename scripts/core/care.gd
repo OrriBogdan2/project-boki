@@ -19,6 +19,7 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 ## Each stage keeps the ones before it. A meal takes 4 hours off; being fed (food over 20) undoes it
 ## three times as fast as it built up. Feeders keep it from ever starting.
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
+const MEAL_H := 4.0       # h of starving one meal takes off the clock
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
@@ -204,10 +205,10 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
 
-## It just ate: a meal takes four hours off the starve clock.
+## It just ate: a meal takes MEAL_H hours off the starve clock.
 static func fed(rec: Dictionary) -> void:
 	if rec.has("starve"):
-		var st := maxf(0.0, float(rec["starve"]) - 4.0 * 3600.0)
+		var st := maxf(0.0, float(rec["starve"]) - MEAL_H * 3600.0)
 		if st > 0.0: rec["starve"] = st
 		else: rec.erase("starve")
 

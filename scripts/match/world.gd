@@ -2511,6 +2511,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:
 				weapon_spots.append(Vector3(wx + 0.5, level[idx(wx, wz)] * LEVEL, wz + 0.5))
+	if bool(L.get("calm", false)):      # the tutorial: nothing random, only what the course places itself
+		for spots: Array in [chest_spots, shrine_spots, wild_spots, break_spots, weapon_spots, camp_spots]:
+			spots.clear()
 	await _slice()
 	_place_stairs()
 

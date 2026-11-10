@@ -4,6 +4,8 @@ extends RefCounted
 ## level pips, the chips on a kin's card, and the Job Board panel (priorities per element, who's
 ## doing what, pinning a kin to a job or keeping it to rest).
 
+const UNSET_COLOR := Color("e8a05a")      # the dropdown reads as something still to choose while no job is set
+
 static var tab := "Jobs"
 
 ## An element's round icon: its colour, with a little glyph (flame, drop, sprout, bolt...).
@@ -152,10 +154,10 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 static func job_label(el: String) -> String:
 	return "%s jobs only" % Work.name_of(el)
 
-## Whatever it's best at / Rest only / <Element> jobs only: one dropdown.
+## Not set (it takes whatever it's best at) / Rest only / <Element> jobs only: one dropdown.
 static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton:
 	var opt := OptionButton.new()
-	opt.add_item("Whatever it's best at"); opt.set_item_metadata(0, "")
+	opt.add_item("Not set"); opt.set_item_metadata(0, "")
 	opt.add_item("Rest only"); opt.set_item_metadata(1, "rest")
 	var sel := 1 if rec.get("work_rest", false) else 0
 	for it in Work.list(rec):
@@ -163,14 +165,16 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 		opt.set_item_metadata(opt.item_count - 1, String(it[0]))
 		if Work.pin(rec) == String(it[0]): sel = opt.item_count - 1
 	opt.select(sel)
+	if sel == 0:
+		opt.add_theme_color_override("font_color", UNSET_COLOR)
 	opt.custom_minimum_size.x = 170
 	opt.add_theme_font_size_override("font_size", 13)
 	opt.item_selected.connect(func(i: int):
 		var m := String(opt.get_item_metadata(i))
 		if m == "rest": Work.set_rest(rec, true)
 		else: Work.set_pin(rec, m)
-		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		_drop(h, rec)
+		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		Save.save_game()
 		reopen.call())
 	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"

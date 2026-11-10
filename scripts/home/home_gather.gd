@@ -238,7 +238,7 @@ static func demo_save(which: String, seed: int) -> Dictionary:
 	HomeLayout.new_fs(d, seed)
 	d["tutorial"] = {"home": true, "day1_done": which != "busy"}
 	if which == "busy":
-		d["tutorial"]["ft"] = {"did": {"axe": true}, "done": false, "skipped": false, "gift": false}
+		d["tutorial"]["ft"] = {"did": {"hob": true}, "done": false, "skipped": false, "gift": false}
 	if which != "empty" and which != "ghost":
 		d["tools"] = ["axe", "pickaxe"]
 		d["mats"] = {"wood": 14, "stone": 6}
