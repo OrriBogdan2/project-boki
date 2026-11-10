@@ -1257,3 +1257,9 @@ for _n,(_st,_ar,_pose) in {'Coolatee':('baby','cute',"rolling onto its back, fli
     _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,False,_n=='Canvastross',_pose)
     SPECS[_n0]['id']='v2s_'+_n.lower()+'_z'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_z'; SPECS[_n0+1]['runs']=2
 SPECS[:]=[s for s in SPECS if s['id'] not in ('v2s_wickapi_q','v2p_wickapi_q','v2s_snapler_q','v2p_snapler_q','v2s_scopeleon_q','v2p_scopeleon_q')]
+
+# 11-10 redo picks live: Spirevark pose3 d_1, Checkmare knight's-move k1_1, Wickapi fur 1, Scopeleon base 3, Snapler older 4. Sets from the new cards.
+for _n,(_st,_ar,_dk,_fu,_pose) in {'Wickapi':('baby','cute',1,1,"sitting with its short legs folded, head tilted, candle flame wobbling"),'Snapler':('mid','creepy',1,0,"swimming forward through the air, lure held out in front, jaws half open"),
+                                   'Scopeleon':('baby','cute',1,0,"sitting with its tail curled under it, squinting through its telescope eye up at the viewer")}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_r2'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_r2'; SPECS[_n0+1]['runs']=2
