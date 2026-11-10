@@ -181,7 +181,11 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
 	HudStyle.strip(c, Rect2(Vector2(x + 6, y + 14), Vector2(w - 12, 4)), float(it["prog"]), Heart.GATE_COL)
 	var mid := sz.x * 0.5
-	HudStyle.ctext(c, Vector2(mid, y + 36), stay_line(hud.m), 13, HudStyle.MUTED, 3, HudStyle.BODY)
+	var stay := stay_line(hud.m)
+	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0
+	var back := Rect2(Vector2(mid - sw * 0.5, y + 22), Vector2(sw, 20))
+	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
+	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
 	return true
 
 ## The line under the Gate prompt: what staying gets you.
