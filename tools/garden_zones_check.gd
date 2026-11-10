@@ -11,9 +11,11 @@ extends RefCounted
 ## (step 5): a Boki sent with "Move to..." walks to the pad and blinks out, is gone from Bramblebank
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
-## opens its cards.
+## opens its cards. With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
+const SHOT_ZOOM := 1.5    # camera zoom for the hub shot (0.8 close .. 1.6 wide)
+const SHOT_WAIT_S := 1.5  # s for the ink wipe to clear and the minder to set off before the shot
 
 var bad := 0
 
@@ -141,6 +143,7 @@ func _travel_part(m: Node) -> void:
 		var mk: Dictionary = back._kin_entry(mrec)
 		ok(back.life != null and back.life._chore(mk) and String(mk["life_chore"]["kind"]) == "mind",
 			"the egg-minder sets off to mind the egg in the Nook")
+		await _hub_shot(m, back)
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() + 1 and (Save.d["roster"] as Array).size() == 4,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
@@ -254,3 +257,20 @@ func _texts(n: Node) -> String:
 	for c in n.get_children():
 		out += "\n" + _texts(c)
 	return out
+
+## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
+func _hub_shot(m: Node, hub) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): dir = a.substr(12)
+	if dir == "" or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	hub.cam.zoom_to = SHOT_ZOOM
+	hub.cam.zoom = SHOT_ZOOM
+	hub.cam.snap(HubWaystone.HUB_AT)
+	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
+	hub.prompt_box.visible = false
+	await m.get_tree().process_frame
+	m.get_viewport().get_texture().get_image().save_png(dir.path_join("hub.png"))
+	print("ZONES shot %s" % dir.path_join("hub.png"))
