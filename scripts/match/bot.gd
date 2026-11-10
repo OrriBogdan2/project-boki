@@ -224,7 +224,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
-				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
+				inp["ult"] = false      # R is the Merge: BotKin decides
 				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
 					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
 					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
@@ -320,6 +320,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			move = dd
 	move = _brake_at_lip(m, h, move)
 	inp["move"] = move
+	if StoneStand.hop_ahead(h, move):
+		inp["jump"] = true      # a teammate's rock in the way: hop it (Tenzo walks up his own; a foe's stops us)
 	if a.has("dash_dir"):
 		inp["move"] = a["dash_dir"]
 		a.erase("dash_dir")

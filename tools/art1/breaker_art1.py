@@ -292,13 +292,16 @@ def main():
 
     hl = B.hull(J)
     part("hull", hl, 2200, "scan", "scanpaint", 3.2)
-    cp, c_at, c_n = B.compass_field(hl)
+    scn = np.load(os.path.join(WORK, "scan_low.npz"))
+    c_at, c_n = B.compass_on(scn["v"])
     dl = S.Field(c_at - 0.16, c_at + 0.16, 0.0022)
-    dl.add(S.cap(c_at - c_n * 0.03, c_at + c_n * 0.006, 0.122, 0.118), 0.0, 1)
+    rot = np.array(((1, 0, 0), (0, c_n[2], c_n[1]), (0, -c_n[1], c_n[2])), np.float32)    # (local z on the chest's normal)
+    dl.add(S.cyl(c_at - c_n * 0.012, rot, 0.1, 0.018, 0.006), 0.0, 1)     # a flat dial, 0.1 m: the art's compass, 30 px at 1600
     part("compass_dial", dl, 120, "brass", "dial", 3.0, centre=c_at)
     hm, cl = B.helmet()
     part("helmet", hm, 1300, "brass", "helmet", 2.6, bone="head", blur=0.003)
     part("collar", cl, 700, "brass", "collar", 2.0, blur=0.006)
+    part("helmglass", B.helm_glass(), 160, "lure", "lure", 1.0, bone="head")
     ms = B.moss(hl, None)
     part("moss", ms, 500, "moss", "moss", 1.0)
     mt = B.masts()
@@ -311,7 +314,7 @@ def main():
         part("pauldron" + n, pd, 300, "scan", "pauldron", 1.6, bone="pauldron." + n, side=s)
         part("upper" + n, up, 240, "scan", "limb", 1.5, bone="upper_arm." + n, side=s, blur=0.008)
         part("fore" + n, fa, 620, "scan", "limb", 1.5, bone="forearm." + n, side=s, blur=0.006)
-        pf = part("fist" + n, fi, 380, "scan", "limb", 1.6, bone=None, sd=n, side=s)
+        pf = part("fist" + n, fi, 380, "scan", "fist", 1.6, bone=None, sd=n, side=s)
         th, sn, ft = B.leg(J, s)
         part("thigh" + n, th, 90, "scan", "leg", 0.9, bone="thigh." + n, side=s)
         part("shin" + n, sn, 150, "scan", "leg", 0.9, bone="shin." + n, side=s)
@@ -341,7 +344,6 @@ def main():
     print("weapons", time.time() - t0, flush=True)
 
     # the retopologised scan replaces the scripted hull, moss, arms and legs, with its own baked maps
-    scn = np.load(os.path.join(WORK, "scan_low.npz"))
     drop = ("hull", "moss", "pauldron", "upper", "fore", "thigh", "shin", "foot")
     for p in [q for q in parts if q["name"].startswith(drop)]:
         bpy.data.objects.remove(p["ob"])
@@ -593,7 +595,7 @@ def main():
         md = o.modifiers.new("Armature", "ARMATURE")
         md.object = arm
     Hc = H_M(np.array([[0, 0, zc]], np.float32))[0]
-    K.anchor(arm, "head", "anchor_head_top", (0, 0.03, 1.05))
+    K.anchor(arm, "head", "anchor_head_top", (0, 0.03, B.HELM_TOP + 0.06))
     K.anchor(arm, "hips", "anchor_chest", tuple(c_at))
     K.anchor(arm, "x_weapon", "anchor_hammer_head", tuple(Hc))
     K.anchor(arm, "x_weapon", "anchor_weapon_tip", tuple(H_M(np.array([[0.295, 0, zc]], np.float32))[0]))
