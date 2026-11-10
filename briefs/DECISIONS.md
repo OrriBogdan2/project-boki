@@ -505,3 +505,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - The opening "Choose your first Mask" offers three: Lace, Kael, Vex. No single locked starter. The tutorial and first portal work with any of the three.
 - Lace is the signature hero (key art, store capsule, trailer lead). Kael and Vex are the other two advertised faces. Vex reads as the obvious hero, so he sits next to the face rather than being it (owner's comparison: Ekko).
 - New roster and unlock order: Lace, Kael, Vex, Albert, then the rest in their current order. This supersedes "Vex free starter, met first" in the 12-hunter order above.
+
+## 2026-11-10 owner: the garden gets a hub with a teleporter and zones you unlock
+- The base becomes a small hub with a teleporter in the middle. From it you travel to separate garden zones. At the start only ONE zone is unlocked; the rest show as locked destinations with a clear way to open them.
+- This is a genre pattern (creature-raising gardens), not a copy. Our own hook: zones are tied to elements and Boki personality. Names, layout and looks are ours.
+- Feeds GARDEN.md (add a "Hub and zones" section). The first slice for video stays as it is; the hub is the next garden milestone.
