@@ -91367,5 +91367,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/fs3_murmuron_3.jpg",
     "ok": true
+  },
+  {
+    "id": "fix_knotwyrm",
+    "name": "Knotwyrm (clean-up with contrast)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fix_knotwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fix_knotwyrm",
+    "name": "Knotwyrm (clean-up with contrast)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fix_knotwyrm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fix_knotwyrm",
+    "name": "Knotwyrm (clean-up with contrast)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fix_knotwyrm_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "fix_glaciammoth",
+    "name": "Glaciammoth (ice musk-ox with the blade horn)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fix_glaciammoth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fix_checkmare",
+    "name": "Checkmare (clean-up, no beak needle)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fix_checkmare_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fix_checkmare",
+    "name": "Checkmare (clean-up, no beak needle)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fix_checkmare_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fix_checkmare",
+    "name": "Checkmare (clean-up, no beak needle)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fix_checkmare_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_olmlet_p3",
+    "name": "Olmlet (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_olmlet_p3_2.jpg",
+    "ok": true
   }
 ]
