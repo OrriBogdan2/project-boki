@@ -1,5 +1,5 @@
 extends RefCounted
-## --dummy-move-shots --shots-dir=<dir> (GPU): the Training Area's station dummy as it strafes, then dodges
+## --dummy-move-shots --shots-dir=<dir> (GPU): the Training Grounds's station dummy as it strafes, then dodges
 ## (Arena.cycle_dummy): <dir>/clip/f000.png ... (ffmpeg it into a clip), the station sign in view.
 
 const STRAFE_FRAMES := 100

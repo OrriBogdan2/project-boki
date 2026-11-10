@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bqsw0m67r7ft2"
-path="res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.ctex"
+path.bptc="res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.bptc.ctex"
+path.astc="res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0f773f7af35ac976be726f33cead5287"
@@ -14,17 +16,17 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/sable/sable_normal.jpg"
-dest_files=["res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.ctex"]
+dest_files=["res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.bptc.ctex", "res://.godot/imported/sable_normal.jpg-acc5711bd2ad6060e1d410758bfd94cf.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

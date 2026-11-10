@@ -1,6 +1,6 @@
 extends RefCounted
 ## --practice-hero-check: changing hero in the practice areas (Practice, PracticeHero, HeroGrid). In the
-## Training Area, the Duel room and the tutorial: the bottom bar exists (Hero, the area's
+## Training Grounds, the Duel room and the tutorial: the bottom bar exists (Hero, the area's
 ## menu, Leave), its Hero button and J open the picker with every hero, picking swaps the hunter's archetype
 ## in place, keeps the Boki, opens every rank and saves the expedition pick, the Esc menu has Change hero,
 ## and the mouse wheel zooms the camera (the Duel room included). A real match gets none of it.

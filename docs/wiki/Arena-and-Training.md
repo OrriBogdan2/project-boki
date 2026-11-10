@@ -1,9 +1,9 @@
-# Training Area
+# Training Grounds
 
 One place to practise, and it costs you nothing: nobody dies and nothing is lost. (The name "Arena" is kept for
 the 4v4 team mode to come.)
 
-Open it from the title screen ("Training Area", no save needed), the portal's Expedition menu ("Training Area")
+Open it from the title screen ("Training Grounds", no save needed), the portal's Expedition menu ("Training Grounds")
 or the farm's Esc menu. You play the Hunter you picked, built exactly as in a real match: same model, outfit,
 kit, effects, tuning and HUD. Leaving puts you back where you came from.
 
@@ -40,9 +40,9 @@ Signs on posts name each area and each piece of the lane.
 
 ## Hunters here are the match's Hunters
 
-The Training Area is a `Match` started with `Match.arena_opts`, and picking a Hunter in its loadout is
+The Training Grounds is a `Match` started with `Match.arena_opts`, and picking a Hunter in its loadout is
 `Arena.set_arch` (a `Hunter.reclass` and the match's pass over small shadow casters). There is no second spawn
-path. `--hunter-parity-check` (in the suite) builds every Hunter in a real match and in the Training Area, started as
+path. `--hunter-parity-check` (in the suite) builds every Hunter in a real match and in the Training Grounds, started as
 them and swapped in place, with no save, a fresh one and after the title screen, and fails on any difference in
 model file, kit script, node tree, bone scales or mesh surfaces (shader, uniforms, visibility range, shadows).
 `--training-area-shots` (GPU) screenshots every Hunter here, front and back. See [Checks](Checks.md).

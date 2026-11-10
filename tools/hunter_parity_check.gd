@@ -1,7 +1,7 @@
 extends RefCounted
-## --hunter-parity-check: the Training Area draws and plays every Hunter exactly as a real match does (owner
+## --hunter-parity-check: the Training Grounds draws and plays every Hunter exactly as a real match does (owner
 ## playtest 11-08 item 26: Meeko's sun and moon gone, Lace in her old model). For every Hunter it builds the
-## player three ways: in a real match, in the Training Area started as that Hunter, and in the Training Area
+## player three ways: in a real match, in the Training Grounds started as that Hunter, and in the Training Grounds
 ## swapped in place from another Hunter (the title screen's route: you start as the default and pick in the
 ## loadout). Each must load the same model file (WardenGlb.path, and the .glb really dressed, not the
 ## procedural fallback), the same kit script (ArchKit), the same node tree (auto names stripped, hidden flags
@@ -132,7 +132,7 @@ func run(main: Node) -> void:
 			var swapped: Dictionary = await _build(main, Match.arena_opts(from), a)
 			_cmp(a, "training swap from %s (%s save)" % [from, save_mode], ref, swapped)
 	# The owner's route: the title screen first (it builds its own squad and a glider with Models.hunter, which
-	# fill the session's model caches), then the Training Area. Every Hunter must still match the match built
+	# fill the session's model caches), then the Training Grounds. Every Hunter must still match the match built
 	# before the title ever showed. Twice: as a Warden of the default kit, then leading as Meeko.
 	for lead in ["", "tender"]:
 		if lead != "":
@@ -151,7 +151,7 @@ func run(main: Node) -> void:
 			var after: Dictionary = await _build(main, Match.arena_opts(from), a)
 			_cmp(a, "training after the title (lead %s)" % (lead if lead != "" else "default"), refs[a], after)
 	if fails == 0:
-		print("OK hunter_parity: %d Hunters match the real match in the Training Area" % ids.size())
+		print("OK hunter_parity: %d Hunters match the real match in the Training Grounds" % ids.size())
 	else:
 		print("FAIL hunter_parity: %d differences" % fails)
 	main.get_tree().quit()
