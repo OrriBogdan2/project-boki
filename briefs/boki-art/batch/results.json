@@ -108342,5 +108342,54 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_chandelapi_f1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_chandelapi_f1",
+    "name": "Chandelapi (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_chandelapi_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_f1",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kayak_f1",
+    "name": "Kayak (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kayak_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kintsuwyrm_f1",
+    "name": "Kintsuwyrm (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kintsuwyrm_f1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kintsuwyrm_f1",
+    "name": "Kintsuwyrm (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kintsuwyrm_f1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kintsuwyrm_f1",
+    "name": "Kintsuwyrm (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kintsuwyrm_f1_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_chandelapi_f1",
+    "name": "Chandelapi (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_chandelapi_f1_2.jpg",
+    "ok": true
   }
 ]
