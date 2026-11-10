@@ -84955,5 +84955,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_bathilus_b4_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_bathilus_b4",
+    "name": "Bathilus (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_bathilus_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bathilus_b4",
+    "name": "Bathilus (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_bathilus_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_torpecone_b4",
+    "name": "Torpecone (V2 portrait, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_torpecone_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_torpecone_b4",
+    "name": "Torpecone (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_torpecone_b4_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_torpecone_b4",
+    "name": "Torpecone (V2 sheet, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_torpecone_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_torpecone_b4",
+    "name": "Torpecone (V2 portrait, batch 4)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_torpecone_b4_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_torpecone_b4",
+    "name": "Torpecone (V2 sheet, batch 4)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_torpecone_b4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dreadmonite_b4",
+    "name": "Dreadmonite (V2 sheet, batch 4)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dreadmonite_b4_1.jpg",
+    "ok": true
   }
 ]
