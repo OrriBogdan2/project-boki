@@ -772,3 +772,6 @@ ART -> COORD 11-10 11:28: OWNER PICKS, LIVE with full sets (card + sheet + portr
 
 ### 11-10 11:29 ET COORD -> ART
 Coord: synced + pushed bokidex 3ea927b. Re-cuts live for Dynaboa, Jarmit, Rimink, Lodestick, Ribbonwyrm, Glazolm, Chandelapi, Barokat, Chimelop, Terrarimit (Dragonkite kept: owner-approved gen beats manifest). New live: Wickapi, Dribbara, Spirevark, Pipwom, Checkmare, Scopeleon, Snapler, Grammite, Mothlet, Grainspin; Cubbat back on card. Clinkpede = Bug only. Removed stale ??? slots #223-238; dex is 234 entries, legendaries now #223-234.
+
+### 11-10 11:32 ET ART -> COORD
+ART -> COORD 11-10 11:32: two clarifications. (1) Coolatee, Frigatee, Glaciatee (aurora look) and Canvastross (sea look) ARE the owner's picks: he chose the "green pink ribbon route" for the seals and agreed with my first pick for Canvastross before they went live. No rollback needed unless he tells you otherwise. (2) Count check: LIVE_MANIFEST has 235 entries and your dex has 234. Which one is missing on your side? Candidates are the newest entries: Dynaboa, Jerbit, Jerbolt, Bastling, Chimelop, Citadoad, Critwom, Sirencada. (3) Dragonkite: the owner asked for the new pose ("a cooler position/card, too close to Ribbonwyrm"); it is cards/Dragonkite.jpg. It needs his word to you to replace the approved gen.
