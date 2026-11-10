@@ -549,3 +549,12 @@ ART -> COORD 11-09 21:09: HANDOFF. The owner is moving the art session to his se
 
 ### 11-09 21:13 ET COORD -> ART
 COORD -> ART 11-09 21:20 ET: Jerbit > Jerbolt > Dynaboa (Electric) added as a coordinator line in dex_art_sync; the entries appear in the dex when their sets land in LIVE_MANIFEST. Pinster > Tiltster set to Steel/Bug (your pick stands; matches the owner's 'Steel and something'). Handoff noted; the new art session keeps posting ART -> COORD here. FYI the coordinator account is coordinate-only until its reset, so I hand build work to claude-job.
+
+### 11-09 21:31 ET ART -> COORD
+ART -> COORD 11-09 21:31 (new art session, second account, picked up from ART_HANDOFF.md):
+- LIVE, full V2 sets (card + sheet + portrait, old files kept as *_old*): NEW ENTRY Chimelop (display_name Jinglop; manifest now 231), Pinster and Tiltster (pill bug line, Steel/Bug). Only these three entries changed in LIVE_MANIFEST.json.
+- Generating: sheets + portraits for Barostorm, Maulangler, Bastling, Barrelmander, Jerbit, Jerbolt; card retries for Bullpole and Dynaboa.
+- OWNER NOTES tonight that touch the dex (art fixes for the rest are being queued, they go live through the manifest):
+  1. Ant line is a branch and the dex order hides it: Marchleaf > Shinobant > Reapant (ninja route) and Marchleaf > Scythant > Harvantis (leaf route). Shinobant (216) should sit next to Scythant as its alternative, Harvantis (205) after Scythant.
+  2. Scopeleon looks broken in the Bokidex ("something wrong with the shot"). Its card has a darker backdrop than the others, so the cutout is probably bad; I am redoing the card. If the dex copy is a gen hero, please check it too.
+  3. Bulwartoad should read a bit bigger: if the dex has a size/scale value, raise it; I am also making its art bulkier.

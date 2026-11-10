@@ -2801,10 +2801,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Pinster.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Pinster.png",
   "hash": {
-   "sheet": "af97cfa349ff",
-   "card": "8b6cdda26a72",
-   "portrait": "817523d75852",
-   "hero": "ca2f71dd32be"
+   "sheet": "37fd74b0e93c",
+   "card": "fa4501ddbefa",
+   "portrait": "1702338cad68",
+   "hero": "ab5fcaecc892"
   }
  },
  "Pocketpus": {
@@ -3042,10 +3042,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Tiltster.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Tiltster.png",
   "hash": {
-   "sheet": "5a97335d7566",
-   "card": "95b661402f0a",
-   "portrait": "4f545258571d",
-   "hero": "da3c37b409b7"
+   "sheet": "ef42013c4b1f",
+   "card": "4307f8cc2bcd",
+   "portrait": "7630c61b9840",
+   "hero": "4c5a1e82c408"
   }
  },
  "Wayshell": {
@@ -3128,5 +3128,19 @@
    "portrait": "2a56f8d515a3",
    "hero": "e587a1d945c9"
   }
+ },
+ "Chimelop": {
+  "sheet": "briefs/boki-art/turnarounds/Chimelop.jpg",
+  "card": "briefs/boki-art/cards/Chimelop.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Chimelop.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Chimelop.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Chimelop.png",
+  "hash": {
+   "sheet": "9c8b974fd402",
+   "card": "50a17212c3a7",
+   "portrait": "75dbb723acf7",
+   "hero": "6a53a105ba13"
+  },
+  "display_name": "Jinglop"
  }
 }
