@@ -19,6 +19,7 @@ func run(main_node: Node) -> void:
 	_render_scale()
 	_lamps()
 	_shadows_and_aa()
+	_benchmark()
 	ok(Settings.QUALITY.has(Settings.detect_quality()), "auto-detect names a preset (%s)" % Settings.detect_quality())
 	print("QUALITY DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -120,3 +121,19 @@ func _shadows_and_aa() -> void:
 	Settings.v["quality"] = keep_q
 	Settings.v["msaa"] = keep_m
 	Settings._apply_quality()
+
+## The loading benchmark steps auto quality down by the GPU's time a frame (whole frames, without a GPU
+## timer, get more room: they carry the CPU's share), from what the adapter guess names.
+func _benchmark() -> void:
+	var keep := [Settings.v.get("quality", "auto"), Settings.v.get("quality_found", "")]
+	var start := Settings.QUALITY_ORDER.find(Settings.detect_quality())
+	for c in [[8.0, true, 0], [15.0, true, 1], [30.0, true, 2], [20.0, false, 0], [30.0, false, 1]]:
+		Settings.v["quality"] = "auto"
+		Settings.v["quality_found"] = ""
+		Settings.note_benchmark(float(c[0]), bool(c[1]))
+		var want: String = Settings.QUALITY_ORDER[maxi(0, start - int(c[2]))]
+		ok(Settings.quality() == want, "a %.0f ms %s benchmark picks %s (%s)" % [c[0], "GPU" if c[1] else "whole-frame",
+			want, Settings.quality()])
+	Settings.v["quality"] = keep[0]
+	Settings.v["quality_found"] = keep[1]
+	Settings.apply("quality")

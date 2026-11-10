@@ -9,7 +9,7 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 6, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -121,23 +121,27 @@ func detect_quality() -> String:
 	if nm.contains("intel") and not nm.contains("arc"): return "low"
 	return "medium"
 
-## Auto quality only: frame times measured while the first expedition loads (ms, the world on screen
-## from the skyship). Too slow for 60 fps steps the preset down once (twice when far too slow) and
-## remembers it.
-const BENCH_SLOW_MS := 20.0     # ms a frame: slower than this steps the preset down one
-const BENCH_FAR_MS := 45.0      # ms a frame: slower than this steps it down two
-func note_benchmark(ms: float) -> void:
+## Auto quality only: GPU time a frame measured while the first expedition loads (ms, the world on screen
+## from the skyship; whole frames where the driver can't time the GPU). Too slow for 60 fps steps the
+## preset down once (twice when far too slow) and remembers it. A preset only changes what the GPU draws,
+## so the CPU's share of a frame (the sim, the loading itself) is left out.
+const BENCH_SLOW_MS := 12.0     # ms of GPU a frame: slower steps the preset down one (the CPU needs the rest of 16.7)
+const BENCH_FAR_MS := 24.0      # ms of GPU a frame: slower than this steps it down two
+const BENCH_WALL_K := 1.75      # whole frames (no GPU timer) carry the CPU's share too: the limits x this
+func note_benchmark(ms: float, gpu_timed := true) -> void:
 	if String(v.get("quality", "auto")) != "auto" or String(v.get("quality_found", "")) != "":
 		return
 	var cur := quality()
 	var i := QUALITY_ORDER.find(cur)
-	if ms > BENCH_SLOW_MS and i > 0:
+	var k := 1.0 if gpu_timed else BENCH_WALL_K
+	if ms > BENCH_SLOW_MS * k and i > 0:
 		cur = QUALITY_ORDER[i - 1]
-		if ms > BENCH_FAR_MS and i > 1: cur = QUALITY_ORDER[i - 2]
+		if ms > BENCH_FAR_MS * k and i > 1: cur = QUALITY_ORDER[i - 2]
 	v["quality_found"] = cur
 	apply("quality")
 	save()
-	print("Quality: auto picked %s (load benchmark %.1f ms a frame)" % [cur, ms])
+	print("Quality: auto picked %s (load benchmark %.1f ms a frame, %s)" % [cur, ms,
+		"GPU" if gpu_timed else "whole frame"])
 
 ## Bumped when the default kit changes enough that old custom bindings would be nonsense.
 const KEYS_V := 3
@@ -204,6 +208,11 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	if int(v.get("video_v", 4)) < 6:
+		# the benchmark times the GPU now (it timed whole frames, and loading's CPU work made an RTX 4070
+		# pick Low): what auto found before is measured again
+		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
+		v["video_v"] = 6
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")

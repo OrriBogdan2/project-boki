@@ -131,18 +131,24 @@ func run(progress := Callable()) -> void:
 			% [t_first - t0, t_views - t_first, t_end - t_views, stamped, seen.size()])
 	WarmStamp.save(seen)
 	PerfLog.mark("build.warm_up")
-	# the benchmark: a few frames of the opening view
+	# the benchmark: a few frames of the opening view, timed on the GPU (whole frames if the driver can't)
 	var times: Array = []
+	var gpu_timed := true
+	var vp := m.get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
 	var last := Time.get_ticks_usec()
 	for i in 8:
 		await m.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		if i >= 2: times.append((now - last) / 1000.0)
+		var gpu := RenderingServer.viewport_get_measured_render_time_gpu(vp)
+		if i >= 2:
+			times.append(gpu if gpu > 0.0 else (now - last) / 1000.0)
+			gpu_timed = gpu_timed and gpu > 0.0
 		last = now
 	times.sort()
 	if not times.is_empty():
 		var setup := WarmStamp.setup_id()
-		Settings.note_benchmark(float(times[times.size() / 2]))
+		Settings.note_benchmark(float(times[times.size() / 2]), gpu_timed)
 		# a first launch's auto quality can step down here (shadows, MSAA): the game goes on, and comes back, at
 		# the new settings. The stamp follows them: the same shader code, only pipelines differ, and those
 		# build as this match draws them (else the next launch redrew every stand-in)
