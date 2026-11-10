@@ -21,10 +21,19 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
-	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
-	"refuse": ["Too weak to go out", "Won't come on expeditions until it's eaten."],
-	"sick": ["Sick from hunger", "Ill and miserable. Feed it and let it rest, and it will pick up."],
+	"weak": ["Weak from hunger", "Slow and weak. Feed it, let it nap or keep a friend close."],
+	"refuse": ["Too weak to go out", "Too weak for expeditions. Feed it, let it nap; a Puffcorn snack works fastest."],
+	"sick": ["Sick from hunger", "Sick and drooping. Feed it, nap, keep a friend close; one Puffcorn snack cures it."],
 }
+## Getting better, in starve-seconds undone per second while it is fed (food over 20): a meal's worth,
+## plus a nap (asleep, indoors or in bed) and a friend close by. A snack crop (Data.CROPS use "snack")
+## given to a weak or sick kin cures it at once.
+const RECOVER_FED := 6.0
+const RECOVER_NAP := 4.0
+const RECOVER_FRIEND := 2.0
+## How fast a weak, and a sick, kin gets about (1.0 is well).
+const PACE_WEAK := 0.7
+const PACE_SICK := 0.5
 const NEGLECT_PATH := "res://content/rules/neglect.json"
 static var _neglect: Dictionary = {}
 
@@ -133,7 +142,7 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 	return float(rec["needs"][n]) - before
 
 ## Time passing at home. sleeping: curled up in bed or napping.
-static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
+static func tick(rec: Dictionary, secs: float, sleeping := false, friend := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -145,7 +154,10 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	var rate := DECAY["food"] / 60.0 * (0.5 if sleeping else 1.0)
 	nd["food"] = clampf(float(nd["food"]) - DECAY["food"] * mins * (0.5 if sleeping else 1.0), 0.0, 100.0)
 	# the part of this stretch spent with nothing in it counts toward starving
-	starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0)
+	var help := 0.0
+	if sleeping: help += RECOVER_NAP
+	if friend: help += RECOVER_FRIEND
+	starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0, help)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
 	if sleeping:
 		nd["energy"] = clampf(float(nd["energy"]) + 9.0 * mins, 0.0, 100.0)
@@ -203,8 +215,9 @@ static func starve_stage(rec: Dictionary) -> String:
 	if float(rec.get("starve", 0.0)) > 0.0 and need(rec, "food") <= 0.5: return "starving"
 	return ""
 
-## secs of time passing; zero_secs of it with an empty belly (defaults to all of it if food is 0).
-static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void:
+## secs of time passing; zero_secs of it with an empty belly (defaults to all of it if food is 0);
+## help: extra recovery a second while fed (a nap, a friend).
+static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0, help := 0.0) -> void:
 	if rec.get("boxed", false):
 		return
 	var z := zero_secs if zero_secs >= 0.0 else (secs if need(rec, "food") <= 0.5 else 0.0)
@@ -215,9 +228,19 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 			rec["trust"] = clampf(float(rec.get("trust", 0.0)) - z / 10800.0, 0.0, 100.0)
 		st = minf(st + z, starve_cap_s())
 	elif need(rec, "food") > 20.0 and st > 0.0:
-		st = maxf(0.0, st - secs * 3.0)
+		st = maxf(0.0, st - secs * (RECOVER_FED + help))
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
+
+## True while it is weak or sick from hunger (it walks slowly, droops, and has its card line).
+static func ailing(rec: Dictionary) -> bool:
+	return starve_h(rec) >= STARVE["weak"]
+
+## How fast it gets about: 1.0 well, PACE_WEAK weak, PACE_SICK sick.
+static func pace(rec: Dictionary) -> float:
+	var h := starve_h(rec)
+	if h >= STARVE["sick"]: return PACE_SICK
+	return PACE_WEAK if h >= STARVE["weak"] else 1.0
 
 ## It just ate: a meal takes four hours off the starve clock.
 static func fed(rec: Dictionary) -> void:
@@ -257,7 +280,7 @@ static func match_mods(rec: Dictionary) -> Dictionary:
 	var st: Dictionary = rec["stats"]
 	var c := condition(rec)
 	var cm := 1.1 if c >= 75.0 else (1.0 if c >= 50.0 else (0.92 if c >= 28.0 else 0.82))
-	if starve_h(rec) >= STARVE["weak"]:
+	if ailing(rec):
 		cm *= 0.85        # weak from hunger
 	var trust := float(rec.get("trust", 50.0))
 	var bond := 1.1 if trust >= 90.0 else 1.0
@@ -365,6 +388,9 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 	var was := need(rec, "food")
 	change(rec, "food", fill)
 	change(rec, "joy", joy)
+	out["cured"] = ailing(rec) and String(Data.CROPS.get(f, {}).get("use", "")) == "snack"
+	if out["cured"]:
+		rec.erase("starve")
 	fed(rec)
 	out["hungry"] = was < 35.0
 	return out

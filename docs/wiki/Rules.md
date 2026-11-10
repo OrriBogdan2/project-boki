@@ -422,6 +422,14 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
 
+## neglect (`content/rules/neglect.json`)
+
+What neglect does to a Boki (Care starve clock, Econ.revive_neglected). natural_death false: a Boki you forget, however long (offline catch-up included), gets hungry, then weak, then sick, and stops there; it never dies and recovers with food and rest. true: the old rule, a Boki dies after Care.STARVE['dead'] hours of nothing to eat. Losing a Boki to another squad in a match is not neglect and is not affected.
+
+| Setting | Value |
+|---|---|
+| natural_death | False |
+
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
 
