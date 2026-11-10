@@ -37,6 +37,8 @@ var old: Array = []
 var car_nodes: Array = []
 var glows: Array = []
 var light: SpotLight3D = null
+var halts: TrainHalts = null  # the beacons and pier glow
+var lamp: TrainLamp = null    # the headlight halo, beam and trail
 var horn_cd := 0.0
 var rail_cd := 0.0
 var was_moving := false
@@ -69,6 +71,11 @@ func setup(match_node: Node) -> void:
 		period += dwell + tm
 	_build_track()
 	_build_cars()
+	halts = TrainHalts.new()
+	add_child(halts)
+	halts.setup(self, Settings.quality() == "low")
+	lamp = TrainLamp.new()
+	lamp.setup(self, car_nodes[0], light.position)
 	for i in cars_n:
 		cur.append(Transform3D()); old.append(Transform3D())
 	_place(0.0)
@@ -432,6 +439,8 @@ func _visuals(dt: float, moving: bool) -> void:
 		(g.material_override as ShaderMaterial).set_shader_parameter("color", Color(1.0, 0.42 + 0.3 * (1.0 - heat), 0.18, clampf(a, 0.0, 1.0)))
 	if light:
 		light.light_energy = 1.4 + heat * 2.6
+	halts.tick(dt)
+	lamp.tick(heat, moving)
 	# sound: the horn about two seconds before it reaches anyone in its path, the rails singing when
 	# it's close
 	horn_cd -= dt; rail_cd -= dt

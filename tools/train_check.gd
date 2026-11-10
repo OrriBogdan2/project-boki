@@ -221,5 +221,36 @@ func run(main: Node) -> void:
 		mb.pos = mpin; mb.vel = Vector3.ZERO; mb.grounded = true
 		m.step(Match.DT)
 	ok(mb.dead and st.hits.any(func(x): return x["e"] == mb), "a brute on the rails is run over (%.1fs)" % (m.time - t0))
+	# ---- 5. the halts: a beacon at every pier, and the pier glow follows the stop state
+	var hl: TrainHalts = st.halts
+	var stations: Array = m.world.train_route["stations"]
+	var per_halt := []
+	per_halt.resize(stations.size()); per_halt.fill(0)
+	var posts_ok := true
+	for b in hl.beacons:
+		per_halt[int(b["halt"])] += 1
+		var bp: Vector3 = b["pos"]
+		posts_ok = posts_ok and not m.world.is_void(bp.x, bp.z)
+	ok(not hl.beacons.is_empty() and per_halt.all(func(n): return n > 0), "a beacon at every one of the %d halts (%s)" % [stations.size(), str(per_halt)])
+	ok(posts_ok, "every beacon stands on pier ground")
+	ok(hl.get_child_count() <= 6, "beacons are merged into few meshes (%d nodes for %d posts)" % [hl.get_child_count(), hl.beacons.size()])
+	var lite := TrainHalts.new()
+	lite.setup(st, true)
+	ok(lite.beacons.size() == hl.beacons.size() and lite.glow_nodes.is_empty() and not hl.glow_nodes.is_empty(), "Low keeps the beacons and drops the glow")
+	lite.free()
+	P.teleport(m.world.random_ground())
+	_set_time(m, _leg_time(st, 1, 0.0) - st.dwell + 0.5)
+	for i in 90: m.step(Match.DT)
+	var at_halt := hl.halt
+	ok(st.head_v < 0.3 and hl.glow > 0.95 and hl.glow_nodes.any(func(g): return g.visible), "stopped at halt %d: the pier glow is on (%.2f)" % [at_halt, hl.glow])
+	ok(at_halt >= 0 and hl.glow_nodes.all(func(g): return not g.visible or (g.position - (st.cur[1] as Transform3D).origin).length() < 14.0), "and sits at that pier, by the train")
+	_set_time(m, _leg_time(st, 1, 0.5))
+	for i in 150: m.step(Match.DT)
+	ok(st.head_v > 3.0 and hl.glow < 0.02 and not hl.glow_nodes.any(func(g): return g.visible), "moving: the pier glow is off (glow %.2f, %.1f m/s)" % [hl.glow, st.head_v])
+	ok(st.lamp.trail_node.visible, "moving: the headlight trail shows")
+	for i in 5: m.step(Match.DT)
+	_set_time(m, _leg_time(st, 2 % st.legs.size(), 0.0) - st.dwell + 0.5)
+	for i in 60: m.step(Match.DT)
+	ok(st.head_v < 0.3 and not st.lamp.trail_node.visible, "standing: no trail")
 	print("TRAIN CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
