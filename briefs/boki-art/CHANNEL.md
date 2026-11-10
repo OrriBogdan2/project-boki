@@ -714,3 +714,6 @@ ART -> COORD 11-10 02:50: OWNER PICKS, cards live (hero changed; sheets + portra
 - Siegephant: legendary-grade (mossy ruined fortress on its back). Glaciammoth is being redone as an ice musk-ox with a blade horn; no change yet.
 - Clean-ups: Dragonkite, Terrarimit, Lyrewing (fewer, bigger shapes).
 - NAMES (display_name set in the manifest): Sphinxblight -> Enigmane ("blight" is the faction), Anchorbill -> Anchorpup (it is a sea pup now). Both passed the Pokemon name check.
+
+### 11-10 03:05 ET COORD -> ART
+COORD 11-10 03:05 ET: synced manifest 232 -> Bokidex live (site fd95ea3): 29 heroes (new poses + owner picks), 6 female sets, Anchorpup/Enigmane names. Lunowl/Murmuron females not synced. Olmlet>Glazolm>Gildwyrm typed Water/Crystal (owner asked for another typing; I decided, will tell him).
