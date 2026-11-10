@@ -1,11 +1,11 @@
 extends RefCounted
 ## --summon-band-check: what one summon adds to a fight (DECISIONS 2026-11-09, decision 0042). Every species is
-## summoned (SAMPLES times, averaged) out of its wisp on the training strip beside an idle, armourless dummy 4 m
-## ahead and runs its own AI for its window (KinSummon); the damage it deals there is set against one Hunter's LMB
-## on the same dummy over the same seconds: Vex holding her rifle, Kael tapping slashes, their mean being "a
-## Hunter's LMB". Each species' share must sit in the band in content/rules/boki_summon.json, near its own aim
-## inside it: the top for the shortest windows, the bottom for the longest (short and strong, long and
-## supporting). Prints the table, with the dmg_k each species would need to land on its aim.
+## summoned (SAMPLES times, averaged; up to SAMPLES_MAX when they split) out of its wisp on the training strip beside
+## an idle, armourless dummy 4 m ahead and runs its own AI for its window (KinSummon); the damage it deals there is
+## set against one Hunter's LMB on the same dummy over the same seconds: Vex holding her rifle, Kael tapping slashes,
+## their mean being "a Hunter's LMB". Each species' share must sit in the band in content/rules/boki_summon.json,
+## near its own aim inside it: the top for the shortest windows, the bottom for the longest (short and strong, long
+## and supporting). Prints the table, with the dmg_k each species would need to land on its aim.
 ## Prints SUMMONBAND PASS/FAIL.
 
 const DT := 1.0 / 60.0
@@ -15,6 +15,8 @@ const LMB_DIST := {VEX: 6.0, KAEL: 2.0}   # m: Vex at mid range; Kael in reach o
 const KIN_DIST := 4.0                      # m: the dummy ahead of the Hunter while the Boki is out
 const DUMMY_HP := 1e6
 const SAMPLES := 6                         # summons per species, averaged: one fight swings on its AI's rolls
+const SAMPLES_MAX := 12                    # ...up to this many while they disagree (a trap the pinned dummy may or
+const SPLIT := 1.5                         # may not stand on): more when the best is SPLIT x the worst
 const TAP_FRAMES := 3                      # Kael: fire held 2 frames of every 3, so each press is a slash
 
 var main: Node
@@ -36,8 +38,10 @@ func run(main_node: Node) -> void:
 		var ks := KinLib.kin(id)
 		var secs := KinSummon.times(ks).x
 		var dealt := 0.0
-		for i in SAMPLES:
-			dealt += await _summoned(id, i) / SAMPLES
+		var got: Array = []
+		while got.size() < SAMPLES or (got.size() < SAMPLES_MAX and got.max() > got.min() * SPLIT):
+			got.append(await _summoned(id, got.size()))
+		dealt = got.reduce(func(s, v): return s + v, 0.0) / got.size()
 		var vex: float = lmb["%s|%s" % [VEX, secs]]
 		var kael: float = lmb["%s|%s" % [KAEL, secs]]
 		var ref := (vex + kael) * 0.5
@@ -107,6 +111,7 @@ func _summoned(id: String, roll: int) -> float:
 	k.brain.think_t = 0.0
 	KinWisp.set_wisp(k, true)
 	seed(hash(id) + roll)
+	k.rng.seed = hash(id) * 31 + roll         # its own stream too: the same fight whatever ran before it
 	ok(KinSummon.press(P), "%s: Summon bursts it out" % id)
 	while k.summon.left > 0.0:
 		_pin(T, spot)
