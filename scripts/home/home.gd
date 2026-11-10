@@ -3301,21 +3301,13 @@ func _weapon() -> String:
 func _open_expedition() -> void:
 	FarmTutorial.event("portal")
 	var v := _new_panel("Expedition", 940, true)
-	UI.subtitle(v, "Pick your kit and where to drop. Everything here is saved as you change it.")
+	UI.subtitle(v, "Pick your Hunter and where to drop.")
 	var cols := UI.hbox(UI.GAP_BIG + 8)
 	v.add_child(cols)
 	# left: who you are (your Hunter, its weapon, your Boki); locked Hunters are greyed (HunterPickRow)
 	var left := UI.vbox(10); left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(left)
-	var cur_a := HunterPickRow.add(self, left)
-	# your abilities before a run: the kit card's compact row (click for the full card)
-	left.add_child(KitCard.strip(cur_a, _open_kit_card))
-	left.add_child(UI.spacer(2))
-	left.add_child(UI.section("Signature weapon"))
-	var wd: Dictionary = Data.weapon_stats(Arch.signature(cur_a))
-	var wb := UI.choice(String(wd["name"]), true, func(): pass, 200, Arch.signature(cur_a))
-	wb.tooltip_text = (String(wd.get("desc", "")) + "\n" if wd.has("desc") else "") + "The one weapon you carry. It grows during a run: level-ups, chests and tunings upgrade it."
-	left.add_child(wb)
+	HunterPickRow.add(self, left)
 	var ak := Save.active_kin()
 	if not ak.is_empty():
 		left.add_child(UI.spacer(2))
