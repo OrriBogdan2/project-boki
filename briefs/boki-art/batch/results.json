@@ -80482,5 +80482,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_tinbrock_b3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_tinbrock_b3",
+    "name": "Tinbrock (V2 sheet, batch 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_tinbrock_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_tinbrock_b3",
+    "name": "Tinbrock (V2 sheet, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_tinbrock_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kindlewren_b3",
+    "name": "Kindlewren (V2 sheet, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kindlewren_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kindlewren_b3",
+    "name": "Kindlewren (V2 sheet, batch 3)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_kindlewren_b3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kindlewren_b3",
+    "name": "Kindlewren (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_kindlewren_b3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_kindlewren_b3",
+    "name": "Kindlewren (V2 portrait, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_kindlewren_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kindlewren_b3",
+    "name": "Kindlewren (V2 sheet, batch 3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_kindlewren_b3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_embrook_b3",
+    "name": "Embrook (V2 portrait, batch 3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_embrook_b3_1.jpg",
+    "ok": true
   }
 ]
