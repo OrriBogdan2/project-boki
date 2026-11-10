@@ -6,6 +6,7 @@ extends RefCounted
 ##   hero --down--> pop in (hero hidden, Wisp puffs out) -> on (bob, flicker, lean and trail when moving)
 ##   on --revive--> pop out (Wisp brightens and fades, hero grows back from the look's hero_from with a squash) -> hero
 ##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
+## While it is up the Wisp hums (WispHum), and the hum falls away when it is finished.
 ## The look (colours, effects, timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
 const IN := "in"
@@ -28,6 +29,8 @@ static func tick(h: Hunter, dt: float) -> void:
 	if mode == "":
 		return
 	st["t"] = float(st["t"]) + dt
+	if mode != OUT:
+		WispHum.hold(h)
 	match mode:
 		IN: _pose_in(h, st)
 		ON: _pose_on(h, st, dt)
@@ -92,6 +95,7 @@ static func _pop_out(h: Hunter, st: Dictionary) -> void:
 	var look: Dictionary = st["look"]
 	st["mode"] = OUT
 	st["t"] = 0.0
+	WispHum.end(h)
 	st["base"] = h.model.scale if h.model else Vector3.ONE
 	_pop_fx(h, look["pop_out"], 0.5)
 
@@ -111,6 +115,7 @@ static func _snuff(h: Hunter, st: Dictionary) -> void:
 	var at := h.position + Vector3(0, float((st["look"] as Dictionary)["hover"]), 0)
 	h.m.fx.burst(at, _team_col(h).lightened(0.4), int(spec["burst"]), 5.0, 0.7, 4.0, 1.0)
 	h.m.sfx(String(spec["sfx"]), h.position, -8.0)
+	WispHum.end(h)
 	_free_node(st)
 	st["mode"] = ""
 
