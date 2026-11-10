@@ -27,17 +27,6 @@
 		"mend_burst": {"fx": [{"p": "skirt", "size": "r", "from": 0.3, "tall": 1.6, "life": 0.5, "c": "deep"},
 				{"p": "flare", "y": 0.8, "size": 3.6, "life": 0.3},
 				{"p": "ember", "shape": "disc", "radius": "r", "way": "up", "n": 40, "speed": 4.5, "spread": 0.3, "grav": -2.0, "life": 0.8, "size": 0.07},
-				{"p": "star", "shape": "disc", "radius": "r", "way": "up", "n": 16, "speed": 2.0, "spread": 0.5, "life": 0.9, "size": 0.14, "c": "heal"}]},
-		"ult_slam": {"fx": [{"p": "flare", "y": 0.5, "size": 3.6, "life": 0.3},
-				{"p": "ember", "shape": "disc", "radius": 1.4, "way": "up", "n": 30, "speed": 6.0, "spread": 0.4, "grav": 4.0, "life": 0.5, "size": 0.06},
-				{"p": "chunk", "shape": "disc", "radius": 1.2, "way": "up", "n": 12, "speed": 6.5, "spread": 0.6, "grav": 16.0, "life": 0.7, "size": 0.16, "c": "char"}]},
-		"ult_strike": {"fx": [{"p": "bolt", "y": 0.2, "len": "len", "jag": 0.5, "size": 0.6, "life": 0.22}]},
-		"ult_erupt": {"fx": [{"p": "scorch", "shape": "lane", "len": "len", "w": "w", "w_x": 0.8, "life": 1.6, "c": "deep", "c3": "char"},
-				{"p": "flare", "fwd": "len", "fwd_x": 0.5, "y": 0.5, "size": 2.6, "life": 0.24},
-				{"p": "shard", "shape": "line", "len": "len", "radius": 0.9, "y": 0.2, "way": "along", "n": 16, "speed": 7.0, "spread": 0.35, "grav": 14.0, "life": 0.7, "size": 0.15},
-				{"p": "chunk", "shape": "line", "len": "len", "radius": 1.0, "y": 0.2, "way": "along", "n": 10, "speed": 6.0, "spread": 0.5, "grav": 16.0, "life": 0.7, "size": 0.14, "c": "char"},
-				{"p": "smoke", "shape": "line", "len": "len", "radius": 0.8, "y": 0.2, "way": "along", "n": 6, "speed": 0.8, "spread": 0.8, "grav": -0.6, "life": 1.2, "size": 0.9, "c": "smoke", "near": true}]},
-		"ult_hit": {"fx": [{"p": "flare", "y": 1.0, "size": 1.8, "life": 0.2},
-				{"p": "ember", "y": 1.0, "way": "up", "n": 12, "speed": 5.0, "spread": 0.5, "grav": 6.0, "life": 0.35, "size": 0.05}]}
+				{"p": "star", "shape": "disc", "radius": "r", "way": "up", "n": 16, "speed": 2.0, "spread": 0.5, "life": 0.9, "size": 0.14, "c": "heal"}]}
 	}
 }
