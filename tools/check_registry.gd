@@ -50,7 +50,6 @@ const CHECKS := {
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],      # draw calls, tris, shadow lights, frame ms
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	"--far-ranges-check": ["res://tools/far_ranges_check.gd", "far_ranges_check", null],      # visibility ranges and far cliffs
-	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],  # draws, tris, shadows, ms
 	"--squad-format-check": ["res://tools/squad_format_check.gd", "squad_format_check", null],      # the 10-trio format
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--anim-lod-check": ["res://tools/anim_lod_check.gd", "anim_lod_check", null],      # owner 11-08 expedition fps
@@ -232,7 +231,6 @@ const CHECKS := {
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],     # + a server, delay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],     # 2 games, laggy relay
-	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],  # 2 games, relay, 0018
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
