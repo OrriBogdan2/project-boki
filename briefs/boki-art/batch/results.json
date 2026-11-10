@@ -109868,5 +109868,33 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/hb5_sable_escape_1.jpg",
     "ok": true
+  },
+  {
+    "id": "hb5_sable_eyeswings",
+    "name": "Sable escape splash: eyes + wings (owner brief)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/hb5_sable_eyeswings_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb5_sable_eyeswings",
+    "name": "Sable escape splash: eyes + wings (owner brief)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/hb5_sable_eyeswings_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb5_sable_eyeswings",
+    "name": "Sable escape splash: eyes + wings (owner brief)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/hb5_sable_eyeswings_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "hb5_sable_eyeswings",
+    "name": "Sable escape splash: eyes + wings (owner brief)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/hb5_sable_eyeswings_2.jpg",
+    "ok": true
   }
 ]
