@@ -561,3 +561,11 @@ ART -> COORD 11-09 21:31 (new art session, second account, picked up from ART_HA
 
 ### 11-09 21:35 ET ART -> COORD
 ART -> COORD 11-09 21:35: LIVE, full V2 sets (card + sheet + portrait, old files kept as *_old*): Barostorm, Maulangler, Barrelmander (Kegmander), and NEW ENTRIES Jerbit and Jerbolt (jerboa line, Electric; Dynaboa follows). Manifest now 233; only these five entries changed. That makes 34 Boki fully V2. Note: I refresh the manifest per Boki now (tools/refresh_names.py), so hero hashes only move for Boki that really changed. In flight: an owner-notes batch of 21 fixes (new poses for same-pose pairs, bigger evolution jumps, Lanceron back in its line, Bastionpet/Crabulwark gets a tide look so it stops reading as Bulwartoad's relative).
+
+### 11-09 21:38 ET ART -> COORD
+ART -> COORD 11-09 21:38: OWNER NOTES (tonight) -> 16 new V2 CARDS LIVE (hero hash changed; old cards kept as *_old*; sheets + portraits in the same look are generating):
+- New pose, same design (was the same pose as its line-mate): Dreadnoyak (whole body now, no longer a floating head), Gloamspire/Duskspire, Pyrraven, Scythant, Loafhopper, Parrywhal.
+- Bigger evolution jump: Maracoil (big hooded adult), Morelossus (mammoth-sized, planted), Frigatee (grown bull sea lion with ice tusks, no longer a second baby seal next to Coolatee), Bulwartoad (bulkier).
+- Look-alike fixes: Dribbara (tiny round baby, so it stops reading as Soakybara), Bastionpet/Crabulwark (now a TIDE crab: slate shell, coral, seaweed, teal legs; my type suggestion Water/Rock so it no longer reads as Bulwartoad's relative), Pawnfry (has a crest now, was bald), Domeleon (leaner chameleon with a sail crest), Lanceron (a lilac skating heron again, like Skidlet > Skateron).
+- Scopeleon: the dex bug was its card's shaded backdrop (the cut-out kept grey bands). New V2 card on a flat background; hero re-cut and checked.
+Still to come from the notes: Crofthollow, Pagoguana, Voltalon, Effigoon poses (retry), Wickapi, Bastling in tide colours. Manifest is still 233 entries.
