@@ -12,7 +12,8 @@ uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);
 uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);
 // 0 ember, 1 smoke, 2 chunk (a dark tumbling shard of ground), 3 shard (a crisp crystal), 4 card (a tumbling card
-// that burns from its edges), 5 coin (a spinning metal glint), 6 star (a twinkling four-point star), 7 drop (water)
+// that burns from its edges), 5 coin (a spinning metal glint), 6 star (a twinkling four-point star), 7 drop (water),
+// 8 petal (a leaf-shaped petal that flutters as it falls)
 uniform int look = 0;
 uniform float stretch = 0.05;  // s of velocity an ember's streak spans
 uniform float gain = 1.0;
@@ -52,6 +53,7 @@ void vertex() {
 		float sa = sin(ang);
 		vec2 qq = q;
 		if (look == 4 || look == 5) { qq.x *= cos(age * 14.0 + pick * 9.0); }   // flipping over as it tumbles
+		if (look == 8) { qq.x *= 0.35 + 0.65 * abs(cos(age * 7.0 + pick * 9.0)); }   // a slow flutter
 		if (look == 4) { qq.y *= 1.4; }
 		vec2 off = vec2(qq.x * ca - qq.y * sa, qq.x * sa + qq.y * ca) * grow;
 		world = center + right * off.x + up * off.y;
@@ -120,6 +122,14 @@ void fragment() {
 		a = drop * (1.0 - smoothstep(0.6, 1.0, age)) * 0.75;
 		ALBEDO = mix(col.rgb, col2.rgb, smoothstep(0.4, 0.9, d)) * a * gain;
 		ALPHA = a * gain;
+	} else if (look == 8) {
+		// a petal: an almond with a pale midrib, its base the body colour, its tip the hot colour
+		float half_w = 0.55 * (1.0 - p.y * p.y);
+		float body = 1.0 - smoothstep(half_w - 0.08, half_w, abs(p.x));
+		float rib = (1.0 - smoothstep(0.0, 0.06, abs(p.x))) * 0.5;
+		a = body * (1.0 - smoothstep(0.7, 1.0, age));
+		ALBEDO = mix(mix(col.rgb, col2.rgb, 0.5 + 0.5 * p.y), col2.rgb, rib) * a * gain;
+		ALPHA = a * 0.95 * gain;
 	} else {
 		float rock = step(abs(p.x) + abs(p.y) * (0.7 + pick * 0.6), 0.85);
 		a = rock * (1.0 - smoothstep(0.8, 1.0, age));
