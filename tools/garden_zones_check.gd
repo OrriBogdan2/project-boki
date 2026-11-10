@@ -97,6 +97,9 @@ func _travel_part(m: Node) -> void:
 	ok(hub.hway.node.name == "Waystone" and off < HubWaystone.ARRIVE_OFF.length() + 0.5,
 		"you arrive beside the Waystone")
 	ok(hub.toys.toys().is_empty() and hub.hrace == null, "no toys or games in the hub")
+	_fixtures_part(hub)
+	hub.ppos = HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF
+	hub._find_interact()
 	hub.hway.use()
 	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
@@ -118,6 +121,32 @@ func _travel_part(m: Node) -> void:
 	ok(GardenZones.residents("bramblebank").size() == home_uids.size() and (Save.d["roster"] as Array).size() == 3,
 		"nobody moved or went missing on the way")
 	Content.rules("farm_build")["base_mode"] = false
+
+## The hub's fixtures: each one is there and E works at it; build mode there offers only the Garden tab.
+func _fixtures_part(hub) -> void:
+	var lay: Dictionary = hub._d()
+	for fx in ["house", "stall", "nook", "burrow"]:
+		ok(not HomeLayout.fixtures(lay, fx).is_empty(), "the hub has its %s" % fx)
+	ok(HomeLayout.placed("shrine", lay) and hub.lots["shrine"]["at"].x > -100.0, "the Soul Shrine has its lot")
+	ok(hub.rack_node != null and hub.hinc != null and hub.hway.board != null, "rack, Incubator and games board stand")
+	ok(is_instance_valid(hub.house_node) and is_instance_valid(hub.burrow_node), "the house and the Burrow are built")
+	var at := {"house": hub._house_door(), "stall": hub.spots["stall"] + Vector3(0, 0, 1.2),
+		"portal": hub.spots["portal"], "rack": hub.spots["rack"], "burrow": hub.BURROW_AT + Vector3(0, 0, 1.55),
+		"nook": hub.NEST_AT, "incubator": hub.INCUB_AT, "waystone": HubLayout.BOARD_AT + Vector3(-1.2, 0, 0)}
+	for kind in at:
+		hub.ppos = at[kind]
+		hub._find_interact()
+		ok(String(hub.interact.get("kind", "")) == kind or (kind == "nook" and hub.interact.get("kind") == "egg"),
+			"E at the %s uses it (got %s)" % [kind, hub.interact.get("kind", "nothing")])
+	var w: World = hub.world
+	var afloat := func(c: Vector2i) -> bool: return w.inb(c.x, c.y) and w.kind[w.idx(c.x, c.y)] != World.T_VOID
+	var decos: Array = lay["layout"]["deco"]
+	ok(decos.all(func(e): return HomeLayout.deco_cells(e).all(afloat)), "every fixture stands on land")
+	var spots: Array = [HubWaystone.HUB_AT, HubLayout.BOARD_AT]
+	ok(spots.all(func(p): return afloat.call(Vector2i(int(p.x), int(p.z)))), "the Waystone and the board are on land")
+	ok(hub.hway.label() == "Games board", "the games board reads as one")
+	ok(hub.hb._tabs() == ["Garden"] and hub.hb.can_build(), "build mode in the hub offers only the Garden tab")
+	ok(typeof(Save.d.get("hub_layout")) == TYPE_DICTIONARY, "the hub's layout is on the save")
 
 func _move_part(m: Node) -> void:
 	Content.rules("farm_build")["base_mode"] = true

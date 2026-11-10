@@ -853,7 +853,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("visit", opts.get("visit", {}))
 			current.set("visit_id", String(opts.get("visit_id", "")))
 			current.set("spawn", String(opts.get("spawn", "")))
-			current.set("zone", String(opts.get("zone", "")))
+			current.set("zone", GardenZones.landing(opts))
 			add_child(current)
 		"interior":
 			var In = load("res://scripts/home/interior.gd")
