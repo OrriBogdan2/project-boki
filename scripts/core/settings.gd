@@ -125,6 +125,9 @@ const ACTIONS := [
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
+	["kin_summon", "Boki quick key: send out or call back (like tapping G)"],
+	["kin_chase", "Boki quick key: Chase"], ["kin_guard", "Boki quick key: Guard"],
+	["kin_return", "Boki quick key: Return"], ["kin_follow", "Boki quick key: Follow"],
 ]
 
 var v: Dictionary = {}
