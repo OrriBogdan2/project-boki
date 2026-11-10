@@ -154,6 +154,7 @@ func _tick(dt: float) -> void:
 			shield_hp = minf(shield_max(), shield_hp + _shield_stat("regen") * dt)
 	_tick_glove()
 	_tick_mace(dt)
+	_tick_aim_line()
 	ult.tick(dt)
 	if h.dash_buf > 0.0 and m.time < step_until:
 		h.roll_t = 0.0         # Shift in the swing's step or launch: the dash goes now (item 51), not at its end
@@ -515,6 +516,21 @@ func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
 ## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
 const THROW_WIND := 0.08
 
+## How far a tap throws the hammer: to the cursor, clamped to its range (m).
+func throw_dist() -> float:
+	var md := lmb_def()
+	return AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
+
+## His aim line (your screen only): out to where a tap lands the hammer, while it is in hand and not swinging.
+func _tick_aim_line() -> void:
+	if not h.is_local() or h.downed or h.wid != "tower_shield" or ult.planted():
+		return
+	if mace.is_empty() and lmb_t < 0.0:
+		AimKit.line(h, "aim", {"len": throw_dist(), "alpha": 0.7})
+
+func own_aim_line() -> bool:
+	return h.wid == "tower_shield"
+
 func _throw() -> void:
 	play("bul_throw")
 	var md := lmb_def()
@@ -523,8 +539,7 @@ func _throw() -> void:
 	fx.hold_end()
 	h.fire_cd = float(md["throw_rate"])
 	var at := h.pos + Vector3(0, 1.0, 0)
-	# it lands at the cursor, clamped to its range
-	var dist := AimMode.dist(h, float(md["throw_range"]), AimMode.CURSOR, float(md.get("throw_min", 2.5)))
+	var dist := throw_dist()
 	throw_at = m.time
 	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
