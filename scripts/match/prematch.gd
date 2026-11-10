@@ -5,7 +5,9 @@ extends RefCounted
 ## loads. The screen is PrematchView; the loading screen shows the same squad (squad_of).
 ## Settings > lobby_enabled (an admin setting) skips all of it for the plain loading screen.
 
-const DURATION := 90.0      # seconds the lobby runs
+const DURATION := 30.0      # seconds the lobby runs
+const TICK_FROM := 10.0     # seconds left when the countdown starts ticking each second
+const PULSE_FROM := 5.0     # seconds left when the countdown pulses red
 const LOCK_HOLD := 1.0      # seconds "picks locked" shows before the match loads
 const CHAT_MAX := 140       # characters in one chat line
 ## Options that mark a match as something other than a real expedition: no lobby for those.
