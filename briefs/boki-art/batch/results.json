@@ -79880,5 +79880,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_thistlynx_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_briarlynx",
+    "name": "Briarlynx (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_briarlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_murmuron",
+    "name": "Murmuron (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_murmuron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_murmuron",
+    "name": "Murmuron (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_murmuron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_nettlynx",
+    "name": "Nettlynx (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_nettlynx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_nettlynx",
+    "name": "Nettlynx (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_nettlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_nettlynx",
+    "name": "Nettlynx (V2 card, batch 3, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_nettlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_briarlynx",
+    "name": "Briarlynx (V2 card, batch 3, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_briarlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_briarlynx",
+    "name": "Briarlynx (V2 card, batch 3, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_briarlynx_3.jpg",
+    "ok": true
   }
 ]
