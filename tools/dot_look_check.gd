@@ -148,7 +148,7 @@ func _boki(m: Match, P: Hunter) -> Kin:
 	var k := m.give_kin(P, rec)
 	k.brain.think_t = 1e9
 	k.runner.reset()
-	k.teleport(P.pos + Vector3(1.6, 0, 0.2))
+	k.teleport(P.pos + Vector3(4.5, 0, 0.2))
 	k.state = "active"
 	k.fly = {}
 	k.settle = 0.0
