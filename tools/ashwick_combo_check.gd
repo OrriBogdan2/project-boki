@@ -378,6 +378,11 @@ func _all() -> void:
 		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
+	ok(
+		"cinder: the aim lane is twice the shot radius (%.2f m), drawn = hit" % float(K.rmb_def()["size"]),
+		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
+		"width %.2f" % float(lane.get("width", 0.0))
+	)
 	P.inp["sec_hold"] = false
 	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
