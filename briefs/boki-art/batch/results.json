@@ -91766,5 +91766,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_ringrove_u2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_blastopuff_m",
+    "name": "Blastopuff (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_blastopuff_m_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_knotwyrm_m",
+    "name": "Knotwyrm (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_knotwyrm_m_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_knotwyrm_m",
+    "name": "Knotwyrm (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_knotwyrm_m_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ringrove_m",
+    "name": "Ringrove (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_ringrove_m_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_knotwyrm_m",
+    "name": "Knotwyrm (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_knotwyrm_m_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_checkmare_m",
+    "name": "Checkmare (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_checkmare_m_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_checkmare_m",
+    "name": "Checkmare (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_checkmare_m_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ringrove_m",
+    "name": "Ringrove (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ringrove_m_1.jpg",
+    "ok": true
   }
 ]
