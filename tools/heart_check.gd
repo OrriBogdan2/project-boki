@@ -462,7 +462,8 @@ func _net(main: Node) -> void:
 	for mm in [host, cli]:
 		for h in mm.hunters:
 			_far(mm, h)
-			h.max_hp = 5000.0; h.hp = 5000.0     # the charge runs 75 s with them parked at random spots
+			h.max_hp = 5000.0     # the charge runs 75 s with them parked at random spots
+			h.hp = 5000.0
 	_charged(host)
 	cli.time = host.time
 	var p: Hunter = host.player
