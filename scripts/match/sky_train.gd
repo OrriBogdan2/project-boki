@@ -54,10 +54,9 @@ func setup(match_node: Node) -> void:
 	speed = float(spec.get("speed", 8.0))
 	dwell = float(spec.get("dwell", 6.0))
 	loop_len = float(R["len"])
-	# the engine stops a little past the pier so the middle of the train sits at it
-	var mid_off := (cars_n - 1) * CAR_GAP * 0.5
+	# the engine stops a little past the pier so the middle of the train sits at it (_mid_off)
 	for s in R["stations"]:
-		stops.append(fposmod(float(s) + mid_off, loop_len))
+		stops.append(fposmod(float(s) + _mid_off(), loop_len))
 	stops.sort()
 	period = 0.0
 	for i in stops.size():
@@ -78,6 +77,25 @@ func setup(match_node: Node) -> void:
 	for k in cars_n:
 		(car_nodes[k] as Node3D).transform = cur[k]
 	_attach_crates()
+
+## m: how far past a station's pier the engine stops, so the middle of the train sits at the pier.
+func _mid_off() -> float:
+	return (cars_n - 1) * CAR_GAP * 0.5
+
+## Seconds until the train next pulls into the stop at the station arc `station_s` (a route station),
+## and 0 while it stands there. The schedule is a pure function of the match clock, so this is exact.
+func halt_eta(station_s: float) -> float:
+	var at := fposmod(station_s + _mid_off(), loop_len)
+	var now := fposmod(float(m.time), period)
+	var leg_start := 0.0
+	for L in legs:
+		var gap := absf(fposmod(float(L["s0"]) - at + loop_len * 0.5, loop_len) - loop_len * 0.5)
+		if gap < 1.0:
+			if now >= leg_start and now < leg_start + dwell:
+				return 0.0
+			return fposmod(leg_start - now, period)
+		leg_start += dwell + float(L["t"])
+	return INF
 
 ## Where the engine is at a given match time, and how fast it's going.
 func _schedule(t: float) -> Vector2:

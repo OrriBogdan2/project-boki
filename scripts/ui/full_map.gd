@@ -173,7 +173,7 @@ func draw(sz: Vector2) -> void:
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
 	if m.skytrain:
-		hud._draw_map_train(rect, v, kk)
+		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
 	if m.exits:
 		var ek := clampf(0.9 + kk * 0.12, 1.0, 1.8)
 		for x in m.exits.list:
@@ -281,10 +281,7 @@ func _labels(c: Control, kk: float) -> void:
 				if not _name("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, zoomed) and zoomed:
 					_name(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), taken, true)
 			"rail":
-				c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-				c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-				if zoomed:
-					_name(nm, pv + Vector2(0, 15), 10, Color("ffe2b0"), taken)
+				pass      # (the halts are TrainMap's)
 			"choke":
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
 				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))

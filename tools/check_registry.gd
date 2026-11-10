@@ -149,6 +149,8 @@ const CHECKS := {
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold
+	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],      # TrainMap
+	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],      # --shots-dir=<dir>
 	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],      # --shots-dir=<dir>
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],      # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],      # shields never hide a Hunter

@@ -675,8 +675,8 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
-	if m.skytrain and MapDetail.shows("train", hold):
-		_draw_map_train(inner, view, k)
+	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
+		train_map.draw(self, m.skytrain, inner, view, k, false)
 	# your view cone, faintly
 	if m.player and not riding:
 		var pp: Vector2 = to_map.call(m.player.pos)
@@ -2436,34 +2436,7 @@ func _draw_world_hover(sz: Vector2, p: Hunter) -> void:
 		c.draw_multiline_string(body, Vector2(pos.x + 12, y + 13), String(lines[i][0]), HORIZONTAL_ALIGNMENT_LEFT, w - 24, 13, -1, lines[i][1])
 		y += hh + 3.0
 
-## The sky train on the minimap: its loop as a dashed amber line (fainter where it runs under a
-## bridge), and the train itself, the engine marked red so you can see which way it's coming.
-var _train_line := PackedVector2Array()
-var _train_low: Array = []
-func _draw_map_train(inner: Rect2, view: Rect2, k: float) -> void:
-	var st: SkyTrain = m.skytrain
-	if _train_line.is_empty():
-		var s := 0.0
-		while s < st.loop_len:
-			var p := m.world.train_at(s)
-			_train_line.append(Vector2(p.x, p.z)); _train_low.append(p.y < -1.0)
-			s += 1.5
-	var n := _train_line.size()
-	for i in n:
-		if i % 2 == 1:
-			continue
-		var a := inner.position + (_train_line[i] - view.position) * k
-		var b := inner.position + (_train_line[(i + 1) % n] - view.position) * k
-		if not (_mm_has(inner, a) and _mm_has(inner, b)):
-			continue
-		c.draw_line(a, b, Color(1.0, 0.72, 0.35, 0.35 if _train_low[i] else 0.8), 2.0, true)
-	var cars: Array = st.car_positions()
-	for ci in range(cars.size() - 1, -1, -1):
-		var pv: Vector2 = inner.position + ((cars[ci] as Vector2) - view.position) * k
-		if not _mm_has(inner, pv, 3.0):
-			continue
-		c.draw_circle(pv, 4.0 if ci == 0 else 3.2, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 3.0 if ci == 0 else 2.3, Color("ff5a3a") if ci == 0 else Color("ffcf7a"))
+var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
 var _regions_of: World = null
 var _regions := {}
@@ -2497,10 +2470,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
-			# a train stop: a small amber square, named in the overview
-			c.draw_rect(Rect2(pv - Vector2(4, 4), Vector2(8, 8)), Color(0, 0, 0, 0.6))
-			c.draw_rect(Rect2(pv - Vector2(3, 3), Vector2(6, 6)), Color("ffcf7a"))
-			continue      # (unnamed here: stop, road and perch names piled on top of each other at this size; the full map names them)
+			continue      # (the halts are TrainMap's, gated as the "train" kind)
 		if String(lb["kind"]) == "choke":
 			# a chokepoint: a small orange diamond, named in the overview
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
