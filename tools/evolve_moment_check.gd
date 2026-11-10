@@ -203,6 +203,7 @@ func _shots(main: Node, stage: Dictionary) -> void:
 			for f in 3:
 				await RenderingServer.frame_post_draw
 			var img: Image = (stage["vp"] as SubViewport).get_texture().get_image()
+			img.convert(Image.FORMAT_RGBA8)
 			var c: Vector2 = (stage["cam"] as Camera3D).unproject_position(Vector3(0, 0.6, 0))
 			sheet.blit_rect(img, Rect2i(int(c.x) - CROP / 2, int(c.y) - CROP / 2, CROP, CROP), Vector2i(CROP * i, 0))
 		sheet.save_png("%s/evolve_%s_%s.png" % [dir, type, spk])
