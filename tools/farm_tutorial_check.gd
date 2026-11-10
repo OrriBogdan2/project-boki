@@ -55,6 +55,9 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
+		if String(a).begins_with("--hob-cam-strip"):      # (=<dir> for frames; bare: the numbers only)
+			await load("res://tools/hob_cam_strip.gd").new().run(m, String(a).substr(16))
+			return
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()

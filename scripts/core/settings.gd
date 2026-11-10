@@ -9,7 +9,7 @@ const DEFAULTS := {
 	# audio
 	"master": 0.8, "music": 0.7, "sfx": 1.0, "ambience": 0.8, "mute_unfocused": false,
 	# video
-	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 4, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
+	"fullscreen": false, "vsync": true, "max_fps": 0, "msaa": 0, "video_v": 5, "shadows": true, "ui_scale": 1.0, "show_fps": 0,
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "try_dismissed": "", "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
@@ -31,7 +31,7 @@ const DEFAULTS := {
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
 	"demo_weather": "random", "demo_blight": true, "demo_fresh": "normal", "demo_all_masks": false, "rec_level": 0,
 	# controls: action -> list of "key:<physical keycode>" / "mouse:<button>"
-	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0,
+	"keys": {}, "keys_v": 2, "keys2_v": 0, "keys3_v": 0, "keys4_v": 0, "keys5_v": 0, "keys6_v": 0,
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
@@ -43,7 +43,6 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
 ##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
 ##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
-##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
 ##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
@@ -51,30 +50,30 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
-		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
+		"scale": 0.5, "fxaa": false,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
-		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
+		"scale": 0.77, "fxaa": true,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
-		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
+		"scale": 1.0, "fxaa": true,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
+		"scale": 1.0, "fxaa": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
-		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
+		"scale": 1.0, "fxaa": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -85,6 +84,12 @@ func quality() -> String:
 		return qv
 	var found := String(v.get("quality_found", ""))
 	return found if QUALITY.has(found) else detect_quality()
+
+## MSAA off by default (performance pass 11-08): Medium's old 2x becomes FXAA; a hand-set 4x stays.
+func _video_v5() -> void:
+	if int(v.get("video_v", 4)) < 5:
+		if int(v.get("msaa", 0)) == 2 and quality() == "medium": v["msaa"] = 0
+		v["video_v"] = 5
 
 ## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
@@ -151,6 +156,8 @@ const ACTIONS := [
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
+	["kin_attack", "Boki order: attack my target"], ["kin_return", "Boki order: come back to me"],
+	["kin_hold", "Boki order: hold this position"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
@@ -158,7 +165,8 @@ const ACTIONS := [
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
-	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
+	["play", "Play fetch with a Boki"],
+		["whistle", "Whistle for your Boki (at home)"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
 	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
@@ -204,6 +212,7 @@ func _ready() -> void:
 		# Very Low and render-height caps came in: what auto found before (at full retina/4K resolution) is measured again
 		if String(v.get("quality", "auto")) == "auto": v["quality_found"] = ""
 		v["video_v"] = 4
+	_video_v5()
 	if v.get("show_fps") is bool: v["show_fps"] = int(v["show_fps"])      # (a toggle before the performance overlay)
 	# a first run (or the first since presets came in) takes the preset's anti-aliasing and shadows
 	_quality_basics = not cf.has_section_key("s", "quality")
@@ -303,8 +312,8 @@ func apply(k: String) -> void:
 				DisplayServer.window_set_mode(want)
 		"vsync":
 			if not OS.has_feature("web"):
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
-		"max_fps": Engine.max_fps = int(v[k])
+				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if Record.vsync(v[k]) else DisplayServer.VSYNC_DISABLED)
+		"max_fps": Engine.max_fps = Record.frame_cap(int(v[k]))
 		"msaa":
 			var m := int(v[k])
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
@@ -425,8 +434,6 @@ func _apply_quality() -> void:
 	var root := get_tree().root
 	_apply_render_scale()
 	root.mesh_lod_threshold = float(Q["lod"])
-	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
-	Engine.max_physics_steps_per_frame = int(Q["steps"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):
@@ -514,15 +521,25 @@ func clear_bind(action: String, slot: int) -> void:
 
 ## Other rebindable actions already using this key or button: [[action, slot], ...].
 func conflicts(ev: InputEvent, except := "") -> Array:
-	var s := ev_code(ev)
+	return conflicts_of_code(ev_code(ev), except)
+
+func conflicts_of_code(code: String, except := "") -> Array:
 	var out: Array = []
-	if s == "":
+	if code == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+			if sl[i] == code and not _shared_ok(a[0], except): out.append([a[0], i])
+	return out
+
+## Actions that clash with `action`: they hold one of its keys and could be pressed in the same place.
+func clashes(action: String) -> Array:
+	var out: Array = []
+	for c in slots(action):
+		for hit in conflicts_of_code(c, action):
+			if not out.has(hit[0]): out.append(hit[0])
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).

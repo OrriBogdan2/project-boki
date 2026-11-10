@@ -16,6 +16,9 @@ uniform float drag = 1.0;         // /s
 uniform float curl = 1.0;         // m/s^2 of drift
 uniform float size = 0.1;         // m
 uniform float size_var = 0.5;     // share of the size that is random
+uniform float floor_y = -1.0e9;   // m, the ground under the emitter (hero_vfx.gd): a falling mote lands on it
+const float LAND_BOUNCE = 0.25;   // share of the fall speed a landing mote bounces back up with
+const float LAND_SKID = 0.6;      // share of its ground speed it keeps as it lands
 
 uint hash_u(uint x) {
 	x = ((x >> uint(16)) ^ x) * uint(73244475);
@@ -74,6 +77,11 @@ void process() {
 	VELOCITY += (drift * curl + vec3(0.0, -gravity, 0.0)) * DELTA;
 	VELOCITY *= max(0.0, 1.0 - drag * DELTA);
 	TRANSFORM[3].xyz += VELOCITY * DELTA;
+	float rest = floor_y + CUSTOM.x * 0.5;
+	if (TRANSFORM[3].y < rest && VELOCITY.y < 0.0) {     // lands and skids instead of sinking through the ground
+		TRANSFORM[3].y = rest;
+		VELOCITY *= vec3(LAND_SKID, -LAND_BOUNCE, LAND_SKID);
+	}
 	TRANSFORM[0] = vec4(VELOCITY, 0.0);
 	TRANSFORM[1] = vec4(CUSTOM.x, age, 0.0, 0.0);
 	TRANSFORM[2] = vec4(CUSTOM.z, 0.0, 0.0, 0.0);

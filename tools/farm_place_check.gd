@@ -1,7 +1,7 @@
 extends RefCounted
 ## --farm-place-check: the farm tutorial's placement spotlight, Enter on "Fill it up", and the hunger gate
 ## (PLAYTEST-1108 items 27, 28 and 31). Never touches the real save.
-##   1. Enter presses "Fill it up" like a click, every time, and never leaves the panel stuck
+##   1. Enter presses "Fill it up" like a click, every time (even with a build tile still focused), never stuck
 ##   2. the placing spotlight (house, trough): dark throughout, the Build button, then the tile, then the exact
 ##      ground, each cut out with a ring and "Click here"; clicks elsewhere do nothing; a click in the cut-out
 ##      places the piece there; it fades after
@@ -116,6 +116,23 @@ func _enter() -> void:
 	await _key(KEY_ENTER)
 	await _frames(3)
 	ok(home.panel_open == "", "Enter on a full trough closes it")
+	# the real cause: the trough tile you just clicked keeps the keyboard focus, and a focused tile takes Enter
+	# (ui_accept) before the panel ever sees it
+	Save.d["items"]["kibble"] = 6
+	f["food"] = []
+	home.hb.toggle()
+	await _frames(2)
+	var tile: Control = home.hb.bar._tiles.get_child(0)
+	tile.grab_focus()
+	ok(tile.has_focus(), "a build tile has the focus, as after a click")
+	home.hecon.open_feeder(f)
+	await _frames(2)
+	await _key(KEY_ENTER)
+	await _frames(3)
+	ok(Econ.fill(f) > 0, "a build tile that kept the focus does not swallow Enter (%d meals in)" % Econ.fill(f))
+	if home.hb.active:
+		home.hb.toggle()
+	home._close_panel()
 	Save.d["items"]["kibble"] = 0
 	f["food"] = []
 	home.hecon.open_feeder(f)
@@ -142,7 +159,7 @@ func _modal() -> void:
 	ok(n._block._has_point(Vector2(5, 5)) and not n._block._has_point(btn_at),
 			"clicks anywhere else are caught, the Build button is open")
 	await main.get_tree().create_timer(0.5).timeout
-	ok(n._mat.get_shader_parameter("dim") >= FarmSpotlight.DIM_MODAL - 0.01,
+	ok(n._mat.get_shader_parameter("dim") >= float(Tuning.of("farm_spotlight")["dim"]) - 0.01,
 		"everything else is dark (%.2f)" % n._mat.get_shader_parameter("dim"))
 	await _shot("place_1_build_button", 0.2)
 	home.hb.toggle()
@@ -157,7 +174,6 @@ func _modal() -> void:
 	ok(tile != null and n._holes.size() == 1 and n._holes[0].grow(2.0).encloses(tile_r),
 			"the cut-out is exactly that tile")
 	ok(n.get_index() == n.get_parent().get_child_count() - 1, "the spotlight sits above the build bar")
-	var placed := HomeLayout.fixtures(Save.d, "house").size() + HomeLayout.fixtures(Save.d, "site").size()
 	var before: int = HomeLayout.ensure(Save.d)["deco"].size()
 	await _click(Vector2(12, 12))
 	await _frames(3)
@@ -233,6 +249,12 @@ func _relic() -> void:
 	ok(FarmTutorial.active() and not home.hob.chat.offer_due(), "reloaded mid-tutorial: still no relic")
 	FarmTutorial.mark("expedition")
 	ok(not FarmTutorial.active() and home.hob.chat.offer_due(), "all steps done: the relic is offered")
+	if shots != "":
+		home.hob.node.shout(String(home.hob.rules()["talk"]["call_offer"]))
+		home.cam.zoom_to = 0.7
+		home.cam.zoom = 0.7
+		home.cam.snap(home.hob.node.global_position)
+		await _shot("hob_got_a_minute", 0.4)
 	home.queue_free()
 	await _frames(2)
 
@@ -241,6 +263,11 @@ func _hunger() -> void:
 	var home = await _home()
 	var rec: Dictionary = Save.active_kin()
 	rec["starve"] = 24.0 * 3600.0
+	Care.ensure(rec)
+	rec["needs"]["food"] = 5.0               # a day without food: an empty belly (not "full right now")
+	var crops: Array = Data.CROPS.keys()
+	rec["likes"]["food"] = crops[0]          # likes are seeded from the random uid: pin them so kibble is never
+	rec["likes"]["hates"] = crops[1]         # the hated food (refused) nor the loved one (fills more)
 	Save.d["items"]["kibble"] = 5
 	ok(HungerGate.meals_needed(rec) == 2, "24 h of starving: two meals (%d)" % HungerGate.meals_needed(rec))
 	home._confirm_start()

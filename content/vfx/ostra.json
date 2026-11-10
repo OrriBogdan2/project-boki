@@ -1,0 +1,70 @@
+{
+	"palette": {
+		"main": "#2ee6c0", "hot": "#b8fff0", "white": "#f2fffc", "void": "#06030c", "deep": "#0b5a50",
+		"mist": "#6fa89e"
+	},
+	"moves": {
+		"snap_wind": {"fx": [
+			{"p": "ember", "n": 18, "shape": "gather", "radius": 0.9, "speed": 3.0, "life": 0.32, "size": 0.07,
+				"c": "main", "c2": "white", "c3": "void"},
+			{"p": "shard", "n": 6, "shape": "gather", "radius": 0.7, "speed": 2.2, "life": 0.3, "size": 0.11,
+				"c": "main", "c2": "hot"}
+		]},
+		"snap": {"fx": [
+			{"p": "flare", "size": 1.0, "grow": 1.3, "life": 0.16, "c": "main", "c2": "white", "c3": "void"},
+			{"p": "shard", "n": 14, "way": "fwd", "speed": 9.0, "spread": 0.18, "drag": 2.0, "life": 0.35, "size": 0.12,
+				"c": "main", "c2": "hot"},
+			{"p": "smoke", "n": 4, "way": "fwd", "speed": 1.5, "spread": 0.5, "grav": -0.6, "life": 0.7, "size": 0.25,
+				"c": "deep", "c3": "void", "near": true}
+		]},
+		"snap_trail": {"fx": [
+			{"p": "ribbon", "size": 0.55, "life": 2.0, "tail": 0.24, "c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "ribbon", "size": 0.18, "life": 2.0, "tail": 0.14, "c": "void", "c2": "deep", "c3": "void"}
+		]},
+		"snap_hit": {"fx": [
+			{"p": "vortex", "size": 0.8, "spin": -2.5, "grow": 0.4, "life": 0.35, "c": "main", "c2": "white", "c3": "void"},
+			{"p": "flare", "y": 0.9, "delay": 0.06, "size": 1.3, "grow": 1.3, "life": 0.2, "c": "main", "c2": "white", "c3": "void"},
+			{"p": "shard", "y": 0.9, "delay": 0.06, "n": 16, "speed": 6.0, "spread": 0.9, "grav": 5.0, "drag": 1.5, "life": 0.5,
+				"size": 0.12, "c": "main", "c2": "hot"},
+			{"p": "ember", "y": 0.9, "delay": 0.08, "n": 10, "speed": 1.2, "spread": 0.8, "grav": -1.2, "life": 1.1, "size": 0.06,
+				"c": "main", "c2": "hot", "c3": "deep", "near": true}
+		]},
+		"seed_plant": {"fx": [
+			{"p": "vortex", "size": 0.9, "spin": 1.5, "grow": 1.2, "life": 0.5, "c": "main", "c2": "hot", "c3": "void"},
+			{"p": "flare", "y": 0.3, "size": 0.7, "grow": 1.2, "life": 0.16, "c": "main", "c2": "white", "c3": "void"},
+			{"p": "ember", "y": 0.1, "n": 10, "shape": "disc", "radius": 0.5, "way": "up", "speed": 1.6, "spread": 0.4,
+				"grav": -0.8, "life": 0.8, "size": 0.06, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"seed_pop": {"fx": [
+			{"p": "vortex", "size": "r", "spin": -3.0, "grow": 0.25, "life": 0.3, "c": "main", "c2": "white", "c3": "void"},
+			{"p": "flare", "delay": 0.12, "y": 0.8, "size": 1.6, "size_k": 0.8, "grow": 1.35, "life": 0.26,
+				"c": "main", "c2": "white", "c3": "void"},
+			{"p": "shard", "delay": 0.12, "y": 0.6, "n": 26, "speed": 8.0, "speed_k": 0.5, "spread": 0.9, "grav": 6.0,
+				"drag": 1.5, "life": 0.6, "size": 0.14, "c": "main", "c2": "hot"},
+			{"p": "chunk", "delay": 0.12, "y": 0.4, "n": 10, "speed": 5.0, "spread": 0.8, "grav": 9.0, "life": 0.7,
+				"size": 0.12, "c": "deep", "c3": "void"},
+			{"p": "scorch", "delay": 0.12, "size": "r", "size_x": 0.8, "life": 1.6, "c": "main", "c2": "hot", "c3": "void"},
+			{"p": "ember", "delay": 0.16, "y": 0.2, "n": 22, "shape": "disc", "radius": "r", "radius_x": 0.7, "way": "up",
+				"speed": 1.8, "spread": 0.5, "grav": -1.4, "drag": 1.0, "life": 1.4, "size": 0.07,
+				"c": "main", "c2": "hot", "c3": "deep"},
+			{"p": "smoke", "delay": 0.14, "y": 0.6, "n": 6, "speed": 1.2, "spread": 0.7, "grav": -1.0, "life": 1.2,
+				"size": 0.35, "c": "mist", "c3": "void", "near": true}
+		]},
+		"well_open": {"fx": [
+			{"p": "vortex", "size": "r", "size_x": 0.85, "spin": 1.2, "grow": 1.1, "life": 0.9,
+				"c": "main", "c2": "white", "c3": "void"},
+			{"p": "flare", "y": 0.6, "size": 2.4, "grow": 1.3, "life": 0.28, "c": "main", "c2": "white", "c3": "void"},
+			{"p": "shard", "y": 0.4, "n": 24, "shape": "gather", "radius": "r", "speed": 6.0, "life": 0.45, "size": 0.13,
+				"c": "main", "c2": "hot"},
+			{"p": "ember", "y": 0.2, "n": 28, "shape": "disc", "radius": "r", "radius_x": 0.8, "way": "up", "speed": 2.0,
+				"spread": 0.5, "grav": -1.0, "life": 1.6, "size": 0.07, "c": "main", "c2": "hot", "c3": "deep"}
+		]},
+		"well_close": {"fx": [
+			{"p": "vortex", "size": "r", "size_x": 0.6, "spin": -2.5, "grow": 0.2, "life": 0.45,
+				"c": "main", "c2": "hot", "c3": "void"},
+			{"p": "scorch", "size": "r", "size_x": 0.6, "life": 1.4, "c": "deep", "c2": "main", "c3": "void"},
+			{"p": "ember", "y": 0.2, "n": 16, "shape": "disc", "radius": "r", "radius_x": 0.5, "way": "up", "speed": 1.2,
+				"spread": 0.5, "grav": -1.0, "life": 1.3, "size": 0.06, "c": "main", "c2": "hot", "c3": "deep"}
+		]}
+	}
+}

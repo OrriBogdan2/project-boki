@@ -268,6 +268,8 @@ func _all() -> void:
 		"lance: a sweep bends the stream (old fire keeps its own heading)", east >= 3 and north >= 1,
 		"still east %d, new north %d" % [east, north]
 	)
+	var heat_id := "heat%d" % P.get_instance_id()
+	ok("lance: her palm glows with heat while it roars", K.fx.shown(heat_id) and K.heat > 0.0, "heat %.2f" % K.heat)
 	P.inp["fire"] = false
 	ak.step(m, 0.15)
 	var live := 0
@@ -285,6 +287,9 @@ func _all() -> void:
 		"emitted +%d" % (K.hose.emitted - em0)
 	)
 	P.inp["fire"] = false
+	ak.step(m, AshwickKit.HEAT_COOL)
+	var cooled: bool = not K.fx.shown(heat_id) and K.heat == 0.0
+	ok("lance: the heat glow cools off after she lets go", cooled, "heat %.2f" % K.heat)
 	# --- Char builds into Ablaze, then Flashover
 	reset.call()
 	var aim_t := func(): P.inp["fire"] = true
@@ -616,6 +621,12 @@ func _all() -> void:
 		float(K.cd["e"]) <= 0.0 and K.resets >= 1 and P.hp > P.max_hp * 0.6,
 		"cd %.1f hp %.0f" % [float(K.cd["e"]), P.hp]
 	)
+	# the kit's heal is ours-only (the data has none): 16% of max health; the takedown reset adds its own 5%
+	ok("passive: the knock heal is 16% of max health (ours-only, the data has none)",
+		absf(P.hp - P.max_hp * 0.66) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
+	DashReset.takedown(P, T)
+	ok("passive: with the takedown reset's 5% a knock heals 21% in all, no more",
+		absf(P.hp - P.max_hp * 0.71) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))

@@ -12,11 +12,11 @@ extends ArchKit
 ## shooting. Longneedle: stand still while the line narrows, the aim turning only so fast, then a long beam
 ## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
-const EMBER := Color("ff9a5c")
-const HOT := Color("fff1c8")
-const DEEP := Color("c43a2a")
-const BRONZE := Color("b9732f")
-const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
+# her signature lime (Arch.color) and its slots: the palette's main, hot and deep in content/vfx/gunslinger.json
+const LIME := Color("b8f03c")
+const HOT := Color("eaffa8")
+const DEEP := Color("4f8a12")
+const BRONZE := Color("b9732f")      # the Burr Charge's metal shell (a material, not an effect)
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
@@ -139,11 +139,11 @@ func _tick_trail() -> void:
 		return
 	var hand: Node3D = h.anim.hand_l if String(tr[0]) == "l" else h.anim.hand_r
 	if hand != null:
-		fx().trail("vn%d" % h.get_instance_id(), hand.global_position, EMBER, HOT, 0.24)
+		fx().trail("vn%d" % h.get_instance_id(), hand.global_position, LIME, HOT, 0.24)
 
 ## Her after-image colour: a deeper ember, so the trail reads apart from her warm live body.
 static func echo_col() -> Color:
-	return EMBER.lerp(DEEP, 0.5)
+	return LIME.lerp(DEEP, 0.5)
 
 ## Her own after-images on Slipstep and the air dash: her silhouette in ember, cooling to deep red.
 func _tick_echo(dt: float) -> void:
@@ -196,6 +196,8 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team or String(o.get("src", "")) == "burn":
 		return
+	if String(o.get("src", "")) == "shot" and not o.has("ab"):
+		vfx("shot_hit", t.pos + Vector3(0, 1.0, 0), h.dir_to(t), {"k": _faded_now()})
 	if res > 0.0:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
@@ -214,7 +216,7 @@ func _on_knock(t: Ent) -> void:
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick.
+## Each round: a lime tracer with a white-hot core, a muzzle flash the size of the gatling's mouth, the shoulder kick.
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -226,8 +228,9 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
-			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
+			var faded := {"k": _faded(float((sd["x"] as Dictionary).get("sus_k", 1.0)))}
+			vfx("shot", sd["start"], sd["vel"] as Vector2, faded)
+			HeroVfx.of(m).trail(h, "shot_trail", sd["node"], faded)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -247,7 +250,8 @@ func _rifle_in_hand() -> bool:
 
 ## The drum (the source's rifle: 30 rounds that "rapidly reload when not firing"; there is no reload key): once no
 ## round has left for `refill_after` it refills at `refill_rate`, so a string after a pause starts full. Run dry,
-## the trigger is dead until the drum is full again (held or not), then the string picks up.
+## the trigger is dead until the drum is full again (held or not), then the string picks up and the drum clicks home
+## (the reload look).
 func _tick_mag(dt: float) -> void:
 	if not _rifle_in_hand():
 		dry = false
@@ -257,17 +261,27 @@ func _tick_mag(dt: float) -> void:
 		dry = true
 	if h.ammo >= mag or h.idle_fire < float(h.wpn["refill_after"]):
 		refill_part = 0.0
-		if h.ammo >= mag:
+		if h.ammo >= mag and dry:
 			dry = false
+			vfx("reload")
 		return
 	refill_part += float(h.wpn["refill_rate"]) * dt
 	var add := int(refill_part)
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
-func _round_end(at: Vector3, vel: Vector2) -> void:
-	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
-	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7)
+## How far a round's damage has decayed toward the rifle's sustained floor: 0 at full damage, 1 once the string
+## is past its first ten rounds. The shot, trail and hit looks in content/vfx/gunslinger.json shrink by it
+## ("size_k"), so a long string visibly thins and a pause makes it full again.
+func _faded(sus_k: float) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
+
+## The decay of the round landing now: the hit does not carry its round's sus_k, so this reads the string's
+## count (a round or two ahead at most).
+func _faded_now() -> float:
+	var rounds := float(h.wpn.get("sustain_rounds", 10))
+	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
 
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
@@ -329,9 +343,9 @@ func _slide_end() -> void:
 	slide = {}
 
 ## A tap: a skid on her fitted dash curve (content/rules/dash_feel.json, ArchKit.travel's "curved"), covering
-## `roll` m over roll_t (you shoot through it).
+## `roll` m over roll_t, stretched by her dash_speed (tuning.json, owner 11-08 item 10; you shoot through it).
 func _skid(t: float, dd: Dictionary) -> void:
-	if t >= float(dd["roll_t"]) * float(dash_feel()["time"]):
+	if t >= float(dd["roll_t"]) * float(dash_feel()["time"]) / Loco.dash_speed(h.arch):
 		_slide_end()
 
 func _tick_slide(dt: float) -> void:
@@ -365,15 +379,15 @@ func _tick_slide(dt: float) -> void:
 		_skid(t, dd)
 		return
 	var st_t := t - float(slide["t0"])
-	var dur := float(dd["slide_t"])
+	var dur := float(dd["slide_t"]) / Loco.dash_speed(h.arch)     # slowed (tuning.json dash_speed), the same length
 	if not held("dash") or st_t >= dur or h.stun_t > 0.0 or h.root_t > 0.0:
 		_slide_end()
 		return
-	var k := 1.0 - st_t / dur
 	h.roll_t = maxf(h.roll_t, dt * 1.5)
+	var k := 1.0 - st_t / dur
 	if anim_id == "gunslinger_dash":
 		anim_at = maxf(anim_at, float(m.time) - SLIDE_KEY)   # the clip stays low on its slide key while she slides
-	h.roll_speed = float(dd["slide"]) / dur * (0.5 + k)
+	h.roll_speed = float(dd["slide"]) / float(dd["slide_t"]) * (0.5 + k)     # (Loco.dash_hv applies dash_speed)
 	h.inv_t = 0.0
 
 # ------------------------------------------------------------------ RMB: Burr Charge
@@ -425,7 +439,7 @@ func _launcher_puff(at: Vector3, d: Vector2) -> void:
 func _puff(at: Vector3, d: Vector2) -> void:
 	puffs += 1
 	last_puff = at
-	m.fx.muzzle(at, d, EMBER, 2.0)
+	m.fx.muzzle(at, d, LIME, 2.0)
 
 ## The charge: a bronze ball about 0.3 m across, a dark band round it, an ember heart showing through
 ## and eight hot spikes. Solid colours, so it reads bronze and ember on any ground.
@@ -434,7 +448,7 @@ func _burr_mesh() -> Node3D:
 	Models.part(n, Models.sphere(0.15, 12), Models.shiny(BRONZE, 0.6))
 	var band := Models.cyl(0.155, 0.155, 0.06, 14)
 	Models.part(n, band, Models.toon(Color("2b2a33"), false, 0.0))
-	var heart := Models.part(n, Models.sphere(0.07, 8), solid_mat(EMBER), Vector3(0, 0.1, 0.1))
+	var heart := Models.part(n, Models.sphere(0.07, 8), solid_mat(LIME), Vector3(0, 0.1, 0.1))
 	heart.name = "Glow"
 	for i in 8:
 		var a := TAU * i / 8.0
@@ -458,7 +472,7 @@ func _tick_burrs(dt: float) -> void:
 				n.global_position = b["pos"]
 				n.scale = Vector3.ONE * (1.0 + 0.35 * sin(m.time * lerpf(10.0, 44.0, k)))
 			var cone := {"from": b["pos"], "dir": b["out"], "len": float(bd["cone_len"]), "deg": float(bd["cone_deg"])}
-			cone.merge({"fill": k, "all": true, "col": EMBER, "col2": HOT, "hot": k})
+			cone.merge({"fill": k, "all": true, "col": LIME, "col2": HOT, "hot": k})
 			AimKit.cone(h, "burr%d" % n.get_instance_id(), cone)
 			if float(b["fuse"]) <= 0.0:
 				burrs.erase(b)
@@ -489,7 +503,7 @@ func _tick_burrs(dt: float) -> void:
 			var back := Vector3(dir.x, 0, dir.y) * 0.35
 			fx().smear(p - back, flat, DEEP, HOT, 0.3, 0.2)      # the ember smear behind it (joined up)
 			if int(b["t"] * 60.0) % 3 == 0:
-				m.fx.burst(flat, EMBER, 3, 0.6, 0.25, 0.0, 0.7)
+				m.fx.burst(flat, LIME, 3, 0.6, 0.25, 0.0, 0.7)
 		if is_instance_valid(n):
 			n.global_position = b["pos"]
 			n.rotation.y += dt * 14.0
@@ -527,8 +541,9 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 	var dir: Vector2 = b["dir"]
 	var spray := Vector3(-dir.x, 0.2, -dir.y)
 	m.fx.flash(at, HOT, 1.2, 0.1)
-	m.fx.burst(at, EMBER, 12, 6.0, 0.35, 2.0, 1.0, spray, 70.0)
+	m.fx.burst(at, LIME, 12, 6.0, 0.35, 2.0, 1.0, spray, 70.0)
 	m.sfx("vn_blast", at, -4.0)
+	net_ring(at, 1.0, LIME)
 	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
 	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
 	daze(victim, float(bd["cone_rattle"]))
@@ -559,7 +574,8 @@ func _stick(b: Dictionary, at: Vector3, wall: bool) -> void:
 	b["fuse0"] = float(bd["fuse"])
 	b["out"] = -(b["dir"] as Vector2)
 	m.sfx("gunslinger_grenade_thunk", at, -3.0)
-	fx().star(at, EMBER, HOT, 0.6, 0.12)
+	fx().star(at, LIME, HOT, 0.6, 0.12)
+	net_ring(at, 1.0, LIME)
 
 func _detonate(b: Dictionary) -> void:
 	var bd := rmb_def()["burr"] as Dictionary
@@ -570,6 +586,7 @@ func _detonate(b: Dictionary) -> void:
 	var at: Vector3 = b["pos"]
 	rattles += 1
 	m.fx.flash(at, HOT, 1.6, 0.1)
+	fx().ring(ground(at), 1.8, LIME, HOT, 0.35)
 	m.sfx("vn_blast", at, -1.0)
 	_cone(at, b["out"] as Vector2, bd, bool(b["wall"]))
 
@@ -577,9 +594,10 @@ func _detonate(b: Dictionary) -> void:
 ## thrower) and Dazing it; a hunter shoved into more terrain is stunned.
 func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 	last_cone = {"at": at, "dir": out, "wall": wall}
-	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), EMBER, HOT, 0.35)
+	fx().fan(ground(at), out, float(bd["cone_len"]), float(bd["cone_deg"]), LIME, HOT, 0.35)
 	var spray := Vector3(out.x, 0.2, out.y)
-	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, EMBER, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
+	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, LIME, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
+	net_ring(at, 1.6, LIME)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
 		if absf(f.pos.y - at.y) > 2.6: continue
@@ -596,7 +614,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 			slam["dr"] = true
 			f.hurt(0.1, h, slam)
 			daze(f, float(bd["cone_rattle"]) + float(bd["wall_daze"]))     # the data: walled, "Dazed longer"
-			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", EMBER, false)   # over DAZED
+			m.fx.word(f.pos + Vector3(0, 2.2, 0) + fx().screen_up() * 2.0, "WALLED", LIME, false)   # over DAZED
 
 # ------------------------------------------------------------------ E: Longneedle
 func cast_e() -> bool:
@@ -639,16 +657,14 @@ func _tick_needle(dt: float) -> void:
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes
 	var wide := beam_width()
 	var lane := {"len": float(ed["range"]), "width": wide, "width_to": wide * 0.12, "k": k, "all": true}
-	lane.merge({"col": EMBER, "col2": HOT})
+	lane.merge({"col": LIME, "col2": HOT})
 	AimKit.lane(h, "e", lane)
 	needle["push"] = lerpf(float(needle["push"]), _push_want(), 1.0 - exp(-PUSH_EASE * dt))
 	if h.is_local() and m.cam:
 		var push := float(needle["push"])
 		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]) * push, float(ed["range"]) * push)   # (the caster's camera)
-	AimKit.charge(h, k, {"col": EMBER, "col2": HOT})
-	# an ember orb swells at the muzzle through the cast
-	if int(m.time * 20.0) != int((m.time - dt) * 20.0):
-		fx().star(_muzzle(h.aim_dir()), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
+	AimKit.charge(h, k, {"col": LIME, "col2": HOT})
+	HeroVfx.of(m).hold(h, "e_charge", k)          # lime sparks drawn into the muzzle through the cast
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
 		_fire_needle()                                              # along the capped aim, so before the lock lifts
 		_end_needle()
@@ -695,13 +711,8 @@ func _fire_needle() -> void:
 	var L := float(ed["range"])
 	var b := a + Vector3(d.x, 0, d.y) * L
 	needle_dir = d
-	# an ember body, a hot core, a bronze shimmer down its edges; the ember muzzle orb and its flare
-	fx().beam(a, b, EMBER, HOT, beam_width(), float(ed["linger"]), BRONZE)
-	fx().star(a, EMBER, HOT, 1.3, 0.16)
-	m.fx.flash(a, EMBER, 1.2, 0.08)
-	fx().pillar(ground(h.pos), SMOKE, EMBER, 1.6, 0.45, 0.4)   # recoil smoke puffs up round her (no ground ring)
-	net_bolt(a, b, EMBER)
-	m.sfx("vn_ion_fire", h.pos, 1.0)
+	# a taut needle of light (deep body, white-hot core, sparks shed along it), a muzzle bloom, recoil smoke round her
+	vfx("e_fire", a, d, {"len": L, "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
@@ -720,14 +731,14 @@ func _fire_needle() -> void:
 			o["payoff"] = f is Hunter
 		f.hurt(dmg, h, o)
 		needle_hits += 1
-		m.fx.burst(f.pos + Vector3(0, 1.0, 0), EMBER, 14, 5.0, 0.3)
+		vfx("e_hit", f.pos + Vector3(0, 1.0, 0), d)
 		if f is Hunter:
 			hits += 1
 			if rat:
 				skewers += 1
 				# the word rides up the screen, clear of the damage number on the body
-				payoff_fx(f.pos, "", EMBER, "", h.dir_to(f), f)
-				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", EMBER, true)
+				payoff_fx(f.pos, "", LIME, "", h.dir_to(f), f)
+				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", LIME, true)
 				m.sfx("hero_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")

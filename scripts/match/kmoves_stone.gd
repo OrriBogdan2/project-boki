@@ -20,7 +20,8 @@ const MOVES := {
 			}
 		]]},
 	# Basalt Spine let go: the fists swing up (0.05) and are driven into the ground (0.1, the cracks), she
-	# stays down through the 0.2s cracks and the 0.4s rise, then heaves up as the ridge stands (0.7)
+	# stays down through the cracks and the rise, then heaves up as the ridge stands (0.7; the 0.8s rise wants it at
+	# 1.0, so tarek.json plays the clip at 0.7 speed until the re-key listed in docs/heroes/dolm.md)
 	"breah_spine": {"keys": [
 		[
 			0.00,

@@ -1,10 +1,9 @@
 class_name HungerGate
 extends VBoxContainer
 ## The "Too hungry to go" panel body: how many more meals the partner needs, a bar with the line it has to
-## cross, and a Feed button right there. It re-reads the Boki every POLL_S, so a feeder or a meal moves the bar
-## and the moment the line is crossed the panel offers Go, with no closing and reopening.
+## cross, and a Feed button right there. It re-reads the Boki every poll_s (tuning.json "hunger_gate"), so a
+## feeder or a meal moves the bar and the moment the line is crossed the panel offers Go, with no closing and reopening.
 
-const POLL_S := 0.4             # s between looks at the Boki
 const BAR_H_PX := 20.0          # px, the fed bar's height
 const BAR_BACK := Color(0.09, 0.085, 0.12)
 const LINE_W_PX := 3.0          # px, the minimum line
@@ -56,7 +55,7 @@ func _ready() -> void:
 
 func _process(dt: float) -> void:
 	_clock += dt
-	if _clock >= POLL_S:
+	if _clock >= float(Tuning.of("hunger_gate")["poll_s"]):
 		_clock = 0.0
 		if _state_key() != _key:
 			_rebuild()

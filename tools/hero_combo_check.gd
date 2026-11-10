@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const MTIME := preload("res://tools/mage_anim_time_check.gd")        # Sparkle's move timing against the footage frames
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -27,6 +28,7 @@ func run(main_node: Node, who: String) -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
 		await _growth()
 		await ults.mage()
+		MTIME.new(self).run()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
@@ -172,18 +174,24 @@ func _mage() -> void:
 	var de := AimKit.entry(P, "dash_end")
 	ok("Wirerun held: rails lane and the ticked end ring show",
 			AimKit.shown(P, "dash") and not de.is_empty() and bool(de["ticks"]) and absf(float(de["r"]) - 2.25) < 0.01)
-	ac.step(m, 0.45, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
+	var dd: Dictionary = K.dash_def()
+	var d_min := float(dd["dist"][0])
+	var d_max := float(dd["dist"][1])
+	ac.step(m, float(dd["hold"]) - 0.1, func(): P.inp["dash_down"] = true; P.inp["move"] = Vector2(0, 1))
 	var e2 := _flat(K.wire.get("end", home), P.pos)
-	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < 10.0 and e2 > 11.5, "%.1f -> %.1f" % [e1, e2])
+	ok("Wirerun: length grows with the charge past the cursor (3m)", e1 < d_min + 1.0 and e2 > d_max - 0.3,
+			"%.1f -> %.1f" % [e1, e2])
 	ok("Wirerun held: your keys don't move you", _flat(P.pos, home) < 0.3, "moved %.2f" % _flat(P.pos, home))
 	P.inp["move"] = Vector2.ZERO
 	P.inp["dash_down"] = false
-	ac.step(m, 0.7)
-	ok("Wirerun: a full hold streaks at least 12.5 m", _flat(P.pos, home) >= 12.5, "%.1f m" % _flat(P.pos, home))
-	var short_v := 7.5 / K.run_time(7.5)
-	var long_v := 13.0 / K.run_time(13.0)
-	ok("Wirerun: a constant speed (40 m/s under the global dash feel), so a short run is quicker",
-			absf(short_v - long_v) < 0.5 and long_v > 31.0 and long_v < 46.0, "%.1f / %.1f m/s" % [short_v, long_v])
+	ac.step(m, 0.8)
+	var ran := _flat(P.pos, home)
+	ok("Wirerun: a full hold streaks its full length (11 m)", ran >= d_max - 0.5 and ran < d_max + 1.0, "%.1f m" % ran)
+	var short_v := d_min / K.run_time(d_min)
+	var long_v := d_max / K.run_time(d_max)
+	var want_v := float(dd["speed"]) / float(K.dash_feel()["time"])
+	ok("Wirerun: a constant speed (34 m/s under the global dash feel), so a short run is quicker",
+			absf(short_v - long_v) < 0.5 and absf(long_v - want_v) < 0.5, "%.1f / %.1f m/s" % [short_v, long_v])
 	# 4. height holds while charging in the air; drift carries into the run
 	P.teleport(home)
 	ac.step(m, 0.2)
@@ -498,8 +506,8 @@ func _mage() -> void:
 	# dash animation: Wirerun and Slipstep keep their own moves, none shared
 	var dm := HunterAnim.km_def("mage_dash_go")
 	var dg := HunterAnim.km_def("gunslinger_dash")
-	ok("dash anim: Wirerun and Slipstep each have their own move; neither is a shared roll",
-			not dm.is_empty() and not dg.is_empty() and not HunterAnim.km_def("mage_dash_ex").is_empty()
+	ok("dash anim: Wirerun and Slipstep each have their own move, neither a shared roll (Sparkle has no tumble)",
+			not dm.is_empty() and not dg.is_empty() and HunterAnim.km_def("mage_dash_ex").is_empty()
 			and not HunterAnim.km_def("gunslinger_dash_ex").is_empty() and not K.dash_def().is_empty())
 	# small mechanics (the wiki's fine print, docs/heroes/mage.md "Small mechanics")
 	ac.fresh(T)
@@ -694,7 +702,9 @@ func _gunslinger() -> void:
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
-	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	var looks := HeroVfx.of(m).plays
+	ok("LMB: each round is a lime tracer with a muzzle flash (HeroVfx shot, shot_trail)",
+			int(looks.get("shot", 0)) >= 1 and int(looks.get("shot_trail", 0)) >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
 	ok("Dazed: the rifle does +90%", is_equal_approx(K.outgoing(T, 10.0, o), 19.0))
@@ -823,6 +833,9 @@ func _gunslinger() -> void:
 	ac.step(m, 0.4)
 	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
 	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
+	var needle_looks := HeroVfx.of(m).plays
+	ok("Longneedle: it charges, fires and hits as its own needle (HeroVfx e_charge, e_fire, e_hit)",
+			["e_charge", "e_fire", "e_hit"].all(func(mv): return int(needle_looks.get(mv, 0)) >= 1))
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
@@ -875,10 +888,10 @@ func _gunslinger() -> void:
 	var early := _flat(P.pos, home)
 	ac.step(m, 0.15)
 	var skidding := not K.slide.is_empty()
-	ac.step(m, 0.25)
+	ac.step(m, 0.4)
 	var total := _flat(P.pos, home)
-	ok("Slipstep tap: a ~0.5s skid that bleeds off (front-loaded past an even pace, still going at 0.3s)",
-			skidding and early > total * 0.35 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
+	ok("Slipstep tap: a ~0.65s skid that eases in (slow at 0.15s) and is still going at 0.3s",
+			skidding and early < total * 0.2 and total > 3.6 and total < 5.6, "%.1f of %.1f m" % [early, total])
 	P.inp["move"] = Vector2(0, 1)
 	ok("Slipstep: along the keys, not the cursor",
 			P.pos.z - home.z > 3.0 and absf(P.pos.x - home.x) < 1.0,
