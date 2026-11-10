@@ -83709,5 +83709,12 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/on_briarlynx_big_3.jpg",
     "ok": true
+  },
+  {
+    "id": "on_briarlynx_big",
+    "name": "Briarlynx (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_briarlynx_big_4.jpg",
+    "ok": true
   }
 ]
