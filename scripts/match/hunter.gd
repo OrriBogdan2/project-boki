@@ -2221,7 +2221,7 @@ func _physics(dt: float) -> void:
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				hv = accel2(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
+				hv = HunterMove.walk(hv, mv * spd, ground_accel * grip, grip, dt)
 			else:
 				hv = HunterMove.brake(hv, spd, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:

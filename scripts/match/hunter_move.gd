@@ -8,6 +8,7 @@ static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
+static var turn_friction: float = _phys["turn_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]
 static var air_control: float = _phys["air_control"]
 static var air_friction: float = _phys["air_friction"]
@@ -26,6 +27,8 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+
+const OVER_RUN := 1.01     # UE IsExceedingMaxSpeed: speed past 1.01x the wanted speed counts as over it
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -57,6 +60,19 @@ static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
 	if s > run + 0.05:
 		return hv * (maxf(run, s - Hunter.GROUND_SHED * grip * dt) / s)
 	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)
+
+## Ground velocity after a step with keys held, UE's walking CalcVelocity: turn_friction (a share per
+## second) bends the velocity toward the keys at its current speed, the accel adds on, and the speed caps
+## at the wanted speed. A reversal sheds speed at 2 x turn_friction plus the accel; a 90-degree cut arcs
+## round at run speed. Over the wanted speed by UE's 1% slack (a kit step, a knock) Hunter.accel2 bleeds it.
+static func walk(hv: Vector2, wish: Vector2, accel: float, grip: float, dt: float) -> Vector2:
+	var run := wish.length()
+	var s := hv.length()
+	if s > run * OVER_RUN:
+		return Hunter.accel2(hv, wish, accel, 0.0, Hunter.GROUND_OVERSPEED * grip, dt)
+	var dir := wish / run
+	var bent := hv - (hv - dir * s) * minf(turn_friction * grip * dt, 1.0)
+	return (bent + dir * accel * dt).limit_length(run)
 
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.
