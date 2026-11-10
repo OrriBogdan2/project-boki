@@ -8,6 +8,8 @@ extends RefCounted
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium] [--bench-stress]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ## --bench-stress: the 60-actor load (10 trios = 30 Hunters, every Boki kept out beside its Hunter, no fight).
+## --bench-real: each frame hands the match the last frame's wall time, so its own catch-up decides the steps
+## (as in play; the default steps once a frame, which hides the catch-up).
 ## --bench-brawl: the ten-trio fight on the Hollow Crown instead (tools/perf_brawl.gd)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 ## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
@@ -35,6 +37,7 @@ const P99_SLACK := 1.15             # the gate: match p99 may be at most 15% ove
 var match_p99 := 0.0
 var created := {}        # node name -> count, nodes that entered the tree from the fight on (BENCH created)
 var fought := false
+var real := false         # --bench-real: the last frame's wall time is the next frame's delta
 var vp: RID
 
 func run(main_node: Node) -> void:
@@ -59,6 +62,7 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 	stress = "--bench-stress" in OS.get_cmdline_user_args()
+	real = "--bench-real" in OS.get_cmdline_user_args()
 	if stress:
 		teams = 10
 		squad = 3
@@ -135,7 +139,8 @@ func _match() -> Array:
 			out_at = m.time + STRESS_OUT_S
 			boki_out = _boki_out(m)
 		var t0 := Time.get_ticks_usec()
-		m._process(DT)        # one frame as the game runs it: one DT step, then the visuals (it stepped twice before)
+		var delta: float = float(fl[-1]["wall"]) / 1000.0 if real and not fl.is_empty() else DT
+		m._process(delta)        # one frame as the game runs it: its steps for delta, then the visuals
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
@@ -148,6 +153,8 @@ func _match() -> Array:
 		added.clear()
 		last = now
 	_summary("match", fl)
+	if real:
+		print("BENCH match real: %.1f s of match in %.1f s of frames" % [m.time, _avg(fl, "wall") * fl.size() / 1000.0])
 	var made := created.keys()
 	made.sort_custom(func(a, b): return created[a] > created[b])
 	var total := 0
