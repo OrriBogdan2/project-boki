@@ -302,6 +302,19 @@ func fire_rmb(c: Dictionary) -> void:
 	scoop = []
 	hook_hold = CastHold.hover_slow(h, float(rdf["fly_slow"]))
 	play("dr_throw")
+	m.sfx("dr_throw", h.pos, -2.0, 1.0)
+	m.later(float(rdf["windup"]), _launch_hook)
+
+## The arm shoots out once the coil-back (`rmb.windup`) is over: the readable cue before a slow hook. A stun, a
+## knock down or a merge in the coil cancels the throw.
+func _launch_hook() -> void:
+	if not flying:
+		return
+	if h.stun_t > 0.0 or h.downed:
+		flying = false
+		hook_hold = null
+		return
+	var rdf := rmb_def()
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
@@ -326,7 +339,6 @@ func fire_rmb(c: Dictionary) -> void:
 		if sn is Node3D and is_instance_valid(sn):
 			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
 			hook_sd["node"] = null
-	m.sfx("dr_throw", h.pos, -2.0, 1.0)
 
 ## The hook in flight: the arm stretched from his forearm to the bone hook, drawn through rocks. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
