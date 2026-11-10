@@ -105304,5 +105304,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px7_xylogator_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px7_sarcobra",
+    "name": "Sarcobra (pixel sprite style 7)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px7_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_sarcobra",
+    "name": "Sarcobra (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_sarcobra",
+    "name": "Sarcobra (pixel sprite style 5)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px5_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_sarcobra",
+    "name": "Sarcobra (pixel sprite style 6)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px6_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px7_sarcobra",
+    "name": "Sarcobra (pixel sprite style 7)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px7_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_calderoise",
+    "name": "Calderoise (pixel sprite style 5)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px5_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px6_sarcobra",
+    "name": "Sarcobra (pixel sprite style 6)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px6_sarcobra_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px5_calderoise",
+    "name": "Calderoise (pixel sprite style 5)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px5_calderoise_2.jpg",
+    "ok": true
   }
 ]
