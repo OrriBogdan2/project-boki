@@ -82421,5 +82421,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_cubbat_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_pipwom",
+    "name": "Pipwom (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_pipwom_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_grammite",
+    "name": "Grammite (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_grammite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_grammite",
+    "name": "Grammite (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_grammite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pipwom",
+    "name": "Pipwom (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_pipwom_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_dobsabre",
+    "name": "Dobsabre (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_dobsabre_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_grammite",
+    "name": "Grammite (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_grammite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_fawngus",
+    "name": "Fawngus (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_fawngus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_pipwom",
+    "name": "Pipwom (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_pipwom_1.jpg",
+    "ok": true
   }
 ]
