@@ -933,6 +933,7 @@ func can_glide() -> bool:
 
 func _open_glider() -> void:
 	gliding = true
+	add_stat("glide_presses")     # the tutorial's glide step counts only a press
 	grounded = false
 	# unfolding catches the air: a slow start gets carried up to cruising speed
 	var hv := Vector2(vel.x, vel.z)

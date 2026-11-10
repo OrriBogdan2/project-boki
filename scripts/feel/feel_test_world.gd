@@ -160,7 +160,7 @@ func _process(_delta: float) -> void:
 	if hud == null or hunter == null:
 		return
 	var h := Vector3(hunter.velocity.x, 0, hunter.velocity.z)
-	hud.text = "State: %s\nSpeed: %.2f m/s   Vy: %.2f\nHeat: %d%s\nDash: %.1fs   Ex-dash: %.1fs\nCamera: %s  (F1/F2/F3)\nWASD move | Space jump, hold to glide | Shift dash | Ctrl sneak" % [
+	hud.text = "State: %s\nSpeed: %.2f m/s   Vy: %.2f\nHeat: %d%s\nDash: %.1fs   Ex-dash: %.1fs\nCamera: %s  (F1/F2/F3)\nWASD move | Space jump, press again in the air to glide | Shift dash | Ctrl sneak" % [
 		HunterController.State.keys()[hunter.state], h.length(), hunter.velocity.y,
 		int(hunter.heat), "  OVERHEATED" if hunter.is_overheated else "",
 		hunter.mini_dash_cd, hunter.ex_dash_cd,
