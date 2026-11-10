@@ -5,11 +5,11 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 
 ## Expedition tiers
 
-| Tier | Monsters | Loot | Wild Boki levels | Unlocks after | Boki at risk | What happens |
-|---|---|---|---|---|---|---|
-| The Meadow | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
-| Dusk Isles | x1.45 | x1.75 | 2 to 5 | 2 extractions | no | Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall. |
-| The Hollow | x2 | x2.75 | 4 to 8 | 5 extractions | dropped dazed, can be scanned | Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key). |
+| Tier | Depth | Monsters | Loot | Wild Boki levels | Unlocks after | Boki at risk | What happens |
+|---|---|---|---|---|---|---|---|
+| The Meadow | 1 | x1 | x1 | 1 to 3 | 0 extractions | no | Gentle islands. Your Boki are always safe here: lose your loot, never your Boki. |
+| Dusk Isles | 2 | x1.45 | x1.75 | 2 to 5 | 2 extractions | no | Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall. |
+| The Hollow | 3 | x2 | x2.75 | 4 to 8 | 5 extractions | dropped dazed, can be scanned | Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key). |
 
 ## Match
 
