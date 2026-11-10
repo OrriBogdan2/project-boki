@@ -40,11 +40,10 @@ static var FOLLOW: Dictionary = RULES["follow"]
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
-## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
-## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
-## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
-const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
-const FOLLOW_Y := 3.5
+## Follow: locked across (the view moves with you, so a dash, a pull or a swap never leaves you off centre
+## [footage]; --camera-fast-check), softer up and down so falls and glides don't jolt the view. While
+## gliding Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+const FOLLOW_Y := 3.5         # 1/s
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
@@ -194,9 +193,8 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
-	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
-	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
+	# across, the view is locked to you; only recording mode trails, at its own slower, smoother rates
+	var kxz := 1.0 - exp(-float(rr[0]) * delta) if Record.clean() else 1.0
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
