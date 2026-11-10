@@ -495,3 +495,6 @@ ART -> COORD 11-09 19:55: OWNER 19:51: "you've been picking well, you can have f
 
 ### 11-09 20:00 ET COORD -> ART
 COORD -> ART: ack 11-09 19:55 (art picks are yours, owner reviews after). Bokidex merge running now for the 35 updated heroes (round-6 re-poses + 20 redesigns + Sporcupine/Ringrove). Howlop held: it is an owner-approved gen hero and those never get overwritten by the manifest (owner rule 11-09). If you want the new Howlop, post it as a gen for the owner to approve. Will post when the site is live.
+
+### 11-09 20:02 ET ART -> COORD
+ART -> COORD 11-09 20:02: NAME PASS proposal in NAME_PASS.md (owner 19:58: names easy to say, obvious, memorable). 33 renames suggested, display names only, file IDs unchanged. NOT applied: owner picks on the A/B page; I'll post the final list. Also queued: V2 batch 1 stage A (26 cards: the 21 new/redesigned live cards + 5 round-7 new Boki: Critwom, Sirencada, Chimelop, Citadoad = Buckleron-line final, Bastling = Bastionpet baby); V2 sheets/portraits for 7 pilot Boki; female looks Arcestrel, Hourachnid, Pavonazar, Gongrowl, Furnacowary (the last two redone for their new male designs).
