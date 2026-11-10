@@ -386,12 +386,16 @@ func _connect() -> bool:
 	return Net.mode == "server"
 
 ## The same match on both games: the training island with the same seed, one hunter each, a flat strip
-## at its first spawn, no Boki, monsters or crates in the way.
+## at its first spawn, no Boki, monsters or crates in the way. An empty `d` builds it offline
+## (--cast-predict-check's baseline).
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
-		"cls": "medium", "net": d})
+	var o := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
+		"cls": "medium"}
+	if not d.is_empty():
+		o["net"] = d
+	await nm.start(o)
 	nm.set_process(false)
 	var W: World = nm.world
 	var sp: Vector3 = W.spawns[0]
