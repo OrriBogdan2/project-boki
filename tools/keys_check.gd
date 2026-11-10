@@ -11,7 +11,7 @@ extends RefCounted
 ##      stops its dive, it drops the key
 ##   6. bots go for a key, then open a chest
 ##   7. fewer chests: a match places chest.keep of the map's chests (the most crowded go first, no dice)
-##      and of the item caches; the vaults stay
+##      and of the item caches; the vaults stay; the tutorial has exactly one, the chest step's
 
 var main: Node
 var fails := 0
@@ -119,10 +119,21 @@ func _fewer() -> void:
 		var map_n := m.chests.size() - vaults - caches - train
 		var info := "%s: map %d of %d spots, vaults %d, caches %d, train %d, total %d" % [
 				map_id, map_n, spots_n, vaults, caches, train, m.chests.size()]
+		var pick := func(cat: String) -> int: return int(m.spawn_plan.cats[cat]["pick"][0])
 		ok("%s: chest.keep of the map's chests and caches, every vault" % map_id,
-				map_n == KeyChest.kept(spots_n) and caches == KeyChest.kept(4) and vaults == 2, info)
+				map_n == KeyChest.kept(spots_n) and caches == KeyChest.kept(pick.call("cache"))
+				and vaults == pick.call("vault"), info)
 		m.queue_free()
 		await main.get_tree().process_frame
+	var tr: Match = await build(5, {"training": true, "teams": 1})
+	ok("training: chest.keep of its generated map's chests", tr.chests.size() == KeyChest.kept(tr.world.chest_spots.size()),
+			"%d of %d spots" % [tr.chests.size(), tr.world.chest_spots.size()])
+	tr.queue_free()
+	var tu: Match = await build(5, {"tutorial": true, "teams": 1})
+	ok("tutorial: exactly one chest, the chest step's", tu.chests.size() == 1 and tu.chests[0].get("tut", false),
+			"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()])
+	tu.queue_free()
+	await main.get_tree().process_frame
 
 # ------------------------------------------------------------------ 2, 3, 4. chest, box, ground, carrier death
 func _chest_and_keys() -> void:
