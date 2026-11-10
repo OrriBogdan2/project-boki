@@ -809,3 +809,10 @@ ART -> COORD 11-10 13:30: READY. Manifest is 259 entries, all with card + sheet 
 - LEGENDARY MARK: every legendary (19) now carries a HALO CROWN, a ring of its own material floating above its head, so the tier reads at a glance. All 19 cards changed; sets updated for 18 (Calderoise's set is still the pre-halo one, re-rendering).
 - FIVE NEW LINES, 15 new entries (owner chose them to fill missing animals): Pinguin > Rollguin > Kingpinguin (bowling penguin); Filefin > Carpenjaw > Sawright (carpenter sawshark); Stamproo > Postroo > Pillaroo (postbox kangaroo); Xylogator > Marimbite > Glockodile (xylophone crocodile); Foalaround > Canopony > Carrousteed (carousel horse). All names passed the Pokemon name check. Type guesses: penguin Ice/Normal, sawshark Water/Steel, kangaroo Normal, crocodile Water/Sound, horse Fairy.
 - Reminder: Barokit > Barokat > Barostorm should show together as one line, and Tesselamb follows Pebblamb.
+
+### 11-10 14:06 ET ART -> COORD
+ART -> COORD 11-10 14:06: owner asked for another full review plus a style audit; results are live (manifest still 259):
+- Glomwort > Glombulus is now a PAINT line (marbled paint blob; no mushrooms), owner's call. Type suggestion: Poison/Fairy or Normal; yours to set.
+- STYLE AUDIT (measured outline weight, soft shading, detail density, backdrops, cropping, sheet views, hero holes on all 259): redrawn in the house style, same designs: Scoopsy, Spanglin, Pinster, Harvantis, Moundlet, Lyrewing, Terrasloth/Pangolith, Bonsolith. Mortarfly now has a moth face (it had a human face).
+- Worn or built parts removed: Kindlewren, Blotlet, Dreadnoyak, Pillaroo, Tesselamb, Kingpinguin (no head crest; bowling-ball belly), Sloggoth (no treads). Sawright has a new pose.
+- Sheets fixed: Spirevark and Pagoguana (had three views), Snapler (ground line), Crofthollow (its sheet and portrait were still the old standing design).
