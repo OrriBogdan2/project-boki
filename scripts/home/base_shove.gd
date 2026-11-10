@@ -130,16 +130,22 @@ var creaked := false           # the lean creak has played this bout
 func _init(home) -> void:
 	h = home
 
-## The stump beside the Training post (none without one); called when fixtures move.
+## This zone's own stump spot (base_shove.json "spots", tiles x and z), or [].
+static func spot() -> Array:
+	return rules()["spots"].get(GardenZones.here, [])
+
+## The stump beside the Training post, or on the zone's own spot (none without either); called when
+## fixtures move.
 func place() -> void:
 	if is_instance_valid(stump):
 		stump.queue_free()
 	stump = null
-	if h.YARD_AT.x < -100.0:
+	var S := spot()
+	if S.is_empty() and h.YARD_AT.x < -100.0:
 		return
 	stump = Node3D.new()
 	stump.name = "Stump"
-	stump.position = h.YARD_AT + STUMP_OFF
+	stump.position = h.YARD_AT + STUMP_OFF if S.is_empty() else Vector3(S[0], 0.0, S[1])
 	h.add_child(stump)
 	var trunk := MeshInstance3D.new()
 	var cm := CylinderMesh.new()

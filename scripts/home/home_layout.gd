@@ -34,6 +34,8 @@ const THEMES := {
 	# a zone's own ground (ZoneLayout): never for sale, it has no gems
 	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
 		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
+	"cinderstep": {"name": "Cinderstep", "zone": true, "region": 1, "top": "7e6c60", "top2": "6a5a50",
+		"side": "54423c", "deep": "261a1a", "leaf": "e07a3a"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and

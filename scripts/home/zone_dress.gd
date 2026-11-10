@@ -1,17 +1,28 @@
 class_name ZoneDress
 extends RefCounted
 ## What a built zone (ZoneLayout) puts on its ground besides the layout's own things: the shallows
-## (one translucent sheet over the channel the tiles say) and a scatter of crystal stacks, reeds and
-## pebbles. The scatter is MultiMesh, one batch per kind and shape, and every instance shares the one
-## cached Flora material of its kind (no per-prop materials), so a zone's whole scatter costs about a
-## dozen draw calls. Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
-## content/rules/garden_zones.json (shallow = a tile rect, scatter = how many of each).
+## (one translucent sheet over the channel the tiles say, if it has one) and a scatter: Flora crystal
+## stacks, reeds and pebbles, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
+## The scatter is MultiMesh, one batch per kind and shape, and every instance of a kind shares one
+## cached material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
+## Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
+## content/rules/garden_zones.json (shallow = a tile rect, scatter = how many of each kind it has).
 
 const SHEET_Y := 0.03          # m above the ground: the water sheet
 const SHEET_COLOUR := Color(0.36, 0.78, 0.86, 0.55)
-const KEEP_OUT := 2.2          # m round the landing and the pad that scatter stays away from
+const KEEP_OUT := 2.2          # m round the landing, the pad and a zone's stump that scatter stays away from
 const TRIES := 40              # spots tried per prop before giving up on it
 const SHAPES := 1              # Flora shapes used per kind (one batch each)
+const KINDS_FLORA := ["crystal", "reed", "pebble"]
+const SHORE := ["crystal", "reed"]     # kinds that crowd the shallows' edge
+## Slab kinds, one unit box scaled per instance. size: m (x, y, z) at scale 1; steps: slabs per prop,
+## each the last one shrunk by STEP_IN and set on top of it; clear: m of free ground the prop needs;
+## colour: its albedo ("" the zone theme's side colour); glow: emission energy (lit day and night).
+const KINDS_BOX := {
+	"terrace": {"size": Vector3(2.2, 0.1, 1.8), "steps": 2, "clear": 1.1, "colour": "", "glow": 0.0},
+	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": "ff7a2a", "glow": 2.2},
+}
+const STEP_IN := 0.6           # a terrace's upper slab, as a fraction of the one under it
 
 ## Called once the zone's world is built; does nothing outside a built zone.
 static func place(h) -> void:
@@ -21,9 +32,12 @@ static func place(h) -> void:
 		for part in ["node", "sign", "label"]:
 			br[part].visible = false          # the side isles' bridge stubs and signs belong to Bramblebank
 	var B: Dictionary = GardenZones.info(h.zone)["build"]
-	var r: Array = B["shallow"]
-	_sheet(h, Rect2(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1))
-	_scatter(h, B["scatter"], Rect2(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1))
+	var shallow := Rect2()
+	if B.has("shallow"):
+		var r: Array = B["shallow"]
+		shallow = Rect2(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1)
+		_sheet(h, shallow)
+	_scatter(h, B["scatter"], shallow)
 
 static func _sheet(h, tiles: Rect2) -> void:
 	var m := MeshInstance3D.new()
@@ -47,10 +61,13 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 	var keep: Array = [HomeLayout.LANDING]
 	if h.hway != null:
 		keep.append(h.hway.node.position)
-	for kind in ["crystal", "reed", "pebble"]:
+	var stump := BaseShove.spot()
+	if not stump.is_empty():
+		keep.append(Vector3(stump[0], 0.0, stump[1]))
+	for kind in KINDS_FLORA:
 		var by: Array = [[], []]
-		for i in int(S[kind]):
-			var at := _spot(h, rng, kind, S, shallow, keep)
+		for i in int(S.get(kind, 0)):
+			var at := _spot(h, rng, kind, S, shallow, keep, 0.3)
 			if at == Vector3.INF:
 				continue
 			var s := rng.randf_range(0.7, 1.3)
@@ -58,18 +75,50 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 			by[rng.randi_range(0, SHAPES - 1)].append(Transform3D(b, at))
 		for v in SHAPES:
 			_batch(h, Flora.mesh(kind, style, v), Flora.material(kind, kind == "crystal"), by[v], "%s_%d" % [kind, v])
+	for kind in KINDS_BOX:
+		var K: Dictionary = KINDS_BOX[kind]
+		var list: Array = []
+		for i in int(S.get(kind, 0)):
+			var at := _spot(h, rng, kind, S, shallow, keep, float(K["clear"]))
+			if at == Vector3.INF:
+				continue
+			var dims: Vector3 = K["size"] * rng.randf_range(0.75, 1.25)
+			var b := Basis(Vector3.UP, rng.randf() * TAU)
+			for step in int(K["steps"]):
+				at.y += dims.y * 0.5
+				list.append(Transform3D(b.scaled(dims), at))
+				at.y += dims.y * 0.5
+				dims *= Vector3(STEP_IN, 1.0, STEP_IN)
+		_batch(h, BoxMesh.new(), _slab_material(kind, h.zone), list, kind)
 
-## A free spot on dry ground for one prop: crystals and reeds crowd the shallows' edge, pebbles go anywhere.
-static func _spot(h, rng: RandomNumberGenerator, kind: String, S: Dictionary, shallow: Rect2, keep: Array) -> Vector3:
+## One material per slab kind, shared by every instance (the zone theme gives a terrace its stone).
+static func _slab_material(kind: String, zone: String) -> StandardMaterial3D:
+	var K: Dictionary = KINDS_BOX[kind]
+	var hex: String = K["colour"]
+	if hex == "":
+		hex = HomeLayout.THEMES[GardenZones.info(zone)["build"]["theme"]]["side"]
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(hex)
+	m.roughness = 1.0
+	if float(K["glow"]) > 0.0:
+		m.emission_enabled = true
+		m.emission = Color(hex)
+		m.emission_energy_multiplier = float(K["glow"])
+	return m
+
+## A free spot on dry ground, `clear` m round, for one prop: crystals and reeds crowd the shallows' edge,
+## the rest go anywhere.
+static func _spot(h, rng: RandomNumberGenerator, kind: String, S: Dictionary, shallow: Rect2, keep: Array,
+		clear: float) -> Vector3:
 	var c := Vector2(HomeLayout.LANDING.x, HomeLayout.LANDING.z)
 	for t in TRIES:
 		var p := c + Vector2(rng.randf_range(-16.0, 16.0), rng.randf_range(-12.0, 12.0))
-		if kind != "pebble":
+		if kind in SHORE:
 			var edge := shallow.grow(float(S["shore"]))
 			p = Vector2(rng.randf_range(edge.position.x, edge.end.x), rng.randf_range(edge.position.y, edge.end.y))
 			if kind == "crystal" and shallow.has_point(p):
 				continue
-		if h.world.is_void(p.x, p.y) or h.world.occupy(p.x, p.y, 0.3, 0.0, false) != 0.0:
+		if h.world.is_void(p.x, p.y) or h.world.occupy(p.x, p.y, clear, 0.0, false) != 0.0:
 			continue
 		if keep.any(func(k): return Vector2(k.x, k.z).distance_to(p) < KEEP_OUT):
 			continue

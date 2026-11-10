@@ -10,6 +10,8 @@ extends RefCounted
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
 ## opens its cards. Glasswater (step 7a): its own island from data (theme, tub, patch, shallow court
 ## and scatter), build mode off, the patch's timer on the save, and nothing of it left in Bramblebank.
+## Cinderstep (step 7b): its theme, two warm stones and a climbing post, a Fire/Rock/Steel/Dragon patch,
+## the Stump Shove stump on its own spot with no Training post, terraces and glowing cracks in batches.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 
@@ -26,6 +28,7 @@ func run(m: Node) -> void:
 	await _travel_part(m)
 	await _move_part(m)
 	await _glasswater_part(m)
+	await _cinderstep_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -231,4 +234,35 @@ func _glasswater_part(m: Node) -> void:
 	gw.hway.hop(GardenZones.HUB)
 	var hub = await _arrived(m, gw)
 	ok(hub != null and ZoneLayout.live.is_empty(), "the hub has no zone layout")
+	Content.rules("farm_build")["base_mode"] = false
+
+func _cinderstep_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	Save.d["zones"]["cinderstep"] = {"open": true}
+	Game.goto("home", {"zone": "cinderstep"})
+	var cs = await _arrived(m, Game.main.current)
+	ok(cs != null and cs.hshove != null, "Cinderstep loads")
+	if cs == null or cs.hshove == null:
+		return
+	ok(HomeLayout.of(Save.d)["theme"] == "cinderstep", "its own cinder ground")
+	var ids: Array = cs.toys.toys().map(func(t): return t["id"])
+	ok(ids.count("toy_stone") == 2 and ids.has("toy_post"), "two warm stones and a climbing post (%s)" % ", ".join(ids))
+	var snacks := SnackPatch.snacks(Save.d)
+	var grown := {}
+	for f in snacks:
+		grown[Content.rules("lean")["foods"][f]] = true
+	ok(grown.keys().size() == 4 and GardenZones.info("cinderstep")["types"].all(func(t): return grown.has(t)),
+		"its patch grows Fire, Rock, Steel and Dragon snacks (%s)" % ", ".join(snacks))
+	var spot: Array = BaseShove.spot()
+	var at := Vector2(cs.hshove.stump.position.x, cs.hshove.stump.position.z)
+	var on_spot := at.is_equal_approx(Vector2(spot[0], spot[1]))
+	ok(cs.YARD_AT.x < -100.0 and on_spot and cs.hshove.find(at) == {"kind": "shove"},
+		"the Stump Shove stump stands on its spot with no Training post and offers a bout")
+	var kinds := {}
+	for mi in cs.find_children("*", "MultiMeshInstance3D", false, false):
+		kinds[mi.name] = (mi as MultiMeshInstance3D).multimesh.instance_count
+	var crack: Node = cs.find_child("crack", false, false)
+	ok(kinds.get("terrace", 0) >= 2 and kinds.get("crack", 0) > 0 and crack.material_override.emission_enabled,
+		"terraces and glowing cracks, one batch each (%s)" % str(kinds))
 	Content.rules("farm_build")["base_mode"] = false

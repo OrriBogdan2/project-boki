@@ -33,3 +33,9 @@ open, `HomeLayout.of(Save.d)` answers with it, so no reader of the layout change
 but the snack patch's ripening timer (`Save.d["zones"][id]["patch"]`, a key that is simply missing on an
 older save); build mode is off there. `ZoneDress` adds the shallows and a MultiMesh scatter; `BaseVolley`
 reads the zone's court from `base_volley.json`.
+
+Step 7b (Cinderstep) is the second, on the same system with no new code path: its `build` (theme
+`cinderstep`, two warm stones, a climbing post, the snack patch) and a scatter of the slab kinds
+`ZoneDress` gained (stepped terraces, glowing cracks; one batch and one material each). The Stump Shove
+stump stands on the zone's own spot from `base_shove.json` `spots`, as Spark Volley's court does, with no
+Training post.
