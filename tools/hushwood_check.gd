@@ -43,8 +43,9 @@ func run(m: Node) -> void:
 	home.zone = ZONE
 	main.add_child(home)
 	main.current = home
-	for i in 3:
+	for i in 600:      # under the ink wipe Home builds in slices: wait for the whole island
 		await main.get_tree().process_frame
+		if i >= 2 and not home.building: break
 	var lay: Dictionary = Save.d["zones"][ZONE]["layout"]
 	ok(HomeLayout.of(Save.d) == lay and lay["theme"] == "hushwood", "the zone has its own island, in its ground")
 	var base: Dictionary = Save.d["layout"]
@@ -63,6 +64,9 @@ func run(m: Node) -> void:
 	ok(motes >= 1 and motes <= MOTES_MAX, "%d mote emitters (at most %d)" % [motes, MOTES_MAX])
 	ok(SnackPatch.snacks() == ["mindmint", "glowcap"], "the snack patch grows mindmint and glowcap")
 	var e := SnackPatch.entry(Save.d)
+	for i in 120:      # the patch's timer starts on its first look tick after it is put down
+		if e.has("t"): break
+		await main.get_tree().process_frame
 	var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system() + 9999.0)
 	ok(not e.is_empty() and got == ["mindmint", "glowcap"] and int(Save.d["crops"]["glowcap"]) == 1,
 			"picking it fills the pantry with both")
