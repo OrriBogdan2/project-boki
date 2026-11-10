@@ -8,7 +8,7 @@ var main: Node
 var m: Match
 var dir := ""
 var focus := Vector3.ZERO
-const FAR := Vector3(-22.0, 1.5, 14.0)   # the far-read shots: the seat sits at the frame's top-right, across the island
+const FAR := Vector3(-11.0, 1.5, 9.0)    # the far-read shots: the seat sits at the frame's top-right, across the island
 
 func _frames(n: int) -> void:
 	for i in n:
