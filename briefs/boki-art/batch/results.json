@@ -102896,5 +102896,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_luckhop_halo_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_luckhop_halo",
+    "name": "Luckhop (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_luckhop_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_twinklup_halo",
+    "name": "Twinklup (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_twinklup_halo_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_twinklup_halo",
+    "name": "Twinklup (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_twinklup_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_luckhop_halo",
+    "name": "Luckhop (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_luckhop_halo_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_twinklup_halo",
+    "name": "Twinklup (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_twinklup_halo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_lockwren_halo",
+    "name": "Lockwren (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_lockwren_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_twinklup_halo",
+    "name": "Twinklup (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_twinklup_halo_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lockwren_halo",
+    "name": "Lockwren (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_lockwren_halo_2.jpg",
+    "ok": true
   }
 ]
