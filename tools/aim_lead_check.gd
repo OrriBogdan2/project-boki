@@ -180,7 +180,8 @@ func _strip(id: String, dir: String) -> void:
 	stage.holder.add_child(model)
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
-	main.fade.reveal(0.01)
+	print("AIMLEAD strip: title covered %s" % main.fade.covered)
+	await main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(TILE, TILE)
 	main.get_viewport().size = Vector2i(TILE, TILE)
 	for f in 30:
