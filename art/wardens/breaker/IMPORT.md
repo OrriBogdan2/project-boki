@@ -8,10 +8,14 @@ breaker_weapons (shape only). The menu splash and portrait (art/portraits/bulwar
     godot --headless --path . -- --warden-rig-json --warden=bulwark --out=res://art/wardens/src/breaker_rig.json
     blender -b --factory-startup --python tools/art1/breaker_art1.py -- WORK                 # sculpt, mesh, atlas, skin
     blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend art/wardens/breaker/breaker.glb
+    blender -b --factory-startup --python tools/art1/breaker_gait.py -- art/wardens/breaker/breaker.glb WORK/breaker_gait.glb  # walk_f, run_f
+    python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb WORK/breaker_gait.glb walk_f,run_f
     godot --headless --path . --import
 
 - **Files:** tools/art1/sculpt_kit.py (hero-independent), breaker_sculpt.py (shapes), breaker_paint.py (paint), breaker_art1.py (mesh, UVs,
-  armature, rigid weights), anim_kit.py (keys -> IK -> baked clips), breaker_anims.py (clips), art1_render.py (Cycles review).
+  armature, rigid weights), anim_kit.py (keys -> IK -> baked clips), breaker_anims.py (clips), breaker_gait.py (walk_f and run_f: a
+  generated stride with the soles locked to the floor at 2.0 and 4.8 m/s, 2.7 and 3.2 steps/s, hammer carried clear of the floor),
+  art1_render.py (Cycles review).
 - **Body:** content/archetypes/bulwark.json body: legs 0.46, torso 1.06, shoulder 1.15, build 1.4, head 0.3, size 2.0: the rig's arms are a
   fixed length, so the art's proportions need a 1.03 m neutral body; size 2.0 keeps the helmet's top at 1.5x a medium hunter. The masts stand over
   that (1.9x). The hit radius stays 0.46 (docs/HITBOX_SIZE.md): the hull's own half width is 0.95 m.
