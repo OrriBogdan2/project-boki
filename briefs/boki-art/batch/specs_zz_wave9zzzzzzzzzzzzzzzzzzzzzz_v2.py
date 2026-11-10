@@ -1893,3 +1893,14 @@ _n0=len(SPECS); SETOF('Hatstag','final','majestic',0,1,"standing calmly, head tu
 # Rollguin / Kingpinguin: any red band on the neck keeps reading as a scarf (cards and all sheets). Take the neck band off; red moves to the plumage.
 RV_EDIT('Rollguin','noband',"remove the red band round its neck completely, leaving plain dark slate feathers there. Instead, the tips of its head tuft are crimson and each flipper has one thin crimson stripe across it. Nothing on the neck at all.",runs=2)
 RV_EDIT('Kingpinguin','noband',"remove the red band, scarf or cape round its neck, shoulders and chest completely: the neck and shoulders are plain slate-navy feathers and the chest is plain ivory with its three dark round spots. Its crimson stays only in the long brow plumes, and each flipper gets one thin crimson stripe. Nothing worn anywhere.",runs=2)
+
+# 11-10 SHEET_CHECK_1110.md (independent check of all 259 turnarounds against their cards): 21 new fails. New sheets from the live cards.
+_SFIX={'Aurostag':"All four views show the long aurora curtains of its mane.",'Cometail':"All four views show its huge sweeping blue and gold comet tail, as on the card.",
+ 'Gambitfin':"No pedestal or base: it has a long free tail as on the card.",'Lanternlong':"It is the long four-legged body made of lantern segments from the card, standing on all fours, never upright.",
+ 'Lunink':"It is the lilac cat with the paintbrush tail from the card, nothing else.",'Sirencada':"All four views show its two large clear wings.",
+ 'Stormit':"No separate cloud floating above it: only what is on the card.",'Hourachnid':"No sand, mounds or ground under its feet; the hourglass body is upright in all four views.",
+ 'Kintsuwyrm':"Four separate bodies with clear gaps between them, one head each.",'Chandelapi':"Four separate views with clear gaps, no smoke joining them, all four standing in the same neutral pose.",
+ 'Kayak':"One row only: four creatures in total."}
+for _n in ('Aurostag','Cometail','Gambitfin','Lanternlong','Lunink','Sirencada','Stormit','Glomwort','Rampartoad','Rimefang','Rimekit','Sloggoth','Tesselamb','Geysirbara','Dynaboa','Glaciammoth','Hourachnid','Polyshroom','Kayak','Kintsuwyrm','Chandelapi'):
+    V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_f1'; SPECS[-1]['runs']=3
+    SPECS[-1]['prompt']+=_NOGHOST+" No ground line, floor or shadow band under the views. "+_SFIX.get(_n,'')
