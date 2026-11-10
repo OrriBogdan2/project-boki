@@ -6,7 +6,7 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
-##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
+##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
@@ -14,6 +14,7 @@ extends RefCounted
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
+const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
@@ -109,9 +110,9 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 	var wrong := []
 	for sname in reach:
 		var m := float(reach[sname])
-		if not sounds.has(sname) or m < Sfx.hear_range or m > REACH_MAX:
+		if not sounds.has(sname) or m < REACH_MIN or m > REACH_MAX:
 			wrong.append("%s %.0f m" % [sname, m])
-	ok(wrong.is_empty(), "%s: %d sounds carry further (wrong: %s)" % [group, reach.size(), wrong])
+	ok(wrong.is_empty(), "%s: %d sounds with their own reach (wrong: %s)" % [group, reach.size(), wrong])
 	var rough := []
 	for sname in d.get("loops", []):
 		var takes := _takes(String(sname))
