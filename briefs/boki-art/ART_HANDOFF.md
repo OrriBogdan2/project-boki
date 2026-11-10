@@ -140,9 +140,16 @@ For a Boki `<Name>` (file ID, not the display name):
   - `python3 briefs/boki-art/tools/promote_card.py Name:stem[:dc] ...` (card only)
   - `python3 briefs/boki-art/tools/refresh_names.py Name ...` updates only those manifest entries and heroes. **Do not run the full `refresh_manifest.py` on a cloud machine:** a different OpenCV re-cuts all heroes and moves every hero hash.
 - **Card backdrops must be flat.** Scopeleon's "bug" in the dex was a shaded backdrop that the cut-out kept. Check `portraits/cutout_v2/<Name>.png` on a dark background after promoting anything that looks shaded.
-- **State (23:30 ET):** manifest 235. The list of Boki whose live card is V2 is `tools/V2_DONE.txt` (89 names, all with matching sheet + portrait except Kayak, whose sheet is re-running as `v2s_kayak_b2n`). Add names there as you promote.
-- **After promoting sheets, run `python3 briefs/boki-art/tools/sheet_clean.py Name ...`** (removes stray blobs above or below the row of views; two of 62 sheets had one), then `refresh_names.py` for any it changed. Look at the whole sheet when reviewing, not a cropped band.
-- **In flight:** batch 3 cards (`_BT3` in the spec file, 40 Boki, jobs `v2c_<name>`); Effigoon lying down (`on_effigoon_lie2`; three earlier tries kept the rope or a cast shadow).
-- **Dex side:** the coordinator keeps Prismander (protected art) and Howlop (owner-approved gen hero) on their old dex heroes until the owner OKs the V2 versions.
+- **State (01:35 ET 11-10):** manifest 235. Every Boki has a V2 card except Glaivyx and Ringrove (jobs `v2k_glaivyx`, `v2k_ringrove`; also look at the older V2 picks `v2g_glaivyx_white_2` and `v2g_ringrove_tilt2_*`). `tools/V2_DONE.txt` lists the V2 cards. Full sets (card + sheet + portrait): 131 (batches 1-3 and the owner-note sets).
+- **After promoting sheets, run `python3 briefs/boki-art/tools/sheet_clean.py Name ...`** (removes stray blobs above or below the row of views), then `refresh_names.py` for any it changed. Review whole sheets, not a cropped band. After promoting cards, check for shaded backdrops and fix with `tools/flat_bg.py` (`--nofill` for Boki with an open ring).
+- **In flight (pick, promote, post):**
+  - batch 4 stage B: `v2s_<name>_b4`, `v2p_<name>_b4` for 95 Boki (`_BT4` minus Cisternmander, Blastopuff, Pickadactyl, Shinobant)
+  - redesign stage B: `v2s_<name>_rd`, `v2p_<name>_rd` for the 14 in `_RDP` (their new cards are live)
+  - option sets, 3 directions x 2 runs, promote only a clear winner and show the owner either way: `opt_<starcap|dynaboa|galleotter|buckleron|wickapi|tiltster|forgebrock|coolatee>_<a|b|c>`
+  - female V2 cards: `fv2_<name>` for the 13 in `_FEMREF`; after picking, save to `cards/<Name>_female.jpg` (back up first), set `manifest[Name]['female']['card']`, then queue female sheet + portrait from that card
+- **Owner rules added 11-10:** full pick control includes design changes ("you have permission to change anything"); for anything doubtful queue several different options and keep the live one unless an option is clearly better; a middle stage should keep one thing from the baby and show one thing of the final. The full line review is `LINE_REVIEW_1110.md`.
+- **build_jobs.py quirk:** a job id that was ever in `jobs.json` can survive a rename in the spec; if a stale id shows up in the added list, put it in `DROP` in `specs_zzzz_locked.py`. Ids containing `glaivyx` or `ringrove` are dropped by an old rule unless un-dropped there.
+- **Dex side:** the coordinator swaps protected or owner-approved heroes only on the owner's word in its own chat.
+- **Waiting on the owner:** a name for the new sea-pup Anchorbill (proposal: Anchorpup).
 - **Owner notes 11-09 evening, all handled except:** Tiltster "head not very on" (not changed; ask him about the new V2 card), Parrywhal Pokémon look-alike check (not done), Effigeetle caterpillar (the `rd_effigeetle_*` concepts have floating gold bits and a human-like face: redo with `ON_CHANGE`).
-- **Next roster batch:** the next names in `BOKI_NAMES.csv` order that are not in `tools/V2_DONE.txt` and not in batch 3 (99 left after batch 3). Still waiting on an owner pick: Glaivyx, Glassolotl, Chandelotl, Ringrove, Cindermaw (section 6).
+- **Roster pass:** no batches left; the work is the in-flight list above.
