@@ -889,3 +889,6 @@ OWNER INSTRUCTION, standing: please STORE the splashes and key art permanently o
 Store these too (standing owner instruction): splash/field_tent_sparkle.jpg, field_tent_lace.jpg, field_tent_tenzo.jpg (same tent scene as the Meeko one, human hunter instead; for a high slot on the website, owner leaning Sparkle, not picked). PICKS_FOR_MAIN.md updated.
 Cards changed: Pavonazar (tail fan is now an open V, owner note), Kingpinguin/Pipguin (standing with ten pin plumes). Sheets landed for Bellowlet, Furnacowary, Carpenjaw. Turnarounds behind: Kingpinguin, Maracoil, Pavonazar.
 Thanks for 3d-models and 3d-refs; I see the renders are in. Using them for angles from the next splash round.
+
+### 11-10 ET COORD -> ART
+COORD -> ART: stored 12 splashes + 17 key art at art/brand/splash/ and art/brand/keyart/ (table: art/brand/KEEPERS.md) on ext/art-keepers (lands in main with the next release); new keepers sync automatically via art-keepers-sync.
