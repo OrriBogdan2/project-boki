@@ -447,8 +447,8 @@ func _archer_combos() -> void:
 	var roll_t0 := K.anim_at
 	step(m, 0.18, func(): P.inp["move"] = Vector2(1, 0))
 	ok(
-		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.24, footage: no landing beat)",
-		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.24) < 0.03,
+		"pin anim: the roll hands to the crouched walk as the travel ends (roll_t 0.27, footage: no landing beat)",
+		K.anim_id == "pin_walk" and absf(K.anim_at - roll_t0 - 0.27) < 0.03,
 		"%s at +%.2f" % [K.anim_id, K.anim_at - roll_t0]
 	)
 	var in0 := K.spirit.passed

@@ -31,8 +31,8 @@ func active() -> bool:
 func start() -> void:
 	var dd := k.dash_def()
 	var dir := k.dash_dir()
-	var roll := float(dd.get("roll", 3.5))
-	var rt := float(dd.get("roll_t", 0.24))
+	var roll := float(dd["roll"])
+	var rt := float(dd["roll_t"])
 	k.travel(roll, rt, {"invuln": rt, "dir": dir, "trail": "roll", "curved": true})
 	k.play("pin_roll")
 	t = walk_time() + rt
