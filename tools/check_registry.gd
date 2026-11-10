@@ -55,6 +55,8 @@ const CHECKS := {
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
+	"--buff-stack-check": ["res://tools/buff_stack_check.gd", "buff_stack_check", null],
+	"--buff-stack-shots": ["res://tools/buff_stack_check.gd", "buff_stack_check", "shots"],      # --shots-dir=<dir> (GPU)
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
