@@ -295,6 +295,7 @@ func _spawn_key() -> void:
 
 ## Brings monsters in near the player for a step (only if none are left).
 func _foes(kinds: Array) -> void:
+	_cull_strays()
 	if m.mobs.any(func(x): return not x.dead):
 		return
 	var i := 0
@@ -304,8 +305,21 @@ func _foes(kinds: Array) -> void:
 			_tank(m.spawn_mob(kd, at))
 		i += 1
 
+## A monster that fell or was knocked off the player's island is out of every kit's reach: it goes, so a
+## new one comes.
+func _cull_strays() -> void:
+	var p := m.player
+	if not p.grounded:
+		return
+	var isl := m.world.island_of(p.pos.x, p.pos.z)
+	for mb in m.mobs:
+		if not mb.dead and m.world.island_of(mb.pos.x, mb.pos.z) != isl:
+			mb.dead = true
+			mb.visible = false
+
 ## Keeps a monster around for the shooting steps (another comes if it falls off).
 func _keep_foe(kind: String) -> void:
+	_cull_strays()
 	if m.mobs.any(func(x): return not x.dead) or int(m.time * 4.0) % 4 != 0:
 		return
 	var at := spot(5.5, randf() * TAU)
@@ -579,6 +593,8 @@ func _words() -> void:
 	var alt: Dictionary = Content.rules("tutorial")["alt"]
 	if sid == "utility" and rmb_has_hold():
 		line = String(alt["utility_hold"])
+	elif sid == "shoot" and m.player.wpn.has("draw"):
+		line = String(alt["shoot_draw"])
 	elif sid == "throw" and not recalled and (need_back or throw_recalls()):
 		line = String(alt["throw_back"])
 	elif sid == "throw" and need_back:
