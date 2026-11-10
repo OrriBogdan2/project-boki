@@ -10,7 +10,7 @@ const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunsli
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
 	"ostra": "ostra", "juggernaut": "kael"}
 const DT := 1.0 / 30.0
-const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move a leg bone this far from the same run unhit (foot slide must not grow)
+const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
@@ -339,15 +339,18 @@ func _flinch(id: String) -> void:
 	for i in mini(calm.size(), hit.size()):
 		legs = maxf(legs, absf(float(hit[i]["legs"]) - float(calm[i]["legs"])))
 		arms = maxf(arms, float(hit[i]["hand"].distance_to(calm[i]["hand"])))
-	ok(legs <= FLINCH_LEGS_M, "%s: a hit mid-run leaves the legs on the run (foot slide off by %.4f m, limit %.3f)" % [id, legs, FLINCH_LEGS_M])
-	ok(arms >= FLINCH_ARMS_M, "%s: a hit mid-run flinches the arms (hand moves %.3f m, min %.3f)" % [id, arms, FLINCH_ARMS_M])
+	ok(legs <= FLINCH_LEGS_M, "%s: a hit mid-run leaves the legs on the run (foot slide off by %.4f m, limit %.3f)"
+			% [id, legs, FLINCH_LEGS_M])
+	ok(arms >= FLINCH_ARMS_M, "%s: a hit mid-run flinches the arms (hand moves %.3f m, min %.3f)"
+			% [id, arms, FLINCH_ARMS_M])
 	var still := await _run_hit(id, 0.0, 1.0, 0.0)
 	var stagger := await _run_hit(id, 0.0, Oomph.HEAVY_FLINCH, 4.0)
-	ok(float(still[still.size() / 3]["act"]) > 0.5, "%s: a hit standing still takes the whole body" % id)
-	ok(float(stagger[stagger.size() / 3]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
-	ok(float(hit[hit.size() / 3]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)
+	var mid := hit.size() / 3
+	ok(float(still[mid]["act"]) > 0.5, "%s: a hit standing still takes the whole body" % id)
+	ok(float(stagger[mid]["act"]) > 0.5, "%s: a stagger on the run takes the whole body" % id)
+	ok(float(hit[mid]["act"]) <= 0.0, "%s: a chip hit on the run leaves the body to the legs" % id)
 
-## 1 s of play at `speed` m/s, the hit landing at the start (hit_t 99: none); per frame: leg bone spread, the right hand, act_w.
+## 1 s of play at `speed` m/s, hit at the start (hit_t 99: none); per frame: leg bone sum, right hand, act_w.
 func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
@@ -356,7 +359,8 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
-	var s := {"vel": Vector3(0, 0, -speed), "face": 0.0, "grounded": true, "hit_t": 99.0, "hit_k": hit_k, "hit_dir": Vector2(0, -1)}
+	var s := {"vel": Vector3(0, 0, -speed), "face": 0.0, "grounded": true, "hit_t": 99.0, "hit_k": hit_k,
+			"hit_dir": Vector2(0, -1)}
 	m.set_meta(WardenClips.STATE, s)
 	for k in 30:
 		sync.call("_process", DT)
