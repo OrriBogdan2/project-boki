@@ -481,6 +481,9 @@ func _build_ui() -> void:
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
+	if Net.can_rejoin():
+		# the online match this game dropped out of is still holding our Hunter (docs/decisions/0022-rejoin.md)
+		items.append(["Rejoin match", _rejoin, "bond"])
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Arena", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if has:
@@ -529,6 +532,13 @@ func _build_ui() -> void:
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
 	b1.grab_focus()
+
+func _rejoin() -> void:
+	var o: Dictionary = await Net.rejoin_match()
+	if o.is_empty():
+		Game.goto("title")
+	else:
+		Game.start_match(o)
 
 ## The menu's item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:

@@ -69,6 +69,15 @@ Settings (environment, or `-- --relay --port=7777 --max=120`): `BOKI_PORT`, `BOK
 with Discord (the launcher does it) and must hold an allowed role in the Project Boki server; without
 them anyone on the right version can join (local testing). Deploy with `deploy/setup_server.sh`.
 
+**Rejoin** ([decision 0022](../decisions/0022-rejoin.md)). The relay gives each connection its own net id.
+When a player in a match drops, it holds their id and their Hunter's and Boki's last snapshot rows for
+90 s (`RelayServer.HOLD_S`) and shows the room the Hunter standing still (or a Wisp, if downed). The game
+keeps `user://rejoin.json` (server, a random rejoin token, the match's start message); while it is under
+90 s old the title offers **Rejoin match**, and a hello with that token gets the same id back plus the
+rows, which `NetRejoin` puts back on the rebuilt match (no drop). Leaving a match on purpose forgets it.
+
 ## Testing
 
 `tests/net/net_probe.gd` and `tests/net/match_probe.gd` are probes for the relay and a match over it.
+`--rejoin-check` runs the relay with two headless games, kills the guest and checks it comes back with
+its Hunter, health and Boki inside the hold, and can't after it (about 4 minutes).

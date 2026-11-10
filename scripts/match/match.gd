@@ -750,7 +750,7 @@ func _start(o: Dictionary) -> void:
 	if o.has("net"):
 		net_on = true
 		is_host = Net.me == String(o["net"]["host"])
-		Net.begin_match("kf-" + String(o["net"]["mid"]), String(o["net"]["host"]), self)
+		Net.begin_match("kf-" + String(o["net"]["mid"]), String(o["net"]["host"]), self, o["net"])
 	await _stage("build.systems")
 	await _spawn_pads_and_exits()
 	await _stage("build.pads_exits")
@@ -5510,7 +5510,8 @@ func _spawn_net_hunters(spots: Array, names: Array) -> void:
 			Equal.start(self, player)
 			if player.kin:
 				_apply_treat(player.kin)
-			_start_drop(player, at)
+			if not NetRejoin.restore(self):
+				_start_drop(player, at)
 		else:
 			var h := make_hunter("P" + peer, t, String(r["cls"]), String(r["name"]), "remote", krec, at, {"weapon": r.get("weapon", ""), "perk": "", "arch": String(r.get("arch", ""))})
 			h.remote = true
