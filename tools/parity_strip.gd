@@ -6,6 +6,7 @@ extends "res://tools/combo51_shots.gd"
 ## briefs/hero-ref/<sheet>.md; the footage comes from
 ## `git checkout origin/ext/hero-ref-footage -- footage/<folder>` (--footage-dir: where footage/ is).
 ## --hold=<s>: how long the key stays down (default: all of an LMB, a tap for the rest).
+## --fire: the trigger held through the whole move (a dash fired through, as the footage does).
 ## Needs a renderer (jobq --needs gpu).
 
 const FPS := 5.0                 # the footage's frame rate
@@ -23,6 +24,7 @@ var slot := "lmb"
 var first_frame := 1
 var count := 1
 var hold := -1.0
+var fire := false
 var footage_dir := "res://"
 var shots: Array = []
 
@@ -37,6 +39,7 @@ func run(main_node: Node) -> void:
 		if arg.begins_with("--frames="): range_arg = arg.substr(9)
 		if arg.begins_with("--hold="): hold = float(arg.substr(7))
 		if arg.begins_with("--footage-dir="): footage_dir = arg.substr(14)
+		if arg == "--fire": fire = true
 	var ends := range_arg.split("-")
 	if ends.size() != 2 or not FOOTAGE.has(who) or not ["lmb", "rmb", "e", "x", "dash"].has(slot):
 		push_error("--parity-strip --hero=<id> --slot=lmb|rmb|e|x|dash --frames=a-b --shots-dir=<dir>")
@@ -71,6 +74,8 @@ func _drive(t: float) -> void:
 	if held < 0.0:
 		held = count / FPS if slot == "lmb" else TAP
 	var down := t < held
+	if fire:
+		P.inp["fire"] = true
 	match slot:
 		"lmb":
 			P.inp["fire"] = down

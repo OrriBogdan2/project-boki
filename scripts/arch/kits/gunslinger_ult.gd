@@ -10,8 +10,6 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
-const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
-                                 # the source's raise, then fire
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const FALL_FX_GAP := 0.05       # s between the falling shell's flicker of green fire and embers
@@ -52,7 +50,7 @@ func cast() -> bool:
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
-	# the reticle shows at once (_fall_tick); the shot leaves the raised barrel on the clip's fire key (_fire_look)
+	# the reticle shows at once (_fall_tick); the shot leaves the raised barrel on the clip's fire key (_fire)
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
 
@@ -88,14 +86,16 @@ func _shell_mesh() -> Node3D:
 func tick(dt: float) -> void:
 	for s in shells.duplicate():
 		s["t"] = float(s["t"]) + dt
-		if not bool(s["fired"]) and float(s["t"]) >= FIRE_T:
+		if not bool(s["fired"]) and float(s["t"]) >= float(Tuning.of("vex")["x_fire_s"]):
 			_fire(s)
 		if String(s["phase"]) == FALL:
 			_fall_tick(s)
 		else:
 			_burn_tick(s, dt)
 
-## The shot: straight up off the raised barrel on the clip's kick key, with its sounds (content/vfx x_cast).
+## The shot: green fire straight up off the barrel once her wind-up tops out (tuning "vex" x_fire_s: the source's
+## ~0.2 s raise, then fire; the clip's barrel-up key under clip_warp), with its sounds (content/vfx x_cast). The
+## cast and the landing time are the tap's: only the shot waits for the pose.
 func _fire(s: Dictionary) -> void:
 	s["fired"] = true
 	kit.vfx("x_cast", s["at"])
@@ -114,18 +114,9 @@ func _fall_tick(s: Dictionary) -> void:
 	var rivets := {"at": at, "r": float(xd["radius"]) + 0.35 * (1.0 - k), "dashed": true, "all": true}
 	rivets.merge({"col": GunslingerKit.HOT, "col2": GunslingerKit.LIME, "alpha": 0.6 + 0.6 * k})
 	AimKit.circle(kit.h, "xr%d" % int(s["n"]), rivets)
-	_fire_look(s)
 	_drop_shell(s, delay)
 	if float(s["t"]) >= delay:
 		_impact(s)
-
-## The look of the shot: green fire off the barrel once her wind-up tops out (tuning "vex" x_fire_s). The cast and
-## the landing time are the tap's: only the flash waits for the pose.
-func _fire_look(s: Dictionary) -> void:
-	if s.has("fired") or float(s["t"]) < float(Tuning.of("vex")["x_fire_s"]):
-		return
-	s["fired"] = true
-	kit.vfx("x_cast", s["at"])
 
 func _drop_shell(s: Dictionary, delay: float) -> void:
 	var n: Node3D = s["node"]
