@@ -442,6 +442,7 @@ func _place_runners() -> void:
 		var fwd := (b - a).normalized()
 		var p := a.lerp(b, f) + Vector3(-fwd.z, 0, fwd.x) * lane * (i - (runners.size() - 1) * 0.5)
 		p.y = _ground(p) + _lift(String(st[s]["kind"]), f)
+		gait(runners[i], "leap" if String(st[s]["kind"]) == "jump" else "")
 		var n: Node3D = runners[i]["node"]
 		n.position = p
 		n.rotation.y = atan2(-fwd.x, -fwd.z)
@@ -461,6 +462,7 @@ func _end(finished: bool) -> void:
 	for k in runners:
 		k["busy"] = false
 		k["t"] = 1.5
+		gait(k, "")
 	bar.close()
 	if finished:
 		if solo_rec.is_empty():
@@ -512,13 +514,20 @@ func _card(title: String, lines: Array) -> void:
 	card = result_card(h, rows)
 	card_t = float(rules()["card_s"])
 
-## Plays a BokiRig clip (win, sulk, push; "" stops it) on a kin's Boki: rigged ones only, the rest ignore it.
+## Plays a BokiRig clip (win, sulk, push, bat; "" stops it) on a kin's Boki: rigged ones only, the rest ignore it.
 static func act(k: Dictionary, which: String) -> void:
+	tag(k, "kact", which)
+
+## Sets the gait a rigged Boki moves in (sniff, leap; "" for its own walk and run).
+static func gait(k: Dictionary, which: String) -> void:
+	tag(k, "kgait", which)
+
+static func tag(k: Dictionary, key: String, which: String) -> void:
 	var n := k["node"] as Node3D
 	if which == "":
-		n.remove_meta("kact")
+		n.remove_meta(key)
 	else:
-		n.set_meta("kact", which)
+		n.set_meta(key, which)
 
 ## The result of a minigame ({win, lose}): the winner shows it, the loser sulks, both stay put until `let_go`.
 static func hold(home, res: Dictionary) -> Array:
@@ -534,9 +543,10 @@ static func hold(home, res: Dictionary) -> Array:
 func release() -> void:
 	let_go(held)
 	held = []
-	if h.get("hshove") != null:
-		BaseRace.let_go(h.hshove.held)
-		h.hshove.held = []
+	for game in [h.get("hshove"), h.get("hvolley"), h.get("hseek")]:
+		if game != null:
+			let_go(game.held)
+			game.held = []
 
 static func let_go(ks: Array) -> void:
 	for k in ks:

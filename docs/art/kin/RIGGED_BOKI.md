@@ -35,7 +35,15 @@ loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body 
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` (also `win`, `sulk`, `push`, set by the Dash and
-the Stump Shove) and `face`.
+the Stump Shove, and `bat` for Spark Volley's hop-and-bat) and `face`.
+
+Game gaits (garden minigames): `sniff` (nose-down walk, Seek) and `leap` (the jump over the Dash's gap) are built like
+the home clips (`BokiHomeClips.GAME_BASE`: walk, run, hop plus `BokiHomePoses` deltas), set by the meta `kgait` and
+played only while the Boki moves. No foot slide: `BokiRig` plays run, walk, carry, sniff and leap at
+`speed_scale = ground speed / stride` (`RUN_STRIDE`, `WALK_STRIDE`; one stride per clip, there is no foot bone to
+measure per species), clamped to `MIN_CADENCE`..`MAX_CADENCE`; `--boki-rig-check` asserts it from 1.4 to 3.8 m/s. The
+Dash runs at `pace` 2.6 m/s (run gait; it was 1.1, a walk). Strips of a race, its leap and a shove on the real base:
+`--garden-motion-shots --shots-dir=<dir>` with `--fixed-fps 30`.
 
 Props (axe, pick, berry) are part of the skinned mesh on their own bones, collapsed in every clip that doesn't use
 them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle over its eye-spots). Materials:

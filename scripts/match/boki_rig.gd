@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet, win, sulk, push), and plays the face on top
-## of whatever the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, win, sulk, push, bat) and "kgait" (sniff, leap:
+## the gait it moves in, instead of the walk or run), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -102,9 +102,15 @@ const FRAME := {
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
-const RUN_SPEED := 3.2        # m/s: from here it gallops
+const RUN_SPEED := 2.2        # m/s: from here it gallops (the walk clip at 1.5 times is its fastest honest cadence)
 const RUN_STRIDE := 2.9       # m/s the run clip covers at speed 1 (Vespyx: reach 1.3, pace 1.06)
 const WALK_STRIDE := 1.5
+const MIN_CADENCE := 0.4      # slowest a gait clip plays: below it the feet are no longer in step with the ground
+const MAX_CADENCE := 1.7      # fastest, above which the legs blur
+## A game gait the clip rides on (BokiHomeClips.GAME_BASE): the stride its baked cadence covers,
+## so the feet stay on the ground.
+const GAIT_STRIDE := {"sniff": WALK_STRIDE, "leap": RUN_STRIDE}
+const LEAP_PITCH := 0.8       # how much of the climb angle (rise over run) a leaping Boki's nose follows
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -117,7 +123,8 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb",
+		"splash", "sniff", "leap", "bat"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend", "sulk", "push"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -142,6 +149,7 @@ const CLIP_FACE := {
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
 	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"sniff": "focus", "leap": "cheer", "bat": "cheer",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -164,6 +172,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _rise := 0.0               # m/s up, eased: what pitches a leap
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -272,18 +281,23 @@ func _keep_flex() -> void:
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
-	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
+	model.position.y = -body.position.y if clip in ["hop", "bat"] else 0.0       # the clip does the hopping, not home
 	if _shadow:
 		_shadow.global_position.y = root.global_position.y + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
+	if clip == "leap":
+		# nose up on the way up, then down
+		model.rotate_object_local(Vector3.RIGHT, atan2(_rise, maxf(_speed, 1.0)) * LEAP_PITCH)
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
-	var v := (gp - _pos_prev).length() / dt
+	var step := gp - _pos_prev
 	_pos_prev = gp
-	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
+	var k := 1.0 - exp(-10.0 * dt)
+	_speed = lerpf(_speed, Vector2(step.x, step.z).length() / dt, k)
+	_rise = lerpf(_rise, step.y / dt, k)
 
 func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
@@ -301,10 +315,10 @@ func _pick_clip(dt: float) -> void:
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
-	if want == "run":
-		player.speed_scale = clampf(_speed / RUN_STRIDE, 0.7, 1.6)
-	elif want == "walk" or want == "carry":
-		player.speed_scale = clampf(_speed / WALK_STRIDE, 0.6, 1.6)
+	var strides := {"run": RUN_STRIDE, "walk": WALK_STRIDE, "carry": WALK_STRIDE}
+	var stride: float = strides.get(want, GAIT_STRIDE.get(want, 0.0))
+	if stride > 0.0:
+		player.speed_scale = clampf(_speed / stride, MIN_CADENCE, MAX_CADENCE)
 
 func _start_shot(which: String) -> void:
 	_shot = which
@@ -321,6 +335,9 @@ func _state_clip() -> String:
 		return act
 	if _shot_left > 0.0:
 		return _shot
+	var gait := String(root.get_meta("kgait", ""))
+	if gait != "" and _speed >= WALK_SPEED:
+		return gait
 	if root.get_meta("happy", false):
 		return "hop"
 	if _speed >= RUN_SPEED:

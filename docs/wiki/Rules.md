@@ -113,8 +113,8 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 |---|---|
 | stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
 | stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
-| pace | 1.1 |
-| pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. |
+| pace | 2.6 |
+| pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. A run: the Boki gallop clip keeps its feet on the ground from about 2.2 m/s (BokiRig.RUN_SPEED), so a lap takes about 9 s. |
 | speed_per_point | 0.015 |
 | speed_per_point_doc | Each trained Speed point (Care stats) adds this much pace, as a fraction. |
 | mood | [0.85, 1.1] |
