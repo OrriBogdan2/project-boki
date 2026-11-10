@@ -386,7 +386,7 @@ lairs = [
 ]
 # exits: skiff docks on the quiet NW/SE isles (pointing out to open sky), walled uplink outposts on
 # the NE/SW isles and in Thornwood (each a short run from a boss lair), rift hatches in the ring.
-docks = [[15, 30, -1, 0], [201, 184, 1, 0], [24, 200, 0, 1], [96, 27, 0, -1]]
+docks = [[15, 30, -1, 0], [201, 184, 1, 0], [11, 190, -1, 0], [96, 27, 0, -1]]
 outposts = [[190, 26, 1], [26, 186, 1], [92, 178, 1], [188, 193, 1], [30, 108, 1]]
 hatches = [[124, 92], [100, 36], [36, 82], [182, 98], [118, 158], [166, 132], [124, 186], [92, 120]]
 
@@ -732,6 +732,9 @@ def gap(a, b, owner):
 # every time this script runs.
 COVER_SEED = 61
 BUSH_BIOMES = ("bloom", "meadow", "gloom", "storm")     # where Shrublings may live: also where exits get cover
+AMBUSH_BIOMES = ("bloom", "meadow")     # where every chest and camp gets a patch beside it (--cover-check)
+AMBUSH_R = (1.3, 1.9)   # m: clump radius of that patch (small enough to fit between a chest and its lanes)
+AMBUSH_LEAST = 12       # tiles: the smallest such patch
 COVER = {   # share of the biome's ground (inside the keys.json range), clump radius, clumps per patch, smallest patch worth planting (tiles), long bands along lanes?
     "bloom":  dict(share=0.18, r=(2.2, 3.2), n=(5, 6), least=40, band=False, gap=2, sp=0.88),
     "meadow": dict(share=0.1, r=(1.4, 2.0), n=(4, 6), least=14, band=True, gap=2),
@@ -1020,6 +1023,14 @@ def place_cover(lv, owner, stairs):
                 P = try_anchor("exit", t, None)
                 if P and C.los(c, (sum(q[0] for q in P[0]) / len(P[0]), sum(q[1] for q in P[0]) / len(P[0]))):
                     C.plant(iid, P[0], P[1], "exit"); break
+        # then, in bloom and meadow, a small patch beside each chest and camp (ambush play), whatever the share
+        if d["biome"] in AMBUSH_BIOMES:
+            small = dict(cfg, r=AMBUSH_R, n=(3, 4), least=AMBUSH_LEAST)
+            for p, r0, r1 in [(p, 3.0, 5.5) for p in d.get("chests", [])] + [(p, 4.6, 6.2) for p in d.get("camps", [])]:
+                for c in ring((p[0] + 0.5, p[1] + 0.5), r0, r1, 40):
+                    P = C.patch(rng, iid, (round(c[0], 1), round(c[1], 1)), small)
+                    if P and C.gap_ok(P[1], cfg["gap"]):
+                        C.plant(iid, P[0], P[1], "chest"); break
         for rnd in range(40):
             if have() >= want * 0.97: break
             progressed = False
