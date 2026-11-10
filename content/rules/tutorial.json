@@ -19,7 +19,7 @@
   ],
   [
    "throw",
-   "Tap %T to send %s at the monster"
+   "Tap %T: send %s at it"
   ],
   [
    "fight",
