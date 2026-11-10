@@ -50,12 +50,14 @@ var m: Match
 var list: Array = []          # every exit, see _add_*
 var rush := false             # the last squad standing: skiffs come quicker, uplinks charge faster
 var _told := {}
+var seats: QuestSeats = null  # Limited Ways Out: the Sealed Lair and the Uplink seats (null outside the mode)
 
 func setup(match_node: Match) -> void:
 	m = match_node
 	if m.opts.get("training", false) or m.opts.get("duel", false):
 		return
 	var tut: bool = m.opts.get("tutorial", false)
+	if Heart.enabled(m.opts): seats = QuestSeats.new(m)      # (the Heart itself is built after the exits)
 	var defs: Array = m.world.exit_defs if not m.world.exit_defs.is_empty() else _default_defs()
 	for d in defs:
 		await m._slice()       # under the loading screen: a frame now and then
@@ -180,7 +182,14 @@ func callable(x: Dictionary) -> bool:
 	return x["kind"] == "dock" and x["state"] == "idle" and m.time >= float(x["open_at"]) and m.time < float(x["close_at"])
 
 func startable(x: Dictionary) -> bool:
-	return x["kind"] == "outpost" and x["state"] == "idle" and m.time >= float(x["open_at"])
+	return x["kind"] == "outpost" and x["state"] == "idle" and m.time >= float(x["open_at"]) \
+		and (seats == null or seats.may_start(x))
+
+## The outpost the uplink runs on: the Uplink seat's in Limited Ways Out, else the first.
+func uplink_x() -> Dictionary:
+	if seats: return seats.uplink_x()
+	var o := of_kind("outpost")
+	return o[0] if not o.is_empty() else {}
 
 ## How long a skiff takes to come once called (shorter for the last squad, and never past the fall).
 func call_time() -> float:
@@ -275,7 +284,10 @@ func interact_for(h: Hunter) -> Dictionary:
 					continue
 				match String(x["state"]):
 					"idle":
-						if m.time < float(x["open_at"]):
+						var why := seats.uplink_wait(x) if seats else ""
+						if why != "":
+							best = {"label": why}
+						elif m.time < float(x["open_at"]):
 							best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 						else:
 							best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
@@ -283,6 +295,7 @@ func interact_for(h: Hunter) -> Dictionary:
 					"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
 					"open": best = {"label": "The lift is open! Step into the light"}
 					"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
+					"closed": best = {"label": "The Uplink has shut"}
 		if not best.is_empty():
 			best["kind"] = "exit"
 			best["x"] = x
@@ -320,13 +333,16 @@ func act(x: Dictionary, what: String, h: Hunter, from_net := false) -> void:
 				return
 			_enter_hatch(x, h)
 		"start":
-			if x["state"] != "idle":
+			if x["state"] != "idle" or (seats and not from_net and not seats.may_start(x)):
 				return
 			_start(x, h)
 	if m.net_on and not from_net:
 		m.net_event(["xc", int(x["i"]), what, h.nid if h else ""])
 
 func net_in(e: Array) -> void:
+	if e.size() > 1 and String(e[1]) == "seat":
+		if seats: seats.net_in(e)
+		return
 	var i := int(e[1])
 	if i < 0 or i >= list.size():
 		return
@@ -612,11 +628,20 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 		"open":
 			x["t"] = float(x["t"]) - dt
 			var p: Vector3 = x["pos"]
+			var seat: bool = x.get("seat", false)      # the Uplink seat: its lift is the finishing squad's alone
+			var rode := false
 			for h in m.hunters:
-				if _live(h) and not h.remote and h.flat_dist(p) < LIFT_R and absf(h.pos.y - p.y) < 1.5:
+				var at_lift: bool = _live(h) and not h.remote and h.flat_dist(p) < LIFT_R and absf(h.pos.y - p.y) < 1.5
+				if at_lift and (not seat or h.team == int(x["team"])):
 					m._extract(h, "uplink", x["name"])
+					rode = true
+			if seat and rode:
+				# ...and it takes their downed in the yard along
+				for h in m.hunters:
+					if _live(h) and not h.remote and h.downed and h.team == int(x["team"]) and in_yard(x, h):
+						m._extract(h, "uplink", x["name"])
 			if float(x["t"]) <= 0.0:
-				x["state"] = "spent"
+				x["state"] = "closed" if seat else "spent"      # (one use: the Uplink seat doesn't come back)
 				x["t"] = UPLINK_CD
 				n.get_node("Lift").visible = false
 				m.sfx("thump", p, -6.0, 0.8)
@@ -637,6 +662,18 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			if float(x["t"]) <= 0.0:
 				x["state"] = "idle"; x["team"] = -1; x["prog"] = 0.0
 	_show_outpost(x, n)
+
+## The Uplink seat shut (its window ran out): dark for the rest of the match.
+func close_outpost(x: Dictionary) -> void:
+	var was := String(x["state"])
+	x["state"] = "closed"
+	x["team"] = -1
+	x["prog"] = 0.0
+	x["contested"] = false
+	x["draining"] = false
+	var n: Node3D = x["node"]
+	((n.get_node("Charge") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("arc", 0.0)
+	if was == "charging": m.sfx("thump", x["pos"], -4.0, 0.6)
 
 ## The yard stood empty until the charge ran out: the uplink flickers and shuts off.
 func _fizzle(x: Dictionary) -> void:
@@ -760,6 +797,7 @@ func _wave_spot(focus: Vector3, ii: int) -> Vector3:
 
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:
+	if seats: seats.tick(dt)
 	for x in list:
 		match String(x["kind"]):
 			"dock": _tick_dock(x, dt)
@@ -904,7 +942,8 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 				elif x["state"] == "open" and int(x["uses"]) > 0 and d < 40.0 and leaving:
 					s = d * 0.3; if s < bs: bs = s; best = [x["pos"], "lift"]
 			"outpost":
-				if x["state"] == "open" and d < float(x["t"]) * 5.0:
+				var ours: bool = not x.get("seat", false) or h.team == int(x["team"])
+				if x["state"] == "open" and d < float(x["t"]) * 5.0 and ours:
 					s = d * 0.4; if s < bs: bs = s; best = [x["pos"], "lift"]
 				elif startable(x) and leaving and m.length - m.time > 70.0:
 					s = d * 1.1; if s < bs: bs = s; best = [x["pos"], "uplink"]
@@ -996,7 +1035,7 @@ func demo(mode: String) -> void:
 				m.set_meta("xdemo_hold", [hx, "open", "t", 4.0])
 			m.cam.zoom_to = 0.6
 		"uplink", "lift":
-			var o: Dictionary = of_kind("outpost")[0]
+			var o: Dictionary = uplink_x()
 			m.time = float(o["open_at"]) + 1.0
 			act(o, "start", p)
 			o["wave_t"] = 0.0
@@ -1010,7 +1049,7 @@ func demo(mode: String) -> void:
 			m.cam.zoom_to = 0.85
 		"drain":
 			# your uplink charging with nobody in its yard: the charge draining (HUD, mast, clock)
-			var o: Dictionary = of_kind("outpost")[0]
+			var o: Dictionary = uplink_x()
 			m.time = float(o["open_at"]) + 1.0
 			act(o, "start", p)
 			o["wave_t"] = 99.0
