@@ -82253,5 +82253,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_blotlet_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_puffuse",
+    "name": "Puffuse (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_puffuse_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blastopuff",
+    "name": "Blastopuff (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_blastopuff_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blastopuff",
+    "name": "Blastopuff (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_blastopuff_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_slog",
+    "name": "Slog (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_slog_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blotlet",
+    "name": "Blotlet (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_blotlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blotlet",
+    "name": "Blotlet (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_blotlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_blastopuff",
+    "name": "Blastopuff (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_blastopuff_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_slog",
+    "name": "Slog (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_slog_2.jpg",
+    "ok": true
   }
 ]
