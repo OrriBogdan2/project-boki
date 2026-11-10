@@ -7,6 +7,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--first-hints-check": ["res://tools/first_hints_check.gd", "first_hints_check", null],
+	"--first-fuse-hint-check": ["res://tools/first_fuse_hint_check.gd", "first_fuse_hint_check", null],
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	"--feed-check": ["res://tools/feed_check.gd", "feed_check", null],      # hungry -> kibble -> feed -> can go
 	"--demo-check": ["res://tools/demo_check.gd", "demo_check", null],      # the recording presets
