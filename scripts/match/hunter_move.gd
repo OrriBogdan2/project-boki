@@ -38,7 +38,10 @@ static func _load() -> Dictionary:
 	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
 	return parsed
 
+## (loads on demand: a class whose own static vars read these, as GlideSpike, can be set up before ours are)
 static func rules() -> Dictionary:
+	if _rules.is_empty():
+		_rules = _load()
 	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
