@@ -43,6 +43,8 @@ func _shot(m: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			var dir := String(a).substr(12)
 			DirAccess.make_dir_recursive_absolute(dir)
+			await Game.main.fade.reveal(0.01)      # the boot splash stays up when a check goes straight to a scene
+			await m.get_tree().create_timer(0.8).timeout      # the hint fades in
 			await RenderingServer.frame_post_draw
 			m.get_viewport().get_texture().get_image().save_png(dir.path_join("hub_hint.png"))
 
