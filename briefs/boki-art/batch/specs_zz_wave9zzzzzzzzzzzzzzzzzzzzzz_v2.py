@@ -599,3 +599,11 @@ V2PORT_NEW('Bastling',_O+'on_bastling_1.jpg','baby','cute',"blue-grey slate shel
 SPECS[_n0]['id']='v2s_bastling_tide'; SPECS[_n0+1]['id']='v2p_bastling_tide'; SPECS[_n0+1]['runs']=2
 SPECS.append({'id':'on_effigoon_clean','name':'Effigoon (lying cocoon, no shadow)','refs':[_O+'on_effigoon_lie_1.jpg'],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':_EDIT+"remove the grey cast shadow on the ground beside and under the cocoon, and remove the short piece of rope at the top edge of the picture. The background is one perfectly flat pale grey (#E8E8EE) everywhere. The cocoon itself stays exactly the same."})
+
+# ===== 22:30 ET 11-09: batch 2 cards: 105 of 105 clean. Picks live as cards (run numbers below). Stage B: sheet (old sheet + V2 card, 3 runs)
+# and portrait (old portrait + V2 card, 2 runs); both images show the same creature, so nothing can bleed.
+_BT2PICK="Vespox:1 Prismander:2 Mycroll:2 Gravadillo:1 Gravitank:2 Mothlet:1 Lunowl:2 Eclipsowl:1 Echolop:2 Howlop:1 Moatpole:1 Rampartoad:1 Zipling:3 Zippelith:2 Seamwyrm:3 Anchorbill:2 Anchorhorn:2 Bellowlet:2 Snuffapi:2 Chandelapi:1 Glaciatee:3 Gongibbon:2 Kayak:1 Glintmole:2 Geodemole:1 Druzemole:3 Gloamshell:2 Glomwort:2 Glomworth:2 Mortarfly:1 Crofthorn:1 Skidlet:2 Skateron:1 Ermink:1 Flarmink:2"
+for _n,_st,_ar,_dk,_fu,_co,_ct,_fx in _BT2:
+    _cd='briefs/boki-art/cards/'+_n+'.jpg'
+    SPECS.append({'id':'v2s_'+_n.lower()+'_b2','name':_n+' (V2 sheet, batch 2)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_co,_ct)})
+    SPECS.append({'id':'v2p_'+_n.lower()+'_b2','name':_n+' (V2 portrait, batch 2)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':2,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_co,_ct,_dk,_fu)})
