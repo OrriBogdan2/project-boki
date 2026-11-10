@@ -74420,5 +74420,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_pagoguana_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_pagoguana",
+    "name": "Pagoguana (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_pagoguana_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_crofthollow",
+    "name": "Crofthollow (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_crofthollow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pagoguana",
+    "name": "Pagoguana (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_pagoguana_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_crofthollow",
+    "name": "Crofthollow (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_crofthollow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pagoguana",
+    "name": "Pagoguana (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pagoguana_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_crofthollow",
+    "name": "Crofthollow (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_crofthollow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pagoguana",
+    "name": "Pagoguana (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_pagoguana_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_stormit",
+    "name": "Stormit (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_stormit_2.jpg",
+    "ok": true
   }
 ]
