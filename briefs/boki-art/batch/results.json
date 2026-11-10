@@ -87552,5 +87552,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_cisternmander_rd_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_cisternmander_rd",
+    "name": "Cisternmander (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_cisternmander_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pickadactyl_rd",
+    "name": "Pickadactyl (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_pickadactyl_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pickadactyl_rd",
+    "name": "Pickadactyl (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pickadactyl_rd_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_sirencada_rd",
+    "name": "Sirencada (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_sirencada_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pickadactyl_rd",
+    "name": "Pickadactyl (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_pickadactyl_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pickadactyl_rd",
+    "name": "Pickadactyl (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pickadactyl_rd_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_blastopuff_rd",
+    "name": "Blastopuff (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_blastopuff_rd_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sirencada_rd",
+    "name": "Sirencada (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_sirencada_rd_2.jpg",
+    "ok": true
   }
 ]
