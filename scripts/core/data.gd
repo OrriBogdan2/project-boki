@@ -185,7 +185,7 @@ func _init() -> void:
 	load_kin_content()
 
 ## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
-## (content/kin/<id>.json: rare, boss).
+## (content/kin/<id>.json: rare, boss, legendary_tier).
 func load_kin_content() -> void:
 	KIN.clear()
 	var ids: Array = []
@@ -199,6 +199,8 @@ func load_kin_content() -> void:
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
+		if home.has("legendary_tier"):
+			sp["legendary_tier"] = String(home["legendary_tier"])
 		KIN[id] = sp
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare

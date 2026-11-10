@@ -35,9 +35,27 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
-## Its number in the Field Book: the order species are listed in (Data.KIN: the starters first).
+## Legendary tiers, lowest first: the order legendaries close the Field Book in (docs/decisions/0002).
+const TIERS := ["minor", "boss", "ultra", "blight"]
+
+static func tier_of(spk: String) -> String:
+	return String(Data.KIN.get(spk, {}).get("legendary_tier", ""))
+
+## Every species in Field Book order: Data.KIN order (starters first), then every legendary last, by tier.
+static func order() -> Array:
+	var all: Array = []
+	var legends: Array = []
+	for spk in Data.KIN:
+		if tier_of(spk) == "":
+			all.append(spk)
+		else:
+			legends.append(spk)
+	legends.sort_custom(func(a, b): return TIERS.find(tier_of(a)) < TIERS.find(tier_of(b)))
+	return all + legends
+
+## Its number in the Field Book (its place in order()).
 static func number(spk: String) -> int:
-	return Data.KIN.keys().find(spk) + 1
+	return order().find(spk) + 1
 
 static func num_text(spk: String) -> String:
 	return "#%03d" % number(spk)
@@ -60,7 +78,17 @@ static func counts() -> Vector2i:
 		if caught(spk): t += 1
 	return Vector2i(s, t)
 
-## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
+## [seen, caught] per type id, over the species of that type.
+static func type_counts() -> Dictionary:
+	var out := {}
+	for spk in Data.KIN:
+		var c: Vector2i = out.get(type_of(spk), Vector2i.ZERO)
+		c.x += int(seen(spk) or caught(spk))
+		c.y += int(caught(spk))
+		out[type_of(spk)] = c
+	return out
+
+## The grid, under a "Seen N · Caught N" line and one seen/caught chip per type. on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	Care.dex_sync()
 	demo()
@@ -74,11 +102,17 @@ static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(hint)
 	v.add_child(head)
+	var per_type := HFlowContainer.new()
+	var tc := type_counts()
+	for t in TYPES:
+		if tc.has(t):
+			per_type.add_child(UI.chip("", "%s %d/%d" % [type_name(t), tc[t].x, tc[t].y], type_col(t), "Seen / caught"))
+	v.add_child(per_type)
 	var g := GridContainer.new()
 	g.columns = 6
 	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
 	v.add_child(g)
-	for spk in Data.KIN:
+	for spk in order():
 		g.add_child(tile(spk, tree, on_open))
 
 ## One numbered tile.
@@ -101,6 +135,8 @@ static func tile(spk: String, tree: SceneTree, on_open: Callable) -> Control:
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
 	if is_seen:
+		if tier_of(spk) != "":
+			top.add_child(UI.label(tier_of(spk).capitalize(), 10, UI.MUTED, UI.semi))
 		top.add_child(TypeIcon.new(type_of(spk), 16.0))
 	col.add_child(top)
 	var pic := CenterContainer.new()
