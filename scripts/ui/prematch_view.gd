@@ -12,6 +12,7 @@ var chat_log: VBoxContainer
 var chat_scroll: ScrollContainer
 var chat_in: LineEdit
 var talk_btn: Button
+var stage: HunterViewer          # your pick, standing: it strikes its lock-in pose each time you choose
 
 func setup(opts: Dictionary) -> void:
 	pm = Prematch.new(opts)
@@ -56,6 +57,9 @@ func _ready() -> void:
 	var side_col := UI.vbox(12)
 	side_col.custom_minimum_size = Vector2(380, 0)
 	cols.add_child(side_col)
+	stage = HunterViewer.make_stage(pm.pick, Vector2(380, 230))
+	stage.play_lockin()
+	side_col.add_child(stage)
 	side_col.add_child(UI.section("Your squad"))
 	squad_box = UI.vbox(6)
 	side_col.add_child(squad_box)
@@ -150,6 +154,8 @@ func _tile(ak: String) -> PanelContainer:
 
 func _choose(ak: String) -> void:
 	if pm.choose(ak):
+		stage.set_hunter(ak)
+		stage.play_lockin()
 		_fill_hunters()
 		_fill_squad()
 		_announce_pick()

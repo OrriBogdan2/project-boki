@@ -325,6 +325,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
 		return {"clip": st["stun"], "t": -1.0}
+	var lock := float(s.get("lockin_t", -1.0))
+	if lock >= 0.0 and d.has("lockin"):
+		return _lockin_at(lock)
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
@@ -339,6 +342,17 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "upper": true}
 	return {}
+
+## The lobby's lock-in pose (data "lockin": clip, from, dur, rate): `t` s into it, a window of an existing clip.
+func _lockin_at(t: float) -> Dictionary:
+	var lk: Dictionary = d["lockin"]
+	var clip := String(lk["clip"])
+	var at := float(lk.get("from", 0.0)) + t * float(lk.get("rate", 1.0))
+	return {"clip": clip, "t": minf(at, lib.get_animation(clip).length - 0.001), "fade": float(lk.get("fade", FADE))}
+
+## How long a Hero's lock-in pose runs (s); 0 for one that has none.
+static func lockin_dur(art_name: String) -> float:
+	return float(data(art_name).get("lockin", {}).get("dur", 0.0))
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})

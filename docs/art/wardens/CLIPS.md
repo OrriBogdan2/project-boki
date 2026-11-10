@@ -20,6 +20,10 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+- `lockin`: the pre-match lobby pose when you pick the Hunter ({clip, from (s, 0), dur (s, 1-1.5), rate}): a window of an
+  existing clip, then the idle. Today every Hunter plays its `emote` sped up to 1.4 s. The art lane owes bespoke beats
+  (a real clip each): Vex flips her coin, Kael rests the sword on his shoulder, Lace pulls a thread taut, and one per
+  Hunter from its personality.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree

@@ -127,6 +127,7 @@
 			"clip": "fuse"
 		}
 	},
+	"lockin": {"clip": "emote", "dur": 1.4, "rate": 1.4},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",
