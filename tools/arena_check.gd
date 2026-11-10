@@ -144,6 +144,12 @@ func _dodge_pen() -> void:
 	var P: Hunter = m.player
 	var D: DodgeDummy = A.dodge
 	A.cd_off = true
+	# the player's Boki fights whatever is near and would knock the shooter out of reach (it then stops firing)
+	for o in m.kins.filter(func(k): return k.owner_h == m.player):
+		o.dead = true
+		m.kins.erase(o)
+		o.queue_free()
+	P.kin = null
 	var row: Dictionary = A.goals.rows.filter(func(r): return r["g"]["id"] == "dash_dodge")[0]
 	var start := A._arena_point(Vector3(64.0, 0, 10.5))
 	P.teleport(start)
@@ -165,7 +171,8 @@ func _dodge_pen() -> void:
 	while D.dodges < before + 1 and m.time < 120.0:
 		P.teleport(start)
 		P.vel = Vector3.ZERO
-		while D._shot.is_empty() or float(D._shot["t"]) < DodgeDummy.SHOT_WINDUP + 0.1:
+		var wait_end := m.time + DodgeDummy.LOOP * 2.0
+		while (D._shot.is_empty() or float(D._shot["t"]) < DodgeDummy.SHOT_WINDUP + 0.1) and m.time < wait_end:
 			step(m, DT)
 		P.inp["move"] = Vector2(side, 0)
 		P.do_dash()
@@ -177,7 +184,8 @@ func _dodge_pen() -> void:
 	while not row["done"] and tries < 12:
 		P.teleport(start)
 		P.vel = Vector3.ZERO
-		while D._shot.is_empty() or float(D._shot["t"]) < DodgeDummy.SHOT_WINDUP + 0.1:
+		var wait_end := m.time + DodgeDummy.LOOP * 2.0
+		while (D._shot.is_empty() or float(D._shot["t"]) < DodgeDummy.SHOT_WINDUP + 0.1) and m.time < wait_end:
 			step(m, DT)
 		P.inp["move"] = Vector2(side, 0)
 		P.do_dash()
