@@ -62,7 +62,8 @@ Still open (shared, not done here):
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
-- Six kits are data-driven (`content/vfx/`: archer, ashwick, dolm, juggernaut, rimewright, tender). The rest draw with
+- Seven kits are data-driven (`content/vfx/`: archer, ashwick, dolm, juggernaut, ostra (RMB, E, X), rimewright,
+  tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar. Tenzo's punch, boulder and launched-rock bursts (`dolm_kit`) still draw `Fx` rings.
 - **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
@@ -79,7 +80,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Tenzo | dolm | 3 | 3 | 4 | 3 | 4 | 4 | 3 | 24 | re-scored 11-08 from strips (ext/vfx-dolm): slam, RMB charge, hop landings and Basalt Spine are HeroVfx data (`content/vfx/dolm.json`): crack crater, wall, rock debris, crack lanes. Left: punch, boulder and launched-rock bursts in `dolm_kit` still draw `Fx` rings |
-| 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
+| 2 | Motley | ostra | 4 | 3 | 4 | 3 | 4 | 4 | 3 | 25 | was 14. RMB, E and X are data-driven in sea teal over a void core, each with an afterglow; Nightwell now reads as a black well with teal arms (strips: jobq vfxq-ostra-abil-before/after). Left: the dome tell is a pale grey-teal, the Snap's flight is one bundle. Dash, LMB and the Swollen pink stay violet (void-jester-dash-feel-1108) |
 | 3 | Vex | gunslinger | 1 | 2 | 2 | 2 | 3 | 1 | 4 | 15 | LMB and held LMB show almost no tracer or muzzle flash; RMB crescents are pink; E/X are opaque brown scorch discs |
 | 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
 | 5 | Lace | archer | 4 | 3 | 4 | 4 | 4 | 4 | 4 | 27 | re-scored 11-08 from strips (ext/vfx-archer, was 16): every thread, needle, trail and beam is orchid; tap/arrow ribbons 2-3x wider with a pale hot core, stuck and stitched threads hold at match zoom; Heavy Shot release layered (white core, orchid body flare, sweep, seam, sparks); new full-draw, release and arrow-hit sounds. Left: the Heavy Shot is still the big flat arrow (owner Nov 4) with a pale fletch rosette; the gold perfect-release cue stays gold (a timing signal) |
