@@ -6111,3 +6111,4 @@ READY ext/garden-lantern-zone 0555ccae0 (Hushwood zone, GARDEN.md 10.7 step 7c: 
 READY ext/vfx-kael-kit ffbed0ba6 (Kael kit VFX at the match camera: white-hot palette, crimson accents; slash arc/reach, wave crescent and lane at the true hit width, lunge lane at strike width, Riposte crescent = strip edge; bursts removed from dash wind-up/tip, air slam, Enrage; combo-check 184/0)
 READY ext/garden-stat-budget 7d1acb8c6 (stat budget: caps, bands, 25-point expedition clamp, Training tab ring; --stat-budget-check)
 READY ext/garden-hub-away 7cf35456d (garden hub step 10: per-zone away card, visit snapshot with hub+zones; based on ext/garden-hub-fixtures)
+READY ext/garden-thrive 1e76a76b2 (garden zones step 8: thrive joy x0.5 and toys +25%, zone trait pull to 0.8; based on ext/garden-hub-zones)
