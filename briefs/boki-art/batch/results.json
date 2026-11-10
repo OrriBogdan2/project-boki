@@ -109259,5 +109259,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/drop_down_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_bellowlet_gh",
+    "name": "Bellowlet (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_bellowlet_gh_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bellowlet_wi",
+    "name": "Bellowlet (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_bellowlet_wi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_furnacowary_gh",
+    "name": "Furnacowary (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_furnacowary_gh_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bellowlet_gh",
+    "name": "Bellowlet (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_bellowlet_gh_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_furnacowary_wi",
+    "name": "Furnacowary (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_furnacowary_wi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bellowlet_wi",
+    "name": "Bellowlet (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_bellowlet_wi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_furnacowary_wi",
+    "name": "Furnacowary (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_furnacowary_wi_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_furnacowary_gh",
+    "name": "Furnacowary (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_furnacowary_gh_1.jpg",
+    "ok": true
   }
 ]
