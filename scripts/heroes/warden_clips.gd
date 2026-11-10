@@ -79,6 +79,7 @@ var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
 var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
 var stowed := false          # "carry_stow" bones are put away
+var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" hand
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -127,6 +128,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
+	drop = WardenCarry.held(sk, d.get("carry_drop", []))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -397,11 +399,14 @@ func _carry(on: bool, dt: float) -> void:
 		if stowed:
 			stowed = false
 			WardenCarry.stow(skel, d.get("carry_stow", []), 0.0)
+			WardenCarry.hold(drop, false)
 			_out(0.0)       # (a weapon bone with a size of its own gets it back)
 		return
-	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w))
+	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
+	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w, fwd))
 	stowed = true
 	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
+	WardenCarry.hold(drop, carry_w >= 0.5)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.

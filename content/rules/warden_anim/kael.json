@@ -216,6 +216,7 @@
 		"hand.R"
 	],
 	"skinned_weapon": true,
+	"carry_drop": ["hand.R"],
 	"blade": {
 		"root": "anchor_blade_root",
 		"tip": "weapon_muzzle"

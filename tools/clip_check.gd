@@ -353,10 +353,17 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 			% [id, worst, front])
 	ok(socket.y > hips_at.y and socket.y < hips_at.y + 0.9 * height,
 			"%s: the Boki rides at chest height (%.2f m over the hips)" % [id, socket.y - hips_at.y])
+	var clear := _clear(sk, socket, height)
+	ok(clear > 0.1, "%s: the Boki rides in front of the chest, not in it (%.2f m clear)" % [id, clear])
 	var held := 0.0
 	for nm in dd.get("carry_stow", []):
 		held = maxf(held, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
 	ok(held < 0.01, "%s: the weapon bones the data stows are put away (%.3f)" % [id, held])
+	if not (dd.get("carry_drop", []) as Array).is_empty():
+		var bare := not clips.drop.is_empty()
+		for h in clips.drop:
+			bare = bare and h[0].mesh == h[2] and _tris(h[2]) < _tris(h[1])
+		ok(bare, "%s: the weapon modelled into the hand leaves the shown mesh" % id)
 	ok(plain < 0.02 or stride >= plain * 0.75,
 			"%s: the legs keep stepping under it (%.2f m of stride, %.2f m without)" % [id, stride, plain])
 	s["kmove"] = "rs_done"
@@ -371,8 +378,32 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	var back := 1.0
 	for nm in dd.get("carry_stow", []):
 		back = minf(back, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
+	for h in clips.drop:
+		back = back if h[0].mesh == h[1] else 0.0
 	ok(clips.carry_w <= 0.0 and not m.has_meta(WardenCarry.SOCKET) and back > 0.5,
 			"%s: the carry lets go (socket gone, weapon back, size %.2f)" % [id, back])
+
+## How far the socket lies in front of the body's surface at its height and across it (the meshes' rest vertices
+## within a band round the socket; the model faces -Z, at rest about the skeleton).
+func _clear(sk: Skeleton3D, socket: Vector3, height: float) -> float:
+	var at := sk.global_transform.affine_inverse() * socket
+	var front := INF
+	for n in sk.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.skin == null or not mi.visible:
+			continue
+		for si in mi.mesh.get_surface_count():
+			for v in mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX]:
+				if absf(v.y - at.y) < 0.06 * height and absf(v.x - at.x) < 0.1 * height:
+					front = minf(front, v.z)
+	return front - at.z if front != INF else 1.0
+
+## A mesh's triangle count.
+func _tris(m: Mesh) -> int:
+	var n := 0
+	for si in m.get_surface_count():
+		n += m.surface_get_array_index_len(si) / 3
+	return n
 
 ## How far the right shin swings front to back over 40 frames of the state.
 func _stride(sync: Node, sk: Skeleton3D) -> float:
