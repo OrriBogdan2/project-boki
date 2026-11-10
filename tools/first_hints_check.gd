@@ -5,7 +5,8 @@ extends RefCounted
 ##   1. each hint shows once, within a second of its moment, and not before it
 ##   2. never in the first 2 s of a fight (a foe close or targeting you)
 ##   3. never more than one hint line on screen
-##   4. after a save round-trip, a second expedition shows none of them again
+##   4. the dive line (gliding 15 m+ up, not diving) shows once, with the live crouch key
+##   5. after a save round-trip, a second expedition shows none of them again
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -25,6 +26,7 @@ var _on: Array = []           # hint ids on screen last step
 var _clock := 0.0         # s played (the match clock is pinned)
 var _fight_t0 := -1.0
 var _rows: Array = []
+var _foe: Mob
 
 func ok(cond: bool, what: String) -> void:
 	print("FHC %s %s" % ["PASS" if cond else "FAIL", what])
@@ -135,6 +137,7 @@ func _expedition(first: bool) -> void:
 	_check("crouch", "match time 41 s on open ground", _moment(func(): _pin = 41.0), "crouch")
 	_check("orders", "Boki sent 14 m out", _moment(_send_boki), "orders")
 	_check("utility", "foe close: nothing for 2 s, then the line", _fight(), "utility")
+	_dive_hint()
 	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
 	_check("after", "everything seen: quiet", _moment(func(): pass, 5.0), "")
@@ -183,6 +186,44 @@ func _over_void() -> void:
 	_secs(0.7)
 	p.teleport(back)
 	p.vel = Vector3.ZERO
+
+## The dive line: once while gliding high, with the live crouch key; silent low, diving, or early in a fight.
+func _dive_hint() -> void:
+	var ev := InputEventKey.new()
+	ev.physical_keycode = KEY_Z
+	var old := InputMap.action_get_events("crouch")
+	Settings.rebind("crouch", ev)
+	var line := FirstTimeHint.text("dive")
+	ok(line.contains("Z"), "dive line wears the rebound crouch key (%s)" % line)
+	InputMap.action_erase_events("crouch")
+	for e in old:
+		InputMap.action_add_event("crouch", e)
+	ok(FirstTimeHint.text("dive").contains(Settings.key_cap("crouch")), "dive line wears the default crouch key again")
+	_check("dive-low", "gliding 10 m up", _moment(_glide_at.bind(10.0)), "")
+	_check("dive-diving", "gliding 40 m up and already diving", _moment(_glide_at.bind(40.0, true)), "")
+	_check("dive-fight", "gliding 40 m up, a foe just came close", _moment(_foe_and_glide, 1.9), "")
+	_foe.hp = 0.0
+	p.inp["glide"] = false      # the glider folds before the foe's gone: the line waits for a glide of its own
+	p.gliding = false
+	_check("dive", "gliding 40 m up, not diving", _moment(_glide_at.bind(40.0)), "dive")
+	_check("dive-twice", "gliding 40 m up again", _moment(_glide_at.bind(40.0)), "")
+	p.inp["glide"] = false
+	p.gliding = false
+
+func _foe_and_glide() -> void:
+	_foe = m.spawn_mob("skitter", p.pos + Vector3(4, 0, 0))
+	_foe.hp = 1e6      # it stays for the whole window
+	_foe.max_hp = 1e6
+	_glide_at(40.0)
+
+func _glide_at(height: float, diving := false) -> void:
+	p.teleport(Vector3(p.pos.x, m.world.ground_at(p.pos.x, p.pos.z) + height, p.pos.z))
+	p.vel = Vector3.ZERO
+	p.grounded = false
+	p.kb_t = -100.0      # an earlier knock would close the glider
+	p.gliding = true
+	p.inp["glide"] = true      # held: the glider closes the moment the button is let go
+	p.inp["crouch"] = diving
 
 func _send_boki() -> void:
 	p.kin.cmd = "chase"

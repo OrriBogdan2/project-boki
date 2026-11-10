@@ -10,6 +10,7 @@
   "key": "A key! Hold {interact} at a chest to open it",
   "uplink": "Stand in the outpost's circle to start the uplink",
   "defend": "Stay in the circle until the lift opens",
+  "dive": "Hold {crouch} to dive faster",
   "goexit": "Outposts get you off the island. Look for one"
  },
  "farm": {
@@ -30,6 +31,7 @@
   "key": "you pick up a chest key",
   "uplink": "you walk near an outpost that can start",
   "defend": "an uplink of yours is charging",
+  "dive": "you glide with more than 15 m of drop below you and are not diving",
   "goexit": "a few minutes into a match with no outpost close",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
@@ -43,6 +45,7 @@
  "goexit_s": 150.0,
  "crouch_s": 40.0,
  "void_s": 0.35,
+ "dive_drop_m": 15.0,
  "sight_m": 40.0,
  "fight_quiet_s": 2.0,
  "poll_s": 0.25

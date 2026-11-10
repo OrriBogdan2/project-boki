@@ -6,7 +6,7 @@ extends RefCounted
 
 const COL := Color("8fe3c7")
 ## Hints the tutorial match leaves for a real one (its outpost opens by itself and the course is short).
-const REAL_ONLY := ["crouch", "uplink", "defend", "goexit"]
+const REAL_ONLY := ["crouch", "uplink", "defend", "goexit", "dive"]
 
 var m: Match
 var _poll_t := 0.0
@@ -55,11 +55,16 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"utility":
 			var has := p.ak != null or (p.runner != null and p.runner.has_slot("utility"))
 			return has and int(p.used.get("utility", 0)) == 0 and _fight_t >= 0.0
+		"dive": return _gliding_high(p, float(r["dive_drop_m"]))
 		"key": return p.chest_keys > 0
 		"uplink": return _outpost(p, "idle", float(r["outpost_m"]))
 		"defend": return _outpost(p, "charging", float(r["outpost_m"]))
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
 	return false
+
+## Gliding (not the opening drop) with more than `drop` m below, and not already diving.
+func _gliding_high(p: Hunter, drop: float) -> bool:
+	return p.gliding and not p.dropping and not p.glide_dive.on and GlideDive.drop_below(p) > drop
 
 ## The last hint is still on the lane, or something waits behind it (a hint never stacks on another).
 func _hint_up() -> bool:
